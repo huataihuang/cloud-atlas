@@ -33,6 +33,15 @@ https://github.com/huataihuang/cloud-atlas
 
 ----
 
-一部关于自由的电影《`云图 <http://movie.douban.com/subject/3530403/>`_》
+一部关于自由的电影《`云图 <http://movie.douban.com/subject/3530403/>`_
 
 .. image:: _static/cloud_atlas.jpg
+
+----------------------------------
+致谢
+----------------------------------
+感谢开源运动和开源软件给予我们能够进一步创造和改变世界的能力。
+
+感谢分享技术和思想的那些探索者，虽然不能一一列出，但是我会在参考引用中尽可能提供出处。
+
+本书采用 `reStructureText <http://zh-sphinx-doc.readthedocs.io/en/latest/rest.html>`_ 撰写，主要参考了 `《Python Cookbook》3rd 中文版 <https://github.com/yidao620c/python3-cookbook>`_ 一书的结构和撰写，感谢该书译者熊熊精心的翻译和文档撰写。此外 `《用Python做科学计算》- 关于本书的编写 <http://bigsec.net/b52/scipydoc/pydoc_write_tools.html>`_ 也给了我撰写书籍的启发。
