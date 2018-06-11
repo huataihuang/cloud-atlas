@@ -30,7 +30,7 @@
     <link rel="search" title="Search" href="../search.html" />
     <link rel="copyright" title="Copyright" href="../copyright.html" />
     <link rel="next" title="第5章：存储" href="../chapters/p05_storage.html" />
-    <link rel="prev" title="第4章：部署虚拟化" href="../chapters/p04_deploy_virtualization.html" /> 
+    <link rel="prev" title="第4章：虚拟化部署" href="../chapters/p04_deploy_virtualization.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -89,8 +89,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../chapters/p01_sandbox.html">第1章：沙箱环境</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/p02_maas.html">第2章：MAAS</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/p03_virtualization.html">第3章：虚拟化技术</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../chapters/p04_deploy_virtualization.html">第4章：部署虚拟化</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">4.1 部署KVM</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../chapters/p04_deploy_virtualization.html">第4章：虚拟化部署</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">4.1 部署KVM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">KVM部署前环境检查</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">安装KVM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">配置用户账号权限</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">参考</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/p05_storage.html">第5章：存储</a></li>
@@ -161,7 +167,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../chapters/p04_deploy_virtualization.html">第4章：部署虚拟化</a> &raquo;</li>
+          <li><a href="../chapters/p04_deploy_virtualization.html">第4章：虚拟化部署</a> &raquo;</li>
         
       <li>4.1 部署KVM</li>
     
@@ -184,6 +190,104 @@
             
   <div class="section" id="kvm">
 <h1>4.1 部署KVM<a class="headerlink" href="#kvm" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">沙箱环境物理主机操作系统Ubuntu 16.04 LTS</p>
+</div>
+<p>物理主机列表：</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">dc-1</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">dc-2</span></code></li>
+</ul>
+<div class="section" id="id1">
+<h2>KVM部署前环境检查<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>确定处理器是否支持硬件虚拟化</li>
+</ul>
+<p>运行KVM前，需要确定处理器是否支持硬件虚拟化，Intel或AMD处理器分别称其为 <code class="docutils literal notranslate"><span class="pre">VT-x</span></code> 和 <code class="docutils literal notranslate"><span class="pre">AMD-V</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">egrep</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;(vmx|svm)&#39;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cpuinfo</span>
+</pre></div>
+</div>
+<p>如果上述输出显示为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 表明处理器不支持硬件虚拟化。 <code class="docutils literal notranslate"><span class="pre">1</span></code> 或以上责表示处理器支持，但是依然 <strong>需要在BIOS中开启虚拟化支持</strong> 。</p>
+<ul class="simple">
+<li>64位处理器</li>
+</ul>
+<p>要检查处理器是否是64位，可以使用如下方法：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">egrep</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39; lm &#39;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cpuinfo</span>
+</pre></div>
+</div>
+<p>输出计数大于 <code class="docutils literal notranslate"><span class="pre">0</span></code> 就是64位处理器。</p>
+<ul class="simple">
+<li>64位内核</li>
+</ul>
+<p>检查内核是否是64位，使用命令：</p>
+<p>···
+uname -m
+···</p>
+<p>&gt; 输出 <code class="docutils literal notranslate"><span class="pre">x86_64</span></code> 表示运行64位内核。如果输出 <code class="docutils literal notranslate"><span class="pre">i386</span></code> , <code class="docutils literal notranslate"><span class="pre">i486</span></code> ,  <code class="docutils literal notranslate"><span class="pre">i586</span></code> 或 <code class="docutils literal notranslate"><span class="pre">i686</span></code> 则为 <code class="docutils literal notranslate"><span class="pre">32</span></code> 位内核。</p>
+</div>
+<div class="section" id="id2">
+<h2>安装KVM<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>采用如下安装方法（Ubuntu 16.04及以上版本）</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">qemu</span><span class="o">-</span><span class="n">kvm</span> <span class="n">libvirt</span><span class="o">-</span><span class="nb">bin</span> <span class="n">virtinst</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 是虚拟机命令行安装工具，原为Red Hat系列发行版所使用，比Ubuntu发行版所使用的类似工具 <code class="docutils literal notranslate"><span class="pre">ubuntu-vm-builder</span></code> 要好用。</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>配置用户账号权限<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Karmic(9.10)及以后版本（但不包括14.04 LTS）需要确保用户已经添加到组 <code class="docutils literal notranslate"><span class="pre">libvirtd</span></code> 中</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo adduser `id -un` libvirtd
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">添加自己的账号到 <code class="docutils literal notranslate"><span class="pre">libvirtd</span></code> 用户组则后续登陆系统不需要 <code class="docutils literal notranslate"><span class="pre">sudo</span></code> 切换到 <code class="docutils literal notranslate"><span class="pre">root</span></code> 账号就可以直接使用 <code class="docutils literal notranslate"><span class="pre">virsh</span></code> 工具命令管理 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 。</p>
+</div>
+<p>重新登陆系统后，作为 <code class="docutils literal notranslate"><span class="pre">libvirtd</span></code> 用户组成员，即可以检查和操作虚拟机：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="nb">list</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+<p>如果看到报错，例如无法访问 <code class="docutils literal notranslate"><span class="pre">sock</span></code> 文件，可以检查 <code class="docutils literal notranslate"><span class="pre">/var/run/libvirt/libvirt-sock</span></code> 文件权限：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo ls -la /var/run/libvirt/libvirt-sock
+srwxrwx--- 1 root libvirtd 0 Mar 15 04:20 /var/run/libvirt/libvirt-sock
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">注意：上述 <code class="docutils literal notranslate"><span class="pre">libvirt-sock</span></code> 文件对于 <code class="docutils literal notranslate"><span class="pre">libvirtd</span></code> 组用户是可以读写执行的，所以才能够以普通用户身份运行 <code class="docutils literal notranslate"><span class="pre">virsh</span></code> 命令。</p>
+</div>
+<p>如果创建虚拟机时遇到问题，则检查 <code class="docutils literal notranslate"><span class="pre">kvm</span></code> 设备的属主：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ls -lh /dev/kvm
+crw-rw----+ 1 root kvm 10, 232 Mar 15 04:20 /dev/kvm
+</pre></div>
+</div>
+<p>可以看到 <code class="docutils literal notranslate"><span class="pre">kvm</span></code> 设备的组属主是 <code class="docutils literal notranslate"><span class="pre">kvm</span></code> 用户组，则需要调整成 <code class="docutils literal notranslate"><span class="pre">libivrtd</span></code> 组（因为前面我们将自己的账号放入了 <code class="docutils literal notranslate"><span class="pre">libvirtd</span></code> 组），或者将自己账号再放入到 <code class="docutils literal notranslate"><span class="pre">kvm</span></code> 组：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo adduser `id -un` kvm
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">如果你采用修改 <code class="docutils literal notranslate"><span class="pre">/dev/kvm</span></code> 设备属主，则需要重新启动内核模块或者 <code class="docutils literal notranslate"><span class="pre">relogin</span></code></p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rmmod</span> <span class="n">kvm</span>
+<span class="n">modprobe</span> <span class="o">-</span><span class="n">a</span> <span class="n">kvm</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://help.ubuntu.com/community/KVM/Installation">KVM/Installation</a></li>
+</ul>
+</div>
 </div>
 
 
@@ -197,7 +301,7 @@
         <a href="../chapters/p05_storage.html" class="btn btn-neutral float-right" title="第5章：存储" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../chapters/p04_deploy_virtualization.html" class="btn btn-neutral" title="第4章：部署虚拟化" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../chapters/p04_deploy_virtualization.html" class="btn btn-neutral" title="第4章：虚拟化部署" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
