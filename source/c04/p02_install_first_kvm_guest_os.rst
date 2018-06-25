@@ -19,7 +19,7 @@
     `ubuntu-vm-builder <http://manpages.ubuntu.com/manpages/xenial/man1/ubuntu-vm-builder.1.html>`_ 现在只是 `vmbuilder <https://help.ubuntu.com/community/JeOSVMBuilder>`_ （属于 ``pyton-vm-builder`` 包）的wrpper，主要维护用于兼容旧的脚本。
 
 -----------------------
-创建虚拟机
+创建Linux虚拟机
 -----------------------
 
 * 串口控制台安装Ubuntu 18.04 LTS (Bionic Beaver)
@@ -65,6 +65,62 @@
     通过VNC方式安装操作系统可以方便做一些定制，操作简便。
 
     需要注意只有虚拟机内存配置2G以上才能启用图形化安装。
+
+* 通过VNC方式通过图形界面安装Fedora 28 xfce
+
+::
+
+    virt-install \
+      --name fedora28 \
+      --os-type linux \
+      --os-variant fedora22 \
+      --ram=4096 \
+      --vcpus=2 \
+      --network=default,model=virtio \
+      --disk path=/var/lib/libvirt/images/fedora28.qcow2,size=10,format=qcow2,bus=virtio,cache=none \
+      --disk device=cdrom,path=/var/lib/libvirt/images/Fedora-Xfce-Live-x86_64-28-1.1.iso \
+      --boot cdrom,hd \
+      --graphics vnc,listen=0.0.0.0:0
+
+.. note::
+
+    这里设置了vnc端口5900，一般不需要指定，会按照顺序自动递增端口号
+
+-----------------------
+创建Windows虚拟机
+-----------------------
+
+* 使用virtio驱动方式(paravirtual)安装Windows
+
+::
+
+    virt-install \
+       --name=win10 \
+       --os-type=windows --os-variant=win8.1 \
+       --boot cdrom,hd \
+       --network=default,model=virtio \
+       --disk path=/var/lib/libvirt/images/win10.qcow2,size=12,format=qcow2,bus=virtio,cache=none \
+       --disk device=cdrom,path=/var/lib/libvirt/images/windows_10.iso \
+       --disk device=cdrom,path=/var/lib/libvirt/images/virtio-win.iso \
+       --boot cdrom,hd \
+       --graphics vnc --ram=2048 \
+       --vcpus=2
+
+
+.. note::
+
+    windows安装光盘镜像需要存放在 ``/var/lib/libvirt/images`` 目录下，这个目录是默认安全上下文要求image指定目录(如果系统启用了SELinux，使用 ``policycoreutils`` )。
+
+    ``virtio-win.iso`` 是Para-Virtual驱动，可以从 `KVM官方网站"Windows VirtIO Drivers" <https://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers>`_ 下载
+
+    * 如果你使用RedHat Enterprise Linux或CentOS，可以采用Fedora提供的Repo方式安装 `Creating Windows virtual machines using virtIO drivers <https://docs.fedoraproject.org/quick-docs/en-US/creating-windows-virtual-machines-using-virtio-drivers.html>`_
+    * 其他发行版可以自行下载 `stable 版本 virtio-win iso <https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso>`_ 或 `latest 版本 virtio-win iso <https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso>`_
+
+.. note::
+
+    Windows操作系统安装时需要首先安装VirtIO对应的驱动才能识别`virtio`类型磁盘设备，至少需要安装``viostor``（Virtio block driver）和 ``vioscsi`` （Virtio SCSI driver）这两个驱动。
+
+    安装Windows 10建议磁盘14G以上。
 
 -----------------------
 参考
