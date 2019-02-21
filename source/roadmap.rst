@@ -14,3 +14,11 @@ Roadmap
 
     |   重新整理文档结构
     |   搭建readthedocs
+
+2019/01/17
+
+::
+
+    |   2019年初，转岗后重新起步
+    |   借鉴Linux Kernel Documentation的Sphinx文档结构，重新组织本书撰写
+    |   采用多个分册来撰写云计算实践指南
