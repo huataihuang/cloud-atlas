@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Docker架构 &mdash; Cloud Atlas 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="远程访问dockerd服务" href="remote-access-dockerd.html" />
+    <link rel="prev" title="构建Docker应用程序" href="building-a-docker-application.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Docker Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="introduce-docker.html">Docker简介</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker-concept.html">Docker基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install-docker.html">安装Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-a-docker-application.html">构建Docker应用程序</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Docker架构</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#docker-daemon">Docker daemon</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="remote-access-dockerd.html">远程访问dockerd服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running-containers-as-daemons.html">将容器作为服务运行</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kali_linux/index.html">Kali Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Docker Atlas</a> &raquo;</li>
+        
+      <li>Docker架构</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/docker/docker-infrastructure.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="docker">
+<span id="docker-infrastructure"></span><h1>Docker架构<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">理解Docker架构可以帮助你更好使用Docker，避免使用误区，更好发挥Docker的优势。</p>
+</div>
+<a class="reference internal image-reference" href="../_images/docker_architecture.png"><img alt="../_images/docker_architecture.png" src="../_images/docker_architecture.png" style="width: 556.0px; height: 448.0px;" /></a>
+<p>在运行Docker的host主机上，Docker分为两部分 – 提供RESTful API的daemon服务 以及 和daemon服务交互的客户端。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">RESTful API使用标准的HTTP请求类型： <code class="docutils literal notranslate"><span class="pre">GET</span></code> ， <code class="docutils literal notranslate"><span class="pre">POST</span></code> ， <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> 以及其他反映资源及对资源对操作。在Docker概念中，镜像、容器、卷就是表达的资源。</p>
+</div>
+<p>在使用 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 命令就是通过Docker客户端向Docker的服务器请求信息和获取结构；服务端接收请求并使用HTTP协议返回响应。这里的服务器可以接收命令行客户端的请求也可以接收任何授权连接的请求。</p>
+<p>在Docker架构中，所有的请求调用和返回响应都是采用RESTful API方式。</p>
+<p>对于私有Docker registry，是运行在内部局域网的Docker镜像存储服务，可以避免外部非授权访问，也加速了镜像的分发。</p>
+<p>Docker Hub则是由Docker公司提供的公共Docker registry，此外也可以使用第三方的公共镜像中心。</p>
+<div class="section" id="docker-daemon">
+<h2>Docker daemon<a class="headerlink" href="#docker-daemon" title="Permalink to this headline">¶</a></h2>
+<p>Docker daemon是Docker交互的中心，也是理解相关Docker概念的起点，它管理这容器和镜像的状态，并且是和外部世界交互的代理：</p>
+<a class="reference internal image-reference" href="../_images/docker_daemon.png"><img alt="../_images/docker_daemon.png" src="../_images/docker_daemon.png" style="width: 304.0px; height: 237.0px;" /></a>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="remote-access-dockerd.html" class="btn btn-neutral float-right" title="远程访问dockerd服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="building-a-docker-application.html" class="btn btn-neutral" title="构建Docker应用程序" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Huatai Huang
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
