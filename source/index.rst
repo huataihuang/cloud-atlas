@@ -14,7 +14,17 @@ I have a dream!
 
 名字来源于一部关于自由的电影 「 `云图 <http://movie.douban.com/subject/3530403/>`_ 」
 
-Discovery曾今拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/subject/2070580/>`_ 」，译名为「列国图志」，我希望我的 Cloud Atlas 也能够简洁生动，为大家带来如同「图志」一般的展现云计算开源技术。
+Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/subject/2070580/>`_ 」，译名为「列国图志」，我希望我的 Cloud Atlas 也能够简洁生动，为大家带来如同「图志」一般的展现云计算开源技术。
+
+阅读
+=========
+
+请访问 `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html>`_ 以便获得最佳阅读体验。
+
+由于工作原因，目前重点撰写容器技术相关章节，预计将首先撰写:
+
+- `Docker Atlas <https://cloud-atlas.readthedocs.io/zh_CN/latest/docker/index.html>`_
+- `Kubernetes Atlas <https://cloud-atlas.readthedocs.io/zh_CN/latest/kubernetes/index.html>`_
 
 .. toctree::
    :maxdepth: 2
