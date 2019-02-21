@@ -1,5 +1,12 @@
 #《云图》 0.1rd Edition
 
+请访问 [readthedocs平台上的云图](https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html) 以便获得最佳阅读体验。
+
+由于工作原因，目前重点撰写容器技术相关章节，预计将首先撰写:
+
+* [Docker Atlas](https://cloud-atlas.readthedocs.io/zh_CN/latest/docker/index.html)
+* [Kubernetes Atlas](https://cloud-atlas.readthedocs.io/zh_CN/latest/kubernetes/index.html)
+
 ## 这本书的目标
 
 大概在两年前，萌生了以开源技术构建自动化部署和交付数据中心的想法。
