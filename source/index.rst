@@ -3,6 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. _cloud_atlas:
+
 云图 -- 云计算图志
 =======================================
 
@@ -30,7 +32,10 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    :maxdepth: 2
    :caption: Contents:
 
+   studio/index
+   devops/index
    kvm/index
+   ceph/index
    openstack/index
    docker/index
    kubernetes/index
