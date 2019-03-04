@@ -18,6 +18,10 @@ Studio Atlas
    ubuntu_on_mbp.rst
    kvm_docker_in_studio.rst
    btrfs_in_studio.rst
+   create_vm_in_studio.rst
+   clone_vm_in_studio.rst
+   libvirt_static_ip_in_studio.rst
+   studio_ip.rst
 
 .. only::  subproject and html
 

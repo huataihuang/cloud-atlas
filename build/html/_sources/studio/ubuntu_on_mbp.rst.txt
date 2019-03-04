@@ -23,6 +23,10 @@ MacBook Pro上运行Ubuntu
 
 最小化安装对于运行云计算平台OpenStack，以及兼顾一些日常工作已经足够。没有必要完整安装大量的应用软件。
 
+- 可选的安装包::
+
+   sudo apt install screen openssh-server nmon net-tools
+
 驱动安装
 ===========
 

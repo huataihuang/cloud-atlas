@@ -9,13 +9,14 @@ Studio环境KVM和Docker
 
 - 安装软件包::
 
-   sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst
+   sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst libguestfs-tools
 
 .. note::
 
    - ``qemu-kvm`` QEMU核心
    - ``libvirt-*`` libvirtd用于管理QEMU
    - ``virtinst`` 安装Guest的工具
+   - ``libguestfs-tools`` 是Guest文件系统工具，包含了初始化虚拟机的工具命令 ``virt-sysprep``
 
 - (可选) 将 ``自己`` 的账号添加到 ``libvirt`` 用户组（18.04版本可能是 ``libvirtd`` 用户组），以便可以直接运行虚拟机::
 

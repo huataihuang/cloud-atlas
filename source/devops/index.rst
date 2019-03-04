@@ -9,6 +9,7 @@ DevOps Atlas
 
    think-devops.rst
    delpoy-monitor-autotest.rst
+   site_fail_recover.rst
 
 .. only::  subproject and html
 
