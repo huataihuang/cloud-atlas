@@ -25,6 +25,10 @@ CentOS, RHEL, Fedora 安装kubectl
    EOF
    yum install -y kubectl
 
+.. note::
+
+   通过Google官方软件库安装需要 :ref:`openconnect_vpn`
+
 Ubuntu, Debian 安装kubectl
 -----------------------------
 
