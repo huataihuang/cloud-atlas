@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Studio环境的Btrfs存储" href="btrfs_in_studio.html" />
-    <link rel="prev" title="MacBook Pro上运行Ubuntu" href="ubuntu_on_mbp.html" /> 
+    <link rel="prev" title="主机间共享键盘鼠标" href="share_mouse_keyboard.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -85,6 +85,9 @@
 <li class="toctree-l2"><a class="reference internal" href="introduce_my_studio.html">模拟云计算的Studio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="base_os.html">基础操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_on_mbp.html">MacBook Pro上运行Ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu_lts_hwe.html">Ubuntu LTS Enablement Stacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu_packages.html">Ubuntu Server软件包</a></li>
+<li class="toctree-l2"><a class="reference internal" href="share_mouse_keyboard.html">主机间共享键盘鼠标</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Studio环境KVM和Docker</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#kvm">安装KVM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nested-virtualization">嵌套虚拟化(Nested Virtualization)</a></li>
@@ -98,6 +101,8 @@
 <li class="toctree-l2"><a class="reference internal" href="clone_vm_in_studio.html">Studio环境复制KVM虚拟机</a></li>
 <li class="toctree-l2"><a class="reference internal" href="libvirt_static_ip_in_studio.html">Studio环境libvirt静态分配IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="studio_ip.html">Studio测试环境IP分配</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu_hibernate.html">Ubuntu Hibernate休眠</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../devops/index.html">DevOps Atlas</a></li>
@@ -220,7 +225,7 @@
 </div>
 </div>
 <div class="section" id="nested-virtualization">
-<h2>嵌套虚拟化(Nested Virtualization)<a class="headerlink" href="#nested-virtualization" title="Permalink to this headline">¶</a></h2>
+<span id="nested-virtualization-in-stuido"></span><h2>嵌套虚拟化(Nested Virtualization)<a class="headerlink" href="#nested-virtualization" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">为了能够在一台物理主机（MacBook Pro）上能够模拟出OpenStack集群，即同时运行多个hypervisor，需要使用嵌套虚拟化(Nested Virtualization)。虽然嵌套虚拟化会导致较大的性能损失，但是对于开发测试环境，依然是节约硬件的解决方案。</p>
@@ -249,6 +254,35 @@
 </pre></div>
 </div>
 <p class="last">并且通过检查 <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/sys/module/kvm_intel/parameters/nested</span></code> 可以看到内核模块 <code class="docutils literal notranslate"><span class="pre">kvm-intel</span></code> 已经激活了嵌套虚拟化。</p>
+</div>
+<ul>
+<li><p class="first">将虚拟化扩展输出给虚拟机，例如 <a class="reference internal" href="../openstack/devstack.html#devstack"><span class="std std-ref">DevStack</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">edit</span> <span class="n">devstack</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>将内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">cpu</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;custom&#39;</span> <span class="n">match</span><span class="o">=</span><span class="s1">&#39;exact&#39;</span> <span class="n">check</span><span class="o">=</span><span class="s1">&#39;partial&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">model</span> <span class="n">fallback</span><span class="o">=</span><span class="s1">&#39;allow&#39;</span><span class="o">&gt;</span><span class="n">Haswell</span><span class="o">-</span><span class="n">noTSX</span><span class="o">-</span><span class="n">IBRS</span><span class="o">&lt;/</span><span class="n">model</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">cpu</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">cpu</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;host-passthrough&#39;</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">cpu</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>然后重启虚拟机，在虚拟机内部执行 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 可以看到如下输出证明已经支持KVM虚拟化:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Virtualization</span><span class="p">:</span>      <span class="n">VT</span><span class="o">-</span><span class="n">x</span>
+<span class="n">Hypervisor</span> <span class="n">vendor</span><span class="p">:</span>   <span class="n">KVM</span>
+<span class="n">Virtualization</span> <span class="nb">type</span><span class="p">:</span> <span class="n">full</span>
+</pre></div>
+</div>
+<p>另外在虚拟机内部可以看到增加了设备文件 <code class="docutils literal notranslate"><span class="pre">/dev/kvm</span></code></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">详细请参考 <a class="reference external" href="https://docs.openstack.org/devstack/latest/guides/devstack-with-nested-kvm.html">Configure DevStack with KVM-based Nested Virtualization</a></p>
 </div>
 </div>
 <div class="section" id="docker">
@@ -282,7 +316,7 @@
         <a href="btrfs_in_studio.html" class="btn btn-neutral float-right" title="Studio环境的Btrfs存储" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="ubuntu_on_mbp.html" class="btn btn-neutral" title="MacBook Pro上运行Ubuntu" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="share_mouse_keyboard.html" class="btn btn-neutral" title="主机间共享键盘鼠标" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

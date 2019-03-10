@@ -220,7 +220,7 @@ libvirt和docker数据迁移到btrfs
    chmod 711 /var/lib/docker
    chmod 755 /var/lib/libvirt
    
-修改 ``/etc/fstab`` ::
+修改 ``/etc/fstab``  添加::
 
    /dev/sda3    /var/lib/libvirt   btrfs  subvol=libvirt,defaults,noatime   0   1
    /dev/sda3    /var/lib/docker    btrfs  subvol=docker,defaults,noatime    0   1
@@ -232,11 +232,19 @@ libvirt和docker数据迁移到btrfs
 
 .. note::
 
-   按照上述操作步骤，最后挂载的 btrfs 文件系统内容如下::
+   按照上述操作步骤，完整的 ``/etc/fstab`` 内容如下::
+
+      /dev/sda3    /data    btrfs    defaults,compress=zstd   0    1
+      /dev/sda3    /var/lib/libvirt   btrfs  subvol=libvirt,defaults,noatime   0   1
+      /dev/sda3    /var/lib/docker    btrfs  subvol=docker,defaults,noatime    0   1
+   
+   最后挂载的 btrfs 文件系统内容如下::
 
       /dev/sda3       186G   17M  185G   1% /data
       /dev/sda3       186G   17M  185G   1% /var/lib/libvirt
       /dev/sda3       186G   17M  185G   1% /var/lib/docker
+
+   可以看到btrfs的最大特点：存储容量是一个完整的"池"被各个存储卷共享，所以不需要担心某些卷预分配过多或锅烧。
 
 - 数据迁移::
 
@@ -251,6 +259,36 @@ libvirt和docker数据迁移到btrfs
 .. note::
 
    可以重启一次操作系统验证是否都工作正常。
+
+其他btrfs卷(可选)
+===================
+
+由于常用的用户目录会存储较多的文件，也可以考虑迁移到btrfs中。这里把 ``/home`` 目录迁移
+
+- 创建btrfs子卷home::
+
+   btrfs subvolume create /data/home
+
+检查创建的子卷::
+
+   btrfs subvolume list /data
+
+- 将 ``/home`` 目录重命名成 ``/home.bak`` ::
+
+    mv /home /home.bak
+
+- 修改 ``/etc/fstab`` 添加::
+
+   /dev/sda3    /home              btrfs  subvol=home,defaults,noatime      0   1
+
+- 创建并挂载 ``/home`` 目录::
+
+   mkdir /home
+   moutn /home
+
+- 同步和恢复 ``/home`` 目录内容::
+
+   rsync -a /home.bak/ /home/
 
 参考
 ==========

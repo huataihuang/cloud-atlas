@@ -8,6 +8,9 @@ Studio测试环境IP分配
 
    192.168.122.2   ubuntu18-04 ubuntu18-04.huatai.me
    
+   192.168.122.10  minikube     minikube.huatai.me
    192.168.122.11  kube-master1 kube-master1.huatai.me
    192.168.122.12  kube-master2 kube-master2.huatai.me
    192.168.122.13  kube-master3 kube-master3.huatai.me
+
+   192.168.122.20  devstack devstack.huatai.me

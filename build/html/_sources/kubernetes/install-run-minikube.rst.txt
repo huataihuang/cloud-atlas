@@ -18,7 +18,10 @@ minikube是通常通过虚拟机来运行的，也就是说必须在主机上运
 如果你是在Linux主机上，由于Linux可以直接运行Docker，所以甚至可以不需要Hypervisor的虚拟机，直接运行在Linux物理主机的Docker中。此时使用参数 ``--vm-driver=none`` 来运行。
 
 安装Minikube
-------------------
+===================
+
+Ubuntu平台安装MiniKube
+----------------------------
 
 .. note::
 
@@ -27,6 +30,13 @@ minikube是通常通过虚拟机来运行的，也就是说必须在主机上运
 安装命令::
 
    curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+macOS平台安装MiniKube
+--------------------------
+
+.. note::
+
+   macOS的minikube可以选择virtualbox作为后端，也可以选择xhyve作为后端。目前我倾向于使用xhyve，以便使用macOS内置的kvm虚拟化。
 
 启动minikube
 ----------------
@@ -70,3 +80,19 @@ minikube是通常通过虚拟机来运行的，也就是说必须在主机上运
       kubectl is now configured to use "minikube"
 
    这表明当前Linux主机的kubectl已经被配置直接使用刚才所安装运行的minikube
+
+使用minikube
+===============
+
+- ssh登陆minikub方法::
+
+   minikube ssh
+
+停止和再次启动minikube
+==========================
+
+安装了minikube之后，通过 ``minikube stop`` 可以停止，然后通过 ``minikube start`` 可以再次启动。
+
+.. note::
+
+   每次启动minikube，系统都会尝试重新连接Google仓库更新镜像，所以需要先搭好梯子

@@ -85,6 +85,9 @@
 <li class="toctree-l2"><a class="reference internal" href="introduce_my_studio.html">模拟云计算的Studio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="base_os.html">基础操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_on_mbp.html">MacBook Pro上运行Ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu_lts_hwe.html">Ubuntu LTS Enablement Stacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu_packages.html">Ubuntu Server软件包</a></li>
+<li class="toctree-l2"><a class="reference internal" href="share_mouse_keyboard.html">主机间共享键盘鼠标</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kvm_docker_in_studio.html">Studio环境KVM和Docker</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Studio环境的Btrfs存储</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">初始安装操作系统的磁盘</a></li>
@@ -92,13 +95,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#id3">磁盘分区</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4">Btrfs部署</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#libvirtdockerbtrfs">libvirt和docker数据迁移到btrfs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">其他btrfs卷(可选)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="create_vm_in_studio.html">Studio环境创建KVM虚拟机</a></li>
 <li class="toctree-l2"><a class="reference internal" href="clone_vm_in_studio.html">Studio环境复制KVM虚拟机</a></li>
 <li class="toctree-l2"><a class="reference internal" href="libvirt_static_ip_in_studio.html">Studio环境libvirt静态分配IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="studio_ip.html">Studio测试环境IP分配</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ubuntu_hibernate.html">Ubuntu Hibernate休眠</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../devops/index.html">DevOps Atlas</a></li>
@@ -407,7 +413,7 @@
 <span class="n">chmod</span> <span class="mi">755</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
 </pre></div>
 </div>
-<p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
+<p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code>  添加:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>   <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">libvirt</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>   <span class="mi">0</span>   <span class="mi">1</span>
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>    <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">docker</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>    <span class="mi">0</span>   <span class="mi">1</span>
 </pre></div>
@@ -419,12 +425,19 @@
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>按照上述操作步骤，最后挂载的 btrfs 文件系统内容如下:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">186</span><span class="n">G</span>   <span class="mi">17</span><span class="n">M</span>  <span class="mi">185</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">data</span>
+<p>按照上述操作步骤，完整的 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">data</span>    <span class="n">btrfs</span>    <span class="n">defaults</span><span class="p">,</span><span class="n">compress</span><span class="o">=</span><span class="n">zstd</span>   <span class="mi">0</span>    <span class="mi">1</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>   <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">libvirt</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>   <span class="mi">0</span>   <span class="mi">1</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>    <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">docker</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>    <span class="mi">0</span>   <span class="mi">1</span>
+</pre></div>
+</div>
+<p>最后挂载的 btrfs 文件系统内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">186</span><span class="n">G</span>   <span class="mi">17</span><span class="n">M</span>  <span class="mi">185</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">data</span>
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">186</span><span class="n">G</span>   <span class="mi">17</span><span class="n">M</span>  <span class="mi">185</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">186</span><span class="n">G</span>   <span class="mi">17</span><span class="n">M</span>  <span class="mi">185</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
 </pre></div>
 </div>
+<p class="last">可以看到btrfs的最大特点：存储容量是一个完整的”池”被各个存储卷共享，所以不需要担心某些卷预分配过多或锅烧。</p>
 </div>
 <ul>
 <li><p class="first">数据迁移:</p>
@@ -446,7 +459,45 @@
 </div>
 </div>
 <div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<h2>其他btrfs卷(可选)<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>由于常用的用户目录会存储较多的文件，也可以考虑迁移到btrfs中。这里把 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录迁移</p>
+<ul>
+<li><p class="first">创建btrfs子卷home:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span> <span class="n">subvolume</span> <span class="n">create</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">home</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>检查创建的子卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span> <span class="n">subvolume</span> <span class="nb">list</span> <span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">将 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录重命名成 <code class="docutils literal notranslate"><span class="pre">/home.bak</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">home</span> <span class="o">/</span><span class="n">home</span><span class="o">.</span><span class="n">bak</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">home</span>              <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">home</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>      <span class="mi">0</span>   <span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">创建并挂载 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">home</span>
+<span class="n">moutn</span> <span class="o">/</span><span class="n">home</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">同步和恢复 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rsync</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">home</span><span class="o">.</span><span class="n">bak</span><span class="o">/</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://wiki.archlinux.org/index.php/Parted">ArchLinux Parted</a></li>
 <li><a class="reference external" href="https://wiki.archlinux.org/index.php/btrfs">ArchLinux Btrfs</a></li>

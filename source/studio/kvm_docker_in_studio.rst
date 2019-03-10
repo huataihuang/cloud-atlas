@@ -34,6 +34,8 @@ Studio环境KVM和Docker
 
    Ubuntu安装libvirt时已经自动激活启动
 
+.. _nested_virtualization_in_stuido:
+
 嵌套虚拟化(Nested Virtualization)
 ====================================
 
@@ -60,6 +62,33 @@ Studio环境KVM和Docker
       options kvm_intel nested=1
 
    并且通过检查 ``cat /sys/module/kvm_intel/parameters/nested`` 可以看到内核模块 ``kvm-intel`` 已经激活了嵌套虚拟化。
+
+- 将虚拟化扩展输出给虚拟机，例如 :ref:`devstack` ::
+
+   virsh edit devstack
+
+将内容::
+
+   <cpu mode='custom' match='exact' check='partial'>
+     <model fallback='allow'>Haswell-noTSX-IBRS</model>
+   </cpu>
+
+修改成::
+
+   <cpu mode='host-passthrough'>
+   </cpu>
+
+然后重启虚拟机，在虚拟机内部执行 ``lscpu`` 可以看到如下输出证明已经支持KVM虚拟化::
+
+   Virtualization:      VT-x
+   Hypervisor vendor:   KVM
+   Virtualization type: full
+
+另外在虚拟机内部可以看到增加了设备文件 ``/dev/kvm``
+
+.. note::
+
+   详细请参考 `Configure DevStack with KVM-based Nested Virtualization <https://docs.openstack.org/devstack/latest/guides/devstack-with-nested-kvm.html>`_
 
 Docker
 ========
