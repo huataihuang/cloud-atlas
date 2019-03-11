@@ -16,8 +16,8 @@ Studio Atlas
    introduce_my_studio.rst
    base_os.rst
    ubuntu_on_mbp.rst
-   ubuntu_lts_hwe.rst
-   ubuntu_packages.rst
+   ubuntu_server.rst
+   ubuntu_desktop.rst
    share_mouse_keyboard.rst
    kvm_docker_in_studio.rst
    btrfs_in_studio.rst
