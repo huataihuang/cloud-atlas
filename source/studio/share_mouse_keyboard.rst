@@ -18,6 +18,10 @@
 
    `Synergy <https://symless.com/synergy>`_ 最初是开源软件，并且现在也在GitHub上提供源代码。不过，作为商用软件销售的版本非常容易使用，作为支持开发者，非常建议购买。
 
+.. warning::
+
+   使用Synergy需要注意安全性，请在安全环境使用：你的笔记本是通过网络共享由远程键盘鼠标控制的，所以安全的方法是采用OpenSSH端口转发方式来实现加密通讯。在 `Synergy官方 <https://symless.com/synergy>`_ 提供的最新版本增加了加密通讯功能，所以更为安全可靠。
+
 安装Synergy
 =================
 
@@ -27,7 +31,24 @@
   
 先安装依赖库::
 
-   sudo apt install libavahi-compat-libdnssd1
+   sudo apt install libavahi-compat-libdnssd1 \
+   qt5-style-plugins
+
+.. note::
+
+   安装 ``qt5-style-plugins`` 是为了在Xfce4桌面集成支持Qt5程序运行，将会安装相应的Qt5核心库程序包。
+
+.. note::
+
+   在Ubuntu官方仓库中提供的Synergy基于Qt4运行 （参考 `SynergyHowto <https://help.ubuntu.com/community/SynergyHowto>`_ ）；而Synergy官方提供的deb安装包是基于Qt5环境运行。所以上述安装依赖库首先安装Qt5运行库文件。
+
+   比较简单的安装Ubuntu环境Qt5软件库是使用::
+
+      sudo apt install qt5-default
+
+   不过，实际上Xfce4提供了 ``qt5-style-plugins`` 来集成Qt5的程序显示，所以单纯要在Xfce4环境运行Qt5程序，例如 Synergy ,只需要安装 ``qt5-style-plugins`` 就足够::
+
+      sudo apt install qt5-style-plugins
 
 安装下载的deb包::
 
