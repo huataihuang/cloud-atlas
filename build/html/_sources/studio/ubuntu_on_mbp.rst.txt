@@ -34,6 +34,10 @@ MacBook Pro上运行Ubuntu
 
    实践发现和Fedora不同，采用 Btrfs 作为根文件系统（ 特别配置了 ``XFS`` 的 ``/boot`` 分区）无法启动Ubuntu。
 
+.. note::
+
+   MacBook Pro笔记本（物理主机）上安装的Host操作系统，我命名为 ``xcloud`` ，后续文档中会引用这个Host主机名。
+
 配置
 ==============
 
@@ -48,6 +52,52 @@ MacBook Pro上运行Ubuntu
 .. note::
 
    详细请参考 `Ubuntu在MacBook Pro上WIFI <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/install/ubuntu_on_macbook_pro_with_wifi.md>`_
+
+- SSH提供了一种 ``multiplexing`` （多路传输）机制，可以重用已有的TCP连接，在维护系统时非常方便，加速了ssh登陆，推荐在 ``xcloud`` Host主机上配置客户端，方便登陆各个虚拟机操作。即设置 ``~/.ssh/config`` 配置如下::
+
+   Host *
+       ServerAliveInterval 60
+       ControlMaster auto
+       ControlPath ~/.ssh/%h-%p-%r
+       ControlPersist yes
+
+   Host ubuntu18-04
+       HostName 192.168.122.2
+       User huatai
+
+.. note::
+
+   详细请参考 `ssh多路传输multiplexing加速 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/service/ssh/multiplexing.md>`_ 
+
+- 在服务器维护过程中，经常需要启用 ``screen`` 以便在服务器端保持工作状态，建议在 ``xcloud`` 主机上添加 ``~/.screenrc`` ::
+
+   source /etc/screenrc
+   altscreen off
+   hardstatus none
+   caption always "%{= wk}%{wk}%-Lw%{rw} %n+%f %t %{wk}%+Lw %=%c%{= R}%{-}"
+   
+   shelltitle "$ |bash"
+   defscrollback 50000
+   startup_message off
+   escape ^aa
+   
+   termcapinfo xterm|xterms|xs|rxvt ti@:te@ # scroll bar support
+   term rxvt # mouse support
+   
+   bindkey -k k; screen
+   bindkey -k F1 prev
+   bindkey -k F2 next
+   bindkey -d -k kb stuff ^H
+   bind x remove
+   bind j eval "focus down"
+   bind k eval "focus up"
+   bind s eval "split" "focus down" "prev"
+   vbell off
+   shell -bash
+
+.. note::
+
+   详细使用screen工具来帮助维护服务器，请参考 `screen <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/shell/utilities/screen.md>`_
 
 .. _set_ubuntu_wifi:
 

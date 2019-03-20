@@ -83,6 +83,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Studio Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduce_my_studio.html">模拟云计算的Studio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intel_core_i7_4850hq.html">Intel Core i7-4850HQ处理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="base_os.html">基础操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_on_mbp.html">MacBook Pro上运行Ubuntu</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_server.html">Ubuntu Server</a></li>
@@ -90,17 +91,22 @@
 <li class="toctree-l2"><a class="reference internal" href="share_mouse_keyboard.html">主机间共享键盘鼠标</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kvm_docker_in_studio.html">Studio环境KVM和Docker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="btrfs_in_studio.html">Studio环境的Btrfs存储</a></li>
-<li class="toctree-l2"><a class="reference internal" href="create_vm_in_studio.html">Studio环境创建KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clone_vm_in_studio.html">Studio环境复制KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="libvirt_static_ip_in_studio.html">Studio环境libvirt静态分配IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="studio_ip.html">Studio测试环境IP分配</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Ubuntu Hibernate休眠</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">测试Ubuntu Hibernate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">内核和驱动准备（关键）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">测试Ubuntu Hibernate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hibernateswap">创建Hibernate使用的swap文件</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#uswsusp">安装uswsusp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">配置uswsusp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">配置uswsusp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">配置uswsusp（可选）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#uswsusppm-utils">集成uswsusp到pm-utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#systemd">集成systemd</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id8">笔记本合上屏幕休眠</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#hibernate">激活图形界面hibernate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -191,8 +197,59 @@
 <li><a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/gentoo/suspend_hibernate.md">Gentoo系统的suspend和hibernate休眠</a></li>
 <li><a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/ubuntu_hibernate.md">Ubuntu系统hibernate休眠</a></li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">我在实现Hibvernate上可能走了弯路，也许用默认的 <code class="docutils literal notranslate"><span class="pre">swsusp</span></code> 可能更简单些（但是我只测试了 <code class="docutils literal notranslate"><span class="pre">uswsusp</span></code> ）。另外，我只解决了命令行休眠，集成到systemd的步骤没有实践成功。</p>
+</div>
 <div class="section" id="id2">
-<h2>测试Ubuntu Hibernate<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>内核和驱动准备（关键）<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>之前花费了一周时间反复折腾MacBook Pro上的Hibernate(save to disk)，总是发现恢复时异常死机或者图形界面无响应，最后总结经验如下:</p>
+<ul class="simple">
+<li>显卡驱动需要从默认 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> 替换成Nvidia闭源驱动</li>
+<li>内核传递参数 <code class="docutils literal notranslate"><span class="pre">acpi_osi=Windows</span></code> 避免BIOS访问操作系统不支持的ACPI特性</li>
+</ul>
+<p class="last">详细记录见 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/ubuntu_hibernate.md">Ubuntu系统hibernate休眠</a></p>
+</div>
+<ul>
+<li><p class="first">修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 设置BIOS标示( <code class="docutils literal notranslate"><span class="pre">acpi_osi</span></code> )系统为Windows避免MacBook Pro查询系统不支持的Darwin特性:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet splash&quot;</span>
+<span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;text&quot;</span>
+<span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;ipv6.disable=1 acpi_osi=Windows&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">启动内核text模式以便查看系统启动信息，关闭IPv6是避免无线网卡驱动触发不支持IPv6特性Segment Fault</p>
+</div>
+<ul>
+<li><p class="first">执行更新grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">安装Nvidia驱动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">ubuntu</span><span class="o">-</span><span class="n">drivers</span><span class="o">-</span><span class="n">common</span>
+<span class="n">ubuntu</span><span class="o">-</span><span class="n">drivers</span> <span class="n">devices</span>
+<span class="n">sudo</span> <span class="n">ubuntu</span><span class="o">-</span><span class="n">drivers</span> <span class="n">autoinstall</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">重启系统，重启后使用 <code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">-vvv</span></code> 检查确保显卡设备使用了Nvidia驱动。并使用 <code class="docutils literal notranslate"><span class="pre">lsmod</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">nouveau</span></code> 检查确保没有加载 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> 内核模块</p>
+</li>
+<li><p class="first">卸载 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> 相关Xorg软件包（可选）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="o">--</span><span class="n">purge</span> <span class="n">remove</span> <span class="n">xserver</span><span class="o">-</span><span class="n">xorg</span><span class="o">-</span><span class="n">video</span><span class="o">-</span><span class="n">nouveau</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>测试Ubuntu Hibernate<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">检查内核是否支持Hibernate:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">power</span><span class="o">/</span><span class="n">state</span>
@@ -222,12 +279,14 @@
 <p class="first admonition-title">Note</p>
 <p class="last">这里建议可以设置swap分区至少 2/5 的内存大小是假设系统内存足够，这样一般情况下系统不会使用swap，所以就可以把所有swap都用于hibernate，也就是默认的 2/5 内存大小的swap应该也够用于保存内存状态。</p>
 </div>
-<p>实际我采用了 <code class="docutils literal notranslate"><span class="pre">2/5</span> <span class="pre">内存</span> <span class="pre">+</span> <span class="pre">2G</span></code> 的swap大小，这是因为默认Ubuntu安装就设置了2G的swap文件，我再加上 2/5 的内存大小swap文件来做保障。我的笔记本是16G内存，所以，我设置了 <code class="docutils literal notranslate"><span class="pre">/swapfile</span></code> 文件 2G， <code class="docutils literal notranslate"><span class="pre">/swapfile1</span></code> 文件 7G:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">fallocate</span> <span class="o">-</span><span class="n">l</span> <span class="mi">7</span><span class="n">g</span> <span class="o">/</span><span class="n">swapfile1</span>
-<span class="n">sudo</span> <span class="n">chmod</span> <span class="mi">600</span> <span class="o">/</span><span class="n">swapfile1</span>
-<span class="n">sudo</span> <span class="n">mkswap</span> <span class="o">/</span><span class="n">swapfile1</span>
-<span class="n">sudo</span> <span class="n">swapon</span> <span class="o">/</span><span class="n">swapfile1</span>
-<span class="n">echo</span> <span class="s1">&#39;/swapfile1  none  swap  sw  0  0&#39;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+<p>实际我采用了 <code class="docutils literal notranslate"><span class="pre">2/5</span> <span class="pre">内存</span> <span class="pre">+</span> <span class="pre">2G</span></code> 的swap大小，这是因为默认Ubuntu安装就设置了2G的swap文件，我再加上 2/5 的内存大小swap文件来做保障。我的笔记本是16G内存，所以，将原先2G的 <code class="docutils literal notranslate"><span class="pre">/swapfile</span></code> 改成 9G:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">swapoff</span> <span class="o">/</span><span class="n">swapfile</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">swapfile</span>
+
+<span class="n">sudo</span> <span class="n">fallocate</span> <span class="o">-</span><span class="n">l</span> <span class="mi">9</span><span class="n">g</span> <span class="o">/</span><span class="n">swapfile</span>
+<span class="n">sudo</span> <span class="n">chmod</span> <span class="mi">600</span> <span class="o">/</span><span class="n">swapfile</span>
+<span class="n">sudo</span> <span class="n">mkswap</span> <span class="o">/</span><span class="n">swapfile</span>
+<span class="n">sudo</span> <span class="n">swapon</span> <span class="o">/</span><span class="n">swapfile</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -238,6 +297,17 @@
 </div>
 <div class="section" id="uswsusp">
 <h2>安装uswsusp<a class="headerlink" href="#uswsusp" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>参考 <a class="reference external" href="https://help.ubuntu.com/community/PowerManagement/Hibernate">PowerManagement/Hibernate</a></p>
+<p>在Ubuntu系统，默认的hibernate是使用内核build的 <code class="docutils literal notranslate"><span class="pre">swsusp</span></code> ，而且 Gnome 和 <code class="docutils literal notranslate"><span class="pre">pm-utils`</span> <span class="pre">也使用这个方式（推荐使用</span> <span class="pre">``platform</span></code> 如果BIOS支持问题，也可以改为 <code class="docutils literal notranslate"><span class="pre">shutdown</span></code> ）:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">s</span>
+<span class="n">echo</span> <span class="n">platform</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">power</span><span class="o">/</span><span class="n">disk</span>
+<span class="n">echo</span> <span class="n">disk</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">power</span><span class="o">/</span><span class="n">state</span>
+</pre></div>
+</div>
+</div>
+<p>我在MacBook Pro上实践遇到恢复时图形界面无响应问题（排查最终是通过更换驱动和添加内核 <code class="docutils literal notranslate"><span class="pre">acpi_osi</span></code> 参数解决），所以改为采用了用户空间 <code class="docutils literal notranslate"><span class="pre">uswsusp</span></code> 。推测如果正确安装了驱动和设置了内核参数，使用默认的 <code class="docutils literal notranslate"><span class="pre">swsusp</span></code> 应该也是可以工作的。</p>
 <ul>
 <li><p class="first">安装用户空间软件suspend – Userspace Software Suspend (uswsusp):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">uswsusp</span>
@@ -254,21 +324,39 @@ Continue without a valid swap space?
 </div>
 <p>这里可以暂时回答Yes，因为我们下一步会进行配置。</p>
 </div>
-<div class="section" id="id4">
-<h2>配置uswsusp<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>配置uswsusp<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">验证Swap文件分区:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">findmnt</span> <span class="o">-</span><span class="n">no</span> <span class="n">SOURCE</span><span class="p">,</span><span class="n">UUID</span> <span class="o">-</span><span class="n">T</span> <span class="o">/</span><span class="n">swapfile1</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">findmnt</span> <span class="o">-</span><span class="n">no</span> <span class="n">SOURCE</span><span class="p">,</span><span class="n">UUID</span> <span class="o">-</span><span class="n">T</span> <span class="o">/</span><span class="n">swapfile</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p>输出显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="n">decda038</span><span class="o">-</span><span class="mi">1</span><span class="n">b51</span><span class="o">-</span><span class="mi">4483</span><span class="o">-</span><span class="mi">9491</span><span class="o">-</span><span class="mi">15</span><span class="n">c3a640e133</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="n">e5b8f8ad</span><span class="o">-</span><span class="n">b767</span><span class="o">-</span><span class="mi">4719</span><span class="o">-</span><span class="mi">8796</span><span class="o">-</span><span class="mi">88</span><span class="n">eae998a056</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>在激活了 <code class="docutils literal notranslate"><span class="pre">/swapfile</span></code> 后，首次安装 <code class="docutils literal notranslate"><span class="pre">uswsusp</span></code> 工具包就会自动配置好 <code class="docutils literal notranslate"><span class="pre">/etc/uswsusp.conf</span></code> 配置文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># /etc/uswsusp.conf(5) -- Configuration file for s2disk/s2both</span>
+<span class="n">resume</span> <span class="n">device</span> <span class="o">=</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+<span class="n">compress</span> <span class="o">=</span> <span class="n">y</span>
+<span class="n">early</span> <span class="n">writeout</span> <span class="o">=</span> <span class="n">y</span>
+<span class="n">image</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">7692818022</span>
+<span class="n">RSA</span> <span class="n">key</span> <span class="n">file</span> <span class="o">=</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">uswsusp</span><span class="o">.</span><span class="n">key</span>
+<span class="n">shutdown</span> <span class="n">method</span> <span class="o">=</span> <span class="n">platform</span>
+<span class="n">resume</span> <span class="n">offset</span> <span class="o">=</span> <span class="mi">8617984</span>
+</pre></div>
+</div>
+<p class="last">这里的 <code class="docutils literal notranslate"><span class="pre">resume</span> <span class="pre">offset</span> <span class="pre">=</span> <span class="pre">8617984</span></code> 是 <code class="docutils literal notranslate"><span class="pre">uswsusp</span></code> 自动计算出的，实际上使用 <code class="docutils literal notranslate"><span class="pre">swap-offset</span> <span class="pre">/swapfile</span></code> 也可以验证这个偏移量。</p>
+</div>
+</div>
+<div class="section" id="id7">
+<h2>配置uswsusp（可选）<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <ul>
-<li><p class="first">创建 <code class="docutils literal notranslate"><span class="pre">/etc/uswsusp.conf</span></code> ，即执行:</p>
+<li><p class="first">(可选，如果安装时没有自动创建的话）创建 <code class="docutils literal notranslate"><span class="pre">/etc/uswsusp.conf</span></code> ，即执行:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dpkg</span><span class="o">-</span><span class="n">reconfigure</span> <span class="o">-</span><span class="n">pmedium</span> <span class="n">uswsusp</span>
 </pre></div>
 </div>
@@ -292,12 +380,12 @@ Continue without a valid swap space?
 
                            <span class="o">/</span><span class="n">swapfile1</span>
                            <span class="o">/</span><span class="n">swapfile</span>
-                           <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">disk</span><span class="o">/</span><span class="n">by</span><span class="o">-</span><span class="n">uuid</span><span class="o">/</span><span class="n">decda038</span><span class="o">-</span><span class="mi">1</span><span class="n">b51</span><span class="o">-</span><span class="mi">4483</span><span class="o">-</span><span class="mi">9491</span><span class="o">-</span><span class="mi">15</span><span class="n">c3a640e133</span>
+                           <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">disk</span><span class="o">/</span><span class="n">by</span><span class="o">-</span><span class="n">uuid</span><span class="o">/</span><span class="n">e5b8f8ad</span><span class="o">-</span><span class="n">b767</span><span class="o">-</span><span class="mi">4719</span><span class="o">-</span><span class="mi">8796</span><span class="o">-</span><span class="mi">88</span><span class="n">eae998a056</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>注意：选择 swap 文件所在的 <code class="docutils literal notranslate"><span class="pre">partition</span></code> ，即之前的命令 <code class="docutils literal notranslate"><span class="pre">findmnt</span></code> 输出的内容， <code class="docutils literal notranslate"><span class="pre">不要</span></code> 选择swap文件自身。所以，我们这里选择最后一行 <code class="docutils literal notranslate"><span class="pre">/dev/disk/by-uuid/decda038-1b51-4483-9491-15c3a640e133</span></code></p>
+<p>注意：选择 swap 文件所在的 <code class="docutils literal notranslate"><span class="pre">partition</span></code> ，即之前的命令 <code class="docutils literal notranslate"><span class="pre">findmnt</span></code> 输出的内容， <code class="docutils literal notranslate"><span class="pre">不要</span></code> 选择swap文件自身。所以，我们这里选择最后一行 <code class="docutils literal notranslate"><span class="pre">/dev/disk/by-uuid/e5b8f8ad-b767-4719-8796-88eae998a056</span></code></p>
 <ul>
 <li><p class="first">在下一个页面中提问是否加密suspend内容（会影响速度）:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>For increased security, it is possible to encrypt the snapshot that is written to disk during suspend. On resume (and suspend if you don&#39;t use an RSA key), you will be prompted for a passphrase. Encryption adds a significant time to the suspend and resume processes.
@@ -310,18 +398,18 @@ Encrypt snapshot?
 <p>安全要求不高，我选择默认 <code class="docutils literal notranslate"><span class="pre">No</span></code> 不加密</p>
 <ul>
 <li><p class="first">检查swap文件的 <code class="docutils literal notranslate"><span class="pre">swap_id</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">s</span> <span class="n">swaplabel</span> <span class="o">/</span><span class="n">swapfile1</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">s</span> <span class="n">swaplabel</span> <span class="o">/</span><span class="n">swapfile</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p>输出显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UUID</span><span class="p">:</span>  <span class="mi">2</span><span class="n">a91e2a6</span><span class="o">-</span><span class="n">e0fc</span><span class="o">-</span><span class="mi">431</span><span class="n">f</span><span class="o">-</span><span class="mi">94</span><span class="n">d2</span><span class="o">-</span><span class="mi">1</span><span class="n">dff3241dcbf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UUID</span><span class="p">:</span>  <span class="mi">825</span><span class="n">fa235</span><span class="o">-</span><span class="n">e08c</span><span class="o">-</span><span class="mf">441e-8637</span><span class="o">-</span><span class="mi">57309</span><span class="n">d600ad6</span>
 </pre></div>
 </div>
 <ul>
 <li><p class="first">创建文件 <code class="docutils literal notranslate"><span class="pre">/etc/initramfs-tools/conf.d/resume</span></code> 加入 <code class="docutils literal notranslate"><span class="pre">swap_id</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;RESUME=UUID=2a91e2a6-e0fc-431f-94d2-1dff3241dcbf&quot;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">initramfs</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">resume</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;RESUME=UUID=825fa235-e08c-441e-8637-57309d600ad6&quot;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">initramfs</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">resume</span>
 
 <span class="n">update</span><span class="o">-</span><span class="n">initramfs</span> <span class="o">-</span><span class="n">u</span>
 </pre></div>
@@ -335,10 +423,116 @@ Encrypt snapshot?
 </ul>
 <p>此时看到屏幕一闪进入终端模式，并显示在保存image。保存过程结束后，笔记本关机。再次按下电源按钮，会有一个image恢复过程，然后就会恢复到之前的图形界面。</p>
 </div>
-<div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="uswsusppm-utils">
+<h2>集成uswsusp到pm-utils<a class="headerlink" href="#uswsusppm-utils" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>需要安装 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">pm-utils</span></code> ( 依赖安装 <code class="docutils literal notranslate"><span class="pre">ethtool</span> <span class="pre">pm-utils</span> <span class="pre">vbetool</span></code> )</p>
+<p class="last">推荐使用 <code class="docutils literal notranslate"><span class="pre">pm-hibernate</span></code> 是因为gnome的默认hibernate是通过pm-hibernate实现的。</p>
+</div>
+<ul>
+<li><p class="first">编辑 <code class="docutils literal notranslate"><span class="pre">/etc/pm/config.d/00sleep_module</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SLEEP_MODULE</span><span class="o">=</span><span class="s2">&quot;uswsusp&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">tail</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">pm</span><span class="o">-</span><span class="n">suspend</span><span class="o">.</span><span class="n">log</span> <span class="o">&amp;</span>
+<span class="n">sudo</span> <span class="n">pm</span><span class="o">-</span><span class="n">hibernate</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在系统休眠之后，按下电源开关恢复，可以看到屏幕字符终端显示恢复保存的镜像，确保正确恢复图形工作洁面后，再进行下一步集成systemd操作。</p>
+</div>
+<div class="section" id="systemd">
+<h2>集成systemd<a class="headerlink" href="#systemd" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">目前只在字符界面测试成功，但是在图形界面测试遇到恢复后黑屏问题，所以暂时放弃图形界面改为启动后直接进入字符终端界面。</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">systemd-suspend.service</span></code> 是一个系统服务，通过 <code class="docutils literal notranslate"><span class="pre">suspend.target</span></code> 拉取并响应实际的系统挂起。同样， <code class="docutils literal notranslate"><span class="pre">systemd-hibernate.service</span></code> 则是有 <code class="docutils literal notranslate"><span class="pre">hibernate.target</span></code> 拉取并执行相应的hibernate。</p>
+<p>在进入系统 syspend 和/或 hibernation 之前，systemd会执行所有在 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system-sleep/</span></code> 目录下的可执行文件并传递2个参数给这些程序。第一个参数是 <code class="docutils literal notranslate"><span class="pre">pre</span></code> ，第二个参数是根据选择的动作传递 <code class="docutils literal notranslate"><span class="pre">suspend</span></code> ， <code class="docutils literal notranslate"><span class="pre">hibernate</span></code> , <code class="docutils literal notranslate"><span class="pre">hybrid-sleep</span></code> 或 <code class="docutils literal notranslate"><span class="pre">suspend-then-hibernate</span></code> 。而当系统离开 <code class="docutils literal notranslate"><span class="pre">suspend</span></code> 和/或 <code class="docutils literal notranslate"><span class="pre">hibernate</span></code> 之前，会执行相同的目录下的可执行程序，只不过第一个参数被改成了 <code class="docutils literal notranslate"><span class="pre">post</span></code> 。所有在这个目录下的可执行程序是并发执行的，并且只有所有的可执行程序执行完毕之后，才会继续动作。</p>
+<p>注意在 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system-sleep/</span></code> 目录下的脚本或程序倾向于本地使用并且可以hack。如果应用程序想要重新执行系统 suspend/hibernation 并恢复，则应该使用 <a class="reference external" href="https://www.freedesktop.org/wiki/Software/systemd/inhibit">Inhibitor interface</a> 。</p>
+<ul>
+<li><p class="first">编辑 <code class="docutils literal notranslate"><span class="pre">hibernate</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">edit</span> <span class="n">systemd</span><span class="o">-</span><span class="n">hibernate</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>粘贴以下代码:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">ExecStart</span><span class="o">=</span>
+<span class="n">ExecStartPre</span><span class="o">=-/</span><span class="nb">bin</span><span class="o">/</span><span class="n">run</span><span class="o">-</span><span class="n">parts</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">a</span> <span class="n">pre</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">-</span><span class="n">sleep</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">s2disk</span>
+<span class="n">ExecStartPost</span><span class="o">=-/</span><span class="nb">bin</span><span class="o">/</span><span class="n">run</span><span class="o">-</span><span class="n">parts</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">reverse</span> <span class="o">-</span><span class="n">a</span> <span class="n">post</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">-</span><span class="n">sleep</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>注意在Ubuntu 18.04及以上版本中， <code class="docutils literal notranslate"><span class="pre">pre/post</span></code> 脚本位于 <code class="docutils literal notranslate"><span class="pre">/lib/systemd/system-sleep</span></code> 目录，和一些介绍debian的文档中设置 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system-sleep</span></code> 不同。错误指向目录的话会导致休眠唤醒之后，图形界面始终是黑屏（虽然系统依然可以ssh登陆和使用）。</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">不过，这个集成systemd的步骤我测试没有成功，目前只能使用命令行pm-hibernate完成休眠</span></code></p>
+</div>
+<ul>
+<li><p class="first">更新systemd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">测试运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">hibernate</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="section" id="id8">
+<h3>笔记本合上屏幕休眠<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>笔记本合上屏幕的时候会触发systemd事件，所以通过修改 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/logind.conf</span></code> 如下可以在合上屏幕时进入hibernate而不是默认的suspend:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#HandleLidSwitch=suspend</span>
+<span class="n">HandleLidSwitch</span><span class="o">=</span><span class="n">hibernate</span>
+</pre></div>
+</div>
+<p>然后重新加载 <code class="docutils literal notranslate"><span class="pre">systemd-logind</span></code> 生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">systemd</span><span class="o">-</span><span class="n">logind</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">现在在字符终端界面合上笔记本屏幕会自动休眠，然后也能够恢复运行。不过目前图形界面尚未解决问题。</p>
+</div>
+</div>
+</div>
+<div class="section" id="hibernate">
+<h2>激活图形界面hibernate<a class="headerlink" href="#hibernate" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">由于集成systemd步骤在图形界面测试未成功，所以此步骤也没有成功。</p>
+</div>
+<ul>
+<li><p class="first">创建 <code class="docutils literal notranslate"><span class="pre">/etc/polkit-1/localauthority/50-local.d/com.ubuntu.enable-hibernate.pkla</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Re</span><span class="o">-</span><span class="n">enable</span> <span class="n">hibernate</span> <span class="n">by</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">upower</span><span class="p">]</span>
+<span class="n">Identity</span><span class="o">=</span><span class="n">unix</span><span class="o">-</span><span class="n">user</span><span class="p">:</span><span class="o">*</span>
+<span class="n">Action</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">upower</span><span class="o">.</span><span class="n">hibernate</span>
+<span class="n">ResultActive</span><span class="o">=</span><span class="n">yes</span>
+
+<span class="p">[</span><span class="n">Re</span><span class="o">-</span><span class="n">enable</span> <span class="n">hibernate</span> <span class="n">by</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">logind</span><span class="p">]</span>
+<span class="n">Identity</span><span class="o">=</span><span class="n">unix</span><span class="o">-</span><span class="n">user</span><span class="p">:</span><span class="o">*</span>
+<span class="n">Action</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">login1</span><span class="o">.</span><span class="n">hibernate</span><span class="p">;</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">login1</span><span class="o">.</span><span class="n">handle</span><span class="o">-</span><span class="n">hibernate</span><span class="o">-</span><span class="n">key</span><span class="p">;</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">login1</span><span class="p">;</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">login1</span><span class="o">.</span><span class="n">hibernate</span><span class="o">-</span><span class="n">multiple</span><span class="o">-</span><span class="n">sessions</span><span class="p">;</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">login1</span><span class="o">.</span><span class="n">hibernate</span><span class="o">-</span><span class="n">ignore</span><span class="o">-</span><span class="n">inhibit</span>
+<span class="n">ResultActive</span><span class="o">=</span><span class="n">yes</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后重启系统就可以看到图形界面菜单显示了 <code class="docutils literal notranslate"><span class="pre">Hibernate</span></code> 功能。不过，这个功能我测试返回还是需要 <code class="docutils literal notranslate"><span class="pre">systemd-hibernate.service</span></code> 支持，否则也是黑屏（虽然可以ssh访问）</p>
+</div>
+<div class="section" id="id9">
+<h2>参考<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://askubuntu.com/questions/768136/how-can-i-hibernate-on-ubuntu-16-04">How can I hibernate on Ubuntu 16.04?</a> 其中最重要的一个解决方案是 “Hibernation using systemctl and getting it working in tough cases” ，在这篇问答的第2个回答中。</li>
+<li><a class="reference external" href="https://help.ubuntu.com/community/PowerManagement/Hibernate">PowerManagement/Hibernate</a></li>
+<li><a class="reference external" href="https://medium.com/&#64;lzcoder/enable-hibernate-on-ubuntu-using-uswsusp-s2disk-ae0b71862eb5">Enable hibernate on Ubuntu using uswsusp (s2disk)</a></li>
+<li><a class="reference external" href="https://www.freedesktop.org/software/systemd/man/systemd-suspend.service.html">systemd-suspend.service</a></li>
 </ul>
 </div>
 </div>

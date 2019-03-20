@@ -62,6 +62,53 @@ Desktop软件
 
    sudo apt install chromium-browser
 
+启动自动进入字符终端
+=======================
+
+为了能够节约系统资源，默认启动也可以只采用字符终端模式。
+
+- 编辑 `/etc/default/grub`::
+
+   #GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+   GRUB_CMDLINE_LINUX_DEFAULT="text"
+   GRUB_CMDLINE_LINUX="ipv6.disable=1 acpi_osi=Windows"
+
+.. note::
+
+   - 内核参数 ``text`` 并去除 ``quiet splash`` 是为了启动时能够查看字符终端信息
+   - ``ipv6.disable=1`` 是为了禁止无用的IPv6（避免无线网卡驱动报错)
+   - ``acpi_osi=Windows`` 是为了避免MacBook Pro笔记本的BIOS查询操作系统不支持的特性，伪装成Windows系统
+   - 以上内核参数和启动到字符终端没有直接关系，但是可以帮助我们排查系统启动问题
+
+- 修改 ``systemd`` 启动级别::
+
+   rm /etc/systemd/system/default.target
+   ln -s /lib/systemd/system/runlevel3.target /etc/systemd/system/default.target
+
+- 重启系统生效
+
+- 在用户目录添加 ``~/.xinitrc``  内容如下::
+
+   exec startxfce4
+
+这样就可以通过 ``startx`` 启动图形界面。 
+
+- 如果要恢复默认图形界面::
+
+   sudo systemctl set-default graphical.target
+
+.. note::
+
+   目前测试存在问题是 ``startx`` 启动的图形界面在退出后无法返回字符终端界面，令人烦恼。
+
+.. note::
+
+   由于Retina屏幕使得默认的字符终端字体非常细小，所以需要 `设置tty终端字体 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/change_tty_console_font_size.md>`_ ::
+
+      sudo dpkg-reconfigure console-setup
+
+   选择字体 Terminus 12x24
+
 无线网卡
 =============
 
@@ -105,3 +152,6 @@ MacBook Pro使用的显卡是NVIDIA GeForce GT 750M Mac Edition ，默认安装�
 
    sudo ubuntu-drivers autoinstall
 
+.. note::
+
+   建议使用Nvidia驱动替换默认安装的 ``nouveau`` 驱动，我实践测试发现 ``nouveau`` 在使用Hibernate休眠恢复时会导致图形界面无响应。 :ref:`ubuntu_hibernate`

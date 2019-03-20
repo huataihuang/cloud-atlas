@@ -25,8 +25,12 @@ Studio环境创建KVM虚拟机
 
 .. note::
 
+   - 只有通过网络安装才可以使用 ``--extra-args="console=tty0 console=ttyS0,115200"`` 以便能够通过串口控制台安装
    - root分区采用EXT4文件系统，占据整个磁盘
    - 软件包只选择 ``OpenSSH server`` 以便保持最小化安装，后续clone出的镜像再按需安装
+
+虚拟机串口设置
+=================
 
 - 设置虚拟机串口输出
 
@@ -63,15 +67,52 @@ Studio环境创建KVM虚拟机
 
    详细的KVM虚拟机串口设置请参考 `虚拟机串口控制台 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/libvirt/devices/vm_serial_console.md>`_
 
+虚拟机内部初始设置
+=====================
+
 - 修改Guest系统的 ``/etc/sudoers`` 允许 ``sudo`` 用户组可以无密码执行::
 
    #%sudo    ALL=(ALL:ALL) ALL
    %sudo    ALL=(ALL:ALL) NOPASSWD:ALL
 
+- 参考 :ref:`ubuntu_static_ip` 设置好Guest虚拟机的静态IP地址，便于后续clone出虚拟机后调整
+
 - 在用户目录 ``~/.ssh/authorized_keys`` 中添加Host物理主机的公钥，以便能够方便登陆管理
+
+- 对齐物理主机、工作主机和虚拟机中同名账号的uid和gid
+
+.. note::
+
+   CentOS/RHEL 默认新开设的第一个账号的 ``uid/gid`` 是 ``501/20`` ，为方便各个虚拟机之间免密同账号登陆，将所有平台的自己个人账号的 ``uid/gid`` 对齐，以便避免权限错乱。
 
 - 安装后登陆Guest系统内部更新系统并安装必要软件::
 
    sudo apt update
    sudo apt upgrade
    sudo apt install screen net-tools nmon 
+
+准备虚拟机的动态调整
+======================
+
+- 配置模版虚拟机的 ``setmaxmem`` 和手工修改配置，以便后续能够根据需要动态修改虚拟机的vcpu和mem::
+
+   virsh setmaxmem ubuntu18.04 16G
+
+不过，设置最大vcpu数量方法没有直接的virsh命令，所以采用 ``virsh edit ubuntu18.04`` 方法，将以下配置::
+
+   <vcpu placement='static'>1</vcpu>
+
+修改成::
+
+   <vcpu placement='static' current='1'>8</vcpu>
+
+.. note::
+
+   详细的动态修改虚拟机vcpu和memory的方法参考 `动态调整KVM虚拟机内存和vcpu实战 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/add_remove_vcpu_memory_to_guest_on_fly.md>`_
+
+下一步
+===========
+
+现在我们已经创建了第一个可用的KVM虚拟机，并且对虚拟机做了调整。现在用这个虚拟机作为模版，我们可以快速clone出实验所需的虚拟机：
+
+- :ref:`clone_vm_in_studio`

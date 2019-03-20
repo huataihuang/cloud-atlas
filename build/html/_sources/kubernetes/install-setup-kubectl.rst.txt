@@ -40,6 +40,13 @@ Ubuntu, Debian 安装kubectl
    sudo apt-get update
    sudo apt-get install -y kubectl
 
+macOS 安装kubectl
+-------------------
+
+- 安装最新版本::
+
+   curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/darwin/amd64/kubectl && chmod +x kubectl && sudo cp kubectl /usr/local/bin/ && rm kubectl
+
 配置kubectl
 ==============
 

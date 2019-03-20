@@ -34,70 +34,27 @@ Studio环境KVM和Docker
 
    Ubuntu安装libvirt时已经自动激活启动
 
-.. _nested_virtualization_in_stuido:
+嵌套虚拟化
+================
 
-嵌套虚拟化(Nested Virtualization)
-====================================
-
-.. note::
-
-   为了能够在一台物理主机（MacBook Pro）上能够模拟出OpenStack集群，即同时运行多个hypervisor，需要使用嵌套虚拟化(Nested Virtualization)。虽然嵌套虚拟化会导致较大的性能损失，但是对于开发测试环境，依然是节约硬件的解决方案。
-
-- 检查系统内核是否激活嵌套虚拟化::
-
-   cat /sys/module/kvm_intel/parameters/nested
-
-输入如果是 ``Y`` 就表示已经激活嵌套虚拟化，如果是 ``N`` 则执行下一步激活
-
-- (根据需要执行这一步)激活嵌套虚拟化步骤是通过重新加载KVM intel内核模块实现::
-
-   sudo rmmod kvm-intel
-   sudo sh -c "echo 'options kvm-intel nested=y' >> /etc/modprobe.d/kvm_intel.conf"
-   sudo modprobe kvm-intel
-
-.. note::
-
-   在Ubuntu 18.10上，已经不需要执行这步--因为默认已经有配置文件 ``/etc/modprobe.d/qemu-system-x86.conf`` 配置文件激活了 ``kvm_intel`` 模块的嵌套虚拟化（内容如下）::
-
-      options kvm_intel nested=1
-
-   并且通过检查 ``cat /sys/module/kvm_intel/parameters/nested`` 可以看到内核模块 ``kvm-intel`` 已经激活了嵌套虚拟化。
-
-- 将虚拟化扩展输出给虚拟机，例如 :ref:`devstack` ::
-
-   virsh edit devstack
-
-将内容::
-
-   <cpu mode='custom' match='exact' check='partial'>
-     <model fallback='allow'>Haswell-noTSX-IBRS</model>
-   </cpu>
-
-修改成::
-
-   <cpu mode='host-passthrough'>
-   </cpu>
-
-然后重启虚拟机，在虚拟机内部执行 ``lscpu`` 可以看到如下输出证明已经支持KVM虚拟化::
-
-   Virtualization:      VT-x
-   Hypervisor vendor:   KVM
-   Virtualization type: full
-
-另外在虚拟机内部可以看到增加了设备文件 ``/dev/kvm``
-
-.. note::
-
-   详细请参考 `Configure DevStack with KVM-based Nested Virtualization <https://docs.openstack.org/devstack/latest/guides/devstack-with-nested-kvm.html>`_
+在使用 ``一台`` 物理主机(MacBook Pro)模拟多个物理服务器来组成集群，部署基于KVM虚拟化的云计算，需要使用 :ref:`nested_virtualization_in_studio` 来实现。在后续 :ref:`kvm` 实践中，会详介绍如何在一台物理主机上运行支持hypervisor的虚拟机，以实现物理服务器集群模拟。 
 
 Docker
 ========
 
 在MacBook Pro的Host环境，不仅要运行嵌套虚拟户的KVM实现OpenStack的集群模拟，而且要运行Docker来支撑一些底层服务。这是因为，底层服务需要更高的性能，而且要具备隔离以实现模拟分布式集群。
 
-::
+- 安装Docker::
 
    sudo apt install docker.io
+
+- (可选) 将 ``自己`` 的账号添加到 ``docker`` 用户组::
+
+     sudo adduser `id -un` docker
+
+.. note::
+
+   用户加入docker组还是需要重启主机操作系统才能直接使用 ``docker ps``
 
 下一步
 ==========

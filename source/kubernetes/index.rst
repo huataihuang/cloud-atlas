@@ -16,6 +16,9 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    operator_framework.rst
    install-etcd.rst
    k8s-ha-master.rst
+   admission_controllers.rst
+   mutating_admission_webhook.rst
+   validating_admission_webhook.rst
 
 
 .. only::  subproject and html

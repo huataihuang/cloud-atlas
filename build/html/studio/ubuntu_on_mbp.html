@@ -83,6 +83,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Studio Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduce_my_studio.html">模拟云计算的Studio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intel_core_i7_4850hq.html">Intel Core i7-4850HQ处理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="base_os.html">基础操作系统</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">MacBook Pro上运行Ubuntu</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">安装</a></li>
@@ -95,9 +96,6 @@
 <li class="toctree-l2"><a class="reference internal" href="share_mouse_keyboard.html">主机间共享键盘鼠标</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kvm_docker_in_studio.html">Studio环境KVM和Docker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="btrfs_in_studio.html">Studio环境的Btrfs存储</a></li>
-<li class="toctree-l2"><a class="reference internal" href="create_vm_in_studio.html">Studio环境创建KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clone_vm_in_studio.html">Studio环境复制KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="libvirt_static_ip_in_studio.html">Studio环境libvirt静态分配IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="studio_ip.html">Studio测试环境IP分配</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_hibernate.html">Ubuntu Hibernate休眠</a></li>
@@ -209,6 +207,10 @@
 <p class="first admonition-title">Note</p>
 <p class="last">实践发现和Fedora不同，采用 Btrfs 作为根文件系统（ 特别配置了 <code class="docutils literal notranslate"><span class="pre">XFS</span></code> 的 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 分区）无法启动Ubuntu。</p>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">MacBook Pro笔记本（物理主机）上安装的Host操作系统，我命名为 <code class="docutils literal notranslate"><span class="pre">xcloud</span></code> ，后续文档中会引用这个Host主机名。</p>
+</div>
 </div>
 <div class="section" id="id2">
 <h2>配置<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
@@ -223,6 +225,58 @@
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">详细请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/install/ubuntu_on_macbook_pro_with_wifi.md">Ubuntu在MacBook Pro上WIFI</a></p>
+</div>
+<ul>
+<li><p class="first">SSH提供了一种 <code class="docutils literal notranslate"><span class="pre">multiplexing</span></code> （多路传输）机制，可以重用已有的TCP连接，在维护系统时非常方便，加速了ssh登陆，推荐在 <code class="docutils literal notranslate"><span class="pre">xcloud</span></code> Host主机上配置客户端，方便登陆各个虚拟机操作。即设置 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> 配置如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="o">*</span>
+    <span class="n">ServerAliveInterval</span> <span class="mi">60</span>
+    <span class="n">ControlMaster</span> <span class="n">auto</span>
+    <span class="n">ControlPath</span> <span class="o">~/.</span><span class="n">ssh</span><span class="o">/%</span><span class="n">h</span><span class="o">-%</span><span class="n">p</span><span class="o">-%</span><span class="n">r</span>
+    <span class="n">ControlPersist</span> <span class="n">yes</span>
+
+<span class="n">Host</span> <span class="n">ubuntu18</span><span class="o">-</span><span class="mi">04</span>
+    <span class="n">HostName</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.2</span>
+    <span class="n">User</span> <span class="n">huatai</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">详细请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/service/ssh/multiplexing.md">ssh多路传输multiplexing加速</a></p>
+</div>
+<ul>
+<li><p class="first">在服务器维护过程中，经常需要启用 <code class="docutils literal notranslate"><span class="pre">screen</span></code> 以便在服务器端保持工作状态，建议在 <code class="docutils literal notranslate"><span class="pre">xcloud</span></code> 主机上添加 <code class="docutils literal notranslate"><span class="pre">~/.screenrc</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">screenrc</span>
+<span class="n">altscreen</span> <span class="n">off</span>
+<span class="n">hardstatus</span> <span class="n">none</span>
+<span class="n">caption</span> <span class="n">always</span> <span class="s2">&quot;%{= wk}%</span><span class="si">{wk}</span><span class="s2">%-Lw%</span><span class="si">{rw}</span><span class="s2"> %n+</span><span class="si">%f</span><span class="s2"> %t %</span><span class="si">{wk}</span><span class="s2">%+Lw %=</span><span class="si">%c</span><span class="s2">%{= R}%{-}&quot;</span>
+
+<span class="n">shelltitle</span> <span class="s2">&quot;$ |bash&quot;</span>
+<span class="n">defscrollback</span> <span class="mi">50000</span>
+<span class="n">startup_message</span> <span class="n">off</span>
+<span class="n">escape</span> <span class="o">^</span><span class="n">aa</span>
+
+<span class="n">termcapinfo</span> <span class="n">xterm</span><span class="o">|</span><span class="n">xterms</span><span class="o">|</span><span class="n">xs</span><span class="o">|</span><span class="n">rxvt</span> <span class="n">ti</span><span class="o">@</span><span class="p">:</span><span class="n">te</span><span class="o">@</span> <span class="c1"># scroll bar support</span>
+<span class="n">term</span> <span class="n">rxvt</span> <span class="c1"># mouse support</span>
+
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">k</span><span class="p">;</span> <span class="n">screen</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">F1</span> <span class="n">prev</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">F2</span> <span class="nb">next</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">k</span> <span class="n">kb</span> <span class="n">stuff</span> <span class="o">^</span><span class="n">H</span>
+<span class="n">bind</span> <span class="n">x</span> <span class="n">remove</span>
+<span class="n">bind</span> <span class="n">j</span> <span class="nb">eval</span> <span class="s2">&quot;focus down&quot;</span>
+<span class="n">bind</span> <span class="n">k</span> <span class="nb">eval</span> <span class="s2">&quot;focus up&quot;</span>
+<span class="n">bind</span> <span class="n">s</span> <span class="nb">eval</span> <span class="s2">&quot;split&quot;</span> <span class="s2">&quot;focus down&quot;</span> <span class="s2">&quot;prev&quot;</span>
+<span class="n">vbell</span> <span class="n">off</span>
+<span class="n">shell</span> <span class="o">-</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">详细使用screen工具来帮助维护服务器，请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/shell/utilities/screen.md">screen</a></p>
 </div>
 </div>
 <div class="section" id="set-ubuntu-wifi">

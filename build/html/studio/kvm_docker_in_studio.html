@@ -83,6 +83,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Studio Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduce_my_studio.html">模拟云计算的Studio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intel_core_i7_4850hq.html">Intel Core i7-4850HQ处理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="base_os.html">基础操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_on_mbp.html">MacBook Pro上运行Ubuntu</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_server.html">Ubuntu Server</a></li>
@@ -90,16 +91,13 @@
 <li class="toctree-l2"><a class="reference internal" href="share_mouse_keyboard.html">主机间共享键盘鼠标</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Studio环境KVM和Docker</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#kvm">安装KVM</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nested-virtualization">嵌套虚拟化(Nested Virtualization)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">嵌套虚拟化</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker">Docker</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">下一步</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">下一步</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="btrfs_in_studio.html">Studio环境的Btrfs存储</a></li>
-<li class="toctree-l2"><a class="reference internal" href="create_vm_in_studio.html">Studio环境创建KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clone_vm_in_studio.html">Studio环境复制KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="libvirt_static_ip_in_studio.html">Studio环境libvirt静态分配IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="studio_ip.html">Studio测试环境IP分配</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_hibernate.html">Ubuntu Hibernate休眠</a></li>
@@ -224,80 +222,36 @@
 <p class="last">Ubuntu安装libvirt时已经自动激活启动</p>
 </div>
 </div>
-<div class="section" id="nested-virtualization">
-<span id="nested-virtualization-in-stuido"></span><h2>嵌套虚拟化(Nested Virtualization)<a class="headerlink" href="#nested-virtualization" title="Permalink to this headline">¶</a></h2>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">为了能够在一台物理主机（MacBook Pro）上能够模拟出OpenStack集群，即同时运行多个hypervisor，需要使用嵌套虚拟化(Nested Virtualization)。虽然嵌套虚拟化会导致较大的性能损失，但是对于开发测试环境，依然是节约硬件的解决方案。</p>
-</div>
-<ul>
-<li><p class="first">检查系统内核是否激活嵌套虚拟化:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">module</span><span class="o">/</span><span class="n">kvm_intel</span><span class="o">/</span><span class="n">parameters</span><span class="o">/</span><span class="n">nested</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>输入如果是 <code class="docutils literal notranslate"><span class="pre">Y</span></code> 就表示已经激活嵌套虚拟化，如果是 <code class="docutils literal notranslate"><span class="pre">N</span></code> 则执行下一步激活</p>
-<ul>
-<li><p class="first">(根据需要执行这一步)激活嵌套虚拟化步骤是通过重新加载KVM intel内核模块实现:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rmmod</span> <span class="n">kvm</span><span class="o">-</span><span class="n">intel</span>
-<span class="n">sudo</span> <span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;echo &#39;options kvm-intel nested=y&#39; &gt;&gt; /etc/modprobe.d/kvm_intel.conf&quot;</span>
-<span class="n">sudo</span> <span class="n">modprobe</span> <span class="n">kvm</span><span class="o">-</span><span class="n">intel</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>在Ubuntu 18.10上，已经不需要执行这步–因为默认已经有配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/qemu-system-x86.conf</span></code> 配置文件激活了 <code class="docutils literal notranslate"><span class="pre">kvm_intel</span></code> 模块的嵌套虚拟化（内容如下）:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span> <span class="n">kvm_intel</span> <span class="n">nested</span><span class="o">=</span><span class="mi">1</span>
-</pre></div>
-</div>
-<p class="last">并且通过检查 <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/sys/module/kvm_intel/parameters/nested</span></code> 可以看到内核模块 <code class="docutils literal notranslate"><span class="pre">kvm-intel</span></code> 已经激活了嵌套虚拟化。</p>
-</div>
-<ul>
-<li><p class="first">将虚拟化扩展输出给虚拟机，例如 <a class="reference internal" href="../openstack/devstack.html#devstack"><span class="std std-ref">DevStack</span></a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">edit</span> <span class="n">devstack</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>将内容:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">cpu</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;custom&#39;</span> <span class="n">match</span><span class="o">=</span><span class="s1">&#39;exact&#39;</span> <span class="n">check</span><span class="o">=</span><span class="s1">&#39;partial&#39;</span><span class="o">&gt;</span>
-  <span class="o">&lt;</span><span class="n">model</span> <span class="n">fallback</span><span class="o">=</span><span class="s1">&#39;allow&#39;</span><span class="o">&gt;</span><span class="n">Haswell</span><span class="o">-</span><span class="n">noTSX</span><span class="o">-</span><span class="n">IBRS</span><span class="o">&lt;/</span><span class="n">model</span><span class="o">&gt;</span>
-<span class="o">&lt;/</span><span class="n">cpu</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>修改成:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">cpu</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;host-passthrough&#39;</span><span class="o">&gt;</span>
-<span class="o">&lt;/</span><span class="n">cpu</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>然后重启虚拟机，在虚拟机内部执行 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 可以看到如下输出证明已经支持KVM虚拟化:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Virtualization</span><span class="p">:</span>      <span class="n">VT</span><span class="o">-</span><span class="n">x</span>
-<span class="n">Hypervisor</span> <span class="n">vendor</span><span class="p">:</span>   <span class="n">KVM</span>
-<span class="n">Virtualization</span> <span class="nb">type</span><span class="p">:</span> <span class="n">full</span>
-</pre></div>
-</div>
-<p>另外在虚拟机内部可以看到增加了设备文件 <code class="docutils literal notranslate"><span class="pre">/dev/kvm</span></code></p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">详细请参考 <a class="reference external" href="https://docs.openstack.org/devstack/latest/guides/devstack-with-nested-kvm.html">Configure DevStack with KVM-based Nested Virtualization</a></p>
-</div>
+<div class="section" id="id1">
+<h2>嵌套虚拟化<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>在使用 <code class="docutils literal notranslate"><span class="pre">一台</span></code> 物理主机(MacBook Pro)模拟多个物理服务器来组成集群，部署基于KVM虚拟化的云计算，需要使用 <a class="reference internal" href="../kvm/nested_virtualization_in_studio.html#nested-virtualization-in-studio"><span class="std std-ref">Studio嵌套虚拟化</span></a> 来实现。在后续 <a class="reference internal" href="../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 实践中，会详介绍如何在一台物理主机上运行支持hypervisor的虚拟机，以实现物理服务器集群模拟。</p>
 </div>
 <div class="section" id="docker">
 <h2>Docker<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h2>
 <p>在MacBook Pro的Host环境，不仅要运行嵌套虚拟户的KVM实现OpenStack的集群模拟，而且要运行Docker来支撑一些底层服务。这是因为，底层服务需要更高的性能，而且要具备隔离以实现模拟分布式集群。</p>
+<ul>
+<li><p class="first">安装Docker:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span>
 </pre></div>
 </div>
+</li>
+<li><p class="first">(可选) 将 <code class="docutils literal notranslate"><span class="pre">自己</span></code> 的账号添加到 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 用户组:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo adduser `id -un` docker
+</pre></div>
 </div>
-<div class="section" id="id1">
-<h2>下一步<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>由于KVM和Docker会占用大量的磁盘空间来存储镜像，所以我准备采用 Btrfs 存储来实现（ <a class="reference internal" href="btrfs_in_studio.html#btrfs-in-studio"><span class="std std-ref">Studio环境的Btrfs存储</span></a> ）。</p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">用户加入docker组还是需要重启主机操作系统才能直接使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code></p>
+</div>
 </div>
 <div class="section" id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>下一步<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>由于KVM和Docker会占用大量的磁盘空间来存储镜像，所以我准备采用 Btrfs 存储来实现（ <a class="reference internal" href="btrfs_in_studio.html#btrfs-in-studio"><span class="std std-ref">Studio环境的Btrfs存储</span></a> ）。</p>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>详细的Ubuntu中安装KVM环境请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/tree/master/virtual/kvm/kvm_on_ubuntu/installation.md">Ubuntu环境</a></li>
 <li><a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/nested_virtualization/nested_virtualization_kvm_centos7.md">CentOS7的嵌套虚拟化(nested virtualization)部署实践</a></li>

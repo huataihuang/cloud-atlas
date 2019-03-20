@@ -94,11 +94,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#id3">安装Minikube</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ubuntuminikube">Ubuntu平台安装MiniKube</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#macosminikube">macOS平台安装MiniKube</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">启动minikube</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">使用minikube</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">停止和再次启动minikube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">启动minikube</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#linuxkvm">Linux平台使用kvm后端</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">macOS平台使用hyperkit后端</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">使用minikube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">停止和再次启动minikube</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="install-setup-kubectl.html">安装和设置kubectl</a></li>
@@ -106,6 +110,9 @@
 <li class="toctree-l2"><a class="reference internal" href="operator_framework.html">Operator框架</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install-etcd.html">安装etcd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="k8s-ha-master.html">高可用Kubernetes Master</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admission_controllers.html">Admission Controllers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mutating_admission_webhook.html">MutatingAdmissionWebhook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="validating_admission_webhook.html">ValidatingAdmissionWebhook</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../big_data/index.html">Big Data Atlas</a></li>
@@ -205,13 +212,69 @@
 </div>
 <div class="section" id="macosminikube">
 <h3>macOS平台安装MiniKube<a class="headerlink" href="#macosminikube" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="macoshyperkit">
+<h4>macOS安装hyperkit<a class="headerlink" href="#macoshyperkit" title="Permalink to this headline">¶</a></h4>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">macOS的minikube可以选择virtualbox作为后端，也可以选择xhyve作为后端。目前我倾向于使用xhyve，以便使用macOS内置的kvm虚拟化。</p>
+<p class="last">macOS的minikube可以选择virtualbox作为后端，也可以选择 <a class="reference external" href="https://github.com/moby/hyperkit">xhyve</a> 作为后端。目前我倾向于使用xhyve，以便使用macOS内置的kvm虚拟化。</p>
+</div>
+<ul>
+<li><p class="first">为了在块设备后端支持qcow，需要安装OCaml <a class="reference external" href="https://opam.ocaml.org/">OPAM</a> 开发环境带有qcow模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>brew install opam libev
+opam init
+eval `opam config env`
+opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix.2.9.0 conf-libev logs fmt mirage-unix prometheus-app
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>为了能够在编译hyperkit之前找到ocaml环境，必须在编译前执行一次 <code class="docutils literal notranslate"><span class="pre">opam</span> <span class="pre">config</span> <span class="pre">env</span></code></p>
+<p>可以通过以下命令移除之前旧版本的 <code class="docutils literal notranslate"><span class="pre">mirage-block-unix</span></code> 的 <code class="docutils literal notranslate"><span class="pre">pin</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">qcow</span></code></p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opam</span> <span class="n">update</span>
+<span class="n">opam</span> <span class="n">pin</span> <span class="n">remove</span> <span class="n">mirage</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="n">unix</span>
+<span class="n">opam</span> <span class="n">pin</span> <span class="n">remove</span> <span class="n">qcow</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p class="first">安装HyperKit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">moby</span><span class="o">/</span><span class="n">hyperkit</span>
+<span class="n">cd</span> <span class="n">hyperkit</span>
+<span class="n">make</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">二进制执行程序位于 <code class="docutils literal notranslate"><span class="pre">build/hyperkit</span></code> 。为了能够让 <code class="docutils literal notranslate"><span class="pre">docker-machine-driver-hyperkit</span></code> 找到hyperkit可执行程序，请将这个目录加入到环境变量，例如 <code class="docutils literal notranslate"><span class="pre">~/.bash_profile</span></code> 。</p>
 </div>
 </div>
 <div class="section" id="id4">
-<h3>启动minikube<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<h4>macOS安装minikube<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<ul>
+<li><p class="first">通过brew安装minikube(我没有使用这个方法):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">cask</span> <span class="n">install</span> <span class="n">minikube</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">直接安装罪行版本minikube（我使用这个方法）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">Lo</span> <span class="n">minikube</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">storage</span><span class="o">.</span><span class="n">googleapis</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">minikube</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="mf">35.0</span><span class="o">/</span><span class="n">minikube</span><span class="o">-</span><span class="n">darwin</span><span class="o">-</span><span class="n">amd64</span> <span class="o">&amp;&amp;</span> <span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">minikube</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">cp</span> <span class="n">minikube</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span> <span class="o">&amp;&amp;</span> <span class="n">rm</span> <span class="n">minikube</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">每次启动minikube默认会检查是否有可用最新版本</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>启动minikube<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">（不推荐直接）启动minikube集群:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">start</span>
@@ -219,6 +282,8 @@
 </div>
 </li>
 </ul>
+<div class="section" id="linuxkvm">
+<h3>Linux平台使用kvm后端<a class="headerlink" href="#linuxkvm" title="Permalink to this headline">¶</a></h3>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>minikube默认使用Virtualbox作为驱动，所以如果简单使用上述命令，会首先下载virtulbox镜像来运行。这可能和你的安装环境不同。所以需要参考 <a class="reference external" href="https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#kvm2-driver">Driver plugin installation</a> 来安装驱动产检，并指定驱动来启动minikube。</p>
@@ -252,6 +317,7 @@
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
+<p>创建的minikube配置: <code class="docutils literal notranslate"><span class="pre">CPUs=2,</span> <span class="pre">Memory=2048MB,</span> <span class="pre">Disk=20000MB</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">start</span></code> 运行指令显示输出:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="ow">is</span> <span class="n">now</span> <span class="n">configured</span> <span class="n">to</span> <span class="n">use</span> <span class="s2">&quot;minikube&quot;</span>
 </pre></div>
@@ -259,9 +325,38 @@
 <p class="last">这表明当前Linux主机的kubectl已经被配置直接使用刚才所安装运行的minikube</p>
 </div>
 </div>
+<div class="section" id="id6">
+<h3>macOS平台使用hyperkit后端<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">安装Hyperkit驱动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">install</span> <span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">hyperkit</span>
+
+<span class="c1"># docker-machine-driver-hyperkit need root owner and uid</span>
+<span class="n">sudo</span> <span class="n">chown</span> <span class="n">root</span><span class="p">:</span><span class="n">wheel</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">hyperkit</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">hyperkit</span>
+<span class="n">sudo</span> <span class="n">chmod</span> <span class="n">u</span><span class="o">+</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">hyperkit</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">hyperkit</span>
+</pre></div>
 </div>
-<div class="section" id="id5">
-<h2>使用minikube<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+</li>
+<li><p class="first">(建议跳过这步，用下一步采用先配置再启动)使用Hyperkit后端启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">start</span> <span class="o">--</span><span class="n">vm</span><span class="o">-</span><span class="n">driver</span> <span class="n">hyperkit</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">使用hyperkit作为默认后端:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">vm</span><span class="o">-</span><span class="n">driver</span> <span class="n">hyperkit</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">启动minikube:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">start</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id7">
+<h2>使用minikube<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">ssh登陆minikub方法:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">ssh</span>
@@ -270,8 +365,8 @@
 </li>
 </ul>
 </div>
-<div class="section" id="id6">
-<h2>停止和再次启动minikube<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id8">
+<h2>停止和再次启动minikube<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <p>安装了minikube之后，通过 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">stop</span></code> 可以停止，然后通过 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">start</span></code> 可以再次启动。</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>

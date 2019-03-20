@@ -83,21 +83,20 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Studio Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduce_my_studio.html">模拟云计算的Studio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intel_core_i7_4850hq.html">Intel Core i7-4850HQ处理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="base_os.html">基础操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_on_mbp.html">MacBook Pro上运行Ubuntu</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_server.html">Ubuntu Server</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Ubuntu Desktop</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#desktop">Desktop软件</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">无线网卡</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">启动自动进入字符终端</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">无线网卡</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ubuntu-desktop-nvidia">显卡</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="share_mouse_keyboard.html">主机间共享键盘鼠标</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kvm_docker_in_studio.html">Studio环境KVM和Docker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="btrfs_in_studio.html">Studio环境的Btrfs存储</a></li>
-<li class="toctree-l2"><a class="reference internal" href="create_vm_in_studio.html">Studio环境创建KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clone_vm_in_studio.html">Studio环境复制KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="libvirt_static_ip_in_studio.html">Studio环境libvirt静态分配IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="studio_ip.html">Studio测试环境IP分配</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_hibernate.html">Ubuntu Hibernate休眠</a></li>
@@ -281,7 +280,64 @@
 </ul>
 </div>
 <div class="section" id="id2">
-<h2>无线网卡<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>启动自动进入字符终端<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>为了能够节约系统资源，默认启动也可以只采用字符终端模式。</p>
+<ul>
+<li><p class="first">编辑 <cite>/etc/default/grub</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet splash&quot;</span>
+<span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;text&quot;</span>
+<span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;ipv6.disable=1 acpi_osi=Windows&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>内核参数 <code class="docutils literal notranslate"><span class="pre">text</span></code> 并去除 <code class="docutils literal notranslate"><span class="pre">quiet</span> <span class="pre">splash</span></code> 是为了启动时能够查看字符终端信息</li>
+<li><code class="docutils literal notranslate"><span class="pre">ipv6.disable=1</span></code> 是为了禁止无用的IPv6（避免无线网卡驱动报错)</li>
+<li><code class="docutils literal notranslate"><span class="pre">acpi_osi=Windows</span></code> 是为了避免MacBook Pro笔记本的BIOS查询操作系统不支持的特性，伪装成Windows系统</li>
+<li>以上内核参数和启动到字符终端没有直接关系，但是可以帮助我们排查系统启动问题</li>
+</ul>
+</div>
+<ul>
+<li><p class="first">修改 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 启动级别:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">target</span>
+<span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">runlevel3</span><span class="o">.</span><span class="n">target</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">重启系统生效</p>
+</li>
+<li><p class="first">在用户目录添加 <code class="docutils literal notranslate"><span class="pre">~/.xinitrc</span></code>  内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exec</span> <span class="n">startxfce4</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这样就可以通过 <code class="docutils literal notranslate"><span class="pre">startx</span></code> 启动图形界面。</p>
+<ul>
+<li><p class="first">如果要恢复默认图形界面:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="nb">set</span><span class="o">-</span><span class="n">default</span> <span class="n">graphical</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">目前测试存在问题是 <code class="docutils literal notranslate"><span class="pre">startx</span></code> 启动的图形界面在退出后无法返回字符终端界面，令人烦恼。</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>由于Retina屏幕使得默认的字符终端字体非常细小，所以需要 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/change_tty_console_font_size.md">设置tty终端字体</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dpkg</span><span class="o">-</span><span class="n">reconfigure</span> <span class="n">console</span><span class="o">-</span><span class="n">setup</span>
+</pre></div>
+</div>
+<p class="last">选择字体 Terminus 12x24</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>无线网卡<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Ubuntu Desktop LiveCD</li>
 </ul>
@@ -297,7 +353,7 @@
 </div>
 </div>
 <div class="section" id="ubuntu-desktop-nvidia">
-<span id="id3"></span><h2>显卡<a class="headerlink" href="#ubuntu-desktop-nvidia" title="Permalink to this headline">¶</a></h2>
+<span id="id4"></span><h2>显卡<a class="headerlink" href="#ubuntu-desktop-nvidia" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">只有需要使用图形界面才需要安装Nvdia驱动，如果只是单纯使Ubuntu作为服务器，可忽略此步骤。</p>
@@ -324,6 +380,10 @@
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">建议使用Nvidia驱动替换默认安装的 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> 驱动，我实践测试发现 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> 在使用Hibernate休眠恢复时会导致图形界面无响应。 <a class="reference internal" href="ubuntu_hibernate.html#ubuntu-hibernate"><span class="std std-ref">Ubuntu Hibernate休眠</span></a></p>
+</div>
 </div>
 </div>
 

@@ -284,7 +284,7 @@ libvirt和docker数据迁移到btrfs
 - 创建并挂载 ``/home`` 目录::
 
    mkdir /home
-   moutn /home
+   mount /home
 
 - 同步和恢复 ``/home`` 目录内容::
 

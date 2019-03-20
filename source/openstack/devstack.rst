@@ -31,14 +31,14 @@ DevStack源代码位于 https://git.openstack.org/cgit/openstack-dev/devstack
    运行DevStack的虚拟机内存建议使用4G，过小的内存会（例如我测试过1c1g配置）会导致安装过程中，nuturn服务会因为OOM被杀掉，导致反复失败，非常麻烦。这里实际测试虚拟机采用 2c4g 配置::
 
       virsh setvcpus devstack 2
-      virsh setmem devstack 4
+      virsh setmem devstack 4G
 
 安装DevStack
 =================
 
 .. note::
 
-   在我的模拟测试环境中使用了 :ref:`nested_virtualization_in_stuido` ，所以DevStack内部可以运行KVM hypervisor进行管理。
+   在我的模拟测试环境中使用了 :ref:`nested_virtualization_in_studio` ，所以DevStack内部可以运行KVM hypervisor进行管理。
 
 在开始运行DevStack的 ``stack.sh`` 脚本之前，请在KVM虚拟机内部确认已经激活了KVM，即虚拟机内部具有 ``/dev/kvm`` 设备。这又这个设备存在，DevStack才会使用 ``/etc/nova.conf`` 配置中的 ``virt_type = kvm`` ，否则就会使用 QEMU 模拟 ``virt_type = qemu`` ，这会影响性能。
 

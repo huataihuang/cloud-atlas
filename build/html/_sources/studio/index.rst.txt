@@ -14,6 +14,7 @@ Studio Atlas
    :maxdepth: 1
 
    introduce_my_studio.rst
+   intel_core_i7_4850hq.rst
    base_os.rst
    ubuntu_on_mbp.rst
    ubuntu_server.rst
@@ -21,9 +22,6 @@ Studio Atlas
    share_mouse_keyboard.rst
    kvm_docker_in_studio.rst
    btrfs_in_studio.rst
-   create_vm_in_studio.rst
-   clone_vm_in_studio.rst
-   libvirt_static_ip_in_studio.rst
    studio_ip.rst
    openconnect_vpn.rst
    ubuntu_hibernate.rst

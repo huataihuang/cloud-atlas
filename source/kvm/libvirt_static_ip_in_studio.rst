@@ -10,6 +10,7 @@ Studio环境libvirt静态分配IP
 
 这里没有采用配置dnsmasq的static DHCP方法，而是修改libvirt的DHCP的range，空出部分IP地址不分配，然后在虚拟机内部配置静态IP地址，这样更为简洁方便，
 
+
 libvirt的DHCP分配范围调整
 ===========================
 
@@ -55,6 +56,8 @@ libvirt的DHCP分配范围调整
 .. note::
 
    Host主机 ``/var/lib/libvirt/dnsmasq/virbr0.status`` 提供了当前dnsmasq分配的IP地址情况。
+
+.. _ubuntu_static_ip:
 
 配置Ubuntu虚拟机的静态IP
 ==========================
@@ -126,7 +129,11 @@ Netplan会读取 ``/etc/netplan/*.yaml`` 配置文件来设置所有的网络接
 
 - 验证检查 ``ifconfig -a`` 可以看到IP地址已经修改成静态配置IP地址
 
-参考
-=========
+.. note::
 
-- `How to Configure Network Static IP Address in Ubuntu 18.04 <https://www.tecmint.com/configure-network-static-ip-address-in-ubuntu/>`_
+   参考 `How to Configure Network Static IP Address in Ubuntu 18.04 <https://www.tecmint.com/configure-network-static-ip-address-in-ubuntu/>`_
+
+依次对必要的测试虚拟机调整静态IP，调整后的IP地址见 :ref:`studio_ip` 。
+
+下一步
+==============
