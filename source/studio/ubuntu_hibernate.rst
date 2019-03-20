@@ -14,6 +14,49 @@ Linux支持 ``Suspend`` (挂起到内存) 和 ``Hibernate`` (挂起到磁盘) �
 - `Gentoo系统的suspend和hibernate休眠 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/gentoo/suspend_hibernate.md>`_
 - `Ubuntu系统hibernate休眠 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/ubuntu_hibernate.md>`_
 
+.. note::
+
+   我在实现Hibvernate上可能走了弯路，也许用默认的 ``swsusp`` 可能更简单些（但是我只测试了 ``uswsusp`` ）。另外，我只解决了命令行休眠，集成到systemd的步骤没有实践成功。
+
+内核和驱动准备（关键）
+=========================
+
+.. note::
+
+   之前花费了一周时间反复折腾MacBook Pro上的Hibernate(save to disk)，总是发现恢复时异常死机或者图形界面无响应，最后总结经验如下:
+
+   - 显卡驱动需要从默认 ``nouveau`` 替换成Nvidia闭源驱动
+   - 内核传递参数 ``acpi_osi=Windows`` 避免BIOS访问操作系统不支持的ACPI特性
+
+   详细记录见 `Ubuntu系统hibernate休眠 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/ubuntu_hibernate.md>`_
+
+- 修改 ``/etc/default/grub`` 设置BIOS标示( ``acpi_osi`` )系统为Windows避免MacBook Pro查询系统不支持的Darwin特性::
+
+   #GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+   GRUB_CMDLINE_LINUX_DEFAULT="text"
+   GRUB_CMDLINE_LINUX="ipv6.disable=1 acpi_osi=Windows"
+
+.. note::
+
+   启动内核text模式以便查看系统启动信息，关闭IPv6是避免无线网卡驱动触发不支持IPv6特性Segment Fault
+
+- 执行更新grub::
+
+   sudo update-grub
+
+- 安装Nvidia驱动::
+
+   sudo apt install ubuntu-drivers-common
+   ubuntu-drivers devices
+   sudo ubuntu-drivers autoinstall
+
+- 重启系统，重启后使用 ``lspci -vvv`` 检查确保显卡设备使用了Nvidia驱动。并使用 ``lsmod | grep nouveau`` 检查确保没有加载 ``nouveau`` 内核模块
+
+- 卸载 ``nouveau`` 相关Xorg软件包（可选）::
+
+   sudo apt --purge remove xserver-xorg-video-nouveau
+   sudo apt autoremove
+
 测试Ubuntu Hibernate
 ==================================
 
@@ -46,13 +89,15 @@ swap分区或swap文件需要和RAM一样大小，或者至少 2/5的内存大�
 
    这里建议可以设置swap分区至少 2/5 的内存大小是假设系统内存足够，这样一般情况下系统不会使用swap，所以就可以把所有swap都用于hibernate，也就是默认的 2/5 内存大小的swap应该也够用于保存内存状态。
 
-实际我采用了 ``2/5 内存 + 2G`` 的swap大小，这是因为默认Ubuntu安装就设置了2G的swap文件，我再加上 2/5 的内存大小swap文件来做保障。我的笔记本是16G内存，所以，我设置了 ``/swapfile`` 文件 2G， ``/swapfile1`` 文件 7G::
+实际我采用了 ``2/5 内存 + 2G`` 的swap大小，这是因为默认Ubuntu安装就设置了2G的swap文件，我再加上 2/5 的内存大小swap文件来做保障。我的笔记本是16G内存，所以，将原先2G的 ``/swapfile`` 改成 9G::
 
-   sudo fallocate -l 7g /swapfile1
-   sudo chmod 600 /swapfile1
-   sudo mkswap /swapfile1
-   sudo swapon /swapfile1
-   echo '/swapfile1  none  swap  sw  0  0' | sudo tee -a /etc/fstab
+   swapoff /swapfile
+   rm -f /swapfile
+
+   sudo fallocate -l 9g /swapfile
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
 
 .. note::
 
@@ -62,6 +107,18 @@ swap分区或swap文件需要和RAM一样大小，或者至少 2/5的内存大�
 
 安装uswsusp
 ================
+
+.. note::
+
+   参考 `PowerManagement/Hibernate <https://help.ubuntu.com/community/PowerManagement/Hibernate>`_
+
+   在Ubuntu系统，默认的hibernate是使用内核build的 ``swsusp`` ，而且 Gnome 和 ``pm-utils` 也使用这个方式（推荐使用 ``platform`` 如果BIOS支持问题，也可以改为 ``shutdown`` ）::
+   
+      sudo -s
+      echo platform > /sys/power/disk
+      echo disk > /sys/power/state
+      
+我在MacBook Pro上实践遇到恢复时图形界面无响应问题（排查最终是通过更换驱动和添加内核 ``acpi_osi`` 参数解决），所以改为采用了用户空间 ``uswsusp`` 。推测如果正确安装了驱动和设置了内核参数，使用默认的 ``swsusp`` 应该也是可以工作的。
 
 - 安装用户空间软件suspend -- Userspace Software Suspend (uswsusp)::
 
@@ -81,13 +138,31 @@ swap分区或swap文件需要和RAM一样大小，或者至少 2/5的内存大�
 
 - 验证Swap文件分区::
 
-   sudo findmnt -no SOURCE,UUID -T /swapfile1
+   sudo findmnt -no SOURCE,UUID -T /swapfile
 
 输出显示::
 
-   /dev/sda2 decda038-1b51-4483-9491-15c3a640e133
+   /dev/sda2 e5b8f8ad-b767-4719-8796-88eae998a056
 
-- 创建 ``/etc/uswsusp.conf`` ，即执行::
+.. note::
+
+   在激活了 ``/swapfile`` 后，首次安装 ``uswsusp`` 工具包就会自动配置好 ``/etc/uswsusp.conf`` 配置文件::
+
+      # /etc/uswsusp.conf(5) -- Configuration file for s2disk/s2both
+      resume device = /dev/sda2
+      compress = y
+      early writeout = y
+      image size = 7692818022
+      RSA key file = /etc/uswsusp.key
+      shutdown method = platform
+      resume offset = 8617984
+
+   这里的 ``resume offset = 8617984`` 是 ``uswsusp`` 自动计算出的，实际上使用 ``swap-offset /swapfile`` 也可以验证这个偏移量。
+
+配置uswsusp（可选）
+=====================
+
+- (可选，如果安装时没有自动创建的话）创建 ``/etc/uswsusp.conf`` ，即执行::
 
    sudo dpkg-reconfigure -pmedium uswsusp
 
@@ -109,9 +184,9 @@ swap分区或swap文件需要和RAM一样大小，或者至少 2/5的内存大�
 
                               /swapfile1
                               /swapfile
-                              /dev/disk/by-uuid/decda038-1b51-4483-9491-15c3a640e133
+                              /dev/disk/by-uuid/e5b8f8ad-b767-4719-8796-88eae998a056
 
-注意：选择 swap 文件所在的 ``partition`` ，即之前的命令 ``findmnt`` 输出的内容， ``不要`` 选择swap文件自身。所以，我们这里选择最后一行 ``/dev/disk/by-uuid/decda038-1b51-4483-9491-15c3a640e133``
+注意：选择 swap 文件所在的 ``partition`` ，即之前的命令 ``findmnt`` 输出的内容， ``不要`` 选择swap文件自身。所以，我们这里选择最后一行 ``/dev/disk/by-uuid/e5b8f8ad-b767-4719-8796-88eae998a056``
 
 - 在下一个页面中提问是否加密suspend内容（会影响速度）::
 
@@ -123,15 +198,15 @@ swap分区或swap文件需要和RAM一样大小，或者至少 2/5的内存大�
 
 - 检查swap文件的 ``swap_id`` ::
 
-   sudo -s swaplabel /swapfile1
+   sudo -s swaplabel /swapfile
 
 输出显示::
 
-   UUID:  2a91e2a6-e0fc-431f-94d2-1dff3241dcbf
+   UUID:  825fa235-e08c-441e-8637-57309d600ad6
 
 - 创建文件 ``/etc/initramfs-tools/conf.d/resume`` 加入 ``swap_id`` ::
 
-   echo "RESUME=UUID=2a91e2a6-e0fc-431f-94d2-1dff3241dcbf" > /etc/initramfs-tools/conf.d/resume
+   echo "RESUME=UUID=825fa235-e08c-441e-8637-57309d600ad6" > /etc/initramfs-tools/conf.d/resume
 
    update-initramfs -u
 
@@ -141,7 +216,106 @@ swap分区或swap文件需要和RAM一样大小，或者至少 2/5的内存大�
 
 此时看到屏幕一闪进入终端模式，并显示在保存image。保存过程结束后，笔记本关机。再次按下电源按钮，会有一个image恢复过程，然后就会恢复到之前的图形界面。
 
+集成uswsusp到pm-utils
+=========================
+
+.. note::
+
+   需要安装 ``apt install pm-utils`` ( 依赖安装 ``ethtool pm-utils vbetool`` )
+
+   推荐使用 ``pm-hibernate`` 是因为gnome的默认hibernate是通过pm-hibernate实现的。
+
+- 编辑 ``/etc/pm/config.d/00sleep_module`` ::
+
+   SLEEP_MODULE="uswsusp"
+   
+- 测试::
+
+   sudo tail -f /var/log/pm-suspend.log &
+   sudo pm-hibernate
+
+在系统休眠之后，按下电源开关恢复，可以看到屏幕字符终端显示恢复保存的镜像，确保正确恢复图形工作洁面后，再进行下一步集成systemd操作。
+
+集成systemd
+=================
+
+.. note::
+
+   目前只在字符界面测试成功，但是在图形界面测试遇到恢复后黑屏问题，所以暂时放弃图形界面改为启动后直接进入字符终端界面。
+
+``systemd-suspend.service`` 是一个系统服务，通过 ``suspend.target`` 拉取并响应实际的系统挂起。同样， ``systemd-hibernate.service`` 则是有 ``hibernate.target`` 拉取并执行相应的hibernate。
+
+在进入系统 syspend 和/或 hibernation 之前，systemd会执行所有在 ``/usr/lib/systemd/system-sleep/`` 目录下的可执行文件并传递2个参数给这些程序。第一个参数是 ``pre`` ，第二个参数是根据选择的动作传递 ``suspend`` ， ``hibernate`` , ``hybrid-sleep`` 或 ``suspend-then-hibernate`` 。而当系统离开 ``suspend`` 和/或 ``hibernate`` 之前，会执行相同的目录下的可执行程序，只不过第一个参数被改成了 ``post`` 。所有在这个目录下的可执行程序是并发执行的，并且只有所有的可执行程序执行完毕之后，才会继续动作。
+
+注意在 ``/usr/lib/systemd/system-sleep/`` 目录下的脚本或程序倾向于本地使用并且可以hack。如果应用程序想要重新执行系统 suspend/hibernation 并恢复，则应该使用 `Inhibitor interface <https://www.freedesktop.org/wiki/Software/systemd/inhibit>`_ 。
+
+- 编辑 ``hibernate`` 服务::
+
+   sudo systemctl edit systemd-hibernate.service
+
+粘贴以下代码::
+
+   [Service]
+   ExecStart=
+   ExecStartPre=-/bin/run-parts -v -a pre /lib/systemd/system-sleep
+   ExecStart=/usr/sbin/s2disk
+   ExecStartPost=-/bin/run-parts -v --reverse -a post /lib/systemd/system-sleep
+
+.. note::
+
+   注意在Ubuntu 18.04及以上版本中， ``pre/post`` 脚本位于 ``/lib/systemd/system-sleep`` 目录，和一些介绍debian的文档中设置 ``/usr/lib/systemd/system-sleep`` 不同。错误指向目录的话会导致休眠唤醒之后，图形界面始终是黑屏（虽然系统依然可以ssh登陆和使用）。
+
+   ``不过，这个集成systemd的步骤我测试没有成功，目前只能使用命令行pm-hibernate完成休眠``
+
+- 更新systemd::
+
+   sudo systemctl daemon-reload
+
+- 测试运行::
+
+   sudo systemctl hibernate
+
+笔记本合上屏幕休眠
+---------------------
+
+笔记本合上屏幕的时候会触发systemd事件，所以通过修改 ``/etc/systemd/logind.conf`` 如下可以在合上屏幕时进入hibernate而不是默认的suspend::
+
+   #HandleLidSwitch=suspend
+   HandleLidSwitch=hibernate
+
+然后重新加载 ``systemd-logind`` 生效::
+
+   sudo systemctl restart systemd-logind
+
+.. note::
+
+   现在在字符终端界面合上笔记本屏幕会自动休眠，然后也能够恢复运行。不过目前图形界面尚未解决问题。
+
+激活图形界面hibernate
+=================================
+
+.. note::
+
+   由于集成systemd步骤在图形界面测试未成功，所以此步骤也没有成功。
+
+- 创建 ``/etc/polkit-1/localauthority/50-local.d/com.ubuntu.enable-hibernate.pkla`` ::
+
+   [Re-enable hibernate by default in upower]
+   Identity=unix-user:*
+   Action=org.freedesktop.upower.hibernate
+   ResultActive=yes
+   
+   [Re-enable hibernate by default in logind]
+   Identity=unix-user:*
+   Action=org.freedesktop.login1.hibernate;org.freedesktop.login1.handle-hibernate-key;org.freedesktop.login1;org.freedesktop.login1.hibernate-multiple-sessions;org.freedesktop.login1.hibernate-ignore-inhibit
+   ResultActive=yes
+
+然后重启系统就可以看到图形界面菜单显示了 ``Hibernate`` 功能。不过，这个功能我测试返回还是需要 ``systemd-hibernate.service`` 支持，否则也是黑屏（虽然可以ssh访问）
+
 参考
 =========
 
 - `How can I hibernate on Ubuntu 16.04? <https://askubuntu.com/questions/768136/how-can-i-hibernate-on-ubuntu-16-04>`_ 其中最重要的一个解决方案是 "Hibernation using systemctl and getting it working in tough cases" ，在这篇问答的第2个回答中。
+- `PowerManagement/Hibernate <https://help.ubuntu.com/community/PowerManagement/Hibernate>`_
+- `Enable hibernate on Ubuntu using uswsusp (s2disk) <https://medium.com/@lzcoder/enable-hibernate-on-ubuntu-using-uswsusp-s2disk-ae0b71862eb5>`_
+- `systemd-suspend.service <https://www.freedesktop.org/software/systemd/man/systemd-suspend.service.html>`_

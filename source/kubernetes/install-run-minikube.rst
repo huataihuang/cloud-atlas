@@ -34,16 +34,64 @@ Ubuntu平台安装MiniKube
 macOS平台安装MiniKube
 --------------------------
 
+macOS安装hyperkit
+~~~~~~~~~~~~~~~~~~~~
+
 .. note::
 
-   macOS的minikube可以选择virtualbox作为后端，也可以选择xhyve作为后端。目前我倾向于使用xhyve，以便使用macOS内置的kvm虚拟化。
+   macOS的minikube可以选择virtualbox作为后端，也可以选择 `xhyve <https://github.com/moby/hyperkit>`_ 作为后端。目前我倾向于使用xhyve，以便使用macOS内置的kvm虚拟化。
+
+- 为了在块设备后端支持qcow，需要安装OCaml `OPAM <https://opam.ocaml.org/>`_ 开发环境带有qcow模块::
+
+   brew install opam libev
+   opam init
+   eval `opam config env`
+   opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix.2.9.0 conf-libev logs fmt mirage-unix prometheus-app
+
+.. note::
+
+   为了能够在编译hyperkit之前找到ocaml环境，必须在编译前执行一次 ``opam config env``
+
+   可以通过以下命令移除之前旧版本的 ``mirage-block-unix`` 的 ``pin`` 或者 ``qcow`` ::
+
+      opam update
+      opam pin remove mirage-block-unix
+      opam pin remove qcow
+
+- 安装HyperKit::
+
+   git clone https://github.com/moby/hyperkit
+   cd hyperkit
+   make
+
+.. note::
+
+   二进制执行程序位于 ``build/hyperkit`` 。为了能够让 ``docker-machine-driver-hyperkit`` 找到hyperkit可执行程序，请将这个目录加入到环境变量，例如 ``~/.bash_profile`` 。
+
+macOS安装minikube
+~~~~~~~~~~~~~~~~~~~
+
+- 通过brew安装minikube(我没有使用这个方法)::
+
+   brew cask install minikube
+
+- 直接安装罪行版本minikube（我使用这个方法）::
+
+   curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.35.0/minikube-darwin-amd64 && chmod +x minikube && sudo cp minikube /usr/local/bin/ && rm minikube
+
+.. note::
+
+   每次启动minikube默认会检查是否有可用最新版本
 
 启动minikube
-----------------
+==================
 
 - （不推荐直接）启动minikube集群::
 
    minikube start
+
+Linux平台使用kvm后端
+-------------------------
 
 .. note::
 
@@ -75,11 +123,36 @@ macOS平台安装MiniKube
 
 .. note::
 
+   创建的minikube配置: ``CPUs=2, Memory=2048MB, Disk=20000MB``
+
    ``minikube start`` 运行指令显示输出::
 
       kubectl is now configured to use "minikube"
 
    这表明当前Linux主机的kubectl已经被配置直接使用刚才所安装运行的minikube
+
+macOS平台使用hyperkit后端
+-----------------------------
+
+- 安装Hyperkit驱动::
+
+   brew install docker-machine-driver-hyperkit
+
+   # docker-machine-driver-hyperkit need root owner and uid 
+   sudo chown root:wheel /usr/local/opt/docker-machine-driver-hyperkit/bin/docker-machine-driver-hyperkit
+   sudo chmod u+s /usr/local/opt/docker-machine-driver-hyperkit/bin/docker-machine-driver-hyperkit
+
+- (建议跳过这步，用下一步采用先配置再启动)使用Hyperkit后端启动::
+
+   minikube start --vm-driver hyperkit
+
+- 使用hyperkit作为默认后端::
+
+   minikube config set vm-driver hyperkit
+
+- 启动minikube::
+
+   minikube start
 
 使用minikube
 ===============

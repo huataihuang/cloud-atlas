@@ -14,9 +14,7 @@
 现在的构想
 =============
 
-最近公司配备了新的MacBook Pro，这样，我原先自己的一台老版本MacBook Pro也就退役了。其实，当年我自己购买这台MacBook Pro选择了高配版本，i7-4850HQ CPU @ 2.30GHz，16G内存。由于处理器是4核8线程，感觉以往作为笔记本使用，实在是没有发挥出真正的性能，实在是太浪费了。
-
-既然虚拟化技术已经支撑了nested virtualization，也就是可以在一台主机上实现嵌套虚拟化。实际上，完全可以在一台硬件足够强大的笔记本上实现多个KVM Host，部署一个小型的OpenStack集群。同时在OpenStack的计算节点上，运行Docker+Kubernetes，这样可以完整模拟出一个小型的IaaS集群。
+最近公司配备了新的MacBook Pro，这样，我原先自己的一台老版本MacBook Pro也就退役了。其实，当年我自己购买这台MacBook Pro选择了高配版本， `Intel® Core™ i7-4850HQ Processor <https://ark.intel.com/content/www/us/en/ark/products/76086/intel-core-i7-4850hq-processor-6m-cache-up-to-3-50-ghz.html>`_ ，支持非常完善的虚拟化高级特性，特别是通过硬件加速nested virtualization，也就是可以在一台主机上实现嵌套虚拟化。实际上，完全可以在一台硬件足够强大的笔记本上实现多个KVM Host，部署一个小型的OpenStack集群。同时在OpenStack的计算节点上，运行Docker+Kubernetes，这样可以完整模拟出一个小型的IaaS集群。
 
 一点一滴
 =============
