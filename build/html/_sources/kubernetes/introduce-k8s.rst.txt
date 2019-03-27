@@ -49,9 +49,9 @@ Kubernetes集群的架构
 
 worker节点是运行容器化应用程序的服务器。负责运行、监控和向应用程序提供服务的任务由以下组件负责：
 
-- Docker、rkt或者其他容器运行环境，负责运行容器
-- Kublet 负责和API服务器通讯以及管理各自节点上的容器
-- Kubernetes Service Proxy (kube-proxy)负责在不同的应用组件负载均衡网络流量
+- docker、rkt或者其他容器运行环境，负责运行容器
+- kubelet 负责和API服务器通讯以及管理各自节点上的容器
+- kube-proxy (Kubernetes Service Proxy) 负责在不同的应用组件负载均衡网络流量
 
 在Kubernetes中运行应用
 =========================

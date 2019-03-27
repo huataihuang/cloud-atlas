@@ -89,7 +89,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Docker Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="introduce-docker.html">Docker简介</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Docker基本概念</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">镜像、层、容器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">镜像、层、容器</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#containerd-runc">containerd / runc</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="install-docker.html">安装Docker</a></li>
@@ -97,10 +100,12 @@
 <li class="toctree-l2"><a class="reference internal" href="docker-infrastructure.html">Docker架构</a></li>
 <li class="toctree-l2"><a class="reference internal" href="remote-access-dockerd.html">远程访问dockerd服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running-containers-as-daemons.html">将容器作为服务运行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nvidia-docker.html">Docker运行NVIDIA容器</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../kubernetes/index.html">Kubernetes Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../machine_learning/index.html">Machine Learning Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kali_linux/index.html">Kali Linux Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../aboutme.html">关于作者</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
@@ -199,6 +204,22 @@
 <p class="last">元数据是环境变量、端口映射、卷等信息</p>
 </div>
 <p>当容器从镜像上运行起来，所修改的文件在容器中采用了 copy-on-write 机制存储，这样就不会影响到基础的镜像。容器是从镜像创建的，继承了镜像的文件系统，并使用元数据来决定启动配置。</p>
+<div class="section" id="containerd-runc">
+<h3>containerd / runc<a class="headerlink" href="#containerd-runc" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">参考 <a class="reference external" href="https://stackoverflow.com/questions/41645665/how-containerd-compares-to-runc">How containerd compares to runC</a></p>
+</div>
+<p>在使用docker时候，会发现系统中有 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 也有 <code class="docutils literal notranslate"><span class="pre">runc</span></code> 进程，有必要梳理一下概念。</p>
+<ul class="simple">
+<li><a class="reference external" href="http://containerd.io/">containerd</a> 是一个用于管理完整容器生命周期的容器运行服务，包括镜像传输和存储，以及容器运行，容器监督和容器网络都是由 <code class="docutils literal notranslate"><span class="pre">contained</span></code> 负责</li>
+<li><code class="docutils literal notranslate"><span class="pre">container-shim</span></code> 负责处理headless 容器（没有显示输出的容器），即负责容器的初始化。这也表示，一旦 <code class="docutils literal notranslate"><span class="pre">runc</span></code> 初始化了容器， <code class="docutils literal notranslate"><span class="pre">container-shim</span></code> 就会退出处理容器，即这是一个中间状态。</li>
+<li><a class="reference external" href="http://runc.io/">runc</a> 是一个轻量级统一运行时容器，遵守了OCI标准。 <code class="docutils literal notranslate"><span class="pre">runc</span></code> 是 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 使用的，用于启动并运行符合OCI标准的容器。这个进程也通常被 <code class="docutils literal notranslate"><span class="pre">libcontainer</span></code> 重新包装。</li>
+<li><a class="reference external" href="http://www.grpc.io/">grpc</a> 用于在docker-engine之间通讯。</li>
+<li><a class="reference external" href="https://www.opencontainers.org/">OCI</a> 维护OCI的运行时和镜像标准。当前的coker版本支持OCI镜像和运行时标准。</li>
+</ul>
+<img alt="../_images/docker_containerd_runc.png" src="../_images/docker_containerd_runc.png" />
+</div>
 </div>
 </div>
 

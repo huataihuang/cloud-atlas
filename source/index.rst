@@ -40,6 +40,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    docker/index
    kubernetes/index
    big_data/index
+   machine_learning/index
    kali_linux/index
    aboutme
    roadmap

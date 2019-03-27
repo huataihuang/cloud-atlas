@@ -19,6 +19,7 @@ KVM Atlas
    kvm_live_migration.rst
    qemu_images.rst
    kvm_image_access_with_libguestfs.rst
+   gpu_passthrough_with_kvm.rst
    xhyve.rst
 
 

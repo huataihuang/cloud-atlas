@@ -9,6 +9,7 @@ Ceph Atlas
 
    introduce-ceph.rst
    bluestore.rst
+   rdma.rst
 
 .. only::  subproject and html
 

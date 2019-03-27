@@ -14,6 +14,7 @@ Docker Atlas
    docker-infrastructure.rst
    remote-access-dockerd.rst
    running-containers-as-daemons.rst
+   nvidia-docker.rst
 
 .. only::  subproject and html
 
