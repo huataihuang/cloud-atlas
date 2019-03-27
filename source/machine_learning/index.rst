@@ -1,15 +1,13 @@
-.. _ceph:
+.. _machine_learning:
 
 =================================
-Ceph Atlas
+Machine Learning Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce-ceph.rst
-   bluestore.rst
-   rdma.rst
+   build_tensorflow_from_source.rst
 
 .. only::  subproject and html
 
