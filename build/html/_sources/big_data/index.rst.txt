@@ -9,6 +9,7 @@ Big Data Atlas
 
    introduce_big_data.rst
    log_analysis.rst
+   jupyter.rst
 
 .. only::  subproject and html
 

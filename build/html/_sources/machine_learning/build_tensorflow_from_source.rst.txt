@@ -48,7 +48,7 @@ Docker准备
 
    将新创建的 ``ubuntu18-04`` 容器的 ``/etc/apt/source.list`` 复制到 CUDA 的容器 ``tfstack`` 中，就可以进行安装和升级工作。另外，我安装了一些必要的工具包::
 
-      sudo apt install vim screen curl
+      sudo apt install vim screen curl git
 
 Linux操作系统准备
 ===================
@@ -112,8 +112,6 @@ macOS不支持GPU，只在Linux平台需要执行 `GPU 支持 <https://www.tenso
 .. note::
 
    我的时间是采用了 NVIDIA CUDA docker 镜像 :ref:`nvidia-docker` ，所以这步忽略，已经具备了在docker容器内部使用GPU设备的能力。
-
----- 目前到这里 ----
 
 下载TensorFlow源代码
 =======================

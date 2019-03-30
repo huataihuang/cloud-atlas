@@ -68,6 +68,31 @@ macOS安装hyperkit
 
    二进制执行程序位于 ``build/hyperkit`` 。为了能够让 ``docker-machine-driver-hyperkit`` 找到hyperkit可执行程序，请将这个目录加入到环境变量，例如 ``~/.bash_profile`` 。
 
+.. note::
+
+   升级macOS 10.14.4 之后，对应的Xcode版本升级，clang编译对于源代码的语法校验加强，遇到类型错误::
+
+      cc src/lib/firmware/fbsd.c
+      src/lib/firmware/fbsd.c:690:7: error: implicit conversion changes signedness: 'unsigned int' to 'int' [-Werror,-Wsign-conversion]
+
+   修改 ``config.mk`` 将::
+
+      -Weverything \
+
+   删除
+
+.. note::
+
+   遇到报错::
+
+      ocamlfind: Package `cstruct.lwt' not found
+
+   则重新安装一次 ``cstruct-lwt`` ::
+
+      opam reinstall cstruct-lwt
+
+   但是参考
+
 macOS安装minikube
 ~~~~~~~~~~~~~~~~~~~
 
