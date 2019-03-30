@@ -15,6 +15,8 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    install-setup-kubectl.rst
    explore_google_gke.rst
    operator_framework.rst
+   operator_startup.rst
+   kuberbuilder.rst
    install-etcd.rst
    k8s-ha-master.rst
    admission_controllers.rst

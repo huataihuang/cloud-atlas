@@ -9,6 +9,7 @@ Docker Atlas
 
    introduce-docker.rst
    docker-concept.rst
+   oci_pouch.rst
    install-docker.rst
    building-a-docker-application.rst
    docker-infrastructure.rst

@@ -1,15 +1,14 @@
-.. _big_data:
+.. _kernel:
 
 =================================
-Big Data Atlas
+Kernel Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_big_data.rst
-   log_analysis.rst
-   jupyter.rst
+   cgroups_v1.rst   
+   cgroups_v2.rst   
 
 .. only::  subproject and html
 
