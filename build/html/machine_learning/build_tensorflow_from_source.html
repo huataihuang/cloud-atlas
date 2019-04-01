@@ -95,9 +95,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#docker">Docker准备</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linux">Linux操作系统准备</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gpu">安装GPU支持</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">下载TensorFlow源代码</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">配置编译</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">下载TensorFlow源代码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure">配置configure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bazel-build">Bazel build</a></li>
 </ul>
 </li>
 </ul>
@@ -213,8 +213,13 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">ubuntu18</span><span class="o">-</span><span class="mi">04</span> <span class="o">--</span><span class="n">name</span> <span class="n">ubuntu18</span><span class="o">-</span><span class="mi">04</span> <span class="o">-</span><span class="n">v</span> <span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">ubuntu</span><span class="p">:</span><span class="n">latest</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
 </pre></div>
 </div>
-<p>将新创建的 <code class="docutils literal notranslate"><span class="pre">ubuntu18-04</span></code> 容器的 <code class="docutils literal notranslate"><span class="pre">/etc/apt/source.list</span></code> 复制到 CUDA 的容器 <code class="docutils literal notranslate"><span class="pre">tfstack</span></code> 中，就可以进行安装和升级工作。另外，我安装了一些必要的工具包:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">vim</span> <span class="n">screen</span> <span class="n">curl</span> <span class="n">git</span>
+<p>将新创建的 <code class="docutils literal notranslate"><span class="pre">ubuntu18-04</span></code> 容器的 <code class="docutils literal notranslate"><span class="pre">/etc/apt/source.list</span></code> 复制到 CUDA 的容器 <code class="docutils literal notranslate"><span class="pre">tfstack</span></code> 中，就可以进行安装和升级工作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">upgrade</span>
+</pre></div>
+</div>
+<p>另外，我安装了一些必要的工具包:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">vim</span> <span class="n">screen</span> <span class="n">curl</span> <span class="n">git</span> <span class="n">wget</span> <span class="n">sudo</span>
 </pre></div>
 </div>
 </div>
@@ -230,51 +235,49 @@
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">TensorFlow当前的Python 3.x只支持到3.6 ( Python 3.x更快，并且大多数库同时支持Python 2.7和Python 3 ）`Choosing the appropriate version of Python runtime to use along with TensorFlow &lt;<a class="reference external" href="https://stackoverflow.com/questions/42862953/choosing-the-appropriate-version-of-python-runtime-to-use-along-with-tensorflow">https://stackoverflow.com/questions/42862953/choosing-the-appropriate-version-of-python-runtime-to-use-along-with-tensorflow</a>&gt;`_</p>
+<p class="last">TensorFlow当前的Python 3.x只支持到3.6 ( Python 3.x更快，并且大多数库同时支持Python 2.7和Python 3 ） <a class="reference external" href="https://stackoverflow.com/questions/42862953/choosing-the-appropriate-version-of-python-runtime-to-use-along-with-tensorflow">Choosing the appropriate version of Python runtime to use along with TensorFlow</a></p>
 </div>
 <ul>
-<li><p class="first">安装TensorFlow pip软件包依赖（如果在Python虚拟环境，忽略 <code class="docutils literal notranslate"><span class="pre">--user</span></code> 参数）:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">user</span> <span class="n">pip</span> <span class="n">six</span> <span class="n">numpy</span> <span class="n">wheel</span> <span class="n">setuptools</span> <span class="n">mock</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">user</span> <span class="n">keras_applications</span><span class="o">==</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">6</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="o">--</span><span class="n">user</span> <span class="n">keras_preprocessing</span><span class="o">==</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">5</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>这里我采用了个人用户 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> 的 <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> 下建立Python虚拟环境来工作:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">virtualenv</span>
-<span class="n">su</span> <span class="o">-</span> <span class="n">huatai</span>
+<li><p class="first">切换到个人目录，然后创建Python virtualenv环境:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip3</span> <span class="n">install</span> <span class="n">virtualenv</span>
 <span class="n">cd</span> <span class="o">~</span>
 <span class="n">virtualenv</span> <span class="n">venv3</span>
 <span class="o">.</span> <span class="n">venv3</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 </pre></div>
 </div>
-<p>然后在执行上述安装TensorFlow pip软件包安装:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">pip</span> <span class="n">six</span> <span class="n">numpy</span> <span class="n">wheel</span> <span class="n">setuptools</span> <span class="n">mock</span>
+</li>
+<li><p class="first">安装TensorFlow pip软件包依赖（这里没有使用 <code class="docutils literal notranslate"><span class="pre">--user</span></code> 参数是因为我是在Python virtualenv环境中，如果是全局安装则要使用 <code class="docutils literal notranslate"><span class="pre">--user</span></code> 参数）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">pip</span> <span class="n">six</span> <span class="n">numpy</span> <span class="n">wheel</span> <span class="n">setuptools</span> <span class="n">mock</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">keras_applications</span><span class="o">==</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">6</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">keras_preprocessing</span><span class="o">==</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">5</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span>
 </pre></div>
 </div>
-</div>
-<ul>
-<li><p class="first">安装Bazel:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">openjdk</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">jdk</span>
-<span class="n">echo</span> <span class="s2">&quot;deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8&quot;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">bazel</span><span class="o">.</span><span class="n">list</span>
-<span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">bazel</span><span class="o">.</span><span class="n">build</span><span class="o">/</span><span class="n">bazel</span><span class="o">-</span><span class="n">release</span><span class="o">.</span><span class="n">pub</span><span class="o">.</span><span class="n">gpg</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="o">-</span>
-
-<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">bazel</span>
-
-<span class="c1"># 升级Bazel方法:</span>
-<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">--</span><span class="n">only</span><span class="o">-</span><span class="n">upgrade</span> <span class="n">bazel</span>
-</pre></div>
-</div>
+</li>
+<li><p class="first">安装Bazel</p>
+<blockquote>
+<div><p>源代码编译Tensorflow需要采用特定合适版本的bazel，目前我测试编译 Tensorflow 1.9.1 需要使用 bazel 0.21.0 或更低版本，所以不能直接采用APT软件仓库方式安装，需要采用bazel官方安装脚本安装。</p>
+</div></blockquote>
 </li>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">参考 <a class="reference external" href="https://docs.bazel.build/versions/master/install-ubuntu.html#ubuntu">Installing Bazel on Ubuntu</a></p>
+<p>参考 <a class="reference external" href="https://docs.bazel.build/versions/master/install-ubuntu.html">Installing Bazel on Ubuntu</a></p>
+<p>注意：由于TensorFlow的configure会检测Bazel的版本，当前要求bazel是0.21.0否则提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Extracting Bazel installation...
+WARNING: --batch mode is deprecated. Please instead explicitly shut down your Bazel server using the command &quot;bazel shutdown&quot;.
+You have bazel 0.24.0 installed.
+Please downgrade your bazel installation to version 0.21.0 or lower to build TensorFlow!
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/24101">Choosing the right Bazel version to build TF is confusing #24101</a> 降低bazel版本，但是参考 <a class="reference external" href="https://groups.google.com/forum/?nomobile=true#!topic/bazel-discuss/bM-8u4F6RKQ">How do you downgrade bazel</a> 通过apt-get安装只能安装最新版本，所以还是参考 <a class="reference external" href="https://docs.bazel.build/versions/master/install-ubuntu.html">Installing Bazel on Ubuntu</a> 采用手工二进制安装方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="n">bazel</span>
+<span class="c1"># 从 https://github.com/bazelbuild/bazel/releases 下载对应release安装</span>
+<span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">bazelbuild</span><span class="o">/</span><span class="n">bazel</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="mf">0.21</span><span class="o">.</span><span class="mi">0</span><span class="o">/</span><span class="n">bazel</span><span class="o">-</span><span class="mf">0.21</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">installer</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">bazel</span><span class="o">-</span><span class="mf">0.21</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">installer</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">./</span><span class="n">bazel</span><span class="o">-</span><span class="mf">0.21</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">installer</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">user</span>
+</pre></div>
+</div>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">--user</span></code> 参数安装Bazel在系统的 <code class="docutils literal notranslate"><span class="pre">$HOME/bin</span></code> 目录并设置 <code class="docutils literal notranslate"><span class="pre">.bazelrc</span></code> 路径到 <code class="docutils literal notranslate"><span class="pre">$HOME/.bazelrc</span></code> ，所以需要在 <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> 中添加 <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">PATH=&quot;$PATH:$HOME/bin&quot;</span></code></p>
 </div>
 </div>
 <div class="section" id="gpu">
@@ -284,16 +287,35 @@
 <li>安装GPU驱动</li>
 </ul>
 <p>如果要避免麻烦，可以直接使用 <a class="reference external" href="https://www.tensorflow.org/install/gpu">具有GPU支持功能的TensorFlow Docker镜像</a> 。如果要安装GPU支持，则只需要安装 <a class="reference external" href="https://www.nvidia.com/drivers">NVIDIA GPU驱动</a> 。</p>
-<ul class="simple">
-<li>安装CUDA软件包</li>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">容器驱动请参考 <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker/wiki/Driver-containers-(Beta)">Driver containers(Beta)</a></p>
+</div>
+<ul>
+<li><p class="first">安装CUDA软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">cuda</span><span class="o">-</span><span class="p">{</span><span class="n">dev</span><span class="p">,</span><span class="n">doc</span><span class="p">,</span><span class="n">gdb</span><span class="p">,</span><span class="n">toolkit</span><span class="p">}</span>
+</pre></div>
+</div>
+</li>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">我的时间是采用了 NVIDIA CUDA docker 镜像 <a class="reference internal" href="../docker/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> ，所以这步忽略，已经具备了在docker容器内部使用GPU设备的能力。</p>
 </div>
+<ul>
+<li><p class="first">安装 <a class="reference external" href="https://developer.nvidia.com/cudnn">NVIDIA cuDNN</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dpkg</span> <span class="o">-</span><span class="n">i</span> <span class="n">libcudnn7_7</span><span class="o">.</span><span class="mf">5.0</span><span class="o">.</span><span class="mi">56</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">cuda10</span><span class="o">.</span><span class="mi">0</span><span class="n">_amd64</span><span class="o">.</span><span class="n">deb</span> <span class="n">libcudnn7</span><span class="o">-</span><span class="n">dev_7</span><span class="o">.</span><span class="mf">5.0</span><span class="o">.</span><span class="mi">56</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">cuda10</span><span class="o">.</span><span class="mi">0</span><span class="n">_amd64</span><span class="o">.</span><span class="n">deb</span>
+</pre></div>
 </div>
-<div class="section" id="id3">
-<h2>下载TensorFlow源代码<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">如果从源代码编译Tensorflow，支持NVIDIA需要使用NVIDIA cuDNN。请参考 <a class="reference external" href="https://askubuntu.com/questions/767269/how-can-i-install-cudnn-on-ubuntu-16-04">How can I install CuDNN on Ubuntu 16.04?</a></p>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>下载TensorFlow源代码<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">使用git获取 <a class="reference external" href="https://github.com/tensorflow/tensorflow">TensorFlow 仓库</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">.</span><span class="n">git</span>
@@ -303,18 +325,139 @@
 </li>
 </ul>
 <p>默认仓库获取的是 <code class="docutils literal notranslate"><span class="pre">master</span></code> 开发分支，可以取出 <a class="reference external" href="https://github.com/tensorflow/tensorflow/releases">release 分支</a> 来编译:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">v1</span><span class="o">.</span><span class="mf">13.1</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">tensorflow</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">rr1</span><span class="o">.</span><span class="mi">13</span>
+</pre></div>
+</div>
+<p>或者:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">v1</span><span class="o">.</span><span class="mf">13.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">tar</span> <span class="n">xfz</span> <span class="n">v1</span><span class="o">.</span><span class="mf">13.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">cd</span> <span class="n">tensorflow</span><span class="o">-</span><span class="mf">1.13</span><span class="o">.</span><span class="mi">1</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>配置编译<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="configure">
+<h2>配置configure<a class="headerlink" href="#configure" title="Permalink to this headline">¶</a></h2>
+<p>通过运行以下脚本通过交互方式设置编译参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span>
+</pre></div>
 </div>
-<div class="section" id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference external" href="https://www.tensorflow.org/install/source">Build from source</a></li>
+<ul>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">./configure</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Please specify the location of python. [Default is /home/huatai/venv3/bin/python]:
+
+Traceback (most recent call last):
+  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+AttributeError: module &#39;site&#39; has no attribute &#39;getsitepackages&#39;
+Found possible Python library paths:
+  /home/huatai/venv3/lib/python3.6/site-packages
+Please input the desired Python library path to use.  Default is [/home/huatai/venv3/lib/python3.6/site-packages]
+
+Do you wish to build TensorFlow with XLA JIT support? [Y/n]:
+XLA JIT support will be enabled for TensorFlow.
+
+Do you wish to build TensorFlow with OpenCL SYCL support? [y/N]:
+No OpenCL SYCL support will be enabled for TensorFlow.
+
+Do you wish to build TensorFlow with ROCm support? [y/N]:
+No ROCm support will be enabled for TensorFlow.
+
+Do you wish to build TensorFlow with CUDA support? [y/N]: Y
+CUDA support will be enabled for TensorFlow.
+
+Please specify the CUDA SDK version you want to use. [Leave empty to default to CUDA 10.0]:
+
+Please specify the location where CUDA 10.0 toolkit is installed. Refer to README.md for more details. [Default is /usr/local/cuda]:
+
+Please specify the cuDNN version you want to use. [Leave empty to default to cuDNN 7]:
+
+Please specify the location where cuDNN 7 library is installed. Refer to README.md for more details. [Default is /usr/local/cuda]: /usr/lib/x86_64-linux-gnu
+</pre></div>
+</div>
+</li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">这里遇到到问题是Tensorflow在CUDA 10.0的目录下找不到CuDNN 7的库文件。请参考 <a class="reference external" href="https://devtalk.nvidia.com/default/topic/936212/tensorflow-cannot-find-cudnn-ubuntu-16-04-cuda7-5-/">TensorFlow cannot find cuDNN [Ubuntu 16.04 + CUDA7.5]</a> 安装CUDA开发工具以及从官方下载安装cuDDN软件库。不过，需要注意安装的目录是 <code class="docutils literal notranslate"><span class="pre">/usr/lib/x86_64-linux-gnu/</span></code> 。</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Do you wish to build TensorFlow with TensorRT support? [y/N]:
+No TensorRT support will be enabled for TensorFlow.
+
+Please specify the locally installed NCCL version you want to use. [Default is to use https://github.com/nvidia/nccl]:
+
+Please specify a list of comma-separated Cuda compute capabilities you want to build with.
+You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.
+Please note that each additional compute capability significantly increases your build time and binary size. [Default is: 3.5,7.0]: 3.0
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">我的显卡GeForce 750M 只支持CUDA 3.0</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Do you want to use clang as CUDA compiler? [y/N]:
+nvcc will be used as CUDA compiler.
+
+Please specify which gcc should be used by nvcc as the host compiler. [Default is /usr/bin/gcc]:
+
+Do you wish to build TensorFlow with MPI support? [y/N]:
+No MPI support will be enabled for TensorFlow.
+
+Please specify optimization flags to use during compilation when bazel option &quot;--config=opt&quot; is specified [Default is -march=native -Wno-sign-compare]:
+
+Would you like to interactively configure ./WORKSPACE for Android builds? [y/N]:
+Not configuring the WORKSPACE for Android builds.
+
+Preconfigured Bazel build configs. You can use any of the below by adding &quot;--config=&lt;&gt;&quot; to your build command. See .bazelrc for more details.
+        --config=mkl            # Build with MKL support.
+        --config=monolithic     # Config for mostly static monolithic build.
+        --config=gdr            # Build with GDR support.
+        --config=verbs          # Build with libverbs support.
+        --config=ngraph         # Build with Intel nGraph support.
+        --config=dynamic_kernels        # (Experimental) Build kernels into separate shared objects.
+Preconfigured Bazel build configs to DISABLE default on features:
+        --config=noaws          # Disable AWS S3 filesystem support.
+        --config=nogcp          # Disable GCP support.
+        --config=nohdfs         # Disable HDFS support.
+        --config=noignite       # Disable Apacha Ignite support.
+        --config=nokafka        # Disable Apache Kafka support.
+        --config=nonccl         # Disable NVIDIA NCCL support.
+Configuration finished
+</pre></div>
+</div>
+</div>
+<div class="section" id="bazel-build">
+<h2>Bazel build<a class="headerlink" href="#bazel-build" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">CPU-only:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bazel</span> <span class="n">build</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">opt</span> <span class="o">//</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">pip_package</span><span class="p">:</span><span class="n">build_pip_package</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">GPU support:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bazel</span> <span class="n">build</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">opt</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">cuda</span> <span class="o">//</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">pip_package</span><span class="p">:</span><span class="n">build_pip_package</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>报错处理：</p>
+<ul>
+<li><p class="first">找不到python:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">bazel</span><span class="o">/</span><span class="n">_bazel_huatai</span><span class="o">/</span><span class="n">ae02d937542a5be4e761c5ab20415f3c</span><span class="o">/</span><span class="n">external</span><span class="o">/</span><span class="n">protobuf_archive</span><span class="o">/</span><span class="n">BUILD</span><span class="p">:</span><span class="mi">259</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span> <span class="n">C</span><span class="o">++</span> <span class="n">compilation</span> <span class="n">of</span> <span class="n">rule</span> <span class="s1">&#39;@protobuf_archive//:protoc_lib&#39;</span> <span class="n">failed</span> <span class="p">(</span><span class="n">Exit</span> <span class="mi">127</span><span class="p">)</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">env</span><span class="p">:</span> <span class="s1">&#39;python&#39;</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>参考 <a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/15618">Tensorflow does not build in a python3 only environment #15618</a> 这个问题和bazel的bug有关，因为Bazel在每个文件的第一行都加入了 <code class="docutils literal notranslate"><span class="pre">/usr/bin/env</span> <span class="pre">python</span></code> ，但是在很多发行版中，默认是python2链接到python，而python3不能软链接到python（为了兼容一些系统级工具），这就导致了bazel在这里无法找到python对应的Python版本。</p>
+<p>注意：在 <code class="docutils literal notranslate"><span class="pre">nvidia/cuda</span></code> 这个docker镜像中并没有安装python2，而只安装了python3（我独立安装的python3)，所以在系统中执行 <code class="docutils literal notranslate"><span class="pre">/usr/bin/evn</span> <span class="pre">python</span></code> 是没有正确相应的。</p>
+<p>我的临时解决方法也比较简单，就是手工创建一个软链接到 python3 上:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python3</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
