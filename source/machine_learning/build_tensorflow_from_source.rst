@@ -251,19 +251,39 @@ Bazel build
 
    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
-.. note::
 
-   报错处理：
+Build 报错处理
+===============
 
-   - 找不到python::
+找不到python
+------------------
 
-      ERROR: /home/huatai/.cache/bazel/_bazel_huatai/ae02d937542a5be4e761c5ab20415f3c/external/protobuf_archive/BUILD:259:1: C++ compilation of rule '@protobuf_archive//:protoc_lib' failed (Exit 127)
+- `/usr/bin/env: 'python': No such file or directory` ::
+
+   ERROR: /home/huatai/.cache/bazel/_bazel_huatai/ae02d937542a5be4e761c5ab20415f3c/external/protobuf_archive/BUILD:259:1: C++ compilation of rule '@protobuf_archive//:protoc_lib' failed (Exit 127)
       /usr/bin/env: 'python': No such file or directory
 
-   参考 `Tensorflow does not build in a python3 only environment #15618 <https://github.com/tensorflow/tensorflow/issues/15618>`_ 这个问题和bazel的bug有关，因为Bazel在每个文件的第一行都加入了 ``/usr/bin/env python`` ，但是在很多发行版中，默认是python2链接到python，而python3不能软链接到python（为了兼容一些系统级工具），这就导致了bazel在这里无法找到python对应的Python版本。
+参考 `Tensorflow does not build in a python3 only environment #15618 <https://github.com/tensorflow/tensorflow/issues/15618>`_ 这个问题和bazel的bug有关，因为Bazel在每个文件的第一行都加入了 ``/usr/bin/env python`` ，但是在很多发行版中，默认是python2链接到python，而python3不能软链接到python（为了兼容一些系统级工具），这就导致了bazel在这里无法找到python对应的Python版本。
 
-   注意：在 ``nvidia/cuda`` 这个docker镜像中并没有安装python2，而只安装了python3（我独立安装的python3)，所以在系统中执行 ``/usr/bin/evn python`` 是没有正确相应的。
+注意：在 ``nvidia/cuda`` 这个docker镜像中并没有安装python2，而只安装了python3（我独立安装的python3)，所以在系统中执行 ``/usr/bin/evn python`` 是没有正确相应的。
 
-   我的临时解决方法也比较简单，就是手工创建一个软链接到 python3 上::
+我的临时解决方法也比较简单，就是手工创建一个软链接到 python3 上::
 
-      sudo ln -s /usr/bin/python3 /usr/bin/python
+   sudo ln -s /usr/bin/python3 /usr/bin/python
+
+- `gcc: internal compiler error: Killed (program cc1plus)`::
+
+   ERROR: /home/huatai/tensorflow/tensorflow/core/kernels/BUILD:762:1: C++ compilation of rule '//tensorflow/core/kernels:broadcast_to_op' failed (Exit 4)
+   gcc: internal compiler error: Killed (program cc1plus)
+
+参考 `Building from source, gcc issues #349 <https://github.com/tensorflow/tensorflow/issues/349>`_ ，上述编译过程中导致gcc被杀掉的原因是因为并发导致占用内存过多，所以需要调整 bazel 降低并发job或者限制资源使用。有建议使用 ``--local_resources 2048,0.5,1.0`` 我使用如下参数表示使用大约3/4的内存(12G)以及使用3/4的CPU核心，以及100%的I/O资源::
+
+   bazel build --config=opt --config=cuda --local_resources 12288,0.75,1.0 //tensorflow/tools/pip_package:build_pip_package 
+
+.. note::
+
+   参考 `Is there a way to limit the number of CPU cores Bazel uses? <https://stackoverflow.com/questions/34756370/is-there-a-way-to-limit-the-number-of-cpu-cores-bazel-uses/34766939>`_ 上述限制的参数表示： ``--local_resources availableRAM,availableCPU,availableIO`` :
+
+   This option, which takes three comma-separated floating point arguments, specifies the amount of local resources that Bazel can take into consideration when scheduling build and test activities. Option expects amount of available RAM (in MB), number of CPU cores (with 1.0 representing single full core) and workstation I/O capability (with 1.0 representing average workstation). By default Bazel will estimate amount of RAM and number of CPU cores directly from system configuration and will assume 1.0 I/O resource. 
+
+   最新版本的 `Commands and Options <https://docs.bazel.build/versions/master/user-manual.html>`_ 使用不同参数组合。
