@@ -157,7 +157,15 @@ macOS不支持GPU，只在Linux平台需要执行 `GPU 支持 <https://www.tenso
 
 通过运行以下脚本通过交互方式设置编译参数::
 
-   ./configure
+   TF_UNOFFICIAL_SETTING=1 ./configure
+
+.. note::
+
+   这里参考 `Cuda 3.0? #25 <https://github.com/tensorflow/tensorflow/issues/25>`_ 使用了 ``TF_UNOFFICIAL_SETTING=1`` ，如果没有这个参数，则在配置 ``Cuda compute capabilities you want to build with`` 时即使指定 ``3.0`` 版本，编译得到的TensorFlow也还是 ``3.5`` 版本的。这一步非常关键！！！
+
+   如果没有特殊的CUDA版本要求，则可以不用参数，直接执行::
+
+      ./configure
 
 - ``./configure`` 配置::
 
@@ -209,6 +217,12 @@ macOS不支持GPU，只在Linux平台需要执行 `GPU 支持 <https://www.tenso
 
    我的显卡GeForce 750M 只支持CUDA 3.0
 
+   参考 `CUDA Compatibility of NVIDIA Display / GPU Drivers <https://tech.amikelive.com/node-930/cuda-compatibility-of-nvidia-display-gpu-drivers/>`_ 可以看到 CUDA 10.0 的最小计算能力和默认计算能力都是 3.0 ，应该能够满足要求。
+
+   注意：如果要编译CUDA 3.0的TensorFlow，一定要按照前文的方法 ``TF_UNOFFICIAL_SETTING=1 ./configure`` ，否则编译的TensorFlow即使指定CUDA 3.0也没有效果，编译后的版本依然要求CUDA 3.5::
+
+      2019-04-03 08:28:21.549207: I tensorflow/compiler/xla/service/platform_util.cc:194] StreamExecutor cuda device (0) is of insufficient compute capability: 3.5 required, device is 3.0
+
 ::
 
    Do you want to use clang as CUDA compiler? [y/N]:
@@ -251,12 +265,17 @@ Bazel build
 
    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
+.. note::
+
+   从源代码编译TensorFlow需要使用大量内存，如果内存有限，需要限制 Bazel 的内存使用，例如使用参数 ``--local_resources 2048,.5,1.0`` 表示只使用2G内存，50%的CPU资源，以及100%的磁盘IO。详细请参考后文的Build 报错处理。
+
+   `官方TensorFlow软件包 <https://www.tensorflow.org/install/pip>`_ 是使用GCC 4并使用较老的ABI编译的。对于使用GCC 5或更新版本，如果要使用较老的ABI确保兼容性，则使用 ``--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0"`` 编译参数。
 
 Build 报错处理
-===============
+-----------------
 
 找不到python
-------------------
+~~~~~~~~~~~~~~~~
 
 - `/usr/bin/env: 'python': No such file or directory` ::
 
@@ -270,6 +289,9 @@ Build 报错处理
 我的临时解决方法也比较简单，就是手工创建一个软链接到 python3 上::
 
    sudo ln -s /usr/bin/python3 /usr/bin/python
+
+编译过程中gcc进程被杀
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - `gcc: internal compiler error: Killed (program cc1plus)`::
 
@@ -287,3 +309,172 @@ Build 报错处理
    This option, which takes three comma-separated floating point arguments, specifies the amount of local resources that Bazel can take into consideration when scheduling build and test activities. Option expects amount of available RAM (in MB), number of CPU cores (with 1.0 representing single full core) and workstation I/O capability (with 1.0 representing average workstation). By default Bazel will estimate amount of RAM and number of CPU cores directly from system configuration and will assume 1.0 I/O resource. 
 
    最新版本的 `Commands and Options <https://docs.bazel.build/versions/master/user-manual.html>`_ 使用不同参数组合。
+
+Build软件包
+=============
+
+``bazel build`` 命令创建名为 ``build_pip_package`` 的可执行程序，这个程序用于构建 ``pip`` 包。请执行以下命令在 ``/tmp/tensolflow_pkg`` 目录下创建一个 ``.whl`` 包。
+
+- 从release分支build::
+
+   ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+
+- 从master分支build则需要使用 ``--nightly_flag`` 以获得正确的依赖::
+
+   ./bazel-bin/tensorflow/tools/pip_package/build_pip_package --nightly_flag /tmp/tensorflow_pkg
+
+.. note::
+
+   虽然有可能在相同的源代码中build通知支持CUDA和不支持CUDA的配置，但是依然建议在切换两种不同的配置钱执行一次 ``bazel clean`` 。
+
+安装软件包
+==============
+
+现在在软件包目录下有一个带有TensoorFlow版本和平台信息的 ``.whl`` 文件，现在使用 ``pip install`` 命令来安装这个软件包::
+
+   pip install /tmp/tensorflow_pkg/tensorflow-1.13.1-cp36-cp36m-linux_x86_64.whl
+
+.. note::
+
+   恭喜，现在TensorFlow已经完成安装了。
+
+Docker Linux builds
+=====================
+
+.. note::
+
+   以下内容摘自 `TensorFlow官方安装文档 Build from source - Docker Linux builds <https://www.tensorflow.org/install/source#docker_linux_builds>`_ 。不过，我目前没有实际操作，因为前述Build from source操作已经完成了在 :ref:`nvidia-docker` 构建支持CUDA 3.0的TensorFlow环境，能够满足我个人的实践操作需求，所以本段 ``Docker Linux builds`` 我没有实践。
+
+TensorFlow的Docker开发者镜像提供了从源代码编译Linux包的方便的环境（例如，你想为Debian/Ubuntu或RHEL/CentOS发布TensorFlow安装软件包）。这些镜像已经包含了构建TensorFlow的源代码和编译依赖。请参考TensorFlow `Docker guide <https://www.tensorflow.org/install/docker>`_ 进行操作。Docker镜像请参考docker hub中官方 `tensorflow Office Docker images <https://hub.docker.com/r/tensorflow/tensorflow>`_ 。
+
+CPU-only
+-----------
+
+以下案例使用 ``:nightly-devel`` 镜像构建CPU-only Python2软件包。请参考 `Docker guide <https://www.tensorflow.org/install/docker>`_ 的 ``-devel`` 标签的TensorFlow。
+
+下载最新的开发镜像并启动Docker容器::
+
+   docker pull tensorflow/tensorflow:nightly-devel
+   docker run -it -w /tensorflow -v $PWD:/mnt -e HOST_PERMS="$(id -u):$(id -g)" \
+       tensorflow/tensorflow:nightly-devel bash
+
+   # 在容器中，执行以下命令下载最新源代码:
+   git pull
+
+以上 ``docker run`` 命令启动了在 ``/tensorflow`` 目录下的一个shell，该目录就是源代码目录。这个容器挂载了host主机的藏钱目录到容器的 ``/mnt`` 目录，并通过环境变量传递host的用户信息给容器。
+
+类似，要在容器中build一个host副本的Tensorflow，则挂载host的源代码目录到容器的 ``/tensorflow`` 目录::
+
+   docker run -it -w /tensorflow -v /path/to/tensorflow:/tensorflow -v $PWD:/mnt \
+       -e HOST_PERMS="$(id -u):$(id -g)" tensorflow/tensorflow:nightly-devel bash
+
+在容器中编译软件::
+
+   ./configure  # answer prompts or use defaults
+   bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
+   ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /mnt  # create package
+   chown $HOST_PERMS /mnt/tensorflow-version-tags.whl
+
+安装和验证软件包::
+
+   pip uninstall tensorflow  # remove current version
+   pip install /mnt/tensorflow-version-tags.whl
+   cd /tmp  # don't import from source directory
+   python -c "import tensorflow as tf; print(tf.__version__)"
+
+此时TensorFlow的pip软件包位于当前目录，执行::
+
+   ./tensorflow-version-tags.whl
+
+GPU support
+--------------
+
+Host主机上只需要安装 `NVIDIA driver驱动 <https://github.com/NVIDIA/nvidia-docker/wiki/Frequently-Asked-Questions#how-do-i-install-the-nvidia-driver>`_ (Host主机不需要安装NVIDIA CUDA Toolkit) 就可以在Docker容器中编译具有GPU支持的TensorFlow。请参考 `GPU support guide <https://www.tensorflow.org/install/gpu>`_ 以及 `TensorFlow Docker guide <https://www.tensorflow.org/install/docker>`_ 来设置 `nvidia-docker <https://github.com/NVIDIA/nvidia-docker>`_ (Linux only) 。
+
+.. note::
+
+   在容器中编译支持GPU的TensorFlow完整步骤可以参考本文前述的我的实践，以下只是官方文档的概述。
+
+以下是下载TensorFlow ``:nightly-devel-gpu-py3`` 镜像并使用 ``nvidia-docker`` 来运行 GPU-enabled 容器。开发镜像配置使用Python 3 pip 软件包具有GPU支持::
+
+   docker pull tensorflow/tensorflow:nightly-devel-gpu-py3
+   docker run --runtime=nvidia -it -w /tensorflow -v $PWD:/mnt -e HOST_PERMS="$(id -u):$(id -g)" \
+       tensorflow/tensorflow:nightly-devel-gpu-py3 bash
+
+在容器的虚拟环境中，构建GPU支持的TensorFlow软件包::
+
+   ./configure  # answer prompts or use defaults
+   bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+   ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /mnt  # create package
+   chown $HOST_PERMS /mnt/tensorflow-version-tags.whl
+
+安装和验证::
+
+   pip uninstall tensorflow  # remove current version
+
+   pip install /mnt/tensorflow-version-tags.whl
+   cd /tmp  # don't import from source directory
+   python -c "import tensorflow as tf; print(tf.contrib.eager.num_gpus())"
+
+验证TensorFlow的GPU加速
+=========================
+
+:ref:`compare_gpu_cpu_in_tensorflow` 中有一个由 `learningtensorflow.com <https://learningtensorflow.com/lesson10/>`_ 提供的 `benchmark.py` 脚本可以用来对比GPU和CPU运算效率。
+
+当然，在使用bencmark脚本测试之前，我们先把花费了我们很多时间精力构建的支持CUDA 3.0的自定义镜像制作出来::
+
+   docker commit tfstack local:tensorflow-cuda3.0
+
+检查镜像::
+
+   docker image
+
+显示新镜像 ``tensorflow-cuda3.0`` 如下::
+
+   REPOSITORY              TAG                  IMAGE ID            CREATED             SIZE
+   local                   tensorflow-cuda3.0   47b19eed03e6        About an hour ago   13GB
+
+- 在本地测试目录下创建 ``benchmark.py``::
+
+   import sys
+   import numpy as np
+   import tensorflow as tf
+   from datetime import datetime
+   
+   device_name = sys.argv[1]  # Choose device from cmd line. Options: gpu or cpu
+   shape = (int(sys.argv[2]), int(sys.argv[2]))
+   if device_name == "gpu":
+       device_name = "/gpu:0"
+   else:
+       device_name = "/cpu:0"
+   
+   with tf.device(device_name):
+       random_matrix = tf.random_uniform(shape=shape, minval=0, maxval=1)
+       dot_operation = tf.matmul(random_matrix, tf.transpose(random_matrix))
+       sum_operation = tf.reduce_sum(dot_operation)
+   
+   startTime = datetime.now()
+   with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as session:
+           result = session.run(sum_operation)
+           print(result)
+   
+   # It can be hard to see the results on the terminal with lots of output -- add some newlines to improve readability.
+   print("\n" * 5)
+   print("Shape:", shape, "Device:", device_name)
+   print("Time taken:", str(datetime.now() - startTime))
+
+- 创建新容器::
+
+   docker run \
+    --runtime=nvidia \
+    --rm \
+    -ti \
+    -v "${PWD}:/app" \
+    --user huatai \
+    local:tensorflow-cuda3.0 \
+    /bin/bash -c "cd /home/huatai; . venv3/bin/activate; \ 
+    python /app/benchmark.py cpu 10000"
+
+.. note::
+
+   ``--user`` 参数表示在容器中切换到 ``huatai`` 用户身份；通过 ``/bin/bash -c`` 可以在运行多条命令，这样可以切换Python的virtualenv环境，并执行python脚本。
