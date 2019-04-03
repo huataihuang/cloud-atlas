@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Kali Linux Atlas" href="../kali_linux/index.html" />
-    <link rel="prev" title="Machine Learning Atlas" href="index.html" /> 
+    <link rel="next" title="TensorFlow快速起步" href="tensorflow_quickstart.html" />
+    <link rel="prev" title="深度学习硬件指南" href="deep_learning_hardware_guide.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../kubernetes/index.html">Kubernetes Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Machine Learning Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="deep_learning_hardware_guide.html">深度学习硬件指南</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">源代码编译安装TensorFlow</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#tensorflowcuda">TensorFlow发行版对CUDA要求</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker">Docker准备</a></li>
@@ -97,13 +98,21 @@
 <li class="toctree-l3"><a class="reference internal" href="#gpu">安装GPU支持</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4">下载TensorFlow源代码</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configure">配置configure</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#bazel-build">Bazel build</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#build">Build 报错处理</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#python">找不到python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bazel-build">Bazel build</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#build">Build 报错处理</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Build软件包</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">安装软件包</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-linux-builds">Docker Linux builds</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cpu-only">CPU-only</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpu-support">GPU support</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#tensorflowgpu">验证TensorFlow的GPU加速</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tensorflow_quickstart.html">TensorFlow快速起步</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../kali_linux/index.html">Kali Linux Atlas</a></li>
@@ -344,8 +353,16 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 <div class="section" id="configure">
 <h2>配置configure<a class="headerlink" href="#configure" title="Permalink to this headline">¶</a></h2>
 <p>通过运行以下脚本通过交互方式设置编译参数:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TF_UNOFFICIAL_SETTING</span><span class="o">=</span><span class="mi">1</span> <span class="o">./</span><span class="n">configure</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>这里参考 <a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/25">Cuda 3.0? #25</a> 使用了 <code class="docutils literal notranslate"><span class="pre">TF_UNOFFICIAL_SETTING=1</span></code> ，如果没有这个参数，则在配置 <code class="docutils literal notranslate"><span class="pre">Cuda</span> <span class="pre">compute</span> <span class="pre">capabilities</span> <span class="pre">you</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">build</span> <span class="pre">with</span></code> 时即使指定 <code class="docutils literal notranslate"><span class="pre">3.0</span></code> 版本，编译得到的TensorFlow也还是 <code class="docutils literal notranslate"><span class="pre">3.5</span></code> 版本的。这一步非常关键！！！</p>
+<p>如果没有特殊的CUDA版本要求，则可以不用参数，直接执行:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">configure</span>
+</pre></div>
+</div>
 </div>
 <ul>
 <li><p class="first"><code class="docutils literal notranslate"><span class="pre">./configure</span></code> 配置:</p>
@@ -397,7 +414,12 @@ Please note that each additional compute capability significantly increases your
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">我的显卡GeForce 750M 只支持CUDA 3.0</p>
+<p>我的显卡GeForce 750M 只支持CUDA 3.0</p>
+<p>参考 <a class="reference external" href="https://tech.amikelive.com/node-930/cuda-compatibility-of-nvidia-display-gpu-drivers/">CUDA Compatibility of NVIDIA Display / GPU Drivers</a> 可以看到 CUDA 10.0 的最小计算能力和默认计算能力都是 3.0 ，应该能够满足要求。</p>
+<p>注意：如果要编译CUDA 3.0的TensorFlow，一定要按照前文的方法 <code class="docutils literal notranslate"><span class="pre">TF_UNOFFICIAL_SETTING=1</span> <span class="pre">./configure</span></code> ，否则编译的TensorFlow即使指定CUDA 3.0也没有效果，编译后的版本依然要求CUDA 3.5:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2019</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">03</span> <span class="mi">08</span><span class="p">:</span><span class="mi">28</span><span class="p">:</span><span class="mf">21.549207</span><span class="p">:</span> <span class="n">I</span> <span class="n">tensorflow</span><span class="o">/</span><span class="n">compiler</span><span class="o">/</span><span class="n">xla</span><span class="o">/</span><span class="n">service</span><span class="o">/</span><span class="n">platform_util</span><span class="o">.</span><span class="n">cc</span><span class="p">:</span><span class="mi">194</span><span class="p">]</span> <span class="n">StreamExecutor</span> <span class="n">cuda</span> <span class="n">device</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="ow">is</span> <span class="n">of</span> <span class="n">insufficient</span> <span class="n">compute</span> <span class="n">capability</span><span class="p">:</span> <span class="mf">3.5</span> <span class="n">required</span><span class="p">,</span> <span class="n">device</span> <span class="ow">is</span> <span class="mf">3.0</span>
+</pre></div>
+</div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Do you want to use clang as CUDA compiler? [y/N]:
 nvcc will be used as CUDA compiler.
@@ -444,11 +466,15 @@ Configuration finished
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>从源代码编译TensorFlow需要使用大量内存，如果内存有限，需要限制 Bazel 的内存使用，例如使用参数 <code class="docutils literal notranslate"><span class="pre">--local_resources</span> <span class="pre">2048,.5,1.0</span></code> 表示只使用2G内存，50%的CPU资源，以及100%的磁盘IO。详细请参考后文的Build 报错处理。</p>
+<p class="last"><a class="reference external" href="https://www.tensorflow.org/install/pip">官方TensorFlow软件包</a> 是使用GCC 4并使用较老的ABI编译的。对于使用GCC 5或更新版本，如果要使用较老的ABI确保兼容性，则使用 <code class="docutils literal notranslate"><span class="pre">--cxxopt=&quot;-D_GLIBCXX_USE_CXX11_ABI=0&quot;</span></code> 编译参数。</p>
 </div>
 <div class="section" id="build">
-<h2>Build 报错处理<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h2>
+<h3>Build 报错处理<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="python">
-<h3>找不到python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h3>
+<h4>找不到python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h4>
 <ul>
 <li><p class="first"><cite>/usr/bin/env: ‘python’: No such file or directory</cite></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">bazel</span><span class="o">/</span><span class="n">_bazel_huatai</span><span class="o">/</span><span class="n">ae02d937542a5be4e761c5ab20415f3c</span><span class="o">/</span><span class="n">external</span><span class="o">/</span><span class="n">protobuf_archive</span><span class="o">/</span><span class="n">BUILD</span><span class="p">:</span><span class="mi">259</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span> <span class="n">C</span><span class="o">++</span> <span class="n">compilation</span> <span class="n">of</span> <span class="n">rule</span> <span class="s1">&#39;@protobuf_archive//:protoc_lib&#39;</span> <span class="n">failed</span> <span class="p">(</span><span class="n">Exit</span> <span class="mi">127</span><span class="p">)</span>
@@ -463,6 +489,9 @@ Configuration finished
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python3</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="gcc">
+<h4>编译过程中gcc进程被杀<a class="headerlink" href="#gcc" title="Permalink to this headline">¶</a></h4>
 <ul>
 <li><p class="first"><cite>gcc: internal compiler error: Killed (program cc1plus)</cite>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="n">kernels</span><span class="o">/</span><span class="n">BUILD</span><span class="p">:</span><span class="mi">762</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span> <span class="n">C</span><span class="o">++</span> <span class="n">compilation</span> <span class="n">of</span> <span class="n">rule</span> <span class="s1">&#39;//tensorflow/core/kernels:broadcast_to_op&#39;</span> <span class="n">failed</span> <span class="p">(</span><span class="n">Exit</span> <span class="mi">4</span><span class="p">)</span>
@@ -484,6 +513,178 @@ Configuration finished
 </div>
 </div>
 </div>
+<div class="section" id="id8">
+<h2>Build软件包<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bazel</span> <span class="pre">build</span></code> 命令创建名为 <code class="docutils literal notranslate"><span class="pre">build_pip_package</span></code> 的可执行程序，这个程序用于构建 <code class="docutils literal notranslate"><span class="pre">pip</span></code> 包。请执行以下命令在 <code class="docutils literal notranslate"><span class="pre">/tmp/tensolflow_pkg</span></code> 目录下创建一个 <code class="docutils literal notranslate"><span class="pre">.whl</span></code> 包。</p>
+<ul>
+<li><p class="first">从release分支build:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">bazel</span><span class="o">-</span><span class="nb">bin</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">pip_package</span><span class="o">/</span><span class="n">build_pip_package</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">tensorflow_pkg</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">从master分支build则需要使用 <code class="docutils literal notranslate"><span class="pre">--nightly_flag</span></code> 以获得正确的依赖:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">bazel</span><span class="o">-</span><span class="nb">bin</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">pip_package</span><span class="o">/</span><span class="n">build_pip_package</span> <span class="o">--</span><span class="n">nightly_flag</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">tensorflow_pkg</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">虽然有可能在相同的源代码中build通知支持CUDA和不支持CUDA的配置，但是依然建议在切换两种不同的配置钱执行一次 <code class="docutils literal notranslate"><span class="pre">bazel</span> <span class="pre">clean</span></code> 。</p>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>安装软件包<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>现在在软件包目录下有一个带有TensoorFlow版本和平台信息的 <code class="docutils literal notranslate"><span class="pre">.whl</span></code> 文件，现在使用 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> 命令来安装这个软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">tensorflow_pkg</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">-</span><span class="mf">1.13</span><span class="o">.</span><span class="mi">1</span><span class="o">-</span><span class="n">cp36</span><span class="o">-</span><span class="n">cp36m</span><span class="o">-</span><span class="n">linux_x86_64</span><span class="o">.</span><span class="n">whl</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">恭喜，现在TensorFlow已经完成安装了。</p>
+</div>
+</div>
+<div class="section" id="docker-linux-builds">
+<h2>Docker Linux builds<a class="headerlink" href="#docker-linux-builds" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">以下内容摘自 <a class="reference external" href="https://www.tensorflow.org/install/source#docker_linux_builds">TensorFlow官方安装文档 Build from source - Docker Linux builds</a> 。不过，我目前没有实际操作，因为前述Build from source操作已经完成了在 <a class="reference internal" href="../docker/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> 构建支持CUDA 3.0的TensorFlow环境，能够满足我个人的实践操作需求，所以本段 <code class="docutils literal notranslate"><span class="pre">Docker</span> <span class="pre">Linux</span> <span class="pre">builds</span></code> 我没有实践。</p>
+</div>
+<p>TensorFlow的Docker开发者镜像提供了从源代码编译Linux包的方便的环境（例如，你想为Debian/Ubuntu或RHEL/CentOS发布TensorFlow安装软件包）。这些镜像已经包含了构建TensorFlow的源代码和编译依赖。请参考TensorFlow <a class="reference external" href="https://www.tensorflow.org/install/docker">Docker guide</a> 进行操作。Docker镜像请参考docker hub中官方 <a class="reference external" href="https://hub.docker.com/r/tensorflow/tensorflow">tensorflow Office Docker images</a> 。</p>
+<div class="section" id="cpu-only">
+<h3>CPU-only<a class="headerlink" href="#cpu-only" title="Permalink to this headline">¶</a></h3>
+<p>以下案例使用 <code class="docutils literal notranslate"><span class="pre">:nightly-devel</span></code> 镜像构建CPU-only Python2软件包。请参考 <a class="reference external" href="https://www.tensorflow.org/install/docker">Docker guide</a> 的 <code class="docutils literal notranslate"><span class="pre">-devel</span></code> 标签的TensorFlow。</p>
+<p>下载最新的开发镜像并启动Docker容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker pull tensorflow/tensorflow:nightly-devel
+docker run -it -w /tensorflow -v $PWD:/mnt -e HOST_PERMS=&quot;$(id -u):$(id -g)&quot; \
+    tensorflow/tensorflow:nightly-devel bash
+
+# 在容器中，执行以下命令下载最新源代码:
+git pull
+</pre></div>
+</div>
+<p>以上 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令启动了在 <code class="docutils literal notranslate"><span class="pre">/tensorflow</span></code> 目录下的一个shell，该目录就是源代码目录。这个容器挂载了host主机的藏钱目录到容器的 <code class="docutils literal notranslate"><span class="pre">/mnt</span></code> 目录，并通过环境变量传递host的用户信息给容器。</p>
+<p>类似，要在容器中build一个host副本的Tensorflow，则挂载host的源代码目录到容器的 <code class="docutils literal notranslate"><span class="pre">/tensorflow</span></code> 目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker run -it -w /tensorflow -v /path/to/tensorflow:/tensorflow -v $PWD:/mnt \
+    -e HOST_PERMS=&quot;$(id -u):$(id -g)&quot; tensorflow/tensorflow:nightly-devel bash
+</pre></div>
+</div>
+<p>在容器中编译软件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>./configure  # answer prompts or use defaults
+bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
+./bazel-bin/tensorflow/tools/pip_package/build_pip_package /mnt  # create package
+chown $HOST_PERMS /mnt/tensorflow-version-tags.whl
+</pre></div>
+</div>
+<p>安装和验证软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">uninstall</span> <span class="n">tensorflow</span>  <span class="c1"># remove current version</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">-</span><span class="n">version</span><span class="o">-</span><span class="n">tags</span><span class="o">.</span><span class="n">whl</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">tmp</span>  <span class="c1"># don&#39;t import from source directory</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import tensorflow as tf; print(tf.__version__)&quot;</span>
+</pre></div>
+</div>
+<p>此时TensorFlow的pip软件包位于当前目录，执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">tensorflow</span><span class="o">-</span><span class="n">version</span><span class="o">-</span><span class="n">tags</span><span class="o">.</span><span class="n">whl</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gpu-support">
+<h3>GPU support<a class="headerlink" href="#gpu-support" title="Permalink to this headline">¶</a></h3>
+<p>Host主机上只需要安装 <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker/wiki/Frequently-Asked-Questions#how-do-i-install-the-nvidia-driver">NVIDIA driver驱动</a> (Host主机不需要安装NVIDIA CUDA Toolkit) 就可以在Docker容器中编译具有GPU支持的TensorFlow。请参考 <a class="reference external" href="https://www.tensorflow.org/install/gpu">GPU support guide</a> 以及 <a class="reference external" href="https://www.tensorflow.org/install/docker">TensorFlow Docker guide</a> 来设置 <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a> (Linux only) 。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">在容器中编译支持GPU的TensorFlow完整步骤可以参考本文前述的我的实践，以下只是官方文档的概述。</p>
+</div>
+<p>以下是下载TensorFlow <code class="docutils literal notranslate"><span class="pre">:nightly-devel-gpu-py3</span></code> 镜像并使用 <code class="docutils literal notranslate"><span class="pre">nvidia-docker</span></code> 来运行 GPU-enabled 容器。开发镜像配置使用Python 3 pip 软件包具有GPU支持:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker pull tensorflow/tensorflow:nightly-devel-gpu-py3
+docker run --runtime=nvidia -it -w /tensorflow -v $PWD:/mnt -e HOST_PERMS=&quot;$(id -u):$(id -g)&quot; \
+    tensorflow/tensorflow:nightly-devel-gpu-py3 bash
+</pre></div>
+</div>
+<p>在容器的虚拟环境中，构建GPU支持的TensorFlow软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>./configure  # answer prompts or use defaults
+bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+./bazel-bin/tensorflow/tools/pip_package/build_pip_package /mnt  # create package
+chown $HOST_PERMS /mnt/tensorflow-version-tags.whl
+</pre></div>
+</div>
+<p>安装和验证:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">uninstall</span> <span class="n">tensorflow</span>  <span class="c1"># remove current version</span>
+
+<span class="n">pip</span> <span class="n">install</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">-</span><span class="n">version</span><span class="o">-</span><span class="n">tags</span><span class="o">.</span><span class="n">whl</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">tmp</span>  <span class="c1"># don&#39;t import from source directory</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import tensorflow as tf; print(tf.contrib.eager.num_gpus())&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="tensorflowgpu">
+<h2>验证TensorFlow的GPU加速<a class="headerlink" href="#tensorflowgpu" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="../docker/nvidia-docker.html#compare-gpu-cpu-in-tensorflow"><span class="std std-ref">对比GPU和CPU运行TensorFlow案例</span></a> 中有一个由 <a class="reference external" href="https://learningtensorflow.com/lesson10/">learningtensorflow.com</a> 提供的 <cite>benchmark.py</cite> 脚本可以用来对比GPU和CPU运算效率。</p>
+<p>当然，在使用bencmark脚本测试之前，我们先把花费了我们很多时间精力构建的支持CUDA 3.0的自定义镜像制作出来:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">commit</span> <span class="n">tfstack</span> <span class="n">local</span><span class="p">:</span><span class="n">tensorflow</span><span class="o">-</span><span class="n">cuda3</span><span class="o">.</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>检查镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">image</span>
+</pre></div>
+</div>
+<p>显示新镜像 <code class="docutils literal notranslate"><span class="pre">tensorflow-cuda3.0</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REPOSITORY</span>              <span class="n">TAG</span>                  <span class="n">IMAGE</span> <span class="n">ID</span>            <span class="n">CREATED</span>             <span class="n">SIZE</span>
+<span class="n">local</span>                   <span class="n">tensorflow</span><span class="o">-</span><span class="n">cuda3</span><span class="o">.</span><span class="mi">0</span>   <span class="mi">47</span><span class="n">b19eed03e6</span>        <span class="n">About</span> <span class="n">an</span> <span class="n">hour</span> <span class="n">ago</span>   <span class="mi">13</span><span class="n">GB</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">在本地测试目录下创建 <code class="docutils literal notranslate"><span class="pre">benchmark.py</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+
+<span class="n">device_name</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Choose device from cmd line. Options: gpu or cpu</span>
+<span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+<span class="k">if</span> <span class="n">device_name</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+    <span class="n">device_name</span> <span class="o">=</span> <span class="s2">&quot;/gpu:0&quot;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">device_name</span> <span class="o">=</span> <span class="s2">&quot;/cpu:0&quot;</span>
+
+<span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device_name</span><span class="p">):</span>
+    <span class="n">random_matrix</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">minval</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dot_operation</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">random_matrix</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">random_matrix</span><span class="p">))</span>
+    <span class="n">sum_operation</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">dot_operation</span><span class="p">)</span>
+
+<span class="n">startTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">ConfigProto</span><span class="p">(</span><span class="n">log_device_placement</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">sum_operation</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="c1"># It can be hard to see the results on the terminal with lots of output -- add some newlines to improve readability.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shape:&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;Device:&quot;</span><span class="p">,</span> <span class="n">device_name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time taken:&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">创建新容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> \
+ <span class="o">--</span><span class="n">runtime</span><span class="o">=</span><span class="n">nvidia</span> \
+ <span class="o">--</span><span class="n">rm</span> \
+ <span class="o">-</span><span class="n">ti</span> \
+ <span class="o">-</span><span class="n">v</span> <span class="s2">&quot;$</span><span class="si">{PWD}</span><span class="s2">:/app&quot;</span> \
+ <span class="o">--</span><span class="n">user</span> <span class="n">huatai</span> \
+ <span class="n">local</span><span class="p">:</span><span class="n">tensorflow</span><span class="o">-</span><span class="n">cuda3</span><span class="o">.</span><span class="mi">0</span> \
+ <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;cd /home/huatai; . venv3/bin/activate; </span><span class="se">\</span>
+<span class="s2"> python /app/benchmark.py cpu 10000&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">--user</span></code> 参数表示在容器中切换到 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> 用户身份；通过 <code class="docutils literal notranslate"><span class="pre">/bin/bash</span> <span class="pre">-c</span></code> 可以在运行多条命令，这样可以切换Python的virtualenv环境，并执行python脚本。</p>
+</div>
+</div>
+</div>
 
 
            </div>
@@ -493,10 +694,10 @@ Configuration finished
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../kali_linux/index.html" class="btn btn-neutral float-right" title="Kali Linux Atlas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tensorflow_quickstart.html" class="btn btn-neutral float-right" title="TensorFlow快速起步" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Machine Learning Atlas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="deep_learning_hardware_guide.html" class="btn btn-neutral" title="深度学习硬件指南" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -213,6 +213,8 @@ NVIDIA持久化服务
 
    从NVIDIA下载的官方镜像 ``nvidia/cuda`` 提供了完整的CUDA支持，并且具备了类似 ``nvidia-smi`` 这样的监控工具。后续可以使用这个镜像来启动创建容器，并安装TensorFlow（由于硬件限制需要自己编译TensorFlow)。
 
+.. _compare_gpu_cpu_in_tensorflow:
+
 对比GPU和CPU运行TensorFlow案例
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
