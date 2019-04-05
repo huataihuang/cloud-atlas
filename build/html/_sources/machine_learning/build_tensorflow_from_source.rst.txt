@@ -26,6 +26,10 @@ TensorFlow发行版对CUDA要求
 
    NVIDIA的GPU支持的CUDA版本请参考 `CUDA GPUs <https://developer.nvidia.com/cuda-gpus>`_ ，例如，我使用的MacBook Pro 2015 later 显卡是 GeForce GT 750M，只支持CUDA 3.0。我将采用自己 `编译TensorFlow <https://www.tensorflow.org/install/source>`_ 来解决这个问题。
 
+.. warning::
+
+   目前解决的进度：已经成功从源代码编译了TensorFlow，但是运行时依然提示CUDA 3.0硬件设备不能支持CUDA 3.5。从网上文档来看，有采用 CUDA 9.0 编译TensorFlow支持 3.0的，所以我考虑下次采用完全全新的Ubuntu环境，从头开始采用CUDA 9编译。
+
 Docker准备
 ==============
 
@@ -116,13 +120,13 @@ macOS不支持GPU，只在Linux平台需要执行 `GPU 支持 <https://www.tenso
 
    容器驱动请参考 `Driver containers(Beta) <https://github.com/NVIDIA/nvidia-docker/wiki/Driver-containers-(Beta)>`_ 
 
-- 安装CUDA软件包::
+   TensorFlow GPU支持只需要安装相应的驱动和库就可以，最简单的方法是使用 `TensorFlow Docker image with GPU support <https://www.tensorflow.org/install/docker>`_ ，这个安装只需要 `NVIDIA GPU drivers <https://www.nvidia.com/drivers>`_
+
+   我的实践是采用了 NVIDIA CUDA docker 镜像 :ref:`nvidia-docker` ，所以这步忽略，已经具备了在docker容器内部使用GPU设备的能力。
+
+- 安装CUDA软件包（这个步骤可选，非必须）::
 
    sudo apt install nvidia-cuda-{dev,doc,gdb,toolkit} 
-
-.. note::
-
-   我的时间是采用了 NVIDIA CUDA docker 镜像 :ref:`nvidia-docker` ，所以这步忽略，已经具备了在docker容器内部使用GPU设备的能力。
 
 - 安装 `NVIDIA cuDNN <https://developer.nvidia.com/cudnn>`_ ::
 
@@ -131,6 +135,18 @@ macOS不支持GPU，只在Linux平台需要执行 `GPU 支持 <https://www.tenso
 .. note::
 
    如果从源代码编译Tensorflow，支持NVIDIA需要使用NVIDIA cuDNN。请参考 `How can I install CuDNN on Ubuntu 16.04? <https://askubuntu.com/questions/767269/how-can-i-install-cudnn-on-ubuntu-16-04>`_
+
+- 检查CUDA版本::
+
+    cat /usr/local/cuda/version.txt
+
+- 检查cuDNN版本::
+
+    cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
+
+.. note::
+
+   检查版本方法灿口 `Compiling TensorFlow-GPU on Ubuntu 16.04 with CUDA 9.1(9.2) and Python3 <https://blog.onemid.net/blog/dl-cuda-and-tf-install/>`_
 
 下载TensorFlow源代码
 =======================
@@ -144,7 +160,7 @@ macOS不支持GPU，只在Linux平台需要执行 `GPU 支持 <https://www.tenso
 
    git clone https://github.com/tensorflow/tensorflow.git
    cd tensorflow
-   git checkout rr1.13
+   git checkout r1.13
 
 或者::
 
@@ -177,7 +193,19 @@ macOS不支持GPU，只在Linux平台需要执行 `GPU 支持 <https://www.tenso
    Found possible Python library paths:
      /home/huatai/venv3/lib/python3.6/site-packages
    Please input the desired Python library path to use.  Default is [/home/huatai/venv3/lib/python3.6/site-packages]
+
+.. note::
+
+   这里遇到的报错 ``AttributeError: module 'site' has no attribute 'getsitepackages'`` 请参考 `problem with installing tensorboard via virtualenv #38 <https://github.com/dmlc/tensorboard/issues/38>`_ 和 `tensorflow学习笔记:运行tensorboard遇到的错误 <https://blog.csdn.net/u010312436/article/details/78648713>`_`
+
+   这个报错是因为在 virtualenv 环境，不能直接使用 ``site.getsitepackages()`` ，不过似乎不影响。 ``third_party/py/python_configure.bzl`` 中如果有 ``PYTHON_LIB_PATH`` 和 ``PYTHON_BIN_PATH`` 环境变量会跳过这段检测。
+
+   参考 `numpy not found during python_api generation #22395 <https://github.com/tensorflow/tensorflow/issues/22395>`_ 如果在bazel执行中遇到无法找到 numpy 则尝试传递环境变量::
+
+      --action_env PYTHONPATH="/home/huatai/venv3/lib/python3.6/site-packages"
    
+::
+
    Do you wish to build TensorFlow with XLA JIT support? [Y/n]:
    XLA JIT support will be enabled for TensorFlow.
    
@@ -337,6 +365,10 @@ Build软件包
 .. note::
 
    恭喜，现在TensorFlow已经完成安装了。
+
+验证编译的TensorFlow是否能够正常工作，即是否支持CUDA 3.0::
+
+   python -c "import tensorflow as tf; print(tf.contrib.eager.num_gpus())"
 
 Docker Linux builds
 =====================

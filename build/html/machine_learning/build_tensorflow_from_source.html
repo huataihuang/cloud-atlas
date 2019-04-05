@@ -207,6 +207,10 @@
 <p class="first admonition-title">Note</p>
 <p class="last">NVIDIA的GPU支持的CUDA版本请参考 <a class="reference external" href="https://developer.nvidia.com/cuda-gpus">CUDA GPUs</a> ，例如，我使用的MacBook Pro 2015 later 显卡是 GeForce GT 750M，只支持CUDA 3.0。我将采用自己 <a class="reference external" href="https://www.tensorflow.org/install/source">编译TensorFlow</a> 来解决这个问题。</p>
 </div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">目前解决的进度：已经成功从源代码编译了TensorFlow，但是运行时依然提示CUDA 3.0硬件设备不能支持CUDA 3.5。从网上文档来看，有采用 CUDA 9.0 编译TensorFlow支持 3.0的，所以我考虑下次采用完全全新的Ubuntu环境，从头开始采用CUDA 9编译。</p>
+</div>
 </div>
 <div class="section" id="docker">
 <h2>Docker准备<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h2>
@@ -302,20 +306,16 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 <p>如果要避免麻烦，可以直接使用 <a class="reference external" href="https://www.tensorflow.org/install/gpu">具有GPU支持功能的TensorFlow Docker镜像</a> 。如果要安装GPU支持，则只需要安装 <a class="reference external" href="https://www.nvidia.com/drivers">NVIDIA GPU驱动</a> 。</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">容器驱动请参考 <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker/wiki/Driver-containers-(Beta)">Driver containers(Beta)</a></p>
+<p>容器驱动请参考 <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker/wiki/Driver-containers-(Beta)">Driver containers(Beta)</a></p>
+<p>TensorFlow GPU支持只需要安装相应的驱动和库就可以，最简单的方法是使用 <a class="reference external" href="https://www.tensorflow.org/install/docker">TensorFlow Docker image with GPU support</a> ，这个安装只需要 <a class="reference external" href="https://www.nvidia.com/drivers">NVIDIA GPU drivers</a></p>
+<p class="last">我的实践是采用了 NVIDIA CUDA docker 镜像 <a class="reference internal" href="../docker/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> ，所以这步忽略，已经具备了在docker容器内部使用GPU设备的能力。</p>
 </div>
 <ul>
-<li><p class="first">安装CUDA软件包:</p>
+<li><p class="first">安装CUDA软件包（这个步骤可选，非必须）:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">cuda</span><span class="o">-</span><span class="p">{</span><span class="n">dev</span><span class="p">,</span><span class="n">doc</span><span class="p">,</span><span class="n">gdb</span><span class="p">,</span><span class="n">toolkit</span><span class="p">}</span>
 </pre></div>
 </div>
 </li>
-</ul>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">我的时间是采用了 NVIDIA CUDA docker 镜像 <a class="reference internal" href="../docker/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> ，所以这步忽略，已经具备了在docker容器内部使用GPU设备的能力。</p>
-</div>
-<ul>
 <li><p class="first">安装 <a class="reference external" href="https://developer.nvidia.com/cudnn">NVIDIA cuDNN</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dpkg</span> <span class="o">-</span><span class="n">i</span> <span class="n">libcudnn7_7</span><span class="o">.</span><span class="mf">5.0</span><span class="o">.</span><span class="mi">56</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">cuda10</span><span class="o">.</span><span class="mi">0</span><span class="n">_amd64</span><span class="o">.</span><span class="n">deb</span> <span class="n">libcudnn7</span><span class="o">-</span><span class="n">dev_7</span><span class="o">.</span><span class="mf">5.0</span><span class="o">.</span><span class="mi">56</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">cuda10</span><span class="o">.</span><span class="mi">0</span><span class="n">_amd64</span><span class="o">.</span><span class="n">deb</span>
 </pre></div>
@@ -325,6 +325,22 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">如果从源代码编译Tensorflow，支持NVIDIA需要使用NVIDIA cuDNN。请参考 <a class="reference external" href="https://askubuntu.com/questions/767269/how-can-i-install-cudnn-on-ubuntu-16-04">How can I install CuDNN on Ubuntu 16.04?</a></p>
+</div>
+<ul>
+<li><p class="first">检查CUDA版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">cuda</span><span class="o">/</span><span class="n">version</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">检查cuDNN版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">cuda</span><span class="o">/</span><span class="n">include</span><span class="o">/</span><span class="n">cudnn</span><span class="o">.</span><span class="n">h</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">CUDNN_MAJOR</span> <span class="o">-</span><span class="n">A</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">检查版本方法灿口 <a class="reference external" href="https://blog.onemid.net/blog/dl-cuda-and-tf-install/">Compiling TensorFlow-GPU on Ubuntu 16.04 with CUDA 9.1(9.2) and Python3</a></p>
 </div>
 </div>
 <div class="section" id="id4">
@@ -340,7 +356,7 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 <p>默认仓库获取的是 <code class="docutils literal notranslate"><span class="pre">master</span></code> 开发分支，可以取出 <a class="reference external" href="https://github.com/tensorflow/tensorflow/releases">release 分支</a> 来编译:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">tensorflow</span>
-<span class="n">git</span> <span class="n">checkout</span> <span class="n">rr1</span><span class="o">.</span><span class="mi">13</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">r1</span><span class="o">.</span><span class="mi">13</span>
 </pre></div>
 </div>
 <p>或者:</p>
@@ -366,16 +382,28 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 </div>
 <ul>
 <li><p class="first"><code class="docutils literal notranslate"><span class="pre">./configure</span></code> 配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Please specify the location of python. [Default is /home/huatai/venv3/bin/python]:
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Please</span> <span class="n">specify</span> <span class="n">the</span> <span class="n">location</span> <span class="n">of</span> <span class="n">python</span><span class="o">.</span> <span class="p">[</span><span class="n">Default</span> <span class="ow">is</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">venv3</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span><span class="p">]:</span>
 
-Traceback (most recent call last):
-  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
-AttributeError: module &#39;site&#39; has no attribute &#39;getsitepackages&#39;
-Found possible Python library paths:
-  /home/huatai/venv3/lib/python3.6/site-packages
-Please input the desired Python library path to use.  Default is [/home/huatai/venv3/lib/python3.6/site-packages]
-
-Do you wish to build TensorFlow with XLA JIT support? [Y/n]:
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+<span class="ne">AttributeError</span><span class="p">:</span> <span class="n">module</span> <span class="s1">&#39;site&#39;</span> <span class="n">has</span> <span class="n">no</span> <span class="n">attribute</span> <span class="s1">&#39;getsitepackages&#39;</span>
+<span class="n">Found</span> <span class="n">possible</span> <span class="n">Python</span> <span class="n">library</span> <span class="n">paths</span><span class="p">:</span>
+  <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">venv3</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span>
+<span class="n">Please</span> <span class="nb">input</span> <span class="n">the</span> <span class="n">desired</span> <span class="n">Python</span> <span class="n">library</span> <span class="n">path</span> <span class="n">to</span> <span class="n">use</span><span class="o">.</span>  <span class="n">Default</span> <span class="ow">is</span> <span class="p">[</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">venv3</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>这里遇到的报错 <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">module</span> <span class="pre">'site'</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'getsitepackages'</span></code> 请参考 <a class="reference external" href="https://github.com/dmlc/tensorboard/issues/38">problem with installing tensorboard via virtualenv #38</a> 和 <cite>tensorflow学习笔记:运行tensorboard遇到的错误 &lt;https://blog.csdn.net/u010312436/article/details/78648713&gt;`_</cite></p>
+<p>这个报错是因为在 virtualenv 环境，不能直接使用 <code class="docutils literal notranslate"><span class="pre">site.getsitepackages()</span></code> ，不过似乎不影响。 <code class="docutils literal notranslate"><span class="pre">third_party/py/python_configure.bzl</span></code> 中如果有 <code class="docutils literal notranslate"><span class="pre">PYTHON_LIB_PATH</span></code> 和 <code class="docutils literal notranslate"><span class="pre">PYTHON_BIN_PATH</span></code> 环境变量会跳过这段检测。</p>
+<p>参考 <a class="reference external" href="https://github.com/tensorflow/tensorflow/issues/22395">numpy not found during python_api generation #22395</a> 如果在bazel执行中遇到无法找到 numpy 则尝试传递环境变量:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">action_env</span> <span class="n">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;/home/huatai/venv3/lib/python3.6/site-packages&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Do you wish to build TensorFlow with XLA JIT support? [Y/n]:
 XLA JIT support will be enabled for TensorFlow.
 
 Do you wish to build TensorFlow with OpenCL SYCL support? [y/N]:
@@ -396,8 +424,6 @@ Please specify the cuDNN version you want to use. [Leave empty to default to cuD
 Please specify the location where cuDNN 7 library is installed. Refer to README.md for more details. [Default is /usr/local/cuda]: /usr/lib/x86_64-linux-gnu
 </pre></div>
 </div>
-</li>
-</ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">这里遇到到问题是Tensorflow在CUDA 10.0的目录下找不到CuDNN 7的库文件。请参考 <a class="reference external" href="https://devtalk.nvidia.com/default/topic/936212/tensorflow-cannot-find-cudnn-ubuntu-16-04-cuda7-5-/">TensorFlow cannot find cuDNN [Ubuntu 16.04 + CUDA7.5]</a> 安装CUDA开发工具以及从官方下载安装cuDDN软件库。不过，需要注意安装的目录是 <code class="docutils literal notranslate"><span class="pre">/usr/lib/x86_64-linux-gnu/</span></code> 。</p>
@@ -542,6 +568,10 @@ Configuration finished
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">恭喜，现在TensorFlow已经完成安装了。</p>
+</div>
+<p>验证编译的TensorFlow是否能够正常工作，即是否支持CUDA 3.0:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import tensorflow as tf; print(tf.contrib.eager.num_gpus())&quot;</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="docker-linux-builds">
