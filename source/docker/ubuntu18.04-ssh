@@ -1,0 +1,64 @@
+# Build ubuntu18.04 image with ssh:
+# ---------------------------------
+#   docker build -f ubuntu18.04-ssh .
+
+# create container:
+# -----------------
+# docker run -itd --hostname myserver --name myserver local:ubuntu18.04-ssh
+
+# create container with volume:
+# -----------------------------
+# docker volume create data
+# docker run -itd --hostname myserver --name myserver -v data:/data local:ubuntu18.04-ssh
+
+# create container with volume and static ip:
+# -------------------------------------------
+# docker volume create data
+# docker network create --subnet=172.18.0.0/16 data-net
+# docker run -itd --hostname myserver --name myserver -v data:/data \
+#   --net data-net --ip 172.18.0.11 local:ubuntu18.04-ssh
+
+# create container with volume and static ip, then limit resource and map port:
+# -----------------------------------------------------------------------------
+# docker volume create data
+# docker network create --subnet=172.18.0.0/16 data-net
+# docker run -itd --hostname myserver --name myserver -v data:/data \
+#   --net data-net --ip 172.18.0.11 --memory=2048M --cpus="1.5" \
+#   -p 22:1122 local:ubuntu18.04-ssh
+
+FROM docker.io/ubuntu:latest
+MAINTAINER vincent huatai <vincent@huatai.me>
+
+RUN apt update
+RUN apt -y upgrade
+RUN apt -y install openssh-server iproute2 sudo vim screen
+
+# Prepare sshd host key
+RUN ssh-keygen -A
+RUN mkdir /run/sshd
+
+# add account "huatai" and give sudo vprivilege
+# groupid 20(dialout=>staff) userid 501
+RUN groupdel staff
+RUN groupmod --new-name staff dialout
+RUN useradd -g 20 -u 501 -d /home/huatai -m -s /bin/bash huatai
+RUN usermod -aG sudo huatai
+RUN sed -i '/^%sudo/d' /etc/sudoers
+RUN echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Add ssh public key for login
+RUN mkdir -p /home/huatai/.ssh
+COPY authorized_keys /home/huatai/.ssh/authorized_keys
+RUN chown -R huatai:staff /home/huatai/.ssh
+RUN chmod 600 /home/huatai/.ssh/authorized_keys
+RUN chmod 700 /home/huatai/.ssh
+
+# run service when container started - sshd
+EXPOSE 22:1122
+#CMD ["/usr/sbin/sshd", "-D"]
+
+# ----------
+# WANT run sshd and get a bash
+# ENTRYPOINT will not be override by commandline
+# ----------
+ENTRYPOINT /usr/sbin/sshd && /bin/bash

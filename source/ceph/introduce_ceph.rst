@@ -1,4 +1,4 @@
-.. _introduce-ceph:
+.. _introduce_ceph:
 
 ===================
 Ceph存储介绍
