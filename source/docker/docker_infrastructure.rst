@@ -1,4 +1,4 @@
-.. _docker-infrastructure:
+.. _docker_infrastructure:
 
 ======================
 Docker架构

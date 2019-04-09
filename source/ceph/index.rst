@@ -4,10 +4,14 @@
 Ceph Atlas
 =================================
 
+.. note::
+
+   YouTube上 `Ceph Intro & Architectural Overview <https://www.youtube.com/watch?v=7I9uxoEhUdY>`_ 提供了Ceph概述，形象介绍了Ceph的概念。
+
 .. toctree::
    :maxdepth: 1
 
-   introduce-ceph.rst
+   introduce_ceph.rst
    bluestore.rst
    rdma.rst
 

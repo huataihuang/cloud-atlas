@@ -56,7 +56,7 @@ Docker准备
    
    另外，我安装了一些必要的工具包::
 
-      apt install vim screen curl git wget sudo
+      apt install vim screen curl git wget sudo iproute2
 
 Linux操作系统准备
 ===================
