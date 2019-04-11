@@ -32,4 +32,6 @@ Studio测试环境IP分配
    172.18.0.11 ceph-node1
    172.18.0.12 ceph-node2
    172.18.0.13 ceph-node3
+   172.18.0.14 ceph-node4
+   172.18.0.15 ceph-node5
 
