@@ -14,6 +14,8 @@ Ceph Atlas
    introduce_ceph.rst
    bluestore.rst
    rdma.rst
+   ceph_docker_in_studio.rst
+   install_ceph_manual.rst
 
 .. only::  subproject and html
 
