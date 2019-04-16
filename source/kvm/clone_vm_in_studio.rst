@@ -90,9 +90,28 @@ clone虚拟机
 
    动态设置方法可以参考 `动态调整KVM虚拟机内存和vcpu实战 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/add_remove_vcpu_memory_to_guest_on_fly.md>`_
 
+模拟物理服务器集群
+====================
+
+为了在笔记本环境中通过嵌套虚拟化模拟出多个物理服务器，在实验环境中，再次使用上述方法创建3个虚拟机来作为物理服务器使用>，为了区别，特意命名成 ``machine-1`` ， ``machine-2`` 和 ``machine-3`` ，这3个 L-1 虚拟机将完全视为物理服务器::
+
+   for i in {1..3};do
+       virt-clone --connect qemu:///system --original ubuntu18.04 --name machine-$i --file /var/lib/libvirt/images/machine-$i.qcow2
+       sudo virt-sysprep -d machine-$i --hostname machine-$i --root-password password:CHANGE_ME
+       virsh start machine-$i
+   done
+
+   virt-clone --connect qemu:///system --original ubuntu18.04 --name dockerstack --file /var/lib/libvirt/images/dockerstack.qcow2
+   sudo virt-sysprep -d dockerstack --hostname dockerstack --root-password password:CHANGE_ME
+   virsh start dockerstack
+
+.. note::
+
+   启动虚拟机之后，按照上述方法修订虚拟机配置并启用SSH服务，然后参考 :ref:`nested_virtualization_in_studio` 配置好用于进一步模拟集群的部署。
+
 下一步
 =============
 
-目前我们得到的第二个虚拟机 ``devstack`` 是从模版中clone出来的，虽然我们能不断clone出虚拟机来模拟集群，但是默认clone出来的虚拟机只能作为guest来运行，在这样的虚拟机内部不能模拟物理服务器来运行虚拟化软件。接下来，我们要做一个非常关键的一步改造，把clone出来的 ``devstack`` 修改成能够嵌套运行虚拟机的虚拟机：
+目前我们得到的多个虚拟机是从模版中clone出来的，虽然我们能不断clone出虚拟机来模拟集群，但是默认clone出来的虚拟机只能作为guest来运行，在这样的虚拟机内部不能模拟物理服务器来运行虚拟化软件。接下来，我们要做一个非常关键的一步改造，把clone出来的虚拟机修改成能够嵌套运行虚拟机的虚拟机：
 
 - :ref:`nested_virtualization_in_studio`

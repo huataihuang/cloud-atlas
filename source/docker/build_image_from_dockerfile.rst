@@ -91,7 +91,7 @@ docker build参数
 
    - 安装了openssh服务之后，需要创建主机key才能启动服务，所以需要执行 ``RUN ssh-keygen -A``
    - 将host主机上 ``authorized_keys`` 复制到镜像中，这里可以使用 ``COPY`` 指令或 ``ADD`` 指令。推荐使用 ``COPY`` （ ``ADD`` 指令用于添加 ``tar.gz`` 文件，可以自动展开: ``ADD rootfs.tar.xz /`` ) 。请参考 `Dockerfile COPY vs ADD: key differences and best practices <https://medium.freecodecamp.org/dockerfile-copy-vs-add-key-differences-and-best-practices-9570c4592e9e>`_
-   - ``EXPOSE`` 指令用来将指示容器中运行端口输出到host主机，这样其他人在使用 ``docker inspect`` 检查镜像时就能够发现这个端口映射提示(hint)。但是，需要 ``注意`` ：如果没有在 ``docker run`` 命令显式使用 ``-p 22:1122`` ，则实际从镜像创建的容器依然是没有输出端口映射的。 请参考 `What is the use of EXPOSE in Docker file <https://forums.docker.com/t/what-is-the-use-of-expose-in-docker-file/37726>`_ 
+   - ``EXPOSE`` 指令用来将指示容器中运行端口输出到host主机，这样其他人在使用 ``docker inspect`` 检查镜像时就能够发现这个端口映射提示(hint)。但是，需要 ``注意`` ：如果没有在 ``docker run`` 命令显式使用 ``-p 2211:22`` ，则实际从镜像创建的容器依然是没有输出端口映射的。 请参考 `What is the use of EXPOSE in Docker file <https://forums.docker.com/t/what-is-the-use-of-expose-in-docker-file/37726>`_ 
    - 虽然能够使用 ``CMD ["/usr/sbin/sshd", "-D"]`` 在镜像最后启动一个sshd服务，但是在Dockerfile中，只能执行一次 ``CMD`` ，多条 ``CMD`` 时后面的命令会覆盖前面的命令（即只有最后一条命令生效）；所以如果有多条命令需要运行，则需要使用 ``ENTRYPOINT`` 。
 
 .. warning::

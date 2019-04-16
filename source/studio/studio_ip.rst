@@ -11,27 +11,9 @@ Studio测试环境IP分配
 - :ref:`nested_virtualization_in_studio`
 - :ref:`libvirt_static_ip_in_studio`
 
-为方便测试环境服务部署，部分关键服务器采用了静态IP地址，解析地址如下（配置在Host主机上）::
+为方便测试环境服务部署，部分关键服务器采用了静态IP地址，解析地址如下（配置在Host主机上）
 
-   # KVM libvirt virbr0: 192.168.122.0/24
-   192.168.122.2   ubuntu18-04 ubuntu18-04.huatai.me
-   
-   192.168.122.10  minikube     minikube.huatai.me
-   192.168.122.11  kube-master1 kube-master1.huatai.me
-   192.168.122.12  kube-master2 kube-master2.huatai.me
-   192.168.122.13  kube-master3 kube-master3.huatai.me
-
-   192.168.122.20  devstack devstack.huatai.me
-   192.168.122.21  devstack-1 devstack-1.huatai.me
-   192.168.122.22  devstack-2 devstack-2.huatai.me
-
-   # Docker docker0: 172.17.0.0/16
-   172.17.0.2  ubunut18-04  # Docker镜像
-   
-   # Docker ceph-net: 172.18.0.0/16
-   172.18.0.11 ceph-node1
-   172.18.0.12 ceph-node2
-   172.18.0.13 ceph-node3
-   172.18.0.14 ceph-node4
-   172.18.0.15 ceph-node5
-
+.. literalinclude:: hosts
+   :language: bash
+   :linenos:
+   :caption:
