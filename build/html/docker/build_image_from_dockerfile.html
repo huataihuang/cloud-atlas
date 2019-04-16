@@ -95,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="building-a-docker-application.html">构建Docker应用程序</a></li>
 <li class="toctree-l2"><a class="reference internal" href="remote-access-dockerd.html">远程访问dockerd服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running-containers-as-daemons.html">将容器作为服务运行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keep_containers_alive_during_daemon_downtime.html">Docker daemon停止时保持容器运行</a></li>
 <li class="toctree-l2"><a class="reference internal" href="assign_static_ip_to_docker_container.html">Docker容器分配静态IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker_ssh.html">Docker容器中运行ssh服务</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">从Dockerfile构建Docker镜像</a><ul>
@@ -110,6 +111,8 @@
 <li class="toctree-l2"><a class="reference internal" href="docker_tmpfs_mount.html">Docker内存文件系统(tmpfs)挂载</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker_storage_driver.html">Docker存储驱动</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker_run_add_host_device.html">添加host设备到容器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="start_containers_automatically.html">自动启动Docker容器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_timezone.html">Docker时区</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nvidia-docker.html">Docker运行NVIDIA容器</a></li>
 </ul>
 </li>
@@ -406,7 +409,7 @@
 <ul class="last simple">
 <li>安装了openssh服务之后，需要创建主机key才能启动服务，所以需要执行 <code class="docutils literal notranslate"><span class="pre">RUN</span> <span class="pre">ssh-keygen</span> <span class="pre">-A</span></code></li>
 <li>将host主机上 <code class="docutils literal notranslate"><span class="pre">authorized_keys</span></code> 复制到镜像中，这里可以使用 <code class="docutils literal notranslate"><span class="pre">COPY</span></code> 指令或 <code class="docutils literal notranslate"><span class="pre">ADD</span></code> 指令。推荐使用 <code class="docutils literal notranslate"><span class="pre">COPY</span></code> （ <code class="docutils literal notranslate"><span class="pre">ADD</span></code> 指令用于添加 <code class="docutils literal notranslate"><span class="pre">tar.gz</span></code> 文件，可以自动展开: <code class="docutils literal notranslate"><span class="pre">ADD</span> <span class="pre">rootfs.tar.xz</span> <span class="pre">/</span></code> ) 。请参考 <a class="reference external" href="https://medium.freecodecamp.org/dockerfile-copy-vs-add-key-differences-and-best-practices-9570c4592e9e">Dockerfile COPY vs ADD: key differences and best practices</a></li>
-<li><code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 指令用来将指示容器中运行端口输出到host主机，这样其他人在使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">inspect</span></code> 检查镜像时就能够发现这个端口映射提示(hint)。但是，需要 <code class="docutils literal notranslate"><span class="pre">注意</span></code> ：如果没有在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令显式使用 <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">22:1122</span></code> ，则实际从镜像创建的容器依然是没有输出端口映射的。 请参考 <a class="reference external" href="https://forums.docker.com/t/what-is-the-use-of-expose-in-docker-file/37726">What is the use of EXPOSE in Docker file</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 指令用来将指示容器中运行端口输出到host主机，这样其他人在使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">inspect</span></code> 检查镜像时就能够发现这个端口映射提示(hint)。但是，需要 <code class="docutils literal notranslate"><span class="pre">注意</span></code> ：如果没有在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令显式使用 <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">2211:22</span></code> ，则实际从镜像创建的容器依然是没有输出端口映射的。 请参考 <a class="reference external" href="https://forums.docker.com/t/what-is-the-use-of-expose-in-docker-file/37726">What is the use of EXPOSE in Docker file</a></li>
 <li>虽然能够使用 <code class="docutils literal notranslate"><span class="pre">CMD</span> <span class="pre">[&quot;/usr/sbin/sshd&quot;,</span> <span class="pre">&quot;-D&quot;]</span></code> 在镜像最后启动一个sshd服务，但是在Dockerfile中，只能执行一次 <code class="docutils literal notranslate"><span class="pre">CMD</span></code> ，多条 <code class="docutils literal notranslate"><span class="pre">CMD</span></code> 时后面的命令会覆盖前面的命令（即只有最后一条命令生效）；所以如果有多条命令需要运行，则需要使用 <code class="docutils literal notranslate"><span class="pre">ENTRYPOINT</span></code> 。</li>
 </ul>
 </div>

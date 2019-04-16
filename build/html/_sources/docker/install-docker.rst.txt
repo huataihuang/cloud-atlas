@@ -4,6 +4,22 @@
 安装Docker
 ======================
 
+模拟环境的Docker
+===================
+
+为了能够在测试环境中不断模拟各种实验，我采用两种模式运行Docker:
+
+- 在KVM虚拟机中运行Docker
+  
+:ref:`clone_vm_in_studio` 构建了一个名为 ``dockerstack`` 的KVM虚拟机，在KVM虚拟机内部测试各种Docker的功能。这种方式可以保持Host物理主机纯净，不容易搞坏基础环境。虚拟机可以不断clone重建，即使偶尔失误异常也能快速恢复测试环境。
+
+- 在物理主机MacBook Pro上运行Docker
+
+在MacBook Pro笔记本上，在 :ref:`ceph_docker_in_studio` ，主要原因是获得接近物理主机运行性能，并且轻量级易维护。这种Docker运行基础服务，保持稳定减少折腾。
+
+.. note::
+
+   大多数Docker测试都在 ``dockerstack`` 中完成。
 
 RHEL/CentOS平台安装Docker
 ===========================

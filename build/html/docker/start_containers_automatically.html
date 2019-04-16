@@ -1,0 +1,400 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>自动启动Docker容器 &mdash; Cloud Atlas 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Docker时区" href="docker_timezone.html" />
+    <link rel="prev" title="添加host设备到容器" href="docker_run_add_host_device.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Docker Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="introduce-docker.html">Docker简介</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_concept.html">Docker基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_infrastructure.html">Docker架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oci_pouch.html">基于OCI标准的Pouch容器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install-docker.html">安装Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-a-docker-application.html">构建Docker应用程序</a></li>
+<li class="toctree-l2"><a class="reference internal" href="remote-access-dockerd.html">远程访问dockerd服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running-containers-as-daemons.html">将容器作为服务运行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keep_containers_alive_during_daemon_downtime.html">Docker daemon停止时保持容器运行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="assign_static_ip_to_docker_container.html">Docker容器分配静态IP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_ssh.html">Docker容器中运行ssh服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build_image_from_dockerfile.html">从Dockerfile构建Docker镜像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_storage.html">Docker存储管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_volume.html">Docker 卷</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_bind_mount.html">Docker 捆绑挂载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_tmpfs_mount.html">Docker内存文件系统(tmpfs)挂载</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_storage_driver.html">Docker存储驱动</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker_run_add_host_device.html">添加host设备到容器</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">自动启动Docker容器</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Docker重启策略</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">使用重启策略</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">重启策略要点</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">使用进程管理器自动重启容器</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">使用systemd自动启动容器</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">在容器内部使用进程管理器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="docker_timezone.html">Docker时区</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nvidia-docker.html">Docker运行NVIDIA容器</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kali_linux/index.html">Kali Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Docker Atlas</a> &raquo;</li>
+        
+      <li>自动启动Docker容器</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/docker/start_containers_automatically.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="docker">
+<span id="start-containers-automatically"></span><h1>自动启动Docker容器<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h1>
+<p>在 <a class="reference internal" href="../ceph/ceph_docker_in_studio.html#ceph-docker-in-studio"><span class="std std-ref">Stuido环境Docker容器运行Ceph</span></a> 时，Ceph是作为整个OpenStack集群的基础服务来运行的，所以需要设置操作系统启动时自动启动这些Ceph容器，以便能够为上层OpenStack提供基础。在生产环境中，如果是通过Docker容器来运行基础服务，往往也需要能够自动启动这些Docker容器。当然，使用Kubernetes ( <a class="reference internal" href="../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> ) 的调度可以自动实现稳定的容器服务，不过在简化的Docker运行环境中，直接采用Docker <cite>restart policies &lt;https://docs.docker.com/v17.09/engine/reference/run/#restart-policies—restart&gt;</cite> 可以简化运维。</p>
+<div class="section" id="id1">
+<h2>Docker重启策略<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Docker 提供了 <code class="docutils literal notranslate"><span class="pre">restart</span> <span class="pre">policies</span></code> 来控制容器退出或者Docker重启时候是否自动启动容器。重启策略确保了链接的容器按照正确顺序启动。Docker建议使用restart策略而不是使用进程管理器（例如systemd）来启动容器。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Docker的重启策略和 <code class="docutils literal notranslate"><span class="pre">dockerd</span></code> 的 <code class="docutils literal notranslate"><span class="pre">--live-restore</span></code> 开关是不同的。 <code class="docutils literal notranslate"><span class="pre">--live-restore</span></code> 开关允许在Docker升级的时候保持容器继续运行，虽然升级过程中容器的网络和用户输入是中断的。请参考 <a class="reference internal" href="keep_containers_alive_during_daemon_downtime.html#keep-containers-alive-during-daemon-downtime"><span class="std std-ref">Docker daemon停止时保持容器运行</span></a></p>
+</div>
+<div class="section" id="id2">
+<h3>使用重启策略<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>在执行 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 指令时，可以使用 <code class="docutils literal notranslate"><span class="pre">--restart</span></code> 参数来配置容器的重启策略，可用值：</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">参数值</th>
+<th class="head">描述</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>no</td>
+<td>不自动重启容器（默认值）</td>
+</tr>
+<tr class="row-odd"><td>on-failure</td>
+<td>当容器发生错误退出（表现为非零的退出值）就重启容器</td>
+</tr>
+<tr class="row-even"><td>unless-stopped</td>
+<td>除非容器明确停止或者Docker自身停止或重启，否则自动重启容器</td>
+</tr>
+<tr class="row-odd"><td>always</td>
+<td>总是在容器停止时候重启容器</td>
+</tr>
+</tbody>
+</table>
+<p>举例，以下命令总是重启Redis容器，除非容器是明确停止或者Docker被重启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">--</span><span class="n">restart</span> <span class="n">unless</span><span class="o">-</span><span class="n">stopped</span> <span class="n">redis</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>重启策略要点<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>在使用重启策略时要牢记以下要点：</p>
+<ul class="simple">
+<li>重启策略只有在容器成功启动之后才会生效。这种情况下，所谓成功启动是指容器启动至少10秒钟并且Docker已经开始监控容器。这种模式避免容器没有成功启动而不断循环重启的问题。</li>
+<li>如果你手工停止一个容器，则该容器的重启策略会被忽略直到Docker服务被重启或者容器被手工重启。这也是避免循环重启的策略。</li>
+<li>重启策略只作用于容器。通过swarm服务实现的重启策略配置方法不同。</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>使用进程管理器自动重启容器<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>如果容器的内建重启策略不能满足需求，例如Docker之外的进程依赖Docker容器，你可以使用进程管理器例如 <a class="reference external" href="http://upstart.ubuntu.com/">upstart</a> ， <a class="reference external" href="http://freedesktop.org/wiki/Software/systemd/">systemd</a> 或者 <a class="reference external" href="http://supervisord.org/">supervisor</a> 来管理容器重启。</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">不要试图同时使用Docker内建的重启策略和host级别的进程管理器，这会导致两者冲突。</p>
+</div>
+<div class="section" id="id5">
+<h3>使用systemd自动启动容器<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>通过SystemD可以启动和停止服务，也可以跟踪依赖以及检查日志，对于docker，主要是wrap命令并正确命名。</p>
+<ul>
+<li><p class="first">通过systemd启动redis服务(参考 <a class="reference external" href="https://karlstoney.com/2017/03/03/docker-containers-as-systemd-services/">Using Docker containers as Systemd services</a> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Unit</span><span class="p">]</span>
+<span class="n">Description</span><span class="o">=</span><span class="n">Redis</span> <span class="n">Key</span> <span class="n">Value</span> <span class="n">store</span>
+<span class="n">Requires</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span>
+
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">ExecStartPre</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sleep</span> <span class="mi">1</span>
+<span class="n">ExecStartPre</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">pull</span> <span class="n">redis</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="n">always</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">systemd_redis</span> <span class="o">-</span><span class="n">p</span><span class="o">=</span><span class="mi">6379</span><span class="p">:</span><span class="mi">6379</span> <span class="n">redis</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">ExecStop</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">stop</span> <span class="n">systemd_redis</span>
+<span class="n">ExecStopPost</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">systemd_redis</span>
+<span class="n">ExecReload</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">restart</span> <span class="n">systemd_redis</span>
+
+<span class="p">[</span><span class="n">Install</span><span class="p">]</span>
+<span class="n">WantedBy</span><span class="o">=</span><span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>将上述文件保存为 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/redis-in-docker.service</span></code> 然后执行 <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">daemon-reload</span></code> 。</p>
+<p>完成后就可以执行以下命令启动redis服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">redis</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">docker</span>
+</pre></div>
+</div>
+<p>启动正常后，就可以设置操作系统启动时启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">redis</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">docker</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://fardog.io/blog/2017/12/30/running-docker-containers-with-systemd/">Running Docker containers with systemd</a> 提供了一个很好的启动nginx容器的案例可以参考:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Unit</span><span class="p">]</span>
+<span class="n">Description</span><span class="o">=</span><span class="n">nginx</span> <span class="p">(</span><span class="n">Docker</span><span class="p">)</span>
+<span class="c1"># start this unit only after docker has started</span>
+<span class="n">After</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span>
+<span class="n">Requires</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span>
+
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">TimeoutStartSec</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">Restart</span><span class="o">=</span><span class="n">always</span>
+<span class="c1"># The following lines start with &#39;-&#39; because they are allowed to fail without</span>
+<span class="c1"># causing startup to fail.</span>
+<span class="c1">#</span>
+<span class="c1"># Kill the old instance, if it&#39;s still running for some reason</span>
+<span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">kill</span> <span class="n">nginx</span>
+<span class="c1"># Remove the old instance, if it stuck around</span>
+<span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">rm</span> <span class="n">nginx</span>
+<span class="c1"># Pull the latest version of the container; NOTE you should be careful to</span>
+<span class="c1"># pull a tagged version, that way you won&#39;t accidentially pull a major-version</span>
+<span class="c1"># upgrade and break your service!</span>
+<span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">pull</span> <span class="s2">&quot;nginx:1.13&quot;</span>
+<span class="c1"># Start the actual service; note we remove the instance after it exits</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="o">-</span><span class="n">p</span> <span class="mi">443</span><span class="p">:</span><span class="mi">443</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">service</span><span class="o">-</span><span class="n">configs</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">ro</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.13</span>
+<span class="c1"># On exit, stop the container</span>
+<span class="n">ExecStop</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">stop</span> <span class="n">nginx</span>
+
+<span class="p">[</span><span class="n">Install</span><span class="p">]</span>
+<span class="n">WantedBy</span><span class="o">=</span><span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>在容器内部使用进程管理器<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>可以在容器内部运行进程管理器来检查一个进程是否运行或者进程没有运行时启动或重启进程。</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">在容器内部使用进程管理器不是Docker可以感知的，并且仅仅在容器内部管理操作系统进程。这种方式不是Docker推荐的方法，因为这种方式和操作系统紧密相关，甚至在Linux发行版的不同版本也有差异。</p>
+</div>
+</div>
+<div class="section" id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://docs.docker.com/config/containers/start-containers-automatically/">Start containers automatically</a></li>
+<li><a class="reference external" href="https://karlstoney.com/2017/03/03/docker-containers-as-systemd-services/">Using Docker containers as Systemd services</a></li>
+<li><a class="reference external" href="https://fardog.io/blog/2017/12/30/running-docker-containers-with-systemd/">Running Docker containers with systemd</a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="docker_timezone.html" class="btn btn-neutral float-right" title="Docker时区" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="docker_run_add_host_device.html" class="btn btn-neutral" title="添加host设备到容器" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Huatai Huang
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

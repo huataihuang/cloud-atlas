@@ -4,9 +4,12 @@
 Studio嵌套虚拟化
 =======================
 
-.. note::
+为了能够在一台物理主机（MacBook Pro）上能够模拟出OpenStack集群，即同时运行多个hypervisor，需要使用嵌套虚拟化(Nested Virtualization)。
 
-   为了能够在一台物理主机（MacBook Pro）上能够模拟出OpenStack集群，即同时运行多个hypervisor，需要使用嵌套虚拟化(Nested Virtualization)。
+.. image:: ../_static/kvm/inception.jpg
+   :scale: 50
+
+.. note::
 
    在支持 :ref:`intel_vmcs` 硬件加速的CPU上使用嵌套虚拟化可以得到较大性能的提升，在Hawwell核心之前的Intel处理器则使用软件方式实现嵌套虚拟化。
 
@@ -73,6 +76,13 @@ Studio嵌套虚拟化
 .. note::
 
    详细请参考 `Configure DevStack with KVM-based Nested Virtualization <https://docs.openstack.org/devstack/latest/guides/devstack-with-nested-kvm.html>`_
+
+   这里我创建的第一个虚拟机 ``devstack`` 将作为Openstack的开发环境。
+
+模拟物理服务器集群
+====================
+
+为了在笔记本环境中通过嵌套虚拟化模拟出多个物理服务器，在实验环境中， :ref:`clone_vm_in_studio` 创建的3台模拟物理服务器的主机 ``machine-1`` ， ``machine-2`` 和 ``machine-3`` 也请按照上述方法设置好嵌套虚拟化，后续测试将采用这3台主机部署OpenStack集群。
 
 下一步
 =======================

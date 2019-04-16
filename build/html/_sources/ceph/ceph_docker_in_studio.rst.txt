@@ -158,10 +158,32 @@ LVM卷
 Docker容器
 =============
 
+.. note
+
+   作为基础服务运行的Docker容器，需要具备如下能力:
+
+   - 即使 docker 服务升级也能保持容器持续运行，这需要设置 :ref:`keep_containers_alive_during_daemon_downtime` 的运行参数 ``live restore``
+   - 物理服务器操作系统重启，在Docker服务启动时自动启动容器，以确保基础分布式文件系统可用，这需要设置 :ref:`start_containers_automatically` 的 ``docker run`` 运行参数 ``--restart always``
+
+- 在 ``/etc/docker/daemon.json`` 中添加如下配置::
+
+   {
+      ...,
+      "live-restore": true
+   }
+
+然后重新加载dacker服务 ``sudo systemctl reload docker`` 确保docker升级时容器可以持续运行。
+
 - 参考 :ref:`docker_run_add_host_device` 执行以下指令批量创建5个容器::
 
    for i in {1..5};do
      docker run -itd --hostname ceph-$i --name ceph-$i -v data:/data \
-         --net ceph-net --ip 172.18.0.1$i \
+         --net ceph-net --ip 172.18.0.1$i -p 221$i:22 --restart always \
          --device=/dev/mapper/ceph-data$i:/dev/xvdc local:ubuntu18.04-ssh
    done
+
+.. note::
+
+   启动5个 ``cepn-N`` 虚拟机，在每个虚拟机内部都具备了 ``/dev/xvdc`` 设备::
+
+      brw-rw---- 1 root disk 253, 0 Apr 11 13:56 /dev/xvdc
