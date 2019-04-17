@@ -33,7 +33,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 版权
 ========
 
-本书 :ref:`copyright` ，你可以非商业转载， 并请注明出处，谢谢。
+本书 :ref:`copyright` ，你可以非商业转载，并请注明出处，谢谢。
 
 讨论和鼓励
 ============
