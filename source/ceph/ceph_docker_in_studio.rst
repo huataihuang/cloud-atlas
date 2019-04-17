@@ -184,6 +184,24 @@ Docker容器
 
 .. note::
 
+   - 采用 :ref:`build_image_from_dockerfile` 中构建的支持SSH服务端镜像 ``local:ubuntu18.04-ssh`` 构建容器
+
+   - ``-itd`` :
+
+     - ``-i`` - 交互模式
+     - ``-t`` - 提供终端，这样可以通过 ``docker attach ceph-X`` 直接访问容器终端控制台
+     - ``-d`` - daemon模式后台运行容器
+
+   - ``--hostname ceph-$i`` - 设置容器内部os所用的主机名为 ``ceph-X``
+   - ``--name ceph-$i`` - 设置Docker中容器的名字，同样为 ``ceph-X``
+   - ``-v data:/data`` - :ref:`docker_volume` 映射提供给容器共享的Host主机卷 ``data``
+   - ``--net ceph-net --ip 172.18.0.1$i`` - :ref:`assign_static_ip_to_docker_container`
+   - ``-p 221$i:22`` - 在 :ref:`docker_ssh` ，通过将容器中运行端口22输出到host主机221x方便外部登陆
+   - ``--restart always`` - 设置 :ref:`start_containers_automatically` 确保物理主机重启时自动恢复容器运行
+   - ``--device=/dev/mapper/ceph-data$i:/dev/xvdc`` - 通过 :ref:`docker_run_add_host_device` 方式将物理主机LVM卷映射为容器中的磁盘设备，这样可以基于磁盘设备来构建 :ref:`bluestore`
+
+.. note::
+
    启动5个 ``cepn-N`` 虚拟机，在每个虚拟机内部都具备了 ``/dev/xvdc`` 设备::
 
       brw-rw---- 1 root disk 253, 0 Apr 11 13:56 /dev/xvdc

@@ -4,7 +4,11 @@
 自动启动Docker容器
 =========================
 
-在 :ref:`ceph_docker_in_studio` 时，Ceph是作为整个OpenStack集群的基础服务来运行的，所以需要设置操作系统启动时自动启动这些Ceph容器，以便能够为上层OpenStack提供基础。在生产环境中，如果是通过Docker容器来运行基础服务，往往也需要能够自动启动这些Docker容器。当然，使用Kubernetes ( :ref:`kubernetes` ) 的调度可以自动实现稳定的容器服务，不过在简化的Docker运行环境中，直接采用Docker `restart policies <https://docs.docker.com/v17.09/engine/reference/run/#restart-policies---restart>` 可以简化运维。
+在 :ref:`ceph_docker_in_studio` 时，Ceph是作为整个OpenStack集群的基础服务来运行的，所以需要设置操作系统启动时自动启动这些Ceph容器，以便能够为上层OpenStack提供基础。在生产环境中，如果是通过Docker容器来运行基础服务，往往也需要能够自动启动这些Docker容器。
+
+.. note::
+
+   使用Kubernetes ( :ref:`kubernetes` ) 的调度可以自动实现稳定的容器服务，但是在 :ref:`introduce_my_studio` ，直接采用Docker `restart policies <https://docs.docker.com/v17.09/engine/reference/run/#restart-policies---restart>`_ 可以无需复杂的部署（消耗大量主机资源）实现底层分布式存储服务持续运行。
 
 Docker重启策略
 ===============
