@@ -6,7 +6,7 @@ Intel Core i7-4850HQ处理器
 
 在我的测试环境使用的MacBook Pro 2015 later版本笔记本，使用的处理器是 `Intel® Core™ i7-4850HQ Processor <https://ark.intel.com/content/www/us/en/ark/products/76086/intel-core-i7-4850hq-processor-6m-cache-up-to-3-50-ghz.html>`_ 。
 
-i7-4840HQ 处理器属于第四代Intel Core i7处理器，产品系列是 `Crystal Well <https://en.wikichip.org/wiki/intel/crystal_well>`_ ，等同于志强服务器的 Haswell 系列，具备以下高级特性
+i7-4840HQ 处理器属于第四代Intel Core i7处理器，Code Nmae 是 `Crystal Well系列 <https://en.wikichip.org/wiki/intel/crystal_well>`_ ，和同期i7-4800MQ 处理器(Code Nmae `Haswell系列 <https://ark.intel.com/content/www/us/en/ark/products/codename/42174/haswell.html>`_  ，例如Intel Xeon process E5 v3也是Haswell系列，支持 :ref:`intel_rdt` )相似，具备以下高级特性
 
 - Advanced Vector Extensions 2.0 (AVX2) Haswell系列是首款支持高级适量扩展指令集2.0的Intel志强处理器。AVX2对于高性能计算应用（如数据库和性能基准应用）带来改进
 - Intel Cache Monitoring Technology (CMT) 高速缓存监控就是可以向操作系统（OS）或虚拟机监控器（VMM ）提供每台虚拟机（VM）高速缓存利用绿信息，以便更好决策如何调度工作负载。

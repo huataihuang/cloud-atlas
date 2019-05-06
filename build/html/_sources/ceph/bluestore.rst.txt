@@ -110,6 +110,20 @@ BlueStore的底线是 ``bluestore_cache_size`` 配置选贤，控制每个OSD所
 
    内存记账当前是不完善的：使用了tcmalloc，会导致有时候实际分配超过设置值。随着时间推移堆栈会碎片化，而内存碎片化使得部分释放内存不能返回给操作系统。结果就是，通常会出现BlueStore(和OSS)认为使用的内核和进程实际使用内存(RSS)差异有时候出现1.5倍差异。对比 ``ceph-osd`` 的进程RSS消耗内存和通过 ``ceph daemon osd.<id> dump_mempools`` 输出的值就可以看到这个差异。目前ceph项目还在解决这个问题。（2017年9月）
 
+校验
+=========
+
+BlueStore计算、存储和验证校验所有存储的数据和元数据。任何时候从磁盘读取数据，数据在输出给系统其他部分（或用户）使用之前都会使用校验来验证数据正确性。默认使用 ``crc32c`` checksum，也提供其他校验选项（ ``xxhash32`` ， ``xxhash64`` ），甚至支持使用降级的 ``crc32c`` （例如，使用标准校验32位数据中的8位或者16位）来降低元数据跟踪（牺牲了数据可靠性）。也支持完全关闭数据校验（但不推荐此方式）。详细可参考 `文档的checksum部分 <http://docs.ceph.com/docs/master/rados/configuration/bluestore-config-ref/#checksums>`_ 。
+
+压缩
+=========
+
+BlueStore可以使用zlib, snappy 或者 lz4 实现透明压缩。默认BlueStore关闭了压缩功能，但是可以全局激活或者针对特定存储池激活，也提供了当RADOS客户端访问数据时选择性激活。详情请参考 `文档的压缩章节 <http://docs.ceph.com/docs/master/rados/configuration/bluestore-config-ref/#inline-compression>`_ 。
+
+转换现有集群到BlueStore
+==========================
+
+在一个单一集群中每个OSD可以同时包含一些FileStore OSD和一些BlueStore OSD。一个升级的集群可以持续完成转换，即新OSD采用BlueStore来不断轮转替换旧的FileStore，通过不断下线旧的FileStore并添加新的FileStore（默认启用BlueStore）利用数据健康恢复将多副本数据复制回来。这个过程可以平滑安全实现，详情请参考 `BlueStore migration <http://docs.ceph.com/docs/master/rados/operations/bluestore-migration/>`_ 。
 
 参考
 =====

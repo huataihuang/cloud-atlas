@@ -9,6 +9,8 @@ Kernel Atlas
 
    cgroups_v1.rst   
    cgroups_v2.rst   
+   intel_rdt.rst
+   flame_graph.rst
 
 .. only::  subproject and html
 

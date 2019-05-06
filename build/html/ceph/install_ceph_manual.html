@@ -90,12 +90,20 @@
 <li class="toctree-l2"><a class="reference internal" href="bluestore.html">Ceph后端存储引擎BlueStore</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rdma.html">Remote Direct Memory Access(RDMA)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ceph_docker_in_studio.html">Stuido环境Docker容器运行Ceph</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">手工安装Ceph</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">手工安装Ceph</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">获取Ceph软件</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">安装环境准备</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceph-deploy">安装ceph-deploy(可选)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">安装Ceph存储集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">参考</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../openstack/index.html">OpenStack Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docker/index.html">Docker Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../machine_learning/index.html">Machine Learning Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kali_linux/index.html">Kali Linux Atlas</a></li>
@@ -173,6 +181,111 @@
             
   <div class="section" id="ceph">
 <span id="install-ceph-manual"></span><h1>手工安装Ceph<a class="headerlink" href="#ceph" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>本文实践是在 <a class="reference internal" href="ceph_docker_in_studio.html#ceph-docker-in-studio"><span class="std std-ref">Stuido环境Docker容器运行Ceph</span></a> 环境实现Ceph集群，提供基础存储给 <a class="reference internal" href="../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 作为模拟集群部署。共有5个模拟节点，本文部署过程将先使用3个节点构建，后续再通过添加节点和删除节点方式来模拟故障切换:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">172.18</span><span class="o">.</span><span class="mf">0.11</span> <span class="n">ceph</span><span class="o">-</span><span class="mi">1</span>
+<span class="mf">172.18</span><span class="o">.</span><span class="mf">0.12</span> <span class="n">ceph</span><span class="o">-</span><span class="mi">2</span>
+<span class="mf">172.18</span><span class="o">.</span><span class="mf">0.13</span> <span class="n">ceph</span><span class="o">-</span><span class="mi">3</span>
+<span class="mf">172.18</span><span class="o">.</span><span class="mf">0.14</span> <span class="n">ceph</span><span class="o">-</span><span class="mi">4</span>
+<span class="mf">172.18</span><span class="o">.</span><span class="mf">0.15</span> <span class="n">ceph</span><span class="o">-</span><span class="mi">5</span>
+</pre></div>
+</div>
+<p class="last">Docker容器中运行的OS是Ubuntu 18.04，所以本实践笔记和官方安装手册有所不同，侧重于在Docker容器的Ubuntu环境中部署，今后有机会可能还会在CentOS系统中部署。本文略去了CentOS的安装介绍。</p>
+</div>
+<div class="section" id="id1">
+<h2>获取Ceph软件<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>最简易获取软件的方法还是采用发行版的软件仓库，例如 <code class="docutils literal notranslate"><span class="pre">apt</span></code> (Debian/Ubuntu) 或 <code class="docutils literal notranslate"><span class="pre">yum</span></code> (RHEL/CentOS) ，如果使用非 <code class="docutils literal notranslate"><span class="pre">deb</span></code> 或 <code class="docutils literal notranslate"><span class="pre">rpm</span></code> 的软件包管理，则可以使用官方提供的tar包安装二进制可执行程序。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">在多台服务器上同时操作，可以使用 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/shell/utilities/pssh.md">pssh</a></p>
+</div>
+<ul>
+<li><p class="first">在主机上安装 <code class="docutils literal notranslate"><span class="pre">release.asc</span></code> 密钥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="o">-</span><span class="n">q</span> <span class="o">-</span><span class="n">O</span><span class="o">-</span> <span class="s1">&#39;https://download.ceph.com/keys/release.asc&#39;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="o">-</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>需要先安装 <code class="docutils literal notranslate"><span class="pre">gnupg</span></code> 才能导入上述 <code class="docutils literal notranslate"><span class="pre">release.asc</span></code> 密钥:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">gnupg</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li>添加软件仓库信息</li>
+</ul>
+<p>首先需要找到Ceph包对应的 <a class="reference external" href="http://docs.ceph.com/docs/master/releases/#">CEPH RELEAS</a> ，则对应仓库信息为</p>
+<p>Debian/Ubuntu:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">ceph</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">debian</span><span class="o">-</span><span class="p">{</span><span class="n">release</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如，我使用最新的Ceph版本 <code class="docutils literal notranslate"><span class="pre">nautilus</span></code> 则组合成 <code class="docutils literal notranslate"><span class="pre">https://download.ceph.com/debian-nautilus</span></code></p>
+<p>然后按照操作系统的版本codename添加配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">add</span><span class="o">-</span><span class="n">repository</span> <span class="s1">&#39;deb https://download.ceph.com/debian-</span><span class="si">{release_name}</span><span class="s1">/ </span><span class="si">{codename}</span><span class="s1"> main&#39;</span>
+</pre></div>
+</div>
+<p>例如我使用的 Ubuntu 18.04 系列，可以从配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/lsb-release</span></code> 配置中找到对应的版本名字是 <code class="docutils literal notranslate"><span class="pre">bionic</span></code> 。所以执行如下命令添加仓库信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">add</span><span class="o">-</span><span class="n">repository</span> <span class="s1">&#39;deb https://download.ceph.com/debian-nautilus/ bionic main&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>在Docker的Ubuntu镜像中没有包含 <code class="docutils literal notranslate"><span class="pre">apt-add-repository</span></code> 工具，参考 <a class="reference external" href="https://stackoverflow.com/questions/32486779/apt-add-repository-command-not-found-error-in-dockerfile">apt-add-repository: command not found error in Dockerfile</a> 使用以下命令安装:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">software</span><span class="o">-</span><span class="n">properties</span><span class="o">-</span><span class="n">common</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>安装环境准备<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>Ceph安装依赖系统软件包如下:</p>
+<ul class="simple">
+<li>libaio1</li>
+<li>libsnappy1</li>
+<li>libcurl3</li>
+<li>curl</li>
+<li>libgoogle-perftools4</li>
+<li>google-perftools</li>
+<li>libleveldb1</li>
+</ul>
+</div>
+<div class="section" id="ceph-deploy">
+<h2>安装ceph-deploy(可选)<a class="headerlink" href="#ceph-deploy" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">安装 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ceph</span><span class="o">-</span><span class="n">deploy</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 是一个设置或拆除Ceph集群的工具，用于开发、测试和验证项目概念。 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 可以使用一条命令方便地在多个服务器上安装ceph软件。</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>安装Ceph存储集群<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">为了能够完整了解Ceph集群部署过程，本文档没有使用 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 工具，而是采用手工通过APT包管理工具进行部署。</p>
+</div>
+<ul>
+<li><p class="first">安装Ceph软件包（在每个节点上执行）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ceph</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mds</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://docs.ceph.com/docs/master/install/">Ceph document - Installation (Manual)</a></li>
+</ul>
+</div>
 </div>
 
 
@@ -202,7 +315,7 @@
   Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
-    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/source/donate.rst">为我买一杯咖啡</a></p>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/source/donate.rst">请我喝一杯咖啡</a></p>
      
 
 
