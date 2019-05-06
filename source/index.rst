@@ -55,6 +55,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    openstack/index
    docker/index
    kubernetes/index
+   mysql/index
    big_data/index
    machine_learning/index
    kali_linux/index

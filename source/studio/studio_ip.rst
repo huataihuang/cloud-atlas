@@ -17,3 +17,10 @@ Studio测试环境IP分配
    :language: bash
    :linenos:
    :caption:
+
+VMware虚拟环境IP分配
+=======================
+
+补充笔记本 :ref:`vmware_in_studio` 环境使用的IP::
+
+   192.168.161.10  devstack

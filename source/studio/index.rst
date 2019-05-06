@@ -21,8 +21,10 @@ Studio Atlas
    ubuntu_desktop.rst
    share_mouse_keyboard.rst
    kvm_docker_in_studio.rst
+   vmware_in_studio.rst
    btrfs_in_studio.rst
    studio_ip.rst
+   dnsmasq_in_studio.rst
    openconnect_vpn.rst
    ubuntu_hibernate.rst
 
