@@ -59,8 +59,11 @@ Debian/Ubuntu::
 
       sudo apt install software-properties-common
 
+安装Ceph软件
+==============
+
 安装环境准备
-=================
+-----------------
 
 Ceph安装依赖系统软件包如下:
 
@@ -73,7 +76,7 @@ Ceph安装依赖系统软件包如下:
 - libleveldb1
 
 安装ceph-deploy(可选)
-=======================
+-------------------------
 
 - 安装 ``ceph-deploy`` 工具::
 
@@ -84,7 +87,7 @@ Ceph安装依赖系统软件包如下:
    ``ceph-deploy`` 是一个设置或拆除Ceph集群的工具，用于开发、测试和验证项目概念。 ``ceph-deploy`` 可以使用一条命令方便地在多个服务器上安装ceph软件。
 
 安装Ceph存储集群
-==================
+-------------------------
 
 .. note::
 
@@ -93,6 +96,33 @@ Ceph安装依赖系统软件包如下:
 - 安装Ceph软件包（在每个节点上执行）::
 
    sudo apt-get update && sudo apt-get install ceph ceph-mds
+
+.. note::
+
+   对于通过对象存储模式使用Ceph，需要安装 ``Ceph Object Gateway`` ，我将另外撰写文章；对于虚拟化平台使用Ceph块设备则需要通过 ``librdb`` 驱动，我也会另外撰写实践文章。
+
+部署Ceph集群
+=================
+
+Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量相同（或更多）的OSD运行在集群中。 monitor部署是整个集群设置的重要步骤，例如存储池的副本数量，每个OSD的placement groups数量，心跳间隔，是否需要认证等等。这些配置都有默认值，但是在部署生产集群需要仔细调整这些配置。
+
+本案例采用3个节点：
+
+.. figure:: ../_static/ceph/simple_3nodes_cluster.png
+
+   Figure 1: 三节点Ceph集群
+
+监控引导(monitor bootstrapping)
+-----------------------------------
+
+引导启动一个监控器（理论上就是Ceph存储集群）需要一系列要求：
+
+- 唯一标识符(Unique Identifier)：对于每个集群 ``fsid`` 是唯一标识符，这个命名有些类似 ``filesystem id`` ，这是因为早期Ceph存储集群主要用于Ceph文件系统。Ceph现在支持原生接口，块设备以及对象存储网关接口等等，所以 ``fsid`` 现在显得有些取名不当。
+- 集群名称(Cluster Name)：Ceph集群有一个集群名字，命名集群名时候需要使用没有空格的字符串。默认Ceph集群名是 ``ceph`` ，显然，对于不同用途的多个Ceph集群，起一个明确易懂的集群名非常重要。例如在 `multisite configuration <http://docs.ceph.com/docs/master/radosgw/multisite/#multisite>`_ 配置模式，可以通过集群名 ``us-west`` 和 ``us-east`` 来表示集群的地理位置，相应的指定Ceph集群配置可以使用集群名，例如 ``ceph.conf`` , ``us-west.conf`` ， ``us-east.conf`` 等等。命令行可以指定集群，例如 ``ceph --cluster {cluster-name}`` 。
+- 监控名(Monitor Name)：在集群中的每个监控实例都有一个唯一命名。根据经验，Ceph监控名通常是主机名（建议每个host主机只配置一个Ceph监控，并且不要混合部署Ceph OSD服务和Ceph Monitor）。通过 ``hostname -s`` 可以获得主机的简短主机名。
+- 监控映射(Monitor Map)：启动引导初始化监控需要生成一个监控映射。这个监控映射需要 ``fsid`` 以及集群名字，以及至少一个主机名和它的IP地址。（注：这表示每个监控对应一个集群，即对应一个 ``fsid`` ）
+- 监控密钥环(Monitor Keyring)：监控进程相互之间通过一个安全密钥加密通讯。你必须生成一个用于监控安全的密钥环并在引导启动时提供给初始化监控。
+- 管理员密钥环(Administrator Keyring)：为了使用ceph命令行工具，需要具备一个 ``client.admin`` 用户，所以必须生成一个管理员用户和密钥环，并且必须将 ``client.admin`` 用户添加到监控密钥环。
 
 参考
 ======
