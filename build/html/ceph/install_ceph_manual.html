@@ -92,10 +92,17 @@
 <li class="toctree-l2"><a class="reference internal" href="ceph_docker_in_studio.html">Stuido环境Docker容器运行Ceph</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">手工安装Ceph</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">获取Ceph软件</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">安装环境准备</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ceph-deploy">安装ceph-deploy(可选)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">安装Ceph存储集群</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">安装Ceph软件</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">安装环境准备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ceph-deploy">安装ceph-deploy(可选)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">安装Ceph存储集群</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">部署Ceph集群</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#monitor-bootstrapping">监控引导(monitor bootstrapping)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -240,7 +247,9 @@
 </div>
 </div>
 <div class="section" id="id2">
-<h2>安装环境准备<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>安装Ceph软件<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h3>安装环境准备<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>Ceph安装依赖系统软件包如下:</p>
 <ul class="simple">
 <li>libaio1</li>
@@ -253,7 +262,7 @@
 </ul>
 </div>
 <div class="section" id="ceph-deploy">
-<h2>安装ceph-deploy(可选)<a class="headerlink" href="#ceph-deploy" title="Permalink to this headline">¶</a></h2>
+<h3>安装ceph-deploy(可选)<a class="headerlink" href="#ceph-deploy" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p class="first">安装 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 工具:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ceph</span><span class="o">-</span><span class="n">deploy</span>
@@ -266,8 +275,8 @@
 <p class="last"><code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 是一个设置或拆除Ceph集群的工具，用于开发、测试和验证项目概念。 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 可以使用一条命令方便地在多个服务器上安装ceph软件。</p>
 </div>
 </div>
-<div class="section" id="id3">
-<h2>安装Ceph存储集群<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h3>安装Ceph存储集群<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">为了能够完整了解Ceph集群部署过程，本文档没有使用 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 工具，而是采用手工通过APT包管理工具进行部署。</p>
@@ -279,9 +288,35 @@
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">对于通过对象存储模式使用Ceph，需要安装 <code class="docutils literal notranslate"><span class="pre">Ceph</span> <span class="pre">Object</span> <span class="pre">Gateway</span></code> ，我将另外撰写文章；对于虚拟化平台使用Ceph块设备则需要通过 <code class="docutils literal notranslate"><span class="pre">librdb</span></code> 驱动，我也会另外撰写实践文章。</p>
 </div>
-<div class="section" id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>部署Ceph集群<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量相同（或更多）的OSD运行在集群中。 monitor部署是整个集群设置的重要步骤，例如存储池的副本数量，每个OSD的placement groups数量，心跳间隔，是否需要认证等等。这些配置都有默认值，但是在部署生产集群需要仔细调整这些配置。</p>
+<p>本案例采用3个节点：</p>
+<div class="figure" id="id7">
+<img alt="../_images/simple_3nodes_cluster.png" src="../_images/simple_3nodes_cluster.png" />
+<p class="caption"><span class="caption-text">Figure 1: 三节点Ceph集群</span></p>
+</div>
+<div class="section" id="monitor-bootstrapping">
+<h3>监控引导(monitor bootstrapping)<a class="headerlink" href="#monitor-bootstrapping" title="Permalink to this headline">¶</a></h3>
+<p>引导启动一个监控器（理论上就是Ceph存储集群）需要一系列要求：</p>
+<ul class="simple">
+<li>唯一标识符(Unique Identifier)：对于每个集群 <code class="docutils literal notranslate"><span class="pre">fsid</span></code> 是唯一标识符，这个命名有些类似 <code class="docutils literal notranslate"><span class="pre">filesystem</span> <span class="pre">id</span></code> ，这是因为早期Ceph存储集群主要用于Ceph文件系统。Ceph现在支持原生接口，块设备以及对象存储网关接口等等，所以 <code class="docutils literal notranslate"><span class="pre">fsid</span></code> 现在显得有些取名不当。</li>
+<li>集群名称(Cluster Name)：Ceph集群有一个集群名字，命名集群名时候需要使用没有空格的字符串。默认Ceph集群名是 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> ，显然，对于不同用途的多个Ceph集群，起一个明确易懂的集群名非常重要。例如在 <a class="reference external" href="http://docs.ceph.com/docs/master/radosgw/multisite/#multisite">multisite configuration</a> 配置模式，可以通过集群名 <code class="docutils literal notranslate"><span class="pre">us-west</span></code> 和 <code class="docutils literal notranslate"><span class="pre">us-east</span></code> 来表示集群的地理位置，相应的指定Ceph集群配置可以使用集群名，例如 <code class="docutils literal notranslate"><span class="pre">ceph.conf</span></code> , <code class="docutils literal notranslate"><span class="pre">us-west.conf</span></code> ， <code class="docutils literal notranslate"><span class="pre">us-east.conf</span></code> 等等。命令行可以指定集群，例如 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">--cluster</span> <span class="pre">{cluster-name}</span></code> 。</li>
+<li>监控名(Monitor Name)：在集群中的每个监控实例都有一个唯一命名。根据经验，Ceph监控名通常是主机名（建议每个host主机只配置一个Ceph监控，并且不要混合部署Ceph OSD服务和Ceph Monitor）。通过 <code class="docutils literal notranslate"><span class="pre">hostname</span> <span class="pre">-s</span></code> 可以获得主机的简短主机名。</li>
+<li>监控映射(Monitor Map)：启动引导初始化监控需要生成一个监控映射。这个监控映射需要 <code class="docutils literal notranslate"><span class="pre">fsid</span></code> 以及集群名字，以及至少一个主机名和它的IP地址。（注：这表示每个监控对应一个集群，即对应一个 <code class="docutils literal notranslate"><span class="pre">fsid</span></code> ）</li>
+<li>监控密钥环(Monitor Keyring)：监控进程相互之间通过一个安全密钥加密通讯。你必须生成一个用于监控安全的密钥环并在引导启动时提供给初始化监控。</li>
+<li>管理员密钥环(Administrator Keyring)：为了使用ceph命令行工具，需要具备一个 <code class="docutils literal notranslate"><span class="pre">client.admin</span></code> 用户，所以必须生成一个管理员用户和密钥环，并且必须将 <code class="docutils literal notranslate"><span class="pre">client.admin</span></code> 用户添加到监控密钥环。</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://docs.ceph.com/docs/master/install/">Ceph document - Installation (Manual)</a></li>
 </ul>
@@ -315,7 +350,7 @@
   Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
-    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/source/donate.rst">请我喝一杯咖啡</a></p>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
      
 
 
