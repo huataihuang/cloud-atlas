@@ -8,6 +8,7 @@ DevOps Atlas
    :maxdepth: 1
 
    think-devops.rst
+   continuous_integration.rst
    gitops.rst
    jenkins.rst
    jenkins_x.rst

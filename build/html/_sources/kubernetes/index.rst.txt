@@ -9,23 +9,28 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
 .. toctree::
    :maxdepth: 1
 
-   introduce-k8s.rst
+   kubernetes_overview.rst
+   install_run_minikube.rst
+   install_setup_kubectl.rst
+   kubernetes_objects.rst
    kubernetes_architecture.rst
-   install-run-minikube.rst
-   install-setup-kubectl.rst
+   kubernetes_dashboard.rst
    explore_google_gke.rst
    operator.rst
    operator_startup.rst
    helm.rst
    draft.rst
+   kustomize.rst
    kuberbuilder.rst
-   install-etcd.rst
+   install_etcd.rst
+   recovery_etcd.rst
    istio.rst
    service_mesh.rst
-   k8s-ha-master.rst
+   k8s_ha_master.rst
    admission_controllers.rst
    mutating_admission_webhook.rst
    validating_admission_webhook.rst
+   debug_node_notready.rst
 
 
 .. only::  subproject and html

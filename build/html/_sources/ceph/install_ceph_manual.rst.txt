@@ -124,6 +124,128 @@ Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量�
 - 监控密钥环(Monitor Keyring)：监控进程相互之间通过一个安全密钥加密通讯。你必须生成一个用于监控安全的密钥环并在引导启动时提供给初始化监控。
 - 管理员密钥环(Administrator Keyring)：为了使用ceph命令行工具，需要具备一个 ``client.admin`` 用户，所以必须生成一个管理员用户和密钥环，并且必须将 ``client.admin`` 用户添加到监控密钥环。
 
+建议创建Ceph配置文件包含 ``fsid`` 以及 mon 的 ``initial`` 成员和 mom 的 ``host`` 设置。
+
+部署monitor
+~~~~~~~~~~~~~~~~
+
+- 登陆到monitor节点，这里案例我安装在 ``ceph-1`` 节点，所以 ``ssh ceph-1``
+
+- 由于我们已经安装了ceph软件，所以安装程序已经创建了 ``/etc/ceph`` 目录
+
+.. note::
+
+   如果集群清理，例如 ``ceph-deploy purgedata {node-name}`` 或者 ``ceph-deploy purge {node-name}`` 则部署工具可能会移除 ``/etc/ceph`` 目录。
+
+- 生成一个unique ID，用于fsid::
+
+   cat /proc/sys/kernel/random/uuid
+
+.. note::
+
+   也可以使用 ``uuidgen`` 工具来生成uuid，这个工具包含在 ``util-linux`` 软件包中（ 参考 `uuidgen - create a new UUID value <http://manpages.ubuntu.com/manpages/xenial/man1/uuidgen.1.html>`_ ）
+
+- 创建Ceph配置文件 - 默认 Ceph 使用 ``ceph.conf`` 配置，这个配置文件的命名规则是 ``{cluster_name}.conf`` ，由于我准备设置集群名字 ``xstore`` ，所以这个配置文件命名为 ``xstore.conf`` ::
+
+   sudo vim /etc/ceph/xstore.conf
+
+配置案例::
+
+   [global]
+   fsid = 3f927fac-27d8-492e-965c-24e59e373430
+   mon initial members = ceph-1
+   mon host = 172.18.0.11
+   public network = 172.18.0.0/16
+   auth cluster required = cephx
+   auth service required = cephx
+   auth client required = cephx
+   osd journal size = 1024
+   osd pool default size = 3
+   osd pool default min size = 2
+   osd pool default pg num = 333
+   osd pool default pgp num = 333
+   osd crush chooseleaf type = 1
+
+解析:
+
+===============================================  ===========================
+配置                                             说明
+===============================================  ===========================
+fsid = {UUID}                                    设置Ceph的唯一ID
+mon initial members = {hostname}[,{hostname}]    初始化monitor(s)主机名
+mon host = {ip-address}[,{ip-address}]           初始化monitor(s)的主机IP
+osd pool default size = {n}                      设置存储池中对象的副本数量
+osd pool default min size = {n}                  设置降级状态下对象的副本数
+===============================================  ===========================
+
+- 创建集群的keyring和monitor密钥::
+
+   ceph-authtool --create-keyring /tmp/ceph.mon.keyring --gen-key -n mon. --cap mon 'allow *'
+
+- 生成管理员keyring，生成 ``client.admin`` 用户并添加用户到keyring::
+
+   sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
+
+- 生成 ``bootstrap-osd`` keyring，生成 ``client.bootstrap-osd`` 用户并添加用户到keyring::
+
+   sudo ceph-authtool --create-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring --gen-key -n client.bootstrap-osd --cap mon 'profile bootstrap-osd'
+
+- 将生成的key添加到 ``ceph.mon.keyring`` ::
+
+   sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/ceph.client.admin.keyring
+   sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring
+
+- 使用主机名、主机IP和FSID生成一个监控映射，保存为 ``/tmp/monmap`` ::
+
+   monmaptool --create --add {hostname} {ip-address} --fsid {uuid} /tmp/monmap
+
+实际操作为::
+
+   monmaptool --create --add ceph-1 172.18.0.11 --fsid 3f927fac-27d8-492e-965c-24e59e373430 /tmp/monmap
+
+.. note::
+
+   这个步骤非常重要
+
+- 创建一个监控主机到默认数据目录::
+
+   sudo mkdir /var/lib/ceph/mon/{cluster-name}-{hostname}
+
+实际操作为-我的实验环境存储集群名设置为 ``xstore`` ::
+
+   sudo -u ceph mkdir /var/lib/ceph/mon/xstore-ceph-1
+
+- 发布监控服务的monitor的map和keyring::
+
+   sudo -u ceph ceph-mon [--cluster {cluster-name}] --mkfs -i {hostname} --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+
+实际操作::
+
+   sudo -u ceph ceph-mon --cluster xstore --mkfs -i ceph-1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+
+- 启动monitor(s)
+
+通常发行版使用 ``systemctl`` 启动监控::
+
+   sudo systemctl start ceph-mon@ceph-1
+
+不过，由于是在Docker容器中运行，没有systemd系统，所以采用如下命令启动::
+
+   sudo /etc/init.d/ceph -c /etc/ceph/xstore.conf start mon
+
+.. note::
+
+   这里需要传递 ``--cluster xstore`` 以便指定启动哪个集群监控。默认会启动脚本会自动解析 ``hostname`` ，如果要强制指定，则床底 ``--hostname ceph-1`` 参数。
+
+   遇到一个报错日志，显示无法读取 /tmp/ceph.mon.keyring ::
+
+      2019-05-09 01:42:02.161 7fb052b1f340 -1 mon.ceph-1@-1(???) e0 unable to find a keyring file on /tmp/ceph.mon.keyring: (13) Permission denied
+
+   原因是这个文件是我个人用户账号只读写::
+
+      sudo chown ceph:ceph /tmp/monmap
+
+
 参考
 ======
 
