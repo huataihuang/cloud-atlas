@@ -1,4 +1,4 @@
-.. _k8s-ha-master:
+.. _k8s_ha_master:
 
 =============================
 高可用Kubernetes Master

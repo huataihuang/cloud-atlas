@@ -1,7 +1,7 @@
-.. _introduce_k8s:
+.. _kubernetes_overview:
 
 =======================
-Kubernetes架构简介
+Kubernetes概览
 =======================
 
 什么是Kubernetes

@@ -15,7 +15,7 @@ KVM虚拟化技术有一个非常有用的杀手锏技术 :ref:`kvm_live_migrati
    virt-clone --connect qemu:///system --original devstack --name devstack-2 --file /var/lib/libvirt/images/devstack-2.qcow2
    sudo virt-sysprep -d devstack-2 --hostname devstack-2 --root-password password:CHANGE_ME
 
-这两个支持 Nested Virtualization 的虚拟机 ``devstack-1`` 和 ``devstack-2`` 不仅是我们测试嵌套虚拟化的虚拟机，也是测试 热迁移技术的虚拟机。我们这里使用 :ref:`kubernetes` 中 :ref:`install-run-minikube` 来作为"嵌在内部"的虚拟机。
+这两个支持 Nested Virtualization 的虚拟机 ``devstack-1`` 和 ``devstack-2`` 不仅是我们测试嵌套虚拟化的虚拟机，也是测试 热迁移技术的虚拟机。我们这里使用 :ref:`kubernetes` 中 :ref:`install_run_minikube` 来作为"嵌在内部"的虚拟机。
 
 .. note::
 

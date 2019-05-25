@@ -1,4 +1,4 @@
-.. _install-setup-kubectl:
+.. _install_setup_kubectl:
 
 ==================
 安装和设置kubectl
@@ -43,9 +43,21 @@ Ubuntu, Debian 安装kubectl
 macOS 安装kubectl
 -------------------
 
-- 安装最新版本::
+- 下载最新版本::
 
-   curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/darwin/amd64/kubectl && chmod +x kubectl && sudo cp kubectl /usr/local/bin/ && rm kubectl
+   curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl
+
+- 设置可执行权限::
+
+   chmod +x ./kubectl
+
+- 移动到路径中::
+
+   sudo mv ./kubectl /usr/local/bin/kubectl
+
+- 检查程序::
+
+   kubectl version
 
 配置kubectl
 ==============
@@ -60,7 +72,7 @@ macOS 安装kubectl
    clusters:
    - cluster:
        certificate-authority: /home/huatai/.minikube/ca.crt
-       server: https://192.168.39.85:8443
+       server: https://192.168.161.140:8443
      name: minikube
    contexts:
    - context:
@@ -82,8 +94,8 @@ macOS 安装kubectl
 
 显示输出::
 
-   Kubernetes master is running at https://192.168.39.85:8443
-   KubeDNS is running at https://192.168.39.85:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+   Kubernetes master is running at https://192.168.161.140:8443
+   KubeDNS is running at https://192.168.161.140:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
    To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 

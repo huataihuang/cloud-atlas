@@ -1,4 +1,4 @@
-.. _install-run-minikube:
+.. _install_run_minikube:
 
 ======================
 安装和运行minikube
@@ -34,12 +34,12 @@ Ubuntu平台安装MiniKube
 macOS平台安装MiniKube
 --------------------------
 
-macOS安装hyperkit
-~~~~~~~~~~~~~~~~~~~~
-
 .. note::
 
-   macOS的minikube可以选择virtualbox作为后端，也可以选择 `xhyve <https://github.com/moby/hyperkit>`_ 作为后端。目前我倾向于使用xhyve，以便使用macOS内置的kvm虚拟化。
+   macOS的minikube可以选择virtualbox作为后端，也可以选择 `xhyve <https://github.com/moby/hyperkit>`_ 作为后端，另外也可以使用VMware Fusion。我分别尝试过使用 xhyve 和 vmware 作为Hypervisor。
+
+macOS安装hyperkit
+~~~~~~~~~~~~~~~~~~~~
 
 - 为了在块设备后端支持qcow，需要安装OCaml `OPAM <https://opam.ocaml.org/>`_ 开发环境带有qcow模块::
 
@@ -92,6 +92,11 @@ macOS安装hyperkit
       opam reinstall cstruct-lwt
 
    但是参考
+
+macOS安装VMware Fusion
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+请参考 :ref:`vmware_in_studio` ，我安装了VMware Fusion。使用 ``vmrun list`` 可以检查当前运行的VMware虚拟机。
 
 macOS安装minikube
 ~~~~~~~~~~~~~~~~~~~
@@ -179,12 +184,42 @@ macOS平台使用hyperkit后端
 
    minikube start
 
+macOS平台使用vmware后端
+----------------------------------
+
+- 安装VMware统一驱动：首先从 https://github.com/machine-drivers/docker-machine-driver-vmware/releases 下载驱动文件 ``docker-machine-driver-vmware_darwin_amd64`` ，并将其保存到 ``$PATH`` 目录，例如，我保存到 ``~/bin`` （这个目录位于环境变量设置文件 ``~/.bash_profile`` ，并且命名为 ``docker-machine-driver-vmware`` 。
+
+也可以直接使用安装命令如下::
+
+   export LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/machine-drivers/docker-machine-driver-vmware/releases/latest | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/') \
+   && curl -L -o docker-machine-driver-vmware https://github.com/machine-drivers/docker-machine-driver-vmware/releases/download/$LATEST_VERSION/docker-machine-driver-vmware_darwin_amd64 \
+   && chmod +x docker-machine-driver-vmware \
+   && mv docker-machine-driver-vmware /usr/local/bin/
+
+- (建议跳过这步，用下一步采用先配置再启动)使用Vmware后端启动::
+
+   minikube start --vm-driver vmware
+
+.. note::
+
+   根据minikube提示，今后将使用 `统一的vmware驱动 <https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#vmware-unified-driver>`_ 来替代vmwarefusion，所以这里设置 ``--vm-driver vmware``
+
+- 使用VMware fussion作为默认后端::
+
+   minikube config set vm-driver vmware
+
+- 启动minikube::
+
+   minikube start
+
 使用minikube
 ===============
 
 - ssh登陆minikub方法::
 
    minikube ssh
+
+minikube虚拟机默认root没有密码，从虚拟机终端可以登陆。
 
 停止和再次启动minikube
 ==========================
@@ -194,3 +229,25 @@ macOS平台使用hyperkit后端
 .. note::
 
    每次启动minikube，系统都会尝试重新连接Google仓库更新镜像，所以需要先搭好梯子
+
+.. _minikube_dashboard:
+
+启动dashboard
+=================
+
+:ref:`kubernetes_dashboard` 可以帮助我们管理集群，在minikube上也可以启用方便管理。
+
+- 执行以下命令启用dashboard::
+
+   minikube dashboard
+
+.. note::
+
+   出现报错::
+
+      ...
+      Verifying proxy health ...
+      http://127.0.0.1:49983/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/ is not responding properly: Temporary Error: unexpected response code: 503
+      ...
+
+    这个报错是因为没有启动代理导致的，所以在执行 ``minikube dashboard`` 之前，需要先执行 ``kubectl proxy`` 指令，这样就能打开正确的监控页面。

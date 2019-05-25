@@ -205,3 +205,7 @@ Docker容器
    启动5个 ``cepn-N`` 虚拟机，在每个虚拟机内部都具备了 ``/dev/xvdc`` 设备::
 
       brw-rw---- 1 root disk 253, 0 Apr 11 13:56 /dev/xvdc
+
+- 容器内安装必要工具::
+
+   sudo apt install dnsutils gnupg
