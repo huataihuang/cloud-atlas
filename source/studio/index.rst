@@ -19,6 +19,7 @@ Studio Atlas
    ubuntu_on_mbp.rst
    ubuntu_server.rst
    ubuntu_desktop.rst
+   reduce_laptop_overheat.rst
    share_mouse_keyboard.rst
    kvm_docker_in_studio.rst
    vmware_in_studio.rst

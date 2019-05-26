@@ -40,6 +40,10 @@ Linux支持 ``Suspend`` (挂起到内存) 和 ``Hibernate`` (挂起到磁盘) �
 
    启动内核text模式以便查看系统启动信息，关闭IPv6是避免无线网卡驱动触发不支持IPv6特性Segment Fault
 
+.. note::
+
+   参考`archLinux的Mac Power management段落 <https://wiki.archlinux.org/index.php/mac#Power_management>`_ 也可以设置 ``acpi_osi=!Darwin`` 内核参数告知firmware系统是不兼容macOS，这样在Mac尚会禁用Thunderbolt adapter，可以极大降低电力消耗。我在 :ref:`reduce_laptop_overheat` 中采用了禁用thunderbolt 模块的方法。
+
 - 执行更新grub::
 
    sudo update-grub
