@@ -15,7 +15,7 @@ minikube是通常通过虚拟机来运行的，也就是说必须在主机上运
 
    之所以minikube通常需要在虚拟机中运行，是因为minikub是基于Docker容器运行的，Docker容器需要在Linux上运行，所以会先要求运行一个Linux虚拟机，然后才能在虚拟机中运行Docker以满足运行minikube的条件。
 
-如果你是在Linux主机上，由于Linux可以直接运行Docker，所以甚至可以不需要Hypervisor的虚拟机，直接运行在Linux物理主机的Docker中。此时使用参数 ``--vm-driver=none`` 来运行。
+   如果你是在Linux主机上，由于Linux可以直接运行Docker，所以甚至可以不需要Hypervisor的虚拟机，直接运行在Linux物理主机的Docker中。此时使用参数 ``--vm-driver=none`` 来运行。
 
 安装Minikube
 ===================
@@ -23,11 +23,7 @@ minikube是通常通过虚拟机来运行的，也就是说必须在主机上运
 Ubuntu平台安装MiniKube
 ----------------------------
 
-.. note::
-
-   这里实践采用Linux环境，已经安装部署了KVM。具体方法请参考 :ref:`studio`
-
-安装命令::
+- 安装命令::
 
    curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
@@ -145,6 +141,14 @@ Linux平台使用kvm后端
    minikube config set vm-driver kvm2
    minikube start
 
+.. note::
+
+   ``minikube config set PROPERTY_NAME`` 会在用户目录下的 ``~/.minikube/config/config.json`` 添加对应的驱动配置，例如::
+
+      {
+          "vm-driver": "kvm2"
+      }
+
 此时会下载minikube的KVM镜像，然后运行这个虚拟机，通过 ``virsh list`` 可以看到系统新启动了一个KVM虚拟机::
 
    Id    Name                           State
@@ -160,6 +164,40 @@ Linux平台使用kvm后端
       kubectl is now configured to use "minikube"
 
    这表明当前Linux主机的kubectl已经被配置直接使用刚才所安装运行的minikube
+
+直接物理主机运行minikube
+-----------------------------
+
+前面我们在 ``xcloud`` :ref:`studio` 环境中通过KVM虚拟化运行了minikube主机，现在，我们实现一个通过物理主机直接运行minikube，以节约运行损耗。
+
+.. note::
+
+   对于已经采用了kvm作为后端的主机，如果使用 ``minikube config set vm-driver none`` 切换后端，会注意到再次运行 ``minikube start`` 会提示由于已经存在一个 "minikube" 虚拟机，所以会忽略参数 ``--vm-driver=none`` 而依然使用KVM来运行minikube。
+
+   要创建第二个minikube并且使用裸机来运行，则第二个minikube需要使用明确的命令来启动另一个命名的minikube::
+
+      minikube start -p <name> --vm-driver=none
+
+- 设置裸物理主机运行minikube::
+
+   minikube config set vm-driver none
+
+- 启动minikube，命名为 ``xminikube`` 表示运行在 ``xcloud`` 物理主机上::
+
+   sudo minikube start -p xminikube --vm-driver=none 
+
+也可以删除掉之前通过KVM运行的minikube（例如，现在我采用只在裸物理主机运行minikube），则就不需要单独指定新的minikube实例，使用如下命令::
+
+   minikube config set vm-driver kvm2  #切换到KVM后端
+   minikube delete   #这里删除了之前我创建的KVM后端的minikube
+   minikube config set vm-driver none  #切换到直接使用裸物理机
+   sudo minikube start  #现在创建的minikube采用物理主机引擎
+
+.. note::
+
+   在物理主机上运行minikube会直接安装 ``/usr/bin/kubelet`` ，所以需要root权限，这里就需要使用 ``sudo`` 来执行命令。
+
+   通过 `none` 驱动运行minikube会降低系统安全和可靠性，详细说明请参考 https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
 
 macOS平台使用hyperkit后端
 -----------------------------
