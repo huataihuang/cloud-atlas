@@ -24,6 +24,7 @@ Studio Atlas
    kvm_docker_in_studio.rst
    vmware_in_studio.rst
    btrfs_in_studio.rst
+   kubenetes_in_studio.rst
    studio_ip.rst
    ntp_in_studio.rst
    dnsmasq_in_studio.rst

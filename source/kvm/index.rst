@@ -9,6 +9,7 @@ KVM Atlas
 
    hypervisor.rst
    kvm_architecture.rst
+   libvirt.rst
    hardware_virtualization.rst
    intel_vmcs.rst
    create_vm_in_studio.rst

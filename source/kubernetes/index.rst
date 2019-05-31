@@ -31,6 +31,9 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    mutating_admission_webhook.rst
    validating_admission_webhook.rst
    debug_node_notready.rst
+   prometheus.rst
+   netdata.rst
+   kubevirt.rst
 
 
 .. only::  subproject and html

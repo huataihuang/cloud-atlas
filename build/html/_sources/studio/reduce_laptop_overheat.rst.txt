@@ -94,8 +94,28 @@ Intel Linux Thermal Daemon
 
    实际发现系统已经安装了 ``thermald`` ，而且已经运行。如果是TLP之前安装的，则说明对系统降低温度最有效的是TLP。
 
+温度监控
+===========
+
+对于服务器硬件的监控，底层是采用 `lm-sensors <https://github.com/lm-sensors/lm-sensors>`_ 提供了对硬件监控驱动的支持。
+
+- 安装::
+
+   sudo apt install lm-sensors
+
+- 安装以后，需要执行一次 ``sensors-detect`` 指令，以便能够检测出系统的硬件::
+
+   sudo sensors-detect
+
+注意：最后会提示是否将检测到驱动添加到 ``/etc/modules`` ，如果你满意自动检测结果，则回答 ``yes`` ，否则需要手工编辑配置文件。
+
+.. note::
+
+   我计划参考 `Lm-sensors or other way to monitor cpu, board temperatures <https://forums.balena.io/t/lm-sensors-or-other-way-to-monitor-cpu-board-temperatures/4173>`_ 提供的线索，采用 `Netdata <https://github.com/netdata/netdata>`_ 或者 `telegraf <https://github.com/influxdata/telegraf>`_ 实现完整的硬件监控解决方案。
+
 参考
 ==========
 
 - `Most Effective Ways To Reduce Laptop Overheating In Linux <https://itsfoss.com/reduce-overheating-laptops-linux/>`_
 - `Prevent Your Laptop From Overheating With Thermald And Intel P-State <http://www.webupd8.org/2014/04/prevent-your-laptop-from-overheating.html>`_
+- `SensorInstallHowto <https://help.ubuntu.com/community/SensorInstallHowto>`_

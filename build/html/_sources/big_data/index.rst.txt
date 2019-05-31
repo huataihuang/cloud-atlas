@@ -9,6 +9,10 @@ Big Data Atlas
 
    introduce_big_data.rst
    log_analysis.rst
+   tsdb.rst
+   influxdb.rst
+   telegraf.rst
+   balena.rst
    jupyter.rst
 
 .. only::  subproject and html
