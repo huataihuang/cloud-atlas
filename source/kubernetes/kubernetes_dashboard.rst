@@ -11,3 +11,5 @@ Kubernetes仪表盘
 .. note::
 
    注意在minikube中默认没有启用dashboard，启动和访问dashboard的方法请参考 :ref:`minikube_dashboard` 。
+
+   但是，dashboard实际上是在kubectl所在客户端运行的一个仪表盘服务，原理是通过本地kubectl去连接Kubernetes集群，获取集群数据并实时在本地的dashboard上

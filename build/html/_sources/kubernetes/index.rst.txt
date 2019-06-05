@@ -12,6 +12,7 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    kubernetes_overview.rst
    install_run_minikube.rst
    install_setup_kubectl.rst
+   remote_minikube.rst
    kubernetes_objects.rst
    kubernetes_architecture.rst
    kubernetes_dashboard.rst

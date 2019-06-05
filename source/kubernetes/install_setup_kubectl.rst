@@ -9,6 +9,25 @@
 安装kubectl
 ===============
 
+在Linux平台使用curl安装kubectl执行程序
+----------------------------------------
+
+- 通过命令行可以直接下载Linux版本执行程序::
+
+   curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+
+- 设置kubectl程序可执行::
+
+   chmod +x ./kubectl
+
+- 将执行程序移动到系统路径目录::
+
+   sudo mv ./kubectl /usr/local/bin/kubectl
+
+- 验证::
+
+   kubectl version
+
 CentOS, RHEL, Fedora 安装kubectl
 ----------------------------------
 
@@ -40,6 +59,10 @@ Ubuntu, Debian 安装kubectl
    sudo apt-get update
    sudo apt-get install -y kubectl
 
+.. note::
+
+   由于我在 :ref:`studio` 环境采用了Ubuntu，并且 :ref:`kubenetes_in_studio` 为了能够提高运行效率，我 :ref:`install_run_minikube` 直接在物理主机运行 minikube 来学习和验证kubernetes技术。目前，采用通过官方软件仓库来安装kubectl。
+
 macOS 安装kubectl
 -------------------
 
@@ -66,20 +89,28 @@ macOS 安装kubectl
 
 如果要访问多个kubernetes集群，请参考 `Shareing Cluster Access document <https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/>`_ 。我将在后续撰写相关实践文档。
 
-默认的kubectl配置文件位于 ``~/.kube/config`` ，由于我们之前已经成功部署了一个minikube集群，所以现在这个文件看上去如下:::
+默认的kubectl配置文件位于 ``~/.kube/config`` ::
 
    apiVersion: v1
    clusters:
    - cluster:
        certificate-authority: /home/huatai/.minikube/ca.crt
-       server: https://192.168.161.140:8443
+       server: https://192.168.101.81:8443
      name: minikube
+   - cluster:
+       certificate-authority: /home/huatai/.minikube/ca.crt
+       server: https://192.168.101.81:8443
+     name: xminikube
    contexts:
    - context:
        cluster: minikube
        user: minikube
      name: minikube
-   current-context: minikube
+   - context:
+       cluster: xminikube
+       user: xminikube
+     name: xminikube
+   current-context: xminikube
    kind: Config
    preferences: {}
    users:
@@ -87,6 +118,14 @@ macOS 安装kubectl
      user:
        client-certificate: /home/huatai/.minikube/client.crt
        client-key: /home/huatai/.minikube/client.key
+   - name: xminikube
+     user:
+       client-certificate: /home/huatai/.minikube/client.crt
+       client-key: /home/huatai/.minikube/client.key
+
+.. note::
+
+   根据你采用的minikube安装方式不同，这里默认 ``~/.kube/config`` 指向的服务器IP地址会不同。我这里采用了裸物理机运行minikube并且指定集群名字是 ``xminikube`` 。这里服务器的IP地址是从 :ref:`openconnect_vpn` 环境获得的tun接口的IP，因为我的测试环境启动了VPN连接到外部网络。
 
 - 现在我们来验证集群状态::
 
@@ -94,8 +133,8 @@ macOS 安装kubectl
 
 显示输出::
 
-   Kubernetes master is running at https://192.168.161.140:8443
-   KubeDNS is running at https://192.168.161.140:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+   Kubernetes master is running at https://192.168.101.81:8443
+   KubeDNS is running at https://192.168.101.81:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
    To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
