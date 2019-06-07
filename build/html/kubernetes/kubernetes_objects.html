@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="copyright" title="Copyright" href="../copyright.html" />
-    <link rel="next" title="Kubernetes架构" href="kubernetes_architecture.html" />
+    <link rel="next" title="输出Kubernetes应用服务" href="kubernetes_expose_service.html" />
     <link rel="prev" title="远程访问minikube" href="remote_minikube.html" /> 
 
   
@@ -103,6 +103,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id5">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes_expose_service.html">输出Kubernetes应用服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kubernetes_architecture.html">Kubernetes架构</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kubernetes_dashboard.html">Kubernetes仪表盘</a></li>
 <li class="toctree-l2"><a class="reference internal" href="explore_google_gke.html">探索Google Kubernetes Engine</a></li>
@@ -225,6 +226,103 @@
 <div class="section" id="id3">
 <h3>描述Kubernetes对象<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>在创建Kubernetes对象时，需要提供 obejct spec 描述对象的终态。这样，在使用 Kuernetes API创建对象（或者通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> ），API请求中必须包含使用JSON作为请求内容的信息。 通常是通过一个 <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> 文件提供信息给 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> ，而 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 会将yaml数据转换成JSON然后发出API请求。</p>
+<p>kubernetes官方提供的案例 <code class="docutils literal notranslate"><span class="pre">deployment.yaml</span></code> 可以帮助我们理解如何完成一个部署:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">application</span><span class="o">/</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">record</span>
+</pre></div>
+</div>
+<p>执行后提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">deployment</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">application/deployment.yaml</span></code></li>
+</ul>
+<div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">apps/v1</span> <span class="c1"># for versions before 1.9.0 use apps/v1beta2</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nginx-deployment</span>
+<span class="nt">spec</span><span class="p">:</span>
+  <span class="nt">selector</span><span class="p">:</span>
+    <span class="nt">matchLabels</span><span class="p">:</span>
+      <span class="nt">app</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nginx</span>
+  <span class="nt">replicas</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span> <span class="c1"># tells deployment to run 2 pods matching the template</span>
+  <span class="nt">template</span><span class="p">:</span>
+    <span class="nt">metadata</span><span class="p">:</span>
+      <span class="nt">labels</span><span class="p">:</span>
+        <span class="nt">app</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nginx</span>
+    <span class="nt">spec</span><span class="p">:</span>
+      <span class="nt">containers</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nginx</span>
+        <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nginx:1.7.9</span>
+        <span class="nt">ports</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="nt">containerPort</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">80</span>
+</pre></div>
+</td></tr></table></div>
+<ul class="simple">
+<li>解析 <code class="docutils literal notranslate"><span class="pre">application/deployment.yaml</span></code>
+- <code class="docutils literal notranslate"><span class="pre">apiVersion:</span> <span class="pre">apps/v1</span></code> 设置创建对象时使用的Kubernetes API版本
+- <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">Deployment</span></code> 创建对象的类型
+- <code class="docutils literal notranslate"><span class="pre">metadata</span></code> - 元数据唯一标识对象，包括 <code class="docutils literal notranslate"><span class="pre">name</span></code> 字符串， <code class="docutils literal notranslate"><span class="pre">UID</span></code> 和可选的 <code class="docutils literal notranslate"><span class="pre">namespace</span></code>
+- 需要提供对象 <code class="docutils literal notranslate"><span class="pre">spec</span></code> 字段，对象 <code class="docutils literal notranslate"><span class="pre">spec</span></code> 的清晰格式对于每个Kubernetes对象都是不同的，并且包含嵌套字段来描述对象。</li>
+</ul>
+<p>执行上述创建后，kubernetes将根据模版（标签是 <code class="docutils literal notranslate"><span class="pre">app:</span> <span class="pre">nginx</span></code> ）采用指定镜像 <code class="docutils literal notranslate"><span class="pre">image:</span> <span class="pre">nginx:1.7.9</span></code> 创建容器，采用端口 <code class="docutils literal notranslate"><span class="pre">containerPort:</span> <span class="pre">80</span></code> 共创建2个pod（ <code class="docutils literal notranslate"><span class="pre">replicas:</span> <span class="pre">2</span></code> ），并且这个容器的模版具备了标签 <code class="docutils literal notranslate"><span class="pre">app:</span> <span class="pre">nginx</span></code> 。</p>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/deployment_pod_example.png"><img alt="../_images/deployment_pod_example.png" src="../_images/deployment_pod_example.png" style="width: 584.0px; height: 382.0px;" /></a>
+</div>
+<ul>
+<li><p class="first">检查部署:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">deployments</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>               <span class="n">READY</span>   <span class="n">UP</span><span class="o">-</span><span class="n">TO</span><span class="o">-</span><span class="n">DATE</span>   <span class="n">AVAILABLE</span>   <span class="n">AGE</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span>   <span class="mi">2</span><span class="o">/</span><span class="mi">2</span>     <span class="mi">2</span>            <span class="mi">2</span>           <span class="mi">91</span><span class="n">m</span>
+</pre></div>
+</div>
+<p>可以进一步检查这个部署:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">deployments</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span> <span class="o">-</span><span class="n">o</span> <span class="n">yaml</span>
+
+<span class="n">kubectl</span> <span class="n">describe</span> <span class="n">deployments</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span>
+</pre></div>
+</div>
+<p>则可以看到详细的部署信息</p>
+<ul>
+<li><p class="first">检查pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                               <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span><span class="o">-</span><span class="mi">6</span><span class="n">dd86d77d</span><span class="o">-</span><span class="n">lmg92</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">90</span><span class="n">m</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span><span class="o">-</span><span class="mi">6</span><span class="n">dd86d77d</span><span class="o">-</span><span class="n">zr9c4</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">90</span><span class="n">m</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">虽然已经启动了pod，但是此时还没有把部署输出到外部网络，所以此时还无法访问nginx的页面。请参考 <a class="reference internal" href="kubernetes_expose_service.html#kubernetes-expose-service"><span class="std std-ref">输出Kubernetes应用服务</span></a> 完成服务输出。</p>
+</div>
 </div>
 </div>
 <div class="section" id="id4">
@@ -246,7 +344,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="kubernetes_architecture.html" class="btn btn-neutral float-right" title="Kubernetes架构" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="kubernetes_expose_service.html" class="btn btn-neutral float-right" title="输出Kubernetes应用服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="remote_minikube.html" class="btn btn-neutral" title="远程访问minikube" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -18,6 +18,7 @@ Studio Atlas
    base_os.rst
    ubuntu_on_mbp.rst
    ubuntu_server.rst
+   upgrade_ubuntu_from_18.10_to_19.04.rst
    ubuntu_desktop.rst
    reduce_laptop_overheat.rst
    share_mouse_keyboard.rst
