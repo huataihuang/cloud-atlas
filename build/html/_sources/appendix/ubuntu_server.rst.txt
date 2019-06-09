@@ -71,6 +71,43 @@ Ubuntu 18.04.2 以及更新的版本在Desktop版本提供了一个保持更新�
    sudo apt-get update
    sudo apt-get --reinstall install bcmwl-kernel-source
 
+设置合上笔记本屏幕
+====================
+
+在Server字符终端方式使用中，实际上都是通过远程登陆服务器方式维护，所以通常会合上笔记本屏幕。和桌面版 :ref:`ubuntu_hibernate` 不同，我期望合上笔记本时候不要休眠继续工作，所以配置 ``/etc/systemd/logind.conf`` 添加::
+
+   HandleLidSwitch=ignore
+   HandleLidSwitchDocked=ignore
+
+然后重启 ``logind`` 服务::
+
+   systemctl restart systemd-logind
+
+这样就可以把笔记本合上屏幕，放置在办公桌角落静静使用。
+
+不过上述设置并没有关闭笔记本屏幕（显示器），所以会导致消耗电能并且发热，解决的方法是执行如下命令::
+
+   sudo sh -c 'vbetool dpms off; read ans; vbetool dpms on'
+
+这样关闭屏幕之后，只要按回车键能够恢复屏幕使用。
+
+字符终端关闭fbvesa
+=====================
+
+我感觉在服务器上启用fbvesa似乎价值不大，并且我反复遇到屏幕花屏问题，似乎是由于混合了设置hibernate休眠以及设置了kms相关。但是由于太多的配置修改，难以恢复到最初的纯净状态。后续再次安装模拟系统，我将完全采用最简单的字符终端模式，关闭fbvesa。
+
+请参考 `How to disable the Linux frame buffer if it's causing problems <https://support.digium.com/s/article/How-to-disable-the-Linux-frame-buffer-if-it-s-causing-problems>`_ 关闭fbvesa驱动。
+
+可能的方法（待验证）是修改 ``/etc/grub.d/10_linux`` ，将以下行::
+
+   linux   ${rel_dirname}/${basename} root=${linux_root_device_thisversion} ro ${args}
+
+修改成::
+
+   linux   ${rel_dirname}/${basename} root=${linux_root_device_thisversion} ro ${args} nomodeset
+
+然后重启系统。不过，当前我测试始终没有成功，似乎是因为安装了nvidia专用驱动导致。我尝试 `I do not know how to Add this thing video=vesafb:off vga=normal' <https://ubuntuforums.org/showthread.php?t=2357949>`_ 也没有成功。
+
 安装Xfce4桌面(可选)
 ========================
 

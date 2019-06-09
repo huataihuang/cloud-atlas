@@ -85,7 +85,7 @@ Linux支持 ``Suspend`` (挂起到内存) 和 ``Hibernate`` (挂起到磁盘) �
 
 .. warning::
 
-   不要使用BTRFS尝试使用swap文件，这会导致文件系统损坏！！！
+   不要在BTRFS上尝试使用swap文件，这会导致文件系统损坏！！！
 
 swap分区或swap文件需要和RAM一样大小，或者至少 2/5的内存大小，参考 `About swap partition/file size <https://wiki.archlinux.org/index.php/Power_management/Suspend_and_hibernate#About_swap_partition.2Ffile_size>`_ 可以看到 ``/sys/power/image_size`` 设置了suspend-to-disk创建映像的大小，默认这个值设置的是内存的2/5大小。如果将数值 ``0`` 写入到 ``/sys/power/image_size`` 则系统会尽可能缩小suspend镜像。通过调整 ``/sys/power/image_size`` 你可以使得suspend镜像尽可能小，或者增加这个值以便hibernate处理速度更快。
 

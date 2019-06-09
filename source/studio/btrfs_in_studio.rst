@@ -154,6 +154,15 @@ Btrfs部署
 
    参考 `Btrfs Zstd Compression Benchmarks On Linux 4.14 <https://www.phoronix.com/scan.php?page=article&item=btrfs-zstd-compress&num=4>`_ 采用 ``Zstd`` 压缩方式挂载btrfs，可以获得性能和压缩率的较好平衡。
 
+libvirt和docker数据迁移到btrfs
+====================================
+
+.. note::
+
+   根据Docker官方文档，在使用btrfs卷的时候，有自己独特的卷管理方式，是可以直接操作btrfs子卷的。我最初是采用本段落的手工迁移卷方法，但是从官方文档来看，似乎用官方方法直接让docker来管理后端卷比较好。所以本段落仅供参考，后续将修改成采用官方btrfs方法来管理docker卷。
+
+   另外，我准备部署 :ref:`ceph_docker_in_studio` ，并且将Ceph存储输出给libvirt使用，作为底层存储，这样就不再使用本段落的btrfs子卷对应libvirt存储，本段落仅供参考。
+
 - 创建btrfs的子卷，分别对应libvirt和docker
 
 创建子卷::
@@ -173,9 +182,6 @@ Btrfs部署
 .. note::
 
    需要将子卷挂载到 ``/lib/virt`` 下的子目录 ``libvirt`` 和 ``docker`` ，不过，先需要做数据迁移
-
-libvirt和docker数据迁移到btrfs
-====================================
 
 .. note::
 

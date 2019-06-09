@@ -152,10 +152,12 @@ NVIDIA持久化服务
       curl -s -L https://nvidia.github.io/nvidia-docker/ubuntu18.04/nvidia-docker.list | \
         sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 
+.. _install_docker-ce:
+
 安装 ``docker-ce``
 ~~~~~~~~~~~~~~~~~~~
 
-在安装 ``nvidia-docker2`` 工具追钱，需要确保系统使用的是最新官方Docker版本，即 ``docker-ce`` ，参考 `official documentation <https://docs.docker.com/install/linux/docker-ce/ubuntu/>`_ 先卸载发行版docker，然后安装官方docker::
+在安装 ``nvidia-docker2`` 工具之前，需要确保系统使用的是最新官方Docker版本，即 ``docker-ce`` ，参考 `official documentation <https://docs.docker.com/install/linux/docker-ce/ubuntu/>`_ 先卸载发行版docker，然后安装官方docker::
 
    # remove all previous Docker versions
    sudo apt remove docker docker-engine docker.io

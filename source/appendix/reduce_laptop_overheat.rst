@@ -1,10 +1,10 @@
 .. _reduce_laptop_overheat:
 
 =====================
-降低笔记本垫高过热
+降低笔记本温度过热
 =====================
 
-在使用MacBook Pro笔记本电脑 :ref:`introduce_my_studio` ，会发现笔记本电脑的风扇持续高速运行，并且笔记本非常热。
+在使用MacBook Pro笔记本电脑 :ref:`introduce_my_studio` ，如果发现笔记本电脑的风扇持续高速运行，并且笔记本非常热，可以采用本文介绍的一些技术来降低系统温度。
 
 .. note::
 

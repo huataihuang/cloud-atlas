@@ -60,6 +60,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    machine_learning/index
    kali_linux/index
    kernel/index
+   appendix/index
    copyright
    aboutme
    donate
