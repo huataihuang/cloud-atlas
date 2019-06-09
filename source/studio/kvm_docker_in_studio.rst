@@ -44,9 +44,27 @@ Docker
 
 在MacBook Pro的Host环境，不仅要运行嵌套虚拟户的KVM实现OpenStack的集群模拟，而且要运行Docker来支撑一些底层服务。这是因为，底层服务需要更高的性能，而且要具备隔离以实现模拟分布式集群。
 
-- 安装Docker::
+- 安装Docker CE::
 
-   sudo apt install docker.io
+   # remove all previous Docker versions
+   sudo apt remove docker docker-engine docker.io
+
+   # add Docker official GPG key
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+   # Add Docker repository (for Ubuntu Bionic) 注意：nvidia-docker会检查docker-ce版本，强制要求 ubuntu-bionic
+   # 所以这里必须采用 bionic 仓库安装 docker-ce
+   sudo add-apt-repository \
+       "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+
+   sudo apt update
+   sudo apt install docker-ce
+
+.. note::
+
+   由于 :ref:`nvidia-docker` 依赖Docker官方最新版本的docker，所以这里不使用发行版提供的docker，而是 :ref:`install_docker-ce` 。如果没有这个需求，也可以安装Ubuntu发行版的 ``docker.io`` ::
+
+      sudo apt install docker.io
 
 - (可选) 将 ``自己`` 的账号添加到 ``docker`` 用户组::
 
@@ -55,11 +73,6 @@ Docker
 .. note::
 
    用户加入docker组还是需要重启主机操作系统才能直接使用 ``docker ps``
-
-下一步
-==========
-
-由于KVM和Docker会占用大量的磁盘空间来存储镜像，所以我准备采用 Btrfs 存储来实现（ :ref:`btrfs_in_studio` ）。
 
 参考
 ===========

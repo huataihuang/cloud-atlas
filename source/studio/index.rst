@@ -17,20 +17,13 @@ Studio Atlas
    intel_core_i7_4850hq.rst
    base_os.rst
    ubuntu_on_mbp.rst
-   ubuntu_server.rst
-   upgrade_ubuntu_from_18.10_to_19.04.rst
-   ubuntu_desktop.rst
-   reduce_laptop_overheat.rst
-   share_mouse_keyboard.rst
    kvm_docker_in_studio.rst
-   vmware_in_studio.rst
    btrfs_in_studio.rst
    kubenetes_in_studio.rst
    studio_ip.rst
    ntp_in_studio.rst
    dnsmasq_in_studio.rst
    openconnect_vpn.rst
-   ubuntu_hibernate.rst
 
 .. only::  subproject and html
 
