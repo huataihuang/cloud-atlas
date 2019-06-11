@@ -24,6 +24,7 @@ Docker Atlas
    docker_bind_mount.rst
    docker_tmpfs_mount.rst
    docker_storage_driver.rst
+   docker_btrfs_storage_driver.rst
    docker_run_add_host_device.rst
    start_containers_automatically.rst
    docker_timezone.rst

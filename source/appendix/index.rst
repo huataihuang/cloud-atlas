@@ -20,6 +20,7 @@
    ubuntu_server.rst
    upgrade_ubuntu_from_18.10_to_19.04.rst
    ubuntu_desktop.rst
+   using_btrfs_in_studio.rst
    reduce_laptop_overheat.rst
    vmware_in_studio.rst
    share_mouse_keyboard.rst
