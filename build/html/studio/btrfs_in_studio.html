@@ -92,10 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id1">初始安装操作系统的磁盘</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id2">Btrfs工具</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">磁盘分区</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">Btrfs部署</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#libvirtdockerbtrfs">libvirt和docker数据迁移到btrfs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">其他btrfs卷(可选)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="kubenetes_in_studio.html">Studio中的kubernetes</a></li>
@@ -264,7 +261,12 @@
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">增加分区3作为btfs，用于直接存储KVM和Docker的镜像</p>
+<p class="last">增加分区3作为btfs，用于存储Docker的镜像</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>最初我采用的 <a class="reference internal" href="../appendix/using_btrfs_in_studio.html#using-btrfs-in-studio"><span class="std std-ref">在Stuido中使用btrfs文件系统</span></a> 方式，将一个btrfs文件系统划分多个子卷分别提供给KVM，Docker和home存储。</p>
+<p class="last">但是参考Docker官方文档，解决方案有所不同，需要将完整磁盘设备分给Docker管理，所以实际操作请参考 <a class="reference internal" href="../docker/docker_btrfs_storage_driver.html#docker-btrfs-storage-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 进行。</p>
 </div>
 <p>增加分区4:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkpart</span> <span class="n">primary</span> <span class="mi">251</span><span class="n">GB</span> <span class="mi">100</span><span class="o">%</span>
@@ -272,10 +274,10 @@
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">增加分区4作为LVM卷，将再划分逻辑卷，用于构建Ceph存储的底层块设备，采用BlueStore存储引擎。</p>
+<p class="last">增加分区4作为LVM卷，将再划分逻辑卷，用于构建Ceph存储的底层块设备()，采用BlueStore存储引擎。</p>
 </div>
 <p>对新增分区命名:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="mi">3</span> <span class="n">data</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="mi">3</span> <span class="n">docker</span>
 <span class="n">name</span> <span class="mi">4</span> <span class="n">ceph</span>
 </pre></div>
 </div>
@@ -290,224 +292,14 @@
 <span class="n">Number</span>  <span class="n">Start</span>   <span class="n">End</span>     <span class="n">Size</span>    <span class="n">File</span> <span class="n">system</span>  <span class="n">Name</span>     <span class="n">Flags</span>
  <span class="mi">1</span>      <span class="mi">1049</span><span class="n">kB</span>  <span class="mi">192</span><span class="n">MB</span>   <span class="mi">191</span><span class="n">MB</span>   <span class="n">fat32</span>                 <span class="n">boot</span><span class="p">,</span> <span class="n">esp</span>
  <span class="mi">2</span>      <span class="mi">192</span><span class="n">MB</span>   <span class="mf">51.4</span><span class="n">GB</span>  <span class="mf">51.2</span><span class="n">GB</span>  <span class="n">ext4</span>
- <span class="mi">3</span>      <span class="mf">51.4</span><span class="n">GB</span>  <span class="mi">251</span><span class="n">GB</span>   <span class="mi">200</span><span class="n">GB</span>                <span class="n">data</span>
+ <span class="mi">3</span>      <span class="mf">51.4</span><span class="n">GB</span>  <span class="mi">251</span><span class="n">GB</span>   <span class="mi">200</span><span class="n">GB</span>                <span class="n">docker</span>
  <span class="mi">4</span>      <span class="mi">251</span><span class="n">GB</span>   <span class="mi">500</span><span class="n">GB</span>   <span class="mi">249</span><span class="n">GB</span>                <span class="n">ceph</span>
 </pre></div>
 </div>
+<p>在初步完成了磁盘分区规划之后，我们现在有了可以用于btrfs的磁盘分区 <code class="docutils literal notranslate"><span class="pre">/dev/sda3</span></code> ，请参考 <a class="reference internal" href="../docker/docker_btrfs_storage_driver.html#configure-docker-btrfs-storage-driver"><span class="std std-ref">配置Docker使用btrfs存储驱动</span></a> 完成Docker的btrfs存储引擎设置。如果你需要多种用途混合使用btrfs，也可以参考 <a class="reference internal" href="../appendix/using_btrfs_in_studio.html#using-btrfs-in-studio"><span class="std std-ref">在Stuido中使用btrfs文件系统</span></a> 。</p>
 </div>
 <div class="section" id="id4">
-<h2>Btrfs部署<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<ul>
-<li><p class="first">采用的btrfs非常简单的卷，单盘。首先创建根卷 <code class="docutils literal notranslate"><span class="pre">data</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">btrfs</span> <span class="o">-</span><span class="n">L</span> <span class="n">data</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>显示输出:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span><span class="o">-</span><span class="n">progs</span> <span class="n">v4</span><span class="o">.</span><span class="mf">16.1</span>
-<span class="n">See</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">btrfs</span><span class="o">.</span><span class="n">wiki</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">org</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
-
-<span class="n">Detected</span> <span class="n">a</span> <span class="n">SSD</span><span class="p">,</span> <span class="n">turning</span> <span class="n">off</span> <span class="n">metadata</span> <span class="n">duplication</span><span class="o">.</span>  <span class="n">Mkfs</span> <span class="k">with</span> <span class="o">-</span><span class="n">m</span> <span class="n">dup</span> <span class="k">if</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">force</span> <span class="n">metadata</span> <span class="n">duplication</span><span class="o">.</span>
-<span class="n">Performing</span> <span class="n">full</span> <span class="n">device</span> <span class="n">TRIM</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span> <span class="p">(</span><span class="mf">185.90</span><span class="n">GiB</span><span class="p">)</span> <span class="o">...</span>
-<span class="n">Label</span><span class="p">:</span>              <span class="n">data</span>
-<span class="n">UUID</span><span class="p">:</span>               <span class="mi">3</span><span class="n">a2963fe</span><span class="o">-</span><span class="n">eb55</span><span class="o">-</span><span class="mi">4160</span><span class="o">-</span><span class="mi">8</span><span class="n">f46</span><span class="o">-</span><span class="n">a1b3ead72f17</span>
-<span class="n">Node</span> <span class="n">size</span><span class="p">:</span>          <span class="mi">16384</span>
-<span class="n">Sector</span> <span class="n">size</span><span class="p">:</span>        <span class="mi">4096</span>
-<span class="n">Filesystem</span> <span class="n">size</span><span class="p">:</span>    <span class="mf">185.90</span><span class="n">GiB</span>
-<span class="n">Block</span> <span class="n">group</span> <span class="n">profiles</span><span class="p">:</span>
-  <span class="n">Data</span><span class="p">:</span>             <span class="n">single</span>            <span class="mf">8.00</span><span class="n">MiB</span>
-  <span class="n">Metadata</span><span class="p">:</span>         <span class="n">single</span>            <span class="mf">8.00</span><span class="n">MiB</span>
-  <span class="n">System</span><span class="p">:</span>           <span class="n">single</span>            <span class="mf">4.00</span><span class="n">MiB</span>
-<span class="n">SSD</span> <span class="n">detected</span><span class="p">:</span>       <span class="n">yes</span>
-<span class="n">Incompat</span> <span class="n">features</span><span class="p">:</span>  <span class="n">extref</span><span class="p">,</span> <span class="n">skinny</span><span class="o">-</span><span class="n">metadata</span>
-<span class="n">Number</span> <span class="n">of</span> <span class="n">devices</span><span class="p">:</span>  <span class="mi">1</span>
-<span class="n">Devices</span><span class="p">:</span>
-   <span class="n">ID</span>        <span class="n">SIZE</span>  <span class="n">PATH</span>
-    <span class="mi">1</span>   <span class="mf">185.90</span><span class="n">GiB</span>  <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li>挂载btrfs的分区</li>
-</ul>
-<p>设置 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">data</span>    <span class="n">btrfs</span>    <span class="n">defaults</span><span class="p">,</span><span class="n">compress</span><span class="o">=</span><span class="n">zstd</span>   <span class="mi">0</span>    <span class="mi">1</span>
-</pre></div>
-</div>
-<p>然后挂载磁盘分区:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">data</span>
-<span class="n">mount</span> <span class="o">/</span><span class="n">data</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">参考 <a class="reference external" href="https://www.phoronix.com/scan.php?page=article&amp;item=btrfs-zstd-compress&amp;num=4">Btrfs Zstd Compression Benchmarks On Linux 4.14</a> 采用 <code class="docutils literal notranslate"><span class="pre">Zstd</span></code> 压缩方式挂载btrfs，可以获得性能和压缩率的较好平衡。</p>
-</div>
-</div>
-<div class="section" id="libvirtdockerbtrfs">
-<h2>libvirt和docker数据迁移到btrfs<a class="headerlink" href="#libvirtdockerbtrfs" title="Permalink to this headline">¶</a></h2>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>根据Docker官方文档，在使用btrfs卷的时候，有自己独特的卷管理方式，是可以直接操作btrfs子卷的。我最初是采用本段落的手工迁移卷方法，但是从官方文档来看，似乎用官方方法直接让docker来管理后端卷比较好。所以本段落仅供参考，后续将修改成采用官方btrfs方法来管理docker卷。</p>
-<p class="last">另外，我准备部署 <a class="reference internal" href="../ceph/ceph_docker_in_studio.html#ceph-docker-in-studio"><span class="std std-ref">Stuido环境Docker容器运行Ceph</span></a> ，并且将Ceph存储输出给libvirt使用，作为底层存储，这样就不再使用本段落的btrfs子卷对应libvirt存储，本段落仅供参考。</p>
-</div>
-<ul class="simple">
-<li>创建btrfs的子卷，分别对应libvirt和docker</li>
-</ul>
-<p>创建子卷:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span> <span class="n">subvolume</span> <span class="n">create</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">libvirt</span>
-<span class="n">btrfs</span> <span class="n">subvolume</span> <span class="n">create</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">docker</span>
-</pre></div>
-</div>
-<p>检查子卷:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span> <span class="n">subvolume</span> <span class="nb">list</span> <span class="o">/</span><span class="n">data</span>
-</pre></div>
-</div>
-<p>显示输出:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ID</span> <span class="mi">257</span> <span class="n">gen</span> <span class="mi">8</span> <span class="n">top</span> <span class="n">level</span> <span class="mi">5</span> <span class="n">path</span> <span class="n">libvirt</span>
-<span class="n">ID</span> <span class="mi">258</span> <span class="n">gen</span> <span class="mi">9</span> <span class="n">top</span> <span class="n">level</span> <span class="mi">5</span> <span class="n">path</span> <span class="n">docker</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">需要将子卷挂载到 <code class="docutils literal notranslate"><span class="pre">/lib/virt</span></code> 下的子目录 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 和 <code class="docutils literal notranslate"><span class="pre">docker</span></code> ，不过，先需要做数据迁移</p>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">详细可以参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/deploy_kvm_using_btrfs.md">使用Btrfs部署KVM</a></p>
-</div>
-<ul>
-<li><p class="first">停止libvirt和docker服务:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">libvirtd</span>
-<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlogd</span><span class="o">.</span><span class="n">socket</span>
-<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlogd</span><span class="o">-</span><span class="n">admin</span><span class="o">.</span><span class="n">socket</span>
-<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlockd</span><span class="o">-</span><span class="n">admin</span><span class="o">.</span><span class="n">socket</span>
-<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlockd</span><span class="o">.</span><span class="n">socket</span>
-<span class="c1"># 停止libvirt使用的dnsmasq</span>
-<span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">dnsmasq</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">v</span> <span class="n">grep</span> <span class="o">|</span> <span class="n">awk</span> <span class="s1">&#39;{print $2}&#39;</span> <span class="o">|</span>  <span class="n">sudo</span> <span class="n">xargs</span> <span class="n">kill</span>
-
-<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>在做数据迁移之前，务必确保没有任何进程在访问 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 目录，以便能够移动和重新挂载这两个目录:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsof</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">libvirt</span>
-<span class="n">lsof</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">docker</span>
-</pre></div>
-</div>
-</div>
-<ul>
-<li><p class="first">将源目录重命名:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span>
-<span class="n">mv</span> <span class="n">libvirt</span> <span class="n">libvirt</span><span class="o">.</span><span class="n">bak</span>
-<span class="n">mv</span> <span class="n">docker</span> <span class="n">docker</span><span class="o">.</span><span class="n">bak</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>注意检查目录的属主和权限:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">drwx</span><span class="o">--</span><span class="n">x</span><span class="o">--</span><span class="n">x</span> <span class="mi">15</span> <span class="n">root</span>          <span class="n">root</span>          <span class="mf">4.0</span><span class="n">K</span> <span class="mi">2</span><span class="n">月</span>  <span class="mi">26</span> <span class="mi">22</span><span class="p">:</span><span class="mi">59</span> <span class="n">docker</span><span class="o">.</span><span class="n">bak</span>
-<span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span>  <span class="mi">7</span> <span class="n">root</span>          <span class="n">root</span>          <span class="mf">4.0</span><span class="n">K</span> <span class="mi">2</span><span class="n">月</span>  <span class="mi">26</span> <span class="mi">17</span><span class="p">:</span><span class="mi">38</span> <span class="n">libvirt</span><span class="o">.</span><span class="n">bak</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li>将btrfs子卷挂载到目标目录</li>
-</ul>
-<p>创建目录:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
-<span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
-<span class="n">chmod</span> <span class="mi">711</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
-<span class="n">chmod</span> <span class="mi">755</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
-</pre></div>
-</div>
-<p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code>  添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>   <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">libvirt</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>   <span class="mi">0</span>   <span class="mi">1</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>    <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">docker</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>    <span class="mi">0</span>   <span class="mi">1</span>
-</pre></div>
-</div>
-<p>挂载目录:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
-<span class="n">mount</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>按照上述操作步骤，完整的 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 内容如下:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">data</span>    <span class="n">btrfs</span>    <span class="n">defaults</span><span class="p">,</span><span class="n">compress</span><span class="o">=</span><span class="n">zstd</span>   <span class="mi">0</span>    <span class="mi">1</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>   <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">libvirt</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>   <span class="mi">0</span>   <span class="mi">1</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>    <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">docker</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>    <span class="mi">0</span>   <span class="mi">1</span>
-</pre></div>
-</div>
-<p>最后挂载的 btrfs 文件系统内容如下:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">186</span><span class="n">G</span>   <span class="mi">17</span><span class="n">M</span>  <span class="mi">185</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">data</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">186</span><span class="n">G</span>   <span class="mi">17</span><span class="n">M</span>  <span class="mi">185</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">186</span><span class="n">G</span>   <span class="mi">17</span><span class="n">M</span>  <span class="mi">185</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
-</pre></div>
-</div>
-<p class="last">可以看到btrfs的最大特点：存储容量是一个完整的”池”被各个存储卷共享，所以不需要担心某些卷预分配过多或锅烧。</p>
-</div>
-<ul>
-<li><p class="first">数据迁移:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rsync</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">.</span><span class="n">bak</span><span class="o">/</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span>
-<span class="n">rsync</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">bak</span><span class="o">/</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">恢复服务:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">libvirtd</span>
-<span class="n">systemctl</span> <span class="n">start</span> <span class="n">docker</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">可以重启一次操作系统验证是否都工作正常。</p>
-</div>
-</div>
-<div class="section" id="id5">
-<h2>其他btrfs卷(可选)<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
-<p>由于常用的用户目录会存储较多的文件，也可以考虑迁移到btrfs中。这里把 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录迁移</p>
-<ul>
-<li><p class="first">创建btrfs子卷home:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span> <span class="n">subvolume</span> <span class="n">create</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">home</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>检查创建的子卷:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span> <span class="n">subvolume</span> <span class="nb">list</span> <span class="o">/</span><span class="n">data</span>
-</pre></div>
-</div>
-<ul>
-<li><p class="first">将 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录重命名成 <code class="docutils literal notranslate"><span class="pre">/home.bak</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">home</span> <span class="o">/</span><span class="n">home</span><span class="o">.</span><span class="n">bak</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">home</span>              <span class="n">btrfs</span>  <span class="n">subvol</span><span class="o">=</span><span class="n">home</span><span class="p">,</span><span class="n">defaults</span><span class="p">,</span><span class="n">noatime</span>      <span class="mi">0</span>   <span class="mi">1</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">创建并挂载 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">home</span>
-<span class="n">mount</span> <span class="o">/</span><span class="n">home</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">同步和恢复 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录内容:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rsync</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">home</span><span class="o">.</span><span class="n">bak</span><span class="o">/</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span>
-</pre></div>
-</div>
-</li>
-</ul>
-</div>
-<div class="section" id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://wiki.archlinux.org/index.php/Parted">ArchLinux Parted</a></li>
 <li><a class="reference external" href="https://wiki.archlinux.org/index.php/btrfs">ArchLinux Btrfs</a></li>
