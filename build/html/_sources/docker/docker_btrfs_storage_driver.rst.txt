@@ -24,7 +24,7 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
 - 为了能够在操作系统级别管理BTRFS文件系统，需要 ``btrfs`` 命令，则需要安装 ``btrfsprogs`` 软件包(SLES)或 ``btrfs-tools`` 软件包(Ubuntu)。
 
-配置Docker使用btrfs存储驱动
+磁盘块设备(分区)准备
 ==============================
 
 在 :ref:`btrfs_in_studio` 准备工作中，我们已经通过 ``parted`` 工具划分了 ``/dev/sda3`` 给btrfs使用::
