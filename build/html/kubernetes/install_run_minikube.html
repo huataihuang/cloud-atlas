@@ -91,21 +91,28 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Kubernetes Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kubernetes_overview.html">Kubernetes概览</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">安装和运行minikube</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">minikube</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">安装Minikube</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">裸机直接部署minikube(快速起步)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">minikube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">安装Minikube</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ubuntuminikube">Ubuntu平台安装MiniKube</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#macosminikube">macOS平台安装MiniKube</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">启动minikube</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">启动minikube</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#linuxkvm">Linux平台使用kvm后端</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">直接物理主机运行minikube</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">macOS平台使用hyperkit后端</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">直接物理主机运行minikube</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">macOS平台使用hyperkit后端</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#macosvmware">macOS平台使用vmware后端</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id8">使用minikube</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id9">停止和再次启动minikube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">使用minikube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">停止和再次启动minikube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">minikube异常排查</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#minikube-cri">minikube CRI安装排查</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#minikube-btrfs">minikube btrfs安装排查</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kubelet">启动kubelet失败</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#dashboard">启动dashboard</a></li>
 </ul>
 </li>
@@ -215,8 +222,36 @@
             
   <div class="section" id="minikube">
 <span id="install-run-minikube"></span><h1>安装和运行minikube<a class="headerlink" href="#minikube" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">本章节因为是综合了我在多个平台部署minikube的实践，所以比较繁杂。实际上在Linux平台上部署minikube默认配置（使用虚拟机）非常简单。但是，如果使用了一些非标准配置，例如，btrfs作为存储驱动，裸物理机运行minikube则略微复杂。</p>
+</div>
 <div class="section" id="id1">
-<h2>minikube<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>裸机直接部署minikube(快速起步)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>为了追求性能，在我的测试环境采用了裸物理主机直接运行minikube，并且采用了btrfs作为存储驱动，所以配置略有复杂。详情请见下文。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>为了快速起步，简述方法如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">LO</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">storage</span><span class="o">.</span><span class="n">googleapis</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">minikube</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="n">minikube</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">install</span> <span class="n">minikube</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">minikube</span>
+<span class="n">minikube</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">vm</span><span class="o">-</span><span class="n">driver</span> <span class="n">none</span>
+<span class="n">sudo</span> <span class="n">minikube</span> <span class="n">start</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">config</span> <span class="n">kubeadm</span><span class="o">.</span><span class="n">ignore</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">SystemVerification</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">config</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">cgroup</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">systemd</span>
+</pre></div>
+</div>
+<p>上述安装步骤只需要具备两个前提条件就可以完成:</p>
+<ul class="simple">
+<li>安装好Docker CE: 请参考 <a class="reference internal" href="../studio/kvm_docker_in_studio.html#install-docker-in-studio"><span class="std std-ref">Docker</span></a>
+- 注意，需要配置项 <code class="docutils literal notranslate"><span class="pre">&quot;exec-opts&quot;:</span> <span class="pre">[&quot;native.cgroupdriver=systemd&quot;]</span></code></li>
+<li>架好翻墙的梯子: 请参考 <a class="reference internal" href="../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a></li>
+</ul>
+<p>启动参数说明：</p>
+<ul class="last simple">
+<li>由于我采用btrfs，默认minikube启动验证storage driver会失败，所以添加参数 kubeadm.ignore-preflight-errors=SystemVerification</li>
+<li>由于docker配置cgroupdriver=systemd，所以对应配置参数 kubelet.cgroup-driver=systemd</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>minikube<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>最简单体验完整的Kubernetes集群功能是使用 <a class="reference external" href="https://github.com/kubernetes/minikube">minikube</a> ，这是一个在单个节点上运行Kubernetes的方式，可以用于测试Kubernetes以及本地开发应用。</p>
 <p>minikube是通常通过虚拟机来运行的，也就是说必须在主机上运行Hypervisor，可以是Virtualbox (跨平台) 也可以是 KVM (Linux) 或者 Hyper-V (Windows)，甚至可以使用非常小众的 HyperKit (macOS)。</p>
 <div class="admonition note">
@@ -225,8 +260,8 @@
 <p class="last">如果你是在Linux主机上，由于Linux可以直接运行Docker，所以甚至可以不需要Hypervisor的虚拟机，直接运行在Linux物理主机的Docker中。此时使用参数 <code class="docutils literal notranslate"><span class="pre">--vm-driver=none</span></code> 来运行。</p>
 </div>
 </div>
-<div class="section" id="id3">
-<h2>安装Minikube<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>安装Minikube<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="ubuntuminikube">
 <h3>Ubuntu平台安装MiniKube<a class="headerlink" href="#ubuntuminikube" title="Permalink to this headline">¶</a></h3>
 <ul>
@@ -298,18 +333,17 @@ opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix
 </pre></div>
 </div>
 <p>则重新安装一次 <code class="docutils literal notranslate"><span class="pre">cstruct-lwt</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opam</span> <span class="n">reinstall</span> <span class="n">cstruct</span><span class="o">-</span><span class="n">lwt</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opam</span> <span class="n">reinstall</span> <span class="n">cstruct</span><span class="o">-</span><span class="n">lwt</span>
 </pre></div>
 </div>
-<p class="last">但是参考</p>
 </div>
 </div>
 <div class="section" id="macosvmware-fusion">
 <h4>macOS安装VMware Fusion<a class="headerlink" href="#macosvmware-fusion" title="Permalink to this headline">¶</a></h4>
 <p>请参考 <a class="reference internal" href="../appendix/vmware_in_studio.html#vmware-in-studio"><span class="std std-ref">Studio环境中的VMware</span></a> ，我安装了VMware Fusion。使用 <code class="docutils literal notranslate"><span class="pre">vmrun</span> <span class="pre">list</span></code> 可以检查当前运行的VMware虚拟机。</p>
 </div>
-<div class="section" id="id4">
-<h4>macOS安装minikube<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id5">
+<h4>macOS安装minikube<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
 <ul>
 <li><p class="first">通过brew安装minikube(我没有使用这个方法):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">cask</span> <span class="n">install</span> <span class="n">minikube</span>
@@ -329,8 +363,8 @@ opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix
 </div>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>启动minikube<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>启动minikube<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">（不推荐直接）启动minikube集群:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">start</span>
@@ -390,8 +424,8 @@ opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix
 <p class="last">这表明当前Linux主机的kubectl已经被配置直接使用刚才所安装运行的minikube</p>
 </div>
 </div>
-<div class="section" id="id6">
-<h3>直接物理主机运行minikube<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h3>直接物理主机运行minikube<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <p>前面我们在 <code class="docutils literal notranslate"><span class="pre">xcloud</span></code> <a class="reference internal" href="../studio/index.html#studio"><span class="std std-ref">Studio Atlas</span></a> 环境中通过KVM虚拟化运行了minikube主机，现在，我们实现一个通过物理主机直接运行minikube，以节约运行损耗。</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -426,8 +460,8 @@ opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix
 <p class="last">通过 <cite>none</cite> 驱动运行minikube会降低系统安全和可靠性，详细说明请参考 <a class="reference external" href="https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md">https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md</a></p>
 </div>
 </div>
-<div class="section" id="id7">
-<h3>macOS平台使用hyperkit后端<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id8">
+<h3>macOS平台使用hyperkit后端<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p class="first">安装Hyperkit驱动:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">install</span> <span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">hyperkit</span>
@@ -492,8 +526,8 @@ opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix
 </ul>
 </div>
 </div>
-<div class="section" id="id8">
-<h2>使用minikube<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h2>使用minikube<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">ssh登陆minikub方法:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">ssh</span>
@@ -503,12 +537,165 @@ opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix
 </ul>
 <p>minikube虚拟机默认root没有密码，从虚拟机终端可以登陆。</p>
 </div>
-<div class="section" id="id9">
-<h2>停止和再次启动minikube<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id10">
+<h2>停止和再次启动minikube<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <p>安装了minikube之后，通过 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">stop</span></code> 可以停止，然后通过 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">start</span></code> 可以再次启动。</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">每次启动minikube，系统都会尝试重新连接Google仓库更新镜像，所以需要先搭好梯子</p>
+</div>
+</div>
+<div class="section" id="id11">
+<h2>minikube异常排查<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="minikube-cri">
+<span id="minikube-debug-cri-install"></span><h3>minikube CRI安装排查<a class="headerlink" href="#minikube-cri" title="Permalink to this headline">¶</a></h3>
+<p>重新在 <a class="reference internal" href="../studio/ubuntu_on_mbp.html#ubuntu-on-mbp"><span class="std std-ref">MacBook Pro上运行Ubuntu</span></a> (重装了Ubuntu 18.04 LTS Server版本) 之后，我重新部署了 <a class="reference internal" href="../studio/btrfs_in_studio.html#btrfs-in-studio"><span class="std std-ref">Studio环境的Btrfs存储</span></a> 并设置 <a class="reference internal" href="../docker/docker_btrfs_storage_driver.html#docker-btrfs-storage-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 。首次在裸主机上部署minikube，启动遇到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*</span> <span class="n">Launching</span> <span class="n">Kubernetes</span> <span class="o">...</span>
+
+<span class="n">X</span> <span class="n">Error</span> <span class="n">starting</span> <span class="n">cluster</span><span class="p">:</span> <span class="n">cmd</span> <span class="n">failed</span><span class="p">:</span> <span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">kubeadm</span> <span class="n">init</span> <span class="o">--</span><span class="n">config</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">kubeadm</span><span class="o">.</span><span class="n">yaml</span>  <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">DirAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="p">,</span><span class="n">DirAvailable</span><span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">minikube</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">etcd</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">Port</span><span class="o">-</span><span class="mi">10250</span><span class="p">,</span><span class="n">Swap</span>
+
+<span class="p">:</span> <span class="n">running</span> <span class="n">command</span><span class="p">:</span> <span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">kubeadm</span> <span class="n">init</span> <span class="o">--</span><span class="n">config</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">kubeadm</span><span class="o">.</span><span class="n">yaml</span>  <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">DirAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="p">,</span><span class="n">DirAvailable</span><span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">minikube</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">FileAvailable</span><span class="o">--</span><span class="n">etc</span><span class="o">-</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">manifests</span><span class="o">-</span><span class="n">etcd</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span><span class="n">Port</span><span class="o">-</span><span class="mi">10250</span><span class="p">,</span><span class="n">Swap</span>
+ <span class="n">output</span><span class="p">:</span> <span class="p">[</span><span class="n">init</span><span class="p">]</span> <span class="n">Using</span> <span class="n">Kubernetes</span> <span class="n">version</span><span class="p">:</span> <span class="n">v1</span><span class="o">.</span><span class="mf">14.3</span>
+<span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">Running</span> <span class="n">pre</span><span class="o">-</span><span class="n">flight</span> <span class="n">checks</span>
+        <span class="p">[</span><span class="n">WARNING</span> <span class="n">IsDockerSystemdCheck</span><span class="p">]:</span> <span class="n">detected</span> <span class="s2">&quot;cgroupfs&quot;</span> <span class="k">as</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">cgroup</span> <span class="n">driver</span><span class="o">.</span> <span class="n">The</span> <span class="n">recommended</span> <span class="n">driver</span> <span class="ow">is</span> <span class="s2">&quot;systemd&quot;</span><span class="o">.</span> <span class="n">Please</span> <span class="n">follow</span> <span class="n">the</span> <span class="n">guide</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">setup</span><span class="o">/</span><span class="n">cri</span><span class="o">/</span>
+        <span class="p">[</span><span class="n">WARNING</span> <span class="n">Swap</span><span class="p">]:</span> <span class="n">running</span> <span class="k">with</span> <span class="n">swap</span> <span class="n">on</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">supported</span><span class="o">.</span> <span class="n">Please</span> <span class="n">disable</span> <span class="n">swap</span>
+        <span class="p">[</span><span class="n">WARNING</span> <span class="n">FileExisting</span><span class="o">-</span><span class="n">socat</span><span class="p">]:</span> <span class="n">socat</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">system</span> <span class="n">path</span>
+</pre></div>
+</div>
+<p>这说明默认的 <a class="reference internal" href="../studio/kvm_docker_in_studio.html#install-docker-in-studio"><span class="std std-ref">Docker</span></a> 存在环境缺陷，需要参考Kubernetes官方 <a class="reference external" href="https://kubernetes.io/docs/setup/cri/">CRI installation</a> 文档进行修正。</p>
+<ul>
+<li><p class="first">修正cgroupfs通过systemd管理:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup daemon</span>
+<span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">daemon</span><span class="o">.</span><span class="n">json</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
+<span class="p">{</span>
+  <span class="s2">&quot;exec-opts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;native.cgroupdriver=systemd&quot;</span><span class="p">],</span>
+  <span class="s2">&quot;log-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;log-opts&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;max-size&quot;</span><span class="p">:</span> <span class="s2">&quot;100m&quot;</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;storage-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;btrfs&quot;</span>
+<span class="p">}</span>
+<span class="n">EOF</span>
+
+<span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">d</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后重启docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Restart docker.</span>
+<span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">关闭swap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">swapoff</span> <span class="o">/</span><span class="n">swap</span><span class="o">.</span><span class="n">img</span>
+<span class="c1"># 删除 /etc/fstab 中swap配置</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">修订 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 添加 <code class="docutils literal notranslate"><span class="pre">minikube</span></code> 的地址解析:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span>  <span class="n">minikube</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">添加IP解析可能不需要，待测试。不过默认 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">start</span></code> 有 WARNING 关于不能解析 minikube 提示</p>
+</div>
+<ul>
+<li><p class="first">然后重新执行一次minikube安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">minikube</span> <span class="n">delete</span>
+<span class="n">sudo</span> <span class="n">minikube</span> <span class="n">start</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="minikube-btrfs">
+<span id="minikube-debug-btrfs"></span><h3>minikube btrfs安装排查<a class="headerlink" href="#minikube-btrfs" title="Permalink to this headline">¶</a></h3>
+<p>再次启动minikube出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[WARNING Hostname]: hostname &quot;minikube&quot; could not be reached
+[WARNING Hostname]: hostname &quot;minikube&quot;: lookup minikube on 8.8.8.8:53: no such host
+[WARNING Service-Kubelet]: kubelet service is not enabled, please run &#39;systemctl enable kubelet.service&#39;
+error execution phase preflight: [preflight] Some fatal errors occurred:
+[ERROR SystemVerification]: unsupported graph driver: btrfs
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+: running command: sudo /usr/bin/kubeadm init --config /var/lib/kubeadm.yaml  --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests,DirAvailable--data-minikube,FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml,FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml,FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml,FileAvailable--etc-kubernetes-manifests-etcd.yaml,Port-10250,Swap
+.: exit status 1
+</pre></div>
+</div>
+<p>这里可以参考 <a class="reference external" href="https://marc.wäckerlin.ch/computer/kubernetes-on-ubuntu-16-04">Kubernetes on Ubuntu 16.04</a> 增加一个启动参数 <code class="docutils literal notranslate"><span class="pre">--skip-preflight-checks</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">kubeadm</span> <span class="n">init</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">checks</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://github.com/kairen/kubeadm-ansible/issues/42">Support for 1.12.1 #42</a> 对于minikube传递参数是 <code class="docutils literal notranslate"><span class="pre">--ignore-preflight-errors</span></code> 就对等于 kubeadmin 参数 <code class="docutils literal notranslate"><span class="pre">--skip-preflight-checks</span></code></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>参考minikube文档 <a class="reference external" href="https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md">vm-driver=none</a> :</p>
+<p class="last">Some versions of Linux have a version of docker that is newer then what Kubernetes expects. To overwrite this, run minikube with the following parameters: <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">-E</span> <span class="pre">minikube</span> <span class="pre">start</span> <span class="pre">--vm-driver=none</span> <span class="pre">--kubernetes-version</span> <span class="pre">v1.11.8</span> <span class="pre">--extra-config</span> <span class="pre">kubeadm.ignore-preflight-errors=SystemVerification</span></code></p>
+</div>
+<p>即执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">minikube</span> <span class="n">start</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">config</span> <span class="n">kubeadm</span><span class="o">.</span><span class="n">ignore</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">SystemVerification</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>我为了能够免去这个参数输入，参考 <a class="reference internal" href="../studio/kvm_docker_in_studio.html#install-docker-in-studio"><span class="std std-ref">Docker</span></a> 中 <code class="docutils literal notranslate"><span class="pre">/etc/docker/dameon.json</span></code> 配置方法，尝试修订 <code class="docutils literal notranslate"><span class="pre">~/.minikube/config/config.json</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;extra-config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;kubeadm.ignore-preflight-errors=SystemVerification&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;vm-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>但是，这个方法无效。参考 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">config</span> <span class="pre">-h</span></code> 输出提示可用的 <code class="docutils literal notranslate"><span class="pre">Configurable</span> <span class="pre">fields</span></code> 并没有包含 <code class="docutils literal notranslate"><span class="pre">extra-config</span></code> 。</p>
+<p>参考 <a class="reference external" href="https://medium.com/faun/using-minikube-profiles-def2477e968a">On Minikube Profiles</a> ，可以minikube的profile是 <code class="docutils literal notranslate"><span class="pre">~/.minikube/profiles/minikube/config.json</span></code> ，这个配置是minikube初始化根据系统环境自动配置的环境变量。例如，包含了检测出我的主机的网卡接口IP地址是 <code class="docutils literal notranslate"><span class="pre">192.168.101.81</span></code> 。</p>
+<p>根据上述信息启发，搜索看到 <code class="docutils literal notranslate"><span class="pre">~/.minikube/machines/minikube/config.json</span></code> 包含了主机的配置信息，其中包含了 <code class="docutils literal notranslate"><span class="pre">HostOptions</span></code> 中就有一个配置项是 <code class="docutils literal notranslate"><span class="pre">&quot;StorageDriver&quot;:</span> <span class="pre">&quot;&quot;,</span></code> ，会不会这个配置项就是可以设置 <code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 呢？</p>
+<p class="last">但是这个 <code class="docutils literal notranslate"><span class="pre">~/.minikube/machines/minikube/config.json</span></code> 每次 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">delete</span></code> 会清理掉。实在没有办法，只好老老实实按照官方文档操作。</p>
+</div>
+</div>
+<div class="section" id="kubelet">
+<h3>启动kubelet失败<a class="headerlink" href="#kubelet" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">在忽略了 SystemVerification 之后，启动发现 kubelet 失败:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">wait</span><span class="o">-</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">]</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">the</span> <span class="n">kubelet</span> <span class="n">to</span> <span class="n">boot</span> <span class="n">up</span> <span class="n">the</span> <span class="n">control</span> <span class="n">plane</span> <span class="k">as</span> <span class="n">static</span> <span class="n">Pods</span> <span class="kn">from</span> <span class="nn">directory</span> <span class="s2">&quot;/etc/kubernetes/manifests&quot;</span><span class="o">.</span> <span class="n">This</span> <span class="n">can</span> <span class="n">take</span> <span class="n">up</span> <span class="n">to</span> <span class="mi">4</span><span class="n">m0s</span>
+<span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">check</span><span class="p">]</span> <span class="n">Initial</span> <span class="n">timeout</span> <span class="n">of</span> <span class="mi">40</span><span class="n">s</span> <span class="n">passed</span><span class="o">.</span>
+<span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">check</span><span class="p">]</span> <span class="n">It</span> <span class="n">seems</span> <span class="n">like</span> <span class="n">the</span> <span class="n">kubelet</span> <span class="n">isn</span><span class="s1">&#39;t running or healthy.</span>
+<span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">check</span><span class="p">]</span> <span class="n">The</span> <span class="n">HTTP</span> <span class="n">call</span> <span class="n">equal</span> <span class="n">to</span> <span class="s1">&#39;curl -sSL http://localhost:10248/healthz&#39;</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">error</span><span class="p">:</span> <span class="n">Get</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">10248</span><span class="o">/</span><span class="n">healthz</span><span class="p">:</span> <span class="n">dial</span> <span class="n">tcp</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">10248</span><span class="p">:</span> <span class="n">connect</span><span class="p">:</span> <span class="n">connection</span> <span class="n">refused</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>检查kubelet:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">kubelet</span>
+<span class="n">journalctl</span> <span class="o">-</span><span class="n">xeu</span> <span class="n">kubelet</span>
+</pre></div>
+</div>
+<p>关键报错如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Jun</span> <span class="mi">11</span> <span class="mi">14</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">52</span> <span class="n">xcloud</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">21142</span><span class="p">]:</span> <span class="n">F0611</span> <span class="mi">14</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">52.353546</span>   <span class="mi">21142</span> <span class="n">server</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">266</span><span class="p">]</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">run</span> <span class="n">Kubelet</span><span class="p">:</span>
+<span class="n">failed</span> <span class="n">to</span> <span class="n">create</span> <span class="n">kubelet</span><span class="p">:</span>
+<span class="n">misconfiguration</span><span class="p">:</span> <span class="n">kubelet</span> <span class="n">cgroup</span> <span class="n">driver</span><span class="p">:</span> <span class="s2">&quot;cgroupfs&quot;</span> <span class="ow">is</span> <span class="n">different</span> <span class="kn">from</span> <span class="nn">docker</span> <span class="n">cgroup</span> <span class="n">driver</span><span class="p">:</span> <span class="s2">&quot;systemd&quot;</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://stackoverflow.com/questions/45708175/kubelet-failed-with-kubelet-cgroup-driver-cgroupfs-is-different-from-docker-c">kubelet failed with kubelet cgroup driver: “cgroupfs” is different from docker cgroup driver: “systemd”</a>  只需要再增加一个参数 <code class="docutils literal notranslate"><span class="pre">--extra-config=kubelet.cgroup-driver=systemd</span></code> 来启动 minikube 就可以:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">minikube</span> <span class="n">start</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">config</span> <span class="n">kubeadm</span><span class="o">.</span><span class="n">ignore</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">SystemVerification</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">config</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">cgroup</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">systemd</span>
+</pre></div>
+</div>
+<p>也可以修订 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/kubelet.service.d/10-kubeadm.conf</span></code> 将 <code class="docutils literal notranslate"><span class="pre">ExecStart=</span></code> 启动行配置 中的 <code class="docutils literal notranslate"><span class="pre">--cgroup-driver=cgroupfs</span></code> 修改成 <code class="docutils literal notranslate"><span class="pre">--cgroup-driver=systemd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">kubelet</span> <span class="o">--</span><span class="n">allow</span><span class="o">-</span><span class="n">privileged</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="n">authorization</span><span class="o">-</span><span class="n">mode</span><span class="o">=</span><span class="n">Webhook</span> <span class="o">--</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">kubeconfig</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">kubelet</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">cgroup</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">systemd</span> <span class="o">--</span><span class="n">client</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">file</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">minikube</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span><span class="n">ca</span><span class="o">.</span><span class="n">crt</span> <span class="o">--</span><span class="n">cluster</span><span class="o">-</span><span class="n">dns</span><span class="o">=</span><span class="mf">10.96</span><span class="o">.</span><span class="mf">0.10</span> <span class="o">--</span><span class="n">cluster</span><span class="o">-</span><span class="n">domain</span><span class="o">=</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span> <span class="o">--</span><span class="n">container</span><span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="n">docker</span> <span class="o">--</span><span class="n">fail</span><span class="o">-</span><span class="n">swap</span><span class="o">-</span><span class="n">on</span><span class="o">=</span><span class="n">false</span> <span class="o">--</span><span class="n">hostname</span><span class="o">-</span><span class="n">override</span><span class="o">=</span><span class="n">minikube</span> <span class="o">--</span><span class="n">kubeconfig</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">kubelet</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">pod</span><span class="o">-</span><span class="n">manifest</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">manifests</span>
+</pre></div>
+</div>
+<p>然后再次执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>就能启动 kubelet 成功。</p>
+<p>不过，请注意，由于 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">start</span></code> 首次初始化时候会重新生成新的 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/kubelet.service.d/10-kubeadm.conf</span></code> ，所以第一次启动还是需要传递参数的，即:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">minikube</span> <span class="n">start</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">config</span> <span class="n">kubeadm</span><span class="o">.</span><span class="n">ignore</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">SystemVerification</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">config</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">cgroup</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">systemd</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="dashboard">

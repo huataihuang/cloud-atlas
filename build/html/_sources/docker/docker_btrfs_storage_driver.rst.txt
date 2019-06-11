@@ -84,6 +84,19 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
      "storage-driver": "btrfs"
    }
 
+.. note::
+
+   实际上述设置 ``/etc/docker/daemon.json`` 请参考 :ref:`minikube_debug_cri_install` 排查过程，按照 :ref:`install_docker_in_studio` 设置如下::
+
+      {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "100m"
+        },
+        "storage-driver": "btrfs"
+      }
+
 - 启动 docker ，然后执行 ``docker info`` 检查 ``btrfs`` 是否已经用作存储驱动::
 
    sudo systemctl start docker

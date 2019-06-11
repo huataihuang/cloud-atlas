@@ -4,6 +4,34 @@
 安装和运行minikube
 ======================
 
+.. note::
+
+   本章节因为是综合了我在多个平台部署minikube的实践，所以比较繁杂。实际上在Linux平台上部署minikube默认配置（使用虚拟机）非常简单。但是，如果使用了一些非标准配置，例如，btrfs作为存储驱动，裸物理机运行minikube则略微复杂。
+
+裸机直接部署minikube(快速起步)
+================================
+
+为了追求性能，在我的测试环境采用了裸物理主机直接运行minikube，并且采用了btrfs作为存储驱动，所以配置略有复杂。详情请见下文。
+
+.. note::
+
+   为了快速起步，简述方法如下::
+
+      curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
+      minikube config set vm-driver none
+      sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification --extra-config kubelet.cgroup-driver=systemd
+
+   上述安装步骤只需要具备两个前提条件就可以完成:
+
+   - 安装好Docker CE: 请参考 :ref:`install_docker_in_studio` 
+     - 注意，需要配置项 ``"exec-opts": ["native.cgroupdriver=systemd"]``
+   - 架好翻墙的梯子: 请参考 :ref:`openconnect_vpn`
+
+   启动参数说明：
+
+   - 由于我采用btrfs，默认minikube启动验证storage driver会失败，所以添加参数 kubeadm.ignore-preflight-errors=SystemVerification
+   - 由于docker配置cgroupdriver=systemd，所以对应配置参数 kubelet.cgroup-driver=systemd
+
 minikube
 =================
 
@@ -86,8 +114,6 @@ macOS安装hyperkit
    则重新安装一次 ``cstruct-lwt`` ::
 
       opam reinstall cstruct-lwt
-
-   但是参考
 
 macOS安装VMware Fusion
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -267,6 +293,157 @@ minikube虚拟机默认root没有密码，从虚拟机终端可以登陆。
 .. note::
 
    每次启动minikube，系统都会尝试重新连接Google仓库更新镜像，所以需要先搭好梯子
+
+minikube异常排查
+==================
+
+.. _minikube_debug_cri_install:
+
+minikube CRI安装排查
+----------------------
+
+重新在 :ref:`ubuntu_on_mbp` (重装了Ubuntu 18.04 LTS Server版本) 之后，我重新部署了 :ref:`btrfs_in_studio` 并设置 :ref:`docker_btrfs_storage_driver` 。首次在裸主机上部署minikube，启动遇到报错::
+
+   * Launching Kubernetes ...
+   
+   X Error starting cluster: cmd failed: sudo /usr/bin/kubeadm init --config /var/lib/kubeadm.yaml  --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests,DirAvailable--data-minikube,FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml,FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml,FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml,FileAvailable--etc-kubernetes-manifests-etcd.yaml,Port-10250,Swap
+   
+   : running command: sudo /usr/bin/kubeadm init --config /var/lib/kubeadm.yaml  --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests,DirAvailable--data-minikube,FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml,FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml,FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml,FileAvailable--etc-kubernetes-manifests-etcd.yaml,Port-10250,Swap
+    output: [init] Using Kubernetes version: v1.14.3
+   [preflight] Running pre-flight checks
+           [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
+           [WARNING Swap]: running with swap on is not supported. Please disable swap
+           [WARNING FileExisting-socat]: socat not found in system path
+
+这说明默认的 :ref:`install_docker_in_studio` 存在环境缺陷，需要参考Kubernetes官方 `CRI installation <https://kubernetes.io/docs/setup/cri/>`_ 文档进行修正。
+
+- 修正cgroupfs通过systemd管理::
+
+   # Setup daemon
+   cat > /etc/docker/daemon.json <<EOF
+   {
+     "exec-opts": ["native.cgroupdriver=systemd"],
+     "log-driver": "json-file",
+     "log-opts": {
+       "max-size": "100m"
+     },
+     "storage-driver": "btrfs"
+   }
+   EOF
+
+   mkdir -p /etc/systemd/system/docker.service.d
+
+然后重启docker::
+
+   # Restart docker.
+   systemctl daemon-reload
+   systemctl restart docker
+
+- 关闭swap::
+
+   swapoff /swap.img
+   # 删除 /etc/fstab 中swap配置
+
+- 修订 ``/etc/hosts`` 添加 ``minikube`` 的地址解析::
+
+   192.168.101.81  minikube
+
+.. note::
+
+   添加IP解析可能不需要，待测试。不过默认 ``minikube start`` 有 WARNING 关于不能解析 minikube 提示
+
+- 然后重新执行一次minikube安装::
+
+   sudo minikube delete
+   sudo minikube start
+
+.. _minikube_debug_btrfs:
+
+minikube btrfs安装排查
+------------------------
+
+再次启动minikube出现报错::
+
+   [WARNING Hostname]: hostname "minikube" could not be reached
+   [WARNING Hostname]: hostname "minikube": lookup minikube on 8.8.8.8:53: no such host
+   [WARNING Service-Kubelet]: kubelet service is not enabled, please run 'systemctl enable kubelet.service'
+   error execution phase preflight: [preflight] Some fatal errors occurred:
+   [ERROR SystemVerification]: unsupported graph driver: btrfs
+   [preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+   : running command: sudo /usr/bin/kubeadm init --config /var/lib/kubeadm.yaml  --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests,DirAvailable--data-minikube,FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml,FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml,FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml,FileAvailable--etc-kubernetes-manifests-etcd.yaml,Port-10250,Swap
+   .: exit status 1
+
+这里可以参考 `Kubernetes on Ubuntu 16.04 <https://marc.wäckerlin.ch/computer/kubernetes-on-ubuntu-16-04>`_ 增加一个启动参数 ``--skip-preflight-checks`` ::
+
+   sudo kubeadm init --skip-preflight-checks
+
+参考 `Support for 1.12.1 #42 <https://github.com/kairen/kubeadm-ansible/issues/42>`_ 对于minikube传递参数是 ``--ignore-preflight-errors`` 就对等于 kubeadmin 参数 ``--skip-preflight-checks``
+
+.. note::
+
+   参考minikube文档 `vm-driver=none <https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md>`_ :
+
+   Some versions of Linux have a version of docker that is newer then what Kubernetes expects. To overwrite this, run minikube with the following parameters: ``sudo -E minikube start --vm-driver=none --kubernetes-version v1.11.8 --extra-config kubeadm.ignore-preflight-errors=SystemVerification``
+
+即执行::
+ 
+   sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification
+
+.. note::
+
+   我为了能够免去这个参数输入，参考 :ref:`install_docker_in_studio` 中 ``/etc/docker/dameon.json`` 配置方法，尝试修订 ``~/.minikube/config/config.json`` ::
+   
+      {
+          "extra-config": ["kubeadm.ignore-preflight-errors=SystemVerification"],
+          "vm-driver": "none"
+      }   
+   
+   但是，这个方法无效。参考 ``minikube config -h`` 输出提示可用的 ``Configurable fields`` 并没有包含 ``extra-config`` 。
+   
+   参考 `On Minikube Profiles <https://medium.com/faun/using-minikube-profiles-def2477e968a>`_ ，可以minikube的profile是 ``~/.minikube/profiles/minikube/config.json`` ，这个配置是minikube初始化根据系统环境自动配置的环境变量。例如，包含了检测出我的主机的网卡接口IP地址是 ``192.168.101.81`` 。
+   
+   根据上述信息启发，搜索看到 ``~/.minikube/machines/minikube/config.json`` 包含了主机的配置信息，其中包含了 ``HostOptions`` 中就有一个配置项是 ``"StorageDriver": "",`` ，会不会这个配置项就是可以设置 ``btrfs`` 呢？
+   
+   但是这个 ``~/.minikube/machines/minikube/config.json`` 每次 ``minikube delete`` 会清理掉。实在没有办法，只好老老实实按照官方文档操作。
+
+启动kubelet失败
+-----------------
+
+- 在忽略了 SystemVerification 之后，启动发现 kubelet 失败::
+
+   [wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests". This can take up to 4m0s
+   [kubelet-check] Initial timeout of 40s passed.
+   [kubelet-check] It seems like the kubelet isn't running or healthy.
+   [kubelet-check] The HTTP call equal to 'curl -sSL http://localhost:10248/healthz' failed with error: Get http://localhost:10248/healthz: dial tcp 127.0.0.1:10248: connect: connection refused.
+
+检查kubelet::
+
+   systemctl status kubelet
+   journalctl -xeu kubelet
+
+关键报错如下::
+
+   Jun 11 14:01:52 xcloud kubelet[21142]: F0611 14:01:52.353546   21142 server.go:266] failed to run Kubelet: 
+   failed to create kubelet: 
+   misconfiguration: kubelet cgroup driver: "cgroupfs" is different from docker cgroup driver: "systemd"
+
+参考 `kubelet failed with kubelet cgroup driver: “cgroupfs” is different from docker cgroup driver: “systemd” <https://stackoverflow.com/questions/45708175/kubelet-failed-with-kubelet-cgroup-driver-cgroupfs-is-different-from-docker-c>`_  只需要再增加一个参数 ``--extra-config=kubelet.cgroup-driver=systemd`` 来启动 minikube 就可以::
+
+   sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification --extra-config kubelet.cgroup-driver=systemd
+
+也可以修订 ``/etc/systemd/system/kubelet.service.d/10-kubeadm.conf`` 将 ``ExecStart=`` 启动行配置 中的 ``--cgroup-driver=cgroupfs`` 修改成 ``--cgroup-driver=systemd`` ::
+
+   ExecStart=/usr/bin/kubelet --allow-privileged=true --authorization-mode=Webhook --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --cgroup-driver=systemd --client-ca-file=/var/lib/minikube/certs/ca.crt --cluster-dns=10.96.0.10 --cluster-domain=cluster.local --container-runtime=docker --fail-swap-on=false --hostname-override=minikube --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manifests 
+
+然后再次执行::
+ 
+   sudo systemctl start kubelet.service
+
+就能启动 kubelet 成功。
+
+不过，请注意，由于 ``minikube start`` 首次初始化时候会重新生成新的 ``/etc/systemd/system/kubelet.service.d/10-kubeadm.conf`` ，所以第一次启动还是需要传递参数的，即::
+
+   sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification --extra-config kubelet.cgroup-driver=systemd
 
 .. _minikube_dashboard:
 
