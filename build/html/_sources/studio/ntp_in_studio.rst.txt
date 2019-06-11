@@ -95,6 +95,26 @@ NTP服务 ``chronyd`` 计算系统时钟的drift和offset并持续修正。如�
    sudo ufw disable
    sudo ufw enable
 
+设置时区
+===========
+
+默认安装 Ubuntu Server ，时区设置是 UTC ，对于本地时间查看非常不习惯。
+
+- 检查默认时区::
+
+   ls -lh /etc/localtime
+
+输出显示::
+
+   lrwxrwxrwx 1 root root 27 Jun  9 08:41 /etc/localtime -> /usr/share/zoneinfo/Etc/UTC
+
+- 修改成本地时间(Shanghai)::
+
+   sudo unlink /etc/localtime
+   sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+然后再使用 ``date`` 命令就可以看到正确的本地时间。
+
 参考
 ========
 
