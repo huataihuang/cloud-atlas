@@ -39,15 +39,24 @@ Studio环境KVM和Docker
 
 在使用 ``一台`` 物理主机(MacBook Pro)模拟多个物理服务器来组成集群，部署基于KVM虚拟化的云计算，需要使用 :ref:`nested_virtualization_in_studio` 来实现。在后续 :ref:`kvm` 实践中，会详介绍如何在一台物理主机上运行支持hypervisor的虚拟机，以实现物理服务器集群模拟。 
 
+.. _install_docker_in_studio:
+
 Docker
 ========
 
 在MacBook Pro的Host环境，不仅要运行嵌套虚拟户的KVM实现OpenStack的集群模拟，而且要运行Docker来支撑一些底层服务。这是因为，底层服务需要更高的性能，而且要具备隔离以实现模拟分布式集群。
 
+.. note::
+
+   安装Docker CE方法参考 Kubernetes 文档 `CRI installation <https://kubernetes.io/docs/setup/cri/>`_ 
+
 - 安装Docker CE::
 
    # remove all previous Docker versions
    sudo apt remove docker docker-engine docker.io
+
+   # Install packages to allow apt to use a repository over HTTPS
+   apt-get update && apt-get install apt-transport-https ca-certificates curl software-properties-common
 
    # add Docker official GPG key
    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -55,10 +64,34 @@ Docker
    # Add Docker repository (for Ubuntu Bionic) 注意：nvidia-docker会检查docker-ce版本，强制要求 ubuntu-bionic
    # 所以这里必须采用 bionic 仓库安装 docker-ce
    sudo add-apt-repository \
-       "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+       $(lsb_release -cs) \
+       stable"
 
    sudo apt update
    sudo apt install docker-ce
+
+注意，由于我使用 :ref:`docker_btrfs_storage_driver` 并且 :ref:`minikube_debug_cri_install` 要求，需要设置 ``btrfs`` 存储驱动和  ``systemd`` 作为cgroup驱动，所以执行以下命令::
+
+   # Setup daemon
+   cat > /etc/docker/daemon.json <<EOF
+   {
+     "exec-opts": ["native.cgroupdriver=systemd"],
+     "log-driver": "json-file",
+     "log-opts": {
+       "max-size": "100m"
+     },
+     "storage-driver": "btrfs"
+   }
+   EOF
+
+   mkdir -p /etc/systemd/system/docker.service.d
+
+然后重启docker::
+
+   # Restart docker.
+   systemctl daemon-reload
+   systemctl restart docker
 
 .. note::
 
