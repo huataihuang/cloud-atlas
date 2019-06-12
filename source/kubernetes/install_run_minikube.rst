@@ -19,7 +19,7 @@
 
       curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
       minikube config set vm-driver none
-      sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification --extra-config kubelet.cgroup-driver=systemd
+      sudo minikube start --extra-config=kubeadm.ignore-preflight-errors=SystemVerification --extra-config=kubelet.cgroup-driver=systemd --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf
 
    上述安装步骤只需要具备两个前提条件就可以完成:
 
@@ -31,6 +31,11 @@
 
    - 由于我采用btrfs，默认minikube启动验证storage driver会失败，所以添加参数 kubeadm.ignore-preflight-errors=SystemVerification
    - 由于docker配置cgroupdriver=systemd，所以对应配置参数 kubelet.cgroup-driver=systemd
+   - 对于Ubuntu 18.04默认启用了 ``systemd-resolv`` ，需要绕过默认的 ``resolv.conf`` ，所以使用参数 ``kubelet.resolv-conf=/run/systemd/resolve/resolv.conf``
+
+.. warning::
+
+   根据 minikube文档 `vm-driver=none <https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md>`_ ，实际上裸物理机运行minikube有一些已知问题需要注意规避。
 
 minikube
 =================
@@ -445,6 +450,15 @@ minikube btrfs安装排查
 
    sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification --extra-config kubelet.cgroup-driver=systemd
 
+使用 ``systemd-resolv`` 配置传递
+-----------------------------------
+
+根据 minikube文档 `vm-driver=none <https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md>`_ 说明，运行在 Ubuntu 18.04 或其他默认配置了 ``systemd-resolve`` 的系统，需要绕过默认的 ``resolv.conf`` ，所以启动参数需要增加 ``--extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf`` 。
+
+完整启动命令修订成::
+
+   sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification --extra-config kubelet.cgroup-driver=systemd --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf
+   
 .. _minikube_dashboard:
 
 启动dashboard
