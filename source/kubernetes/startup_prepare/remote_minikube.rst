@@ -126,7 +126,7 @@ kubectl访问远程KVM虚拟机minikube
 
 就可以打开远程服务器的dashboard。
 
-.. figure:: ../_static/kubernetes/remote_minikube_dashboard.png
+.. figure:: ../../_static/kubernetes/remote_minikube_dashboard.png
    :scale: 30
 
 .. note::
