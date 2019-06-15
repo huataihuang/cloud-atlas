@@ -59,6 +59,35 @@ Node概览
 - ``kubectl logs`` - 打印一个pod中的某个容器的日志
 - ``kubectl exec`` - 执行一个pod中某个容器中的命令
 
+kubectl排查案例
+-----------------
+
+- 首先检查Deployment是否成功部署了pod::
+
+   kubectl get pods
+
+- 然后通过 ``describe`` 命令检查pod的详细信息::
+
+   kubectl describe pods
+
+.. note::
+
+   ``kubectl describe`` 可以详细观察Pod的容器: IP地址，Pod的生命周期相关事件。这个describe输出非常方便阅读
+
+- 由于Kubernetes私有网络外部无法访问，则需要启动 ``kubectl proxy`` ，然后才能访问服务::
+
+   kubectl proxy
+
+   export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+
+   curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/
+
+同上案例就可以访问Pod上运行Nginx服务。
+
+.. note::
+
+   请注意Kubernetes私有网络在外部无法访问，我们需要通过 :ref:`minikube_expose_app` 。
+
 参考
 ========
 

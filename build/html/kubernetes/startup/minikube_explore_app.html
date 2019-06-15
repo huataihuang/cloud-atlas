@@ -17,36 +17,38 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
-    <link rel="next" title="Kubernetes概念辨析" href="../kubernetes_concepts.html" />
+    <link rel="next" title="Minikube对外输出应用" href="minikube_expose_app.html" />
     <link rel="prev" title="使用Minikube集群部署应用" href="minikube_deploy_app.html" /> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -97,13 +99,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#kubernetes-pods">Kubernetes Pods概念</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#kubernetes-nodes">Kubernetes Nodes概念</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#kubectl">使用kubectl排查问题</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="minikube_expose_app.html">Minikube对外输出应用</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../kubernetes_concepts.html">Kubernetes概念辨析</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../kubernetes_objects.html">Kubernetes对象</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/index.html">Kubernetes概念辨析</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kubernetes_expose_service.html">输出Kubernetes应用服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kubernetes_architecture.html">Kubernetes架构</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kubernetes_dashboard.html">Kubernetes仪表盘</a></li>
@@ -262,9 +264,44 @@
 <li><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">logs</span></code> - 打印一个pod中的某个容器的日志</li>
 <li><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">exec</span></code> - 执行一个pod中某个容器中的命令</li>
 </ul>
-</div>
 <div class="section" id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h3>kubectl排查案例<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">首先检查Deployment是否成功部署了pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">然后通过 <code class="docutils literal notranslate"><span class="pre">describe</span></code> 命令检查pod的详细信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">pods</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">describe</span></code> 可以详细观察Pod的容器: IP地址，Pod的生命周期相关事件。这个describe输出非常方便阅读</p>
+</div>
+<ul>
+<li><p class="first">由于Kubernetes私有网络外部无法访问，则需要启动 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code> ，然后才能访问服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>kubectl proxy
+
+export POD_NAME=$(kubectl get pods -o go-template --template &#39;{{range .items}}{{.metadata.name}}{{&quot;\n&quot;}}{{end}}&#39;)
+
+curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/
+</pre></div>
+</div>
+</li>
+</ul>
+<p>同上案例就可以访问Pod上运行Nginx服务。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">请注意Kubernetes私有网络在外部无法访问，我们需要通过 <a class="reference internal" href="minikube_expose_app.html#minikube-expose-app"><span class="std std-ref">Minikube对外输出应用</span></a> 。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/">Viewing Pods and Nodes</a></li>
 </ul>
@@ -279,10 +316,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../kubernetes_concepts.html" class="btn btn-neutral float-right" title="Kubernetes概念辨析" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="minikube_expose_app.html" class="btn btn-neutral float-right" title="Minikube对外输出应用" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="minikube_deploy_app.html" class="btn btn-neutral" title="使用Minikube集群部署应用" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="minikube_deploy_app.html" class="btn btn-neutral float-left" title="使用Minikube集群部署应用" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -313,26 +350,16 @@
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
