@@ -4,7 +4,7 @@
 输出Kubernetes应用服务
 ======================
 
-在 :ref:`kubernetes_objects` 章节我们参考Kubernetes官方案例创建了2个副本的nginx部署::
+在 :ref:`understanding_kubernetes_objects` 章节我们参考Kubernetes官方案例创建了2个副本的nginx部署::
 
    kubectl apply -f https://k8s.io/examples/application/deployment.yaml --record
 

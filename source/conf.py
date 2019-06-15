@@ -84,6 +84,11 @@ html_theme = "sphinx_rtd_theme"
 # documentation.
 #
 # html_theme_options = {}
+
+# rtd_theme default navigation_depth = 4 , can't change?
+#html_theme_options = {
+#    'navigation_depth': -1,
+#}
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
