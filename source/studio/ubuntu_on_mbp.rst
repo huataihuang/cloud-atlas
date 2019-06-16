@@ -155,6 +155,8 @@ MacBook Pro使用的显卡是NVIDIA GeForce GT 750M Mac Edition ，默认安装�
 
    详细请参考 `Ubuntu在MacBook Pro上WIFI <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/install/ubuntu_on_macbook_pro_with_wifi.md>`_
 
+.. _studio_ubuntu_setup:
+
 配置
 ==============
 
