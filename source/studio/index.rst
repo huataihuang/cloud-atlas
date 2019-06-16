@@ -15,8 +15,10 @@ Studio Atlas
 
    introduce_my_studio.rst
    intel_core_i7_4850hq.rst
+   intel_core_i5_2410m.rst
    base_os.rst
    ubuntu_on_mbp.rst
+   ubuntu_on_thinkpad_x220.rst
    kvm_docker_in_studio.rst
    btrfs_in_studio.rst
    kubenetes_in_studio.rst
