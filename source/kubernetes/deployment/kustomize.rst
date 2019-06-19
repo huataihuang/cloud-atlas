@@ -280,7 +280,7 @@ production补丁
 
 - 通过 :ref:`kubernetes_dashboard` 我们观察部署可以看到针对不同环境
 
-.. figure:: ../_static/kubernetes/kustomize_overlays.png
+.. figure:: ../../_static/kubernetes/kustomize_overlays.png
    :scale: 30%
 
    Figure 1: 创建staging和production环境的overlays的不同pod

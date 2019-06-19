@@ -8,3 +8,4 @@ Kubernetes对象
    :maxdepth: 1
 
    understanding_kubernetes_objects.rst
+   labels_and_selectors.rst

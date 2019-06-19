@@ -8,3 +8,4 @@ Kubernetes负载
    :maxdepth: 1
 
    pods/index
+   controllers/index

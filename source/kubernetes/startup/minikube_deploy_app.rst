@@ -242,6 +242,15 @@ Kubernetes是采用最终一致性方式来维护系统的。一旦应用实例�
 
 这证明，通过 ``kubectl proxy`` 我们可以访问Kubernetes内部私有网络，并且我们刚才部署的Nginx运行环境已经正常工作。
 
+自定义镜像
+============
+
+.. note::
+
+   请注意，我的案例和 `Google提供的在线教程 <https://kubernetes.io/docs/tutorials/>`_ 不同，我采用了从 `Ubuntu Docker 官方镜像 <https://hub.docker.com/_/ubuntu>`_ 从头开始定制镜像内容，所以初始的 ``my-dev`` 容器已经做了一定的内容修改（ 相当于自己做了一个和Google案例相同的容器），这样就需要把容器转换（存储）成自定义镜像，然后通过自定义镜像来重新部署应用。
+
+上述自己定制的Pod ``my-dev`` 需要制作成镜像，以便能够继续下一步试验。比较简单的方式是把自定义镜像推送到Docker Hub公共镜像服务器上（需要Docker Hub账号），但是更好的方法是
+
 参考
 ========
 
