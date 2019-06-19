@@ -14,4 +14,4 @@ Kubernetes起步准备
    install_run_minikube.rst
    install_setup_kubectl.rst
    remote_minikube.rst
-
+   ubuntu_in_kubernetes.rst

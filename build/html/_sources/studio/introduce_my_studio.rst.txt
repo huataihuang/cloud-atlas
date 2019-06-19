@@ -50,4 +50,4 @@
 补充设备
 ===========
 
-除了上述 MacBook Pro 设备能够完整模拟组建一个云计算集群外，我还有一台更为古老的 ThinkPad X220 笔记本，处理器是 :ref:`intel_core_i5_2410m` ，虽然性能较差，但是更换过SSD磁盘之后，感觉还有一战之力，所以就作为模拟云计算平台的补充设备。
+除了上述 MacBook Pro 设备能够完整模拟组建一个云计算集群外，我还有一台更为古老的 `ThinkPad X220 笔记本 <https://www.cnet.com/products/lenovo-thinkpad-x220-4287-12-5-core-i5-2410m-windows-7-pro-64-bit-4-gb-ram-320-gb-hdd-series/>`_ ，处理器是 :ref:`intel_core_i5_2410m` ，虽然性能较差，但是更换过SSD磁盘之后，感觉还有一战之力，所以就作为模拟云计算平台的补充设备。
