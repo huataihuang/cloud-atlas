@@ -9,6 +9,7 @@ Kubernetes概念辨析
 .. toctree::
    :maxdepth: 1
 
+   kubernetes_architecture.rst
    objects/index
    workloads/index
    services_networking/index

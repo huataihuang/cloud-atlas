@@ -27,30 +27,15 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    startup_prepare/index
    startup/index
    concepts/index
-   kubernetes_expose_service.rst
-   kubernetes_architecture.rst
-   kubernetes_dashboard.rst
-   explore_google_gke.rst
-   configure_pods_and_containers.rst
-   operator.rst
-   operator_startup.rst
+   administer/index
    deployment/index
    production/index
+   service_mesh/index
    ci_cd/index
-   install_etcd.rst
-   recovery_etcd.rst
-   istio.rst
-   service_mesh.rst
-   k8s_ha_master.rst
-   admission_controllers.rst
-   mutating_admission_webhook.rst
-   validating_admission_webhook.rst
-   debug_node_notready.rst
-   cadvisor.rst
-   prometheus.rst
-   grafana.rst
-   netdata.rst
-   kubevirt.rst
+   monitor/index
+   security/index
+   virtual/index
+   cloud/index
 
 .. only::  subproject and html
 
