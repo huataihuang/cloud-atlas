@@ -31,7 +31,7 @@ Operator SDK
 
 Operator SDK提供了用于构建、测试和打包Operators的工具。起初，SDK采用Kubernetes API加速了一个应用程序的业务逻辑（例如，如何伸缩，更新或者备份）来执行这些操作。随着时间推移，SDK开始让工程师能够使得应用程序更为灵活，云计算服务体验更佳。
 
-.. image:: ../_static/kubernetes/operator-framework-1.png
+.. figure:: ../../../_static/kubernetes/operator-framework-1.png
    :scale: 75
 
 Operator Lifecycle Manager
@@ -39,7 +39,7 @@ Operator Lifecycle Manager
 
 一旦构建成功，Operator就需要部署到Kubernetes集群。Operator Lifecycle Manager是Kubernetes集群负责管理Operators的后台。使用Operator生命周期管理器，系统管理员可以控制Operators在哪个namespace中使用，谁能够操作运行Operators。并且能够管理Operators的整个生命期以及可用资源，例如触发Operator和它的资源的升级，或者授权一个团队能够操作集群的某个有权限的分片。
 
-.. image:: ../_static/kubernetes/operator-framework-2.png
+.. figure:: ../../../_static/kubernetes/operator-framework-2.png
    :scale: 75
 
 简单来说，无状态应用程序可以通过使用一个通用Operator（例如 `Helm Operator <https://github.com/operator-framework/helm-app-operator-kit>`_ ）来使用Operator Framework中的生命周期管理功能而不需要写任何代码。不过，复杂的状态相关应用程序才是Operator的用武之地。一个云能力可以编码到Operator中来提供一个高级用户功能，例如自动升级、备份和伸缩。

@@ -1,4 +1,4 @@
-.. _service_mesh:
+.. _service_mesh_architecture:
 
 ==================
 Service Mesh架构
@@ -29,7 +29,7 @@ Kubernetes在引入了服务网格( `Service Mesh <https://www.cncf.io/blog/2017
 
    通过中心化的管理平台(Service Mesh)来设置每个逻辑单元(Pod)中的特殊的 ``代理服务`` Sidecar Container提供服务输出，这样Pod之间调用以及外部调用Pod的服务都可以通过访问 ``代理服务`` 来实现。
 
-.. image:: ../_static/kubernetes/soa_msa_cna.jpg
+.. figure:: ../../_static/kubernetes/soa_msa_cna.jpg
    :scale: 50
 
 参考

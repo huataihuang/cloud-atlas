@@ -45,7 +45,7 @@ Prometheus 包含多个组件：
 架构
 -------
 
-.. figure:: ../_static/kubernetes/prometheus_architecture.png
+.. figure:: ../../_static/kubernetes/prometheus_architecture.png
    :scale: 50
 
 Prometheus可以从编排任务中获取metrics，既支持直接获取也支持通过中间推送网管执行的短时间任务。所有抓取短样本都存储在本地并且基于这些数据运行归来在聚合或者从现有数据中记录下新的时序数据或生成告警。通常Prometheus会结合到 :ref:`grafana` 或者其他API消费者平台来可视化采集的数据。

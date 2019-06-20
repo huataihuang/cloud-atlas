@@ -4,7 +4,7 @@
 高可用Kubernetes Master
 =============================
 
-.. image:: ../_static/kubernetes/kubernetes_ha_master.png
+.. figure:: ../../_static/kubernetes/kubernetes_ha_master.png
    :scale: 50
 
 参考

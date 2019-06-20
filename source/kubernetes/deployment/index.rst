@@ -9,6 +9,9 @@ Kubernetes部署
 .. toctree::
    :maxdepth: 1
 
+   stateless_application/index
+   operator/index
+   install_etcd.rst
    deploy_nginx_ingress_controller.rst
    deploy_private_docker_registry_in_kubernetes.rst
    helm.rst
