@@ -1,15 +1,14 @@
-.. _kali_linux:
+.. _jenkins:
 
 =================================
-Kali Linux Atlas
+Jenkins
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_kali_linux.rst
-   startup_prepare/index
-   startup/index
+   jenkins_startup.rst
+   jenkins_x_startup.rst
 
 .. only::  subproject and html
 

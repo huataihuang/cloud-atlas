@@ -1,4 +1,4 @@
-.. _think-devops:
+.. _think_devops:
 
 ==================
 思考DevOps

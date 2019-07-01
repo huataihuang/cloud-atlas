@@ -1,15 +1,11 @@
-.. _kali_linux:
+.. _sre:
 
 =================================
-Kali Linux Atlas
+SRE - 站点可靠性工程师
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   introduce_kali_linux.rst
-   startup_prepare/index
-   startup/index
 
 .. only::  subproject and html
 

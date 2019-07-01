@@ -1,15 +1,17 @@
-.. _kali_linux:
+.. _devops_thought:
 
 =================================
-Kali Linux Atlas
+DevOps 思考集锦
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_kali_linux.rst
-   startup_prepare/index
-   startup/index
+   think_devops.rst
+   continuous_integration.rst
+   gitops.rst
+   delpoy_monitor_autotest.rst
+   site_fail_recover.rst
 
 .. only::  subproject and html
 

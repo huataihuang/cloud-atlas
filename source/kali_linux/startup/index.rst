@@ -1,15 +1,13 @@
-.. _kali_linux:
+.. _kali_linux_startup:
 
 =================================
-Kali Linux Atlas
+Kali Linux 快速起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_kali_linux.rst
-   startup_prepare/index
-   startup/index
+   change_mac_address_in_kali.rst
 
 .. only::  subproject and html
 

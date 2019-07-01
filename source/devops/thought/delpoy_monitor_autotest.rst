@@ -1,4 +1,4 @@
-.. _delpoy-monitor-autotest:
+.. _delpoy_monitor_autotest:
 
 ===========================
 应用部署、监控和自动测试
