@@ -7,13 +7,9 @@ DevOps Atlas
 .. toctree::
    :maxdepth: 1
 
-   think-devops.rst
-   continuous_integration.rst
-   gitops.rst
-   jenkins.rst
-   jenkins_x.rst
-   delpoy-monitor-autotest.rst
-   site_fail_recover.rst
+   thought/index
+   sre/index
+   jenkins/index
 
 .. only::  subproject and html
 

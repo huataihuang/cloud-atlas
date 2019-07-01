@@ -516,10 +516,14 @@ Docker Registry Pod定义
    docker tag busybox:latest registry.xcloud.huatai.me/busybox:latest
    docker push registry.xcloud.huatai.me/busybox:latest
 
+WEB UI
+=========
 
+`What are the best docker image private registries? <https://www.slant.co/topics/2436/~best-docker-image-private-registries>`_ 提供了多种docker镜像仓库管理平台的对比，可以选择进行部署。待实践...
 
 参考
 ========
 
 - `How to run a Public Docker Registry in Kubernetes <https://www.nearform.com/blog/how-to-run-a-public-docker-registry-in-kubernetes/>`_
 - `How To Set Up a Private Docker Registry on Top of DigitalOcean Spaces and Use It with DigitalOcean Kubernetes <https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-top-of-digitalocean-spaces-and-use-it-with-digitalocean-kubernetes>`_
+- `How to Setup Docker Private Registry on Ubuntu 18? <https://geekflare.com/docker-private-registry-ubuntu/>`_ 简化配置，采用Docker运行Registry（无需kubernetes）

@@ -25,6 +25,8 @@
    vmware_in_studio.rst
    share_mouse_keyboard.rst
    ubuntu_hibernate.rst
+   raspberry_pi_quick_start.rst
+   raspberry_pi_zero_ethernet_gadget.rst
 
 .. only::  subproject and html
 

@@ -230,6 +230,18 @@ IPv6设置
 
 在合上屏幕之前，先执行这个脚本命令关闭屏幕，这样也能降低笔记本温度。
 
+.. note::
+
+   测试发现 ``vbetool dpms off`` 可以关闭 :ref:`ubuntu_on_thinkpad_x220` 的显示屏幕，但是对于MacBook笔记本运行的Ubuntu无效。
+
+   参考 `Turning off screen <https://unix.stackexchange.com/questions/433452/turning-off-screen>`_ 似乎可以通过设置::
+
+      echo 0 | sudo tee /sys/class/backlight/acpi_video0/brightness
+
+   来修改亮度。但是我测试没有效果。这个问题似乎和Nvidia显卡驱动有关 `DPMS not working with DisplayPort monitor <https://devtalk.nvidia.com/default/topic/968059/linux/dpms-not-working-with-displayport-monitor/1>`_ 例如，Nvidia驱动 375.10 不支持DPMS，
+
+   不过，根据最新反馈 `Nvidia v415.22驱动+Kernel 4.19.8可能支持 HardDPMS <https://devtalk.nvidia.com/default/topic/968059/linux/dpms-not-working-with-displayport-monitor/5>`_ ，或许可以尝试一下。
+
 ssh设置
 ------------
 
