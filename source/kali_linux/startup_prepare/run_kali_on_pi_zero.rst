@@ -1,4 +1,4 @@
-.. _install_run_kali_linux_on_pi_zero_w:
+.. _run_kali_on_pi_zero:
 
 ======================================
 在树莓派Zero W上安装和运行Kali Linux
@@ -11,20 +11,20 @@
 
 .. note::
 
-   详细在树莓派上安装操作系统，请参考 :ref:`raspberry_pi_quick_start` 。
+   详细在树莓派上安装操作系统，请参考 :ref:`pi_quick_start` 。
 
 为了好玩（更Geek一些），我在Raspberry Pi（树莓派）上安装和运行Kali Linux，并且，使用一种称为 `Raspberry Pi Zero W <https://www.raspberrypi.org/products/raspberry-pi-zero-w/>`_ 的口香糖大小树莓派:
 
 .. figure:: ../../_static/kali_linux/pi_zero_w.jpg
 
-另外，Zero W的USB扩展卡 ( :ref:`raspberry_pi_zero_ethernet_gadget` )，可以方便地将Kali Linux随身携带，只需要插入主机USB接口就可以工作， 加上一个透明的亚克力保护壳，非常美观：
+另外，Zero W的USB扩展卡 ( :ref:`pi_zero_net_gadget` )，可以方便地将Kali Linux随身携带，只需要插入主机USB接口就可以工作， 加上一个透明的亚克力保护壳，非常美观：
 
 .. figure:: ../../_static/kali_linux/zero_usb_2.jpg
    :scale: 50
 
 .. note::
 
-   请注意，需要 :ref:`raspberry_pi_zero_ethernet_gadget` 才能实现通讯。
+   请注意，需要 :ref:`pi_zero_net_gadget` 才能实现通讯。
 
 下载和镜像
 ============
@@ -41,7 +41,7 @@
 设置USB方式网络通讯
 ======================
 
-采用 :ref:`raspberry_pi_zero_ethernet_gadget` 方式，设置通过USB通讯。所以需要修订树莓派启动配置参数。
+采用 :ref:`pi_zero_net_gadget` 方式，设置通过USB通讯。所以需要修订树莓派启动配置参数。
 
 - 挂载U盘::
 
