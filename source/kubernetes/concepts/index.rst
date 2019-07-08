@@ -14,3 +14,4 @@ Kubernetes概念辨析
    workloads/index
    services_networking/index
    storage/index
+   configuration/index

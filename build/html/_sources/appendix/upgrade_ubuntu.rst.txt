@@ -1,7 +1,7 @@
-.. _upgrade_ubuntu_from_18.10_to_19.04:
+.. _upgrade_ubuntu:
 
 ========================
-升级Ubuntu 18.10到19.04
+升级Ubuntu
 ========================
 
 .. warning::

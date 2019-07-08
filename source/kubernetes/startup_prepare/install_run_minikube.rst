@@ -458,6 +458,21 @@ minikube btrfs安装排查
 完整启动命令修订成::
 
    sudo minikube start --extra-config kubeadm.ignore-preflight-errors=SystemVerification --extra-config kubelet.cgroup-driver=systemd --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf
+
+操作系统启动时启动minikube
+=============================
+
+安装了minikube的系统，默认会激活 ``kubelet.service`` ，即在启动操作系统时会自动启动服务器上所有kubernetes的容器，也就是自动启动minikube。但是，由于我们上述配置的裸物理机运行minikube，并且使用btrfs文件系统，所以需要定制一些参数传递给kubelet，否则启动后会发现自动启动的minikube无法工作。
+
+参考 `Cconfigure kubelets using kubeadm <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/kubelet-integration/#configure-kubelets-using-kubeadm>`_ 修订kubelet配置文件 ``/var/lib/kubelet/kubeadm-flags.env`` ，将默认的配置内容::
+
+   KUBELET_KUBEADM_ARGS=--cgroup-driver=systemd --hostname-override=minikube --network-plugin=cni --pod-infra-container-image=k8s.gcr.io/pause:3.1 --resolv-conf=/run/systemd/resolve/resolv.conf
+
+修订成::
+
+   KUBELET_KUBEADM_ARGS=--cgroup-driver=systemd --hostname-override=minikube --network-plugin=cni --pod-infra-container-image=k8s.gcr.io/pause:3.1 --resolv-conf=/run/systemd/resolve/resolv.conf --ignore-preflight-errors=SystemVerification 
+
+然后重启系统就可以看到随着操作系统启动，systemd可以正确启动minikube。
    
 .. _minikube_dashboard:
 

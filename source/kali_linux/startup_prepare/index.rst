@@ -7,7 +7,7 @@ Kali Linux 起步准备
 .. toctree::
    :maxdepth: 1
 
-   install_run_kali_linux_on_pi_zero_w.rst
+   run_kali_on_pi_zero.rst
 
 .. only::  subproject and html
 

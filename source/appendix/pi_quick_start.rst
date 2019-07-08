@@ -1,4 +1,4 @@
-.. _raspberry_pi_quick_start:
+.. _pi_quick_start:
 
 ===============================
 树莓派(Raspberry Pi)快速起步
@@ -27,7 +27,7 @@
 
    为了能够通过网线直接连接笔记本电脑，所以简化设置树莓派采用静态IP地址。我采用笔记本电脑直接连接一条短网线和树莓派通讯，中间不经过交换机。树莓派的电源由笔记本电脑的USB口供电。
 
-  :ref:`install_run_kali_linux_on_pi_zero_w` 采用了 `Offensive Security官方网站提供Kali Linux ARM Images <https://www.offensive-security.com/kali-linux-arm-images/>`_ 安装方法类似可以借鉴。
+  :ref:`run_kali_on_pi_zero` 采用了 `Offensive Security官方网站提供Kali Linux ARM Images <https://www.offensive-security.com/kali-linux-arm-images/>`_ 安装方法类似可以借鉴。
 
 - 将前面通过 ``dd`` 命令复制好镜像的TF卡通过USB转接器连接到笔记本的USB接口，识别成 ``/dev/sdb`` 。
 
@@ -68,7 +68,7 @@
 
 .. note::
 
-   网卡接口可能随系统识别硬件而不同命名，例如在 :ref:`install_run_kali_linux_on_pi_zero_w` 系统识别的有线网卡可能命名为 ``usb0`` 。
+   网卡接口可能随系统识别硬件而不同命名，例如在 :ref:`run_kali_on_pi_zero` 系统识别的有线网卡可能命名为 ``usb0`` 。
 
 设置ssh默认启动
 ----------------

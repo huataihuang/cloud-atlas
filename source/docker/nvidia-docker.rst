@@ -10,7 +10,7 @@ Docker运行NVIDIA容器
 
 .. note::
 
-   本文的实践是在MacBook Pro 2015 later笔记本上完成，显卡 ``GeForce GT 750M Mac Edition`` ::
+   本文的实践是在MacBook Pro 2013 later笔记本上完成，显卡 ``GeForce GT 750M Mac Edition`` ::
 
       lspci | grep VGA
 

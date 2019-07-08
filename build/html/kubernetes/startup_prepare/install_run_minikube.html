@@ -101,6 +101,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id9">使用minikube</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id10">停止和再次启动minikube</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id11">minikube异常排查</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">操作系统启动时启动minikube</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dashboard">启动dashboard</a></li>
 </ul>
 </li>
@@ -691,6 +692,19 @@ error execution phase preflight: [preflight] Some fatal errors occurred:
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="id14">
+<h2>操作系统启动时启动minikube<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<p>安装了minikube的系统，默认会激活 <code class="docutils literal notranslate"><span class="pre">kubelet.service</span></code> ，即在启动操作系统时会自动启动服务器上所有kubernetes的容器，也就是自动启动minikube。但是，由于我们上述配置的裸物理机运行minikube，并且使用btrfs文件系统，所以需要定制一些参数传递给kubelet，否则启动后会发现自动启动的minikube无法工作。</p>
+<p>参考 <a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/kubelet-integration/#configure-kubelets-using-kubeadm">Cconfigure kubelets using kubeadm</a> 修订kubelet配置文件 <code class="docutils literal notranslate"><span class="pre">/var/lib/kubelet/kubeadm-flags.env</span></code> ，将默认的配置内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">KUBELET_KUBEADM_ARGS</span><span class="o">=--</span><span class="n">cgroup</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">systemd</span> <span class="o">--</span><span class="n">hostname</span><span class="o">-</span><span class="n">override</span><span class="o">=</span><span class="n">minikube</span> <span class="o">--</span><span class="n">network</span><span class="o">-</span><span class="n">plugin</span><span class="o">=</span><span class="n">cni</span> <span class="o">--</span><span class="n">pod</span><span class="o">-</span><span class="n">infra</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">image</span><span class="o">=</span><span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">pause</span><span class="p">:</span><span class="mf">3.1</span> <span class="o">--</span><span class="n">resolv</span><span class="o">-</span><span class="n">conf</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">resolve</span><span class="o">/</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+<p>修订成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">KUBELET_KUBEADM_ARGS</span><span class="o">=--</span><span class="n">cgroup</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">systemd</span> <span class="o">--</span><span class="n">hostname</span><span class="o">-</span><span class="n">override</span><span class="o">=</span><span class="n">minikube</span> <span class="o">--</span><span class="n">network</span><span class="o">-</span><span class="n">plugin</span><span class="o">=</span><span class="n">cni</span> <span class="o">--</span><span class="n">pod</span><span class="o">-</span><span class="n">infra</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">image</span><span class="o">=</span><span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">pause</span><span class="p">:</span><span class="mf">3.1</span> <span class="o">--</span><span class="n">resolv</span><span class="o">-</span><span class="n">conf</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">resolve</span><span class="o">/</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">preflight</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">SystemVerification</span>
+</pre></div>
+</div>
+<p>然后重启系统就可以看到随着操作系统启动，systemd可以正确启动minikube。</p>
 </div>
 <div class="section" id="dashboard">
 <span id="minikube-dashboard"></span><h2>启动dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h2>

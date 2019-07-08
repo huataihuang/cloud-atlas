@@ -1,4 +1,4 @@
-.. _raspberry_pi_zero_ethernet_gadget:
+.. _pi_zero_net_gadget:
 
 ==========================================
 树莓派Zero设置USB网络通讯(Ethernet Gadget)
@@ -24,7 +24,7 @@
 
 当网络连接后，可以通过USB线将主机的网络共享给 ``Pi`` 
 
-- 首先 :ref:`raspberry_pi_quick_start` 将系统安装好
+- 首先 :ref:`pi_quick_start` 将系统安装好
 
 - 编辑 ``config.txt`` ，在最后添加一行::
 

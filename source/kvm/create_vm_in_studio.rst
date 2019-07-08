@@ -26,6 +26,7 @@ Studio环境创建KVM虚拟机
 .. note::
 
    - 只有通过网络安装才可以使用 ``--extra-args="console=tty0 console=ttyS0,115200"`` 以便能够通过串口控制台安装
+   - 要模拟UEFI，需要安装 ``ovmf`` 软件包，并使用参数 ``--boot uefi``
    - root分区采用EXT4文件系统，占据整个磁盘
    - 软件包只选择 ``OpenSSH server`` 以便保持最小化安装，后续clone出的镜像再按需安装
 

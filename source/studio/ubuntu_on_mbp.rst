@@ -96,6 +96,16 @@ MacBook Pro使用的显卡是NVIDIA GeForce GT 750M Mac Edition ，默认安装�
 
    sudo ubuntu-drivers autoinstall
 
+.. note::
+
+   稳定版本 ``nvidia-driver-390`` 不支持 DPMS ，会导致 ``vbetool dpms off`` 关闭屏幕命令无效，所以，我采用添加图形驱动仓库(也是Ubuntu维护)以便安装最新图形驱动(418)::
+
+      sudo add-apt-repository ppa:graphics-drivers/ppa
+      ubuntu-drivers devices
+      sudo ubuntu-drivers autoinstall
+
+   不过，目前测试 ``418`` 版本的Nvidia驱动，依然没有实现 ``vbetool dpms off`` ，这个问题待解决。
+
 .. _set_ubuntu_wifi:
 
 设置无线网络
