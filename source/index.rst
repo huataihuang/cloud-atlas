@@ -38,7 +38,9 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 讨论和鼓励
 ============
 
-如果你想和我讨论或者鼓励我一下，可以在 `Github上的Cloud Atlas创建issues <https://github.com/huataihuang/cloud-atlas/issues>`_ 。
+如果你想鼓励我，请访问 `GitHub上Cloud Atlas项目 <https://github.com/huataihuang/cloud-atlas>`_ ，请在右上角为我加一颗 ``Star`` 。
+
+如果你想和我讨论，可以在 `Github上的Cloud Atlas创建issues <https://github.com/huataihuang/cloud-atlas/issues>`_ 。
 
 如果你觉得我整理和编著的文章有价值，可以考虑 :ref:`donate` ，为我买一杯咖啡。
 

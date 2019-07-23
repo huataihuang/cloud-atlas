@@ -53,3 +53,21 @@
    # Restart Docker
    systemctl daemon-reload
    systemctl restart docker
+
+.. note::
+
+   如果这里docker启动失败，请使用 ``systemctl status docker`` 和 ``journalctl -xe`` 检查启动日志。我遇到的问题是 ``network controller`` 初始化失败::
+
+      Jul 23 20:16:17 worker4.huatai.me dockerd[16518]: failed to start daemon: Error initializing c: list bridge addresses failed: PredefinedLocalScopeDefaultNetworks List: [172.17.0.0/16 172.18.0.0/16 172.19.0.0/16 172.20.0.0/1]
+
+   参考 `Error starting daemon: Error initializing network controller: list bridge addresses failed: no available network #123 <https://github.com/docker/for-linux/issues/123#issuecomment-346546953>`_ 创建 ``docker0`` 网桥::
+
+      ip link add name docker0 type bridge
+      ip addr add dev docker0 172.17.0.1/16
+   
+   就可以正常启动 ``docker`` 服务。
+
+参考
+=======
+
+- `Container runtimes <https://kubernetes.io/docs/setup/production-environment/container-runtimes/>`_
