@@ -307,7 +307,7 @@ minikube异常排查
 minikube CRI安装排查
 ----------------------
 
-重新在 :ref:`ubuntu_on_mbp` (重装了Ubuntu 18.04 LTS Server版本) 之后，我重新部署了 :ref:`btrfs_in_studio` 并设置 :ref:`docker_btrfs_storage_driver` 。首次在裸主机上部署minikube，启动遇到报错::
+重新在 :ref:`ubuntu_on_mbp` (重装了Ubuntu 18.04 LTS Server版本) 之后，我重新部署了 :ref:`btrfs_in_studio` 并设置 :ref:`docker_btrfs` 。首次在裸主机上部署minikube，启动遇到报错::
 
    * Launching Kubernetes ...
    

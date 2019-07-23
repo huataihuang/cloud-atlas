@@ -1,4 +1,4 @@
-.. _docker_btrfs_storage_driver:
+.. _docker_btrfs:
 
 =========================
 Docker btrfs 存储驱动
@@ -40,7 +40,7 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
    ...
    3      51.4GB  251GB   200GB                docker
 
-.. _configure_docker_btrfs_storage_driver:
+.. _configure_docker_btrfs:
 
 配置Docker使用btrfs存储驱动
 ================================

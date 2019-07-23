@@ -20,7 +20,7 @@ DevStack源代码位于 https://git.openstack.org/cgit/openstack-dev/devstack
 
 最小化安装Linux，DevStack会尝试支持最新的两个LTS版本Ubuntu，以及最新的Fedora，CentOS/RHEL 7，以及Debian和OpenSUSE。当前测试最充分和完善运行的是Ubuntu 16.04版本。
 
-在我的模拟环境中通过 :ref:`clone_vm_in_studio` 创建 ``devstack`` 测试虚拟机::
+在我的模拟环境中通过 :ref:`clone_vm` 创建 ``devstack`` 测试虚拟机::
 
    virt-clone --connect qemu:///system --original ubuntu18.04 --name devstack --file /var/lib/libvirt/images/devstack.qcow2
    sudo virt-sysprep -d devstack --hostname devstack --root-password password:CHANGE_ME
@@ -38,7 +38,7 @@ DevStack源代码位于 https://git.openstack.org/cgit/openstack-dev/devstack
 
 .. note::
 
-   在我的模拟测试环境中使用了 :ref:`nested_virtualization_in_studio` ，所以DevStack内部可以运行KVM hypervisor进行管理。
+   在我的模拟测试环境中使用了 :ref:`nested_virtual` ，所以DevStack内部可以运行KVM hypervisor进行管理。
 
 在开始运行DevStack的 ``stack.sh`` 脚本之前，请在KVM虚拟机内部确认已经激活了KVM，即虚拟机内部具有 ``/dev/kvm`` 设备。这又这个设备存在，DevStack才会使用 ``/etc/nova.conf`` 配置中的 ``virt_type = kvm`` ，否则就会使用 QEMU 模拟 ``virt_type = qemu`` ，这会影响性能。
 

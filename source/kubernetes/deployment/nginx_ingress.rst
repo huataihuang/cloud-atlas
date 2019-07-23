@@ -1,4 +1,4 @@
-.. _deploy_nginx_ingress_controller:
+.. _nginx_ingress:
 
 =================================
 部署Nginx Ingress Controller

@@ -32,7 +32,7 @@ VMware Fusion基于 Intel 的 macOS操作系统运行的虚拟机系统，通过
 VMware Fusion克隆虚拟机
 =========================
 
-和 :ref:`clone_vm_in_studio` 类似，在VMware Fusion中，不仅支持快速clone虚拟机，而且借助macOS的 `APFS <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/mac/apfs.md>`_ 可以实现秒速复制，即 ``copy-on-write`` ，可以极大节约磁盘空间消耗。
+和 :ref:`clone_vm` 类似，在VMware Fusion中，不仅支持快速clone虚拟机，而且借助macOS的 `APFS <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/mac/apfs.md>`_ 可以实现秒速复制，即 ``copy-on-write`` ，可以极大节约磁盘空间消耗。
 
 .. note::
 

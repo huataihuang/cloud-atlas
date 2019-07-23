@@ -1,4 +1,4 @@
-.. _deploy_private_docker_registry_in_kubernetes:
+.. _docker_registry:
 
 ========================================
 在Kubernetes中部署私有Docker镜像仓库
@@ -44,7 +44,7 @@
 
 .. note::
 
-   本次部署采用的是 :ref:`minikube_deploy_nginx_ingrerss_controller` ，所以激活Nginx ingress controller非常简单。详细可参考 :ref:`deploy_nginx_ingress_controller` 。 
+   本次部署采用的是 :ref:`nginx_ingress` ，所以激活Nginx ingress controller非常简单。
 
 - 执行以下命令激活NGINX Ingress controller::
 
@@ -108,7 +108,7 @@
 
 .. note::
 
-   详细的解释和遇到过的异常排查过程，请参考 :ref:`deploy_nginx_ingress_controller`
+   详细的解释和遇到过的异常排查过程，请参考 :ref:`nginx_ingress`
 
 获取TLS证书
 ================
