@@ -85,7 +85,7 @@ Btrfs工具
 
    最初我采用的 :ref:`using_btrfs_in_studio` 方式，将一个btrfs文件系统划分多个子卷分别提供给KVM，Docker和home存储。
    
-   但是参考Docker官方文档，解决方案有所不同，需要将完整磁盘设备分给Docker管理，所以实际操作请参考 :ref:`docker_btrfs_storage_driver` 进行。
+   但是参考Docker官方文档，解决方案有所不同，需要将完整磁盘设备分给Docker管理，所以实际操作请参考 :ref:`docker_btrfs` 进行。
 
 增加分区4::
 
@@ -115,7 +115,7 @@ Btrfs工具
     3      51.4GB  251GB   200GB                docker
     4      251GB   500GB   249GB                ceph
 
-在初步完成了磁盘分区规划之后，我们现在有了可以用于btrfs的磁盘分区 ``/dev/sda3`` ，请参考 :ref:`configure_docker_btrfs_storage_driver` 完成Docker的btrfs存储引擎设置。如果你需要多种用途混合使用btrfs，也可以参考 :ref:`using_btrfs_in_studio` 。
+在初步完成了磁盘分区规划之后，我们现在有了可以用于btrfs的磁盘分区 ``/dev/sda3`` ，请参考 :ref:`configure_docker_btrfs` 完成Docker的btrfs存储引擎设置。如果你需要多种用途混合使用btrfs，也可以参考 :ref:`using_btrfs_in_studio` 。
 
 参考
 ==========

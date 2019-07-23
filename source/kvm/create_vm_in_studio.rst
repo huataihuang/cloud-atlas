@@ -76,7 +76,7 @@ Studio环境创建KVM虚拟机
    #%sudo    ALL=(ALL:ALL) ALL
    %sudo    ALL=(ALL:ALL) NOPASSWD:ALL
 
-- 参考 :ref:`ubuntu_static_ip` 设置好Guest虚拟机的静态IP地址，便于后续clone出虚拟机后调整
+- 参考 :ref:`netplan_static_ip` 设置好Guest虚拟机的静态IP地址，便于后续clone出虚拟机后调整
 
 - 在用户目录 ``~/.ssh/authorized_keys`` 中添加Host物理主机的公钥，以便能够方便登陆管理
 
@@ -116,4 +116,4 @@ Studio环境创建KVM虚拟机
 
 现在我们已经创建了第一个可用的KVM虚拟机，并且对虚拟机做了调整。现在用这个虚拟机作为模版，我们可以快速clone出实验所需的虚拟机：
 
-- :ref:`clone_vm_in_studio`
+- :ref:`clone_vm`

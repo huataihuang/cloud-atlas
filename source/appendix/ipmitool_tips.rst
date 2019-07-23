@@ -42,6 +42,16 @@ BMC难免存在BUG，有时候作为带外管理设备，自身也会死机。
 
    ipmitool -I lanplus -H IP  -U username -P password -E sol activate
 
+如果遇到其他ipmitool已经连接到控制台，再次访问会提示错误::
+
+   Info: SOL payload already active on another session
+
+解决方法是先断开当前的连接::
+
+   ipmitool -I lanplus -H IP  -U username -P password sol deactivate
+
+然后再重新连接。
+
 重启服务器
 =============
 

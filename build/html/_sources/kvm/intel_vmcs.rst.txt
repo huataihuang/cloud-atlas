@@ -4,7 +4,7 @@
 Intel VMCS
 ===============
 
-Intel Virtual Machine Control Structure (Intel VMCS) shadowing ，即 Intel虚拟机控制结构映射，是Intel 自2013年推出Haswell系列志强处理器提供的 :ref:`hardware_virtualization` 技术中重要的改进。
+Intel Virtual Machine Control Structure (Intel VMCS) shadowing ，即 Intel虚拟机控制结构映射，是Intel 自2013年推出Haswell系列志强处理器提供的 :ref:`hardware_virtual` 技术中重要的改进。
 
 .. note::
 

@@ -18,6 +18,8 @@
 
    appendix_base_os.rst
    ubuntu_server.rst
+   netplan.rst
+   efi_system_partition.rst
    upgrade_ubuntu.rst
    ubuntu_desktop.rst
    using_btrfs_in_studio.rst
@@ -29,6 +31,7 @@
    pi_quick_start.rst
    pi_zero_net_gadget.rst
    ipmitool_tips.rst
+   dnf.rst
 
 
 .. only::  subproject and html

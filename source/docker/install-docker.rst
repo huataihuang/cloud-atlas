@@ -11,7 +11,7 @@
 
 - 在KVM虚拟机中运行Docker
   
-:ref:`clone_vm_in_studio` 构建了一个名为 ``dockerstack`` 的KVM虚拟机，在KVM虚拟机内部测试各种Docker的功能。这种方式可以保持Host物理主机纯净，不容易搞坏基础环境。虚拟机可以不断clone重建，即使偶尔失误异常也能快速恢复测试环境。
+:ref:`clone_vm` 构建了一个名为 ``dockerstack`` 的KVM虚拟机，在KVM虚拟机内部测试各种Docker的功能。这种方式可以保持Host物理主机纯净，不容易搞坏基础环境。虚拟机可以不断clone重建，即使偶尔失误异常也能快速恢复测试环境。
 
 - 在物理主机MacBook Pro上运行Docker
 

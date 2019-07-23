@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="copyright" title="Copyright" href="../copyright.html" />
-    <link rel="next" title="升级Ubuntu" href="upgrade_ubuntu.html" />
+    <link rel="next" title="netplan网络配置" href="netplan.html" />
     <link rel="prev" title="图形基础操作系统" href="appendix_base_os.html" /> 
 </head>
 
@@ -96,10 +96,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../machine_learning/index.html">Machine Learning Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kali_linux/index.html">Kali Linux Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../real/index.html">Real Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">附录</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="appendix_base_os.html">图形基础操作系统</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Ubuntu Server</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">安装</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#shell">软件包和shell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ip">配置静态IP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">串口通讯</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#timezone">timezone</a></li>
 </ul>
 </li>
@@ -107,17 +111,19 @@
 <li class="toctree-l4"><a class="reference internal" href="#hwe">安装HWE软件栈</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">无线网卡</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">设置合上笔记本屏幕</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">无线网卡</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">设置合上笔记本屏幕</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fbvesa">字符终端关闭fbvesa</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#xfce4">安装Xfce4桌面(可选)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#startx">默认字符终端+startx</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#x">默认启动X</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">调整xfce4桌面</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">调整xfce4桌面</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="netplan.html">netplan网络配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="efi_system_partition.html">EFI系统分区</a></li>
 <li class="toctree-l2"><a class="reference internal" href="upgrade_ubuntu.html">升级Ubuntu</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ubuntu_desktop.html">Ubuntu Desktop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="using_btrfs_in_studio.html">在Stuido中使用btrfs文件系统</a></li>
@@ -129,6 +135,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pi_quick_start.html">树莓派(Raspberry Pi)快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pi_zero_net_gadget.html">树莓派Zero设置USB网络通讯(Ethernet Gadget)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ipmitool_tips.html">IPMI工具ipmitool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dnf.html">DNF包管理器</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../copyright.html">Copyright</a></li>
@@ -214,13 +221,80 @@
 <li>最小化安装</li>
 </ul>
 <p>最小化安装对于运行云计算平台OpenStack，以及兼顾一些日常工作已经足够。没有必要完整安装大量的应用软件。</p>
+<div class="section" id="shell">
+<h3>软件包和shell<a class="headerlink" href="#shell" title="Permalink to this headline">¶</a></h3>
 <ul>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 需要设置主机名反向解析(添加 <code class="docutils literal notranslate"><span class="pre">xcloud</span></code> )，否则会导致很多操作命令响应缓慢:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>    <span class="n">localhost</span><span class="o">.</span><span class="n">localdomain</span>    <span class="n">localhost</span> <span class="n">xcloud</span>
+<span class="c1"># 如果有固定IP，则设置类似</span>
+<span class="c1"># 192.168.1.24  xcloud</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">设置sudo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">udo   ALL=(ALL:ALL) NOPASSWD:ALL&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sudoers</span>
+</pre></div>
+</div>
+</li>
 <li><p class="first">安装Server版本之后，有一些必要的软件包推荐安装:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">nmon</span> <span class="n">network</span><span class="o">-</span><span class="n">manager</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">parted</span> <span class="n">nmon</span> <span class="n">network</span><span class="o">-</span><span class="n">manager</span> <span class="n">zsh</span> <span class="n">openconnect</span> <span class="n">ipmitool</span> <span class="n">lm</span><span class="o">-</span><span class="n">sensors</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">安装 <code class="docutils literal notranslate"><span class="pre">oh</span> <span class="pre">my</span> <span class="pre">zsh</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">oh</span> <span class="pre">my</span> <span class="pre">zsh</span></code> 添加用户名和主机提示，在 <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code> 最后添加一行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">PROMPT</span><span class="o">=</span><span class="s1">&#39;%(!.%{</span><span class="si">%F{yellow}</span><span class="s1">%}.)$USER@%{$fg[white]%}%M $</span><span class="si">{ret_status}</span><span class="s1"> %{$fg[cyan]%}</span><span class="si">%c</span><span class="s1">%{$reset_color%} $(git_prompt_info)&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">~/.screenrc</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#source /etc/screenrc</span>
+<span class="n">altscreen</span> <span class="n">off</span>
+<span class="n">hardstatus</span> <span class="n">none</span>
+<span class="n">caption</span> <span class="n">always</span> <span class="s2">&quot;%{= wk}%</span><span class="si">{wk}</span><span class="s2">%-Lw%</span><span class="si">{rw}</span><span class="s2"> %n+</span><span class="si">%f</span><span class="s2"> %t %</span><span class="si">{wk}</span><span class="s2">%+Lw %=</span><span class="si">%c</span><span class="s2">%{= R}%{-}&quot;</span>
+
+<span class="n">shelltitle</span> <span class="s2">&quot;$ |zsh&quot;</span>
+<span class="n">defscrollback</span> <span class="mi">50000</span>
+<span class="n">startup_message</span> <span class="n">off</span>
+<span class="n">escape</span> <span class="o">^</span><span class="n">aa</span>
+
+<span class="n">termcapinfo</span> <span class="n">xterm</span><span class="o">|</span><span class="n">xterms</span><span class="o">|</span><span class="n">xs</span><span class="o">|</span><span class="n">rxvt</span> <span class="n">ti</span><span class="o">@</span><span class="p">:</span><span class="n">te</span><span class="o">@</span> <span class="c1"># scroll bar support</span>
+<span class="n">term</span> <span class="n">rxvt</span> <span class="c1"># mouse support</span>
+
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">k</span><span class="p">;</span> <span class="n">screen</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">F1</span> <span class="n">prev</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">F2</span> <span class="nb">next</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">k</span> <span class="n">kb</span> <span class="n">stuff</span> <span class="o">^</span><span class="n">H</span>
+<span class="n">bind</span> <span class="n">x</span> <span class="n">remove</span>
+<span class="n">bind</span> <span class="n">j</span> <span class="nb">eval</span> <span class="s2">&quot;focus down&quot;</span>
+<span class="n">bind</span> <span class="n">k</span> <span class="nb">eval</span> <span class="s2">&quot;focus up&quot;</span>
+<span class="n">bind</span> <span class="n">s</span> <span class="nb">eval</span> <span class="s2">&quot;split&quot;</span> <span class="s2">&quot;focus down&quot;</span> <span class="s2">&quot;prev&quot;</span>
+<span class="n">vbell</span> <span class="n">off</span>
+<span class="n">shell</span> <span class="o">-</span><span class="n">zsh</span>
 </pre></div>
 </div>
 </li>
 </ul>
+</div>
+<div class="section" id="ip">
+<h3>配置静态IP<a class="headerlink" href="#ip" title="Permalink to this headline">¶</a></h3>
+<p>请参考 <a class="reference internal" href="netplan.html#netplan-static-ip"><span class="std std-ref">使用netplan配置静态IP</span></a> 配置服务器静态IP地址，如果采用多网卡bonding，则参考 <a class="reference internal" href="netplan.html#netplan-bonding"><span class="std std-ref">netplan配置bonding</span></a></p>
+</div>
+<div class="section" id="id3">
+<h3>串口通讯<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>物理服务器通常支持串口管理，可以通过 <a class="reference internal" href="ipmitool_tips.html#ipmitool-tips"><span class="std std-ref">IPMI工具ipmitool</span></a> 实现远程管理和维护，但是需要操作系统内核配置。编辑 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;ipv6.disable=1 crashkernel=auto console=tty0 console=ttyS0,115200n8&quot;</span>
+</pre></div>
+</div>
+<p>然后更新grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="timezone">
 <h3>timezone<a class="headerlink" href="#timezone" title="Permalink to this headline">¶</a></h3>
 <p>安装完成Unbuntu Server会发现系统时钟不是本地时钟（东8区），这个解决方法是修改 <code class="docutils literal notranslate"><span class="pre">/etc/localtime</span></code> 这个软链接文件的指向:</p>
@@ -262,16 +336,16 @@
 </div>
 </div>
 </div>
-<div class="section" id="id3">
-<h2>无线网卡<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>无线网卡<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>我在安装Ubuntu Server时，采用了一块USB网卡连接有线网络，这样可以完整把整个安装过程进行结束。安装完成之后，通过以下方式安装驱动:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
 <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="o">--</span><span class="n">reinstall</span> <span class="n">install</span> <span class="n">bcmwl</span><span class="o">-</span><span class="n">kernel</span><span class="o">-</span><span class="n">source</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id4">
-<h2>设置合上笔记本屏幕<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h2>设置合上笔记本屏幕<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>在Server字符终端方式使用中，实际上都是通过远程登陆服务器方式维护，所以通常会合上笔记本屏幕。和桌面版 <a class="reference internal" href="ubuntu_hibernate.html#ubuntu-hibernate"><span class="std std-ref">Ubuntu Hibernate休眠</span></a> 不同，我期望合上笔记本时候不要休眠继续工作，所以配置 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/logind.conf</span></code> 添加:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HandleLidSwitch</span><span class="o">=</span><span class="n">ignore</span>
 <span class="n">HandleLidSwitchDocked</span><span class="o">=</span><span class="n">ignore</span>
@@ -404,8 +478,8 @@
 <p class="last">不过实践中遇到的问题较多</p>
 </div>
 </div>
-<div class="section" id="id6">
-<h3>调整xfce4桌面<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h3>调整xfce4桌面<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><code class="docutils literal notranslate"><span class="pre">Settings</span> <span class="pre">=&gt;</span> <span class="pre">Appearance</span></code><ul>
 <li>选择 <code class="docutils literal notranslate"><span class="pre">Xfce-flat</span></code> 作为 Style</li>
@@ -435,7 +509,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="upgrade_ubuntu.html" class="btn btn-neutral float-right" title="升级Ubuntu" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="netplan.html" class="btn btn-neutral float-right" title="netplan网络配置" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="appendix_base_os.html" class="btn btn-neutral float-left" title="图形基础操作系统" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

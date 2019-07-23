@@ -10,11 +10,11 @@ KVM Atlas
    hypervisor.rst
    kvm_architecture.rst
    libvirt.rst
-   hardware_virtualization.rst
+   hardware_virtual.rst
    intel_vmcs.rst
    create_vm_in_studio.rst
    clone_vm_in_studio.rst
-   nested_virtualization_in_studio.rst
+   nested_virtual.rst
    add_resize_virtual_disk_to_guest_on_fly.rst
    libvirt_static_ip_in_studio.rst
    kvm_live_migration.rst

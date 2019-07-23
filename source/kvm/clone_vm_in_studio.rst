@@ -1,4 +1,4 @@
-.. _clone_vm_in_studio:
+.. _clone_vm:
 
 ==========================
 Studio环境复制KVM虚拟机
@@ -107,11 +107,11 @@ clone虚拟机
 
 .. note::
 
-   启动虚拟机之后，按照上述方法修订虚拟机配置并启用SSH服务，然后参考 :ref:`nested_virtualization_in_studio` 配置好用于进一步模拟集群的部署。
+   启动虚拟机之后，按照上述方法修订虚拟机配置并启用SSH服务，然后参考 :ref:`nested_virtual` 配置好用于进一步模拟集群的部署。
 
 下一步
 =============
 
 目前我们得到的多个虚拟机是从模版中clone出来的，虽然我们能不断clone出虚拟机来模拟集群，但是默认clone出来的虚拟机只能作为guest来运行，在这样的虚拟机内部不能模拟物理服务器来运行虚拟化软件。接下来，我们要做一个非常关键的一步改造，把clone出来的虚拟机修改成能够嵌套运行虚拟机的虚拟机：
 
-- :ref:`nested_virtualization_in_studio`
+- :ref:`nested_virtual`

@@ -15,12 +15,75 @@ Ubuntu Server
 
 最小化安装对于运行云计算平台OpenStack，以及兼顾一些日常工作已经足够。没有必要完整安装大量的应用软件。
 
+软件包和shell
+-----------------
+
+- ``/etc/hosts`` 需要设置主机名反向解析(添加 ``xcloud`` )，否则会导致很多操作命令响应缓慢::
+
+   127.0.0.1    localhost.localdomain    localhost xcloud
+   # 如果有固定IP，则设置类似
+   # 192.168.1.24  xcloud
+
+- 设置sudo::
+
+   echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 - 安装Server版本之后，有一些必要的软件包推荐安装::
 
-   sudo apt install nmon network-manager
+   sudo apt install parted nmon network-manager zsh openconnect ipmitool lm-sensors
+
+- 安装 ``oh my zsh`` ::
+
+   sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+
+- ``oh my zsh`` 添加用户名和主机提示，在 ``~/.zshrc`` 最后添加一行::
+
+   export PROMPT='%(!.%{%F{yellow}%}.)$USER@%{$fg[white]%}%M ${ret_status} %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
+
+- ``~/.screenrc`` ::
+
+   #source /etc/screenrc
+   altscreen off
+   hardstatus none
+   caption always "%{= wk}%{wk}%-Lw%{rw} %n+%f %t %{wk}%+Lw %=%c%{= R}%{-}"
+   
+   shelltitle "$ |zsh"
+   defscrollback 50000
+   startup_message off
+   escape ^aa
+   
+   termcapinfo xterm|xterms|xs|rxvt ti@:te@ # scroll bar support
+   term rxvt # mouse support
+   
+   bindkey -k k; screen
+   bindkey -k F1 prev
+   bindkey -k F2 next
+   bindkey -d -k kb stuff ^H
+   bind x remove
+   bind j eval "focus down"
+   bind k eval "focus up"
+   bind s eval "split" "focus down" "prev"
+   vbell off
+   shell -zsh
+
+配置静态IP
+--------------
+
+请参考 :ref:`netplan_static_ip` 配置服务器静态IP地址，如果采用多网卡bonding，则参考 :ref:`netplan_bonding`
+
+串口通讯
+------------
+
+物理服务器通常支持串口管理，可以通过 :ref:`ipmitool_tips` 实现远程管理和维护，但是需要操作系统内核配置。编辑 ``/etc/default/grub`` 设置::
+
+   GRUB_CMDLINE_LINUX="ipv6.disable=1 crashkernel=auto console=tty0 console=ttyS0,115200n8"
+
+然后更新grub::
+
+   update-grub
 
 timezone
-----------
+---------
 
 安装完成Unbuntu Server会发现系统时钟不是本地时钟（东8区），这个解决方法是修改 ``/etc/localtime`` 这个软链接文件的指向::
 
