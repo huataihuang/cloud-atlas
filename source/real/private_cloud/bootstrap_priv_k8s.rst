@@ -67,6 +67,59 @@
    
    就可以正常启动 ``docker`` 服务。
 
+服务器环境
+===========
+
+- 关闭SELinux::
+
+   setenforce 0
+
+并且修改 ``/etc/sysconfig/selinux`` 设置 ``SELINUX=disabled`` 确保操作系统重启后依然禁用SELinux。
+
+- 执行以下命令确保iptables不会被绕过::
+
+   cat <<EOF >  /etc/sysctl.d/k8s.conf
+   net.bridge.bridge-nf-call-ip6tables = 1
+   net.bridge.bridge-nf-call-iptables = 1
+   EOF
+   sysctl --system
+
+- 确保 ``br_netfilter`` 模块已经加载::
+
+   lsmod | grep br_netfilter
+
+安装软件包
+==============
+
+- 按照服务器环境CentOS 7安装软件包::
+
+   cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+   [kubernetes]
+   name=Kubernetes
+   baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+   enabled=1
+   gpgcheck=1
+   repo_gpgcheck=1
+   gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+   EOF
+   
+   # Set SELinux in permissive mode (effectively disabling it)
+   setenforce 0
+   sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+   
+   yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+   
+   systemctl enable --now kubelet
+
+.. note::
+
+   安装会遇到GFW阻碍，所以请参考 :ref:`openconnect_vpn` 搭好翻墙梯子之后再执行安装。
+
+配置管控节点cgroup驱动
+=======================
+
+在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 ``/var/lib/kubelet/kubeadm-flags.env`` ，所以在我们的部署环境中不需要设置 ``cgroup-driver`` 值。
+
 参考
 =======
 
