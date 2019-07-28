@@ -32,7 +32,7 @@
 操作系统
 ============
 
-私有云物理服务器采用CentOS 7.x操作系统，采用最小化安装，并升级到最新版本::
+- 私有云物理服务器采用CentOS 7.x操作系统，采用最小化安装，并升级到最新版本::
 
    sudo yum update
    sudo yum upgrade
@@ -40,3 +40,9 @@
 .. note::
 
    在CentOS 8正式推出以后，将升级到8.x系列，以获得更好的软件性能及特性。
+
+- 安装必要软件包::
+
+   yum install nmon
+
+- 关闭swap（Kubernetes运行要求节点关闭swap)

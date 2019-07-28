@@ -38,7 +38,7 @@
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
     <link rel="next" title="附录" href="../../appendix/index.html" />
-    <link rel="prev" title="私有云计算构建" href="index.html" /> 
+    <link rel="prev" title="私有云KVM环境" href="priv_kvm.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -100,9 +100,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../real_concept.html">真实架构的构想</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../prepare/index.html">真实云计算的构建准备</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">引导私有云Kubernetes</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#docker">安装Docker运行环境</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">服务器环境</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">安装软件包</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cgroup">配置管控节点cgroup驱动</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -255,7 +259,68 @@
 </div>
 </div>
 <div class="section" id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>服务器环境<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">关闭SELinux:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setenforce</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>并且修改 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/selinux</span></code> 设置 <code class="docutils literal notranslate"><span class="pre">SELINUX=disabled</span></code> 确保操作系统重启后依然禁用SELinux。</p>
+<ul>
+<li><p class="first">执行以下命令确保iptables不会被绕过:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span>  <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">EOF</span>
+<span class="n">sysctl</span> <span class="o">--</span><span class="n">system</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">确保 <code class="docutils literal notranslate"><span class="pre">br_netfilter</span></code> 模块已经加载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsmod</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">br_netfilter</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>安装软件包<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">按照服务器环境CentOS 7安装软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">yum</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
+<span class="p">[</span><span class="n">kubernetes</span><span class="p">]</span>
+<span class="n">name</span><span class="o">=</span><span class="n">Kubernetes</span>
+<span class="n">baseurl</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">el7</span><span class="o">-</span><span class="n">x86_64</span>
+<span class="n">enabled</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">gpgcheck</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">repo_gpgcheck</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">gpgkey</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">yum</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">rpm</span><span class="o">-</span><span class="n">package</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span>
+<span class="n">EOF</span>
+
+<span class="c1"># Set SELinux in permissive mode (effectively disabling it)</span>
+<span class="n">setenforce</span> <span class="mi">0</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">selinux</span><span class="o">/</span><span class="n">config</span>
+
+<span class="n">yum</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span> <span class="o">--</span><span class="n">disableexcludes</span><span class="o">=</span><span class="n">kubernetes</span>
+
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">kubelet</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">安装会遇到GFW阻碍，所以请参考 <a class="reference internal" href="../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 搭好翻墙梯子之后再执行安装。</p>
+</div>
+</div>
+<div class="section" id="cgroup">
+<h2>配置管控节点cgroup驱动<a class="headerlink" href="#cgroup" title="Permalink to this headline">¶</a></h2>
+<p>在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 <code class="docutils literal notranslate"><span class="pre">/var/lib/kubelet/kubeadm-flags.env</span></code> ，所以在我们的部署环境中不需要设置 <code class="docutils literal notranslate"><span class="pre">cgroup-driver</span></code> 值。</p>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">Container runtimes</a></li>
 </ul>
@@ -273,7 +338,7 @@
         <a href="../../appendix/index.html" class="btn btn-neutral float-right" title="附录" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="私有云计算构建" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="priv_kvm.html" class="btn btn-neutral float-left" title="私有云KVM环境" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

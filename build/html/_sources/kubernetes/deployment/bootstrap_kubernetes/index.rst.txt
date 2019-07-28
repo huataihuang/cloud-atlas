@@ -7,4 +7,5 @@ Kubernetes集群引导
 .. toctree::
    :maxdepth: 1
 
-   cluster_kubeadm.rst
+   kubeadm.rst
+   create_k8s_cluster.rst
