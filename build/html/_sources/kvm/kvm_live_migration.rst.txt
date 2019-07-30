@@ -162,7 +162,7 @@ NFS客户端挂载
 测试虚拟机
 =====================
 
-在 :ref:`create_vm_in_studio` 创建过第一个虚拟机名为 `ubuntu18.04` ，我们现在将这个虚拟机从 ``xcloud`` 物理服务器上复制到支持嵌套虚拟化的 ``devstack-1`` 虚拟机中，存放到 ``/var/lib/libvirt/images`` 目录下::
+在 :ref:`create_vm` 创建过第一个虚拟机名为 `ubuntu18.04` ，我们现在将这个虚拟机从 ``xcloud`` 物理服务器上复制到支持嵌套虚拟化的 ``devstack-1`` 虚拟机中，存放到 ``/var/lib/libvirt/images`` 目录下::
 
 - 在 ``xcloud`` 上执行::
 

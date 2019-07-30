@@ -1,4 +1,4 @@
-.. _create_vm_in_studio:
+.. _create_vm:
 
 =============================
 Studio环境创建KVM虚拟机

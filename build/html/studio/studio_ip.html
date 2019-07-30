@@ -95,6 +95,8 @@
 <li class="toctree-l2"><a class="reference internal" href="btrfs_in_studio.html">Studio环境的Btrfs存储</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kubenetes_in_studio.html">Studio中的kubernetes</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Studio测试环境IP分配</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">物理机/虚拟化/容器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#macbook">MacBook模拟集群</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#vmwareip">VMware虚拟环境IP分配</a></li>
 </ul>
 </li>
@@ -191,14 +193,27 @@
 <span id="studio-ip"></span><h1>Studio测试环境IP分配<a class="headerlink" href="#studioip" title="Permalink to this headline">¶</a></h1>
 <p>在模拟测试环境中，采用了KVM虚拟化来实现单台主机（MacBook Pro）来模拟集群的部署，以下是部署的步骤，如果你准备借鉴我的实验环境部署方法，可以先跳到以下章节参考:</p>
 <ul class="simple">
-<li><a class="reference internal" href="../kvm/create_vm_in_studio.html#create-vm-in-studio"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a></li>
-<li><a class="reference internal" href="../kvm/clone_vm_in_studio.html#clone-vm"><span class="std std-ref">Studio环境复制KVM虚拟机</span></a></li>
+<li><a class="reference internal" href="../kvm/create_vm.html#create-vm"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a></li>
+<li><a class="reference internal" href="../kvm/clone_vm.html#clone-vm"><span class="std std-ref">复制KVM虚拟机</span></a></li>
 <li><a class="reference internal" href="../kvm/nested_virtual.html#nested-virtual"><span class="std std-ref">Studio嵌套虚拟化</span></a></li>
 <li><a class="reference internal" href="../kvm/libvirt_static_ip_in_studio.html#libvirt-static-ip-in-studio"><span class="std std-ref">Studio环境libvirt静态分配IP</span></a></li>
 </ul>
+<div class="section" id="id1">
+<h2>物理机/虚拟化/容器<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>纵观我的 <a class="reference internal" href="introduce_my_studio.html#introduce-my-studio"><span class="std std-ref">模拟云计算的Studio</span></a> 依旧 <a class="reference internal" href="../real/real_concept.html#real-concept"><span class="std std-ref">真实架构的构想</span></a> ，始终都是结婚了物理主机、KVM虚拟化和容器即技术(Kubernetes)来实现的。为了区分不同的主机，我规划主机命名策略:</p>
+<ul class="simple">
+<li>worker-X <a class="reference internal" href="../real/index.html#real"><span class="std std-ref">Real Atlas</span></a> 真实物理主机</li>
+<li>machine-X 使用KVM的 <a class="reference internal" href="../kvm/nested_virtual.html#nested-virtual"><span class="std std-ref">Studio嵌套虚拟化</span></a> 技术模拟物理主机</li>
+<li>vm-X 使用KVM虚拟化技术虚拟出来的Guest主机，通用虚拟机，不使用 <a class="reference internal" href="../kvm/nested_virtual.html#nested-virtual"><span class="std std-ref">Studio嵌套虚拟化</span></a> 技术
+- kube-X 在VKM虚拟机运行的Kubernetes集群节点</li>
+<li>vc-X (较少使用)直接命名的运行容器，通常会做一些容器验证测试。不过，在 <a class="reference internal" href="../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 环境中通常容器会起一个和应用有关的命名，例如 <code class="docutils literal notranslate"><span class="pre">mangdb-1</span></code></li>
+</ul>
+</div>
+<div class="section" id="macbook">
+<h2>MacBook模拟集群<a class="headerlink" href="#macbook" title="Permalink to this headline">¶</a></h2>
 <p>为方便测试环境服务部署，部分关键服务器采用了静态IP地址，解析地址如下（配置在Host主机上）</p>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">hosts</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">hosts</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -239,7 +254,8 @@
 38
 39
 40
-41</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Host启动时启动：</span>
+41
+42</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Host启动时启动：</span>
 <span class="c1"># ceph-1 / ceph-2 / ceph-3 / ceph-4 / ceph -5 - 提供分布式存储</span>
 <span class="c1"># machine-1 / machine-2 / machine-3 - 提供物理主机模拟</span>
 <span class="c1"># 嵌套虚拟化 =&gt;  </span>
@@ -248,6 +264,7 @@
 
 <span class="c1"># KVM libvirt virbr0: 192.168.122.0/24</span>
 <span class="m">192</span>.168.122.2   ubuntu18-04 ubuntu18-04.huatai.me
+<span class="m">192</span>.168.122.3   centos7 centos7.huatai.me
 
 <span class="c1"># 测试各种技术的临时主机，随时可能重建(基于devstack)</span>
 <span class="m">192</span>.168.122.10  nullstack nullstack.huatai.me
@@ -282,6 +299,7 @@
 <span class="m">192</span>.168.7.10 kali
 </pre></div>
 </td></tr></table></div>
+</div>
 </div>
 <div class="section" id="vmwareip">
 <h2>VMware虚拟环境IP分配<a class="headerlink" href="#vmwareip" title="Permalink to this headline">¶</a></h2>

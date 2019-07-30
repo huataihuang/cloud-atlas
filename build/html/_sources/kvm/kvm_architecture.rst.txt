@@ -9,4 +9,4 @@ KVM虚拟化
 
 在 :ref:`studio` 我提到了我的模拟云计算技术的方法，现在在介绍了KVM虚拟化的概况以后，我们真正动手实践一下：
 
-- :ref:`create_vm_in_studio`
+- :ref:`create_vm`
