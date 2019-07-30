@@ -32,7 +32,7 @@
 
 .. note::
 
-   构建 Ubuntu 模版guest系统，则参考 :ref:`create_vm_in_studio` 
+   构建 Ubuntu 模版guest系统，则参考 :ref:`create_vm` 
 
 虚拟机串口设置
 ----------------
@@ -100,3 +100,27 @@
 然后在控制台重启生效::
 
    /etc/init.d/network restart
+
+复制KVM虚拟机
+=================
+
+.. note::
+
+   详细克隆KVM虚拟机请参考 :ref:`clone_vm` ，这里仅提供一个概述。因为在 :ref:`real` 中我将部署OpenStack作为KVM集群的工作平台。
+
+- 暂停虚拟机::
+
+   virsh suspend centos7
+
+- clone虚拟机::
+
+   virt-clone --connect qemu:///system --original centos7 --name devstack --file /var/lib/libvirt/images/devstack.qcow2
+
+- 使用 ``virt-sysprep`` 初始化虚拟机::
+
+   virt-sysprep -d devstack --hostname devstack --root-password password:CHANGE_ME
+
+- 启动虚拟机，进一步定制::
+
+   virsh start devstack
+

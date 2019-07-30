@@ -100,7 +100,7 @@ CRI0-O      /var/run/crio/crio.sock
       net.bridge.bridge-nf-call-iptables = 1
       EOF
       sysctl --system
-
+   
    - 确保先加载 ``br_netfilter`` 模块已经加载，通过 ``lsmod | grep br_netfilter`` 确保，如果没有加载，则执行以下命令加载该内核模块::
 
       modprobe br_netfilter
@@ -151,7 +151,17 @@ CentOS, RHEL, Fedora
 在管控平台节点配置kubelet使用cgroup driver
 =============================================
 
-当在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 ``/var/lib/kubelet/kubeadm-flags.env`` 。不过对于其他CRI，则需要修改 ``/etc/default/kubelet`` 设置 ``cgroup-driver`` 值，类似::
+当在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 ``/var/lib/kubelet/kubeadm-flags.env`` 。
+
+.. note::
+
+   在使用Docker环境中，kubelet设置 ``/var/lib/kubelet/kubeadm-flags.env`` 如下::
+
+      KUBELET_KUBEADM_ARGS="--cgroup-driver=systemd --network-plugin=cni --pod-infra-container-image=k8s.gcr.io/pause:3.1"
+
+   这个文件是 ``kubeadmin init`` 和 ``kubeadm join`` 时使用。
+
+不过对于其他CRI，则需要修改 ``/etc/default/kubelet`` 设置 ``cgroup-driver`` 值，类似::
 
    KUBELET_EXTRA_ARGS=--cgroup-driver=<value>
 
@@ -161,6 +171,14 @@ CentOS, RHEL, Fedora
 
    systemctl daemon-reload
    systemctl restart kubelet
+
+.. note::
+
+   这里还没有初始化集群，可能会无法启动kubelet，出现报错::
+
+      Jul 29 17:25:11 devstack kubelet[10529]: F0729 17:25:11.339363   10529 server.go:198] failed to load Kubelet config file /var/lib/kubelet/config.yaml, error failed to read kubelet config file "/var/lib/kubelet/config.yaml", error: open /var/lib/kubelet/config.yaml: no such file or directory
+
+   通过 ``kubeadm init --pod-network-cidr=10.244.0.0/16`` 初始化集群。 见 :ref:`create_k8s_cluster`
 
 kubelet排查
 ===========
@@ -285,7 +303,9 @@ kubelet排查
    5:cpuacct,cpu,cpuset:/
    ...
 
+.. note::
 
+   `unified-hierarchy <https://lwn.net/Articles/601923/>`_ 是下一代cgrooup v2接口的特性，请参考 `cgroupv2: Linux's new unified control group system <https://qconlondon.com/system/files/presentation-slides/cgroupv2-qcon.pdf>`_ 介绍。目前看，内核 4.6以上结合systemd v226以上能够实现这个特性。
 
 参考
 ========

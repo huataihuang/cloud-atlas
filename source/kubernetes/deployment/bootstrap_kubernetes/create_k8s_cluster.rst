@@ -49,6 +49,17 @@
 
 .. note::
 
+   如果运行了firewalld，则需要确保端口 ``6443 10250`` 对外开放::
+
+      sudo firewall-cmd --zone=public --add-port=6443/tcp --permanent
+      sudo firewall-cmd --zone=public --add-port=10250/tcp --permanent
+
+   参考 `Setting up a Kubernetes cluster across 2 virtualized CentOS nodes <https://www.kevinhooke.com/2017/10/08/setting-up-a-kubernetes-cluster-across-2-virtualized-centos-nodes/>`_ ，当然也可以直接关闭::
+
+      systemctl stop firewalld
+
+.. note::
+
    上述 ``kubeadm init`` 要求主机已经正确运行了kubelet，否则会出现报错::
 
       [kubelet-check] It seems like the kubelet isn't running or healthy.

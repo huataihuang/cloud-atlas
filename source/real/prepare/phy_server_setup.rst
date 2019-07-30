@@ -43,6 +43,13 @@
 
 - 安装必要软件包::
 
-   yum install nmon
+   yum install nmon which sudo nmap-ncat mlocate net-tools rsyslog file ntp ntpdate \
+   wget tar bzip2 screen sysstat unzip nfs-utils parted lsof man bind-utils \
+   gcc gcc-c++ make telnet flex autoconf automake ncurses-devel crontabs \
+   zlib-devel git vim
 
 - 关闭swap（Kubernetes运行要求节点关闭swap)
+
+- 安装EPEL::
+
+   yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm

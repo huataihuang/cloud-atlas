@@ -75,7 +75,7 @@ tar包手工安装多重启动的ubuntu
 
 .. note::
 
-   请参考 :ref:`create_vm_in_studio` 创建一个基本Ubuntu系统，做好系统初始化以便减少后续的重复工作。
+   请参考 :ref:`create_vm` 创建一个基本Ubuntu系统，做好系统初始化以便减少后续的重复工作。
 
    注意：启用了UEFI支持，因为安装的现代服务器都是采用UEFI启动。
 
