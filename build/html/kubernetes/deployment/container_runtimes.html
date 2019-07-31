@@ -38,7 +38,7 @@
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
     <link rel="next" title="Kubernetes集群引导" href="bootstrap_kubernetes/index.html" />
-    <link rel="prev" title="Kubernetes部署" href="index.html" /> 
+    <link rel="prev" title="Kubernetes部署服务器" href="k8s_hosts.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../concepts/index.html">Kubernetes概念辨析</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Kubernetes部署</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="k8s_hosts.html">Kubernetes部署服务器</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">容器运行环境</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#cgroup">Cgroup驱动</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#docker">Docker</a></li>
@@ -281,6 +282,7 @@
   <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">docker</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">linux</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">ce</span><span class="o">.</span><span class="n">repo</span>
 
 <span class="c1">## Install Docker CE.</span>
+<span class="c1"># 我部署的测试环境采用默认docker-ce未指定版本</span>
 <span class="n">yum</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">docker</span><span class="o">-</span><span class="n">ce</span><span class="o">-</span><span class="mf">18.06</span><span class="o">.</span><span class="mf">2.</span><span class="n">ce</span>
 
 <span class="c1">## Create /etc/docker directory.</span>
@@ -306,7 +308,43 @@
 <span class="c1"># Restart Docker</span>
 <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
 <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+
+<span class="c1"># Enable Docker</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="n">docker</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>强烈推荐采用pssh工具来并发执行安装，例如将上述所有主机IP地址保存为 <code class="docutils literal notranslate"><span class="pre">kube</span></code> 文件，然后执行以下命令批量安装更新:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo yum install yum-utils device-mapper-persistent-data lvm2 -y&#39;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo&#39;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo yum update &amp;&amp; sudo yum install docker-ce -y&#39;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo mkdir /etc/docker&#39;</span>
+
+<span class="n">cat</span> <span class="o">&gt;</span> <span class="n">daemon</span><span class="o">.</span><span class="n">json</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
+<span class="p">{</span>
+  <span class="s2">&quot;exec-opts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;native.cgroupdriver=systemd&quot;</span><span class="p">],</span>
+  <span class="s2">&quot;log-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;log-opts&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;max-size&quot;</span><span class="p">:</span> <span class="s2">&quot;100m&quot;</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;storage-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;overlay2&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;storage-opts&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">&quot;overlay2.override_kernel_check=true&quot;</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+<span class="n">EOF</span>
+
+<span class="n">pscp</span><span class="o">.</span><span class="n">pssh</span> <span class="o">-</span><span class="n">h</span> <span class="n">kube</span> <span class="n">daemon</span><span class="o">.</span><span class="n">json</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">daemon</span><span class="o">.</span><span class="n">json</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo mv /tmp/daemon.json /etc/docker/daemon.json&#39;</span>
+
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo mkdir -p /etc/systemd/system/docker.service.d&#39;</span>
+
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo systemctl daemon-reload&#39;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo systemctl restart docker&#39;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo systemctl enable docker&#39;</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -323,7 +361,7 @@
         <a href="bootstrap_kubernetes/index.html" class="btn btn-neutral float-right" title="Kubernetes集群引导" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Kubernetes部署" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="k8s_hosts.html" class="btn btn-neutral float-left" title="Kubernetes部署服务器" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

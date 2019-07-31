@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/index.html">Kubernetes概念辨析</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Kubernetes部署</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../k8s_hosts.html">Kubernetes部署服务器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../container_runtimes.html">容器运行环境</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Kubernetes集群引导</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="kubeadm.html">kubeadm</a></li>
@@ -210,6 +211,10 @@
 <span id="id1"></span><h1>创建单一控制平面集群<a class="headerlink" href="#create-k8s-cluster" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="control-plane-node">
 <h2>初始化控制平面节点(control-plane node)<a class="headerlink" href="#control-plane-node" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">本段落为背景说明，实际操作命令只需要执行下一段落 <a class="reference internal" href="#kubeadm-init"><span class="std std-ref">初始化命令执行</span></a></p>
+</div>
 <p>管控平面节点(control-plane node)是指控制平面组件运行的主机节点，包括 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> (集群数据库) 和 API 服务器(kubectl命令行工具通讯的服务器组件)。</p>
 <ul class="simple">
 <li>规划并选择一个pod network add-on，请注意所选择CNI是否需要的任何参数传递给kubeadm初始化</li>
@@ -237,16 +242,18 @@
 <li>(可选)除非指定，否则kubeadm将使用默认网关相关的网络接口来公告master的IP。如果要使用不同的网络接口，则传递 <code class="docutils literal notranslate"><span class="pre">--apiserver-advertise-address=&lt;ip-address&gt;</span></code> 参数给 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code></li>
 <li>(可选)可运行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">config</span> <span class="pre">images</span> <span class="pre">pull</span></code> 使得 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 验证到 <code class="docutils literal notranslate"><span class="pre">gcr.io</span></code> 仓库的网络连接</li>
 </ul>
-<div class="section" id="id2">
-<h3>初始化命令执行<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">init</span> <span class="o">--</span><span class="n">pod</span><span class="o">-</span><span class="n">network</span><span class="o">-</span><span class="n">cidr</span><span class="o">=</span><span class="mf">10.244</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">16</span>
-</pre></div>
-</div>
+<div class="section" id="kubeadm-init">
+<span id="id2"></span><h3>初始化命令执行<a class="headerlink" href="#kubeadm-init" title="Permalink to this headline">¶</a></h3>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>如果运行了firewalld，则需要确保端口 <code class="docutils literal notranslate"><span class="pre">6443</span> <span class="pre">10250</span></code> 对外开放:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">6443</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
 <span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">10250</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+</pre></div>
+</div>
+<p>如前文，我通过pssh批量关闭了 <code class="docutils literal notranslate"><span class="pre">kube</span></code> 文件指定的Kubernetes各个节点的上述端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo firewall-cmd --zone=public --add-port=6443/tcp --permanent&#39;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo firewall-cmd --zone=public --add-port=10250/tcp --permanent&#39;</span>
 </pre></div>
 </div>
 <p>参考 <a class="reference external" href="https://www.kevinhooke.com/2017/10/08/setting-up-a-kubernetes-cluster-across-2-virtualized-centos-nodes/">Setting up a Kubernetes cluster across 2 virtualized CentOS nodes</a> ，当然也可以直接关闭:</p>
@@ -256,7 +263,18 @@
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>上述 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 要求主机已经正确运行了kubelet，否则会出现报错:</p>
+<p>部署Kubernetes的服务需要能够解析所安装服务器的域名，通常这个工作由DNS来提供，建议在局域网内部部署一个DNSmasq服务。在初始阶段，也可以在每个主机上部署 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 提供静态地址解析（例如，我在Host物理主机上的 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 就包含了这个测试集群所有主机的域名解析，可以分发到各个虚拟机上提供基本解析）:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pscp</span><span class="o">.</span><span class="n">pssh</span> <span class="o">-</span><span class="n">h</span> <span class="n">kube</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">hosts</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo cp /tmp/hosts /etc/hosts&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">init</span> <span class="o">--</span><span class="n">pod</span><span class="o">-</span><span class="n">network</span><span class="o">-</span><span class="n">cidr</span><span class="o">=</span><span class="mf">10.244</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">16</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>上述 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 要求主机已经正确安装了kubelet，否则会出现报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">check</span><span class="p">]</span> <span class="n">It</span> <span class="n">seems</span> <span class="n">like</span> <span class="n">the</span> <span class="n">kubelet</span> <span class="n">isn</span><span class="s1">&#39;t running or healthy.</span>
 <span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">check</span><span class="p">]</span> <span class="n">The</span> <span class="n">HTTP</span> <span class="n">call</span> <span class="n">equal</span> <span class="n">to</span> <span class="s1">&#39;curl -sSL http://localhost:10248/healthz&#39;</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">error</span><span class="p">:</span> <span class="n">Get</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">10248</span><span class="o">/</span><span class="n">healthz</span><span class="p">:</span> <span class="n">dial</span> <span class="n">tcp</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">10248</span><span class="p">:</span> <span class="n">connect</span><span class="p">:</span> <span class="n">connection</span> <span class="n">refused</span><span class="o">.</span>
 

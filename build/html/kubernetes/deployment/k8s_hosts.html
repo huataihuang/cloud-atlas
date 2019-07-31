@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Kubebuilder &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>Kubernetes部署服务器 &mdash; Cloud Atlas 0.1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
-    <link rel="next" title="Terraform基础架构管理平台" href="terraform.html" />
-    <link rel="prev" title="kustomize" href="kustomize.html" /> 
+    <link rel="next" title="容器运行环境" href="container_runtimes.html" />
+    <link rel="prev" title="Kubernetes部署" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -97,7 +97,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../concepts/index.html">Kubernetes概念辨析</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Kubernetes部署</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="k8s_hosts.html">Kubernetes部署服务器</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes部署服务器</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#clone-k8s">clone k8s虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">主机名解析</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pssh">pssh配置</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="container_runtimes.html">容器运行环境</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bootstrap_kubernetes/index.html">Kubernetes集群引导</a></li>
 <li class="toctree-l3"><a class="reference internal" href="stateless_application/index.html">Kubernetes部署无状态应用</a></li>
@@ -108,12 +113,7 @@
 <li class="toctree-l3"><a class="reference internal" href="helm.html">Helm - Kubernetes包管理器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="draft.html">Draft - Kubernetes应用部署工具</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kustomize.html">kustomize</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubebuilder</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">安装Kubebuilder</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Kubebuilder快速起步</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="kuberbuilder.html">Kubebuilder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="terraform.html">Terraform基础架构管理平台</a></li>
 </ul>
 </li>
@@ -187,13 +187,13 @@
         
           <li><a href="index.html">Kubernetes部署</a> &raquo;</li>
         
-      <li>Kubebuilder</li>
+      <li>Kubernetes部署服务器</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/kubernetes/deployment/kuberbuilder.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/kubernetes/deployment/k8s_hosts.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -206,21 +206,126 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kubebuilder">
-<span id="kuberbuilder"></span><h1>Kubebuilder<a class="headerlink" href="#kubebuilder" title="Permalink to this headline">¶</a></h1>
-<p>Kubebuilder是一个使用可定制资源定义（custom resource definitions, CRDs）来构建Kubernetes API的开发框架。</p>
-<div class="section" id="id1">
-<h2>安装Kubebuilder<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="id2">
-<h2>Kubebuilder快速起步<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="kubernetes">
+<span id="k8s-hosts"></span><h1>Kubernetes部署服务器<a class="headerlink" href="#kubernetes" title="Permalink to this headline">¶</a></h1>
+<p>在部署模拟Kubernetes集群的环境中，我采用如下虚拟机部署:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://book.kubebuilder.io/getting_started/installation_and_setup.html">Kuberbuilder Installation and Setup</a></li>
-<li><a class="reference external" href="http://book.kubebuilder.io/quick_start.html">Kuberbuilder Getting Started</a></li>
+<li>3台 Kubernetes Mster</li>
+<li>5台 Kubernetes Node</li>
 </ul>
+<div class="section" id="clone-k8s">
+<h2>clone k8s虚拟机<a class="headerlink" href="#clone-k8s" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">clone虚拟就:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>virsh shutdown centos7
+
+for i in {1..4};do
+  virt-clone --connect qemu:///system --original centos7 --name kubemaster-${i} --file /var/lib/libvirt/images/kubemaster-${i}.qcow2
+  virt-sysprep -d kubemaster-${i} --hostname kubemaster-${i} --root-password password:CHANGE_ME
+  virsh start kubemaster-${i}
+done
+
+for i in {1..5};do
+  virt-clone --connect qemu:///system --original centos7 --name kubenode-${i} --file /var/lib/libvirt/images/kubenode-${i}.qcow2
+  virt-sysprep -d kubenode-${i} --hostname kubenode-${i} --root-password password:CHANGE_ME
+  virsh start kubenode-${i}
+done
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">稳定运行的Kubernetes集群需要3台Master服务器，这里多创建多 <code class="docutils literal notranslate"><span class="pre">kubermaster-4</span></code> 是为了演练Master服务器故障替换所准备的。</p>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>主机名解析<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>在运行KVM的物理主机上 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 提供了模拟集群的域名解析，在DNSmasq中可以提供配置</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">hosts</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="m">127</span>.0.0.1 localhost localhost.localdomain
+
+<span class="m">192</span>.168.122.1   myadmin myadmin.huatai.me
+<span class="m">192</span>.168.122.11  kubemaster-1 kubemaster-1.huatai.me
+<span class="m">192</span>.168.122.12  kubemaster-2 kubemaster-2.huatai.me
+<span class="m">192</span>.168.122.13  kubemaster-3 kubemaster-3.huatai.me
+<span class="m">192</span>.168.122.14  kubemaster-4 kubemaster-4.huatai.me  <span class="c1">#测试替换轮转</span>
+<span class="m">192</span>.168.122.15  kubenode-1 kubenode-1.huatai.me
+<span class="m">192</span>.168.122.16  kubenode-2 kubenode-2.huatai.me
+<span class="m">192</span>.168.122.17  kubenode-3 kubenode-3.huatai.me
+<span class="m">192</span>.168.122.18  kubenode-4 kubenode-4.huatai.me
+<span class="m">192</span>.168.122.19  kubenode-r kubenode-5.huatai.me
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+<div class="section" id="pssh">
+<h2>pssh配置<a class="headerlink" href="#pssh" title="Permalink to this headline">¶</a></h2>
+<p>为了方便在集群多台服务器上同时安装软件包和进行基础配置，采用pssh方式执行命令，所以准备按照虚拟机用途进行分组如下：</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">kube</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="m">192</span>.168.122.11
+<span class="m">192</span>.168.122.12
+<span class="m">192</span>.168.122.13
+<span class="m">192</span>.168.122.14
+<span class="m">192</span>.168.122.15
+<span class="m">192</span>.168.122.16
+<span class="m">192</span>.168.122.17
+<span class="m">192</span>.168.122.18
+<span class="m">192</span>.168.122.19
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">kubemaster</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="m">192</span>.168.122.11
+<span class="m">192</span>.168.122.12
+<span class="m">192</span>.168.122.13
+<span class="m">192</span>.168.122.14
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">kubenode</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="m">192</span>.168.122.15
+<span class="m">192</span>.168.122.16
+<span class="m">192</span>.168.122.17
+<span class="m">192</span>.168.122.18
+<span class="m">192</span>.168.122.19
+</pre></div>
+</td></tr></table></div>
+</div>
+<p>这样，例如需要同时安装docker软件包，只需要执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;yum install docker-ce -y&#39;</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -232,10 +337,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="terraform.html" class="btn btn-neutral float-right" title="Terraform基础架构管理平台" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="container_runtimes.html" class="btn btn-neutral float-right" title="容器运行环境" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="kustomize.html" class="btn btn-neutral float-left" title="kustomize" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Kubernetes部署" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -9,7 +9,15 @@ kubeadm是用于自举kubernetes集群的工具，我们将使用kubeadm结合ku
 准备工作
 ==========
 
-- 硬件: 2CPU / 2GB内存 ，并且服务器必须 ``禁用`` swap，否则kubelet可能工作不正常
+- 硬件: 2CPU / 2GB内存 ，并且服务器必须 ``禁用`` swap，否则kubelet可能工作不正常（kubeadm初始化系统时会检查swap，如存在swap会报错）
+
+.. note::
+
+   批量关闭所有Kubernetes服务器上swap::
+
+      pssh -ih kube 'sudo swapoff -a'
+      pssh -ih kube "sudo sed -i -e '/swap/s/^UUID=/#UUID=/g' /etc/fstab" 
+
 - 网络：每个主机具有唯一主机名，MAC地址以及 ``product_uuid`` ，并且开放必要管控端口(见下文)
 - 操作系统：采用符合要求OS，通常 Ubuntu 16.04+, CentOS 7, Fedora 25/26
 
@@ -26,7 +34,7 @@ kubeadm是用于自举kubernetes集群的工具，我们将使用kubeadm结合ku
 
 .. note::
 
-   务必确保服务器具有唯一地址，特别是一些虚拟机可能会使用重复的标识值，会导致Kubernetes的安装过程失败。
+   务必确保服务器具有唯一地址，特别是一些虚拟机可能会使用重复的标识值，会导致Kubernetes的安装过程失败。我在 :ref:`k8s_hosts` 采用KVM虚拟机是通过 ``virt-clone`` 和 ``virt-sysprep`` 构建的，会自动初始化不同的 ``product_uuid`` 和 MAC地址。
 
 检查网络
 ------------
@@ -56,6 +64,17 @@ TCP    入     10252       kube-controller-manager  自身
 TCP    入     10250       Kubelet API              自身，管控平台
 TCP    入     30000-32767 节点端口服务             All
 ====== ====== =========== =======================  ======================
+
+.. note::
+
+   由于虚拟机安装默认开启了firewalld服务，所以我批量通过以下命令来开启端口::
+
+      pssh -ih kubemaster 'sudo firewall-cmd --zone=public --add-port=6443/tcp --permanent'
+      pssh -ih kubemaster 'sudo firewall-cmd --zone=public --add-port=2379-2380/tcp --permanent'
+      pssh -ih kubemaster 'sudo firewall-cmd --zone=public --add-port=10250-10252/tcp --permanent'
+
+      pssh -ih kubenode 'sudo firewall-cmd --zone=public --add-port=10250/tcp --permanent'
+      pssh -ih kubenode 'sudo firewall-cmd --zone=public --add-port=30000-32767/tcp --permanent'
 
 安装runtime
 =============
@@ -88,22 +107,30 @@ CRI0-O      /var/run/crio/crio.sock
 由于 kubeadm ``不会`` 安装和管理 ``kubelet`` 或 ``kubectl`` ，所以要确保你需要kubeadm为你安装的正确版本。
 
 安装前准备
--------------
+------------
 
-.. note::
+- 请参考 :ref:`openconnect_vpn` 准备好梯子，安装Kubernetes软件包需要访问Google的软件仓库。
 
-   - 节点上的 SELinux 需要设置成 ``permissive`` 模式，这样容器才可以访问主机的文件系统，这个特性是pod网络锁需要的特性。目前kubelet还不能支持SELinux，所以需要禁用SELinux。
-   - 一些RHEL/CentOS 7用户报告流量路由错误，因为iptables被绕过。所以需要确保 ``net.bridge.bridge-nf-call-iptables`` 设置成 ``1`` ::
+- 节点上的 SELinux 需要设置成 ``permissive`` 模式::
 
-      cat <<EOF >  /etc/sysctl.d/k8s.conf
-      net.bridge.bridge-nf-call-ip6tables = 1
-      net.bridge.bridge-nf-call-iptables = 1
-      EOF
-      sysctl --system
-   
-   - 确保先加载 ``br_netfilter`` 模块已经加载，通过 ``lsmod | grep br_netfilter`` 确保，如果没有加载，则执行以下命令加载该内核模块::
+   setenforce 0
+   sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
-      modprobe br_netfilter
+这样容器才可以访问主机的文件系统，这个特性是pod网络锁需要的特性。目前kubelet还不能支持SELinux，所以需要禁用SELinux。
+
+- 一些RHEL/CentOS 7用户报告流量路由错误，因为iptables被绕过。所以需要确保 ``net.bridge.bridge-nf-call-iptables`` 设置成 ``1`` ::
+
+   cat <<EOF >  /etc/sysctl.d/k8s.conf
+   net.bridge.bridge-nf-call-ip6tables = 1
+   net.bridge.bridge-nf-call-iptables = 1
+   EOF
+   sysctl --system
+
+该步骤必须执行，否则 ``kubedam init`` 时报错。
+  
+- 确保先加载 ``br_netfilter`` 模块已经加载，通过 ``lsmod | grep br_netfilter`` 确保，如果没有加载，则执行以下命令加载该内核模块::
+
+   modprobe br_netfilter
 
 ``kubelet`` 会不断重启，以等待kubeadm的crashloop告知其执行。
 
@@ -146,10 +173,14 @@ CentOS, RHEL, Fedora
 
 .. note::
 
-   由于Kubernetes软件仓库由 ""不存在公司" Google提供，所以需要 `飞越疯人院 <https://movie.douban.com/subject/1292224/>`_ ，呃，说错了，是 **翻墙** :ref:`openconnect_vpn` 才能正确安装。
+   由于Kubernetes软件仓库由 "不存在公司" Google提供，所以需要 **翻墙** `飞越疯人院 <https://movie.douban.com/subject/1292224/>`_ ，请参考 :ref:`openconnect_vpn` 安装。
 
 在管控平台节点配置kubelet使用cgroup driver
 =============================================
+
+.. note::
+
+   这个步骤暂时不需要执行，因为在下一步 ``kubeadm init`` 时会初始化环境并自动配置并启动kubelet。
 
 当在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 ``/var/lib/kubelet/kubeadm-flags.env`` 。
 
@@ -174,14 +205,20 @@ CentOS, RHEL, Fedora
 
 .. note::
 
-   这里还没有初始化集群，可能会无法启动kubelet，出现报错::
+   这里还没有初始化集群，无法启动kubelet，出现报错::
 
       Jul 29 17:25:11 devstack kubelet[10529]: F0729 17:25:11.339363   10529 server.go:198] failed to load Kubelet config file /var/lib/kubelet/config.yaml, error failed to read kubelet config file "/var/lib/kubelet/config.yaml", error: open /var/lib/kubelet/config.yaml: no such file or directory
 
    通过 ``kubeadm init --pod-network-cidr=10.244.0.0/16`` 初始化集群。 见 :ref:`create_k8s_cluster`
 
-kubelet排查
-===========
+kubelet排查(待续)
+===================
+
+.. note::
+
+   目前这个 ``cpu and memory cgroup hierarchy not unified`` 问题尚未解决，不过我仅在 `AliOS 转换CentOS <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/redhat/package/convert_alios_to_centos.md>`_ 的系统中遇到，而纯净的CentOS部署Kubernetes则完全没有问题。虽然看上去两种操作系统的cgroup没有太大差别，但是我怀疑或许在转换中我有某些软件包转换问题或者AliOS原先的cgroup配置有什么坑在里面尚未发觉。
+
+   这个问题留待后续再排查，目前我改为在纯净版CentOS中部署原生Kubernetes集群。
 
 由于我使用标准的Docker，所以kubeadm会自动检测cgroup driver，并设置环境 ``/var/lib/kubelet/kubeadm-flags.env`` 所以我没有设置 ``KUBELET_EXTRA_ARGS`` 直接启动 ``kubelet`` 。但是启动失败，排查如下：
 

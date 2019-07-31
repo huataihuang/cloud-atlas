@@ -102,6 +102,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">物理服务器设置</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ipmi">服务器IPMI</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">操作系统</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">磁盘分区</a></li>
 </ul>
 </li>
 </ul>
@@ -243,6 +244,65 @@
 </li>
 <li><p class="first">安装EPEL:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">dl</span><span class="o">.</span><span class="n">fedoraproject</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pub</span><span class="o">/</span><span class="n">epel</span><span class="o">/</span><span class="n">epel</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="mf">7.</span><span class="n">noarch</span><span class="o">.</span><span class="n">rpm</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>磁盘分区<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">服务器磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda4</span></code> 构建LVM卷，所以首先通过 <code class="docutils literal notranslate"><span class="pre">parted</span> <span class="pre">/dev/sda</span></code> 划分分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkpart</span> <span class="n">primary</span> <span class="mf">54.8</span><span class="n">GB</span> <span class="mi">567</span><span class="n">GB</span>
+<span class="n">name</span> <span class="mi">4</span> <span class="n">store</span>
+<span class="nb">set</span> <span class="mi">4</span> <span class="n">lvm</span> <span class="n">on</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">构建LVM卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span>
+<span class="n">vgcreate</span> <span class="n">store</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span>
+<span class="n">lvcreate</span> <span class="o">--</span><span class="n">size</span> <span class="mi">256</span><span class="n">G</span> <span class="o">-</span><span class="n">n</span> <span class="n">libvirt</span> <span class="n">store</span>
+<span class="n">mkfs</span><span class="o">.</span><span class="n">xfs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">store</span><span class="o">/</span><span class="n">libvirt</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">停止libvirt，将磁盘卷迁移到LVM卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">libvirtd</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlogd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时还会提示有sockect没有停止:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span><span class="p">:</span> <span class="n">Stopping</span> <span class="n">virtlogd</span><span class="o">.</span><span class="n">service</span><span class="p">,</span> <span class="n">but</span> <span class="n">it</span> <span class="n">can</span> <span class="n">still</span> <span class="n">be</span> <span class="n">activated</span> <span class="n">by</span><span class="p">:</span>
+  <span class="n">virtlogd</span><span class="o">-</span><span class="n">admin</span><span class="o">.</span><span class="n">socket</span>
+  <span class="n">virtlogd</span><span class="o">.</span><span class="n">socket</span>
+</pre></div>
+</div>
+<p>停止对应socket:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlogd</span><span class="o">-</span><span class="n">admin</span><span class="o">.</span><span class="n">socket</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlogd</span><span class="o">.</span><span class="n">socket</span>
+</pre></div>
+</div>
+<p>此外还需要停止virtlockd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlockd</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">virtlockd</span><span class="o">.</span><span class="n">socket</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">此时确保 <code class="docutils literal notranslate"><span class="pre">lsof</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">libvirt</span></code> 没有输出之后，才可以迁移 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt</span></code> 内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">.</span><span class="n">bak</span>
+<span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
+
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">store</span><span class="o">/</span><span class="n">libvirt</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span>
+
+<span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">.</span><span class="n">bak</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">cf</span> <span class="o">-</span> <span class="o">.</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">xf</span> <span class="o">-</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">恢复libvirt:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">libvirtd</span>
 </pre></div>
 </div>
 </li>
