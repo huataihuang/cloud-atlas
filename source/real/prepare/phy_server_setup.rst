@@ -53,3 +53,54 @@
 - 安装EPEL::
 
    yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+磁盘分区
+============
+
+- 服务器磁盘 ``/dev/sda4`` 构建LVM卷，所以首先通过 ``parted /dev/sda`` 划分分区::
+
+   mkpart primary 54.8GB 567GB
+   name 4 store
+   set 4 lvm on
+
+- 构建LVM卷::
+
+   pvcreate /dev/sda4
+   vgcreate store /dev/sda4
+   lvcreate --size 256G -n libvirt store
+   mkfs.xfs /dev/store/libvirt
+
+- 停止libvirt，将磁盘卷迁移到LVM卷::
+
+   systemctl stop libvirtd
+   systemctl stop virtlogd
+
+此时还会提示有sockect没有停止::
+
+   Warning: Stopping virtlogd.service, but it can still be activated by:
+     virtlogd-admin.socket
+     virtlogd.socket
+
+停止对应socket::
+
+   systemctl stop virtlogd-admin.socket
+   systemctl stop virtlogd.socket
+
+此外还需要停止virtlockd::
+
+   systemctl stop virtlockd
+   systemctl stop virtlockd.socket
+
+- 此时确保 ``lsof | grep libvirt`` 没有输出之后，才可以迁移 ``/var/lib/libvirt`` 内容::
+
+   mv /var/lib/libvirt /var/lib/libvirt.bak
+   mkdir /var/lib/libvirt
+
+   mount /dev/store/libvirt /var/lib/libvirt
+
+   (cd /var/lib/libvirt.bak && tar cf - .)|(cd /var/lib/libvirt && tar xf -)
+
+- 恢复libvirt::
+
+   systemctl start libvirtd
+   

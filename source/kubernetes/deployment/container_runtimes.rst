@@ -87,6 +87,7 @@ CentOS/RHEL 7.4+
      https://download.docker.com/linux/centos/docker-ce.repo
    
    ## Install Docker CE.
+   # 我部署的测试环境采用默认docker-ce未指定版本
    yum update && yum install docker-ce-18.06.2.ce
    
    ## Create /etc/docker directory.
@@ -112,3 +113,38 @@ CentOS/RHEL 7.4+
    # Restart Docker
    systemctl daemon-reload
    systemctl restart docker
+
+   # Enable Docker
+   systemctl enable docker
+
+.. note::
+
+   强烈推荐采用pssh工具来并发执行安装，例如将上述所有主机IP地址保存为 ``kube`` 文件，然后执行以下命令批量安装更新::
+
+      pssh -ih kube 'sudo yum install yum-utils device-mapper-persistent-data lvm2 -y'
+      pssh -ih kube 'sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo'
+      pssh -ih kube 'sudo yum update && sudo yum install docker-ce -y'
+      pssh -ih kube 'sudo mkdir /etc/docker'
+
+      cat > daemon.json <<EOF
+      {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "100m"
+        },
+        "storage-driver": "overlay2",
+        "storage-opts": [
+          "overlay2.override_kernel_check=true"
+        ]
+      }
+      EOF
+
+      pscp.pssh -h kube daemon.json /tmp/daemon.json
+      pssh -ih kube 'sudo mv /tmp/daemon.json /etc/docker/daemon.json'
+
+      pssh -ih kube 'sudo mkdir -p /etc/systemd/system/docker.service.d'
+
+      pssh -ih kube 'sudo systemctl daemon-reload'
+      pssh -ih kube 'sudo systemctl restart docker'
+      pssh -ih kube 'sudo systemctl enable docker'

@@ -101,8 +101,8 @@
 
    /etc/init.d/network restart
 
-复制KVM虚拟机
-=================
+复制KVM虚拟机(案例)
+====================
 
 .. note::
 
@@ -114,13 +114,21 @@
 
 - clone虚拟机::
 
-   virt-clone --connect qemu:///system --original centos7 --name devstack --file /var/lib/libvirt/images/devstack.qcow2
+   virt-clone --connect qemu:///system --original centos7 --name nullstack --file /var/lib/libvirt/images/nullstack.qcow2
 
 - 使用 ``virt-sysprep`` 初始化虚拟机::
 
-   virt-sysprep -d devstack --hostname devstack --root-password password:CHANGE_ME
+   virt-sysprep -d nullstack --hostname nullstack --root-password password:CHANGE_ME
+
+.. note::
+
+   请参考 `How to reset a KVM clone virtual Machines with virt-sysprep on Linux <https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/>`_ 做一些重置调整::
+
+      virt-sysprep -d nullstack --hostname nullstack \
+        --run 'sed -i "s/192.168.122.3/192.168.122.10/" /etc/sysconfig/network-scripts/ifcfg-eth0' \
+        --keep-user-accounts huatai --keep-user-accounts root
 
 - 启动虚拟机，进一步定制::
 
-   virsh start devstack
+   virsh start nullstack
 

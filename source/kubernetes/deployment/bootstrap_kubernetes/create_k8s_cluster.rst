@@ -7,6 +7,10 @@
 初始化控制平面节点(control-plane node)
 ========================================
 
+.. note::
+
+   本段落为背景说明，实际操作命令只需要执行下一段落 :ref:`kubeadm_init`
+
 管控平面节点(control-plane node)是指控制平面组件运行的主机节点，包括 ``etcd`` (集群数据库) 和 API 服务器(kubectl命令行工具通讯的服务器组件)。
 
 - 规划并选择一个pod network add-on，请注意所选择CNI是否需要的任何参数传递给kubeadm初始化
@@ -39,13 +43,10 @@
 
 - (可选)可运行 ``kubeadm config images pull`` 使得 ``kubeadm init`` 验证到 ``gcr.io`` 仓库的网络连接
 
+.. _kubeadm_init:
 
 初始化命令执行
 ----------------
-
-::
-
-   kubeadm init --pod-network-cidr=10.244.0.0/16
 
 .. note::
 
@@ -54,13 +55,29 @@
       sudo firewall-cmd --zone=public --add-port=6443/tcp --permanent
       sudo firewall-cmd --zone=public --add-port=10250/tcp --permanent
 
+   如前文，我通过pssh批量关闭了 ``kube`` 文件指定的Kubernetes各个节点的上述端口::
+
+      pssh -ih kube 'sudo firewall-cmd --zone=public --add-port=6443/tcp --permanent'
+      pssh -ih kube 'sudo firewall-cmd --zone=public --add-port=10250/tcp --permanent'
+
    参考 `Setting up a Kubernetes cluster across 2 virtualized CentOS nodes <https://www.kevinhooke.com/2017/10/08/setting-up-a-kubernetes-cluster-across-2-virtualized-centos-nodes/>`_ ，当然也可以直接关闭::
 
       systemctl stop firewalld
 
 .. note::
 
-   上述 ``kubeadm init`` 要求主机已经正确运行了kubelet，否则会出现报错::
+   部署Kubernetes的服务需要能够解析所安装服务器的域名，通常这个工作由DNS来提供，建议在局域网内部部署一个DNSmasq服务。在初始阶段，也可以在每个主机上部署 ``/etc/hosts`` 提供静态地址解析（例如，我在Host物理主机上的 ``/etc/hosts`` 就包含了这个测试集群所有主机的域名解析，可以分发到各个虚拟机上提供基本解析）::
+
+      pscp.pssh -h kube /etc/hosts /tmp/hosts
+      pssh -ih kube 'sudo cp /tmp/hosts /etc/hosts'
+
+::
+
+   kubeadm init --pod-network-cidr=10.244.0.0/16
+
+.. note::
+
+   上述 ``kubeadm init`` 要求主机已经正确安装了kubelet，否则会出现报错::
 
       [kubelet-check] It seems like the kubelet isn't running or healthy.
       [kubelet-check] The HTTP call equal to 'curl -sSL http://localhost:10248/healthz' failed with error: Get http://localhost:10248/healthz: dial tcp 127.0.0.1:10248: connect: connection refused.
