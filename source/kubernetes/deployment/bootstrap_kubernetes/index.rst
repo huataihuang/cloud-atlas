@@ -10,4 +10,5 @@ Kubernetes集群引导
    :maxdepth: 1
 
    kubeadm.rst
-   create_k8s_cluster.rst
+   single_master_k8s.rst
+   change_master_ip.rst

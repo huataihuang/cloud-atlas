@@ -12,6 +12,10 @@ Kubernetes部署服务器
 clone k8s虚拟机
 ==================
 
+.. note::
+
+   本案例在单台物理主机上部署多个KVM虚拟机，这些虚拟机是在该物理主机的NAT网络中，所以外部不能直接访问（需要端口映射）。
+
 - clone虚拟就::
 
    virsh shutdown centos7

@@ -111,6 +111,10 @@ CRI0-O      /var/run/crio/crio.sock
 
 - 请参考 :ref:`openconnect_vpn` 准备好梯子，安装Kubernetes软件包需要访问Google的软件仓库。
 
+注意：请不要直接在Kubernetes集群服务器上部署VPN客户端来翻墙，我遇到的问题是，VPN客户端运行时会在服务器上添加 ``tun0`` 网络设备，并且设置了默认路由。这会导致 ``kubeadm`` 初始化时以 ``tun0`` 接口的IP地址作为API服务接口。这样一旦关闭VPN接口就会引起异常。
+
+解决的方法时采用VPN网关方式，在外部的服务器上构建VPN转发，这样局域网内部的服务器就不需要单独运行VPN，也就不再为这个网卡无识别困扰了。
+
 - 节点上的 SELinux 需要设置成 ``permissive`` 模式::
 
    setenforce 0
@@ -133,6 +137,22 @@ CRI0-O      /var/run/crio/crio.sock
    modprobe br_netfilter
 
 ``kubelet`` 会不断重启，以等待kubeadm的crashloop告知其执行。
+
+.. note::
+
+   批量处理方式::
+
+      pssh -ih kube "sudo setenforce 0;sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config"
+
+      cat <<EOF > k8s._onf
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      EOF
+
+      pscp.pssh -h kube k8s.conf /tmp/k8s.conf
+      pssh -ih kube "sudo cp /tmp/k8s.conf /etc/sysctl.d/k8s.conf"
+      pssh -ih kube "sudo sysctl --system"
+
 
 Ubuntu, Debian
 ----------------
@@ -175,6 +195,29 @@ CentOS, RHEL, Fedora
 
    由于Kubernetes软件仓库由 "不存在公司" Google提供，所以需要 **翻墙** `飞越疯人院 <https://movie.douban.com/subject/1292224/>`_ ，请参考 :ref:`openconnect_vpn` 安装。
 
+   对于采用NAT模式的KVM虚拟机集群，只需要在Host物理主机上启用VPN客户端就可以使得各节点获得正常的Internet访问。
+
+.. note::
+
+   批量处理命令::
+
+      cat <<EOF > kubernetes.repo
+      cat <<EOF > kubernetes.repo
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      EOF
+
+      pscp.pssh -h kube kubernetes.repo /tmp/kubernetes.repo
+      pssh -ih kube 'sudo cp /tmp/kubernetes.repo /etc/yum.repos.d/kubernetes.repo'
+
+      pssh -ih kube 'sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes'
+      pssh -ih kube 'sudo systemctl enable --now kubelet'
+
 在管控平台节点配置kubelet使用cgroup driver
 =============================================
 
@@ -209,7 +252,7 @@ CentOS, RHEL, Fedora
 
       Jul 29 17:25:11 devstack kubelet[10529]: F0729 17:25:11.339363   10529 server.go:198] failed to load Kubelet config file /var/lib/kubelet/config.yaml, error failed to read kubelet config file "/var/lib/kubelet/config.yaml", error: open /var/lib/kubelet/config.yaml: no such file or directory
 
-   通过 ``kubeadm init --pod-network-cidr=10.244.0.0/16`` 初始化集群。 见 :ref:`create_k8s_cluster`
+   通过 ``kubeadm init --pod-network-cidr=10.244.0.0/16`` 初始化集群。 见 :ref:`single_master_k8s`
 
 kubelet排查(待续)
 ===================

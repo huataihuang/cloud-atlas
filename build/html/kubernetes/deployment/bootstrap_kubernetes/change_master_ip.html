@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Kubernetes部署无状态应用 &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>修改Kubernetes Master IP &mdash; Cloud Atlas 0.1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="copyright" title="Copyright" href="../../../copyright.html" />
-    <link rel="next" title="输出Kubernetes应用服务" href="kubernetes_expose_service.html" />
-    <link rel="prev" title="修改Kubernetes Master IP" href="../bootstrap_kubernetes/change_master_ip.html" /> 
+    <link rel="next" title="Kubernetes部署无状态应用" href="../stateless_application/index.html" />
+    <link rel="prev" title="创建单一控制平面(单master)集群" href="single_master_k8s.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -99,11 +99,13 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Kubernetes部署</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../k8s_hosts.html">Kubernetes部署服务器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../container_runtimes.html">容器运行环境</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../bootstrap_kubernetes/index.html">Kubernetes集群引导</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes部署无状态应用</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="kubernetes_expose_service.html">输出Kubernetes应用服务</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Kubernetes集群引导</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="kubeadm.html">kubeadm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="single_master_k8s.html">创建单一控制平面(单master)集群</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">修改Kubernetes Master IP</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../stateless_application/index.html">Kubernetes部署无状态应用</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../operator/index.html">Kubernetes应用部署方法Operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../install_etcd.html">安装etcd</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../nginx_ingress.html">部署Nginx Ingress Controller</a></li>
@@ -185,13 +187,15 @@
         
           <li><a href="../index.html">Kubernetes部署</a> &raquo;</li>
         
-      <li>Kubernetes部署无状态应用</li>
+          <li><a href="index.html">Kubernetes集群引导</a> &raquo;</li>
+        
+      <li>修改Kubernetes Master IP</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../../_sources/kubernetes/deployment/stateless_application/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/kubernetes/deployment/bootstrap_kubernetes/change_master_ip.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -204,12 +208,75 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kubernetes">
-<span id="kubernetes-deploy-stateless-application"></span><h1>Kubernetes部署无状态应用<a class="headerlink" href="#kubernetes" title="Permalink to this headline">¶</a></h1>
-<p>虽然 <a class="reference internal" href="../../startup_prepare/install_run_minikube.html#install-run-minikube"><span class="std std-ref">安装和运行minikube</span></a> 让我们能够轻而易举获得一个可用的单机测试环境，但是实际上生产环境部署需要实现极其复杂的高可用、高性能的容灾系统。本章节将聚焦生产环境的部署交付工作，并为下一阶段的</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="kubernetes_expose_service.html">输出Kubernetes应用服务</a></li>
+  <div class="section" id="kubernetes-master-ip">
+<span id="change-master-ip"></span><h1>修改Kubernetes Master IP<a class="headerlink" href="#kubernetes-master-ip" title="Permalink to this headline">¶</a></h1>
+<p>可能会遇到需要修改Kubernetes Mater IP地址的场景：</p>
+<ul class="simple">
+<li>我在最初部署 <a class="reference internal" href="single_master_k8s.html#single-master-k8s"><span class="std std-ref">创建单一控制平面(单master)集群</span></a> 时，由于GFW的存在，在安装部署Kubernetes集群时需要启动 <a class="reference internal" href="../../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> ，但这带来一个问题：如果你是直接在Kubernetes节点上启用VPN，会导致增加了一个 <code class="docutils literal notranslate"><span class="pre">tun0</span></code> 网络接口，并且由于这个接口启用了默认路由，导致 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 会将这个接口作为Kubernetes集群的control panel地址。</li>
+<li>服务器搬迁或者云服务器采用动态IP地址分配，重启服务器后主机IIP变化。</li>
+</ul>
+<div class="section" id="master-ip">
+<h2>Master IP变化的影响<a class="headerlink" href="#master-ip" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">/etc/kubenetes</span></code> 目录下所有涉及接口IP的配置文件可以通过以下方式找出一一修订:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span>
+<span class="n">grep</span> <span class="o">-</span><span class="n">R</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>但是，实际上 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 签发的证书是包含服务器IP地址的，所以 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 访问API服务器会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span><span class="p">:</span> <span class="n">x509</span><span class="p">:</span> <span class="n">certificate</span> <span class="ow">is</span> <span class="n">valid</span> <span class="k">for</span> <span class="mf">10.96</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">,</span> <span class="ow">not</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.11</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">最好的初始化Kubernetes集群采用主机名方式，这样或许可以使得证书签发仅涉及主机名（域名），则可以方便后续调整master服务器IP地址。后续可以尝试验证。</p>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>修正Master IP<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>参考 <a class="reference external" href="https://github.com/kubernetes/kubeadm/issues/338">Changing master IP address</a> 中 valerius257 的解决方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>systemctl stop kubelet docker
+
+cd /etc/
+
+# backup old kubernetes data
+mv kubernetes kubernetes-backup
+mv /var/lib/kubelet /var/lib/kubelet-backup
+
+# restore certificates
+mkdir -p kubernetes
+cp -r kubernetes-backup/pki kubernetes
+rm kubernetes/pki/{apiserver.*,etcd/peer.*}
+
+systemctl start docker
+
+# reinit master with data in etcd
+# add --kubernetes-version, --pod-network-cidr and --token options if needed
+# 原文使用如下命令:
+# kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd
+# 但是由于我使用的是Flannel网络，所以一定要加上参数，否则后续安装 flannel addon无法启动pod
+kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd --pod-network-cidr=10.244.0.0/16
+
+# update kubectl config
+cp kubernetes/admin.conf ~/.kube/config
+
+# wait for some time and delete old node
+sleep 120
+kubectl get nodes --sort-by=.metadata.creationTimestamp
+kubectl delete node $(kubectl get nodes -o jsonpath=&#39;{.items[?(@.status.conditions[0].status==&quot;Unknown&quot;)].metadata.name}&#39;)
+
+# check running pods
+kubectl get pods --all-namespaces
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">如果集群具有多个master节点，并且master IP地址转换是可控硅的，可以采用轮转替换master服务求来修订IP地址。即将新的Master加入集群，下线老的Master，逐步替换。</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/kubernetes/kubeadm/issues/338">Changing master IP address</a></li>
 </ul>
 </div>
 </div>
@@ -222,10 +289,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="kubernetes_expose_service.html" class="btn btn-neutral float-right" title="输出Kubernetes应用服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../stateless_application/index.html" class="btn btn-neutral float-right" title="Kubernetes部署无状态应用" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../bootstrap_kubernetes/change_master_ip.html" class="btn btn-neutral float-left" title="修改Kubernetes Master IP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="single_master_k8s.html" class="btn btn-neutral float-left" title="创建单一控制平面(单master)集群" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="copyright" title="Copyright" href="../../../copyright.html" />
-    <link rel="next" title="创建单一控制平面集群" href="create_k8s_cluster.html" />
+    <link rel="next" title="创建单一控制平面(单master)集群" href="single_master_k8s.html" />
     <link rel="prev" title="Kubernetes集群引导" href="index.html" /> 
 </head>
 
@@ -101,7 +101,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../container_runtimes.html">容器运行环境</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Kubernetes集群引导</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">kubeadm</a></li>
-<li class="toctree-l4"><a class="reference internal" href="create_k8s_cluster.html">创建单一控制平面集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="single_master_k8s.html">创建单一控制平面(单master)集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="change_master_ip.html">修改Kubernetes Master IP</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../stateless_application/index.html">Kubernetes部署无状态应用</a></li>
@@ -394,9 +395,12 @@
 <p>由于 kubeadm <code class="docutils literal notranslate"><span class="pre">不会</span></code> 安装和管理 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 或 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> ，所以要确保你需要kubeadm为你安装的正确版本。</p>
 <div class="section" id="id5">
 <h3>安装前准备<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>请参考 <a class="reference internal" href="../../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 准备好梯子，安装Kubernetes软件包需要访问Google的软件仓库。</li>
+</ul>
+<p>注意：请不要直接在Kubernetes集群服务器上部署VPN客户端来翻墙，我遇到的问题是，VPN客户端运行时会在服务器上添加 <code class="docutils literal notranslate"><span class="pre">tun0</span></code> 网络设备，并且设置了默认路由。这会导致 <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 初始化时以 <code class="docutils literal notranslate"><span class="pre">tun0</span></code> 接口的IP地址作为API服务接口。这样一旦关闭VPN接口就会引起异常。</p>
+<p>解决的方法时采用VPN网关方式，在外部的服务器上构建VPN转发，这样局域网内部的服务器就不需要单独运行VPN，也就不再为这个网卡无识别困扰了。</p>
 <ul>
-<li><p class="first">请参考 <a class="reference internal" href="../../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 准备好梯子，安装Kubernetes软件包需要访问Google的软件仓库。</p>
-</li>
 <li><p class="first">节点上的 SELinux 需要设置成 <code class="docutils literal notranslate"><span class="pre">permissive</span></code> 模式:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setenforce</span> <span class="mi">0</span>
 <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">selinux</span><span class="o">/</span><span class="n">config</span>
@@ -425,6 +429,22 @@
 </li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 会不断重启，以等待kubeadm的crashloop告知其执行。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>批量处理方式:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s2">&quot;sudo setenforce 0;sudo sed -i &#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39; /etc/selinux/config&quot;</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">k8s</span><span class="o">.</span><span class="n">_onf</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">EOF</span>
+
+<span class="n">pscp</span><span class="o">.</span><span class="n">pssh</span> <span class="o">-</span><span class="n">h</span> <span class="n">kube</span> <span class="n">k8s</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s2">&quot;sudo cp /tmp/k8s.conf /etc/sysctl.d/k8s.conf&quot;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s2">&quot;sudo sysctl --system&quot;</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="ubuntu-debian">
 <h3>Ubuntu, Debian<a class="headerlink" href="#ubuntu-debian" title="Permalink to this headline">¶</a></h3>
@@ -462,7 +482,30 @@
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">由于Kubernetes软件仓库由 “不存在公司” Google提供，所以需要 <strong>翻墙</strong> <a class="reference external" href="https://movie.douban.com/subject/1292224/">飞越疯人院</a> ，请参考 <a class="reference internal" href="../../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 安装。</p>
+<p>由于Kubernetes软件仓库由 “不存在公司” Google提供，所以需要 <strong>翻墙</strong> <a class="reference external" href="https://movie.douban.com/subject/1292224/">飞越疯人院</a> ，请参考 <a class="reference internal" href="../../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 安装。</p>
+<p class="last">对于采用NAT模式的KVM虚拟机集群，只需要在Host物理主机上启用VPN客户端就可以使得各节点获得正常的Internet访问。</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>批量处理命令:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
+<span class="p">[</span><span class="n">kubernetes</span><span class="p">]</span>
+<span class="n">name</span><span class="o">=</span><span class="n">Kubernetes</span>
+<span class="n">baseurl</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">el7</span><span class="o">-</span><span class="n">x86_64</span>
+<span class="n">enabled</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">gpgcheck</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">repo_gpgcheck</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">gpgkey</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">yum</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">rpm</span><span class="o">-</span><span class="n">package</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span>
+<span class="n">EOF</span>
+
+<span class="n">pscp</span><span class="o">.</span><span class="n">pssh</span> <span class="o">-</span><span class="n">h</span> <span class="n">kube</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo cp /tmp/kubernetes.repo /etc/yum.repos.d/kubernetes.repo&#39;</span>
+
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes&#39;</span>
+<span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo systemctl enable --now kubelet&#39;</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -497,7 +540,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Jul</span> <span class="mi">29</span> <span class="mi">17</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">11</span> <span class="n">devstack</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">10529</span><span class="p">]:</span> <span class="n">F0729</span> <span class="mi">17</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mf">11.339363</span>   <span class="mi">10529</span> <span class="n">server</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">198</span><span class="p">]</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">load</span> <span class="n">Kubelet</span> <span class="n">config</span> <span class="n">file</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">kubelet</span><span class="o">/</span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">error</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">read</span> <span class="n">kubelet</span> <span class="n">config</span> <span class="n">file</span> <span class="s2">&quot;/var/lib/kubelet/config.yaml&quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">open</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">kubelet</span><span class="o">/</span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
 </pre></div>
 </div>
-<p class="last">通过 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span> <span class="pre">--pod-network-cidr=10.244.0.0/16</span></code> 初始化集群。 见 <a class="reference internal" href="create_k8s_cluster.html#create-k8s-cluster"><span class="std std-ref">创建单一控制平面集群</span></a></p>
+<p class="last">通过 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span> <span class="pre">--pod-network-cidr=10.244.0.0/16</span></code> 初始化集群。 见 <a class="reference internal" href="single_master_k8s.html#single-master-k8s"><span class="std std-ref">创建单一控制平面(单master)集群</span></a></p>
 </div>
 </div>
 <div class="section" id="kubelet">
@@ -648,7 +691,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="create_k8s_cluster.html" class="btn btn-neutral float-right" title="创建单一控制平面集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="single_master_k8s.html" class="btn btn-neutral float-right" title="创建单一控制平面(单master)集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="Kubernetes集群引导" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
