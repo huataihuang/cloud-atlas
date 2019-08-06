@@ -19,6 +19,12 @@
 
 时间序列数据之所以如此强大，是因为将系统的每个变化都记录为新的一行，从而可以去 ``衡量变化`` ：分析过去的变化，监测现在的变化，以及预测未来将如何变化。
 
+.. note::
+
+   时序数据库使用量排名 `DB-Engines Ranking of Time Series DBMS <https://db-engines.com/en/ranking/time+series+dbms>`_ ，`InfluxDB时序数据库 <https://www.influxdata.com/products/influxdb-overview/>`_ 使用最为广泛。但是InfluxDB只提供开源单机版本，集群部署版本需要购买。
+
+   OpenTSDB则基于HBase上实现实时监控信息采集和展示，采用HBase进行永久存储，可以实现集群化部署。
+
 采用TSDB的场景
 =================
 

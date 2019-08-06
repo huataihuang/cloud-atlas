@@ -32,9 +32,18 @@ clone k8s虚拟机
      virsh start kubenode-${i}
    done
 
+   for i in {1..2};do
+     virt-clone --connect qemu:///system --original centos7 --name haproxy-${i} --file /var/lib/libvirt/images/haproxy-${i}.qcow2
+     virt-sysprep -d haproxy-${i} --hostname haproxy-${i} --root-password password:CHANGE_ME
+     virsh start haproxy-${i}
+   done
+
+
 .. note::
 
    稳定运行的Kubernetes集群需要3台Master服务器，这里多创建多 ``kubermaster-4`` 是为了演练Master服务器故障替换所准备的。
+
+   haproxy-X是用于构建 :ref:`ha_k8s` 时所需的负载均衡，用于提供apiserver的负载均衡能力。
 
 主机名解析
 =============

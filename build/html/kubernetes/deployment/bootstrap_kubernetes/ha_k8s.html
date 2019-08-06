@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>修改Kubernetes Master IP &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>高可用(HA)Kubernetes集群 &mdash; Cloud Atlas 0.1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="copyright" title="Copyright" href="../../../copyright.html" />
-    <link rel="next" title="高可用(HA)Kubernetes集群" href="ha_k8s.html" />
-    <link rel="prev" title="创建单一控制平面(单master)集群" href="single_master_k8s.html" /> 
+    <link rel="next" title="使用kubeadm创建高可用集群" href="create_ha_k8s.html" />
+    <link rel="prev" title="修改Kubernetes Master IP" href="change_master_ip.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -102,8 +102,8 @@
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Kubernetes集群引导</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="kubeadm.html">kubeadm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="single_master_k8s.html">创建单一控制平面(单master)集群</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">修改Kubernetes Master IP</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ha_k8s.html">高可用(HA)Kubernetes集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="change_master_ip.html">修改Kubernetes Master IP</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">高可用(HA)Kubernetes集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="create_ha_k8s.html">使用kubeadm创建高可用集群</a></li>
 </ul>
 </li>
@@ -191,13 +191,13 @@
         
           <li><a href="index.html">Kubernetes集群引导</a> &raquo;</li>
         
-      <li>修改Kubernetes Master IP</li>
+      <li>高可用(HA)Kubernetes集群</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../../_sources/kubernetes/deployment/bootstrap_kubernetes/change_master_ip.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/kubernetes/deployment/bootstrap_kubernetes/ha_k8s.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -210,75 +210,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kubernetes-master-ip">
-<span id="change-master-ip"></span><h1>修改Kubernetes Master IP<a class="headerlink" href="#kubernetes-master-ip" title="Permalink to this headline">¶</a></h1>
-<p>可能会遇到需要修改Kubernetes Mater IP地址的场景：</p>
+  <div class="section" id="ha-kubernetes">
+<span id="ha-k8s"></span><h1>高可用(HA)Kubernetes集群<a class="headerlink" href="#ha-kubernetes" title="Permalink to this headline">¶</a></h1>
+<p>Kubernetes高可用集群实现方法:</p>
 <ul class="simple">
-<li>我在最初部署 <a class="reference internal" href="single_master_k8s.html#single-master-k8s"><span class="std std-ref">创建单一控制平面(单master)集群</span></a> 时，由于GFW的存在，在安装部署Kubernetes集群时需要启动 <a class="reference internal" href="../../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> ，但这带来一个问题：如果你是直接在Kubernetes节点上启用VPN，会导致增加了一个 <code class="docutils literal notranslate"><span class="pre">tun0</span></code> 网络接口，并且由于这个接口启用了默认路由，导致 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 会将这个接口作为Kubernetes集群的control panel地址。</li>
-<li>服务器搬迁或者云服务器采用动态IP地址分配，重启服务器后主机IIP变化。</li>
+<li>通过堆叠的控制平面节点(stacked control plane nodes)，即etcd节点和控制平面节点结合在一起</li>
+<li>通过外部的etcd节点，即etcd节点运行在控制平面节点之外</li>
 </ul>
-<div class="section" id="master-ip">
-<h2>Master IP变化的影响<a class="headerlink" href="#master-ip" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">/etc/kubenetes</span></code> 目录下所有涉及接口IP的配置文件可以通过以下方式找出一一修订:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span>
-<span class="n">grep</span> <span class="o">-</span><span class="n">R</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span> <span class="o">*</span>
-</pre></div>
-</div>
-<p>但是，实际上 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 签发的证书是包含服务器IP地址的，所以 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 访问API服务器会提示错误:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span><span class="p">:</span> <span class="n">x509</span><span class="p">:</span> <span class="n">certificate</span> <span class="ow">is</span> <span class="n">valid</span> <span class="k">for</span> <span class="mf">10.96</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">,</span> <span class="ow">not</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.11</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">最好的初始化Kubernetes集群采用主机名方式，这样或许可以使得证书签发仅涉及主机名（域名），则可以方便后续调整master服务器IP地址。后续可以尝试验证。</p>
+<p>请注意上述两种高可用部署方案各有优缺点，请仔细考虑利弊：</p>
+<div class="section" id="etcd">
+<h2>堆叠etcd方案<a class="headerlink" href="#etcd" title="Permalink to this headline">¶</a></h2>
+<p>堆叠etcd的HHA集群是将提供分布式数据存储的etcd集群建立在集群构建的节点上，并且由kubeadm管理和作为控制平面组件。</p>
+<p>每个控制平面节点都是运行了 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> , <code class="docutils literal notranslate"><span class="pre">kube-scheduler</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kube-controller-manager</span></code> 实例的节点，并且 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> 是通过负载均衡输出给集群的worker节点。</p>
+<p>每个控制平面节点创建一个本地etcd成员，并且这个etcd成员 <strong>只和</strong> 这个节点的 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> 通讯。同样的通讯模式也发生在 <code class="docutils literal notranslate"><span class="pre">kube-controller-manager</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kube-scheculer</span></code> 实例上。（etcd堆叠部署在控制平面节点上，则控制平面节点上的管控组件只和本地的etcd通讯）</p>
+<p>这种紧密结合了控制平面和etcd在同一节点上的部署拓扑简化了集群的设置（不需要部署外部etcd节点），并且也简化了复制管理。</p>
+<p>但是，堆叠集群部署方案存在失效结合(failed coupling)的风险。如果一个节点故障，则etcd和管控平面实例同时失效，此时就存在冗灾风险。要解决这个风险，需要添加更多的管控平面节点。</p>
+<p>在HA集群中，至少需要运行3个堆叠的管控平面节点。</p>
+<p>这种堆叠部署管控节点是默认的kubeadm生成架构，即 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">join</span> <span class="pre">--control-plane</span></code> 命令自动创建的管控节点就是运行一个本地etcd服务的部署方式。</p>
+<div class="figure" id="id3">
+<a class="reference internal image-reference" href="../../../_images/kubeadm-ha-topology-stacked-etcd.svg"><img alt="../../../_images/kubeadm-ha-topology-stacked-etcd.svg" src="../../../_images/kubeadm-ha-topology-stacked-etcd.svg" /></a>
+<p class="caption"><span class="caption-text">Figure 1: Kubeadm HA topology - stacked etcd</span></p>
 </div>
 </div>
 <div class="section" id="id1">
-<h2>修正Master IP<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>参考 <a class="reference external" href="https://github.com/kubernetes/kubeadm/issues/338">Changing master IP address</a> 中 valerius257 的解决方法:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>systemctl stop kubelet docker
-
-cd /etc/
-
-# backup old kubernetes data
-mv kubernetes kubernetes-backup
-mv /var/lib/kubelet /var/lib/kubelet-backup
-
-# restore certificates
-mkdir -p kubernetes
-cp -r kubernetes-backup/pki kubernetes
-rm kubernetes/pki/{apiserver.*,etcd/peer.*}
-
-systemctl start docker
-
-# reinit master with data in etcd
-# add --kubernetes-version, --pod-network-cidr and --token options if needed
-# 原文使用如下命令:
-# kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd
-# 但是由于我使用的是Flannel网络，所以一定要加上参数，否则后续安装 flannel addon无法启动pod
-kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd --pod-network-cidr=10.244.0.0/16
-
-# update kubectl config
-cp kubernetes/admin.conf ~/.kube/config
-
-# wait for some time and delete old node
-sleep 120
-kubectl get nodes --sort-by=.metadata.creationTimestamp
-kubectl delete node $(kubectl get nodes -o jsonpath=&#39;{.items[?(@.status.conditions[0].status==&quot;Unknown&quot;)].metadata.name}&#39;)
-
-# check running pods
-kubectl get pods --all-namespaces
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">如果集群具有多个master节点，并且master IP地址转换是可控硅的，可以采用轮转替换master服务求来修订IP地址。即将新的Master加入集群，下线老的Master，逐步替换。</p>
+<h2>外部etcd部署<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>另一种HA集群部署模式是将etcd独立出来单独部署，这样就可以控制平面节点分离。此时，etcd节点运行在独立的服务器，并且每个etcd主机和每个控制平面节点上的apiserver通讯。</p>
+<p>采用独立的etcd集群部署可以获得更为稳定的高可用集群，即使某个控制平面实例或者etcd压力过大也不会像堆叠etcd模式那样影响整个kubernetes集群。</p>
+<p>但是，独立外部etcd部署需要两倍的管控服务器，即至少3台控制平面节点和3台etcd节点服务器来部署高可用集群。</p>
+<div class="figure" id="id4">
+<a class="reference internal image-reference" href="../../../_images/kubeadm-ha-topology-external-etcd.svg"><img alt="../../../_images/kubeadm-ha-topology-external-etcd.svg" src="../../../_images/kubeadm-ha-topology-external-etcd.svg" /></a>
+<p class="caption"><span class="caption-text">Figure 1: Kubeadm HA topology - external etcd</span></p>
 </div>
 </div>
 <div class="section" id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://github.com/kubernetes/kubeadm/issues/338">Changing master IP address</a></li>
+<li><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/">Options for Highly Available topology</a></li>
 </ul>
 </div>
 </div>
@@ -291,10 +258,10 @@ kubectl get pods --all-namespaces
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ha_k8s.html" class="btn btn-neutral float-right" title="高可用(HA)Kubernetes集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="create_ha_k8s.html" class="btn btn-neutral float-right" title="使用kubeadm创建高可用集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="single_master_k8s.html" class="btn btn-neutral float-left" title="创建单一控制平面(单master)集群" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="change_master_ip.html" class="btn btn-neutral float-left" title="修改Kubernetes Master IP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

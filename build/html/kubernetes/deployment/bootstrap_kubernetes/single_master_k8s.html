@@ -103,6 +103,8 @@
 <li class="toctree-l4"><a class="reference internal" href="kubeadm.html">kubeadm</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">创建单一控制平面(单master)集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="change_master_ip.html">修改Kubernetes Master IP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ha_k8s.html">高可用(HA)Kubernetes集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="create_ha_k8s.html">使用kubeadm创建高可用集群</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../stateless_application/index.html">Kubernetes部署无状态应用</a></li>
@@ -593,15 +595,82 @@ kube-system   kubernetes-dashboard-7d75c474bb-x5ntd   1/1     Running   51      
 </pre></div>
 </div>
 <p>如果你当时记录了提示信息，可以直接复制使用(执行时候请先登陆到node节点上，并切换到root身份)。</p>
-<p>如果你当时错过了记录下 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 指令输出的添加节点的命令，你可以在管控节点上再次输入如下命令获取添加节点的命令方法:</p>
+<ul class="simple">
+<li>添加节点的标准方法是先创建一个临时token，然后使用这个24小时有效的token结合pki的sha256值添加服务器节点</li>
+</ul>
+<p>默认情况下，token有效期是24小时:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span>
+</pre></div>
+</div>
+<p>如果token过期，可以通过运行上述命令再创建一个token，上述命令输出类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">5</span><span class="n">didvk</span><span class="o">.</span><span class="n">d09sbcov8ph2amjw</span>
+</pre></div>
+</div>
+<p>此时你再次使用 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">token</span> <span class="pre">list</span></code> 检查可以看到上述命令创建的新token，有效期24小时，并且可以通过以下命令获得control-plane的命令链有关 <code class="docutils literal notranslate"><span class="pre">--discovery-token-ca-cert-hash</span></code> 内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">pubkey</span> <span class="o">-</span><span class="ow">in</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">pki</span><span class="o">/</span><span class="n">ca</span><span class="o">.</span><span class="n">crt</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="n">pubin</span> <span class="o">-</span><span class="n">outform</span> <span class="n">der</span> <span class="mi">2</span><span class="o">&gt;/</span><span class="n">dev</span><span class="o">/</span><span class="n">null</span> <span class="o">|</span> \
+  <span class="n">openssl</span> <span class="n">dgst</span> <span class="o">-</span><span class="n">sha256</span> <span class="o">-</span><span class="nb">hex</span> <span class="o">|</span> <span class="n">sed</span> <span class="s1">&#39;s/^.* //&#39;</span>
+</pre></div>
+</div>
+<p>输出内容类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">8</span><span class="n">cb2de97839780a412b93877f8507ad6c94f73add17d5d7058e91741c9d5ec78</span>
+</pre></div>
+</div>
+<p>则结合新生成的token和sha256字符串，就可以添加新的节点到集群:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="mi">5</span><span class="n">didvk</span><span class="o">.</span><span class="n">d09sbcov8ph2amjw</span> <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> \
+  <span class="n">sha256</span><span class="p">:</span><span class="mi">8</span><span class="n">cb2de97839780a412b93877f8507ad6c94f73add17d5d7058e91741c9d5ec78</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>上述方法分两步命令执行，并且使用 <code class="docutils literal notranslate"><span class="pre">openssl</span></code> 原始命令比较繁琐（虽然更直接和底层），所以 <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 还提供了一个直接打印输出最终 <code class="docutils literal notranslate"><span class="pre">join</span></code> 命令的方法:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span> <span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">join</span><span class="o">-</span><span class="n">command</span>
 </pre></div>
 </div>
-<p>此时会提示你正确的添加命令方法（包含token和sha256哈希值）。</p>
-<p>如果执行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">join</span></code> 报错显示没有授权，请再次检查上述命令输出，确保使用了正确的token和密钥:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">Reading</span> <span class="n">configuration</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">cluster</span><span class="o">...</span>
-<span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">FYI</span><span class="p">:</span> <span class="n">You</span> <span class="n">can</span> <span class="n">look</span> <span class="n">at</span> <span class="n">this</span> <span class="n">config</span> <span class="n">file</span> <span class="k">with</span> <span class="s1">&#39;kubectl -n kube-system get cm kubeadm-config -oyaml&#39;</span>
-<span class="n">error</span> <span class="n">execution</span> <span class="n">phase</span> <span class="n">preflight</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">fetch</span> <span class="n">the</span> <span class="n">kubeadm</span><span class="o">-</span><span class="n">config</span> <span class="n">ConfigMap</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">get</span> <span class="n">config</span> <span class="nb">map</span><span class="p">:</span> <span class="n">Unauthorized</span>
+<p class="last">此时会提示你正确的添加命令方法（包含token和sha256哈希值）。这样只需要复制粘贴就可以添加节点。</p>
+</div>
+</div>
+<div class="section" id="control-plane">
+<h2>从非control-plane节点管理集群<a class="headerlink" href="#control-plane" title="Permalink to this headline">¶</a></h2>
+<p>将control-plane节点的 <code class="docutils literal notranslate"><span class="pre">/etc/kubernetes/admin.conf</span></code> 配置文件分发到安装了 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 工具的主机上，则该主机就具有管理集群的权限:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="n">root</span><span class="o">@&lt;</span><span class="n">master</span> <span class="n">ip</span><span class="o">&gt;</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">admin</span><span class="o">.</span><span class="n">conf</span> <span class="o">.</span>
+<span class="n">kubectl</span> <span class="o">--</span><span class="n">kubeconfig</span> <span class="o">./</span><span class="n">admin</span><span class="o">.</span><span class="n">conf</span> <span class="n">get</span> <span class="n">nodes</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>请注意 <code class="docutils literal notranslate"><span class="pre">admin.conf</span></code> 文件包含了集群的超级用户首选，所以需要谨慎使用。对于普通用户，建议生成一个唯一信任证书，然后再将这个证书加入白名单权限（whitelist privileges）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">alpha</span> <span class="n">kubeconfig</span> <span class="n">user</span> <span class="o">--</span><span class="n">client</span><span class="o">-</span><span class="n">name</span> <span class="o">&lt;</span><span class="n">CN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p class="last">上述命令输出的kubeconfig文件到标准输出，可以保存为一个文件分发给用户。然后通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">create</span> <span class="pre">(cluster)rolebind</span></code> 命令添加白名单权限。</p>
+</div>
+</div>
+<div class="section" id="api-server">
+<h2>本地主机代理API Server<a class="headerlink" href="#api-server" title="Permalink to this headline">¶</a></h2>
+<p>如果想在集群之外连接API Server，可以使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="n">root</span><span class="o">@&lt;</span><span class="n">master</span> <span class="n">ip</span><span class="o">&gt;</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">admin</span><span class="o">.</span><span class="n">conf</span> <span class="o">.</span>
+<span class="n">kubectl</span> <span class="o">--</span><span class="n">kubeconfig</span> <span class="o">./</span><span class="n">admin</span><span class="o">.</span><span class="n">conf</span> <span class="n">proxy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tear-down">
+<h2>拆除节点(Tear down)<a class="headerlink" href="#tear-down" title="Permalink to this headline">¶</a></h2>
+<p>要去除节点（消除所有kubeadm的操作），需要先清理节点(drain the node)，并确保节点完全清理干净之后才可以关闭节点。</p>
+<p>执行以下命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">drain</span> <span class="o">&lt;</span><span class="n">node</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">delete</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">data</span> <span class="o">--</span><span class="n">force</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">daemonsets</span>
+<span class="n">kubectl</span> <span class="n">delete</span> <span class="n">node</span> <span class="o">&lt;</span><span class="n">node</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>然后在节点移除之后，再reset所有kubeadmin的已经安装状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">reset</span>
+</pre></div>
+</div>
+<p>注意，这个reset国晨并不会清理掉iptables规则或者IPVS表，如果需要reset iptables，需要手工执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">F</span> <span class="o">&amp;&amp;</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">F</span> <span class="o">&amp;&amp;</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">mangle</span> <span class="o">-</span><span class="n">F</span> <span class="o">&amp;&amp;</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">X</span>
+</pre></div>
+</div>
+<p>如果需要reset IPVS表，必须运行以下命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ipvsadm</span> <span class="o">-</span><span class="n">C</span>
 </pre></div>
 </div>
 </div>

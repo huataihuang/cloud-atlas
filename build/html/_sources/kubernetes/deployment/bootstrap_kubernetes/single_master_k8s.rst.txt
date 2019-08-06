@@ -383,19 +383,83 @@ Kubernetes Dashboard
 
 如果你当时记录了提示信息，可以直接复制使用(执行时候请先登陆到node节点上，并切换到root身份)。
 
-如果你当时错过了记录下 ``kubeadm init`` 指令输出的添加节点的命令，你可以在管控节点上再次输入如下命令获取添加节点的命令方法::
+- 添加节点的标准方法是先创建一个临时token，然后使用这个24小时有效的token结合pki的sha256值添加服务器节点
 
-   kubeadm token create --print-join-command
+默认情况下，token有效期是24小时::
 
-此时会提示你正确的添加命令方法（包含token和sha256哈希值）。
+   kubeadm token create
 
-如果执行 ``kubeadm join`` 报错显示没有授权，请再次检查上述命令输出，确保使用了正确的token和密钥::
+如果token过期，可以通过运行上述命令再创建一个token，上述命令输出类似::
 
-   [preflight] Reading configuration from the cluster...
-   [preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
-   error execution phase preflight: unable to fetch the kubeadm-config ConfigMap: failed to get config map: Unauthorized
+   5didvk.d09sbcov8ph2amjw
 
+此时你再次使用 ``kubeadm token list`` 检查可以看到上述命令创建的新token，有效期24小时，并且可以通过以下命令获得control-plane的命令链有关 ``--discovery-token-ca-cert-hash`` 内容::
 
+   openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | \
+     openssl dgst -sha256 -hex | sed 's/^.* //'
+
+输出内容类似::
+
+   8cb2de97839780a412b93877f8507ad6c94f73add17d5d7058e91741c9d5ec78
+
+则结合新生成的token和sha256字符串，就可以添加新的节点到集群::
+
+   kubeadm join 192.168.122.11:6443 --token 5didvk.d09sbcov8ph2amjw --discovery-token-ca-cert-hash \
+     sha256:8cb2de97839780a412b93877f8507ad6c94f73add17d5d7058e91741c9d5ec78 
+
+.. note::
+
+   上述方法分两步命令执行，并且使用 ``openssl`` 原始命令比较繁琐（虽然更直接和底层），所以 ``kubeadm`` 还提供了一个直接打印输出最终 ``join`` 命令的方法::
+
+      kubeadm token create --print-join-command
+
+   此时会提示你正确的添加命令方法（包含token和sha256哈希值）。这样只需要复制粘贴就可以添加节点。
+
+从非control-plane节点管理集群
+===============================
+
+将control-plane节点的 ``/etc/kubernetes/admin.conf`` 配置文件分发到安装了 ``kubectl`` 工具的主机上，则该主机就具有管理集群的权限::
+
+   scp root@<master ip>:/etc/kubernetes/admin.conf .
+   kubectl --kubeconfig ./admin.conf get nodes
+
+.. note::
+
+   请注意 ``admin.conf`` 文件包含了集群的超级用户首选，所以需要谨慎使用。对于普通用户，建议生成一个唯一信任证书，然后再将这个证书加入白名单权限（whitelist privileges）::
+
+      kubeadm alpha kubeconfig user --client-name <CN>
+
+   上述命令输出的kubeconfig文件到标准输出，可以保存为一个文件分发给用户。然后通过 ``kubectl create (cluster)rolebind`` 命令添加白名单权限。
+
+本地主机代理API Server
+=======================
+
+如果想在集群之外连接API Server，可以使用 ``kubectl proxy`` ::
+
+   scp root@<master ip>:/etc/kubernetes/admin.conf .
+   kubectl --kubeconfig ./admin.conf proxy
+
+拆除节点(Tear down)
+======================
+
+要去除节点（消除所有kubeadm的操作），需要先清理节点(drain the node)，并确保节点完全清理干净之后才可以关闭节点。
+
+执行以下命令::
+
+   kubectl drain <node name> --delete-local-data --force --ignore-daemonsets
+   kubectl delete node <node name>
+
+然后在节点移除之后，再reset所有kubeadmin的已经安装状态::
+
+   kubeadm reset
+
+注意，这个reset国晨并不会清理掉iptables规则或者IPVS表，如果需要reset iptables，需要手工执行::
+
+   iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
+如果需要reset IPVS表，必须运行以下命令::
+
+   ipvsadm -C
 
 参考
 =========
