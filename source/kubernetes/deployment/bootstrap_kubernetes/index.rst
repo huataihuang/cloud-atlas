@@ -12,3 +12,5 @@ Kubernetes集群引导
    kubeadm.rst
    single_master_k8s.rst
    change_master_ip.rst
+   ha_k8s.rst
+   create_ha_k8s.rst
