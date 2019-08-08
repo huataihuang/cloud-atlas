@@ -8,6 +8,8 @@ Kubernetes部署服务器
 
 - 3台 Kubernetes Mster
 - 5台 Kubernetes Node
+- 2台 HAProxy
+- 3台 etcd
 
 clone k8s虚拟机
 ==================
@@ -38,6 +40,11 @@ clone k8s虚拟机
      virsh start haproxy-${i}
    done
 
+   for i in {1..3};do
+     virt-clone --connect qemu:///system --original centos7 --name etcd-${i} --file /var/lib/libvirt/images/etcd-${i}.qcow2
+     virt-sysprep -d etcd-${i} --hostname etcd-${i} --root-password password:CHANGE_ME
+     virsh start etcd-${i}
+   done
 
 .. note::
 
@@ -50,8 +57,9 @@ clone k8s虚拟机
 
 在运行KVM的物理主机上 ``/etc/hosts`` 提供了模拟集群的域名解析，在DNSmasq中可以提供配置
 
-.. literalinclude:: hosts
+.. literalinclude:: ../../studio/hosts
    :language: bash
+   :emphasize-lines: 8,18-33
    :linenos:
    :caption:
 
