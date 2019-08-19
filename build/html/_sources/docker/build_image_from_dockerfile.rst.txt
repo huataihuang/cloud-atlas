@@ -51,20 +51,6 @@ docker build参数
 
       docker build -f ubuntu18.04-ssh -t local:ubuntu18.04-ssh .
 
-标签`` ，并且可以使用多个 ``-t`` 参数来标记镜像属于多个镜像仓库，例如::
-   docker build -t shykes/myapp:1.0.2 -t shykes/myapp:latest .
-
-.. note::
-
-   当使用 ``-f`` 参数指定Dockerfile来build镜像时，创建的镜像是没有 ``REPOSITORY`` 和 ``TAG`` 的，所以引用起来非常不便，类似::
-
-      REPOSITORY              TAG                  IMAGE ID            CREATED             SIZE
-      <none>                  <none>               845219589871        12 hours ago        277MB
-
-   建议结合 ``-f`` 和 ``-t`` 参数，这样就可以对镜像标记::
-
-      docker build -f ubuntu18.04-ssh -t local:ubuntu18.04-ssh .
-
    这样创建的镜像具有仓库和标签，显示如下::
 
       REPOSITORY              TAG                  IMAGE ID            CREATED             SIZE
@@ -106,6 +92,18 @@ docker build参数
    :language: dockerfile
    :linenos:
    :caption:
+
+启动容器
+=============
+
+既然已经构建成功image，现在可以非常容易就启动容器::
+
+   docker run -it -d --hostname ubuntu18 --name ubuntu18 local:ubuntu18.04-ssh
+
+此时使用 ``docker ps`` 可以看到新启动的容器::
+
+   CONTAINER ID        IMAGE                   COMMAND                  CREATED             STATUS              PORTS               NAMES
+   1a1535ce00ed        local:ubuntu18.04-ssh   "/bin/sh -c '/usr/sb…"   3 seconds ago       Up 2 seconds        22/tcp              ubuntu18
 
 参考
 ======

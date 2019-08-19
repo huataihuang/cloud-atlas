@@ -260,7 +260,7 @@ done
 </div>
 <div class="section" id="id1">
 <h2>主机名解析<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>在运行KVM的物理主机上 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 提供了模拟集群的域名解析，在DNSmasq中可以提供配置</p>
+<p>在运行KVM的物理主机上 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 配置模拟集群的hosts域名解析</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">../../studio/hosts</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
@@ -380,6 +380,57 @@ done
 <span class="m">192</span>.168.7.10 kali
 </pre></div>
 </td></tr></table></div>
+</div>
+<div class="section" id="libvirt-dnsmasq">
+<h3>libvirt dnsmasq<a class="headerlink" href="#libvirt-dnsmasq" title="Permalink to this headline">¶</a></h3>
+<p>但是，在KVM虚拟机集群中，如何能够使得所有虚拟机都获得统一的DNS解析呢？显然，在集群中运行一个DNS服务器是一个解决方案。但是，请注意，在KVM libvirt的运行环境中，默认就在libvirt中运行了一个dnsmasq，实际上为 <code class="docutils literal notranslate"><span class="pre">virtbr0</span></code> 网络接口上连接的所有虚拟机提供了DNS解析服务。通过在物理服务器上检查 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">dnsmasq</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>nobody    13280  0.0  0.0  53884  1116 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
+root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
+</pre></div>
+</div>
+<p>检查libvirt的dnsmasq配置文件 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/default.conf</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">strict</span><span class="o">-</span><span class="n">order</span>
+<span class="n">pid</span><span class="o">-</span><span class="n">file</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">network</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">pid</span>
+<span class="k">except</span><span class="o">-</span><span class="n">interface</span><span class="o">=</span><span class="n">lo</span>
+<span class="n">bind</span><span class="o">-</span><span class="n">dynamic</span>
+<span class="n">interface</span><span class="o">=</span><span class="n">virbr0</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="nb">range</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.51</span><span class="p">,</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.254</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">no</span><span class="o">-</span><span class="n">override</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">authoritative</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">lease</span><span class="o">-</span><span class="nb">max</span><span class="o">=</span><span class="mi">204</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">hostsfile</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">dnsmasq</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">hostsfile</span>
+<span class="n">addn</span><span class="o">-</span><span class="n">hosts</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">dnsmasq</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">addnhosts</span>
+</pre></div>
+</div>
+<p>上述配置:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">interface=virbr0</span></code> 表示libvirt dnsmasq只对 <code class="docutils literal notranslate"><span class="pre">virtbr0</span></code> 接口提供服务，所以也就只影响NAT网络中对虚拟机</li>
+<li><code class="docutils literal notranslate"><span class="pre">dhcp-range=192.168.122.51,192.168.122.254</span></code> 是我配置的DHCP范围</li>
+<li><code class="docutils literal notranslate"><span class="pre">dhcp-hostsfile=/var/lib/libvirt/dnsmasq/default.hostsfile</span></code> 是配置静态分配DHCP地址的配置文件</li>
+<li><code class="docutils literal notranslate"><span class="pre">addn-hosts=/var/lib/libvirt/dnsmasq/default.addnhosts</span></code> 是配置dnsmasq的DNS解析配置文件，类似 <code class="docutils literal notranslate"><span class="pre">/etc/hots</span></code></li>
+</ul>
+<p>为了能统一整个虚拟机网络的DNS服务，只需要在 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/default.addnhosts</span></code> 配置静态IP解析，然后启动的libvirt dnsmasq就能够提供DNS服务。所以修改 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/default.addnhosts</span></code> 内容就是上文 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 配置内容。</p>
+<p>然后重启libvirt default网络:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="n">delete</span> <span class="n">default</span>
+<span class="n">sudo</span> <span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="n">start</span> <span class="n">default</span>
+</pre></div>
+</div>
+<p>注意，重启网络之后，所有虚拟机的虚拟网卡会脱离网桥 <code class="docutils literal notranslate"><span class="pre">virbr0</span></code> ，需要重新连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for i in {0..13};do sudo brctl addif virbr0 vnet${i};done
+</pre></div>
+</div>
+<p>随后登陆任意虚拟机，尝试解析DNS，例如，解析后续作为apiserver的VIP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dig</span> <span class="n">kubeapi</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+<p>输出应该类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeapi</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">.</span>    <span class="mi">0</span>    <span class="n">IN</span>    <span class="n">A</span>    <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">如果要使用独立的dnsmasq对外提供DNS解析服务，可以参考我之前的实践 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/service/dns/dnsmasq/dnsmasq_quick_startup.md">DNSmasq 快速起步</a> 或者 <a class="reference external" href="https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/">KVM: Using dnsmasq for libvirt DNS resolution</a></p>
+</div>
 </div>
 </div>
 <div class="section" id="pssh">
