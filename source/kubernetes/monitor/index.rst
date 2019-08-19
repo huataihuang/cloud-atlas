@@ -12,5 +12,6 @@ Kubernetes监控
    cadvisor.rst
    prometheus/index
    jaeger/index
+   node_health/index
    grafana.rst
    netdata.rst

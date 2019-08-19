@@ -55,13 +55,65 @@ clone k8s虚拟机
 主机名解析
 =============
 
-在运行KVM的物理主机上 ``/etc/hosts`` 提供了模拟集群的域名解析，在DNSmasq中可以提供配置
+在运行KVM的物理主机上 ``/etc/hosts`` 配置模拟集群的hosts域名解析
 
 .. literalinclude:: ../../studio/hosts
    :language: bash
    :emphasize-lines: 8,18-33
    :linenos:
    :caption:
+
+libvirt dnsmasq
+-----------------
+
+但是，在KVM虚拟机集群中，如何能够使得所有虚拟机都获得统一的DNS解析呢？显然，在集群中运行一个DNS服务器是一个解决方案。但是，请注意，在KVM libvirt的运行环境中，默认就在libvirt中运行了一个dnsmasq，实际上为 ``virtbr0`` 网络接口上连接的所有虚拟机提供了DNS解析服务。通过在物理服务器上检查 ``ps aux | grep dnsmasq`` 可以看到::
+
+   nobody    13280  0.0  0.0  53884  1116 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
+   root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
+
+检查libvirt的dnsmasq配置文件 ``/var/lib/libvirt/dnsmasq/default.conf`` 可以看到::
+
+   strict-order
+   pid-file=/var/run/libvirt/network/default.pid
+   except-interface=lo
+   bind-dynamic
+   interface=virbr0
+   dhcp-range=192.168.122.51,192.168.122.254
+   dhcp-no-override
+   dhcp-authoritative
+   dhcp-lease-max=204
+   dhcp-hostsfile=/var/lib/libvirt/dnsmasq/default.hostsfile
+   addn-hosts=/var/lib/libvirt/dnsmasq/default.addnhosts
+
+上述配置:
+
+- ``interface=virbr0`` 表示libvirt dnsmasq只对 ``virtbr0`` 接口提供服务，所以也就只影响NAT网络中对虚拟机
+- ``dhcp-range=192.168.122.51,192.168.122.254`` 是我配置的DHCP范围
+- ``dhcp-hostsfile=/var/lib/libvirt/dnsmasq/default.hostsfile`` 是配置静态分配DHCP地址的配置文件
+- ``addn-hosts=/var/lib/libvirt/dnsmasq/default.addnhosts`` 是配置dnsmasq的DNS解析配置文件，类似 ``/etc/hots``
+
+为了能统一整个虚拟机网络的DNS服务，只需要在 ``/var/lib/libvirt/dnsmasq/default.addnhosts`` 配置静态IP解析，然后启动的libvirt dnsmasq就能够提供DNS服务。所以修改 ``/var/lib/libvirt/dnsmasq/default.addnhosts`` 内容就是上文 ``/etc/hosts`` 配置内容。
+
+然后重启libvirt default网络::
+
+   sudo virsh net-delete default
+   sudo virsh net-start default
+
+注意，重启网络之后，所有虚拟机的虚拟网卡会脱离网桥 ``virbr0`` ，需要重新连接::
+
+   for i in {0..13};do sudo brctl addif virbr0 vnet${i};done
+
+随后登陆任意虚拟机，尝试解析DNS，例如，解析后续作为apiserver的VIP地址::
+
+   dig kubeapi.huatai.me
+
+输出应该类似::
+
+   kubeapi.huatai.me.    0    IN    A    192.168.122.10
+
+.. note::
+
+   如果要使用独立的dnsmasq对外提供DNS解析服务，可以参考我之前的实践 `DNSmasq 快速起步 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/service/dns/dnsmasq/dnsmasq_quick_startup.md>`_ 或者 `KVM: Using dnsmasq for libvirt DNS resolution <https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/>`_
 
 pssh配置
 ==========
