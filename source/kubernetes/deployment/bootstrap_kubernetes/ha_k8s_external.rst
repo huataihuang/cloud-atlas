@@ -5,3 +5,8 @@
 ==========================
 
 
+
+参考
+========
+
+- `Creating Highly Available clusters with kubeadm <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/>`_

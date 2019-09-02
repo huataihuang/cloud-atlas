@@ -21,7 +21,7 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    `阿里云联合CNCF推出的云原生技术公开课 <https://edu.aliyun.com/course/1651?spm=5176.10731542.0.0.1cea20beUj7Oz0>`_ 由一线工程师和开源社区一起制作，讲解清晰，并且中文授课，推荐学习。
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    kubernetes_overview.rst
    startup_prepare/index
@@ -29,6 +29,7 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    concepts/index
    administer/index
    deployment/index
+   network/index
    production/index
    service_mesh/index
    ci_cd/index

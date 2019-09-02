@@ -195,8 +195,8 @@
 </ul>
 <p>大多数网上介绍的Ceph+Docker都是指将Ceph在物理服务器上运行服务，在Docker Host主机上在Host OS层挂载Ceph RBD块存储，在Ceph RBD块存储上创建文件系统。然后有两种方式使用Ceph分布式存储：</p>
 <ul class="simple">
-<li>将Docker的 <a class="reference internal" href="../docker/docker_storage_driver.html#docker-storage-driver"><span class="std std-ref">Docker存储驱动</span></a> 迁移到Ceph块存储上实现Docker容器运行在Ceph分布式存储上，这样可以实现计算节点本地硬盘极小化甚至无盘。</li>
-<li>将 <a class="reference internal" href="../docker/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 映射到Ceph块存储的文件系统目录，以便将持久化数据存储到Ceph分布式存储上，这样可以确保Docker容器中的业务数据高可用、高性能。</li>
+<li>将Docker的 <a class="reference internal" href="../docker/storage/docker_storage_driver.html#docker-storage-driver"><span class="std std-ref">Docker存储驱动</span></a> 迁移到Ceph块存储上实现Docker容器运行在Ceph分布式存储上，这样可以实现计算节点本地硬盘极小化甚至无盘。</li>
+<li>将 <a class="reference internal" href="../docker/storage/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 映射到Ceph块存储的文件系统目录，以便将持久化数据存储到Ceph分布式存储上，这样可以确保Docker容器中的业务数据高可用、高性能。</li>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -207,7 +207,7 @@
 <p>由于笔记本电脑只有一块硬盘，要部署Ceph集群，需要模拟出多块磁盘块设备给不同的Docker容器。所以，采用LVM卷管理方式来把磁盘的一个分区划分成5个块设备。</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>如果要简单化，也可以使用host主机的扩展分区，可以支持多个逻辑分区，同样也能通过 <a class="reference internal" href="../docker/docker_run_add_host_device.html#docker-run-add-host-device"><span class="std std-ref">添加host设备到容器</span></a> 方式映射到Docker容器内使用。</p>
+<p>如果要简单化，也可以使用host主机的扩展分区，可以支持多个逻辑分区，同样也能通过 <a class="reference internal" href="../docker/storage/docker_run_add_host_device.html#docker-run-add-host-device"><span class="std std-ref">添加host设备到容器</span></a> 方式映射到Docker容器内使用。</p>
 <p class="last">详细的Linux LVM原理和操作请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/storage/device-mapper/lvm/linux_lvm.md">Linux卷管理</a> 。</p>
 </div>
 <ul>
@@ -359,7 +359,7 @@
 </ul>
 <p>然后重新加载dacker服务 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">systemctl</span> <span class="pre">reload</span> <span class="pre">docker</span></code> 确保docker升级时容器可以持续运行。</p>
 <ul>
-<li><p class="first">参考 <a class="reference internal" href="../docker/docker_run_add_host_device.html#docker-run-add-host-device"><span class="std std-ref">添加host设备到容器</span></a> 执行以下指令批量创建5个容器:</p>
+<li><p class="first">参考 <a class="reference internal" href="../docker/storage/docker_run_add_host_device.html#docker-run-add-host-device"><span class="std std-ref">添加host设备到容器</span></a> 执行以下指令批量创建5个容器:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for i in {1..5};do
   docker run -itd --hostname ceph-$i --name ceph-$i -v data:/data \
       --net ceph-net --ip 172.18.0.1$i -p 221$i:22 --restart always \
@@ -372,7 +372,7 @@ done
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <ul class="last simple">
-<li>采用 <a class="reference internal" href="../docker/build_image_from_dockerfile.html#build-image-from-dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中构建的支持SSH服务端镜像 <code class="docutils literal notranslate"><span class="pre">local:ubuntu18.04-ssh</span></code> 构建容器</li>
+<li>采用 <a class="reference internal" href="../docker/administer/build_image_from_dockerfile.html#build-image-from-dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中构建的支持SSH服务端镜像 <code class="docutils literal notranslate"><span class="pre">local:ubuntu18.04-ssh</span></code> 构建容器</li>
 <li><code class="docutils literal notranslate"><span class="pre">-itd</span></code> :<ul>
 <li><code class="docutils literal notranslate"><span class="pre">-i</span></code> - 交互模式</li>
 <li><code class="docutils literal notranslate"><span class="pre">-t</span></code> - 提供终端，这样可以通过 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">attach</span> <span class="pre">ceph-X</span></code> 直接访问容器终端控制台</li>
@@ -381,11 +381,11 @@ done
 </li>
 <li><code class="docutils literal notranslate"><span class="pre">--hostname</span> <span class="pre">ceph-$i</span></code> - 设置容器内部os所用的主机名为 <code class="docutils literal notranslate"><span class="pre">ceph-X</span></code></li>
 <li><code class="docutils literal notranslate"><span class="pre">--name</span> <span class="pre">ceph-$i</span></code> - 设置Docker中容器的名字，同样为 <code class="docutils literal notranslate"><span class="pre">ceph-X</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">data:/data</span></code> - <a class="reference internal" href="../docker/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 映射提供给容器共享的Host主机卷 <code class="docutils literal notranslate"><span class="pre">data</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">--net</span> <span class="pre">ceph-net</span> <span class="pre">--ip</span> <span class="pre">172.18.0.1$i</span></code> - <a class="reference internal" href="../docker/assign_static_ip_to_docker_container.html#assign-static-ip-to-docker-container"><span class="std std-ref">Docker容器分配静态IP</span></a></li>
-<li><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">221$i:22</span></code> - 在 <a class="reference internal" href="../docker/docker_ssh.html#docker-ssh"><span class="std std-ref">Docker容器中运行ssh服务</span></a> ，通过将容器中运行端口22输出到host主机221x方便外部登陆</li>
-<li><code class="docutils literal notranslate"><span class="pre">--restart</span> <span class="pre">always</span></code> - 设置 <a class="reference internal" href="../docker/start_containers_automatically.html#start-containers-automatically"><span class="std std-ref">自动启动Docker容器</span></a> 确保物理主机重启时自动恢复容器运行</li>
-<li><code class="docutils literal notranslate"><span class="pre">--device=/dev/mapper/ceph-data$i:/dev/xvdc</span></code> - 通过 <a class="reference internal" href="../docker/docker_run_add_host_device.html#docker-run-add-host-device"><span class="std std-ref">添加host设备到容器</span></a> 方式将物理主机LVM卷映射为容器中的磁盘设备，这样可以基于磁盘设备来构建 <a class="reference internal" href="bluestore.html#bluestore"><span class="std std-ref">Ceph后端存储引擎BlueStore</span></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">data:/data</span></code> - <a class="reference internal" href="../docker/storage/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 映射提供给容器共享的Host主机卷 <code class="docutils literal notranslate"><span class="pre">data</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">--net</span> <span class="pre">ceph-net</span> <span class="pre">--ip</span> <span class="pre">172.18.0.1$i</span></code> - <a class="reference internal" href="../docker/administer/assign_static_ip_to_docker_container.html#assign-static-ip-to-docker-container"><span class="std std-ref">Docker容器分配静态IP</span></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">221$i:22</span></code> - 在 <a class="reference internal" href="../docker/administer/docker_ssh.html#docker-ssh"><span class="std std-ref">Docker容器中运行ssh服务</span></a> ，通过将容器中运行端口22输出到host主机221x方便外部登陆</li>
+<li><code class="docutils literal notranslate"><span class="pre">--restart</span> <span class="pre">always</span></code> - 设置 <a class="reference internal" href="../docker/administer/start_containers_automatically.html#start-containers-automatically"><span class="std std-ref">自动启动Docker容器</span></a> 确保物理主机重启时自动恢复容器运行</li>
+<li><code class="docutils literal notranslate"><span class="pre">--device=/dev/mapper/ceph-data$i:/dev/xvdc</span></code> - 通过 <a class="reference internal" href="../docker/storage/docker_run_add_host_device.html#docker-run-add-host-device"><span class="std std-ref">添加host设备到容器</span></a> 方式将物理主机LVM卷映射为容器中的磁盘设备，这样可以基于磁盘设备来构建 <a class="reference internal" href="bluestore.html#bluestore"><span class="std std-ref">Ceph后端存储引擎BlueStore</span></a></li>
 </ul>
 </div>
 <div class="admonition note">

@@ -59,7 +59,7 @@ clone k8s虚拟机
 
 .. literalinclude:: ../../studio/hosts
    :language: bash
-   :emphasize-lines: 8,18-33
+   :emphasize-lines: 8,19-34
    :linenos:
    :caption:
 
@@ -92,12 +92,30 @@ libvirt dnsmasq
 - ``dhcp-hostsfile=/var/lib/libvirt/dnsmasq/default.hostsfile`` 是配置静态分配DHCP地址的配置文件
 - ``addn-hosts=/var/lib/libvirt/dnsmasq/default.addnhosts`` 是配置dnsmasq的DNS解析配置文件，类似 ``/etc/hots``
 
-为了能统一整个虚拟机网络的DNS服务，只需要在 ``/var/lib/libvirt/dnsmasq/default.addnhosts`` 配置静态IP解析，然后启动的libvirt dnsmasq就能够提供DNS服务。所以修改 ``/var/lib/libvirt/dnsmasq/default.addnhosts`` 内容就是上文 ``/etc/hosts`` 配置内容。
+参考 `KVM: Using dnsmasq for libvirt DNS resolution <https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/>`_ ，执行 ``virsh net-edit default`` 编辑 libvirt 网络，添加 ``<dns></dns>`` 段落:
+
+.. literalinclude:: ../../studio/libvirt_net_default.xml
+   :language: xml
+   :emphasize-lines: 7-53
+   :linenos:
+   :caption: virsh net-edit default
+
+   
 
 然后重启libvirt default网络::
 
-   sudo virsh net-delete default
+   sudo virsh net-destroy default
    sudo virsh net-start default
+
+此时检查物理服务器的 ``/var/lib/libvirt/dnsmasq/default.addnhosts`` 内容，原先空白的文件就会自动填写上类似 ``/etc/hosts`` 这样的配置静态IP解析::
+
+   192.168.122.5    etcd-1.test.huatai.me
+   192.168.122.6    etcd-2.test.huatai.me
+   ...
+
+.. note::
+
+   之前我的实践发现，直接修改 ``/var/lib/libvirt/dnsmasq/default.addnhosts`` 添加静态解析内容，然后重建 ``default`` 网络也能够实现相同的DNS解析。但是，我发现过一段时间以后物理服务器的 ``/var/lib/libvirt/dnsmasq/default.addnhosts`` 会被清空。不过，在虚拟机网络中，依然能够解析DNS。似乎直接修改文件不是好的方法，所以还是参考上述文档通过修订default网络的xml来完成配置。
 
 注意，重启网络之后，所有虚拟机的虚拟网卡会脱离网桥 ``virbr0`` ，需要重新连接::
 
@@ -105,11 +123,19 @@ libvirt dnsmasq
 
 随后登陆任意虚拟机，尝试解析DNS，例如，解析后续作为apiserver的VIP地址::
 
-   dig kubeapi.huatai.me
+   dig kubeapi.test.huatai.me
 
 输出应该类似::
 
-   kubeapi.huatai.me.    0    IN    A    192.168.122.10
+   kubeapi.test.huatai.me.    0    IN    A    192.168.122.10
+
+而且可以使用短域名解析::
+
+   dig kubeapi
+
+输出::
+
+   kubeapi.        0    IN    A    192.168.122.10
 
 .. note::
 
