@@ -16,4 +16,5 @@ Kubernetes集群引导
    ha_k8s_lb.rst
    create_ha_k8s.rst
    ha_k8s_stacked.rst
+   ha_etcd.rst
    ha_k8s_external.rst
