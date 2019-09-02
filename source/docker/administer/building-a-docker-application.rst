@@ -8,7 +8,7 @@
 
    案例采用「Docker in Practice」介绍的一个to-do应用程序案例。这个to-do应用是一个简单的WEB界面程序，适合作为演示。
 
-.. image:: ../_static/docker/building-a-docker-application.png
+.. image:: ../../_static/docker/building-a-docker-application.png
    :scale: 50
 
 创建Docker image
@@ -219,7 +219,7 @@ Docker的层功能解决了一个容器伸缩性的难题：
 
 数据层使得在一个镜像之上创建的所有容器都共享来这部分数据，每个容器的区别只是启动容器之后修改的部分。所以在Host主机上，不需要从基础Image实际复制出不同的容器，而是直接启动容器，只记录容器修改的部分。这种本地缓存的共享Image方式极大地加快了创建新容器的速度，也减少了存储消耗。
 
-.. image:: ../_static/docker/docker_copy_on_write.png
+.. image:: ../../_static/docker/docker_copy_on_write.png
    :scale: 50
 
 镜像的分层模式也加快了软件更新的分发：

@@ -8,7 +8,7 @@ Docker内存文件系统(tmpfs)挂载
 
 在运行Docker的Linux系统中，还有一种特殊的基于内存文件系统 ``tmpfs`` 的挂载，可以在容器和主机间共享文件，虽然这种共享文件是非持久化的，即容器停止， ``tmpfs`` 挂载就会移除，则写入 ``tmpfs`` 的文件无法持久化。但是由于交换文件是存储在服务器的内存中，读写性能非常高，特别适合容器和外部交换临时文件，例如，只需要短暂存储就可以被日志采集系统读取完毕而无需长久保存的日志文件。
 
-.. image:: ../_static/docker/types-of-mounts-tmpfs.png
+.. image:: ../../_static/docker/types-of-mounts-tmpfs.png
 
 ``tmpfs`` 挂载的限制：
 

@@ -100,6 +100,10 @@
 
    (cd /var/lib/libvirt.bak && tar cf - .)|(cd /var/lib/libvirt && tar xf -)
 
+- 添加 ``/etc/fstab`` 配置::
+
+   echo '/dev/mapper/store-libvirt    /var/lib/libvirt    xfs    defaults    0 0' >> /etc/fstab
+
 - 恢复libvirt::
 
    systemctl start libvirtd

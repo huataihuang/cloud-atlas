@@ -1,4 +1,4 @@
-.. _docker_storage:
+.. _docker_storage_manage:
 
 ===================
 Docker存储管理
@@ -30,7 +30,7 @@ Docker可以使用两种方式把文件存储到Host主机上，以实现数据�
 
 无论你选择哪种挂载方式，数据在容器内部看起来都是一样的，数据在容器内部表现为文件系统一个目录或独立文件。如何区分数据挂载类型，例如 卷，绑定挂载，以及 ``tmpfs`` 挂载，最简单的方式是考虑数据在Docker Host（底层主机）上存储的位置：
 
-.. image:: ../_static/docker/types-of-mounts.png
+.. image:: ../../_static/docker/types-of-mounts.png
 
 - ``Volumes`` （卷）将数据存储在host主机文件系统中由Docker管理的部分（ ``/var/lib/docker/volumes/`` ）。不是Docker的进程将不会修改这部分文件系统，通常卷是Docker持久化数据的最佳选择。
 - ``Bind mounts`` （绑定挂载）可以将数据存储在host主机的任何位置，甚至可以存储在重要的系统文件和目录。在Docker主机上非Docker进程也能够访问和修改这些数据。（限制最小，但存在安全隐患，因为不仅每个容器都可以修改系统文件导致影响其他容器，而且在host主机修改也将影响所有容器）

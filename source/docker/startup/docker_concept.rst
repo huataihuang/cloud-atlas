@@ -7,7 +7,7 @@ Docker基本概念
 镜像、层、容器
 ------------------
 
-.. image:: ../_static/docker/docker_image_layer_container.png
+.. image:: ../../_static/docker/docker_image_layer_container.png
    :scale: 50
 
 * Docker Image
@@ -28,7 +28,7 @@ Docker容器就是从镜像上运行的实例，相同镜像可以运行多个�
 
    用面向对象编程做一个对比：镜像就相当于类，而容器相当于对象。对象是类的实例化，类似的，容器就是镜像的实例化。可以从单个镜像创建多个容器，每个容器都是彼此隔离的，就好像从类创建的对象也是彼此分离的。无论你如何修改对象，都不会影响到类的定义。
 
-.. image:: ../_static/docker/docker_image_container.png
+.. image:: ../../_static/docker/docker_image_container.png
    :scale: 50
 
 Docker镜像文件实际存储在磁盘中，镜像包含了文件（系统文件）和元数据，是应用程序运行环境。
@@ -54,7 +54,7 @@ containerd / runc
 - `gRPC <http://www.grpc.io/>`_ 用于在docker-engine之间通讯。
 - `OCI <https://www.opencontainers.org/>`_ 维护OCI的运行时和镜像标准。当前的docker版本支持OCI镜像和运行时标准。
 
-.. image:: ../_static/docker/docker_containerd_runc.png
+.. image:: ../../_static/docker/docker_containerd_runc.png
 
 Docker容器内服务
 ===================

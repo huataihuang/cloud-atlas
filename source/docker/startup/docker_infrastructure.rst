@@ -8,7 +8,7 @@ Docker架构
 
    理解Docker架构可以帮助你更好使用Docker，避免使用误区，更好发挥Docker的优势。
 
-.. image:: ../_static/docker/docker_architecture.png
+.. image:: ../../_static/docker/docker_architecture.png
    :scale: 50
 
 在运行Docker的host主机上，Docker分为两部分 -- 提供RESTful API的daemon服务 以及 和daemon服务交互的客户端。
@@ -30,6 +30,6 @@ Docker daemon
 
 Docker daemon是Docker交互的中心，也是理解相关Docker概念的起点，它管理这容器和镜像的状态，并且是和外部世界交互的代理：
 
-.. image:: ../_static/docker/docker_daemon.png
+.. image:: ../../_static/docker/docker_daemon.png
    :scale: 50
 

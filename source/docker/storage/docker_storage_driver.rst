@@ -10,7 +10,7 @@ Docker存储驱动( ``storage drivers`` )允许在容器中创建可以存储数
 
 ``缓慢的 storage drivers`` :
 
-.. image:: ../_static/docker/docker_storage_driver_sloth.png
+.. image:: ../../_static/docker/docker_storage_driver_sloth.png
    :scale: 50
    :target: http://en.wikifur.com/wiki/Sloth_(species)
 

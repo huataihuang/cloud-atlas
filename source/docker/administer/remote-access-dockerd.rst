@@ -10,7 +10,7 @@
 
    虽然远程访问Docker daemon是非常强大的技术，但是需要考虑安全性。Docker socket可能被滥用并导致攻击。
 
-.. image:: ../_static/docker/docker_daemon_remote_access.png
+.. image:: ../../_static/docker/docker_daemon_remote_access.png
    :scale: 50
 
 docker的TCP访问

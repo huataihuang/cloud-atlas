@@ -4,7 +4,7 @@
 Docker运行NVIDIA容器
 ==========================
 
-.. image:: ../_static/docker/nvidia_container_runtime_for_docker.png
+.. image:: ../../_static/docker/nvidia_container_runtime_for_docker.png
 
 在机器学习中，需要通过GPU加速矩阵计算来实现卷积神经网络CNN。在云计算环境中， :ref:`gpu_passthrough_with_kvm` 可以将一块物理GPU显卡分割成多块虚拟GPU卡提供给虚拟机使用。同样类似，在Docker容器中，nVidia通过 ``nvidia-container-runtime-hook`` 将Host主机的GPU驱动共享给容器，这样就不需要在每个容器中单独安装驱动。
 

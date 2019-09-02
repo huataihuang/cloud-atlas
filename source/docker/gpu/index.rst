@@ -1,17 +1,13 @@
-.. _docker:
+.. _docker_gpu:
 
 =================================
-Docker Atlas
+Docker GPU设备
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   startup/index
-   administer/index
-   storage/index
-   network/index
-   gpu/index
+   nvidia-docker.rst
 
 .. only::  subproject and html
 

@@ -27,7 +27,7 @@ Pouch
 - `katacontainers <https://github.com/kata-containers/runtime>`_ 基于hypervisor的container runtime， `Kata Containers <https://katacontainers.io/>`_ 结合了内核虚拟化的轻量级容器，提供比单纯容器更好的安全隔离
 - `runlxc <https://linuxcontainers.org/lxc/getting-started/>`_ 基于LXC的container runtime(对于较老的2.6.32+内核支持)
 
-.. image:: ../_static/docker/pouchcontainer-arch.png
+.. image:: ../../_static/docker/pouchcontainer-arch.png
    :scale: 30
 
 PouchContainer主要的功能:

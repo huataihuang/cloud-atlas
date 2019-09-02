@@ -28,7 +28,7 @@ Docker带来的DevOps改变
 
 `Docker in Practice <https://www.amazon.cn/dp/B079GQV832>`_ 的示意图非常形象：
 
-.. image:: ../_static/docker/devops_with_docker.png
+.. image:: ../../_static/docker/devops_with_docker.png
    :scale: 50
 
 可以看到，虚拟机(vagrant)、自动编译、测试、部署系统(jenkins)和配置管理系统（chef）被融合到Docker系统中，成为一个整体，通过Docker build来实现软件持续交付的完整流程。
@@ -37,7 +37,7 @@ Docker带来的DevOps改变
 
 使用Docker之后，配置管理被分解成资源管理：执行 ``docker run`` 下载环境的镜像并运行。由于容器不需要像虚拟机那样模拟完整x86硬件，所以消耗host硬件资源大为减少，启动和销毁速度更快。容器镜像中包含了所有运行应用的组件，包括OS、软件、配置，把复杂性封装在容器中，只要在最初构建镜像时完成了一次复杂工作，就可以在后续部署时非常简洁地运行。
 
-.. image:: ../_static/docker/before_and_after_docker.png
+.. image:: ../../_static/docker/before_and_after_docker.png
    :scale: 50
 
 .. note::
