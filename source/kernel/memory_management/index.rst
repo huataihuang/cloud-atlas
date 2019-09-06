@@ -1,18 +1,13 @@
-.. _kernel:
+.. _linux_memory_management:
 
 =================================
-Kernel Atlas
+Linux内存管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   cgroups_v1.rst   
-   cgroups_v2.rst   
-   intel_rdt.rst
-   flame_graph.rst
-   ebpf.rst
-   memory_management/index
+   numa.rst
 
 .. only::  subproject and html
 
