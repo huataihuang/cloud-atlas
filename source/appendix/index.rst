@@ -13,15 +13,23 @@
 
 跌跌撞撞，依然不断探索前进，这里有自己的经验和体会，也许在今后依然有参考的价值，所以都汇总整理在这里。
 
+.. note::
+
+   在twitter上，我曾经看过不少非常有趣 `犀利而无用的知识 <https://twitter.com/hashtag/%E7%8A%80%E5%88%A9%E8%80%8C%E6%97%A0%E7%94%A8%E7%9A%84%E7%9F%A5%E8%AF%86>`_ ，我希望在实践中能够记录下有用的知识，在恰当的时候事半功倍完美解决问题。
+
 .. toctree::
    :maxdepth: 1
 
-   appendix_base_os.rst
+   intel_core_i7_4850hq.rst
+   thinkpad_x220.rst
+   intel_core_i5_2410m.rst
+   desktop_base_os.rst
    ubuntu_server.rst
    netplan.rst
    efi_system_partition.rst
    upgrade_ubuntu.rst
    ubuntu_desktop.rst
+   archlinux_desktop.rst
    using_btrfs_in_studio.rst
    reduce_laptop_overheat.rst
    vmware_in_studio.rst
@@ -32,6 +40,7 @@
    pi_zero_net_gadget.rst
    ipmitool_tips.rst
    dnf.rst
+   ip_command.rst
 
 
 .. only::  subproject and html

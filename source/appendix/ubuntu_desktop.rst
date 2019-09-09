@@ -4,8 +4,12 @@
 Ubuntu Desktop
 ===================
 
-Desktop软件
-=============
+Xubuntu Desktop软件
+====================
+
+.. note::
+
+   为了减少在桌面风格上花费太多时间调试，我选择过采用Xubuntu发行版安装桌面系统。不过，由于Xubuntu默认额安装了太多我不需要的桌面软件(Xubuntu 18.04.3初始安装就占用4.6磁盘)，所以我会在初始安装以后，进行软件包清理。
 
 - 安装了Desktop版本之后，有一些必要软件推荐安装::
 
@@ -51,16 +55,21 @@ Desktop软件
    firefox pidgin thunderbird transmission-gtk \
    parole
 
+
 .. note::
 
    `How to uninstall pre-installed programs in Xubuntu <https://askubuntu.com/questions/319764/how-to-uninstall-pre-installed-programs-in-xubuntu>`_ : Ubuntu提供了一个 ``synaptic`` 图形化软件包管理工具，同时安装的软件包列表::
 
       docbook-xml libept1.5.0 libgtk2-perl libpango-perl librarian0 libxapian30 rarian-compat sgml-base sgml-data
-        synaptic xml-core
+      synaptic xml-core
 
 - 安装需要的软件::
 
    sudo apt install chromium-browser
+
+.. note::
+
+   以上如果不卸载firefox（也没有安装chromium）和parole，则占用磁盘空间 4.2G，感觉依然比较累赘。
 
 启动自动进入字符终端
 =======================

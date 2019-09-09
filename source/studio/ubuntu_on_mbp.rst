@@ -45,7 +45,20 @@ MacBook Pro上运行Ubuntu
 
    Ubuntu Desktop版本安装比较灵活，可以自定义EFI分区大小，例如，可以设置200MB。但是，如果使用Ubuntu Server版本，则会强制设置512MB（大小不可调整），而且是系统自动选择创建在 ``/dev/sda1`` 。
 
-- Ubuntu操作系统 ``/`` 分区需要采用 ``Ext4`` 文件系统，我设置了 50G 空间，这样其余的空间预留给 :ref:`btrfs_in_studio` (提供灵活的卷管理以及磁盘压缩功能) 和 :ref:`ceph_docker_in_studio` (通过LVM卷模拟多块磁盘)
+- Ubuntu操作系统 ``/`` 分区默认采用 ``Ext4`` 文件系统
+  - 设置了 50G 空间，这样其余的空间预留给 :ref:`btrfs_in_studio` (提供灵活的卷管理以及磁盘压缩功能) 和 :ref:`ceph_docker_in_studio` (通过LVM卷模拟多块磁盘)
+
+.. note::
+
+   在UEFI系统中，使用XFS系统分区无法启动Ubuntu，这是因为GRUB的XFS支持的bug。变通的方法是：
+
+   - 创建独立的 ``/boot`` 分区使用ext4文件系统，这样就避免了GRUB读取XFS，可以绕过这个问题。建议 ``/boot`` 分区至少500MB。
+   - 挂在ESP到 ``/boot`` : 这个变通类似前一个方法，但是Ubuntu
+     installer会拒绝这个磁盘划分方法，需要采用其他变通方法安装，然后在emergency启动系统后调整为这个配置。警告：Ubuntu有时候(但不总是)在安装新内核时候会临时创建软连接，而FAT文件系统(在ESP中使用FAT)不支持软链接，就会导致失败。对于使用Mac，可以在ESP上使用HFS+文件系统，即如果在MacBook笔记本上安装双系统启动Linux，可以直接采用macOS使用的HFS+作为ESP文件系统，这样再将这个文件系统挂载到
+     ``/boot`` 就可以同时满足条件来使用XFS作为Ubuntu的rootfs。
+   - 使用rEFInd作为boot loader : 实际上GRUB不是Linux唯一的EFI boot loader，可以使用 `efifs <http://efi.akeo.ie/>`_ 提供的XFS驱动，即同时安装rEFInd和efifs的XFS驱动就可以工作。
+
+   以上解决方案参考 `Ubuntu 17.04 will not boot on UEFI system with XFS system partition <https://askubuntu.com/questions/945337/ubuntu-17-04-will-not-boot-on-uefi-system-with-xfs-system-partition>`_ ，我觉得在MacBook上可以采用方案二，在ThinkPad X220上则可以采用方案一。
   
 .. note::
 
