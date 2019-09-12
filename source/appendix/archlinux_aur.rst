@@ -4,6 +4,10 @@
 Arch Linux AUR
 ================
 
+.. note::
+
+   :ref:`archlinux_on_thinkpad_x220` ，除了发行版仓库安装软件，Arch Linux的社区维护的AUR软件仓库是重要的来源。很多第三方软件都是通过AUR才能方便快捷安装在Arch Linux中。所以，在初始设置好Arch Linux之后，推荐部署AUR并进一步定制系统。
+
 Arch User Repository (AUR)是社区驱动的软件仓库，包含了软件包描述(PKGBUILDs)以帮助你从源代码使用makepkg来编译软件并通过pacman安装。
 
 使用AUR有两种方式：
