@@ -4,6 +4,10 @@
 Studio环境的Btrfs存储
 =======================
 
+.. note::
+
+   Btrfs实践是在Ubuntu和Arch Linux完成，本文在涉及不同操作系统时会指出区别，并综合两者的文档。
+
 初始安装操作系统的磁盘
 =========================
 
@@ -41,9 +45,13 @@ Studio环境的Btrfs存储
 Btrfs工具
 =============
 
-安装Btrfs工具 ``btrfs-progs`` （在RHEL/CentOS中名为 ``btrfs-tools`` 软件包)::
+- Ubuntu安装Btrfs工具 ``btrfs-progs`` （在RHEL/CentOS中名为 ``btrfs-tools`` 软件包)::
 
    apt install btrfs-progs
+
+Arch Linux的软件包同名，安装命令如下::
+
+   pacman -S btrfs-progs
 
 加载btrfs模块::
 
@@ -63,19 +71,28 @@ Btrfs工具
 显示磁盘分区::
 
    (parted) print
-   Model: ATA APPLE SSD SM0512 (scsi)
-   Disk /dev/sda: 500GB
-   Sector size (logical/physical): 512B/4096B
+   Model: ATA INTEL SSDSC2KW51 (scsi)
+   Disk /dev/sda: 512GB
+   Sector size (logical/physical): 512B/512B
    Partition Table: gpt
    Disk Flags:
 
    Number  Start   End     Size    File system  Name  Flags
-    1      1049kB  192MB   191MB   fat32              boot, esp
-    2      192MB   51.4GB  51.2GB  ext4
+    1      1049kB  512MB   511MB   fat16                 boot, esp
+    2      512MB   51.7GB  51.2GB  ext4
 
 增加分区3::
 
-   mkpart primary 51.4GB 251GB
+   mkpart primary btrfs 51.4GB 251GB
+
+.. note::
+
+   parted 命令格式 ``mkpart part-type fs-type start end``
+
+   ``part-type`` 可以是 ``primary`` ``extended`` 或 ``logical`` ，但是这种分区类型只对MBR分区表有效。所以如果是GPT分区表，则使用 ``primary`` 只会将分区名字设置为 ``primary`` 类似如下::
+
+      Number  Start   End     Size    File system  Name     Flags
+       3      51.7GB  352GB   300GB   btrfs        primary
 
 .. note::
 
@@ -85,15 +102,17 @@ Btrfs工具
 
    最初我采用的 :ref:`using_btrfs_in_studio` 方式，将一个btrfs文件系统划分多个子卷分别提供给KVM，Docker和home存储。
    
-   但是参考Docker官方文档，解决方案有所不同，需要将完整磁盘设备分给Docker管理，所以实际操作请参考 :ref:`docker_btrfs` 进行。
+   但是参考Docker官方文档，解决方案有所不同，所以实际操作请参考 :ref:`docker_btrfs` 进行。
+
+   现在本文是在 :ref:`thinkpad_x220` 的再次实践，结合了用于 Docker 的独立btrfs分区和用于数据存储/KVM虚拟机的btrfs分区。
 
 增加分区4::
 
-   mkpart primary 251GB 100%
+   mkpart primary btrfs 352GB 100%
 
 .. note::
 
-   增加分区4作为LVM卷，将再划分逻辑卷，用于构建Ceph存储的底层块设备()，采用BlueStore存储引擎。
+   在 分区4作为LVM卷，将再划分逻辑卷，用于构建Ceph存储的底层块设备()，采用BlueStore存储引擎。
 
 对新增分区命名::
 

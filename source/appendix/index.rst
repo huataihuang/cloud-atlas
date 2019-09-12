@@ -29,7 +29,6 @@
    efi_system_partition.rst
    upgrade_ubuntu.rst
    ubuntu_desktop.rst
-   archlinux_desktop.rst
    using_btrfs_in_studio.rst
    reduce_laptop_overheat.rst
    vmware_in_studio.rst

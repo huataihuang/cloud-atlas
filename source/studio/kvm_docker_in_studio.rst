@@ -7,6 +7,9 @@ Studio环境KVM和Docker
 安装KVM
 ===========
 
+Ubuntu安装KVM
+---------------
+
 - 安装软件包::
 
    sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst libguestfs-tools ovmf
@@ -34,6 +37,15 @@ Studio环境KVM和Docker
 .. note::
 
    Ubuntu安装libvirt时已经自动激活启动
+
+Arch Linux安装KVM
+-------------------
+
+- 安装::
+
+   sudo pacman -S qemu libvirt
+
+   sudo systemctl start libvirtd
 
 嵌套虚拟化
 ================
@@ -113,3 +125,6 @@ Docker
 
 - 详细的Ubuntu中安装KVM环境请参考 `Ubuntu环境 <https://github.com/huataihuang/cloud-atlas-draft/tree/master/virtual/kvm/kvm_on_ubuntu/installation.md>`_
 - `CentOS7的嵌套虚拟化(nested virtualization)部署实践 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/nested_virtualization/nested_virtualization_kvm_centos7.md>`_
+- `Arch Linux文档 - KVM <https://wiki.archlinux.org/index.php/KVM>`_
+- `Arch Linux文档 - QEMU <https://wiki.archlinux.org/index.php/QEMU>`_
+- `Arch Linux文档 - Libvirt <https://wiki.archlinux.org/index.php/Libvirt>`_
