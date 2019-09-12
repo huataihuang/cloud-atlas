@@ -1,8 +1,12 @@
-.. _archlinux_desktop:
+.. _archlinux_on_thinkpad_x220:
 
-====================
-Arch Linux Desktop
-====================
+================================
+ThinkPad X220上运行Arch Linux
+================================
+
+在 :ref:`ubuntu_on_thinkpad_x220` 一段时间后，感觉还有一些不满意：主要是 :ref:`thinkpad_x220` 对Linux非常友好，能够hack BIOS释放更大性能，可玩性高，所以权衡之后，转为采用arch linux来运行底层操作系统，部署了桌面系统作为个人开发平台。
+
+当然，Ubuntu对商业软件支持更为完善，对于生产系统，还是建议使用Ubuntu，或者更为保守稳定的RHEL。
 
 安装
 ======
@@ -243,13 +247,62 @@ Root密码及用户账号
 - 为方便工作，安装以下软件包::
 
    pacman -S sudo screen wpa_supplicant \
-     firefox leafpad
+     firefox leafpad keepassxc
 
-- 同样需要配置无线网络，参见前述。
+.. note::
+
+   firefox虽然没有chromium(chrome)速度快，但是相对节约资源，并且随着版本迭代，速度已经基本和chrome接近。
+
+   KeePassX在Linux平台需要安装mono实在太沉重，所以替换成社区版本到KeePassXC，不过不能打开KeePassX的最新割舍密码库文件，所以采用先从KeePassX导出CSV文件，然后导入到KeePassXC中使用。
+
 
 - 升级系统::
 
    sudo pacman -Syu
+
+无线网路设置
+---------------
+
+家庭WPA无线网络
+~~~~~~~~~~~~~~~~
+
+- 同样需要配置无线网络，参见前述。
+
+公司802.1X无线网络
+~~~~~~~~~~~~~~~~~~~
+
+参考 `Getting wired internet with 802.1X security running at install <https://bbs.archlinux.org/viewtopic.php?id=219157>`_ 
+
+- 创建 ``/etc/netctl/office`` 配置文件，认证信息采用 wpa_supplicant ::
+
+   Description="802.1X wireless connection"
+   Interface=wlp3s0
+   Connection=wireless
+   
+   IP=dhcp
+   Auth8021X=yes
+   WPAConfigFile=/etc/wpa_supplicant/wpa_supplicant-office.conf
+
+- 创建 ``/etc/wpa_supplicant/wpa_supplicant-office.conf`` 配置文件包含认证信息::
+
+   ctrl_interface=/var/run/wpa_supplicant
+   ap_scan=0
+   network={
+     key_mgmt=IEEE8021X
+     eap=TTLS
+     identity="email address"
+     password="password"
+     phase2="autheao=MSCHAPV2"
+   }
+
+- 然后通过netctl启动无线网络::
+
+   sudo netctl start office
+
+就可以连接802.1X认证网络。
+
+图像界面
+------------
 
 - 安装显卡驱动(虽然没有选择mesa 3D支持但是依然会安装)::
 
