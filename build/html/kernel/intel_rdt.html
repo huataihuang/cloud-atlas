@@ -207,10 +207,10 @@
 <p>Intel志强处理器 E5-xxxx v4系列(即Broadwell)提供了L3缓存的配置以及CAT机制，其中部分通讯相关功能在 E5-xxxx v3系列(即Haswell)引入。一些Intel处理器系列(例如Intel Atom处理器系列)可能支持对L2缓存的控制。此外，MBA共功能提供了相应的处理器核心级别的内存带宽管理。</p>
 <p>为了能够在Linux中使用资源分配技术，需要在内核和用户空间引入 <code class="docutils literal notranslate"><span class="pre">resctl</span></code> 接口。从Linux Kernel 4.10开始，可以使用 L3 CAT, L3 CDP 和 L2 CAT 以及 <code class="docutils literal notranslate"><span class="pre">resctrl</span></code> 架构。从Linux Kernel 4.12开始，开始引入并正在开发MBA技术。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>在虚拟化环境中，宿主机的资源（包括CPU cache和内存带宽）都是共享的。这带来一个问题就是：如果有一个过度消耗cache的应用耗尽了L3缓存或者大量的内存带宽，将无法保障其他虚拟机应用的性能。这种问题称为 <a class="reference external" href="https://www.slideshare.net/MichelleHolley1/quieting-noisy-neighbor-with-intel-resource-director-technology">noisy neighbor</a> 。</p>
 <p>以往解决方法是通过控制虚拟机逻辑资源(cgroup)但是调整粒度太粗，并且无法控制处理器缓存这样敏感而且稀缺的资源。为此Intel推出了RDT技术。在Intel中文网站的 <a class="reference external" href="https://www.intel.cn/content/www/cn/zh/architecture-and-technology/optimize-resource-utilization-rdt-animation.html">通过英特尔® 资源调配技术优化资源利用</a> 视频形象介绍了RDT的作用。</p>
-<p class="last">Intel的Fenghua Yu在Linux Foundation上的演讲 <a class="reference external" href="https://01.org/intel-rdt-linux/blogs/fyu1/2017/resource-allocation-intel%C2%AE-resource-director-technology">Resource Allocation in Intel® Resource Director Technology</a> 可以帮助我们快速了解这项技术。</p>
+<p>Intel的Fenghua Yu在Linux Foundation上的演讲 <a class="reference external" href="https://01.org/intel-rdt-linux/blogs/fyu1/2017/resource-allocation-intel%C2%AE-resource-director-technology">Resource Allocation in Intel® Resource Director Technology</a> 可以帮助我们快速了解这项技术。</p>
 </div>
 </div>
 <div class="section" id="rdt">
@@ -219,46 +219,46 @@
 <p>对于每个逻辑处理器，都有一个寄存器(被称为 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR或PQR)来允许操作系统(OS)或虚拟机管理器(VMM)在应用程序、线程、虚拟机(VM)调度(scheduled)的时候指定它的CLOS。</p>
 <p>RDT分为5个功能模块：</p>
 <ul class="simple">
-<li>Cache Monitoring Technology (CMT) 缓存检测技术</li>
-<li>Cache Allocation Technology (CAT) 缓存分配技术</li>
-<li>Memory Bandwidth Monitoring (MBM) 内存带宽监测</li>
-<li>Memory Bandwidth Allocation (MBA) 内存带宽分配</li>
-<li>Code and Data Prioritization (CDP) 代码和数据优先级</li>
+<li><p>Cache Monitoring Technology (CMT) 缓存检测技术</p></li>
+<li><p>Cache Allocation Technology (CAT) 缓存分配技术</p></li>
+<li><p>Memory Bandwidth Monitoring (MBM) 内存带宽监测</p></li>
+<li><p>Memory Bandwidth Allocation (MBA) 内存带宽分配</p></li>
+<li><p>Code and Data Prioritization (CDP) 代码和数据优先级</p></li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">RDT技术针对的是缓存和内存带宽，分别又分为监控和控制，就形成了4个功能模块，再加上代码和数据优先级(控制技术)，合起来形成5个功能模块。</p>
+<p class="admonition-title">Note</p>
+<p>RDT技术针对的是缓存和内存带宽，分别又分为监控和控制，就形成了4个功能模块，再加上代码和数据优先级(控制技术)，合起来形成5个功能模块。</p>
 </div>
 <p>RDT允许OS或VMM监控线程、应用或VM使用的cache/内存带宽，通过分析cache/内存带宽使用率，OS或VMM可以优化调度策略提高效能，使得高级优化技术可以实现。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">实时监控缓存和内存带宽，处理器可以把资源分配给虚拟机的最重要、最紧迫的任务，或者分配给最重要的容器。例如在线和离线应用混布的场景就非常依赖RDT技术，在发生缓存和内存带宽竞争时优先把资源分配给在线应用。</p>
+<p class="admonition-title">Note</p>
+<p>实时监控缓存和内存带宽，处理器可以把资源分配给虚拟机的最重要、最紧迫的任务，或者分配给最重要的容器。例如在线和离线应用混布的场景就非常依赖RDT技术，在发生缓存和内存带宽竞争时优先把资源分配给在线应用。</p>
 </div>
 <p>Intel RDT功能随着Intel几代服务器芯片发展而不断扩展，在Haswell上只能简单在几个预设定的LLC (末级高速缓存，Last Level Cache)  partition之间切换，而到最近的Skylake上已经实现了自主编程的LLC和内存带宽分配（全面控制）。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">我的 <a class="reference internal" href="../studio/index.html#studio"><span class="std std-ref">Studio Atlas</span></a> 模拟云计算集群的实验环境使用的是 <a class="reference internal" href="../appendix/intel_core_i7_4850hq.html#intel-core-i7-4850hq"><span class="std std-ref">Intel Core i7-4850HQ处理器</span></a> 处理器是 Haswll 系列，仅支持</p>
+<p class="admonition-title">Note</p>
+<p>我的 <a class="reference internal" href="../studio/index.html#studio"><span class="std std-ref">Studio Atlas</span></a> 模拟云计算集群的实验环境使用的是 <a class="reference internal" href="../appendix/intel_core_i7_4850hq.html#intel-core-i7-4850hq"><span class="std std-ref">Intel Core i7-4850HQ处理器</span></a> 处理器是 Haswll 系列，仅支持</p>
 </div>
 <div class="section" id="id2">
 <h3>RDT术语<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>RMID</li>
+<li><p>RMID</p></li>
 </ul>
 <p>OS或VMM会给每个应用或虚拟机标记一个软件定义的ID，叫做RMID（Resource Monitoring ID），通过RMID可以同时监控运行在多处理器上相互独立的线程，注意这里是指应用线程而是不是硬件的core。每个处理器可用的RMIDs数量是不一样的，这个可以通过CPUID指令获取得到，RMID数量不一样意味着可以监控独立线程的数量会有差异，如果一个系统上运行过多的线程可能会导致不能监控到所有线程的资源使用。</p>
 <p>此外线程可以被独立监控，也可以按组的方式进行监控：</p>
 <ul class="simple">
-<li>多个线程可以标记为相同的RMID</li>
-<li>同一个虚拟机下的所有线程可以标记为相同的RMID</li>
-<li>同样一个应用下的所有线程可以标记为相同的RMID</li>
+<li><p>多个线程可以标记为相同的RMID</p></li>
+<li><p>同一个虚拟机下的所有线程可以标记为相同的RMID</p></li>
+<li><p>同样一个应用下的所有线程可以标记为相同的RMID</p></li>
 </ul>
 <p>绑定RMID到线程的动作由OS/VMM来完成。见下文的使用 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR 来关联 RMID。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">每个CPUcore上存在一个 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR</p>
+<p class="admonition-title">Note</p>
+<p>每个CPUcore上存在一个 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR</p>
 </div>
 <p>获取监控数据也是通过MSR来实现的: <code class="docutils literal notranslate"><span class="pre">IA32_QM_EVTSEL</span></code> 设置RMID和Event ID，硬件就会查看特定数据，并通过 <code class="docutils literal notranslate"><span class="pre">IA32_QM_CTR</span></code> MSR返回结果。这个 <code class="docutils literal notranslate"><span class="pre">IA32_QM_CTR</span></code> MSR的 <code class="docutils literal notranslate"><span class="pre">E/U</span></code> 位表示 <code class="docutils literal notranslate"><span class="pre">Error</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Unavailable</span></code> ，如果数据合法就不会设置这两个位，则数据就可以被软件使用。</p>
 <ul class="simple">
-<li>CLOS</li>
+<li><p>CLOS</p></li>
 </ul>
 <p>CAT中引入了一个中间结构叫做 <code class="docutils literal notranslate"><span class="pre">CLOS</span></code> (Class of Service)，可以理解为资源控制标签。此外每个CLOS定义了CBM（capacity bitmasks），CLOS和CBM一起，确定有多少cache可以被这个CLOS使用。</p>
 </div>
@@ -272,70 +272,71 @@
 <p>高速缓存分配技术（CAT）提供了软件可编程控制，以控制特定线程、应用、虚拟机或容器等消耗的高速缓存空间。可支持操作系统保护重要的进程，支持管理程序即使在 <code class="docutils literal notranslate"><span class="pre">noisy</span></code> 环境中也可以对重要虚拟机进行优先级划分。</p>
 <p>CAT基本机制：</p>
 <ul class="simple">
-<li>通过CPUID枚举CAT功能和相关LLC分配支持的能力</li>
-<li>支持操作系统/管理程序将应用划分成不同服务类(CLOS)并为不同CLOS指定可用末级高速缓存量的接口。这些接口都基于特定型号寄存器（MSR）</li>
+<li><p>通过CPUID枚举CAT功能和相关LLC分配支持的能力</p></li>
+<li><p>支持操作系统/管理程序将应用划分成不同服务类(CLOS)并为不同CLOS指定可用末级高速缓存量的接口。这些接口都基于特定型号寄存器（MSR）</p></li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Intel在Haswell志强处理器首次引入CAT L3功能，并且在后续的Broadwell和Skylake系列上得到增强改进。未来x86处理器还将引入CAT L2功能，对共享的L2缓存进行类似的分配管理技术。</p>
+<p class="admonition-title">Note</p>
+<p>Intel在Haswell志强处理器首次引入CAT L3功能，并且在后续的Broadwell和Skylake系列上得到增强改进。未来x86处理器还将引入CAT L2功能，对共享的L2缓存进行类似的分配管理技术。</p>
 </div>
 <div class="section" id="id3">
 <h3>CAT硬件架构<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
-<div class="figure" id="id14">
+<div class="figure align-default" id="id14">
 <img alt="../_images/cat_l3_hardware_architecture.png" src="../_images/cat_l3_hardware_architecture.png" />
-<p class="caption"><span class="caption-text">Figure 1: CAT L3硬件架构</span></p>
+<p class="caption"><span class="caption-text">Figure 1: CAT L3硬件架构</span><a class="headerlink" href="#id14" title="Permalink to this image">¶</a></p>
 </div>
-<div class="figure" id="id15">
+<div class="figure align-default" id="id15">
 <img alt="../_images/l2_l3_cat.png" src="../_images/l2_l3_cat.png" />
-<p class="caption"><span class="caption-text">Figure 2: 多资源分配 - L2和L3 CAT</span></p>
+<p class="caption"><span class="caption-text">Figure 2: 多资源分配 - L2和L3 CAT</span><a class="headerlink" href="#id15" title="Permalink to this image">¶</a></p>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>Intel L1缓存分为 <code class="docutils literal notranslate"><span class="pre">iCache</span></code> (指令缓存) 和 <code class="docutils literal notranslate"><span class="pre">dCache</span></code> (数据缓存) ，是每个CPU物理核心独享的缓存。L1缓存分为 <code class="docutils literal notranslate"><span class="pre">iCache</span></code> 和 <code class="docutils literal notranslate"><span class="pre">dCache</span></code> 结构具有多种优势:</p>
 <ul class="simple">
-<li>高性能：独立的 <code class="docutils literal notranslate"><span class="pre">iCache</span></code> 和 <code class="docutils literal notranslate"><span class="pre">dCache</span></code> 可以并行处理提高性能。iCache较少更改，主要用于读取(这也是为何自修改代码的开销很高的原因)；而dCache则需要同时处理读写。</li>
-<li>节能：通过分离缓存，处理器可以分别激活指令和数据的缓存电路，以便能够节约电能开销。</li>
+<li><p>高性能：独立的 <code class="docutils literal notranslate"><span class="pre">iCache</span></code> 和 <code class="docutils literal notranslate"><span class="pre">dCache</span></code> 可以并行处理提高性能。iCache较少更改，主要用于读取(这也是为何自修改代码的开销很高的原因)；而dCache则需要同时处理读写。</p></li>
+<li><p>节能：通过分离缓存，处理器可以分别激活指令和数据的缓存电路，以便能够节约电能开销。</p></li>
 </ul>
-<p class="last">参考： <a class="reference external" href="https://softwareengineering.stackexchange.com/questions/44731/why-are-there-separate-l1-caches-for-data-and-instructions">Why are there separate L1 caches for data and instructions?</a></p>
+<p>参考： <a class="reference external" href="https://softwareengineering.stackexchange.com/questions/44731/why-are-there-separate-l1-caches-for-data-and-instructions">Why are there separate L1 caches for data and instructions?</a></p>
 </div>
 </div>
 <div class="section" id="id4">
 <h3>CAT技术的关键概念<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>CLOS</li>
+<li><p>CLOS</p></li>
 </ul>
 <p>高速缓存分配技术引入一种名为服务类(CLOS)的中间接口，可以为资源控制标记，线程/应用/虚拟机/容器在该标记内进行分组。CLOS包含相关资源容量位掩码(CBM)，来说明特定的CLOS能够使用多少高速缓存。</p>
 <img alt="../_images/clos.png" src="../_images/clos.png" />
 <ul class="simple">
-<li>使用模式</li>
+<li><p>使用模式</p></li>
 </ul>
 <p>通过高速缓存分配技术（Cache Allocation Technology, CAT) 功能提供的可伸缩接口可以创建出大量的 使用模式，包括对重要应用程序的优先级以及隔离应用程序降低干扰。</p>
 <p>在使用CAT功能的底层软件，例如OS或VMM使用如下步骤实现:</p>
 <ul class="simple">
-<li>通过CPUID检查CPU是否支持CAT: CPUID 的leaf （最末端值？）0x10 提供了CAT功能的能力的详细信息</li>
-<li>配置服务分类（the class of service, CLOS）定义了通过MSRs可提供的资源范围（缓存空间）</li>
-<li>每一个逻辑线程都有响应的一个可用的逻辑CLOS</li>
-<li>当OS/VMM将一个线程或VCPU加载到CPU核心中，将通过 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR来更新CPU核心的CLOS，以确保这个资源是通过步骤2（配置的服务分类）来控制其使用的资源</li>
+<li><p>通过CPUID检查CPU是否支持CAT: CPUID 的leaf （最末端值？）0x10 提供了CAT功能的能力的详细信息</p></li>
+<li><p>配置服务分类（the class of service, CLOS）定义了通过MSRs可提供的资源范围（缓存空间）</p></li>
+<li><p>每一个逻辑线程都有响应的一个可用的逻辑CLOS</p></li>
+<li><p>当OS/VMM将一个线程或VCPU加载到CPU核心中，将通过 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR来更新CPU核心的CLOS，以确保这个资源是通过步骤2（配置的服务分类）来控制其使用的资源</p></li>
 </ul>
 <p>更高层次的软件，例如一个调度框架（Kubernetes）或者管理员层次的工具可以通过 <code class="docutils literal notranslate"><span class="pre">OS/VMM</span></code> 激活硬件能力，可以参考 <a class="reference external" href="https://software.intel.com/en-us/articles/software-enabling-for-cache-allocation-technology">Software Enabling for Cache Allocation Technology in the Intel® Xeon® Processor E5 v4 Family</a> 文档的设置方法。</p>
 <p>对于给定应用程序指定可用的缓存是通过MSR所包含 <code class="docutils literal notranslate"><span class="pre">能力掩码</span></code> ( capacity bitmasks, CBMs )来设置的：</p>
-<div class="figure" id="id16">
+<div class="figure align-default" id="id16">
 <img alt="../_images/config_l3_cbms_per_clos.png" src="../_images/config_l3_cbms_per_clos.png" />
-<p class="caption"><span class="caption-text">Figure 2: 为每个服务逻辑分类 (logical class of service, CLOS) 配置L3容量位掩码 (L3 capacity bitmasks)</span></p>
+<p class="caption"><span class="caption-text">Figure 2: 为每个服务逻辑分类 (logical class of service, CLOS) 配置L3容量位掩码 (L3 capacity bitmasks)</span><a class="headerlink" href="#id16" title="Permalink to this image">¶</a></p>
 <div class="legend">
-通过 MSR的  <code class="docutils literal notranslate"><span class="pre">IA32_L3_MASK_n</span></code> 可以配置CLOS的L3容量位掩码，这里 <code class="docutils literal notranslate"><span class="pre">n</span></code> 表示 CLOS 编号</div>
+<p>通过 MSR的  <code class="docutils literal notranslate"><span class="pre">IA32_L3_MASK_n</span></code> 可以配置CLOS的L3容量位掩码，这里 <code class="docutils literal notranslate"><span class="pre">n</span></code> 表示 CLOS 编号</p>
+</div>
 </div>
 <p>在CBMs中的值表示了可用缓存量以及重叠或隔离程度。例如下图CLOS[1]的可用缓存小于CLOS[3]，即优先级较低：</p>
-<div class="figure" id="id17">
+<div class="figure align-default" id="id17">
 <img alt="../_images/clos_cbm_example.png" src="../_images/clos_cbm_example.png" />
-<p class="caption"><span class="caption-text">Figure 3: 容量位掩码覆盖和横跨多个CLOS的隔离</span></p>
+<p class="caption"><span class="caption-text">Figure 3: 容量位掩码覆盖和横跨多个CLOS的隔离</span><a class="headerlink" href="#id17" title="Permalink to this image">¶</a></p>
 </div>
 <p>在末端高速缓存（LLC）中，如果应用程序没有相互覆盖或者VM没有竞争缓存空间的情况下，系统不会使用独立的缓存分区，而是可以动态更新任何需要修改的资源。</p>
 <p>使用覆盖位掩码（overlapping bitmasks）（在上图Figure 2中的CLOS[2]和CLOS[3]）通常可能比隔离情况更能达到较高的带宽，并且依然具备了相关优先级：因为比使用完全隔离的分区，可以动态按需更新资源可以获得更大的LLC。这可能是适合很多线程/应用/VM并发运行的模型。</p>
 <p>关联软件线程和CLOS是通过 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR实现的，为每个硬件线程做了定义：</p>
-<div class="figure" id="id18">
+<div class="figure align-default" id="id18">
 <img alt="../_images/hardware_thread_clos.png" src="../_images/hardware_thread_clos.png" />
-<p class="caption"><span class="caption-text">Figure 3: 一个线程的当前服务分类（class of service, CLOS）可以使用 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR 为每个硬件线程定义</span></p>
+<p class="caption"><span class="caption-text">Figure 3: 一个线程的当前服务分类（class of service, CLOS）可以使用 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR 为每个硬件线程定义</span><a class="headerlink" href="#id18" title="Permalink to this image">¶</a></p>
 </div>
 <p>另一种可选的方法是不激活操作系统和VMM的CLOS直接pin到硬件线程的方式，而是采用软件线程pin到硬件线程上；不过建议激活OS/VMM的方式避免需要pin应用线程。</p>
 <p>在开始评估截断，pin模式可以通过 <a class="reference external" href="https://github.com/01org/intel-cmt-cat">RDT工具</a> 来实现，这个工具提供了Linux系统的线程监控和通过关联 <a class="reference external" href="https://software.intel.com/en-us/blogs/2014/12/11/intel-s-cache-monitoring-technology-software-visible-interfaces">Resource Monitoring IDs (RMIDs)</a> 和 每个硬件线程的 <a class="reference external" href="https://software.intel.com/en-us/articles/introduction-to-cache-allocation-technology">CLOS</a> 控制资源使用。</p>
@@ -345,17 +346,17 @@
 <h2>CAT技术的应用场景<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <p>CAT缓存分配技术在很多领域有广泛适应性，具备动态更新的伸缩和重叠(overlapped)、隔离(isolated)配置，可以将一个设备在不同应用领域轮转共享使用：</p>
 <ul class="simple">
-<li>数据中心的云计算主机 - 在同时运行着 <code class="docutils literal notranslate"><span class="pre">noisy</span> <span class="pre">neighbors</span></code> 的主机上保障重要虚拟机或容器的资源使用</li>
-<li>公有/私有云 - 保护重要的基础架构VM（例如VPN to bridge连接私有和公有云）能够提供稳定的网络服务</li>
-<li>数据中心基础架构 - 确保虚拟交换机能够稳定服务</li>
-<li>通讯 - 确保网络应用的性能和后台任务稳定运行</li>
-<li>内容分发（CDN） - 提供内容分发应用的带宽稳定</li>
-<li>网络 - 基于 <a class="reference external" href="http://dpdk.org/">DPDK</a> 的高性能应用能够不受 <code class="docutils literal notranslate"><span class="pre">noisy</span> <span class="pre">neighbor</span></code> 干扰</li>
-<li>工业控制 - 实时环境确保重要代码部分能够符合要求稳定运行</li>
+<li><p>数据中心的云计算主机 - 在同时运行着 <code class="docutils literal notranslate"><span class="pre">noisy</span> <span class="pre">neighbors</span></code> 的主机上保障重要虚拟机或容器的资源使用</p></li>
+<li><p>公有/私有云 - 保护重要的基础架构VM（例如VPN to bridge连接私有和公有云）能够提供稳定的网络服务</p></li>
+<li><p>数据中心基础架构 - 确保虚拟交换机能够稳定服务</p></li>
+<li><p>通讯 - 确保网络应用的性能和后台任务稳定运行</p></li>
+<li><p>内容分发（CDN） - 提供内容分发应用的带宽稳定</p></li>
+<li><p>网络 - 基于 <a class="reference external" href="http://dpdk.org/">DPDK</a> 的高性能应用能够不受 <code class="docutils literal notranslate"><span class="pre">noisy</span> <span class="pre">neighbor</span></code> 干扰</p></li>
+<li><p>工业控制 - 实时环境确保重要代码部分能够符合要求稳定运行</p></li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">在 <a class="reference external" href="https://software.intel.com/en-us/articles/cache-allocation-technology-proof-points">Proof Points for Cache Allocation Technology in the Intel® Xeon® Processor E5 v4 Family</a> 文档中，Intel提供了一些应用CAT的案例可以参考，例如借鉴作为性能测试方案。</p>
+<p class="admonition-title">Note</p>
+<p>在 <a class="reference external" href="https://software.intel.com/en-us/articles/cache-allocation-technology-proof-points">Proof Points for Cache Allocation Technology in the Intel® Xeon® Processor E5 v4 Family</a> 文档中，Intel提供了一些应用CAT的案例可以参考，例如借鉴作为性能测试方案。</p>
 </div>
 </div>
 <div class="section" id="cdp">
@@ -366,8 +367,8 @@
 <h2>RDT实战<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <p>RDT使用分为两种方式:</p>
 <ul class="simple">
-<li>直接将RMID绑定到硬件线程，然后将应用绑定到这些线程</li>
-<li>使能OS/VMM调度（需要内核支持），在进程切换时候会自动将RMID进行更新，能够支持线程迁移。</li>
+<li><p>直接将RMID绑定到硬件线程，然后将应用绑定到这些线程</p></li>
+<li><p>使能OS/VMM调度（需要内核支持），在进程切换时候会自动将RMID进行更新，能够支持线程迁移。</p></li>
 </ul>
 <p>使用Intel开源工具 <a class="reference external" href="https://github.com/intel/intel-cmt-cat">intel-cmt-cat</a> 可以不需要内核支持，直接使用 CAT,CMT,MBM,CDP功能。</p>
 <div class="section" id="intelrdtintel-cmt-cat">
@@ -378,15 +379,15 @@
 <p>如果找不到动态链接库，则指定: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">LD_LIBRARY_PATH=/usr/local/lib</span></code></p>
 <p>RDT工具只要是 <code class="docutils literal notranslate"><span class="pre">pqos</span></code> ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户琴弦。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">具体实践待进行</p>
+<p class="admonition-title">Note</p>
+<p>具体实践待进行</p>
 </div>
 </div>
 <div class="section" id="id8">
 <h3>内核方式使用RDT<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <p>虽然传统上通过Intel开源RDT工具intel-cmt-cat来直接访问MSR设置RDT，但是也可以通过操作系统内核方式使用RDT，需要内核支持。</p>
 <ul>
-<li><p class="first">确认kernel和CPU均支持CAT:</p>
+<li><p>确认kernel和CPU均支持CAT:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cpuinfo</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">cat_l3</span>
 </pre></div>
 </div>
@@ -397,14 +398,14 @@
 <div class="section" id="id9">
 <h2>参考<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://01.org/intel-rdt-linux/blogs/fyu1/2017/resource-allocation-intel%C2%AE-resource-director-technology">Resource Allocation in Intel® Resource Director Technology</a> - Intel的FengHua Yu撰写的RDT技术介绍文档，较为全面</li>
-<li><a class="reference external" href="https://www.youtube.com/watch?v=rKe5_xWpH8o">Resource Allocation: Intel Resource Director Technology (RDT) by Fenghua Yu, Intel</a> - Intel的FengHua Yu在Linux Foundation上演讲介绍RDT视频，可参考</li>
-<li><a class="reference external" href="https://events.static.linuxfound.org/sites/events/files/slides/cat8.pdf">Resource Allocation: Intel Resource Director Technology (RDT)</a> - Intel的FengHua Yu的演讲PPT，举了不少形象的例子</li>
-<li><a class="reference external" href="https://zhuanlan.zhihu.com/p/29432536">Intel RDT 三级缓存管理技术</a></li>
-<li><a class="reference external" href="linuxperformance.top/index.php/archives/21/">Intel RDT特性详解</a></li>
-<li><a class="reference external" href="https://www.intel.cn/content/www/cn/zh/architecture-and-technology/resource-director-technology.html">英特尔® 资源调配技术 (英特尔® RDT)</a></li>
-<li><a class="reference external" href="https://software.intel.com/zh-cn/articles/introduction-to-cache-allocation-technology?_ga=2.21223931.1997524624.1555917558-1194351684.1555901060">英特尔® 至强™ 处理器 E5 v4 产品家族的高速缓存分配技术简介</a></li>
-<li><a class="reference external" href="https://blog.csdn.net/force_eagle/article/details/77197833">Intel CMT &amp; CAT &amp; CDP 技术</a> 这篇blog提供了很多技术文档参考链接</li>
+<li><p><a class="reference external" href="https://01.org/intel-rdt-linux/blogs/fyu1/2017/resource-allocation-intel%C2%AE-resource-director-technology">Resource Allocation in Intel® Resource Director Technology</a> - Intel的FengHua Yu撰写的RDT技术介绍文档，较为全面</p></li>
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=rKe5_xWpH8o">Resource Allocation: Intel Resource Director Technology (RDT) by Fenghua Yu, Intel</a> - Intel的FengHua Yu在Linux Foundation上演讲介绍RDT视频，可参考</p></li>
+<li><p><a class="reference external" href="https://events.static.linuxfound.org/sites/events/files/slides/cat8.pdf">Resource Allocation: Intel Resource Director Technology (RDT)</a> - Intel的FengHua Yu的演讲PPT，举了不少形象的例子</p></li>
+<li><p><a class="reference external" href="https://zhuanlan.zhihu.com/p/29432536">Intel RDT 三级缓存管理技术</a></p></li>
+<li><p><a class="reference external" href="linuxperformance.top/index.php/archives/21/">Intel RDT特性详解</a></p></li>
+<li><p><a class="reference external" href="https://www.intel.cn/content/www/cn/zh/architecture-and-technology/resource-director-technology.html">英特尔® 资源调配技术 (英特尔® RDT)</a></p></li>
+<li><p><a class="reference external" href="https://software.intel.com/zh-cn/articles/introduction-to-cache-allocation-technology?_ga=2.21223931.1997524624.1555917558-1194351684.1555901060">英特尔® 至强™ 处理器 E5 v4 产品家族的高速缓存分配技术简介</a></p></li>
+<li><p><a class="reference external" href="https://blog.csdn.net/force_eagle/article/details/77197833">Intel CMT &amp; CAT &amp; CDP 技术</a> 这篇blog提供了很多技术文档参考链接</p></li>
 </ul>
 </div>
 </div>

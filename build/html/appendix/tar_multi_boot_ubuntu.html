@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="copyright" title="Copyright" href="../copyright.html" />
-    <link rel="next" title="树莓派(Raspberry Pi)快速起步" href="pi_quick_start.html" />
+    <link rel="next" title="Arch Linux AUR" href="archlinux_aur.html" />
     <link rel="prev" title="Ubuntu Hibernate休眠" href="ubuntu_hibernate.html" /> 
 </head>
 
@@ -126,6 +126,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="archlinux_aur.html">Arch Linux AUR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="archlinux_developer.html">Arch Linux开发环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pi_quick_start.html">树莓派(Raspberry Pi)快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pi_zero_net_gadget.html">树莓派Zero设置USB网络通讯(Ethernet Gadget)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ipmitool_tips.html">IPMI工具ipmitool</a></li>
@@ -211,23 +213,23 @@
 <p>服务器已经安装了CentOS操作系统，由于不能满足开发需求，准备将服务器转换成Ubuntu Server 18.04 LTS。但是，远程服务器依然想保留CentOS作为测试使用，所以部署双操作系统多重启动方案。</p>
 <p>远程服务器安装和直接可以物理接触的桌面系统不同，不方便从光盘镜像开始从头安装。所以规划如下安装方案：</p>
 <ul class="simple">
-<li>如果原操作系统占据了整个磁盘，则通过PXE启动到无盘，然后通过resize方法缩小现有文件系统分区（具体方法和文件系统相关）</li>
-<li>空出足够安装新Ubuntu操作系统的分区</li>
-<li>线下通过kvm或virtualbox这样的全虚拟化安装一个精简的Ubuntu操作系统，然后通过tar打包方式完整备份整个Ubuntu操作系统</li>
-<li>将备份的Ubuntu操作系统tar包上传，并解压缩到对应服务器分区</li>
-<li>修订CentOS的grub2配置，加入启动Ubuntu的配置</li>
-<li>重启操作系统，选择进入Ubuntu</li>
+<li><p>如果原操作系统占据了整个磁盘，则通过PXE启动到无盘，然后通过resize方法缩小现有文件系统分区（具体方法和文件系统相关）</p></li>
+<li><p>空出足够安装新Ubuntu操作系统的分区</p></li>
+<li><p>线下通过kvm或virtualbox这样的全虚拟化安装一个精简的Ubuntu操作系统，然后通过tar打包方式完整备份整个Ubuntu操作系统</p></li>
+<li><p>将备份的Ubuntu操作系统tar包上传，并解压缩到对应服务器分区</p></li>
+<li><p>修订CentOS的grub2配置，加入启动Ubuntu的配置</p></li>
+<li><p>重启操作系统，选择进入Ubuntu</p></li>
 </ul>
 <p>以上方法避免了在服务器上重新安装Ubnntu的步骤，并且可以作为今后快速部署Ubuntu的方案。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">本方案可参考我以前的实践 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/install/backup_and_restore_system_by_tar.md">使用tar方式备份和恢复系统</a></p>
+<p class="admonition-title">Note</p>
+<p>本方案可参考我以前的实践 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/install/backup_and_restore_system_by_tar.md">使用tar方式备份和恢复系统</a></p>
 </div>
 </div>
 <div class="section" id="id2">
 <h2>准备<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>检查操作系统分区划分</li>
+<li><p>检查操作系统分区划分</p></li>
 </ul>
 <p>使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span> <span class="pre">/dev/sda</span></code> 显示输入如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#         Start          End    Size  Type            Name</span>
@@ -251,16 +253,16 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">令人迷惑的分区配置， <code class="docutils literal notranslate"><span class="pre">parted</span></code> 输出 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 显示是 <code class="docutils literal notranslate"><span class="pre">BIOS</span> <span class="pre">boot</span> <span class="pre">parti</span></code> 但是 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 显示类型是 <code class="docutils literal notranslate"><span class="pre">EFI</span> <span class="pre">System</span></code> ，但是却没有 <code class="docutils literal notranslate"><span class="pre">ESP</span></code> 标记。然而使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span></code> 输出显示 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 是 <code class="docutils literal notranslate"><span class="pre">ext4</span></code> 文件系统，并且有 <code class="docutils literal notranslate"><span class="pre">boot</span></code> 标记，然而 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 则是 <code class="docutils literal notranslate"><span class="pre">bios_grub</span></code> 标记。</p>
+<p class="admonition-title">Note</p>
+<p>令人迷惑的分区配置， <code class="docutils literal notranslate"><span class="pre">parted</span></code> 输出 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 显示是 <code class="docutils literal notranslate"><span class="pre">BIOS</span> <span class="pre">boot</span> <span class="pre">parti</span></code> 但是 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 显示类型是 <code class="docutils literal notranslate"><span class="pre">EFI</span> <span class="pre">System</span></code> ，但是却没有 <code class="docutils literal notranslate"><span class="pre">ESP</span></code> 标记。然而使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span></code> 输出显示 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 是 <code class="docutils literal notranslate"><span class="pre">ext4</span></code> 文件系统，并且有 <code class="docutils literal notranslate"><span class="pre">boot</span></code> 标记，然而 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 则是 <code class="docutils literal notranslate"><span class="pre">bios_grub</span></code> 标记。</p>
 </div>
 <ul class="simple">
-<li>CentOS分区挂载</li>
+<li><p>CentOS分区挂载</p></li>
 </ul>
 <div class="section" id="kvmubuntu">
 <h3>在KVM环境安装Ubuntu<a class="headerlink" href="#kvmubuntu" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li><p class="first">在KVM虚拟环境安装一个最简单的Ubuntu系统:</p>
+<li><p>在KVM虚拟环境安装一个最简单的Ubuntu系统:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
   <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> \
   <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
@@ -277,48 +279,48 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>请参考 <a class="reference internal" href="../kvm/create_vm.html#create-vm"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a> 创建一个基本Ubuntu系统，做好系统初始化以便减少后续的重复工作。</p>
-<p class="last">注意：启用了UEFI支持，因为安装的现代服务器都是采用UEFI启动。</p>
+<p>注意：启用了UEFI支持，因为安装的现代服务器都是采用UEFI启动。</p>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">请参考 <a class="reference internal" href="ubuntu_server.html#ubuntu-server"><span class="std std-ref">Ubuntu Server</span></a> 安装设置服务器环境</p>
+<p class="admonition-title">Note</p>
+<p>请参考 <a class="reference internal" href="ubuntu_server.html#ubuntu-server"><span class="std std-ref">Ubuntu Server</span></a> 安装设置服务器环境</p>
 </div>
 <ul>
-<li><p class="first">登陆到虚拟机中，通过以下命令把整个系统打包同时通过ssh传输到备份服务器上:</p>
+<li><p>登陆到虚拟机中，通过以下命令把整个系统打包同时通过ssh传输到备份服务器上:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">tar</span> <span class="o">-</span><span class="n">cpz</span> <span class="o">--</span><span class="n">one</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">system</span> <span class="o">/</span> <span class="o">|</span> <span class="n">ssh</span> <span class="o">&lt;</span><span class="n">backuphost</span><span class="o">&gt;</span> <span class="s2">&quot;( cat &gt; ubuntu16_backup.tar.gz )&quot;</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <ul>
-<li><p class="first">需要确保备份服务器 <code class="docutils literal notranslate"><span class="pre">&lt;backuphost&gt;</span></code> 能ssh直接登陆，最好设置免密码；例如，我要将KVM虚拟机备份到本地，则这个 <code class="docutils literal notranslate"><span class="pre">&lt;backuphost&gt;</span></code> 就是我的本队笔记本IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.161.1</span></code></p>
+<li><p>需要确保备份服务器 <code class="docutils literal notranslate"><span class="pre">&lt;backuphost&gt;</span></code> 能ssh直接登陆，最好设置免密码；例如，我要将KVM虚拟机备份到本地，则这个 <code class="docutils literal notranslate"><span class="pre">&lt;backuphost&gt;</span></code> 就是我的本队笔记本IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.161.1</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">tar</span> <span class="o">-</span><span class="n">cpz</span> <span class="o">--</span><span class="n">one</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">system</span> <span class="o">/</span> <span class="o">|</span> <span class="n">ssh</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">161.1</span> <span class="s2">&quot;( cat &gt; ubuntu18-04_backup.tar.gz )&quot;</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p class="last">备份完成后，在笔记本上 <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> 目录下就于备份文件 ubuntu18-04_backup.tar.gz</p>
+<p>备份完成后，在笔记本上 <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> 目录下就于备份文件 ubuntu18-04_backup.tar.gz</p>
 </div>
 </div>
 <div class="section" id="id3">
 <h3>服务器<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li><p class="first">重启服务求进入PXE无盘状态:</p>
+<li><p>重启服务求进入PXE无盘状态:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ipmitool</span> <span class="o">-</span><span class="n">I</span> <span class="n">lanplus</span> <span class="o">-</span><span class="n">H</span> <span class="n">IP</span> <span class="o">-</span><span class="n">U</span> <span class="n">username</span> <span class="o">-</span><span class="n">P</span> <span class="n">password</span> <span class="n">bootdev</span> <span class="n">pxe</span>
 <span class="n">ipmitool</span> <span class="o">-</span><span class="n">I</span> <span class="n">lanplus</span> <span class="o">-</span><span class="n">H</span> <span class="n">IP</span> <span class="o">-</span><span class="n">U</span> <span class="n">username</span> <span class="o">-</span><span class="n">P</span> <span class="n">password</span> <span class="n">power</span> <span class="n">reset</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">PXE环境下通过串口控制台访问系统:</p>
+<li><p>PXE环境下通过串口控制台访问系统:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ipmitool</span> <span class="o">-</span><span class="n">I</span> <span class="n">lanplus</span> <span class="o">-</span><span class="n">H</span> <span class="n">IP</span> <span class="o">-</span><span class="n">U</span> <span class="n">username</span> <span class="o">-</span><span class="n">P</span> <span class="n">password</span> <span class="o">-</span><span class="n">E</span> <span class="n">sol</span> <span class="n">activate</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">服务器磁盘分区 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">parted</span> <span class="pre">-o</span> <span class="pre">optimal</span> <span class="pre">/dev/sda</span></code></p>
+<li><p>服务器磁盘分区 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">parted</span> <span class="pre">-o</span> <span class="pre">optimal</span> <span class="pre">/dev/sda</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">parted</span><span class="p">)</span> <span class="nb">print</span>
 <span class="n">Model</span><span class="p">:</span> <span class="n">HP</span> <span class="n">LOGICAL</span> <span class="n">VOLUME</span> <span class="p">(</span><span class="n">scsi</span><span class="p">)</span>
 <span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mi">600</span><span class="n">GB</span>
@@ -337,11 +339,11 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">这里 <code class="docutils literal notranslate"><span class="pre">/dev/sda4</span></code> 分区是swap， <code class="docutils literal notranslate"><span class="pre">/dev/sda5</span></code> 分区是数据盘，我们后续步骤将合并这两个分区(划分50G)，用于安装Ubuntu，另外再创建一些分区构建Btrfs来存储数据。</p>
+<p class="admonition-title">Note</p>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">/dev/sda4</span></code> 分区是swap， <code class="docutils literal notranslate"><span class="pre">/dev/sda5</span></code> 分区是数据盘，我们后续步骤将合并这两个分区(划分50G)，用于安装Ubuntu，另外再创建一些分区构建Btrfs来存储数据。</p>
 </div>
 <ul>
-<li><p class="first">磁盘分区重构:</p>
+<li><p>磁盘分区重构:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
 <span class="n">rm</span> <span class="mi">5</span>
 <span class="n">rm</span> <span class="mi">4</span>
@@ -378,24 +380,23 @@
 <div class="section" id="ubuntu">
 <h2>恢复Ubuntu系统<a class="headerlink" href="#ubuntu" title="Permalink to this headline">¶</a></h2>
 <ul>
-<li><p class="first">将备份的Ubuntu系统 <code class="docutils literal notranslate"><span class="pre">tar.gz</span></code> 包复制到无盘状态服务器内存文件系统目录下</p>
-</li>
-<li><p class="first">挂载分区 <code class="docutils literal notranslate"><span class="pre">/dev/sda4</span></code> ，假设挂载到 <code class="docutils literal notranslate"><span class="pre">/media/sda4</span></code> 目录:</p>
+<li><p>将备份的Ubuntu系统 <code class="docutils literal notranslate"><span class="pre">tar.gz</span></code> 包复制到无盘状态服务器内存文件系统目录下</p></li>
+<li><p>挂载分区 <code class="docutils literal notranslate"><span class="pre">/dev/sda4</span></code> ，假设挂载到 <code class="docutils literal notranslate"><span class="pre">/media/sda4</span></code> 目录:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sda4</span>
 <span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sda4</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">恢复备份的Ubuntu系统:</p>
+<li><p>恢复备份的Ubuntu系统:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">tar</span> <span class="o">-</span><span class="n">xpzf</span> <span class="n">ubuntu18</span><span class="o">-</span><span class="mi">04</span><span class="n">_backup</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sda4</span> <span class="o">--</span><span class="n">numeric</span><span class="o">-</span><span class="n">owner</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>从虚拟机中将系统复制到物理服务器，需要注意以下内容变化:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span>- 磁盘分区变化，包括磁盘UUID变化
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- 磁盘分区变化，包括磁盘UUID变化
 - UEFI分区 ``/boot/uefi``
 </pre></div>
 </div>
@@ -403,7 +404,7 @@
 <div class="section" id="boot">
 <h3>启动boot调整<a class="headerlink" href="#boot" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li><p class="first">在目标物理服务器上，通过chroot进入Ubuntu系统:</p>
+<li><p>在目标物理服务器上，通过chroot进入Ubuntu系统:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for f in dev dev/pts proc sys ; do mount --bind /$f /media/sda4/$f ; done
 chroot /media/sda4
 </pre></div>
@@ -411,11 +412,11 @@ chroot /media/sda4
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">注意，这里 mount 需要包含 /sys ，否则在后面 <code class="docutils literal notranslate"><span class="pre">update-grub</span></code> 会出现大量的 <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">node</span> <span class="pre">not</span> <span class="pre">found</span></code> 报错。参考: <a class="reference external" href="https://unix.stackexchange.com/questions/397927/how-to-restore-grub-after-restoring-debian-from-backup">How to restore GRUB after restoring Debian from backup?</a></p>
+<p class="admonition-title">Note</p>
+<p>注意，这里 mount 需要包含 /sys ，否则在后面 <code class="docutils literal notranslate"><span class="pre">update-grub</span></code> 会出现大量的 <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">node</span> <span class="pre">not</span> <span class="pre">found</span></code> 报错。参考: <a class="reference external" href="https://unix.stackexchange.com/questions/397927/how-to-restore-grub-after-restoring-debian-from-backup">How to restore GRUB after restoring Debian from backup?</a></p>
 </div>
 <ul>
-<li><p class="first">挂载物理服务器磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> (原先CentOS的 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 分区) ，将其中内容备份出来:</p>
+<li><p>挂载物理服务器磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> (原先CentOS的 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 分区) ，将其中内容备份出来:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 注意，这里操作系统已经切换到 /dev/sda4 分区的Ubuntu</span>
 <span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
 <span class="c1"># 备份文件是备份到 /dev/sda4 分区Ubuntu的/boot/sda2-backup</span>
@@ -427,16 +428,16 @@ chroot /media/sda4
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">这个步骤似乎不需要，我发现实际上 /boot/efi 目录是空的，只有Ubuntu系统后 <code class="docutils literal notranslate"><span class="pre">/boot/eefi</span></code> 目录下才会有 <code class="docutils literal notranslate"><span class="pre">EFI</span></code> 子目录并包含系统系统信息。</p>
+<p class="admonition-title">Note</p>
+<p>这个步骤似乎不需要，我发现实际上 /boot/efi 目录是空的，只有Ubuntu系统后 <code class="docutils literal notranslate"><span class="pre">/boot/eefi</span></code> 目录下才会有 <code class="docutils literal notranslate"><span class="pre">EFI</span></code> 子目录并包含系统系统信息。</p>
 </div>
 <ul>
-<li><p class="first">回到前面 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> 方式的Ubuntu系统，重新格式化 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 分区，转换成 <code class="docutils literal notranslate"><span class="pre">vfat</span></code></p>
+<li><p>回到前面 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> 方式的Ubuntu系统，重新格式化 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 分区，转换成 <code class="docutils literal notranslate"><span class="pre">vfat</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">vfat</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">通过 <code class="docutils literal notranslate"><span class="pre">blkid</span></code> 命令获取物理服务求磁盘分区的UUID，例如输出如下:</p>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">blkid</span></code> 命令获取物理服务求磁盘分区的UUID，例如输出如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span><span class="p">:</span> <span class="n">UUID</span><span class="o">=</span><span class="s2">&quot;40B7-5189&quot;</span> <span class="n">TYPE</span><span class="o">=</span><span class="s2">&quot;vfat&quot;</span>
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span><span class="p">:</span> <span class="n">LABEL</span><span class="o">=</span><span class="s2">&quot;/&quot;</span> <span class="n">UUID</span><span class="o">=</span><span class="s2">&quot;a484c965-8db2-48e0-95d6-fa3d4cfb8229&quot;</span> <span class="n">TYPE</span><span class="o">=</span><span class="s2">&quot;ext4&quot;</span>
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span><span class="p">:</span> <span class="n">UUID</span><span class="o">=</span><span class="s2">&quot;17256094-e6b7-4204-ad58-1f4a368f9181&quot;</span> <span class="n">TYPE</span><span class="o">=</span><span class="s2">&quot;ext4&quot;</span>
@@ -446,7 +447,7 @@ chroot /media/sda4
 </ul>
 <p>这里 <code class="docutils literal notranslate"><span class="pre">/dev/sda4</span></code> 是Ubuntu分区，而 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 是原先CentOS使用的EFI分区，需要挂载到 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 。不过，和Ubuntu不同的是，原先CentOS这个分区是EXT4，挂载到 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> ，而Ubuntu是vfat，挂载为 <code class="docutils literal notranslate"><span class="pre">/boot/efi</span></code> ，需要做一个兼容转换。</p>
 <ul class="simple">
-<li>对比检查原先虚拟机磁盘分区 ( <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">parted</span> <span class="pre">-a</span> <span class="pre">optimal</span> <span class="pre">/dev/sda</span></code> ) 和磁盘分区uuid ( <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">blkid</span></code> )</li>
+<li><p>对比检查原先虚拟机磁盘分区 ( <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">parted</span> <span class="pre">-a</span> <span class="pre">optimal</span> <span class="pre">/dev/sda</span></code> ) 和磁盘分区uuid ( <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">blkid</span></code> )</p></li>
 </ul>
 <p>虚拟机磁盘分区:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mi">6442</span><span class="n">MB</span>
@@ -472,8 +473,8 @@ chroot /media/sda4
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">请注意虚拟机磁盘分区以及uuid需要调整成物理服务器配置</p>
+<p class="admonition-title">Note</p>
+<p>请注意虚拟机磁盘分区以及uuid需要调整成物理服务器配置</p>
 </div>
 <p>上述虚拟机磁盘分区挂载对应实际物理服务器的磁盘UUID:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># /boot/efi</span>
@@ -483,13 +484,13 @@ chroot /media/sda4
 </pre></div>
 </div>
 <ul>
-<li><p class="first">修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UUID</span><span class="o">=</span><span class="mi">17256094</span><span class="o">-</span><span class="n">e6b7</span><span class="o">-</span><span class="mi">4204</span><span class="o">-</span><span class="n">ad58</span><span class="o">-</span><span class="mi">1</span><span class="n">f4a368f9181</span> <span class="o">/</span> <span class="n">ext4</span> <span class="n">defaults</span> <span class="mi">0</span> <span class="mi">0</span>
 <span class="n">UUID</span><span class="o">=</span><span class="mi">40</span><span class="n">B7</span><span class="o">-</span><span class="mi">5189</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">efi</span> <span class="n">vfat</span> <span class="n">defaults</span> <span class="mi">0</span> <span class="mi">0</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">将原先Ubuntu的 <code class="docutils literal notranslate"><span class="pre">/boot/efi</span></code> 目录内容备份，然后挂载物理机 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 磁盘分区再恢复内容:</p>
+<li><p>将原先Ubuntu的 <code class="docutils literal notranslate"><span class="pre">/boot/efi</span></code> 目录内容备份，然后挂载物理机 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 磁盘分区再恢复内容:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">efi</span><span class="o">-</span><span class="n">backup</span>
 <span class="c1"># 备份</span>
 <span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">efi</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">cf</span> <span class="o">-</span> <span class="o">.</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">efi</span><span class="o">-</span><span class="n">backup</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">xf</span> <span class="o">-</span><span class="p">)</span>
@@ -508,12 +509,12 @@ chroot /media/sda4
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">该步骤不需要</p>
+<p class="admonition-title">Note</p>
+<p>该步骤不需要</p>
 </div>
 <p>此时物理服务器磁盘分区和原虚拟机相似，但是还需要修订grub</p>
 <ul>
-<li><p class="first">内核设置串口控制台输出，即编辑 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
+<li><p>内核设置串口控制台输出，即编辑 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;ipv6.disable=1 crashkernel=auto console=tty0 console=ttyS0,115200n8&quot;</span>
 <span class="c1"># 以下两行配置附加</span>
 <span class="n">GRUB_TERMINAL</span><span class="o">=</span><span class="s2">&quot;console serial&quot;</span>
@@ -523,29 +524,29 @@ chroot /media/sda4
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <ul class="simple">
-<li><a class="reference external" href="https://www.tldp.org/HOWTO/Remote-Serial-Console-HOWTO/configure-kernel-grub.html">Configure Linux kernel using GRUB</a></li>
-<li><a class="reference external" href="https://wiki.archlinux.org/index.php/working_with_the_serial_console">Working with the serial console</a></li>
-<li><a class="reference external" href="https://www.hiroom2.com/2018/04/30/ubuntu-1804-serial-console-en/">Ubuntu 18.04: GRUB2 and Linux with serial console</a></li>
+<li><p><a class="reference external" href="https://www.tldp.org/HOWTO/Remote-Serial-Console-HOWTO/configure-kernel-grub.html">Configure Linux kernel using GRUB</a></p></li>
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/working_with_the_serial_console">Working with the serial console</a></p></li>
+<li><p><a class="reference external" href="https://www.hiroom2.com/2018/04/30/ubuntu-1804-serial-console-en/">Ubuntu 18.04: GRUB2 and Linux with serial console</a></p></li>
 </ul>
-<p class="last">遇到串口始终无法输出信息，尝试将波特率从 115200 调整为 9600</p>
+<p>遇到串口始终无法输出信息，尝试将波特率从 115200 调整为 9600</p>
 </div>
 <ul>
-<li><p class="first">安装grub到 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 磁盘:</p>
+<li><p>安装grub到 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 磁盘:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">grub</span><span class="o">-</span><span class="n">install</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>这里报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grub</span><span class="o">-</span><span class="n">install</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">grub</span><span class="o">/</span><span class="n">i386</span><span class="o">-</span><span class="n">pc</span><span class="o">/</span><span class="n">modinfo</span><span class="o">.</span><span class="n">sh</span> <span class="n">doesn</span><span class="s1">&#39;t exist. Please specify --target or --directory.</span>
 </pre></div>
 </div>
 <p>参考 <a class="reference external" href="https://superuser.com/questions/1293793/grub-install-error-usr-lib-grub-i386-pc-modinfo-sh-doesnt-exist">grub-install: error: /usr/lib/grub/i386-pc/modinfo.sh doesn’t exist</a> 解决:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">tmp</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">tmp</span>
 <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">download</span> <span class="n">grub</span><span class="o">-</span><span class="n">pc</span><span class="o">-</span><span class="nb">bin</span>
 <span class="n">dpkg</span><span class="o">-</span><span class="n">deb</span> <span class="o">-</span><span class="n">R</span> <span class="n">grub</span><span class="o">-</span><span class="n">pc</span><span class="o">-</span><span class="n">bin_2</span><span class="o">.</span><span class="mi">02</span><span class="o">-</span><span class="mi">2</span><span class="n">ubuntu8</span><span class="o">.</span><span class="mi">13</span><span class="n">_amd64</span><span class="o">.</span><span class="n">deb</span> <span class="n">grub</span><span class="o">/</span>
 <span class="n">sudo</span> <span class="n">mv</span> <span class="n">grub</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">grub</span><span class="o">/</span><span class="n">i386</span><span class="o">-</span><span class="n">pc</span><span class="o">/</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">grub</span><span class="o">/</span>
@@ -553,16 +554,16 @@ chroot /media/sda4
 </div>
 </div>
 <ul>
-<li><p class="first">恢复grub:</p>
+<li><p>恢复grub:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">update</span><span class="o">-</span><span class="n">grub</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>在Fedora中也可以使用命令 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">grub2-install</span> <span class="pre">/dev/sda</span></code> 和 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">grub2-mkconfig</span> <span class="pre">-o</span> <span class="pre">/boot/grub2/grub.cfg</span></code> 来生成配置文件，不过在Debian/Ubuntu中，使用 <code class="docutils literal notranslate"><span class="pre">update-grub</span></code></p>
-<p class="last">详细参考 <a class="reference external" href="https://docs.pagure.org/docs-fedora/the-grub2-bootloader.html">The GRUB2 Bootloader</a> 和 <a class="reference external" href="https://howtoubuntu.org/how-to-repair-restore-reinstall-grub-2-with-a-ubuntu-live-cd">How to Repair, Restore, or Reinstall Grub 2 with a Ubuntu Live CD or USB</a></p>
+<p>详细参考 <a class="reference external" href="https://docs.pagure.org/docs-fedora/the-grub2-bootloader.html">The GRUB2 Bootloader</a> 和 <a class="reference external" href="https://howtoubuntu.org/how-to-repair-restore-reinstall-grub-2-with-a-ubuntu-live-cd">How to Repair, Restore, or Reinstall Grub 2 with a Ubuntu Live CD or USB</a></p>
 </div>
 <p>提示信息:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Sourcing file `/etc/default/grub&#39;
@@ -582,7 +583,7 @@ done
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>执行 <code class="docutils literal notranslate"><span class="pre">update-grub</span></code> 将会自动修改 <code class="docutils literal notranslate"><span class="pre">/boot/grub/grub.cfg</span></code> 配置，将其中的磁盘UUID修正正确，例如:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">linux</span>   <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">4.18</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">25</span><span class="o">-</span><span class="n">generic</span> <span class="n">root</span><span class="o">=</span><span class="n">UUID</span><span class="o">=</span><span class="mi">17256094</span><span class="o">-</span><span class="n">e6b7</span><span class="o">-</span><span class="mi">4204</span><span class="o">-</span><span class="n">ad58</span><span class="o">-</span><span class="mi">1</span><span class="n">f4a368f9181</span> <span class="n">ro</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">disable</span><span class="o">=</span><span class="mi">1</span>
 <span class="n">initrd</span>  <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initrd</span><span class="o">.</span><span class="n">img</span><span class="o">-</span><span class="mf">4.18</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">25</span><span class="o">-</span><span class="n">generic</span>
@@ -590,17 +591,16 @@ done
 </div>
 <p>但是不会修改 <code class="docutils literal notranslate"><span class="pre">/boot/grub/menu.lst</span></code> (这个文件是以前grub1使用的，目前grub2不再使用，所以内容还是 <code class="docutils literal notranslate"><span class="pre">root=/dev/hda1</span></code> 等初始配置，和原虚拟机配置不同，是无用等)</p>
 <p>参考 <a class="reference external" href="https://askubuntu.com/questions/763472/what-can-i-do-to-fix-this-error-on-grub-efi/763984">What can I do to fix this error on grub-efi?</a> 可能需要事先安装 <code class="docutils literal notranslate"><span class="pre">grub-efi</span></code> 软件包</p>
-<p class="last">之前我执行的时候出现 <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">node</span> <span class="pre">not</span> <span class="pre">found</span></code> 是因为执行 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> 之前没有 <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">/sys</span></code></p>
+<p>之前我执行的时候出现 <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">node</span> <span class="pre">not</span> <span class="pre">found</span></code> 是因为执行 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> 之前没有 <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">/sys</span></code></p>
 </div>
 <ul>
-<li><p class="first">注意：需要修订服务器的IP地址，以及配置服务求串口输出，详细请参考 <a class="reference internal" href="ubuntu_server.html#ubuntu-server"><span class="std std-ref">Ubuntu Server</span></a></p>
-</li>
-<li><p class="first">远程串口连接服务器:</p>
+<li><p>注意：需要修订服务器的IP地址，以及配置服务求串口输出，详细请参考 <a class="reference internal" href="ubuntu_server.html#ubuntu-server"><span class="std std-ref">Ubuntu Server</span></a></p></li>
+<li><p>远程串口连接服务器:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ipmitool</span> <span class="o">-</span><span class="n">I</span> <span class="n">lanplus</span> <span class="o">-</span><span class="n">H</span> <span class="n">IP</span> <span class="o">-</span><span class="n">U</span> <span class="n">username</span> <span class="o">-</span><span class="n">P</span> <span class="n">password</span> <span class="o">-</span><span class="n">E</span> <span class="n">sol</span> <span class="n">activate</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">将服务器重启到以硬盘启动:</p>
+<li><p>将服务器重启到以硬盘启动:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ipmitool</span> <span class="o">-</span><span class="n">I</span> <span class="n">lanplus</span> <span class="o">-</span><span class="n">H</span> <span class="n">IP</span> <span class="o">-</span><span class="n">U</span> <span class="n">username</span> <span class="o">-</span><span class="n">P</span> <span class="n">password</span> <span class="n">chassis</span> <span class="n">bootdev</span> <span class="n">disk</span>
 <span class="n">ipmitool</span> <span class="o">-</span><span class="n">I</span> <span class="n">lanplus</span> <span class="o">-</span><span class="n">H</span> <span class="n">IP</span> <span class="o">-</span><span class="n">U</span> <span class="n">username</span> <span class="o">-</span><span class="n">P</span> <span class="n">password</span> <span class="n">chassis</span> <span class="n">bootparam</span> <span class="nb">set</span> <span class="n">bootflag</span> <span class="n">force_disk</span>
 <span class="n">ipmitool</span> <span class="o">-</span><span class="n">I</span> <span class="n">lanplus</span> <span class="o">-</span><span class="n">H</span> <span class="n">IP</span> <span class="o">-</span><span class="n">U</span> <span class="n">username</span> <span class="o">-</span><span class="n">P</span> <span class="n">password</span> <span class="n">power</span> <span class="n">reset</span>
@@ -613,10 +613,10 @@ done
 <div class="section" id="id4">
 <h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://gist.github.com/AndersonIncorp/3acb1d657cb5eba285f4fb31f323d1c3">AndersonIncorp/fix.sh</a></li>
-<li><a class="reference external" href="https://askubuntu.com/questions/493826/grub-rescue-problem-after-deleting-ubuntu-partition">GRUB rescue problem after deleting Ubuntu partition!</a></li>
-<li><a class="reference external" href="https://www.pcsuggest.com/grub-rescue-legacy-bios/">Rescue GRUB when grub.cfg is missing or corrupted</a></li>
-<li><a class="reference external" href="https://help.ubuntu.com/community/BackupYourSystem/TAR">BackupYourSystem/TAR</a></li>
+<li><p><a class="reference external" href="https://gist.github.com/AndersonIncorp/3acb1d657cb5eba285f4fb31f323d1c3">AndersonIncorp/fix.sh</a></p></li>
+<li><p><a class="reference external" href="https://askubuntu.com/questions/493826/grub-rescue-problem-after-deleting-ubuntu-partition">GRUB rescue problem after deleting Ubuntu partition!</a></p></li>
+<li><p><a class="reference external" href="https://www.pcsuggest.com/grub-rescue-legacy-bios/">Rescue GRUB when grub.cfg is missing or corrupted</a></p></li>
+<li><p><a class="reference external" href="https://help.ubuntu.com/community/BackupYourSystem/TAR">BackupYourSystem/TAR</a></p></li>
 </ul>
 </div>
 </div>
@@ -629,7 +629,7 @@ done
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pi_quick_start.html" class="btn btn-neutral float-right" title="树莓派(Raspberry Pi)快速起步" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="archlinux_aur.html" class="btn btn-neutral float-right" title="Arch Linux AUR" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="ubuntu_hibernate.html" class="btn btn-neutral float-left" title="Ubuntu Hibernate休眠" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

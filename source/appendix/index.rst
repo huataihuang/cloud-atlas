@@ -35,6 +35,8 @@
    share_mouse_keyboard.rst
    ubuntu_hibernate.rst
    tar_multi_boot_ubuntu.rst
+   archlinux_aur.rst
+   archlinux_developer.rst
    pi_quick_start.rst
    pi_zero_net_gadget.rst
    ipmitool_tips.rst

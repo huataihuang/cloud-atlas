@@ -205,37 +205,37 @@
 <span id="minikube-deploy-app"></span><h1>使用Minikube集群部署应用<a class="headerlink" href="#minikube" title="Permalink to this headline">¶</a></h1>
 <p>Kubernetes将计算机的高可用集群作为一个整体来运行，允许你部署容器化应用到集群中而不需要指定明确到主机。这种情况下，应用程序需要被打包成和与主机无关的容器化部署模式。Kubernetes会在集群内高效地自动化分发和调度应用程序容器。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">在 <a class="reference internal" href="../startup_prepare/install_run_minikube.html#install-run-minikube"><span class="std std-ref">安装和运行minikube</span></a> 中，我们构建的单节点minikube即是一个最小的集群，真实环境的Kubernetes集群部署要远复杂得多。这里我们开始使用这个集群来部署应用测试。</p>
+<p class="admonition-title">Note</p>
+<p>在 <a class="reference internal" href="../startup_prepare/install_run_minikube.html#install-run-minikube"><span class="std std-ref">安装和运行minikube</span></a> 中，我们构建的单节点minikube即是一个最小的集群，真实环境的Kubernetes集群部署要远复杂得多。这里我们开始使用这个集群来部署应用测试。</p>
 </div>
 <div class="section" id="id1">
 <h2>集群概念<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../../_images/kubernetes_cluster.svg" src="../../_images/kubernetes_cluster.svg" /></div>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">master</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">master</span></code></p></li>
 </ul>
 <p>master节点是负责集群所有活动的协调，例如调度应用程序，维护应用程序最终状态一致性(desired state)，应用程序伸缩，以及滚动升级。</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">node</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node</span></code></p></li>
 </ul>
 <p>每个node节点都运行一个 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 代理程序，用于管理节点以及和Kubernetes master通讯。节点也安装了用于操作容器都工具，例如Docker或rkt。一个用于生产环境都Kubernetes集群至少需要3个node节点。</p>
 <p>但你在kubernetes中部署应用时，你是和master节点进行交互以启动应用程序的容器。master节点会将容器调度到集群的node节点。 <code class="docutils literal notranslate"><span class="pre">node节点和master节点之间通许使用Kubernetes</span> <span class="pre">API</span></code> ，也就是master对外暴露的API接口提供的。用户虽然使用的是 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 命令行工具，实际也是调用 Kubernetes API和集群进行交互。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>Kubernetes集群可以部署在物理主机上也可以部署在虚拟机中，两种方案各有利弊：</p>
-<ul class="last simple">
-<li>直接部署在物理主机上则硬件性能损失最小，并且由于简化了部署层次（没有虚拟化层），降低了故障排查的链路复杂度。</li>
-<li>但是直接部署在物理主机上，应用隔离只有通过容器技术进行安全隔离，安全性难以得到保障。</li>
-<li>部署在虚拟机内部的Kubernetes自然获得了虚拟化技术良好的安全隔离，并且得到了很多成熟的虚拟化技术增强，例如虚拟化技术支持热迁移，对于上层容器几乎感觉不到虚拟化底层解决了很多硬件上的异常和维护。</li>
-<li>但是虚拟机中部署Kubernetes带了了很大的虚拟化开销，特别是没有得到良好优化的虚拟化部署会消耗大量的硬件资源，使得最终用户的应用性能降低。并且，引入虚拟化层带来了维护上的复杂度和维护成本。</li>
+<ul class="simple">
+<li><p>直接部署在物理主机上则硬件性能损失最小，并且由于简化了部署层次（没有虚拟化层），降低了故障排查的链路复杂度。</p></li>
+<li><p>但是直接部署在物理主机上，应用隔离只有通过容器技术进行安全隔离，安全性难以得到保障。</p></li>
+<li><p>部署在虚拟机内部的Kubernetes自然获得了虚拟化技术良好的安全隔离，并且得到了很多成熟的虚拟化技术增强，例如虚拟化技术支持热迁移，对于上层容器几乎感觉不到虚拟化底层解决了很多硬件上的异常和维护。</p></li>
+<li><p>但是虚拟机中部署Kubernetes带了了很大的虚拟化开销，特别是没有得到良好优化的虚拟化部署会消耗大量的硬件资源，使得最终用户的应用性能降低。并且，引入虚拟化层带来了维护上的复杂度和维护成本。</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="id2">
 <h2>创建集群<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul>
-<li><p class="first">检查集群版本:</p>
+<li><p>检查集群版本:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">version</span>
 </pre></div>
 </div>
@@ -256,7 +256,7 @@
 </div>
 <p>输出的json格式可以查看到集群详细信息，包括每个pod的镜像信息。</p>
 <ul>
-<li><p class="first">检查集群节点:</p>
+<li><p>检查集群节点:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span>
 </pre></div>
 </div>
@@ -275,16 +275,16 @@
 <p>Kubernetes是采用最终一致性方式来维护系统的。一旦应用实例创建，Kubernetes Deployment Controller就持续监控这些实例。如果运行实例的主机宕机或者被删除，Deployment Controller就用集群中其他节点上的实例来替代故障的实例。这种机制提供了处理服务器故障或维护态情况下的自愈机制。</p>
 <div class="section" id="kubernetes">
 <h3>部署Kubernetes的应用<a class="headerlink" href="#kubernetes" title="Permalink to this headline">¶</a></h3>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../../_images/deployment_application.svg" src="../../_images/deployment_application.svg" /></div>
 <p>当创建一个Deployment时，需要指定应用程序使用的容器镜像，以及需要运行的副本数量。此外，可以在部署之后update你的deployment，随时可以修改配置信息。</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>我这里采用的一个案例是部署Ubuntu容器，目的是能够实现一个基础的开发工作环境。同时为后续部署持续集成环境做准备。</p>
-<p class="last">参考 <a class="reference external" href="https://gc-taylor.com/blog/2016/10/31/fire-up-an-interactive-bash-pod-within-a-kubernetes-cluster">Fire up an interactive bash Pod within a Kubernetes cluster</a></p>
+<p>参考 <a class="reference external" href="https://gc-taylor.com/blog/2016/10/31/fire-up-an-interactive-bash-pod-within-a-kubernetes-cluster">Fire up an interactive bash Pod within a Kubernetes cluster</a></p>
 </div>
 <ul>
-<li><p class="first">创建ubuntu实例pod:</p>
+<li><p>创建ubuntu实例pod:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">run</span> <span class="n">my</span><span class="o">-</span><span class="n">dev</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">i</span> <span class="o">--</span><span class="n">tty</span> <span class="o">--</span><span class="n">image</span> <span class="n">ubuntu</span> <span class="o">--</span> <span class="n">bash</span>
 </pre></div>
 </div>
@@ -295,18 +295,18 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>参数解析:</p>
-<ul class="last simple">
-<li><code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 是创建的Deployment的名字，通常 pod 名字就是Deploymentin名字加上一个随机has或者ID</li>
-<li><code class="docutils literal notranslate"><span class="pre">--rm</span></code> 当detach时候删除所有创建的资源。这样当我们退出会话是，会清理掉Deployment和Pod</li>
-<li><code class="docutils literal notranslate"><span class="pre">-i/--tty</span></code> 提供一个交互会话</li>
-<li><code class="docutils literal notranslate"><span class="pre">--</span></code> 不限制kubectl运行参数的结束，以便传递可能参数(bash)</li>
-<li><code class="docutils literal notranslate"><span class="pre">bash</span></code> 覆盖默认当容器 <code class="docutils literal notranslate"><span class="pre">CMD</span></code> ，这样就最后能够加载bash作为容器的命令</li>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 是创建的Deployment的名字，通常 pod 名字就是Deploymentin名字加上一个随机has或者ID</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--rm</span></code> 当detach时候删除所有创建的资源。这样当我们退出会话是，会清理掉Deployment和Pod</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-i/--tty</span></code> 提供一个交互会话</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--</span></code> 不限制kubectl运行参数的结束，以便传递可能参数(bash)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bash</span></code> 覆盖默认当容器 <code class="docutils literal notranslate"><span class="pre">CMD</span></code> ，这样就最后能够加载bash作为容器的命令</p></li>
 </ul>
 </div>
 <ul>
-<li><p class="first">检查我们创建的 Deployment</p>
+<li><p>检查我们创建的 Deployment</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">deployments</span>
 </pre></div>
 </div>
@@ -318,11 +318,11 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">当 Pod 创建并运行，pod 是运行在Kubernetes内部当，并且运行在一个私有并且隔离的网络中。默认情况下，pod可以被相同的kubernetes集群内的其他pod和service访问，但是不能被外部网络访问。此时我们使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 命令实际上是和应用程序的API endpoint 通讯交互。</p>
+<p class="admonition-title">Note</p>
+<p>当 Pod 创建并运行，pod 是运行在Kubernetes内部当，并且运行在一个私有并且隔离的网络中。默认情况下，pod可以被相同的kubernetes集群内的其他pod和service访问，但是不能被外部网络访问。此时我们使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 命令实际上是和应用程序的API endpoint 通讯交互。</p>
 </div>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code></p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 提供了一个代理能够将通讯转发到集群范围到私有网络，所以，我们在另外一个终端窗口执行 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code> 命令（注意不要 ctrl-c 终止) ，此时就提供了一个直接从终端访问API的代理，端口 8001 。</p>
 <p>例如，以下命令可以检查版本:</p>
@@ -345,7 +345,7 @@
 </div>
 <p>这个输出信息实际上就是和 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">version</span></code> 命令输出的服务器端版本信息是一致的。这说明 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code> 打通了到API入口，可以通过REST方式获取到Kubernetes信息。</p>
 <ul>
-<li><p class="first">检查刚才创建的pod（默认只显示 <code class="docutils literal notranslate"><span class="pre">default</span></code> 这个namespace）:</p>
+<li><p>检查刚才创建的pod（默认只显示 <code class="docutils literal notranslate"><span class="pre">default</span></code> 这个namespace）:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span>
 </pre></div>
 </div>
@@ -357,21 +357,21 @@
 </pre></div>
 </div>
 <ul>
-<li><p class="first">登陆pod内部shell:</p>
+<li><p>登陆pod内部shell:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">default</span> <span class="n">exec</span> <span class="o">-</span><span class="n">ti</span> <span class="n">my</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="mi">558</span><span class="n">d6cdd</span><span class="o">-</span><span class="mi">4</span><span class="n">bnxq</span> <span class="n">sh</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last simple">
-<li><code class="docutils literal notranslate"><span class="pre">-t/--tty</span></code> 表示开启 tty 终端</li>
-<li><code class="docutils literal notranslate"><span class="pre">-i</span></code> 表示交互</li>
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-t/--tty</span></code> 表示开启 tty 终端</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-i</span></code> 表示交互</p></li>
 </ul>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>根据 Docker Hub 提供的 <a class="reference external" href="https://hub.docker.com/_/ubuntu">Ubuntu Docker官方镜像</a> 说明，默认不指定版本，即为 <code class="docutils literal notranslate"><span class="pre">ubuntu:latest</span></code> ，该版本指向的是最新的LTS版本，即 18.04 bionic 。通过上述命令登陆到pod容器内部检查版本 <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/etc/lsb-release</span></code> 可以看到:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DISTRIB_ID</span><span class="o">=</span><span class="n">Ubuntu</span>
 <span class="n">DISTRIB_RELEASE</span><span class="o">=</span><span class="mf">18.04</span>
@@ -386,13 +386,13 @@
 </pre></div>
 </div>
 <p>注意，默认的ubuntu image是最小化的安装，设置的locale是 POSIX ，通常我们需要修订locale:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">locales</span> <span class="o">&amp;&amp;</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span> \
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">locales</span> <span class="o">&amp;&amp;</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span> \
     <span class="o">&amp;&amp;</span> <span class="n">localedef</span> <span class="o">-</span><span class="n">i</span> <span class="n">en_US</span> <span class="o">-</span><span class="n">c</span> <span class="o">-</span><span class="n">f</span> <span class="n">UTF</span><span class="o">-</span><span class="mi">8</span> <span class="o">-</span><span class="n">A</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">locale</span><span class="o">/</span><span class="n">locale</span><span class="o">.</span><span class="n">alias</span> <span class="n">en_US</span><span class="o">.</span><span class="n">UTF</span><span class="o">-</span><span class="mi">8</span>
 </pre></div>
 </div>
 </div>
 <ul class="simple">
-<li>访问容器服务</li>
+<li><p>访问容器服务</p></li>
 </ul>
 <p>当使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code> 架起了到kubernetes内部私有网络的代理通道以后，我们还可以直接访问容器的服务端口。</p>
 <p>这里举例，现在容器内部安装NGINX服务:</p>
@@ -413,10 +413,10 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>注意这里有一个nginx日志错误 <code class="docutils literal notranslate"><span class="pre">&quot;socket()</span> <span class="pre">[::]:80</span> <span class="pre">failed</span> <span class="pre">(97:</span> <span class="pre">Address</span> <span class="pre">family</span> <span class="pre">not</span> <span class="pre">supported</span> <span class="pre">by</span> <span class="pre">protocol)</span></code></p>
 <p>这是因为 /etc/nginx/sites-enabled/default 配置默认有一行监听 IPv6 地址的设置需要注释掉:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#listen [::]:80 default_server;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#listen [::]:80 default_server;</span>
 </pre></div>
 </div>
 </div>
@@ -452,15 +452,15 @@ echo $POD_NAME
 <div class="section" id="id4">
 <h2>自定义镜像<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">请注意，我的案例和 <a class="reference external" href="https://kubernetes.io/docs/tutorials/">Google提供的在线教程</a> 不同，我采用了从 <a class="reference external" href="https://hub.docker.com/_/ubuntu">Ubuntu Docker 官方镜像</a> 从头开始定制镜像内容，所以初始的 <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 容器已经做了一定的内容修改（ 相当于自己做了一个和Google案例相同的容器），这样就需要把容器转换（存储）成自定义镜像，然后通过自定义镜像来重新部署应用。</p>
+<p class="admonition-title">Note</p>
+<p>请注意，我的案例和 <a class="reference external" href="https://kubernetes.io/docs/tutorials/">Google提供的在线教程</a> 不同，我采用了从 <a class="reference external" href="https://hub.docker.com/_/ubuntu">Ubuntu Docker 官方镜像</a> 从头开始定制镜像内容，所以初始的 <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 容器已经做了一定的内容修改（ 相当于自己做了一个和Google案例相同的容器），这样就需要把容器转换（存储）成自定义镜像，然后通过自定义镜像来重新部署应用。</p>
 </div>
 <p>上述自己定制的Pod <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 需要制作成镜像，以便能够继续下一步试验。比较简单的方式是把自定义镜像推送到Docker Hub公共镜像服务器上（需要Docker Hub账号），但是更好的方法是</p>
 </div>
 <div class="section" id="id6">
 <h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/">Using kubectl to Create a Deployment</a></li>
+<li><p><a class="reference external" href="https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/">Using kubectl to Create a Deployment</a></p></li>
 </ul>
 </div>
 </div>

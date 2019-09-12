@@ -260,16 +260,18 @@ Root密码及用户账号
 
    sudo pacman -Syu
 
-无线网路设置
----------------
-
-家庭WPA无线网络
-~~~~~~~~~~~~~~~~
-
-- 同样需要配置无线网络，参见前述。
 
 公司802.1X无线网络
-~~~~~~~~~~~~~~~~~~~
+-----------------------
+
+.. note::
+
+   个人实践发现，802.1X设置相对比较复杂，虽然能够通过命令行和配置文件实现，例如使用nmcli或netctl结合wpa_supplicant完成配置。但是，实际上协议分为很多种加密和认证类别，命令行配置需要花费很多时间尝试。即使我之前配置过很多次，依然发现在配置中遇到很多挫折。
+
+   推荐采用 NetworkManager 来完成配置，兼容性和易用性非常好。虽然wicd更为轻量，但是我发现wicd强制需要提供详细的WPA/WEP协议细节，反而非常难以匹配环境。实际上，最终我采用NetworkManager一次配置成功。
+
+netctl命令行配置网络
+~~~~~~~~~~~~~~~~~~~~~
 
 参考 `Getting wired internet with 802.1X security running at install <https://bbs.archlinux.org/viewtopic.php?id=219157>`_ 
 
@@ -300,6 +302,50 @@ Root密码及用户账号
    sudo netctl start office
 
 就可以连接802.1X认证网络。
+
+wicd设置网络
+~~~~~~~~~~~~~~~
+
+参考 `Arch Linux 文档 - wicd <https://wiki.archlinux.org/index.php/Wicd>`_
+
+Xfce虽然没有提供默认的网路管理工具，但是结合轻量级wicd管理工具非常容易设置。
+
+- 安装::
+
+   sudo pacman -S wicd wicd-gtk
+
+- 将用户加入到users组::
+
+   sudo gpasswd -a USERNAME users
+
+- 启动wicd::
+
+   sudo systemctl start wicd
+   sudo systemctl enable wicd
+
+- 启动客户端::
+
+   wicd-client
+
+也可以启动到通知栏::
+
+   wicd-client --tray
+
+NetworkManager设置网络
+~~~~~~~~~~~~~~~~~~~~~~~
+
+参考 `Arch Linux 文档 - NetworkManager <https://wiki.archlinux.org/index.php/NetworkManager>`_
+
+- 安装NetworkManager::
+
+   sudo pacman -S networkmanager network-manager-applet
+
+- 激活NetworkManager::
+
+   sudo systemctl start NetworkManager
+   sudo systemctl enable NetworkManager
+
+- 重新登陆xfce图形桌面，会看到自动启动NetworkManager Applet，则在托盘可以看到图标，配置交互方式完成，EASY
 
 图像界面
 ------------
