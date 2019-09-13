@@ -28,6 +28,10 @@ AUR helper
    cd yay
    makepkg -si
 
+.. note::
+
+   编译安装yay会相关依赖安装开发软件工具链(gcc,make,automake等)，并且安装golang，所以也是一个准备开发环境的过程。
+
 通过snapshot安装
 ==================
 

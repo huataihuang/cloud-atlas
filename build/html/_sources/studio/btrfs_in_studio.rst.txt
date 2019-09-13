@@ -117,22 +117,26 @@ Arch Linux的软件包同名，安装命令如下::
 对新增分区命名::
 
    name 3 docker
-   name 4 ceph
+   name 4 data
+
+.. note::
+
+   上述2个新增分区是在 :ref:`archlinux_on_thinkpad_x220` 中使用docker(docker分区)和livirt+数据存储(data分区)。对于 :ref:`ubuntu_on_mbp` 则会将数据分区构建成LVM分区，以便实现 :ref:`ceph_docker_in_studio` 方案中采用LVM设备模拟docker中的存储设备，就可以单机运行基于 :ref:`bluestore` 的Ceph模拟集群。
 
 磁盘分区完成后，检查结果::
 
    (parted) print
-   Model: ATA APPLE SSD SM0512 (scsi)
-   Disk /dev/sda: 500GB
-   Sector size (logical/physical): 512B/4096B
+   Model: ATA INTEL SSDSC2KW51 (scsi)
+   Disk /dev/sda: 512GB
+   Sector size (logical/physical): 512B/512B
    Partition Table: gpt
-   Disk Flags:
-
-   Number  Start   End     Size    File system  Name     Flags
-    1      1049kB  192MB   191MB   fat32                 boot, esp
-    2      192MB   51.4GB  51.2GB  ext4
-    3      51.4GB  251GB   200GB                docker
-    4      251GB   500GB   249GB                ceph
+   Disk Flags: 
+   
+   Number  Start   End     Size    File system  Name    Flags
+    1      1049kB  512MB   511MB   fat16                boot, esp
+    2      512MB   51.7GB  51.2GB  ext4
+    3      51.7GB  352GB   300GB   btrfs        docker
+    4      352GB   512GB   160GB   btrfs        data
 
 在初步完成了磁盘分区规划之后，我们现在有了可以用于btrfs的磁盘分区 ``/dev/sda3`` ，请参考 :ref:`configure_docker_btrfs` 完成Docker的btrfs存储引擎设置。如果你需要多种用途混合使用btrfs，也可以参考 :ref:`using_btrfs_in_studio` 。
 

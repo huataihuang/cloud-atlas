@@ -4,6 +4,10 @@
 ThinkPad X220笔记本
 =====================
 
+.. note::
+
+   ThinkPad X220是一个具有可玩性的对Linux友好的笔记本设备，在 :ref:`archlinux_on_thinkpad_x220` 流畅无比，特别是在本文实践中加持的16GB 1866MHz内存+BIOS高级扩展。
+
 x220.mdonnelltech.com
 ======================
 
@@ -19,7 +23,7 @@ x220.mdonnelltech.com
 硬件配置参考 `Lenovo ThinkPad X220 specs <https://www.cnet.com/products/lenovo-thinkpad-x220/specs/>`_
 
 - CPU: Core i5-2410M @ 2.30GHz
-- 内存: 8G (自己配置)
+- 内存: 16G (自己配置micron 16GB 1866MHz DDR3内存)
 - 硬盘: Intel SSDSCC2KW51 (512G)
 
 BIOS微码

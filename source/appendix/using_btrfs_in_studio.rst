@@ -39,75 +39,64 @@ Btrfs工具
 显示磁盘分区::
 
    (parted) print
-   Model: ATA APPLE SSD SM0512 (scsi)
-   Disk /dev/sda: 500GB
-   Sector size (logical/physical): 512B/4096B
+   Model: ATA INTEL SSDSC2KW51 (scsi)
+   Disk /dev/sda: 512GB
+   Sector size (logical/physical): 512B/512B
    Partition Table: gpt
-   Disk Flags:
-
-   Number  Start   End     Size    File system  Name  Flags
-    1      1049kB  192MB   191MB   fat32              boot, esp
-    2      192MB   51.4GB  51.2GB  ext4
+   Disk Flags: 
+   
+   Number  Start   End     Size    File system  Name    Flags
+    1      1049kB  512MB   511MB   fat16                boot, esp
+    2      512MB   51.7GB  51.2GB  ext4
 
 增加分区3::
 
-   mkpart primary 51.4GB 251GB
+   mkpart primary btrfs 51.7GB 351.7GB
 
 对新增分区命名::
 
-   name 3 data
+   name 3 docker
+
+增加分区4::
+
+   mkpart primary btrfs 351.7GB 100%
+   name 4 data
 
 磁盘分区完成后，检查结果::
 
    (parted) print
-   Model: ATA APPLE SSD SM0512 (scsi)
-   Disk /dev/sda: 500GB
-   Sector size (logical/physical): 512B/4096B
+   Model: ATA INTEL SSDSC2KW51 (scsi)
+   Disk /dev/sda: 512GB
+   Sector size (logical/physical): 512B/512B
    Partition Table: gpt
-   Disk Flags:
+   Disk Flags: 
+   
+   Number  Start   End     Size    File system  Name    Flags
+    1      1049kB  512MB   511MB   fat16                boot, esp
+    2      512MB   51.7GB  51.2GB  ext4
+    3      51.7GB  352GB   300GB   btrfs        docker
+    4      352GB   512GB   160GB   btrfs        data
 
-   Number  Start   End     Size    File system  Name     Flags
-    1      1049kB  192MB   191MB   fat32                 boot, esp
-    2      192MB   51.4GB  51.2GB  ext4
-    3      51.4GB  251GB   200GB                data
 
 Btrfs部署
 ================
 
-- 采用的btrfs非常简单的卷，单盘。首先创建根卷 ``data`` ::
+- 采用的btrfs非常简单的卷，单盘。首先创建根卷 ``docker`` 和 ``data``  ::
 
-   mkfs.btrfs -L data /dev/sda3
-
-显示输出::
-
-   btrfs-progs v4.16.1
-   See http://btrfs.wiki.kernel.org for more information.
-
-   Detected a SSD, turning off metadata duplication.  Mkfs with -m dup if you want to force metadata duplication.
-   Performing full device TRIM /dev/sda3 (185.90GiB) ...
-   Label:              data
-   UUID:               3a2963fe-eb55-4160-8f46-a1b3ead72f17
-   Node size:          16384
-   Sector size:        4096
-   Filesystem size:    185.90GiB
-   Block group profiles:
-     Data:             single            8.00MiB
-     Metadata:         single            8.00MiB
-     System:           single            4.00MiB
-   SSD detected:       yes
-   Incompat features:  extref, skinny-metadata
-   Number of devices:  1
-   Devices:
-      ID        SIZE  PATH
-       1   185.90GiB  /dev/sda3
+   mkfs.btrfs -L docker /dev/sda3
+   mkfs.btrfs -L data /dev/sda4
 
 - 挂载btrfs的分区
 
 设置 ``/etc/fstab`` ::
 
-   /dev/sda3    /data    btrfs    defaults,compress=zstd   0    1
+   /dev/sda3  /var/lib/docker  btrfs  defaults,compress=zstd  0 1
+   /dev/sda4  /data            btrfs  defaults,compress=zstd  0 1
 
 然后挂载磁盘分区::
+
+   mkdir /var/lib/docker
+   mount /var/lib/docker
 
    mkdir /data
    mount /data
@@ -125,12 +114,12 @@ libvirt和docker数据迁移到btrfs(可选)
 
    另外，我准备部署 :ref:`ceph_docker_in_studio` ，并且将Ceph存储输出给libvirt使用，作为底层存储，这样就不再使用本段落的btrfs子卷对应libvirt存储，本段落仅供参考。
 
-- 创建btrfs的子卷，分别对应libvirt和docker
+- 创建btrfs的子卷，分别对应libvirt和home
 
 创建子卷::
 
    btrfs subvolume create /data/libvirt
-   btrfs subvolume create /data/docker
+   btrfs subvolume create /data/home
 
 检查子卷::
 
@@ -138,18 +127,18 @@ libvirt和docker数据迁移到btrfs(可选)
 
 显示输出::
 
-   ID 257 gen 8 top level 5 path libvirt
-   ID 258 gen 9 top level 5 path docker
+   ID 257 gen 7 top level 5 path libvirt
+   ID 258 gen 8 top level 5 path home
 
 .. note::
 
-   需要将子卷挂载到 ``/lib/virt`` 下的子目录 ``libvirt`` 和 ``docker`` ，不过，先需要做数据迁移
+   如果已经安装了libvirt软件包，在将btrfs子卷挂载前需要先停止libvirtd服务，并且需要要做数据迁移
 
 .. note::
 
    详细可以参考 `使用Btrfs部署KVM <https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/deploy_kvm_using_btrfs.md>`_
 
-- 停止libvirt和docker服务::
+- 停止libvirt服务::
 
    systemctl stop libvirtd
    systemctl stop virtlogd.socket
@@ -159,44 +148,59 @@ libvirt和docker数据迁移到btrfs(可选)
    # 停止libvirt使用的dnsmasq
    ps aux | grep dnsmasq | grep -v grep | awk '{print $2}' |  sudo xargs kill
 
-   systemctl stop docker
-
 .. note::
 
-   在做数据迁移之前，务必确保没有任何进程在访问 ``/var/lib/libvirt`` 和 ``/var/lib/docker`` 目录，以便能够移动和重新挂载这两个目录::
+   在做数据迁移之前，务必确保没有任何进程在访问 ``/var/lib/libvirt`` 目录，以便能够移动和重新挂载这两个目录::
 
       lsof | grep libvirt
-      lsof | grep docker
 
 - 将源目录重命名::
 
    cd /var/lib
    mv libvirt libvirt.bak
-   mv docker docker.bak
 
 注意检查目录的属主和权限::
 
-   drwx--x--x 15 root          root          4.0K 2月  26 22:59 docker.bak
    drwxr-xr-x  7 root          root          4.0K 2月  26 17:38 libvirt.bak
 
 - 将btrfs子卷挂载到目标目录
 
 创建目录::
 
-   mkdir /var/lib/docker
    mkdir /var/lib/libvirt
-   chmod 711 /var/lib/docker
    chmod 755 /var/lib/libvirt
 
 修改 ``/etc/fstab``  添加::
 
-   /dev/sda3    /var/lib/libvirt   btrfs  subvol=libvirt,defaults,noatime   0   1
-   /dev/sda3    /var/lib/docker    btrfs  subvol=docker,defaults,noatime    0   1
+   /dev/sda4  /var/lib/libvirt  btrfs subvol=libvirt,defaults,noatime,compress=zstd  0 1
 
 挂载目录::
 
    mount /var/lib/libvirt
-   mount /var/lib/docker
+
+- 数据迁移::
+
+   rsync -a /var/lib/libvirt.bak/ /var/lib/libvirt/
+
+- 恢复服务::
+
+   systemctl start libvirtd
+
+Home目录迁移
+==============
+
+Home目录迁移比较麻烦一些，首先要退出所有使用 ``/home`` 目录的普通用户帐号，然后切换到root用户才可以进行目录挂载和数据迁移。
+
+- 在 ``/etc/fstab`` 中添加::
+
+   /dev/sda4  /home             btrfs subvol=home,defaults,noatime,compress=zstd  0 1
+
+- 退出所有普通用户帐号，切换到root用户执行以下命令::
+
+   mv /home /home.bak
+   mkdir /home
+   mount /home
+   rsync -a /home.bak/ /home/
 
 .. note::
 
@@ -214,15 +218,7 @@ libvirt和docker数据迁移到btrfs(可选)
 
    可以看到btrfs的最大特点：存储容量是一个完整的"池"被各个存储卷共享，所以不需要担心某些卷预分配过多或锅烧。
 
-- 数据迁移::
 
-   rsync -a /var/lib/libvirt.bak/ /var/lib/libvirt/
-   rsync -a /var/lib/docker.bak/ /var/lib/docker/
-
-- 恢复服务::
-
-   systemctl start libvirtd
-   systemctl start docker
 
 .. note::
 

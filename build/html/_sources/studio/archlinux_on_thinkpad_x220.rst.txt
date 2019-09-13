@@ -247,11 +247,18 @@ Root密码及用户账号
 - 为方便工作，安装以下软件包::
 
    pacman -S sudo screen wpa_supplicant \
-     firefox leafpad keepassxc
+     firefox midori parole \
+     ristretto leafpad keepassxc
 
 .. note::
 
-   firefox虽然没有chromium(chrome)速度快，但是相对节约资源，并且随着版本迭代，速度已经基本和chrome接近。
+   firefox虽然没有chromium(chrome)速度快，但是相对节约资源，并且随着版本迭代，速度已经基本和chrome接近。并且插件丰富，可以实现很多的功能，也是开发web应用的利器。
+
+   midori是Xfce4平台支持的浏览器开源项目，内核采用webkit，非常轻量级，作为主要的工作浏览器。(Xfce4修改默认浏览器方法: Settings -> Settings Manager -> Preferred Applications )
+
+   parole是Xfce4推荐的媒体播放器。
+
+   ristretto和leafpad是Xfce4平台支持的轻量级图片浏览和文本编辑器。
 
    KeePassX在Linux平台需要安装mono实在太沉重，所以替换成社区版本到KeePassXC，不过不能打开KeePassX的最新割舍密码库文件，所以采用先从KeePassX导出CSV文件，然后导入到KeePassXC中使用。
 

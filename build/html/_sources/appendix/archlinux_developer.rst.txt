@@ -50,3 +50,39 @@ Sphinx-doc
 
    pip install sphinx
    pip install sphinx_rtd_theme
+
+.. note::
+
+   sphinx初始使用请参考文档
+
+Go
+===============
+
+通过安装 ``go`` 软件包可以获得Go编译器::
+
+   pacman -S go go-tools
+
+.. note::
+
+   ``go-tools`` 附加软件包提供了常用工具，如 ``goimports`` ``guru`` ``gorename`` 等等。
+
+   Go希望源代码位于 ``GOPATH`` ，默认是 ``~/go`` ，所以创建相应的工作目录::
+
+      mkdir -p ~/go/src
+
+goland
+===============
+
+Jetbrains提供了著名的开发工具，其中包括goland，用于开发Go语言。可以通过 :ref:`archlinux_aur` 安装::
+
+   yay -S goland goland-jre
+
+.. note::
+
+   `How to install GoLand on Arch Linux <https://snapcraft.io/install/goland/arch>`_ 介绍了另外一种激活Arch Linux snapd的方法，然后在snapd的容器内安装GoLand的方案，可以对比参考::
+
+      git clone https://aur.archlinux.org/snapd.git
+      cd snapd
+      sudo systemctl enable --now snapd.socket
+      sudo ln -s /var/lib/snapd/snap /snap
+      sudo snap install goland --classic
