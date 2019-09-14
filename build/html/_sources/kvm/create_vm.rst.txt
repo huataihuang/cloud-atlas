@@ -12,6 +12,9 @@ Studio环境创建KVM虚拟机
 
    Studio环境采用Ubuntu作为host和guest的OS，在 :ref:`real` 中， :ref:`priv_kvm` 则采用CentOS作为OS。
 
+创建CentOS虚拟机
+------------------
+
 - 创建虚拟机安装Guest操作系统::
 
    virt-install \
@@ -35,6 +38,98 @@ Studio环境创建KVM虚拟机
    - 软件包只选择 ``OpenSSH server`` 以便保持最小化安装，后续clone出的镜像再按需安装
 
    上述安装是通过 ``virsh console`` 连接到虚拟机的串口控制台实现的，安装完成后，需要 ``detach`` 断开串口控制台: ``CTRL+Shift+]`` ，这就可以返回host主机的控制台。
+
+创建Windows虚拟机
+----------------------
+
+- 安装 ``virt-viewer`` 工具可以提供spice或vnc方式连接安装的虚拟机图形界面，程序名称是 ``remote viewer``
+
+- 创建Windows虚拟机::
+
+   virt-install \
+     --network bridge=virbr0,model=virtio \
+     --name win10 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=windows --os-variant=win10 \
+     --disk path=/var/lib/libvirt/images/win10.qcow2,format=qcow2,bus=virtio,cache=none,size=32 \
+     --graphics spice \
+     --cdrom=/var/lib/libvirt/images/en_windows_10_enterprise_version_1607_updated_jul_2016_x86_dvd_9060097.iso 
+
+.. note::
+
+   这里有提示::
+
+     WARNING  Graphics requested but DISPLAY is not set. Not running virt-viewer.
+     WARNING  No console to launch for the guest, defaulting to --wait -1
+
+Windows系统没有包涵virtio驱动，所以在系统安装时候必须提供开源社区提供的 `virtio-win/kvm-guest-drivers-windows <https://github.com/virtio-win/kvm-guest-drivers-windows>`_ 提供了最新的release光盘镜像。
+
+在arch linux中，通过AUR可以安装 virtio-win 软件包::
+
+   yay -S virtio-win
+
+.. note::
+
+   对应上游请参考 `Creating Windows virtual machines using virtIO drivers <https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html>`_ ，通过AUR下载的virtio-win驱动位于 ``/usr/share/virtio/`` 目录。
+
+
+由于 ``virt-install`` 不直接支持多个cdrom，所以在上述安装启动之后，需要将当前cdrom配置导出成一个xml文件，参考第一个cdrom配置修订虚拟机，增加第二个cdrom设备(cdrom 不支持热插拔，所以需要重启虚拟机)，以便在Windows安装过程中提供virtio驱动。
+
+virt-install会创建一个对应虚拟机的XML配置文件，位于 ``/etc/libvirt/qemu/`` 目录下，以上案例就是 ``/etc/libvirt/qemu/win10.xml`` 。查看该文件可以看到定义的第一个cdrom配置::
+
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/var/lib/libvirt/images/en_windows_10_enterprise_version_1607_updated_jul_2016_x86_dvd_9060097.iso'/>
+      <target dev='sda' bus='sata'/>
+      <readonly/>
+      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk> 
+
+执行 ``virsh edit win10`` 修改虚拟机配置，在第一个cdrom之后模仿添加一段，并修改 ``<source file=...>`` ， ``<target dev=...>`` 以及 ``<address unit=...>``::
+
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/var/lib/libvirt/images/virt-win.iso'/>
+      <target dev='sdb' bus='sata'/>
+      <readonly/>
+      <address type='drive' controller='0' bus='0' target='0' unit='1'/>
+    </disk> 
+
+由于cdrom/floppy设备不支持热插拔，所以执行 ``virsh edit win10`` 命令修改虚拟机配置，将上述 ``cdrom2.yaml`` 内容复制增加到第一个cdrom下面。
+
+注意，由于默认虚拟机的XML指定启动设备只有硬盘，所以再次使用 ``virsh start win10`` 将不能从光盘启动。所以，需要在 ``virsh edit win10`` 中将::
+
+     <os>
+       <type arch='x86_64' machine='pc-q35-4.1'>hvm</type>
+       <boot dev='hd'/>
+     </os>
+
+修改成::
+
+     <os>
+       <type arch='x86_64' machine='pc-q35-4.1'>hvm</type>
+       <boot dev='cdrom'/>
+       <boot dev='hd'/>
+     </os>
+
+然后启动虚拟机::
+
+   virsh start win10
+
+就可以开始正式安装Windows操作系统了。在安装过程中，最初无法识别的virtio设备，请参考下图添加驱动，注意在提示驱动加载时直接点ok，windows安装程序会自动搜索到可能的驱动，你只需要选择win10驱动就可以了：
+
+.. figure:: ../_static/kvm/win10_install_load_driver.png
+   :scale: 75%   
+
+.. figure:: ../_static/kvm/win10_install_load_driver_choice.png
+   :scale: 75%   
+
+.. figure:: ../_static/kvm/win10_install_load_driver_install.png
+   :scale: 75%   
+
+.. figure:: ../_static/kvm/win10_install_load_driver_get_disk.png
+   :scale: 75%   
 
 虚拟机串口设置
 =================

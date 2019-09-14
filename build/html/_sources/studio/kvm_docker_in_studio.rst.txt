@@ -43,9 +43,15 @@ Arch Linux安装KVM
 
 - 安装::
 
-   sudo pacman -S qemu libvirt
+   sudo pacman -S qemu libvirt bridge-utils
 
    sudo systemctl start libvirtd
+
+.. note::
+
+   需要安装 ``bridge-utils`` 才能具备 ``brctl`` 工具   
+
+   参考 `How to Create and use Network Bridge on Arch Linux and Manjaro <https://computingforgeeks.com/how-to-create-and-use-network-bridge-on-arch-linux-and-manjaro/>`_
 
 嵌套虚拟化
 ================

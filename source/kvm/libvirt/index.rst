@@ -1,0 +1,18 @@
+.. _libvirt:
+
+=================================
+Libvirt虚拟机管理器
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   libvirt_architecture.rst
+   network/index
+
+.. only::  subproject and html
+
+   Indices
+   =======
+
+   * :ref:`genindex`
