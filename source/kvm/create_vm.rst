@@ -74,7 +74,7 @@ Windows系统没有包涵virtio驱动，所以在系统安装时候必须提供�
    对应上游请参考 `Creating Windows virtual machines using virtIO drivers <https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html>`_ ，通过AUR下载的virtio-win驱动位于 ``/usr/share/virtio/`` 目录。
 
 
-由于 ``virt-install`` 不直接支持多个cdrom，所以在上述安装启动之后，需要将当前cdrom配置导出成一个xml文件，参考第一个cdrom配置修订虚拟机，增加第二个cdrom设备(cdrom 不支持热插拔，所以需要重启虚拟机)，以便在Windows安装过程中提供virtio驱动。
+由于 ``virt-install`` 不直接支持多个cdrom，所以在上述安装启动之后，需要将当前cdrom配置导出成一个xml文件，参考第一个cdrom配置修订虚拟机，增加第二个cdrom设备(cdrom 不支持热插拔，所以需要重启虚拟机)，以便在Windows安装过程中提供virtio驱动。(参考 `Using virt-install to mount multiple cdrom drives/images <https://superuser.com/questions/147419/using-virt-install-to-mount-multiple-cdrom-drives-images/677766>`_ )
 
 virt-install会创建一个对应虚拟机的XML配置文件，位于 ``/etc/libvirt/qemu/`` 目录下，以上案例就是 ``/etc/libvirt/qemu/win10.xml`` 。查看该文件可以看到定义的第一个cdrom配置::
 
@@ -90,7 +90,7 @@ virt-install会创建一个对应虚拟机的XML配置文件，位于 ``/etc/lib
 
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
-      <source file='/var/lib/libvirt/images/virt-win.iso'/>
+      <source file='/var/lib/libvirt/images/virtio-win.iso'/>
       <target dev='sdb' bus='sata'/>
       <readonly/>
       <address type='drive' controller='0' bus='0' target='0' unit='1'/>
@@ -98,7 +98,7 @@ virt-install会创建一个对应虚拟机的XML配置文件，位于 ``/etc/lib
 
 由于cdrom/floppy设备不支持热插拔，所以执行 ``virsh edit win10`` 命令修改虚拟机配置，将上述 ``cdrom2.yaml`` 内容复制增加到第一个cdrom下面。
 
-注意，由于默认虚拟机的XML指定启动设备只有硬盘，所以再次使用 ``virsh start win10`` 将不能从光盘启动。所以，需要在 ``virsh edit win10`` 中将::
+注意，由于默认虚拟机的XML指定启动设备只有硬盘，所以再次使用 ``virsh start win10`` 将不能从光盘启动( 参考 `Booting from a cdrom in a kvm guest using libvirt <https://mycfg.net/articles/booting-from-a-cdrom-in-a-kvm-guest-with-libvirt.html>`_ 。所以，需要在 ``virsh edit win10`` 中将::
 
      <os>
        <type arch='x86_64' machine='pc-q35-4.1'>hvm</type>
@@ -130,6 +130,45 @@ virt-install会创建一个对应虚拟机的XML配置文件，位于 ``/etc/lib
 
 .. figure:: ../_static/kvm/win10_install_load_driver_get_disk.png
    :scale: 75%   
+
+安装完毕在重启windows操作系统之前，请务必重新 ``virsh edit win10`` 去除优先从cdrom启动设置。
+
+安装完操Windows之后，需要注意这个虚拟机的硬件，包括虚拟网卡，虚拟串口等设备都是virtio类型的，默认的Windows系统都没有驱动，所以还需要在Windows中使用鼠标右击启动按钮，选择 ``Computer Management`` ，然后选择 ``Device Manager`` ，再选择驱动没有正确安装的设备，例如 ``Ethernet Controller`` 。鼠标右击没有正确安装驱动的设备图标，选择 ``Update Driver Softwre`` 
+
+.. figure:: ../_static/kvm/win10_update_driver.png
+   :scale: 75%   
+
+然后选择 ``Browser my computer for driver software``
+
+.. figure:: ../_static/kvm/win10_update_driver_locate.png
+   :scale: 75%   
+
+点击 ``Browse...`` 浏览选择包含virtio驱动的cdrom，并确认。注意，这里搜索驱动的选项选择了 ``Include subfolers`` 这样才能搜索整个cdrom，找到cdrom子目录中正确的驱动
+
+.. figure:: ../_static/kvm/win10_update_driver_locate_cdrom.png
+   :scale: 75%   
+
+Windows会搜索到正确的驱动，请点击确认安装，注意选择了 ``Always trust software form "Red Hat, Inc"``
+
+.. figure:: ../_static/kvm/win10_update_driver_install.png
+   :scale: 75%   
+
+安装成功
+
+.. figure:: ../_static/kvm/win10_update_driver_install_success.png
+   :scale: 75%   
+
+建议启用windows远程桌面，然后安装 xrdp 客户端，方便从Linux上访问Windows桌面。
+
+.. note::
+
+   Linux也可以安装RDP服务，这样就非常容易从Windows客户端访问Linux桌面。请参考 `Install XRDP on Ubuntu Server with XFCE Template <https://www.interserver.net/tips/kb/install-xrdp-ubuntu-server-xfce-template/>`_
+
+.. note::
+
+   `rdesktop <https://www.rdesktop.org/>`_ 是轻量级RDP客户端，支持SeamlessRDP。
+
+   `Remmina <https://remmina.org/>`_ 是支持多种协议(RDP, VNC, SPICE, NX, XDMCP, SSH and EXEC)的远程桌面客户端。
 
 虚拟机串口设置
 =================
