@@ -38,6 +38,7 @@
    archlinux_aur.rst
    archlinux_developer.rst
    xfce.rst
+   seamless_rdp.rst
    pi_quick_start.rst
    pi_zero_net_gadget.rst
    ipmitool_tips.rst

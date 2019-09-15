@@ -274,7 +274,7 @@
 <p class="admonition-title">Note</p>
 <p>对应上游请参考 <a class="reference external" href="https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html">Creating Windows virtual machines using virtIO drivers</a> ，通过AUR下载的virtio-win驱动位于 <code class="docutils literal notranslate"><span class="pre">/usr/share/virtio/</span></code> 目录。</p>
 </div>
-<p>由于 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 不直接支持多个cdrom，所以在上述安装启动之后，需要将当前cdrom配置导出成一个xml文件，参考第一个cdrom配置修订虚拟机，增加第二个cdrom设备(cdrom 不支持热插拔，所以需要重启虚拟机)，以便在Windows安装过程中提供virtio驱动。</p>
+<p>由于 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 不直接支持多个cdrom，所以在上述安装启动之后，需要将当前cdrom配置导出成一个xml文件，参考第一个cdrom配置修订虚拟机，增加第二个cdrom设备(cdrom 不支持热插拔，所以需要重启虚拟机)，以便在Windows安装过程中提供virtio驱动。(参考 <a class="reference external" href="https://superuser.com/questions/147419/using-virt-install-to-mount-multiple-cdrom-drives-images/677766">Using virt-install to mount multiple cdrom drives/images</a> )</p>
 <p>virt-install会创建一个对应虚拟机的XML配置文件，位于 <code class="docutils literal notranslate"><span class="pre">/etc/libvirt/qemu/</span></code> 目录下，以上案例就是 <code class="docutils literal notranslate"><span class="pre">/etc/libvirt/qemu/win10.xml</span></code> 。查看该文件可以看到定义的第一个cdrom配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;file&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cdrom&#39;</span><span class="o">&gt;</span>
   <span class="o">&lt;</span><span class="n">driver</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;qemu&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="o">/&gt;</span>
@@ -288,7 +288,7 @@
 <p>执行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">win10</span></code> 修改虚拟机配置，在第一个cdrom之后模仿添加一段，并修改 <code class="docutils literal notranslate"><span class="pre">&lt;source</span> <span class="pre">file=...&gt;</span></code> ， <code class="docutils literal notranslate"><span class="pre">&lt;target</span> <span class="pre">dev=...&gt;</span></code> 以及 <code class="docutils literal notranslate"><span class="pre">&lt;address</span> <span class="pre">unit=...&gt;</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;file&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cdrom&#39;</span><span class="o">&gt;</span>
   <span class="o">&lt;</span><span class="n">driver</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;qemu&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="o">/&gt;</span>
-  <span class="o">&lt;</span><span class="n">source</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;/var/lib/libvirt/images/virt-win.iso&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;/var/lib/libvirt/images/virtio-win.iso&#39;</span><span class="o">/&gt;</span>
   <span class="o">&lt;</span><span class="n">target</span> <span class="n">dev</span><span class="o">=</span><span class="s1">&#39;sdb&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;sata&#39;</span><span class="o">/&gt;</span>
   <span class="o">&lt;</span><span class="n">readonly</span><span class="o">/&gt;</span>
   <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;drive&#39;</span> <span class="n">controller</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="o">/&gt;</span>
@@ -296,7 +296,7 @@
 </pre></div>
 </div>
 <p>由于cdrom/floppy设备不支持热插拔，所以执行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">win10</span></code> 命令修改虚拟机配置，将上述 <code class="docutils literal notranslate"><span class="pre">cdrom2.yaml</span></code> 内容复制增加到第一个cdrom下面。</p>
-<p>注意，由于默认虚拟机的XML指定启动设备只有硬盘，所以再次使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">start</span> <span class="pre">win10</span></code> 将不能从光盘启动。所以，需要在 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">win10</span></code> 中将:</p>
+<p>注意，由于默认虚拟机的XML指定启动设备只有硬盘，所以再次使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">start</span> <span class="pre">win10</span></code> 将不能从光盘启动( 参考 <a class="reference external" href="https://mycfg.net/articles/booting-from-a-cdrom-in-a-kvm-guest-with-libvirt.html">Booting from a cdrom in a kvm guest using libvirt</a> 。所以，需要在 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">win10</span></code> 中将:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">os</span><span class="o">&gt;</span>
   <span class="o">&lt;</span><span class="nb">type</span> <span class="n">arch</span><span class="o">=</span><span class="s1">&#39;x86_64&#39;</span> <span class="n">machine</span><span class="o">=</span><span class="s1">&#39;pc-q35-4.1&#39;</span><span class="o">&gt;</span><span class="n">hvm</span><span class="o">&lt;/</span><span class="nb">type</span><span class="o">&gt;</span>
   <span class="o">&lt;</span><span class="n">boot</span> <span class="n">dev</span><span class="o">=</span><span class="s1">&#39;hd&#39;</span><span class="o">/&gt;</span>
@@ -327,6 +327,37 @@
 </div>
 <div class="figure align-default">
 <a class="reference internal image-reference" href="../_images/win10_install_load_driver_get_disk.png"><img alt="../_images/win10_install_load_driver_get_disk.png" src="../_images/win10_install_load_driver_get_disk.png" style="width: 768.0px; height: 576.0px;" /></a>
+</div>
+<p>安装完毕在重启windows操作系统之前，请务必重新 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">win10</span></code> 去除优先从cdrom启动设置。</p>
+<p>安装完操Windows之后，需要注意这个虚拟机的硬件，包括虚拟网卡，虚拟串口等设备都是virtio类型的，默认的Windows系统都没有驱动，所以还需要在Windows中使用鼠标右击启动按钮，选择 <code class="docutils literal notranslate"><span class="pre">Computer</span> <span class="pre">Management</span></code> ，然后选择 <code class="docutils literal notranslate"><span class="pre">Device</span> <span class="pre">Manager</span></code> ，再选择驱动没有正确安装的设备，例如 <code class="docutils literal notranslate"><span class="pre">Ethernet</span> <span class="pre">Controller</span></code> 。鼠标右击没有正确安装驱动的设备图标，选择 <code class="docutils literal notranslate"><span class="pre">Update</span> <span class="pre">Driver</span> <span class="pre">Softwre</span></code></p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../_images/win10_update_driver.png"><img alt="../_images/win10_update_driver.png" src="../_images/win10_update_driver.png" style="width: 768.0px; height: 576.0px;" /></a>
+</div>
+<p>然后选择 <code class="docutils literal notranslate"><span class="pre">Browser</span> <span class="pre">my</span> <span class="pre">computer</span> <span class="pre">for</span> <span class="pre">driver</span> <span class="pre">software</span></code></p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../_images/win10_update_driver_locate.png"><img alt="../_images/win10_update_driver_locate.png" src="../_images/win10_update_driver_locate.png" style="width: 768.0px; height: 576.0px;" /></a>
+</div>
+<p>点击 <code class="docutils literal notranslate"><span class="pre">Browse...</span></code> 浏览选择包含virtio驱动的cdrom，并确认。注意，这里搜索驱动的选项选择了 <code class="docutils literal notranslate"><span class="pre">Include</span> <span class="pre">subfolers</span></code> 这样才能搜索整个cdrom，找到cdrom子目录中正确的驱动</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../_images/win10_update_driver_locate_cdrom.png"><img alt="../_images/win10_update_driver_locate_cdrom.png" src="../_images/win10_update_driver_locate_cdrom.png" style="width: 768.0px; height: 576.0px;" /></a>
+</div>
+<p>Windows会搜索到正确的驱动，请点击确认安装，注意选择了 <code class="docutils literal notranslate"><span class="pre">Always</span> <span class="pre">trust</span> <span class="pre">software</span> <span class="pre">form</span> <span class="pre">&quot;Red</span> <span class="pre">Hat,</span> <span class="pre">Inc&quot;</span></code></p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../_images/win10_update_driver_install.png"><img alt="../_images/win10_update_driver_install.png" src="../_images/win10_update_driver_install.png" style="width: 768.0px; height: 576.0px;" /></a>
+</div>
+<p>安装成功</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../_images/win10_update_driver_install_success.png"><img alt="../_images/win10_update_driver_install_success.png" src="../_images/win10_update_driver_install_success.png" style="width: 768.0px; height: 576.0px;" /></a>
+</div>
+<p>建议启用windows远程桌面，然后安装 xrdp 客户端，方便从Linux上访问Windows桌面。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Linux也可以安装RDP服务，这样就非常容易从Windows客户端访问Linux桌面。请参考 <a class="reference external" href="https://www.interserver.net/tips/kb/install-xrdp-ubuntu-server-xfce-template/">Install XRDP on Ubuntu Server with XFCE Template</a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://www.rdesktop.org/">rdesktop</a> 是轻量级RDP客户端，支持SeamlessRDP。</p>
+<p><a class="reference external" href="https://remmina.org/">Remmina</a> 是支持多种协议(RDP, VNC, SPICE, NX, XDMCP, SSH and EXEC)的远程桌面客户端。</p>
 </div>
 <div class="section" id="id1">
 <h3>虚拟机串口设置<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
