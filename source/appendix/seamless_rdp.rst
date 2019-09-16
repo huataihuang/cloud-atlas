@@ -54,7 +54,15 @@ SeamlessRDP
 
 SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Windows应用程序推送到本地桌面，类似RAIL/RemoteApp。SeamlessRDP要求Windows Server 2008r2或更高版本。
 
-请访问 `seamlessrdp github仓库 <https://github.com/rdesktop/seamlessrdp>`_ 获取源代码编译(需要交叉平台编译)，不过官方网站没有提供Windoes的二进制执行程序::
+通过使用Seamless RDP，远程的Windows程序
+
+请访问 `seamlessrdp github仓库 <https://github.com/rdesktop/seamlessrdp>`_ 获取源代码编译(需要交叉平台编译)，不过官方网站没有提供Windoes的二进制执行程序，以下是我的编译过层。
+
+.. note::
+
+   在Linux平台编译运行在Windows的应用程序，需要预先安装cross-compiling environment for Windows，然后通过参数 ``--host`` 告诉 ``./configure`` 设置合适的交叉编译设置。
+
+编译seamlessrdp::
 
    git clone https://github.com/rdesktop/seamlessrdp.git
    cd seamlessrdp/
@@ -68,7 +76,19 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
    main.c:27:10: fatal error: windows.h: No such file or directory
       27 | #include <windows.h>
 
-现在好像很难找到二进制服务端程序？
+- 安装
+
+首先打包已经编译输出的Windows执行程序::
+
+   zip -j seamlessrdp.zip .libs/seamlessrdpshell.exe .libs/seamlessrdp??.dll .libs/seamlessrdphook??.exe
+
+将上述 ``seamlessrdp.zip`` 文件复制到Windows服务器的 ``C:\SeamlessRDP\`` 目录中并解压缩
+
+- 使用
+
+在Linux客户端执行以下命令，启动远程Windows平台的notepad应用，此时nodepad程序将显示在本地Linux桌面上，就好像是Linux原生的应用程序::
+
+   rdesktop -A 'C:\SeamlessRDP\seamlessrdpshell.exe' -s 'notepad.exe'
 
 参考
 =========
