@@ -142,6 +142,10 @@ Ubuntu 18.04.2 以及更新的版本在Desktop版本提供了一个保持更新�
    HandleLidSwitch=ignore
    HandleLidSwitchDocked=ignore
 
+.. note::
+
+   不过，上述ignore配置不会关闭屏幕，所以还有一个参数 ``lock`` 可以在字符终端合上笔记本屏幕时自动关闭屏幕电源，可以更加节约电能，也降低了笔记本的热量。
+
 然后重启 ``logind`` 服务::
 
    systemctl restart systemd-logind
