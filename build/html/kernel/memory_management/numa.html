@@ -195,29 +195,29 @@ SMP)，这种共用SMP总线互联了所有的cluster。这种SMP系统通常包
 <p>数据在NUMA SMP系统clusters之间的总线中移动，使用了一种称为可伸缩一致性接口(scalable coherent interface, SCI)技术。SCI一致性也被称为 <a class="reference external" href="https://www.infoq.cn/article/cache-coherency-primer">缓存一致性</a> 或者多集群节点一致性访问。</p>
 <p>SMP和NUMA系统通常用于数据挖掘和决策支持系统的应用程序，这样多个进程可以并行运行在多个处理器上为公共数据库工作。</p>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>缓存一致性指在多级缓存和多处理器情况下保证缓存和内存中数据一致的技术：</p>
 <ul class="simple">
-<li><p>直写模式：数据直接写到下一级缓存(或直接写到内存)中，如果对应的段被缓存了，则同时更新缓存的内容(甚至直接丢弃缓存)</p></li>
-<li><p>回写模式: 缓存不会立即把写操作传递到下一级，而是仅修改本级缓存中数据，并把对应的缓存段标记为”脏”段。脏段会触发回写，也就是把里面的内容写到对应的内存或下一级缓存中。回写后，脏段又变”干净”了。当一个脏段被丢弃的时候，总是先进行一次回写。</p></li>
+<li>直写模式：数据直接写到下一级缓存(或直接写到内存)中，如果对应的段被缓存了，则同时更新缓存的内容(甚至直接丢弃缓存)</li>
+<li>回写模式: 缓存不会立即把写操作传递到下一级，而是仅修改本级缓存中数据，并把对应的缓存段标记为”脏”段。脏段会触发回写，也就是把里面的内容写到对应的内存或下一级缓存中。回写后，脏段又变”干净”了。当一个脏段被丢弃的时候，总是先进行一次回写。</li>
 </ul>
 <p>直写模式简单，回写模式虽然复杂，但是优势是: 能够过滤掉对同一地址的反复写操作，并且，如果大多数缓存段都在回写模式下工作，系统经常可以一下子写一大片内存，提高了效率。</p>
-<p>缓存一致性协议通常采用”窥探”协议(snooping
+<p class="last">缓存一致性协议通常采用”窥探”协议(snooping
 protocol)：所有内存传输都发生在一条共享总线上，而所有处理器都能看到这条总线。缓存本身是独立的，但是内存是共享资源，所有内存访问都要经过仲裁(arbitrate)。同一个指令周期中，只有一个缓存可以读写内存。当一个缓存代表它所属的处理器去读写内存时，其他处理器会得到通知，以此来使得自己的缓存保持同步。只要某个处理器一写内存，其他处理器马上就知道这块内存在它们自己的缓存中对应的段已经失效。上述方式在直写模式下写操作是直接公布的，但是回写模式，则需要在处理器修改本地缓存之前就告知其他处理器。这种处理回写模式的方案称为 MESI协议(MESI, Modified、Exclusive、Shared、Invalid，代表四种缓存状态)。详细技术我将在 <a class="reference internal" href="../index.html#kernel"><span class="std std-ref">Kernel Atlas</span></a> 的内存管理相关文档中详细解说。</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>ARM处理器有一种类似cache的和处理器内核紧密耦合的内存（TCM, Tightly Coupled Memoried)，性能和cache相当，但是提供了程序代码可精确控制的缓存控制，提供用户控制什么函数或代码存放在TCM中，确保永远不会被踢出主存储器: 可预见的实时处理（中断处理）、时间可预见（加密算法）、避免cache分析（加密算法）、或者只是要求高性能的代码（编解码功能）。 参考:  <a class="reference external" href="https://zhuanlan.zhihu.com/p/30684711">TCM - 紧耦合内存</a></p>
+<p class="first admonition-title">Note</p>
+<p class="last">ARM处理器有一种类似cache的和处理器内核紧密耦合的内存（TCM, Tightly Coupled Memoried)，性能和cache相当，但是提供了程序代码可精确控制的缓存控制，提供用户控制什么函数或代码存放在TCM中，确保永远不会被踢出主存储器: 可预见的实时处理（中断处理）、时间可预见（加密算法）、避免cache分析（加密算法）、或者只是要求高性能的代码（编解码功能）。 参考:  <a class="reference external" href="https://zhuanlan.zhihu.com/p/30684711">TCM - 紧耦合内存</a></p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Intel处理器的拓扑有些复杂，可以使用 <a class="reference external" href="https://github.com/gbitzes/cpu-topology">cpu-topology</a> 这个脚本检查。</p>
+<p class="first admonition-title">Note</p>
+<p class="last">Intel处理器的拓扑有些复杂，可以使用 <a class="reference external" href="https://github.com/gbitzes/cpu-topology">cpu-topology</a> 这个脚本检查。</p>
 </div>
 <div class="section" id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://www.kernel.org/doc/html/v4.18/vm/numa.html">What is NUMA?</a></p></li>
-<li><p><a class="reference external" href="https://whatis.techtarget.com/definition/NUMA-non-uniform-memory-access">NUMA (non-uniform memory access)</a></p></li>
+<li><a class="reference external" href="https://www.kernel.org/doc/html/v4.18/vm/numa.html">What is NUMA?</a></li>
+<li><a class="reference external" href="https://whatis.techtarget.com/definition/NUMA-non-uniform-memory-access">NUMA (non-uniform memory access)</a></li>
 </ul>
 </div>
 </div>

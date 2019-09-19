@@ -95,7 +95,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../../startup_prepare/index.html">Kubernetes起步准备</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../startup/index.html">Kubernetes快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/index.html">Kubernetes概念辨析</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Kubernetes部署</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../k8s_hosts.html">Kubernetes部署服务器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../container_runtimes.html">容器运行环境</a></li>
@@ -123,6 +122,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../terraform.html">Terraform基础架构管理平台</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Kubernetes网络</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../production/index.html">Kubernetes生产环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../service_mesh/index.html">Service Mesh</a></li>
@@ -219,8 +219,8 @@
 <span id="ha-k8s-lb"></span><h1>高可用k8s的Master负载均衡<a class="headerlink" href="#k8smaster" title="Permalink to this headline">¶</a></h1>
 <p>正如 <a class="reference internal" href="ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 所述，构建Kubernetes高可用集群，以etcd是否独立部署来划分两种不同对HA部署架构：</p>
 <ul class="simple">
-<li><p>堆叠部署etcd</p></li>
-<li><p>独立部署etcd</p></li>
+<li>堆叠部署etcd</li>
+<li>独立部署etcd</li>
 </ul>
 <p>在部署扩展多Master节点高可用集群之前，我们先要为apiserver准备好负载均衡。即完成本章节准备工作之后，我们才能继续 <a class="reference internal" href="create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 。</p>
 <div class="section" id="id1">
@@ -228,30 +228,29 @@
 <p>不管采用哪种HA部署方式，都需要使负载均衡来分发worker节点对请求和连接给后端的多个apiserver。在 <a class="reference internal" href="create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 中，我们扩展了Kubenetes Master服务器，使得对外同时具备了多个Kube-apiserver服务，现在我们需要在apiserver之前构建负载均衡，使得worker节点可以通过负载均衡的VIP来访问后端实际服务器。</p>
 <p>kube-apiserver负载均衡：</p>
 <ul class="simple">
-<li><p>对外服务VIP需要DNS解析</p></li>
-<li><p>控制平面节点(Master节点)使用的是TCP转发负载均衡，该负载均衡将请求分发给所有健康的控制平面节点(健康检查是TCP检查kube-apiserver端口，默认6443)</p></li>
-<li><p>在云环境中不建议直接使用IP地址(通过DNS解析可以按需调整IP)</p></li>
-<li><p>负载均衡必须能够和所有控制平面节点的apiserver端口通讯，并且在负载均衡的监听端口允许进入流量(请参考下文通过 <code class="docutils literal notranslate"><span class="pre">firewall-cmd</span></code> 添加防火墙规则方法)</p></li>
-<li><p>确保负载均衡的地址和 kubeadm 的 <code class="docutils literal notranslate"><span class="pre">ControlPlaneEndpoint</span></code> 地址完全一致</p></li>
+<li>对外服务VIP需要DNS解析</li>
+<li>控制平面节点(Master节点)使用的是TCP转发负载均衡，该负载均衡将请求分发给所有健康的控制平面节点(健康检查是TCP检查kube-apiserver端口，默认6443)</li>
+<li>在云环境中不建议直接使用IP地址(通过DNS解析可以按需调整IP)</li>
+<li>负载均衡必须能够和所有控制平面节点的apiserver端口通讯，并且在负载均衡的监听端口允许进入流量(请参考下文通过 <code class="docutils literal notranslate"><span class="pre">firewall-cmd</span></code> 添加防火墙规则方法)</li>
+<li>确保负载均衡的地址和 kubeadm 的 <code class="docutils literal notranslate"><span class="pre">ControlPlaneEndpoint</span></code> 地址完全一致</li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>apiserver高可用采用的是负载均衡方式实现，不论堆叠部署etcd还是分离部署etcd，集群的worker节点访问apiserver都是通过负载均衡实现的。负载均衡有多种解决方案，这里采用的是HAProxy实现，并且结合了Keepalived实现HAProxy的高可用部署。</p>
 <p>HAProxy虚拟机采用 <a class="reference internal" href="../k8s_hosts.html#k8s-hosts"><span class="std std-ref">Kubernetes部署服务器</span></a> 所创建的2个 <code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 虚拟机。</p>
-<blockquote>
-<div><p>192.168.122.8   haproxy-1 haproxy-1.huatai.me
+<blockquote class="last">
+<div>192.168.122.8   haproxy-1 haproxy-1.huatai.me
 192.168.122.9   haproxy-2 haproxy-2.huatai.me
-192.168.122.10  kubeapi kubeapi.huatai.me            #在HAProxy上构建apiserver的VIP</p>
-</div></blockquote>
+192.168.122.10  kubeapi kubeapi.huatai.me            #在HAProxy上构建apiserver的VIP</div></blockquote>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a> 采用的是直接在3个Kuberenetes Master构建Keepalived和HAProxy，这种方式可以节约服务器使用。不过，我的部署采用了独立的haproxy服务器，目的是为了能够功能清晰并且能够更好横向扩展，以便适应大型负载网络。</p>
+<p class="first admonition-title">Note</p>
+<p class="last"><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a> 采用的是直接在3个Kuberenetes Master构建Keepalived和HAProxy，这种方式可以节约服务器使用。不过，我的部署采用了独立的haproxy服务器，目的是为了能够功能清晰并且能够更好横向扩展，以便适应大型负载网络。</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Warning</p>
+<p class="first admonition-title">Warning</p>
 <p>由于kubelet客户端采用长连接方式访问apiserver，所以一旦kubelet通过负载均衡分发到后端到apiserver之后，除非kubelet客户端重启，一般情况下kubelete客户端会始终访问同一台apiserver。这就带来了一个均衡性问题：当apiserver由于升级重启或者crash重启，kubelet客户端连接会集中到其他正常服务器上并且不会再平衡。极端情况下，可能虽然有多个apiserver，但负载会集中到少量服务器上。</p>
-<p>这个问题在KubeCon China 2019的阿里云演讲 <a class="reference external" href="https://www.youtube.com/watch?v=1ThhTbMO1NE">Understanding Scalability and Performance in the Kubenetes Masteer</a> 有详细介绍和解决方案思路介绍(中文观看请访问 <a class="reference external" href="https://v.qq.com/x/page/v0906j1czvd.html">了解 Kubernetes Master 的可扩展性和性能</a> )。</p>
+<p class="last">这个问题在KubeCon China 2019的阿里云演讲 <a class="reference external" href="https://www.youtube.com/watch?v=1ThhTbMO1NE">Understanding Scalability and Performance in the Kubenetes Masteer</a> 有详细介绍和解决方案思路介绍(中文观看请访问 <a class="reference external" href="https://v.qq.com/x/page/v0906j1czvd.html">了解 Kubernetes Master 的可扩展性和性能</a> )。</p>
 </div>
 </div>
 <div class="section" id="apihaproxykeeplived">
@@ -259,7 +258,7 @@
 <div class="section" id="id2">
 <h3>准备工作<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 需要关闭SELinux，否则启动haproxy服务无法绑定端口(详细见下文 <code class="docutils literal notranslate"><span class="pre">问题排查</span></code> ):</p>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 需要关闭SELinux，否则启动haproxy服务无法绑定端口(详细见下文 <code class="docutils literal notranslate"><span class="pre">问题排查</span></code> ):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setenforce</span> <span class="mi">0</span>
 <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">selinux</span><span class="o">/</span><span class="n">config</span>
 </pre></div>
@@ -271,16 +270,16 @@
 <h3>Keepalived<a class="headerlink" href="#keepalived" title="Permalink to this headline">¶</a></h3>
 <p>Keepalived提供Kubernetes集群Master VIP 192.168.122.10 ( <a class="reference internal" href="../../../studio/studio_ip.html#studio-ip"><span class="std std-ref">Studio测试环境IP分配</span></a> )，即浮动在HAProxy的健康节点之一，提供对外服务的访问IP，并在节点故障时自动切换到其他健康节点。Kubernetes API将始终通过HAProxy提供对外访问。</p>
 <ul>
-<li><p>安装 keepalived</p>
+<li><p class="first">安装 keepalived</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">keepalived</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>默认安装 keepalived 已经具备了一个案例配置 <code class="docutils literal notranslate"><span class="pre">/etc/keepalived/keepalived.conf</span></code> ，备份这个文件再重新按本文配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">keepalived</span><span class="o">/</span><span class="n">keepalived</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">keepalived</span><span class="o">/</span><span class="n">keepalived</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">bak</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">keepalived</span><span class="o">/</span><span class="n">keepalived</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">keepalived</span><span class="o">/</span><span class="n">keepalived</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">bak</span>
 </pre></div>
 </div>
 </div>
@@ -316,9 +315,9 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>对于Keepalived其他节点，例如 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> ，需要修订 <code class="docutils literal notranslate"><span class="pre">unicast</span></code> 部分，将对等部分互换，例如:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unicast_src_ip</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.9</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unicast_src_ip</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.9</span>
 <span class="n">unicast_peer</span> <span class="p">{</span>
     <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.8</span>
     <span class="c1"># 可配置多个peer</span>
@@ -328,7 +327,7 @@
 </div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>keepalived 使用VRRP协议(ip protocol 112)以及多播地址 <code class="docutils literal notranslate"><span class="pre">224.0.0.18</span></code> ，需要在防火墙上开启:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">rich</span><span class="o">-</span><span class="n">rule</span><span class="o">=</span><span class="s1">&#39;rule protocol value=&quot;vrrp&quot; accept&#39;</span> <span class="o">--</span><span class="n">permanent</span>
 <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
@@ -339,7 +338,7 @@
 </pre></div>
 </div>
 <p>参考文档： <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/load_balancer_administration/s1-lvs-connect-vsa">Red Hat Enterprise Linux7 &gt; Load Balancer Administration &gt; 3.3. Putting the Configuration Together</a></p>
-<blockquote>
+<blockquote class="last">
 <div><p>也可以参考 <a class="reference external" href="https://docs.oracle.com/cd/E52668_01/E54669/html/section_ksr_psb_nr.html">Oracle® Linux Administrator’s Guide for Release 7 &gt; Load Balancing Configuration &gt; 17.5 Installing and Configuring Keepalived</a> 通过以下命令添加:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">direct</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">rule</span> <span class="n">ipv4</span> <span class="nb">filter</span> <span class="n">INPUT</span> <span class="mi">0</span> \
   <span class="o">--</span><span class="ow">in</span><span class="o">-</span><span class="n">interface</span> <span class="n">eth0</span> <span class="o">--</span><span class="n">destination</span> <span class="mf">224.0</span><span class="o">.</span><span class="mf">0.18</span> <span class="o">--</span><span class="n">protocol</span> <span class="n">vrrp</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
@@ -351,7 +350,7 @@
 </div></blockquote>
 </div>
 <ul>
-<li><p>启动keeplived:</p>
+<li><p class="first">启动keeplived:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">keepalived</span>
 <span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">keepalived</span>
 </pre></div>
@@ -375,25 +374,25 @@
 <h3>HAProxy<a class="headerlink" href="#haproxy" title="Permalink to this headline">¶</a></h3>
 <p>HAProxy将检查后端 <code class="docutils literal notranslate"><span class="pre">kubemaster-X</span></code> 服务器上的 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> 端口健康状态，并且负载均衡请求到集群的健康实例上，并且也将对局域网提供Kubernetes web UI(Dashboard)服务，对外提供服务的虚拟VIP即Keepalived的浮动IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 。</p>
 <ul>
-<li><p>安装HAProxy:</p>
+<li><p class="first">安装HAProxy:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">haproxy</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>默认安装HAProxy配置文件备份:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">haproxy</span><span class="o">.</span><span class="n">cfg</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">haproxy</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">bak</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">haproxy</span><span class="o">.</span><span class="n">cfg</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">haproxy</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">bak</span>
 </pre></div>
 </div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a> 原文 <a class="reference external" href="https://icicimov.github.io/blog/download/haproxy-k8s.cfg">haproxy-k8s.cfg案例配置</a> 中包含了 <a class="reference external" href="https://traefik.io/">trafik (Cloud Native边缘路由器，用于提供代理和负载均衡，取代nginx)</a> 配置，这里我没有采用。后续再做学习和实践。</p>
+<p class="first admonition-title">Note</p>
+<p class="last"><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a> 原文 <a class="reference external" href="https://icicimov.github.io/blog/download/haproxy-k8s.cfg">haproxy-k8s.cfg案例配置</a> 中包含了 <a class="reference external" href="https://traefik.io/">trafik (Cloud Native边缘路由器，用于提供代理和负载均衡，取代nginx)</a> 配置，这里我没有采用。后续再做学习和实践。</p>
 </div>
 <ul class="simple">
-<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/haproxy/haproxy.cfg</span></code> 内容如下，注意相关 <code class="docutils literal notranslate"><span class="pre">k8s-api</span></code> 部分高亮</p></li>
+<li>配置 <code class="docutils literal notranslate"><span class="pre">/etc/haproxy/haproxy.cfg</span></code> 内容如下，注意相关 <code class="docutils literal notranslate"><span class="pre">k8s-api</span></code> 部分高亮</li>
 </ul>
 <blockquote>
 <div><div class="literal-block-wrapper docutils container" id="id7">
@@ -542,17 +541,17 @@ listen stats
 </div>
 </div></blockquote>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>同样需要放开HAProxy的apiserver访问端口，参考 <a class="reference internal" href="kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">6443</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">6443</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
 <span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
 </pre></div>
 </div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">stats</span> <span class="pre">socket</span> <span class="pre">/var/lib/haproxy/stats</span></code> 替换了 <code class="docutils literal notranslate"><span class="pre">stats</span> <span class="pre">socket</span> <span class="pre">/run/haproxy/admin.sock</span> <span class="pre">mode</span> <span class="pre">660</span> <span class="pre">level</span> <span class="pre">admin</span></code> ，原因是发行版操作系统启动默认没有 <code class="docutils literal notranslate"><span class="pre">/run/haproxy</span></code> 目录，会导致无法创建 sock 文件。见下文。</p>
-<p><code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">*:6443</span></code> 是为了使得haproxy启动时能绑定任何的接口，因为keeplived只在主服务器上启动了VIP地址，所以设置了通配符 <code class="docutils literal notranslate"><span class="pre">*</span></code> 来匹配，否则haproxy在没有浮动VIP的主机上无法启动。</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">*:6443</span></code> 是为了使得haproxy启动时能绑定任何的接口，因为keeplived只在主服务器上启动了VIP地址，所以设置了通配符 <code class="docutils literal notranslate"><span class="pre">*</span></code> 来匹配，否则haproxy在没有浮动VIP的主机上无法启动。</p>
 </div>
 </div>
 </div>
@@ -562,7 +561,7 @@ listen stats
 <h3>测试apiserver VIP<a class="headerlink" href="#apiserver-vip" title="Permalink to this headline">¶</a></h3>
 <p>现在 VIP <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 浮动在 <code class="docutils literal notranslate"><span class="pre">proxy-1</span></code> 虚拟机上，所以我们可以通过以下命令验证是否可以访问集群。</p>
 <ul>
-<li><p>首先验证端口:</p>
+<li><p class="first">首先验证端口:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">telnet</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span> <span class="mi">6443</span>
 </pre></div>
 </div>
@@ -577,7 +576,7 @@ listen stats
 </pre></div>
 </div>
 <ul>
-<li><p>再次访问服务 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">cluster-info</span></code> 则显示证书错误:</p>
+<li><p class="first">再次访问服务 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">cluster-info</span></code> 则显示证书错误:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span><span class="p">:</span> <span class="n">x509</span><span class="p">:</span> <span class="n">certificate</span> <span class="ow">is</span> <span class="n">valid</span> <span class="k">for</span> <span class="mf">10.96</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.11</span><span class="p">,</span> <span class="ow">not</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span>
 </pre></div>
 </div>
@@ -621,10 +620,10 @@ listen stats
 <div class="section" id="id5">
 <h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a></p></li>
-<li><p><a class="reference external" href="https://www.unixmen.com/configure-high-available-load-balancer-haproxy-keepalived/">How To Configure A High Available Load-balancer With HAProxy And Keepalived</a></p></li>
-<li><p><a class="reference external" href="https://snapdev.net/2015/09/08/install-haproxy-and-keepalived-on-centos-7-for-mariadb-cluster/">INSTALL HAPROXY AND KEEPALIVED ON CENTOS 7 FOR MARIADB CLUSTER</a>
-`</p></li>
+<li><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a></li>
+<li><a class="reference external" href="https://www.unixmen.com/configure-high-available-load-balancer-haproxy-keepalived/">How To Configure A High Available Load-balancer With HAProxy And Keepalived</a></li>
+<li><a class="reference external" href="https://snapdev.net/2015/09/08/install-haproxy-and-keepalived-on-centos-7-for-mariadb-cluster/">INSTALL HAPROXY AND KEEPALIVED ON CENTOS 7 FOR MARIADB CLUSTER</a>
+`</li>
 </ul>
 </div>
 </div>

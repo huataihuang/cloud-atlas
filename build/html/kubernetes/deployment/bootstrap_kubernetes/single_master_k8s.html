@@ -95,7 +95,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../../startup_prepare/index.html">Kubernetes起步准备</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../startup/index.html">Kubernetes快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/index.html">Kubernetes概念辨析</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Kubernetes部署</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../k8s_hosts.html">Kubernetes部署服务器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../container_runtimes.html">容器运行环境</a></li>
@@ -123,6 +122,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../terraform.html">Terraform基础架构管理平台</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Kubernetes网络</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../production/index.html">Kubernetes生产环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../service_mesh/index.html">Service Mesh</a></li>
@@ -218,48 +218,48 @@
   <div class="section" id="master">
 <span id="single-master-k8s"></span><h1>创建单一控制平面(单master)集群<a class="headerlink" href="#master" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>请注意本章节是部署单个Master节点方法，仅适合测试环境。生产环境需要部署高可用集群，请参考 <a class="reference internal" href="ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 架构，并直接按照 <a class="reference internal" href="ha_k8s_stacked.html#ha-k8s-stacked"><span class="std std-ref">堆叠型管控/etcd节点高可用集群</span></a> 或 <a class="reference internal" href="ha_k8s_external.html#ha-k8s-external"><span class="std std-ref">扩展etcd节点高可用集群</span></a> 部署步骤直接部署，不用执行本章节操作步骤。</p>
+<p class="first admonition-title">Note</p>
+<p class="last">请注意本章节是部署单个Master节点方法，仅适合测试环境。生产环境需要部署高可用集群，请参考 <a class="reference internal" href="ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 架构，并直接按照 <a class="reference internal" href="ha_k8s_stacked.html#ha-k8s-stacked"><span class="std std-ref">堆叠型管控/etcd节点高可用集群</span></a> 或 <a class="reference internal" href="ha_k8s_external.html#ha-k8s-external"><span class="std std-ref">扩展etcd节点高可用集群</span></a> 部署步骤直接部署，不用执行本章节操作步骤。</p>
 </div>
 <div class="section" id="control-plane-node">
 <h2>初始化控制平面节点(control-plane node)<a class="headerlink" href="#control-plane-node" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>本段落为背景说明，实际操作命令只需要执行下一段落 <a class="reference internal" href="#kubeadm-init"><span class="std std-ref">初始化命令执行</span></a></p>
+<p class="first admonition-title">Note</p>
+<p class="last">本段落为背景说明，实际操作命令只需要执行下一段落 <a class="reference internal" href="#kubeadm-init"><span class="std std-ref">初始化命令执行</span></a></p>
 </div>
 <p>管控平面节点(control-plane node)是指控制平面组件运行的主机节点，包括 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> (集群数据库) 和 API 服务器(kubectl命令行工具通讯的服务器组件)。</p>
 <ul class="simple">
-<li><p>规划并选择一个pod network add-on，请注意所选择CNI是否需要的任何参数传递给kubeadm初始化</p></li>
+<li>规划并选择一个pod network add-on，请注意所选择CNI是否需要的任何参数传递给kubeadm初始化</li>
 </ul>
 <p>我这里选择 Flannel 作为CNI，以便采用精简的网络配置和获得较好的性能。根据Flannel CNI的安装要求，是需要想 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 传递参数 <code class="docutils literal notranslate"><span class="pre">--pod-network-cidr=10.244.0.0/16</span></code> 。</p>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>必须安装一个 pod network add-on 这样你的pod才能彼此通讯。</p>
 <p>在部署任何应用程序之前需要部署网络，并且网络安装之前不能启动 CoreDNS。 kubeadm 只支持 Container Network Interface (CNI) 网络(并且不支持kubenet)。</p>
 <p>由于有多种CNI容器网络接口，对比选择很重要，可以参考 <a class="reference external" href="https://chrislovecnm.com/kubernetes/cni/choosing-a-cni-provider/">Choosing a CNI Network Provider for Kubernetes</a> 和 <a class="reference external" href="https://feisky.gitbooks.io/kubernetes/network/network.html">Kubernetes 网络模型</a></p>
 <p><a class="reference external" href="https://tonybai.com/2019/04/18/benchmark-result-of-k8s-network-plugin-cni/">Kubernetes网络插件（CNI）基准测试的最新结果</a> 一文对比测试了不同CNI的性能、易用性和高级加密特性，推荐如下:</p>
-<ul class="simple">
-<li><p>服务器硬件资源有限并且不需要安全功能，推荐 Flannel ：最精简和易用的CNI，兼容x86和ARM，自动检测MTU，无需配置。</p></li>
-<li><p>如果需要加密网络则使用WeaveNet，但是徐亚注意MTU设置，并且性能较差（加密的代价）</p></li>
-<li><p>其他常用场景推荐 Calico ，是广泛用于Kubernetes部署工具(Kops, Kubespray, Rancher等)的CNI，在资源消耗、性能和安全性有较好平衡。需要注意ConfigMap中设置MTU以适配巨型帧。</p></li>
+<ul class="last simple">
+<li>服务器硬件资源有限并且不需要安全功能，推荐 Flannel ：最精简和易用的CNI，兼容x86和ARM，自动检测MTU，无需配置。</li>
+<li>如果需要加密网络则使用WeaveNet，但是徐亚注意MTU设置，并且性能较差（加密的代价）</li>
+<li>其他常用场景推荐 Calico ，是广泛用于Kubernetes部署工具(Kops, Kubespray, Rancher等)的CNI，在资源消耗、性能和安全性有较好平衡。需要注意ConfigMap中设置MTU以适配巨型帧。</li>
 </ul>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>kubeadm默认设置了一个较为安全的集群并且使用 RBAC ，所以需要确保你选择的网络框架支持 RBAC 。</p>
-<p>使用的 Pod network 必须不覆盖任何主机网络，否则会导致故障。如果你发现网络插件的Pod neetowrk和物理主机网络冲突，则需要选择合适的CIDR，并且采用 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 的 <code class="docutils literal notranslate"><span class="pre">--pod-network-cidr</span></code> 来指定</p>
+<p class="last">使用的 Pod network 必须不覆盖任何主机网络，否则会导致故障。如果你发现网络插件的Pod neetowrk和物理主机网络冲突，则需要选择合适的CIDR，并且采用 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 的 <code class="docutils literal notranslate"><span class="pre">--pod-network-cidr</span></code> 来指定</p>
 </div>
 <ul class="simple">
-<li><p>(可选)从v1.14开始，kubeadm可以自动检测Linux所使用的container runtime。如果使用不同的container runtime，则指定 <code class="docutils literal notranslate"><span class="pre">--cri-socket</span></code> 参数传递给 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code></p></li>
-<li><p>(可选)除非指定，否则kubeadm将使用默认网关相关的网络接口来公告master的IP。如果要使用不同的网络接口，则传递 <code class="docutils literal notranslate"><span class="pre">--apiserver-advertise-address=&lt;ip-address&gt;</span></code> 参数给 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code></p></li>
-<li><p>(可选)可运行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">config</span> <span class="pre">images</span> <span class="pre">pull</span></code> 使得 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 验证到 <code class="docutils literal notranslate"><span class="pre">gcr.io</span></code> 仓库的网络连接</p></li>
+<li>(可选)从v1.14开始，kubeadm可以自动检测Linux所使用的container runtime。如果使用不同的container runtime，则指定 <code class="docutils literal notranslate"><span class="pre">--cri-socket</span></code> 参数传递给 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code></li>
+<li>(可选)除非指定，否则kubeadm将使用默认网关相关的网络接口来公告master的IP。如果要使用不同的网络接口，则传递 <code class="docutils literal notranslate"><span class="pre">--apiserver-advertise-address=&lt;ip-address&gt;</span></code> 参数给 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code></li>
+<li>(可选)可运行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">config</span> <span class="pre">images</span> <span class="pre">pull</span></code> 使得 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 验证到 <code class="docutils literal notranslate"><span class="pre">gcr.io</span></code> 仓库的网络连接</li>
 </ul>
 <div class="section" id="kubeadm-init">
 <span id="id1"></span><h3>初始化命令执行<a class="headerlink" href="#kubeadm-init" title="Permalink to this headline">¶</a></h3>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>部署Kubernetes的服务需要能够解析所安装服务器的域名，通常这个工作由DNS来提供，建议在局域网内部部署一个DNSmasq服务。在初始阶段，也可以在每个主机上部署 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 提供静态地址解析（例如，我在Host物理主机上的 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 就包含了这个测试集群所有主机的域名解析，可以分发到各个虚拟机上提供基本解析）:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pscp</span><span class="o">.</span><span class="n">pssh</span> <span class="o">-</span><span class="n">h</span> <span class="n">kube</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">hosts</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pscp</span><span class="o">.</span><span class="n">pssh</span> <span class="o">-</span><span class="n">h</span> <span class="n">kube</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">hosts</span>
 <span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;sudo cp /tmp/hosts /etc/hosts&#39;</span>
 </pre></div>
 </div>
@@ -268,7 +268,7 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>上述 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 要求主机已经正确安装了kubelet，否则会出现报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">check</span><span class="p">]</span> <span class="n">It</span> <span class="n">seems</span> <span class="n">like</span> <span class="n">the</span> <span class="n">kubelet</span> <span class="n">isn</span><span class="s1">&#39;t running or healthy.</span>
 <span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">check</span><span class="p">]</span> <span class="n">The</span> <span class="n">HTTP</span> <span class="n">call</span> <span class="n">equal</span> <span class="n">to</span> <span class="s1">&#39;curl -sSL http://localhost:10248/healthz&#39;</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">error</span><span class="p">:</span> <span class="n">Get</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">10248</span><span class="o">/</span><span class="n">healthz</span><span class="p">:</span> <span class="n">dial</span> <span class="n">tcp</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">10248</span><span class="p">:</span> <span class="n">connect</span><span class="p">:</span> <span class="n">connection</span> <span class="n">refused</span><span class="o">.</span>
@@ -278,7 +278,7 @@
 </pre></div>
 </div>
 <p>可通过以下方法检查 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 问题:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">kubelet</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">kubelet</span>
 <span class="n">journalctl</span> <span class="o">-</span><span class="n">xeu</span> <span class="n">kubelet</span>
 </pre></div>
 </div>
@@ -288,21 +288,21 @@
 <h3>集群初始化过程<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>在执行了 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 指令之后，可以看到执行了一系列操作</p>
 <ul>
-<li><p>下载镜像:</p>
+<li><p class="first">下载镜像:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">Pulling</span> <span class="n">images</span> <span class="n">required</span> <span class="k">for</span> <span class="n">setting</span> <span class="n">up</span> <span class="n">a</span> <span class="n">Kubernetes</span> <span class="n">cluster</span>
 <span class="o">...</span>
 <span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">You</span> <span class="n">can</span> <span class="n">also</span> <span class="n">perform</span> <span class="n">this</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">beforehand</span> <span class="n">using</span> <span class="s1">&#39;kubeadm config images pull&#39;</span>
 </pre></div>
 </div>
 </li>
-<li><p>kubeadm会把kubelet运行环境写入配置文件，然后启动 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code></p>
+<li><p class="first">kubeadm会把kubelet运行环境写入配置文件，然后启动 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">start</span><span class="p">]</span> <span class="n">Writing</span> <span class="n">kubelet</span> <span class="n">environment</span> <span class="n">file</span> <span class="k">with</span> <span class="n">flags</span> <span class="n">to</span> <span class="n">file</span> <span class="s2">&quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span>
 <span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">start</span><span class="p">]</span> <span class="n">Writing</span> <span class="n">kubelet</span> <span class="n">configuration</span> <span class="n">to</span> <span class="n">file</span> <span class="s2">&quot;/var/lib/kubelet/config.yaml&quot;</span>
 <span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">start</span><span class="p">]</span> <span class="n">Activating</span> <span class="n">the</span> <span class="n">kubelet</span> <span class="n">service</span>
 </pre></div>
 </div>
 </li>
-<li><p>创建Kubernetes证书:</p>
+<li><p class="first">创建Kubernetes证书:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">Using</span> <span class="n">certificateDir</span> <span class="n">folder</span> <span class="s2">&quot;/etc/kubernetes/pki&quot;</span>
 <span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">Generating</span> <span class="s2">&quot;front-proxy-ca&quot;</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">key</span>
 <span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">Generating</span> <span class="s2">&quot;front-proxy-client&quot;</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">key</span>
@@ -321,7 +321,7 @@
 </pre></div>
 </div>
 </li>
-<li><p>创建Kubernetes配置:</p>
+<li><p class="first">创建Kubernetes配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">kubeconfig</span><span class="p">]</span> <span class="n">Using</span> <span class="n">kubeconfig</span> <span class="n">folder</span> <span class="s2">&quot;/etc/kubernetes&quot;</span>
 <span class="p">[</span><span class="n">kubeconfig</span><span class="p">]</span> <span class="n">Writing</span> <span class="s2">&quot;admin.conf&quot;</span> <span class="n">kubeconfig</span> <span class="n">file</span>
 <span class="p">[</span><span class="n">kubeconfig</span><span class="p">]</span> <span class="n">Writing</span> <span class="s2">&quot;kubelet.conf&quot;</span> <span class="n">kubeconfig</span> <span class="n">file</span>
@@ -330,7 +330,7 @@
 </pre></div>
 </div>
 </li>
-<li><p>启动Kubernetes control plane控制平面(管控三大件):</p>
+<li><p class="first">启动Kubernetes control plane控制平面(管控三大件):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">]</span> <span class="n">Using</span> <span class="n">manifest</span> <span class="n">folder</span> <span class="s2">&quot;/etc/kubernetes/manifests&quot;</span>
 <span class="p">[</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">]</span> <span class="n">Creating</span> <span class="n">static</span> <span class="n">Pod</span> <span class="n">manifest</span> <span class="k">for</span> <span class="s2">&quot;kube-apiserver&quot;</span>
 <span class="p">[</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">]</span> <span class="n">Creating</span> <span class="n">static</span> <span class="n">Pod</span> <span class="n">manifest</span> <span class="k">for</span> <span class="s2">&quot;kube-controller-manager&quot;</span>
@@ -338,35 +338,35 @@
 </pre></div>
 </div>
 </li>
-<li><p>创建etcd，然后等待control plane的三大组件正常运行(需要依赖etcd服务):</p>
+<li><p class="first">创建etcd，然后等待control plane的三大组件正常运行(需要依赖etcd服务):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">etcd</span><span class="p">]</span> <span class="n">Creating</span> <span class="n">static</span> <span class="n">Pod</span> <span class="n">manifest</span> <span class="k">for</span> <span class="n">local</span> <span class="n">etcd</span> <span class="ow">in</span> <span class="s2">&quot;/etc/kubernetes/manifests&quot;</span>
 <span class="p">[</span><span class="n">wait</span><span class="o">-</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">]</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">the</span> <span class="n">kubelet</span> <span class="n">to</span> <span class="n">boot</span> <span class="n">up</span> <span class="n">the</span> <span class="n">control</span> <span class="n">plane</span> <span class="k">as</span> <span class="n">static</span> <span class="n">Pods</span> <span class="kn">from</span> <span class="nn">directory</span> <span class="s2">&quot;/etc/kubernetes/manifests&quot;</span><span class="o">.</span> <span class="n">This</span> <span class="n">can</span> <span class="n">take</span> <span class="n">up</span> <span class="n">to</span> <span class="mi">4</span><span class="n">m0s</span>
 <span class="p">[</span><span class="n">apiclient</span><span class="p">]</span> <span class="n">All</span> <span class="n">control</span> <span class="n">plane</span> <span class="n">components</span> <span class="n">are</span> <span class="n">healthy</span> <span class="n">after</span> <span class="mf">23.506119</span> <span class="n">seconds</span>
 </pre></div>
 </div>
 </li>
-<li><p>在集群的 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> 名字空间存储 <code class="docutils literal notranslate"><span class="pre">kubeadm-config</span></code> 配置映射:</p>
+<li><p class="first">在集群的 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> 名字空间存储 <code class="docutils literal notranslate"><span class="pre">kubeadm-config</span></code> 配置映射:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">upload</span><span class="o">-</span><span class="n">config</span><span class="p">]</span> <span class="n">Storing</span> <span class="n">the</span> <span class="n">configuration</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">ConfigMap</span> <span class="s2">&quot;kubeadm-config&quot;</span> <span class="ow">in</span> <span class="n">the</span> <span class="s2">&quot;kube-system&quot;</span> <span class="n">Namespace</span>
 </pre></div>
 </div>
 </li>
-<li><p>同样客户端kubelet的配置映射也需要存储到 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> 中:</p>
+<li><p class="first">同样客户端kubelet的配置映射也需要存储到 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> 中:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">kubelet</span><span class="p">]</span> <span class="n">Creating</span> <span class="n">a</span> <span class="n">ConfigMap</span> <span class="s2">&quot;kubelet-config-1.15&quot;</span> <span class="ow">in</span> <span class="n">namespace</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="k">with</span> <span class="n">the</span> <span class="n">configuration</span> <span class="k">for</span> <span class="n">the</span> <span class="n">kubelets</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cluster</span>
 </pre></div>
 </div>
 </li>
-<li><p>跳过了上传certs:</p>
+<li><p class="first">跳过了上传certs:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">upload</span><span class="o">-</span><span class="n">certs</span><span class="p">]</span> <span class="n">Skipping</span> <span class="n">phase</span><span class="o">.</span> <span class="n">Please</span> <span class="n">see</span> <span class="o">--</span><span class="n">upload</span><span class="o">-</span><span class="n">certs</span>
 </pre></div>
 </div>
 </li>
-<li><p>由于control plane已经就绪，现在把第一个master节点 <code class="docutils literal notranslate"><span class="pre">kubemaster-1</span></code> 标记为master节点:</p>
+<li><p class="first">由于control plane已经就绪，现在把第一个master节点 <code class="docutils literal notranslate"><span class="pre">kubemaster-1</span></code> 标记为master节点:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mark</span><span class="o">-</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">]</span> <span class="n">Marking</span> <span class="n">the</span> <span class="n">node</span> <span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span> <span class="k">as</span> <span class="n">control</span><span class="o">-</span><span class="n">plane</span> <span class="n">by</span> <span class="n">adding</span> <span class="n">the</span> <span class="n">label</span> <span class="s2">&quot;node-role.kubernetes.io/master=&#39;&#39;&quot;</span>
 <span class="p">[</span><span class="n">mark</span><span class="o">-</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">]</span> <span class="n">Marking</span> <span class="n">the</span> <span class="n">node</span> <span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span> <span class="k">as</span> <span class="n">control</span><span class="o">-</span><span class="n">plane</span> <span class="n">by</span> <span class="n">adding</span> <span class="n">the</span> <span class="n">taints</span> <span class="p">[</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="p">:</span><span class="n">NoSchedule</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
-<li><p>配置集群的RBAC角色:</p>
+<li><p class="first">配置集群的RBAC角色:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">token</span><span class="p">]</span> <span class="n">Using</span> <span class="n">token</span><span class="p">:</span> <span class="n">fm9k1o</span><span class="o">.</span><span class="n">vhxmun0sriombljn</span>
 <span class="p">[</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">token</span><span class="p">]</span> <span class="n">Configuring</span> <span class="n">bootstrap</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">cluster</span><span class="o">-</span><span class="n">info</span> <span class="n">ConfigMap</span><span class="p">,</span> <span class="n">RBAC</span> <span class="n">Roles</span>
 <span class="p">[</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">token</span><span class="p">]</span> <span class="n">configured</span> <span class="n">RBAC</span> <span class="n">rules</span> <span class="n">to</span> <span class="n">allow</span> <span class="n">Node</span> <span class="n">Bootstrap</span> <span class="n">tokens</span> <span class="n">to</span> <span class="n">post</span> <span class="n">CSRs</span> <span class="ow">in</span> <span class="n">order</span> <span class="k">for</span> <span class="n">nodes</span> <span class="n">to</span> <span class="n">get</span> <span class="n">long</span> <span class="n">term</span> <span class="n">certificate</span> <span class="n">credentials</span>
@@ -376,13 +376,13 @@
 </pre></div>
 </div>
 </li>
-<li><p>最后执行基础addon:</p>
+<li><p class="first">最后执行基础addon:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">addons</span><span class="p">]</span> <span class="n">Applied</span> <span class="n">essential</span> <span class="n">addon</span><span class="p">:</span> <span class="n">CoreDNS</span>
 <span class="p">[</span><span class="n">addons</span><span class="p">]</span> <span class="n">Applied</span> <span class="n">essential</span> <span class="n">addon</span><span class="p">:</span> <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span>
 </pre></div>
 </div>
 </li>
-<li><p>最后提示Kubernetes control plane初始化成功:</p>
+<li><p class="first">最后提示Kubernetes control plane初始化成功:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Your Kubernetes control-plane has initialized successfully!
 
 To start using your cluster, you need to run the following as a regular user:
@@ -404,9 +404,9 @@ kubeadm join &lt;master-ip&gt;:&lt;master-port&gt; --token &lt;token&gt; \
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>请注意，上述 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 输出信息是我在测试虚拟机集群的演示输出，隐去了token信息。</p>
-<p><strong>警告！</strong> 这里输出的token信息和安全紧密相关，请勿将token信息泄漏。否则获得token的任何人都可以在集群添加授权节点，并且可以展示，创建和删除节点。</p>
+<p class="last"><strong>警告！</strong> 这里输出的token信息和安全紧密相关，请勿将token信息泄漏。否则获得token的任何人都可以在集群添加授权节点，并且可以展示，创建和删除节点。</p>
 </div>
 </div>
 <div class="section" id="id3">
@@ -427,17 +427,17 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 <h2>安装Pod网络插件<a class="headerlink" href="#pod" title="Permalink to this headline">¶</a></h2>
 <p>在Kubernetes集群中，必须安装一个po network add-on 才能使得pods彼此通讯。</p>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>必须在所有应用部署之前部署好网络。并且，CoreDNS只有在网络安装以后才能启动。Kubeadm只支持基于容器网络接口(Container Network Interface, CNI)的网络（并且不支持kubenet）。</p>
+<p class="first admonition-title">Note</p>
+<p class="last">必须在所有应用部署之前部署好网络。并且，CoreDNS只有在网络安装以后才能启动。Kubeadm只支持基于容器网络接口(Container Network Interface, CNI)的网络（并且不支持kubenet）。</p>
 </div>
 <p>注意，kubeadm设置了一个默认较为安全的集群并且增强使用RBAC，所以需要确保你选择的网络框架支持RBAC。</p>
 <p>并且需要注意的是，Pod network必须不覆盖任何主机网络(host network)，否则会导致问题。</p>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>上文我参考 <a class="reference external" href="https://tonybai.com/2019/04/18/benchmark-result-of-k8s-network-plugin-cni/">Kubernetes网络插件（CNI）基准测试的最新结果</a> 一文选择了 Flannel 网络，所以这里记录的是安装 Flannel 网络插件的实践记录。</p>
+<p class="first admonition-title">Note</p>
+<p class="last">上文我参考 <a class="reference external" href="https://tonybai.com/2019/04/18/benchmark-result-of-k8s-network-plugin-cni/">Kubernetes网络插件（CNI）基准测试的最新结果</a> 一文选择了 Flannel 网络，所以这里记录的是安装 Flannel 网络插件的实践记录。</p>
 </div>
 <ul>
-<li><p>安装 Flannel 网络插件之前，请先检查以下设置必须是 1 ，这可以是的IPv4流量被传递给iptables:</p>
+<li><p class="first">安装 Flannel 网络插件之前，请先检查以下设置必须是 1 ，这可以是的IPv4流量被传递给iptables:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">bridge</span><span class="o">/</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span>
 </pre></div>
 </div>
@@ -445,7 +445,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 </ul>
 <p>如果值不是1，则执行 <code class="docutils literal notranslate"><span class="pre">sysctl</span> <span class="pre">net.bridge.bridge-nf-call-iptables=1</span></code> 修改，并参考前文设置内核sysctl。</p>
 <ul class="simple">
-<li><p>允许报所有主机的网络允许 UDP端口 8285 到 8472 流量</p></li>
+<li>允许报所有主机的网络允许 UDP端口 8285 到 8472 流量</li>
 </ul>
 <p>由于我采用CentOS 7操作系统，需要设置 firewalld ，方法如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">8285</span><span class="o">-</span><span class="mi">8472</span><span class="o">/</span><span class="n">udp</span> <span class="o">--</span><span class="n">permanent</span>
@@ -456,7 +456,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 </pre></div>
 </div>
 <ul>
-<li><p>安装套件:</p>
+<li><p class="first">安装套件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">coreos</span><span class="o">/</span><span class="n">flannel</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">Documentation</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">.</span><span class="n">yml</span>
 </pre></div>
 </div>
@@ -516,12 +516,12 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>IP <code class="docutils literal notranslate"><span class="pre">192.168.101.81</span></code> 是我在部署 Kubernetes 时启用了 <a class="reference internal" href="../../../studio/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 使用的 <code class="docutils literal notranslate"><span class="pre">tun0</span></code> 接口上IP地址，在关闭VPN之后，我通过 <a class="reference internal" href="change_master_ip.html#change-master-ip"><span class="std std-ref">修改Kubernetes Master IP</span></a> 重新初始化了Kubernetes集群，所以 <code class="docutils literal notranslate"><span class="pre">/etc/kubernetes</span></code> 配置目录中所有apiserver访问入口IP地址都修订为 <code class="docutils literal notranslate"><span class="pre">192.168.122.11</span></code> 。</p>
-<p><code class="docutils literal notranslate"><span class="pre">10.96.0.1</span></code> 地址是kubernetes的内部集群IP地(在Kubernetes集群内部有一个服务CIRD网络，子网网段是 <code class="docutils literal notranslate"><span class="pre">10.96.0.0/12</span></code> ，分配的第一个地址就是 <code class="docutils literal notranslate"><span class="pre">10.96.0.1</span></code> ，这个地址是集群的Master服务求第一个IP)。这里访问端口 <code class="docutils literal notranslate"><span class="pre">443</span></code> 是Kubernetes的 <a class="reference internal" href="../../administer/kubernetes_dashboard.html#kubernetes-dashboard"><span class="std std-ref">Kubernetes仪表盘</span></a> 服务的端口。这说明在Kubernetes集群中缺少了Dashboard pod运行。</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">10.96.0.1</span></code> 地址是kubernetes的内部集群IP地(在Kubernetes集群内部有一个服务CIRD网络，子网网段是 <code class="docutils literal notranslate"><span class="pre">10.96.0.0/12</span></code> ，分配的第一个地址就是 <code class="docutils literal notranslate"><span class="pre">10.96.0.1</span></code> ，这个地址是集群的Master服务求第一个IP)。这里访问端口 <code class="docutils literal notranslate"><span class="pre">443</span></code> 是Kubernetes的 <a class="reference internal" href="../../administer/kubernetes_dashboard.html#kubernetes-dashboard"><span class="std std-ref">Kubernetes仪表盘</span></a> 服务的端口。这说明在Kubernetes集群中缺少了Dashboard pod运行。</p>
 </div>
 <ul>
-<li><p>创建Dashboard:</p>
+<li><p class="first">创建Dashboard:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">dashboard</span><span class="o">/</span><span class="n">v1</span><span class="o">.</span><span class="mf">10.1</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">recommended</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
 </div>
@@ -573,9 +573,9 @@ kube-system   kubernetes-dashboard-7d75c474bb-x5ntd   1/1     Running   51      
 </div>
 <p>现在就可以在自己个人电脑上使用浏览器访问:  <a class="reference external" href="http://127.0.0.1:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/">http://127.0.0.1:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/</a> 查看集群的Dashboard。</p>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>这里还有一个页面报错提示待解决:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span><span class="p">:</span> <span class="s1">&#39;net/http: HTTP/1.x transport connection broken: malformed HTTP response &quot;</span><span class="se">\x15\x03\x01\x00\x02\x02</span><span class="s1">&quot;&#39;</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span><span class="p">:</span> <span class="s1">&#39;net/http: HTTP/1.x transport connection broken: malformed HTTP response &quot;</span><span class="se">\x15\x03\x01\x00\x02\x02</span><span class="s1">&quot;&#39;</span>
 <span class="n">Trying</span> <span class="n">to</span> <span class="n">reach</span><span class="p">:</span> <span class="s1">&#39;http://10.244.0.7:8443/&#39;</span>
 </pre></div>
 </div>
@@ -605,7 +605,7 @@ kube-system   kubernetes-dashboard-7d75c474bb-x5ntd   1/1     Running   51      
 </div>
 <p>如果你当时记录了提示信息，可以直接复制使用(执行时候请先登陆到node节点上，并切换到root身份)。</p>
 <ul class="simple">
-<li><p>添加节点的标准方法是先创建一个临时token，然后使用这个24小时有效的token结合pki的sha256值添加服务器节点</p></li>
+<li>添加节点的标准方法是先创建一个临时token，然后使用这个24小时有效的token结合pki的sha256值添加服务器节点</li>
 </ul>
 <p>默认情况下，token有效期是24小时:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span>
@@ -630,12 +630,12 @@ kube-system   kubernetes-dashboard-7d75c474bb-x5ntd   1/1     Running   51      
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>上述方法分两步命令执行，并且使用 <code class="docutils literal notranslate"><span class="pre">openssl</span></code> 原始命令比较繁琐（虽然更直接和底层），所以 <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 还提供了一个直接打印输出最终 <code class="docutils literal notranslate"><span class="pre">join</span></code> 命令的方法:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span> <span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">join</span><span class="o">-</span><span class="n">command</span>
 </pre></div>
 </div>
-<p>此时会提示你正确的添加命令方法（包含token和sha256哈希值）。这样只需要复制粘贴就可以添加节点。</p>
+<p class="last">此时会提示你正确的添加命令方法（包含token和sha256哈希值）。这样只需要复制粘贴就可以添加节点。</p>
 </div>
 </div>
 <div class="section" id="control-plane">
@@ -646,12 +646,12 @@ kube-system   kubernetes-dashboard-7d75c474bb-x5ntd   1/1     Running   51      
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="first admonition-title">Note</p>
 <p>请注意 <code class="docutils literal notranslate"><span class="pre">admin.conf</span></code> 文件包含了集群的超级用户首选，所以需要谨慎使用。对于普通用户，建议生成一个唯一信任证书，然后再将这个证书加入白名单权限（whitelist privileges）:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">alpha</span> <span class="n">kubeconfig</span> <span class="n">user</span> <span class="o">--</span><span class="n">client</span><span class="o">-</span><span class="n">name</span> <span class="o">&lt;</span><span class="n">CN</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>上述命令输出的kubeconfig文件到标准输出，可以保存为一个文件分发给用户。然后通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">create</span> <span class="pre">(cluster)rolebind</span></code> 命令添加白名单权限。</p>
+<p class="last">上述命令输出的kubeconfig文件到标准输出，可以保存为一个文件分发给用户。然后通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">create</span> <span class="pre">(cluster)rolebind</span></code> 命令添加白名单权限。</p>
 </div>
 </div>
 <div class="section" id="api-server">
@@ -686,11 +686,11 @@ kube-system   kubernetes-dashboard-7d75c474bb-x5ntd   1/1     Running   51      
 <div class="section" id="id7">
 <h2>参考<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">Creating a single control-plane cluster with kubeadm</a></p></li>
-<li><p><a class="reference external" href="https://www.jianshu.com/p/d5ce8a9ecbbf">使用kubeadm部署k8s集群</a></p></li>
-<li><p><a class="reference external" href="https://segmentfault.com/a/1190000016304924">k8s与网络–Flannel解读</a></p></li>
-<li><p><a class="reference external" href="https://chrislovecnm.com/kubernetes/cni/choosing-a-cni-provider/">Choosing a CNI Network Provider for Kubernetes</a></p></li>
-<li><p><a class="reference external" href="https://feisky.gitbooks.io/kubernetes/network/network.html">Kubernetes 网络模型</a></p></li>
+<li><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">Creating a single control-plane cluster with kubeadm</a></li>
+<li><a class="reference external" href="https://www.jianshu.com/p/d5ce8a9ecbbf">使用kubeadm部署k8s集群</a></li>
+<li><a class="reference external" href="https://segmentfault.com/a/1190000016304924">k8s与网络–Flannel解读</a></li>
+<li><a class="reference external" href="https://chrislovecnm.com/kubernetes/cni/choosing-a-cni-provider/">Choosing a CNI Network Provider for Kubernetes</a></li>
+<li><a class="reference external" href="https://feisky.gitbooks.io/kubernetes/network/network.html">Kubernetes 网络模型</a></li>
 </ul>
 </div>
 </div>
