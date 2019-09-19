@@ -117,7 +117,13 @@
 <li class="toctree-l2"><a class="reference internal" href="archlinux_developer.html">Arch Linux开发环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="xfce.html">Xfce</a></li>
 <li class="toctree-l2"><a class="reference internal" href="seamless_rdp.html">Seamless RDP使用Windows应用</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">xrdp远程桌面实践</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">xrdp远程桌面实践</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">安装</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xrdp-ini">xrdp.ini</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xrdpfor-macos">xrdp客户端for macOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="firewalld.html">firewalld防护墙服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pi_quick_start.html">树莓派(Raspberry Pi)快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pi_zero_net_gadget.html">树莓派Zero设置USB网络通讯(Ethernet Gadget)</a></li>
@@ -199,6 +205,68 @@
             
   <div class="section" id="xrdp">
 <span id="id1"></span><h1>xrdp远程桌面实践<a class="headerlink" href="#xrdp" title="Permalink to this headline">¶</a></h1>
+<p>xrdp是支持Microsoft的Remote Desktop Protocol(RDP)的服务，使用Xvnc, X11rdp 或 xorgxrdp 作为后端。</p>
+<div class="section" id="id2">
+<h2>安装<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Arch Linux平台xrdp通过 <a class="reference internal" href="archlinux_aur.html#archlinux-aur"><span class="std std-ref">Arch Linux AUR</span></a> 安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">S</span> <span class="n">xrdp</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">xrdp通过systemd可以激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">xrdp</span><span class="o">.</span><span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">xrdp</span><span class="o">-</span><span class="n">sesman</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果要启动时激活，执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">xrdp</span><span class="o">.</span><span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="n">xrdp</span><span class="o">-</span><span class="n">sesman</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">服务器端添加 <a class="reference internal" href="firewalld.html#firewalld"><span class="std std-ref">firewalld防护墙服务</span></a> 规则:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">service</span> <span class="n">rdp</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="xrdp-ini">
+<h2>xrdp.ini<a class="headerlink" href="#xrdp-ini" title="Permalink to this headline">¶</a></h2>
+<p>我实践发现，在使用微软RDP客户端访问xrdp服务时，有可能不能同时存储用户名和密码在客户端，而是只存储用户名，例如 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> ，这样访问xrdp的时候，会提示访问错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">connecting</span> <span class="n">to</span> <span class="n">sesman</span> <span class="n">ip</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">3350</span>
+<span class="n">sesman</span> <span class="n">connect</span> <span class="n">ok</span>
+<span class="n">sending</span> <span class="n">login</span> <span class="n">info</span> <span class="n">session</span> <span class="n">manager</span><span class="p">,</span> <span class="n">please</span> <span class="n">wait</span><span class="o">...</span>
+<span class="n">login</span> <span class="n">failed</span> <span class="k">for</span> <span class="n">display</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/xrdp_login_err.png"><img alt="../_images/xrdp_login_err.png" src="../_images/xrdp_login_err.png" style="width: 570.75px; height: 600.0px;" /></a>
+</div>
+<p>此时确认OK以后，会弹出一个</p>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/xrdp_login_choice.png"><img alt="../_images/xrdp_login_choice.png" src="../_images/xrdp_login_choice.png" style="width: 600.0px; height: 597.75px;" /></a>
+</div>
+<p>实际上这个可选Session配置全部在服务器的 <code class="docutils literal notranslate"><span class="pre">/etc/xrdp/xrdp.ini</span></code></p>
+</div>
+<div class="section" id="xrdpfor-macos">
+<h2>xrdp客户端for macOS<a class="headerlink" href="#xrdpfor-macos" title="Permalink to this headline">¶</a></h2>
+<p>微软官方提供了macOS的Remote Desktop Client，可以参考 <a class="reference external" href="https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-mac">Get started with the macOS client</a> 从 AppStore 安装 <a class="reference external" href="https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12">Microsoft Remote Desktop 10</a> ，不过这个App需要切换到美国App市场安装。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">目前我还不知道如何调整xrdp的色彩深度，显示桌面还非常丑陋。有待进一步探索。</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://wiki.archlinux.org/index.php/Xrdp">arch linux社区文档 - Xrdp</a></li>
+<li><a class="reference external" href="https://www.hiroom2.com/2018/05/07/ubuntu-1804-xrdp-xfce-en/">Ubuntu 18.04: Connect to Xfce desktop environment via XRDP</a></li>
+</ul>
+</div>
 </div>
 
 
