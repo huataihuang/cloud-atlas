@@ -52,12 +52,30 @@ xrdp客户端for macOS
 
 微软官方提供了macOS的Remote Desktop Client，可以参考 `Get started with the macOS client <https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-mac>`_ 从 AppStore 安装 `Microsoft Remote Desktop 10 <https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12>`_ ，不过这个App需要切换到美国App市场安装。
 
-.. note::
+color depth
+=============
 
-   目前我还不知道如何调整xrdp的色彩深度，显示桌面还非常丑陋。有待进一步探索。
+在 ``/etc/xrdp/sesman.ini`` 中配置项 ``[Xvnc]`` 段落添加以下两项可以允许客户端以任何色彩深度连接xrdp服务::
+
+   param=-depth
+   param=32
+
+然后重启服务::
+
+   systemctl restart xrdp
+   systemctl restart xrdp-sesman
+
+不过，需要注意，如果已经使用过xrdp远程登陆过桌面，系统中会有一个Xvnc进程已经启动，类似如下::
+
+   Xvnc :10 -auth .Xauthority -geometry 1024x768 -depth 32 -rfbauth /home/huatai/.vnc/sesman_passwd-huatai@zcloud:10 -bs -nolisten tcp -localhost -dpi 96
+
+需要杀掉这个进程再从客户端连接，否则xrdp认证以后连接这个桌面会因为参数不一致导致断开连接。杀掉上述进程之后再登陆，可以看到再次启动的Xvnc进程多了一个参数 ``-depth 32`` ::
+
+   Xvnc :10 -auth .Xauthority -geometry 1024x768 -depth 32 -rfbauth /home/huatai/.vnc/sesman_passwd-huatai@zcloud:10 -bs -nolisten tcp -localhost -dpi 96 -depth 32 
 
 参考
 =======
 
 - `arch linux社区文档 - Xrdp <https://wiki.archlinux.org/index.php/Xrdp>`_
 - `Ubuntu 18.04: Connect to Xfce desktop environment via XRDP <https://www.hiroom2.com/2018/05/07/ubuntu-1804-xrdp-xfce-en/>`_
+- `XRDP - connect using any color (colour) depth <https://gist.github.com/rmoff/9687727>`_

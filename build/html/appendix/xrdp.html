@@ -121,6 +121,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id2">安装</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#xrdp-ini">xrdp.ini</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#xrdpfor-macos">xrdp客户端for macOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#color-depth">color depth</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
@@ -255,9 +256,26 @@
 <div class="section" id="xrdpfor-macos">
 <h2>xrdp客户端for macOS<a class="headerlink" href="#xrdpfor-macos" title="Permalink to this headline">¶</a></h2>
 <p>微软官方提供了macOS的Remote Desktop Client，可以参考 <a class="reference external" href="https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-mac">Get started with the macOS client</a> 从 AppStore 安装 <a class="reference external" href="https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12">Microsoft Remote Desktop 10</a> ，不过这个App需要切换到美国App市场安装。</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">目前我还不知道如何调整xrdp的色彩深度，显示桌面还非常丑陋。有待进一步探索。</p>
+</div>
+<div class="section" id="color-depth">
+<h2>color depth<a class="headerlink" href="#color-depth" title="Permalink to this headline">¶</a></h2>
+<p>在 <code class="docutils literal notranslate"><span class="pre">/etc/xrdp/sesman.ini</span></code> 中配置项 <code class="docutils literal notranslate"><span class="pre">[Xvnc]</span></code> 段落添加以下两项可以允许客户端以任何色彩深度连接xrdp服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">param</span><span class="o">=-</span><span class="n">depth</span>
+<span class="n">param</span><span class="o">=</span><span class="mi">32</span>
+</pre></div>
+</div>
+<p>然后重启服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">xrdp</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">xrdp</span><span class="o">-</span><span class="n">sesman</span>
+</pre></div>
+</div>
+<p>不过，需要注意，如果已经使用过xrdp远程登陆过桌面，系统中会有一个Xvnc进程已经启动，类似如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Xvnc</span> <span class="p">:</span><span class="mi">10</span> <span class="o">-</span><span class="n">auth</span> <span class="o">.</span><span class="n">Xauthority</span> <span class="o">-</span><span class="n">geometry</span> <span class="mi">1024</span><span class="n">x768</span> <span class="o">-</span><span class="n">depth</span> <span class="mi">32</span> <span class="o">-</span><span class="n">rfbauth</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">vnc</span><span class="o">/</span><span class="n">sesman_passwd</span><span class="o">-</span><span class="n">huatai</span><span class="nd">@zcloud</span><span class="p">:</span><span class="mi">10</span> <span class="o">-</span><span class="n">bs</span> <span class="o">-</span><span class="n">nolisten</span> <span class="n">tcp</span> <span class="o">-</span><span class="n">localhost</span> <span class="o">-</span><span class="n">dpi</span> <span class="mi">96</span>
+</pre></div>
+</div>
+<p>需要杀掉这个进程再从客户端连接，否则xrdp认证以后连接这个桌面会因为参数不一致导致断开连接。杀掉上述进程之后再登陆，可以看到再次启动的Xvnc进程多了一个参数 <code class="docutils literal notranslate"><span class="pre">-depth</span> <span class="pre">32</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Xvnc</span> <span class="p">:</span><span class="mi">10</span> <span class="o">-</span><span class="n">auth</span> <span class="o">.</span><span class="n">Xauthority</span> <span class="o">-</span><span class="n">geometry</span> <span class="mi">1024</span><span class="n">x768</span> <span class="o">-</span><span class="n">depth</span> <span class="mi">32</span> <span class="o">-</span><span class="n">rfbauth</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">vnc</span><span class="o">/</span><span class="n">sesman_passwd</span><span class="o">-</span><span class="n">huatai</span><span class="nd">@zcloud</span><span class="p">:</span><span class="mi">10</span> <span class="o">-</span><span class="n">bs</span> <span class="o">-</span><span class="n">nolisten</span> <span class="n">tcp</span> <span class="o">-</span><span class="n">localhost</span> <span class="o">-</span><span class="n">dpi</span> <span class="mi">96</span> <span class="o">-</span><span class="n">depth</span> <span class="mi">32</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="id3">
@@ -265,6 +283,7 @@
 <ul class="simple">
 <li><a class="reference external" href="https://wiki.archlinux.org/index.php/Xrdp">arch linux社区文档 - Xrdp</a></li>
 <li><a class="reference external" href="https://www.hiroom2.com/2018/05/07/ubuntu-1804-xrdp-xfce-en/">Ubuntu 18.04: Connect to Xfce desktop environment via XRDP</a></li>
+<li><a class="reference external" href="https://gist.github.com/rmoff/9687727">XRDP - connect using any color (colour) depth</a></li>
 </ul>
 </div>
 </div>
