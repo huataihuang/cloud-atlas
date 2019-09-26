@@ -18,3 +18,4 @@ etcd是Kubernetes后端存储所有集群数据的高可用key value存储。由
    :maxdepth: 1
 
    startup/index
+   recovery/index
