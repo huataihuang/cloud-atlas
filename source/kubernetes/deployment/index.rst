@@ -16,7 +16,7 @@ Kubernetes部署
    bootstrap_kubernetes/index
    stateless_application/index
    operator/index
-   install_etcd.rst
+   etcd/index
    nginx_ingress.rst
    docker_registry.rst
    helm.rst

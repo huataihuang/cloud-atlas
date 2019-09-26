@@ -1,12 +1,10 @@
-.. _service_mesh:
+.. _istio:
 
 ===============================
-Service Mesh
+Istio服务网格
 ===============================
 
 .. toctree::
    :maxdepth: 1
 
-   service_mesh_architecture.rst
-   istio/index
-
+   istio_architecture.rst

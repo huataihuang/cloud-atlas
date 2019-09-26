@@ -1,7 +1,7 @@
-.. _install_etcd:
+.. _deploy_etcd_cluster:
 
 ===============
-安装etcd
+部署etcd集群
 ===============
 
 .. note::

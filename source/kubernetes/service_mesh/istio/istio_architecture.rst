@@ -1,4 +1,4 @@
-.. _istio:
+.. _istio_architecture:
 
 ============
 Istio架构

@@ -1,10 +1,10 @@
-.. _etcd_startup:
+.. _etcd_recovery:
 
 =========================
-etcd起步
+etcd故障恢复
 =========================
 
 .. toctree::
    :maxdepth: 1
 
-   etcd_secret.rst
+   replace_etcd_node.rst
