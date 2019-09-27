@@ -128,6 +128,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../service_mesh/index.html">Service Mesh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../ci_cd/index.html">Kubernetes持续集成和持续部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../monitor/index.html">Kubernetes监控</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../debug/index.html">Kubernetes排查</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cloud/index.html">Kubernetes云厂商</a></li>
@@ -621,6 +622,152 @@ on a control plane to generate a new one
 <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">pki</span><span class="o">/</span><span class="n">etcd</span><span class="o">/</span><span class="n">ca</span><span class="o">.</span><span class="n">key</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="corednscrash">
+<h2>CoreDNS组件crash排查<a class="headerlink" href="#corednscrash" title="Permalink to this headline">¶</a></h2>
+<p>升级系统并重启了操作系统，发现CoreDNS不断crash，检查日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">logs</span> <span class="n">coredns</span><span class="o">-</span><span class="mi">5</span><span class="n">c98db65d4</span><span class="o">-</span><span class="mi">9</span><span class="n">xt9c</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
+</pre></div>
+</div>
+<p>日志显示是控制器无法访问apiserver服务器获得list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>E0927 01:29:33.763789       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:322: Failed to list *v1.Namespace: Get https://10.96.0.1:443/api/v1/namespaces?limit=500&amp;resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+E0927 01:29:33.763789       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:322: Failed to list *v1.Namespace: Get https://10.96.0.1:443/api/v1/namespaces?limit=500&amp;resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+log: exiting because of error: log: cannot create log: open /tmp/coredns.coredns-5c98db65d4-9xt9c.unknownuser.log.ERROR.20190927-012933.1: no such file or directory
+</pre></div>
+</div>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">pods</span> <span class="pre">-o</span> <span class="pre">wide</span></code> 可以看到，实际上 <code class="docutils literal notranslate"><span class="pre">coredns</span></code> 没有获得IP地址分配:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                                   <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>               <span class="n">NODE</span>           <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">coredns</span><span class="o">-</span><span class="mi">5</span><span class="n">c98db65d4</span><span class="o">-</span><span class="mi">9</span><span class="n">xt9c</span>               <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Error</span>     <span class="mi">4</span>          <span class="mi">62</span><span class="n">m</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="n">kubenode</span><span class="o">-</span><span class="mi">5</span>     <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">coredns</span><span class="o">-</span><span class="mi">5</span><span class="n">c98db65d4</span><span class="o">-</span><span class="n">cgqlj</span>               <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Error</span>     <span class="mi">3</span>          <span class="mi">61</span><span class="n">m</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="n">kubenode</span><span class="o">-</span><span class="mi">2</span>     <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>由于coredns是随着flannel网络部署的，尝试升级:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">coreos</span><span class="o">/</span><span class="n">flannel</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">Documentation</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<p>显示升级:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">podsecuritypolicy</span><span class="o">.</span><span class="n">policy</span><span class="o">/</span><span class="n">psp</span><span class="o">.</span><span class="n">flannel</span><span class="o">.</span><span class="n">unprivileged</span> <span class="n">configured</span>
+<span class="n">clusterrole</span><span class="o">.</span><span class="n">rbac</span><span class="o">.</span><span class="n">authorization</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">flannel</span> <span class="n">unchanged</span>
+<span class="n">clusterrolebinding</span><span class="o">.</span><span class="n">rbac</span><span class="o">.</span><span class="n">authorization</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">flannel</span> <span class="n">unchanged</span>
+<span class="n">serviceaccount</span><span class="o">/</span><span class="n">flannel</span> <span class="n">unchanged</span>
+<span class="n">configmap</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">cfg</span> <span class="n">configured</span>
+<span class="n">daemonset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span> <span class="n">configured</span>
+<span class="n">daemonset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">arm64</span> <span class="n">configured</span>
+<span class="n">daemonset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">arm</span> <span class="n">configured</span>
+<span class="n">daemonset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">ppc64le</span> <span class="n">configured</span>
+<span class="n">daemonset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">s390x</span> <span class="n">configured</span>
+</pre></div>
+</div>
+<p>升级了flannel网络之后:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="mi">5</span><span class="n">d2wm</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">5</span><span class="n">m4s</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">cp428</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">3</span><span class="n">m40s</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">csxnm</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">3</span><span class="n">m4s</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">f259d</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">5</span><span class="n">m50s</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">hbqx6</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">4</span><span class="n">m18s</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">kjssh</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">6</span><span class="n">m34s</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">qk5ww</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">7</span><span class="n">m11s</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">rk565</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>            <span class="mi">0</span>          <span class="mi">2</span><span class="n">m24s</span>
+</pre></div>
+</div>
+<p>就看到coredns获得了IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$kubectl get pods -n kube-system -o wide
+NAME                                   READY   STATUS             RESTARTS   AGE     IP               NODE           NOMINATED NODE   READINESS GATES
+coredns-5c98db65d4-cgqlj               0/1     CrashLoopBackOff   8          80m     10.244.4.3       kubenode-2     &lt;none&gt;           &lt;none&gt;
+coredns-5c98db65d4-kd9cn               0/1     CrashLoopBackOff   4          2m38s   10.244.6.2       kubenode-4     &lt;none&gt;           &lt;none&gt;
+</pre></div>
+</div>
+<p>但是发现依然出现crash。</p>
+<p>coredns分配到地址是 flannel网络 <code class="docutils literal notranslate"><span class="pre">10.244.x.x</span></code> 而不是其他pod显示的 <code class="docutils literal notranslate"><span class="pre">192.168.122.x</span></code> (实际上其他pod有第二块flannel网卡分配了 <code class="docutils literal notranslate"><span class="pre">10.244.x.x</span></code> 地址 )</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$kubectl get pods -n kube-system -o wide
+NAME                                   READY   STATUS             RESTARTS   AGE     IP               NODE           NOMINATED NODE   READINESS GATES
+coredns-5c98db65d4-cgqlj               0/1     CrashLoopBackOff   8          80m     10.244.4.3       kubenode-2     &lt;none&gt;           &lt;none&gt;
+coredns-5c98db65d4-kd9cn               0/1     CrashLoopBackOff   4          2m38s   10.244.6.2       kubenode-4     &lt;none&gt;           &lt;none&gt;
+etcd-kubemaster-1                      1/1     Running            0          85m     192.168.122.11   kubemaster-1   &lt;none&gt;           &lt;none&gt;
+etcd-kubemaster-2                      1/1     Running            0          83m     192.168.122.12   kubemaster-2   &lt;none&gt;           &lt;none&gt;
+etcd-kubemaster-3                      1/1     Running            0          82m     192.168.122.13   kubemaster-3   &lt;none&gt;           &lt;none&gt;
+kube-apiserver-kubemaster-1            1/1     Running            0          85m     192.168.122.11   kubemaster-1   &lt;none&gt;           &lt;none&gt;
+kube-apiserver-kubemaster-2            1/1     Running            0          83m     192.168.122.12   kubemaster-2   &lt;none&gt;           &lt;none&gt;
+kube-apiserver-kubemaster-3            1/1     Running            0          82m     192.168.122.13   kubemaster-3   &lt;none&gt;           &lt;none&gt;
+</pre></div>
+</div>
+<p>检查出现crash的coredns的日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$kubectl logs coredns-5c98db65d4-cgqlj -n kube-system
+E0927 02:48:02.036323       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:317: Failed to list *v1.Endpoints: Get https://10.96.0.1:443/api/v1/endpoints?limit=500&amp;resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+E0927 02:48:02.036323       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:317: Failed to list *v1.Endpoints: Get https://10.96.0.1:443/api/v1/endpoints?limit=500&amp;resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+log: exiting because of error: log: cannot create log: open /tmp/coredns.coredns-5c98db65d4-cgqlj.unknownuser.log.ERROR.20190927-024802.1: no such file or directory
+</pre></div>
+</div>
+<p>尝试登陆 <code class="docutils literal notranslate"><span class="pre">kube-apiserver-kubemaster-1</span></code> 检查，可以看到这个容器分配的地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">exec</span> <span class="o">-</span><span class="n">ti</span> <span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>在容器内部检查IP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">addr</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="p">:</span> <span class="n">eth0</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">pfifo_fast</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">52</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">8</span><span class="n">e</span><span class="p">:</span><span class="mi">71</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.11</span><span class="o">/</span><span class="mi">24</span> <span class="n">brd</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">noprefixroute</span> <span class="n">eth0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="mi">5054</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">fe40</span><span class="p">:</span><span class="mf">8e71</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+<span class="mi">3</span><span class="p">:</span> <span class="n">docker0</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">NO</span><span class="o">-</span><span class="n">CARRIER</span><span class="p">,</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">noqueue</span> <span class="n">state</span> <span class="n">DOWN</span> <span class="n">group</span> <span class="n">default</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">02</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">89</span><span class="p">:</span><span class="n">c3</span><span class="p">:</span><span class="n">f5</span><span class="p">:</span><span class="n">ea</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="o">/</span><span class="mi">16</span> <span class="n">brd</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">255.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">docker0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+<span class="mi">4</span><span class="p">:</span> <span class="n">flannel</span><span class="o">.</span><span class="mi">1</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1450</span> <span class="n">qdisc</span> <span class="n">noqueue</span> <span class="n">state</span> <span class="n">UNKNOWN</span> <span class="n">group</span> <span class="n">default</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">86</span><span class="p">:</span><span class="mi">5</span><span class="n">f</span><span class="p">:</span><span class="mi">75</span><span class="p">:</span><span class="mi">3</span><span class="n">b</span><span class="p">:</span><span class="mi">48</span><span class="p">:</span><span class="n">e5</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">10.244</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">32</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">flannel</span><span class="o">.</span><span class="mi">1</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="mi">845</span><span class="n">f</span><span class="p">:</span><span class="mi">75</span><span class="n">ff</span><span class="p">:</span><span class="n">fe3b</span><span class="p">:</span><span class="mf">48e5</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+</pre></div>
+</div>
+<p>由于 coredns 是部署在node节点的，检查所有部署在node节点的pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$kubectl get pods -n kube-system -o wide | grep node
+coredns-5c98db65d4-cgqlj               0/1     CrashLoopBackOff   11         94m   10.244.4.3       kubenode-2     &lt;none&gt;           &lt;none&gt;
+coredns-5c98db65d4-kd9cn               0/1     CrashLoopBackOff   7          16m   10.244.6.2       kubenode-4     &lt;none&gt;           &lt;none&gt;
+kube-flannel-ds-amd64-cp428            1/1     Running            0          18m   192.168.122.16   kubenode-2     &lt;none&gt;           &lt;none&gt;
+kube-flannel-ds-amd64-csxnm            1/1     Running            0          17m   192.168.122.15   kubenode-1     &lt;none&gt;           &lt;none&gt;
+kube-flannel-ds-amd64-f259d            1/1     Running            0          20m   192.168.122.17   kubenode-3     &lt;none&gt;           &lt;none&gt;
+kube-flannel-ds-amd64-qk5ww            1/1     Running            0          21m   192.168.122.18   kubenode-4     &lt;none&gt;           &lt;none&gt;
+kube-flannel-ds-amd64-rk565            1/1     Running            0          16m   192.168.122.19   kubenode-5     &lt;none&gt;           &lt;none&gt;
+kube-proxy-8g2xp                       1/1     Running            3          24d   192.168.122.19   kubenode-5     &lt;none&gt;           &lt;none&gt;
+kube-proxy-hptg4                       1/1     Running            3          24d   192.168.122.17   kubenode-3     &lt;none&gt;           &lt;none&gt;
+kube-proxy-jtfds                       1/1     Running            4          24d   192.168.122.15   kubenode-1     &lt;none&gt;           &lt;none&gt;
+kube-proxy-mgvlp                       1/1     Running            3          24d   192.168.122.18   kubenode-4     &lt;none&gt;           &lt;none&gt;
+kube-proxy-plxvq                       1/1     Running            3          24d   192.168.122.16   kubenode-2     &lt;none&gt;           &lt;none&gt;
+</pre></div>
+</div>
+<p>可以看到在节点上 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 没有重建过，可能是这个原因导致无法提供通讯，所有根据 coredns 所在节点，重建对应 <code class="docutils literal notranslate"><span class="pre">kbuenode-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kubenode-4</span></code> 上的 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">delete</span> <span class="n">pods</span> <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">plxvq</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>不过，依然没有解决。参考 <a class="reference external" href="kubednscontainercannotconnecttoapiserver#193">kubedns container cannot connect to apiserver #193</a> 解决思路是客户端kubelet的NAT网络问题，需要确保:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 确保IP forward</span>
+<span class="n">sysctl</span> <span class="n">net</span><span class="o">.</span><span class="n">ipv4</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">forwarding</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1"># 确保Docker转发</span>
+<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">P</span> <span class="n">FORWARD</span> <span class="n">ACCEPT</span>
+<span class="c1"># 确保 kube-proxy 参数具备 --cluster-cidr=</span>
+</pre></div>
+</div>
+<p>不过我检查了kubenode节点，发现是满足上述要求的</p>
+<p>重新刷新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">kubelet</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span>
+<span class="n">iptables</span> <span class="o">--</span><span class="n">flush</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">tnat</span> <span class="o">--</span><span class="n">flush</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">kubelet</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<p>果然，kubenode客户端处理过iptables转发之后，能够正常运行cordns了</p>
 </div>
 <div class="section" id="id5">
 <h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
