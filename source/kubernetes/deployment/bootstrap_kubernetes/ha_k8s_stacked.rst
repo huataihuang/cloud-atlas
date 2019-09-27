@@ -389,6 +389,155 @@
    /etc/kubernetes/pki/etcd/ca.crt
    /etc/kubernetes/pki/etcd/ca.key
 
+CoreDNS组件crash排查
+=====================
+
+升级系统并重启了操作系统，发现CoreDNS不断crash，检查日志::
+
+   kubectl logs coredns-5c98db65d4-9xt9c -n kube-system
+
+日志显示是控制器无法访问apiserver服务器获得list::
+
+   E0927 01:29:33.763789       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:322: Failed to list *v1.Namespace: Get https://10.96.0.1:443/api/v1/namespaces?limit=500&resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+   E0927 01:29:33.763789       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:322: Failed to list *v1.Namespace: Get https://10.96.0.1:443/api/v1/namespaces?limit=500&resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+   log: exiting because of error: log: cannot create log: open /tmp/coredns.coredns-5c98db65d4-9xt9c.unknownuser.log.ERROR.20190927-012933.1: no such file or directory
+
+使用 ``get pods -o wide`` 可以看到，实际上 ``coredns`` 没有获得IP地址分配::
+
+   kubectl get pods -n kube-system -o wide
+
+显示::
+
+   NAME                                   READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+   coredns-5c98db65d4-9xt9c               0/1     Error     4          62m   <none>           kubenode-5     <none>           <none>
+   coredns-5c98db65d4-cgqlj               0/1     Error     3          61m   <none>           kubenode-2     <none>           <none>
+
+由于coredns是随着flannel网络部署的，尝试升级::
+
+   kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+显示升级::
+
+   podsecuritypolicy.policy/psp.flannel.unprivileged configured
+   clusterrole.rbac.authorization.k8s.io/flannel unchanged
+   clusterrolebinding.rbac.authorization.k8s.io/flannel unchanged
+   serviceaccount/flannel unchanged
+   configmap/kube-flannel-cfg configured
+   daemonset.apps/kube-flannel-ds-amd64 configured
+   daemonset.apps/kube-flannel-ds-arm64 configured
+   daemonset.apps/kube-flannel-ds-arm configured
+   daemonset.apps/kube-flannel-ds-ppc64le configured
+   daemonset.apps/kube-flannel-ds-s390x configured
+
+升级了flannel网络之后::
+
+   kube-flannel-ds-amd64-5d2wm            1/1     Running            0          5m4s
+   kube-flannel-ds-amd64-cp428            1/1     Running            0          3m40s
+   kube-flannel-ds-amd64-csxnm            1/1     Running            0          3m4s
+   kube-flannel-ds-amd64-f259d            1/1     Running            0          5m50s
+   kube-flannel-ds-amd64-hbqx6            1/1     Running            0          4m18s
+   kube-flannel-ds-amd64-kjssh            1/1     Running            0          6m34s
+   kube-flannel-ds-amd64-qk5ww            1/1     Running            0          7m11s
+   kube-flannel-ds-amd64-rk565            1/1     Running            0          2m24s
+
+就看到coredns获得了IP地址::
+
+   $kubectl get pods -n kube-system -o wide
+   NAME                                   READY   STATUS             RESTARTS   AGE     IP               NODE           NOMINATED NODE   READINESS GATES
+   coredns-5c98db65d4-cgqlj               0/1     CrashLoopBackOff   8          80m     10.244.4.3       kubenode-2     <none>           <none>
+   coredns-5c98db65d4-kd9cn               0/1     CrashLoopBackOff   4          2m38s   10.244.6.2       kubenode-4     <none>           <none>
+
+但是发现依然出现crash。
+
+coredns分配到地址是 flannel网络 ``10.244.x.x`` 而不是其他pod显示的 ``192.168.122.x`` (实际上其他pod有第二块flannel网卡分配了 ``10.244.x.x`` 地址 ) ::
+
+   $kubectl get pods -n kube-system -o wide
+   NAME                                   READY   STATUS             RESTARTS   AGE     IP               NODE           NOMINATED NODE   READINESS GATES
+   coredns-5c98db65d4-cgqlj               0/1     CrashLoopBackOff   8          80m     10.244.4.3       kubenode-2     <none>           <none>
+   coredns-5c98db65d4-kd9cn               0/1     CrashLoopBackOff   4          2m38s   10.244.6.2       kubenode-4     <none>           <none>
+   etcd-kubemaster-1                      1/1     Running            0          85m     192.168.122.11   kubemaster-1   <none>           <none>
+   etcd-kubemaster-2                      1/1     Running            0          83m     192.168.122.12   kubemaster-2   <none>           <none>
+   etcd-kubemaster-3                      1/1     Running            0          82m     192.168.122.13   kubemaster-3   <none>           <none>
+   kube-apiserver-kubemaster-1            1/1     Running            0          85m     192.168.122.11   kubemaster-1   <none>           <none>
+   kube-apiserver-kubemaster-2            1/1     Running            0          83m     192.168.122.12   kubemaster-2   <none>           <none>
+   kube-apiserver-kubemaster-3            1/1     Running            0          82m     192.168.122.13   kubemaster-3   <none>           <none>
+
+检查出现crash的coredns的日志::
+
+   $kubectl logs coredns-5c98db65d4-cgqlj -n kube-system
+   E0927 02:48:02.036323       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:317: Failed to list *v1.Endpoints: Get https://10.96.0.1:443/api/v1/endpoints?limit=500&resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+   E0927 02:48:02.036323       1 reflector.go:134] github.com/coredns/coredns/plugin/kubernetes/controller.go:317: Failed to list *v1.Endpoints: Get https://10.96.0.1:443/api/v1/endpoints?limit=500&resourceVersion=0: dial tcp 10.96.0.1:443: connect: no route to host
+   log: exiting because of error: log: cannot create log: open /tmp/coredns.coredns-5c98db65d4-cgqlj.unknownuser.log.ERROR.20190927-024802.1: no such file or directory
+
+尝试登陆 ``kube-apiserver-kubemaster-1`` 检查，可以看到这个容器分配的地址::
+
+   kubectl -n kube-system exec -ti kube-apiserver-kubemaster-1 -- /bin/sh
+
+在容器内部检查IP::
+
+   ip addr
+
+可以看到::
+
+   2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+       link/ether 52:54:00:40:8e:71 brd ff:ff:ff:ff:ff:ff
+       inet 192.168.122.11/24 brd 192.168.122.255 scope global noprefixroute eth0
+          valid_lft forever preferred_lft forever
+       inet6 fe80::5054:ff:fe40:8e71/64 scope link
+          valid_lft forever preferred_lft forever
+   3: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default
+       link/ether 02:42:89:c3:f5:ea brd ff:ff:ff:ff:ff:ff
+       inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+          valid_lft forever preferred_lft forever
+   4: flannel.1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UNKNOWN group default
+       link/ether 86:5f:75:3b:48:e5 brd ff:ff:ff:ff:ff:ff
+       inet 10.244.0.0/32 scope global flannel.1
+          valid_lft forever preferred_lft forever
+       inet6 fe80::845f:75ff:fe3b:48e5/64 scope link
+          valid_lft forever preferred_lft forever   
+
+由于 coredns 是部署在node节点的，检查所有部署在node节点的pod::
+
+   $kubectl get pods -n kube-system -o wide | grep node
+   coredns-5c98db65d4-cgqlj               0/1     CrashLoopBackOff   11         94m   10.244.4.3       kubenode-2     <none>           <none>
+   coredns-5c98db65d4-kd9cn               0/1     CrashLoopBackOff   7          16m   10.244.6.2       kubenode-4     <none>           <none>
+   kube-flannel-ds-amd64-cp428            1/1     Running            0          18m   192.168.122.16   kubenode-2     <none>           <none>
+   kube-flannel-ds-amd64-csxnm            1/1     Running            0          17m   192.168.122.15   kubenode-1     <none>           <none>
+   kube-flannel-ds-amd64-f259d            1/1     Running            0          20m   192.168.122.17   kubenode-3     <none>           <none>
+   kube-flannel-ds-amd64-qk5ww            1/1     Running            0          21m   192.168.122.18   kubenode-4     <none>           <none>
+   kube-flannel-ds-amd64-rk565            1/1     Running            0          16m   192.168.122.19   kubenode-5     <none>           <none>
+   kube-proxy-8g2xp                       1/1     Running            3          24d   192.168.122.19   kubenode-5     <none>           <none>
+   kube-proxy-hptg4                       1/1     Running            3          24d   192.168.122.17   kubenode-3     <none>           <none>
+   kube-proxy-jtfds                       1/1     Running            4          24d   192.168.122.15   kubenode-1     <none>           <none>
+   kube-proxy-mgvlp                       1/1     Running            3          24d   192.168.122.18   kubenode-4     <none>           <none>
+   kube-proxy-plxvq                       1/1     Running            3          24d   192.168.122.16   kubenode-2     <none>           <none>
+
+可以看到在节点上 ``kube-proxy`` 没有重建过，可能是这个原因导致无法提供通讯，所有根据 coredns 所在节点，重建对应 ``kbuenode-2`` 和 ``kubenode-4`` 上的 ``kube-proxy`` ::
+
+   kubectl -n kube-system delete pods kube-proxy-plxvq
+   ...
+
+不过，依然没有解决。参考 `kubedns container cannot connect to apiserver #193 <kubedns container cannot connect to apiserver #193>`_ 解决思路是客户端kubelet的NAT网络问题，需要确保::
+
+   # 确保IP forward
+   sysctl net.ipv4.conf.all.forwarding = 1
+   # 确保Docker转发
+   sudo iptables -P FORWARD ACCEPT
+   # 确保 kube-proxy 参数具备 --cluster-cidr=
+
+不过我检查了kubenode节点，发现是满足上述要求的
+   
+重新刷新::
+
+   systemctl stop kubelet
+   systemctl stop docker
+   iptables --flush
+   iptables -tnat --flush
+   systemctl start kubelet
+   systemctl start docker
+
+果然，kubenode客户端处理过iptables转发之后，能够正常运行cordns了
+
 参考
 ========
 
