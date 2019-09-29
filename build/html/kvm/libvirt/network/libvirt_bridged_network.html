@@ -210,10 +210,127 @@
             
   <div class="section" id="libvirt">
 <span id="libvirt-bridged-network"></span><h1>libvirt 网桥型网络<a class="headerlink" href="#libvirt" title="Permalink to this headline">¶</a></h1>
+<p>libvirt的网桥型网络(bridged network)是物理主机和虚拟机共享一个真实的以太网设备，每个虚拟机可以绑定局域网的任何可用的IPv4或IPv6地址，就好像一个物理主机。Bridge网络提供了最好的性能以及最易于配置的libvirt网络类型。</p>
+<div class="section" id="bridge">
+<h2>Bridge网络限制<a class="headerlink" href="#bridge" title="Permalink to this headline">¶</a></h2>
+<p>libvirt服务器必须通过以太网有线网络连接，如果是无线网络，则只能使用 <a class="reference internal" href="libvirt_routed_network.html#libvirt-routed-network"><span class="std std-ref">libvirt 路由型网络</span></a> 或者 <a class="reference internal" href="libvirt_nat_network.html#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> 。</p>
+</div>
 <div class="section" id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>初始步骤<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>实践案例：</p>
+<ul>
+<li><p class="first">主机的以太网设备名 <code class="docutils literal notranslate"><span class="pre">enp0s25</span></code></p>
+</li>
+<li><p class="first">虚拟机共享以太网设备 <code class="docutils literal notranslate"><span class="pre">enp0s25</span></code>，并连接到网桥设备 <code class="docutils literal notranslate"><span class="pre">br0</span></code></p>
+</li>
+<li><p class="first">主机提供2个地址网段
+- 对外IPv4地址段(203.0.113.160/29)
+- 对外IPv6地址段(2001:db8::/64)</p>
+</li>
+<li><p class="first">主机静态绑定到 203.0.113.116 和 2001:db8::1</p>
+</li>
+<li><p class="first">虚拟机可以绑定到分配地址段任何IPv4和IPv6</p>
+</li>
+<li><p class="first">检查物理主机以太网设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">address</span> <span class="n">show</span> <span class="n">dev</span> <span class="n">enp0s25</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="p">:</span> <span class="n">enp0s25</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">fq_codel</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">94</span><span class="p">:</span><span class="n">eb</span><span class="p">:</span><span class="n">cd</span><span class="p">:</span><span class="mi">8</span><span class="n">e</span><span class="p">:</span><span class="n">eb</span><span class="p">:</span><span class="mi">3</span><span class="n">f</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">30.17</span><span class="o">.</span><span class="mf">201.3</span><span class="o">/</span><span class="mi">24</span> <span class="n">brd</span> <span class="mf">30.17</span><span class="o">.</span><span class="mf">201.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">dynamic</span> <span class="n">noprefixroute</span> <span class="n">enp0s25</span>
+       <span class="n">valid_lft</span> <span class="mi">11803</span><span class="n">sec</span> <span class="n">preferred_lft</span> <span class="mi">11803</span><span class="n">sec</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="n">d9ef</span><span class="p">:</span><span class="mi">58</span><span class="n">a4</span><span class="p">:</span><span class="n">a664</span><span class="p">:</span><span class="mi">6</span><span class="n">d7c</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span> <span class="n">noprefixroute</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">由于 <a class="reference external" href="https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0">ntefilter的bridge性能和安全原因</a> ，禁止bridge设备的netfilter，所以创建 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/bridge.conf</span></code> 以下设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">arptables</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">创建 <code class="docutils literal notranslate"><span class="pre">/etc/udev/rules.d/99-bridge.rules</span></code> ，这个udev规则将在sysctl设置上述bridge模块时加载。注意，对于Kernel 3.18之前的版本， <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;br_netfilter&quot;</span></code> 需要修改成 <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;bridge&quot;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ACTION</span><span class="o">==</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="n">SUBSYSTEM</span><span class="o">==</span><span class="s2">&quot;module&quot;</span><span class="p">,</span> <span class="n">KERNEL</span><span class="o">==</span><span class="s2">&quot;bridge&quot;</span><span class="p">,</span> <span class="n">RUN</span><span class="o">+=</span><span class="s2">&quot;/sbin/sysctl -p /etc/sysctl.d/bridge.conf&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">实践发现在RHEL的系统中，存在 <code class="docutils literal notranslate"><span class="pre">/proc/sys/net/bridge/bridge-nf-call-*tables</span></code> 内核配置入口，上述配置在CentOS 7上可以完成。但是在Arch Linux平台没有上述内核配置，所以没有执行。</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>配置网桥<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">有多种方法可以用来创建网桥，本文案例实践在arch linux上完成</p>
+</div>
+<div class="section" id="iproute2">
+<h3>使用iproute2<a class="headerlink" href="#iproute2" title="Permalink to this headline">¶</a></h3>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">iproute2</span></code> 软件包的 <code class="docutils literal notranslate"><span class="pre">ip</span></code> 工具可以管理网桥</p>
+<ul>
+<li><p class="first">创建新网桥并启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="n">add</span> <span class="n">name</span> <span class="n">br0</span> <span class="nb">type</span> <span class="n">bridge</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">br0</span></code> 是网桥名字</p>
+<ul>
+<li><p class="first">设置网卡 <code class="docutils literal notranslate"><span class="pre">enp0s25</span></code> 启动状态(up)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="nb">set</span> <span class="n">enp0s25</span> <span class="n">up</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">将网络接口(这里是 <code class="docutils literal notranslate"><span class="pre">enp0s25</span></code> )添加到网桥 <code class="docutils literal notranslate"><span class="pre">br0</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="nb">set</span> <span class="n">enp0s25</span> <span class="n">master</span> <span class="n">br0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">检查网桥及相应接口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bridge</span> <span class="n">link</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">这里如果 <code class="docutils literal notranslate"><span class="pre">enp0s25</span></code> 是已经激活并获取了DHCP地址，添加到 br0 网桥上，可能会导致网络断开。</p>
+</div>
+<ul>
+<li><p class="first">要从网桥移除一个接口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="nb">set</span> <span class="n">enp0s25</span> <span class="n">nomaster</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时接口还是up的，所以需要将接口down:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="nb">set</span> <span class="n">enp0s25</span> <span class="n">down</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">删除网桥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="n">delete</span> <span class="n">br0</span> <span class="nb">type</span> <span class="n">bridge</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="bridge-utils">
+<h3>使用bridge-utils<a class="headerlink" href="#bridge-utils" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://jamielinux.com/docs/libvirt-networking-handbook/bridged-network.html">libvirt Networking Handbook - Bridged network</a></li>
+<li><a class="reference external" href="https://wiki.archlinux.org/index.php/Network_bridge">Arch Linux社区文档 - Network bridge</a></li>
 </ul>
 </div>
 </div>

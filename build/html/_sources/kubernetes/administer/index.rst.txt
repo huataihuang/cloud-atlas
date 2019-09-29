@@ -13,5 +13,6 @@ Kubernetes管理
 
    kubernetes_dashboard.rst
    configure_pods_and_containers.rst   
+   delete_cluster.rst
    etcd/index
    federation/index
