@@ -100,6 +100,111 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
 使用bridge-utils
 ------------------
 
+传统的 ``brctl`` 工具( ``bridge-utils`` 软件包)提供了管理网桥的功能。
+
+- 创建网桥::
+
+   brctl addbr br0
+
+- 将设备加到网桥::
+
+   brctl addif br0 enp0s25
+
+.. note::
+
+   将接口加入到网桥会导致该接口丢失现有IP地址，所以建议不要远程操作，或者至少有其他方式远程连接。当网桥脚本工作完成后网络连接会恢复。
+
+- 显示网桥::
+
+   brctl show
+
+- 设置网桥设备启动::
+
+   ip link set dev br0 up
+
+- 删除网桥时，需要首先停止::
+
+   ip link set dev br0 down
+   brctl delbr br0
+
+.. note::
+
+   要激活网桥的netfilter功能，需要手工加载 ``br_netfilter`` 模块::
+
+      modprobe br_netfilter
+
+使用NetworkManager
+--------------------
+
+使用NetworkManager配置网络是很多发行版默认的网络配置方法，我在 :ref:`archlinux_on_thinkpad_x220` 采用 :ref:`xfce` 桌面，配置无线网络就采用NetworkManager。这个网络配置管理工具和桌面完美结合，使用非常方便。这里介绍如何使用NetworkManager的命令行 ``nmcli`` 来完成网桥配置。
+
+- 创建网桥并禁止STP(避免网桥被公告到网络)::
+
+   nmcli c add type bridge ifname br0 stp no
+
+.. note::
+
+   xfce桌面使用NetworkManager图形界面配置时，只提供了对物理网卡设备(作为网桥的slave)的mac地址修改功能，所以如果网络限制了mac地址接入，这里需要命令行修订::
+
+      macchanger -m XX:XX:XX:XX:XX:XX br0
+
+- 将物理网络接口 ``enp0s25`` 作为slave添加到网桥::
+
+   nmcli c add type bridge-slave ifname enp0s25 master br0
+
+- 设置连接down::
+
+   nmcli c down bridge-br0
+
+- 设置网桥启动::
+
+   nmcli c up bridge-br0
+
+- 检查NetworkManager连接::
+
+   nmcli c
+
+可以看到输出::
+
+   NAME                  UUID                                  TYPE      DEVICE
+   bridge-br0            9dcd545c-f65a-471c-b1c9-399912dcb4dc  bridge    br0
+   bridge-slave-enp0s25  583f6a08-9af1-41c7-bea7-e17387f42071  ethernet  enp0s25
+
+- 检查网桥::
+
+   brctl show
+
+显示::
+
+   bridge name    bridge id        STP enabled    interfaces
+   br0        8000.94ebcd8eeb3f    no        enp0s25
+
+其他方法
+---------
+
+其他方法我没有实践，列举如下:
+
+- 使用netctl: `Bridge with netctl <https://wiki.archlinux.org/index.php/Bridge_with_netctl>`_
+- 使用systemd-networkd: `systemd-networkd#Bridge interface <https://wiki.archlinux.org/index.php/Systemd-networkd#Bridge_interface>`_
+
+配置虚拟机
+=============
+
+- 对于新安装虚拟机，可以直接指定网络设备的bridge::
+
+   virt-install --network bridge=br0 ...
+
+- 对于 :ref:`create_vm` ，已经创建的虚拟机，可以通过 ``virsh edit win10`` 编辑已经存在的虚拟机配置，修改或添加网卡设备::
+
+    <interface type='bridge'>
+      <mac address='52:54:00:9f:98:c9'/>
+      <source bridge='br0'/>
+      <model type='virtio'/>
+    </interface>
+
+.. note::
+
+   这里 ``<model type='virtio'/>`` 选项可选添加，需要确保guest操作系统已经安装过virtio驱动(Linux默认)
 
 参考
 ========
