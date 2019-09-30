@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Studio环境libvirt静态分配IP &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>备份KVM虚拟机 &mdash; Cloud Atlas 0.1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="copyright" title="Copyright" href="../copyright.html" />
-    <link rel="next" title="KVM热迁移" href="kvm_live_migration.html" />
-    <link rel="prev" title="KVM虚拟机动态添加、调整磁盘" href="add_resize_virtual_disk_to_guest_on_fly.html" /> 
+    <link rel="next" title="复制KVM虚拟机" href="clone_vm.html" />
+    <link rel="prev" title="Studio环境创建KVM虚拟机" href="create_vm.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,16 +93,16 @@
 <li class="toctree-l2"><a class="reference internal" href="hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="intel_vmcs.html">Intel VMCS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="create_vm.html">Studio环境创建KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="backup_vm.html">备份KVM虚拟机</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">备份KVM虚拟机</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">冷备份KVM虚拟机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#live-kvm">热(Live)备份KVM虚拟机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">参考</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="clone_vm.html">复制KVM虚拟机</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nested_virtual.html">Studio嵌套虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="add_resize_virtual_disk_to_guest_on_fly.html">KVM虚拟机动态添加、调整磁盘</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Studio环境libvirt静态分配IP</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#libvirtdhcp">libvirt的DHCP分配范围调整</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ubuntuip">配置Ubuntu虚拟机的静态IP</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">下一步</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="libvirt_static_ip_in_studio.html">Studio环境libvirt静态分配IP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kvm_live_migration.html">KVM热迁移</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qemu_images.html">QEMU磁盘镜像</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kvm_image_access_with_libguestfs.html">使用libguestfs访问KVM镜像</a></li>
@@ -177,13 +177,13 @@
         
           <li><a href="index.html">KVM Atlas</a> &raquo;</li>
         
-      <li>Studio环境libvirt静态分配IP</li>
+      <li>备份KVM虚拟机</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/kvm/libvirt_static_ip_in_studio.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/kvm/backup_vm.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -196,74 +196,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="studiolibvirtip">
-<span id="libvirt-static-ip-in-studio"></span><h1>Studio环境libvirt静态分配IP<a class="headerlink" href="#studiolibvirtip" title="Permalink to this headline">¶</a></h1>
-<p>默认情况下libvirt内置的dnsmasq服务会动态分配IP地址给虚拟机，这导致每次启动的虚拟机IP地址可能不同。有部分作为固定服务的虚拟机IP地址期望不变，需要对libvirt的default网络做一些修改。</p>
-<p>详细配置请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/kvm_libvirt_static_ip_for_dhcp_and_port_forwarding.md">KVM libvirt静态分配IP和端口转发</a></p>
-<p>这里没有采用配置dnsmasq的static DHCP方法，而是修改libvirt的DHCP的range，空出部分IP地址不分配，然后在虚拟机内部配置静态IP地址，这样更为简洁方便，</p>
-<div class="section" id="libvirtdhcp">
-<h2>libvirt的DHCP分配范围调整<a class="headerlink" href="#libvirtdhcp" title="Permalink to this headline">¶</a></h2>
-<ul>
-<li><p class="first">检查libvirt网络:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="nb">list</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>可以看到输出:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span>                 <span class="n">State</span>      <span class="n">Autostart</span>     <span class="n">Persistent</span>
-<span class="o">----------------------------------------------------------</span>
-<span class="n">default</span>              <span class="n">active</span>     <span class="n">yes</span>           <span class="n">yes</span>
-</pre></div>
-</div>
-<ul>
-<li><p class="first">编辑默认网络:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="n">edit</span> <span class="n">default</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>将:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">dhcp</span><span class="o">&gt;</span>
-  <span class="o">&lt;</span><span class="nb">range</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;192.168.122.2&#39;</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;192.168.122.254&#39;</span><span class="o">/&gt;</span>
-<span class="o">&lt;/</span><span class="n">dhcp</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>修改成:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">dhcp</span><span class="o">&gt;</span>
-  <span class="o">&lt;</span><span class="nb">range</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;192.168.122.51&#39;</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;192.168.122.254&#39;</span><span class="o">/&gt;</span>
-<span class="o">&lt;/</span><span class="n">dhcp</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>这样，IP地址段 <code class="docutils literal notranslate"><span class="pre">192.168.122.1</span> <span class="pre">~</span> <span class="pre">192.168.122.50</span></code> 就不会动态分批，保留给固定IP地址使用。</p>
-<ul>
-<li><p class="first">重新生成libvirt网络:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span>  <span class="n">net</span><span class="o">-</span><span class="n">destroy</span> <span class="n">default</span>
-<span class="n">virsh</span>  <span class="n">net</span><span class="o">-</span><span class="n">start</span> <span class="n">default</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">然后重新将虚拟机网络连接:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">addif</span> <span class="n">virbr0</span> <span class="n">vnet0</span>
-<span class="n">brctl</span> <span class="n">addif</span> <span class="n">virbr0</span> <span class="n">vnet1</span>
-<span class="o">...</span>
-</pre></div>
-</div>
-</li>
-</ul>
+  <div class="section" id="kvm">
+<span id="backup-vm"></span><h1>备份KVM虚拟机<a class="headerlink" href="#kvm" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Host主机 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/virbr0.status</span></code> 提供了当前dnsmasq分配的IP地址情况。</p>
-</div>
-</div>
-<div class="section" id="ubuntuip">
-<h2>配置Ubuntu虚拟机的静态IP<a class="headerlink" href="#ubuntuip" title="Permalink to this headline">¶</a></h2>
-<p>对于Kubernetes master等服务器，我期望IP地址是固定的IP地址，所以准备配置static IP。不过，Ubuntu 18系列的静态IP地址配置方法和以前传统配置方法不同，采用了 <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> 配置文件，通过 <code class="docutils literal notranslate"><span class="pre">netplan</span></code> 网络配置工具来修改。</p>
-<p>请参考 <a class="reference internal" href="../appendix/netplan.html#netplan-static-ip"><span class="std std-ref">使用netplan配置静态IP</span></a></p>
-<p>依次对必要的测试虚拟机调整静态IP，调整后的IP地址见 <a class="reference internal" href="../studio/studio_ip.html#studio-ip"><span class="std std-ref">Studio测试环境IP分配</span></a> 。</p>
+<p class="last">我暂时还没有执行过在线KVM虚拟机备份实践，但是我感觉后续在运维过程中会有这样的需求，后续再实践。</p>
 </div>
 <div class="section" id="id1">
-<h2>下一步<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>冷备份KVM虚拟机<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>比较简单的虚拟机备份方法是先关闭虚拟机，然后备份xml配置和磁盘文件，举例备份 <a class="reference internal" href="create_vm.html#create-vm"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a> 实践中创建的Windows 10虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">shutdown</span> <span class="n">win10</span>
+<span class="n">virsh</span> <span class="n">dumpxml</span> <span class="n">win10</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">win10</span><span class="o">.</span><span class="n">xml</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span>
+<span class="n">tar</span> <span class="n">cfJ</span> <span class="n">win10</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">xz</span> <span class="n">win10</span><span class="o">.</span><span class="n">xml</span> <span class="n">win10</span><span class="o">.</span><span class="n">qcow2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="live-kvm">
+<h2>热(Live)备份KVM虚拟机<a class="headerlink" href="#live-kvm" title="Permalink to this headline">¶</a></h2>
+<p>待实践…</p>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://wiki.libvirt.org/page/Live-disk-backup-with-active-blockcommit">Live-disk-backup-with-active-blockcommit</a></li>
+<li><a class="reference external" href="https://www.virtkick.com/docs/how-to-perform-a-live-backup-on-your-kvm-virtual-machines.html">How to Perform a Live Backup on your KVM Virtual Machines</a></li>
+</ul>
 </div>
 </div>
 
@@ -275,10 +233,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="kvm_live_migration.html" class="btn btn-neutral float-right" title="KVM热迁移" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="clone_vm.html" class="btn btn-neutral float-right" title="复制KVM虚拟机" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="add_resize_virtual_disk_to_guest_on_fly.html" class="btn btn-neutral float-left" title="KVM虚拟机动态添加、调整磁盘" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="create_vm.html" class="btn btn-neutral float-left" title="Studio环境创建KVM虚拟机" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
