@@ -13,6 +13,7 @@ KVM Atlas
    hardware_virtual.rst
    intel_vmcs.rst
    create_vm.rst
+   backup_vm.rst
    clone_vm.rst
    nested_virtual.rst
    add_resize_virtual_disk_to_guest_on_fly.rst
