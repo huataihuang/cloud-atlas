@@ -324,10 +324,141 @@
 </div>
 <div class="section" id="bridge-utils">
 <h3>使用bridge-utils<a class="headerlink" href="#bridge-utils" title="Permalink to this headline">¶</a></h3>
+<p>传统的 <code class="docutils literal notranslate"><span class="pre">brctl</span></code> 工具( <code class="docutils literal notranslate"><span class="pre">bridge-utils</span></code> 软件包)提供了管理网桥的功能。</p>
+<ul>
+<li><p class="first">创建网桥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">addbr</span> <span class="n">br0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">将设备加到网桥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">addif</span> <span class="n">br0</span> <span class="n">enp0s25</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">将接口加入到网桥会导致该接口丢失现有IP地址，所以建议不要远程操作，或者至少有其他方式远程连接。当网桥脚本工作完成后网络连接会恢复。</p>
+</div>
+<ul>
+<li><p class="first">显示网桥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">show</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">设置网桥设备启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="nb">set</span> <span class="n">dev</span> <span class="n">br0</span> <span class="n">up</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">删除网桥时，需要首先停止:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="nb">set</span> <span class="n">dev</span> <span class="n">br0</span> <span class="n">down</span>
+<span class="n">brctl</span> <span class="n">delbr</span> <span class="n">br0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>要激活网桥的netfilter功能，需要手工加载 <code class="docutils literal notranslate"><span class="pre">br_netfilter</span></code> 模块:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modprobe</span> <span class="n">br_netfilter</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="networkmanager">
+<h3>使用NetworkManager<a class="headerlink" href="#networkmanager" title="Permalink to this headline">¶</a></h3>
+<p>使用NetworkManager配置网络是很多发行版默认的网络配置方法，我在 <a class="reference internal" href="../../../studio/archlinux_on_thinkpad_x220.html#archlinux-on-thinkpad-x220"><span class="std std-ref">ThinkPad X220上运行Arch Linux</span></a> 采用 <a class="reference internal" href="../../../appendix/xfce.html#xfce"><span class="std std-ref">Xfce</span></a> 桌面，配置无线网络就采用NetworkManager。这个网络配置管理工具和桌面完美结合，使用非常方便。这里介绍如何使用NetworkManager的命令行 <code class="docutils literal notranslate"><span class="pre">nmcli</span></code> 来完成网桥配置。</p>
+<ul>
+<li><p class="first">创建网桥并禁止STP(避免网桥被公告到网络):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">c</span> <span class="n">add</span> <span class="nb">type</span> <span class="n">bridge</span> <span class="n">ifname</span> <span class="n">br0</span> <span class="n">stp</span> <span class="n">no</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>xfce桌面使用NetworkManager图形界面配置时，只提供了对物理网卡设备(作为网桥的slave)的mac地址修改功能，所以如果网络限制了mac地址接入，这里需要命令行修订:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">macchanger</span> <span class="o">-</span><span class="n">m</span> <span class="n">XX</span><span class="p">:</span><span class="n">XX</span><span class="p">:</span><span class="n">XX</span><span class="p">:</span><span class="n">XX</span><span class="p">:</span><span class="n">XX</span><span class="p">:</span><span class="n">XX</span> <span class="n">br0</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p class="first">将物理网络接口 <code class="docutils literal notranslate"><span class="pre">enp0s25</span></code> 作为slave添加到网桥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">c</span> <span class="n">add</span> <span class="nb">type</span> <span class="n">bridge</span><span class="o">-</span><span class="n">slave</span> <span class="n">ifname</span> <span class="n">enp0s25</span> <span class="n">master</span> <span class="n">br0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">设置连接down:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">c</span> <span class="n">down</span> <span class="n">bridge</span><span class="o">-</span><span class="n">br0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">设置网桥启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">c</span> <span class="n">up</span> <span class="n">bridge</span><span class="o">-</span><span class="n">br0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">检查NetworkManager连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">c</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                  <span class="n">UUID</span>                                  <span class="n">TYPE</span>      <span class="n">DEVICE</span>
+<span class="n">bridge</span><span class="o">-</span><span class="n">br0</span>            <span class="mi">9</span><span class="n">dcd545c</span><span class="o">-</span><span class="n">f65a</span><span class="o">-</span><span class="mi">471</span><span class="n">c</span><span class="o">-</span><span class="n">b1c9</span><span class="o">-</span><span class="mi">399912</span><span class="n">dcb4dc</span>  <span class="n">bridge</span>    <span class="n">br0</span>
+<span class="n">bridge</span><span class="o">-</span><span class="n">slave</span><span class="o">-</span><span class="n">enp0s25</span>  <span class="mi">583</span><span class="n">f6a08</span><span class="o">-</span><span class="mi">9</span><span class="n">af1</span><span class="o">-</span><span class="mi">41</span><span class="n">c7</span><span class="o">-</span><span class="n">bea7</span><span class="o">-</span><span class="n">e17387f42071</span>  <span class="n">ethernet</span>  <span class="n">enp0s25</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">检查网桥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">show</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bridge</span> <span class="n">name</span>    <span class="n">bridge</span> <span class="nb">id</span>        <span class="n">STP</span> <span class="n">enabled</span>    <span class="n">interfaces</span>
+<span class="n">br0</span>        <span class="mf">8000.94</span><span class="n">ebcd8eeb3f</span>    <span class="n">no</span>        <span class="n">enp0s25</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<h3>其他方法<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>其他方法我没有实践，列举如下:</p>
+<ul class="simple">
+<li>使用netctl: <a class="reference external" href="https://wiki.archlinux.org/index.php/Bridge_with_netctl">Bridge with netctl</a></li>
+<li>使用systemd-networkd: <a class="reference external" href="https://wiki.archlinux.org/index.php/Systemd-networkd#Bridge_interface">systemd-networkd#Bridge interface</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>配置虚拟机<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">对于新安装虚拟机，可以直接指定网络设备的bridge:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="o">=</span><span class="n">br0</span> <span class="o">...</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">对于 <a class="reference internal" href="../../create_vm.html#create-vm"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a> ，已经创建的虚拟机，可以通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">win10</span></code> 编辑已经存在的虚拟机配置，修改或添加网卡设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">interface</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;bridge&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">mac</span> <span class="n">address</span><span class="o">=</span><span class="s1">&#39;52:54:00:9f:98:c9&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span> <span class="n">bridge</span><span class="o">=</span><span class="s1">&#39;br0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">model</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;virtio&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">interface</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">这里 <code class="docutils literal notranslate"><span class="pre">&lt;model</span> <span class="pre">type='virtio'/&gt;</span></code> 选项可选添加，需要确保guest操作系统已经安装过virtio驱动(Linux默认)</p>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://jamielinux.com/docs/libvirt-networking-handbook/bridged-network.html">libvirt Networking Handbook - Bridged network</a></li>
 <li><a class="reference external" href="https://wiki.archlinux.org/index.php/Network_bridge">Arch Linux社区文档 - Network bridge</a></li>
