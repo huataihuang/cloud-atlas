@@ -12,6 +12,8 @@ Arch Linux
    xfce.rst
    xrdp.rst
    seamless_rdp.rst
+   cross_compile.rst
+   gpu_deep_learning_on_arch_linux.rst
 
 .. only::  subproject and html
 

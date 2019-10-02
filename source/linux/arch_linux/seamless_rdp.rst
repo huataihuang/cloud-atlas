@@ -76,6 +76,14 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
    main.c:27:10: fatal error: windows.h: No such file or directory
       27 | #include <windows.h>
 
+上述报错是因为没有安装跨平台编译环境，例如对于fedora 26需要安装mingw32-gcc和mingw64-gcc。对于arch linux，参考 `MinGW package guidelines <https://wiki.archlinux.org/index.php/MinGW_package_guidelines>`_ 则需要通过 :ref:`archlinux_aur` 安装 ``mingw-w64-gcc`` ::
+
+   yay -S mingw-w64-gcc-base mingw-w64-gcc
+
+.. note::
+
+   详细请参考
+
 - 安装
 
 首先打包已经编译输出的Windows执行程序::

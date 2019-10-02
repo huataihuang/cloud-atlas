@@ -41,6 +41,7 @@
    ipmitool_tips.rst
    dnf.rst
    ip_command.rst
+   win10_ssh_server.rst
 
 
 .. only::  subproject and html
