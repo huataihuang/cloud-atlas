@@ -57,3 +57,12 @@ GoldenDict
 - 安装::
 
    pacman -S goldendict
+
+flameshot
+---------------
+
+`Flameshot <https://flameshot.js.org/>`_ 是一个轻量级截图软件，并且支持直接图形编译，添加一些标注。并且flameshot和Xfce集成非常完美，能够在托盘驻留，编辑后的截图还可以传送给其他程序进一步出来。
+
+- 安装::
+
+   pacman -S flameshot

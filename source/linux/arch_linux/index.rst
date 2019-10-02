@@ -1,15 +1,17 @@
-.. _kali_linux:
+.. _arch_linux:
 
 =================================
-Kali Linux Atlas
+Arch Linux
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_kali_linux.rst
-   startup_prepare/index
-   startup/index
+   archlinux_aur.rst
+   archlinux_developer.rst
+   xfce.rst
+   xrdp.rst
+   seamless_rdp.rst
 
 .. only::  subproject and html
 

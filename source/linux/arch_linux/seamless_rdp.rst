@@ -46,7 +46,7 @@ Windows 10操作系统需要开启远程桌面访问，设置方法：
 
 - 在 ``System Properties`` 设置的 ``Remote`` 面板，有一个 ``Remote Desktop`` 设置区域，选择 ``Allow remote connections to this computer`` 。注意：一定要去除 ``Allow connections only from computers running Remote Desktop with Network Level Authentication (recommended)`` ，否则Linux客户端的rdesktop无法访问。
 
-.. figure:: ../_static/kvm/win10_rdp_setting.png
+.. figure:: ../../_static/kvm/win10_rdp_setting.png
    :scale: 75%
 
 SeamlessRDP
