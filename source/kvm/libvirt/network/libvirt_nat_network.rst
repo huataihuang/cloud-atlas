@@ -110,6 +110,70 @@ libvirt会添加iptables规则INPUT, FORWARD, OUTPUT 和 POSTROUTING 链路，�
 
     创建虚拟机参考 :ref:`create_vm`
 
+virbr0设备DOWN排查
+====================
+
+发现一个比较奇怪的问题，之前工作正常的NAT libvirt网络，突然不能正常通讯，虚拟机无法ping网关192.168.122.1，但是实际上default的libvirt网络是激活状态的::
+
+   virsh net-list
+
+显示正常::
+
+    Name      State    Autostart   Persistent
+   --------------------------------------------
+    default   active   yes         yes   
+
+``brctl show`` 也正常显示了虚拟网卡设备 ``virbr0-nic``::
+
+   bridge name	bridge id		STP enabled	interfaces
+   br0		8000.7e33f1ea9ee3	no		
+   virbr0		8000.7a5026bf337c	yes		virbr0-nic
+
+但是，使用 ``ip addr`` 显示libvirt网络并未启动::
+
+   6: virbr0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+       link/ether 7a:50:26:bf:33:7c brd ff:ff:ff:ff:ff:ff
+       inet 192.168.122.1/24 brd 192.168.122.255 scope global virbr0
+          valid_lft forever preferred_lft forever
+   7: virbr0-nic: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master virbr0 state DOWN group default qlen 1000
+       link/ether 52:54:00:45:db:25 brd ff:ff:ff:ff:ff:ff
+
+启动虚拟机之后检查，可以看到 ``virbr0`` 设备恢复了UP状态，但是绑定的``virbr0-nic``依然状态DOWN::
+
+   6: virbr0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+       link/ether 7a:50:26:bf:33:7c brd ff:ff:ff:ff:ff:ff
+       inet 192.168.122.1/24 brd 192.168.122.255 scope global virbr0
+          valid_lft forever preferred_lft forever
+   7: virbr0-nic: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master virbr0 state DOWN group default qlen 1000
+       link/ether 52:54:00:45:db:25 brd ff:ff:ff:ff:ff:ff
+   10: vnet0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master virbr0 state UNKNOWN group default qlen 1000
+       link/ether 6e:5e:da:70:92:0b brd ff:ff:ff:ff:ff:ff
+       inet6 fe80::fc54:ff:fe9f:98b9/64 scope link 
+          valid_lft forever preferred_lft forever
+
+这让我很疑惑，特别是虚拟机网开 ``vnet0`` 状态 UNKNOWN 并且 ``virbr0-nic`` 状态始终为DOWN。
+
+检查 ``brctl show`` 显示::
+
+   bridge name  bridge id               STP enabled     interfaces
+   br0          8000.7e33f1ea9ee3       no
+   virbr0       8000.7a5026bf337c       yes             virbr0-nic
+                                                        vnet0
+
+之前发现 ``virbr0`` 接口始终是DOWN状态，这可能是VM网络不通的原因。我关闭虚拟机，使用了 ``ip link set virtbr0 up`` 设置之后，再启动虚拟机，则这个接口会从DOWN自动转变成UP。则此时虚拟机能够通讯了。但是 ``virbr0-nic`` 始终是DOWN状态。
+
+参考 `How virbr0-nic is created? <https://serverfault.com/questions/516366/how-virbr0-nic-is-created>`_ 解说，这个 ``virbr0-nic`` 是网络dummy设备。
+
+使用以下命令可以检查虚拟机的虚拟网卡设备::
+
+   sudo virsh domiflist win10
+
+输出显示::
+
+    Interface   Type     Source   Model    MAC
+   -----------------------------------------------------------
+    vnet0       bridge   virbr0   virtio   52:54:00:9f:98:b9
+
 参考
 ========
 

@@ -170,6 +170,12 @@ Windows会搜索到正确的驱动，请点击确认安装，注意选择了 ``A
 
    `Remmina <https://remmina.org/>`_ 是支持多种协议(RDP, VNC, SPICE, NX, XDMCP, SSH and EXEC)的远程桌面客户端。
 
+.. note::
+
+   Windows的更新升级默认会在系统中保留历次update的安装包，以便能够回滚。但是虚拟机磁盘空间往往有限，所以建议通过Disk cleanup工具清理。请参考 `Huge LCU-Folder after latest Cumulative Update on Windows 10 1809 <https://social.technet.microsoft.com/Forums/en-US/be35a9ee-a610-4fdc-bb6c-50b9f458d19a/huge-lcufolder-after-latest-cumulative-update-on-windows-10-1809?forum=win10itprosetup>`_ : ``c:\Windows\servicing\LCU`` 目录即最新累积更新(Lastest Cumulative Update,LCU)中有最近更新的下载软件包，可以通过选择Disk Cleanup工具的 ``Clean up system files`` 然后勾选 ``windows update cleanup`` 清理。
+
+   如果通过第三方软件包安装管理工具安装软件，则可能在 ``c:\Users\<用户名>\AppData\Local\Temp\`` 目录下有缓存下载文件。
+
 虚拟机串口设置
 =================
 
