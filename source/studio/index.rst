@@ -20,6 +20,7 @@ Studio Atlas
    archlinux_on_thinkpad_x220.rst
    kvm_docker_in_studio.rst
    btrfs_in_studio.rst
+   lvm_xfs_in_studio.rst
    kubenetes_in_studio.rst
    studio_ip.rst
    ntp_in_studio.rst
