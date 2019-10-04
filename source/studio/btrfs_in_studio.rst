@@ -21,6 +21,14 @@ Studio环境的Btrfs存储
    此时使用 ``top`` 观察系统处理器use和sys都不高，还有较多idle，但是系统负载达到10+，超过了主机cpu个数，运行非常缓慢。强制杀掉VM后回复正常。
 
    另外一个现象是在 ``/var/lib/libvirt/images`` 目录下压缩30G大小Windows镜像，压缩非常缓慢远超过1小时，并且压缩文件解压缩以后，Wiondows虚拟机运行时显示磁盘文件系统损坏，自动修复依然失败。
+   
+   复制报错::
+
+      cp: error reading 'win10.qcow2': Input/output error
+
+   执行vm clone报错::
+
+      ERROR    Couldn't create storage volume 'win10.qcow2': 'internal error: Child process (/usr/bin/qemu-img convert -f qcow2 -O qcow2 -o compat=1.1,lazy_refcounts /data-libvirt/images/win10.qcow2 /var/lib/libvirt/images/win10.qcow2) unexpected exit status 1: qemu-img: error while reading sector 13647872: Input/output error
 
 按照我的实践经验，btrfs的基本功能稳定，但是高级压缩功能可能存在风险。
 
