@@ -8,6 +8,28 @@ Studio环境的Btrfs存储
 
    Btrfs实践是在Ubuntu和Arch Linux完成，本文在涉及不同操作系统时会指出区别，并综合两者的文档。
 
+.. warning::
+
+   我在Arch Linux上实践 :ref:`using_btrfs_in_studio` 遇到运行Windows虚拟机间歇性hang的问题，推测和Btrfs开启了 ``zstd`` 压缩有关。因为之前在Ubuntu上部署btrfs使用了很长时间也没有遇到问题，但是这次系统报错::
+
+      [Tue Oct  1 23:44:37 2019] BTRFS warning (device sda4): csum failed root 257 ino 293 off 15661608960 csum 0x445ced74 expected csum 0x2f7d82ec mirror 1
+      [Tue Oct  1 23:44:38 2019] BTRFS warning (device sda4): csum failed root 257 ino 293 off 15661608960 csum 0x445ced74 expected csum 0x2f7d82ec mirror 1
+      ...
+      [Tue Oct  1 23:44:47 2019] mce: CPU2: Core temperature above threshold, cpu clock throttled (total events = 73235)
+      [Tue Oct  1 23:44:47 2019] mce: CPU3: Core temperature above threshold, cpu clock throttled (total events = 73235)
+
+   此时使用 ``top`` 观察系统处理器use和sys都不高，还有较多idle，但是系统负载达到10+，超过了主机cpu个数，运行非常缓慢。强制杀掉VM后回复正常。
+
+   另外一个现象是在 ``/var/lib/libvirt/images`` 目录下压缩30G大小Windows镜像，压缩非常缓慢远超过1小时，并且压缩文件解压缩以后，Wiondows虚拟机运行时显示磁盘文件系统损坏，自动修复依然失败。
+
+按照我的实践经验，btrfs的基本功能稳定，但是高级压缩功能可能存在风险。
+
+.. note::
+
+   参考 `Red Hat banishes Btrfs from RHEL <https://www.theregister.co.uk/2017/08/16/red_hat_banishes_btrfs_from_rhel>`_ 报道，Red Hat在RHEL 7.4还保持Btrfs上游补丁更新，但之后放弃了Btrfs功能更新。从 RHEL 8 `Considerations in adopting RHEL 8Chapter 12. File systems and storage <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/considerations_in_adopting_rhel_8/file-systems-and-storage_considerations-in-adopting-rhel-8>`_ 可以看到Red Hat Enterprise Linux 8已经完全移除了Btrfs支持，已经不能在RHEL中创建、挂载和安装Btrfs文件系统。
+
+
+
 初始安装操作系统的磁盘
 =========================
 
