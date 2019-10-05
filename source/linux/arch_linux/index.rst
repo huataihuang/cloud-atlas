@@ -8,6 +8,7 @@ Arch Linux
    :maxdepth: 1
 
    archlinux_aur.rst
+   alien_convert_package.rst
    archlinux_developer.rst
    xfce.rst
    xrdp.rst
