@@ -96,9 +96,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#id1">方案选择</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lvm">LVM卷管理</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id2">创建分区</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">创建物理卷</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">卷组管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">逻辑卷</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xfs">XFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="kubenetes_in_studio.html">Studio中的kubernetes</a></li>
@@ -119,6 +123,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../machine_learning/index.html">Machine Learning Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../linux/index.html">Linux Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../real/index.html">Real Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">附录</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../copyright.html">Copyright</a></li>
@@ -258,17 +263,112 @@
  <span class="mi">3</span>      <span class="mf">51.7</span><span class="n">GB</span>  <span class="mi">512</span><span class="n">GB</span>   <span class="mi">460</span><span class="n">GB</span>                <span class="n">data</span>  <span class="n">lvm</span>
 </pre></div>
 </div>
-<p>以上分区3将作为数据存储的LVM卷。</p>
-<p>不过 <code class="docutils literal notranslate"><span class="pre">partprobe</span></code> 提示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span><span class="p">:</span> <span class="n">The</span> <span class="n">driver</span> <span class="n">descriptor</span> <span class="n">says</span> <span class="n">the</span> <span class="n">physical</span> <span class="n">block</span> <span class="n">size</span> <span class="ow">is</span> <span class="mi">2048</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">but</span> <span class="n">Linux</span> <span class="n">says</span> <span class="n">it</span> <span class="ow">is</span> <span class="mi">512</span> <span class="nb">bytes</span><span class="o">.</span>
+<p>以上分区3将作为数据存储的LVM卷。对于修改系统磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 分区，则建议重启一次操作系统以便刷新。或者通过 <code class="docutils literal notranslate"><span class="pre">partprobe</span></code> 刷新分区。</p>
+</div>
+<div class="section" id="id3">
+<h3>创建物理卷<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>初始化物理卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>如果有多个设备，可以一起初始化，例如:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdd1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdf1</span>
 </pre></div>
 </div>
 </div>
+<ul>
+<li><p>检查物理卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvdispaly</span>
+</pre></div>
 </div>
-<div class="section" id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;/dev/sda3&quot;</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">new</span> <span class="n">physical</span> <span class="n">volume</span> <span class="n">of</span> <span class="s2">&quot;&lt;428.78 GiB&quot;</span>
+<span class="o">---</span> <span class="n">NEW</span> <span class="n">Physical</span> <span class="n">volume</span> <span class="o">---</span>
+<span class="n">PV</span> <span class="n">Name</span>               <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
+<span class="n">VG</span> <span class="n">Name</span>
+<span class="n">PV</span> <span class="n">Size</span>               <span class="o">&lt;</span><span class="mf">428.78</span> <span class="n">GiB</span>
+<span class="n">Allocatable</span>           <span class="n">NO</span>
+<span class="n">PE</span> <span class="n">Size</span>               <span class="mi">0</span>
+<span class="n">Total</span> <span class="n">PE</span>              <span class="mi">0</span>
+<span class="n">Free</span> <span class="n">PE</span>               <span class="mi">0</span>
+<span class="n">Allocated</span> <span class="n">PE</span>          <span class="mi">0</span>
+<span class="n">PV</span> <span class="n">UUID</span>               <span class="n">HYPqoi</span><span class="o">-</span><span class="n">s2Ga</span><span class="o">-</span><span class="n">r2c9</span><span class="o">-</span><span class="n">upv6</span><span class="o">-</span><span class="n">Q3by</span><span class="o">-</span><span class="n">DFf3</span><span class="o">-</span><span class="n">NJe9BT</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>卷组管理<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>在物理卷上构建卷组:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vgcreate</span> <span class="n">data</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>这里将卷组命名为 <code class="docutils literal notranslate"><span class="pre">data</span></code></p>
+<p>当物理卷用于创建卷组的时候，它的磁盘空间默认被划分为以4MB为单位的 <code class="docutils literal notranslate"><span class="pre">extent</span></code> 。这个 <code class="docutils literal notranslate"><span class="pre">extent</span></code> 是用于逻辑卷增长和缩减的最小大小。 <code class="docutils literal notranslate"><span class="pre">extent</span></code> 的数量不会影响逻辑卷的I/O性能。</p>
+</div>
+<ul>
+<li><p>如果要扩展卷组，可以新的物理卷加入到卷组，例如，以下在卷组 <code class="docutils literal notranslate"><span class="pre">vg1</span></code> 中添加 <code class="docutils literal notranslate"><span class="pre">/dev/sdf1</span></code> 物理卷来扩展卷组的大小:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vgextend</span> <span class="n">vg1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdf1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h3>逻辑卷<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">data</span></code> 卷组上创建 <code class="docutils literal notranslate"><span class="pre">home</span></code> 逻辑卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvcreate</span> <span class="o">-</span><span class="n">L</span> <span class="mi">100</span><span class="n">G</span> <span class="o">-</span><span class="n">n</span> <span class="n">home</span> <span class="n">data</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查逻辑卷 <code class="docutils literal notranslate"><span class="pre">lvdisplay</span></code> 显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---</span> <span class="n">Logical</span> <span class="n">volume</span> <span class="o">---</span>
+<span class="n">LV</span> <span class="n">Path</span>                <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">home</span>
+<span class="n">LV</span> <span class="n">Name</span>                <span class="n">home</span>
+<span class="n">VG</span> <span class="n">Name</span>                <span class="n">data</span>
+<span class="n">LV</span> <span class="n">UUID</span>                <span class="n">gIwomd</span><span class="o">-</span><span class="n">B9x2</span><span class="o">-</span><span class="n">MRNP</span><span class="o">-</span><span class="n">o2Jd</span><span class="o">-</span><span class="n">diqn</span><span class="o">-</span><span class="n">Tgji</span><span class="o">-</span><span class="n">N70rP4</span>
+<span class="n">LV</span> <span class="n">Write</span> <span class="n">Access</span>        <span class="n">read</span><span class="o">/</span><span class="n">write</span>
+<span class="n">LV</span> <span class="n">Creation</span> <span class="n">host</span><span class="p">,</span> <span class="n">time</span> <span class="n">zcloud</span><span class="p">,</span> <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">05</span> <span class="mi">23</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mi">59</span> <span class="o">+</span><span class="mi">0800</span>
+<span class="n">LV</span> <span class="n">Status</span>              <span class="n">available</span>
+<span class="c1"># open                 0</span>
+<span class="n">LV</span> <span class="n">Size</span>                <span class="mf">100.00</span> <span class="n">GiB</span>
+<span class="n">Current</span> <span class="n">LE</span>             <span class="mi">25600</span>
+<span class="n">Segments</span>               <span class="mi">1</span>
+<span class="n">Allocation</span>             <span class="n">inherit</span>
+<span class="n">Read</span> <span class="n">ahead</span> <span class="n">sectors</span>     <span class="n">auto</span>
+<span class="o">-</span> <span class="n">currently</span> <span class="nb">set</span> <span class="n">to</span>     <span class="mi">256</span>
+<span class="n">Block</span> <span class="n">device</span>           <span class="mi">254</span><span class="p">:</span><span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>同样再创建一个用于libvirt的逻辑卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvcreate</span> <span class="o">-</span><span class="n">L</span> <span class="mi">128</span><span class="n">G</span> <span class="o">-</span><span class="n">n</span> <span class="n">libvirt</span> <span class="n">data</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="xfs">
+<h2>XFS<a class="headerlink" href="#xfs" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/LVM">Arch Linux社区文档 - LVM</a></p></li>
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/XFS">Arch Linux社区文档 - XFS</a></p></li>
 </ul>
 </div>
 </div>
