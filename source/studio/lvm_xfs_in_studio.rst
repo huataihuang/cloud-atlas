@@ -155,10 +155,35 @@ LVM构建基础概念:
 XFS
 ===========
 
+.. note::
 
+   详细XFS相关请参考 :ref:`xfs` 和 :ref:`xfs_tunning`
+
+- 安装XFS管理工具 ``xfsprogs`` ::
+
+   sudo pacman -S xfsprogs
+
+- 格式化LVM卷::
+
+   mkfs.xfs /dev/data/home
+   mkfs.xfs /dev/data/home
+
+- 配置 ``/etc/fstab`` ::
+
+   /dev/mapper/data-home  /home  xfs  defaults  0 1
+   /dev/mapper/data-libvirt  /var/lib/libvirt  xfs  defaults  0 1
+
+- 挂载目录(注意，请使用root用户的单用户状态登陆，避免普通用户登陆影响/home目录修改)::
+
+   mount /home
+   mount /var/lib/libvirt
+
+.. note::
+
+   实际我的操作是采用root用户登陆后，将上述两个XFS文件系统先挂载到临时目录下，将数据迁移到新建的XFS文件系统中，然后再切换目录挂载来完成的。请参考 :ref:`using_btrfs_in_studio` 中切换 libvirt 目录到btrfs文件系统步骤。
 
 参考
-======
+=========
 
 - `Arch Linux社区文档 - LVM <https://wiki.archlinux.org/index.php/LVM>`_
 - `Arch Linux社区文档 - XFS <https://wiki.archlinux.org/index.php/XFS>`_

@@ -4,7 +4,7 @@
 EDAC 诊断系统硬件故障
 =========================
 
-当前Linux内核和故障检测框架已经转向 Error detection and correction (EDAC) 架构，替代了早期使用的MCE。
+当前Linux内核和故障检测框架已经转向 Error detection and correction (EDAC) 架构，替代了早期使用的MCE(mcelog)。
 
 mcelog
 ===============
