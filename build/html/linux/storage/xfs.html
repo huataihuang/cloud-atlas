@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Linux服务器 &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>XFS文件系统 &mdash; Cloud Atlas 0.1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
-    <link rel="next" title="EDAC 诊断系统硬件故障" href="edac.html" />
-    <link rel="prev" title="XFS性能优化" href="../storage/xfs_tunning.html" /> 
+    <link rel="next" title="XFS性能优化" href="xfs_tunning.html" />
+    <link rel="prev" title="Linux文件系统选择" href="choice_linux_filesystem.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -98,11 +98,20 @@
 <li class="toctree-l2"><a class="reference internal" href="../redhat_linux/index.html">RedHat Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arch_linux/index.html">Arch Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kali_linux/index.html">Kali Linux</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Linux存储</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Linux服务器</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="edac.html">EDAC 诊断系统硬件故障</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Linux存储</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="choice_linux_filesystem.html">Linux文件系统选择</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">XFS文件系统</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">安装和修复XFS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#xfs-scrub">XFS在线元数据检验(scrub)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">XFS元数据校验</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">XFS性能</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">XFS条带大小和宽度</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="xfs_tunning.html">XFS性能优化</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../server/index.html">Linux服务器</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
@@ -161,13 +170,15 @@
         
           <li><a href="../index.html">Linux Atlas</a> &raquo;</li>
         
-      <li>Linux服务器</li>
+          <li><a href="index.html">Linux存储</a> &raquo;</li>
+        
+      <li>XFS文件系统</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/linux/server/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/linux/storage/xfs.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -180,12 +191,60 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="linux">
-<span id="linux-server"></span><h1>Linux服务器<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+  <div class="section" id="xfs">
+<span id="id1"></span><h1>XFS文件系统<a class="headerlink" href="#xfs" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id2">
+<h2>安装和修复XFS<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="edac.html">EDAC 诊断系统硬件故障</a></li>
+<li><p>安装XFS管理工具 <code class="docutils literal notranslate"><span class="pre">xfsprogs</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">xfsprogs</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果需要修复XFS文件系统，需要先umount之后再修复:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">umount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
+<span class="n">xfs_repair</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
+</pre></div>
+</div>
+</li>
 </ul>
+</div>
+<div class="section" id="xfs-scrub">
+<h2>XFS在线元数据检验(scrub)<a class="headerlink" href="#xfs-scrub" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>XFS的scrub可以用来检验元数据，但是这是一个试验性质程序。</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">xfs_scrub</span></code> 会查询内核有有关XFS文件系统所有元数据独爱想。元数据记录被扫描检查明显损坏值然后交叉应用另一个元数据。目的是通过检查单个元数据记录相对于文件系统中其他元数据的一致性来建立对整个文件系统一致性的合理信心。如果存在完整的冗余数据结构，则可以从其他元数据重建损坏的元数据。</p>
+<p>通过启动和激活 <code class="docutils literal notranslate"><span class="pre">xfs_scrub_all.timer</span></code> 来周期性检查在线XFS文件系统的元数据。</p>
+</div>
+<div class="section" id="id3">
+<h2>XFS元数据校验<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>xfsprogs 3.2.0引入了一个磁盘格式v5包含了元数据校验和机制，称为”自描述元数据”(Self-Describing Metadata)，基于CRC32，提供了对于元数据的附加保护，避免电源故障时发生意外。从xfsprogs 3.2.3开始默认激活了校验，不过对于比较旧哦内核，可以通过 <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">crc=0</span></code> 关闭校验:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">xfs</span> <span class="o">-</span><span class="n">m</span> <span class="n">crc</span><span class="o">=</span><span class="mi">0</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">target_partition</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>XFS性能<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>在RAID社别上使用XFS时候，有可能通过使用 <code class="docutils literal notranslate"><span class="pre">largeio</span></code> , <code class="docutils literal notranslate"><span class="pre">swalloc</span></code> 参数值增加来提高性能。参考:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://help.marklogic.com/Knowledgebase/Article/View/505/0/recommended-xfs-settings-for-marklogic-server">Recommended XFS settings for MarkLogic Server</a></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>MarkLogic Server是面向文档的No-SQL数据库，上文提供了XFS优化策略可以参考实践。</p>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>XFS条带大小和宽度<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>如果文件系统建立在条代化的RAID之上，通过 <code class="docutils literal notranslate"><span class="pre">mkfs.xfs</span></code> 命令参数设置特定条带大小可以显著提升性能。XFS有时能够检查出底层软RAID的分布，但是对于硬件RAID，请参考 <a class="reference external" href="http://xfs.org/index.php/XFS_FAQ#Q:_How_to_calculate_the_correct_sunit.2Cswidth_values_for_optimal_performance">how to calculate the correct sunit,swidth values for optimal performance</a></p>
+<div class="section" id="id6">
+<h3>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/XFS">Arch Linux社区文档 - XFS</a></p></li>
+</ul>
+</div>
 </div>
 </div>
 
@@ -197,10 +256,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="edac.html" class="btn btn-neutral float-right" title="EDAC 诊断系统硬件故障" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="xfs_tunning.html" class="btn btn-neutral float-right" title="XFS性能优化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../storage/xfs_tunning.html" class="btn btn-neutral float-left" title="XFS性能优化" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="choice_linux_filesystem.html" class="btn btn-neutral float-left" title="Linux文件系统选择" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

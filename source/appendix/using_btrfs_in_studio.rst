@@ -141,6 +141,9 @@ libvirt和docker数据迁移到btrfs(可选)
 - 停止libvirt服务::
 
    systemctl stop libvirtd
+   systemctl stop libvirtd-admin.socket
+   systemctl stop libvirtd-ro.socket
+   systemctl stop libvirtd.socket
    systemctl stop virtlogd.socket
    systemctl stop virtlogd-admin.socket
    systemctl stop virtlockd-admin.socket

@@ -8,6 +8,8 @@ Linux存储
    :maxdepth: 1
 
    choice_linux_filesystem.rst
+   xfs.rst
+   xfs_tunning.rst
 
 .. only::  subproject and html
 

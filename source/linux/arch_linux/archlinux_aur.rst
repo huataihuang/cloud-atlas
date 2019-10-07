@@ -22,6 +22,14 @@ AUR helper
 
    `为什么一个个的AUR helper停止了开发？ <https://zhuanlan.zhihu.com/p/60874343>`_ 提到了著名的AUR helper yaourt停止维护的信息，以及推荐 `yay - Yet another Yogurt - An AUR Helper written in Go <https://github.com/Jguer/yay>`_ 作为AUR helper。使用方法可以参考 `Manjaro 使用基础 <https://www.cnblogs.com/kirito-c/p/11181978.html>`_ 。
 
+yay是使用Go编写的Arch Linux AUR helper，基于 yaourt, apacman 和 pacaur 的设计，完善地解决了AUR安装依赖，并具有以下特性:
+
+- yay自身几乎无依赖
+- 为pacman提供了一个接口
+- 具有yaourt相似的搜索
+- 最小化用户输入
+- 在升级中能够使用git包
+
 - 下载yay源代码并编译::
 
    git clone https://aur.archlinux.org/yay.git
@@ -63,8 +71,49 @@ AUR helper
 
    yay 不建议使用root/sudo执行，所有操作命令类似pacman，非常方便。
 
+- 使用yay删除软件::
+
+   yay -Rns package
+
+- 加载一个包选择菜单::
+
+   yay <search term>
+
+- 使用yay升级已经安装的包::
+
+   yay -Syu
+
+.. note::
+
+   使用 ``yay -Syu`` 升级时，有时候会看到提示::
+
+      :: Searching AUR for updates...
+       -> Out Of Date AUR Packages:  android-studio  rpm-org
+       there is nothing to do
+
+   这里表示包含的release声明中已经有最新的tar包，可以通过email通知维护者更新。如果维护者2周以后仍然没有答复，你可以发起一个orphan request(孤儿请求)，即请求原维护者放弃包属主全权限。
+
+   在维护期内，你可以编辑本地的PKGBUILD来更新软件。
+
+- 包含开发包::
+
+   yay -Syu --devel --timeupdate
+
+- 清理不需要的依赖::
+
+   yay -Yc
+
+- 打印系统状态::
+
+   yay -Ps
+
+- 生成开发包数据库用于devel升级::
+
+   yay -Y --gendb
+
 参考
 ======
 
 - `Arch User Repository <https://wiki.archlinux.org/index.php/Arch_User_Repository>`_
 - `How to Install Deb Package in Arch Linux <https://www.maketecheasier.com/install-deb-package-in-arch-linux/>`_
+- `yay – Best AUR Helper for Arch Linux / Manjaro <https://computingforgeeks.com/yay-best-aur-helper-for-arch-linux-manjaro/>`_
