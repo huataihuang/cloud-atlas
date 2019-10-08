@@ -4,6 +4,14 @@
 主机间共享键盘鼠标
 =======================
 
+.. note::
+
+   Synergy是我购买的一款非常有价值的软件：对于类似我这样跨平台工作的人来说，能够无缝在多台电脑(不同操作系统)共享一套键盘鼠标，极大提高了工作效率：
+
+   - 多屏幕显示内容，等我有时间排好最强屏幕给大家秀一下
+   - 支持跨系统剪贴板共享：这点非常重要，我需要能够在Linux,macOS,Windows之间剪贴板内容，方便使用不同平台的软件
+   - 解决了一些特定商用软件没有Linux版本的缺陷：例如，我在macOS上运行的钉钉(没有Linux版本)，我可以一边和同事沟通，一边用我的Linux笔记本ssh登陆服务器维护。而且可以在两个平台之间复制粘贴共享文本内容，基本解决了运维协作问题。
+
 在 :ref:`ubuntu_on_mbp` 之后，我的日常桌面工作在一台MacBook Pro上完成，桌面操作系统是macOS。使用macOS工作可以节约大量的折腾桌面的时间，可以集中精力做开发和运维工作。不过，既然我 :ref:`ubuntu_on_mbp` 用来模拟大规模的集群部署，Linux的桌面也运行起来，相当于在办公桌上又多了一块屏幕，不充分利用实在太可惜了。
 
 .. note::
@@ -21,6 +29,8 @@
 .. warning::
 
    使用Synergy需要注意安全性，请在安全环境使用：你的笔记本是通过网络共享由远程键盘鼠标控制的，所以安全的方法是采用OpenSSH端口转发方式来实现加密通讯。在 `Synergy官方 <https://symless.com/synergy>`_ 提供的最新版本增加了加密通讯功能，所以更为安全可靠。
+
+   推荐购买官方提供的Pro版本，内置了SSL加密通讯。
 
 安装Synergy
 =================
@@ -54,6 +64,10 @@
 
    sudo dpkg -i synergy_1.10.1.stable_b81+8941241e_ubuntu_amd64.deb
 
+- Arch Linux也可以通过 :ref:`archlinux_aur` 安装 synergy::
+
+   yay -S synergy
+
 使用Synergy
 ===============
 
@@ -64,3 +78,11 @@
 - 回到macOS上，点击状态栏上的Synergy图标的 ``show`` 菜单，在管理界面上点击 ``Configure Server...`` 按钮，然后点击拖放右上角的电脑图标（代表Client），拖放到部署界面的位置，然后将Client主机的名字设置成和实际相同（例如，我的Ubuntu主机的名字是 ``xcloud`` ），完成后点击 ``Ok`` 。再次重启 Server端，就可以看到两台服务器建立了连接。
 
 现在可以顺畅使用两台主机，Ubuntu的图形界面就是一块扩展屏幕。
+
+防火墙端口
+---------------
+
+如果将Linux作为Server共享键盘和鼠标，则需要在Linux上开启防火墙端口24800::
+
+   sudo firewall-cmd --zone=public --add-port=24800/tcp
+   sudo firewall-cmd --runtime-to-permanent
