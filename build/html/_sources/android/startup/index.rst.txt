@@ -11,6 +11,7 @@ Android 起步
 
    android_develop_env.rst
    android_vm_acceleration.rst
+   anbox.rst
 
 .. only::  subproject and html
 

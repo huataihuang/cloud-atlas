@@ -111,6 +111,21 @@ yay是使用Go编写的Arch Linux AUR helper，基于 yaourt, apacman 和 pacaur
 
    yay -Y --gendb
 
+PKGBUILD补丁
+==============
+
+在通过AUR安装 :ref:`anbox` 时遇到编译报错，需要patch PKGBUILD。参考 `how to write a patch and how to integrate it in PKGBUILD <https://bbs.archlinux.org/viewtopic.php?id=4309>`_ 采用 `Anbox installation fail.. <https://bbs.archlinux.org/viewtopic.php?id=249747>`_ 提供的 logger.patch 。
+
+在 ``~/.cache/yay/anbox-git/src/anbox`` 目录下存放 ``logger.patch`` ，然后编辑 ``.cache/yay/anbox-git/PKGBUILD`` 在 ``package_anbox-git()`` 段落添加一行::
+
+   patch -Np0 -i patchfile
+
+然后执行::
+
+   updpkgsums
+
+更新 ``md5sums`` 部分
+
 参考
 ======
 

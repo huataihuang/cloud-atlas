@@ -20,6 +20,7 @@
 .. toctree::
    :maxdepth: 1
 
+   write_doc.rst
    intel_core_i7_4850hq.rst
    thinkpad_x220.rst
    intel_core_i5_2410m.rst

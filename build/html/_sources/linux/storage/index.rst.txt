@@ -7,9 +7,7 @@ Linux存储
 .. toctree::
    :maxdepth: 1
 
-   choice_linux_filesystem.rst
-   xfs.rst
-   xfs_tunning.rst
+   filesystem/index
 
 .. only::  subproject and html
 
