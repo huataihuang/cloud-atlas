@@ -116,15 +116,32 @@ PKGBUILD补丁
 
 在通过AUR安装 :ref:`anbox` 时遇到编译报错，需要patch PKGBUILD。参考 `how to write a patch and how to integrate it in PKGBUILD <https://bbs.archlinux.org/viewtopic.php?id=4309>`_ 采用 `Anbox installation fail.. <https://bbs.archlinux.org/viewtopic.php?id=249747>`_ 提供的 logger.patch 。
 
-在 ``~/.cache/yay/anbox-git/src/anbox`` 目录下存放 ``logger.patch`` ，然后编辑 ``.cache/yay/anbox-git/PKGBUILD`` 在 ``package_anbox-git()`` 段落添加一行::
+- 在 ``~/.cache/yay/anbox-git/`` 目录下存放 ``logger.patch`` ，因为patch文件需要位于PKGBUILD相同目录。
 
-   patch -Np0 -i patchfile
+- 编辑PKGBUILD，在 ``source=`` 的列表变量部分添加补丁文件名::
 
-然后执行::
+   source=("git+https://github.com/anbox/anbox.git"
+           ...
+           'logger.patch')
 
-   updpkgsums
+ 这样，这个 ``logger.patch`` 就会复制到 ``src`` 目录中。
 
-更新 ``md5sums`` 部分
+- 执行 ``updpkgsums`` 命令(这个工具位于 ``pacman-crontab`` 软件包)，就会更新 ``md5sums`` 这个列表变量，或者手工在 ``md5sum`` 列表中加入
+ 
+- 在PKGBUILD文件中创建 ``prepare()`` 函数(如果还没有的话)，添加::
+
+   cd "$srcdir/$pkgname-$pkgver"
+   patch --strip=1 --input=logger.patch
+
+- 然后执行命令::
+
+   makepkg
+
+在补丁自动实施了。
+
+.. note::
+
+   以上补丁方法我还没有实践，待后续实践验证。
 
 参考
 ======

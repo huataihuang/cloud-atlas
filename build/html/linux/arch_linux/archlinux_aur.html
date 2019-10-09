@@ -324,15 +324,38 @@
 <div class="section" id="pkgbuild">
 <h2>PKGBUILD补丁<a class="headerlink" href="#pkgbuild" title="Permalink to this headline">¶</a></h2>
 <p>在通过AUR安装 <a class="reference internal" href="../../android/startup/anbox.html#anbox"><span class="std std-ref">Anbox运行Andorid程序</span></a> 时遇到编译报错，需要patch PKGBUILD。参考 <a class="reference external" href="https://bbs.archlinux.org/viewtopic.php?id=4309">how to write a patch and how to integrate it in PKGBUILD</a> 采用 <a class="reference external" href="https://bbs.archlinux.org/viewtopic.php?id=249747">Anbox installation fail..</a> 提供的 logger.patch 。</p>
-<p>在 <code class="docutils literal notranslate"><span class="pre">~/.cache/yay/anbox-git/src/anbox</span></code> 目录下存放 <code class="docutils literal notranslate"><span class="pre">logger.patch</span></code> ，然后编辑 <code class="docutils literal notranslate"><span class="pre">.cache/yay/anbox-git/PKGBUILD</span></code> 在 <code class="docutils literal notranslate"><span class="pre">package_anbox-git()</span></code> 段落添加一行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">patch</span> <span class="o">-</span><span class="n">Np0</span> <span class="o">-</span><span class="n">i</span> <span class="n">patchfile</span>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">~/.cache/yay/anbox-git/</span></code> 目录下存放 <code class="docutils literal notranslate"><span class="pre">logger.patch</span></code> ，因为patch文件需要位于PKGBUILD相同目录。</p></li>
+<li><p>编辑PKGBUILD，在 <code class="docutils literal notranslate"><span class="pre">source=</span></code> 的列表变量部分添加补丁文件名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;git+https://github.com/anbox/anbox.git&quot;</span>
+        <span class="o">...</span>
+        <span class="s1">&#39;logger.patch&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>然后执行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">updpkgsums</span>
+</li>
+</ul>
+<blockquote>
+<div><p>这样，这个 <code class="docutils literal notranslate"><span class="pre">logger.patch</span></code> 就会复制到 <code class="docutils literal notranslate"><span class="pre">src</span></code> 目录中。</p>
+</div></blockquote>
+<ul>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">updpkgsums</span></code> 命令(这个工具位于 <code class="docutils literal notranslate"><span class="pre">pacman-crontab</span></code> 软件包)，就会更新 <code class="docutils literal notranslate"><span class="pre">md5sums</span></code> 这个列表变量，或者手工在 <code class="docutils literal notranslate"><span class="pre">md5sum</span></code> 列表中加入</p></li>
+<li><p>在PKGBUILD文件中创建 <code class="docutils literal notranslate"><span class="pre">prepare()</span></code> 函数(如果还没有的话)，添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="s2">&quot;$srcdir/$pkgname-$pkgver&quot;</span>
+<span class="n">patch</span> <span class="o">--</span><span class="n">strip</span><span class="o">=</span><span class="mi">1</span> <span class="o">--</span><span class="nb">input</span><span class="o">=</span><span class="n">logger</span><span class="o">.</span><span class="n">patch</span>
 </pre></div>
 </div>
-<p>更新 <code class="docutils literal notranslate"><span class="pre">md5sums</span></code> 部分</p>
+</li>
+<li><p>然后执行命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">makepkg</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在补丁自动实施了。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>以上补丁方法我还没有实践，待后续实践验证。</p>
+</div>
 </div>
 <div class="section" id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>

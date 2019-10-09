@@ -53,6 +53,10 @@ Dropbox是目前我使用过最好的网盘:
 
 然后通过 ``systemctl cat dropbox@username`` 可以检查服务启动配置。
 
+.. note::
+
+   上述设置自动启动步骤，我验证在后台启动dropbox没有问题，但是我使用xfce桌面登陆图形界面，还是无法看到托盘中dropbox图标。可能gnome或者kde能够实现，亦或我的步骤中还有问题。
+
 参考
 =======
 
