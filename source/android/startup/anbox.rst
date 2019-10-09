@@ -167,7 +167,28 @@ anbox的container日志位于 ``/var/lib/anbox/logs/container.log`` 可以看到
 
 此时 ``adb devices`` 显示模拟器停止了。
 
+`anbox splash screen disappears #814 <https://github.com/anbox/anbox/issues/814>`_ 提示修改 ``/usr/lib/systemd/user/anbox-session-manager.service`` ::
 
+   ExecStart=/usr/bin/anbox session-manager --gles-driver=host
+
+启动方式::
+
+   sudo systemctl start systemd-resolved.service
+   sudo systemctl start systemd-networkd.service
+   sudo systemctl start anbox-container-manager.service
+
+   systemctl --user start anbox-session-manager.service
+
+最后再启动Anbox应用。果然，这个方法是正确的，现在可以完整的Android模拟器了：
+
+.. figure:: ../../_static/android/startup/anbox.png
+   :scale: 75
+
+不过，此时无法接受鼠标操作。
+
+关闭窗口，尝试命令行运行::
+
+   anbox launch --package=org.anbox.appmgr --component=org.anbox.appmgr.AppViewActivity
 
 参考
 =======
