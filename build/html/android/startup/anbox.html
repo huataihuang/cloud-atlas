@@ -105,7 +105,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#id2">使用Anbox准备</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">编译报错处理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">运行报错处理</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">完整设置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snapanbox">改为snap来安装Anbox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snap">使用snap案例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">安装应用程序</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -363,6 +367,11 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span> <span class="n">session</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">gles</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">host</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>参考 <a class="reference external" href="https://github.com/anbox/anbox/issues/171">Anbox Does Not Running On Arch Linux #171</a> 这里 <code class="docutils literal notranslate"><span class="pre">--gles-driver</span></code> 是允许你修改Anbox使用从物理主机获取libGL.so或者libGLES.so。如果是 <code class="docutils literal notranslate"><span class="pre">--gles-driver=translator</span></code> 就选择 libGL.so ，这样Anbox就会使用自己的 GL-to-GLES 转换来提供必要的GLES功能给 Android。</p>
+<p>另外，这个 <a class="reference external" href="https://github.com/anbox/anbox/issues/171">Anbox Does Not Running On Arch Linux #171</a> 也提供一条线索 <a class="reference external" href="https://github.com/anbox/anbox/issues/305#issuecomment-306465578">How to install on archlinux or manjaro pls help me?? #305</a> 就是我这里采用的方法。同样也存在应用程序不刷新窗口问题（只有resize才刷新），在 <a class="reference external" href="https://github.com/anbox/anbox/issues/437">app does not refresh/update #437</a> 讨论过这个问题，是由于系统采用了较新的mesa库导致的，降级mesa库实在太麻烦了。所以还是推荐采用snap来安装Anbox</p>
+</div>
 <p>启动方式:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolved</span><span class="o">.</span><span class="n">service</span>
 <span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
@@ -375,16 +384,194 @@
 <div class="figure align-default">
 <a class="reference internal image-reference" href="../../_images/anbox.png"><img alt="../../_images/anbox.png" src="../../_images/anbox.png" style="width: 766.5px; height: 219.75px;" /></a>
 </div>
-<p>不过，此时无法接受鼠标操作。</p>
+<p>不过，无法接受鼠标操作 - 实际我发现是Anbox的应用程序不会刷新图形，只有窗口缩放时候才刷新一次。因为我发现Clock一直不更新时间显示，还以为程序是死掉的，实际不是，缩放一下窗口就看到时间是正确的，只是不会刷新窗口内容。这可能就是无法响应鼠标的原因。</p>
+<p>另外，程序启动后，后台console.log日志显示无法解析主机名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">resolve</span> <span class="n">host</span> <span class="s2">&quot;android.googleapis.com&quot;</span><span class="p">:</span> <span class="n">No</span> <span class="n">address</span> <span class="n">associated</span> <span class="k">with</span> <span class="n">hostname</span>
+</pre></div>
+</div>
+<p>不过，通过 <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span></code> 可以看到物理主机的虚拟网卡IP地址是 192.168.250.1 ，尝试 <code class="docutils literal notranslate"><span class="pre">ping</span> <span class="pre">-b</span> <span class="pre">192.168.250.255</span></code> 然后检查 <code class="docutils literal notranslate"><span class="pre">arp</span> <span class="pre">-a</span></code> 可以看到这个 anbox0 网络中有另外一个地址 192.168.250.2 ，是Anbox虚拟机的IP地址。 - 请参考 <a class="reference external" href="https://docs.anbox.io/userguide/advanced/network_configuration.html">Anbox Network Configuration</a></p>
 <p>关闭窗口，尝试命令行运行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anbox</span> <span class="n">launch</span> <span class="o">--</span><span class="n">package</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">--</span><span class="n">component</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span><span class="o">.</span><span class="n">AppViewActivity</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ANBOX_LOG_LEVEL</span><span class="o">=</span><span class="n">debug</span>
+<span class="n">anbox</span> <span class="n">launch</span> <span class="o">--</span><span class="n">package</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">--</span><span class="n">component</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span><span class="o">.</span><span class="n">AppViewActivity</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>完整设置<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>为了能够今后自动就绪环境，设置系统服务自动启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolved</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>准备一个个人用户脚本 anbox-setup.sh</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mi">1</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpuset</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">clone_children</span>
+<span class="n">anbox</span><span class="o">-</span><span class="n">bridge</span>
+<span class="n">systemctl</span> <span class="o">--</span><span class="n">user</span> <span class="n">start</span> <span class="n">anbox</span><span class="o">-</span><span class="n">session</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>然后就可以运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anbox</span> <span class="n">launch</span> <span class="o">--</span><span class="n">package</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">--</span><span class="n">component</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span><span class="o">.</span><span class="n">AppViewActivity</span>
+</pre></div>
+</div>
+<p>或者从菜单选择运行anbox</p>
+</div>
+<div class="section" id="snapanbox">
+<h2>改为snap来安装Anbox<a class="headerlink" href="#snapanbox" title="Permalink to this headline">¶</a></h2>
+<p>如上所述，在Arch中确实很难解决运行Anbox问题，所以回退到采用snap来保障运行环境。</p>
+<ul>
+<li><p>停止服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="o">--</span><span class="n">user</span> <span class="n">stop</span> <span class="n">anbox</span><span class="o">-</span><span class="n">session</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>卸载安装包，不过保留了anbox-dkms-git</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">Rns</span> <span class="n">anbox</span><span class="o">-</span><span class="n">git</span> <span class="n">anbox</span><span class="o">-</span><span class="n">image</span><span class="o">-</span><span class="n">gapps</span> <span class="n">anbox</span><span class="o">-</span><span class="n">bridge</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装snapd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">S</span> <span class="n">snapd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">snapd</span></code> 安装了一个 <code class="docutils literal notranslate"><span class="pre">/etc/profile.d/snapd.sh</span></code> 来输出snapd包和桌面的安装路径。需要重启一次系统来使之生效。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>从2.36开始， <code class="docutils literal notranslate"><span class="pre">snapd</span></code> 需要激活激活 AppArmr 来支持Arch Linux。如果没有激活AppArmor，则所有snaps都运行在 <code class="docutils literal notranslate"><span class="pre">devel</span></code> 模式，意味着它们运行在相同的不受限制访问系统，类似Arch Linux仓库安装的应用。</p>
+<p>要使用AppArmor:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">apparmor</span><span class="o">.</span><span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">snapd</span><span class="o">.</span><span class="n">apparmor</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>激活snapd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">snapd</span><span class="o">.</span><span class="n">socket</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>为了激活经典snap，执行以下命令创建链接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">snapd</span><span class="o">/</span><span class="n">snap</span> <span class="o">/</span><span class="n">snap</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>测试</p></li>
+</ul>
+<p>先安装一个简单的 hello-world snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">install</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span>
+</pre></div>
+</div>
+<p>这里报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">too</span> <span class="n">early</span> <span class="k">for</span> <span class="n">operation</span><span class="p">,</span> <span class="n">device</span> <span class="ow">not</span> <span class="n">yet</span> <span class="n">seeded</span> <span class="ow">or</span> <span class="n">device</span> <span class="n">model</span> <span class="ow">not</span> <span class="n">acknowledged</span>
+</pre></div>
+</div>
+<p>需要等一会等环境就绪再重新执行</p>
+<p>需要将 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/snap/bin</span></code> 添加到PATH环境(或者如前所述，先重启一次系统)</p>
+<p>然后测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hello</span><span class="o">-</span><span class="n">world</span>
+</pre></div>
+</div>
+<ul>
+<li><p>(可选)成功以后，通过snap安装snap-store应用商店:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">install</span> <span class="n">snap</span><span class="o">-</span><span class="n">store</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>通过snap-store可以安装很多重量级软件，具有独立的容器运行环境，不影响系统。</p>
+</div>
+<ul>
+<li><p>命令行安装anbox(没有位于正式的snap-store中):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">install</span> <span class="o">--</span><span class="n">devmode</span> <span class="o">--</span><span class="n">beta</span> <span class="n">anbox</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意， <code class="docutils literal notranslate"><span class="pre">--devmode</span></code> 安装的snap不会自动更新，需要使用胰腺癌命令更新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">refresh</span> <span class="o">--</span><span class="n">beta</span> <span class="o">--</span><span class="n">devmode</span> <span class="n">anbox</span>
+</pre></div>
+</div>
+<p>如果beta通道的anbox还不能正常工作，则可以尝试edge通道</p>
+<p>卸载方法如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">remove</span> <span class="n">anbox</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="snap">
+<h2>使用snap案例<a class="headerlink" href="#snap" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p>查询Ubuntu Store:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">find</span> <span class="o">&lt;</span><span class="n">searchterm</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">install</span> <span class="o">&lt;</span><span class="n">snapname</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>安装将下载snap到 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/snaps</span></code> 并挂载成 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/snap/snapname</span></code> 来使之对系统可用。并且将创建每个snap的挂载点，并将它们加入到 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/multi-user.target.wants/</span></code> 软链接，以便系统嗯启动时素有snap可用。</p>
+<ul>
+<li><p>检查已经安装的snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Name         Version    Rev   Tracking  Publisher   Notes
+anbox        4-e1ecd04  158   beta      morphis     devmode
+core         16-2.41    7713  stable    canonical✓  core
+hello-world  6.4        29    stable    canonical✓  -
+</pre></div>
+</div>
+<ul>
+<li><p>更新snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">refresh</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查最新的刷新时间:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">refresh</span> <span class="o">--</span><span class="n">time</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置刷新时间，例如每天2次:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="nb">set</span> <span class="n">core</span> <span class="n">refresh</span><span class="o">.</span><span class="n">timer</span><span class="o">=</span><span class="mi">0</span><span class="p">:</span><span class="mi">00</span><span class="o">-</span><span class="mi">24</span><span class="p">:</span><span class="mi">00</span><span class="o">/</span><span class="mi">2</span>
+</pre></div>
+</div>
+</li>
+<li><p>删除snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">remove</span> <span class="n">snapname</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id7">
+<h2>安装应用程序<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>最好是从Google Play应用商店安装，不过有很多国内应用提供apk包，可以通过adb命令安装到虚拟机中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">install</span> <span class="n">app</span><span class="o">.</span><span class="n">apk</span>
+</pre></div>
+</div>
+<p>安装完成后，在 Anbox Application Manager可以看到安装的应用程序。</p>
+</div>
+<div class="section" id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Anbox">Arch Linux社区文档 - Anbox</a></p></li>
+<li><p><a class="reference external" href="https://forum.manjaro.org/t/running-android-applications-on-arch-using-anbox/53332">Running Android applications on Arch using anbox</a></p></li>
+<li><p><a class="reference external" href="https://blissroms.com/">Bliss ROMs</a> 是一个将Android改造成原生运行的操作系统，可以在PC或者KVM虚拟机中运行，或许有些类似ChromeBook，但是可以运行丰富的Android程序，可以在以后尝试一下。此外，类似还有 Phoenix OS 。</p></li>
 </ul>
 </div>
 </div>

@@ -33,9 +33,6 @@ SSH Tunnel
 
 接下来，你只需要在chrome或firefox浏览器中设置socks代理就可以自由访问因特网，方法如下：
 
-Chrome Socks Proxy
----------------------
-
 Firefox Socks Proxy
 ----------------------
 
@@ -48,14 +45,44 @@ Firefox Socks Proxy
 - 勾选 ``Enable DNS over HTTPS`` - 这是为了使用受信任的DNS服务器而不是本地的DNS服务商(国内电信运营商的DNS是污染的)。当然，如果你操作系统已经设置了采用Google的DNS 8.8.8.8并且已经勾选过 ``Proxy DNS when using SOCKS v5`` ，则这步可以省略。
 
 .. figure:: ../_static/appendix/firefox_socks_proxy.png
-   :scale: 75
+   :scale: 50 
 
 .. figure:: ../_static/appendix/firefox_socks_proxy_dns.png
-   :scale: 75
+   :scale: 50
+
+SwitchyOmega
+--------------
+
+SwitchyOmega是一个浏览器插件，用于自动切换代理。即部分被屏蔽的网站指定Proxy访问，其他则direct访问。这个插件有Chrome版本，也有firefox版本，设置方法相同。
+
+这是一个非常有用的浏览器插件，可以极大提高上网效率，兼顾了跨越防火墙以及避免无谓的代理网速下降。
+
+- 首先添加在线规则列表，这个规则列表是以前网友搜集的被屏蔽地址列表，虽然是几年前的地址列表，但是可以作为配置的起步基础：
+
+.. figure:: ../_static/appendix/switchy_omega_import_online_rule.png
+   :scale: 50
+
+地址从 https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt 获取：
+
+.. figure:: ../_static/appendix/switchy_omega_import_online_rule_setup.png
+   :scale: 50
+
+注意： ``Rule list rules`` 对应的动作要修改成 ``proxy`` ，因为我们添加的地址列表都是被屏蔽地址，需要启用代理。另外，案例的2条记录可选删除。
+
+然后还要设置 ``proxy`` 这个profile，调整成自己实际的Proxy设置，别忘记最后还要 ``Apply changes``
+
+.. figure:: ../_static/appendix/switchy_omega_import_online_rule_setup_proxy.png
+   :scale: 50
+
+- 如果在使用过程中，发现有页面资源不能加载，则点击 SigmaOmega 图标按钮，补充添加规则。
 
 SSH Tunnel
 ===========
 
+SSH Tunnel 原理请参考 `SSH TUNNEL <https://www.ssh.com/ssh/tunneling/>`_
+
+.. figure:: ../_static/appendix/ssh_tunnel.png
+   :scale: 50
 
 
 参考

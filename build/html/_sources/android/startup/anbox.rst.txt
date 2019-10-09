@@ -171,6 +171,12 @@ anbox的container日志位于 ``/var/lib/anbox/logs/container.log`` 可以看到
 
    ExecStart=/usr/bin/anbox session-manager --gles-driver=host
 
+.. note::
+
+   参考 `Anbox Does Not Running On Arch Linux #171  <https://github.com/anbox/anbox/issues/171>`_ 这里 ``--gles-driver`` 是允许你修改Anbox使用从物理主机获取libGL.so或者libGLES.so。如果是 ``--gles-driver=translator`` 就选择 libGL.so ，这样Anbox就会使用自己的 GL-to-GLES 转换来提供必要的GLES功能给 Android。
+   
+   另外，这个 `Anbox Does Not Running On Arch Linux #171  <https://github.com/anbox/anbox/issues/171>`_ 也提供一条线索 `How to install on archlinux or manjaro pls help me?? #305 <https://github.com/anbox/anbox/issues/305#issuecomment-306465578>`_ 就是我这里采用的方法。同样也存在应用程序不刷新窗口问题（只有resize才刷新），在 `app does not refresh/update #437 <https://github.com/anbox/anbox/issues/437>`_ 讨论过这个问题，是由于系统采用了较新的mesa库导致的，降级mesa库实在太麻烦了。所以还是推荐采用snap来安装Anbox
+
 启动方式::
 
    sudo systemctl start systemd-resolved.service
@@ -184,13 +190,171 @@ anbox的container日志位于 ``/var/lib/anbox/logs/container.log`` 可以看到
 .. figure:: ../../_static/android/startup/anbox.png
    :scale: 75
 
-不过，此时无法接受鼠标操作。
+不过，无法接受鼠标操作 - 实际我发现是Anbox的应用程序不会刷新图形，只有窗口缩放时候才刷新一次。因为我发现Clock一直不更新时间显示，还以为程序是死掉的，实际不是，缩放一下窗口就看到时间是正确的，只是不会刷新窗口内容。这可能就是无法响应鼠标的原因。
+
+另外，程序启动后，后台console.log日志显示无法解析主机名::
+
+   Unable to resolve host "android.googleapis.com": No address associated with hostname
+
+不过，通过 ``ip addr`` 可以看到物理主机的虚拟网卡IP地址是 192.168.250.1 ，尝试 ``ping -b 192.168.250.255`` 然后检查 ``arp -a`` 可以看到这个 anbox0 网络中有另外一个地址 192.168.250.2 ，是Anbox虚拟机的IP地址。 - 请参考 `Anbox Network Configuration <https://docs.anbox.io/userguide/advanced/network_configuration.html>`_
 
 关闭窗口，尝试命令行运行::
 
+   ANBOX_LOG_LEVEL=debug
    anbox launch --package=org.anbox.appmgr --component=org.anbox.appmgr.AppViewActivity
+
+完整设置
+=============
+
+为了能够今后自动就绪环境，设置系统服务自动启动::
+
+   sudo systemctl enable systemd-resolved.service
+   sudo systemctl enable systemd-networkd.service
+   sudo systemctl enable anbox-container-manager.service
+   
+准备一个个人用户脚本 anbox-setup.sh ::
+
+   echo 1 | sudo tee /sys/fs/cgroup/cpuset/cgroup.clone_children
+   anbox-bridge
+   systemctl --user start anbox-session-manager.service
+   
+然后就可以运行::
+
+   anbox launch --package=org.anbox.appmgr --component=org.anbox.appmgr.AppViewActivity
+   
+或者从菜单选择运行anbox
+
+改为snap来安装Anbox
+=====================
+
+如上所述，在Arch中确实很难解决运行Anbox问题，所以回退到采用snap来保障运行环境。
+
+- 停止服务::
+
+   systemctl --user stop anbox-session-manager.service
+   sudo systemctl stop anbox-container-manager.service
+
+- 卸载安装包，不过保留了anbox-dkms-git ::
+
+   yay -Rns anbox-git anbox-image-gapps anbox-bridge
+
+- 安装snapd::
+
+   yay -S snapd
+
+.. note::
+
+   ``snapd`` 安装了一个 ``/etc/profile.d/snapd.sh`` 来输出snapd包和桌面的安装路径。需要重启一次系统来使之生效。
+
+.. note::
+
+   从2.36开始， ``snapd`` 需要激活激活 AppArmr 来支持Arch Linux。如果没有激活AppArmor，则所有snaps都运行在 ``devel`` 模式，意味着它们运行在相同的不受限制访问系统，类似Arch Linux仓库安装的应用。
+
+   要使用AppArmor::
+
+      systemctl enable --now apparmor.service
+      systemctl enable --now snapd.apparmor.service
+
+- 激活snapd::
+
+   sudo systemctl enable --now snapd.socket  
+
+为了激活经典snap，执行以下命令创建链接::
+
+   sudo ln -s /var/lib/snapd/snap /snap
+
+- 测试
+
+先安装一个简单的 hello-world snap::
+
+   sudo snap install hello-world
+
+这里报错::
+
+   error: too early for operation, device not yet seeded or device model not acknowledged
+
+需要等一会等环境就绪再重新执行
+
+需要将 ``/var/lib/snapd/snap/bin`` 添加到PATH环境(或者如前所述，先重启一次系统)
+
+然后测试::
+
+    hello-world
+
+- (可选)成功以后，通过snap安装snap-store应用商店::
+
+    sudo snap install snap-store
+
+.. note::
+
+   通过snap-store可以安装很多重量级软件，具有独立的容器运行环境，不影响系统。
+
+- 命令行安装anbox(没有位于正式的snap-store中)::
+
+   snap install --devmode --beta anbox
+
+注意， ``--devmode`` 安装的snap不会自动更新，需要使用胰腺癌命令更新::
+
+   snap refresh --beta --devmode anbox
+
+如果beta通道的anbox还不能正常工作，则可以尝试edge通道
+
+卸载方法如下::
+
+   snap remove anbox
+
+使用snap案例
+==============
+  
+- 查询Ubuntu Store::
+
+   snap find <searchterm>
+
+- 安装snap::
+
+   sudo snap install <snapname>
+
+安装将下载snap到 ``/var/lib/snapd/snaps`` 并挂载成 ``/var/lib/snapd/snap/snapname`` 来使之对系统可用。并且将创建每个snap的挂载点，并将它们加入到 ``/etc/systemd/system/multi-user.target.wants/`` 软链接，以便系统嗯启动时素有snap可用。
+
+- 检查已经安装的snap::
+
+   snap list
+
+可以看到::
+
+   Name         Version    Rev   Tracking  Publisher   Notes
+   anbox        4-e1ecd04  158   beta      morphis     devmode
+   core         16-2.41    7713  stable    canonical✓  core
+   hello-world  6.4        29    stable    canonical✓  -
+
+- 更新snap::
+
+   snap refresh
+
+- 检查最新的刷新时间::
+
+   snap refresh --time
+
+- 设置刷新时间，例如每天2次::
+
+   snap set core refresh.timer=0:00-24:00/2
+
+- 删除snap::
+
+   snap remove snapname
+
+安装应用程序
+===============
+
+最好是从Google Play应用商店安装，不过有很多国内应用提供apk包，可以通过adb命令安装到虚拟机中::
+
+   adb install app.apk
+
+安装完成后，在 Anbox Application Manager可以看到安装的应用程序。
 
 参考
 =======
 
 - `Arch Linux社区文档 - Anbox <https://wiki.archlinux.org/index.php/Anbox>`_
+- `Running Android applications on Arch using anbox <https://forum.manjaro.org/t/running-android-applications-on-arch-using-anbox/53332>`_
+- `Bliss ROMs <https://blissroms.com/>`_ 是一个将Android改造成原生运行的操作系统，可以在PC或者KVM虚拟机中运行，或许有些类似ChromeBook，但是可以运行丰富的Android程序，可以在以后尝试一下。此外，类似还有 Phoenix OS 。
