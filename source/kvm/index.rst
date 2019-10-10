@@ -13,6 +13,7 @@ KVM Atlas
    hardware_virtual.rst
    intel_vmcs.rst
    create_vm.rst
+   deploy_win_vm.rst
    backup_vm.rst
    clone_vm.rst
    nested_virtual.rst
@@ -21,6 +22,7 @@ KVM Atlas
    kvm_live_migration.rst
    qemu_images.rst
    kvm_image_access_with_libguestfs.rst
+   memballoon.rst
    pci_passthrough.rst
    gpu_passthrough_with_kvm.rst
    vt-d_in_kvm.rst

@@ -71,25 +71,6 @@ clone虚拟机
 
    由于libvirt的dnsmasq默认是动态分配虚拟机IP，但是对于一些服务虚拟机，需要能够使用静态IP地址，所以需要修改libvirt的默认网络。详细参考 :ref:`libvirt_static_ip_in_studio`
 
-动态调整虚拟机配置
-=====================
-
-.. note::
-
-   以下操作步骤在 ``xcloud`` 物理主机上执行，展示如何在虚拟机运行状态下 ``动态调整`` 虚拟机VCPU数量和内存大小。
-
-- 动态调整虚拟机内存 4G::
-
-   virsh setmem devstack 4G
-
-- 动态调整虚拟机VCPU为2个::
-
-   virsh setvcpus devstack 2
-
-.. note::
-
-   动态设置方法可以参考 `动态调整KVM虚拟机内存和vcpu实战 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/add_remove_vcpu_memory_to_guest_on_fly.md>`_
-
 模拟物理服务器集群
 ====================
 
