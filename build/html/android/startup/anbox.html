@@ -108,8 +108,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#id6">完整设置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snapanbox">改为snap来安装Anbox</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snap">使用snap案例</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">安装应用程序</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">安装应用程序</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -557,17 +557,112 @@ hello-world  6.4        29    stable    canonical✓  -
 </div>
 </li>
 </ul>
+<div class="section" id="net-err-name-not-resolved">
+<h3>net::ERR_NAME_NOT_RESOLVED<a class="headerlink" href="#net-err-name-not-resolved" title="Permalink to this headline">¶</a></h3>
+<p>使用snap来运行anbox，确实非常容易解决之前直接部署在arch linux主机模式无法刷新和相应键盘鼠标的问题。但是，使用webview浏览器就发现，实际上地址解析存在问题：</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../_images/anbox_dns_error.png"><img alt="../../_images/anbox_dns_error.png" src="../../_images/anbox_dns_error.png" style="width: 330.0px; height: 171.75px;" /></a>
 </div>
-<div class="section" id="id7">
-<h2>安装应用程序<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">net::ERR_NAME_NOT_RESOLVED</span></code> 报错表明Android系统无法解析DNS。</p>
+<p>在 <a class="reference external" href="https://zhuanlan.zhihu.com/p/50994213">如何在 Anbox 上安装 Google Play 商店及启用 ARM 支持</a> 提到了 <a class="reference external" href="https://github.com/anbox/anbox/issues/118#issuecomment-295270113">anbox需要主机安装DNSmasq</a> ，应该就是提供IP地址分配，以及分配DNS解析。</p>
+<ul>
+<li><p>安装dnsmasq:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">dnsmasq</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span><span class="o">=</span><span class="n">anbox0</span>
+<span class="n">bind</span><span class="o">-</span><span class="n">interfaces</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="nb">range</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">250.50</span><span class="p">,</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">250.150</span><span class="p">,</span><span class="mf">255.255</span><span class="o">.</span><span class="mf">255.0</span><span class="p">,</span><span class="mi">12</span><span class="n">h</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>dnsmasq 默认就是设置default gw指向自身，以及dns也指向自身</p>
+</div>
+<p>不过，我还是没有解决这个问题。并且，我发现 anbox 项目实际上已经包含了 <a class="reference external" href="https://superuser.com/questions/1395384/internet-not-working-in-anbox-on-ubuntu-18-04">Internet not working in Anbox on Ubuntu 18.04</a> 介绍的 <a class="reference external" href="https://github.com/anbox/anbox/blob/master/scripts/anbox-bridge.sh">anbox-bridge.sh</a> 脚本。</p>
+<ul>
+<li><p>重启Anbox:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">snap</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重启anbox网络:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="n">current</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span><span class="o">-</span><span class="n">bridge</span><span class="o">.</span><span class="n">sh</span> <span class="n">restart</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是我发现问题并没有解决。</p>
+<div class="section" id="id8">
+<h4>进一步排查<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">adb</span> <span class="pre">shell</span></code> 命令可以登陆到Android虚拟机内部</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span></code> 可以看到Android虚拟机的IP地址是 <code class="docutils literal notranslate"><span class="pre">192.168.250.2</span></code> ，对应的网关应该是host主机上的 <code class="docutils literal notranslate"><span class="pre">192.168.250.1</span></code> ，但是，在虚拟机内部检查路由:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">rn</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Destination</span>     <span class="n">Gateway</span>         <span class="n">Genmask</span>         <span class="n">Flags</span>   <span class="n">MSS</span> <span class="n">Window</span>  <span class="n">irtt</span> <span class="n">Iface</span>
+<span class="mf">192.168</span><span class="o">.</span><span class="mf">250.0</span>   <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span>         <span class="mf">255.255</span><span class="o">.</span><span class="mf">255.0</span>   <span class="n">U</span>         <span class="mi">0</span> <span class="mi">0</span>          <span class="mi">0</span> <span class="n">eth0</span>
+</pre></div>
+</div>
+<p>这表明虚拟机没有默认路由指向外网。</p>
+<p>参考 ` The anbox container can not connect to the network #443 &lt;<a class="reference external" href="https://github.com/anbox/anbox/issues/443">https://github.com/anbox/anbox/issues/443</a>&gt;`_ 使用以下命令可以手工解决网络连接问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">shell</span>
+<span class="n">su</span>
+<span class="n">ip</span> <span class="n">route</span> <span class="n">add</span> <span class="n">default</span> <span class="n">dev</span> <span class="n">eth0</span> <span class="n">via</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">250.1</span>
+<span class="n">ip</span> <span class="n">rule</span> <span class="n">add</span> <span class="n">pref</span> <span class="mi">32766</span> <span class="n">table</span> <span class="n">main</span>
+<span class="n">ip</span> <span class="n">rule</span> <span class="n">add</span> <span class="n">pref</span> <span class="mi">32767</span> <span class="n">table</span> <span class="n">local</span>
+</pre></div>
+</div>
+<p>然后再 ping 外部IP地址，就会发现虚拟机已经网络就绪了。</p>
+<p>但此时使用浏览器 WebView 访问网站报错依旧，此时问题原因和DNS解析相关。DNS解析取决于 <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> ，参考 <a class="reference external" href="https://butterflydroid.wordpress.com/2011/10/19/how-to-set-dns-server-on-android-phone/">How to set DNS Server on Android Phone</a> ，可以看到Android的DNS配制位于 <code class="docutils literal notranslate"><span class="pre">/system/etc/resolv.conf</span></code> (系统的 <code class="docutils literal notranslate"><span class="pre">/etc</span></code> 是软链接到 <code class="docutils literal notranslate"><span class="pre">/system/etc</span></code> ，不过这个虚拟机中没有配制。</p>
+<p>注意， <code class="docutils literal notranslate"><span class="pre">/</span></code> 文件系统挂载是只读的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Filesystem</span>            <span class="n">Size</span>  <span class="n">Used</span> <span class="n">Avail</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="n">overlay</span>                <span class="mi">47</span><span class="n">G</span>   <span class="mi">28</span><span class="n">G</span>   <span class="mi">16</span><span class="n">G</span>  <span class="mi">64</span><span class="o">%</span> <span class="o">/</span>
+</pre></div>
+</div>
+<p>所以修改之前需要先重新挂载成读写模式:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">shell</span>
+<span class="n">su</span>
+<span class="n">mount</span> <span class="o">-</span><span class="n">o</span> <span class="n">remount</span><span class="p">,</span><span class="n">rw</span> <span class="o">/</span><span class="n">system</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">nameserver</span> <span class="mf">8.8</span><span class="o">.</span><span class="mf">8.8</span>
+<span class="n">nameserver</span> <span class="mf">8.8</span><span class="o">.</span><span class="mf">4.4</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="google-play">
+<h3>安装Google Play<a class="headerlink" href="#google-play" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>安装Google Play:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">geeks</span><span class="o">-</span><span class="n">r</span><span class="o">-</span><span class="n">us</span><span class="o">/</span><span class="n">anbox</span><span class="o">-</span><span class="n">playstore</span><span class="o">-</span><span class="n">installer</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">install</span><span class="o">-</span><span class="n">playstore</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">install</span><span class="o">-</span><span class="n">playstore</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">sudo</span> <span class="o">./</span><span class="n">install</span><span class="o">-</span><span class="n">playstore</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这样就可以直接访问Google Play安装应用程序，就和Android手机没有什么差异了。</p>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>安装应用程序<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <p>最好是从Google Play应用商店安装，不过有很多国内应用提供apk包，可以通过adb命令安装到虚拟机中:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">install</span> <span class="n">app</span><span class="o">.</span><span class="n">apk</span>
 </pre></div>
 </div>
 <p>安装完成后，在 Anbox Application Manager可以看到安装的应用程序。</p>
 </div>
-<div class="section" id="id8">
-<h2>参考<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id10">
+<h2>参考<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Anbox">Arch Linux社区文档 - Anbox</a></p></li>
 <li><p><a class="reference external" href="https://forum.manjaro.org/t/running-android-applications-on-arch-using-anbox/53332">Running Android applications on Arch using anbox</a></p></li>

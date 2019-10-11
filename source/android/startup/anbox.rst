@@ -343,6 +343,99 @@ anbox的container日志位于 ``/var/lib/anbox/logs/container.log`` 可以看到
 
    snap remove snapname
 
+net::ERR_NAME_NOT_RESOLVED
+---------------------------
+
+使用snap来运行anbox，确实非常容易解决之前直接部署在arch linux主机模式无法刷新和相应键盘鼠标的问题。但是，使用webview浏览器就发现，实际上地址解析存在问题：
+
+.. figure:: ../../_static/android/startup/anbox_dns_error.png
+   :scale: 75
+
+``net::ERR_NAME_NOT_RESOLVED`` 报错表明Android系统无法解析DNS。
+
+在 `如何在 Anbox 上安装 Google Play 商店及启用 ARM 支持 <https://zhuanlan.zhihu.com/p/50994213>`_ 提到了 `anbox需要主机安装DNSmasq <https://github.com/anbox/anbox/issues/118#issuecomment-295270113>`_ ，应该就是提供IP地址分配，以及分配DNS解析。
+
+- 安装dnsmasq::
+
+   sudo pacman -S dnsmasq
+
+- 修改 ``/etc/dnsmasq.conf`` ::
+
+   interface=anbox0
+   bind-interfaces
+   dhcp-range=192.168.250.50,192.168.250.150,255.255.255.0,12h
+
+.. note::
+
+   dnsmasq 默认就是设置default gw指向自身，以及dns也指向自身
+
+不过，我还是没有解决这个问题。并且，我发现 anbox 项目实际上已经包含了 `Internet not working in Anbox on Ubuntu 18.04 <https://superuser.com/questions/1395384/internet-not-working-in-anbox-on-ubuntu-18-04>`_ 介绍的 `anbox-bridge.sh <https://github.com/anbox/anbox/blob/master/scripts/anbox-bridge.sh>`_ 脚本。
+
+- 重启Anbox::
+
+   sudo systemctl restart snap.anbox.container-manager.service
+
+- 然后重启anbox网络::
+
+   sudo /snap/anbox/current/bin/anbox-bridge.sh restart
+
+但是我发现问题并没有解决。
+
+进一步排查
+~~~~~~~~~~~
+
+- 执行 ``adb shell`` 命令可以登陆到Android虚拟机内部
+
+``ip addr`` 可以看到Android虚拟机的IP地址是 ``192.168.250.2`` ，对应的网关应该是host主机上的 ``192.168.250.1`` ，但是，在虚拟机内部检查路由::
+
+   netstat -rn
+
+显示::
+
+   Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+   192.168.250.0   0.0.0.0         255.255.255.0   U         0 0          0 eth0
+
+这表明虚拟机没有默认路由指向外网。
+
+参考 ` The anbox container can not connect to the network #443 <https://github.com/anbox/anbox/issues/443>`_ 使用以下命令可以手工解决网络连接问题::
+
+   adb shell
+   su
+   ip route add default dev eth0 via 192.168.250.1
+   ip rule add pref 32766 table main
+   ip rule add pref 32767 table local
+
+然后再 ping 外部IP地址，就会发现虚拟机已经网络就绪了。
+
+但此时使用浏览器 WebView 访问网站报错依旧，此时问题原因和DNS解析相关。DNS解析取决于 ``resolv.conf`` ，参考 `How to set DNS Server on Android Phone <https://butterflydroid.wordpress.com/2011/10/19/how-to-set-dns-server-on-android-phone/>`_ ，可以看到Android的DNS配制位于 ``/system/etc/resolv.conf`` (系统的 ``/etc`` 是软链接到 ``/system/etc`` ，不过这个虚拟机中没有配制。
+
+注意， ``/`` 文件系统挂载是只读的::
+
+   Filesystem            Size  Used Avail Use% Mounted on
+   overlay                47G   28G   16G  64% /
+
+所以修改之前需要先重新挂载成读写模式::
+
+   adb shell
+   su
+   mount -o remount,rw /system
+   cat << EOF > /system/etc/resolv.conf
+   nameserver 8.8.8.8
+   nameserver 8.8.4.4
+   EOF
+
+
+安装Google Play
+-----------------
+
+- 安装Google Play::
+
+     wget https://raw.githubusercontent.com/geeks-r-us/anbox-playstore-installer/master/install-playstore.sh
+     chmod +x install-playstore.sh
+     sudo ./install-playstore.sh
+
+这样就可以直接访问Google Play安装应用程序，就和Android手机没有什么差异了。
+
 安装应用程序
 ===============
 
