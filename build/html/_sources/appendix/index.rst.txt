@@ -44,6 +44,7 @@
    ip_command.rst
    win10_ssh_server.rst
    ssh_tunnel_gfw_autoproxy.rst
+   anbox_scratch.rst
 
 
 .. only::  subproject and html
