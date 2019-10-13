@@ -106,7 +106,7 @@ arch linux的镜像网站定义在 ``/etc/pacman.d/mirrorlist`` 。在这个定�
 
 - 安装基本软件包::
 
-   pacstrap /mnt base
+   pacstrap /mnt base linux linux-firmware
 
 配置
 ======
