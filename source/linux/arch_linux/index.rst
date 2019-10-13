@@ -16,6 +16,7 @@ Arch Linux
    seamless_rdp.rst
    cross_compile.rst
    gpu_deep_learning_on_arch_linux.rst
+   wine.rst
 
 .. only::  subproject and html
 

@@ -16,6 +16,7 @@ Studio Atlas
    introduce_my_studio.rst
    base_os.rst
    ubuntu_on_mbp.rst
+   archlinux_on_mbp.rst
    ubuntu_on_thinkpad_x220.rst
    archlinux_on_thinkpad_x220.rst
    kvm_docker_in_studio.rst

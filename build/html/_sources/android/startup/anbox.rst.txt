@@ -238,6 +238,10 @@ masq::
 
    sudo systemctl restart snap.anbox.container-manager.service
 
+- 给anbox0接口加上DNS允许访问的防火墙规则::
+
+   firewall-cmd --zone=internal --add-service dns --permanent
+
 安装Google Play
 =================
 
