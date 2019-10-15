@@ -37,6 +37,12 @@ Vim设置
    git clone --depth=1 https://github.com/amix/vimrc.git ~/.vim_runtime
    sh ~/.vim_runtime/install_awesome_vimrc.sh
 
+.. note::
+
+   默认开启了代码折叠功能，但是我觉得非常不好用，所以设置 `~/.vimrc` 默认关闭:
+
+      set foldlevelstart=99
+
 Python Virtualenv
 ===================
 
@@ -123,6 +129,10 @@ MkDoc
 - 如果要build文档::
 
    mkdocs build
+
+.. note::
+
+   如果你想看看mkdocs的网站案例，可以参考一下 `Argo CD 官方文档 <https://argoproj.github.io/argo-cd/>`_ ，提供了一个生动形象的 `Argo CD 手册案例 <https://github.com/argoproj/argo-cd/blob/master/mkdocs.yml>`_ 。
 
 参考
 =========
