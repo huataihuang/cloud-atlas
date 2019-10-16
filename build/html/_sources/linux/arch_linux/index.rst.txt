@@ -7,6 +7,7 @@ Arch Linux
 .. toctree::
    :maxdepth: 1
 
+   archlinux_mbp_nvidia.rst
    archlinux_aur.rst
    alien_convert_package.rst
    archlinux_developer.rst

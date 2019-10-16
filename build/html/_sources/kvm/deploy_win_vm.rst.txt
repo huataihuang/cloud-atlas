@@ -13,6 +13,13 @@
 
 - 安装 ``virt-viewer`` 工具可以提供spice或vnc方式连接安装的虚拟机图形界面，程序名称是 ``remote viewer``
 
+对于远程服务器上启动的Windows虚拟机，由于VNC/SPICE只监听本地127.0.0.1:5900端口，所以需要通过ssh端口转发方式访问，即在本地客户端上ssh到远程服务器上::
+
+   ssh -C -L 5900:127.0.0.1:5900 <server_ip>
+
+这样使用本地 ``remote viewer`` 访问 ``spice://127.0.0.1:5900`` 就可以看到Windows桌面，也就能够进行安装了。
+
+
 - 创建Windows虚拟机::
 
    virt-install \

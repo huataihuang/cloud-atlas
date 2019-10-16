@@ -50,6 +50,9 @@ Python Virtualenv
 
    如果是Linux环境，请参考 `在CentOS上安装 Python3 virtualenv <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/python/startup/install_python_3_and_virtualenv_on_centos.md>`_
 
+macOS安装
+----------
+
 - 安装 `Homebrew <https://brew.sh>`_ ::
 
    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -68,7 +71,21 @@ Python Virtualenv
 
 - 安装virtualenv ::
 
-   sudo -H ip3 install virtualenv
+   sudo -H pip3 install virtualenv
+
+Arch Linux安装
+-----------------
+
+Arch Linux默认安装了Python3，所以仅需要安装pip::
+
+   sudo pacman -S python-pip
+
+安装virtualenv::
+
+   sudo pacman -S python-virtualenv
+
+设置virtualenv
+----------------
 
 - 创建工作目录下的Python 3 Virtualenv::
 
@@ -140,3 +157,4 @@ MkDoc
 - `使用vim作为macOS的IDE <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/vim/using_vim_as_ide_in_macos.md>`_
 - `在macOS上安装Python3 virtualenv <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/python/startup/install_python_3_and_virtualenv_on_macos.md>`_
 - `使用Sphinx撰写python文档 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/doc/sphinx/sphinx_for_python_doc.md>`_
+- `Arch Linux社区文档 - Python/Virtual environment <https://wiki.archlinux.org/index.php/Python/Virtual_environment>`_
