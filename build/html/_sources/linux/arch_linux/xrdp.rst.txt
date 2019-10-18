@@ -47,11 +47,6 @@ xrdp.ini
 
 实际上这个可选Session配置全部在服务器的 ``/etc/xrdp/xrdp.ini``
 
-xrdp客户端for macOS
-=====================
-
-微软官方提供了macOS的Remote Desktop Client，可以参考 `Get started with the macOS client <https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-mac>`_ 从 AppStore 安装 `Microsoft Remote Desktop 10 <https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12>`_ ，不过这个App需要切换到美国App市场安装。
-
 color depth
 =============
 
@@ -72,6 +67,22 @@ color depth
 需要杀掉这个进程再从客户端连接，否则xrdp认证以后连接这个桌面会因为参数不一致导致断开连接。杀掉上述进程之后再登陆，可以看到再次启动的Xvnc进程多了一个参数 ``-depth 32`` ::
 
    Xvnc :10 -auth .Xauthority -geometry 1024x768 -depth 32 -rfbauth /home/huatai/.vnc/sesman_passwd-huatai@zcloud:10 -bs -nolisten tcp -localhost -dpi 96 -depth 32 
+
+xrdp客户端for macOS
+=====================
+
+微软官方提供了macOS的Remote Desktop Client，可以参考 `Get started with the macOS client <https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-mac>`_ 从 AppStore 安装 `Microsoft Remote Desktop 10 <https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12>`_ ，不过这个App需要切换到美国App市场安装。
+
+rdp客户端for Linux
+=====================
+
+在Linux平台上有很多rdp的客户端，实际上都是基于 rdesktop 和 freerdp 软件。如果你需要轻量级的解决方案，建议直接使用 ``rdesktop`` 终端命令，实际上只需要简单的参数就可以::
+
+   rdesktop -g 1440x900 -P -z -x l -r sound:off -r clipboard:CLIPBOARD -r disk:test=/home/u -u USERNAME -p PASSWORD 192.168.1.100:3389
+
+.. note::
+
+   - ``-r disk:test=/home/u`` 映射本地目录到远程磁盘，方便数据共享
 
 参考
 =======
