@@ -18,6 +18,7 @@ Linux是运计算的主流基础操作系统，除了微软的Azure，其他主�
    kali_linux/index
    storage/index
    server/index
+   security/index
 
 .. only::  subproject and html
 
