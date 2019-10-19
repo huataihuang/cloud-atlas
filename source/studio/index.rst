@@ -26,7 +26,6 @@ Studio Atlas
    studio_ip.rst
    ntp_in_studio.rst
    dnsmasq_in_studio.rst
-   openconnect_vpn.rst
 
 .. only::  subproject and html
 
