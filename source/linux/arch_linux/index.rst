@@ -7,7 +7,8 @@ Arch Linux
 .. toctree::
    :maxdepth: 1
 
-   archlinux_mbp_nvidia.rst
+   archlinux_on_mbp.rst
+   archlinux_on_thinkpad_x220.rst
    archlinux_aur.rst
    alien_convert_package.rst
    archlinux_developer.rst
