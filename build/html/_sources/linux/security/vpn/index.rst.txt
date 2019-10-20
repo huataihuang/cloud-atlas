@@ -12,6 +12,7 @@ Linux VPN
    :maxdepth: 1
 
    openconnect_vpn.rst
+   vpnc.rst
 
 .. only::  subproject and html
 

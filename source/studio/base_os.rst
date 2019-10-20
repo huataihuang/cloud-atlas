@@ -4,6 +4,16 @@
 基础操作系统
 ===============
 
+部署实践
+==========
+
+在我的MacBook Pro和ThinkPad X220笔记本上，我组合实践过以下操作系统:
+
+- :ref:`archlinux_on_mbp`
+- :ref:`archlinux_on_thinkpad_x220`
+- :ref:`ubuntu_on_mbp`
+- :ref:`ubuntu_on_thinkpad_x220`
+
 发行版选择
 ==================
 

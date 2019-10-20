@@ -15,11 +15,11 @@
 
 为了好玩（更Geek一些），我在Raspberry Pi（树莓派）上安装和运行Kali Linux，并且，使用一种称为 `Raspberry Pi Zero W <https://www.raspberrypi.org/products/raspberry-pi-zero-w/>`_ 的口香糖大小树莓派:
 
-.. figure:: ../../../_static/kali_linux/pi_zero_w.jpg
+.. figure:: ../../../_static/linux/kali_linux/pi_zero_w.jpg
 
 另外，Zero W的USB扩展卡 ( :ref:`pi_zero_net_gadget` )，可以方便地将Kali Linux随身携带，只需要插入主机USB接口就可以工作， 加上一个透明的亚克力保护壳，非常美观：
 
-.. figure:: ../../../_static/kali_linux/zero_usb_2.jpg
+.. figure:: ../../../_static/linux/kali_linux/zero_usb_2.jpg
    :scale: 50
 
 .. note::
