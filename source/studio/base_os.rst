@@ -14,6 +14,14 @@
 - :ref:`ubuntu_on_mbp`
 - :ref:`ubuntu_on_thinkpad_x220`
 
+存储实践
+-----------
+
+由于需要模拟大规模集群，部署大量的虚拟机，所以需要模拟分布式存储，所以需要构建基于卷管理的架构系统，我采用:
+
+- :ref:`btrfs_in_studio`
+- :ref:`lvm_xfs_in_studio`
+
 发行版选择
 ==================
 
