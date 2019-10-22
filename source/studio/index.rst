@@ -16,8 +16,6 @@ Studio Atlas
    introduce_my_studio.rst
    base_os.rst
    kvm_docker_in_studio.rst
-   btrfs_in_studio.rst
-   lvm_xfs_in_studio.rst
    kubenetes_in_studio.rst
    studio_ip.rst
    ntp_in_studio.rst
