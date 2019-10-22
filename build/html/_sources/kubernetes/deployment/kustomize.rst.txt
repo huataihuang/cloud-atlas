@@ -13,6 +13,10 @@ kustomize
 
    brew install kustomize
 
+.. note::
+
+   使用 brew 安装的kustomize执行时报错 ``zsh: exec format error: kustomize`` ，所以我安装官方安装文档，采用官方仓库下载二进制可执行文件。
+
 - 在windows平台，可以通过 Chocolatey 包管理器安装（我没有windows，尚未实践）::
 
    choco install kustomize
