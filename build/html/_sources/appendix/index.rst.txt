@@ -25,17 +25,12 @@
    thinkpad_x220.rst
    intel_core_i5_2410m.rst
    desktop_base_os.rst
-   ubuntu_server.rst
    netplan.rst
    efi_system_partition.rst
-   upgrade_ubuntu.rst
-   ubuntu_desktop.rst
    using_btrfs_in_studio.rst
    reduce_laptop_overheat.rst
    vmware_in_studio.rst
    share_mouse_keyboard.rst
-   ubuntu_hibernate.rst
-   tar_multi_boot_ubuntu.rst
    firewalld.rst
    pi_quick_start.rst
    pi_zero_net_gadget.rst
