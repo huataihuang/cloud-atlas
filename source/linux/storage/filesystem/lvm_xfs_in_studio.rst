@@ -39,6 +39,13 @@ LVM构建基础概念:
 
 - 物理扩展(Physical extent): 物理扩展PE时在PV上的最小连续扩展(默认4MB)，可以分配给LV，你可以将PE视为PV的一部分，被分配给LV。
 
+安装软件包
+----------------
+
+- 安装 ``lvm2`` 软件包::
+
+   sudo pacman -S lvm2
+
 创建分区
 ------------
 
@@ -166,7 +173,7 @@ XFS
 - 格式化LVM卷::
 
    mkfs.xfs /dev/data/home
-   mkfs.xfs /dev/data/home
+   mkfs.xfs /dev/data/libvirt
 
 - 配置 ``/etc/fstab`` ::
 
