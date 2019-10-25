@@ -43,15 +43,28 @@ Arch Linux安装KVM
 
 - 安装::
 
-   sudo pacman -S qemu libvirt bridge-utils
+   sudo pacman -S qemu libvirt virt-install \
+      dnsmasq ebtables firewalld bridge-utils
 
+   sudo systemctl start firewalld
+   sudo systemctl enable firewalld
    sudo systemctl start libvirtd
+   sudo systemctl enable libvirtd
 
 .. note::
 
-   需要安装 ``bridge-utils`` 才能具备 ``brctl`` 工具   
+   - 安装 ``bridge-utils`` 才能具备 ``brctl`` 工具，这样才能建立virtbr0这个NAT旺桥
+   - libvirt需要dnsmasq, ebtables, firewalld 来分配NAT网络IP地址和设置netfilter防火墙规则，否则也启动不了NAT网络。详见 :ref:`libvirt_nat_network`
 
    参考 `How to Create and use Network Bridge on Arch Linux and Manjaro <https://computingforgeeks.com/how-to-create-and-use-network-bridge-on-arch-linux-and-manjaro/>`_
+
+- 安装完qemu之后，如果没有重启系统，则此时还没有加载kvm内核模块，可以通过以下命令手工加载::
+
+   modprobe kvm_intel
+
+- 加载virtio模块::
+
+   modprobe virtio
 
 嵌套虚拟化
 ================

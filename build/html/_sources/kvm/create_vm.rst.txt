@@ -12,7 +12,7 @@ Studio环境创建KVM虚拟机
 
    Studio环境采用Ubuntu作为host和guest的OS，在 :ref:`real` 中， :ref:`priv_kvm` 则采用CentOS作为OS。
 
-创建CentOS虚拟机
+创建CentOS 7虚拟机
 ------------------
 
 - 创建虚拟机安装Guest操作系统::
@@ -42,6 +42,25 @@ Studio环境创建KVM虚拟机
 .. note::
 
    在KVM中部署和运行Windows虚拟机相对复杂，请参考 :ref:`deploy_win_vm`
+
+创建CentOS 8虚拟机
+------------------
+
+- CentOS 8虚拟机安装::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name centos8 \
+     --ram=4096 \
+     --vcpus=2 \
+     --os-variant=rhel8.0 \
+     --disk path=/var/lib/libvirt/images/centos8.qcow2,format=qcow2,bus=virtio,cache=none,size=8 \
+     --graphics spice \
+     --cdrom=/var/lib/libvirt/images/CentOS-8-x86_64-1905-boot.iso
+
+- 安装过程的 ``installation source`` 设置为 ``http://mirrors.163.com/centos/8.0.1905/BaseOS/x86_64/os/`` (URL type是 ``repository URL`` ) 然后点击 ``Done`` 则自动刷新验证，最后显示的安装源如下：
+
+.. figure:: ../_static/kvm/centos8_installation_source.png
 
 虚拟机串口设置
 =================

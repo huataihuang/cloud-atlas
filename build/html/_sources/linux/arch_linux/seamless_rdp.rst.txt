@@ -49,6 +49,39 @@ Windows 10操作系统需要开启远程桌面访问，设置方法：
 .. figure:: ../../_static/kvm/win10_rdp_setting.png
    :scale: 75%
 
+MacBook Pro高分辨率显示
+-------------------------
+
+在MacBook Pro Retina高分辨率屏幕下使用Windows系统会发现自体非常小，这种现象不仅在Windows虚拟机的VNC终端如此，远程桌面如果是Retina屏幕下显示也几乎无法看清字体。解决的方法是调整Windows屏幕缩放比例：
+
+- 启动菜单 ``Settings => System => Display => Advanced scaling settings`` ，在这个设置界面中，可以设置 ``Custom scaling`` ，设置范围可以从 ``100% - 500%`` 。对于MacBook Pro Retina屏幕，这个设置值修改成 ``150`` 较为合适。
+
+修改以后，通过Remote Desktop访问的界面，字体也会相应方法，就能够舒适使用了。
+
+如果需要调整鼠标指针样式：
+
+- 启动菜单 ``Settings => Personalization => Themes`` ，在这个风格设置中，有一个 ``Mouse cursor`` 选项可以调整鼠标指针样式。
+
+.. note::
+
+   ``rdesktop`` 远程桌面显示的鼠标图形几乎无法看清，上述调整鼠标指针式样依然无法解决。
+
+   在 `Arch Linux社区文档 - Supplying missing cursors <https://wiki.archlinux.org/index.php/Cursor_themes#Supplying_missing_cursors>`_ 提供的解决方案：由于rdesktop使用从远程主机获得的光标，则由于协议限制难以看清。需要使用相同(或其他)光标风格来替代。为了能够替换，需要获得图像的 ``hash`` ，这是通过 ``XCURSOR_DISCOVER`` 环境变量激活，然后查看应用程序使用的光标::
+
+      XCURSOR_DISCOVER=1 rdesktop ...
+
+   首次加载光标就会显示详细信息，例如::
+
+      Cursor image name: 24020000002800000528000084810000
+      ...
+      Cursor image name: 7bf1cc07d310bf080118007e08fc30ff
+      ...
+      Cursor hash 24020000002800000528000084810000 returns 0x0
+
+   然后将这些hash软链接到目标图像，例如使用 ``Vanilla-DMZ`` 光标风格的 ``left_ptr`` 图像::
+
+      ln -s /usr/share/icons/Vanilla-DMZ/cursors/left_ptr ~/.icons/default/cursors/24020000002800000528000084810000
+
 SeamlessRDP
 ================
 
@@ -68,7 +101,8 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
    cd seamlessrdp/
    cd ServerExe/
    ./autogen.sh
-   ./configure --host=i686-pc-mingw32
+   #./configure --host=i686-pc-mingw32
+   ./configure --host=x86_64-w64-mingw32
    make
 
 报错::

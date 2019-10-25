@@ -122,7 +122,7 @@ MkDoc
 
 .. note::
 
-   采用Google Material Design风格的theme `Material for MkDocs <https://squidfunk.github.io/mkdocs-material/>`_`
+   采用Google Material Design风格的theme `Material for MkDocs <https://squidfunk.github.io/mkdocs-material/>`_
 
 - 创建项目::
 

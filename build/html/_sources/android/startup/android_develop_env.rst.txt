@@ -13,7 +13,7 @@ Android Studio
 
 - 通过 :ref:`archlinux_aur` 安装Android Studio::
 
-   ysy -S android-studio
+   yay -S android-studio
 
 - 安装Java运行环境 - Android Studio是基于IntelliJ IDEA开发的，需要Java环境才能运行::
    sudo pacman -S jdk-openjdk

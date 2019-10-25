@@ -10,6 +10,7 @@ KVM Atlas
    hypervisor.rst
    kvm_architecture.rst
    libvirt/index
+   performance/index
    hardware_virtual.rst
    intel_vmcs.rst
    create_vm.rst

@@ -277,6 +277,28 @@ Suspend
 
    不过，依然需要关闭蓝牙鼠标连接，否则鼠标移动还是唤醒系统。但至少不再无法suspend了。
 
+屏幕分辨率相关设置
+=====================
+
+MacBook Pro的屏幕分辨率极高，默认情况下Linux运行时字体都显示过小，在xfce桌面上主要调整如下：
+
+- ``Settings => Appearance => Fonts`` (默认编辑区域文字)
+  - 设置 ``Default Font`` 为 ``WenQuanYi Micro Hei Regular 13``
+  - 设置 ``Default Monospace Font`` 为 ``WenQuanYi Micro Hei Regular 13``
+
+- ``Settings => Windows Manager => Style => Theme => Default``
+  - 设置 ``Title font`` 为 ``Sans Bold 13``
+
+以上设置之后，基本图形功能都可以非常舒畅使用。但是，Firefox浏览器默认显示的自体过小，调整：
+
+- 菜单 ``Preferences => Language and Appearance => Fonts and Colors``
+  - 设置 ``Default front`` 为 ``Default(FreeSerif) 16``
+
+但是，上述设置对于WEB页面已经通过CSS设置字体无效，除非你在 ``Advanced...`` 选项中 ``去除`` 选择 ``Allow pages to choose their own fonts, instead of your selections above`` 。不过，用自己定义的字体强制覆盖WEB页面自体会导致页面风格破坏。
+
+解决方法是调整Firefox默认页面缩放比例，这个设置没有提供UI菜单，需要在地址栏输入 ``about:config`` 并回车，然后点击 ``I accept the risk!`` 按钮进入配置。搜索 ``layout.css.devPixelsPerPx`` ，这个选项默认设置值是 ``1.0`` ，表示页面显示比例是 100% 。可以调整这个数值，例如 ``1.5`` 表示显示比例 150%
+，以此类推。不过，这个页面显示比例是全局影响，也会导致Firefox的菜单和工具条同步放大，所以也不宜调整过大，我在MacBook Pro上设置 ``1.5`` 基本已经满足大多数页面浏览。少数页面字体实在过小，只能通过 ``ctrl`` 加 ``+`` 按钮临时调整。
+
 参考
 ========
 
