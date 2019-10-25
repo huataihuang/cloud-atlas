@@ -40,6 +40,25 @@ yay是使用Go编写的Arch Linux AUR helper，基于 yaourt, apacman 和 pacaur
 
    编译安装yay会相关依赖安装开发软件工具链(gcc,make,automake等)，并且安装golang，所以也是一个准备开发环境的过程。
 
+yay-git
+----------
+
+最近有一次升级系统 ``sudo pacman -Syu`` 但是发现报错::
+
+   error: failed to prepare transaction (could not satisfy dependencies)
+   :: installing pacman (5.2.0-2) breaks dependency 'pacman<=5.1.3' required by yay
+
+参考 `Dependency breakage with pacman and yay after pacman -Syu <https://bbs.archlinux.org/viewtopic.php?id=250197>`_ ，当前 ``yay-git`` 已经更新，但是 ``yay`` 滞后，所以修改成 ``yay-git``
+
+安装方法参考 `Can't pacman -Syu because of yay <https://www.reddit.com/r/archlinux/comments/dlpng7/cant_pacman_syu_because_of_yay/>`_ ::
+
+   yay -G yay #clones new yay from git
+   yay -R yay #removes old yay
+   sudo pacman -Syu
+   cd yay/
+   makepkg -si #install the yay you cloned
+   yay #do your yay system upgrade you were trying to do in the first place
+
 通过snapshot安装
 ==================
 
