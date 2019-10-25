@@ -60,7 +60,11 @@ MacBook Pro高分辨率显示
 
 如果需要调整鼠标指针样式：
 
-- 启动菜单 ``Settings => Personalization => Themes`` ，在这个风格设置中，有一个 ``Mouse cursor`` 选项可以调整鼠标指针样式。
+- 启动菜单 ``Settings => Personalization => Themes`` ，在这个风格设置中，有一个 ``Mouse cursor`` 选项可以调整鼠标指针样式。将样式调整成 ``Windows Black (system scheme)`` 这样 ``可能`` 可以解决rdesktop远程桌面无法正常显示鼠标光标的问题。
+
+.. note::
+
+   参考 `How to fix mouse cursor disappearing on Remote Desktop <https://camerondwyer.com/2018/05/09/how-to-fix-mouse-cursor-disappearing-on-on-remote-desktop/>`_ 不过，这个方法我实践没有成功。
 
 .. note::
 
@@ -112,11 +116,14 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
 
 上述报错是因为没有安装跨平台编译环境，例如对于fedora 26需要安装mingw32-gcc和mingw64-gcc。对于arch linux，参考 `MinGW package guidelines <https://wiki.archlinux.org/index.php/MinGW_package_guidelines>`_ 则需要通过 :ref:`archlinux_aur` 安装 ``mingw-w64-gcc`` ::
 
-   yay -S mingw-w64-gcc-base mingw-w64-gcc
+   yay -S mingw-w64-gcc-base
+   yay -S mingw-w64-gcc
 
 .. note::
 
-   详细请参考
+   先安装 ``mingw-w64-gcc-base`` ，然后安装 ``mingw-w64-gcc`` ，但后者会提示和前者冲突，只要在安装后者同时卸载前者就可以了。
+
+   注意，安装好 ``mingw-w64-gcc`` 之后，还要重新 ``./autogen.sh; ./configure --host=x86_64-w64-mingw32; make`` 。
 
 - 安装
 
@@ -131,6 +138,10 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
 在Linux客户端执行以下命令，启动远程Windows平台的notepad应用，此时nodepad程序将显示在本地Linux桌面上，就好像是Linux原生的应用程序::
 
    rdesktop -A 'C:\SeamlessRDP\seamlessrdpshell.exe' -s 'notepad.exe'
+
+.. note::
+
+   我按照上述方法针对64位Windows环境编译的 :download:`seamlessrdp.zip <seamlessrdp.zip>` ，你可以下载使用。
 
 参考
 =========
