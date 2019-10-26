@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
-    <link rel="next" title="交叉编译" href="cross_compile.html" />
+    <link rel="next" title="Windows 10 SSH服务" href="win10_ssh.html" />
     <link rel="prev" title="xrdp远程桌面实践" href="xrdp.html" /> 
 </head>
 
@@ -110,9 +110,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#rdp">安装rdp客户端</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#windowsremote-desktop">Windows系统Remote Desktop</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#seamlessrdp">SeamlessRDP</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="win10_ssh.html">Windows 10 SSH服务</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cross_compile.html">交叉编译</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gpu_deep_learning_on_arch_linux.html">Arch Linux环境GPU加速Deep Learning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="wine.html">wine环境运行Windows程序</a></li>
@@ -287,6 +288,10 @@
 <div class="section" id="seamlessrdp">
 <h2>SeamlessRDP<a class="headerlink" href="#seamlessrdp" title="Permalink to this headline">¶</a></h2>
 <p>SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Windows应用程序推送到本地桌面，类似RAIL/RemoteApp。SeamlessRDP要求Windows Server 2008r2或更高版本。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>进过一番折腾，我发现实际上这个 SeamlessRDP 只能在Windows Server服务器版本上正常工作，我居然没有注意到这点，反复在Windows 10 Pro上尝试，一直没有成功。这主要原因应该是只有Server版本才提供了Terminal Server功能。</p>
+</div>
 <p>通过使用Seamless RDP，远程的Windows程序</p>
 <p>请访问 <a class="reference external" href="https://github.com/rdesktop/seamlessrdp">seamlessrdp github仓库</a> 获取源代码编译(需要交叉平台编译)，不过官方网站没有提供Windoes的二进制执行程序，以下是我的编译过层。</p>
 <div class="admonition note">
@@ -337,9 +342,26 @@
 <p class="admonition-title">Note</p>
 <p>我按照上述方法针对64位Windows环境编译的 <a class="reference download internal" download="" href="../../_downloads/550ab8e432a73f1050b2d18c02817779/seamlessrdp.zip"><code class="xref download docutils literal notranslate"><span class="pre">seamlessrdp.zip</span></code></a> ，你可以下载使用。</p>
 </div>
+<ul class="simple">
+<li><p>对于Windows 10 这样的现代操作系统，默认做了安全限制，不允许没有列出的应用程序远程运行，所以需要添加策略 - <a class="reference external" href="https://social.technet.microsoft.com/Forums/de-DE/84393b01-295e-4c4f-9477-b8b45a8e297b/how-to-setup-remoteapp-mode-for-some-application-in-windows-10-professional?forum=win10itprosetup">How to setup RemoteApp mode for some application in Windows 10 Professional</a></p></li>
+</ul>
+<p>编辑一个 <code class="docutils literal notranslate"><span class="pre">seamlessrdp.reg</span></code> 文件内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Windows</span> <span class="n">Registry</span> <span class="n">Editor</span> <span class="n">Version</span> <span class="mf">5.00</span>
+
+<span class="p">[</span><span class="n">HKEY_LOCAL_MACHINE</span>\<span class="n">SOFTWARE</span>\<span class="n">Policies</span>\<span class="n">Microsoft</span>\<span class="n">Windows</span> <span class="n">NT</span>\<span class="n">Terminal</span> <span class="n">Services</span><span class="p">]</span>
+<span class="s2">&quot;fAllowUnlistedRemotePrograms&quot;</span><span class="o">=</span><span class="n">dword</span><span class="p">:</span><span class="mi">00000001</span>
+</pre></div>
 </div>
-<div class="section" id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>然后在文件管理器中双击该 <code class="docutils literal notranslate"><span class="pre">seamlesssrdp.reg</span></code> 文件导入注册表。参考 <a class="reference external" href="https://social.technet.microsoft.com/Forums/de-DE/84393b01-295e-4c4f-9477-b8b45a8e297b/how-to-setup-remoteapp-mode-for-some-application-in-windows-10-professional?forum=win10itprosetup">How to setup RemoteApp mode for some application in Windows 10 Professional</a></p>
+<p>不过，seamlessrdp 需要服务器端使用Terminal Server，也就是能够在服务器端 <a class="reference external" href="https://social.technet.microsoft.com/wiki/contents/articles/10817.publishing-remoteapps-in-windows-server-2012.aspx">Publishing RemoteApps in Windows Server 2012</a> 或者类似在 Windows Sever 2008上参考 <a class="reference external" href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc730673(v=ws.10)?redirectedfrom=MSDN">TS RemoteApp Step-by-Step Guide</a> ，而Windows 10 Pro恰恰没有提供Terminal Server功能。勤劳朴实的Haker提供了以下两种方案实现 <a class="reference external" href="https://www.mysysadmintips.com/windows/clients/545-multiple-rdp-remote-desktop-sessions-in-windows-10">Multiple RDP (Remote Desktop) sessions in Windows 10</a> ：</p>
+<ul class="simple">
+<li><p>修改 termsrv.dll</p></li>
+<li><p>部署开源的RDP Wrapper中间层</p></li>
+</ul>
+<p>以上待实践</p>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Remmina">arch linux社区文档 - Remmina</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Rdesktop">arch linux社区文档 - Redsktop</a></p></li>
@@ -357,7 +379,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="cross_compile.html" class="btn btn-neutral float-right" title="交叉编译" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="win10_ssh.html" class="btn btn-neutral float-right" title="Windows 10 SSH服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="xrdp.html" class="btn btn-neutral float-left" title="xrdp远程桌面实践" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
