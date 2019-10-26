@@ -4,6 +4,10 @@
 Seamless RDP使用Windows应用
 ===========================
 
+.. note::
+
+   虽然目前我还没有解决Windows 10 Pro的RemoteApp设置，即Seamless RDP，不过， `How to setup RemoteApp mode for some application in Windows 10 Professional <https://social.technet.microsoft.com/Forums/de-DE/84393b01-295e-4c4f-9477-b8b45a8e297b/how-to-setup-remoteapp-mode-for-some-application-in-windows-10-professional?forum=win10itprosetup>`_ 还是提供了方向，有待我在合适的时候继续探索。
+
 安装rdp客户端
 ================
 
@@ -58,7 +62,12 @@ MacBook Pro高分辨率显示
 
 修改以后，通过Remote Desktop访问的界面，字体也会相应方法，就能够舒适使用了。
 
-如果需要调整鼠标指针样式：
+远程桌面光标显示
+-------------------
+
+.. note::
+
+   不知道为何我远程访问Windows 10桌面显示的光标非常暗淡，所以探索如何解决远程桌面光标显示问题。
 
 - 启动菜单 ``Settings => Personalization => Themes`` ，在这个风格设置中，有一个 ``Mouse cursor`` 选项可以调整鼠标指针样式。将样式调整成 ``Windows Black (system scheme)`` 这样 ``可能`` 可以解决rdesktop远程桌面无法正常显示鼠标光标的问题。
 
@@ -66,25 +75,37 @@ MacBook Pro高分辨率显示
 
    参考 `How to fix mouse cursor disappearing on Remote Desktop <https://camerondwyer.com/2018/05/09/how-to-fix-mouse-cursor-disappearing-on-on-remote-desktop/>`_ 不过，这个方法我实践没有成功。
 
-.. note::
 
-   ``rdesktop`` 远程桌面显示的鼠标图形几乎无法看清，上述调整鼠标指针式样依然无法解决。
+``rdesktop`` 远程桌面显示的鼠标图形几乎无法看清，上述调整鼠标指针式样依然无法解决。
 
-   在 `Arch Linux社区文档 - Supplying missing cursors <https://wiki.archlinux.org/index.php/Cursor_themes#Supplying_missing_cursors>`_ 提供的解决方案：由于rdesktop使用从远程主机获得的光标，则由于协议限制难以看清。需要使用相同(或其他)光标风格来替代。为了能够替换，需要获得图像的 ``hash`` ，这是通过 ``XCURSOR_DISCOVER`` 环境变量激活，然后查看应用程序使用的光标::
+在 `Arch Linux社区文档 - Supplying missing cursors <https://wiki.archlinux.org/index.php/Cursor_themes#Supplying_missing_cursors>`_ 提供的解决方案：由于rdesktop使用从远程主机获得的光标，则由于协议限制难以看清。需要使用相同(或其他)光标风格来替代。为了能够替换，需要获得图像的 ``hash`` ，这是通过 ``XCURSOR_DISCOVER`` 环境变量激活，然后查看应用程序使用的光标::
 
-      XCURSOR_DISCOVER=1 rdesktop ...
+   XCURSOR_DISCOVER=1 rdesktop ...
 
-   首次加载光标就会显示详细信息，例如::
+首次加载光标就会显示详细信息，例如::
 
-      Cursor image name: 24020000002800000528000084810000
-      ...
-      Cursor image name: 7bf1cc07d310bf080118007e08fc30ff
-      ...
-      Cursor hash 24020000002800000528000084810000 returns 0x0
+   Cursor image name: 24020000002800000528000084810000
+   ...
+   Cursor image name: 7bf1cc07d310bf080118007e08fc30ff
+   ...
+   Cursor hash 24020000002800000528000084810000 returns 0x0
 
-   然后将这些hash软链接到目标图像，例如使用 ``Vanilla-DMZ`` 光标风格的 ``left_ptr`` 图像::
+然后将这些hash软链接到目标图像，例如使用 ``Vanilla-DMZ`` 光标风格的 ``left_ptr`` 图像::
 
-      ln -s /usr/share/icons/Vanilla-DMZ/cursors/left_ptr ~/.icons/default/cursors/24020000002800000528000084810000
+   ln -s /usr/share/icons/Vanilla-DMZ/cursors/left_ptr ~/.icons/default/cursors/24020000002800000528000084810000
+
+实际我参考了 `Arch Linux社区文档 - Supplying missing cursors <https://wiki.archlinux.org/index.php/Cursor_themes#Supplying_missing_cursors>`_  ::
+
+   THEME=Adwaita
+   ln -s /usr/share/icons/$THEME/cursors/xterm          ~/.icons/default/cursors/00000000017e000002fc000000000000
+   ln -s /usr/share/icons/$THEME/cursors/right_ptr      ~/.icons/default/cursors/00000093000010860000631100006609
+   ln -s /usr/share/icons/$THEME/cursors/plus           ~/.icons/default/cursors/01e00000201c00004038000080300000
+   ln -s /usr/share/icons/$THEME/cursors/left_ptr       ~/.icons/default/cursors/24020000002800000528000084810000
+   ln -s /usr/share/icons/$THEME/cursors/left_ptr_watch ~/.icons/default/cursors/6ce0180090108e0005814700a0021400
+   ln -s /usr/share/icons/$THEME/cursors/hand           ~/.icons/default/cursors/d2201000a2c622004385440041308800
+   ln -s /usr/share/icons/$THEME/cursors/watch          ~/.icons/default/cursors/fc618c00da110f0034fd0e004e082400
+
+但是比较奇怪的是，当前帐号的鼠标光标问题依旧。但是我偶然新建了一个Windows帐号，则远程桌面的光标显示则真的是 ``Adwaita`` 的黑色图表，恰好解决了这个光标显示问题。虽然还没有最终找到规律，但是不失为一个解决方向。
 
 SeamlessRDP
 ================
@@ -147,6 +168,12 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
 
    我按照上述方法针对64位Windows环境编译的 :download:`seamlessrdp.zip <seamlessrdp.zip>` ，你可以下载使用。
 
+Windows 10设置
+---------------
+
+注册表
+~~~~~~~~
+
 - 对于Windows 10 这样的现代操作系统，默认做了安全限制，不允许没有列出的应用程序远程运行，所以需要添加策略 - `How to setup RemoteApp mode for some application in Windows 10 Professional <https://social.technet.microsoft.com/Forums/de-DE/84393b01-295e-4c4f-9477-b8b45a8e297b/how-to-setup-remoteapp-mode-for-some-application-in-windows-10-professional?forum=win10itprosetup>`_
 
 编辑一个 ``seamlessrdp.reg`` 文件内容如下::
@@ -158,12 +185,12 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
 
 然后在文件管理器中双击该 ``seamlesssrdp.reg`` 文件导入注册表。参考 `How to setup RemoteApp mode for some application in Windows 10 Professional <https://social.technet.microsoft.com/Forums/de-DE/84393b01-295e-4c4f-9477-b8b45a8e297b/how-to-setup-remoteapp-mode-for-some-application-in-windows-10-professional?forum=win10itprosetup>`_
 
-不过，seamlessrdp 需要服务器端使用Terminal Server，也就是能够在服务器端 `Publishing RemoteApps in Windows Server 2012 <https://social.technet.microsoft.com/wiki/contents/articles/10817.publishing-remoteapps-in-windows-server-2012.aspx>`_ 或者类似在 Windows Sever 2008上参考 `TS RemoteApp Step-by-Step Guide <https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc730673(v=ws.10)?redirectedfrom=MSDN>`_ ，而Windows 10 Pro恰恰没有提供Terminal Server功能。勤劳朴实的Haker提供了以下两种方案实现 `Multiple RDP (Remote Desktop) sessions in Windows 10 <https://www.mysysadmintips.com/windows/clients/545-multiple-rdp-remote-desktop-sessions-in-windows-10>`_ ：
+Terminal Server
+~~~~~~~~~~~~~~~~
 
-- 修改 termsrv.dll
-- 部署开源的RDP Wrapper中间层
+从目前探索来看，需要实现类似Windows Server一样的Terminal Server才有可能实现RemoteApp，也就是SeamlessRDP。
 
-以上待实践
+请参考 :ref:`win10_multi_rdp_sessions` 实践。不过，我还没有最终解决这个SeamlessRDP，虽然我感觉已经离目标很近了。只是现在时间精力有限，目前单个窗口RDP基本能够满足我使用Windows桌面的钉钉，所以暂时没有进一步探索的动力。
 
 参考
 =========
@@ -172,3 +199,4 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
 - `arch linux社区文档 - Redsktop <https://wiki.archlinux.org/index.php/Rdesktop>`_
 - `Guide - Using Seamless RDP for native looking Windows applications <https://forums.macrumors.com/threads/guide-using-seamless-rdp-for-native-looking-windows-applications.1984261/>`_
 - `Remmina Setting <http://www.muflone.com/remmina-plugin-rdesktop/english/settings.html>`_
+- `How to fix corrupted system files in Windows 10 <https://www.thewindowsclub.com/how-to-fix-corrupted-system-files-in-windows-10>`_
