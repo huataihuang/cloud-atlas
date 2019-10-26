@@ -91,6 +91,10 @@ SeamlessRDP
 
 SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Windows应用程序推送到本地桌面，类似RAIL/RemoteApp。SeamlessRDP要求Windows Server 2008r2或更高版本。
 
+.. note::
+
+   进过一番折腾，我发现实际上这个 SeamlessRDP 只能在Windows Server服务器版本上正常工作，我居然没有注意到这点，反复在Windows 10 Pro上尝试，一直没有成功。这主要原因应该是只有Server版本才提供了Terminal Server功能。
+
 通过使用Seamless RDP，远程的Windows程序
 
 请访问 `seamlessrdp github仓库 <https://github.com/rdesktop/seamlessrdp>`_ 获取源代码编译(需要交叉平台编译)，不过官方网站没有提供Windoes的二进制执行程序，以下是我的编译过层。
@@ -142,6 +146,24 @@ SeamlessRDP是一个RDP服务器扩展，允许将RDP服务器上运行的Window
 .. note::
 
    我按照上述方法针对64位Windows环境编译的 :download:`seamlessrdp.zip <seamlessrdp.zip>` ，你可以下载使用。
+
+- 对于Windows 10 这样的现代操作系统，默认做了安全限制，不允许没有列出的应用程序远程运行，所以需要添加策略 - `How to setup RemoteApp mode for some application in Windows 10 Professional <https://social.technet.microsoft.com/Forums/de-DE/84393b01-295e-4c4f-9477-b8b45a8e297b/how-to-setup-remoteapp-mode-for-some-application-in-windows-10-professional?forum=win10itprosetup>`_
+
+编辑一个 ``seamlessrdp.reg`` 文件内容如下::
+
+   Windows Registry Editor Version 5.00
+ 
+   [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services]
+   "fAllowUnlistedRemotePrograms"=dword:00000001
+
+然后在文件管理器中双击该 ``seamlesssrdp.reg`` 文件导入注册表。参考 `How to setup RemoteApp mode for some application in Windows 10 Professional <https://social.technet.microsoft.com/Forums/de-DE/84393b01-295e-4c4f-9477-b8b45a8e297b/how-to-setup-remoteapp-mode-for-some-application-in-windows-10-professional?forum=win10itprosetup>`_
+
+不过，seamlessrdp 需要服务器端使用Terminal Server，也就是能够在服务器端 `Publishing RemoteApps in Windows Server 2012 <https://social.technet.microsoft.com/wiki/contents/articles/10817.publishing-remoteapps-in-windows-server-2012.aspx>`_ 或者类似在 Windows Sever 2008上参考 `TS RemoteApp Step-by-Step Guide <https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc730673(v=ws.10)?redirectedfrom=MSDN>`_ ，而Windows 10 Pro恰恰没有提供Terminal Server功能。勤劳朴实的Haker提供了以下两种方案实现 `Multiple RDP (Remote Desktop) sessions in Windows 10 <https://www.mysysadmintips.com/windows/clients/545-multiple-rdp-remote-desktop-sessions-in-windows-10>`_ ：
+
+- 修改 termsrv.dll
+- 部署开源的RDP Wrapper中间层
+
+以上待实践
 
 参考
 =========
