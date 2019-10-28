@@ -1,4 +1,4 @@
-.. _docker_btrfs:
+.. _docker_btrfs_driver:
 
 =========================
 Docker btrfs 存储驱动

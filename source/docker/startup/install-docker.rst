@@ -91,6 +91,40 @@ Ubuntu默认发行版本 ``docker.io`` 是可以兼容在Ubuntu主推的LXD系�
 
    sudo docker run hello-world
 
+Arch Linux安装Docker
+=======================
+
+Arch Linux发行版的 ``docker`` 软件包就是Docker CE版本，可以直接安装::
+
+   sudo pacman -S docker
+
+- 安装完成后检查::
+
+   docker info
+
+.. note::
+
+   Docker支持不同的 :ref:`docker_storage_driver` ，不同的存储驱动一个影响到容器镜像的存储层(多个镜像共享存储层)性能。
+
+   ``devicemapper`` 性能较弱，特别在传统磁盘上，所以不建议在生产环境使用 ``devicemapper`` 。
+
+   由于Arch Linux使用了较新的内核，所以不需要使用兼容选线，通常的较好选项是 ``overlay2`` 。
+
+.. note::
+
+   使用 ``docker info`` 可以看到存储驱动类型，例如::
+
+       Storage Driver: overlay2
+         Backing Filesystem: extfs
+         Supports d_type: true
+         Native Overlay Diff: false
+
+.. note::
+
+   注意，这里 ``storage driver`` 不是Docker用于数据持久化存储的 :ref:`docker_volume` ，而是用于存储容器镜像的层次型文件系统。
+
+   我在 :ref:`ubuntu_linux` 上采用 :ref:`docker_btrfs_driver` (虽然现在我更倾向于生产环境使用XFS) ；在 :ref:`arch_linux` 我采用 :ref:`lvm_xfs_in_studio` 文件系统，所以对应Docker的storage driver是 :ref:`docker_overlay_driver` 。
+
 无需sudo运行docker
 ======================
 

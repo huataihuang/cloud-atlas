@@ -155,9 +155,10 @@ LVM构建基础概念:
      - currently set to     256
      Block device           254:0
 
-- 同样再创建一个用于libvirt的逻辑卷::
+- 同样再创建一个用于libvirt的逻辑卷，一个用于docker的逻辑卷::
 
    lvcreate -L 128G -n libvirt data 
+   lvcreate -L 128G -n docker data 
 
 XFS
 ===========
@@ -174,16 +175,23 @@ XFS
 
    mkfs.xfs /dev/data/home
    mkfs.xfs /dev/data/libvirt
+   mkfs.xfs /dev/data/docker
+
+.. note::
+
+   :ref:`docker_overlay_driver` 要求 ``xfs`` 文件系统启用 ``d_type=true`` 选项，也就是 ``xfs_info`` 检查文件系统输出信息中有 ``ftype=1`` 。现代XFS文件系统默认都启用了 ``ftype=1`` 。
 
 - 配置 ``/etc/fstab`` ::
 
    /dev/mapper/data-home  /home  xfs  defaults  0 1
    /dev/mapper/data-libvirt  /var/lib/libvirt  xfs  defaults  0 1
+   /dev/mapper/data-docker  /var/lib/docker  xfs  defaults  0 1
 
 - 挂载目录(注意，请使用root用户的单用户状态登陆，避免普通用户登陆影响/home目录修改)::
 
    mount /home
    mount /var/lib/libvirt
+   mount /var/lib/docker
 
 .. note::
 

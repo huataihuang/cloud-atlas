@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
-    <link rel="next" title="添加host设备到容器" href="docker_run_add_host_device.html" />
+    <link rel="next" title="Docker OverlayFS存储引擎" href="docker_overlay_driver.html" />
     <link rel="prev" title="Docker存储驱动" href="docker_storage_driver.html" /> 
 </head>
 
@@ -99,14 +99,15 @@
 <li class="toctree-l3"><a class="reference internal" href="docker_tmpfs_mount.html">Docker内存文件系统(tmpfs)挂载</a></li>
 <li class="toctree-l3"><a class="reference internal" href="docker_storage_driver.html">Docker存储驱动</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Docker btrfs 存储驱动</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id2">准备工作</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">磁盘块设备(分区)准备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">准备工作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">磁盘块设备(分区)准备</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dockerbtrfs">配置Docker使用btrfs存储驱动</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#btrfs">管理btrfs卷</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 存储驱动工作原理</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 存储驱动工作原理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="docker_overlay_driver.html">Docker OverlayFS存储引擎</a></li>
 <li class="toctree-l3"><a class="reference internal" href="docker_run_add_host_device.html">添加host设备到容器</a></li>
 </ul>
 </li>
@@ -183,7 +184,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/docker/storage/docker_btrfs.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/docker/storage/docker_btrfs_driver.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -197,11 +198,11 @@
            <div itemprop="articleBody">
             
   <div class="section" id="docker-btrfs">
-<span id="id1"></span><h1>Docker btrfs 存储驱动<a class="headerlink" href="#docker-btrfs" title="Permalink to this headline">¶</a></h1>
+<span id="docker-btrfs-driver"></span><h1>Docker btrfs 存储驱动<a class="headerlink" href="#docker-btrfs" title="Permalink to this headline">¶</a></h1>
 <p>btrfs是现代化的 <code class="docutils literal notranslate"><span class="pre">copy-on-write</span></code> 文件系统，支持很多高级技术，非常适合用于Docker。并且btrfs已经进入Linux内核主线。</p>
 <p>Docker的 <code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 存储驱动使用了很多btrfs的功能用于镜像和容器管理。功能包括块级别操作，thin provisioning，copy-on-write快照，并且易于管理。</p>
-<div class="section" id="id2">
-<h2>准备工作<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h2>准备工作<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 支持需要满足以下条件：</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">Docker</span> <span class="pre">CE</span></code> : 对于docker ce， btrfs 仅在 Ubuntu 和 Debian 下才建议使用</p></li>
@@ -217,8 +218,8 @@
 <li><p>为了能够在操作系统级别管理BTRFS文件系统，需要 <code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 命令，则需要安装 <code class="docutils literal notranslate"><span class="pre">btrfsprogs</span></code> 软件包(SLES)或 <code class="docutils literal notranslate"><span class="pre">btrfs-tools</span></code> 软件包(Ubuntu)。</p></li>
 </ul>
 </div>
-<div class="section" id="id3">
-<h2>磁盘块设备(分区)准备<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h2>磁盘块设备(分区)准备<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>在 <a class="reference internal" href="../../linux/storage/filesystem/btrfs_in_studio.html#btrfs-in-studio"><span class="std std-ref">Studio环境的Btrfs存储</span></a> 准备工作中，我们已经通过 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 工具划分了 <code class="docutils literal notranslate"><span class="pre">/dev/sda3</span></code> 给btrfs使用:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span>
 <span class="n">mkpart</span> <span class="n">primary</span> <span class="mf">51.4</span><span class="n">GB</span> <span class="mi">251</span><span class="n">GB</span>   <span class="c1">#注意分区不可重叠，这里划分了200G</span>
@@ -337,11 +338,11 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="id4">
-<h2><code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 存储驱动工作原理<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h2><code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 存储驱动工作原理<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.docker.com/storage/storagedriver/btrfs-driver/">Use the BTRFS storage driver</a></p></li>
 </ul>
@@ -356,7 +357,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="docker_run_add_host_device.html" class="btn btn-neutral float-right" title="添加host设备到容器" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="docker_overlay_driver.html" class="btn btn-neutral float-right" title="Docker OverlayFS存储引擎" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="docker_storage_driver.html" class="btn btn-neutral float-left" title="Docker存储驱动" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

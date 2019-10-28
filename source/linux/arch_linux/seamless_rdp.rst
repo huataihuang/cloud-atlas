@@ -51,7 +51,7 @@ Windows 10操作系统需要开启远程桌面访问，设置方法：
 - 在 ``System Properties`` 设置的 ``Remote`` 面板，有一个 ``Remote Desktop`` 设置区域，选择 ``Allow remote connections to this computer`` 。注意：一定要去除 ``Allow connections only from computers running Remote Desktop with Network Level Authentication (recommended)`` ，否则Linux客户端的rdesktop无法访问。
 
 .. figure:: ../../_static/kvm/win10_rdp_setting.png
-   :scale: 75%
+   :scale: 60%
 
 MacBook Pro高分辨率显示
 -------------------------
@@ -65,9 +65,7 @@ MacBook Pro高分辨率显示
 远程桌面光标显示
 -------------------
 
-.. note::
-
-   不知道为何我远程访问Windows 10桌面显示的光标非常暗淡，所以探索如何解决远程桌面光标显示问题。
+默认情况下， ``rdesktop`` 远程访问Windows桌面，会把鼠标光标显示的白色光标改成Linux桌面的黑色实心光标，这样才能在远程桌面显示中看清。不过，这个实现远离是rdesktop根据RDP对鼠标调用的图标替换实现的，所以如果更改了Windows桌面的显示比例(例如上述为了能够看清高分屏我调整 ``Custom scaling`` 设置为 ``150``)就会导致鼠标光标无法看到。
 
 - 启动菜单 ``Settings => Personalization => Themes`` ，在这个风格设置中，有一个 ``Mouse cursor`` 选项可以调整鼠标指针样式。将样式调整成 ``Windows Black (system scheme)`` 这样 ``可能`` 可以解决rdesktop远程桌面无法正常显示鼠标光标的问题。
 
@@ -94,18 +92,7 @@ MacBook Pro高分辨率显示
 
    ln -s /usr/share/icons/Vanilla-DMZ/cursors/left_ptr ~/.icons/default/cursors/24020000002800000528000084810000
 
-实际我参考了 `Arch Linux社区文档 - Supplying missing cursors <https://wiki.archlinux.org/index.php/Cursor_themes#Supplying_missing_cursors>`_  ::
-
-   THEME=Adwaita
-   ln -s /usr/share/icons/$THEME/cursors/xterm          ~/.icons/default/cursors/00000000017e000002fc000000000000
-   ln -s /usr/share/icons/$THEME/cursors/right_ptr      ~/.icons/default/cursors/00000093000010860000631100006609
-   ln -s /usr/share/icons/$THEME/cursors/plus           ~/.icons/default/cursors/01e00000201c00004038000080300000
-   ln -s /usr/share/icons/$THEME/cursors/left_ptr       ~/.icons/default/cursors/24020000002800000528000084810000
-   ln -s /usr/share/icons/$THEME/cursors/left_ptr_watch ~/.icons/default/cursors/6ce0180090108e0005814700a0021400
-   ln -s /usr/share/icons/$THEME/cursors/hand           ~/.icons/default/cursors/d2201000a2c622004385440041308800
-   ln -s /usr/share/icons/$THEME/cursors/watch          ~/.icons/default/cursors/fc618c00da110f0034fd0e004e082400
-
-但是比较奇怪的是，当前帐号的鼠标光标问题依旧。但是我偶然新建了一个Windows帐号，则远程桌面的光标显示则真的是 ``Adwaita`` 的黑色图表，恰好解决了这个光标显示问题。虽然还没有最终找到规律，但是不失为一个解决方向。
+不过，默认Arch Linux安装的rdesktop没有debug模式，看不到上述输出信息，所以我采用自己编译的 ``rdesktop`` 来找出这个对应关系。
 
 SeamlessRDP
 ================

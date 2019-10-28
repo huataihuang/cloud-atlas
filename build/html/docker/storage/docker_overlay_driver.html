@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Docker OverlayFS存储引擎 &mdash; Cloud Atlas 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="添加host设备到容器" href="docker_run_add_host_device.html" />
+    <link rel="prev" title="Docker btrfs 存储驱动" href="docker_btrfs_driver.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Docker Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">Docker 起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Docker 管理</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker存储</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="docker_storage_manage.html">Docker存储管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_volume.html">Docker 卷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_bind_mount.html">Docker 捆绑挂载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_tmpfs_mount.html">Docker内存文件系统(tmpfs)挂载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_storage_driver.html">Docker存储驱动</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_btrfs_driver.html">Docker btrfs 存储驱动</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Docker OverlayFS存储引擎</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">系统要求</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overlay">配置Overlay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overlay2"><code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 驱动工作原理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="docker_run_add_host_device.html">添加host设备到容器</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../network/index.html">Docker网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">Docker GPU设备</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Docker Atlas</a> &raquo;</li>
+        
+          <li><a href="index.html">Docker存储</a> &raquo;</li>
+        
+      <li>Docker OverlayFS存储引擎</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/docker/storage/docker_overlay_driver.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="docker-overlayfs">
+<span id="docker-overlay-driver"></span><h1>Docker OverlayFS存储引擎<a class="headerlink" href="#docker-overlayfs" title="Permalink to this headline">¶</a></h1>
+<p>OverlayFS是一个类似AUFS的现代化联合文件系统，但是速度更快并且实现更为简单。Docker提供了两种OverlayFS存储驱动：早期的 <code class="docutils literal notranslate"><span class="pre">overlay</span></code> 以及较新的更为稳定的 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 。</p>
+<p>在Linux内核驱动中，称为 <code class="docutils literal notranslate"><span class="pre">OverlayFS</span></code> ，在 Docker 存储驱动则称之为 <code class="docutils literal notranslate"><span class="pre">overlay</span></code> 或 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 。</p>
+<p>..note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>如果使用OverlayFS，请使用 ``overlay2`` 而不是 ``overlay`` ，因为 ``overlay2`` 在inode使用上效率更高。为了使用较新的 ``overlay2`` 驱动，你需要Linux内核 4.0 或更高版本，或者在RHEL/CentOS中使用内核 ``3.10.0-514`` 以上版本。详细的 ``overlay`` 和 ``overlay2`` 区别，请参考 :ref:`docker_storage_driver` 。
+</pre></div>
+</div>
+<div class="section" id="id1">
+<h2>系统要求<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>系统必须满足以下要求才能够支持OverlayFS:</p>
+<ul class="simple">
+<li><p>Docker Engine-Community (Docker-CE) 和 Docker EE 17.06.02-ee5及以上版本支持 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 存储引擎，并且 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 也是推荐的存储引擎。</p></li>
+<li><p>Linux内核版本 4.0以上或者 RHEL/CentOS 3.10.0-514 以上内核才支持 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> ，如果是早期版本内核，则只能使用 <code class="docutils literal notranslate"><span class="pre">overlay</span></code> 引擎(不推荐)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">overlay</span></code> 和 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 存储引擎支持 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 文件系统，但是 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 文件系统必须激活 <code class="docutils literal notranslate"><span class="pre">d_type=true</span></code></p></li>
+</ul>
+<p>请使用 <code class="docutils literal notranslate"><span class="pre">xfs_info</span></code> 来校验文件系统选项是否已经设置了 <code class="docutils literal notranslate"><span class="pre">ftype</span></code> 选项为 <code class="docutils literal notranslate"><span class="pre">1</span></code> 。如果没有激活 <code class="docutils literal notranslate"><span class="pre">d_type=true</span></code> ，则必须重新格式化xfs文件系统，格式化时候使用参数 <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">ftype=1</span></code> 。</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">xfs_info</span> <span class="pre">/var/lib/docker</span></code> 显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">naming</span>   <span class="o">=</span><span class="n">version</span> <span class="mi">2</span>              <span class="n">bsize</span><span class="o">=</span><span class="mi">4096</span>   <span class="n">ascii</span><span class="o">-</span><span class="n">ci</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ftype</span><span class="o">=</span><span class="mi">1</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>没有启用 <code class="docutils literal notranslate"><span class="pre">d_type</span></code> 的XFS文件系统会导致Docker不能使用 <code class="docutils literal notranslate"><span class="pre">overlay</span></code> 或 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 驱动。已经安装的Docker虽然可以运行但是会报错，这样至少能够允许用户歉意数据。但是未来版本，Docker将拒绝启动。</p>
+</div>
+<ul class="simple">
+<li><p>修改现有容器和镜像的存储引擎可能会导致不可访问。所以在修改 <a class="reference internal" href="docker_storage_driver.html#docker-storage-driver"><span class="std std-ref">Docker存储驱动</span></a> 之前，应该使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">save</span></code> 命令将镜像存储或推送到镜像仓库中，以应对异常问题。</p></li>
+</ul>
+</div>
+<div class="section" id="overlay">
+<h2>配置Overlay<a class="headerlink" href="#overlay" title="Permalink to this headline">¶</a></h2>
+<p>强烈建议使用 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 存储引擎(内核4.0或以上版本)，如果内核不满足要求(例如内核版本低于4.0但高于3.18)则使用 <code class="docutils literal notranslate"><span class="pre">overlay</span></code> 存储引擎。</p>
+<p>以下为切换存储引擎overlay2方法：</p>
+<ul>
+<li><p>停止 Docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>备份 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">-</span><span class="n">au</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">bk</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果需要，重新挂载 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 目录到新的磁盘</p></li>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/docker/daemon.json</span></code> 添加以下内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;storage-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;overlay2&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动Docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="overlay2">
+<h2><code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 驱动工作原理<a class="headerlink" href="#overlay2" title="Permalink to this headline">¶</a></h2>
+<p>OverlayFS在单个Linux主机上将两个目录表现为一个单一目录。这些目录被成为 <code class="docutils literal notranslate"><span class="pre">层</span></code> 并且统一的进程将它作为一个 <code class="docutils literal notranslate"><span class="pre">统一挂载</span></code> 。OverlayFS将较低层的目录称为 <code class="docutils literal notranslate"><span class="pre">lowerdir</span></code> 而较高层的目录称为 <code class="docutils literal notranslate"><span class="pre">upperdir</span></code> 。这个统一视图是通过称为 <code class="docutils literal notranslate"><span class="pre">merged</span></code> 的自有目录输出的。</p>
+<p><code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 原生最多支持 128 层OverlayFS文件层。这个能力使得和文件层相关的Docker命令，例如 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">build</span></code> 和 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">commit</span></code> ，获得较高的性能，并且消耗较少的后端文件系统inode。</p>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.docker.com/storage/storagedriver/overlayfs-driver/">Use the OverlayFS storage driver</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="docker_run_add_host_device.html" class="btn btn-neutral float-right" title="添加host设备到容器" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="docker_btrfs_driver.html" class="btn btn-neutral float-left" title="Docker btrfs 存储驱动" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; <a href="../../copyright.html">Copyright</a> 2019, Huatai Huang
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

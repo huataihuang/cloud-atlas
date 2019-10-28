@@ -27,7 +27,7 @@
 
 .. note::
 
-   在 :ref:`docker_btrfs` 中，我是在Studio环境部署Ubuntu 18操作系统，由于内核4.x已经较好支持了btrfs文件系统，所以官方推荐在Ubuntu/Debian中使用btrfs。但是CentOS/RHEL 7.x目前内核还处于3.x，所以不推荐使用btrfs。
+   在 :ref:`docker_btrfs_driver` 中，我是在Studio环境部署Ubuntu 18操作系统，由于内核4.x已经较好支持了btrfs文件系统，所以官方推荐在Ubuntu/Debian中使用btrfs。但是CentOS/RHEL 7.x目前内核还处于3.x，所以不推荐使用btrfs。
 
    我计划在CentOS 8发布后，再check官方支持btrfs情况确定是否迁移Docker Driver到btrfs系统。根据RHEL8选择的内核4.18，预计能够很好支持btrfs系统。
 
