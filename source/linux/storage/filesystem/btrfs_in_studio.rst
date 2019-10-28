@@ -125,7 +125,7 @@ Arch Linux的软件包同名，安装命令如下::
 
    最初我采用的 :ref:`using_btrfs_in_studio` 方式，将一个btrfs文件系统划分多个子卷分别提供给KVM，Docker和home存储。
    
-   但是参考Docker官方文档，解决方案有所不同，所以实际操作请参考 :ref:`docker_btrfs` 进行。
+   但是参考Docker官方文档，解决方案有所不同，所以实际操作请参考 :ref:`docker_btrfs_driver` 进行。
 
    现在本文是在 :ref:`thinkpad_x220` 的再次实践，结合了用于 Docker 的独立btrfs分区和用于数据存储/KVM虚拟机的btrfs分区。
 

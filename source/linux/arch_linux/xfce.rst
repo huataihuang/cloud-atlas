@@ -136,3 +136,12 @@ flameshot
 - 安装::
 
    pacman -S flameshot
+
+mupdf
+----------------
+
+`mupdf <https://mupdf.com>`_ 是一个开源的采用C语言编写的PDF, XPS和EPUB阅读器，性能非常卓越，并且安装体积小依赖少::
+
+   pacman -S mupdf
+
+mupdf非常简洁，甚至没有提供菜单，但是基本功能完备。使用 ``ctrl`` 键结合鼠标滚轮可以方法缩小页面（对于MacBook Pro的Retina屏幕，epub和pdf显示的字体都太小了)。

@@ -12,7 +12,8 @@ Docker存储
    docker_bind_mount.rst
    docker_tmpfs_mount.rst
    docker_storage_driver.rst
-   docker_btrfs.rst
+   docker_btrfs_driver.rst
+   docker_overlay_driver.rst
    docker_run_add_host_device.rst
 
 .. only::  subproject and html

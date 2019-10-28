@@ -103,7 +103,7 @@ Docker
    sudo apt update
    sudo apt install docker-ce
 
-注意，由于我使用 :ref:`docker_btrfs` 并且 :ref:`minikube_debug_cri_install` 要求，需要设置 ``btrfs`` 存储驱动和  ``systemd`` 作为cgroup驱动，所以执行以下命令::
+注意，由于我使用 :ref:`docker_btrfs_driver` 并且 :ref:`minikube_debug_cri_install` 要求，需要设置 ``btrfs`` 存储驱动和  ``systemd`` 作为cgroup驱动，所以执行以下命令::
 
    # Setup daemon
    cat > /etc/docker/daemon.json <<EOF
