@@ -39,7 +39,7 @@
 
 .. note::
 
-   在CentOS 8正式推出以后，就 :ref:`upgrade_centos_7_to_8` ，以获得更好的软件性能及特性。
+   在CentOS 8正式推出以后，将升级到8.x系列，以获得更好的软件性能及特性。
 
 - 安装必要软件包::
 
@@ -57,15 +57,9 @@
 磁盘分区
 ============
 
-.. note::
-
-   存储磁盘参考 :ref:`lvm_xfs_in_studio` ，即磁盘块设备采用LVM卷管理，文件系统采用成熟的XFS系统。借鉴 `Stratis项目 <https://stratis-storage.github.io/>`_ 存储架构。
-
 - 服务器磁盘 ``/dev/sda4`` 构建LVM卷，所以首先通过 ``parted /dev/sda`` 划分分区::
 
-   parted -a optimal /dev/sda
-
-   mkpart primary 54.8GB 100%
+   mkpart primary 54.8GB 567GB
    name 4 store
    set 4 lvm on
 
@@ -73,12 +67,8 @@
 
    pvcreate /dev/sda4
    vgcreate store /dev/sda4
-
-   lvcreate --size 128G -n libvirt store
+   lvcreate --size 256G -n libvirt store
    mkfs.xfs /dev/store/libvirt
-
-   lvcreate --size 256G -n docker store
-   mkfs.xfs /dev/store/docker
 
 - 停止libvirt，将磁盘卷迁移到LVM卷::
 
@@ -110,22 +100,11 @@
 
    (cd /var/lib/libvirt.bak && tar cf - .)|(cd /var/lib/libvirt && tar xf -)
 
-- 同理迁移 docker::
-
-   mv /var/lib/docker /var/lib/docker.bak
-   mkdir /var/lib/docker
-
-   mount /dev/store/docker /var/lib/docker
-
-   (cd /var/lib/docker.bak && tar cf - .)|(cd /var/lib/docker && tar xf -)
-
 - 添加 ``/etc/fstab`` 配置::
 
-   echo '/dev/mapper/store-libvirt    /var/lib/libvirt    xfs    defaults    0 1' >> /etc/fstab
-   echo '/dev/mapper/store-docker     /var/lib/docker     xfs    defaults    0 1' >> /etc/fstab
+   echo '/dev/mapper/store-libvirt    /var/lib/libvirt    xfs    defaults    0 0' >> /etc/fstab
 
-- 恢复libvirt 和 docker::
+- 恢复libvirt::
 
    systemctl start libvirtd
-   systemctl start docker
    
