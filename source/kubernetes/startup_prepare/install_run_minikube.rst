@@ -230,6 +230,20 @@ Linux平台使用kvm后端
 
    通过 `none` 驱动运行minikube会降低系统安全和可靠性，详细说明请参考 https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
 
+Arch Linux平台实践物理机运行minikube
+--------------------------------------
+
+- 由于minikube的物理主机运行模式必须以root身份运行，所以先配置驱动::
+
+   sudo minikube config set vm-driver none
+
+- 配置防火墙允许22端口连接
+
+
+.. note::
+
+   我的物理主机采用了 :ref:`kvm_docker_in_studio` ，所以默认有2个内部NAT网桥 ``docker0`` 和 ``virtbr0`` ，这两个都是内部网段
+
 macOS平台使用hyperkit后端
 -----------------------------
 
