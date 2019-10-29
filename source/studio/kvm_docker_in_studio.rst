@@ -139,6 +139,23 @@ Docker
 
    用户加入docker组还是需要重启主机操作系统才能直接使用 ``docker ps``
 
+Arch Linux安装Docker
+-----------------------
+
+- 安装Docker::
+
+   sudo pacman -S docker
+
+.. note::
+
+   在启动docker服务之前，需要确保系统没有启动VPN连接，因为VPN和Docker的网桥以及overlay网络冲突。这种情况下，需要在启动docker之前先断开VPN。
+
+我遇到一个问题，就是 ``sysctl -a | grep ip_forward`` 输出已经显示::
+
+   net.ipv4.ip_forward = 1
+
+但是创建的容器不能通外网，导致安装以后
+
 参考
 ===========
 

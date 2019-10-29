@@ -116,6 +116,7 @@
    
    systemctl enable --now kubelet
 
+
 .. note::
 
    安装会遇到GFW阻碍，所以请参考 :ref:`openconnect_vpn` 搭好翻墙梯子之后再执行安装。
