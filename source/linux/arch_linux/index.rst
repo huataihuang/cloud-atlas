@@ -17,8 +17,7 @@ Arch Linux
    dropbox.rst
    xrdp.rst
    seamless_rdp.rst
-   win10_multi_rdp_sessions.rst
-   win10_ssh.rst
+   rdesktop_mouse_cursor_appear.rst
    cross_compile.rst
    gpu_deep_learning_on_arch_linux.rst
    wine.rst
