@@ -59,7 +59,7 @@ LVM构建基础概念:
 
 - 设置分区名和启用分区LVM::
 
-   name 3 data
+   name 3 store
    set 3 lvm on
 
 - 最后检查::
@@ -77,7 +77,7 @@ LVM构建基础概念:
    Number  Start   End     Size    File system  Name  Flags
     1      1049kB  512MB   511MB   fat16              boot, esp
     2      512MB   51.7GB  51.2GB  ext4
-    3      51.7GB  512GB   460GB                data  lvm
+    3      51.7GB  512GB   460GB                store lvm
 
 以上分区3将作为数据存储的LVM卷。对于修改系统磁盘 ``/dev/sda`` 分区，则建议重启一次操作系统以便刷新。或者通过 ``partprobe`` 刷新分区。
 
@@ -117,11 +117,11 @@ LVM构建基础概念:
 
 - 在物理卷上构建卷组::
 
-   vgcreate data /dev/sda3
+   vgcreate store /dev/sda3
 
 .. note::
 
-   这里将卷组命名为 ``data``
+   这里将卷组命名为 ``store``
 
    当物理卷用于创建卷组的时候，它的磁盘空间默认被划分为以4MB为单位的 ``extent`` 。这个 ``extent`` 是用于逻辑卷增长和缩减的最小大小。 ``extent`` 的数量不会影响逻辑卷的I/O性能。
 
@@ -132,16 +132,16 @@ LVM构建基础概念:
 逻辑卷
 ---------
 
-- 在 ``data`` 卷组上创建 ``home`` 逻辑卷::
+- 在 ``store`` 卷组上创建 ``home`` 逻辑卷::
 
-   lvcreate -L 100G -n home data
+   lvcreate -L 100G -n home store
 
 - 检查逻辑卷 ``lvdisplay`` 显示如下::
 
      --- Logical volume ---
-     LV Path                /dev/data/home
+     LV Path                /dev/store/home
      LV Name                home
-     VG Name                data
+     VG Name                store
      LV UUID                gIwomd-B9x2-MRNP-o2Jd-diqn-Tgji-N70rP4
      LV Write Access        read/write
      LV Creation host, time zcloud, 2019-10-05 23:02:59 +0800
@@ -155,10 +155,19 @@ LVM构建基础概念:
      - currently set to     256
      Block device           254:0
 
-- 同样再创建一个用于libvirt的逻辑卷，一个用于docker的逻辑卷::
+- 同样再创建一个用于libvirt的逻辑卷，一个用于docker的逻辑卷，一个用于docker容器和虚拟机等共享的存储::
 
-   lvcreate -L 128G -n libvirt data 
-   lvcreate -L 128G -n docker data 
+   lvcreate -L 128G -n libvirt store
+   lvcreate -L 128G -n docker store
+   lvcreate -L 128G -n store store
+
+.. note::
+
+   :ref:`docker_volume` 是Docker持久化数据的存储共享卷，单独划分 ``store`` 存储，可以在这个存储下构建不同的隔离目录给Docker共享。
+
+   Docker支持quota可以用来限制容器可用空间，如果要强制隔离，则可以利用LVM卷来实现。
+   
+   详细的 ``store`` 卷部署使用请参考 :ref:`docker_volume` 和 :ref:`build_image_from_dockerfile` 中配置Docker使用共享卷部分。
 
 XFS
 ===========
@@ -173,9 +182,10 @@ XFS
 
 - 格式化LVM卷::
 
-   mkfs.xfs /dev/data/home
-   mkfs.xfs /dev/data/libvirt
-   mkfs.xfs /dev/data/docker
+   mkfs.xfs /dev/store/home
+   mkfs.xfs /dev/store/libvirt
+   mkfs.xfs /dev/store/docker
+   mkfs.xfs /dev/store/store
 
 .. note::
 
@@ -183,15 +193,17 @@ XFS
 
 - 配置 ``/etc/fstab`` ::
 
-   /dev/mapper/data-home  /home  xfs  defaults  0 1
-   /dev/mapper/data-libvirt  /var/lib/libvirt  xfs  defaults  0 1
-   /dev/mapper/data-docker  /var/lib/docker  xfs  defaults  0 1
+   /dev/mapper/store-home  /home  xfs  defaults  0 1
+   /dev/mapper/store-libvirt  /var/lib/libvirt  xfs  defaults  0 1
+   /dev/mapper/store-docker  /var/lib/docker  xfs  defaults  0 1
+   /dev/mapper/store-store  /store  xfs  defaults  0 1
 
 - 挂载目录(注意，请使用root用户的单用户状态登陆，避免普通用户登陆影响/home目录修改)::
 
    mount /home
    mount /var/lib/libvirt
    mount /var/lib/docker
+   mount /store
 
 .. note::
 

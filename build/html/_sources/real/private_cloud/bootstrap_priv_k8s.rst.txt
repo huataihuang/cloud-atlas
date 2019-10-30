@@ -4,10 +4,59 @@
 引导私有云Kubernetes
 ========================
 
-准备服务器
+集群选型
 ==============
 
-构建Kubernetes集群，我规划使用 3台服务器作为 Kubernetes Master, 以及5台服务器作为 Kubernetes Node。最佳实践是采用物理服务器，但是穷人的孩子早当家，你也可以构建KVM虚拟机来实践部署 :ref:`k8s_hosts` 。
+部署Kubernetes，通常有3种模式：
+
+- 单节点Kubernetes: 通过单台服务器，运行minikube，不提供任何容灾能力
+
+- 单个master多个woker集群：管控平面只部署一台服务器，工作节点至少2台，提供了一定的工作节点容灾能力。最少3太服务器(1master2worker)
+
+
+- 3个master多个worker集群：管控平面部署3台服务器，工作节点至少2台，同时具备了master和worker节点的容灾能力。最少5台服务器(3master2worker)
+
+  - 随着规模扩大，可以水平扩展worker节点
+  - 要进一步提高master节点稳定性和性能，可以将 ``etcd`` 抽取出来独立部署，则管控平面增加到6台服务器，而woker节点可以水平扩展到5000+。
+
+.. figure:: ../../_static/kubernetes/kubeadm-ha-topology-stacked-etcd.svg
+   :scale: 45
+
+.. figure:: ../../_static/kubernetes/kubeadm-ha-topology-external-etcd.svg
+   :scale: 45
+    
+.. note::
+
+   详细高可用kubernetes集群部署参考 :ref:`ha_k8s`
+
+我的私有云选型
+---------------
+
+从集群稳定性和扩展性来说，推荐采用 :ref:`ha_k8s_external` 部署模式：
+
+- kubernetes的管控组件和etcd分别部署在不同服务器，单节点故障影响从1/3降低到1/6
+- 运维管理简化，拓扑清晰
+- etcd和apiserver都是管控平面非常消耗资源的组件，通过分离etcd部署提升了管控平面整体性能
+
+但是，我的私有云由于资源限制，只有3台物理服务器，所以我采用了一种混合虚拟化和容器的部署架构：
+
+- 管控平面服务器(kubernetes master和etcd)运行在OpenStack虚拟化集群(OpenStack部署在3台物理服务器上)
+
+  - 共计6台KVM虚拟机，对外提供apiserver服务
+  - 物理网络连接Kubernetes worker节点，管理运行在物理节点上的worker nodes
+  - 可以节约服务器占用，同时KVM虚拟机可以平滑迁移
+
+- Kubernetes的worker nodes直接部署在3台物理服务器上
+
+  - 裸物理服务器运行Docker容器，可以充分发挥物理硬件性能
+  - :ref:`ceph` 直接运行在物理服务器，提供OpenStack对象存储和Kubernetes卷存储，最大化存储性能
+  - 网络直通，最大化网络性能
+
+.. note::
+
+   整个似有网络仅使用 ``3台物理服务器`` 。如果你缺少服务器资源，也可以采用KVM虚拟机来实践部署，即采用完全的OpenStack集群(单机或多机都可以)，在OpenStack之上运行Kubernetes。
+
+   拓扑图待补充
 
 安装Docker运行环境
 ====================
@@ -27,9 +76,9 @@
 
 .. note::
 
-   在 :ref:`docker_btrfs_driver` 中，我是在Studio环境部署Ubuntu 18操作系统，由于内核4.x已经较好支持了btrfs文件系统，所以官方推荐在Ubuntu/Debian中使用btrfs。但是CentOS/RHEL 7.x目前内核还处于3.x，所以不推荐使用btrfs。
+   在 :ref:`docker_btrfs_driver` 中，我是在Studio环境部署Ubuntu 18操作系统，由于内核4.x已经支持了btrfs文件系统，目前Docker官方文档仅在Ubuntu/Debian中推荐使用btrfs。但是，我实际测试发现稳定性可能还存在问题。
 
-   我计划在CentOS 8发布后，再check官方支持btrfs情况确定是否迁移Docker Driver到btrfs系统。根据RHEL8选择的内核4.18，预计能够很好支持btrfs系统。
+   CentOS/RHEL 7.x开始已经放弃了btrfs，官方推荐采用XFS。
 
 - 设置Docker的配置::
 
@@ -116,6 +165,7 @@
    
    systemctl enable --now kubelet
 
+
 .. note::
 
    安装会遇到GFW阻碍，所以请参考 :ref:`openconnect_vpn` 搭好翻墙梯子之后再执行安装。
@@ -129,3 +179,4 @@
 =======
 
 - `Container runtimes <https://kubernetes.io/docs/setup/production-environment/container-runtimes/>`_
+- 

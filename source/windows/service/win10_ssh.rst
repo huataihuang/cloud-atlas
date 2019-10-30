@@ -17,17 +17,17 @@ Windows 10 1809 提供了OpenSSH client和server的安装功能:
 
 - 点击启动按钮，然后选择 ``Settings => Apps`` ，在选择 ``Apps & features => Optional Feature``
 
-.. figure:: ../../_static/linux/arch_linux/win10_ssh_1.png
+.. figure:: ../../_static/windows/service/win10_ssh_1.png
    :scale: 60
 
 - 默认已经安装了OpenSSH client，只需要安装OpenSSH Server，所以点击 ``Add a feature``
 
-.. figure:: ../../_static/linux/arch_linux/win10_ssh_2.png
+.. figure:: ../../_static/windows/service/win10_ssh_2.png
    :scale: 60
 
 - 点击安装OpenSSH Server
    
-.. figure:: ../../_static/linux/arch_linux/win10_ssh_3.png
+.. figure:: ../../_static/windows/service/win10_ssh_3.png
    :scale: 60
 
 启用
