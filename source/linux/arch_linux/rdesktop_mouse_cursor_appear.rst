@@ -45,17 +45,24 @@ Windows scale 150实践
 
 由于我使用的是MacBook Pro笔记本，Retina屏幕需要调整Windows桌面 Custom scaling 设置比率: ``150``
 
+调整Windows桌面custom scaling设置比率需要在VNC桌面上设置(通过Remote Viewer的 ``spice://`` 协议访问)，然后在远程桌面RDP访问就能够看到放大比率的屏幕显示。
+
 .. note::
 
-   但是，不知道为何，之前调整桌面缩放比例之后，rdesktop远程访问也同步会调整比率。但是最近一次却发现调整桌面比率之后，rdesktop远程访问显示还是100%的比率，导致我无法对比。
+   遇到过桌面 Custom scaling 调整后但是RDP远程桌面访问依然是100%比率的，后来偶然发现可能是公司的"阿里郎"软件影响(阿里郎具有桌面共享功能)，居然发现在阿里郎切换一次语言界面(从英文切换到中文)，之后RDP远程桌面访问的显示比率就和桌面设置比率一致了。
 
+FreeRDP(推荐)
+================
 
-FreeRDP
-==========
+实际上，我始终没有解决rdesktop在缩放了显示比率后鼠标光标显示问题，实践发现，在桌面调整了显示比率之后，使用环境变量 ``export XCURSOR_DISCOVER=1`` 无效，并不能在终端显示光标详细值。
 
-现在我改为采用 `FreeRDP <http://www.freerdp.com/>`_ ，是通过 Rimmina 的内建freerdp功能来访问Windows远程桌面。也就是需要同时安装remmina和freerdp，这样remmina就能够直接访问RDP远程桌面。
+现在我改为采用 `FreeRDP <http://www.freerdp.com/>`_ ，是通过 Remmina 的内建freerdp功能来访问Windows远程桌面。也就是需要同时安装remmina和freerdp，这样remmina就能够直接访问RDP远程桌面::
 
+   sudo pacman -S freerdp remmina
 
+.. note::
+
+   推荐使用Remmina，这是当前主流的Gnome桌面内建的多协议远程访问客户端，确实功能完备，并且Remmina基于的组件选择是合理的，freerdp比原先使用的rdesktop要更为现代化，支持协议版本更高且没有光标显示问题。也就不想要折腾了，虽然我已经浪费了好几天时间来摸索......
 
 参考
 =======
