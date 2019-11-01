@@ -43,7 +43,15 @@ OpenStack有两种网络选型：
 
 - Self-service networks:
 
-自服务网络选型是采用VXLAN这样的overlay分片方式实现self-service networks。
+自服务网络选型是采用VXLAN这样的overlay分片方式实现self-service networks。底层，使用NAT将虚拟网络路由给物理网络，这个网络选型提供了高级服务功能，例如LBaaS和FWaaS。
+
+OpenStack用户可以在不知道底层数据网络的情况下构建虚拟网络，包括VLAN网络，如果配置了layer-2插件。
+
+.. note::
+
+   我采用Self-service network，以便实现VXLAN的虚拟网络。
+
+.. figure:: ../../_static/openstack/installation/network2-services.png
 
 
 
