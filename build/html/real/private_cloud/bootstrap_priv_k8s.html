@@ -225,13 +225,25 @@
 </ul>
 <p>但是，我的私有云由于资源限制，只有3台物理服务器，所以我采用了一种混合虚拟化和容器的部署架构：</p>
 <ul class="simple">
-<li><p>管控平面服务器(kubernetes master和etcd)运行在OpenStack虚拟化集群(OpenStack部署在3台物理服务器上)</p>
+<li><p>管控平面服务器(kubernetes master)运行在KVM虚拟机(每个物理服务器上运行一个虚拟机)</p>
 <ul>
-<li><p>共计6台KVM虚拟机，对外提供apiserver服务</p></li>
+<li><p>共计3台KVM虚拟机，对外提供apiserver服务</p></li>
 <li><p>物理网络连接Kubernetes worker节点，管理运行在物理节点上的worker nodes</p></li>
 <li><p>可以节约服务器占用，同时KVM虚拟机可以平滑迁移</p></li>
 </ul>
 </li>
+<li><p>etcd服务器运行在物理主机上</p>
+<ul>
+<li><p>etcd是整个kubernetes集群的数据存储，不仅需要保障数据安全性，而且要保证读写性能</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>最初我考虑采用OpenStack来运行Kubernetes管控服务器，但是OpenStack构建和运行复杂，Kubernetes依赖OpenStack则过于沉重，一旦出现OpenStack异常会导致整个Kubernetes不可用。</p>
+<p>基础服务部署着重于稳定和简洁，依赖越少越好：并不是所有基础设施都适合云化(OpenStack)或者云原生(Kubernetes)，特别是BootStrap的基础服务，使用物理裸机来运行反而更稳定更不容易出错。</p>
+</div>
+<ul class="simple">
 <li><p>Kubernetes的worker nodes直接部署在3台物理服务器上</p>
 <ul>
 <li><p>裸物理服务器运行Docker容器，可以充分发挥物理硬件性能</p></li>
