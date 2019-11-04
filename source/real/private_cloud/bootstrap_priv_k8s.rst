@@ -189,6 +189,19 @@
 
    安装会遇到GFW阻碍，所以请参考 :ref:`openconnect_vpn` 搭好翻墙梯子之后再执行安装。
 
+排查kubelet异常
+-------------------
+
+检查 worker1 服务器上的 kubelet运行正常，但是 worker2/3 上kubelet运行失败::
+
+   systemctl status kubelet
+
+显示::
+
+   Process: 3620 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS (code=exited, status=255)
+   ...
+
+
 配置管控节点cgroup驱动
 =======================
 

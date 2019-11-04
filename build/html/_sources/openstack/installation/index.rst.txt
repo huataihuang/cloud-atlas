@@ -9,6 +9,7 @@ OpenStack安装
 
    openstack_overview.rst
    openstack_install_overview.rst
+   environment/index
 
 .. only::  subproject and html
 

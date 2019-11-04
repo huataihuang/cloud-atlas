@@ -1,7 +1,7 @@
-.. _vitess:
+.. _introduce_vitess:
 
 =====================
-Vitess数据库集群
+Vitess数据库集群简介
 =====================
 
 `Vitess平台 <https://vitess.io>`_ 是YouTube开源的部署、扩展和管理大型MySQL实力集群的数据库解决方案：
@@ -70,7 +70,7 @@ Vitess特性
 
 Vitess平台由多个服务进程，命令行实用工具和基于WEB的实用程序组成，并由一致性的元数据存储提供支持。
 
-.. image:: ../_static/mysql/vitess_overview.png
+.. figure:: ../../_static/mysql/vitess/vitess_overview.png
    :scale: 75
 
 Topology服务

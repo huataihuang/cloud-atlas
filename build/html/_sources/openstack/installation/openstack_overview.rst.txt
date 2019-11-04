@@ -17,3 +17,5 @@ OpenStack实现了基础架构即服务(Infrastructure-as-a-Service, IaaS)解决
    - Ubuntu 使用Ubuntu Cloud archive repository for Ubuntu (Pike和Queens版本支持Ubuntu 16.04 LTS，而Queens则直接使用Ubuntu 18.04 LTS)
 
 要理解OpenStack，请参考 :ref:`openstack_architecture` ，特别是 ``OpenStack逻辑架构图`` 。
+
+我的实践基于 2019年10月发布的OpenStack train版本。

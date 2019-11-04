@@ -14,9 +14,8 @@ MySQL是使用最广泛的开源数据库，很多开源项目都会在后端使
 .. toctree::
    :maxdepth: 1
 
-   install_mysql.rst
-   vitess.rst
-   deploy_vitess.rst
+   installation/index
+   vitess/index
 
 .. only::  subproject and html
 
