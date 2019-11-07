@@ -17,6 +17,11 @@ Arch Linux运行snap
 
    ``snapd`` 安装了一个脚本在 ``/etc/profile.d/snapd.sh`` 来输出所有安装的snapd包和桌面入口的路径，所以要重启一次系统才能生效。
 
+启用snapd::
+
+   systemctl enable snapd
+   systemctl start snapd
+
 - (可选)激活apparmor可以将snap程序运行在受限制的沙箱内，提供更好的安全性(如果不使用AppArmor就会让所有snaps运行在 ``devel`` 模式，也就是没有限制地访问系统，就好像普通应用程序)::
 
    systemctl enable --now apparmor.service
@@ -52,3 +57,10 @@ Arch Linux运行snap
    一些snap，例如 Skype 和 Pycharm 使用经典配置，需要 ``/snap`` 目录，不是 FHS兼容，则需要手工创建::
 
       ln -s /var/lib/snapd/snap /snap
+
+安装微信
+=========
+
+- 安装::
+
+   sudo snap install electronic-wechat
