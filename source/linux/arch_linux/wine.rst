@@ -112,10 +112,54 @@ Nvidia
 
    `Linux上运行最新版腾讯QQ与TIM的解决方案 <https://github.com/askme765cs/Wine-QQ-TIM>`_ 采用了 `AppImage <https://appimage.org/>`_ 打包方式运行wine，据说能够输入中文，或许可以测试一下。
 
-字体
-----
+微软字体
+===========
 
-如果Wine应用程序不能显示良好字体，需要复制Windows字体
+.. note::
+
+   参考 `Ubuntu 安装 Wine 4.4 并设置微软雅黑字体解决中文乱码 <https://www.linuxidc.com/Linux/2019-03/157663.htm>`_
+
+如果Wine应用程序不能显示良好字体，需要复制Windows字体到 ``.wine/drive_c/windows/Fonts`` 目录下，共3个文件::
+
+   msyh.ttc      常规字体
+   msyhbd.ttc    黑体
+   msyhl.ttc     细体
+
+- 编辑 ``msyh_font.reg`` 文件::
+
+   REGEDIT4
+   [HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink]
+   "Lucida Sans Unicode"="msyh.ttc"
+   "Microsoft Sans Serif"="msyh.ttc"
+   "MS Sans Serif"="msyh.ttc"
+   "Tahoma"="msyh.ttc"
+   "Tahoma Bold"="msyhbd.ttc"
+   "msyh"="msyh.ttc"
+   "Arial"="msyh.ttc"
+   "Arial Black"="msyh.ttc"
+
+- 执行生效::
+
+   regedit msyh_font.reg
+
+- 编辑 ``~/.wine/system.reg`` ，搜索关键字 ``FontSubstitutes`` 把下面的::
+
+   "MS Shell Dlg"="Tahoma"
+   "MS Shell Dlg 2"="Tahoma"
+
+修改成::
+
+   "MS Shell Dlg"="msyh"
+   "MS Shell Dlg 2"="msyh"
+
+- 运行 ``winecfg`` 命令配置wine，在 ``Graphics`` 面板，调整 ``Screen resoultion`` ，将默认的 ``96 dpi`` 调整成 ``144dpi`` 或者更大，这样显示的字体将匹配MacBook Pro Retina屏幕。
+
+Kindle
+============
+
+参考 `How to install Kindle on Ubuntu 18.04? <https://askubuntu.com/questions/1104411/how-to-install-kindle-on-ubuntu-18-04>`_ 需要安装Kindle特定版本 1.17.44183。
+
+同样，对于中文Kindle书籍，需要完成wine的中文字体设置之后才能正常显示。幸运的是，Kindle在wine下运行非常流畅，字体显示也很美观，满足了电子书阅读的需求。
 
 参考
 =======

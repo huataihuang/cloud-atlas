@@ -83,6 +83,8 @@ kubernetes官方提供的案例 ``deployment.yaml`` 可以帮助我们理解如�
 
    虽然已经启动了pod，但是此时还没有把部署输出到外部网络，所以此时还无法访问nginx的页面。请参考 :ref:`kubernetes_expose_service` 完成服务输出。
 
+   在kubernetes中展示的pod命名和运行主机上的docker容器命名相关，在物理主机上使用 ``docker ps`` 可以看到 ``XXXX_nginx-deployment-6dd86d77d-lmg92_YYYY`` 命名的容器。
+
 参考
 ===========
 

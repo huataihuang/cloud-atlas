@@ -9,6 +9,7 @@ RedHat Linux
 
    upgrade_centos_7_to_8.rst
    install_centos8.rst
+   systemd/index
 
 .. only::  subproject and html
 
