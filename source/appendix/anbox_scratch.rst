@@ -588,7 +588,7 @@ That's It...!!! We are done...!!!
 
 微信有一个Linux版本，基于Qt开发，可以方便在linux下实现基本的沟通。通过snap可以安装::
 
-   ysy -S snapd snapd-xdg-open
+   yay -S snapd snapd-xdg-open
 
 然后安装::
 
@@ -601,6 +601,8 @@ That's It...!!! We are done...!!!
 .. note::
 
    微信Linux版本支持托盘，就像原生程序一般，非常流畅。基本上和微信Mac版本一样简洁。
+
+   参考 `How to install electronic-wechat on Arch Linux <https://snapcraft.io/install/electronic-wechat/arch>`_
 
 参考
 =======
