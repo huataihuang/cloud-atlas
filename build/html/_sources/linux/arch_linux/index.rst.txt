@@ -11,6 +11,7 @@ Arch Linux
    archlinux_on_thinkpad_x220.rst
    archlinux_ms_fonts.rst
    archlinux_aur.rst
+   archlinux_snap.rst
    archlinux_hibernates.rst
    alien_convert_package.rst
    archlinux_developer.rst
