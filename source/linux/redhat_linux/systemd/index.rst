@@ -1,15 +1,13 @@
-.. _redhat_linux:
+.. _redhat_linux_systemd:
 
 =================================
-RedHat Linux
+RedHat Linux Systemd管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   upgrade_centos_7_to_8.rst
-   install_centos8.rst
-   systemd/index
+   introduce_systemd.rst
 
 .. only::  subproject and html
 
