@@ -13,6 +13,7 @@ Linux VPN
 
    openconnect_vpn.rst
    vpnc.rst
+   polipo_proxy_yum.rst
 
 .. only::  subproject and html
 

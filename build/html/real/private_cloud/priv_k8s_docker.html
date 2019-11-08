@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>引导私有云Kubernetes &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>私有云Kubernetes运行docker环境 &mdash; Cloud Atlas 0.1 documentation</title>
   
 
   
@@ -103,13 +103,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../prepare/index.html">真实云计算的构建准备</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">引导私有云Kubernetes</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">私有云Kubernetes运行docker环境</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">集群选型</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#docker">安装Docker运行环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">服务器环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">安装软件包</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">网络端口</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cgroup">配置管控节点cgroup驱动</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -171,13 +172,13 @@
         
           <li><a href="index.html">私有云计算构建</a> &raquo;</li>
         
-      <li>引导私有云Kubernetes</li>
+      <li>私有云Kubernetes运行docker环境</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/real/private_cloud/bootstrap_priv_k8s.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/real/private_cloud/priv_k8s_docker.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -190,8 +191,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kubernetes">
-<span id="bootstrap-priv-k8s"></span><h1>引导私有云Kubernetes<a class="headerlink" href="#kubernetes" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="kubernetesdocker">
+<span id="priv-k8s-docker"></span><h1>私有云Kubernetes运行docker环境<a class="headerlink" href="#kubernetesdocker" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>集群选型<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>部署Kubernetes，通常有3种模式：</p>
@@ -394,28 +395,40 @@
 <p class="admonition-title">Note</p>
 <p>安装会遇到GFW阻碍，所以请参考 <a class="reference internal" href="../../linux/security/vpn/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 搭好翻墙梯子之后再执行安装。</p>
 </div>
-<div class="section" id="kubelet">
-<h3>排查kubelet异常<a class="headerlink" href="#kubelet" title="Permalink to this headline">¶</a></h3>
-<p>检查 worker1 服务器上的 kubelet运行正常，但是 worker2/3 上kubelet运行失败:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">kubelet</span>
+</div>
+<div class="section" id="id5">
+<h2>网络端口<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>请参考 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes/index.html#bootstrap-kubernetes"><span class="std std-ref">Kubernetes集群引导</span></a>  的 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes/kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a> 部分调整好物理服务器的防火墙端口。</p>
+<p>默认安装docker时候已经配置了iptables，但是CentOS 7默认只安装了firewalld但没有激活firewalld:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">firewalld</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">firewalld</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">firewalld</span>
 </pre></div>
 </div>
-<p>显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Process: 3620 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS (code=exited, status=255)
-...
+</div>
+<ul>
+<li><p>开启防火墙端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">6443</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">2379</span><span class="o">-</span><span class="mi">2380</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">10250</span><span class="o">-</span><span class="mi">10252</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+
+<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">10250</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">30000</span><span class="o">-</span><span class="mi">32767</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
 </pre></div>
 </div>
-</div>
+</li>
+</ul>
 </div>
 <div class="section" id="cgroup">
 <h2>配置管控节点cgroup驱动<a class="headerlink" href="#cgroup" title="Permalink to this headline">¶</a></h2>
 <p>在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 <code class="docutils literal notranslate"><span class="pre">/var/lib/kubelet/kubeadm-flags.env</span></code> ，所以在我们的部署环境中不需要设置 <code class="docutils literal notranslate"><span class="pre">cgroup-driver</span></code> 值。</p>
 </div>
-<div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">Container runtimes</a></p></li>
-<li></li>
 </ul>
 </div>
 </div>

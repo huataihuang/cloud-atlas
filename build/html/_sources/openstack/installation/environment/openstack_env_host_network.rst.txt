@@ -61,8 +61,9 @@ provider网络需要Internet访问以便提供OpenStack环境的虚拟机实例�
 
 物理服务器IP分配见 :ref:`real_prepare` :
 
-.. literalinclude:: ../../../real/prepare/hosts
+.. literalinclude:: ../../../studio/hosts
    :language: bash
+   :emphasize-lines: 72-80
    :linenos:
 
 

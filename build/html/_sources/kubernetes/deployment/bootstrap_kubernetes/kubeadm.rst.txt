@@ -106,14 +106,18 @@ CRI0-O      /var/run/crio/crio.sock
 
 由于 kubeadm ``不会`` 安装和管理 ``kubelet`` 或 ``kubectl`` ，所以要确保你需要kubeadm为你安装的正确版本。
 
-安装前准备
-------------
+.. _prepare_for_k8s_install:
+
+安装kubernetes前准备
+----------------------
 
 - 请参考 :ref:`openconnect_vpn` 准备好梯子，安装Kubernetes软件包需要访问Google的软件仓库。
 
 注意：请不要直接在Kubernetes集群服务器上部署VPN客户端来翻墙，我遇到的问题是，VPN客户端运行时会在服务器上添加 ``tun0`` 网络设备，并且设置了默认路由。这会导致 ``kubeadm`` 初始化时以 ``tun0`` 接口的IP地址作为API服务接口。这样一旦关闭VPN接口就会引起异常。
 
-解决的方法时采用VPN网关方式，在外部的服务器上构建VPN转发，这样局域网内部的服务器就不需要单独运行VPN，也就不再为这个网卡无识别困扰了。
+解决的方法时采用VPN网关方式，在外部的服务器上构建VPN转发，这样局域网内部的服务器就不需要单独运行VPN，也就不再为这个网卡无识别困扰了。 具体方法请参考 :ref:`polipo_proxy_yum`
+
+如果部署Kubernetes时使用了VPN，导致VPN关闭时无法运行Kubernetes，则需要 :ref:`change_master_ip` 来恢复正确配置。
 
 - 节点上的 SELinux 需要设置成 ``permissive`` 模式::
 
