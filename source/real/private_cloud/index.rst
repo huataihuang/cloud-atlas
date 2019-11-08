@@ -10,4 +10,4 @@
    :maxdepth: 1
 
    priv_kvm.rst
-   bootstrap_priv_k8s.rst
+   priv_k8s_docker.rst

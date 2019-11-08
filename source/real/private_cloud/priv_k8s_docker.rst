@@ -1,8 +1,8 @@
-.. _bootstrap_priv_k8s:
+.. _priv_k8s_docker:
 
-========================
-引导私有云Kubernetes
-========================
+===============================
+私有云Kubernetes运行docker环境
+===============================
 
 集群选型
 ==============
@@ -161,6 +161,7 @@
 
    lsmod | grep br_netfilter
 
+
 安装软件包
 ==============
 
@@ -189,17 +190,27 @@
 
    安装会遇到GFW阻碍，所以请参考 :ref:`openconnect_vpn` 搭好翻墙梯子之后再执行安装。
 
-排查kubelet异常
--------------------
+网络端口
+===========
 
-检查 worker1 服务器上的 kubelet运行正常，但是 worker2/3 上kubelet运行失败::
+.. note::
 
-   systemctl status kubelet
+   请参考 :ref:`bootstrap_kubernetes`  的 :ref:`kubeadm` 部分调整好物理服务器的防火墙端口。
 
-显示::
+   默认安装docker时候已经配置了iptables，但是CentOS 7默认只安装了firewalld但没有激活firewalld::
 
-   Process: 3620 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS (code=exited, status=255)
-   ...
+      sudo yum install firewalld
+      sudo systemctl enable firewalld
+      sudo systemctl start firewalld
+
+- 开启防火墙端口::
+
+   sudo firewall-cmd --zone=public --add-port=6443/tcp --permanent
+   sudo firewall-cmd --zone=public --add-port=2379-2380/tcp --permanent
+   sudo firewall-cmd --zone=public --add-port=10250-10252/tcp --permanent
+
+   sudo firewall-cmd --zone=public --add-port=10250/tcp --permanent
+   sudo firewall-cmd --zone=public --add-port=30000-32767/tcp --permanent
 
 
 配置管控节点cgroup驱动
@@ -211,4 +222,3 @@
 =======
 
 - `Container runtimes <https://kubernetes.io/docs/setup/production-environment/container-runtimes/>`_
-- 
