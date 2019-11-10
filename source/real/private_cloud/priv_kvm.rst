@@ -105,12 +105,12 @@
 
    /etc/init.d/network restart
 
-复制KVM虚拟机(案例)
+复制KVM虚拟机
 ====================
 
 .. note::
 
-   详细克隆KVM虚拟机请参考 :ref:`clone_vm` ，这里仅提供一个概述。因为在 :ref:`real` 中我将部署OpenStack作为KVM集群的工作平台。
+   详细克隆KVM虚拟机请参考 :ref:`clone_vm` ，这里为了准备 :ref:`priv_k8s_docker` 中作为 kubemaster 服务器的虚拟机。
 
 - 暂停虚拟机::
 
@@ -118,22 +118,29 @@
 
 - clone虚拟机::
 
-   virt-clone --connect qemu:///system --original centos7 --name nullstack --file /var/lib/libvirt/images/nullstack.qcow2
-
-- 使用 ``virt-sysprep`` 初始化虚拟机::
-
-   virt-sysprep -d nullstack --hostname nullstack --root-password password:CHANGE_ME
+   virt-clone --connect qemu:///system --original centos7 --name kubemaster-1 --file /var/lib/libvirt/images/kubemaster-1.qcow2
 
 .. note::
 
-   请参考 `How to reset a KVM clone virtual Machines with virt-sysprep on Linux <https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/>`_ 做一些重置调整::
+   分别在3台物理服务器上创建 ``kubemaster-1`` ``kubemaster-2`` 和 ``kubemaster-3`` 。
+
+- 使用 ``virt-sysprep`` 初始化虚拟机::
+
+   virt-sysprep -d kubemaster-1 --hostname kubemaster-1 --root-password password:CHANGE_ME
+
+.. note::
+
+   如果要保留一些设置，可以参考 `How to reset a KVM clone virtual Machines with virt-sysprep on Linux <https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/>`_ 做一些重置调整::
 
       virt-sysprep -d nullstack --hostname nullstack \
         --run 'sed -i "s/192.168.122.3/192.168.122.10/" /etc/sysconfig/network-scripts/ifcfg-eth0' \
         --keep-user-accounts huatai --keep-user-accounts root
 
+- 参考 :ref:`libvirt_bridged_network` 配置网桥型网络::
+
+
 - 启动虚拟机，进一步定制::
 
-   virsh start nullstack
+   virsh start kubemaster-1
 
 
