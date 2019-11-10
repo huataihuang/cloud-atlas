@@ -104,7 +104,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">私有云KVM环境</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">创建模版虚拟机</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">复制KVM虚拟机(案例)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">复制KVM虚拟机</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="priv_k8s_docker.html">私有云Kubernetes运行docker环境</a></li>
@@ -300,10 +300,10 @@
 </div>
 </div>
 <div class="section" id="id3">
-<h2>复制KVM虚拟机(案例)<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<h2>复制KVM虚拟机<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>详细克隆KVM虚拟机请参考 <a class="reference internal" href="../../kvm/clone_vm.html#clone-vm"><span class="std std-ref">复制KVM虚拟机</span></a> ，这里仅提供一个概述。因为在 <a class="reference internal" href="../index.html#real"><span class="std std-ref">Real Atlas</span></a> 中我将部署OpenStack作为KVM集群的工作平台。</p>
+<p>详细克隆KVM虚拟机请参考 <a class="reference internal" href="../../kvm/clone_vm.html#clone-vm"><span class="std std-ref">复制KVM虚拟机</span></a> ，这里为了准备 <a class="reference internal" href="priv_k8s_docker.html#priv-k8s-docker"><span class="std std-ref">私有云Kubernetes运行docker环境</span></a> 中作为 kubemaster 服务器的虚拟机。</p>
 </div>
 <ul>
 <li><p>暂停虚拟机:</p>
@@ -312,19 +312,25 @@
 </div>
 </li>
 <li><p>clone虚拟机:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">connect</span> <span class="n">qemu</span><span class="p">:</span><span class="o">///</span><span class="n">system</span> <span class="o">--</span><span class="n">original</span> <span class="n">centos7</span> <span class="o">--</span><span class="n">name</span> <span class="n">nullstack</span> <span class="o">--</span><span class="n">file</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nullstack</span><span class="o">.</span><span class="n">qcow2</span>
-</pre></div>
-</div>
-</li>
-<li><p>使用 <code class="docutils literal notranslate"><span class="pre">virt-sysprep</span></code> 初始化虚拟机:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">sysprep</span> <span class="o">-</span><span class="n">d</span> <span class="n">nullstack</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">nullstack</span> <span class="o">--</span><span class="n">root</span><span class="o">-</span><span class="n">password</span> <span class="n">password</span><span class="p">:</span><span class="n">CHANGE_ME</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">connect</span> <span class="n">qemu</span><span class="p">:</span><span class="o">///</span><span class="n">system</span> <span class="o">--</span><span class="n">original</span> <span class="n">centos7</span> <span class="o">--</span><span class="n">name</span> <span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">file</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">kubemaster</span><span class="o">-</span><span class="mf">1.</span><span class="n">qcow2</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>请参考 <a class="reference external" href="https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/">How to reset a KVM clone virtual Machines with virt-sysprep on Linux</a> 做一些重置调整:</p>
+<p>分别在3台物理服务器上创建 <code class="docutils literal notranslate"><span class="pre">kubemaster-1</span></code> <code class="docutils literal notranslate"><span class="pre">kubemaster-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kubemaster-3</span></code> 。</p>
+</div>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">virt-sysprep</span></code> 初始化虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">sysprep</span> <span class="o">-</span><span class="n">d</span> <span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">root</span><span class="o">-</span><span class="n">password</span> <span class="n">password</span><span class="p">:</span><span class="n">CHANGE_ME</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>如果要保留一些设置，可以参考 <a class="reference external" href="https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/">How to reset a KVM clone virtual Machines with virt-sysprep on Linux</a> 做一些重置调整:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">sysprep</span> <span class="o">-</span><span class="n">d</span> <span class="n">nullstack</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">nullstack</span> \
   <span class="o">--</span><span class="n">run</span> <span class="s1">&#39;sed -i &quot;s/192.168.122.3/192.168.122.10/&quot; /etc/sysconfig/network-scripts/ifcfg-eth0&#39;</span> \
   <span class="o">--</span><span class="n">keep</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">accounts</span> <span class="n">huatai</span> <span class="o">--</span><span class="n">keep</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">accounts</span> <span class="n">root</span>
@@ -332,8 +338,9 @@
 </div>
 </div>
 <ul>
+<li><p>参考 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 配置网桥型网络:</p></li>
 <li><p>启动虚拟机，进一步定制:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">nullstack</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span>
 </pre></div>
 </div>
 </li>
