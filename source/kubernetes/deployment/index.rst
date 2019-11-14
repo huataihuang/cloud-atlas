@@ -23,4 +23,4 @@ Kubernetes部署
    draft.rst
    kustomize.rst
    kuberbuilder.rst
-   terraform.rst
+   terraform/index
