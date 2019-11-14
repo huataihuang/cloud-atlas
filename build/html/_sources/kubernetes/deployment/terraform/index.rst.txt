@@ -11,3 +11,6 @@ Terraform基础架构管理平台
 
 - `Webinar: Controlling Your Organization With HashiCorp Terraform and Google Cloud Platform <https://www.youtube.com/watch?v=Ym6DtUx5REg>`_
 - `Webinar: Multi-Cloud, One Command with Terraform <https://youtu.be/nLg7fpVcIv4>`_
+
+.. toctree::
+   :maxdepth: 1

@@ -138,6 +138,7 @@
 
 - 参考 :ref:`libvirt_bridged_network` 配置网桥型网络::
 
+   待补充
 
 - 启动虚拟机，进一步定制::
 
