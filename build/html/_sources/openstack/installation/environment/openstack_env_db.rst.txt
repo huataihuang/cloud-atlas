@@ -34,4 +34,11 @@ OpenStack使用SQL数据库存储大多数信息，数据库可以安装在管�
 
    这里 ``bind-address`` 是物理主机 ``worker1`` 的网卡地址，OpenStack将使用这个绑定地址来访问数据库。
 
+- 启动数据库服务::
 
+   systemctl enable mariadb.service
+   systemctl start mariadb.service
+
+- 执行 ``mysql_secure_installation`` 脚本设置数据库安全::
+
+   mysql_secure_installation

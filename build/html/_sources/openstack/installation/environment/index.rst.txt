@@ -14,6 +14,7 @@ OpenStack环境
    openstack_env_ntp.rst
    openstack_env_repo.rst
    openstack_env_db.rst
+   openstack_env_mq.rst
 
 .. only::  subproject and html
 
