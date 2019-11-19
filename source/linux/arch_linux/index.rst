@@ -12,6 +12,7 @@ Arch Linux
    archlinux_ms_fonts.rst
    archlinux_aur.rst
    archlinux_snap.rst
+   archlinux_alsa.rst
    archlinux_hibernates.rst
    alien_convert_package.rst
    archlinux_developer.rst
