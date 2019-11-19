@@ -16,7 +16,9 @@ Docker也有一个 :ref:`docker_volume` 的概念，但是只是一个磁盘上�
 
 Kubernetes卷有一个明确的lifetime概念。Kubernetes卷是在Pod中所有容器所共享的，并且容器重启不影响卷上的数据。当Pod停止存在，则卷也停止存在。Kubernetes支持很多种卷，并且一个Pod可以同时使用任意数量卷。
 
-为了使用一个卷，Pod必须指定哪个卷提供给Pod（通过 ``.spec.volumes`` 字段)以及卷如何挂载到容器中(通过 ``.spec.containers.volumeMounts`` 字段)
+为了使用一个卷，Pod必须指定哪个卷提供给Pod（通过 ``.spec.volumes`` 字段)以及卷如何挂载到容器中(通过 ``.spec.containers[*].volumeMounts`` 字段)
+
+在容器中的进程从Docker镜像和卷看到的文件系统视图。Docker镜像是文件系统根，而卷则在景象中挂载到制定目录。注意，卷不能挂载到另一个卷里面，也不能有硬连接到其他卷。每个Pod中容器必须和挂载的任何一个卷都没有依赖关系。
 
 不同类型的Kubernetes卷
 =======================
@@ -24,6 +26,24 @@ Kubernetes卷有一个明确的lifetime概念。Kubernetes卷是在Pod中所有�
 .. note::
 
    以下是我整理的自己关注的存储卷或常用存储卷，详细的所有支持卷类型，请参考 `Kubernetes Types of Volumes <https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes>`_
+
+cephfs
+-----------
+
+``cephfs`` 卷是现有的CephFS卷挂载到Pod中。和 ``emptyDir`` 不同， ``emptyDir`` 在Pod销毁的时候消失，而 ``cephfs`` 卷则始终存在，只是卸载了卷。这意味着CephFS可以预先填充数据，并且这些数据可以在不同的Pods之间共享。CephFS可以挂载成被多个写入器并发写入。
+
+.. note::
+
+   这里cephfs可以并发写入我还不理解原理，有待实践...
+
+   官方有一个 `CephFS example <https://github.com/kubernetes/examples/tree/master/volumes/cephfs/>`_
+
+cinder
+----------
+
+.. note::
+
+   cinder 是 :ref:`openstack` 的对象存储，对于Kubernetes需要基于 OpenStack Cloud Provider配置，请参考 :ref:`cloud_providers` 中OpenStack部分。
 
 configMap卷
 -------------

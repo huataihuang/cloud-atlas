@@ -14,3 +14,4 @@ OK，我们已经做好了 :ref:`kubernetes_startup_prepare` ，有了一个精�
    minikube_expose_app.rst
    minikube_deploy_nginx_ingrerss_controller.rst
    minikube_scale_app.rst
+   best_practices/index

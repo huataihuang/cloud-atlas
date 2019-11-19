@@ -15,3 +15,4 @@ Kubernetes概念辨析
    services_networking/index
    storage/index
    configuration/index
+   cluster_administration/index
