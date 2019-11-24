@@ -1,14 +1,15 @@
-.. _linux_server:
+.. _ovirt:
 
 =================================
-Linux服务器
+oVirt Atlas
 =================================
+
+oVirt是开源分布式虚拟化解决方案，集成了 :ref:`kvm` 和 :ref:`gluster` 等开源解决方案。
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   cockpit/index
+   develop/index
 
 .. only::  subproject and html
 

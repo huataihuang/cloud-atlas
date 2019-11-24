@@ -1,14 +1,13 @@
-.. _linux_server:
+.. _tendrl:
 
 =================================
-Linux服务器
+Tendrl 软件定义存储(SDS)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   cockpit/index
+   introduce_tendrl.rst
 
 .. only::  subproject and html
 

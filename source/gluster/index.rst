@@ -1,14 +1,17 @@
-.. _linux_server:
+.. _gluster:
 
 =================================
-Linux服务器
+Gluster Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   cockpit/index
+   introduce_gluster.rst
+   gluster_vs_ceph.rst
+   glusterd2.rst
+   cockpit-gluster.rst
+   tendrl/index
 
 .. only::  subproject and html
 

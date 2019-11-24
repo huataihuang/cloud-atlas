@@ -1,15 +1,14 @@
-.. _linux_server:
+.. _cockpit:
 
 =================================
-Linux服务器
+Cockpit服务器统一管理平台
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   cockpit/index
-
+   introduce_cockpit.rst
+   
 .. only::  subproject and html
 
    Indices
