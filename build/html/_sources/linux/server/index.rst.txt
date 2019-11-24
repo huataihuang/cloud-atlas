@@ -8,6 +8,7 @@ Linux服务器
    :maxdepth: 1
 
    edac.rst
+   cockpit/index
 
 .. only::  subproject and html
 

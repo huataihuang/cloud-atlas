@@ -9,6 +9,7 @@
 - Sphinx Doc
 - MkDocs
 - GitBook
+- Hugo
 
 GitBook是我最早撰写 :ref:`cloud_atlas` 的 `Cloud Atlas 草稿 <https://github.com/huataihuang/cloud-atlas-draft>`_ 时使用的文档撰写平台。但我感觉GitBook采用Node.js来生成html，效率比较低，对于大量文档生成非常缓慢。所以我仅更新源文件，很少再build生成最终的html文件。
 
@@ -20,7 +21,9 @@ Sphinx Doc是我撰写 :ref:`cloud_atlas` 的文档平台，我是模仿Kernel D
 - MarkDown语法
 - 文档生成快速
 
-我目前结合Sphinx 和 MkDoc 来完成日常工作学习的笔记:
+此外，在很多Go语言开发项目中采用了 Hugo 作为文档系统，同样采用MarkDown格式的静态网站，定制性更强(也更复杂)，提供了大量的theme实现，甚至可以生成类似WordPress的个人网站。
+
+我目前结合Sphinx 和 MkDoc 来完成日常工作学习的笔记
 
 - Sphinx用于撰写集结成册的技术手册
 - MkDoc用于日常工作笔记，记录各种资料信息采集
@@ -28,6 +31,8 @@ Sphinx Doc是我撰写 :ref:`cloud_atlas` 的文档平台，我是模仿Kernel D
 .. note::
 
    Sphinx Doc 和 MkDocs 都采用Python编写，可以共用Python virtualenv环境，这也是我比较喜欢这两个文档撰写工具的原因。
+
+并且，我准备采用 Hugo 来制作个人Blog(待进行...)
 
 Vim设置
 ==========
