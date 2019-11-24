@@ -9,6 +9,7 @@ KVM Atlas
 
    hypervisor.rst
    kvm_architecture.rst
+   virtio/index
    libvirt/index
    performance/index
    hardware_virtual.rst

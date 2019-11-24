@@ -1,18 +1,13 @@
-.. _android_startup:
+.. _kvm_virtio:
 
 =================================
-Android 起步
+KVM virtio
 =================================
-
-
 
 .. toctree::
    :maxdepth: 1
 
-   android_develop_env.rst
-   android_sshd.rst
-   android_vm_acceleration.rst
-   anbox.rst
+   virtio-scsi.rst
 
 .. only::  subproject and html
 
