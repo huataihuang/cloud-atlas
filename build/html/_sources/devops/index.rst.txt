@@ -10,6 +10,7 @@ DevOps Atlas
    thought/index
    sre/index
    jenkins/index
+   terraform/index
 
 .. only::  subproject and html
 

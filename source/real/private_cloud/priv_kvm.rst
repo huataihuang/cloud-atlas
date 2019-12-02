@@ -105,12 +105,14 @@
 
    /etc/init.d/network restart
 
-复制KVM虚拟机
-====================
+复制KVM虚拟机(Kubernetes Master)
+=====================================
 
 .. note::
 
-   详细克隆KVM虚拟机请参考 :ref:`clone_vm` ，这里为了准备 :ref:`priv_k8s_docker` 中作为 kubemaster 服务器的虚拟机。
+   详细克隆KVM虚拟机请参考 :ref:`clone_vm` 。
+
+   准备 :ref:`priv_k8s_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 
 
 - 暂停虚拟机::
 
