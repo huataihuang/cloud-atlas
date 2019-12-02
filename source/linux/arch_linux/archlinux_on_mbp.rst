@@ -275,7 +275,23 @@ Suspend
 
 .. note::
 
-   不过，依然需要关闭蓝牙鼠标连接，否则鼠标移动还是唤醒系统。但至少不再无法suspend了。
+   不过，依然需要关闭蓝牙鼠标连接，否则鼠标移动还是可能会唤醒系统。但至少不再无法suspend了。
+
+内核参数
+=============
+
+参考 `Arch Linux社区文档 - MacBookPro11,x#Kernel parameters <https://wiki.archlinux.org/index.php/MacBook
+Pro11,x#Kernel_parameters>`_ ，实际上要设置 :ref:`archlinux_hibernates`  还需要传递参数 ``acpi_osi=Darwin`` 。这是因为从内核 4.17.2-1 开始，增加了 ``acpi_osi`` 参数空值会导致电池无法检测到。此外，添加了 ``acpi_osi`` 内核参数还可以增加电池寿命。
+
+由于需要传递 ``acpi_mask_gpe=0x06`` 内核参数避免有时候迅速增加的终端寄存器值导致某个CPU核心达到100%。
+
+.. note::
+
+   确实我发现 ``dmesg -T`` 现实启动有Apple相关的ACPI报错，并且我也遇到过莫名其妙的系统负载极高现象，应该和上述内核参数相关。
+
+完整 ``efi`` 命令如下::
+
+   efibootmgr --disk /dev/sda --part 1 --create --label "Arch Linux" --loader /vmlinuz-linux --unicode 'root=PARTUUID=c31f68cd-97f7-4471-93c7-adb62b22a17b rw initrd=\initramfs-linux.img resume=UUID=e38d80cc-4044-4d34-b730-1f0c874ad765 swap_file_offset=7798784 acpi_osi=Darwin acpi_mask_gpe=0x06' --verbose
 
 屏幕分辨率相关设置
 =====================
