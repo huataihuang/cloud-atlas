@@ -29,7 +29,7 @@ Linux支持3中不同的挂起系统模式：
 内核级接口(swsusp)
 ------------------
 
-在内核的 ``/sys/power/state`` 接口写入相应字符串可以触发suspend
+在内核的 ``/sys/power/state`` 接口写入相应字符串可以触发suspend。在内核文档中 `states.txt <https://www.kernel.org/doc/Documentation/power/states.txt>`_ 有详细说明。
 
 用户级软件设置(uswsusp)
 ------------------------
@@ -53,6 +53,8 @@ hibernation
 
 ``/sys/power/image_size`` 控制了 ``suspend-to-disk`` 机制创建的镜像大小，这个值是一个非负的整数，默认设置为内存的 2/5 。
 
+可以调整 ``/sys/power/image_size`` 大小，可以尽可能缩小这个swap大小，也可以增加这个swap大小来加速hibernate处理速度。注意，suspend镜像不能跨多个swap分区或者多个swap文件，必须完全存储在一个swap分区或者一个swap文件。
+
 需要的内核参数
 ~~~~~~~~~~~~~~~~~
 
@@ -62,7 +64,103 @@ hibernation
    resume="PARTLABEL=Swap partition"
    resume=/dev/archVolumeGroup/archLogicalVolume  (如果是LVM逻辑卷)
 
-待续...
+Hibernation到swap文件
+========================
+
+.. note::
+
+   内核5.0之前不支持Btrfs文件系统的swap文件，如果在Btrfs文件系统中使用swap文件存储hibernetes会导致文件系统损坏。虽然能够在Btrfs中将swap文件挂载成一个loop设备，但是这样会显著降低swap性能。
+
+使用swap文件爱你需要传递给内核参数 ``resume_offset=swap_file_offset`` 。
+
+.. note::
+
+   ``resume`` 参数必须指向 swap文件所在的卷。对于堆叠类型的块设备，例如加密容器，或者RAID，或者LVM，这意味着 ``resume`` 必须指向包含swap文件的文件系统的 ``unlocked`` 或者 ``mapped`` 设备。
+
+通过 ``filefreg -v swap_file`` 可以获得 ``swap_file_offset`` 值，输出内容的第一行中 ``phyiscal_offset`` 列值就是需要提供的定位值::
+
+   filefrag -v /swapfile
+
+输出内容::
+
+   Filesystem type is: ef53
+   File size of /swapfile is 4294967296 (1048576 blocks of 4096 bytes)
+    ext:     logical_offset:        physical_offset: length:   expected: flags:
+      0:        0..       0:      38912..     38912:      1:            
+      1:        1..   22527:      38913..     61439:  22527:             unwritten
+      2:    22528..   53247:     899072..    929791:  30720:      61440: unwritten   
+
+上述输出中第一行的 ``physical_offset`` 列，即 ``38912`` 就是我们查询得到的偏移值。
+
+.. note::
+
+   如果安装了 ``uswsusp`` 工具包，则提供了一个 ``swap-offset`` 命令可以直接输出swap问价的偏移值::
+
+      swap-offset swap_file
+
+Hibernate设置实践
+=====================
+
+- 获取swap文件应该设置的大小::
+
+   /sys/power/image_size
+
+例如，输出值是 ``6672080896`` 则对应大约 6.4GB
+
+- 创建swap文件::
+
+   dd if=/dev/zero of=/swap bs=64MiB count=100
+
+- 创建swap::
+
+   mkswap /swap
+   swapon /swap
+
+- 配置 ``/etc/fstab`` 添加swap配置::
+
+   /swap none swap defaults 0 0
+
+- 获取磁盘分区uuid::
+
+   blkid /dev/sda3
+
+输出显示::
+
+   /dev/sda3: UUID="e38d80cc-4044-4d34-b730-1f0c874ad765" TYPE="ext4" PARTLABEL="arch_linux" PARTUUID="c31f68cd-97f7-4471-93c7-adb62b22a17b"
+
+
+- 获取 ``/swap`` 文件偏移量::
+
+   filefrag -v /swap
+
+输出::
+
+   Filesystem type is: ef53
+   File size of /swap is 6710886400 (1638400 blocks of 4096 bytes)
+    ext:     logical_offset:        physical_offset: length:   expected: flags:
+      0:        0..   32767:    7798784..   7831551:  32768:
+   ...
+
+则偏移量是: ``7798784``
+
+- 需要向内核传递参数::
+
+   resume=UUID=e38d80cc-4044-4d34-b730-1f0c874ad765
+   swap_file_offset=7798784
+
+.. note::
+
+   我在MacBook Pro上使用的EFI设置启动是采用 ``efibootmgr`` ，请参考 :ref:`archlinux_on_mbp` ，所以，这里需要通过 ``efibootmgr`` 传递内核参数。
+
+将原先设置efibootmgr命令::
+
+   efibootmgr --disk /dev/sda --part 1 --create --label "Arch Linux" --loader /vmlinuz-linux --unicode 'root=PARTUUID=c31f68cd-97f7-4471-93c7-adb62b22a17b rw initrd=\initramfs-linux.img' --verbose
+
+添加上hibernate参数如下::
+
+   efibootmgr --disk /dev/sda --part 1 --create --label "Arch Linux" --loader /vmlinuz-linux --unicode 'root=PARTUUID=c31f68cd-97f7-4471-93c7-adb62b22a17b rw initrd=\initramfs-linux.img resume=UUID=e38d80cc-4044-4d34-b730-1f0c874ad765 swap_file_offset=7798784' --verbose
+
+- 重启操作系统
 
 参考
 =====
