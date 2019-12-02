@@ -11,3 +11,4 @@
 
    priv_kvm.rst
    priv_k8s_docker.rst
+   priv_cloud_infrastructure.rst

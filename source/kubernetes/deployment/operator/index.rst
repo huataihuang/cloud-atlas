@@ -11,4 +11,5 @@ Operator是Kuernetes主要的维护管理工具
 
    operator.rst
    operator_startup.rst
+   python/index
 

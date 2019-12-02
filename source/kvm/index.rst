@@ -11,6 +11,7 @@ KVM Atlas
    kvm_architecture.rst
    virtio/index
    libvirt/index
+   remote_desktop/index
    performance/index
    hardware_virtual.rst
    intel_vmcs.rst

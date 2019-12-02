@@ -60,6 +60,23 @@ Xfce
 
    不过，我发现默认安装的theme，选择 Apperance 中的 Adwaita-dark Style就已经非常美观简洁，除了图标比较简陋以外，其他似乎不需要再做调整。
 
+Theme
+-----------
+
+以下文档可参考Xfce theme:
+
+- `8 Great XFCE Themes To Check Out <https://www.addictivetips.com/ubuntu-linux-tips/great-xfce-themes/>`_
+- `Make Xfce look modern and beautiful <https://averagelinuxuser.com/xfce-look-modern-and-beautiful/>`_
+- `4 Ways You Can Make Xfce Look Modern and Beautiful <https://itsfoss.com/customize-xfce/>`_
+
+我感觉比较modern的是平面型(flat)的风格，推荐可以尝试一下 Arc 风格::
+
+   pacman -S arc-gtk-theme
+
+此外，图标可以选择安装 Flat Remix icons ::
+
+   yay -S flat-remix
+
 平铺窗口
 ===========
 
@@ -118,6 +135,13 @@ slock还可以结合 ``xautolock`` 来使用，例如，没有交互10分钟自�
 
 应用软件
 ==========
+
+thunar
+---------
+
+thunar轻量级强大的文件管理器，提供了插件支持文件压缩和解压缩::
+
+   pacman -S thunar-archive-plugin
 
 GoldenDict
 ------------

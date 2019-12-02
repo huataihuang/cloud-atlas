@@ -1,14 +1,15 @@
-.. _kubernetes_configure:
+.. _remote_desktop:
 
 =================================
-Kubernetes 配置
+远程桌面
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   configure_service_accounts_for_pods.rst
-   configure_liveness_readiness_and_startup_probes.rst
+   introduce_remote_desktop.rst
+   guacamole.rst
+   spice.rst
 
 .. only::  subproject and html
 

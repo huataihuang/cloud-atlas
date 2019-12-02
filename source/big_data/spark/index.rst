@@ -1,14 +1,11 @@
-.. _kubernetes_configure:
+.. _spark:
 
 =================================
-Kubernetes 配置
+Spark大数据处理
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   configure_service_accounts_for_pods.rst
-   configure_liveness_readiness_and_startup_probes.rst
 
 .. only::  subproject and html
 

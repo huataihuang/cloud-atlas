@@ -1,14 +1,11 @@
-.. _kubernetes_configure:
+.. _kafka:
 
 =================================
-Kubernetes 配置
+Kafka消息队列系统
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   configure_service_accounts_for_pods.rst
-   configure_liveness_readiness_and_startup_probes.rst
 
 .. only::  subproject and html
 

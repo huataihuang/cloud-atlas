@@ -1,14 +1,14 @@
-.. _kubernetes_configure:
+.. _message_queue:
 
 =================================
-Kubernetes 配置
+消息队列
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   configure_service_accounts_for_pods.rst
-   configure_liveness_readiness_and_startup_probes.rst
+   rabbitmq/index
+   kafka/index
 
 .. only::  subproject and html
 
