@@ -162,6 +162,18 @@ Hibernate设置实践
 
 - 重启操作系统
 
+- 重启操作系统后，再次登陆到 :ref:`xfce` 图形界面，此时用户 ``Log Out`` 菜单选项中就会增加 ``Hibernate`` 和 ``Hybrid Sleep`` 选项。并且 ``cat /proc/cmdline`` 可以看到内核参数::
+
+   root=PARTUUID=c31f68cd-97f7-4471-93c7-adb62b22a17b rw initrd=\initramfs-linux.img resume=UUID=e38d80cc-4044-4d34-b730-1f0c874ad765 swap_file_offset=7798784
+
+.. note::
+
+   不过，我此时使用 ``Hibernate`` 功能发现操作系统是直接关机了，并没有成功恢复到
+
+   参考 `Arch Linux社区文档 - MacBookPro11,x#Kernel parameters <https://wiki.archlinux.org/index.php/MacBookPro11,x#Kernel_parameters>`_ 提示需要向内核传递参数 ``acpi_osi=Darwin`` 才能使 ``suspension/hibernation`` 工作正常。
+
+   所以MacBook Pro完整的内核启动配置，请参考 :ref:`archlinux_on_mbp`
+
 参考
 =====
 
