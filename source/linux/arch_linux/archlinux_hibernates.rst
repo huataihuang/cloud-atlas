@@ -174,6 +174,19 @@ Hibernate设置实践
 
    所以MacBook Pro完整的内核启动配置，请参考 :ref:`archlinux_on_mbp`
 
+但是，我发现并没有实现hibernate存储到磁盘的操作，每次执行 ``systemctl hibernate`` 实际是直接关机。
+
+按照内核文档::
+
+   The states are represented by strings that can be read or written to the
+   /sys/power/state file.  Those strings may be "mem", "standby", "freeze" and
+   "disk", where the last three always represent Power-On Suspend (if supported),
+   Suspend-To-Idle and hibernation (Suspend-To-Disk), respectively.
+
+通过直接 ``echo disk > /sys/power/state`` 应该能够直接 suspend to disk ，但是我发现在字符终端显示设备不能写入？ why
+
+...
+
 参考
 =====
 

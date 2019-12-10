@@ -22,9 +22,6 @@
 
    terraform --help plan
 
-安装provider
-===============
-
 参考
 ========
 

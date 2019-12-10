@@ -91,12 +91,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../jenkins/index.html">Jenkins</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Terraform基础架构管理平台</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Terraform简介</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#devops">DevOps实现方式</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id6">架构即代码</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id10">Terraform适用场景</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id14">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">Terraform工作原理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="install_terraform.html">安装Terraform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="terraform_aliyun_demo.html">阿里云Terraform Demo</a></li>
 </ul>
 </li>
 </ul>
@@ -192,6 +195,9 @@
             
   <div class="section" id="terraform">
 <span id="introduce-terraform"></span><h1>Terraform简介<a class="headerlink" href="#terraform" title="Permalink to this headline">¶</a></h1>
+<p>长期以来，数据中心部署是由系统管理员负责，从零开始，一步步手工安装每个服务器，每个数据库，每个负载均衡，以及手工配置网络。这是一个非常黑暗而痛苦的过程：宕机、错误配置以及缓慢而重复的安装配置。</p>
+<p><a class="reference internal" href="../index.html#devops"><span class="std std-ref">DevOps Atlas</span></a> 的兴起，极大程度减轻了系统管理员的工作负担，可以采用申明式语言描述来实现自动化部署，无需每个系统管理员低效地编写”匆忙而未经充分测试”的脚本。随着云计算的兴起，有带来的新的挑战：每个云计算厂商提供的API以及资源都存在不兼容情况，就如同早期系统工程师需要面对不同厂商的数据库、网络设备和操作系统。</p>
+<p>Terraform则应运而生，提供了不同云厂商的统一抽象，实现了将IaaS视为简单的、精心定义的语言程序，实现在不同云厂商统一的管理架构。不论你使用的是AWS，Azure，Google Cloud，阿里云，以及私有云计算平台(例如，OpenStack，VMware)，都能使用很少的命令完成复杂的部署。</p>
 <p>Terraform是一个用于构建、修改和版本控制的基础架构。</p>
 <p>配置文件描述Terraform组件需要运行一个单一程序或者整个数据中心。Terraform生成一个执行计划来描述如何达到指定状态，然后执行这个计划构建所描述的架构。当配置文件修改，Terraform能够检测到配置修改并创建增量执行计划来完成。</p>
 <p>Terraform能够管理的架构包括底层组件，例如计算实例，存储和网络，以及高层组件，如DNS对象，SaaS功能等等。</p>
@@ -207,6 +213,46 @@
 - <a class="reference external" href="https://yq.aliyun.com/articles/726467">Terraform 的安装和加速</a>
 - <a class="reference external" href="https://yq.aliyun.com/articles/727057">Terraform 常用命令详解</a></p></li>
 </ul>
+</div>
+<div class="section" id="devops">
+<h2>DevOps实现方式<a class="headerlink" href="#devops" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="configuration-management-tools">
+<h3>配置管理工具(Configuration Management Tools)<a class="headerlink" href="#configuration-management-tools" title="Permalink to this headline">¶</a></h3>
+<p>Chef, Puppet, Ansible, SaltStac等配置管理工具设计成对现有服务器进行安装和管理软件以及配置文件来实现DevOps：</p>
+<ul class="simple">
+<li><p>代码转换成一致性，可预测结构：清晰的结构和命名参数</p></li>
+<li><p>结合脚本实现</p></li>
+<li><p>分布式分发执行</p></li>
+</ul>
+</div>
+<div class="section" id="server-templating-tools">
+<h3>服务器模板工具(Server Templating Tools)<a class="headerlink" href="#server-templating-tools" title="Permalink to this headline">¶</a></h3>
+<p>服务器模板工具类似 Docker, Packer 和 Vargant。和配置管理工具不同，配置管理工具是在服务器上运行相同代码，而服务器模板工具则采用完全自包含的快照，所有软件，文件和相关配置都在一个镜像中。</p>
+<div class="figure align-default" id="id16">
+<a class="reference internal image-reference" href="../../_images/vm_container.png"><img alt="../../_images/vm_container.png" src="../../_images/vm_container.png" style="width: 570.0px; height: 402.5px;" /></a>
+<p class="caption"><span class="caption-text">两种不同类型的镜像：虚拟机(VM)和容器(Container)</span><a class="headerlink" href="#id16" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="server-provisioning-tools">
+<h3>服务器供给工具(Server Provisioning Tools)<a class="headerlink" href="#server-provisioning-tools" title="Permalink to this headline">¶</a></h3>
+<p>虽然配置管理工具和服务器模板工具都定义了在每个服务器上运行的代码，但是服务器供给工具(Server Provisioning Tools)，例如Terraform, CloudFormation, OpenStack Heat提供了另一种DevOps模式：可以创建服务器，数据库，缓存，负载均衡，消息队列，监控，网络配置，SSL证书，几乎是所有的基础架构。</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../_images/server_provision_tool.png"><img alt="../../_images/server_provision_tool.png" src="../../_images/server_provision_tool.png" style="width: 315.5px; height: 660.0px;" /></a>
+</div>
+<p>Terraform案例代码:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resoure</span> <span class="s2">&quot;aws_instance&quot;</span> <span class="s2">&quot;app&quot;</span> <span class="p">{</span>
+  <span class="n">instance_type</span> <span class="o">=</span> <span class="s2">&quot;t2.micro&quot;</span>
+  <span class="n">availability_zone</span> <span class="o">=</span> <span class="s2">&quot;us-east-1a&quot;</span>
+  <span class="n">ami</span> <span class="o">=</span> <span class="s2">&quot;ami-40d8157&quot;</span>
+
+  <span class="n">user_data</span> <span class="o">=</span> <span class="o">&lt;&lt;-</span><span class="n">EOF</span>
+              <span class="c1">#!/bin/bash</span>
+              <span class="n">sudo</span> <span class="n">service</span> <span class="n">apache2</span> <span class="n">start</span>
+              <span class="n">EOF</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="id6">
 <h2>架构即代码<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
@@ -249,7 +295,15 @@
 </div>
 </div>
 <div class="section" id="id14">
-<h2>参考<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<h2>Terraform工作原理<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<p>通过Terraform部署架构：</p>
+<ul class="simple">
+<li><p>使用不同provider的API，包装抽象成Terraform的标准代码结构</p></li>
+<li><p>用户不需要了解每个云计算厂商的API细节，降低了部署难度</p></li>
+</ul>
+</div>
+<div class="section" id="id15">
+<h2>参考<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.terraform.io/intro/index.html">Terraform官方文档 - Introduction to Terraform</a></p></li>
 <li><p><a class="reference external" href="https://www.youtube.com/watch?v=Ym6DtUx5REg">Webinar: Controlling Your Organization With HashiCorp Terraform and Google Cloud Platform</a></p></li>
