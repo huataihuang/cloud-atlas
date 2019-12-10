@@ -13,7 +13,8 @@ Kernel Atlas
    flame_graph.rst
    ebpf.rst
    admin/index
-   memory_management/index
+   memory/index
+   power/index
 
 .. only::  subproject and html
 
