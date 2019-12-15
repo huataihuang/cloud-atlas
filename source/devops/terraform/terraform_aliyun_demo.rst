@@ -72,6 +72,17 @@ Terraform代码使用了 HashiCorp Configuration Language(HCL)，代码文件扩
        profile = "terraform"
        region = "cn-hangzhou"
    }
+
+.. note::
+
+   这里 ``profile`` 引用了前面使用 ``aliyun`` 命令创建的访问凭证。如果没有使用上述访问凭证，你也可以在 ``provider "aliclou"`` 中直接添加AK，但是这样公布的``.tf``配置缺乏安全性：
+
+   provider "alicloud" {
+     access_key = "${var.access_key}"
+     secret_key = "${var.secret_key}"
+     region     = "${var.region}"
+         
+   }
    
 然后执行以下命令初始化::
 
@@ -204,6 +215,19 @@ apply执行
 - 没有必要的配置，例如帐号
 
 但我们至少已经创建了一个实例，可以开始进一步探索了。
+
+resource变更
+-------------
+
+资源变更只需要修改模板定义的属性值，Terraform资源变更有两种情况:
+
+- 原地变更(update in-place)
+
+即不改变资源生命周期情况下(不销毁,不重启)实现对资源属性修改，例如修改资源名称，描述，标签等。
+
+- 重建变更(destroy and then create replacement)
+
+
 
 参考
 =======

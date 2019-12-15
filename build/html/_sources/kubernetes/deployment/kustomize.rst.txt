@@ -21,20 +21,15 @@ kustomize
 
    choco install kustomize
 
-- 全系列各平台都可以使用都安装方法是直接从官方仓库下载二进制可执行工具::
-
-   opsys=linux  # or darwin, or windows
-   curl -s https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest |\
-     grep browser_download |\
-     grep $opsys |\
-     cut -d '"' -f 4 |\
-     xargs curl -O -L
-   mv kustomize_*_${opsys}_amd64 kustomize
-   chmod u+x kustomize
+- 全系列各平台都可以使用都安装方法是直接从 `kustomize 官方release <https://github.com/kubernetes-sigs/kustomize/releases>`_ 下载。
 
 - 也可以通过Go v.10.1 或更高版本安装::
 
    go get sigs.k8s.io/kustomize
+
+.. note::
+
+   从 1.14 版本开始，kubectl已经支持使用kustomization文件来管理Kubernetes对象，所以不再需要单独安装kustomize，可以直接 :ref:`install_setup_kubectl` 来实现相同功能。
 
 创建base
 =========

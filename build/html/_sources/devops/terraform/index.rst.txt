@@ -16,3 +16,5 @@ Terraform基础架构管理平台
    introduce_terraform.rst
    install_terraform.rst
    terraform_aliyun_demo.rst
+   terraform_module.rst
+   terraform_ansible.rst
