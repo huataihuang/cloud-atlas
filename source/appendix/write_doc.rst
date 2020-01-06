@@ -156,6 +156,74 @@ MkDoc
 
    如果你想看看mkdocs的网站案例，可以参考一下 `Argo CD 官方文档 <https://argoproj.github.io/argo-cd/>`_ ，提供了一个生动形象的 `Argo CD 手册案例 <https://github.com/argoproj/argo-cd/blob/master/mkdocs.yml>`_ 。
 
+GitBook
+===========
+
+- 安装 nvm 来管理node.js版本 ::
+
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+
+.. note::
+
+   安装脚本会在用户目录下的shell profile文件中添加加载nvm的配置，但是如果用户目录下没有任何profile，则添加会失败。所以建议至少要touch一个空的profile，或者类似我在macOS环境下使用zsh，采用 `oh-my-zsh <https://github.com/robbyrussell/oh-my-zsh>`_ 先生成环境配置::
+
+      sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+
+   然后再执行上述按章nvm的脚本。
+
+- 使用 nvm 安装node.js稳定版::
+
+   nvm install stable
+
+- 使用npm安装Gitbook::
+
+   npm install gitbook-cli -g
+   npm install gitbook -g
+
+.. note::
+
+   如果要升级版本，可以采用::
+
+      npm update -g
+      gitbook update
+
+- 安装插件disques::
+
+   npm install react react-dom react-disqus-thread gitbook-plugin-disqus -g
+
+- 初始化目录::
+
+   gitbook init cloud-atlas-draft
+
+- 在生成的 `cloud-atlas-draft` 目录下创建配置文件 `book.json` 配置启用插件::
+
+   {
+     "plugins": ["disqus"],
+     "pluginsConfig": {
+       "disqus": {
+         "shortName": "huatai-gitbooks"
+       }
+     }
+   }
+
+.. note::
+
+   这里 `shortName` 是你在disqus 网站上申请的论坛名称，将附加到你的gitbook上。
+
+- 请参考我的文档项目 `Cloud Atlas 草稿 <https://github.com/huataihuang/cloud-atlas-draft>`_ ，关键文件是 `SUMMARY.md` ，用于生成文档导航，引用的就是markdown格式的文档。
+
+- 编译::
+
+   gitbook build ./ --log=debug --debug
+
+或者使用::
+
+   gitbook build ./ --timing
+
+可以debug编译的过程以及每个文档的时间，这样容易发现存在问题的文档。
+
+- 直接将内容推送到github仓库，并在gitbook官方网站上连接github仓库，就可以在推送github仓库时自动生成gitbook网站的书籍文档。
+
 参考
 =========
 
