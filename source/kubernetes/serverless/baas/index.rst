@@ -1,12 +1,8 @@
-.. _kubernetes_faas:
+.. _kubernetes_baas:
 
 ===============================
-Kubernetes运行FaaS
+Kubernetes运行BaaS
 ===============================
 
 .. toctree::
    :maxdepth: 2
-
-   introduce_faas.rst
-   riff.rst
-
