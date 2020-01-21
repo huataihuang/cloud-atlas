@@ -28,6 +28,24 @@ Knative是针对不同用户设计的：
 
 .. figure:: ../../../_static/kubernetes/knative/startup/knative-audience.svg
 
+- 开发者
+
+Knative组件提供了开发者Kubernates原生API在一个自动伸缩的运行环境中部署serverless风格的函数、应用和容器。
+
+- 操作者
+
+Knative组件被规划成能够集成到大多数成熟产品中，以便云计算服务供应商或者在大企业中的小型团队能够运维它。
+
+- 贡献者
+
+具有清晰的项目领域，轻量级治理模式(lightweight governance model)，以及插件的清晰分离线路，Knative项目建立了一个高效的贡献者工作流。
+
+你可参与Knative贡献者的以下工作：
+
+  - serving
+  - eventing
+  - documentation
+
 参考
 ======
 

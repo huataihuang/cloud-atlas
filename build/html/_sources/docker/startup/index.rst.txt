@@ -5,13 +5,14 @@ Docker 起步
 =================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    introduce-docker.rst
    docker_concept.rst
    docker_infrastructure.rst
    oci_pouch.rst
-   install-docker.rst
+   install_docker_linux.rst
+   install_docker_macos.rst
 
 .. only::  subproject and html
 

@@ -101,6 +101,8 @@ Arch Linux默认安装了Python3，所以仅需要安装pip::
 
    . ~/venv3/bin/activate
 
+.. _sphinx_doc:
+
 Sphinx Doc
 ============
 

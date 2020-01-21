@@ -8,6 +8,7 @@ Kali Linux 快速起步
    :maxdepth: 1
 
    change_mac_address_in_kali.rst
+   kali_undercover.rst
 
 .. only::  subproject and html
 

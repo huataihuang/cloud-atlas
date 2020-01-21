@@ -8,3 +8,4 @@ Knative快速起步
    :maxdepth: 2
 
    introduce_knative.rst
+   install_knative.rst

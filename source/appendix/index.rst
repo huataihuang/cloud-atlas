@@ -32,8 +32,6 @@
    vmware_in_studio.rst
    share_mouse_keyboard.rst
    firewalld.rst
-   pi_quick_start.rst
-   pi_zero_net_gadget.rst
    ipmitool_tips.rst
    dnf.rst
    ip_command.rst
