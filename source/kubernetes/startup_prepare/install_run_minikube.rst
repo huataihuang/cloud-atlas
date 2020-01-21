@@ -37,10 +37,12 @@
 
    根据 minikube文档 `vm-driver=none <https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md>`_ ，实际上裸物理机运行minikube有一些已知问题需要注意规避。
 
+.. _minikube:
+
 minikube
 =================
 
-最简单体验完整的Kubernetes集群功能是使用 `minikube <https://github.com/kubernetes/minikube>`_ ，这是一个在单个节点上运行Kubernetes的方式，可以用于测试Kubernetes以及本地开发应用。
+最简单体验完整的Kubernetes集群功能是使用 `minikube GitHub官网 <https://github.com/kubernetes/minikube>`_ ，这是一个在单个节点上运行Kubernetes的方式，可以用于测试Kubernetes以及本地开发应用。
 
 minikube是通常通过虚拟机来运行的，也就是说必须在主机上运行Hypervisor，可以是Virtualbox (跨平台) 也可以是 KVM (Linux) 或者 Hyper-V (Windows)，甚至可以使用非常小众的 HyperKit (macOS)。
 

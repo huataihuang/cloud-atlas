@@ -1,14 +1,15 @@
-.. _kali_linux_startup:
+.. _pinebook:
 
 =================================
-Kali Linux 快速起步
+PineBook
 =================================
+
+PineBook 是基于ARM芯片的笔记本电脑，性价比较高。
 
 .. toctree::
    :maxdepth: 1
 
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
+   pinebook_pro.rst
 
 .. only::  subproject and html
 

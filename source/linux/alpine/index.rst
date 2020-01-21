@@ -1,14 +1,13 @@
-.. _kali_linux_startup:
+.. _alpine_linux:
 
 =================================
-Kali Linux 快速起步
+Alpine Linux
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
+   introduce_alpine.rst
 
 .. only::  subproject and html
 

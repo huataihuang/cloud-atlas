@@ -1,11 +1,9 @@
-.. _knative_startup:
+.. _kubernetes_develop:
 
 ===============================
-Knative快速起步
+Kubernetes开发
 ===============================
 
 .. toctree::
    :maxdepth: 2
 
-   introduce_knative.rst
-   install_knative.rst

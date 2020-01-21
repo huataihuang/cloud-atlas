@@ -1,14 +1,14 @@
-.. _kali_linux_startup:
+.. _raspberry_pi:
 
 =================================
-Kali Linux 快速起步
+Raspberry Pi
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
+   pi_quick_start.rst
+   pi_zero_net_gadget.rst
 
 .. only::  subproject and html
 

@@ -1,14 +1,15 @@
-.. _kali_linux_startup:
+.. _arm:
 
 =================================
-Kali Linux 快速起步
+ARM Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
+   raspberry_pi/index
+   pine/index
+   openwrt/index
 
 .. only::  subproject and html
 

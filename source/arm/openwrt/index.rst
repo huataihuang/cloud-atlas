@@ -1,14 +1,13 @@
-.. _kali_linux_startup:
+.. _openwrt:
 
 =================================
-Kali Linux 快速起步
+OpenWrt
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
+   introduce_openwrt.rst
 
 .. only::  subproject and html
 

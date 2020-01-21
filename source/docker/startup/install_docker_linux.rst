@@ -1,7 +1,7 @@
-.. _install-docker:
+.. _install_docker_linux:
 
 ======================
-安装Docker
+Linux环境安装Docker
 ======================
 
 模拟环境的Docker

@@ -13,11 +13,11 @@
 
 淘宝上有一种Raspberry pi zero专用的USB扩展板，可以直接将Zero转换成通过标准USB接口取电和同时通讯，方便了使用和携带：
 
-.. figure:: ../_static/linux/kali_linux/zero_usb_1.jpg
+.. figure:: ../../_static/linux/kali_linux/zero_usb_1.jpg
 
 加上一个透明的亚克力保护壳，非常美观：
 
-.. figure:: ../_static/linux/kali_linux/zero_usb_2.jpg
+.. figure:: ../../_static/linux/kali_linux/zero_usb_2.jpg
 
 配置Ethernet Gadget
 ====================

@@ -1,14 +1,13 @@
-.. _kali_linux_startup:
+.. _pinephone:
 
 =================================
-Kali Linux 快速起步
+PinePhone
 =================================
+
+PinePhone 2020发布开发者使用的 ``Brave Heart Edition`` 。我非常想尝试，这里先开一个分支。
 
 .. toctree::
    :maxdepth: 1
-
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
 
 .. only::  subproject and html
 

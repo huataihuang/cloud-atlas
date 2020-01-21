@@ -1,14 +1,14 @@
-.. _kali_linux_startup:
+.. _postmarketos:
 
 =================================
-Kali Linux 快速起步
+postmarketOS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
+   about_postmarketos.rst
+   plasma/index
 
 .. only::  subproject and html
 

@@ -1,14 +1,13 @@
-.. _kali_linux_startup:
+.. _plasma:
 
 =================================
-Kali Linux 快速起步
+Plasma - 移动设备交互界面
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   change_mac_address_in_kali.rst
-   kali_undercover.rst
+   introduce_plasma.rst
 
 .. only::  subproject and html
 
