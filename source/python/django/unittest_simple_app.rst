@@ -8,7 +8,11 @@
 
 .. note::
 
-   术语：功能测试(Function Test) = 验收测试(Accptance Test) = 端到端测试(End-to-End Test)
+   术语：功能测试(Function Test) = 验收测试(Acceptance Test) = 端到端测试(End-to-End Test)
+
+.. note::
+
+   在 :ref:`jenkins` 完成软件的编译之后，我们会进行一种称为BVT(Build Verification Test)测试，就是在新的build之上跑一系列case来验证这个build功能是否符合预期。这个测试也就是上述的功能测试(Function Test)，验收测试(Acceptance Test)，端到端测试(End-to-End Test)。
 
 功能测试需要一个易读易理解的说明文档。为了叙述清晰，可以把测试代码和代码注释结合起来使用。编写新功能测试时，可以先写注释，以便清晰描述功能，甚至可以作为讨论应用需求和功能的方式分享给非程序员看。
 

@@ -1,18 +1,13 @@
-.. _docker:
+.. _docker_applications:
 
 =================================
-Docker Atlas
+Docker 环境运行应用程序案例
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   startup/index
-   administer/index
-   applications/index
-   storage/index
-   network/index
-   gpu/index
+   docker_compose_django.rst
 
 .. only::  subproject and html
 

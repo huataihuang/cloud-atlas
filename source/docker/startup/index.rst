@@ -13,6 +13,7 @@ Docker 起步
    oci_pouch.rst
    install_docker_linux.rst
    install_docker_macos.rst
+   docker_compose.rst
 
 .. only::  subproject and html
 
