@@ -125,6 +125,8 @@ Arch Linux发行版的 ``docker`` 软件包就是Docker CE版本，可以直接�
 
    我在 :ref:`ubuntu_linux` 上采用 :ref:`docker_btrfs_driver` (虽然现在我更倾向于生产环境使用XFS) ；在 :ref:`arch_linux` 我采用 :ref:`lvm_xfs_in_studio` 文件系统，所以对应Docker的storage driver是 :ref:`docker_overlay_driver` 。
 
+.. _run_docker_without_sudo:
+
 无需sudo运行docker
 ======================
 

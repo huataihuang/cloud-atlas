@@ -9,6 +9,7 @@ Docker Atlas
 
    startup/index
    administer/index
+   applications/index
    storage/index
    network/index
    gpu/index
