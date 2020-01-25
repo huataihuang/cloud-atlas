@@ -285,6 +285,8 @@ Django密码安全secrets.json
 
    docker-compose up
 
+也可以将上述两个命令结合成 ``docker-comose up --build``
+
 .. note::
 
    目前发现这个部署还是有一点问题，mysql数据库初始化( ``docker-compose build`` )较慢，导致web启动后连接数据库失败。不过第二次启动，MySQL无需初始化则启动迅速，则web正常工作。

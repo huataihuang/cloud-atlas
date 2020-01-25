@@ -14,6 +14,7 @@ Django是Python编写的开源Web应用框架，结构清晰，应用广泛。�
    django_env.rst
    run_django.rst
    unittest_simple_app.rst
+   django_app.rst
 
 .. only::  subproject and html
 
