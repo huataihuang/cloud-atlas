@@ -17,15 +17,43 @@ Django开发环境
 
    brew install python3
 
+.. _virtualenv:
+
 安装Virtualenv
 ================
 
 为了方便使用Python 3，建议通过virtualenv来构建Python运行环境::
 
-   pip3 install venv3
+   sudo pip3 install --upgrade pip
+   sudo pip3 install virtualenv
+   /usr/local/bin/virtualenv venv3
+
+根据提示，将脚本路径 ``/Users/huataihuang/Library/Python/3.7/bin`` 加入环境变量 ``$PATH`` ::
+
+   export PATH=$PATH:$HOME/bin:/usr/local/mysql/bin:/Users/huataihuang/Library/Python/3.7/bin
+
+然后激活环境变量::
+
+   . ~/.zshrc
+
+再激活Python 3的virutalenv::
+
    . venv3/bin/activate
 
 此时激活了virtualenv环境，则执行 ``python`` 指令显示的运行环境就是Python 3。
+
+- 安装我的常用开发依赖库：即编辑一个 ``requirements.txt`` 配置（通常可以在Django项目的目录下存放）::
+
+   Django
+   selenium
+   djangorestframework
+   markdown
+   django-filter
+   mysqlclient
+
+然后执行以下命令安装::
+
+   pip install -r requirements.txt
 
 安装Django
 ===========
