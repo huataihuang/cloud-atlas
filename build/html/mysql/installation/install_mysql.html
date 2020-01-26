@@ -98,7 +98,8 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">MySQL 安装</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">MySQL安装</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#macosmysql">macOS上安装MySQL</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">数据库初始化</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -201,9 +202,36 @@
 <li><p>安装过程会提示输入root账号密码，输入root密码后自动安装</p></li>
 <li><p>默认安装目录在 <code class="docutils literal notranslate"><span class="pre">/usr/local/mysql</span></code> ，所以需要将执行目录路径 <code class="docutils literal notranslate"><span class="pre">/usr/local/mysql/bin</span></code> 添加到环境变量 <code class="docutils literal notranslate"><span class="pre">$PAHT</span></code> 中</p></li>
 </ul>
+<p>由于MySQL在macOS的安装路径 <code class="docutils literal notranslate"><span class="pre">/usr/local/mysql/lib</span></code> 不是系统默认的动态库加载目录，所以需要在环境变量中添加如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/usr/local/mysql/lib
+</pre></div>
+</div>
+<p>否则Python使用 <code class="docutils literal notranslate"><span class="pre">mysqlclient</span></code> 模块会报无法找到动态库错误(请参考 <a class="reference internal" href="../../python/django/django_app.html#django-app"><span class="std std-ref">Django 应用</span></a> )</p>
 </div>
 <div class="section" id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>数据库初始化<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>在 <a class="reference internal" href="../../python/django/index.html#django"><span class="std std-ref">Django Atlas</span></a> 开发中，我采用了两种环境:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../docker/applications/docker_compose_django.html#docker-compose-django"><span class="std std-ref">在Docker环境运行Django</span></a> 是先 <a class="reference internal" href="../../docker/startup/install_docker_macos.html#install-docker-macos"><span class="std std-ref">macOS安装Docker</span></a> ，然后通过 <code class="docutils literal notranslate"><span class="pre">docker-compose</span></code> 实现的MySQL容器化运行</p></li>
+<li><p><a class="reference internal" href="../../python/django/django_env.html#django-env"><span class="std std-ref">Django开发环境</span></a> 是在macOS上通过Python virtualenv运行Django，连接的是本地运行的一个MySQL数据库</p></li>
+</ul>
+<p>前者通过 <a class="reference internal" href="../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 的官方镜像，支持传递环境变量就可以自动配置好MySQL数据库；但是后者则是传统的数据库维护方式，需要我们做数据库初始化才能用于 <a class="reference internal" href="../../python/django/index.html#django"><span class="std std-ref">Django Atlas</span></a> 开发。</p>
+<ul>
+<li><p>在MySQL中床架数据库 <code class="docutils literal notranslate"><span class="pre">mydb</span></code> 并创建 <code class="docutils literal notranslate"><span class="pre">myapp_user</span></code> 账号及对应密码 <code class="docutils literal notranslate"><span class="pre">myapp_passwd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">create</span> <span class="n">database</span> <span class="n">mydb</span> <span class="n">characterset</span> <span class="n">utf8</span><span class="p">;</span>
+
+<span class="n">grant</span> <span class="n">usage</span> <span class="n">on</span> <span class="n">mydb</span><span class="o">.*</span> <span class="n">to</span> <span class="n">myapp_user</span><span class="o">@</span><span class="s1">&#39;%&#39;</span> <span class="n">identified</span> <span class="n">by</span> <span class="s1">&#39;myapp_passwd&#39;</span><span class="p">;</span>
+
+<span class="n">grant</span> <span class="nb">all</span> <span class="n">privileges</span> <span class="n">on</span> <span class="n">mydb</span><span class="o">.*</span> <span class="n">to</span> <span class="n">myapp_user</span><span class="o">@</span><span class="s1">&#39;%&#39;</span><span class="p">;</span>
+
+<span class="n">flush</span> <span class="n">privileges</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://dev.mysql.com/doc/refman/8.0/en/osx-installation-pkg.html">Installing MySQL on macOS Using Native Packages</a></p></li>
 </ul>
