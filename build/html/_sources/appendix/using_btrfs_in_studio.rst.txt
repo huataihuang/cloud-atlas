@@ -1,7 +1,7 @@
 .. _using_btrfs_in_studio:
 
 ==============================
-在Stuido中使用btrfs文件系统
+在Studio中使用btrfs文件系统
 ==============================
 
 .. note::
