@@ -6,9 +6,11 @@ Django开发环境
 
 作为Python Web框架，Django需要Python支持才能运行。目前Python 2.x已经终止开发，如果你的项目刚刚开始，请从Python 3开始(Python 3不兼容Python 2)。请首先安装Python 3。
 
-可以从 `Python官网下载 <https://www.python.org/downloads/>`_ 最新版本，或者从发行版安装。对于macOS系统默认安装了Python 2.7为了兼容遗留代码，最新的Catalina(10.15.x)也安装了Python 3，不过需要注意执行命令是 ``python3`` 。
+建议从 `Python官网下载 <https://www.python.org/downloads/>`_ 最新版本，或者从发行版安装。当前稳定版本Python 3.8.1支持Mac OS X 10.9及以上环境运行。
 
-如果是早期macOS版本，则可以通过 `Homebrew <http://brew.sh/>`_ 安装Python3::
+对于macOS系统默认安装了Python 2.7为了兼容遗留代码，最新的Catalina(10.15.x)也安装了Python 3，不过需要注意执行命令是 ``python3`` 。
+
+也可以通过 `Homebrew <http://brew.sh/>`_ 安装Python3::
 
    xcode-select --install
    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -26,7 +28,11 @@ Django开发环境
 
    sudo pip3 install --upgrade pip
    sudo pip3 install virtualenv
-   /usr/local/bin/virtualenv venv3
+   # 在Catalina上，使用默认Python3
+   #/usr/local/bin/virtualenv venv3
+
+   # 在早期Mac OS X 10.9(Mavericks)，使用Python官方Python3
+   virtualenv venv3
 
 根据提示，将脚本路径 ``/Users/huataihuang/Library/Python/3.7/bin`` 加入环境变量 ``$PATH`` ::
 
@@ -34,6 +40,7 @@ Django开发环境
 
 然后激活环境变量::
 
+   # Catalina系统使用zsh，如果是早期版本，使用 ~/.bash_profile
    . ~/.zshrc
 
 再激活Python 3的virutalenv::
@@ -42,14 +49,11 @@ Django开发环境
 
 此时激活了virtualenv环境，则执行 ``python`` 指令显示的运行环境就是Python 3。
 
-- 安装我的常用开发依赖库：即编辑一个 ``requirements.txt`` 配置（通常可以在Django项目的目录下存放）::
+- 安装我的常用开发依赖库：即编辑一个 ``requirements.txt`` 配置（通常可以在Django项目的目录下存放），这里和 :ref:`docker_compose_django` 共用 ``requirements.tst`` :
 
-   Django
-   selenium
-   djangorestframework
-   markdown
-   django-filter
-   mysqlclient
+.. literalinclude:: ../../docker/applications/requirements.txt
+   :language: bash
+   :linenos:
 
 然后执行以下命令安装::
 
