@@ -1,13 +1,13 @@
-.. _android_startup:
+.. _android_virtual:
 
 =================================
-Android 起步
+Android 虚拟化
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   adb.rst
+   anbox.rst
 
 .. only::  subproject and html
 

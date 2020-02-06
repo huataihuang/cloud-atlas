@@ -15,7 +15,29 @@ Android上的sshd服务分为两类：
 
    不需要root就能够使用的sshd服务，只能使用1024端口以上的监听端口，例如 SimpleSSHD 默认使用 2222 端口；此外，非root的sshd服务，登陆以后限制在个人目录沙箱下，权限不能看到整个系统的进程，只能作为简单的个人应用文件传输或转跳其他sshd服务。
 
-   本文主要探索root以后的Android安装sshd服务的设置，因为我的目标是管控整个Android系统。
+SimpleSSHD
+=============
+
+SimpleSSHD是一个非常简洁的SSHD服务，可以直接从Google Play上安装，并且不需要root设备就可以运行。
+
+首次启动SimpleSSHD，默认启动在端口 ``2222`` 上，这个SSH服务建议使用密钥登陆，但是，如果首次运行，还没有复制公钥到服务器端时，提供了一个简单的一次性密码登陆方式。当你使用 ``ssh user@<server_ip>`` 访问SimpleSSHD服务，由于程序第一次启动是开启了一个终端在前台运行，你会看到控制台在检测了没有密钥存在，就会提示::
+
+   no authorized keys, generating sigle-use passwd:
+   ------
+   XXXXXX
+   ------
+
+这样，你就可以在客户端输入这个密码登陆到SimpleSSHD提供的个人用户系统中。
+
+现在你可以把自己的公钥存放到 `~/authorized_keys` ::
+
+   echo "ssh-rsa AAAAB3...." > authorized_keys
+
+然后就可以无需密码登陆到SimpleSSHD系统中。
+
+.. note::
+
+   Android系统提供了一个内置的 ``/system/bin/ssh`` ，但是这个工具访问服务器，需要读写本地目录 ``/data/.ssh`` ，对于没有root系统的SimpleSSHD环境是没有权限的。所以会无法使用密钥对等。通过 ``adb`` 在
 
 安装设置系统sshd
 =================

@@ -4,7 +4,13 @@
 xhyve - macOS平台的KVM
 ==========================
 
-我个人使用MacBook Pro作为工作笔记本，使用的是macOS操作系统。macOS兼具精美方便的图形界面和灵活强大的Unix核心工具，对于开发和运维工作非常友好。macOS虽然没有KVM这样经过大量服务运维验证的虚拟化方案，但是实际上也有基于开源 `bhyve <http://bhyve.org>`_ port到OS X的开源项目 `xhyve hypervisor <https://github.com/mist64/xhyve>`_ 。xhyve构建在OS X 10.10的 `Hypervisor.framework <https://developer.apple.com/documentation/hypervisor>`_ ，完全运行在用户空间，没有其他依赖。
+我个人使用MacBook Pro作为工作笔记本，使用的是macOS操作系统。macOS兼具精美方便的图形界面和灵活强大的Unix核心工具，对于开发和运维工作非常友好。macOS虽然没有KVM这样经过大量服务运维验证的虚拟化方案，但是实际上也有基于开源 `bhyve <http://bhyve.org>`_ port到OS X的开源项目 `xhyve hypervisor <https://github.com/mist64/xhyve>`_ 。
+
+xhyve构建在OS X 10.10的 `Hypervisor.framework <https://developer.apple.com/documentation/hypervisor>`_ ，完全运行在用户空间，没有其他依赖。
+
+.. note::
+
+   在macOS上，可以基于系统内建的hypervisor能力 :ref:`install_docker_macos` 和 :ref:`install_run_minikube` ，这两个重量级的开源项目在macOS上都使用了基于 xhyve 开发的工具集 :ref:`hyperkit` 。
 
 xhyve安装
 =============

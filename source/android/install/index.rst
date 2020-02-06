@@ -1,13 +1,13 @@
-.. _android_startup:
+.. _android_install:
 
 =================================
-Android 起步
+Android 安装
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   adb.rst
+   lineageos_14.1_nexus_5.rst
 
 .. only::  subproject and html
 

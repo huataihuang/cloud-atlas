@@ -1,13 +1,14 @@
-.. _android_startup:
+.. _android_develop:
 
 =================================
-Android 起步
+Android 开发
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   adb.rst
+   android_develop_env.rst
+   android_vm_acceleration.rst
 
 .. only::  subproject and html
 
