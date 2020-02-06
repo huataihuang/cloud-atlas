@@ -8,35 +8,6 @@
 
    本章节因为是综合了我在多个平台部署minikube的实践，所以比较繁杂。实际上在Linux平台上部署minikube默认配置（使用虚拟机）非常简单。但是，如果使用了一些非标准配置，例如，btrfs作为存储驱动，裸物理机运行minikube则略微复杂。
 
-裸机直接部署minikube(快速起步)
-================================
-
-为了追求性能，在我的测试环境采用了裸物理主机直接运行minikube，并且采用了btrfs作为存储驱动，所以配置略有复杂。详情请见下文。
-
-.. note::
-
-   为了快速起步，简述方法如下::
-
-      curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
-      minikube config set vm-driver none
-      sudo minikube start --extra-config=kubeadm.ignore-preflight-errors=SystemVerification --extra-config=kubelet.cgroup-driver=systemd --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf
-
-   上述安装步骤只需要具备两个前提条件就可以完成:
-
-   - 安装好Docker CE: 请参考 :ref:`install_docker_in_studio` 
-     - 注意，需要配置项 ``"exec-opts": ["native.cgroupdriver=systemd"]``
-   - 架好翻墙的梯子: 请参考 :ref:`openconnect_vpn`
-
-   启动参数说明：
-
-   - 由于我采用btrfs，默认minikube启动验证storage driver会失败，所以添加参数 kubeadm.ignore-preflight-errors=SystemVerification
-   - 由于docker配置cgroupdriver=systemd，所以对应配置参数 kubelet.cgroup-driver=systemd
-   - 对于Ubuntu 18.04默认启用了 ``systemd-resolv`` ，需要绕过默认的 ``resolv.conf`` ，所以使用参数 ``kubelet.resolv-conf=/run/systemd/resolve/resolv.conf``
-
-.. warning::
-
-   根据 minikube文档 `vm-driver=none <https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md>`_ ，实际上裸物理机运行minikube有一些已知问题需要注意规避。
-
 .. _minikube:
 
 minikube
@@ -62,6 +33,35 @@ Ubuntu平台安装MiniKube
 
    curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
+Linux裸机直接部署minikube(快速起步)
+-------------------------------------
+
+为了追求性能，在我的测试环境(Linux)采用了裸物理主机直接运行minikube，并且采用了btrfs作为存储驱动，所以配置略有复杂。详情请见下文。
+
+.. note::
+
+   为了快速起步，简述方法如下::
+
+      curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
+      minikube config set vm-driver none
+      sudo minikube start --extra-config=kubeadm.ignore-preflight-errors=SystemVerification --extra-config=kubelet.cgroup-driver=systemd --extra-config=kubelet.resolv-conf=/run/systemd/resolve/resolv.conf
+
+   上述安装步骤只需要具备两个前提条件就可以完成:
+
+   - 安装好Docker CE: 请参考 :ref:`install_docker_in_studio` 
+     - 注意，需要配置项 ``"exec-opts": ["native.cgroupdriver=systemd"]``
+   - 架好翻墙的梯子: 请参考 :ref:`openconnect_vpn`
+
+   启动参数说明：
+
+   - 由于我采用btrfs，默认minikube启动验证storage driver会失败，所以添加参数 kubeadm.ignore-preflight-errors=SystemVerification
+   - 由于docker配置cgroupdriver=systemd，所以对应配置参数 kubelet.cgroup-driver=systemd
+   - 对于Ubuntu 18.04默认启用了 ``systemd-resolv`` ，需要绕过默认的 ``resolv.conf`` ，所以使用参数 ``kubelet.resolv-conf=/run/systemd/resolve/resolv.conf``
+
+.. warning::
+
+   根据 minikube文档 `vm-driver=none <https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md>`_ ，实际上裸物理机运行minikube有一些已知问题需要注意规避。
+
 macOS平台安装MiniKube
 --------------------------
 
@@ -71,6 +71,10 @@ macOS平台安装MiniKube
 
 macOS安装hyperkit
 ~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   请参考 `GitHub上hyperkit项目 <https://github.com/moby/hyperkit>`_ 以及我的实践记录： :ref:`hyperkit` (此外， :ref:`xhyve` 也是在macOS上基于相同的底层框架 ``Hypervisor.framework`` 实现的虚拟化技术)
 
 - 为了在块设备后端支持qcow，需要安装OCaml `OPAM <https://opam.ocaml.org/>`_ 开发环境带有qcow模块::
 

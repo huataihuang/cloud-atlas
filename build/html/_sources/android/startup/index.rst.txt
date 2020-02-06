@@ -4,15 +4,10 @@
 Android 起步
 =================================
 
-
-
 .. toctree::
    :maxdepth: 1
 
-   android_develop_env.rst
-   android_sshd.rst
-   android_vm_acceleration.rst
-   anbox.rst
+   adb.rst
 
 .. only::  subproject and html
 

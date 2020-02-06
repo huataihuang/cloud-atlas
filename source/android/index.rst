@@ -12,6 +12,11 @@ Android核心是Linux操作系统，开源系统具有极大的可玩性。随�
    :maxdepth: 1
 
    startup/index
+   install/index
+   build/index
+   hack/index
+   virtual/index
+   develop/index
 
 .. only::  subproject and html
 
