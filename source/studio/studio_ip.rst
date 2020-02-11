@@ -38,6 +38,6 @@ MacBook模拟集群
 VMware虚拟环境IP分配
 =======================
 
-补充笔记本 :ref:`vmware_in_studio` 环境使用的IP::
+补充笔记本 :ref:`vmware_fusion` 环境使用的IP::
 
    192.168.161.10  devstack

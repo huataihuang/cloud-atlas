@@ -8,6 +8,7 @@ Docker Atlas
    :maxdepth: 2
 
    startup/index
+   moby/index
    administer/index
    applications/index
    storage/index

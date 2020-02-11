@@ -8,8 +8,6 @@ macOS平台的KVM
    :maxdepth: 1
 
    xhyve.rst
-   hyperkit.rst
-   multipass.rst
 
 
 .. only::  subproject and html

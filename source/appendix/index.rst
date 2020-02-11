@@ -29,7 +29,6 @@
    efi_system_partition.rst
    using_btrfs_in_studio.rst
    reduce_laptop_overheat.rst
-   vmware_in_studio.rst
    share_mouse_keyboard.rst
    firewalld.rst
    ipmitool_tips.rst

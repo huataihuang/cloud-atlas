@@ -11,6 +11,7 @@ Android核心是Linux操作系统，开源系统具有极大的可玩性。随�
 .. toctree::
    :maxdepth: 1
 
+   device/index
    startup/index
    install/index
    build/index

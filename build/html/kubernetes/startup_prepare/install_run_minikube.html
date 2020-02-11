@@ -104,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id10">minikube异常排查</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id13">操作系统启动时启动minikube</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dashboard">启动dashboard</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="install_setup_kubectl.html">安装和设置kubectl</a></li>
@@ -232,7 +233,7 @@
 <p>minikube是通常通过虚拟机来运行的，也就是说必须在主机上运行Hypervisor，可以是Virtualbox (跨平台) 也可以是 KVM (Linux) 或者 Hyper-V (Windows)，甚至可以使用非常小众的 HyperKit (macOS)。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>之所以minikube通常需要在虚拟机中运行，是因为minikub是基于Docker容器运行的，Docker容器需要在Linux上运行，所以会先要求运行一个Linux虚拟机，然后才能在虚拟机中运行Docker以满足运行minikube的条件。</p>
+<p>之所以minikube通常需要在虚拟机中运行，是因为minikube是基于Docker容器运行的，Docker容器需要在Linux上运行，所以会先要求运行一个Linux虚拟机，然后才能在虚拟机中运行Docker以满足运行minikube的条件。</p>
 <p>如果你是在Linux主机上，由于Linux可以直接运行Docker，所以甚至可以不需要Hypervisor的虚拟机，直接运行在Linux物理主机的Docker中。此时使用参数 <code class="docutils literal notranslate"><span class="pre">--vm-driver=none</span></code> 来运行。</p>
 </div>
 </div>
@@ -285,71 +286,11 @@
 </div>
 <div class="section" id="macoshyperkit">
 <h4>macOS安装hyperkit<a class="headerlink" href="#macoshyperkit" title="Permalink to this headline">¶</a></h4>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>请参考 <a class="reference external" href="https://github.com/moby/hyperkit">GitHub上hyperkit项目</a> 以及我的实践记录： <a class="reference internal" href="../../kvm/macos/hyperkit.html#hyperkit"><span class="std std-ref">macOS虚拟化工具集HyperKit</span></a> (此外， <a class="reference internal" href="../../kvm/macos/xhyve.html#xhyve"><span class="std std-ref">xhyve - macOS平台的KVM</span></a> 也是在macOS上基于相同的底层框架 <code class="docutils literal notranslate"><span class="pre">Hypervisor.framework</span></code> 实现的虚拟化技术)</p>
-</div>
-<ul>
-<li><p>为了在块设备后端支持qcow，需要安装OCaml <a class="reference external" href="https://opam.ocaml.org/">OPAM</a> 开发环境带有qcow模块:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>brew install opam libev
-opam init
-eval `opam config env`
-opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix.2.9.0 conf-libev logs fmt mirage-unix prometheus-app
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>为了能够在编译hyperkit之前找到ocaml环境，必须在编译前执行一次 <code class="docutils literal notranslate"><span class="pre">opam</span> <span class="pre">config</span> <span class="pre">env</span></code></p>
-<p>可以通过以下命令移除之前旧版本的 <code class="docutils literal notranslate"><span class="pre">mirage-block-unix</span></code> 的 <code class="docutils literal notranslate"><span class="pre">pin</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">qcow</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opam</span> <span class="n">update</span>
-<span class="n">opam</span> <span class="n">pin</span> <span class="n">remove</span> <span class="n">mirage</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="n">unix</span>
-<span class="n">opam</span> <span class="n">pin</span> <span class="n">remove</span> <span class="n">qcow</span>
-</pre></div>
-</div>
-</div>
-<ul>
-<li><p>安装HyperKit:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">moby</span><span class="o">/</span><span class="n">hyperkit</span>
-<span class="n">cd</span> <span class="n">hyperkit</span>
-<span class="n">make</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>二进制执行程序位于 <code class="docutils literal notranslate"><span class="pre">build/hyperkit</span></code> 。为了能够让 <code class="docutils literal notranslate"><span class="pre">docker-machine-driver-hyperkit</span></code> 找到hyperkit可执行程序，请将这个目录加入到环境变量，例如 <code class="docutils literal notranslate"><span class="pre">~/.bash_profile</span></code> 。</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>升级macOS 10.14.4 之后，对应的Xcode版本升级，clang编译对于源代码的语法校验加强，遇到类型错误:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cc</span> <span class="n">src</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">firmware</span><span class="o">/</span><span class="n">fbsd</span><span class="o">.</span><span class="n">c</span>
-<span class="n">src</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">firmware</span><span class="o">/</span><span class="n">fbsd</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="mi">690</span><span class="p">:</span><span class="mi">7</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="n">implicit</span> <span class="n">conversion</span> <span class="n">changes</span> <span class="n">signedness</span><span class="p">:</span> <span class="s1">&#39;unsigned int&#39;</span> <span class="n">to</span> <span class="s1">&#39;int&#39;</span> <span class="p">[</span><span class="o">-</span><span class="n">Werror</span><span class="p">,</span><span class="o">-</span><span class="n">Wsign</span><span class="o">-</span><span class="n">conversion</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>修改 <code class="docutils literal notranslate"><span class="pre">config.mk</span></code> 将:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">Weverything</span> \
-</pre></div>
-</div>
-<p>删除</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>遇到报错:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ocamlfind: Package `cstruct.lwt&#39; not found
-</pre></div>
-</div>
-<p>则重新安装一次 <code class="docutils literal notranslate"><span class="pre">cstruct-lwt</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opam</span> <span class="n">reinstall</span> <span class="n">cstruct</span><span class="o">-</span><span class="n">lwt</span>
-</pre></div>
-</div>
-</div>
+<p>请参考 <a class="reference external" href="https://github.com/moby/hyperkit">GitHub上hyperkit项目</a> 以及我的实践记录： <a class="reference internal" href="../../docker/moby/hyperkit/run_hyperkit.html#build-hyperkit"><span class="std std-ref">编译HyperKit</span></a> 。</p>
 </div>
 <div class="section" id="macosvmware-fusion">
 <h4>macOS安装VMware Fusion<a class="headerlink" href="#macosvmware-fusion" title="Permalink to this headline">¶</a></h4>
-<p>请参考 <a class="reference internal" href="../../appendix/vmware_in_studio.html#vmware-in-studio"><span class="std std-ref">Studio环境中的VMware</span></a> ，我安装了VMware Fusion。使用 <code class="docutils literal notranslate"><span class="pre">vmrun</span> <span class="pre">list</span></code> 可以检查当前运行的VMware虚拟机。</p>
+<p>请参考 <a class="reference internal" href="../../macos_ios/vmware/vmware_fusion.html#vmware-fusion"><span class="std std-ref">Studio环境中的VMware Fusion</span></a> ，我安装了VMware Fusion。使用 <code class="docutils literal notranslate"><span class="pre">vmrun</span> <span class="pre">list</span></code> 可以检查当前运行的VMware虚拟机。</p>
 </div>
 <div class="section" id="id4">
 <h4>macOS安装minikube<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
@@ -765,6 +706,12 @@ error execution phase preflight: [preflight] Some fatal errors occurred:
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="id14">
+<h2>参考<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://minikube.sigs.k8s.io/docs/start/">minikube官方文档startup</a></p></li>
+</ul>
 </div>
 </div>
 
