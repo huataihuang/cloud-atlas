@@ -1,16 +1,11 @@
-.. _android_virtual:
+.. _linuxkit:
 
 =================================
-Android 虚拟化
+linuxkit
 =================================
 
 .. toctree::
-   :maxdepth: 1
-
-   android_on_linux.rst
-   archon.rst
-   anbox.rst
-
+   :maxdepth: 2
 
 .. only::  subproject and html
 

@@ -19,7 +19,7 @@ minikube是通常通过虚拟机来运行的，也就是说必须在主机上运
 
 .. note::
 
-   之所以minikube通常需要在虚拟机中运行，是因为minikub是基于Docker容器运行的，Docker容器需要在Linux上运行，所以会先要求运行一个Linux虚拟机，然后才能在虚拟机中运行Docker以满足运行minikube的条件。
+   之所以minikube通常需要在虚拟机中运行，是因为minikube是基于Docker容器运行的，Docker容器需要在Linux上运行，所以会先要求运行一个Linux虚拟机，然后才能在虚拟机中运行Docker以满足运行minikube的条件。
 
    如果你是在Linux主机上，由于Linux可以直接运行Docker，所以甚至可以不需要Hypervisor的虚拟机，直接运行在Linux物理主机的Docker中。此时使用参数 ``--vm-driver=none`` 来运行。
 
@@ -72,64 +72,12 @@ macOS平台安装MiniKube
 macOS安装hyperkit
 ~~~~~~~~~~~~~~~~~~~~
 
-.. note::
-
-   请参考 `GitHub上hyperkit项目 <https://github.com/moby/hyperkit>`_ 以及我的实践记录： :ref:`hyperkit` (此外， :ref:`xhyve` 也是在macOS上基于相同的底层框架 ``Hypervisor.framework`` 实现的虚拟化技术)
-
-- 为了在块设备后端支持qcow，需要安装OCaml `OPAM <https://opam.ocaml.org/>`_ 开发环境带有qcow模块::
-
-   brew install opam libev
-   opam init
-   eval `opam config env`
-   opam install uri qcow.0.10.4 conduit.1.0.0 lwt.3.1.0 qcow-tool mirage-block-unix.2.9.0 conf-libev logs fmt mirage-unix prometheus-app
-
-.. note::
-
-   为了能够在编译hyperkit之前找到ocaml环境，必须在编译前执行一次 ``opam config env``
-
-   可以通过以下命令移除之前旧版本的 ``mirage-block-unix`` 的 ``pin`` 或者 ``qcow`` ::
-
-      opam update
-      opam pin remove mirage-block-unix
-      opam pin remove qcow
-
-- 安装HyperKit::
-
-   git clone https://github.com/moby/hyperkit
-   cd hyperkit
-   make
-
-.. note::
-
-   二进制执行程序位于 ``build/hyperkit`` 。为了能够让 ``docker-machine-driver-hyperkit`` 找到hyperkit可执行程序，请将这个目录加入到环境变量，例如 ``~/.bash_profile`` 。
-
-.. note::
-
-   升级macOS 10.14.4 之后，对应的Xcode版本升级，clang编译对于源代码的语法校验加强，遇到类型错误::
-
-      cc src/lib/firmware/fbsd.c
-      src/lib/firmware/fbsd.c:690:7: error: implicit conversion changes signedness: 'unsigned int' to 'int' [-Werror,-Wsign-conversion]
-
-   修改 ``config.mk`` 将::
-
-      -Weverything \
-
-   删除
-
-.. note::
-
-   遇到报错::
-
-      ocamlfind: Package `cstruct.lwt' not found
-
-   则重新安装一次 ``cstruct-lwt`` ::
-
-      opam reinstall cstruct-lwt
+请参考 `GitHub上hyperkit项目 <https://github.com/moby/hyperkit>`_ 以及我的实践记录： :ref:`build_hyperkit` 。
 
 macOS安装VMware Fusion
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-请参考 :ref:`vmware_in_studio` ，我安装了VMware Fusion。使用 ``vmrun list`` 可以检查当前运行的VMware虚拟机。
+请参考 :ref:`vmware_fusion` ，我安装了VMware Fusion。使用 ``vmrun list`` 可以检查当前运行的VMware虚拟机。
 
 macOS安装minikube
 ~~~~~~~~~~~~~~~~~~~
@@ -515,3 +463,8 @@ minikube btrfs安装排查
       ...
 
     这个报错是因为没有启动代理导致的，所以在执行 ``minikube dashboard`` 之前，需要先执行 ``kubectl proxy`` 指令，这样就能打开正确的监控页面。
+
+参考
+=====
+
+- `minikube官方文档startup <https://minikube.sigs.k8s.io/docs/start/>`_

@@ -44,9 +44,19 @@ macOS
 
    multipass launch -c 2 -d 12G -m 2G -n devstack
 
+.. note::
+
+   ``multipass launch`` 命令会从Ubuntu网站下载镜像，但是ubuntu的官方服务器在国内访问很慢(移动固网)，经常会报错::
+
+      launch failed: failed to download from 'http://cloud-images.ubuntu.com/releases/server/releases/bionic/release-20200129.1/ubuntu-18.04-server-cloudimg-amd64.img': Network timeout
+
+   `Ubuntu cloud-image网站 <https://cloud-images.ubuntu.com>`_ 提供了Ubuntu官方镜像下载，对于难以直接launch的镜像(由于网络原因)，可以通过海外虚拟机预先下载再传回自己的服务器。
+
 - 进入新实例shell::
 
    multipass shell
+
+
 
 参考
 ======

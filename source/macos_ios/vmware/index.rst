@@ -1,16 +1,13 @@
-.. _android_virtual:
+.. _macos_vmware:
 
 =================================
-Android 虚拟化
+macOS平台VMware
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   android_on_linux.rst
-   archon.rst
-   anbox.rst
-
+   vmware_fusion.rst
 
 .. only::  subproject and html
 

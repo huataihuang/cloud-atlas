@@ -1,16 +1,14 @@
-.. _android_virtual:
+.. _hyperkit:
 
 =================================
-Android 虚拟化
+hyperkit
 =================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   android_on_linux.rst
-   archon.rst
-   anbox.rst
-
+   run_hyperkit.rst
+   multipass.rst
 
 .. only::  subproject and html
 

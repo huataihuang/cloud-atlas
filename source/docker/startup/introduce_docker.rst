@@ -21,6 +21,15 @@ Docker 利用现有的 Linux 容器技术，以不同方式将其封装及扩展
 
 对实施快速迭代开发模式的开发者来说，Docker 容器能迅速启动至关重要，因为他们可以很快看到代码变更后的结果。容器能保障的可移植性及隔离特性，使得开发与运维部门之间更容易协作，因为开发者知道他们的代码在不同环境下都能工作，而运维部门只需专注于容器的托管及服务编排，而无需担心任何关于代码的事。
 
+Docker生态
+=============
+
+.. note::
+
+   cnblog上的rianbowymail有一篇翻译整理自 `An Overall View On Docker Ecosystem — Containers, Moby, Swarm, Linuxkit, containerd, Kubernetes <https://medium.com/devopslinks/an-overall-view-on-docker-ecosystem-containers-moby-swarm-linuxkit-containerd-kubernetes-5e4972a6a1e8>`_ 的文章 `Docker 生态(rianbowymail) <https://www.cnblogs.com/rianbowymail/p/9006322.html>`_ 对Docker生态纷繁复杂的组件以及开源项目关系有一个概括性描述。
+
+- :ref:`docker_moby`
+
 Docker带来的DevOps改变
 =======================
 
