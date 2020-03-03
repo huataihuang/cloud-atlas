@@ -24,9 +24,9 @@ macOS工作环境
 
 hyperkit也是在macOS上运行Docker的基础，并且Ubuntu提供了基于hyperkit的完整桌面虚拟化解决方案 :ref:`multipass` ，可以非常方便在macOS上运行多个Ubuntu服务器，这要就可以非常轻松构建服务器集群。
 
-我在公司配发的MacBook Pro笔记本上，通过这种解决方案可以运行一个完整的Kubernetes集群，能够做很多也是和验证工作。
+我在公司配发的MacBook Pro笔记本上，通过这种解决方案可以运行一个完整的Kubernetes集群，能够做很多开发和验证工作。
 
-- :ref:`vmware_fusion`
+- :ref:`vmware_fusion` - VMware Fusion是商用软件，虽然不是macOS内置的虚拟化技术，略微沉重，但是，设置非常方便，并且不仅支持硬件虚拟化(当然hyperkit也支持)而且支持 :ref:`vmware_nested_virtual` ，这项技术和 :ref:`kvm_nested_virtual` 类似，通过嵌套虚拟化技术在一台物理主机上运行多个支持虚拟化的虚拟机，可以构建复杂的云计算集群。
 
 参考
 =======

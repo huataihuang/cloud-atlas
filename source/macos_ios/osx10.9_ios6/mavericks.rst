@@ -29,67 +29,10 @@ Visual Studio Code
 
 最新版本VSC不能在Mac OS X 10.9上运行
 
-安装Homebrew
+Homebrew
 =============
 
-安装Homebrew
--------------
-
-Homebrew是mac上必备工具，我们回退到Mac OS X 10.9.5之后，依然需要brew软件包管理器来安装第三方软件，以增强Mac OS X的功能::
-
-   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-.. note::
-
-   会提示安装 Xcode command tools，请按照提示安装命令行工具，并继续安装Homebrew
-
-- brew使用帮助::
-
-   brew help
-
-- 检查是否存在安装问题::
-
-   brew doctor
-
-- 搜索应用程序::
-
-   brew search
-
-- 安装::
-
-   brew install packgename
-
-- 列出所有Homebrew安装的应用::
-
-   brew list
-
-- 删除应用::
-
-   brew remove packagename
-
-- 更新Homebrew自身::
-
-   brew update
-
-- 查看是否有软件包没有及时更新::
-
-   brew outdated
-
-- 更新所有软件包或单个软件包::
-
-   brew update
-   brew update packagename
-
-- 将一个软件包保持在某个版本::
-
-   brew pin packagename
-
-- 解除软件包版本锁定::
-
-   brew unpin packagename
-
-Homebrew实践
----------------
+:ref:`homebrew` 是macOS必备工具，可以安装大量的GNU/Linux工具。
 
 Homebrew安装过程需要从GitHub上下载源代码，但是GitHub的证书识别错误::
 
@@ -112,7 +55,7 @@ Homebrew安装过程需要从GitHub上下载源代码，但是GitHub的证书识
    fatal: unable to access 'https://github.com/Homebrew/homebrew-core/': SSLRead() return error -36
    Error: Fetching /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core failed!
 
-安装了 Homebrew 就提供了大量可安装的GNU工具。
+这个问题我没有解决，最终在Mavericks上安装homebrew不成功。
 
 应用软件
 ===========

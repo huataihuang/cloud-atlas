@@ -39,7 +39,7 @@
 一点一滴
 =============
 
-我准备实践一个模拟云计算的开发测试集群，就用一台MacBook Pro笔记本。主要的思路是通过 :ref:`nested_virtual` 来模拟多个物理主机，这样就可以搭建集群化的OpenStack云计算环境( :ref:`openstack` )；由于OpenStack采用了KVM虚拟化，能够运行大量的KVM虚拟机，进而可以在KVM虚拟机内部构建基于Kubernetes技术 ( :ref:`kubernetes` )的容器集群，甚至进一步实现基于GPU的机器学习环境 ( :ref:`machine_learning` )。
+我准备实践一个模拟云计算的开发测试集群，就用一台MacBook Pro笔记本。主要的思路是通过 :ref:`kvm_nested_virtual` 来模拟多个物理主机，这样就可以搭建集群化的OpenStack云计算环境( :ref:`openstack` )；由于OpenStack采用了KVM虚拟化，能够运行大量的KVM虚拟机，进而可以在KVM虚拟机内部构建基于Kubernetes技术 ( :ref:`kubernetes` )的容器集群，甚至进一步实现基于GPU的机器学习环境 ( :ref:`machine_learning` )。
 
 详细的各个技术实践细节，我将分不同的分册来撰写。
 

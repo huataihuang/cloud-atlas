@@ -38,7 +38,7 @@ DevStack源代码位于 https://git.openstack.org/cgit/openstack-dev/devstack
 
 .. note::
 
-   在我的模拟测试环境中使用了 :ref:`nested_virtual` ，所以DevStack内部可以运行KVM hypervisor进行管理。
+   在我的模拟测试环境中使用了 :ref:`kvm_nested_virtual` ，所以DevStack内部可以运行KVM hypervisor进行管理。
 
 在开始运行DevStack的 ``stack.sh`` 脚本之前，请在KVM虚拟机内部确认已经激活了KVM，即虚拟机内部具有 ``/dev/kvm`` 设备。这又这个设备存在，DevStack才会使用 ``/etc/nova.conf`` 配置中的 ``virt_type = kvm`` ，否则就会使用 QEMU 模拟 ``virt_type = qemu`` ，这会影响性能。
 

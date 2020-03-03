@@ -1,13 +1,11 @@
-.. _alpine:
+.. _squid:
 
 =================================
-Alpine Linux
+Squid代理服务
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   introduce_alpine.rst
 
 .. only::  subproject and html
 

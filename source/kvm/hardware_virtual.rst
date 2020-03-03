@@ -23,6 +23,6 @@
 
 .. note::
 
-   我所使用的模拟集群部署的MacBook Pro 2015 later恰好是等同于Haswell的Crystal Well系列处理器（ :ref:`intel_core_i7_4850hq` ），在 :ref:`nested_virtual` 我就只需要使用一台MacBook Pro来模拟OpenStack集群。请参考我的 :ref:`nested_virtual` 来了解嵌套虚拟化的神奇能力。
+   我所使用的模拟集群部署的MacBook Pro 2015 later恰好是等同于Haswell的Crystal Well系列处理器（ :ref:`intel_core_i7_4850hq` ），在 :ref:`kvm_nested_virtual` 我就只需要使用一台MacBook Pro来模拟OpenStack集群。请参考我的 :ref:`kvm_nested_virtual` 来了解嵌套虚拟化的神奇能力。
 
 

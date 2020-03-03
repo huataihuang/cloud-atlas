@@ -1,13 +1,13 @@
-.. _alpine:
+.. _tails_linux:
 
 =================================
-Alpine Linux
+Tails Linux
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_alpine.rst
+   introduce_tails_linux.rst
 
 .. only::  subproject and html
 

@@ -69,7 +69,7 @@ Arch Linux安装KVM
 嵌套虚拟化
 ================
 
-在使用 ``一台`` 物理主机(MacBook Pro)模拟多个物理服务器来组成集群，部署基于KVM虚拟化的云计算，需要使用 :ref:`nested_virtual` 来实现。在后续 :ref:`kvm` 实践中，会详介绍如何在一台物理主机上运行支持hypervisor的虚拟机，以实现物理服务器集群模拟。 
+在使用 ``一台`` 物理主机(MacBook Pro)模拟多个物理服务器来组成集群，部署基于KVM虚拟化的云计算，需要使用 :ref:`kvm_nested_virtual` 来实现。在后续 :ref:`kvm` 实践中，会详介绍如何在一台物理主机上运行支持hypervisor的虚拟机，以实现物理服务器集群模拟。 
 
 .. _install_docker_in_studio:
 

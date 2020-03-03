@@ -1,13 +1,14 @@
-.. _alpine:
+.. _proxy:
 
 =================================
-Alpine Linux
+Proxy代理服务
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_alpine.rst
+   squid/index
+   varnish/index
 
 .. only::  subproject and html
 

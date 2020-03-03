@@ -51,6 +51,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    :caption: Contents:
 
    studio/index
+   infrastructure/index
    devops/index
    kvm/index
    ceph/index
@@ -61,6 +62,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    kubernetes/index
    openshift/index
    mysql/index
+   web/index
    big_data/index
    machine_learning/index
    linux/index

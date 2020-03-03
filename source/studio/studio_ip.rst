@@ -8,7 +8,7 @@ Studio测试环境IP分配
 
 - :ref:`create_vm`
 - :ref:`clone_vm`
-- :ref:`nested_virtual`
+- :ref:`kvm_nested_virtual`
 - :ref:`libvirt_static_ip_in_studio`
 
 物理机/虚拟化/容器
@@ -17,8 +17,8 @@ Studio测试环境IP分配
 纵观我的 :ref:`introduce_my_studio` 依旧 :ref:`real_concept` ，始终都是结婚了物理主机、KVM虚拟化和容器即技术(Kubernetes)来实现的。为了区分不同的主机，我规划主机命名策略:
 
 - worker-X :ref:`real` 真实物理主机
-- machine-X 使用KVM的 :ref:`nested_virtual` 技术模拟物理主机
-- vm-X 使用KVM虚拟化技术虚拟出来的Guest主机，通用虚拟机，不使用 :ref:`nested_virtual` 技术
+- machine-X 使用KVM的 :ref:`kvm_nested_virtual` 技术模拟物理主机
+- vm-X 使用KVM虚拟化技术虚拟出来的Guest主机，通用虚拟机，不使用 :ref:`kvm_nested_virtual` 技术
 
   - kubemaster-X 在VKM虚拟机运行的Kubernetes集群master节点
   - kubenode-X 在VKM虚拟机运行的Kubernetes集群worker节点
