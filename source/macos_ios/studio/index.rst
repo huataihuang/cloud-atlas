@@ -10,6 +10,8 @@ macOS Studio
    :maxdepth: 1
 
    introduce_macos_studio.rst
+   macos_studio_startup.rst
+   homebrew.rst
 
 .. only::  subproject and html
 

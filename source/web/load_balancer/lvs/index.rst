@@ -1,13 +1,11 @@
-.. _alpine:
+.. _lvs:
 
 =================================
-Alpine Linux
+Linux Virtual Server (LVS)
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   introduce_alpine.rst
 
 .. only::  subproject and html
 

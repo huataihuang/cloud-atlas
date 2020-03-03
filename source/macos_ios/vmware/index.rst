@@ -8,6 +8,7 @@ macOS平台VMware
    :maxdepth: 1
 
    vmware_fusion.rst
+   vmware_nested_virtual.rst
 
 .. only::  subproject and html
 

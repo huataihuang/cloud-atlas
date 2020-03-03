@@ -20,7 +20,7 @@ KVM Atlas
    deploy_win_vm.rst
    backup_vm.rst
    clone_vm.rst
-   nested_virtual.rst
+   kvm_nested_virtual.rst
    add_resize_virtual_disk_to_guest_on_fly.rst
    libvirt_static_ip_in_studio.rst
    kvm_live_migration.rst
