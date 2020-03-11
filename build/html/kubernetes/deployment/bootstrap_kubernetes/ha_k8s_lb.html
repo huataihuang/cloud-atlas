@@ -1,0 +1,704 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>高可用k8s的Master负载均衡 &mdash; Cloud Atlas 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../../copyright.html" />
+    <link rel="next" title="使用kubeadm创建高可用集群" href="create_ha_k8s.html" />
+    <link rel="prev" title="高可用(HA)Kubernetes集群" href="ha_k8s.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Kubernetes Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../kubernetes_overview.html">Kubernetes概览</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../startup_prepare/index.html">Kubernetes起步准备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../startup/index.html">Kubernetes快速起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/index.html">Kubernetes概念辨析</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Kubernetes部署</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../k8s_hosts.html">Kubernetes部署服务器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../container_runtimes.html">容器运行环境</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Kubernetes集群引导</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="kubeadm.html">kubeadm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="single_master_k8s.html">创建单一控制平面(单master)集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="change_master_ip.html">修改Kubernetes Master IP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ha_k8s.html">高可用(HA)Kubernetes集群</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">高可用k8s的Master负载均衡</a></li>
+<li class="toctree-l4"><a class="reference internal" href="create_ha_k8s.html">使用kubeadm创建高可用集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ha_k8s_stacked.html">堆叠型管控/etcd节点高可用集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ha_etcd.html">高可用etcd集群部署</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ha_k8s_external.html">扩展etcd节点高可用集群</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../stateless_application/index.html">Kubernetes部署无状态应用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operator/index.html">Kubernetes应用部署方法Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../etcd/index.html">部署etcd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nginx_ingress.html">部署Nginx Ingress Controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../docker_registry.html">在Kubernetes中部署私有Docker镜像仓库</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../helm.html">Helm - Kubernetes包管理器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../draft.html">Draft - Kubernetes应用部署工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kustomize.html">kustomize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kuberbuilder.html">Kubebuilder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../manage_object/index.html">Kubernetes管理对象</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../access_application/index.html">Kubernetes访问应用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../configure/index.html">Kubernetes 配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Kubernetes网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../production/index.html">Kubernetes生产环境</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../service_mesh/index.html">Service Mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../istio/index.html">Istio服务网格</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../serverless/index.html">Kubernetes Severless</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ci_cd/index.html">Kubernetes持续集成和持续部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../monitor/index.html">Kubernetes监控</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../debug/index.html">Kubernetes排查</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../knative/index.html">Knative - Serverless计算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cloud/index.html">Kubernetes云厂商</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../develop/index.html">Kubernetes开发</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../macos_ios/index.html">macOS &amp; iOS Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Kubernetes Atlas</a> &raquo;</li>
+        
+          <li><a href="../index.html">Kubernetes部署</a> &raquo;</li>
+        
+          <li><a href="index.html">Kubernetes集群引导</a> &raquo;</li>
+        
+      <li>高可用k8s的Master负载均衡</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../_sources/kubernetes/deployment/bootstrap_kubernetes/ha_k8s_lb.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="k8smaster">
+<span id="ha-k8s-lb"></span><h1>高可用k8s的Master负载均衡<a class="headerlink" href="#k8smaster" title="Permalink to this headline">¶</a></h1>
+<p>正如 <a class="reference internal" href="ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 所述，构建Kubernetes高可用集群，以etcd是否独立部署来划分两种不同对HA部署架构：</p>
+<ul class="simple">
+<li><p>堆叠部署etcd</p></li>
+<li><p>独立部署etcd</p></li>
+</ul>
+<p>在部署扩展多Master节点高可用集群之前，我们先要为apiserver准备好负载均衡。即完成本章节准备工作之后，我们才能继续 <a class="reference internal" href="create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 。</p>
+<div class="section" id="id1">
+<h2>负载均衡<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>不管采用哪种HA部署方式，都需要使负载均衡来分发worker节点对请求和连接给后端的多个apiserver。在 <a class="reference internal" href="create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 中，我们扩展了Kubenetes Master服务器，使得对外同时具备了多个Kube-apiserver服务，现在我们需要在apiserver之前构建负载均衡，使得worker节点可以通过负载均衡的VIP来访问后端实际服务器。</p>
+<p>kube-apiserver负载均衡：</p>
+<ul class="simple">
+<li><p>对外服务VIP需要DNS解析</p></li>
+<li><p>控制平面节点(Master节点)使用的是TCP转发负载均衡，该负载均衡将请求分发给所有健康的控制平面节点(健康检查是TCP检查kube-apiserver端口，默认6443)</p></li>
+<li><p>在云环境中不建议直接使用IP地址(通过DNS解析可以按需调整IP)</p></li>
+<li><p>负载均衡必须能够和所有控制平面节点的apiserver端口通讯，并且在负载均衡的监听端口允许进入流量(请参考下文通过 <code class="docutils literal notranslate"><span class="pre">firewall-cmd</span></code> 添加防火墙规则方法)</p></li>
+<li><p>确保负载均衡的地址和 kubeadm 的 <code class="docutils literal notranslate"><span class="pre">ControlPlaneEndpoint</span></code> 地址完全一致</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>apiserver高可用采用的是负载均衡方式实现，不论堆叠部署etcd还是分离部署etcd，集群的worker节点访问apiserver都是通过负载均衡实现的。负载均衡有多种解决方案，这里采用的是HAProxy实现，并且结合了Keepalived实现HAProxy的高可用部署。</p>
+<p>HAProxy虚拟机采用 <a class="reference internal" href="../k8s_hosts.html#k8s-hosts"><span class="std std-ref">Kubernetes部署服务器</span></a> 所创建的2个 <code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 虚拟机。</p>
+<blockquote>
+<div><p>192.168.122.8   haproxy-1 haproxy-1.huatai.me
+192.168.122.9   haproxy-2 haproxy-2.huatai.me
+192.168.122.10  kubeapi kubeapi.huatai.me            #在HAProxy上构建apiserver的VIP</p>
+</div></blockquote>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a> 采用的是直接在3个Kuberenetes Master构建Keepalived和HAProxy，这种方式可以节约服务器使用。不过，我的部署采用了独立的haproxy服务器，目的是为了能够功能清晰并且能够更好横向扩展，以便适应大型负载网络。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>由于kubelet客户端采用长连接方式访问apiserver，所以一旦kubelet通过负载均衡分发到后端到apiserver之后，除非kubelet客户端重启，一般情况下kubelete客户端会始终访问同一台apiserver。这就带来了一个均衡性问题：当apiserver由于升级重启或者crash重启，kubelet客户端连接会集中到其他正常服务器上并且不会再平衡。极端情况下，可能虽然有多个apiserver，但负载会集中到少量服务器上。</p>
+<p>这个问题在KubeCon China 2019的阿里云演讲 <a class="reference external" href="https://www.youtube.com/watch?v=1ThhTbMO1NE">Understanding Scalability and Performance in the Kubenetes Masteer</a> 有详细介绍和解决方案思路介绍(中文观看请访问 <a class="reference external" href="https://v.qq.com/x/page/v0906j1czvd.html">了解 Kubernetes Master 的可扩展性和性能</a> )。</p>
+</div>
+</div>
+<div class="section" id="apihaproxykeeplived">
+<h2>API高可用HAProxy和Keeplived<a class="headerlink" href="#apihaproxykeeplived" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>准备工作<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 需要关闭SELinux，否则启动haproxy服务无法绑定端口(详细见下文 <code class="docutils literal notranslate"><span class="pre">问题排查</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setenforce</span> <span class="mi">0</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">selinux</span><span class="o">/</span><span class="n">config</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="keepalived">
+<h3>Keepalived<a class="headerlink" href="#keepalived" title="Permalink to this headline">¶</a></h3>
+<p>Keepalived提供Kubernetes集群Master VIP 192.168.122.10 ( <a class="reference internal" href="../../../studio/studio_ip.html#studio-ip"><span class="std std-ref">Studio测试环境IP分配</span></a> )，即浮动在HAProxy的健康节点之一，提供对外服务的访问IP，并在节点故障时自动切换到其他健康节点。Kubernetes API将始终通过HAProxy提供对外访问。</p>
+<ul>
+<li><p>安装 keepalived</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">keepalived</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>默认安装 keepalived 已经具备了一个案例配置 <code class="docutils literal notranslate"><span class="pre">/etc/keepalived/keepalived.conf</span></code> ，备份这个文件再重新按本文配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">keepalived</span><span class="o">/</span><span class="n">keepalived</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">keepalived</span><span class="o">/</span><span class="n">keepalived</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">bak</span>
+</pre></div>
+</div>
+</div>
+<p>在 <code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 节点的 <code class="docutils literal notranslate"><span class="pre">/etc/keepalived/keepalived.conf</span></code> 配置如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vrrp_script</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">check</span> <span class="p">{</span>
+    <span class="n">script</span> <span class="s2">&quot;killall -0 haproxy&quot;</span>
+    <span class="n">interval</span> <span class="mi">2</span>
+    <span class="n">weight</span> <span class="mi">20</span>
+<span class="p">}</span>
+
+<span class="n">vrrp_instance</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">vip</span> <span class="p">{</span>
+    <span class="n">state</span> <span class="n">BACKUP</span>
+    <span class="n">priority</span> <span class="mi">101</span>
+    <span class="n">interface</span> <span class="n">eth0</span>
+    <span class="n">virtual_router_id</span> <span class="mi">47</span>
+    <span class="n">advert_int</span> <span class="mi">3</span>
+
+    <span class="n">unicast_src_ip</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.8</span>
+    <span class="n">unicast_peer</span> <span class="p">{</span>
+        <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.9</span>
+        <span class="c1"># 可配置多个peer</span>
+        <span class="c1"># 192.168.122.X</span>
+    <span class="p">}</span>
+
+    <span class="n">virtual_ipaddress</span> <span class="p">{</span>
+        <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span>
+    <span class="p">}</span>
+
+    <span class="n">track_script</span> <span class="p">{</span>
+        <span class="n">haproxy</span><span class="o">-</span><span class="n">check</span> <span class="n">weight</span> <span class="mi">20</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>对于Keepalived其他节点，例如 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> ，需要修订 <code class="docutils literal notranslate"><span class="pre">unicast</span></code> 部分，将对等部分互换，例如:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unicast_src_ip</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.9</span>
+<span class="n">unicast_peer</span> <span class="p">{</span>
+    <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.8</span>
+    <span class="c1"># 可配置多个peer</span>
+    <span class="c1"># 192.168.122.X</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>keepalived 使用VRRP协议(ip protocol 112)以及多播地址 <code class="docutils literal notranslate"><span class="pre">224.0.0.18</span></code> ，需要在防火墙上开启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">rich</span><span class="o">-</span><span class="n">rule</span><span class="o">=</span><span class="s1">&#39;rule protocol value=&quot;vrrp&quot; accept&#39;</span> <span class="o">--</span><span class="n">permanent</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
+</pre></div>
+</div>
+<p>通过以下命令可以检查已经添加的filter rules:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">rich</span><span class="o">-</span><span class="n">rules</span>
+</pre></div>
+</div>
+<p>参考文档： <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/load_balancer_administration/s1-lvs-connect-vsa">Red Hat Enterprise Linux7 &gt; Load Balancer Administration &gt; 3.3. Putting the Configuration Together</a></p>
+<blockquote>
+<div><p>也可以参考 <a class="reference external" href="https://docs.oracle.com/cd/E52668_01/E54669/html/section_ksr_psb_nr.html">Oracle® Linux Administrator’s Guide for Release 7 &gt; Load Balancing Configuration &gt; 17.5 Installing and Configuring Keepalived</a> 通过以下命令添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">direct</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">rule</span> <span class="n">ipv4</span> <span class="nb">filter</span> <span class="n">INPUT</span> <span class="mi">0</span> \
+  <span class="o">--</span><span class="ow">in</span><span class="o">-</span><span class="n">interface</span> <span class="n">eth0</span> <span class="o">--</span><span class="n">destination</span> <span class="mf">224.0</span><span class="o">.</span><span class="mf">0.18</span> <span class="o">--</span><span class="n">protocol</span> <span class="n">vrrp</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">direct</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">rule</span> <span class="n">ipv4</span> <span class="nb">filter</span> <span class="n">OUTPUT</span> <span class="mi">0</span> \
+  <span class="o">--</span><span class="ow">in</span><span class="o">-</span><span class="n">interface</span> <span class="n">eth0</span> <span class="o">--</span><span class="n">destination</span> <span class="mf">224.0</span><span class="o">.</span><span class="mf">0.18</span> <span class="o">--</span><span class="n">protocol</span> <span class="n">vrrp</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<ul>
+<li><p>启动keeplived:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">keepalived</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">keepalived</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>启动后观察服务器，可以看到其中一台服务器的 eth0 上会绑定浮动IP 192.168.122.10</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="p">:</span> <span class="n">eth0</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">pfifo_fast</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">52</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="n">d2</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">88</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.8</span><span class="o">/</span><span class="mi">24</span> <span class="n">brd</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">noprefixroute</span> <span class="n">eth0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span><span class="o">/</span><span class="mi">32</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">eth0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="mi">5054</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">fed2</span><span class="p">:</span><span class="mi">3088</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+</pre></div>
+</div>
+<p>注意：浮动VIP只绑定在 <code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 的其中一台网卡上，所以只有一个服务器能够启动haproxy(因为启动时缺少浮动IP <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 则不能启动haproxy)。</p>
+</div>
+<div class="section" id="haproxy">
+<h3>HAProxy<a class="headerlink" href="#haproxy" title="Permalink to this headline">¶</a></h3>
+<p>HAProxy将检查后端 <code class="docutils literal notranslate"><span class="pre">kubemaster-X</span></code> 服务器上的 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> 端口健康状态，并且负载均衡请求到集群的健康实例上，并且也将对局域网提供Kubernetes web UI(Dashboard)服务，对外提供服务的虚拟VIP即Keepalived的浮动IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 。</p>
+<ul>
+<li><p>安装HAProxy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">haproxy</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>默认安装HAProxy配置文件备份:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">haproxy</span><span class="o">.</span><span class="n">cfg</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">haproxy</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">bak</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a> 原文 <a class="reference external" href="https://icicimov.github.io/blog/download/haproxy-k8s.cfg">haproxy-k8s.cfg案例配置</a> 中包含了 <a class="reference external" href="https://traefik.io/">trafik (Cloud Native边缘路由器，用于提供代理和负载均衡，取代nginx)</a> 配置，这里我没有采用。后续再做学习和实践。</p>
+</div>
+<ul class="simple">
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/haproxy/haproxy.cfg</span></code> 内容如下，注意相关 <code class="docutils literal notranslate"><span class="pre">k8s-api</span></code> 部分高亮</p></li>
+</ul>
+<blockquote>
+<div><div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">haproxy.cfg</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70</pre></div></td><td class="code"><div class="highlight"><pre><span></span>global
+  log /dev/log  local0
+  log /dev/log  local1 notice
+  chroot /var/lib/haproxy
+  <span class="c1">#stats socket /run/haproxy/admin.sock mode 660 level admin</span>
+<span class="hll">  stats socket /var/lib/haproxy/stats
+</span>  stats timeout 30s
+  user haproxy
+  group haproxy
+  daemon
+
+  <span class="c1"># Default SSL material locations</span>
+  ca-base /etc/ssl/certs
+  crt-base /etc/ssl/private
+
+  <span class="c1"># Default ciphers to use on SSL-enabled listening sockets.</span>
+  <span class="c1"># For more information, see ciphers(1SSL). This list is from:</span>
+  <span class="c1">#  https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/</span>
+  <span class="c1"># An alternative list with additional directives can be obtained from</span>
+  <span class="c1">#  https://mozilla.github.io/server-side-tls/ssl-config-generator/?server=haproxy</span>
+  ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS
+  ssl-default-bind-options no-sslv3
+
+defaults
+  log global
+  mode  http
+  option  httplog
+  option  dontlognull
+  timeout connect <span class="m">5000</span>
+  timeout client  <span class="m">50000</span>
+  timeout server  <span class="m">50000</span>
+  timeout http-request 15s
+  timeout http-keep-alive 15s
+
+frontend monitor-in
+  <span class="nb">bind</span> *:33305
+  mode http
+  option httplog
+  monitor-uri /monitor
+
+listen stats
+  <span class="nb">bind</span>    *:9000
+  mode    http
+  stats   <span class="nb">enable</span>
+  stats   hide-version
+  stats   uri       /stats
+  stats   refresh   30s
+  stats   realm     Haproxy<span class="se">\ </span>Statistics
+  stats   auth      Admin:Password
+
+<span class="hll">frontend k8s-api
+</span>  <span class="c1">#bind 192.168.122.10:6443</span>
+  <span class="c1">#bind 127.0.0.1:6443</span>
+<span class="hll">  <span class="nb">bind</span> *:6443
+</span><span class="hll">  mode tcp
+</span><span class="hll">  option tcplog
+</span>  tcp-request inspect-delay 5s
+  <span class="c1">#tcp-request content reject if !HTTP</span>
+  tcp-request content accept <span class="k">if</span> <span class="o">{</span> req.ssl_hello_type <span class="m">1</span> <span class="o">}</span>
+<span class="hll">  default_backend k8s-api
+</span>
+<span class="hll">backend k8s-api
+</span><span class="hll">  mode tcp
+</span><span class="hll">  option tcplog
+</span><span class="hll">  option tcp-check
+</span><span class="hll">  balance roundrobin
+</span><span class="hll">  default-server inter 10s downinter 5s rise <span class="m">2</span> fall <span class="m">2</span> slowstart 60s maxconn <span class="m">250</span> maxqueue <span class="m">256</span> weight <span class="m">100</span>
+</span><span class="hll">  server k8s-api-1 <span class="m">192</span>.168.122.11:6443 check
+</span><span class="hll">  server k8s-api-2 <span class="m">192</span>.168.122.12:6443 check
+</span><span class="hll">  server k8s-api-3 <span class="m">192</span>.168.122.13:6443 check
+</span></pre></div>
+</td></tr></table></div>
+</div>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>同样需要放开HAProxy的apiserver访问端口，参考 <a class="reference internal" href="kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">6443</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">stats</span> <span class="pre">socket</span> <span class="pre">/var/lib/haproxy/stats</span></code> 替换了 <code class="docutils literal notranslate"><span class="pre">stats</span> <span class="pre">socket</span> <span class="pre">/run/haproxy/admin.sock</span> <span class="pre">mode</span> <span class="pre">660</span> <span class="pre">level</span> <span class="pre">admin</span></code> ，原因是发行版操作系统启动默认没有 <code class="docutils literal notranslate"><span class="pre">/run/haproxy</span></code> 目录，会导致无法创建 sock 文件。见下文。</p>
+<p><code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">*:6443</span></code> 是为了使得haproxy启动时能绑定任何的接口，因为keeplived只在主服务器上启动了VIP地址，所以设置了通配符 <code class="docutils literal notranslate"><span class="pre">*</span></code> 来匹配，否则haproxy在没有浮动VIP的主机上无法启动。</p>
+</div>
+</div>
+</div>
+<div class="section" id="keepalived-haproxy">
+<h2>keepalived+haproxy验证<a class="headerlink" href="#keepalived-haproxy" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="apiserver-vip">
+<h3>测试apiserver VIP<a class="headerlink" href="#apiserver-vip" title="Permalink to this headline">¶</a></h3>
+<p>现在 VIP <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 浮动在 <code class="docutils literal notranslate"><span class="pre">proxy-1</span></code> 虚拟机上，所以我们可以通过以下命令验证是否可以访问集群。</p>
+<ul>
+<li><p>首先验证端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">telnet</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span> <span class="mi">6443</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>验证端口可以正常打开，则修改物理主机 <code class="docutils literal notranslate"><span class="pre">worker4</span></code> 上访问集群的配置文件 <code class="docutils literal notranslate"><span class="pre">.kube/config</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">server</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.11</span><span class="p">:</span><span class="mi">6443</span>
+</pre></div>
+</div>
+<p>修订成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">server</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span><span class="p">:</span><span class="mi">6443</span>
+</pre></div>
+</div>
+<ul>
+<li><p>再次访问服务 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">cluster-info</span></code> 则显示证书错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span><span class="p">:</span> <span class="n">x509</span><span class="p">:</span> <span class="n">certificate</span> <span class="ow">is</span> <span class="n">valid</span> <span class="k">for</span> <span class="mf">10.96</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.11</span><span class="p">,</span> <span class="ow">not</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>问题排查<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="haproxysocket">
+<h3>HAProxy无法绑定socket<a class="headerlink" href="#haproxysocket" title="Permalink to this headline">¶</a></h3>
+<p>启动遇到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">haproxy</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">wrapper</span><span class="p">[</span><span class="mi">20624</span><span class="p">]:</span> <span class="p">[</span><span class="n">ALERT</span><span class="p">]</span> <span class="mi">229</span><span class="o">/</span><span class="mi">120654</span> <span class="p">(</span><span class="mi">20625</span><span class="p">)</span> <span class="p">:</span> <span class="n">Starting</span> <span class="n">frontend</span> <span class="n">GLOBAL</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">bind</span> <span class="n">UNIX</span> <span class="n">socket</span> <span class="p">[</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">admin</span><span class="o">.</span><span class="n">sock</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>上述报错是因为默认系统没有 <code class="docutils literal notranslate"><span class="pre">/run/haproxy</span></code> 目录，原文配置中指定的 <code class="docutils literal notranslate"><span class="pre">/run/haproxy/admin.sock</span></code> 无法构构建。我参考发行版将目录修改成 <code class="docutils literal notranslate"><span class="pre">/var/lib/haproxy</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="n">socket</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">stats</span>
+</pre></div>
+</div>
+<p>keepalived启动无问题，但是haproxy启动显示无法绑定服务端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Aug</span> <span class="mi">13</span> <span class="mi">17</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">13</span> <span class="n">haproxy</span><span class="o">-</span><span class="mi">1</span> <span class="n">haproxy</span><span class="p">[</span><span class="mi">11385</span><span class="p">]:</span> <span class="n">Proxy</span> <span class="n">monitor</span><span class="o">-</span><span class="ow">in</span> <span class="n">started</span><span class="o">.</span>
+<span class="n">Aug</span> <span class="mi">13</span> <span class="mi">17</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">13</span> <span class="n">haproxy</span><span class="o">-</span><span class="mi">1</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">wrapper</span><span class="p">[</span><span class="mi">11384</span><span class="p">]:</span> <span class="p">[</span><span class="n">ALERT</span><span class="p">]</span> <span class="mi">224</span><span class="o">/</span><span class="mi">173213</span> <span class="p">(</span><span class="mi">11385</span><span class="p">)</span> <span class="p">:</span> <span class="n">Starting</span> <span class="n">frontend</span> <span class="n">k8s</span><span class="o">-</span><span class="n">api</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">bind</span> <span class="n">socket</span> <span class="p">[</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span><span class="p">:</span><span class="mi">6443</span><span class="p">]</span>
+<span class="n">Aug</span> <span class="mi">13</span> <span class="mi">17</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">13</span> <span class="n">haproxy</span><span class="o">-</span><span class="mi">1</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">wrapper</span><span class="p">[</span><span class="mi">11384</span><span class="p">]:</span> <span class="p">[</span><span class="n">ALERT</span><span class="p">]</span> <span class="mi">224</span><span class="o">/</span><span class="mi">173213</span> <span class="p">(</span><span class="mi">11385</span><span class="p">)</span> <span class="p">:</span> <span class="n">Starting</span> <span class="n">frontend</span> <span class="n">k8s</span><span class="o">-</span><span class="n">api</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">bind</span> <span class="n">socket</span> <span class="p">[</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">6443</span><span class="p">]</span>
+<span class="n">Aug</span> <span class="mi">13</span> <span class="mi">17</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">13</span> <span class="n">haproxy</span><span class="o">-</span><span class="mi">1</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">wrapper</span><span class="p">[</span><span class="mi">11384</span><span class="p">]:</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">wrapper</span><span class="p">:</span> <span class="n">exit</span><span class="p">,</span> <span class="n">haproxy</span> <span class="n">RC</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">Aug</span> <span class="mi">13</span> <span class="mi">17</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">13</span> <span class="n">haproxy</span><span class="o">-</span><span class="mi">1</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">haproxy</span><span class="o">.</span><span class="n">service</span><span class="p">:</span> <span class="n">main</span> <span class="n">process</span> <span class="n">exited</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">exited</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">FAILURE</span>
+<span class="n">Aug</span> <span class="mi">13</span> <span class="mi">17</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">13</span> <span class="n">haproxy</span><span class="o">-</span><span class="mi">1</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">Unit</span> <span class="n">haproxy</span><span class="o">.</span><span class="n">service</span> <span class="n">entered</span> <span class="n">failed</span> <span class="n">state</span><span class="o">.</span>
+<span class="n">Aug</span> <span class="mi">13</span> <span class="mi">17</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">13</span> <span class="n">haproxy</span><span class="o">-</span><span class="mi">1</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">haproxy</span><span class="o">.</span><span class="n">service</span> <span class="n">failed</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://serverfault.com/questions/286598/could-not-bind-socket-while-haproxy-restart">could not bind socket while haproxy restart</a> 原因是默认CentOS激活了SELinux不允许绑定，可以通过以下命令设置selinux:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setsebool</span> <span class="n">haproxy_connect_any</span> <span class="n">on</span>
+</pre></div>
+</div>
+<p>或者参考 <a class="reference internal" href="kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a> 同样设置HAProxy 节点上的 SELinux 设置成 <code class="docutils literal notranslate"><span class="pre">permissive</span></code> 模式:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setenforce</span> <span class="mi">0</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">selinux</span><span class="o">/</span><span class="n">config</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a></p></li>
+<li><p><a class="reference external" href="https://www.unixmen.com/configure-high-available-load-balancer-haproxy-keepalived/">How To Configure A High Available Load-balancer With HAProxy And Keepalived</a></p></li>
+<li><p><a class="reference external" href="https://snapdev.net/2015/09/08/install-haproxy-and-keepalived-on-centos-7-for-mariadb-cluster/">INSTALL HAPROXY AND KEEPALIVED ON CENTOS 7 FOR MARIADB CLUSTER</a>
+`</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="create_ha_k8s.html" class="btn btn-neutral float-right" title="使用kubeadm创建高可用集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ha_k8s.html" class="btn btn-neutral float-left" title="高可用(HA)Kubernetes集群" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; <a href="../../../copyright.html">Copyright</a> 2019, Huatai Huang
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

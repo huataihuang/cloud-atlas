@@ -1,0 +1,367 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>远程访问dockerd服务 &mdash; Cloud Atlas 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="将容器作为服务运行" href="running-containers-as-daemons.html" />
+    <link rel="prev" title="构建Docker应用程序" href="building-a-docker-application.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Docker Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">Docker 起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../moby/index.html">Docker Moby</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker 管理</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="building-a-docker-application.html">构建Docker应用程序</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">远程访问dockerd服务</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dockertcp">docker的TCP访问</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ubuntu">Ubuntu早期版本</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#systemdubuntu">使用systemd的现代Ubuntu版本</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#docker">docker客户端远程连接测试</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="running-containers-as-daemons.html">将容器作为服务运行</a></li>
+<li class="toctree-l3"><a class="reference internal" href="keep_containers_alive_during_daemon_downtime.html">Docker daemon停止时保持容器运行</a></li>
+<li class="toctree-l3"><a class="reference internal" href="assign_static_ip_to_docker_container.html">Docker容器分配静态IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_ssh.html">Docker容器中运行ssh服务</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build_image_from_dockerfile.html">从Dockerfile构建Docker镜像</a></li>
+<li class="toctree-l3"><a class="reference internal" href="start_containers_automatically.html">自动启动Docker容器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_timezone.html">Docker时区</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/index.html">Docker 环境运行应用程序案例</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Docker存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network/index.html">Docker网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">Docker GPU设备</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../macos_ios/index.html">macOS &amp; iOS Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Docker Atlas</a> &raquo;</li>
+        
+          <li><a href="index.html">Docker 管理</a> &raquo;</li>
+        
+      <li>远程访问dockerd服务</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/docker/administer/remote-access-dockerd.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dockerd">
+<span id="remote-access-dockerd"></span><h1>远程访问dockerd服务<a class="headerlink" href="#dockerd" title="Permalink to this headline">¶</a></h1>
+<p>虽然默认情况下都是在host主机上访问Docker daemon，不过，远程访问Docker daemon也很有必要，特别是在DevOps工作流中，往往需要远程调试Docker。</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>虽然远程访问Docker daemon是非常强大的技术，但是需要考虑安全性。Docker socket可能被滥用并导致攻击。</p>
+</div>
+<a class="reference internal image-reference" href="../../_images/docker_daemon_remote_access.png"><img alt="../../_images/docker_daemon_remote_access.png" src="../../_images/docker_daemon_remote_access.png" style="width: 521.0px; height: 402.0px;" /></a>
+<div class="section" id="dockertcp">
+<h2>docker的TCP访问<a class="headerlink" href="#dockertcp" title="Permalink to this headline">¶</a></h2>
+<p>默认Docker配置限制只能通过 <code class="docutils literal notranslate"><span class="pre">/var/run/docker.sock</span></code> 在本地host上访问Docker daemon，这样非host主机上的进程就不能访问Docker服务，这提供了一定的安全保障。</p>
+<p>通过Docker配置修改，可以将Docker daemon的访问通过TCP网络输出给外部访问，这样不仅远程Docker client可以管理Docker，并且可以集成到Jenkins这样的持续集成系统，实现软件开发部署的持续交付流程。</p>
+<ul>
+<li><p>修改配置之前，首先停止Docker daemon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>开启Docker daemon的TCP访问</p></li>
+</ul>
+<p>可以通过手工命令运行Docker daemon提供对外的TCP访问:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">docker</span> <span class="n">daemon</span> <span class="o">-</span><span class="n">H</span> <span class="n">tcp</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">2375</span>
+</pre></div>
+</div>
+<p>或者通过环境变量 <code class="docutils literal notranslate"><span class="pre">DOCKER_HOST</span></code> 来使得docker运行时启用TCP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DOCKER_HOST</span><span class="o">=</span><span class="n">tcp</span><span class="p">:</span><span class="o">//&lt;</span><span class="n">your</span> <span class="n">host</span><span class="s1">&#39;s ip&gt;:2375</span>
+<span class="n">docker</span> <span class="o">&lt;</span><span class="n">subcommand</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ubuntu">
+<h2>Ubuntu早期版本<a class="headerlink" href="#ubuntu" title="Permalink to this headline">¶</a></h2>
+<p>Ubuntu 上默认启动的docker服务显示的运行参数是 <code class="docutils literal notranslate"><span class="pre">/usr/bin/dockerd</span> <span class="pre">-H</span> <span class="pre">fd://</span></code> 。参考 <a class="reference external" href="https://medium.com/&#64;sudarakayasindu/enabling-and-accessing-docker-engine-api-on-a-remote-docker-host-on-ubuntu-16-04-2c15f55f5d39">Enabling and accessing Docker Engine API on a remote docker host on Ubuntu</a></p>
+<p>早期Ubuntu版本采用修改 <code class="docutils literal notranslate"><span class="pre">/etc/defualt/docker</span></code> 配置文件，添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DOCKER_OPTS</span><span class="o">=</span><span class="s2">&quot;-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="systemdubuntu">
+<h2>使用systemd的现代Ubuntu版本<a class="headerlink" href="#systemdubuntu" title="Permalink to this headline">¶</a></h2>
+<p>在当前采用systemd的系统中，激活remote API的方法参考 <a class="reference external" href="https://success.docker.com/article/how-do-i-enable-the-remote-api-for-dockerd">How do I enable the remote API for dockerd</a>  ，创建一个 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/docker.service.d/startup_options.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># /etc/systemd/system/docker.service.d/override.conf</span>
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">ExecStart</span><span class="o">=</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">dockerd</span> <span class="o">-</span><span class="n">H</span> <span class="n">fd</span><span class="p">:</span><span class="o">//</span> <span class="o">-</span><span class="n">H</span> <span class="n">tcp</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">2375</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">-H</span></code> 参数可以指定dockerd的监听socket，可以是Unix socket或者TCP端口。可以指定多个 <code class="docutils literal notranslate"><span class="pre">-H</span></code> 参数来绑定多个 sockets/ports。默认的 <code class="docutils literal notranslate"><span class="pre">-H</span> <span class="pre">fd://</span></code> 使用的是systemd的socket激活功能，引用的是 <code class="docutils literal notranslate"><span class="pre">/lib/systemd/system/docker.service</span></code> 。</p>
+<p>从上述配置 <code class="docutils literal notranslate"><span class="pre">startup_options.conf</span></code> 来看，是先将 <code class="docutils literal notranslate"><span class="pre">ExecStart</span></code> 配置清空然后再重新加入完整新配置。</p>
+</div>
+<p>然后重新加载unit文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+</pre></div>
+</div>
+<p>使用新的参数重启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>如果没有使用上述这种override方式，也可以直接修改 <code class="docutils literal notranslate"><span class="pre">/lib/systemd/system/docker.service</span></code> 配置文件，同样可以添加监听参数。但是这种直接修改系统配置文件的方法会对后续升级影响。</p>
+<p><code class="docutils literal notranslate"><span class="pre">/lib/systemd/system/docker.service</span></code> 配置中如果有 <code class="docutils literal notranslate"><span class="pre">EnvironmentFile=</span></code> 配置项，则指定环境参数文件，就可以通过环境参数文件内容来添加参数。</p>
+</div>
+<ul>
+<li><p>检查docker重启后日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">docker</span>
+<span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">docker</span> <span class="o">-</span><span class="n">f</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到日志显示TCP端口监听:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Feb</span> <span class="mi">20</span> <span class="mi">08</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">01</span> <span class="n">kube</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">Started</span> <span class="n">Docker</span> <span class="n">Application</span> <span class="n">Container</span> <span class="n">Engine</span><span class="o">.</span>
+<span class="n">Feb</span> <span class="mi">20</span> <span class="mi">08</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">01</span> <span class="n">kube</span> <span class="n">dockerd</span><span class="p">[</span><span class="mi">2010</span><span class="p">]:</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;2019-02-20T08:32:01.987747054+08:00&quot;</span> <span class="n">level</span><span class="o">=</span><span class="n">info</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;API listen on [::]:2375&quot;</span>
+<span class="n">Feb</span> <span class="mi">20</span> <span class="mi">08</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">01</span> <span class="n">kube</span> <span class="n">dockerd</span><span class="p">[</span><span class="mi">2010</span><span class="p">]:</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;2019-02-20T08:32:01.988023375+08:00&quot;</span> <span class="n">level</span><span class="o">=</span><span class="n">info</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;API listen on /var/run/docker.sock&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="docker">
+<h2>docker客户端远程连接测试<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h2>
+<p>现在可以在远程主机上使用如下命令语法来测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="o">-</span><span class="n">H</span> <span class="n">tcp</span><span class="p">:</span><span class="o">//&lt;</span><span class="n">your</span> <span class="n">host</span><span class="s1">&#39;s ip&gt;:2375 &lt;subcommand&gt;</span>
+</pre></div>
+</div>
+<p>举例，显示远程服务器上的镜像列表:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="o">-</span><span class="n">H</span> <span class="n">tcp</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">64.3</span><span class="p">:</span><span class="mi">2375</span> <span class="n">images</span>
+</pre></div>
+</div>
+<p>为了方便远程调试，也可以先创建 <code class="docutils literal notranslate"><span class="pre">DOCKER_HOST</span></code> 环境变量（这种方式在 <code class="docutils literal notranslate"><span class="pre">sudo</span></code> 方式执行docker不生效）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DOCKER_HOST</span><span class="o">=</span><span class="n">tcp</span><span class="p">:</span><span class="o">//&lt;</span><span class="n">your</span> <span class="n">host</span><span class="s1">&#39;s ip&gt;:2375</span>
+<span class="n">docker</span> <span class="o">&lt;</span><span class="n">subcommand</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>如果直接使用 <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> 作为绑定docker daemon的地址会存在安全隐患，所以这种远程访问配置仅适合在公司局域网内部使用。并且最好是有专用的私有管控网络接口，然后指定docker daemon只在指定的网络接口上打开TCP端口服务，这样可以提高安全性。</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="running-containers-as-daemons.html" class="btn btn-neutral float-right" title="将容器作为服务运行" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="building-a-docker-application.html" class="btn btn-neutral float-left" title="构建Docker应用程序" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; <a href="../../copyright.html">Copyright</a> 2019, Huatai Huang
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
