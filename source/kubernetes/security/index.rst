@@ -11,3 +11,4 @@ Kubernetes安全
    mutating_admission_webhook.rst
    validating_admission_webhook.rst
    kccss_kube-scan.rst
+   grafeas.rst

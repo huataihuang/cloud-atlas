@@ -8,6 +8,9 @@ Android 安装
    :maxdepth: 1
 
    lineageos_14.1_nexus_5.rst
+   lineageos_16_nexus_5.rst
+   android_10_pixel_xl.rst
+   disable_setupwizard.rst
 
 .. only::  subproject and html
 

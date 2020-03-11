@@ -10,6 +10,7 @@ Android Hack
    :maxdepth: 1
 
    android_sshd.rst
+   vpn_hotspot.rst
 
 .. only::  subproject and html
 
