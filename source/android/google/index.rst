@@ -1,17 +1,13 @@
-.. _redhat_linux:
+.. _android_google:
 
 =================================
-RedHat Linux
+Android的Google应用
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   upgrade_centos_7_to_8.rst
-   install_centos8.rst
-   admin/index
-   systemd/index
-   cgroup/index
+   google_play_music.rst
 
 .. only::  subproject and html
 

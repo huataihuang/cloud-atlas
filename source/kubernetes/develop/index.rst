@@ -8,4 +8,5 @@ Kubernetes开发
    :maxdepth: 2
 
    install_golang.rst
+   write_go.rst
 

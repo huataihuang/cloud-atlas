@@ -1,17 +1,13 @@
-.. _redhat_linux:
+.. _redhat_linux_cgroup:
 
 =================================
-RedHat Linux
+RedHat Linux 资源管理(cgroup)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   upgrade_centos_7_to_8.rst
-   install_centos8.rst
-   admin/index
-   systemd/index
-   cgroup/index
+   introduce_cgroup.rst
 
 .. only::  subproject and html
 

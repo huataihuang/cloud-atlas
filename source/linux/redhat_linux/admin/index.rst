@@ -1,17 +1,13 @@
-.. _redhat_linux:
+.. _redhat_linux_admin:
 
 =================================
-RedHat Linux
+RedHat Linux 系统管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   upgrade_centos_7_to_8.rst
-   install_centos8.rst
-   admin/index
-   systemd/index
-   cgroup/index
+   init_centos.rst
 
 .. only::  subproject and html
 
