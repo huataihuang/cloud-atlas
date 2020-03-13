@@ -80,6 +80,14 @@ macOS虚拟化的限制
 
    由于这个限制，我考虑在最新的macOS 10.15 发布之后，重新规划安装macOS+Linux实现双启动，以便在个人笔记本上构建完整的虚拟化系统。敬请期待!
 
+快捷键隐藏VMware窗口
+======================
+
+
+参考 `Is it possible to run VMware Fusion in the background to hide the windows and icons it produces? <https://apple.stackexchange.com/questions/68928/is-it-possible-to-run-vmware-fusion-in-the-background-to-hide-the-windows-and-ic/68941>`_
+
+在VMware Fusion窗口启动虚拟机之后，同时按下 ``Command+Option+Shift+Esc`` 可以关闭VMware窗口并且保持虚拟机在后台运行。非常赞的方法！
+
 参考
 ======
 

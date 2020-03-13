@@ -160,6 +160,11 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
 连接建立以后，就可以正常使用apt安装Google软件仓库中的软件。
 
+Cisco AnyConnect VPN Client
+=============================
+
+`Cisco AnyConnnect VPN Client <https://software.cisco.com/download/home/286281283/type/282364313/release/4.8.02045>`_ 和OpenConnect VPN Server (ocserv) 兼容，所以可以从Cisco官方网站下载客户端。
+
 参考
 =======
 

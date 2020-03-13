@@ -1,0 +1,21 @@
+.. _write_go:
+
+==============
+Go代码编写
+==============
+
+Go代码组织方法
+================
+
+Go程序通过包(packages)来组织代码。一个package只在相同目录下的一组源代码文件，这些源代码文件将一起编译。在一个源代码文件中的函数，类型，变量以及代码内容可以被同一个package中的所有其他源代码访问。
+
+.. note::
+
+   我理解package(相同目录)相当于一个作用域。
+
+一个仓库(repository)抱恨了一个或多个模块(module)。一个模块是一组相关Go package，将在一起发布。一个Go repository通常只包含一个模块，位于repository的根。有一个名为 ``go.mod`` 文件声明了模块路径，在模块中的所有package的import路径都包含了。
+
+参考
+========
+
+- `How to Write Go Code <https://golang.org/doc/code.html#Workspaces>`_
