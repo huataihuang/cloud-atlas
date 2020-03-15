@@ -14,7 +14,7 @@ Android 设备
    :maxdepth: 1
 
    nexus_5.rst
-   pixel_xl.rst
+   pixel.rst
 
 .. only::  subproject and html
 

@@ -9,6 +9,7 @@ Android Hack
 .. toctree::
    :maxdepth: 1
 
+   android_busybox.rst
    android_sshd.rst
    vpn_hotspot.rst
 
