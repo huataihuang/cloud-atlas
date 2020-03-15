@@ -8,6 +8,7 @@ Android 虚拟化
    :maxdepth: 1
 
    android_on_linux.rst
+   linux_on_android.rst
    archon.rst
    anbox.rst
 

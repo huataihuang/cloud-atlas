@@ -8,6 +8,7 @@ Alpine Linux
    :maxdepth: 1
 
    introduce_alpine.rst
+   init_alpine.rst
 
 .. only::  subproject and html
 

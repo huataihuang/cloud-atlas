@@ -109,6 +109,11 @@ create_ap
 
    这也是我 :ref:`android_10_pixel_xl` 时解决首次启动Android强制连接Google服务的方法。
 
+下一步
+=========
+
+我准备下次实践的时候不仅要解决DHCP分配地址问题，而且需要结合 FreeRADIUS 实现一个 `arch Linux 环境WPA2 Enterprise 部署 <https://wiki.archlinux.org/index.php/WPA2_Enterprise>`_ 。
+
 参考
 =======
 
