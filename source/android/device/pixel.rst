@@ -1,8 +1,10 @@
-.. _pixel_xl:
+.. _pixel:
 
-============
-Pixel XL
-============
+================
+Pixel和Pixel XL
+================
+
+Pixel和Pixel XL是Google推出的第一代Pixel手机设备，最早发布于
 
 
 

@@ -12,6 +12,9 @@ Android Hack
    android_busybox.rst
    android_sshd.rst
    vpn_hotspot.rst
+   androidscreencast.rst
+   android_usb_tethering.rst
+   reverse_tethering.rst
 
 .. only::  subproject and html
 
