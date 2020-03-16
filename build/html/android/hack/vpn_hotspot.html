@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
-    <link rel="next" title="Android 虚拟化" href="../virtual/index.html" />
+    <link rel="next" title="AndroidScreencast控制Android" href="androidscreencast.html" />
     <link rel="prev" title="Android SSH服务" href="android_sshd.html" /> 
 </head>
 
@@ -115,9 +115,13 @@
 <li class="toctree-l3"><a class="reference internal" href="android_sshd.html">Android SSH服务</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">VPN Hotspot</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id2">原理</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">使用VPN HotSpot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="androidscreencast.html">AndroidScreencast控制Android</a></li>
+<li class="toctree-l3"><a class="reference internal" href="android_usb_tethering.html">通过USB Tethering方式共享Android的Internet连接</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reverse_tethering.html">Android反向Tethering</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Android 虚拟化</a></li>
@@ -217,9 +221,49 @@
 <div class="section" id="id2">
 <h2>原理<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/Mygod/VPNHotspot">VPN Hotspot</a> 是一个开源共享VPN连接给hotspot或repeater的Android程序，不过运行需要root过的Android环境。可以从 <a class="reference external" href="https://labs.xda-developers.com/store/app/be.mygod.vpnhotspot">XDA labs的vpnhotspot</a> 下载，也可以直接从Goolge Play安装。</p>
+<p>VPN Hotspot程序默认设置是一种通用型并且最大兼容的设置，但是这个设置可能并没有为电池寿命做优化。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>共享热点也称为 <code class="docutils literal notranslate"><span class="pre">Tethering</span></code> 技术，特别是通过USB共享Internet连接，称为 <code class="docutils literal notranslate"><span class="pre">USB</span> <span class="pre">Tethering</span></code> 。不过，macOS默认没有包含Android USB Tethering驱动，所以在Android手机上激活USB Tethering后，通过USB连接到Mac电脑上是没有任何响应的，需要安装和设置 <a class="reference internal" href="android_usb_tethering.html#android-usb-tethering"><span class="std std-ref">通过USB Tethering方式共享Android的Internet连接</span></a> 驱动。</p>
+</div>
+<div class="section" id="upstream">
+<h3>Upstream<a class="headerlink" href="#upstream" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Upstream network interface: 在VPN Hotspot中主要的upstream是用于重路由数据流量的。如果保持空白则表示自动检测系统VPN(允许/在使用VPN时不允许绕过本程序)。如果设置为 <code class="docutils literal notranslate"><span class="pre">none</span></code> 就阻止绑定VPN</p></li>
+<li><p>Fallback upstream: Fallack upstream是用于某些VPN将一些失效路由返到默认网卡。如果该设置空白就表示自动检测。如果设置 <code class="docutils literal notranslate"><span class="pre">none</span></code> 就禁止 fallback。你可以设置一个接口</p></li>
+<li><p>IP Masquerade Mode:
+* <code class="docutils literal notranslate"><span class="pre">None</span></code> : 从downstream来的数据不做任何地址/端口重映射。这个选贤更可能在一些dummy VPN，如ad-blocker或者socksifiers(Shadowsocks)有用。但是如果你使用真正的VPN，如OpenVPN就不要使用这个选项。
+* <code class="docutils literal notranslate"><span class="pre">Simple</span></code> : 从downstream来的数据包的源地址和源端口被重映射
+* <code class="docutils literal notranslate"><span class="pre">Android</span> <span class="pre">Netd</span> <span class="pre">Service</span></code> (从Android 9开始提供) : 允许你的系统来处理masquerade。Android系统将做一些额外的事情，如FTP以及绑定流量计数器。在移动运营商网络上隐藏你的绑定操作就可能不会使用这个选项。</p></li>
+</ul>
+</div>
+<div class="section" id="downstream">
+<h3>Downstream<a class="headerlink" href="#downstream" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Disable IPv6 tethering: 启用这个选项禁止系统绑定IPv6。这可以阻止IPv6泄漏，因为当前程序不能处理IPv6 VPN 绑定</p></li>
+<li><p>(从Android 8.1开始)Tethering hardware acceleration: 这个功能是系统开发者模式的相同设置的快捷方式。为了让VPN绑在系统绑定上工作可能必须关闭这个选项，但是当绑定激活时候可能降低电池寿命</p></li>
+<li><p>Enable DHCP workaround: 只在VPN开启时设备无法获得客户端IP地址时使用。这是一个全局设置，也就是只能全局使用一次。</p></li>
+</ul>
+</div>
+<div class="section" id="misc">
+<h3>Misc<a class="headerlink" href="#misc" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Keep Wi-Fi alive: 当开启repeater, temporary hotspot 或 system VPN hotspot时，锁定Wi-Fi
+* 选择 <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">default</span></code> (从)</p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<h2>使用VPN HotSpot<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>如果是使用移动数据网络建立的VPN连接，则可以使用 <code class="docutils literal notranslate"><span class="pre">Wi-Fi</span> <span class="pre">Hotspot</span></code> 。但是，如果是已经在Wi-Fi网络上启用了VPN，就不可以使用 <code class="docutils literal notranslate"><span class="pre">Wi-Fi</span> <span class="pre">Hotspot</span></code> ，否则会导致VPN断开(因为无线网卡被改为AP热点导致直联的WLAN断开)</p></li>
+<li><p>通常有两步操作：
+* 启用 <code class="docutils literal notranslate"><span class="pre">Wi-Fi</span> <span class="pre">Hotspot</span></code> 或 <code class="docutils literal notranslate"><span class="pre">USB</span> <span class="pre">Tethering</span></code> 或 <code class="docutils literal notranslate"><span class="pre">Bluetooth</span> <span class="pre">Tething</span></code> ，也可以组合这几种Tethering设置。这是调用Android系统内建的Tethering设置。
+* 启用 VPN Sharing</p></li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.technadu.com/share-vpn-connection/38816/">How to Share Your VPN Connection? – Step-By-Step Guide Covering Windows, MacOS, Android &amp; iOS!</a></p></li>
 <li></li>
@@ -235,7 +279,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../virtual/index.html" class="btn btn-neutral float-right" title="Android 虚拟化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="androidscreencast.html" class="btn btn-neutral float-right" title="AndroidScreencast控制Android" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="android_sshd.html" class="btn btn-neutral float-left" title="Android SSH服务" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

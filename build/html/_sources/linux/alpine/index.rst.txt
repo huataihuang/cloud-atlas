@@ -9,6 +9,7 @@ Alpine Linux
 
    introduce_alpine.rst
    init_alpine.rst
+   alpine_apk.rst
 
 .. only::  subproject and html
 

@@ -19,6 +19,10 @@ Google Play Music for Chrome
 Google Music Manager
 =======================
 
+.. note::
+
+   我实践发现Google Music Manager现在已经无法登陆，即使已经按照错误提示确保了浏览器中Google Music已经登陆了相同的账号。估计Google是为了强制用户切换到自家的网上音乐商店，限制了个人自己上传下载音乐。所以，我放弃使用Google Music，改为采用VLC Player来播放音乐和视频。
+
 `Google Play Music Manager <https://play.google.com/music/listen?u=0#/manager>`_ 是Google开发的提供管理音乐的工具，并且可以在Windows, Mac和一些Linux发行版工作。只要通过Music Manager登陆了Google账号，就能够完成一些基本管理任务：
 
 - 从iTunes或Windows Media Player上传音乐，或者从特定目录上传音乐

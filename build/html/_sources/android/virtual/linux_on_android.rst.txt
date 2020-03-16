@@ -61,6 +61,8 @@ Deploy Linux账号密码重置
 
    adduser`` 添加的用户shell是 ``/system/bin/sh`` 实际是android系统的shell，需要修改成alpine的 ``/bin/sh`` 。
 
+不过，上述账号错误可能和执行安装时网络异常有关。我在较好的网络环境下再次验证安装，则非常顺利完成账号初始化。
+
 参考
 =======
 
