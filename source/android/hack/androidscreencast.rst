@@ -10,16 +10,79 @@ AndroidScreencast控制Android
 * 电脑屏幕可以放大显示，避免使用Android程序是过小的屏幕无法看清同事共享给你的屏幕
 * 如果你的Android已经root过，还能直接使用电脑的键盘鼠标操作Android，非常方便输入文字
 
+AndroidScreencast功能
+========================
+
+- 不需要在手机上安装客户端
+- 支持点击和滑动操作
+- 可以使用PC的键盘写消息
+- 支持横屏模式
+- 可以在PC上浏览手机文件
+- 在浏览时可以录制手机屏幕
+
 准备工作
 ===========
 
 * 下载安装 `Android SDK <http://developer.android.com/sdk/index.html>`_ ，由于我已经安装了 :ref:`android_develop_env` ，所以已经具备了Andorid SDK。你也可以单独下载SDK部分。
+  * 在 ``SDK Manager`` 中，只需要选择 ``Android SDK Platform-Tools`` 就可以满足运行需求
 * 下载 `AndroidScreencast官方仓库 <https://xsavikx.github.io/AndroidScreencast/>`_ 提供的JAR或安装包
 * 操作系统安装Java运行环境 - 在macOS中，在终端程序中执行 ``java version`` 命令，如果系统没有安装java会提示你直接从Oracle网站下载安装。
 
+连接好手机和主机，执行以下命令确保手机设备就绪::
 
+   adb devices
+
+可以看到输出::
+
+   List of devices attached
+   HT6C10200963    device   
+
+* 将下载的 ``androidscrencast.jnlp`` 复制到 ``android-sdk`` 目录，在macOS中，复制到 ``~/Library/Android/sdk/platform-tools/`` 目录下
+
+配置
+=======
+
+有两种方法运行应用:
+
+* 自己运行ADB服务器
+* 设置正确的 ``app.properties`` 文件
+
+自己运行ADB服务器
+-------------------
+
+* 首先确保主机已经安装好了 ``adb`` 然后使用以下命令运行服务器::
+
+   adb start-server
+
+.. note::
+
+   如果在 ``adb.path`` 中填写了 ``app.properties`` ，则 AndroidScreencast会在应用程序终止时也停止ADB server。例如，通过ssh forwarding方式使用远程ADB server，则建议不要使用 ``app.properties`` 或者将该配置文件中的 ``adb.path`` 属性注释掉。
+
+设置正确的 ``app.properties`` 文件
+------------------------------------
+
+为了正确运行应用，你需要在 ``app.properties`` 配置中指定正确的 ``adb.path`` ，例如::
+
+   #relative or absolute path to ADB
+   adb.path=/Users/huataihuang/Library/Android/sdk/platform-tools/adb
+
+此外， ``app.properties`` 配置还提供了一些有关设置应用程序特性的配置，如启动窗口大小，以及是否让应用运行类似 natively程序。
+
+JNLP
+========
+
+AndroidScreencast使用了Java web start技术，下载 `androidscreencast.jnlp <http://xsavikx.github.io/AndroidScreencast/jnlp/androidscreencast.jnlp>`_ 存放到 androidscreecast JAR文件相同目录下。
+
+* 在文件管理器中点击之心 ``androidscreencast.jnlp`` 就会启动AndroidScreencast运行程序。
+
+.. note::
+
+   我在macOS上运行 ``androidscreencast.jnlp`` 发现总是提示需要JRE运行环境，并引导我下载(访问到却是flash.cn网站，像是被劫持了域名)。但是实践发现，在macOS的为难管理器中，直接点解运行 androidscreencast.jar 也是能够正常工作的。
+
+   注意运行时，手机屏幕不能锁屏，否则Java应用的屏幕是完全空白的。手机解锁以后，就能够正常在Java应用页面看到屏幕输出。虽然有些延迟和缓慢，但是可以将这种方式作为投屏解决方案，引对一些屏幕比较静态的应用使用。
 
 参考
 ========
 
 - `How to Remote View and Control Your Android Phone <https://www.howtogeek.com/howto/42491/how-to-remote-view-and-control-your-android-phone/>`_
+- `AndroidScreencast GitHub网站 <https://github.com/xSAVIKx/AndroidScreencast>`_
