@@ -49,7 +49,18 @@ Misc
 --------
 
 * Keep Wi-Fi alive: 当开启repeater, temporary hotspot 或 system VPN hotspot时，锁定Wi-Fi
-  * 选择 ``System default`` (从)
+
+  * 选择 ``System default`` (从Android 10开始的默认设置)可以保护电池寿命
+  * 选择 ``On`` (针对Android 10)(默认)主要是在repeater/hotspot仅用了一会儿就自动关闭或停止工作时用来解决这个问题。
+  * 选择 ``Disable power save`` 是为了降低数据包延迟，例如在语音连接可能需要，或许可以提高通话质量。这个设置需要硬件支持，
+  * 选择 ``Low latency mode`` 是降低数据包延迟(从Android 10提供)，但是可能会导致以下问题:
+
+    * 降低电池寿命
+    * 降低带宽
+    * 降低Wi-Fi扫描频率 - 这可能导致设备移动或AP间切换的信号质量
+
+* Start repeater on boot
+* Network status monitor mode
 
 使用VPN HotSpot
 =========================
