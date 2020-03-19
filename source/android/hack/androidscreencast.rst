@@ -77,9 +77,24 @@ AndroidScreencast使用了Java web start技术，下载 `androidscreencast.jnlp 
 
 .. note::
 
-   我在macOS上运行 ``androidscreencast.jnlp`` 发现总是提示需要JRE运行环境，并引导我下载(访问到却是flash.cn网站，像是被劫持了域名)。但是实践发现，在macOS的为难管理器中，直接点解运行 androidscreencast.jar 也是能够正常工作的。
+   我在macOS上运行 ``androidscreencast.jnlp`` 发现总是提示需要JRE运行环境，并引导我下载(访问到却是flash.cn网站，像是被劫持了域名)。但是实践发现，在macOS的文件管理器中，直接点解运行 androidscreencast.jar 也是能够正常工作的。
 
    注意运行时，手机屏幕不能锁屏，否则Java应用的屏幕是完全空白的。手机解锁以后，就能够正常在Java应用页面看到屏幕输出。虽然有些延迟和缓慢，但是可以将这种方式作为投屏解决方案，引对一些屏幕比较静态的应用使用。
+
+.. figure:: ../../_static/android/hack/androidscreencast.png
+   :scale: 75
+
+AndroidScreencast使用场景
+==========================
+
+虽然AndroidScreencast看起来性能较差，使用体验不佳(毕竟没法在电脑上灵活使用手机屏幕的交互操作)，但是依然有一些特定场景非常有用：
+
+* 公司的商业VPN软件和视频会议系统没有对应的Linux版本，但是可以在Android手机上使用：通过AndroidScreencast可以把手机屏幕放大到电脑屏幕上，可以清晰看清视频会议的共享桌面进行协作
+* 在对外演示自己的Android上应用操作，可以通过电脑屏幕投影出来做演示，特别是一些会议投屏不支持手机直连，只能通过笔记本电脑输出。
+
+.. note::
+
+   结合 :ref:`vpn_hotspot` ，你可以随时随地移动办公 ^_^
 
 参考
 ========
