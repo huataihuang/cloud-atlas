@@ -65,13 +65,33 @@ Misc
 使用VPN HotSpot
 =========================
 
-* 如果是使用移动数据网络建立的VPN连接，则可以使用 ``Wi-Fi Hotspot`` 。但是，如果是已经在Wi-Fi网络上启用了VPN，就不可以使用 ``Wi-Fi Hotspot`` ，否则会导致VPN断开(因为无线网卡被改为AP热点导致直联的WLAN断开)
-* 通常有两步操作：
-  * 启用 ``Wi-Fi Hotspot`` 或 ``USB Tethering`` 或 ``Bluetooth Tething`` ，也可以组合这几种Tethering设置。这是调用Android系统内建的Tethering设置。
-  * 启用 VPN Sharing
+.. note::
+
+   如果是使用移动数据网络建立的VPN连接，则可以使用 ``Wi-Fi Hotspot`` 。但是，如果是已经在Wi-Fi网络上启用了VPN，就不可以使用 ``Wi-Fi Hotspot`` ，否则会导致VPN断开(因为无线网卡被改为AP热点导致直联的WLAN断开)
+
+通常有3步操作：
+
+* 启动VPN - 可以使用Cisco AnyConnect连接VPN，连接完成后，切换到VPN Hot Spot程序
+
+* 启用 ``Wi-Fi Hotspot`` 或 ``USB Tethering`` 或 ``Bluetooth Tething`` ，也可以组合这几种Tethering设置。这是调用Android系统内建的Tethering设置。
+
+.. figure:: ../../_static/android/hack/vpn_hotspot_1.png
+   :scale: 75
+
+这里点击 ``USB tethering`` 将转跳到系统设置 ``Hotspot & tethering`` 启动 :ref:`android_usb_tethering` :
+
+.. figure:: ../../_static/android/hack/vpn_hotspot_2.png
+   :scale: 75
+
+* 然后返回 VPN Hotspot 程序，可以看到此时不仅显示 ``USB tethering`` 已经激活，而且多出了一个 ``mdis0`` 设置(这个设置就是共享USB上网的upstream)，请激活 ``mdis0`` 接口:
+
+.. figure:: ../../_static/android/hack/vpn_hotspot_3.png
+   :scale: 75
+
+此时你就会发现你的电脑也能够和已经连接VPN的手机一样访问公司内网或者翻墙了。
 
 参考
 =====
 
 - `How to Share Your VPN Connection? – Step-By-Step Guide Covering Windows, MacOS, Android & iOS! <https://www.technadu.com/share-vpn-connection/38816/>`_
-- 
+- `VPN Hotspot <https://github.com/Mygod/VPNHotspot>`_

@@ -29,7 +29,7 @@
 
 .. note::
 
-   Linux诶和需要编译 ``USB Network Adapters`` 驱动支持，启用 ``Host for RNDIS and ActiveSync devices`` 才可以使用Android USB Tethering。请参考: `Gentoo linux - Android USB Tethering <https://wiki.gentoo.org/wiki/Android_USB_Tethering>`_
+   Linux内核需要编译 ``USB Network Adapters`` 驱动支持，启用 ``Host for RNDIS and ActiveSync devices`` 才可以使用Android USB Tethering。请参考: `Gentoo linux - Android USB Tethering <https://wiki.gentoo.org/wiki/Android_USB_Tethering>`_
 
 参考
 ======
