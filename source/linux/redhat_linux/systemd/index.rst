@@ -8,6 +8,8 @@ RedHat Linux Systemd管理
    :maxdepth: 1
 
    introduce_systemd.rst
+   systemd_rc_local.rst
+   systemd_dissuspend.rst
 
 .. only::  subproject and html
 
