@@ -38,6 +38,10 @@ systemd禁止笔记本suspend
 
    sudo sh -c 'vbetool dpms off; read ans; vbetool dpms on'
 
+.. note::
+
+   X图形界面下关闭屏幕使用 ``xset`` 工具实现，可以参考 `合上笔记本屏幕时关闭屏幕 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/redhat/system_administration/systemd/disable_screen_on_lid_close.md>`_ 的实践记录。
+
 # 参考
 
 * `How to disable auto suspend when I close laptop lid? <https://unix.stackexchange.com/questions/52643/how-to-disable-auto-suspend-when-i-close-laptop-lid>`_

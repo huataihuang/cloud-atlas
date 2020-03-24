@@ -16,6 +16,7 @@ Android Hack
    android_usb_tethering.rst
    reverse_tethering.rst
    pixel_volte.rst
+   android_proxy.rst
 
 .. only::  subproject and html
 
