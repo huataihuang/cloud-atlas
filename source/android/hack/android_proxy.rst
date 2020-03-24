@@ -67,6 +67,14 @@ Mobile Data Proxy
 .. figure:: ../../_static/android/hack/mobile_setup_proxy_4.png
    :scale: 50
 
+* 还有一步非常反直觉的设置：需要点击一下右上角的 ``...`` ，并选择菜单中的 ``save`` 保存一下配置才能生效：
+
+.. figure:: ../../_static/android/hack/mobile_setup_proxy_5.png
+   :scale: 50
+
+.. note::
+
+   如果在配置Mobile Data的Proxy之前已经建立了VPN连接，则Android App的数据不会使用这个新配置的Proxy。我验证发现，需要断开VPN，并重新连接VPN。则新连接VPN后的Android App才会使用Proxy。
 
 参考
 ======
