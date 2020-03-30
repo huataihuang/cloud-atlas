@@ -52,6 +52,7 @@ Squid快速起步
 - 对于使用了firewalld的防火墙主机，请设置允许访问端口 3128 ::
 
    firewall-cmd --zone=public --add-port=3128/tcp --permanent
+   firewall-cmd --reload
 
 参考
 ======

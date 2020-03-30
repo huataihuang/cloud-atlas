@@ -9,6 +9,7 @@ Squid代理服务
 
    introduce_squid.rst
    squid_startup.rst
+   squid_socks_peer.rst
 
 .. only::  subproject and html
 

@@ -7,6 +7,7 @@ Proxy代理服务
 .. toctree::
    :maxdepth: 1
 
+   pac.rst
    squid/index
    varnish/index
 

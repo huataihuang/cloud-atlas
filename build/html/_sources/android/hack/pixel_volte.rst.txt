@@ -60,6 +60,26 @@ Pixel 和 Pixel XL硬件上是支持VoLTE技术的(2016底年印度市场Pixel�
 
    上述方法是针对Pixel 2/2XL，我在Pixel XL上验证没有效果。原因是每款产品的配置文件目录实际是不同的，例如 Pixel 2 和 Pixel 2XL的运营商配置目录不同，相应的Pixel一代的运营商配置也有差异。
 
+在 ``/firmware/radio/modem_pr/mcfg/configs/mcfg_sw/generic/common/wildcard/wildcard`` 文件中有包含中国移动波段::
+
+      <!-- China LTE Bands: 1, 3, 5, 7, 8, 38, 39, 40, 41  -->
+      <rf_band_list name="china_bands">
+         <gw_bands base="hardware"/>
+         <lte_bands base="none">
+            <include> 0 2 4 6 7 37 38 39 40 </include>
+         </lte_bands>
+         <tds_bands base="hardware"/>
+      </rf_band_list>
+
+在安装了上述magisk的module之后 ``/sbin/.magisk/mirror/data`` 目录下可以找到 ``mcfg_sw`` 配置目录::
+
+   ./misc/radio/modem_config/mcfg_sw
+   ./misc/modem_config/mcfg_sw
+
+其中 ``/sbin/.magisk/mirror/data/misc/radio/modem_config/mcfg_sw/generic`` 目录下包含了 ``china`` 目录 以及 ``common`` 目录。
+
+更进一步可以看到 ``/sbin/.magisk/mirror/data/misc/radio/modem_config/mcfg_sw/generic/common/wildcard/wildcard/mcfg_sw.mbn`` 配置文件
+
 手工配置VoLTE
 ================
 
@@ -83,7 +103,14 @@ Pixel 和 Pixel XL硬件上是支持VoLTE技术的(2016底年印度市场Pixel�
    /data/misc/radio/modem_config/mcfg_sw/generic
    /firmware/radio/modem_pr/mcfg/configs/mcfg_sw/generic
 
-但是，其中后一个目录 ``/firmware/radio/modem_pr/mcfg/configs/mcfg_sw/generic`` 是系统目录，只读无法写入。所以推断应该将中国运营商的配置信息存放到 ``/data/misc/radio/modem_config/mcfg_sw/generic`` 目录下，在没有添加中国运营商配置信息之前，该目录下有5个子目录，分别代表欧洲、北美、亚太等5个地区::
+但是，其中后一个目录 ``/firmware/radio/modem_pr/mcfg/configs/mcfg_sw/generic`` 是系统目录，只读无法写入。
+
+参考 `pixel XL VOLTE求助 <http://bbs.gfan.com/android-9538649-1-1.html>`_ 有人提到 pixel的目录应该是这个 ``/firmware/radio/modem_pr/mcfg/configs/mcfg_sw/generic/common`` 
+
+但是如何写入这个目录是一个疑问？
+
+
+所以推断应该将中国运营商的配置信息存放到 ``/data/misc/radio/modem_config/mcfg_sw/generic`` 目录下，在没有添加中国运营商配置信息之前，该目录下有5个子目录，分别代表欧洲、北美、亚太等5个地区::
 
    apac aus common eu na
 
@@ -118,19 +145,50 @@ Pixel 和 Pixel XL硬件上是支持VoLTE技术的(2016底年印度市场Pixel�
 
 * 在 ``build.prop`` 文件中添加以下内容激活volte代码
 
-系统中哦那该有以下 build.prop ::
+常规是需要修改 ``/system/build.prop`` 配置的，但是在android 10中，默认不能读写根文件系统。并且以前采用的命令::
 
-   /vendor/odm/etc/build.prop
-   /vendor/build.prop
+   mount -o remount,rw /
 
-其中 ``/vendor/odm/etc/build.prop`` 是odm配置信息不要修改，修改 ``/vendor/build.prop`` 增加以下配置::
+会提示报错::
 
-   /data/local/busybox vi /vendor/odm/etc/build.prop
+   '/dev/root' is read-only
+
+解决方法是参考 `Android O, failed to mount /system, /dev/block/dm-0 is read only <https://android.stackexchange.com/questions/186630/android-o-failed-to-mount-system-dev-block-dm-0-is-read-only>`_ 执行::
+
+   adb root
+   adb disable-verity
+   adb reboot
+   adb remount
+   adb shell
+   mount -o rw,remount /system
+
+.. note::
+
+   需要注意，上述 ``adb disable-verity`` 只能在 ``userdebug`` builds使用，默认通过 ``cat /system/build.prop | grep build.type`` 可以看到::
+
+      ro.system.build.type=user
+      ro.build.type=user
+
+   这种user模式下，执行 ``adb disable-verity`` 会报错::
+
+      disable-verity only works for userdebug builds
+      verity cannot be disabled/enabled - USER build
+
+magisk提供了覆盖方法，在 ``/sbin/.magisk/`` 目录下搜索可以看到有如下配置::
+
+   ./mirror/vendor/odm/etc/build.prop
+   ./mirror/vendor/build.prop
+   ./mirror/system_root/system/product/build.prop
+   ./mirror/system_root/system/build.prop
+
+但是也不能修改(因为是软链接) ``./mirror/system_root/system/build.prop`` ::
 
    ro.mtk_ims_support=1                                
    ro.mtk_volte_support=1
    persist.mtk.volte.enable=1
    persist.dbg.volte_avail_ovr=1
+
+   # 可能只要添加以上4行就可以
    persist.dbg.ims_volte_enable=1
    persist.dbg.volte_avail_ovr=1
    persist.dbg.vt_avail_ovr=1
@@ -139,6 +197,12 @@ Pixel 和 Pixel XL硬件上是支持VoLTE技术的(2016底年印度市场Pixel�
    persist.radio.data_ltd_sys_ind=1
    persist.radio.data_con_rprt=1
    persist.radio.calls.on.ims=1
+
+.. warning::
+
+   非常失败，实际上没有搞定Android 10环境下激活Pixel的VoLTE，实在太折腾了。Pixel全系列不能在墙内使用VoLTE真是让人折磨死，即使后续各个版本，能够通过破解来激活VoLTE，但依然没有保障，任何升级都可能破坏激活。
+
+   看来，Pixel注定只能是移动终端兼备机角色了...
 
 参考
 ======

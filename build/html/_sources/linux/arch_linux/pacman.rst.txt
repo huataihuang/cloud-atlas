@@ -61,6 +61,10 @@ pacman简明使用
 
    pacman -Sc
 
+* 查询系统中安装的某个程序属于哪个软件包提供(这里举例查询netstat命令)::
+
+   pacmsn -Qo /usr/bin/netstat
+
 break dependency
 =================
 

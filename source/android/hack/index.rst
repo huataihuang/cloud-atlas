@@ -17,6 +17,9 @@ Android Hack
    reverse_tethering.rst
    pixel_volte.rst
    android_proxy.rst
+   android_pac.rst
+   android_monitor.rst
+   android_otg.rst
 
 .. only::  subproject and html
 
