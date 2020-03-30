@@ -1,15 +1,15 @@
-.. _proxy:
+.. _jetson:
 
 =================================
-Proxy代理服务
+NVIDIA Jetson系列
 =================================
+
+NVIDIA Jetson系列设备是用于AI开发的ARM+GPU设备。
 
 .. toctree::
    :maxdepth: 1
 
-   pac.rst
-   squid/index
-   varnish/index
+   jetson_nano.rst
 
 .. only::  subproject and html
 
