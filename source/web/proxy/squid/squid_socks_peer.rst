@@ -79,7 +79,7 @@ squid转发配置实例
 
 .. literalinclude:: squid_liberty.conf
    :linenos:
-   :caption: Squid Liberty
+   :caption: squid_liberty.conf - 添加到 /etc/squid/squid.conf
 
 参考
 =======
