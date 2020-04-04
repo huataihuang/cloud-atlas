@@ -212,6 +212,9 @@
 </ul>
 </div>
 <p>Squid提供了 <code class="docutils literal notranslate"><span class="pre">cache_peer</span></code> 配置parent proxies来请求内容，并且可以控制哪些内容可以直接获取或者间接使用 <code class="docutils literal notranslate"><span class="pre">always_direct</span></code> 或 <code class="docutils literal notranslate"><span class="pre">never_direct</span></code> 。</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../../_images/peering_basics.png"><img alt="../../../_images/peering_basics.png" src="../../../_images/peering_basics.png" style="width: 267.75px; height: 209.25px;" /></a>
+</div>
 <p>举例:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cache_peer</span> <span class="n">proxy</span><span class="o">.</span><span class="n">some</span><span class="o">-</span><span class="n">isp</span><span class="o">.</span><span class="n">com</span> <span class="n">parent</span> <span class="mi">8080</span> <span class="mi">0</span> <span class="n">no</span><span class="o">-</span><span class="n">query</span> <span class="n">no</span><span class="o">-</span><span class="n">digest</span>
 <span class="n">never_direct</span> <span class="n">allow</span> <span class="nb">all</span>
@@ -224,10 +227,82 @@
 <span class="n">cache_peer</span> <span class="n">proxy</span><span class="o">.</span><span class="n">isp3</span><span class="o">.</span><span class="n">com</span> <span class="n">parent</span> <span class="mi">8080</span> <span class="nb">round</span><span class="o">-</span><span class="n">robin</span> <span class="n">no</span><span class="o">-</span><span class="n">query</span>
 </pre></div>
 </div>
+<p>可以使用任意数量的层次级别代理，例如，以下案例中使用了6个sibling caches组成一个代理负载均衡:</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../../_images/squid_cluster_1x6.png"><img alt="../../../_images/squid_cluster_1x6.png" src="../../../_images/squid_cluster_1x6.png" style="width: 258.75px; height: 321.75px;" /></a>
+</div>
+<div class="section" id="sockssquid">
+<h2>通过socks转发访问父级squid代理<a class="headerlink" href="#sockssquid" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../../_images/squid-parent-proxy-server.png"><img alt="../../../_images/squid-parent-proxy-server.png" src="../../../_images/squid-parent-proxy-server.png" style="width: 412.5px; height: 135.0px;" /></a>
+</div>
+<p>本地局域网的squid代理提供了部分穿墙功能，但是也有部分site无法直接访问，所以在墙外再搭建一个squid代理。本地squid和墙外squid之间通过ssh tunnel连接 - 在 <code class="docutils literal notranslate"><span class="pre">INTERNAL</span> <span class="pre">PROXY</span></code> 上执行以下命令创建SSL TUNNEL:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">C</span> <span class="o">-</span><span class="n">L</span> <span class="mi">4128</span><span class="p">:</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">3128</span> <span class="o">&lt;</span><span class="n">REMOTE_SERVER</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后在墙外squid ( <code class="docutils literal notranslate"><span class="pre">EXTERNAL</span> <span class="pre">PROXY</span></code> ) 配置 <code class="docutils literal notranslate"><span class="pre">/etc/squid/squid.conf</span></code> 修改:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 仅提供本地回环地址服务，避免安全隐患</span>
+<span class="n">http_port</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">3128</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>通常parent proxy需要对child proxy做IP限制(上述因为是本地回环地址，所以可以忽略)，所以我们一般需要配置类似如下(假设child proxy的IP地址是 192.168.0.6 ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">acl</span> <span class="n">child_proxy</span> <span class="n">src</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">0.5</span><span class="o">/</span><span class="mi">32</span>
+<span class="n">http_access</span> <span class="n">allow</span> <span class="n">child_proxy</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>本地squid服务器 ( <code class="docutils literal notranslate"><span class="pre">INTERNAL</span> <span class="pre">PROXY</span></code> ) 配置指定部分站点使用父级代理:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">acl</span> <span class="n">free</span><span class="o">-</span><span class="n">internet</span> <span class="n">dstdomain</span> <span class="o">.</span><span class="n">i</span><span class="o">-</span><span class="n">want</span><span class="o">-</span><span class="n">access</span><span class="o">.</span><span class="n">com</span>
+<span class="n">cache_peer</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">parent</span> <span class="mi">4128</span> <span class="mi">0</span> <span class="n">no</span><span class="o">-</span><span class="n">query</span> <span class="n">default</span>
+<span class="n">never_direct</span> <span class="n">allow</span> <span class="n">free</span><span class="o">-</span><span class="n">internet</span>
+<span class="n">never_direct</span> <span class="n">deny</span> <span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>为了能够找出需要转发由parent proxy提供解析的域名，我采用了一个取巧的方法：在自己笔记本上使用 Firefox + SwitchyOmega 插件。这样，如果本地浏览器访问不了的域名，通过SwitchyOmega插件的 <code class="docutils literal notranslate"><span class="pre">auto</span> <span class="pre">switch</span></code> 功能就立即可以知道是哪个域名内容无法访问。则添加到 child proxy 的 <code class="docutils literal notranslate"><span class="pre">squid.conf</span></code> 配置acl中，转发到parent proxy处理。</p>
+<p>当然，你也可以在网上搜索PAC来进行参考添加。</p>
+</div>
+<div class="section" id="squid">
+<h3>squid转发配置实例<a class="headerlink" href="#squid" title="Permalink to this headline">¶</a></h3>
+<p>以下为实践配置，用于访问 twitter, facebook, wikipedia 等404网站，并不断更新:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Squid Liberty</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># twitter</span>
+<span class="n">acl</span> <span class="n">free</span><span class="o">-</span><span class="n">internet</span> <span class="n">dstdomain</span> <span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">com</span> <span class="o">.</span><span class="n">twimg</span><span class="o">.</span><span class="n">com</span> <span class="o">.</span><span class="n">branch</span><span class="o">.</span><span class="n">io</span>
+<span class="c1"># wikipedia</span>
+<span class="n">acl</span> <span class="n">free</span><span class="o">-</span><span class="n">internet</span> <span class="n">dstdomain</span> <span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span>
+<span class="c1"># facebook</span>
+<span class="n">acl</span> <span class="n">free</span><span class="o">-</span><span class="n">internet</span> <span class="n">dstdomain</span> <span class="o">.</span><span class="n">facebook</span><span class="o">.</span><span class="n">com</span> <span class="o">.</span><span class="n">fbcdn</span><span class="o">.</span><span class="n">net</span>
+<span class="n">cache_peer</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">parent</span> <span class="mi">4128</span> <span class="mi">0</span> <span class="n">no</span><span class="o">-</span><span class="n">query</span> <span class="n">default</span>
+<span class="n">never_direct</span> <span class="n">allow</span> <span class="n">free</span><span class="o">-</span><span class="n">internet</span>
+<span class="n">never_direct</span> <span class="n">deny</span> <span class="nb">all</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+</div>
 <div class="section" id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.christianschenk.org/blog/using-a-parent-proxy-with-squid/">Using a parent proxy with Squid</a></p></li>
+<li><p><a class="reference external" href="https://www.rootusers.com/configure-squid-proxy-to-forward-to-a-parent-proxy/">Configure Squid Proxy To Forward To A Parent Proxy</a></p></li>
 <li><p><a class="reference external" href="https://wiki.squid-cache.org/Features/CacheHierarchy">squid-cache wiki - Feature: Linking Squid into a Cache Hierarchy</a></p></li>
 <li><p><cite>Squid configuration directive cache_peer &lt;http://www.squid-cache.org/Doc/config/cache_peer/&gt;`_</cite></p></li>
 </ul>

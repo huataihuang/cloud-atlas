@@ -226,6 +226,19 @@ GitBook
 
 - 直接将内容推送到github仓库，并在gitbook官方网站上连接github仓库，就可以在推送github仓库时自动生成gitbook网站的书籍文档。
 
+Markdown和reStructuredText转换格式
+===================================
+
+同时使用gitbook和sphinx撰写文档就有一个困扰，两者使用的文档格式不同，有时候需要互相转换。这时候就需要强大的开源工具 ``pandoc`` 。
+
+首先通过Homebrew安装pandoc::
+
+   brew install pandoc
+
+然后就可以使用如下命令转换格式(案例是markdown转换成rst)::
+
+   pandoc --from=markdown --to=rst --output=README.rst README.md
+
 参考
 =========
 
@@ -233,3 +246,4 @@ GitBook
 - `在macOS上安装Python3 virtualenv <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/python/startup/install_python_3_and_virtualenv_on_macos.md>`_
 - `使用Sphinx撰写python文档 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/doc/sphinx/sphinx_for_python_doc.md>`_
 - `Arch Linux社区文档 - Python/Virtual environment <https://wiki.archlinux.org/index.php/Python/Virtual_environment>`_
+- `Converting Markdown to reStructuredText <https://bfroehle.com/2013/04/26/converting-md-to-rst/>`_

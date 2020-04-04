@@ -139,6 +139,15 @@ Pixel 和 Pixel XL硬件上是支持VoLTE技术的(2016底年印度市场Pixel�
 
 * 上述步骤完成以后，就会发现开启了工程模式查看 phone info 中，原先灰色的 ``VoLTE Provisioned`` 虽然还是灰色，但是灰色部分却显示为激活状态(虽然看上去不能调整)。这比之前始终灰色且关闭状态前进了一步。
 
+修改 build.prop
+================
+
+Andorid 6.0之后不能直接修改只读的 ``/system`` 分区，所以我们需要使用 ``systemless`` 方式的 :ref:`magisk` 来overlay修改系统配置。
+
+.. note::
+
+   我暂时还没有找到修订 build.prop 的方法，但是我觉得magisk通过overlay可以修订。此外，既然 一加3T 和 小米 5s 是和Pixel同样的CPU，应该可以借鉴他们的image来解决Pixel的VoLTE。我准备下载这两个国产手机的rom来找寻VoLTE配置。
+
 * (未找到该文件，没有执行)在gneric同级目录下有一个 ``oem-sw.txt`` 文件，在最后添加如下内容::
 
    mcfg_sw/generic/china/cmcc/commerci/volte_op/mcfg_sw.mbn

@@ -9,6 +9,8 @@ Android Hack
 .. toctree::
    :maxdepth: 1
 
+   magisk.rst
+   change_build_prop.rst
    android_busybox.rst
    android_sshd.rst
    vpn_hotspot.rst
