@@ -16,3 +16,4 @@ Kubernetes概念辨析
    storage/index
    configuration/index
    cluster_administration/index
+   scheduling/index

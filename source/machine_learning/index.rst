@@ -12,6 +12,7 @@ Machine Learning Atlas
    :maxdepth: 1
 
    deep_learning_hardware_guide.rst
+   jetson/index
    build_tensorflow_from_source.rst
    tensorflow_quickstart.rst
 

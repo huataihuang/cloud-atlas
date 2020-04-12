@@ -464,6 +464,35 @@ minikube btrfs安装排查
 
     这个报错是因为没有启动代理导致的，所以在执行 ``minikube dashboard`` 之前，需要先执行 ``kubectl proxy`` 指令，这样就能打开正确的监控页面。
 
+离线安装minikube
+===================
+
+通常我们安装minikube都是需要连接internet并且从google的仓库安装。但是有时候无法连接网络，需要离线在内网安装，则参考 `minikube install offline step by step <https://blog.zhoulouzi.com/2017/10/minikube/>`_ 实施安装：
+
+- kubectl 的二进制文件 官网下载 放到 ``/usr/local/bin/``
+- minikube 的二进制文件 官网下载放到 ``/usr/local/bin/`` 下
+- docker的离线安装包 docker 离线安装
+
+- minikube要跑起来所需要的docker镜像::
+
+   gcr.io/google_containers/kubernetes-dashboard-amd64 v1.6.3
+   gcr.io/google_containers/k8s-dns-sidecar-amd64 1.14.5
+   gcr.io/google_containers/k8s-dns-kube-dns-amd64 1.14.5
+   gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64 1.14.5
+   gcr.io/google-containers/kube-addon-manager v6.4-beta.2
+   gcr.io/google_containers/pause-amd64 3.0
+   docker image save 导出tar包，方便随时在离线环境使用
+
+- minikue.iso 下载地址：`minikube.iso <https://storage.googleapis.com/minikube/iso/minikube-v0.23.5.iso>`_
+
+- 执行以下命令启动::
+
+   /usr/local/bin/minikube start --vm-driver=none --iso-url file://tmp/minikube-v0.23.5.iso --kubernetes-version v1.7.5 --extra-config=apiserver.Service.NodePortRange=0-60000
+
+.. note::
+
+   目前我还没有实际验证，不过这个安装方法应该可行，有待遇到需要时实际验证再做调整优化。
+
 参考
 =====
 

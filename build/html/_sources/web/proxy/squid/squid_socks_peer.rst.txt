@@ -12,7 +12,6 @@ Squid父级socks代理
 
    * 在Squid服务器上直接使用 :ref:`openconnect_vpn` 会导致该服务器网络断开，目前我还没有找到解决的方法。
    * 我希望在Squid上实现 :ref:`pac` 以便仅仅做部分被墙掉的网站流量走加密代理
-     * 公司内部有专线提供了部分被墙网站的访问，但是有些必要网站依然需要梯子
 
 Squid提供了 ``cache_peer`` 配置parent proxies来请求内容，并且可以控制哪些内容可以直接获取或者间接使用 ``always_direct`` 或 ``never_direct`` 。
 

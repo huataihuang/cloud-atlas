@@ -57,7 +57,7 @@ create_ap
 
 - 基本的命令就可以配置一个NAT模式虚拟网络::
 
-   create_ap --hidden wlp3s0 enp0s25 MyAccessPoint MyPassPhrase
+   create_ap wlp3s0 enp0s25 MyAccessPoint MyPassPhrase
 
 .. note::
 
@@ -83,6 +83,21 @@ create_ap
    如果没有激活无线网卡，则运行 ``create_ap`` 会提示报错::
 
       RTNETLINK answers: Operation not possible due to RF-kill
+
+如果再次运行 ``create_ap`` 命令，有可能残留了进程锁文件，导致启动报错::
+
+   ERROR: Failed to initialize lock
+
+解决方法是删除锁::
+
+   rm /tmp/create_ap.all.lock
+
+如果你升级过内核，则可能会出现一个报错::
+
+   iptables v1.8.4 (legacy): unknown option "--to-ports"
+   Try `iptables -h' or 'iptables --help' for more information.
+
+需要重启一次系统来解决。
 
 综上，还可以添加 ``--hidden`` 设置隐藏但SSID::
 

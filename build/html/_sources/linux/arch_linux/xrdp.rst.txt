@@ -1,7 +1,7 @@
 .. _xrdp:
 
 ================
-xrdp远程桌面实践
+xrdp远程桌面
 ================
 
 xrdp是支持Microsoft的Remote Desktop Protocol(RDP)的服务，使用Xvnc, X11rdp 或 xorgxrdp 作为后端。
