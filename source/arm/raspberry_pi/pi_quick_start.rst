@@ -220,3 +220,4 @@
 =========
 
 - `How to give your Raspberry Pi a Static IP Address - UPDATE <https://www.modmypi.com/blog/how-to-give-your-raspberry-pi-a-static-ip-address-update>`_
+- `Raspberry Valley <https://raspberry-valley.azurewebsites.net/>`_ 提供了很多有价值的资料

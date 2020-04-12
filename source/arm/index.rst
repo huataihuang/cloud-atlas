@@ -9,7 +9,6 @@ ARM Atlas
 
    sdcard_speed_class.rst
    raspberry_pi/index
-   jetson/index
    pine/index
    openwrt/index
 

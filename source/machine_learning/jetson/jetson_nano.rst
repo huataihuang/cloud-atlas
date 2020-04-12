@@ -18,10 +18,10 @@ CPU        Quad-core ARM Cortex-A57 MPCore processor @1.43GHz
 USB        4x USB 3.0, USB 2.0 Micro-B
 ========== ===========================================================================
 
-.. figure:: ../../_static/arm/jetson/nvidia-jetson-nano-module-standing.jpg
+.. figure:: ../../_static/machine_learning/jetson/nvidia-jetson-nano-module-standing.jpg
    :scale: 50
 
-.. figure:: ../../_static/arm/jetson/nvidia-jetson-nano-dev-kit.png
+.. figure:: ../../_static/machine_learning/jetson/nvidia-jetson-nano-dev-kit.png
    :scale: 50
 
 .. note::
@@ -56,7 +56,7 @@ Jetson Nano对电源要求较高，特别是安装了外设之后，如果电量
 
 Jetson Nano开发版没有提供WiFi和蓝牙功能，不过支持通过M.2卡槽安装Intel Wireless-AC8265无线模块，加上无线天线，安装以后特别像无线路由器，确实也是非常Cool的解决方案。
 
-.. figure:: ../../_static/arm/jetson/jetson_shell.png
+.. figure:: ../../_static/machine_learning/jetson/jetson_shell.png
    :scale: 75
 
 参考
