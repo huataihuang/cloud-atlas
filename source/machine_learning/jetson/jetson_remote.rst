@@ -31,6 +31,12 @@ xrdp问题
 
 不过，我这个是没有外接显示器的直接网络远程登陆。在 `Issue with xrdp <https://forums.developer.nvidia.com/t/issue-with-xrdp/110654>`_ 提到，如果没有外接显示器，可能需要附加的配置。目前尚未解决。
 
+jetson中 ``/var/log/xrdp-sesman.log`` 日志显示似乎是window manager退出导致的::
+
+   [20200412-20:41:34] [INFO ] /usr/lib/xorg/Xorg :10 -auth .Xauthority -config xrdp/xorg.conf -noreset -nolisten tcp -logfile .xorgxrdp.%s.log
+   [20200412-20:41:35] [CORE ] waiting for window manager (pid 8421) to exit
+   [20200412-20:41:35] [CORE ] window manager (pid 8421) did exit, cleaning up session
+
 远程桌面VNC
 ===============
 

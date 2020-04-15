@@ -7,7 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
-   introduce_remote_desktop.rst
+   remote_desktop_classify.rst
    guacamole.rst
    spice.rst
 
