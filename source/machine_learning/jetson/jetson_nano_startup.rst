@@ -14,6 +14,19 @@ NVIDIA :ref:`jetson_nano` Developer Kit是一个小型AI计算机，面向创客
    unzip nv-jetson-nano-sd-card-image-r32.3.1.zip
    sudo dd if=sd-blob-b01.img of=/dev/rdisk2 bs=100m
 
+电源跳线
+===========
+
+Jetson Nano有3种供电方式：
+
+- 通过Micro-USB接口供电：这种USB供电可以提供 ``5V⎓2A`` 电力，通常对于不带附件的方式已经足够电力。可以很方便移动使用。
+
+- 独立外接电源： ``5V⎓4A`` 适合带动周边附件，例如，将Jetson Nano连接外接磁盘设备
+
+.. note::
+
+   主板上 J48 跳线是用来切换外接电源还是Micro-USB供电。默认是使用Micro-USB供电(跳线没有使用)，如果要使用外接电源，务必将该跳线连接上。
+
 初始化
 ========
 

@@ -1,7 +1,7 @@
-.. _introduce_remote_desktop:
+.. _remote_desktop_classify:
 
 ======================
-远程桌面简介
+远程桌面分类
 ======================
 
 软件分类
