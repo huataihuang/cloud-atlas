@@ -18,7 +18,6 @@ Python Atlas
    :maxdepth: 1
 
    python_doc.rst
-   django/index
 
 .. only::  subproject and html
 

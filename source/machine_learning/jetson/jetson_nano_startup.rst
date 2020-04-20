@@ -84,7 +84,7 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 
 .. note::
 
-   在国内访问NVIDIA的软件仓库非常缓慢，甚至无法连接。目前我采用的临时方法是翻墙，虽然速度缓慢，但是至少能够连接更新。有待寻找到更好的方法。
+   在国内访问NVIDIA的软件仓库非常缓慢，甚至无法连接。不过，在墙内现在VPN访问阻塞得非常严重，所以我采用 :ref:`linux_tether_vpn` 方式来加速软件更新。
 
 - 升级系统::
 
@@ -98,12 +98,21 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 瘦身
 ======
 
-NVIDIA Jetson nano的官方发行版默认安装了很多桌面软件，实际上对于我平时使用并没有用处。例如Office软件，所以我准备清理掉不需要的软件包::
+NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使用并没有用处的Office软件，所以我准备清理掉不需要的软件包::
 
-   sudo apt remove 
+   sudo apt remove --purge libreoffice* -y
+   sudo apt-get clean -y
+   sudo apt autoremove -y
+   sudo apt-get update
+
+远程访问
+===========
+
+虽然Jetson nano可以通过直接连接键盘鼠标和显示器进行操作，但是我更希望将这个设备作为远程访问的的边缘AI设备。所以， :ref:`jetson_remote` 可以方便我们以图形界面方式使用。
 
 参考
 ======
 
 - `Getting Started With Jetson Nano Developer Kit <https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit>`_
 - `Jetson Nano Developer Kit User Guide <https://developer.nvidia.com/embedded/dlc/jetson-nano-developer-kit-user-guide>`_
+- `Raspberry Valley: NVIDIA Jetson Nano <https://raspberry-valley.azurewebsites.net/NVIDIA-Jetson-Nano/>`_
