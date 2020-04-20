@@ -37,11 +37,15 @@ jetson中 ``/var/log/xrdp-sesman.log`` 日志显示似乎是window manager退出
    [20200412-20:41:35] [CORE ] waiting for window manager (pid 8421) to exit
    [20200412-20:41:35] [CORE ] window manager (pid 8421) did exit, cleaning up session
 
+`Raspberry Valley: NVIDIA Jetson Nano <https://raspberry-valley.azurewebsites.net/NVIDIA-Jetson-Nano/>`_ 提到了需要创建一个PolKit文件让用户能够执行指定操作，以避免一个常见的系统crash。不过，我没有遇到这个问题。我尝试在 ``/etc/group`` 的 ``xrdp`` 用户组添加自己的账号，也没有解决这个问题。
+
 远程桌面VNC
 ===============
+
+
 
 参考
 =======
 
 - `Getting Started with the NVIDIA Jetson Nano - Part 1: Setup <https://www.digikey.com/en/maker/projects/getting-started-with-the-nvidia-jetson-nano-part-1-setup/2f497bb88c6f4688b9774a81b80b8ec2>`_
-- `NVIDIA Jetson Nano <https://raspberry-valley.azurewebsites.net/NVIDIA-Jetson-Nano/>`_
+- `Raspberry Valley: NVIDIA Jetson Nano <https://raspberry-valley.azurewebsites.net/NVIDIA-Jetson-Nano/>`_

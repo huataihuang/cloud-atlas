@@ -1,7 +1,7 @@
-.. _redhat_linux_systemd:
+.. _systemd:
 
 =================================
-RedHat Linux Systemd管理
+Systemd管理
 =================================
 
 .. toctree::

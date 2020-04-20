@@ -51,7 +51,7 @@ Django开发环境
 
 - 安装我的常用开发依赖库：即编辑一个 ``requirements.txt`` 配置（通常可以在Django项目的目录下存放），这里和 :ref:`docker_compose_django` 共用 ``requirements.tst`` :
 
-.. literalinclude:: ../../docker/applications/requirements.txt
+.. literalinclude:: ../docker/applications/requirements.txt
    :language: bash
    :linenos:
 

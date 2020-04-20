@@ -32,7 +32,6 @@
    share_mouse_keyboard.rst
    firewalld.rst
    ipmitool_tips.rst
-   dnf.rst
    ip_command.rst
    win10_ssh_server.rst
    ssh_tunnel_gfw_autoproxy.rst

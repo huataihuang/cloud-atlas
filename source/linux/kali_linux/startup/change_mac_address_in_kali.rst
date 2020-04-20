@@ -72,6 +72,15 @@ Kali Linux伪装MAC地址
 
    service network-manager restart
 
-# 参考
+ubuntu macchanger
+===================
+
+在Ubuntu中，安装macchanger，则会提示
+
+.. figure:: ../../../_static/linux/kali_linux/startup/ubuntu_macchanger.png
+   :scale: 75
+
+参考
+=======
 
 - `Change Mac Address in Kali Linux(Permanently) <https://www.yeahhub.com/change-mac-address-kali-linux-permanently/>`_

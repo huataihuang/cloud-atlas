@@ -8,6 +8,7 @@ RedHat Linux 系统管理
    :maxdepth: 1
 
    init_centos.rst
+   dnf.rst
 
 .. only::  subproject and html
 

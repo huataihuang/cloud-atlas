@@ -6,6 +6,13 @@ DNF包管理器
 
 DNF是在基于RPM的Linux发布版本中提供软件包管理器，提供自动计算软件包依赖和安装卸载，并且容易维护服务器组。从Fedora 18开始，DNF被引入，并从Fedora 22开始成为默认包管理器，取代了YUM。由于Red Hat Enterprise Linux 8基于Fedora 28，将全面转向使用DNF管理RPM。
 
+.. note::
+
+   在 CentOS 8中检查 ``yum`` 命令，可以看到上是 ``dnf`` 命令的软链接::
+
+      $ ls -lh /usr/bin/yum
+      lrwxrwxrwx. 1 root root 5 Dec 19 23:43 /usr/bin/yum -> dnf-3
+
 DNF提供了YUM兼容的命令行以及为扩展和插件提供了精确的API。插件可以修改或者扩展DNF的功能或者提供附加的CLI命令。
 
 DNF从Yum分支出来，使用专注于性能的C语言库hawkey进行依赖关系解析工作，大幅度提升包管理操作效率并降低内存消耗。DNF替代Yum的原因如下：
