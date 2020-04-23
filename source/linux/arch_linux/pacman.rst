@@ -90,6 +90,27 @@ signature error
 
    pacman-key --refresh-keys
 
+conflicting files
+==================
+
+执行 ``pacman -Syu`` 提示报错::
+
+   error: failed to commit transaction (conflicting files)
+   nss: /usr/lib/p11-kit-trust.so exists in filesystem
+   Errors occurred, no packages were upgraded.
+
+这个问题参考 `archlinux - pacman <https://wiki.archlinux.org/index.php/Pacman>`_ 中 ``"Failed to commit transaction (conflicting files)" error`` 解决方法::
+
+   pacman -Qo /usr/lib/p11-kit-trust.so
+
+检查看看是否有软件包包含这个文件::
+
+   error: No package owns /usr/lib/p11-kit-trust.so
+
+然后将这个文件重命名::
+
+   sudo mv /usr/lib/p11-kit-trust.so /usr/lib/p11-kit-trust.so.bak
+
 参考
 =======
 
