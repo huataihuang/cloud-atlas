@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Docker网络 &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>配置Docker使用代理 &mdash; Cloud Atlas 0.1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="copyright" title="Copyright" href="../../copyright.html" />
-    <link rel="next" title="配置Docker使用代理" href="docker_proxy.html" />
-    <link rel="prev" title="添加host设备到容器" href="../storage/docker_run_add_host_device.html" /> 
+    <link rel="next" title="Docker GPU设备" href="../gpu/index.html" />
+    <link rel="prev" title="Docker网络" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -98,8 +98,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Docker 管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/index.html">Docker 环境运行应用程序案例</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Docker存储</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Docker网络</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="docker_proxy.html">配置Docker使用代理</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker网络</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">配置Docker使用代理</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dockerproxy">Docker客户端的Proxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Docker服务器Proxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">Docker GPU设备</a></li>
@@ -174,13 +179,15 @@
         
           <li><a href="../index.html">Docker Atlas</a> &raquo;</li>
         
-      <li>Docker网络</li>
+          <li><a href="index.html">Docker网络</a> &raquo;</li>
+        
+      <li>配置Docker使用代理</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/docker/network/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/docker/network/docker_proxy.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -194,10 +201,87 @@
            <div itemprop="articleBody">
             
   <div class="section" id="docker">
-<span id="docker-network"></span><h1>Docker网络<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+<span id="docker-proxy"></span><h1>配置Docker使用代理<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h1>
+<p>如果你也苦于GFW的阻塞，无法正常更新软件，或者下载Docker镜像，可以部署 <a class="reference internal" href="../../web/proxy/squid/index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 的 <a class="reference internal" href="../../web/proxy/squid/squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 来实现代理翻墙。</p>
+<div class="section" id="dockerproxy">
+<h2>Docker客户端的Proxy<a class="headerlink" href="#dockerproxy" title="Permalink to this headline">¶</a></h2>
+<p>Docker客户端支持使用代理服务器，主要有两种方式配置：</p>
+<ul class="simple">
+<li><p>从Docker 17.07和更高版本，可以配置 Docker可短自动传递代理信息给容器</p></li>
+<li><p>Docker 17.06或低版本，则需要在容器中设置相应的环境变量</p></li>
+</ul>
+<div class="section" id="id1">
+<h3>配置Docker客户端<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="docker_proxy.html">配置Docker使用代理</a></li>
+<li><p>在Docker客户端，创建或配置 <code class="docutils literal notranslate"><span class="pre">~/.docker/config.json</span></code> 设置以下json格式配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+ <span class="s2">&quot;proxies&quot;</span><span class="p">:</span>
+ <span class="p">{</span>
+   <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+   <span class="p">{</span>
+     <span class="s2">&quot;httpProxy&quot;</span><span class="p">:</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;httpsProxy&quot;</span><span class="p">:</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;noProxy&quot;</span><span class="p">:</span> <span class="s2">&quot;*.test.example.com,.example2.com&quot;</span>
+   <span class="p">}</span>
+ <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后创建的新容器，在容器中的环境变量会自动设置代理</p></li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h3>Docker客户端环境变量<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>可以在 dockerfile 中配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ENV</span> <span class="n">HTTP_PROXY</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span>
+<span class="n">ENV</span> <span class="n">HTTP_PROXY</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span>
+<span class="n">ENV</span> <span class="n">FTP_PROXY</span> <span class="s2">&quot;ftp://127.0.0.1:3001&quot;</span>
+<span class="n">ENV</span> <span class="n">NO_PROXY</span> <span class="s2">&quot;*.test.example.com,.example2.com&quot;</span>
+</pre></div>
+</div>
+<p>也可以在运行命令行使用参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">env</span> <span class="n">HTTP_PROXY</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:3001&quot;</span>
+<span class="o">--</span><span class="n">env</span> <span class="n">HTTPS_PROXY</span><span class="o">=</span><span class="s2">&quot;https://127.0.0.1:3001&quot;</span>
+<span class="o">--</span><span class="n">env</span> <span class="n">FTP_PROXY</span><span class="o">=</span><span class="s2">&quot;ftp://127.0.0.1:3001&quot;</span>
+<span class="o">--</span><span class="n">env</span> <span class="n">NO_PROXY</span><span class="o">=</span><span class="s2">&quot;*.test.example.com,.example2.com&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>Docker服务器Proxy<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>对于主机上的dockerd服务，在下载镜像等工作使用代理，则需要配置服务的环境变量。</p>
+<ul>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/docker.service.d/http-proxy.conf</span></code> 配置文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;HTTP_PROXY=http://user01:password@10.10.10.10:8080/&quot;</span>
+<span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;HTTPS_PROXY=https://user01:password@10.10.10.10:8080/&quot;</span>
+<span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;NO_PROXY= hostname.example.com,172.10.10.10&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重新加载配置并重启服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后检查加载的配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">show</span> <span class="n">docker</span> <span class="o">--</span><span class="nb">property</span> <span class="n">Environment</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Environment</span><span class="o">=</span><span class="n">GOTRACEBACK</span><span class="o">=</span><span class="n">crash</span> <span class="n">HTTP_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">10.10</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span> <span class="n">HTTPS_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">10.10</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span> <span class="n">NO_PROXY</span><span class="o">=</span> <span class="n">hostname</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="p">,</span><span class="mf">172.10</span><span class="o">.</span><span class="mf">10.10</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.docker.com/network/proxy/">Configure Docker to use a proxy server</a></p></li>
 </ul>
 </div>
 </div>
@@ -210,10 +294,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="docker_proxy.html" class="btn btn-neutral float-right" title="配置Docker使用代理" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../gpu/index.html" class="btn btn-neutral float-right" title="Docker GPU设备" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../storage/docker_run_add_host_device.html" class="btn btn-neutral float-left" title="添加host设备到容器" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Docker网络" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
