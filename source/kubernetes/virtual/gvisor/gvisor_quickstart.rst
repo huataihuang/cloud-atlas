@@ -85,6 +85,41 @@ bazel默认需要使用python3，而现在CentOS 8默认没有安装Python2/3，
 
 - gVisor官方文档提供了在 :ref:`ubuntu_linux` 环境通过软件仓库安装指南。
 
+配置Docker
+===========
+
+- 首先需要在Docker配置文件 ``/etc/docker/daemon.json`` (如果该配置文件不存在则创建它)中添加runtime内容::
+
+   {
+       "runtimes": {
+           "runsc": {
+               "path": "/usr/local/bin/runsc"
+           }
+       }
+   }
+
+- 重启docker::
+
+   sudo systemctl restart docker
+
+运行容器
+=========
+
+- 通过 ``--runtime=runsc`` 命令运行容器::
+
+   docker run --runtime=runsc --rm hello-world
+
+- 可以运行一个ubuntu系统::
+
+   docker run --runtime=runsc --rm -it ubuntu /bin/bash
+
+验证runtime
+=============
+
+- 可以通过 ``dmesg`` 命令验证运行了gVisor::
+
+   docker run --runtime=runsc -it ubuntu dmesg
+
 参考
 =======
 
