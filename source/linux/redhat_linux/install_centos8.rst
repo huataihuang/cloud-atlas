@@ -44,3 +44,11 @@ CentOS 8于2019年9月发布，标志着Red Hat社区进入了一个新的阶段
    huatai   ALL=(ALL:ALL) NOPASSWD:ALL
 
 - ``huatai`` 用户帐号修改uid为 ``501`` gid 为 ``20``
+
+- 安装必要初始软件包::
+
+   sudo dnf install gcc gcc-c++ git python3
+
+.. note::
+
+   在不同的编译安装环境，可能需要安装不同的软件包。我准备通过 :ref:`vmware_fusion_clone_vm` 创建不同的开发环境，例如 :ref:`gvisor_quickstart` 中安装编译开发环境。
