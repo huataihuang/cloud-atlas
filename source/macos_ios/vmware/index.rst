@@ -9,6 +9,7 @@ macOS平台VMware
 
    vmware_fusion.rst
    vmware_nested_virtual.rst
+   vmware_fusion_clone_vm.rst
 
 .. only::  subproject and html
 

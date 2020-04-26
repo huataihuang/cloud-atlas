@@ -36,6 +36,10 @@ RHEL/CentOS平台安装Docker
 
    sudo systemctl enable docker
 
+.. note::
+
+   :ref:`install_docker_centos8` 方法略有不同。
+
 Debian/Ubuntu平台安装Docker
 ===============================
 

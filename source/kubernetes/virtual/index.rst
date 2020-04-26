@@ -7,10 +7,11 @@ Kubernetes结合虚拟化
 Kubernetes结合虚拟化技术的实现：
 
 - katacontainer
-- nanovisor
+- gvisor
 - kubevirt
 
 .. toctree::
    :maxdepth: 1
 
+   gvisor/index
    kubevirt.rst
