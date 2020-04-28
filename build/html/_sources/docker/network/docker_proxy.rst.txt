@@ -53,6 +53,13 @@ Docker客户端环境变量
 Docker服务器Proxy
 ===================
 
+systemd配置Docker服务器Proxy
+--------------------------------
+
+.. warning::
+
+   配置Docker服务器使用Proxy是成功的，但是访问Docker Hub证书存在问题，见后文参考官方设置。
+
 对于主机上的dockerd服务，在下载镜像等工作使用代理，则需要配置服务的环境变量。
 
 - 创建 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` 配置文件::
@@ -75,7 +82,41 @@ Docker服务器Proxy
 
    Environment=GOTRACEBACK=crash HTTP_PROXY=http://10.10.10.10:8080/ HTTPS_PROXY=http://10.10.10.10:8080/ NO_PROXY= hostname.example.com,172.10.10.10
 
+Ubuntu配置Docker服务器Proxy
+-----------------------------
+
+.. note::
+
+   暂时没有环境验证，本段落待实践。
+
+在Ubuntu上配置Docker服务器Proxy非常简单，只需要编辑 ``/etc/default/docker`` ::
+
+   # If you need Docker to use an HTTP proxy, it can also be specified here.
+   export http_proxy="http://127.0.0.1:3128/"
+
+按照上述配置完成后重启::
+
+   sudo systemctl restart docker
+
+Docker官方解决方案
+--------------------
+
+参考 Docker官方文档 `Running a Docker daemon behind an HTTPS_PROXY <https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy>`_ 配置局域网在https代理后使用docker服务:
+
+- 安装 ``ca-certificates`` 软件包
+
+- 在 ``/etc/pki/tls/certs/ca-bundle.crt`` 中添加代理服务器证书
+
+- 启动 Docker 时使用参数 ``HTTPS_PROXY=http://username:password@proxy:port/``
+
+.. note::
+
+   这也是前述配置代理后出现证书错误的解决方法：需要在服务器上添加代理服务器证书
+
 参考
 ======
 
 - `Configure Docker to use a proxy server <https://docs.docker.com/network/proxy/>`_
+- `How to configure docker to use proxy <https://www.thegeekdiary.com/how-to-configure-docker-to-use-proxy/>`_
+- `Configure Docker to use a proxy server <https://docs.docker.com/network/proxy/>`_
+- Docker官方文档 `Running a Docker daemon behind an HTTPS_PROXY <https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy>`_

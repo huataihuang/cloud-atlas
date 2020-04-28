@@ -9,3 +9,5 @@ Kubernetes排查
 
    get_container_shell.rst
    get_container_logs.rst
+   kubelet_cert_expire.rst
+   apiserver_cert_expire.rst

@@ -13,12 +13,12 @@
 捐助方式
 =========
 
-.. image:: _static/donate_alipay.jpg
-   :scale: 70
+.. figure:: _static/donate_alipay.jpg
+   :scale: 60
 
 .. note::
 
    微信支付默认不显示转账者信息，请在转账留言中备注姓名或昵称，我好记在 :ref:`thanks` 页面中。
 
-.. image:: _static/donate_wx.jpg
-   :scale: 35
+.. figure:: _static/donate_wx.jpg
+   :scale: 30

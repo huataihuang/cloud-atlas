@@ -1,7 +1,7 @@
-.. _kubernetes_architecture:
+.. _kubernetes_components:
 
 ======================
-Kubernetes架构
+Kubernetes组件
 ======================
 
 Kubernetes Master

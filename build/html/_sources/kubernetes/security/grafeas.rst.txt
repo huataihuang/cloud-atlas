@@ -13,6 +13,8 @@ Grafeas元数据安全审计
 
    任何一个巨型软件公司都使用了大量的开源、商用以及自研软件，就好比组装iPhone是由全世界不同供应商提供的零部件，你需要完整跟踪整个供应链，以确保质量和安全性。
 
+   你可以将Grafeas+Kritis视为一个巨大的软件指纹库，来验证部署的源代码、软件状态、测试和安全记录。在InfoQ有一篇翻译介绍文章 `使用“Grafeas”元数据 API 和“Kritis”部署授权管理软件供应链 <https://www.infoq.cn/article/2018/05/grafeas-kritis-security>`_
+
 当你编写了代码，构建了镜像以及容器，并且测试和验证了二进制代码，然后通过QA测试最终部署到生产环境。这个过程由持续集成CI pipelines自动完成。你依然需要检查你的发布包中所包含的第三方依赖，因为你只控制了自己编写的程序代码部分，如果没有第三方依赖的功能、安全检查，你依然无法信任自己发布的软件包是安全可靠的。
 
 由于容器化部署带来的交付二进制包(包括Docker镜像)呈指数级增长，进一步扩大了上述安全隐患 - 你很难判断容器镜像内包含的多种语言的二进制包的质量信息以及安全漏洞信息。
@@ -60,6 +62,14 @@ Occurrences(存在)
 -------------------
 
 occurrence是note的执行实体(实例/instantiation)。occurrences描述了给定note的特定对象。例如，有关一个漏洞的note的occurrence将会描述在哪个软件包中发现漏洞，指定补救步骤(remediation steps)。或者，一个有关编译详情的note的occurrence会描述一个编译的生成的容器镜像。
+
+开源元数据API和审计平台Grafeas
+================================
+
+`开源元数据API和审计平台Grafeas <https://grafeas.io>`_ 可以审计完整的软件供应链。提供了API用于管理软件资源的元数据，例如容器镜像、虚拟机镜像、JAR文件和脚本。
+
+.. figure:: ../../_static/kubernetes/security/grafeas_architecture.png
+   :scale: 75
 
 参考
 ========
