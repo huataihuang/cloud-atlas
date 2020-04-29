@@ -9,3 +9,5 @@
 
    install_run_local_etcd.rst
    deploy_etcd_cluster.rst
+   etcd_tls
+   runtime_config_etcd.rst

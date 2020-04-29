@@ -10,12 +10,14 @@
 
    本文实践是开发测试环境单机运行，服务监听 127.0.0.1 端口，所以没有任何安全加密认证，仅供测试。
 
-Linux安装local etcd
+.. _install_etcd_linux:
+
+Linux安装etcd
 =====================
 
 - 执行以下安装::
 
-   ETCD_VER=v3.4.1
+   ETCD_VER=v3.4.7
 
    # choose either URL
    GOOGLE_URL=https://storage.googleapis.com/etcd
@@ -40,7 +42,7 @@ macOS安装local etcd
 
 - 执行以下安装::
 
-   ETCD_VER=v3.4.1
+   ETCD_VER=v3.4.7
 
    # choose either URL
    GOOGLE_URL=https://storage.googleapis.com/etcd

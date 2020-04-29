@@ -47,6 +47,31 @@ Ubuntu自带的Unity是一个深度定制的Gnome3环境，对于我来说使用
 
    sudo apt autoremove
 
+lightdm登陆
+------------
+
+lightdm登陆时，虽然密码输入正确，但是提示 ``Failed to start session`` ，不过 :ref:`jetson_remote` 还能够正常工作。
+
+移除xfce4
+============
+
+如果不再使用xfce4，则可以使用以下命令移除::
+
+   sudo apt purge xubuntu-icon-theme xfce4-*
+   sudo apt autoremove
+
+如果是通过 xubuntu-desktop 软件包安装Xfce，则使用如下命令移除::
+
+   sudo apt purge xubuntu-desktop xubuntu-icon-theme xfce4-*
+   sudo apt purge plymouth-theme-xubuntu-logo plymouth-theme-xubuntu-text
+   sudo apt autoremove
+
+此外可以反向把lightdm回退到gdm3::
+
+   sudo apt remove -y lightdm
+   sudo apt install --reinstall -y gdm3
+   sudo reboot
+
 参考
 =====
 
