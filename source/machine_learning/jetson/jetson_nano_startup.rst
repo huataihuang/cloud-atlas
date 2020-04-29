@@ -101,6 +101,7 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使用并没有用处的Office软件，所以我准备清理掉不需要的软件包::
 
    sudo apt remove --purge libreoffice* -y
+   sudo apt remove --purge thunderbird* -y
    sudo apt-get clean -y
    sudo apt autoremove -y
    sudo apt-get update

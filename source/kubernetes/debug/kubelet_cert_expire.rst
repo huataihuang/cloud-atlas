@@ -37,6 +37,8 @@ kubelet v1.11.0开始，支持 ``rotateCertificates: true`` ，默认开启支�
 
    systemctl restart kubelet
 
+不过，上述操作有可能并没有解决 kubelet-client-current.pem 问题，我查询到 `How to renew certificates on kubernetes 1.14.x <https://docs.wire.com/how-to/administrate/kubernetes/certificate-renewal/scenario-1_k8s-v1.14-kubespray.html>`_ 这个文档应该可以解决这个问题，但是操作比较复杂，需要线下演练。
+
 .. note::
 
    另外，如果apiserver服务器的证书过期，有一个解决方案 `how to renew the certificate when apiserver cert expired? #581 <https://github.com/kubernetes/kubeadm/issues/581>`_ 我准备在适当时候验证一下
