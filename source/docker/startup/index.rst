@@ -8,12 +8,13 @@ Docker 起步
    :maxdepth: 2
 
    introduce_docker.rst
-   docker_concept.rst
-   docker_infrastructure.rst
-   oci_pouch.rst
    install_docker_linux.rst
    install_docker_centos8.rst
    install_docker_macos.rst
+   docker_run.rst
+   docker_concept.rst
+   docker_infrastructure.rst
+   oci_pouch.rst
    docker_compose.rst
 
 .. only::  subproject and html

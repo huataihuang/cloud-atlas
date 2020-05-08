@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Polipo代理和YUM代理配置 &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>Polipo代理和YUM代理配置 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script type="text/javascript" src="../../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -34,9 +35,9 @@
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="copyright" title="Copyright" href="../../../copyright.html" />
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="搜索" href="../../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="Kernel Atlas" href="../../../kernel/index.html" />
     <link rel="prev" title="vpnc - Cisco VPN客户端" href="vpnc.html" /> 
 </head>
@@ -213,7 +214,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="polipoyum">
-<span id="polipo-proxy-yum"></span><h1>Polipo代理和YUM代理配置<a class="headerlink" href="#polipoyum" title="Permalink to this headline">¶</a></h1>
+<span id="polipo-proxy-yum"></span><h1>Polipo代理和YUM代理配置<a class="headerlink" href="#polipoyum" title="永久链接至标题">¶</a></h1>
 <p>在部署 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 时我们需要使用 <a class="reference internal" href="openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 来搭建翻墙的梯子，以便能够从Google仓库安装Kubernetes。这在最初 <a class="reference internal" href="../../../studio/kvm_docker_in_studio.html#kvm-docker-in-studio"><span class="std std-ref">Studio环境KVM和Docker</span></a> 模拟构建使用 <a class="reference internal" href="../../../kvm/libvirt/network/libvirt_nat_network.html#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> 是可行的：</p>
 <ul class="simple">
 <li><p>在物理主机上使用openconnect打通VPN</p></li>
@@ -226,7 +227,7 @@
 <li><p>配置所有部署Kubernetes的主机YUM使用polipo代理访问Internet进行软件包安装</p></li>
 </ul>
 <div class="section" id="polipo">
-<h2>Polipo<a class="headerlink" href="#polipo" title="Permalink to this headline">¶</a></h2>
+<h2>Polipo<a class="headerlink" href="#polipo" title="永久链接至标题">¶</a></h2>
 <p><a class="reference external" href="http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/">Polipo代理服务器</a> 是一个非常小巧快速的缓存型web代理服务器。虽然Polipo被设计成个人或者小型团队私用，但是也可以用于大型组织。</p>
 <p>Polipo具有以下一些特点：</p>
 <ul class="simple">
@@ -239,13 +240,13 @@
 <li><p>Polipo支持简单的过滤，可以用来移除一些广告和增加私密性。</p></li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p><code class="docutils literal notranslate"><span class="pre">pipelining</span></code> - 使用持久化连接时，有可能转换成管道化或流化请求，例如，在一个连接中发送多个请求而不用等待请求返回。这种技术使得服务器更快响应减少延迟。另外，由于多个请求在一个数据包中发送，管道化减少网络流量。管道化已经是一种常用技术，但是HTTP 1.0不支持管道化。HTTP 1.1在使用持久化连接的服务器实现要求管道化支持，但是有些存在bug的服务器虽然声称自己支持HTTP/1.1但却不支持管道化。Polipo会小心地侦测服务器是否支持管道化，如果确认服务器支持就会启用管道化。</p>
 <p><code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">segement</span></code> - 一个部分会话表示会话只有部分被缓存在本地缓存中。有三种方式会导致部分会话：客户端只请求会话的一部分（如Adobe Acrobat Reader插件），服务器端在传输中途丢弃连接（如服务器缺少资源，或者存在bug），客户端丢弃连接（例如用户点击停止）。当一个会话只有部分缓存，它仍然可以使用HTTP的称为 <code class="docutils literal notranslate"><span class="pre">range</span></code> 请求来请求缺失部分的数据。Polipo缓存部分会话在内存中，只存储部分会话的initial分片在磁盘缓存，然后会尝试使用 <code class="docutils literal notranslate"><span class="pre">range</span></code> 请求来获取缺失部分。</p>
 </div>
 </div>
 <div class="section" id="id2">
-<h2>安装Polipo<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>安装Polipo<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>从Git软件仓库扩取源代码:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jech</span><span class="o">/</span><span class="n">polipo</span><span class="o">.</span><span class="n">git</span>
@@ -270,13 +271,13 @@
 </ul>
 </div>
 <div class="section" id="id3">
-<h2>使用Polipo<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<h2>使用Polipo<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>polipo默认启动只监听 <code class="docutils literal notranslate"><span class="pre">127.0.0.1:8123</span></code> ，这样可以防止被非法利用。如果要对外提供服务监听所有接口:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">polipo</span> <span class="n">proxyAddress</span><span class="o">=</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span>
 </pre></div>
 </div>
 <div class="section" id="systemdpolipo">
-<h3>设置systemd启动polipo<a class="headerlink" href="#systemdpolipo" title="Permalink to this headline">¶</a></h3>
+<h3>设置systemd启动polipo<a class="headerlink" href="#systemdpolipo" title="永久链接至标题">¶</a></h3>
 <p>参考 <a class="reference external" href="https://linuxconfig.org/how-to-create-systemd-service-unit-in-linux">How to create systemd service unit in Linux</a></p>
 <ul>
 <li><p>配置 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system/polipo.service</span></code></p>
@@ -316,7 +317,7 @@
 </li>
 </ul>
 <div class="section" id="unit-not-found">
-<h4>‘Unit not found’错误排查<a class="headerlink" href="#unit-not-found" title="Permalink to this headline">¶</a></h4>
+<h4>‘Unit not found’错误排查<a class="headerlink" href="#unit-not-found" title="永久链接至标题">¶</a></h4>
 <p>最初我配置 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system/polipo.service</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Unit</span><span class="p">]</span>
 <span class="n">Description</span><span class="o">=</span><span class="n">Polipo</span> <span class="n">Proxy</span>
@@ -373,7 +374,7 @@
 </div>
 </div>
 <div class="section" id="yum">
-<h2>YUM使用代理<a class="headerlink" href="#yum" title="Permalink to this headline">¶</a></h2>
+<h2>YUM使用代理<a class="headerlink" href="#yum" title="永久链接至标题">¶</a></h2>
 <p>YUM可以通过通过设置环境变量来使用代理安装软件包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">http_proxy</span><span class="o">=</span><span class="s2">&quot;http://PROXY_IP:8123&quot;</span>
 <span class="n">yum</span> <span class="n">upgrade</span>
@@ -390,7 +391,7 @@
 </div>
 </div>
 <div class="section" id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/polipo.html">The Polipo Manual</a></p></li>
 </ul>

@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Studio环境的LVM+XFS存储 &mdash; Cloud Atlas 0.1 documentation</title>
+  <title>Studio环境的LVM+XFS存储 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -25,6 +25,7 @@
         <script type="text/javascript" src="../../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script type="text/javascript" src="../../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -34,9 +35,9 @@
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="copyright" title="Copyright" href="../../../copyright.html" />
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="搜索" href="../../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="XFS性能优化" href="xfs_tunning.html" />
     <link rel="prev" title="XFS文件系统" href="xfs.html" /> 
 </head>
@@ -216,16 +217,16 @@
            <div itemprop="articleBody">
             
   <div class="section" id="studiolvm-xfs">
-<span id="lvm-xfs-in-studio"></span><h1>Studio环境的LVM+XFS存储<a class="headerlink" href="#studiolvm-xfs" title="Permalink to this headline">¶</a></h1>
+<span id="lvm-xfs-in-studio"></span><h1>Studio环境的LVM+XFS存储<a class="headerlink" href="#studiolvm-xfs" title="永久链接至标题">¶</a></h1>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p>最初我选择 <a class="reference internal" href="btrfs_in_studio.html#btrfs-in-studio"><span class="std std-ref">Studio环境的Btrfs存储</span></a> ，主要考虑到Btrfs文件系统接近ZFS的特性，结合了卷管理和文件系统的高级特性，灵活并且充分利用好磁盘空间。在 <a class="reference internal" href="../../ubuntu_linux/ubuntu_on_mbp.html#ubuntu-on-mbp"><span class="std std-ref">MacBook Pro上运行Ubuntu</span></a> 采用Btrfs构建libvirt卷和Docker卷，确实非常方便管理和维护。</p>
 <p>不过， <a class="reference internal" href="../../arch_linux/archlinux_on_thinkpad_x220.html#archlinux-on-thinkpad-x220"><span class="std std-ref">ThinkPad X220上运行Arch Linux</span></a> 实践中，我为了体验技术，启用了Btrfs的磁盘透明压缩功能。这次尝试似乎带来了不稳定的因素，Btrfs出现csum错误。目前我还不确实是否是因为SSD磁盘存在硬件故障。</p>
 <p>从Red Hat Enterprise Linux 8开始，Red Hat放弃了Btrfs支持，这对于企业运行RHEL/CentOS环境，实际上已经变相阻止了Btrfs。原因可能比较复杂，一方面是Btrfs的高级特性(如RAID)一直不稳定，另一方面可能和Oracle和Red Hat的存储竞争策略冲突相关。</p>
 <p>Red Hat Enterprise Linux推荐的默认文件系统是XFS，XFS文件系统是数据库本地磁盘首选的文件系统。</p>
 </div>
 <div class="section" id="id1">
-<h2>方案选择<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>方案选择<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>存储分区需要能够灵活调整，所以需要采用LVM卷管理来划分磁盘分区</p></li>
 <li><p>需要有高性能文件系统，对SSD存储优化，并适合大型应用运行</p></li>
@@ -233,7 +234,7 @@
 <p>LVM + XFS是适合数据库应用运行的Linux存储组合，并且也是Red Hat主推的用于取代ZFS和Btrfs的 <a class="reference external" href="https://stratis-storage.github.io/">Stratis项目</a> 底层技术堆栈。所以，我选择这个存储技术组合。</p>
 </div>
 <div class="section" id="lvm">
-<h2>LVM卷管理<a class="headerlink" href="#lvm" title="Permalink to this headline">¶</a></h2>
+<h2>LVM卷管理<a class="headerlink" href="#lvm" title="永久链接至标题">¶</a></h2>
 <p>逻辑卷管理(Logical Volume Management)工具使用了内核 <a class="reference internal" href="../../../kernel/admin/device_mapper.html#device-mapper"><span class="std std-ref">Device Mapper</span></a> 功能来提供系统分区无关的底层磁盘布局。通过LVM抽象存储就能够获得”虚拟分区”，已及方便的扩展和收缩功能。</p>
 <p>虚拟分区允许添加或移除一个分区的底层磁盘，这样就无需担忧磁盘空间不足。</p>
 <p>LVM构建基础概念:</p>
@@ -244,7 +245,7 @@
 <li><p>物理扩展(Physical extent): 物理扩展PE时在PV上的最小连续扩展(默认4MB)，可以分配给LV，你可以将PE视为PV的一部分，被分配给LV。</p></li>
 </ul>
 <div class="section" id="id2">
-<h3>安装软件包<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<h3>安装软件包<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>安装 <code class="docutils literal notranslate"><span class="pre">lvm2</span></code> 软件包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">lvm2</span>
@@ -254,7 +255,7 @@
 </ul>
 </div>
 <div class="section" id="id3">
-<h3>创建分区<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<h3>创建分区<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>使用parted划分分区，参数采用 <code class="docutils literal notranslate"><span class="pre">--align</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
@@ -294,7 +295,7 @@
 <p>以上分区3将作为数据存储的LVM卷。对于修改系统磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 分区，则建议重启一次操作系统以便刷新。或者通过 <code class="docutils literal notranslate"><span class="pre">partprobe</span></code> 刷新分区。</p>
 </div>
 <div class="section" id="id4">
-<h3>创建物理卷<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<h3>创建物理卷<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>初始化物理卷:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
@@ -303,7 +304,7 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p>如果有多个设备，可以一起初始化，例如:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdd1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdf1</span>
 </pre></div>
@@ -332,7 +333,7 @@
 </div>
 </div>
 <div class="section" id="id5">
-<h3>卷组管理<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<h3>卷组管理<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在物理卷上构建卷组:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vgcreate</span> <span class="n">store</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
@@ -341,7 +342,7 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p>这里将卷组命名为 <code class="docutils literal notranslate"><span class="pre">store</span></code></p>
 <p>当物理卷用于创建卷组的时候，它的磁盘空间默认被划分为以4MB为单位的 <code class="docutils literal notranslate"><span class="pre">extent</span></code> 。这个 <code class="docutils literal notranslate"><span class="pre">extent</span></code> 是用于逻辑卷增长和缩减的最小大小。 <code class="docutils literal notranslate"><span class="pre">extent</span></code> 的数量不会影响逻辑卷的I/O性能。</p>
 </div>
@@ -354,7 +355,7 @@
 </ul>
 </div>
 <div class="section" id="id6">
-<h3>逻辑卷<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<h3>逻辑卷<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">store</span></code> 卷组上创建 <code class="docutils literal notranslate"><span class="pre">home</span></code> 逻辑卷:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvcreate</span> <span class="o">-</span><span class="n">L</span> <span class="mi">100</span><span class="n">G</span> <span class="o">-</span><span class="n">n</span> <span class="n">home</span> <span class="n">store</span>
@@ -390,7 +391,7 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p><a class="reference internal" href="../../../docker/storage/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 是Docker持久化数据的存储共享卷，单独划分 <code class="docutils literal notranslate"><span class="pre">store</span></code> 存储，可以在这个存储下构建不同的隔离目录给Docker共享。</p>
 <p>Docker支持quota可以用来限制容器可用空间，如果要强制隔离，则可以利用LVM卷来实现。</p>
 <p>详细的 <code class="docutils literal notranslate"><span class="pre">store</span></code> 卷部署使用请参考 <a class="reference internal" href="../../../docker/storage/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 和 <a class="reference internal" href="../../../docker/administer/build_image_from_dockerfile.html#build-image-from-dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中配置Docker使用共享卷部分。</p>
@@ -398,9 +399,9 @@
 </div>
 </div>
 <div class="section" id="xfs">
-<h2>XFS<a class="headerlink" href="#xfs" title="Permalink to this headline">¶</a></h2>
+<h2>XFS<a class="headerlink" href="#xfs" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p>详细XFS相关请参考 <a class="reference internal" href="xfs.html#xfs"><span class="std std-ref">XFS文件系统</span></a> 和 <a class="reference internal" href="xfs_tunning.html#xfs-tunning"><span class="std std-ref">XFS性能优化</span></a></p>
 </div>
 <ul>
@@ -419,7 +420,7 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p><a class="reference internal" href="../../../docker/storage/docker_overlay_driver.html#docker-overlay-driver"><span class="std std-ref">Docker OverlayFS存储引擎</span></a> 要求 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 文件系统启用 <code class="docutils literal notranslate"><span class="pre">d_type=true</span></code> 选项，也就是 <code class="docutils literal notranslate"><span class="pre">xfs_info</span></code> 检查文件系统输出信息中有 <code class="docutils literal notranslate"><span class="pre">ftype=1</span></code> 。现代XFS文件系统默认都启用了 <code class="docutils literal notranslate"><span class="pre">ftype=1</span></code> 。</p>
 </div>
 <ul>
@@ -441,12 +442,12 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
+<p class="admonition-title">注解</p>
 <p>实际我的操作是采用root用户登陆后，将上述两个XFS文件系统先挂载到临时目录下，将数据迁移到新建的XFS文件系统中，然后再切换目录挂载来完成的。请参考 <a class="reference internal" href="../../../appendix/using_btrfs_in_studio.html#using-btrfs-in-studio"><span class="std std-ref">在Studio中使用btrfs文件系统</span></a> 中切换 libvirt 目录到btrfs文件系统步骤。</p>
 </div>
 </div>
 <div class="section" id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/LVM">Arch Linux社区文档 - LVM</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/XFS">Arch Linux社区文档 - XFS</a></p></li>

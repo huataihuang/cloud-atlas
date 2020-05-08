@@ -39,7 +39,7 @@ Kubernetes Nodes概念
 
 Pod总是运行在Node上。所谓Node就是在Kubernetes集群中的工作服务器，可以是虚拟机也可以是物理服务器。所有的Node节点都是由Master管理的。一个Node节点可以运行多个Pods，并且Kubernetes master会自动处理调度，以便将pods分布到整个集群。Master自动调度任务会对每个节点的可用资源进行记账。
 
-每个Kubernetes Node极少具有:
+每个Kubernetes Node至少具有:
 
 - Kubelet: 负责在Kubernetes Master和Node之间通讯，负责管理主机上的Pod和容器。
 - 一个容器运行时（container runtime)，例如 Docker, rkt : 负责从镜像中心（registry）拉取容器镜像，解包容器，并运行应用程序

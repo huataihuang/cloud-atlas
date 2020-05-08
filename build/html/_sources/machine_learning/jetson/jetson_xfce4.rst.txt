@@ -52,6 +52,34 @@ lightdm登陆
 
 lightdm登陆时，虽然密码输入正确，但是提示 ``Failed to start session`` ，不过 :ref:`jetson_remote` 还能够正常工作。
 
+导致 lightdm 无法登陆xfce4桌面的解决方法参考 `How to solve ‘Failed to start session’ with LightDM and Xfce <https://cialu.net/how-to-solve-failed-to-start-session-with-lightdm-and-xfce/>`_ ，原因是一些错误配置文件导致的，主要发生在Ubuntu Server上安装Xfce或者在Ubuntu上从一个旧的桌面版本切换到奥Xfce会话。
+
+.. note::
+
+   Ubuntu的LightDM是为Unity配置的，所以需要特别为Xfce配置LightDM。
+
+- 删除 Unity配置文件::
+
+   rm /usr/share/lightdm/lightdm.conf.d/50-unity-greeter.conf
+
+- 为LightDM创建Xfce配置文件 ``/usr/share/lightdm/lightdm.conf.d/50-xfce-greeter.conf`` 内容如下::
+
+   [SeatDefaults]
+   greeter-session=unity-greeter
+   user-session=xfce
+
+然后重启系统
+
+.. note::
+
+   使用lightdm，登陆桌面以后，观察 ``top`` 输出，我发现 ``/usr/sbin/unity-greeter`` 占用内存居然有105MB(lightdm)，占用了实际使用内存的1/7，让我非常无语。如果不是为了远程访问xrdp，或许还是从字符终端直接使用 ``startx`` 启动桌面比较节约内存。
+
+- 如果希望禁止guest用户登陆并且启用自动登陆选项，添加以下行::
+
+   allow-guest=false
+   autologin-user=<your-username>
+   autologin-user-timeout=0
+
 移除xfce4
 ============
 
@@ -72,8 +100,36 @@ lightdm登陆时，虽然密码输入正确，但是提示 ``Failed to start ses
    sudo apt install --reinstall -y gdm3
    sudo reboot
 
+中文输入
+==========
+
+默认安装的Xfce4已经很好显示中文，字体也非常美观。和 :ref:`xfce` 一样安装fcitx中文输入法::
+
+   #apt install fcitx fcitx-sunpinyin
+   apt install fcitx-bin fcitx-googlepinyin
+
+进入xfce4桌面，在终端运行 ``fcitx-configtool`` 命令提示输出::
+
+   fcitx-configtool
+
+在 ``Input Method Configuration`` 中点击 ``+`` 添加输入方法，注意需要去除 ``Only Show Current Language`` 的勾选，然后就可以选择 ``Google Pinyin`` 
+
+- 传统的 ``fcitx`` 的图标比较简陋，可选安装新的UI::
+
+   # Remove classic UI
+   sudo apt remove fcitx-ui-classic
+   # Install new UI
+   sudo apt install fcitx-ui-qimpanel
+
+- 需要修改 ``XMODIFIERS`` ，即在 ``~/.xinitrc`` 添加::
+
+   export GTK_IM_MODULE=fcitx
+   export QT_IM_MODULE=fcitx
+   export XMODIFIERS=@im=fcitx
+
 参考
 =====
 
 - `Install Xfce Desktop on Ubuntu and Turn it Into Xubuntu <https://itsfoss.com/install-xfce-desktop-xubuntu/>`_
 - `Ubuntu 19.04: Install Xfce for desktop environment <https://www.hiroom2.com/2019/06/13/ubuntu-1904-xfce-en/>`_
+- `Fcitx Chinese Input Setup on Ubuntu for Gaming <https://leimao.github.io/blog/Ubuntu-Gaming-Chinese-Input/>`_

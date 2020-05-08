@@ -11,6 +11,7 @@ Prometheus监控
 
    introduce_prometheus.rst
    prometheus_startup.rst
+   prometheus_node_exporter.rst
 
 推荐阅读:
 

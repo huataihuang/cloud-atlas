@@ -149,6 +149,14 @@ Arch Linux发行版的 ``docker`` 软件包就是Docker CE版本，可以直接�
 
    实践发现上述将用户添加到 ``docker`` 用户组不能立即生效。我尝试直接重启 ``docker`` 服务未生效，实际是重启了操作系统之后才生效。
 
+快速起步
+===========
+
+当你安装完docker运行环境，我们就可以开始快速 :ref:`docker_run` ，体验docker神奇的魔力。当然，如果你使用的操纵系统比较特殊，例如macOS，或者你使用了最新的CentOS 8操作系统，请参考对应环境的安装:
+
+- :ref:`install_docker_macos`
+- :ref:`install_docker_centos8`
+
 参考
 ======
 

@@ -10,6 +10,7 @@ Kubernetes监控
    :maxdepth: 1
 
    cadvisor.rst
+   fluentd/index
    prometheus/index
    jaeger/index
    node_health/index
