@@ -109,9 +109,13 @@ bazel默认需要使用python3，而现在CentOS 8默认没有安装Python2/3，
 
    docker run --runtime=runsc --rm hello-world
 
+.. note::
+
+   ``--rm`` 参数会在命令执行结束时删除容器
+
 - 可以运行一个ubuntu系统::
 
-   docker run --runtime=runsc --rm -it ubuntu /bin/bash
+   docker run --runtime=runsc -it ubuntu /bin/bash
 
 验证runtime
 =============

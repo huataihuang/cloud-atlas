@@ -24,9 +24,9 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    :maxdepth: 2
 
    kubernetes_overview.rst
-   startup_prepare/index
    startup/index
    concepts/index
+   startup_prepare/index
    deployment/index
    manage_object/index
    administer/index

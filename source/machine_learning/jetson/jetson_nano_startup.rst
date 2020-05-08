@@ -45,6 +45,10 @@ NVIDIA Jetson Nano首次启动速度比较慢，应该是有很多初始化操�
 
 Jetson Nano主板没有集成无线网卡，不过，主板m2接口可以安装笔记本通用的无线网卡。我选购的是Intel 8265AC NGW无线网卡，同时集成了蓝牙 4.2。
 
+安装 Intel Wireless-AC8265无线模块 之后，使用 ``lspci`` 命令检查可以看到无线网络设备::
+
+   01:00.0 Network controller: Intel Corporation Wireless 8265 / 8275 (rev 78)
+
 NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 
    lsb_release -a
@@ -67,6 +71,19 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 .. note::
 
    详细配置可参考 :ref:`set_ubuntu_wifi`
+
+蓝牙
+=======
+
+- 安装蓝牙管理工具::
+
+   apt install bluetools blueman
+
+- 然后启动蓝牙服务::
+
+   systemctl start bluetooth
+
+在 :ref:`jetson_xfce4` 中可以使用blueman图形管理工具直接管理蓝牙设备。
 
 初始设置
 ===========
@@ -110,6 +127,10 @@ NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使�
 ===========
 
 虽然Jetson nano可以通过直接连接键盘鼠标和显示器进行操作，但是我更希望将这个设备作为远程访问的的边缘AI设备。所以， :ref:`jetson_remote` 可以方便我们以图形界面方式使用。
+
+.. note::
+
+   如果你把Jetson Nano作为桌面系统使用，基本上轻量级的使用没有任何问题。主要的限制是磁盘IO，如果没有快速的TF卡支持，或者通过外接SSD磁盘运行系统，日常使用中IO Wait会导致系统卡顿。但是，只要你能够使用快速的存储系统，则Jetson作为个人桌面系统完全没有压力。
 
 参考
 ======

@@ -21,6 +21,7 @@ Big Data Atlas
    hadoop/index
    spark/index
    flink/index
+   elasticsearch/index
    log_analysis.rst
    tsdb.rst
    influxdb.rst

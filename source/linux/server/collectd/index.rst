@@ -1,18 +1,11 @@
-.. _gluster:
+.. _collectd:
 
 =================================
-Gluster Atlas
+collectd - 系统信息采集服务
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   introduce_gluster.rst
-   gluster_vs_ceph.rst
-   glusterd.rst
-   glusterd2.rst
-   cockpit-gluster.rst
-   tendrl/index
 
 .. only::  subproject and html
 

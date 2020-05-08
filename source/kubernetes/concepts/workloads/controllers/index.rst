@@ -8,3 +8,4 @@ Kubernetes Controllers
    :maxdepth: 1
 
    replicaset.rst
+   daemonset.rst
