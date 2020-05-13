@@ -11,6 +11,7 @@ ARM Atlas
    raspberry_pi/index
    pine/index
    openwrt/index
+   build/index
 
 .. only::  subproject and html
 

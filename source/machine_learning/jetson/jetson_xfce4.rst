@@ -127,6 +127,10 @@ lightdm登陆时，虽然密码输入正确，但是提示 ``Failed to start ses
    export QT_IM_MODULE=fcitx
    export XMODIFIERS=@im=fcitx
 
+.. note::
+
+   详细Xfce4设置请参考 :ref:`xfce`
+
 参考
 =====
 

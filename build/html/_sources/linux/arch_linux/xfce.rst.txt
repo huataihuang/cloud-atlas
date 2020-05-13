@@ -34,6 +34,8 @@ Xfce
 
    fcitx-sunpinyin 是输入速度和输入精度较为平衡的输入法，并且轻巧
 
+   此外，现在推荐 fcitx-googlepinyin 
+
 .. note::
 
    中文设置参考 `arch linux 文档 - Localization/Chinese <https://wiki.archlinux.org/index.php/Localization/Chinese>`_
@@ -76,6 +78,46 @@ Theme
 此外，图标可以选择安装 Flat Remix icons ::
 
    yay -S flat-remix
+
+.. note::
+
+   我在 :ref:`jetson_xfce4` 中没有安装其他第三方theme，主要是为了精简和减轻系统负担。不过，默认安装的xfce4 theme也有比较精巧的界面，例如，我选择 ``Greybird-compact`` 作为窗口管理器风格： ``Settings >> Window Manager`` 然后选择 ``Greybird-compact`` 可以使得窗口标题条占用较少的屏幕空间。
+
+.. note::
+
+   对于高分辨率屏幕，字体有可能会显示较小，看起来比较吃力。在不修改显示器分辨率(不使用默认显示器分辨率虽然能够使得字体放大但是显示会模糊)，可以通过修改显示DPI来解决: ``Settings >> Appearance >> Fonts`` 然后调整 ``DPI`` 使用 ``Custom DPI settings`` 或者干脆取消这个选项可以使得屏幕调整到合适显示。
+
+::
+
+   Appearance >>
+     Style >>
+       Xfce
+     Icons >>
+       Ubuntu-Mono-Light
+     Fonts >>
+       Default Font: Sans 9
+       Default Monospace Font: Monospace 9
+       Rendering: Enable anti-aliasing
+       DPI: 
+
+   Window Manager >>
+     Style >>
+       Theme: Greybird-compact
+       Title font: Sans Bold 9
+
+   Window Manager Tweaks >>
+     Compositor >> (我感觉启用display compositing会消耗资源)
+       去除 Enable display compositing 选择
+
+   Panel >>
+     Panel1 >>
+       Display >>
+         Measurements >>
+           Row Size (pixels) : 20 (默认是30，该数值调小可以使得工具条变窄)
+     Panels2 >>
+       Display >>
+         Measurements >>
+           Row Size (pixels) : 33 (默认是?，该数值调小可以使得工具条变窄)
 
 平铺窗口
 ===========
@@ -169,3 +211,10 @@ mupdf
    pacman -S mupdf
 
 mupdf非常简洁，甚至没有提供菜单，但是基本功能完备。使用 ``ctrl`` 键结合鼠标滚轮可以方法缩小页面（对于MacBook Pro的Retina屏幕，epub和pdf显示的字体都太小了)。
+
+midori
+----------
+
+虽然chrome已经成为浏览器的事实标准，但是chromium实在太庞大沉重了。xfce项目推荐的集成的浏览器是midori。虽然midori一度停止开发，但是现在再次活跃开发。作为轻量级的 webkit 引擎浏览器，比chromium消耗资源少，也能兼容大多数网站。
+
+在 :ref:`jetson_nano` 上使用的默认浏览器是chromium，可以通过 :ref:`arm_build_midori` 方式安装。

@@ -1,17 +1,15 @@
-.. _arm:
+.. _arm_build:
 
 =================================
-ARM Atlas
+ARM编译
 =================================
+
+在ARM环境编译软件
 
 .. toctree::
    :maxdepth: 1
 
-   sdcard_speed_class.rst
-   raspberry_pi/index
-   pine/index
-   openwrt/index
-   build/index
+   arm_build_midori.rst
 
 .. only::  subproject and html
 
