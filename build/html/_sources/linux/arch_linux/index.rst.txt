@@ -19,6 +19,7 @@ Arch Linux
    alien_convert_package.rst
    archlinux_developer.rst
    xfce.rst
+   xmodmap.rst
    dropbox.rst
    xrdp.rst
    seamless_rdp.rst

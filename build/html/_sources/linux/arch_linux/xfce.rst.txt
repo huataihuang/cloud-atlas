@@ -85,9 +85,11 @@ Theme
 
 .. note::
 
-   对于高分辨率屏幕，字体有可能会显示较小，看起来比较吃力。在不修改显示器分辨率(不使用默认显示器分辨率虽然能够使得字体放大但是显示会模糊)，可以通过修改显示DPI来解决: ``Settings >> Appearance >> Fonts`` 然后调整 ``DPI`` 使用 ``Custom DPI settings`` 或者干脆取消这个选项可以使得屏幕调整到合适显示。
+   对于高分辨率屏幕，字体有可能会显示较小，看起来比较吃力。在不修改显示器分辨率(不使用默认显示器分辨率虽然能够使得字体放大但是显示会模糊)，可以通过修改显示DPI来解决: ``Settings >> Appearance >> Fonts`` 然后调整 ``DPI`` 使用 ``Custom DPI settings`` 进行调整，例如，对于2K屏幕，调整为 ``108`` 可以达到普通屏幕 ``96`` DPI的显示效果。
 
-::
+   注意，DPI调整只影响字体显示，对图标显示不影响，适合编码工作放大字体。请参考 `DPI Calculator / PPI Calculator <https://www.sven.de/dpi/>`_ 进行计算以及常用显示器配置参考。
+
+以下是我在 :ref:`jetson` 中使用xfce4的设置::
 
    Appearance >>
      Style >>
@@ -184,6 +186,11 @@ thunar
 thunar轻量级强大的文件管理器，提供了插件支持文件压缩和解压缩::
 
    pacman -S thunar-archive-plugin
+
+xfce4-terminal
+------------------
+
+xfce4-terminal兼顾了轻量级和功能丰富，可以在xfce桌面替代常用的uxterm/xterm。
 
 GoldenDict
 ------------

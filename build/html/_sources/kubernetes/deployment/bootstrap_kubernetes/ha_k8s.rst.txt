@@ -29,7 +29,6 @@ Kubernetes高可用集群实现方法:
 这种堆叠部署管控节点是默认的kubeadm生成架构，即 ``kubeadm init`` 和 ``kubeadm join --control-plane`` 命令自动创建的管控节点就是运行一个本地etcd服务的部署方式。
 
 .. figure:: ../../../_static/kubernetes/kubeadm-ha-topology-stacked-etcd.svg
-   :scale: 45
 
    Figure 1: Kubeadm HA topology - stacked etcd
 
@@ -43,7 +42,6 @@ Kubernetes高可用集群实现方法:
 但是，独立外部etcd部署需要两倍的管控服务器，即至少3台控制平面节点和3台etcd节点服务器来部署高可用集群。
 
 .. figure:: ../../../_static/kubernetes/kubeadm-ha-topology-external-etcd.svg
-   :scale: 45
 
    Figure 2: Kubeadm HA topology - external etcd
 

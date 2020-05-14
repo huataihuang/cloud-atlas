@@ -89,6 +89,17 @@ Arch Linux默认安装了Python3，所以仅需要安装pip::
 
    sudo pacman -S python-virtualenv
 
+ Ubuntu Linux安装
+ ---------------------
+
+ Ubuntu Linux现在默认安装了Python3，所以也仅安装pip::
+
+    sudo apt install python3-pip
+
+ 安装virtualenv::
+
+    sudo pip3 install virtualenv
+
 设置virtualenv
 ----------------
 
@@ -247,3 +258,4 @@ Markdown和reStructuredText转换格式
 - `使用Sphinx撰写python文档 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/doc/sphinx/sphinx_for_python_doc.md>`_
 - `Arch Linux社区文档 - Python/Virtual environment <https://wiki.archlinux.org/index.php/Python/Virtual_environment>`_
 - `Converting Markdown to reStructuredText <https://bfroehle.com/2013/04/26/converting-md-to-rst/>`_
+- `python3 + virtualenv + ubuntu <https://naysan.ca/2019/08/05/install-python-3-virtualenv-on-ubuntu/>`_
