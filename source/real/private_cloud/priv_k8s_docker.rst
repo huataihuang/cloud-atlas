@@ -20,10 +20,8 @@ Kubernetes选型
   - 要进一步提高master节点稳定性和性能，可以将 ``etcd`` 抽取出来独立部署，则管控平面增加到6台服务器，而woker节点可以水平扩展到5000+。
 
 .. figure:: ../../_static/kubernetes/kubeadm-ha-topology-stacked-etcd.svg
-   :scale: 45
 
 .. figure:: ../../_static/kubernetes/kubeadm-ha-topology-external-etcd.svg
-   :scale: 45
     
 .. note::
 
