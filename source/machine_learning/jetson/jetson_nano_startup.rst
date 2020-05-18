@@ -123,6 +123,13 @@ NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使�
    sudo apt autoremove -y
    sudo apt-get update
 
+安装必要工具软件::
+
+   sudo apt install curl screen nmon machager lsof dnsmasq
+   sudo apt install xfce4 xfce4-terminal fcitx fcitx-sunpinyin
+   sudo apt install bluez-tools blueman
+   sudo apt install synergy
+
 远程访问
 ===========
 
