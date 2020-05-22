@@ -12,6 +12,7 @@ macOS Studio
    introduce_macos_studio.rst
    macos_studio_startup.rst
    homebrew.rst
+   macos_keyboard_customize.rst
 
 .. only::  subproject and html
 
