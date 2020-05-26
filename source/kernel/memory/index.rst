@@ -8,6 +8,7 @@ Linux内存管理
    :maxdepth: 1
 
    numa.rst
+   oomd.rst
 
 .. only::  subproject and html
 
