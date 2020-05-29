@@ -28,6 +28,20 @@ ARM环境编译midori浏览器
 
    (midori:24218): dbind-WARNING **: 11:52:32.772: Couldn't connect to accessibility bus: Failed to connect to socket /tmp/dbus-l6ig7oOSaG: Connection refused
 
+不过，这种方式至少还能正常工作，即能够浏览网站。
+
+但是直接执行 ``midori`` 程序，则控制台不断提示错误::
+
+    ** (WebKitWebProcess:24924): WARNING **: 00:08:28:116: AT-SPI: Could not obtain desktop path or name
+    ** (midori:24880): WARNING **: 00:08:28:117: AT-SPI: Could not obtain desktop path or name
+
+并且浏览器窗口无法显示任何内容，总是提示错误 ``Oops - https://www.baidu.com/ Something went wrong with 'https://www.baidu.com/'.``
+
+此时终端输出提示::
+
+   MESA-LOADER: failed to open swrast (search paths /usr/lib/aarch64-linux-gnu/dri:\$${ORIGIN}/dri:/usr/lib/dri)
+   libGL error: failed to load driver: swrast
+
 参考
 ======
 
