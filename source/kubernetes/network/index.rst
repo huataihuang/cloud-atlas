@@ -11,3 +11,4 @@ Kubernetes只支持基于Container Network Interface(CNI)的网络，需要通�
 
    flannel/index
    cilium/index
+   weave/index

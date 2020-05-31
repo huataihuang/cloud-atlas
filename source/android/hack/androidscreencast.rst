@@ -10,6 +10,10 @@ AndroidScreencast控制Android
 * 电脑屏幕可以放大显示，避免使用Android程序是过小的屏幕无法看清同事共享给你的屏幕
 * 如果你的Android已经root过，还能直接使用电脑的键盘鼠标操作Android，非常方便输入文字
 
+.. note::
+
+   AndroidScreencast 是采用Java编写的工具，另外，也有开源基于C编写的Android设备显示和控制软件 :ref:`scrcpy` ，性能可能更好，但是Android要求版本更高一些(Android 5)
+
 AndroidScreencast功能
 ========================
 

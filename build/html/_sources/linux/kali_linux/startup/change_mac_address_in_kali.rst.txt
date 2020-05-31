@@ -80,6 +80,10 @@ ubuntu macchanger
 .. figure:: ../../../_static/linux/kali_linux/startup/ubuntu_macchanger.png
    :scale: 75
 
+.. note::
+
+   实际上系统修改MAC地址有很多种方法，在 `arch linux官方文档-MAC address spoofing <https://wiki.archlinux.org/index.php/MAC_address_spoofing>`_ 提供了不同的方案。使用的工具有两种 ``iproute2`` 和 ``macchanger`` ，不过自动化设置则结合了systemd-networkd，systemd-udevd, systemd unit以及netctl hook等方法。
+
 参考
 =======
 
