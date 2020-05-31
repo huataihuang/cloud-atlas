@@ -15,6 +15,7 @@ Android Hack
    android_sshd.rst
    vpn_hotspot.rst
    androidscreencast.rst
+   scrcpy.rst
    android_usb_tethering.rst
    reverse_tethering.rst
    pixel_volte.rst
