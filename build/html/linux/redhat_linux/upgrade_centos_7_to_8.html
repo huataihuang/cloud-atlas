@@ -102,7 +102,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Linux Atlas</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">RedHat Linux</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">升级CentOS 7到CentOS 8</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">升级CentOS 7到CentOS 8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">准备工作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dnf">安装dnf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">升级CentOS 7到CentOS 8</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="install_centos8.html">安装CentOS8</a></li>
 <li class="toctree-l3"><a class="reference internal" href="admin/index.html">RedHat Linux 系统管理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="systemd/index.html">Systemd管理</a></li>
@@ -213,9 +219,130 @@
 <span id="upgrade-centos-7-to-8"></span><h1>升级CentOS 7到CentOS 8<a class="headerlink" href="#centos-7centos-8" title="永久链接至标题">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>目前还没有看到升级方案，从CentOS FAQ来看RHEL7升级RHEL8使用了工具leapp，但是这个工具没有移植到CentOS。</p>
-<p>CentOS论坛有 <a class="reference external" href="https://www.centos.org/forums/viewtopic.php?t=71745">Upgrade process from CentOS7</a> 讨论，使用的工具 <a class="reference external" href="https://leapp-to.github.io/gettingstarted#centos-7">leapp</a> 据测试还存在问题。</p>
+<p>从CentOS FAQ来看RHEL7升级RHEL8使用了工具leapp，但是这个工具没有移植到CentOS。</p>
+<blockquote>
+<div><p>CentOS论坛有 <a class="reference external" href="https://www.centos.org/forums/viewtopic.php?t=71745">Upgrade process from CentOS7</a> 讨论，使用的工具 <a class="reference external" href="https://leapp-to.github.io/gettingstarted#centos-7">leapp</a> 据测试还存在问题。</p>
 <p>Red Hat官方文档 <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/upgrading_to_rhel_8/index">UPGRADING TO RHEL 8</a> 有一个文档说明，可以参考学习。</p>
+<p>本文实践是根据第三方文档 <a class="reference external" href="https://www.tecmint.com/upgrade-centos-7-to-centos-8/">How to Upgrade CentOS 7 to CentOS 8</a> 完成</p>
+</div></blockquote>
+</div>
+<div class="section" id="id1">
+<h2>准备工作<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>首先需要安装EPEL仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">epel</span><span class="o">-</span><span class="n">release</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装yum-utils工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">yum</span><span class="o">-</span><span class="n">utils</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+</li>
+<li><p>解析RPM包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">rpmconf</span> <span class="o">-</span><span class="n">y</span>
+<span class="n">rpmconf</span> <span class="o">-</span><span class="n">a</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意，这里 <code class="docutils literal notranslate"><span class="pre">rpmconf</span> <span class="pre">-a</span></code> 有一些交互问答，擦用默认选项。</p>
+<ul>
+<li><p>清理所有不需要的软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">package</span><span class="o">-</span><span class="n">cleanup</span> <span class="o">--</span><span class="n">leaves</span>
+<span class="n">package</span><span class="o">-</span><span class="n">cleanup</span> <span class="o">--</span><span class="n">orphans</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="dnf">
+<h2>安装dnf<a class="headerlink" href="#dnf" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>需要首先安装CentOS 8的默认包管理器 dnf</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">dnf</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后移除yum包管理器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">remove</span> <span class="n">yum</span> <span class="n">yum</span><span class="o">-</span><span class="n">metadata</span><span class="o">-</span><span class="n">parser</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">Rf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">yum</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>升级CentOS 7到CentOS 8<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>现在执行CentOS 7升级到CentOS 8前需要线升级从:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">upgrade</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后安装CentOS 8的release软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="o">.</span><span class="mf">163.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">BaseOS</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span><span class="n">Packages</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="n">repos</span><span class="o">-</span><span class="mf">8.1</span><span class="o">-</span><span class="mf">1.1911</span><span class="o">.</span><span class="mf">0.9</span><span class="o">.</span><span class="n">el8</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span> \
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="o">.</span><span class="mf">163.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">BaseOS</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span><span class="n">Packages</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="mf">8.1</span><span class="o">-</span><span class="mf">1.1911</span><span class="o">.</span><span class="mf">0.9</span><span class="o">.</span><span class="n">el8</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span> \
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="o">.</span><span class="mf">163.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">BaseOS</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span><span class="n">Packages</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="n">gpg</span><span class="o">-</span><span class="n">keys</span><span class="o">-</span><span class="mf">8.1</span><span class="o">-</span><span class="mf">1.1911</span><span class="o">.</span><span class="mf">0.9</span><span class="o">.</span><span class="n">el8</span><span class="o">.</span><span class="n">noarch</span><span class="o">.</span><span class="n">rpm</span>
+</pre></div>
+</div>
+</li>
+<li><p>更新EPEL仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">upgrade</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">dl</span><span class="o">.</span><span class="n">fedoraproject</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pub</span><span class="o">/</span><span class="n">epel</span><span class="o">/</span><span class="n">epel</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="mf">8.</span><span class="n">noarch</span><span class="o">.</span><span class="n">rpm</span>
+</pre></div>
+</div>
+</li>
+<li><p>在升级了EPEL仓库后，移除所有临时文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">clean</span> <span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+<li><p>删除CentOS 7的旧内核core:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>rpm -e `rpm -q kernel`
+</pre></div>
+</div>
+</li>
+<li><p>移除冲突的软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpm</span> <span class="o">-</span><span class="n">e</span> <span class="o">--</span><span class="n">nodeps</span> <span class="n">sysvinit</span><span class="o">-</span><span class="n">tools</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后执行CentOS 8升级:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">releasever</span><span class="o">=</span><span class="mi">8</span> <span class="o">--</span><span class="n">allowerasing</span> <span class="o">--</span><span class="n">setopt</span><span class="o">=</span><span class="n">deltarpm</span><span class="o">=</span><span class="n">false</span> <span class="n">distro</span><span class="o">-</span><span class="n">sync</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装CentOS 8的新Kernel Core:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">kernel</span><span class="o">-</span><span class="n">core</span>
+
+<span class="c1">#   dnf install \</span>
+<span class="c1">#   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/kernel-4.18.0-147.8.1.el8_1.x86_64.rpm \</span>
+<span class="c1">#   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/kernel-core-4.18.0-147.8.1.el8_1.x86_64.rpm \</span>
+<span class="c1">#   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/kernel-modules-4.18.0-147.8.1.el8_1.x86_64.rpm</span>
+</pre></div>
+</div>
+</li>
+<li><p>最后安装CentOS 8最小化包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">groupupdate</span> <span class="s2">&quot;Core&quot;</span> <span class="s2">&quot;Minimal Install&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>现在可以检查CentOS版本信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">redhat</span><span class="o">-</span><span class="n">release</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，上述步骤中每一步都需要仔细检查是否正确执行，千万不能跳过失败都步骤，否则会导致升级错乱失败。</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.tecmint.com/upgrade-centos-7-to-centos-8/">How to Upgrade CentOS 7 to CentOS 8</a></p></li>
+</ul>
 </div>
 </div>
 
