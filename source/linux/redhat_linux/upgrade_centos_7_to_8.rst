@@ -133,6 +133,14 @@
       python3-setuptools => platform-python-setuptools
       vim-minimal (CentOS 7) 和 vim-common (CentOS 8)冲突
 
+.. note::
+
+   在 `How to Upgrade Centos 7 to 8 <https://www.howtoforge.com/how-to-upgrade-centos-7-core-to-8/>`_ 的comments中，stafwag提出解决方法是删除 gcc 和所有 devel 软件包::
+
+      rpm -qa | grep -i devel | xargs -n 1 dnf remove -y
+
+   不过我还没有验证过这个方法是否可行，目前还是采用上述移除冲突包信息的升级rpm方法。
+
 - 然后再次执行CentOS 8升级就可以成功::
 
    dnf -y --releasever=8 --allowerasing --setopt=deltarpm=false distro-sync
@@ -226,6 +234,25 @@ CentOS 7旧软件包和升级
 ========================
 
 现在已经完成了操作系统大版本升级，并且解决了基本的ssh登陆。但是系统中依然有一些软件包是el7版本，原因可能是旧操作系统软件包名字在新版本已经不同，所以没有得到直接升级。可以通过 ``rpm -qa | grep el7`` 检查列表，并进行清理。
+
+除了少数el7软件包被依赖，例如 ``nss-pem-1.0.3-7.el7.x86_64`` 被 ``rpm`` 工具包依赖，不能删除。其他非重要的软件包可以手工清理。
+
+清理无用软件包
+===============
+
+:ref:`dnf` 提供了类似apt的autoremove的功能，可以自动清理不需要的(没有被依赖的)软件包::
+
+   dnf autoremove
+
+.. note::
+
+   参考 `How to remove orphaned packages on CentOS Linux <https://linuxconfig.org/how-to-remove-orphaned-packages-on-centos-linux>`_ 对于CentOS 7版本， ``yum-utils`` 提供了类似功能::
+
+      yum install yun-utils
+      # 获取孤儿软件包
+      package-cleanup --leaves
+      # 删除孤儿软件包
+      yum remove `package-cleanup --leaves`
 
 参考
 ======

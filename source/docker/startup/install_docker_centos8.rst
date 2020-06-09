@@ -28,7 +28,7 @@
 安装docker-ce
 ==============
 
-安装docker-ce有两种模式，一种是直接使用仓库中最佳可用版本，使用参数 ``--nobest`` ；另一种是使用最新的可用版本，则不需要参数，但是这种安装模式需要最新的contained(没有包含在软件仓库)。
+安装docker-ce有两种模式，一种是直接使用仓库中最佳可用版本，使用参数 ``--nobest`` 则安装的是stable版本 ；另一种是使用最新的可用版本，则不需要参数，但是这种安装模式需要最新的contained(没有包含在软件仓库)。
 
 * 方法一：最简洁方便的安装方式，安装稳定版本::
 
@@ -47,11 +47,15 @@
 
 所以先安装containerd.io::
 
-   sudo dnf install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.13-3.1.el7.x86_64.rpm
+   sudo dnf install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.13-3.2.el7.x86_64.rpm
 
 然后执行安装docker-ce::
 
    sudo dnf install docker-ce
+
+.. note::
+
+   我当前在 :ref:`docker_in_docker` 环境部署持续集成系统，采用的是最新版本，即方法2。
 
 * 关闭firewalld::
 

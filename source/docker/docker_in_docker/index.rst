@@ -1,20 +1,17 @@
-.. _docker:
+.. _docker_in_docker:
 
 =================================
-Docker Atlas
+Docker in Docker
 =================================
 
 .. toctree::
    :maxdepth: 2
 
-   startup/index
-   docker_in_docker/index
-   moby/index
-   administer/index
-   applications/index
-   storage/index
-   network/index
-   gpu/index
+   docker_in_docker_arch.rst
+   docker_in_docker_kind.rst
+   kind_cluster.rst
+   kind_multi_node.rst
+   build_kind_image.rst
 
 .. only::  subproject and html
 
