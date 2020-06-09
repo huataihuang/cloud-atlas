@@ -493,6 +493,15 @@ minikube btrfs安装排查
 
    目前我还没有实际验证，不过这个安装方法应该可行，有待遇到需要时实际验证再做调整优化。
 
+Docker in Docker
+==================
+
+在运行单节点的minikube确实能够体验和测试Kubernetes基本功能，但是你也可能不满足这种简单而单调的单节点部署。如果你想要实现一个完整Kubernetes集群，一种方式是采用多个KVM虚拟机实现 :ref:`k8s_hosts` ，另一种方式是采用 :ref:`docker_in_docker` 实现单一物理服务器部署Kubernetes集群。
+
+.. note::
+
+   除了minikube，Docker公司也推出了一个集成standalone Kubernetes，包含了服务器和客户端，也是一个不能配置，并且单节点的Kubernetes集群。如果你和我一样使用 :ref:`macos_studio` ，并且只做开发不关心部署，并且不想由于VirtualBox虚拟化白白消耗系统资源，则可以尝试Docker Desktop集成的Kubernetes。（这个系统采用了macOS集成的 :ref:`xhyve` 所以性能损耗较少)
+
 参考
 =====
 

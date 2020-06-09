@@ -108,7 +108,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#id2">升级CentOS 7到CentOS 8</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sshd">sshd服务启动</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#centos-7">CentOS 7旧软件包和升级</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">清理无用软件包</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="install_centos8.html">安装CentOS8</a></li>
@@ -367,6 +368,14 @@
 </pre></div>
 </div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在 <a class="reference external" href="https://www.howtoforge.com/how-to-upgrade-centos-7-core-to-8/">How to Upgrade Centos 7 to 8</a> 的comments中，stafwag提出解决方法是删除 gcc 和所有 devel 软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpm</span> <span class="o">-</span><span class="n">qa</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">devel</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="n">dnf</span> <span class="n">remove</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+<p>不过我还没有验证过这个方法是否可行，目前还是采用上述移除冲突包信息的升级rpm方法。</p>
+</div>
 <ul>
 <li><p>然后再次执行CentOS 8升级就可以成功:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">releasever</span><span class="o">=</span><span class="mi">8</span> <span class="o">--</span><span class="n">allowerasing</span> <span class="o">--</span><span class="n">setopt</span><span class="o">=</span><span class="n">deltarpm</span><span class="o">=</span><span class="n">false</span> <span class="n">distro</span><span class="o">-</span><span class="n">sync</span>
@@ -470,9 +479,28 @@
 <div class="section" id="centos-7">
 <h2>CentOS 7旧软件包和升级<a class="headerlink" href="#centos-7" title="永久链接至标题">¶</a></h2>
 <p>现在已经完成了操作系统大版本升级，并且解决了基本的ssh登陆。但是系统中依然有一些软件包是el7版本，原因可能是旧操作系统软件包名字在新版本已经不同，所以没有得到直接升级。可以通过 <code class="docutils literal notranslate"><span class="pre">rpm</span> <span class="pre">-qa</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">el7</span></code> 检查列表，并进行清理。</p>
+<p>除了少数el7软件包被依赖，例如 <code class="docutils literal notranslate"><span class="pre">nss-pem-1.0.3-7.el7.x86_64</span></code> 被 <code class="docutils literal notranslate"><span class="pre">rpm</span></code> 工具包依赖，不能删除。其他非重要的软件包可以手工清理。</p>
 </div>
 <div class="section" id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>清理无用软件包<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p><a class="reference internal" href="admin/dnf.html#dnf"><span class="std std-ref">DNF包管理器</span></a> 提供了类似apt的autoremove的功能，可以自动清理不需要的(没有被依赖的)软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">autoremove</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参考 <a class="reference external" href="https://linuxconfig.org/how-to-remove-orphaned-packages-on-centos-linux">How to remove orphaned packages on CentOS Linux</a> 对于CentOS 7版本， <code class="docutils literal notranslate"><span class="pre">yum-utils</span></code> 提供了类似功能:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>yum install yun-utils
+# 获取孤儿软件包
+package-cleanup --leaves
+# 删除孤儿软件包
+yum remove `package-cleanup --leaves`
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.tecmint.com/upgrade-centos-7-to-centos-8/">How to Upgrade CentOS 7 to CentOS 8</a></p></li>
 </ul>

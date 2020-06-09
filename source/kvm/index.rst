@@ -32,7 +32,7 @@ KVM Atlas
    vt-d_in_kvm.rst
    nvidia_cuda_gpu_in_kvm.rst
    amd_rocm_gpu_in_kvm.rst
-   macos/index
+   macos_xhyve/index
 
 
 .. only::  subproject and html
