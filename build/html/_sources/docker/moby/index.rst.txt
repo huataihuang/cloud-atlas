@@ -8,6 +8,7 @@ Docker Moby
    :maxdepth: 2
 
    introduce_moby.rst
+   nsenter.rst
    containerd/index
    runc/index
    linuxkit/index
