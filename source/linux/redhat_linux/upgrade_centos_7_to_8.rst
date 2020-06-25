@@ -58,13 +58,13 @@
 
 - 现在执行CentOS 7升级到CentOS 8前需要线升级从::
 
-   dnf upgrade
+   dnf upgrade -y
 
 - 然后安装CentOS 8的release软件包::
 
-   dnf install http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.9.el8.x86_64.rpm \
-   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-release-8.1-1.1911.0.9.el8.x86_64.rpm \
-   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.9.el8.noarch.rpm
+   dnf -y install http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm \
+   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-release-8.2-2.2004.0.1.el8.x86_64.rpm \
+   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm
 
 - 升级EPEL仓库::
 
@@ -103,7 +103,7 @@
 
 - 升级gcc(升级以后gcc版本是8.3.1)::
 
-   dnf upgrade gcc
+   dnf upgrade gcc -y
 
 但是升级以后报错依旧，看起来是因为依赖 ``rpm-4.14.2-26.el8_1.x86_64`` 才能完成。
 
@@ -123,6 +123,7 @@
    rpm -e --justdb python36-rpmconf-1.0.22-1.el7.noarch rpmconf-1.0.22-1.el7.noarch
    rpm -e --justdb --nodeps python3-setuptools-39.2.0-10.el7.noarch
    rpm -e --justdb --nodeps python3-pip-9.0.3-7.el7_7.noarch
+   rpm -e --justdb --nodeps iptables-1.4.21-34.el7.x86_64
    rpm -e --justdb --nodeps vim-minimal
 
 .. note::
@@ -132,6 +133,14 @@
       python36-rpmconf => python3-rpmconf
       python3-setuptools => platform-python-setuptools
       vim-minimal (CentOS 7) 和 vim-common (CentOS 8)冲突
+
+.. note::
+
+   ``rpm -e --justdb --nodeps vim-minimal`` 会遇到卡死问题，实际上此时是rpm的数据库损坏了，需要强制杀掉 ``kill -9`` 这个卡住的rpm命令，然后执行一次 ``rpm --rebuilddb`` 修复，再继续进行安装。
+
+- 然后重新执行一次升级rpm::
+
+   dnf upgrade --best --allowerasing rpm
 
 .. note::
 
@@ -224,6 +233,7 @@ sshd服务启动
 
 实际上系统缺少 ``/usr/lib64/security/pam_tally2.so`` 文件，原因是 ``/etc/pam.d/system-auth`` 包含了该认证策略。检查 ``/etc/pam.d`` 可以看到，升级CentOS 8的很多配置文件没有覆盖原先旧系统的配置文件，需要修正::
 
+   cd /etc/pam.d
    mv sshd sshd.bak
    mv sshd.rpmnew sshd
    sysemctl restart sshd
