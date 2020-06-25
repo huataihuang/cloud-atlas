@@ -51,13 +51,50 @@ macOS上使用Java 8
    1.8.0.252 added
    1.8 added
 
-然后就可以通过 ``/usr/libexec/java_home -verbose`` 检查系统安装的JDK版本。
+例如，再添加jdk 14::
+
+   jenv add /Library/Java/JavaVirtualMachines/adoptopenjdk-14.jdk/Contents/Home
+
+然后就可以通过 ``/usr/libexec/java_home -verbose`` 检查系统安装的JDK版本::
+
+   Matching Java Virtual Machines (2):
+       14.0.1, x86_64:"AdoptOpenJDK 14": /Library/Java/JavaVirtualMachines/adoptopenjdk-14.jdk/Contents/Home
+       1.8.0_252, x86_64:"AdoptOpenJDK 8": /Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
 
 可以看到现在的java位置 ``which java`` 显示是 ``/Users/huatai/.jenv/shims/java`` ，当前的 ``java -version`` 输出就是::
+
+   openjdk version "14.0.1" 2020-04-14
+   OpenJDK Runtime Environment AdoptOpenJDK (build 14.0.1+7)
+   OpenJDK 64-Bit Server VM AdoptOpenJDK (build 14.0.1+7, mixed mode, sharing)
+
+- 检查当前已经添加的Java版本::
+
+   jenv versions
+
+jenv使用
+---------
+
+有两种jenv版本设置方式，一种是当前工作目录的本地Java版本，将在当前目录下创建一个 ``.java-version`` 文件，这个文件可以添加到项目的git仓库中。 ``jenv`` 可以在当前目录下启动shell时正确加载java版本::
+
+   jenv local 1.8
+   exec $SHELL -l
+   cat .java-version
+
+此时显示 ``.java-version`` 内容是 ``1.8`` ，我们现在来验证一下::
+
+   java -version
+
+则显示输出::
 
    openjdk version "1.8.0_252"
    OpenJDK Runtime Environment (AdoptOpenJDK)(build 1.8.0_252-b09)
    OpenJDK 64-Bit Server VM (AdoptOpenJDK)(build 25.252-b09, mixed mode)
+
+而没有设置 jenv local 的全局版本显示 ``java -version`` 输出为::
+
+   openjdk version "14.0.1" 2020-04-14
+   OpenJDK Runtime Environment AdoptOpenJDK (build 14.0.1+7)
+   OpenJDK 64-Bit Server VM AdoptOpenJDK (build 14.0.1+7, mixed mode, sharing)
 
 通过Docker运行JDK8
 ====================
