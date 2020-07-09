@@ -1,18 +1,18 @@
-.. _gluster:
+.. _gluster_admin:
 
 =================================
-Gluster Atlas
+GlusterFS管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_gluster.rst
-   gluster_vs_ceph.rst
-   startup/index
-   admin/index
-   performance/index
-   tendrl/index
+   glusterd.rst
+   glusterd2.rst
+   gluster_volume.rst
+   gluster_split_brain_deal.rst
+   arbiter_volume_quorum.rst
+   cockpit-gluster.rst
 
 .. only::  subproject and html
 

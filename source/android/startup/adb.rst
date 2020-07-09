@@ -40,6 +40,13 @@ Android Debug Bridge (adb) 是一个多用途命令行工具，用于和设备�
 
 现在就可以使用adb对设备进行操作了。
 
+安装软件包
+============
+
+如果你的电脑上连接了多个Android设备，则需要指定设备进行操作，请使用参数 ``-s <DEVICE ID>`` 。可以使用 ``adb`` 安装软件包::
+
+   adb -s <DEVICE ID> install <PATH TO APK>
+
 复制文件
 ==========
 

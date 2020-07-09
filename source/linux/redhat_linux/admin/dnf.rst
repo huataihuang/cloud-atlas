@@ -51,6 +51,24 @@ DNF包管理器使用
 
    dnf repolist all
 
+- 添加DNF Repository::
+
+   dnf config-manager --add-repo repository_url
+
+举例::
+
+   dnf config-manager --add-repo http://www.example.com/example.repo
+
+- 激活DNF Repository::
+
+   dnf config-manager --set-enabled repository…
+
+- 也可以反向关闭::
+
+   dnf config-manager --set-disabled repository…
+
+参考 `Adding, Enabling, and Disabling a DNF Repository <https://docs.fedoraproject.org/en-US/Fedora/23/html/System_Administrators_Guide/sec-Managing_DNF_Repositories.html>`_
+
 - 列出所有RPM包::
 
    dnf list

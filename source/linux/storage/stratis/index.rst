@@ -1,18 +1,13 @@
-.. _gluster:
+.. _stratis:
 
 =================================
-Gluster Atlas
+Stratis - Linux存储系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_gluster.rst
-   gluster_vs_ceph.rst
-   startup/index
-   admin/index
-   performance/index
-   tendrl/index
+   xfs_performance.rst
 
 .. only::  subproject and html
 

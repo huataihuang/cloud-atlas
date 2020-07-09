@@ -1,18 +1,13 @@
-.. _gluster:
+.. _gluster_performance:
 
 =================================
-Gluster Atlas
+GlusterFS性能
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_gluster.rst
-   gluster_vs_ceph.rst
-   startup/index
-   admin/index
-   performance/index
-   tendrl/index
+   gluster_tunning.rst
 
 .. only::  subproject and html
 

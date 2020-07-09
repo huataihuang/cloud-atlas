@@ -1,18 +1,15 @@
-.. _gluster:
+.. _android_develop_startup:
 
 =================================
-Gluster Atlas
+Android 开发起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_gluster.rst
-   gluster_vs_ceph.rst
-   startup/index
-   admin/index
-   performance/index
-   tendrl/index
+   android_develop_env.rst
+   android_vm_acceleration.rst
+   gradle_sync_failed.rst
 
 .. only::  subproject and html
 

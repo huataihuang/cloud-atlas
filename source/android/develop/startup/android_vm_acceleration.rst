@@ -27,19 +27,19 @@ AVD包含硬件规则，系统镜像以及存储区域，皮肤等，建议为�
 
 - 选择硬件profile：
 
-.. figure:: ../../_static/android/startup/avd-manager-device.png
+.. figure:: ../../../_static/android/develop/startup/avd-manager-device.png
    :scale: 35
 
 - 然后选择系统镜像，其中有推荐(Recommended)镜像列表，可以选择安装:
 
-.. figure:: ../../_static/android/startup/avd-manager-system.png
+.. figure:: ../../../_static/android/develop/startup/avd-manager-system.png
    :scale: 35
 
 这里需要先下载需要的镜像，然后才能进行下一步操作
 
 - 最后选择AVD的特性，然后点击Finish结束:
 
-.. figure:: ../../_static/android/startup/avd-manager-verify.png
+.. figure:: ../../../_static/android/develop/startup/avd-manager-verify.png
    :scale: 35
 
 .. note::

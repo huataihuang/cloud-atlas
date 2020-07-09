@@ -8,6 +8,7 @@ Linux存储
    :maxdepth: 1
 
    filesystem/index
+   stratis/index
 
 .. only::  subproject and html
 
