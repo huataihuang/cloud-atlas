@@ -9,9 +9,9 @@ Gluster Atlas
 
    introduce_gluster.rst
    gluster_vs_ceph.rst
-   glusterd.rst
-   glusterd2.rst
-   cockpit-gluster.rst
+   startup/index
+   admin/index
+   performance/index
    tendrl/index
 
 .. only::  subproject and html

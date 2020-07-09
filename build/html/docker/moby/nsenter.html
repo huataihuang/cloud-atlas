@@ -99,7 +99,9 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker Moby</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="introduce_moby.html">MoBy开源项目集</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">nsenter管理namespace</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dockershell">Docker的shell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">nsenter使用</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="containerd/index.html">Containerd</a></li>
@@ -209,10 +211,40 @@
   <div class="section" id="nsenternamespace">
 <span id="nsenter"></span><h1>nsenter管理namespace<a class="headerlink" href="#nsenternamespace" title="永久链接至标题">¶</a></h1>
 <p>在深入学习moby架构之前，我想先介绍一个docker环境中常用的管理namespace的工具 <code class="docutils literal notranslate"><span class="pre">nsenter</span></code> 。</p>
+<p>我们知道Docker使用了Linux的namespace来隔离容器资源，我们在维护Docker的运行实例时，经常需要在物理主机上去检查容器内部。这时候，有一个工具 <code class="docutils literal notranslate"><span class="pre">nsenter</span></code> 可以帮助我们进入容器的namespace。</p>
+<div class="section" id="dockershell">
+<h2>Docker的shell<a class="headerlink" href="#dockershell" title="永久链接至标题">¶</a></h2>
+<p>Docker提供了 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">exec</span></code> 指令允许用户进入Docker容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">CONTAINER_NAME</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>nsenter和docker exec不同，nsenter不会进入cgroups，所以也就避免了资源限制。带来的潜在好处就是方便debugging和额外审计，但是对于远程访问， <strong>docker exec是当前推荐的方式</strong> 。</p>
+<p>nsenter提供了一种进入现有namespaces的方法，也可以在一个新的namespace中启动一个进程。这样nsenter就可以做很多事情，但最重要但用途是进入Docker容器进行维护操作。</p>
+</div>
 <div class="section" id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>nsenter使用<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>首先找出需要进入的容器的PID:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>PID=$(docker inspect --format {{.State.Pid}} &lt;container_name_or_ID&gt;)
+</pre></div>
+</div>
+</li>
+<li><p>然后使用以下命令进入容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>nsenter --target $PID --mount --uts --ipc --net --pid
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在 <a class="reference internal" href="../startup/install_docker_macos.html#install-docker-macos"><span class="std std-ref">macOS安装Docker</span></a> 所使用的是Docker Desktop，采用的是macOS系统的HyperKit运行的Linux系统。</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/jpetazzo/nsenter">Looking to start a shell inside a Docker container?</a></p></li>
+<li><p><a class="reference external" href="https://coderwall.com/p/xwbraq/attach-to-your-docker-containers-with-ease-using-nsenter">Attach to your Docker containers with ease using nsenter</a></p></li>
 </ul>
 </div>
 </div>

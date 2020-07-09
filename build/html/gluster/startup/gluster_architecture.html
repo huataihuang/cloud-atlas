@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GlusterFS架构 &mdash; Cloud Atlas 0.1 文档</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script src="../../_static/translations.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="部署简单GlusterFS集群" href="deploy_simple_gluster.html" />
+    <link rel="prev" title="GlusterFS起步" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gluster Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduce_gluster.html">Gluster分布式存储简介</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gluster_vs_ceph.html">Gluster和Ceph对比</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">GlusterFS起步</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">GlusterFS架构</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">GlusterFS卷类型</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#glusterfs-replicated-glusterfs-volume">GlusterFS复制卷(Replicated GlusterFS Volume)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fuse">FUSE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#translators">转换器(Translators)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_simple_gluster.html">部署简单GlusterFS集群</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html">GlusterFS管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../performance/index.html">GlusterFS性能</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tendrl/index.html">Tendrl 软件定义存储(SDS)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../macos_ios/index.html">macOS &amp; iOS Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Gluster Atlas</a> &raquo;</li>
+        
+          <li><a href="index.html">GlusterFS起步</a> &raquo;</li>
+        
+      <li>GlusterFS架构</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/gluster/startup/gluster_architecture.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="glusterfs">
+<span id="gluster-architecture"></span><h1>GlusterFS架构<a class="headerlink" href="#glusterfs" title="永久链接至标题">¶</a></h1>
+<p>在 <a class="reference internal" href="../introduce_gluster.html#introduce-gluster"><span class="std std-ref">Gluster分布式存储简介</span></a> 中，我们初步了解了GlusterFS能够提供哪些功能，现在我们来解析组成GlusterFS分布式存储的底层技术。</p>
+<div class="section" id="id1">
+<h2>GlusterFS卷类型<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>在gluster文件系统中卷volume是底层brick的集合，几乎所有操作都是在卷层面进行的。Gluster文件系统根据需求支持不同类型的存储卷。有些卷适合不断扩展的存储规模，有些卷则针对性能，也有一些卷则两者兼而有之。</p>
+<div class="section" id="glusterfs-distributed-glusterfs-volume">
+<h3>分布式GlusterFS卷(Distributed GlusterFS Volume)<a class="headerlink" href="#glusterfs-distributed-glusterfs-volume" title="永久链接至标题">¶</a></h3>
+<p>Distributed GlusterFS Volume是默认创建的GlusterFS卷，也就是如果不指定卷类型，就是创建distributed volume。在分布式卷中，文件会分散到卷的不同bricks上。也就是说，file1可能会存储到brick1或者brick2，但是不会同时存放到2个brick中。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>Discributed GlusterFS Volume就是纯粹的文件打散存储， <strong>没有任何数据冗余</strong> 所以这种分布式卷只提供了规模化和性能提升优点，存储卷中任何一个brick故障都会导致数据丢失。所以，Discributed GlusterFS Volume必须结合底层硬件数据保护(如RAID)，否则极其容易故障。</p>
+</div>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../_images/distributed_gluster_volume.png"><img alt="../../_images/distributed_gluster_volume.png" src="../../_images/distributed_gluster_volume.png" style="width: 528.0px; height: 288.0px;" /></a>
+</div>
+<ul>
+<li><p>创建Distributed Volume命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">NEW</span><span class="o">-</span><span class="n">VOLNAME</span> <span class="p">[</span><span class="n">transport</span> <span class="p">[</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">rdma</span> <span class="o">|</span> <span class="n">tcp</span><span class="p">,</span><span class="n">rdma</span><span class="p">]]</span> <span class="n">NEW</span><span class="o">-</span><span class="n">BRICK</span><span class="o">...</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>例如创建一个使用TCP协议的4个存储服务器的分布式卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">test</span><span class="o">-</span><span class="n">volume</span> <span class="n">server1</span><span class="p">:</span><span class="o">/</span><span class="n">exp1</span> <span class="n">server2</span><span class="p">:</span><span class="o">/</span><span class="n">exp2</span> <span class="n">server3</span><span class="p">:</span><span class="o">/</span><span class="n">exp3</span> <span class="n">server4</span><span class="p">:</span><span class="o">/</span><span class="n">exp4</span>
+</pre></div>
+</div>
+<p>然后就可以检查卷信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">info</span>
+</pre></div>
+</div>
+<p>显示信息类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Volume</span> <span class="n">Name</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">volume</span>
+<span class="n">Type</span><span class="p">:</span> <span class="n">Distribute</span>
+<span class="n">Status</span><span class="p">:</span> <span class="n">Created</span>
+<span class="n">Number</span> <span class="n">of</span> <span class="n">Bricks</span><span class="p">:</span> <span class="mi">4</span>
+<span class="n">Transport</span><span class="o">-</span><span class="nb">type</span><span class="p">:</span> <span class="n">tcp</span>
+<span class="n">Bricks</span><span class="p">:</span>
+<span class="n">Brick1</span><span class="p">:</span> <span class="n">server1</span><span class="p">:</span><span class="o">/</span><span class="n">exp1</span>
+<span class="n">Brick2</span><span class="p">:</span> <span class="n">server2</span><span class="p">:</span><span class="o">/</span><span class="n">exp2</span>
+<span class="n">Brick3</span><span class="p">:</span> <span class="n">server3</span><span class="p">:</span><span class="o">/</span><span class="n">exp3</span>
+<span class="n">Brick4</span><span class="p">:</span> <span class="n">server4</span><span class="p">:</span><span class="o">/</span><span class="n">exp4</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="glusterfs-replicated-glusterfs-volume">
+<h2>GlusterFS复制卷(Replicated GlusterFS Volume)<a class="headerlink" href="#glusterfs-replicated-glusterfs-volume" title="永久链接至标题">¶</a></h2>
+<p>GlusterFS复制卷解决了纯分布式卷的数据丢失风险。在所有的bricks上，明确指定了数据需要维护的副本数量。在存储卷的副本数量可以在创建卷的时候由客户端决定。</p>
+<p>如果我们需要创建双副本的存储卷，则至少需要2个bricks；同理，要创建3副本的存储卷，则需要至少3个bricks。当创建卷时候，需要确保bricks的数量是集群卷配置的副本数量的整数倍。例如，要创建3副本卷，则bricks数量必须是3的倍数，如3,6,9…</p>
+<p>采用Replicated GlusterFS Volume的优点是，即使由一个brick出现故障，数据也不会丢失并且卷依然能够访问。所以，Replicated GlusterFS Volume是兼顾了可靠性和数据冗余的优点，在企业级使用非常广泛。</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../_images/replicated_gluster_volume.png"><img alt="../../_images/replicated_gluster_volume.png" src="../../_images/replicated_gluster_volume.png" style="width: 528.0px; height: 288.0px;" /></a>
+</div>
+<ul>
+<li><p>创建Replicated Volume:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">NEW</span><span class="o">-</span><span class="n">VOLNAME</span> <span class="p">[</span><span class="n">replica</span> <span class="n">COUNT</span><span class="p">]</span> <span class="p">[</span><span class="n">transport</span> <span class="p">[</span><span class="n">tcp</span> <span class="o">|</span><span class="n">rdma</span> <span class="o">|</span> <span class="n">tcp</span><span class="p">,</span><span class="n">rdma</span><span class="p">]]</span> <span class="n">NEW</span><span class="o">-</span><span class="n">BRICK</span><span class="o">...</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>以下案例在2台存储服务器上创建一个replicated volume:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">test</span><span class="o">-</span><span class="n">volume</span> <span class="n">replica</span> <span class="mi">3</span> <span class="n">transport</span> <span class="n">tcp</span> \
+      <span class="n">server1</span><span class="p">:</span><span class="o">/</span><span class="n">exp1</span> <span class="n">server2</span><span class="p">:</span><span class="o">/</span><span class="n">exp2</span> <span class="n">server3</span><span class="p">:</span><span class="o">/</span><span class="n">exp3</span>
+</pre></div>
+</div>
+<div class="section" id="glusterfs-distributed-replicated-glusterfs-volume">
+<h3>分布式复制GlusterFS卷(Distributed Replicated GlusterFS Volume)<a class="headerlink" href="#glusterfs-distributed-replicated-glusterfs-volume" title="永久链接至标题">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>当创建复制卷时候，如果bricks数量是replicas的2倍或更多倍时，创建的就是分布式复制卷(Distributed Replicated GlusterFS Volume)。这是因为GlusterFS不仅构建文件副本，还会把文件分散到多个bricks集上，实现更大范围的数据分布，从而提高访问性能。</p>
+</div>
+<p>在Distributed Replicated GlusterFS Volume 分布式复制卷中，文件会在bricks的复制集上打散分布。Distributed Replicated GlusterFS Volume要求bricks的数量必须是replica数量的整数倍，并且在创建卷时指定的bricks顺序对于数据分布紧密相关。</p>
+<p>Distributed Replicated GlusterFS Volume用于要求高可用数据同时要求数据冗余和可扩展的存储环境。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，文件分布是首先实现多副本存储(replicas)，然后再实现分布式存储(distributed)，所以需要关注创建GlusterFS时候设置的bricks的顺序。见下文图示。</p>
+</div>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../_images/replicated_gluster_volume.png"><img alt="../../_images/replicated_gluster_volume.png" src="../../_images/replicated_gluster_volume.png" style="width: 528.0px; height: 288.0px;" /></a>
+</div>
+<p>上图是 <code class="docutils literal notranslate"><span class="pre">replicas</span> <span class="pre">2</span></code> 的分布结构。如果在创建卷的时候，提供了8个bricks，则结构就是 2x4 。同理，如果在8个bricks上创建 <code class="docutils literal notranslate"><span class="pre">replicas</span> <span class="pre">4</span></code> 卷，则结构就是 4x2 。</p>
+<ul>
+<li><p>创建分布式复制卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">NEW</span><span class="o">-</span><span class="n">VOLNAME</span> <span class="p">[</span><span class="n">replica</span> <span class="n">COUNT</span><span class="p">]</span> <span class="p">[</span><span class="n">transport</span> <span class="p">[</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">rdma</span> <span class="o">|</span> <span class="n">tcp</span><span class="p">,</span><span class="n">rdma</span><span class="p">]]</span> <span class="n">NEW</span><span class="o">-</span><span class="n">BRICK</span><span class="o">...</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>举例，创建6节点分布式复制卷，使用3副本，即 3x2</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">test</span><span class="o">-</span><span class="n">volume</span> <span class="n">replica</span> <span class="mi">3</span> <span class="n">transport</span> <span class="n">tcp</span> <span class="n">server1</span><span class="p">:</span><span class="o">/</span><span class="n">exp1</span> <span class="n">server2</span><span class="p">:</span><span class="o">/</span><span class="n">exp2</span> <span class="n">server3</span><span class="p">:</span><span class="o">/</span><span class="n">exp3</span> <span class="n">server4</span><span class="p">:</span><span class="o">/</span><span class="n">exp4</span> <span class="n">server5</span><span class="p">:</span><span class="o">/</span><span class="n">exp5</span> <span class="n">server6</span><span class="p">:</span><span class="o">/</span><span class="n">exp6</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dispersed-glusterfs-volume">
+<h3>纠错卷(Dispersed GlusterFS Volume)<a class="headerlink" href="#dispersed-glusterfs-volume" title="永久链接至标题">¶</a></h3>
+<p>Dispersed Volume是基于ErasureCodes（纠错码）的一种新类型的Volume（3.6版本正式发布该特性），类似于RAID5/6。将文件的编码数据条带化，然后加上一些冗余信息，然后将这些数据打散到GlusterFS卷的多个bricks上。通过配置Redundancy（冗余）级别提高可靠性，在保证较高的可靠性同时，可以提升物理存储空间的利用率。</p>
+<p>文件是被分割成大小相同的Chunk(块)，而每个Chunk又被分割成fragment，而冗余信息的Fragment也随之生成，且同一个Fragment只会保存一个Brick上。</p>
+<div class="section" id="id2">
+<h4>冗余信息<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h4>
+<p>每个纠错卷都有一个在创建卷的时候定义的redundancy value(冗余值)，这个值决定了多少bricks丢失情况下都不会终端卷的操作。卷的使用空间取决于以下计算公式:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Usable</span> <span class="n">size</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">Brick</span> <span class="n">size</span><span class="o">&gt;</span> <span class="o">*</span> <span class="p">(</span><span class="c1">#Bricks - Redundancy)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="distributed-dispersed-volume">
+<h3>分布式纠错卷(Distributed Dispersed Volume)<a class="headerlink" href="#distributed-dispersed-volume" title="永久链接至标题">¶</a></h3>
+<p>待补充</p>
+</div>
+</div>
+<div class="section" id="fuse">
+<h2>FUSE<a class="headerlink" href="#fuse" title="永久链接至标题">¶</a></h2>
+<p>GlusterFS是一个用户空间文件系统(userspace filesystem)，这种方式可以避免使用内核模块。由于是一个用户空间文件系统，为了和内核VFS交互，GlusterFS需要使用FUSE(File System in
+Userspace)。长期依赖，实现一个用户空间文件系统是非常重要的，FUSE就是这样一个解决方案。FUSE是一个内核模块，支持在内核VFS和没有特权用户应用程序之间交互，并且FUSE有一个API可以从用户空间访问。通过使用这个API，任何文件系统都几乎可以使用任意编程语言编写，事实上确实有很多中绑定了FUSE和其他语言的实现。</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../_images/fuse_figure.png"><img alt="../../_images/fuse_figure.png" src="../../_images/fuse_figure.png" style="width: 480.0px; height: 360.8px;" /></a>
+</div>
+<p>上述示意图是假设一个 “hello world” 文件系统，编译用于创建一个二进制”hello”。这个文件系统被挂载到 <code class="docutils literal notranslate"><span class="pre">/tmp/fuse</span></code> 。当用户执行 <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">-l</span> <span class="pre">/tmp/fuse</span></code> 命令时，这给命令通过glibc到达VFS，由于这个挂载 <code class="docutils literal notranslate"><span class="pre">/tmp/fuse</span></code> 是对应的FUSE文件系统，所以VFS将命令传递给FUSE模块。FUSE内核模块则联系实际的文件系统二进制”hello”，然后传递给glibc和用户空间的FUSE库(libfuse)。这个结果就是通过相同路径返回”hello”给 <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">-l</span></code>
+命令。</p>
+<p>这里在FUSE内核模块和FUSE库(libfuse)的通讯是通过打开的 <code class="docutils literal notranslate"><span class="pre">/dev/fuse</span></code> 而获得的特殊文件描述符。这个文件可以被多次打开，并且获得的文件描述符被传递给mount系统调用来匹配挂载的文件系统的描述符。</p>
+</div>
+<div class="section" id="translators">
+<h2>转换器(Translators)<a class="headerlink" href="#translators" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.gluster.org/en/latest/Quick-Start-Guide/Architecture/">GlusterFS Architecture</a></p></li>
+<li><p><a class="reference external" href="https://cloud.tencent.com/developer/article/1536260">GlusterFS的数据分布(DHT)和文件副本(AFR)机制</a> 腾讯工程师邵靖撰写的架构解析，非常详尽</p></li>
+<li><p><a class="reference external" href="https://blog.csdn.net/xdgouzongmei/article/details/52748812">GlusterFS Dispersed Volume(纠错卷)总结</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="deploy_simple_gluster.html" class="btn btn-neutral float-right" title="部署简单GlusterFS集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="GlusterFS起步" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; <a href="../../copyright.html">Copyright</a> 2019, Huatai Huang
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

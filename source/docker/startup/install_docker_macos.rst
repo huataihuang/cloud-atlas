@@ -73,8 +73,14 @@ Docker Desktop on Mac的关键技术:
 
    查看目录下的 ``Dockerfile`` 可以看到这是一个简单绘制ASCII图形的Go程序，提供了一个运行案例。上述案例完整体现了一个如何构建自己的Docker程序并推送到Docker Hub的实例，也是今后构建自己的应用程序的一个良好模版，简单高效。
 
+Docker VM on macOS
+=====================
+
+我们知道Docker容器需要使用Linux内核才能够运行，在Mac系统中要获得Linux内核，需要使用hypervsor
+
 参考
 =======
 
 - `Install Docker Desktop on Mac <https://docs.docker.com/docker-for-mac/install/>`_
 - `Docker Desktop on Mac vs. Docker Toolbox <https://docs.docker.com/docker-for-mac/docker-toolbox/>`_
+- `Enter Docker VM on MacOS Catalina (SSH, xhyve) <https://ekartco.com/2019/12/enter-docker-vm-on-macos-catalina-ssh-xhyve/>`_

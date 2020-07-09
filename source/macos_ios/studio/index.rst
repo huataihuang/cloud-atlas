@@ -12,7 +12,7 @@ macOS Studio
    introduce_macos_studio.rst
    macos_studio_startup.rst
    homebrew.rst
-   jdk8_on_macos.rst
+   multi_jdk_on_macos.rst
    macos_keyboard_customize.rst
 
 .. only::  subproject and html

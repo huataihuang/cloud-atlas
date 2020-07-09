@@ -58,20 +58,26 @@ Xmodmap映射修改
 - 配置 ``~/.Xmodmap`` 修改::
 
    keycode  64 = Alt_L Meta_L Alt_L Meta_L  # 左Alt键
-   keycode 133 = Super_L NoSymbol Super_L  # 向上键
+   keycode 133 = Super_L NoSymbol Super_L  # command键(win键)
    keycode 114 = Right NoSymbol Right   # 向右方向键
 
 - 修改成::
 
-   keycode 111 = Up NoSymbol Up  # command键(win键)
-   keycode  61 = slash question slash question  # /?
-   keycode  49 = grave asciitilde grave asciitilde # `键
+   # 左Alt键和command键互换
+   keycode  64 = Super_L NoSymbol Super_L 
+   keycode 133 = Alt_L Meta_L Alt_L Meta_L
+
+   # 向右方向键改为`键
+   keycode 114 = grave asciitilde grave asciitilde
+
+   # 向上键修改成 /?
+   keycode  111 = slash question slash question  # /?
 
 上述配置修改实现的是::
 
    左Alt键 <=> command键(win键)
-   向上键 <=> /?键
-   向右方向键 <=> `键
+   向上键 => /?键
+   向右方向键 => `键
 
 macOS的键盘映射
 ================

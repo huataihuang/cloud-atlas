@@ -7,8 +7,7 @@ Android 开发
 .. toctree::
    :maxdepth: 1
 
-   android_develop_env.rst
-   android_vm_acceleration.rst
+   startup/index
 
 .. only::  subproject and html
 
