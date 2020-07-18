@@ -1,0 +1,62 @@
+# Build centos 8 image with ssh:
+# ------------------------------
+# docker build - < centos8-ssh
+
+# create container:
+# -----------------
+# docker run -itd --hostname myserver --name myserver local:centos8-ssh
+
+# create container with volume:
+# -----------------------------
+# docker volume create data
+# docker run -itd --hostname myserver --name myserver -v data:/data local:centos8-ssh
+
+# create container with volume and static ip:
+# -------------------------------------------
+# docker volume create data
+# docker network create --subnet=172.18.0.0/16 data-net
+# docker run -itd --hostname myserver --name myserver -v data:/data \
+#   --net data-net --ip 172.18.0.252 local:centos8-ssh
+
+# create container with volume and static ip, then limit resource and map port:
+# -----------------------------------------------------------------------------
+# docker volume create data
+# docker network create --subnet=172.18.0.0/16 data-net
+# docker run -itd --hostname myserver --name myserver -v data:/data \
+#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus="1.5" \
+#   -p 22 -p 8080:80 local:centos8-ssh
+
+FROM docker.io/centos:8
+MAINTAINER vincent huatai <vincent@huatai.me>
+
+RUN dnf clean all
+RUN dnf -y update
+
+RUN dnf -y install which sudo openssh-clients openssh-server initscripts
+
+# Prepare sshd host key
+RUN ssh-keygen -A
+
+# add account "admin" and give sudo privilege
+RUN groupadd -g 505 admin
+RUN useradd -g 505 -u 505 -d /home/admin -m admin
+RUN usermod -aG wheel admin
+RUN echo "%wheel        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+
+# Add ssh public key for login
+RUN mkdir -p /home/admin/.ssh
+COPY authorized_keys /home/admin/.ssh/authorized_keys
+RUN chown -R admin:admin /home/admin/.ssh
+RUN chmod 600 /home/admin/.ssh/authorized_keys
+RUN chmod 700 /home/admin/.ssh
+RUN mv /var/run/nologin /var/run/nologin.bak
+
+# run service when container started - sshd
+EXPOSE 22:1122
+#CMD ["/usr/sbin/sshd", "-D"]
+
+# ----------
+# WANT run sshd and get a bash
+# ENTRYPOINT will not be override by commandline
+# ----------
+ENTRYPOINT /usr/sbin/sshd && /bin/bash

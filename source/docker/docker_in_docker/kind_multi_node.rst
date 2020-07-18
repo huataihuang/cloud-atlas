@@ -42,4 +42,19 @@ kind官方网站提供了 `kind-example-config <https://raw.githubusercontent.co
    dev-worker4          Ready    <none>   29s     v1.18.2
    dev-worker5          Ready    <none>   32s     v1.18.2
 
+.. note::
 
+   我发现物理服务器重启以后，docker容器自动恢复，则apiserver映射端口可能变化，此时使用 ``kubectl --context kind-dev get nodes`` 会显示访问拒绝。
+
+   我目前解决方法是使用 ``docker ps`` 检查当前运行实例的端口映射，例如输出::
+
+      CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                       NAMES
+      b45fbc686a7e        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker5
+      ccb37b172d80        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker4
+      ed9d75f5372c        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days           127.0.0.1:20393->6443/tcp   dev-control-plane2
+      87d67866ae4c        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days           127.0.0.1:36379->6443/tcp   dev-control-plane3
+      01e52aaad127        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days           127.0.0.1:20923->6443/tcp   dev-control-plane
+      d1e9cf091d97        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker
+      79ab28c0f6a6        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker2
+
+   则可以看到访问apiserver的端口是 ``20393 / 36379 / 20923`` ，则只需要修改一下 ``.kube/config`` 配置文件，修订访问apiserver的端口到上述3个端口之一就可以继续使用 ``kubectl`` 来管理集群了。

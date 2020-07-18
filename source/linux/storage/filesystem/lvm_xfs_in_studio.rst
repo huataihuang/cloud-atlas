@@ -167,7 +167,7 @@ LVM构建基础概念:
 
    Docker支持quota可以用来限制容器可用空间，如果要强制隔离，则可以利用LVM卷来实现。
    
-   详细的 ``store`` 卷部署使用请参考 :ref:`docker_volume` 和 :ref:`build_image_from_dockerfile` 中配置Docker使用共享卷部分。
+   详细的 ``store`` 卷部署使用请参考 :ref:`docker_volume` 和 :ref:`dockerfile` 中配置Docker使用共享卷部分。
 
 XFS
 ===========

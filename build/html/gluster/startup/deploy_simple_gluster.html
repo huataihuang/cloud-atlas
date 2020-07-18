@@ -97,10 +97,10 @@
 <li class="toctree-l3"><a class="reference internal" href="gluster_architecture.html">GlusterFS架构</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">部署简单GlusterFS集群</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">服务器准备</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">安装GlusterFS</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">配置GlusterFS</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">使用GlusterFS卷</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id10">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">安装GlusterFS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">配置GlusterFS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">使用GlusterFS卷</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -233,6 +233,20 @@
 </div>
 </li>
 </ul>
+<p>如果磁盘之前已经有分区表，但是分区表没有对齐，你没有执行 <code class="docutils literal notranslate"><span class="pre">mklabel</span> <span class="pre">gpt</span></code> 就执行 <code class="docutils literal notranslate"><span class="pre">mkpart</span></code> 就可能会提示磁盘分区从0开始对齐需要接近扇区，这个警告需要通过使用 <code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">optimal</span></code> 参数来修正:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Warning: You requested a partition from 0.00GB to 3840GB (sectors 0..7500000000).
+The closest location we can manage is 0.00GB to 0.00GB (sectors 34..2047).
+Is this still acceptable to you?
+Yes/No?
+</pre></div>
+</div>
+<p>对于原先有分区的磁盘，覆盖原先的分区表，默认是会提示WARNING的，对于脚本执行命令，需要关闭提示，则使用参数 <code class="docutils literal notranslate"><span class="pre">-s</span></code> 表示 <code class="docutils literal notranslate"><span class="pre">--script</span></code> 就不会有提示了。举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span> <span class="n">mklabel</span> <span class="n">gpt</span>
+<span class="n">parted</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="mi">0</span><span class="o">%</span> <span class="mi">100</span><span class="o">%</span>
+<span class="n">parted</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span> <span class="n">name</span> <span class="mi">1</span> <span class="n">gluster_brick1</span>
+<span class="n">mkfs</span><span class="o">.</span><span class="n">xfs</span> <span class="o">-</span><span class="n">f</span> <span class="o">-</span><span class="n">i</span> <span class="n">size</span><span class="o">=</span><span class="mi">512</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb1</span>
+</pre></div>
+</div>
 <p>此时显示分区信息:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Model</span><span class="p">:</span> <span class="n">Virtio</span> <span class="n">Block</span> <span class="n">Device</span> <span class="p">(</span><span class="n">virtblk</span><span class="p">)</span>
 <span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span><span class="p">:</span> <span class="mi">537</span><span class="n">GB</span>
@@ -281,14 +295,39 @@ vdb    253:16   0   500G  0 disk
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>挂载XFS的参数建议: <code class="docutils literal notranslate"><span class="pre">rw,inode64,noatime,nouuid</span></code> 所以上述命令可以修改:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s1">&#39;/dev/vdb1 /data/brick1 xfs rw,inode64,noatime,nouuid 1 2&#39;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+</pre></div>
+</div>
+<p>我对比了默认的 <code class="docutils literal notranslate"><span class="pre">defaults</span></code> 参数，实际上就是 <code class="docutils literal notranslate"><span class="pre">rw,relatime,attr2,inode64,noquota</span></code> ，则上述 <code class="docutils literal notranslate"><span class="pre">rw,inode64,noatime,nouuid</span></code> 实际效果仅仅是将默认的 <code class="docutils literal notranslate"><span class="pre">relatime</span></code> 修改成了 <code class="docutils literal notranslate"><span class="pre">noatime</span></code></p>
+</div>
 <p>此时可以看到 vdb1 挂载到 <code class="docutils literal notranslate"><span class="pre">/data/brick1</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb1</span> <span class="n">on</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">brick1</span> <span class="nb">type</span> <span class="n">xfs</span> <span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">attr2</span><span class="p">,</span><span class="n">inode64</span><span class="p">,</span><span class="n">noquota</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="id4">
-<h2>安装GlusterFS<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h3>批量创建文件系统脚本<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<p>服务器有多块nvme磁盘，从 <code class="docutils literal notranslate"><span class="pre">/dev/nvme0n1</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/dev/nvme11n1</span></code> 共计12块磁盘，则采用如下脚本快速完成格式化挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for i in {0..11};do
+    if [ ! -d /data/brick${i} ];then mkdir -p /data/brick${i};fi
+    parted -s -a optimal /dev/nvme${i}n1 mklabel gpt
+    parted -s -a optimal /dev/nvme${i}n1 mkpart primary xfs 0% 100%
+    parted -s -a optimal /dev/nvme${i}n1 name 1 gluster_brick${i}
+    sleep 1
+    mkfs.xfs -f -i size=512 /dev/nvme${i}n1p1
+    fstab_line=`grep &quot;/dev/nvme${i}n1p1&quot; /etc/fstab`
+    if [ ! -n &quot;$fstab_line&quot;  ];then echo &quot;/dev/nvme${i}n1p1 /data/brick${i} xfs rw,inode64,noatime,nouuid 1 2&quot; &gt;&gt; /etc/fstab;fi
+    mount /data/brick${i}
+done
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>安装GlusterFS<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>以前安装GlusterFS的方法是先下载repo仓库配置文件，例如 <a class="reference external" href="https://download.gluster.org/pub/gluster/glusterfs/LATEST/CentOS/glusterfs-rhel8.repo">glusterfs-rhel8.repo</a></p>
@@ -333,9 +372,26 @@ vdb    253:16   0   500G  0 disk
 </div>
 </li>
 </ul>
+<div class="section" id="centos-7glusterfs">
+<h3>在CentOS 7上安装GlusterFS<a class="headerlink" href="#centos-7glusterfs" title="永久链接至标题">¶</a></h3>
+<p>如果在标准的CentOS 7上，当前也是可以直接使用 SIG Yum Repos进行安装的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">centos</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">gluster</span>
+</pre></div>
 </div>
-<div class="section" id="id5">
-<h2>配置GlusterFS<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>然后安装方式同上。</p>
+<p>不过，如果你的CentOS安装没有升级到最新版本，或者是采用了CentOS的自制版本，则需要独立分发仓库配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d/CentOS-Gluster-7.repo</span></code> 和软件包签名证书文件 <code class="docutils literal notranslate"><span class="pre">/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-Storage</span></code> ，这两个文件分别是通过如下rpm包可以通过CentOS的发行版extras仓库获得:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="o">.</span><span class="mf">163.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mf">7.8</span><span class="o">.</span><span class="mi">2003</span><span class="o">/</span><span class="n">extras</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">Packages</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">gluster7</span><span class="o">-</span><span class="mf">1.0</span><span class="o">-</span><span class="mf">2.</span><span class="n">el7</span><span class="o">.</span><span class="n">centos</span><span class="o">.</span><span class="n">noarch</span><span class="o">.</span><span class="n">rpm</span>
+<span class="n">yum</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="o">.</span><span class="mf">163.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mf">7.8</span><span class="o">.</span><span class="mi">2003</span><span class="o">/</span><span class="n">extras</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">Packages</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">storage</span><span class="o">-</span><span class="n">common</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="mf">2.</span><span class="n">el7</span><span class="o">.</span><span class="n">centos</span><span class="o">.</span><span class="n">noarch</span><span class="o">.</span><span class="n">rpm</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>centos-release-gluster7-1.0-2.el7.centos.noarch 要求 centos-release &gt;= 7-5.1804.el7.centos.2</p>
+</div>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>配置GlusterFS<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>在第一台服务器上执行以下命令配置信任存储池，将7台服务器组成一个信任存储池:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">peer</span> <span class="n">probe</span> <span class="n">worker2</span>
@@ -367,8 +423,8 @@ vdb    253:16   0   500G  0 disk
 <span class="n">State</span><span class="p">:</span> <span class="n">Peer</span> <span class="ow">in</span> <span class="n">Cluster</span> <span class="p">(</span><span class="n">Connected</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="id6">
-<h3>设置GlusterFS卷<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id7">
+<h3>设置GlusterFS卷<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在 <strong>所有服务器</strong> 上执行以下命令创建一个GlusterFS卷:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">brick1</span><span class="o">/</span><span class="n">gv0</span>
@@ -563,11 +619,11 @@ vdb    253:16   0   500G  0 disk
 </div>
 </div>
 </div>
-<div class="section" id="id7">
-<h2>使用GlusterFS卷<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
-<p>通常为了结构清晰和便于维护，GlusterFS客户端和服务器是采用分离部署的。这里我们把刚才剔除掉的 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> 作为客户端来测试刚才构建的数据卷。当然，客户端和服务器端部署在相同服务器上也是可以的，但是需要确保GlusterFS服务端比客户端先启动并就绪，否则可能会导致客户端异常。</p>
 <div class="section" id="id8">
-<h3>客户端挂载GlusterFS卷<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
+<h2>使用GlusterFS卷<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<p>通常为了结构清晰和便于维护，GlusterFS客户端和服务器是采用分离部署的。这里我们把刚才剔除掉的 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> 作为客户端来测试刚才构建的数据卷。当然，客户端和服务器端部署在相同服务器上也是可以的，但是需要确保GlusterFS服务端比客户端先启动并就绪，否则可能会导致客户端异常。</p>
+<div class="section" id="id9">
+<h3>客户端挂载GlusterFS卷<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> 上创建挂载目录:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">gv0</span>
@@ -615,8 +671,8 @@ vdb    253:16   0   500G  0 disk
 </ul>
 <p>我估算了一下，12秒钟复制了 27MB*100 = 2.7GB 数据，大约写入速度是 245MB/s (连续大文件写入)</p>
 </div>
-<div class="section" id="id9">
-<h3>GlusterFS文件分布<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id10">
+<h3>GlusterFS文件分布<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h3>
 <p>上述6个brick，按照顺序排列，可以在 <code class="docutils literal notranslate"><span class="pre">worker1</span></code> 节点 <code class="docutils literal notranslate"><span class="pre">/data/brick1/gv0</span></code> 目录下看到文件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">copy</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">001</span>
 <span class="n">copy</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">004</span>
@@ -673,8 +729,8 @@ vdb    253:16   0   500G  0 disk
 </div>
 </div>
 </div>
-<div class="section" id="id10">
-<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id11">
+<h2>参考<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.gluster.org/en/latest/Quick-Start-Guide/Quickstart/">Getting started with GlusterFS - Quick Start Guide</a></p></li>
 <li><p><a class="reference external" href="https://linuxhint.com/creating-and-resizing-xfs-partitions/">Creating and Resizing XFS Partitions</a></p></li>

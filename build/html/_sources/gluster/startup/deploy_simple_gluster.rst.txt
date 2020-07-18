@@ -31,6 +31,20 @@
    name 1 gluster_brick1
    print
 
+如果磁盘之前已经有分区表，但是分区表没有对齐，你没有执行 ``mklabel gpt`` 就执行 ``mkpart`` 就可能会提示磁盘分区从0开始对齐需要接近扇区，这个警告需要通过使用 ``-a optimal`` 参数来修正::
+
+   Warning: You requested a partition from 0.00GB to 3840GB (sectors 0..7500000000).
+   The closest location we can manage is 0.00GB to 0.00GB (sectors 34..2047).
+   Is this still acceptable to you?
+   Yes/No?
+
+对于原先有分区的磁盘，覆盖原先的分区表，默认是会提示WARNING的，对于脚本执行命令，需要关闭提示，则使用参数 ``-s`` 表示 ``--script`` 就不会有提示了。举例::
+
+   parted -s -a optimal /dev/vdb mklabel gpt
+   parted -s -a optimal /dev/vdb mkpart primary 0% 100%
+   parted -s -a optimal /dev/vdb name 1 gluster_brick1
+   mkfs.xfs -f -i size=512 /dev/vdb1
+
 此时显示分区信息::
 
    Model: Virtio Block Device (virtblk)
@@ -74,9 +88,34 @@ XFS文件系统
    echo '/dev/vdb1 /data/brick1 xfs defaults 1 2' >> /etc/fstab
    mount -a && mount
 
+.. note::
+
+   挂载XFS的参数建议: ``rw,inode64,noatime,nouuid`` 所以上述命令可以修改::
+
+      echo '/dev/vdb1 /data/brick1 xfs rw,inode64,noatime,nouuid 1 2' >> /etc/fstab
+
+   我对比了默认的 ``defaults`` 参数，实际上就是 ``rw,relatime,attr2,inode64,noquota`` ，则上述 ``rw,inode64,noatime,nouuid`` 实际效果仅仅是将默认的 ``relatime`` 修改成了 ``noatime``
+
 此时可以看到 vdb1 挂载到 ``/data/brick1`` ::
 
    /dev/vdb1 on /data/brick1 type xfs (rw,relatime,attr2,inode64,noquota)
+
+批量创建文件系统脚本
+----------------------
+
+服务器有多块nvme磁盘，从 ``/dev/nvme0n1`` 到 ``/dev/nvme11n1`` 共计12块磁盘，则采用如下脚本快速完成格式化挂载::
+
+   for i in {0..11};do
+       if [ ! -d /data/brick${i} ];then mkdir -p /data/brick${i};fi
+       parted -s -a optimal /dev/nvme${i}n1 mklabel gpt
+       parted -s -a optimal /dev/nvme${i}n1 mkpart primary xfs 0% 100%
+       parted -s -a optimal /dev/nvme${i}n1 name 1 gluster_brick${i}
+       sleep 1
+       mkfs.xfs -f -i size=512 /dev/nvme${i}n1p1
+       fstab_line=`grep "/dev/nvme${i}n1p1" /etc/fstab`
+       if [ ! -n "$fstab_line"  ];then echo "/dev/nvme${i}n1p1 /data/brick${i} xfs rw,inode64,noatime,nouuid 1 2" >> /etc/fstab;fi
+       mount /data/brick${i}
+   done
 
 安装GlusterFS
 ================
@@ -114,6 +153,25 @@ XFS文件系统
 - 检查服务状态::
 
    systemctl status glusterd
+
+在CentOS 7上安装GlusterFS
+---------------------------
+
+如果在标准的CentOS 7上，当前也是可以直接使用 SIG Yum Repos进行安装的::
+
+   yum install centos-release-gluster
+
+然后安装方式同上。
+
+不过，如果你的CentOS安装没有升级到最新版本，或者是采用了CentOS的自制版本，则需要独立分发仓库配置文件 ``/etc/yum.repos.d/CentOS-Gluster-7.repo`` 和软件包签名证书文件 ``/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-Storage`` ，这两个文件分别是通过如下rpm包可以通过CentOS的发行版extras仓库获得::
+
+   yum install http://mirrors.163.com/centos/7.8.2003/extras/x86_64/Packages/centos-release-gluster7-1.0-2.el7.centos.noarch.rpm
+   yum install http://mirrors.163.com/centos/7.8.2003/extras/x86_64/Packages/centos-release-storage-common-2-2.el7.centos.noarch.rpm
+
+.. note::
+
+   centos-release-gluster7-1.0-2.el7.centos.noarch 要求 centos-release >= 7-5.1804.el7.centos.2
+
 
 配置GlusterFS
 =================
