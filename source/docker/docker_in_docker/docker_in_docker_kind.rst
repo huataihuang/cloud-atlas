@@ -19,7 +19,13 @@ Docker in Docker部署工具kind
 为了达到最佳性能和功能，我在 Docker in Docker 的测试运行环境中，采用的是:
 
 - CentOS 8 - 可以直接 :ref:`install_centos8` 或者 :ref:`upgrade_centos_7_to_8`
-- Docker-CE最新版本 - :ref:`install_docker_centos8`
+- Docker-CE最新版本 - :ref:`install_docker_centos8` 这里我采用docker-ce最新版本::
+
+   dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+   dnf install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.13-3.2.el7.x86_64.rpm
+   dnf install docker-ce
+   systemctl enable --now docker
+
 - Go最新版本 - :ref:`install_golang` 源代码编译KIND需要go 1.14以上版本支持
 
 安装kind
@@ -81,6 +87,10 @@ Docker in Docker部署工具kind
 
    NAME                 STATUS   ROLES    AGE    VERSION
    kind-control-plane   Ready    master   148m   v1.18.2
+
+.. note::
+
+   上述简单的部署kind，默认仅部署了单机集群，并没有体现出趣味。如果你更感兴趣是部署多节点集群，则可以参考 :ref:`kind_multi_node` 来部署一个完整的集群。
 
 参考
 =======

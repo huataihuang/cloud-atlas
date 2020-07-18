@@ -1,4 +1,4 @@
-.. _building-a-docker-application:
+.. _build_docker_app:
 
 ==========================
 构建Docker应用程序

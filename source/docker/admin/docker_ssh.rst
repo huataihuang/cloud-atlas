@@ -12,7 +12,7 @@ Docker容器中运行ssh服务
 
    以下案例在Ubuntu 18.04 官方镜像上建立的容器中安装和运行sshd服务，方便开发测试的案例。
 
-   启动容器方法参考 :ref:`assign_static_ip_to_docker_container`
+   启动容器方法参考 :ref:`container_static_ip`
 
 - 启动容器::
 
@@ -59,7 +59,7 @@ Docker容器中运行ssh服务
 
 .. note::
 
-   虽然上述通过命令方式一点点积累也能够搞好镜像，并且能让别人能参考这篇文档来完成镜像制作，不过毕竟还是一个重复的手工操作。Docker为了方便系统管理员能够自己定制镜像，提供了一个 :ref:`build_image_from_dockerfile`
+   虽然上述通过命令方式一点点积累也能够搞好镜像，并且能让别人能参考这篇文档来完成镜像制作，不过毕竟还是一个重复的手工操作。Docker为了方便系统管理员能够自己定制镜像，提供了一个 :ref:`dockerfile`
 
 参考
 =====

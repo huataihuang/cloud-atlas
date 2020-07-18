@@ -17,7 +17,7 @@ Docker 提供了 ``restart policies`` 来控制容器退出或者Docker重启时
 
 .. note::
 
-   Docker的重启策略和 ``dockerd`` 的 ``--live-restore`` 开关是不同的。 ``--live-restore`` 开关允许在Docker升级的时候保持容器继续运行，虽然升级过程中容器的网络和用户输入是中断的。请参考 :ref:`keep_containers_alive_during_daemon_downtime`
+   Docker的重启策略和 ``dockerd`` 的 ``--live-restore`` 开关是不同的。 ``--live-restore`` 开关允许在Docker升级的时候保持容器继续运行，虽然升级过程中容器的网络和用户输入是中断的。请参考 :ref:`container_live_restore`
 
 使用重启策略
 --------------

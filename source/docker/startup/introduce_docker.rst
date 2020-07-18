@@ -21,6 +21,13 @@ Docker 利用现有的 Linux 容器技术，以不同方式将其封装及扩展
 
 对实施快速迭代开发模式的开发者来说，Docker 容器能迅速启动至关重要，因为他们可以很快看到代码变更后的结果。容器能保障的可移植性及隔离特性，使得开发与运维部门之间更容易协作，因为开发者知道他们的代码在不同环境下都能工作，而运维部门只需专注于容器的托管及服务编排，而无需担心任何关于代码的事。
 
+- Docker的快速理解：
+
+Docker就是通过中心化的registry提供镜像下载到服务器本地，然后在服务器本地通过镜像创建实例运行，所有的操作仅仅通过 ``docker pull`` ``docker build`` ``docker run`` 等简单命令就可以实现。
+
+.. figure:: ../../_static/docker/startup/docker_simple_architecture.png
+   :scale: 50
+
 Docker生态
 =============
 
@@ -37,7 +44,7 @@ Docker带来的DevOps改变
 
 `Docker in Practice <https://www.amazon.cn/dp/B079GQV832>`_ 的示意图非常形象：
 
-.. image:: ../../_static/docker/devops_with_docker.png
+.. figure:: ../../_static/docker/devops_with_docker.png
    :scale: 50
 
 可以看到，虚拟机(vagrant)、自动编译、测试、部署系统(jenkins)和配置管理系统（chef）被融合到Docker系统中，成为一个整体，通过Docker build来实现软件持续交付的完整流程。
@@ -46,7 +53,7 @@ Docker带来的DevOps改变
 
 使用Docker之后，配置管理被分解成资源管理：执行 ``docker run`` 下载环境的镜像并运行。由于容器不需要像虚拟机那样模拟完整x86硬件，所以消耗host硬件资源大为减少，启动和销毁速度更快。容器镜像中包含了所有运行应用的组件，包括OS、软件、配置，把复杂性封装在容器中，只要在最初构建镜像时完成了一次复杂工作，就可以在后续部署时非常简洁地运行。
 
-.. image:: ../../_static/docker/before_and_after_docker.png
+.. figure:: ../../_static/docker/before_and_after_docker.png
    :scale: 50
 
 .. note::

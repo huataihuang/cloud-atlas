@@ -1,4 +1,4 @@
-.. _assign_static_ip_to_docker_container:
+.. _container_static_ip:
 
 =======================
 Docker容器分配静态IP

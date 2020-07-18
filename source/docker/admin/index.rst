@@ -1,4 +1,4 @@
-.. _docker_administer:
+.. _docker_admin:
 
 =================================
 Docker 管理
@@ -7,13 +7,13 @@ Docker 管理
 .. toctree::
    :maxdepth: 1
 
-   building-a-docker-application.rst
-   remote-access-dockerd.rst
-   running-containers-as-daemons.rst
-   keep_containers_alive_during_daemon_downtime.rst
-   assign_static_ip_to_docker_container.rst
+   build_docker_app.rst
+   remote_access_dockerd.rst
+   run_container_as_daemon.rst
+   container_live_restore.rst
+   container_static_ip.rst
    docker_ssh.rst
-   build_image_from_dockerfile.rst
+   dockerfile.rst
    start_containers_automatically.rst
    docker_timezone.rst
 

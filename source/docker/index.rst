@@ -10,11 +10,12 @@ Docker Atlas
    startup/index
    docker_in_docker/index
    moby/index
-   administer/index
+   admin/index
    applications/index
    storage/index
    network/index
    gpu/index
+   logs/index
 
 .. only::  subproject and html
 

@@ -1,4 +1,4 @@
-.. _keep_containers_alive_during_daemon_downtime:
+.. _container_live_restore:
 
 ====================================
 Docker daemon停止时保持容器运行

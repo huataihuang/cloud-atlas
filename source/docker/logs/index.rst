@@ -1,14 +1,11 @@
-.. _android_develop:
+.. _docker_logs:
 
 =================================
-Android 开发
+Docker 管理
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   diving_android_code.rst
-   startup/index
 
 .. only::  subproject and html
 
