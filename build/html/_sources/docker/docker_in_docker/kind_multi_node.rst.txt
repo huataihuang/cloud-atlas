@@ -42,19 +42,29 @@ kind官方网站提供了 `kind-example-config <https://raw.githubusercontent.co
    dev-worker4          Ready    <none>   29s     v1.18.2
    dev-worker5          Ready    <none>   32s     v1.18.2
 
-.. note::
+通过 ``docker ps`` 命令可以看到，kind还多启动了一个容器来运行haproxy，以提供外部访问这个集群的apiserver的负载均衡分发，例如以下案例中端口 ``33401`` 就是访问该集群的apiserver端口(见第一行)::
 
-   我发现物理服务器重启以后，docker容器自动恢复，则apiserver映射端口可能变化，此时使用 ``kubectl --context kind-dev get nodes`` 会显示访问拒绝。
+   #docker ps
+   CONTAINER ID        IMAGE                          COMMAND                  CREATED             STATUS              PORTS                       NAMES
+   48309bdd8439        kindest/haproxy:2.1.1-alpine   "/docker-entrypoint.…"   42 hours ago        Up 42 hours         127.0.0.1:33401->6443/tcp   dev-external-load-balancer
+   b0f8267aa09a        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours                                     dev-worker2
+   524c7b50790b        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours                                     dev-worker
+   9790bbe67900        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours         127.0.0.1:21003->6443/tcp   dev-control-plane
+   21c86c9750dd        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours         127.0.0.1:32351->6443/tcp   dev-control-plane3
+   8abd58281f54        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours                                     dev-worker5
+   634df18e345e        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours                                     dev-worker4
+   06d46f9ff05e        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours         127.0.0.1:14861->6443/tcp   dev-control-plane2
+   a8f88cb59b1b        kindest/node:v1.18.2           "/usr/local/bin/entr…"   42 hours ago        Up 42 hours                                     dev-worker3
 
-   我目前解决方法是使用 ``docker ps`` 检查当前运行实例的端口映射，例如输出::
+所以，在运行 kind 的服务器上执行::
 
-      CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                       NAMES
-      b45fbc686a7e        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker5
-      ccb37b172d80        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker4
-      ed9d75f5372c        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days           127.0.0.1:20393->6443/tcp   dev-control-plane2
-      87d67866ae4c        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days           127.0.0.1:36379->6443/tcp   dev-control-plane3
-      01e52aaad127        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days           127.0.0.1:20923->6443/tcp   dev-control-plane
-      d1e9cf091d97        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker
-      79ab28c0f6a6        kindest/node:v1.18.2   "/usr/local/bin/entr…"   5 weeks ago         Up 9 days                                       dev-worker2
+   kubectl cluster-info
 
-   则可以看到访问apiserver的端口是 ``20393 / 36379 / 20923`` ，则只需要修改一下 ``.kube/config`` 配置文件，修订访问apiserver的端口到上述3个端口之一就可以继续使用 ``kubectl`` 来管理集群了。
+可以看到如下输出::
+
+   Kubernetes master is running at https://127.0.0.1:33401
+   KubeDNS is running at https://127.0.0.1:33401/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+   To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+
