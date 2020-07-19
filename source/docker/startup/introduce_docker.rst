@@ -159,4 +159,4 @@ Docker容器的限制（缺点）
 
 .. note::
 
-   `Rook <https://rook.io>`_ 是基于 `Ceph <https://ceph.com>`_ 分布式存储在Kubernetes中通过容器运行的Cloud Native服务，是一种分布式存储的容器实现，可以作为方案借鉴。
+   :ref:`rook` 是分布式存储在Kubernetes中通过容器运行的Cloud Native服务，是一种分布式存储的容器实现，可以作为方案借鉴。
