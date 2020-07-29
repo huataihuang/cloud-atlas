@@ -1,15 +1,13 @@
-.. _kubernetes_scheduling:
+.. _kubernetes_cantainers:
 
 ======================
-Kubernetes调度
+Kubernetes的容器
 ======================
 
 .. toctree::
    :maxdepth: 1
 
-   kube-scheduler.rst
-   kube-scheduling-framework.rst
-   kube-scheduling-tuning.rst
+   k8s_container_image.rst
 
 .. only::  subproject and html
 

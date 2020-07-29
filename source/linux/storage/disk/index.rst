@@ -1,15 +1,14 @@
-.. _linux_storage:
+.. _linux_disk:
 
 =================================
-Linux存储
+Linux磁盘
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   disk/index
-   filesystem/index
-   stratis/index
+   linux_partition.rst
+   parted.rst
 
 .. only::  subproject and html
 

@@ -117,6 +117,13 @@ CentOS/RHEL 7.4+
    # Enable Docker
    systemctl enable docker
 
+CentOS 8.2
+==============
+
+近期 :ref:`upgrade_centos_7_to_8` 再 :ref:`install_docker_centos8` ，过程会比较折腾，但是可以在最新的内核和发行版上部署完整的Kubernetes环境。
+
+我将补充CentSO 8平台部署Kubernetes和之前在CentOS 7上部署 :ref:`ha_k8s` 的不同。
+
 .. note::
 
    强烈推荐采用pssh工具来并发执行安装，例如将上述所有主机IP地址保存为 ``kube`` 文件，然后执行以下命令批量安装更新::

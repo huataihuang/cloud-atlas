@@ -11,7 +11,7 @@ Docker in Docker
    docker_in_docker_kind.rst
    kind_cluster.rst
    kind_multi_node.rst
-   build_kind_image.rst
+   load_kind_image.rst
 
 .. only::  subproject and html
 
