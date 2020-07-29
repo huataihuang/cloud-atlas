@@ -8,7 +8,7 @@ macOS上使用多个JDK版本
 
 .. note::
 
-   使用Oracle官方提供的JDK软件安装包安装JDK之后，如果要切换到社区维护的不同JDK版本，则需要先卸载Oracle Java。不过卸载方法有些复杂。我以前的一些实践记录 `在Mac OS X上安装Java多个版本 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/mac/multiple_versions_java_in_os_x.md>`_`
+   使用Oracle官方提供的JDK软件安装包安装JDK之后，如果要切换到社区维护的不同JDK版本，则需要先卸载Oracle Java。不过卸载方法有些复杂。我以前的一些实践记录 `在Mac OS X上安装Java多个版本 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/mac/multiple_versions_java_in_os_x.md>`_
 
 开源的OpenJDK维护了不同版本的JDK，也包括了JDK 8。所以，如果你个人开发使用，可以使用OpenJDK来代替Oracle的JDK。
 

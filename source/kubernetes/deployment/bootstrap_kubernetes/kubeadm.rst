@@ -201,6 +201,12 @@ CentOS, RHEL, Fedora
 
    对于采用NAT模式的KVM虚拟机集群，只需要在Host物理主机上启用VPN客户端就可以使得各节点获得正常的Internet访问。
 
+   不过，使用 openconnect 翻墙也可能导致KVM虚拟服务器网络断开(路由冲突?)，所以，我也采用了 :ref:`squid` 构建了 :ref:`squid_socks_peer` 实现无限上网来帮助部署Kubernetes。
+
+.. note::
+
+   目前google软件仓库中Kubernetes只有针对el6和el7版本软件包，所以即使是CentOS 8也只能采用上述el7软件仓库安装。
+
 .. note::
 
    批量处理命令::

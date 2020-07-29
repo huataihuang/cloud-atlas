@@ -7,6 +7,7 @@ Linux存储
 .. toctree::
    :maxdepth: 1
 
+   disk/index
    filesystem/index
    stratis/index
 

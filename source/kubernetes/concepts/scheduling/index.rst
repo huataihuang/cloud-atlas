@@ -10,3 +10,10 @@ Kubernetes调度
    kube-scheduler.rst
    kube-scheduling-framework.rst
    kube-scheduling-tuning.rst
+
+.. only::  subproject and html
+
+   Indices
+   =======
+
+   * :ref:`genindex`

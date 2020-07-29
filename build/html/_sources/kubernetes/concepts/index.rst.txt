@@ -10,6 +10,7 @@ Kubernetes概念辨析
    :maxdepth: 1
 
    kubernetes_components.rst
+   containers/index
    objects/index
    workloads/index
    services_networking/index

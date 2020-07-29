@@ -33,6 +33,7 @@ Kubernetes是Google基于其内部容器管理技术研发的开源实现，简�
    access_application/index
    configure/index
    network/index
+   rook/index
    production/index
    service_mesh/index
    istio/index

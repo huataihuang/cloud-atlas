@@ -13,6 +13,10 @@ oom-killer对于Linux用户来说是"臭名昭著"的最坏情况，当Linux内�
    - `Why are low memory conditions handled so badly? <https://www.reddit.com/r/linux/comments/56r4xj/why_are_low_memory_conditions_handled_so_badly/>`_
    - `Is it possible to make the OOM killer intervent earlier? <https://superuser.com/questions/406101/is-it-possible-to-make-the-oom-killer-intervent-earlier>`_
 
+.. note::
+
+   在 Fedora 32 版本中，开始默认激活 EarlyOOM 功能，这代表着主流社区尝试解决OOM的努力，也表明EarlyOOM稳定可靠性得到认可。
+
 earlyoom工作原理
 ==================
 
