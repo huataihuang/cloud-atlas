@@ -9,6 +9,7 @@ RedHat Linux 系统管理
 
    init_centos.rst
    dnf.rst
+   firewalld.rst
 
 .. only::  subproject and html
 

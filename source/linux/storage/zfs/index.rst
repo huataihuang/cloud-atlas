@@ -1,17 +1,13 @@
-.. _linux_storage:
+.. _zfs:
 
 =================================
-Linux存储
+ZFS - Linux存储系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   disk/index
-   filesystem/index
-   zfs/index
-   btrfs/index
-   stratis/index
+   introduce_zfs.rst
 
 .. only::  subproject and html
 

@@ -1,17 +1,12 @@
-.. _linux_storage:
+.. _btrfs:
 
 =================================
-Linux存储
+Btrfs - Linux存储系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   disk/index
-   filesystem/index
-   zfs/index
-   btrfs/index
-   stratis/index
 
 .. only::  subproject and html
 

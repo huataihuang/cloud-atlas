@@ -79,7 +79,7 @@ Keepalived提供Kubernetes集群Master VIP 192.168.122.10 ( :ref:`studio_ip` )�
    }
    
    vrrp_instance haproxy-vip {
-       state BACKUP
+       state MASTER
        priority 101
        interface eth0
        virtual_router_id 47
@@ -103,13 +103,21 @@ Keepalived提供Kubernetes集群Master VIP 192.168.122.10 ( :ref:`studio_ip` )�
 
 .. note::
 
-   对于Keepalived其他节点，例如 ``haproxy-2`` ，需要修订 ``unicast`` 部分，将对等部分互换，例如::
+   对于Keepalived其他节点，例如 ``haproxy-2`` ，需要修订 ``unicast`` 部分，将对等部分互换。此外， ``state BACKUP`` 和 ``priority 100`` 表示后备节点::
 
-      unicast_src_ip 192.168.122.9
-      unicast_peer {
-          192.168.122.8
-          # 可配置多个peer
-          # 192.168.122.X
+      vrrp_instance haproxy-vip {
+          state BACKUP
+          priority 100
+          interface eth0
+          virtual_router_id 47
+          advert_int 3
+
+          unicast_src_ip 192.168.122.9
+          unicast_peer {
+              192.168.122.8
+              # 可配置多个peer
+              # 192.168.122.X
+          }
       }
 
 .. note::
@@ -150,6 +158,14 @@ Keepalived提供Kubernetes集群Master VIP 192.168.122.10 ( :ref:`studio_ip` )�
           valid_lft forever preferred_lft forever
 
 注意：浮动VIP只绑定在 ``haproxy-1`` 和 ``haproxy-2`` 的其中一台网卡上，所以只有一个服务器能够启动haproxy(因为启动时缺少浮动IP ``192.168.122.10`` 则不能启动haproxy)。
+
+.. note::
+
+   采用Keepalived管理HAProxy也有一个不足，就是只使用了一台HAProxy的负载能力。为了能够提供更多的HAProxy负载均衡能力，我考虑可以采用两两配对方式，分别在多对服务器上启用keeplived来实现对不同端口对HAProxy进行监控和提供浮动VIP。
+
+   在HAProxy前端，则部署Nginx做反向代理，Nginx实现简单的四层负载均衡。Nginx对外采用DNS轮询方式实现GSLB。
+
+   GSLB结合脚本侦测和DDNS动态更新DNS记录，自动摘除故障的Nginx节点。
 
 HAProxy
 -----------
@@ -256,4 +272,4 @@ keepalived启动无问题，但是haproxy启动显示无法绑定服务端口::
 - `Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA <https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/>`_
 - `How To Configure A High Available Load-balancer With HAProxy And Keepalived <https://www.unixmen.com/configure-high-available-load-balancer-haproxy-keepalived/>`_
 - `INSTALL HAPROXY AND KEEPALIVED ON CENTOS 7 FOR MARIADB CLUSTER <https://snapdev.net/2015/09/08/install-haproxy-and-keepalived-on-centos-7-for-mariadb-cluster/>`_
-  `
+- `Managing Failovers with Keepalived & HAproxy <https://medium.com/@sliit.sk95/managing-failovers-with-keepalived-haproxy-c8de98d0c96e>`_

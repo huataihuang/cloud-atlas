@@ -8,3 +8,4 @@ Kubernetes存储
    :maxdepth: 1
 
    kubernetes_volumes.rst
+   kadalu/index
