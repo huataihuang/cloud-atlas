@@ -14,7 +14,6 @@ Kubernetes概念辨析
    objects/index
    workloads/index
    services_networking/index
-   storage/index
    configuration/index
    cluster_administration/index
    scheduling/index

@@ -130,6 +130,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../access_application/index.html">Kubernetes访问应用</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../configure/index.html">Kubernetes 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Kubernetes网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../storage/index.html">Kubernetes存储</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../rook/index.html">Rook - 云原生存储调度器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../production/index.html">Kubernetes生产环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../service_mesh/index.html">Service Mesh</a></li>
@@ -314,7 +315,7 @@
 <span class="p">}</span>
 
 <span class="n">vrrp_instance</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">vip</span> <span class="p">{</span>
-    <span class="n">state</span> <span class="n">BACKUP</span>
+    <span class="n">state</span> <span class="n">MASTER</span>
     <span class="n">priority</span> <span class="mi">101</span>
     <span class="n">interface</span> <span class="n">eth0</span>
     <span class="n">virtual_router_id</span> <span class="mi">47</span>
@@ -339,12 +340,20 @@
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>对于Keepalived其他节点，例如 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> ，需要修订 <code class="docutils literal notranslate"><span class="pre">unicast</span></code> 部分，将对等部分互换，例如:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unicast_src_ip</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.9</span>
-<span class="n">unicast_peer</span> <span class="p">{</span>
-    <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.8</span>
-    <span class="c1"># 可配置多个peer</span>
-    <span class="c1"># 192.168.122.X</span>
+<p>对于Keepalived其他节点，例如 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> ，需要修订 <code class="docutils literal notranslate"><span class="pre">unicast</span></code> 部分，将对等部分互换。此外， <code class="docutils literal notranslate"><span class="pre">state</span> <span class="pre">BACKUP</span></code> 和 <code class="docutils literal notranslate"><span class="pre">priority</span> <span class="pre">100</span></code> 表示后备节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vrrp_instance</span> <span class="n">haproxy</span><span class="o">-</span><span class="n">vip</span> <span class="p">{</span>
+    <span class="n">state</span> <span class="n">BACKUP</span>
+    <span class="n">priority</span> <span class="mi">100</span>
+    <span class="n">interface</span> <span class="n">eth0</span>
+    <span class="n">virtual_router_id</span> <span class="mi">47</span>
+    <span class="n">advert_int</span> <span class="mi">3</span>
+
+    <span class="n">unicast_src_ip</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.9</span>
+    <span class="n">unicast_peer</span> <span class="p">{</span>
+        <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.8</span>
+        <span class="c1"># 可配置多个peer</span>
+        <span class="c1"># 192.168.122.X</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -392,6 +401,12 @@
 </pre></div>
 </div>
 <p>注意：浮动VIP只绑定在 <code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 的其中一台网卡上，所以只有一个服务器能够启动haproxy(因为启动时缺少浮动IP <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 则不能启动haproxy)。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>采用Keepalived管理HAProxy也有一个不足，就是只使用了一台HAProxy的负载能力。为了能够提供更多的HAProxy负载均衡能力，我考虑可以采用两两配对方式，分别在多对服务器上启用keeplived来实现对不同端口对HAProxy进行监控和提供浮动VIP。</p>
+<p>在HAProxy前端，则部署Nginx做反向代理，Nginx实现简单的四层负载均衡。Nginx对外采用DNS轮询方式实现GSLB。</p>
+<p>GSLB结合脚本侦测和DDNS动态更新DNS记录，自动摘除故障的Nginx节点。</p>
+</div>
 </div>
 <div class="section" id="haproxy">
 <h3>HAProxy<a class="headerlink" href="#haproxy" title="永久链接至标题">¶</a></h3>
@@ -645,8 +660,8 @@ listen stats
 <ul class="simple">
 <li><p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a></p></li>
 <li><p><a class="reference external" href="https://www.unixmen.com/configure-high-available-load-balancer-haproxy-keepalived/">How To Configure A High Available Load-balancer With HAProxy And Keepalived</a></p></li>
-<li><p><a class="reference external" href="https://snapdev.net/2015/09/08/install-haproxy-and-keepalived-on-centos-7-for-mariadb-cluster/">INSTALL HAPROXY AND KEEPALIVED ON CENTOS 7 FOR MARIADB CLUSTER</a>
-`</p></li>
+<li><p><a class="reference external" href="https://snapdev.net/2015/09/08/install-haproxy-and-keepalived-on-centos-7-for-mariadb-cluster/">INSTALL HAPROXY AND KEEPALIVED ON CENTOS 7 FOR MARIADB CLUSTER</a></p></li>
+<li><p><a class="reference external" href="https://medium.com/&#64;sliit.sk95/managing-failovers-with-keepalived-haproxy-c8de98d0c96e">Managing Failovers with Keepalived &amp; HAproxy</a></p></li>
 </ul>
 </div>
 </div>

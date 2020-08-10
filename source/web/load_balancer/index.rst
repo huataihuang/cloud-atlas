@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    lvs/index
+   haproxy/index
 
 .. only::  subproject and html
 

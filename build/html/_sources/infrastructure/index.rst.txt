@@ -12,6 +12,7 @@ Infrastructure Atlas
    :maxdepth: 1
 
    wikipedia_base.rst
+   fedoraproject_base.rst
 
 .. only::  subproject and html
 

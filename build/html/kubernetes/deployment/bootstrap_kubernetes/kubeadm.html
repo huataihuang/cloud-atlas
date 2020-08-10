@@ -380,6 +380,7 @@
 <span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kubenode</span> <span class="s1">&#39;sudo firewall-cmd --zone=public --add-port=30000-32767/tcp --permanent&#39;</span>
 </pre></div>
 </div>
+<p>为了简化防火墙管理，我将iptables转化成采用firewalld管理。参考 <a class="reference internal" href="../../../linux/redhat_linux/admin/firewalld.html#firewalld"><span class="std std-ref">firewalld防护墙服务</span></a> 启用防火墙配置，按照上文中设置好必要的开放端口才能够正常启动kubelet。</p>
 </div>
 </div>
 </div>
@@ -476,6 +477,9 @@
 </div>
 </div>
 </div>
+</div>
+<div class="section" id="id5">
+<h2>不同发行版安装方法<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <div class="section" id="ubuntu-debian">
 <h3>Ubuntu, Debian<a class="headerlink" href="#ubuntu-debian" title="永久链接至标题">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">apt</span><span class="o">-</span><span class="n">transport</span><span class="o">-</span><span class="n">https</span> <span class="n">curl</span>
@@ -514,7 +518,7 @@
 <p class="admonition-title">注解</p>
 <p>由于Kubernetes软件仓库由 “不存在公司” Google提供，所以需要 <strong>翻墙</strong> <a class="reference external" href="https://movie.douban.com/subject/1292224/">飞越疯人院</a> ，请参考 <a class="reference internal" href="../../../linux/security/vpn/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 安装。</p>
 <p>对于采用NAT模式的KVM虚拟机集群，只需要在Host物理主机上启用VPN客户端就可以使得各节点获得正常的Internet访问。</p>
-<p>不过，使用 openconnect 翻墙也可能导致KVM虚拟服务器网络断开(路由冲突?)，所以，我也采用了 <a class="reference internal" href="../../../web/proxy/squid/index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 构建了 <a class="reference internal" href="../../../web/proxy/squid/squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 实现无限上网来帮助部署Kubernetes。</p>
+<p>不过，使用 openconnect 翻墙也可能导致KVM虚拟服务器网络断开(路由冲突?)，所以，我 <strong>最终</strong> 采用了 <a class="reference internal" href="../../../web/proxy/squid/index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 构建了 <a class="reference internal" href="../../../web/proxy/squid/squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 实现无限上网来帮助部署Kubernetes。</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -524,7 +528,6 @@
 <p class="admonition-title">注解</p>
 <p>批量处理命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
-<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
 <span class="p">[</span><span class="n">kubernetes</span><span class="p">]</span>
 <span class="n">name</span><span class="o">=</span><span class="n">Kubernetes</span>
 <span class="n">baseurl</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">el7</span><span class="o">-</span><span class="n">x86_64</span>
@@ -542,6 +545,24 @@
 </pre></div>
 </div>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>注意，此时kubelet服务还启动不了，因为默认的服务配置 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf</span></code> 所配置的 <code class="docutils literal notranslate"><span class="pre">[Service]</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&quot;</span>
+<span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&quot;</span>
+</pre></div>
+</div>
+<p>实际上还不存在，需要等下一步配置bootstrap才能具备。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>目前已经具备了部署Kubernetes集群的条件，所以接下来请跳到：</p>
+<ul class="simple">
+<li><p>如果安装单节点，则 <a class="reference internal" href="single_master_k8s.html#single-master-k8s"><span class="std std-ref">创建单一控制平面(单master)集群</span></a></p></li>
+<li><p>如果安装多节点高可用，则 <a class="reference internal" href="create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> (需要先 <a class="reference internal" href="ha_k8s_lb.html#ha-k8s-lb"><span class="std std-ref">高可用k8s的Master负载均衡</span></a> )</p></li>
+</ul>
+</div>
+<p><strong>本文下面部分仅是一些调试信息，如无必要可以忽略。</strong></p>
 </div>
 </div>
 <div class="section" id="kubeletcgroup-driver">
@@ -709,8 +730,8 @@
 <p><a class="reference external" href="https://lwn.net/Articles/601923/">unified-hierarchy</a> 是下一代cgrooup v2接口的特性，请参考 <a class="reference external" href="https://qconlondon.com/system/files/presentation-slides/cgroupv2-qcon.pdf">cgroupv2: Linux’s new unified control group system</a> 介绍。目前看，内核 4.6以上结合systemd v226以上能够实现这个特性。</p>
 </div>
 </div>
-<div class="section" id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">Installing kubeadm</a></p></li>
 <li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/troubleshooting-kubeadm/">Troubleshooting kubeadm</a></p></li>

@@ -76,6 +76,8 @@ TCP    入     30000-32767 节点端口服务             All
       pssh -ih kubenode 'sudo firewall-cmd --zone=public --add-port=10250/tcp --permanent'
       pssh -ih kubenode 'sudo firewall-cmd --zone=public --add-port=30000-32767/tcp --permanent'
 
+   为了简化防火墙管理，我将iptables转化成采用firewalld管理。参考 :ref:`firewalld` 启用防火墙配置，按照上文中设置好必要的开放端口才能够正常启动kubelet。
+
 安装runtime
 =============
 
@@ -157,6 +159,8 @@ CRI0-O      /var/run/crio/crio.sock
       pssh -ih kube "sudo cp /tmp/k8s.conf /etc/sysctl.d/k8s.conf"
       pssh -ih kube "sudo sysctl --system"
 
+不同发行版安装方法
+===================
 
 Ubuntu, Debian
 ----------------
@@ -201,7 +205,7 @@ CentOS, RHEL, Fedora
 
    对于采用NAT模式的KVM虚拟机集群，只需要在Host物理主机上启用VPN客户端就可以使得各节点获得正常的Internet访问。
 
-   不过，使用 openconnect 翻墙也可能导致KVM虚拟服务器网络断开(路由冲突?)，所以，我也采用了 :ref:`squid` 构建了 :ref:`squid_socks_peer` 实现无限上网来帮助部署Kubernetes。
+   不过，使用 openconnect 翻墙也可能导致KVM虚拟服务器网络断开(路由冲突?)，所以，我 **最终** 采用了 :ref:`squid` 构建了 :ref:`squid_socks_peer` 实现无限上网来帮助部署Kubernetes。
 
 .. note::
 
@@ -211,7 +215,6 @@ CentOS, RHEL, Fedora
 
    批量处理命令::
 
-      cat <<EOF > kubernetes.repo
       cat <<EOF > kubernetes.repo
       [kubernetes]
       name=Kubernetes
@@ -227,6 +230,24 @@ CentOS, RHEL, Fedora
 
       pssh -ih kube 'sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes'
       pssh -ih kube 'sudo systemctl enable --now kubelet'
+
+.. warning::
+
+   注意，此时kubelet服务还启动不了，因为默认的服务配置 ``/usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf`` 所配置的 ``[Service]`` 参数::
+
+      Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+      Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+
+   实际上还不存在，需要等下一步配置bootstrap才能具备。
+
+.. note::
+
+   目前已经具备了部署Kubernetes集群的条件，所以接下来请跳到：
+
+   - 如果安装单节点，则 :ref:`single_master_k8s`
+   - 如果安装多节点高可用，则 :ref:`create_ha_k8s` (需要先 :ref:`ha_k8s_lb` )
+
+**本文下面部分仅是一些调试信息，如无必要可以忽略。**
 
 在管控平台节点配置kubelet使用cgroup driver
 =============================================

@@ -9,6 +9,8 @@ Linux存储
 
    disk/index
    filesystem/index
+   zfs/index
+   btrfs/index
    stratis/index
 
 .. only::  subproject and html

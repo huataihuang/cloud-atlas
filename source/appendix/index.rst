@@ -30,7 +30,6 @@
    using_btrfs_in_studio.rst
    reduce_laptop_overheat.rst
    share_mouse_keyboard.rst
-   firewalld.rst
    ipmitool_tips.rst
    ip_command.rst
    win10_ssh_server.rst

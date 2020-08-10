@@ -187,6 +187,26 @@ yumdownloader           dnf download                   dnf-plugins-core
 repo-graph              dnf repograph                  dnf-plugins-extras-repograph
 ======================  ============================== ================================
 
+代理
+=======
+
+在部署 :ref:`kubernetes` 时，需要能够访问Google软件仓库，采用的方法是使用 :ref:`squid_socks_peer` 方案提供局域网内部服务器共享翻墙。这里涉及到如何配置yum/dnf使用代理服务器。
+
+设置 **当前用户** 环境变量 ``http_proxy`` 来实现::
+
+   export http_proxy="http://PROXY_IP:8123"
+   yum upgrade
+   yum install XXXX
+
+如果要一直使用代理服务器方式，则修改 ``/etc/yum.conf`` 配置文件，添加::
+
+   # The proxy server - proxy server:port number
+   proxy=http://PROXY_IP:3128
+   # The account details for yum connections
+   proxy_username=yum-user
+   proxy_password=qwerty
+
+
 参考
 ========
 
@@ -195,4 +215,4 @@ repo-graph              dnf repograph                  dnf-plugins-extras-repogr
 - `Managing packages on Fedora with DNF <https://fedoramagazine.org/managing-packages-fedora-dnf/>`_
 - `Yum is dead, long live DNF <http://dnf.baseurl.org/2015/05/11/yum-is-dead-long-live-dnf/>`_
 - `DNF Fedora文档 <https://fedoraproject.org/wiki/DNF?rd=Dnf>`_
-
+- `Using yum with a Proxy Server <https://www.centos.org/docs/5/html/yum/sn-yum-proxy-server.html>`_

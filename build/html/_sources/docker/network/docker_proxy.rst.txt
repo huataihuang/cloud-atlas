@@ -4,7 +4,7 @@
 配置Docker使用代理
 ====================
 
-如果你也苦于GFW的阻塞，无法正常更新软件，或者下载Docker镜像，可以部署 :ref:`squid` 的 :ref:`squid_socks_peer` 来实现代理翻墙。
+如果你也苦于GFW的阻塞，无法正常更新软件，并且在docker需要pull images时候发现无法下载Docker镜像，则可以部署 :ref:`squid` 的 :ref:`squid_socks_peer` 来实现代理翻墙。这里介绍如何配置docker客户端，以便能够通过代理加速镜像下载。
 
 Docker客户端的Proxy
 ======================
