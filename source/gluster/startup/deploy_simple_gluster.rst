@@ -117,6 +117,21 @@ XFS文件系统
        mount /data/brick${i}
    done
 
+完成后磁盘挂载如下::
+
+   /dev/nvme0n1p1   3.5T   33M  3.5T   1% /data/brick0
+   /dev/nvme1n1p1   3.5T   33M  3.5T   1% /data/brick1
+   /dev/nvme2n1p1   3.5T   33M  3.5T   1% /data/brick2
+   /dev/nvme3n1p1   3.5T   33M  3.5T   1% /data/brick3
+   /dev/nvme4n1p1   3.5T   33M  3.5T   1% /data/brick4
+   /dev/nvme5n1p1   3.5T   33M  3.5T   1% /data/brick5
+   /dev/nvme6n1p1   3.5T   33M  3.5T   1% /data/brick6
+   /dev/nvme7n1p1   3.5T   33M  3.5T   1% /data/brick7
+   /dev/nvme8n1p1   3.5T   33M  3.5T   1% /data/brick8
+   /dev/nvme9n1p1   3.5T   33M  3.5T   1% /data/brick9
+   /dev/nvme10n1p1  3.5T   33M  3.5T   1% /data/brick10
+   /dev/nvme11n1p1  3.5T   33M  3.5T   1% /data/brick11
+
 安装GlusterFS
 ================
 
@@ -141,6 +156,8 @@ XFS文件系统
 .. note::
 
    可以通过 ``dnf repolist all`` 检查可用的repo，并且通过上述命令激活需要的仓库。
+
+   在CentOS 7上安装旧版本 GlusterFS 6.10 则不需要激活PowerTools
 
 - 安装GlusterFS::
 
@@ -171,6 +188,33 @@ XFS文件系统
 .. note::
 
    centos-release-gluster7-1.0-2.el7.centos.noarch 要求 centos-release >= 7-5.1804.el7.centos.2
+
+如果由于业务原因，无法升级操作系统，则可以考虑安装较低版本的GlusterFS，通过以下命令搜索可能的GlusterFS版本::
+
+   yum search centos-release-gluster
+
+提示可选版本如下::
+
+   ===================== N/S Matched: centos-release-gluster ======================
+   centos-release-gluster-legacy.noarch : Disable unmaintained Gluster repositories
+                                        : from the CentOS Storage SIG
+   centos-release-gluster312.noarch : Gluster 3.12 (Long Term Stable) packages from
+                                    : the CentOS Storage SIG repository
+   centos-release-gluster41.x86_64 : Gluster 4.1 (Long Term Stable) packages from
+                                   : the CentOS Storage SIG repository
+   centos-release-gluster5.noarch : Gluster 5 packages from the CentOS Storage SIG
+                                  : repository
+   centos-release-gluster6.noarch : Gluster 6 packages from the CentOS Storage SIG
+                                  : repository
+   centos-release-gluster7.noarch : Gluster 7 packages from the CentOS Storage SIG
+                                  : repository
+
+旧版本CentOS 7.x可以安装GlusterFS 6系列，对操作系统版本要求较低。可以直接复制 ``centos-release-gluster6`` 安装包的 ``CentOS-Gluster-6.repo`` 到需要装的服务器上作为配置进行安装。
+
+在CentOS 6上安装GlusterFS
+--------------------------
+
+生产环境也有非常古老的CentOS 6系统，安装GlusterFS旧版本客户端，测试和GlusterFS 7的兼容性。首先通过 ``yum search centos-release-gluster`` 检查可用版本，然后安装对应的GlusterFS。
 
 
 配置GlusterFS
