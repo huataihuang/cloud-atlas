@@ -92,8 +92,9 @@
 <li class="toctree-l3"><a class="reference internal" href="think_devops.html">思考DevOps</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">“云原生”吐槽</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id2">基础镜像之罪</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">安全？</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">热迁移的遗憾</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">臃肿的镜像绝不是云原生</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">安全？</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">热迁移的遗憾</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="continuous_integration.html">持续集成</a></li>
@@ -262,12 +263,30 @@
 </div>
 </div>
 <div class="section" id="id4">
-<h2>安全？<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>臃肿的镜像绝不是云原生<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>号称轻量级的Docker在生产环境中使用往往会让人跌破眼镜：不是说秒级启动么？现实是等待了数分钟，甚至十数分钟，都没有见到应用容器启动，时不时还出现因为启动超时而导致容器被销毁。</p>
+<p>导致这个奇葩的现象是因为对镜像的滥用，导致不断在镜像中堆积文件层，加上初始镜像无节制的安装各种无用的软件包。一个简单运行服务的镜像需要几个G的容量，在生产环境中大规模并发部署，导致网络阻塞，更拖慢了容器创建的进程。</p>
+<div class="section" id="id5">
+<h3>镜像瘦身<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<p>实际上，在Docker容器化一定要坚持功能单一和镜像简：</p>
+<ul class="simple">
+<li><p>无用的内容绝不要打包到镜像中</p></li>
+<li><p>多层次镜像(不断迭代)一定要做镜像瘦身</p></li>
+</ul>
+<p>当需要大规模部署的同质环境，可以通过基础镜像预分发，使得首次启动速度加快。不过，这个工作是非常繁琐和需要投入持续改进，很多生产环境缺乏动力(kpi驱动)进行优化，所以Docker的启动性能往往不尽如人意。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我将在 <a class="reference internal" href="../../docker/moby/index.html#docker-moby"><span class="std std-ref">Docker Moby</span></a> 深入探讨镜像制作，并在镜像精简上做更多实践。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>安全？<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>容器的隔离和数据安全是极大的挑战，从一个容器逃逸到host主机，进而侵入到其他非授权容器，是云原生技术需要解决的最大问题。</p>
 <p>对于host主机，容器不过是操作系统中运行的一个进程，通过namespace切换，可以进入不同容器内部。这带来了运维的全新上帝视角，也带来了安全隔离的挑战。</p>
 </div>
-<div class="section" id="id5">
-<h2>热迁移的遗憾<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id7">
+<h2>热迁移的遗憾<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <p>当前容器技术有一个非常”致命”的短板，就是缺乏类似虚拟化的 <a class="reference internal" href="../../kvm/kvm_live_migration.html#kvm-live-migration"><span class="std std-ref">KVM热迁移</span></a> 技术，所以在修补底层缺陷(安全漏洞)上具有很大的局限性。</p>
 </div>
 </div>

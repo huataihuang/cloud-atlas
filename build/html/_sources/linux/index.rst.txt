@@ -27,6 +27,7 @@ Linux是运计算的主流基础操作系统，除了微软的Azure，其他主�
    redhat_linux/index
    arch_linux/index
    gentoo_linux/index
+   lfs_linux/index
    ubuntu_linux/index
    suse_linux/index
    kali_linux/index

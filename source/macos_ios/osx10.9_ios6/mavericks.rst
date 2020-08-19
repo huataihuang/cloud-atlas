@@ -39,23 +39,8 @@ Homebrew安装过程需要从GitHub上下载源代码，但是GitHub的证书识
    fatal: unable to access 'https://github.com/Homebrew/homebrew-core/': SSLRead() return error -9806
    Error: Fetching /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core failed!
 
-这个问题在早期Mac OS X上都存在，例如 `Git Clone Fails with sslRead() error on OS X Yosemite <https://www.howtobuildsoftware.com/index.php/how-do/ugg/git-curl-openssl-osx-yosemite-gitlab-git-clone-fails-with-sslread-error-on-os-x-yosemite>`_ 建议使用homebrew安装git来完成安装。
-
-我发现系统中有两个版本git:
-
-- ``/usr/bin/git`` v1.9.5
-- ``/usr/local/bin/git`` v2.25.0
-
-但是我设置了环境变量::
-
-   export PATH=$HOME/bin:/usr/local/bin:$PATH
-
-还是有报错::
-
-   fatal: unable to access 'https://github.com/Homebrew/homebrew-core/': SSLRead() return error -36
-   Error: Fetching /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core failed!
-
-这个问题我没有解决，最终在Mavericks上安装homebrew不成功。
+这个问题在早期Mac OS X上都存在，例如 `Git Clone Fails with sslRead() error on OS X Yosemite <https://www.howtobuildsoftware.com/index.php/how-do/ugg/git-curl-openssl-osx-yosemite-gitlab-git-clone-fails-with-sslread-error-on-os-x-yosemite>`_ 。参考 `Homebrew tutorial:How to use Homebrew for MacOS <https://www.infoworld.com/article/3328824/homebew-tutorial-how-to-use-homebrew-for-macos.html>`_ ，对于使用PPC版本OS X或者地版本OS X(Tiger/ Leopard)可以尝试  `Tigerbrew
+<https://github.com/mistydemeo/tigerbrew>`_
 
 应用软件
 ===========

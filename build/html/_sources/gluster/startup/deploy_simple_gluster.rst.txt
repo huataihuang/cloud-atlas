@@ -209,7 +209,14 @@ XFS文件系统
    centos-release-gluster7.noarch : Gluster 7 packages from the CentOS Storage SIG
                                   : repository
 
-旧版本CentOS 7.x可以安装GlusterFS 6系列，对操作系统版本要求较低。可以直接复制 ``centos-release-gluster6`` 安装包的 ``CentOS-Gluster-6.repo`` 到需要装的服务器上作为配置进行安装。
+旧版本CentOS 7.x可以安装GlusterFS 6系列，对操作系统版本要求较低。在一台服务器上安装过 ``centos-release-gluster6`` 之后，只需要将这台服务器上的以下文件直接复制到其他需要安装的服务器(可能不适合直接安装发行版软件包)就可以在服务器上安装GlusterFS:
+
+- ``/etc/yum.repo.d/CentOS-Gluster-6.repo``
+- ``/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-Storage``
+
+然后在需要安装服务器上执行::
+
+   yum install glusterfs-server
 
 在CentOS 6上安装GlusterFS
 --------------------------
@@ -219,6 +226,18 @@ XFS文件系统
 
 配置GlusterFS
 =================
+
+- 确保服务器打开正确通讯端口::
+
+   # firewall-cmd --zone=public --add-port=24007-24008/tcp --permanent
+   success
+
+   # firewall-cmd --reload
+   success
+
+.. note::
+
+   CentOS 7 默认启用了防火墙，上述步骤请无比确认执行成功。否则后续添加 ``peer`` 节点会显示 ``Disconected`` 状态，无法正常工作。
 
 - 在第一台服务器上执行以下命令配置信任存储池，将7台服务器组成一个信任存储池::
 
@@ -542,3 +561,4 @@ GlusterFS文件分布
 - `Getting started with GlusterFS - Quick Start Guide <https://docs.gluster.org/en/latest/Quick-Start-Guide/Quickstart/>`_
 - `Creating and Resizing XFS Partitions <https://linuxhint.com/creating-and-resizing-xfs-partitions/>`_
 - `Install & configure glusterfs distributed volume RHEL/CentOS 8 <https://www.golinuxcloud.com/glusterfs-distributed-volume-centos-rhel-8/>`_
+- `GlusterFS Storage Cluster on CentOS 7 <https://wiki.centos.org/HowTos/GlusterFSonCentOS>`_

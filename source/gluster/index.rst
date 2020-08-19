@@ -10,8 +10,10 @@ Gluster Atlas
    introduce_gluster.rst
    gluster_vs_ceph.rst
    startup/index
+   deploy/index
    admin/index
    performance/index
+   debug/index
    tendrl/index
 
 .. only::  subproject and html
