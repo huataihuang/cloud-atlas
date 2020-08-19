@@ -1,16 +1,13 @@
-.. _osx10.9_ios6:
+.. _gluster_debug:
 
 =================================
-Mac OS X 10.9 & iOS 6
+GlusterFS异常排查
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   skeuomorphism_os.rst      
-   mavericks.rst
-   lfs_on_mba.rst
-   apps_for_ios6.rst
+   glusterfs_crash_test.rst
 
 .. only::  subproject and html
 

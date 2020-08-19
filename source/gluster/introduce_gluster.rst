@@ -9,6 +9,8 @@ Gluster
 
 Gluster是一个提供了从多个服务器聚合磁盘存储资源成为一个单一全局命名空间的高度可伸缩、分布式文件系统。
 
+GlusterFS作为一种兼容OpenStack和oVirt集成的分布式文件系统，可以作为IaaS的基础存储系统。GlusterFS具有大型和活跃的社区支持并且通过libgfapi接口可以原生支持QEMU。
+
 Gluster优点
 ------------
 
