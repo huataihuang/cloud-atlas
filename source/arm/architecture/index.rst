@@ -1,13 +1,13 @@
-.. _spark:
+.. _arm_architecture:
 
 =================================
-Spark大数据处理
+ARM 架构随想
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   spark_startup.rst
+   arm_cloud.rst
 
 .. only::  subproject and html
 

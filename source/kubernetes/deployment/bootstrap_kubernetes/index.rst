@@ -24,7 +24,8 @@ Kubernetes集群引导
    single_master_k8s.rst
    change_master_ip.rst
    ha_k8s.rst
-   ha_k8s_lb.rst
+   ha_k8s_lb/index
+   ha_k8s_dnsrr/index
    create_ha_k8s.rst
    ha_k8s_stacked.rst
    ha_etcd.rst

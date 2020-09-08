@@ -18,7 +18,6 @@ Android Hack
    scrcpy.rst
    android_usb_tethering.rst
    reverse_tethering.rst
-   pixel_volte.rst
    android_proxy.rst
    android_pac.rst
    android_monitor.rst

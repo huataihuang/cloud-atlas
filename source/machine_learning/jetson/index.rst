@@ -1,7 +1,7 @@
 .. _jetson:
 
 =================================
-NVIDIA Jetson系列
+NVIDIA Jetson
 =================================
 
 NVIDIA Jetson系列设备是用于AI开发的ARM+GPU设备。

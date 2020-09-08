@@ -1,7 +1,7 @@
 .. _deploy_gluster6:
 
 ===================
-部署Gluster 6实践
+部署Gluster 6
 ===================
 
 .. note::
@@ -316,6 +316,25 @@ GlusterFS软件安装
    volume=backup
    ./create_gluster ${volume}
    gluster volume start ${volume}
+
+如果创建卷错误，也可以很容易删除::
+
+   gluster volume stop ${volume}
+   gluster volume delete ${volume}
+
+不过，命令行操作默认会提示是否删除，所以对于脚本化不利。此时可以使用参数 ``--mode=script`` 来直接执行::
+
+   gluster volume stop ${volume} --mode=script
+   gluster volume delete ${volume} --mode=script
+
+.. note::
+
+   删除掉的卷在 ``bricks`` 目录下依然残留以卷名为子目录，所以需要进一步清理::
+
+      volume=$1
+      for i in {0..11};do
+         rm -rf /data/brick${i}/${volume}
+      done
 
 - 创建完成后检查::
 

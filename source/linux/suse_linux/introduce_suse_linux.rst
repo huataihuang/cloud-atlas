@@ -20,6 +20,10 @@ openSUSE Leap 是 openSUSE 的常规版本，发行周期如下:
 - 大约 12 个月发行一次次要版本，与 SUSE Linux Enterprise Service Packs 保持一致
 - 大约 36~48 个月发行一次主要版本，与 SUSE Linux Enterprise Releases 保持一致
 
+.. note::
+
+   SUSE官方提供了非常完善的文档 `SUSE Documetation <https://documentation.suse.com/>`_ ，和Red Hat相似，提供了不同发行版本的部署、管理、优化以及存储、虚拟化等指南手册。
+
 SUSE特色
 ==========
 
