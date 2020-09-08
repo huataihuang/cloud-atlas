@@ -15,6 +15,7 @@ Docker存储
    docker_btrfs_driver.rst
    docker_overlay_driver.rst
    docker_run_add_host_device.rst
+   docker_container_nfs.rst
 
 .. only::  subproject and html
 

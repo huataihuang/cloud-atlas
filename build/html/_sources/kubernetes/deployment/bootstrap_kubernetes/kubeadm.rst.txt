@@ -246,6 +246,59 @@ CentOS, RHEL, Fedora
 
    - 如果安装单节点，则 :ref:`single_master_k8s`
    - 如果安装多节点高可用，则 :ref:`create_ha_k8s` (需要先 :ref:`ha_k8s_lb` )
+   - 如果无法部署keeplived来实现VIP，可以采用 :ref:`ha_k8s_dnsrr`
+
+升级kubernetes
+==================
+
+在安装了kubeadm和kubelet 1.18.6 之后，在执行 ``dnf update`` 升级遇到报错::
+
+   Error:
+    Problem: cannot install both kubelet-1.19.0-0.x86_64 and kubelet-1.18.4-0.x86_64
+     - cannot install the best update candidate for package kubernetes-cni-0.8.6-0.x86_64
+     - cannot install the best update candidate for package kubelet-1.18.6-0.x86_64
+   (try to add '--allowerasing' to command line to replace conflicting packages or '--skip-broken' to skip uninstallable packages or '--nobest' to use not only best candidate packages)
+
+这个问题参考 `Upgade to v18.4 failed, cannot install both kubelet-1.18.4-1.x86_64 and kubelet-1.18.4-0.x86_64 <https://github.com/kubernetes/kubernetes/issues/92463>`_ 目前在centos8存在问题 1.17.8, 1.18.1, 1.18.3, and 1.18.5 ::
+
+   dnf info kubelet
+
+显示::
+
+   Last metadata expiration check: 0:39:13 ago on Wed 02 Sep 2020 09:18:41 AM CST.
+   Installed Packages
+   Name         : kubelet
+   Version      : 1.18.6
+   Release      : 0
+   Architecture : x86_64
+   Size         : 108 M
+   Source       : kubelet-1.18.6-0.src.rpm
+   Repository   : @System
+   From repo    : kubernetes
+   Summary      : Container cluster management
+   URL          : https://kubernetes.io
+   License      : ASL 2.0
+   Description  : The node agent of Kubernetes, the container cluster manager.
+   
+   Available Packages
+   Name         : kubelet
+   Version      : 1.19.0
+   Release      : 0
+   Architecture : x86_64
+   Size         : 19 M
+   Source       : kubelet-1.19.0-0.src.rpm
+   Repository   : kubernetes
+   Summary      : Container cluster management
+   URL          : https://kubernetes.io
+   License      : ASL 2.0
+   Description  : The node agent of Kubernetes, the container cluster manager.
+
+通过在 ``/etc/yum.conf`` 添加exclude配置(逐个添加exclude配置，验证还有冲突则再添加exclude版本)::
+
+   ...
+   exclude=kubelet-1.18.4-0 kubelet-1.17.7-0 kubelet-1.16.11-0
+
+然后就可以正常进行 ``dnf upgrade`` 升级到 ``kubelet-1.19.0``
 
 **本文下面部分仅是一些调试信息，如无必要可以忽略。**
 

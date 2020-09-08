@@ -40,7 +40,7 @@ USB        4x USB 3.0, USB 2.0 Micro-B
 TF卡(必须)
 -----------
 
-请参考 :ref:`sdcard_speed_class` 选择能够承担的高速TF卡，这对系统性能有直接影响，建议采用 容量至少32GB，速度等级U3，视频速度等级V30的高速TF卡(NVIDIA提供的系统镜像已经超过16G)，建议128G或256G。
+请参考 :ref:`sd_tf_card_speed_class` 选择能够承担的高速TF卡，这对系统性能有直接影响，建议采用 容量至少32GB，速度等级U3，视频速度等级V30的高速TF卡(NVIDIA提供的系统镜像已经超过16G)，建议128G或256G。
 
 .. note::
 

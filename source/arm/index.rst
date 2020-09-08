@@ -13,7 +13,8 @@ ARM Atlas
 .. toctree::
    :maxdepth: 1
 
-   sdcard_speed_class.rst
+   hardware/index
+   architecture/index
    blackberry/index
    raspberry_pi/index
    pine/index
