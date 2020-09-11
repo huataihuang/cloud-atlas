@@ -11,6 +11,8 @@ NVIDIA Jetson系列设备是用于AI开发的ARM+GPU设备。
 
    jetson_nano.rst
    jetson_nano_startup.rst
+   backup_restore_jetson.rst
+   clone_jetson_system.rst
    jetson_usb_hd.rst
    linux_tether_vpn.rst
    jetson_remote.rst
