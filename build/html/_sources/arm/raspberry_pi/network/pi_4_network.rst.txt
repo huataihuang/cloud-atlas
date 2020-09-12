@@ -56,7 +56,7 @@ Ubuntu默认使用netplan结合systemd-networkd来完成网络设置，初始安
 
    然后保存。然后用这个SD卡首次启动树莓派，就会自动连接WiFi。
 
-Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在 :ref:`ubuntu_on_mbp` 和 :ref:`ubuntu_on_thinkpad_x220` 都使用了NetworkManager :ref:`set-ubuntu-wifi` 。但是这种方式实际上多安装了组件，并且和默认netplan使用的 ``systemd-networkd`` 是完成相同工作，浪费系统内存资源。
+Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在 :ref:`ubuntu_on_mbp` 和 :ref:`ubuntu_on_thinkpad_x220` 都使用了NetworkManager :ref:`set_ubuntu_wifi` 。但是这种方式实际上多安装了组件，并且和默认netplan使用的 ``systemd-networkd`` 是完成相同工作，浪费系统内存资源。
 
 所以，这里采用系统已经安装的 ``netplan`` + ``networkd`` 后端来完成无线设置。
 
@@ -86,5 +86,5 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
 参考
 ======
 
-- `Create an Ubuntu image for a Raspberry Pi on MacOS <https://ubuntu.com/tutorials/create-an-ubuntu-image-for-a-raspberry-pi-on-macos#2-on-your-macos-machine>`_
 - `How to install Ubuntu on your Raspberry Pi <https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi>`_
+- `Netplan configuration examples <https://netplan.io/examples/>`_
