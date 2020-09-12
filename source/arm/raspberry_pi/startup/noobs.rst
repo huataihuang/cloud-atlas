@@ -6,7 +6,7 @@ NOOBS (New Out of Box Software)
 
 Raspberry Pi为了方便初学者安装操作系统，提供了一个名为 NOOBS 的工具。NOOBS提供了方便的选择，可以用来安装可以用于树莓派的不同操作系统，例如官方版本 ``Raspbian`` (基于debian的Raspberry Pi官方操作系统)或者Windows 10 IoT Core操作系统等。
 
-.. figure:: ../../_static/arm/raspberry_pi/noobs.png
+.. figure:: ../../../_static/arm/raspberry_pi/startup/noobs.png
    :scale: 75
 
 - 首先 `下载最新版本的NOOBS <http://downloads.raspberrypi.org/NOOBS_latest>`_
