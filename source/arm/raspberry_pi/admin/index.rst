@@ -1,17 +1,13 @@
-.. _raspberry_pi:
+.. _pi_admin:
 
 =================================
-Raspberry Pi
+树莓派系统管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   startup/index
-   admin/index
-   network/index
-   pi_cluster/index
-   android/index
+   backup_restore_pi.rst
 
 .. only::  subproject and html
 

@@ -1,17 +1,14 @@
-.. _raspberry_pi:
+.. _pi_network:
 
 =================================
-Raspberry Pi
+树莓派网络
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   startup/index
-   admin/index
-   network/index
-   pi_cluster/index
-   android/index
+   pi_zero_net_gadget.rst
+   pi_4_network.rst
 
 .. only::  subproject and html
 

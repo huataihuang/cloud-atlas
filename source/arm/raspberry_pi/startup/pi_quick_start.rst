@@ -17,7 +17,28 @@
 
    这里写入磁盘的工具 ``dd`` 是Linux平台常用工具，上述写入设备是 ``/dev/sdb`` ，是U盘插入Linux电脑识别的磁盘设备。如果你使用其他操作系统，或者Linux电脑中安装的磁盘数量不同，则设备明会不相同。请按照实际设备设备处理。
 
-现在 :ref:`pi_4` 官方推荐使用 `NOOBS (New Out Of Box Software) <https://www.raspberrypi.org/documentation/installation/noobs.md>`_ ，不过，由于早期的树莓派都是32为处理器，并且内存都不超过4GB，所以默认官方提供都树莓派操作系统都是32位的。2020年树莓派4B增加了8G规格，也就需要操作系统改用64位以支持超过4G内存。
+现在 :ref:`pi_4` 官方推荐使用 `NOOBS (New Out Of Box Software) <https://www.raspberrypi.org/documentation/installation/noobs.md>`_ ，不过，由于早期的树莓派都是32为处理器，并且内存都不超过4GB，所以默认官方提供都树莓派操作系统都是32位的。2020年树莓派4B增加了8G规格，也就需要操作系统改用64位以支持超过4G内存。但当前(2020年9月)树莓派官方尚未提供64位正式版，所以推荐采用 `Ubuntu Server for Raspberry Pi <https://ubuntu.com/download/raspberry-pi>`_ 的64位系统。
+
+创建树莓派镜像
+===============
+
+.. note::
+
+   制作树莓派的启动TF卡，我是在macOS上完成，所以参考 `Create an Ubuntu image for a Raspberry Pi on MacOS <https://ubuntu.com/tutorials/create-an-ubuntu-image-for-a-raspberry-pi-on-macos#2-on-your-macos-machine>`_ 完成。
+
+- 检查macOS磁盘::
+
+   diskutil list
+
+- 制作树莓派镜像::
+
+   dd if=XXXX.img of=/dev/rdisk2 bs=100m
+
+.. note::
+
+   树莓派启动以后，如果采用的是官方镜像，会有一个引导过程方便你设置，这里不再详述。以下是我在早期树莓派上实践快速初始化的经验记录。
+
+   不过，2020年9月，我购买的新版64位树莓派4b，为了能够学习和实践64位ARM系统，我选择 :ref:`ubuntu64bit_pi` 。
 
 配置树莓派初始环境
 ===================

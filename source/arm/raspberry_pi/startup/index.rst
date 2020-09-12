@@ -1,17 +1,17 @@
-.. _raspberry_pi:
+.. _pi_startup:
 
 =================================
-Raspberry Pi
+树莓派起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   startup/index
-   admin/index
-   network/index
-   pi_cluster/index
-   android/index
+   pi_3.rst
+   pi_4.rst
+   noobs.rst
+   pi_quick_start.rst
+   ubuntu64bit_pi.rst
 
 .. only::  subproject and html
 
