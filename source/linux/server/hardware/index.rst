@@ -1,15 +1,16 @@
-.. _pi_admin:
+.. _server_hardware:
 
 =================================
-树莓派系统管理
+服务器硬件
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   backup_restore_pi.rst
-   pi_4_lm_sensor.rst
-
+   edac.rst
+   lm_sensor.rst
+   check_server_temp.rst
+   
 .. only::  subproject and html
 
    Indices
