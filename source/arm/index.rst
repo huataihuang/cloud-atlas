@@ -15,6 +15,7 @@ ARM Atlas
 
    hardware/index
    architecture/index
+   power_manage/index
    blackberry/index
    raspberry_pi/index
    pine/index

@@ -84,6 +84,11 @@ ubuntu macchanger
 
    实际上系统修改MAC地址有很多种方法，在 `arch linux官方文档-MAC address spoofing <https://wiki.archlinux.org/index.php/MAC_address_spoofing>`_ 提供了不同的方案。使用的工具有两种 ``iproute2`` 和 ``macchanger`` ，不过自动化设置则结合了systemd-networkd，systemd-udevd, systemd unit以及netctl hook等方法。
 
+netplan实现mac spoof
+======================
+
+现代的Ubuntu发行版采用了 :ref:`netplan` 来配置网络，这个netplan工具后端实现是通过 systemd 的 networkd 或者 NetworkManager 来实现的，同样支持 :ref:`netplan_mac_spoof` 。
+
 参考
 =======
 

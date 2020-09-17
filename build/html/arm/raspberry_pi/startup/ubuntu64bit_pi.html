@@ -111,6 +111,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../blackberry/index.html">BlackBerry(黑莓)</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Raspberry Pi</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">树莓派起步</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pi_3.html">树莓派Raspberry Pi 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_4.html">树莓派Raspberry Pi 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="noobs.html">NOOBS (New Out of Box Software)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_quick_start.html">树莓派(Raspberry Pi)快速起步</a></li>
@@ -218,7 +219,25 @@
 <li><p>探索ARM环境编程</p></li>
 </ul>
 <div class="section" id="id1">
-<h2>无线网络<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>下载镜像<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>从Ubuntu官方下载 <a class="reference external" href="https://ubuntu.com/download/raspberry-pi">Ubuntu 20.04.1 LTS for Raspberry Pi 2,3 or 4</a> ，下载的文件是 <cite>.xz</cite> 压缩文件，解压缩以后，通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令写入到TF卡:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">ubuntu</span><span class="o">-</span><span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span><span class="o">-</span><span class="n">preinstalled</span><span class="o">-</span><span class="n">server</span><span class="o">-</span><span class="n">arm64</span><span class="o">+</span><span class="n">raspi</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">rdisk2</span> <span class="n">bs</span><span class="o">=</span><span class="mi">100</span><span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>启动<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>我选择安装的是Ubuntu Server for Raspberry Pi，这个版本安装没有任何交互，直接启动以后，通过终端使用账号 <code class="docutils literal notranslate"><span class="pre">ubuntu</span></code> 登陆即可使用(密码和账号名相同，首次登陆会强制修改)。</p>
+</div>
+<div class="section" id="id3">
+<h2>网络<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>在我的 <a class="reference internal" href="../pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> 中，我将有线网络通过千兆桌面交换机连接，构建一个内部高速网络，以便实现分布式环境，部署 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 以及 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> / <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 。</p>
+<div class="section" id="ip">
+<h3>静态IP地址配置<a class="headerlink" href="#ip" title="永久链接至标题">¶</a></h3>
+<p>有线网口的静态IP地址采用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 配置，设置方法见 <a class="reference internal" href="../network/pi_4_network.html#pi-4-network"><span class="std std-ref">树莓派网络设置</span></a></p>
+</div>
+<div class="section" id="id4">
+<h3>无线网络<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <p><a class="reference external" href="https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#3-wifi-or-ethernet">How to install Ubuntu on your Raspberry Pi - 3. Wi-Fi or Ethernet</a> 提供了一个在安装过程中设置WiFi的步骤，即编辑SD卡的 <code class="docutils literal notranslate"><span class="pre">system-boot</span></code> 分区中的 <code class="docutils literal notranslate"><span class="pre">network-config</span></code> 文件，去除掉以下段落的注释符号 <code class="docutils literal notranslate"><span class="pre">#</span></code> 类似如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wifis</span><span class="p">:</span>
   <span class="n">wlan0</span><span class="p">:</span>
@@ -230,8 +249,37 @@
 </pre></div>
 </div>
 <p>然后保存。然后用这个SD卡首次启动树莓派，就会自动连接WiFi。</p>
-<p>Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在 <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_mbp.html#ubuntu-on-mbp"><span class="std std-ref">MacBook Pro上运行Ubuntu</span></a> 和 <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_thinkpad_x220.html#ubuntu-on-thinkpad-x220"><span class="std std-ref">ThinkPad X220上运行Ubuntu</span></a> 都使用了NetworkManager <span class="xref std std-ref">set-ubuntu-wifi</span> 。但是这种方式实际上多安装了组件，并且和默认netplan使用的 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 是完成相同工作，浪费系统内存资源。</p>
+<p>Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在 <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_mbp.html#ubuntu-on-mbp"><span class="std std-ref">MacBook Pro上运行Ubuntu</span></a> 和 <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_thinkpad_x220.html#ubuntu-on-thinkpad-x220"><span class="std std-ref">ThinkPad X220上运行Ubuntu</span></a> 都使用了NetworkManager <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_mbp.html#set-ubuntu-wifi"><span class="std std-ref">设置无线网络</span></a> 。但是这种方式实际上多安装了组件，并且和默认netplan使用的 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 是完成相同工作，浪费系统内存资源。</p>
 <p>所以，建议采用系统已经安装的 <code class="docutils literal notranslate"><span class="pre">netplan</span></code> + <code class="docutils literal notranslate"><span class="pre">networkd</span></code> 后端来完成无线设置。请参考 <a class="reference internal" href="../network/pi_4_network.html#pi-4-network"><span class="std std-ref">树莓派网络设置</span></a> 完成设置。</p>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>桌面系统<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>默认安装的Ubuntu Server是纯字符界面系统，保持了精简的系统部署，提供了极大的灵活性。所以，如果你需要将服务器版本改造成桌面系统也是可能的(虽然我不建议在服务器上安装桌面软件)。</p>
+<ul>
+<li><p>首先更新系统软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">upgrade</span>
+</pre></div>
+</div>
+</li>
+<li><p>通过以下 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span></code> 命令选择一个桌面进行安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 轻量级桌面Xfce4</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">xubuntu</span><span class="o">-</span><span class="n">desktop</span>
+<span class="c1"># 轻量级桌面LXDE</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">lubuntu</span><span class="o">-</span><span class="n">desktop</span>
+<span class="c1"># 全功能桌面Gnome</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">ubuntu</span><span class="o">-</span><span class="n">desktop</span>
+<span class="c1"># 全功能桌面KDE</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">kubuntu</span><span class="o">-</span><span class="n">desktop</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>对于 <a class="reference internal" href="../../../machine_learning/jetson/index.html#jetson"><span class="std std-ref">NVIDIA Jetson</span></a> 或者 <a class="reference internal" href="pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 这样硬件有一定限制的ARM系统，推荐采用轻量级桌面系统，例如 <a class="reference internal" href="../../../linux/arch_linux/xfce.html#xfce"><span class="std std-ref">Xfce</span></a> 。如果系统默认采用了资源消耗严重的Gnome，例如Jetson Nano默认桌面是Gnome，你也可以将 <a class="reference internal" href="../../../machine_learning/jetson/jetson_xfce4.html#jetson-xfce4"><span class="std std-ref">Jetson转换Xfce4桌面</span></a> 。</p>
+</div>
 </div>
 </div>
 

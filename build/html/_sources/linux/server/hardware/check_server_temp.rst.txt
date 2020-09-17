@@ -35,7 +35,48 @@ porc脚本检查
 
    acpitz        43.0°C
    x86_pkg_temp  53.0°C
+
+硬盘温度
+==========
+
+- 监控硬盘，可以安装 ``hddtemp`` 工具::
+
+   sudo apt install hddtemp
+
+图形界面温度监控
+=================
+
+- 安装 ``psensor`` 工具可以以图形界面方式观察温度::
    
+   sudo apt install psensor
+
+glances
+========
+
+Glances是一个使用Python编写的跨平台系统监控工具，我最早接触这个工具还是在十几年前给电信维护HP小型机时，在远程终端上使用这个超级工具glances。
+
+- 安装::
+
+   sudo apt -y --force-yes update
+   sudo pip install --upgrade pip
+   wget -O- https://bit.ly/glances | /bin/bash
+
+- 也可以通过仓库安装::
+
+   sudo apt-add-repository ppa:arnaud-hartmann/glances-stable
+   sudo apt-get update
+   sudo apt-get install glances
+
+hardinfo
+===========
+
+hardinfo是一个系统分析和性能评测工具，可以获得硬件和基本软件信息，并且使用GUI组织这些信息。
+
+大多数硬件可以通过hardinfo自动检测，也有部分硬件需要手工设置：
+
+- lm-sensors: 需要如上使用 ``sensors-detect`` 先检测需要加载哪些内核模块
+- hddtemp:  需要以daemon模式运行hddtemp并且使用默认端口，这样hardinfo就可以使用hddtemp
+- 模块 ``eeprom`` 必须加载用于显示当前安装的内存信息，所以需要先使用 ``modprobe eeprom`` 加载并刷新
 
 参考
 =====
