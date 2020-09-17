@@ -1,4 +1,4 @@
-.. _backup_and_restore_system_by_tar:
+.. _recover_system_by_tar:
 
 =============================
 通过tar备份和恢复Linux系统

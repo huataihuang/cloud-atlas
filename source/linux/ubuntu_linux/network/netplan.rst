@@ -4,6 +4,13 @@
 netplan网络配置
 ================
 
+Ubuntu发行版默认使用 `Netplan网络配置工具 <https://netplan.io>`_ 配置网络接口，例如我在在 :ref:`pi_4_network` 中就使用了netplan。netplan支持后端使用 ``networkd`` 或者 ``network-manager`` 进行管理配置。
+
+netplan简介
+=============
+
+.. figure:: ../../../_static/linux/ubuntu_linux/network/netplan_design_overview.svg
+
 .. _netplan_static_ip:
 
 使用netplan配置静态IP
@@ -75,6 +82,115 @@ Netplan会读取 ``/etc/netplan/*.yaml`` 配置文件来设置所有的网络接
    sudo netplan apply
 
 - 验证检查 ``ifconfig -a`` 可以看到IP地址已经修改成静态配置IP地址
+
+netplan配置无线
+================
+
+连接开放无线网络
+--------------------
+
+对于没有密码要求的无线网络，只需要定义access point::
+
+   network:
+     version: 2
+     wifis:
+       wlan0:
+         access-points:
+           "open_network_ssid_name": {}
+         dhcp4: yes
+
+连接WPA Personal无线
+---------------------
+
+对于采用WPA密码保护的无线网络，配置access-point和对应的password就可以。
+
+ - 配置 ``/etc/netplan/02-homewifi.yaml`` ::
+
+    network:
+      version: 2
+      renderer: networkd
+      wifis:
+        wlan0:
+          dhcp4: yes
+          dhcp6: no
+          #addresses: [192.168.1.21/24]
+          #gateway4: 192.168.1.1
+          #nameservers:
+          #  addresses: [192.168.0.1, 8.8.8.8]
+          access-points:
+            "network_ssid_name":
+              password: "**********"
+
+WPA Enterprise无线网络
+------------------------
+
+在企业网络中，常见的是使用 WPA 或 WPA2 Enterprise加密方式的无线网络，则需要添加认证信息。
+
+- 以下案例是 WPA-EAP 和 TTLS 加密无线网络连接配置::
+
+   network:
+     version: 2
+     wifis:
+       wl0:
+         access-points:
+           workplace:
+             auth:
+               key-management: eap
+               method: ttls
+               anonymous-identity: "@internal.example.com"
+               identity: "joe@internal.example.com"
+               password: "v3ryS3kr1t"
+         dhcp4: yes
+
+- 以下案例是 WPA-EAP 和 TLS加密无线网络::
+
+   network:
+     version: 2
+     wifis:
+       wl0:
+         access-points:
+           university:
+             auth:
+               key-management: eap
+               method: tls
+               anonymous-identity: "@cust.example.com"
+               identity: "cert-joe@cust.example.com"
+               ca-certificate: /etc/ssl/cust-cacrt.pem
+               client-certificate: /etc/ssl/cust-crt.pem
+               client-key: /etc/ssl/cust-key.pem
+               client-key-password: "d3cryptPr1v4t3K3y"
+         dhcp4: yes
+
+.. _netplan_mac_spoof:
+
+netplan mac spoof
+==================
+
+如果使用 ``networkd`` 后端，则不支持wifi匹配，只能使用接口名字。以下为举例::
+
+   network:
+     version: 2
+     renderer: networkd
+     wifis:
+       wlan0:
+         dhcp4: yes
+         dhcp6: no
+         macaddress: xx:xx:xx:xx:xx:xx
+     ...
+
+如果使用NetworkManager后端，还可以采用 ``match:`` 方法::
+
+   network:
+     version: 2
+     renderer: networkd
+     wifis:
+       wlan0:
+         dhcp4: yes
+         dhcp6: no
+         match:
+           macaddress: yy:yy:yy:yy:yy:yy
+         macaddress: xx:xx:xx:xx:xx:xx
+     ...
 
 .. _netplan_bonding:
 
@@ -161,3 +277,5 @@ bonding上增加VLAN
 
 - `How to Configure Network Static IP Address in Ubuntu 18.04 <https://www.tecmint.com/configure-network-static-ip-address-in-ubuntu/>`_
 - `Netplan configuration examples <https://netplan.io/examples>`_
+- `Netplan not spoofing MAC as expected <https://serverfault.com/questions/920020/netplan-not-spoofing-mac-as-expected>`_
+- `Netplan reference <https://netplan.io/reference/>`_

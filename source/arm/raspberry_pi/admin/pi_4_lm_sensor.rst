@@ -17,7 +17,7 @@
 
    cpu-thermal  52.5°C
 
-通过 ``top`` 命令可以看到ubuntu默认启动的 :ref:`snap_package_manager` 服务 ``snapd`` 持续消耗CPU资源::
+通过 ``top`` 命令可以看到ubuntu默认启动的 :ref:`snap` 服务 ``snapd`` 持续消耗CPU资源::
 
    top - 03:23:12 up  2:03,  1 user,  load average: 0.92, 0.79, 0.80
    Tasks: 130 total,   1 running, 129 sleeping,   0 stopped,   0 zombie
