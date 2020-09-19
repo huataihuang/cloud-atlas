@@ -54,6 +54,12 @@ USB存储设备
 - ``/dev/mmcblk0``   SD卡
 - ``/dev/sda``       USB接口的磁盘
 
+.. note::
+
+   目前我部署 :ref:`pi_cluster` 采用64位操作系统，设备是 :ref:`pi_4` 和 :ref:`pi_3` 。实际上Ubuntu提供的64位ARM操作系统是一个版本，可以同时用于树莓派3和4。
+
+   我首次安装64位操作系统是在树莓派4上，完成后，我将采用本方案clone到树莓派3上组建集群。
+
 - Raspberry Pi 4安装的64位Ubuntu分区如下::
 
    Disk /dev/mmcblk0: 119.9 GiB, 127865454592 bytes, 249737216 sectors
@@ -198,18 +204,35 @@ USB存储设备
 
       /dev/sda2: UUID="b2e461e7-5a68-434d-bda1-c7c137e8c38e" TYPE="ext4" PARTUUID="1a99ca08-02"
 
-- 复制 ``boot`` 分区::
+- 格式化 ``/dev/sda1`` 作为vfat32 分区::
 
    # mkfs.vfat /dev/sda1  <= 这里没有指定FAT32文件系统，默认格式化是FAT16
    # 检查发现`fdisk`虽然可以通过`c`这个type来标记分区为FAT32，但是如果`mkfs.fat`不指定`-F32`参数
    # 会导致文件系统还是`fat16`文件系统，虽然用`fdisk -l`看不出，但是`parted`则能够看到是`fat16`
    mkfs.fat -F32 /dev/sda1
+
+- 早期的32位系统可以通过以下命令复制 ``/boot`` 分区::
+
    mount /dev/sda1 /mnt/boot
    (cd /boot && tar cf - .)|(cd /mnt/boot && tar xf -)
 
+- 但是现在64位操作系统 ``/dev/sda1`` 已经不是直接挂载为 ``/boot`` 目录，检查对比TF卡中操作系统可以看到::
+
+   # df -h
+   Filesystem      Size  Used Avail Use% Mounted on
+   ...
+   /dev/mmcblk0p2  117G  3.5G  109G   4% /
+   ...
+   /dev/mmcblk0p1  253M   97M  156M  39% /boot/firmware
+
+所以对应挂载目录不同，我们采用以下命令::
+
+   mount /dev/sda1 /mnt/boot/firmware
+   (cd /boot/firmware && tar cf - .)|(cd /mnt/boot/firmware && tar xf -)
+
 .. note::
 
-   要避免包含目录，使用 ``--exclude`` 参数。参考 `Exclude Multiple Directories When Creating A tar Archive <https://www.question-defense.com/2012/06/13/exclude-multiple-directories-when-creating-a-tar-archive>`_ 。但是我使用如下命令依然包含了不需要的目录（ **失败**），最后还是采用 :ref:`recover_system_by_tar` 来完成::
+   要避免包含目录，使用 ``--exclude`` 参数。参考 `Exclude Multiple Directories When Creating A tar Archive <https://www.question-defense.com/2012/06/13/exclude-multiple-directories-when-creating-a-tar-archive>`_ 。但是我使用如下命令依然包含了不需要的目录（ **失败** ），最后还是采用 :ref:`recover_system_by_tar` 来完成::
 
       (cd / && tar cf - --exclude "/mnt" --exclude "/sys" --exclude "/proc" --exclude "/lost+found" --exclude "/tmp" .)|(cd /mnt && tar xf -)
 
@@ -237,15 +260,19 @@ note::
 
 以下是 ``/dev/mmcblk0`` 在 ``parted`` 中 ``print`` 输出::
 
-   Model: SD SD32G (sd/mmc)
-   Disk /dev/mmcblk0: 31.5GB
+   GNU Parted 3.3
+   Using /dev/mmcblk0
+   Welcome to GNU Parted! Type 'help' to view a list of commands.
+   (parted) print
+   Model: SD SN128 (sd/mmc)
+   Disk /dev/mmcblk0: 128GB
    Sector size (logical/physical): 512B/512B
    Partition Table: msdos
    Disk Flags:
    
-   Number  Start   End     Size    Type     File system  Flags
-    1      4194kB  47.7MB  43.5MB  primary  fat32        lba
-    2      48.2MB  31.5GB  31.4GB  primary  ext4
+   Number  Start   End    Size   Type     File system  Flags
+    1      1049kB  269MB  268MB  primary  fat32        boot, lba
+    2      269MB   128GB  128GB  primary  ext4
 
 上述可以看到
 
@@ -258,9 +285,16 @@ note::
 但是通过磁盘 ``parted`` 和 ``mkfs.ext4`` 创建的HDD文件系统，然后再通过 ``tar`` 恢复操作系统。此时磁盘 ``PARTUUID`` 和 ``UUID`` 不同，则要修改对应配置 ``/boot/cmdline.txt`` 和 ``/etc/fstab`` ::
 
    # blkid /dev/sda1
-   /dev/sda1: UUID="47D1-C570" TYPE="vfat" PARTUUID="1a99ca08-01"
+   /dev/sda1: UUID="CB15-2042" TYPE="vfat" PARTUUID="5e878358-01"
    # blkid /dev/sda2
-   /dev/sda2: UUID="b2e461e7-5a68-434d-bda1-c7c137e8c38e" TYPE="ext4" PARTUUID="1a99ca08-02"
+   /dev/sda2: UUID="d11f9da5-aeee-477f-9d95-d290c6f56267" TYPE="ext4" PARTUUID="5e878358-02"
+
+32位操作系统启动配置
+---------------------
+
+.. note::
+
+   以下32位操作系统配置方法是我之前的记录整理，当前实践是64位操作系统，方法不同。
 
 - 检查 ``/boot/cmdline.txt`` 配置文件，可以看到原先配置内容如下::
 
@@ -291,6 +325,46 @@ note::
 .. note::
 
    测试下来，如果再次使用TF卡，依然能够优先从TF卡启动树莓派。只有TF卡不可用时候，才会从USB HDD启动。
+
+64位操作系统启动修改
+----------------------
+
+64位操作系统 ``/boot`` 目录并没有独立建立分区，而是在 ``/boot/firmware`` 目录单独建立vfat32分区，并且这个分区是可启动分区。所以我也同样在这个分区上打上启动标签::
+
+   # parted /dev/sda
+   GNU Parted 3.3
+   Using /dev/sda
+   Welcome to GNU Parted! Type 'help' to view a list of commands.
+   (parted) print
+   Model: External USB3.0 (scsi)
+   Disk /dev/sda: 500GB
+   Sector size (logical/physical): 512B/4096B
+   Partition Table: msdos
+   Disk Flags:
+   
+   Number  Start   End     Size    Type     File system  Flags
+    1      1049kB  256MB   255MB   primary  fat32        lba
+    2      256MB   30.0GB  29.7GB  primary  ext4
+   
+   (parted) set 1 boot on
+   (parted) print
+   Model: External USB3.0 (scsi)
+   Disk /dev/sda: 500GB
+   Sector size (logical/physical): 512B/4096B
+   Partition Table: msdos
+   Disk Flags:
+   
+   Number  Start   End     Size    Type     File system  Flags
+    1      1049kB  256MB   255MB   primary  fat32        boot, lba
+    2      256MB   30.0GB  29.7GB  primary  ext4
+   
+   (parted) quit
+   Information: You may need to update /etc/fstab.
+
+- 修改 ``/mnt/etc/fstab`` 配置，对应磁盘分区的PARTID::
+
+   PARTUUID="5e878358-02"  /        ext4   defaults        0 0
+   PARTUUID="5e878358-01"  /boot/firmware  vfat    defaults        0       1
 
 参考
 ======
