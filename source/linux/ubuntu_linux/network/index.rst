@@ -8,6 +8,7 @@ Ubuntu网络
    :maxdepth: 1
 
    netplan.rst
+   wpa_supplicant.rst
 
 .. only::  subproject and html
 
