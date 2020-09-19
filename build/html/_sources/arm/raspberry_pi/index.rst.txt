@@ -10,6 +10,7 @@ Raspberry Pi
    startup/index
    admin/index
    network/index
+   storage/index
    pi_cluster/index
    android/index
 

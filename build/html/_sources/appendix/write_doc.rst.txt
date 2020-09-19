@@ -130,6 +130,10 @@ Sphinx Doc
 
 接下来就是文档撰写了，撰写在 ``source`` 目录下，结构请参考 `我的云图项目 <https://github.com/huataihuang/cloud-atlas>`_`
 
+.. note::
+
+   Sphinx撰写时经常需要引用代码片段，请参考 `sphinx插入代码 <https://www.cnblogs.com/youxin/p/3653027.html>`_ 和 `展示示例代码 <https://zh-sphinx-doc.readthedocs.io/en/latest/markup/code.html>`_
+
 MkDoc
 =========
 

@@ -1,0 +1,22 @@
+.. _pi_storage:
+
+=================================
+Raspberry Pi 存储
+=================================
+
+ARM架构在存储上似乎落后于x86体系，毕竟我们熟悉的各种存储标准之后都有Intel的身影，并且很多服务器上使用的存储技术都是Intel研发和推广的。
+
+本章节试图研究和实践树莓派可用的存储技术，以期尽可能提高存储性能，达到或接近服务器级水准。
+
+.. toctree::
+   :maxdepth: 1
+
+   usb_boot_pi.rst
+   choice_pi_storage.rst
+
+.. only::  subproject and html
+
+   Indices
+   =======
+
+   * :ref:`genindex`
