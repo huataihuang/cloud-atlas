@@ -11,8 +11,9 @@ ARM架构在存储上似乎落后于x86体系，毕竟我们熟悉的各种存�
 .. toctree::
    :maxdepth: 1
 
-   usb_boot_pi.rst
    choice_pi_storage.rst
+   usb_boot_pi_3.rst
+   usb_boot_ubuntu_pi_4.rst
 
 .. only::  subproject and html
 

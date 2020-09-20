@@ -1,12 +1,14 @@
-.. _usb_boot_pi:
+.. _usb_boot_pi_3:
 
-============================
-USB移动存储启动和运行树莓派
-============================
+===============================
+USB移动存储启动和运行树莓派3
+===============================
 
 .. note::
 
    本文实践是在 :ref:`pi_3` 结合USB转接卡，使用 2.5寸 笔记本硬盘构建的。后续我准备再使用 :ref:`pi_4` 结合USB SSD移动硬盘来构建 :ref:`pi_cluster` 。 
+
+   注意，最初我的实践是在树莓派官方32位raspbian系统上实践的，最近为了构建 :ref:`pi_cluster` 运行 :ref:`kubernetes` ，我改为使用64位Ubuntu系统。Ubuntu for Raspberry Pi和官方Raspbian在bootloader上有点差异，详见文章最后部分。
 
 设置USB启动模式
 ================
@@ -326,10 +328,168 @@ note::
 
    测试下来，如果再次使用TF卡，依然能够优先从TF卡启动树莓派。只有TF卡不可用时候，才会从USB HDD启动。
 
-64位操作系统启动修改
+64位Ubuntu启动修改
 ----------------------
 
-64位操作系统 ``/boot`` 目录并没有独立建立分区，而是在 ``/boot/firmware`` 目录单独建立vfat32分区，并且这个分区是可启动分区。所以我也同样在这个分区上打上启动标签::
+Ubuntu镜像使用 u-boot 作为bootloader，而树莓派内建的bootloader可以使用在 ``system-boot`` 分区的config.txt文件的一些修改。
+
+64位Ubuntu操作系统 ``/boot`` 目录并没有独立建立分区，而是在 ``/boot/firmware`` 目录单独建立vfat32分区，并且这个分区是可启动分区。
+
+对于2017年4月以后的系统，必须具备bootloader文件，所以需要获得最新的 bootcode.bin, fixup.dat 和 start.elf 并复制到 ``system-boot`` 分区。另外，Ubuntu的u-boot脚本硬编码了使用SD卡启动，所以需要修改bootloader，采用树莓派的bootloader才能够从USB磁盘启动。
+
+解压缩内核
+~~~~~~~~~~~~~
+
+.. warning::
+
+   每次Ubuntu升级内核都需要重复这个步骤。
+
+首先我们需要把 ``vmlinuz`` 解压缩成 ``vmlinux`` ，这是因为当前还不支持从压缩的 64位 arm 内核启动
+
+- 找出内核镜像的gziped内容位置::
+
+   od -A d -t x1 vmlinuz | grep '1f 8b 08 00'
+
+输出内容::
+
+   0000000 1f 8b 08 00 00 00 00 00 02 03 ec 5c 0f 74 54 e
+
+这里第一个 ``0000000`` 数字就是我们查找的位置，在这个位置右边就是镜像起点。
+
+- 使用 ``dd`` 命令输出数据并使用 ``zcat`` 解压缩。如果你看到的数字不是 ``0000000`` ，就用你看到的数字作为 ``skip=`` 参数::
+
+   dd if=vmlinuz bs=1 skip=0000000 | zcat > vmlinux
+
+修改bootloader
+~~~~~~~~~~~~~~~~~
+
+- 查看 ``/mnt/boot/firmware/config.txt`` (也就是USB硬盘分区 ``/dev/sda1`` 挂载后的配置文件) ，默认内容是针对不同树莓派的启动配置。注意，在配置文件开头说明建议不要直接修改 ``config.txt`` ，而是应该修改 ``usercfg.txt`` 来包含用户修改::
+
+   [pi4]
+   kernel=uboot_rpi_4.bin
+   max_framebuffers=2
+
+   [pi2]
+   kernel=uboot_rpi_2.bin
+
+   [pi3]
+   kernel=uboot_rpi_3.bin
+
+   [all]
+   arm_64bit=1
+   device_tree_address=0x03000000
+
+   enable_uart=1
+   cmdline=cmdline.txt
+
+   include syscfg.txt
+   include usercfg.txt
+
+按照Ubuntu文档，需要将修改成::
+
+   kernel=vmlinuz
+   initramfs initrd.img followkernel
+   #device_tree_address=0x03000000
+
+所以我实际修改 ``config.txt`` 内容如下::
+
+   [pi4]
+   #kernel=uboot_rpi_4.bin
+   #max_framebuffers=2
+
+   [pi2]
+   #kernel=uboot_rpi_2.bin
+
+   [pi3]
+   #kernel=uboot_rpi_3.bin
+
+   [all]
+   arm_64bit=1
+   device_tree_address=0x03000000
+   kernel=vmlinux
+   initramfs initrd.img followkernel
+
+更新.dat和.elf文件
+~~~~~~~~~~~~~~~~~~~~
+
+- 检查 ``/mnt/boot`` 目录下内容，可以看到 ``dtbs`` 目录因为我最初是安装的树莓派4系统，所以 ``dtb`` 软链接都是只想树莓派4，这部分需要手工修改。
+
+不过我发现使用树莓派4的TF卡插入到树莓派3上能够正常启动
+
+以下是当前 ``/mnt/boot`` 下内容，如果有必要我准备手工修改 ``dtb`` 软链接::
+
+   # ls -lh
+   total 81M
+   -rw------- 1 root root 4.0M Jul 10 05:18 System.map-5.4.0-1015-raspi
+   -rw------- 1 root root 4.0M Sep  5 01:03 System.map-5.4.0-1018-raspi
+   -rw-r--r-- 1 root root 216K Jul 10 05:18 config-5.4.0-1015-raspi
+   -rw-r--r-- 1 root root 216K Sep  5 01:03 config-5.4.0-1018-raspi
+   lrwxrwxrwx 1 root root   43 Sep 18 12:53 dtb -> dtbs/5.4.0-1018-raspi/./bcm2711-rpi-4-b.dtb
+   lrwxrwxrwx 1 root root   43 Sep 12 06:07 dtb-5.4.0-1015-raspi -> dtbs/5.4.0-1015-raspi/./bcm2711-rpi-4-b.dtb
+   lrwxrwxrwx 1 root root   43 Sep 18 12:53 dtb-5.4.0-1018-raspi -> dtbs/5.4.0-1018-raspi/./bcm2711-rpi-4-b.dtb
+   drwxr-xr-x 4 root root 4.0K Sep 12 06:08 dtbs
+   drwxr-xr-x 5 root root 5.0K Jan  1  1970 firmware
+   lrwxrwxrwx 1 root root   27 Sep 12 06:06 initrd.img -> initrd.img-5.4.0-1018-raspi
+   -rw-r--r-- 1 root root  29M Sep 12 06:07 initrd.img-5.4.0-1015-raspi
+   -rw-r--r-- 1 root root  29M Sep 18 12:53 initrd.img-5.4.0-1018-raspi
+   lrwxrwxrwx 1 root root   27 Jul 31 16:44 initrd.img.old -> initrd.img-5.4.0-1015-raspi
+   lrwxrwxrwx 1 root root   24 Sep 12 06:06 vmlinuz -> vmlinuz-5.4.0-1018-raspi
+   -rw------- 1 root root 8.1M Jul 10 05:18 vmlinuz-5.4.0-1015-raspi
+   -rw------- 1 root root 8.1M Sep  5 01:03 vmlinuz-5.4.0-1018-raspi
+   lrwxrwxrwx 1 root root   24 Jul 31 16:44 vmlinuz.old -> vmlinuz-5.4.0-1015-raspi
+
+以下是复制树莓派3的dtb文件并建立软链接步骤::
+
+   cd /mnt/boot/dtbs/5.4.0-1018-raspi
+   cp /lib/firmware/5.4.0-1018-raspi/device-tree/broadcom/bcm2837-rpi-3-b.dtb ./
+   cd /mnt/boot/dtbs/5.4.0-1015-raspi
+   cp /lib/firmware/5.4.0-1015-raspi/device-tree/broadcom/bcm2837-rpi-3-b.dtb ./
+
+   cd /mnt/boot
+   unlink dtb
+   ln -s dtbs/5.4.0-1018-raspi/./bcm2837-rpi-3-b.dtb ./dtb
+   unlink dtb-5.4.0-1015-raspi
+   ln -s dtbs/5.4.0-1015-raspi/./bcm2837-rpi-3-b.dtb ./dtb-5.4.0-1015-raspi
+   unlink dtb-5.4.0-1018-raspi
+   ln -s dtbs/5.4.0-1018-raspi/./bcm2837-rpi-3-b.dtb ./dtb-5.4.0-1018-raspi
+
+.. note::
+
+   不过我执行了上述软链接修正，在树莓派3上依然不能从USB磁盘启动。从 `USB Boot Ubuntu Server 20.04 on Raspberry Pi 4 <https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4>`_ 来看，可能需要更新最新的 `raspberrypi/firmware <https://github.com/raspberrypi/firmware/tree/master/boot>`_
+
+- 重新开始，从 `raspberrypi/firmware <https://github.com/raspberrypi/firmware/tree/master/boot>`_ 下载最新版本的 .dat 和 .elf 文件
+
+然后复制到 ``/mnt/boot/firmware`` 目录下覆盖原文件::
+
+   cd /mnt/boot/firmware
+   cp ~/Downloads/firmware-/boot/*.dat ./
+   cp ~/Downloads/firmware-/boot/*.elf .
+
+.. note::
+
+   这步待验证
+
+修改bootloader
+~~~~~~~~~~~~~~~~
+
+- 修改 ``/mnt/boot/firmware/cmdline.txt`` 
+
+将 ``cmdline.txt`` ::
+
+   net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=LABEL=writable rootfstype=ext4 elevator=deadline rootwait fixrtc
+
+原先记录是 ``root=LABEL=writable`` 实际上就是SD卡的原先的 ``/dev/mmcblk0p2`` (分区2) 的文件系统LABEL名字(我觉得其实格式化移动硬盘也加上这个标签，或许不需要再修订 ``cmdline.txt`` 配置) 。我现在修改成USB移动硬盘分区的PARTUUID。
+
+另外还修改一个针对机械硬盘优化参数 ``elevator=cfq`` 。
+
+完整修订如下::
+
+   net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=PARTUUID=5e878358-02 rootfstype=ext4 elevator=cfq rootwait fixrtc
+   
+分区
+~~~~~~~~~~~~~~
+
+参考原先SD卡的分区标记，在 ``/dev/sda1`` 上加上启动标记::
 
    # parted /dev/sda
    GNU Parted 3.3
@@ -366,8 +526,16 @@ note::
    PARTUUID="5e878358-02"  /        ext4   defaults        0 0
    PARTUUID="5e878358-01"  /boot/firmware  vfat    defaults        0       1
 
+.. note::
+
+   我现在暂时还没有解决Raspberry Pi 3从USB存储启动Ubuntu Server 64bit for Raspberry Pi系统，似乎是需要更新firmware来解决。
+
+   不过这两天感觉有点瓶颈(疲倦)，先放下，等过两天解决 :ref:`usb_boot_ubuntu_pi_4` 之后再会过来处理。
+
 参考
 ======
 
 - `Raspberry Pi: Adding an SSD drive to the Pi-Desktop kit <http://www.zdnet.com/article/raspberry-pi-adding-an-ssd-drive-to-the-pi-desktop-kit/>`_
 - `HOW TO BOOT FROM A USB MASS STORAGE DEVICE ON A RASPBERRY PI 3 <https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/msd.md>`_
+- `Ubuntu wiki - RaspberryPi USB booting <https://wiki.ubuntu.com/ARM/RaspberryPi#USB_booting>`_
+- `USB Boot Ubuntu Server 20.04 on Raspberry Pi 4 <https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4>`_
