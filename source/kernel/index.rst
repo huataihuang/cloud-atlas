@@ -16,6 +16,7 @@ Kernel Atlas
    admin/index
    memory/index
    power/index
+   tracing/index
 
 .. only::  subproject and html
 

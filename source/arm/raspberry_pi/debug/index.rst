@@ -1,19 +1,13 @@
-.. _raspberry_pi:
+.. _pi_debug:
 
 =================================
-Raspberry Pi
+树莓派异常排查
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   startup/index
-   admin/index
-   network/index
-   storage/index
-   debug/index
-   pi_cluster/index
-   android/index
+   debug_pi_fio_crash.rst
 
 .. only::  subproject and html
 

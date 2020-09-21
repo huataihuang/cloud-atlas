@@ -52,8 +52,16 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
 
 所以，建议采用系统已经安装的 ``netplan`` + ``networkd`` 后端来完成无线设置。请参考 :ref:`pi_4_network` 完成设置。
 
-桌面系统
-=========
+时区
+-------
+
+- 默认是UTC时区，需要修改成本地时区，例如Shanghai::
+
+   sudo unlink /etc/localtime
+   sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+桌面系统(不建议)
+==================
 
 默认安装的Ubuntu Server是纯字符界面系统，保持了精简的系统部署，提供了极大的灵活性。所以，如果你需要将服务器版本改造成桌面系统也是可能的(虽然我不建议在服务器上安装桌面软件)。
 

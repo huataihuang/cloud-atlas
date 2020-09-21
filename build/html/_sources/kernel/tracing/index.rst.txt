@@ -1,19 +1,13 @@
-.. _raspberry_pi:
+.. _linux_tracing:
 
 =================================
-Raspberry Pi
+Linux内核追踪
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   startup/index
-   admin/index
-   network/index
-   storage/index
-   debug/index
-   pi_cluster/index
-   android/index
+   debug_system_crash.rst
 
 .. only::  subproject and html
 

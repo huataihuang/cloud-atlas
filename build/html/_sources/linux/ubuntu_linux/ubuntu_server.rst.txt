@@ -32,6 +32,10 @@ Ubuntu Server
 
    sudo apt install parted nmon network-manager zsh openconnect ipmitool lm-sensors
 
+.. note::
+
+   在安装 :ref:`ubuntu64bit_pi` 我发现对于Ubuntu Server版本，不需要安装桌面版常用但 ``NetworkManager`` 网络配置工具，而只需要使用内建的 :ref:`netplan` 就可以完成网络配置。这样可以轻量级运行，降低使用资源。
+
 - 安装 ``oh my zsh`` ::
 
    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
@@ -99,7 +103,7 @@ Ubuntu LTS Enablement Stacks
 
 Ubuntu LTS enablement（也称为 HWE 或 Hardware Enablement）stacks为Ubuntu LTS版本提供了较新的内核以及X支持。这些enablement stacks可以手工安装。
 
-Ubuntu 18.04.2 以及更新的版本在Desktop版本提供了一个保持更新的内核以及X对战。服务器架构则默认采用GA内核，并提供了可选的增强内核。
+Ubuntu 18.04.2 以及更新的版本在Desktop版本提供了一个保持更新的内核以及X堆栈。服务器架构则默认采用GA内核，并提供了可选的增强内核。
 
 安装HWE软件栈
 ------------------
