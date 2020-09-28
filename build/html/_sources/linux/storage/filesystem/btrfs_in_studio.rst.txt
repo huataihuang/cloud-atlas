@@ -4,6 +4,9 @@
 Studio环境的Btrfs存储
 =======================
 
+我的Btrfs使用经验
+===================
+
 .. note::
 
    Btrfs实践是在Ubuntu和Arch Linux完成，本文在涉及不同操作系统时会指出区别，并综合两者的文档。
@@ -27,9 +30,44 @@ Studio环境的Btrfs存储
 
 按照我的实践经验，btrfs的基本功能稳定，但是高级压缩功能可能存在风险。
 
+Btrfs在不同发行版和厂商应用对比
+=================================
+
+Red Hat Enterprise Linux
+---------------------------
+
+参考 `Red Hat banishes Btrfs from RHEL <https://www.theregister.co.uk/2017/08/16/red_hat_banishes_btrfs_from_rhel>`_ 报道，Red Hat在RHEL 7.4还保持Btrfs上游补丁更新，但之后放弃了Btrfs功能更新。从 RHEL 8 `Considerations in adopting RHEL 8Chapter 12. File systems and storage <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/considerations_in_adopting_rhel_8/file-systems-and-storage_considerations-in-adopting-rhel-8>`_ 可以看到Red Hat Enterprise Linux 8已经完全移除了Btrfs支持，已经不能在RHEL中创建、挂载和安装Btrfs文件系统。
+
+Red Hat社区Fedora
+--------------------
+
+从 `Fedora 33重新引入Btrfs作为默认文件系统 <https://fedoramagazine.org/btrfs-coming-to-fedora-33/>`_ ，可以观察到Red Hat社区开始尝试在桌面系统引入Btrfs，今后有可能进入Red Hat服务器领域的话，则可以作为生产引入验证使用。
+
+SUSE企业版Linux
+-------------------
+
+SUSE发行版一直以来都是将 Btrfs 作为服务器版默认文件系统。这应该和各个Linux发行版公司在开发力量投入上有关。
+
+Facebook
+--------------
+
+根据网上信息了解，Facebook可能是最积极采用Btrfs的超级互联网公司，并且雇佣了Btrfs的核心开发者，也是能够在生产环境采用Btrfs高级特性并保证稳定性的底气。
+
+Facebook使用Btrfs的快照和镜像来隔离容器，在 `Btrfs at Facebook(facebookmicrosites) <https://facebookmicrosites.github.io/btrfs/docs/btrfs-facebook.html>`_ 透露了F厂应用Btrfs遇到的问题和解决方案。同时在LWN源代码新闻网站， `Btrfs at Facebook(LWN) <https://lwn.net/Articles/824855/>`_ 记录了Btrfs开发 Josef Bacik 在 `2020 Open Source Summit North America <https://events.linuxfoundation.org/open-source-summit-north-america/>`_
+演讲，介绍了Facebook利用Btrfs进行快速测试的隔离解决方案。
+
+我的观点
+---------
+
+Btrfs和ZFS是目前Linux系统功能最丰富同时也是最具发展潜力的本地文件系统。两者各自有独特的发展历史和技术优势，当前都已经逐步进入稳定生产状态，比早期动辄crash已经不可同日而语。
+
+Btrfs和ZFS需要非常精心的部署和调优，以充分发挥最佳性能，我决定后续做实践对比，进行性能优化和测试，并撰写应用方案。
+
+建议保持持续跟进观察，并不断做性能和稳定性测试，在合适的时候正式采用Btrfs。
+
 .. note::
 
-   参考 `Red Hat banishes Btrfs from RHEL <https://www.theregister.co.uk/2017/08/16/red_hat_banishes_btrfs_from_rhel>`_ 报道，Red Hat在RHEL 7.4还保持Btrfs上游补丁更新，但之后放弃了Btrfs功能更新。从 RHEL 8 `Considerations in adopting RHEL 8Chapter 12. File systems and storage <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/considerations_in_adopting_rhel_8/file-systems-and-storage_considerations-in-adopting-rhel-8>`_ 可以看到Red Hat Enterprise Linux 8已经完全移除了Btrfs支持，已经不能在RHEL中创建、挂载和安装Btrfs文件系统。
+   以下是我较早的一些实践笔记，不太完善，但是我今后会再次迭代改进。
 
 初始安装操作系统的磁盘
 =========================

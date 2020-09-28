@@ -30,6 +30,7 @@ Studio环境创建KVM虚拟机
 
 .. note::
 
+   - 使用 ``osinfo-query os`` 可以查询出 ``--os-variant`` 所有支持的参数，这样可以精确指定操作系统版本以便优化运行参数。
    - ``--graphics none`` 表示不使用VNC来访问VM的控制台，而是使用VM串口的字符控制台。
    - ```--location`` 指定通过网络安装，如果使用本地iso安装，则使用 ``--cdrom /var/lib/libvirt/images/ubuntu-18.04.2-live-server-amd64.iso``
    - 只有通过网络安装才可以使用 ``--extra-args="console=tty0 console=ttyS0,115200"`` 以便能够通过串口控制台安装
@@ -61,6 +62,35 @@ Studio环境创建KVM虚拟机
 - 安装过程的 ``installation source`` 设置为 ``http://mirrors.163.com/centos/8.0.1905/BaseOS/x86_64/os/`` (URL type是 ``repository URL`` ) 然后点击 ``Done`` 则自动刷新验证，最后显示的安装源如下：
 
 .. figure:: ../_static/kvm/centos8_installation_source.png
+
+创建SUSE虚拟机
+================
+
+- 部署suse server 12 sp3::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name sles12-sp3 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=sles12sp3 \
+     --disk path=/var/lib/libvirt/images/sles12-sp3.qcow2,format=qcow2,bus=virtio,cache=none,size=16 \
+     --graphics vnc \
+     --cdrom=/var/lib/libvirt/images/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
+
+.. note::
+
+   参数 ``--graphics vnc`` 会在服务器本地回环地址 ``127.0.0.1`` 上启动VNC监听，可以通过 ``virsh vncdisplay <vm_name>`` 查看::
+
+      virsh vncdispaly sles12-sp3
+
+   例如输出::
+
+      127.0.0.1:0
+
+   则可以使用ssh端口转发登陆服务器::
+
+      ssh -L 5900:127.0.0.1:5900 <username>@<server_ip>
 
 虚拟机串口设置
 =================

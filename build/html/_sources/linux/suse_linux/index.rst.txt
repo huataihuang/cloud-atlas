@@ -8,7 +8,10 @@ SUSE Linux
    :maxdepth: 1
 
    introduce_suse_linux.rst
+   install_suse.rst
    zypper.rst
+   suse_local_setup.rst
+
 
 .. only::  subproject and html
 

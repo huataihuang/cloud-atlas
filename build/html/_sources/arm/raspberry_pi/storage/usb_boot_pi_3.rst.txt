@@ -79,56 +79,10 @@ USB存储设备
 
 对照TF卡上的当前树莓派操作系统分区，可以看到有2个分区，一个是FAT32分区，另一个是Linux分区，我们也需要对应在USB磁盘上完成这个划分。
 
-使用 ``parted`` 划分分区::
+使用 ``parted`` 划分分区
 
-   # parted -a optimal /dev/sda
-   GNU Parted 3.3
-   Using /dev/sda
-   Welcome to GNU Parted! Type 'help' to view a list of commands.
-   (parted) rm 2
-   (parted) rm 1
-   (parted) mkpart primary fat32 2048s 256M
-   (parted) align-check optimal 1
-   1 aligned
-   (parted) unit s
-   (parted) print
-   Model: External USB3.0 (scsi)
-   Disk /dev/sda: 976773168s
-   Sector size (logical/physical): 512B/4096B
-   Partition Table: msdos
-   Disk Flags:
-   
-   Number  Start  End      Size     Type     File system  Flags
-    1      2048s  499711s  497664s  primary  fat32        lba
-   
-   (parted) mkpart primary ext4 499712 30G
-   (parted) print
-   Model: External USB3.0 (scsi)
-   Disk /dev/sda: 976773168s
-   Sector size (logical/physical): 512B/4096B
-   Partition Table: msdos
-   Disk Flags:
-   
-   Number  Start    End        Size       Type     File system  Flags
-    1      2048s    499711s    497664s    primary  fat32        lba
-    2      499712s  58593279s  58093568s  primary  ext4         lba
-   
-   (parted) align-check optimal 2
-   2 aligned
-   (parted) unit MB
-   (parted) print
-   Model: External USB3.0 (scsi)
-   Disk /dev/sda: 500108MB
-   Sector size (logical/physical): 512B/4096B
-   Partition Table: msdos
-   Disk Flags:
-   
-   Number  Start   End      Size     Type     File system  Flags
-    1      1.05MB  256MB    255MB    primary  fat32        lba
-    2      256MB   30000MB  29744MB  primary  ext4         lba
-   
-   (parted) q
-   Information: You may need to update /etc/fstab.
+.. literalinclude:: parted_pi_ssd
+   :linenos:
 
 .. note::
 

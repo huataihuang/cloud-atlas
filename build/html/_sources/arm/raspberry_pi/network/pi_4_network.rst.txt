@@ -60,7 +60,7 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
 
 所以，这里采用系统已经安装的 ``netplan`` + ``networkd`` 后端来完成无线设置。
 
-- 配置 ``/etc/netplan/02-homewifi.yaml`` ::
+- 配置 ``/etc/netplan/02-wifi.yaml`` ::
 
    network:
      version: 2
@@ -74,7 +74,7 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
          #nameservers:
          #  addresses: [192.168.0.1, 8.8.8.8]
          access-points:
-           "network_ssid_name":
+           "home_ssid_name":
              password: "**********"
 
 然后再次执行::
@@ -82,6 +82,49 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
    netplan apply
 
 激活无线网络。
+
+企业网络链接
+=============
+
+如果企业级网络采用了EAP认证，则修订上述配置::
+
+   network:
+     version: 2
+     renderer: networkd
+     wifis:
+       wlan0:
+         dhcp4: yes
+         dhcp6: no
+         #addresses: [192.168.1.21/24]
+         #gateway4: 192.168.1.1
+         #nameservers:
+         #  addresses: [192.168.0.1, 8.8.8.8]
+         access-points:
+           "home_ssid_name":
+             password: "**********"
+           "office_ssid_name":
+             auth:
+               key-management: eap
+               identity: "user_name"
+               password: "user_passwd"
+
+然后再次执行::
+
+   netplan apply
+
+报错排查
+===========
+
+在执行 ``netplan apply`` 有时会遇到报错::
+
+   Warning: The unit file, source configuration file or drop-ins of 
+   netplan-wpa-wlan0.service changed on disk. 
+   Run 'systemctl daemon-reload' to reload units.
+
+这个问题让我很困惑，因为系统重启有时候工作是正常的，有时候无线网络却没有正常运行，启动系统后手工执行命令 ``netplan apply`` 则报上述错误。
+
+排查采用 ``netplan --debug apply`` 
+
 
 参考
 ======

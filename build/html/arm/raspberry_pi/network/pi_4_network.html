@@ -38,7 +38,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Raspberry Pi Cluster" href="../pi_cluster/index.html" />
+    <link rel="next" title="Raspberry Pi 存储" href="../storage/index.html" />
     <link rel="prev" title="树莓派Zero设置USB网络通讯(Ethernet Gadget)" href="pi_zero_net_gadget.html" /> 
 </head>
 
@@ -108,6 +108,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../index.html">ARM Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../hardware/index.html">ARM 硬件概述</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../architecture/index.html">ARM 架构随想</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../power_manage/index.html">ARM电源管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../blackberry/index.html">BlackBerry(黑莓)</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Raspberry Pi</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../startup/index.html">树莓派起步</a></li>
@@ -117,6 +118,8 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">树莓派网络设置</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../storage/index.html">Raspberry Pi 存储</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../debug/index.html">树莓派异常排查</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pi_cluster/index.html">Raspberry Pi Cluster</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../android/index.html">树莓派运行Android</a></li>
 </ul>
@@ -260,7 +263,7 @@
 <p>Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在 <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_mbp.html#ubuntu-on-mbp"><span class="std std-ref">MacBook Pro上运行Ubuntu</span></a> 和 <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_thinkpad_x220.html#ubuntu-on-thinkpad-x220"><span class="std std-ref">ThinkPad X220上运行Ubuntu</span></a> 都使用了NetworkManager <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_mbp.html#set-ubuntu-wifi"><span class="std std-ref">设置无线网络</span></a> 。但是这种方式实际上多安装了组件，并且和默认netplan使用的 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 是完成相同工作，浪费系统内存资源。</p>
 <p>所以，这里采用系统已经安装的 <code class="docutils literal notranslate"><span class="pre">netplan</span></code> + <code class="docutils literal notranslate"><span class="pre">networkd</span></code> 后端来完成无线设置。</p>
 <ul>
-<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/02-homewifi.yaml</span></code></p>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/02-wifi.yaml</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
   <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
   <span class="n">renderer</span><span class="p">:</span> <span class="n">networkd</span>
@@ -273,7 +276,7 @@
       <span class="c1">#nameservers:</span>
       <span class="c1">#  addresses: [192.168.0.1, 8.8.8.8]</span>
       <span class="n">access</span><span class="o">-</span><span class="n">points</span><span class="p">:</span>
-        <span class="s2">&quot;network_ssid_name&quot;</span><span class="p">:</span>
+        <span class="s2">&quot;home_ssid_name&quot;</span><span class="p">:</span>
           <span class="n">password</span><span class="p">:</span> <span class="s2">&quot;**********&quot;</span>
 </pre></div>
 </div>
@@ -286,7 +289,47 @@
 <p>激活无线网络。</p>
 </div>
 <div class="section" id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>企业网络链接<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>如果企业级网络采用了EAP认证，则修订上述配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
+  <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">renderer</span><span class="p">:</span> <span class="n">networkd</span>
+  <span class="n">wifis</span><span class="p">:</span>
+    <span class="n">wlan0</span><span class="p">:</span>
+      <span class="n">dhcp4</span><span class="p">:</span> <span class="n">yes</span>
+      <span class="n">dhcp6</span><span class="p">:</span> <span class="n">no</span>
+      <span class="c1">#addresses: [192.168.1.21/24]</span>
+      <span class="c1">#gateway4: 192.168.1.1</span>
+      <span class="c1">#nameservers:</span>
+      <span class="c1">#  addresses: [192.168.0.1, 8.8.8.8]</span>
+      <span class="n">access</span><span class="o">-</span><span class="n">points</span><span class="p">:</span>
+        <span class="s2">&quot;home_ssid_name&quot;</span><span class="p">:</span>
+          <span class="n">password</span><span class="p">:</span> <span class="s2">&quot;**********&quot;</span>
+        <span class="s2">&quot;office_ssid_name&quot;</span><span class="p">:</span>
+          <span class="n">auth</span><span class="p">:</span>
+            <span class="n">key</span><span class="o">-</span><span class="n">management</span><span class="p">:</span> <span class="n">eap</span>
+            <span class="n">identity</span><span class="p">:</span> <span class="s2">&quot;user_name&quot;</span>
+            <span class="n">password</span><span class="p">:</span> <span class="s2">&quot;user_passwd&quot;</span>
+</pre></div>
+</div>
+<p>然后再次执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netplan</span> <span class="n">apply</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>报错排查<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>在执行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 有时会遇到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span><span class="p">:</span> <span class="n">The</span> <span class="n">unit</span> <span class="n">file</span><span class="p">,</span> <span class="n">source</span> <span class="n">configuration</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">drop</span><span class="o">-</span><span class="n">ins</span> <span class="n">of</span>
+<span class="n">netplan</span><span class="o">-</span><span class="n">wpa</span><span class="o">-</span><span class="n">wlan0</span><span class="o">.</span><span class="n">service</span> <span class="n">changed</span> <span class="n">on</span> <span class="n">disk</span><span class="o">.</span>
+<span class="n">Run</span> <span class="s1">&#39;systemctl daemon-reload&#39;</span> <span class="n">to</span> <span class="n">reload</span> <span class="n">units</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>这个问题让我很困惑，因为系统重启有时候工作是正常的，有时候无线网络却没有正常运行，启动系统后手工执行命令 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 则报上述错误。</p>
+<p>排查采用 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">--debug</span> <span class="pre">apply</span></code></p>
+</div>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi">How to install Ubuntu on your Raspberry Pi</a></p></li>
 <li><p><a class="reference external" href="https://netplan.io/examples/">Netplan configuration examples</a></p></li>
@@ -302,7 +345,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../pi_cluster/index.html" class="btn btn-neutral float-right" title="Raspberry Pi Cluster" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../storage/index.html" class="btn btn-neutral float-right" title="Raspberry Pi 存储" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pi_zero_net_gadget.html" class="btn btn-neutral float-left" title="树莓派Zero设置USB网络通讯(Ethernet Gadget)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

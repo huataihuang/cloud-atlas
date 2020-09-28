@@ -171,7 +171,31 @@ YUM可以通过通过设置环境变量来使用代理安装软件包::
    proxy_username=yum-user
    proxy_password=qwerty
 
+SUSE zypper/YaST使用代理
+==========================
+
+SUSE的zypper和YaST的代理配置文件是 ``/etc/sysconfig/proxy`` ，可以设置以下类型配置::
+
+   PROXY_ENABLED="yes"
+   HTTP_PROXY="http://192.168.0.1:3128"
+   HTTPS_PROXY="http://192.168.0.1:3128"
+   FTP_PROXY="http://192.168.0.1:3128"
+   NO_PROXY="localhost, 127.0.0.1"
+
+如果需要账号认证，采用以下形式::
+
+   HTTP_PROXY="http://myusername:mypassword@myproxy.example.com:8080"
+
+如果要临时生效，也可以在shell中执行以下命令(或者 ``.bashrc`` 配置::
+
+   export http_proxy="http://192.168.0.1"
+   export ftp_proxy="http://192.168.0.1"
+   export https_proxy="http://192.168.0.1"
+   export no_proxy="localhost, 127.0.0.1"   
+
 参考
 ======
 
 - `The Polipo Manual <http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/polipo.html>`_
+- `SUSE Linux Enterprise : How to setup a Proxy manually <https://www.suse.com/support/kb/doc/?id=000017441>`_
+- `How to use openSUSE zypper behind a proxy (with authentication) <https://www.claudiokuenzler.com/blog/515/use-opensuse-zypper-behind-with-http-proxy-authenticiation>`_

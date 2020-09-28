@@ -26,3 +26,12 @@ Jetson Nano PCIe Buss Error
    PMIC-Die         100.0°C
    thermal-fan-est  33.0°C
    iwlwifi          39.0°C
+
+上述 ``PCIe Bus Error: severity=Corrected, type=Physical Layer, id=0008(Receiver ID)`` 报错在 askubuntu `PCIe Bus Error: severity=Corrected, type=Physical Layer, id=00e5(Receiver ID) <https://askubuntu.com/questions/863150/pcie-bus-error-severity-corrected-type-physical-layer-id-00e5receiver-id>`_ 有一个解释：
+
+PCIe活跃状态电源管理() 
+
+参考
+=======
+
+- `PCIe Bus Error: severity=Corrected, type=Physical Layer, id=00e5(Receiver ID) <https://askubuntu.com/questions/863150/pcie-bus-error-severity-corrected-type-physical-layer-id-00e5receiver-id>`_
