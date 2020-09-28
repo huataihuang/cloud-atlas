@@ -11,6 +11,7 @@ Kubernetes 自愈
 
    decode_k8s_self_healing.rst
    draino.rst
+   kublr.rst
 
 .. only::  subproject and html
 

@@ -11,7 +11,7 @@
 
 从 `树莓派官网 <https://www.raspberrypi.org/>`_ 可以下载镜像文件，通常推荐基于Debian的发行版 Raspbian 。然后将镜像文件通过 ``dd`` 命令写入到U盘中::
 
-   sudo dd if=2017-11-29-raspbian-stretch-lite.img of=/dev/sdb bs=4M
+   sudo dd if=2020-08-20-raspios-buster-armhf-lite.img of=/dev/sdb bs=100M
 
 .. note::
 
@@ -36,7 +36,7 @@
 
 .. note::
 
-   树莓派启动以后，如果采用的是官方镜像，会有一个引导过程方便你设置，这里不再详述。以下是我在早期树莓派上实践快速初始化的经验记录。
+   树莓派启动以后，如果采用的是官方镜像，会有一个引导过程方便你设置，这里不再详述。
 
    不过，2020年9月，我购买的新版64位树莓派4b，为了能够学习和实践64位ARM系统，我选择 :ref:`ubuntu64bit_pi` 。
 
