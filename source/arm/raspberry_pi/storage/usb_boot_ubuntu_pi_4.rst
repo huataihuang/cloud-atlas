@@ -94,9 +94,25 @@
 挂载SSD存储的系统启动分区
 ============================
 
+- Ubuntu for Raspberry Pi 分区挂载如下::
+
+   /dev/mmcblk0p2  117G  4.1G  109G   4% /
+   /dev/mmcblk0p1  253M   97M  156M  39% /boot/firmware
+
+需要对应复制到新的SSD存储中，采用 ``tar`` 打包::
+
+   cd /
+   tar -cpzf pi.tar.gz --exclude=/pi.tar.gz --one-file-system /
+
 
 更新 .dat 和 .elf 文件
 ============================
+
+- 下载最新的raspberry pi的firmware::
+
+   git clone git@github.com:raspberrypi/firmware.git
+
+ 不过，这个仓库非常巨大，所以如果你要节约下载时间，可以采用chrome插件 `GitZip <https://gitzip.org/>`_ 来指定只下载部分文件。
 
 可以直接从 raspbian 的 目录 ``/boot`` 复制 .dat 和 .elf 文件到Ubuntu的 ``/boot`` 分区::
 
