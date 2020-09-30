@@ -279,7 +279,29 @@
 </div>
 </div>
 <div class="section" id="ssd">
-<h2>划分SSD存储<a class="headerlink" href="#ssd" title="永久链接至标题">¶</a></h2>
+<h2>复制系统到SSD存储<a class="headerlink" href="#ssd" title="永久链接至标题">¶</a></h2>
+<div class="section" id="dd">
+<h3>通过dd复制系统<a class="headerlink" href="#dd" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>采用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令完整复制磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">bs</span><span class="o">=</span><span class="mi">100</span><span class="n">M</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后挂载SSD磁盘分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="tar">
+<h3>通过tar复制系统(失败)<a class="headerlink" href="#tar" title="永久链接至标题">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我一直想采用tar包方式clone系统，这样可以灵活调整磁盘分区，但是我的尝试目前没有成功。所以还是采用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 方式来复制系统</p>
+</div>
 <p>我的规划是使用SSD存储30G空间部署系统，启用空间划分给 <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 和 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> ，以及构建本地 <a class="reference internal" href="../../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 运行存储。</p>
 <ul class="simple">
 <li><p>把 <a class="reference internal" href="wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 插入树莓派4的USB接口(请使用蓝色的USB 3.0接口)，然后执行以下命令进行磁盘分区和文件系统格式化。划分方法统一采用分区方法，参考 <a class="reference internal" href="usb_boot_pi_3.html#usb-boot-pi-3"><span class="std std-ref">USB移动存储启动和运行树莓派3</span></a></p></li>
@@ -332,19 +354,41 @@
 46
 47
 48
-49</pre></div></td><td class="code"><div class="highlight"><pre><span></span># parted -a optimal /dev/sda
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60</pre></div></td><td class="code"><div class="highlight"><pre><span></span># parted -a optimal /dev/sda
 GNU Parted 3.3
 Using /dev/sda
 Welcome to GNU Parted! Type &#39;help&#39; to view a list of commands.
-(parted) rm 2
-(parted) rm 1
+(parted) mklabel msdos
+Warning: The existing disk label on /dev/sda will be destroyed and all data on
+this disk will be lost. Do you want to continue?
+Yes/No? y
+(parted) print
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 1024GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: msdos
+Disk Flags:
+
+Number  Start  End  Size  Type  File system  Flags
+
 (parted) mkpart primary fat32 2048s 256M
 (parted) align-check optimal 1
 1 aligned
 (parted) unit s
 (parted) print
-Model: External USB3.0 (scsi)
-Disk /dev/sda: 976773168s
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 2000343040s
 Sector size (logical/physical): 512B/4096B
 Partition Table: msdos
 Disk Flags:
@@ -354,8 +398,8 @@ Number  Start  End      Size     Type     File system  Flags
 
 (parted) mkpart primary ext4 499712 30G
 (parted) print
-Model: External USB3.0 (scsi)
-Disk /dev/sda: 976773168s
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 2000343040s
 Sector size (logical/physical): 512B/4096B
 Partition Table: msdos
 Disk Flags:
@@ -369,20 +413,24 @@ Number  Start    End        Size       Type     File system  Flags
 (parted) unit MB
 (parted) set 1 boot on
 (parted) print
-Model: External USB3.0 (scsi)
-Disk /dev/sda: 500GB
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 1024176MB
 Sector size (logical/physical): 512B/4096B
 Partition Table: msdos
 Disk Flags:
 
-Number  Start   End     Size    Type     File system  Flags
- 1      1049kB  256MB   255MB   primary  fat32        boot, lba
- 2      256MB   30.0GB  29.7GB  primary  ext4
+Number  Start   End      Size     Type     File system  Flags
+ 1      1.05MB  256MB    255MB    primary  fat32        boot, lba
+ 2      256MB   30000MB  29744MB  primary  ext4         lba
 
 (parted) q
 Information: You may need to update /etc/fstab.
 </pre></div>
 </td></tr></table></div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>一定要将磁盘分区表创建成MBR(msdos)，当前树莓派不支持GPT分区表磁盘启动。我尝试采用Hybrid partition table，但是没有成功。</p>
+</div>
 <ul>
 <li><p>格式化文件系统:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">fat</span> <span class="o">-</span><span class="n">F32</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>
@@ -390,11 +438,6 @@ Information: You may need to update /etc/fstab.
 </pre></div>
 </div>
 </li>
-</ul>
-</div>
-<div class="section" id="id1">
-<h2>挂载SSD存储的系统启动分区<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<ul>
 <li><p>Ubuntu for Raspberry Pi 分区挂载如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span>  <span class="mi">117</span><span class="n">G</span>  <span class="mf">4.1</span><span class="n">G</span>  <span class="mi">109</span><span class="n">G</span>   <span class="mi">4</span><span class="o">%</span> <span class="o">/</span>
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p1</span>  <span class="mi">253</span><span class="n">M</span>   <span class="mi">97</span><span class="n">M</span>  <span class="mi">156</span><span class="n">M</span>  <span class="mi">39</span><span class="o">%</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
@@ -404,34 +447,291 @@ Information: You may need to update /etc/fstab.
 </ul>
 <p>需要对应复制到新的SSD存储中，采用 <code class="docutils literal notranslate"><span class="pre">tar</span></code> 打包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span>
+<span class="c1">#tar打包系统不包含跨磁盘目录，所以/boot/firmware需要单独复制</span>
 <span class="n">tar</span> <span class="o">-</span><span class="n">cpzf</span> <span class="n">pi</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">--</span><span class="n">exclude</span><span class="o">=/</span><span class="n">pi</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">--</span><span class="n">one</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">system</span> <span class="o">/</span>
+
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">sudo</span> <span class="n">tar</span> <span class="o">-</span><span class="n">xpzf</span> <span class="o">/</span><span class="n">pi</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">mnt</span> <span class="o">--</span><span class="n">numeric</span><span class="o">-</span><span class="n">owner</span>
+
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+<span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">cf</span> <span class="o">-</span> <span class="o">.</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">xf</span> <span class="o">-</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>以上已经完整将原先在TF卡上运行的 <a class="reference internal" href="../startup/ubuntu64bit_pi.html#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 复制到了USB外接的SSD移动硬盘上。</p>
+<ul>
+<li><p>检查SSD磁盘的UUID，我们需要将PARTUUID配置到启动命令 <code class="docutils literal notranslate"><span class="pre">cmdline.txt</span></code> 配置文件以及 <code class="docutils literal notranslate"><span class="pre">fstab</span></code> 配置文件，正确反映磁盘挂载和启动分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># blkid /dev/sda</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="n">PTUUID</span><span class="o">=</span><span class="s2">&quot;b541639f&quot;</span> <span class="n">PTTYPE</span><span class="o">=</span><span class="s2">&quot;dos&quot;</span>
+<span class="c1"># blkid /dev/sda1</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span><span class="p">:</span> <span class="n">UUID</span><span class="o">=</span><span class="s2">&quot;6E36-5E03&quot;</span> <span class="n">TYPE</span><span class="o">=</span><span class="s2">&quot;vfat&quot;</span> <span class="n">PARTUUID</span><span class="o">=</span><span class="s2">&quot;b541639f-01&quot;</span>
+<span class="c1"># blkid /dev/sda2</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span><span class="p">:</span> <span class="n">UUID</span><span class="o">=</span><span class="s2">&quot;f4d2caed-9b2c-4645-99b4-8b406eb7d3f1&quot;</span> <span class="n">TYPE</span><span class="o">=</span><span class="s2">&quot;ext4&quot;</span> <span class="n">PARTUUID</span><span class="o">=</span><span class="s2">&quot;b541639f-02&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里的 <code class="docutils literal notranslate"><span class="pre">PARTUUID</span></code> 需要修改对应配置。</p>
+<ul>
+<li><p>编辑 <code class="docutils literal notranslate"><span class="pre">/mnt/boot/firmware/cmdline.txt</span></code> 将:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">ifnames</span><span class="o">=</span><span class="mi">0</span> <span class="n">dwc_otg</span><span class="o">.</span><span class="n">lpm_enable</span><span class="o">=</span><span class="mi">0</span> <span class="n">console</span><span class="o">=</span><span class="n">serial0</span><span class="p">,</span><span class="mi">115200</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=</span><span class="n">LABEL</span><span class="o">=</span><span class="n">writable</span> <span class="n">rootfstype</span><span class="o">=</span><span class="n">ext4</span> <span class="n">elevator</span><span class="o">=</span><span class="n">deadline</span> <span class="n">rootwait</span> <span class="n">fixrtc</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">ifnames</span><span class="o">=</span><span class="mi">0</span> <span class="n">dwc_otg</span><span class="o">.</span><span class="n">lpm_enable</span><span class="o">=</span><span class="mi">0</span> <span class="n">console</span><span class="o">=</span><span class="n">serial0</span><span class="p">,</span><span class="mi">115200</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=</span><span class="n">PARTUUID</span><span class="o">=</span><span class="s2">&quot;b541639f-02&quot;</span> <span class="n">rootfstype</span><span class="o">=</span><span class="n">ext4</span> <span class="n">elevator</span><span class="o">=</span><span class="n">deadline</span> <span class="n">rootwait</span> <span class="n">fixrtc</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">PARTUUID=</span></code> 是USB外接SSD磁盘的分区2的PARTUUID。注意，是SSD磁盘，所以 <code class="docutils literal notranslate"><span class="pre">elevator=</span></code> 参数保持和原先TF卡配置一样，还是 <code class="docutils literal notranslate"><span class="pre">deadline</span></code> 。不过，如果你的外接磁盘是机械硬盘，则参数改为 <code class="docutils literal notranslate"><span class="pre">cfq</span></code> 。</p>
+</div>
+<ul>
+<li><p>编辑 <code class="docutils literal notranslate"><span class="pre">/mnt/etc/fstab</span></code> ，将:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LABEL</span><span class="o">=</span><span class="n">writable</span>       <span class="o">/</span>        <span class="n">ext4</span>   <span class="n">defaults</span>        <span class="mi">0</span> <span class="mi">0</span>
+<span class="n">LABEL</span><span class="o">=</span><span class="n">system</span><span class="o">-</span><span class="n">boot</span>       <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>  <span class="n">vfat</span>    <span class="n">defaults</span>        <span class="mi">0</span>       <span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PARTUUID</span><span class="o">=</span><span class="s2">&quot;b541639f-01&quot;</span>       <span class="o">/</span>        <span class="n">ext4</span>   <span class="n">defaults</span>        <span class="mi">0</span> <span class="mi">0</span>
+<span class="n">PARTUUID</span><span class="o">=</span><span class="s2">&quot;b541639f-02&quot;</span>  <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>  <span class="n">vfat</span>    <span class="n">defaults</span>        <span class="mi">0</span>       <span class="mi">1</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>以上是通过tar方式复制系统，目前多次尝试都没有成功。</p>
+</div>
+</div>
+<div class="section" id="id1">
+<h3>有关树莓派分区表<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
+<p>注意到SD卡使用的分区表是msdos，但是我在划分USB外接移动硬盘时候，使用了 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 将磁盘的分区表构建成了GPT。参考 <a class="reference external" href="https://www.raspberrypi.org/forums/viewtopic.php?t=205418">booting from a GPT mass storage device</a> 了解到树莓派不支持GPT分区表的磁盘启动，而是要使用2TB以下磁盘，采用msdos分区表启动。有人尝试将MBR转换成GPT(使用 <code class="docutils literal notranslate"><span class="pre">gdisk</span></code> 工具的选项 <code class="docutils literal notranslate"><span class="pre">r-f-y-w</span></code> )，虽然GPT分区正确并且数据能够在Mac/Windows/Linux上读取，但是树莓派3不能从磁盘启动，始终看到的是彩虹屏幕。解决的方法是添加hybrid MBR(包含第一个启动分区，或者包含第一、第二分区，或者包含第一、第二和空闲分区)，都能够解决这个问题。</p>
+<p>我参考 <a class="reference external" href="https://www.rodsbooks.com/gdisk/hybrid.html">Hybrid MBRs: The Good, the Bad, and the So Ugly You’ll Tear Your Eyes Out</a> 使用 <code class="docutils literal notranslate"><span class="pre">gdisk</span></code> 转换分区表:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># gdisk /dev/sda
+GPT fdisk (gdisk) version 1.0.5
+
+Partition table scan:
+  MBR: protective
+  BSD: not present
+  APM: not present
+  GPT: present
+
+Found valid GPT with protective MBR; using GPT.
+
+Command (? for help): r
+
+Recovery/transformation command (? for help): p
+Disk /dev/sda: 2000343040 sectors, 953.8 GiB
+Model: My Passport 25F3
+Sector size (logical/physical): 512/4096 bytes
+Disk identifier (GUID): A0ACD939-81CF-4874-B5E3-45B51A11B1B5
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 34, last usable sector is 2000343006
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 1941751741 sectors (925.9 GiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048          499711   243.0 MiB   EF00  primary
+   2          499712        58593279   27.7 GiB    8300  primary
+
+Recovery/transformation command (? for help): h
+
+WARNING! Hybrid MBRs are flaky and dangerous! If you decide not to use one,
+just hit the Enter key at the below prompt and your MBR partition table will
+be untouched.
+
+Type from one to three GPT partition numbers, separated by spaces, to be
+added to the hybrid MBR, in sequence: 1 2
+Place EFI GPT (0xEE) partition first in MBR (good for GRUB)? (Y/N): y
+
+Creating entry for GPT partition #1 (MBR partition #2)
+Enter an MBR hex code (default EF):
+Set the bootable flag? (Y/N): y
+
+Creating entry for GPT partition #2 (MBR partition #3)
+Enter an MBR hex code (default 83):
+Set the bootable flag? (Y/N): n
+
+Unused partition space(s) found. Use one to protect more partitions? (Y/N): n
+
+Recovery/transformation command (? for help): o
+
+Disk size is 2000343040 sectors (953.8 GiB)
+MBR disk identifier: 0x16F2A91F
+MBR partitions:
+
+Number  Boot  Start Sector   End Sector   Status      Code
+   1                     1         2047   primary     0xEE
+   2      *           2048       499711   primary     0xEF
+   3                499712     58593279   primary     0x83
+
+Recovery/transformation command (? for help): w
+
+Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING
+PARTITIONS!!
+
+Do you want to proceed? (Y/N): y
+OK; writing new GUID partition table (GPT) to /dev/sda.
+The operation has completed successfully.
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>转换完成后，使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span></code> 和 <code class="docutils literal notranslate"><span class="pre">parted</span> <span class="pre">/dev/sda</span></code> 检查，可以看到分区表依然是GPT(暂时没有探索明白)，后续我准备再采购新设备时重新实践一下。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>解压缩内核<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>每次Ubuntu更新内核都需要重复执行这个步骤。</p>
+</div>
+<p>当前不支持压缩版本的64位arm内核启动，所以我们需要将 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> 解压成 <code class="docutils literal notranslate"><span class="pre">vmlinux</span></code> 。</p>
+<ul>
+<li><p>找出镜像中gzip压缩的内容起点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span>
+<span class="n">od</span> <span class="o">-</span><span class="n">A</span> <span class="n">d</span> <span class="o">-</span><span class="n">t</span> <span class="n">x1</span> <span class="n">vmlinuz</span> <span class="o">|</span> <span class="n">grep</span> <span class="s1">&#39;1f 8b 08 00&#39;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0000000</span> <span class="mi">1</span><span class="n">f</span> <span class="mi">8</span><span class="n">b</span> <span class="mi">08</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">02</span> <span class="mi">03</span> <span class="n">ec</span> <span class="mi">5</span><span class="n">c</span> <span class="mi">0</span><span class="n">d</span> <span class="mi">74</span> <span class="mi">14</span> <span class="mi">55</span>
+</pre></div>
+</div>
+<p>这里第一串数字 <code class="docutils literal notranslate"><span class="pre">0000000</span></code> 就是起点，也就是镜像的开始位置。</p>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令展开数据然后用 <code class="docutils literal notranslate"><span class="pre">zcat</span></code> 解压缩到一个文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">vmlinuz</span> <span class="n">bs</span><span class="o">=</span><span class="mi">1</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0000000</span> <span class="o">|</span> <span class="n">zcat</span> <span class="o">&gt;</span> <span class="n">vmlinux</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="config-txt">
+<h2>更新启动config.txt<a class="headerlink" href="#config-txt" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">config.txt</span></code> 文件告知树莓派如何启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vi</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span><span class="o">/</span><span class="n">config</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注释掉所有 <code class="docutils literal notranslate"><span class="pre">[pi*]</span></code> 段落，然后添加 <code class="docutils literal notranslate"><span class="pre">kernel=vmlinux</span></code> 和 <code class="docutils literal notranslate"><span class="pre">initramfs</span> <span class="pre">initrd.img</span> <span class="pre">followkernel</span></code> 到 <code class="docutils literal notranslate"><span class="pre">[all]</span></code> 段落:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#[pi4]</span>
+<span class="c1">#kernel=uboot_rpi_4.bin</span>
+<span class="c1">#max_framebuffers=2</span>
+
+<span class="c1">#[pi2]</span>
+<span class="c1">#kernel=uboot_rpi_2.bin</span>
+
+<span class="c1">#[pi3]</span>
+<span class="c1">#kernel=uboot_rpi_3.bin</span>
+
+<span class="p">[</span><span class="nb">all</span><span class="p">]</span>
+<span class="n">arm_64bit</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">device_tree_address</span><span class="o">=</span><span class="mh">0x03000000</span>
+<span class="n">kernel</span><span class="o">=</span><span class="n">vmlinux</span>
+<span class="n">initramfs</span> <span class="n">initrd</span><span class="o">.</span><span class="n">img</span> <span class="n">followkernel</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="dat-elf">
 <h2>更新 .dat 和 .elf 文件<a class="headerlink" href="#dat-elf" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>下载最新的raspberry pi的firmware，但是这个库非常巨大(10G+)，所以不建议直接clone，而是采用chrome插件 <a class="reference external" href="https://gitzip.org/">GitZip</a> 来指定只下载部分文件。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>GitZip插件刚开始使用有点让我疑惑，实际上这个插件使用有两步：</p>
+<ul class="simple">
+<li><p>点击GitZip插件按钮，在弹出浮动窗口点 <code class="docutils literal notranslate"><span class="pre">Get</span> <span class="pre">Token:Normal/Private</span></code> 的 <code class="docutils literal notranslate"><span class="pre">Normal</span></code> 链接，转到GitHub授权页面给这个插件授权(即获得Github API Access Token)</p></li>
+</ul>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../../_images/gitzip_token.png"><img alt="../../../_images/gitzip_token.png" src="../../../_images/gitzip_token.png" style="width: 600.0px; height: 218.25px;" /></a>
+</div>
+<ul class="simple">
+<li><p>然后在GitHub的文件中，选择文件或者目录，不要直接点文件或目录的url(这样还是转跳)而是在这一行中点空白处，并且连点2下。此时在这行的开头就会浮现一个勾选符号，并且页面右下角会浮现出下载按钮</p></li>
+</ul>
+</div>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../../_images/gitzip_download.png"><img alt="../../../_images/gitzip_download.png" src="../../../_images/gitzip_download.png" style="width: 600.0px; height: 321.75px;" /></a>
+</div>
 <ul>
-<li><p>下载最新的raspberry pi的firmware:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">raspberrypi</span><span class="o">/</span><span class="n">firmware</span><span class="o">.</span><span class="n">git</span>
+<li><p>将下载的最新Raspberry pi firmware 的 <code class="docutils literal notranslate"><span class="pre">boot</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">.dat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">.elf</span></code> 文件到Ubuntu的 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">~/</span><span class="n">Downloads</span><span class="o">/</span><span class="n">boot</span><span class="o">/*.</span><span class="n">dat</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+<span class="n">sudo</span> <span class="n">cp</span> <span class="o">~/</span><span class="n">Downloads</span><span class="o">/</span><span class="n">boot</span><span class="o">/*.</span><span class="n">elf</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<blockquote>
-<div><p>不过，这个仓库非常巨大，所以如果你要节约下载时间，可以采用chrome插件 <a class="reference external" href="https://gitzip.org/">GitZip</a> 来指定只下载部分文件。</p>
-</div></blockquote>
-<p>可以直接从 raspbian 的 目录 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 复制 .dat 和 .elf 文件到Ubuntu的 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 分区:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">boot</span><span class="o">/*.</span><span class="n">dat</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span>
-<span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">boot</span><span class="o">/*.</span><span class="n">elf</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span>
+</div>
+<div class="section" id="id3">
+<h2>启动<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>关机，将TF卡拔出，只连接USB外接的SSD移动硬盘，然后重启系统，观察Raspberry Pi从USB移动硬盘启动。</p>
+<div class="section" id="id4">
+<h3>启动报错<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<p>按照上述操作步骤，启动页面显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lba</span><span class="p">:</span> <span class="mi">2048</span> <span class="n">oem</span><span class="p">:</span> <span class="s1">&#39;mkfs.fat&#39;</span> <span class="n">volume</span><span class="p">:</span> <span class="s1">&#39; system-boot&#39;</span>
+<span class="n">rsc</span> <span class="mi">32</span> <span class="n">fat</span><span class="o">-</span><span class="n">sectors</span> <span class="mi">4033</span> <span class="n">c</span><span class="o">-</span><span class="n">count</span> <span class="mi">516190</span> <span class="n">c</span><span class="o">-</span><span class="n">size</span> <span class="mi">1</span> <span class="n">r</span><span class="o">-</span><span class="nb">dir</span> <span class="mi">2</span> <span class="n">r</span><span class="o">-</span><span class="n">sec</span> <span class="mi">0</span>
+<span class="n">Read</span> <span class="n">config</span><span class="o">.</span><span class="n">txt</span> <span class="nb">bytes</span>     <span class="mi">1173</span> <span class="n">hnd</span> <span class="mh">0x0001eb9c</span> <span class="nb">hash</span> <span class="s1">&#39;fafd37aa6348be46&#39;</span>
+<span class="n">recovery4</span><span class="o">.</span><span class="n">elf</span> <span class="ow">not</span> <span class="n">found</span> <span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">recovery</span><span class="o">.</span><span class="n">elf</span> <span class="ow">not</span> <span class="n">found</span>
 </pre></div>
 </div>
-<p>也可以从 GitHub 获取 <a class="reference external" href="https://github.com/raspberrypi/firmware/tree/master/boot">raspberrypi/firmware</a> 获取。</p>
+<p>然后就是彩虹页面</p>
+<p>这个报错看起来和我之前在做tar备份恢复的报错相同。</p>
+<p>我仔细核对了一下 <a class="reference external" href="https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4">USB Boot Ubuntu Server 20.04 on Raspberry Pi 4</a></p>
+<p>我发现这个文档中就没有挂载过 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> ，只是挂载 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/mnt/ssdboot</span></code> 目录下，然后所有操作都是在 <code class="docutils literal notranslate"><span class="pre">/mnt/ssdboot</span></code> 下进行的。我最初以为文章中所指的 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> 是指 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 目录下的 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> ( <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 磁盘中的 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 目录)，但是核对以后发现实际操作的是SSD磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 对应的 <code class="docutils literal notranslate"><span class="pre">/boot/firmware</span></code> 目录下的 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> 。</p>
+<p>原因是Ubuntu for Raspberry实际上在 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/boot/firmware</span></code> 目录下各有一个 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> 文件。看来是我操作错误了。</p>
+<p>重新回到 <code class="docutils literal notranslate"><span class="pre">/mnt/boot</span></code> 目录，将这个目录下的 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> 解压的 <code class="docutils literal notranslate"><span class="pre">vmlinux</span></code> 复制到子目录 <code class="docutils literal notranslate"><span class="pre">/mnt/boot/firmware</span></code> ，并相应复制 <code class="docutils literal notranslate"><span class="pre">initrd.img</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/mnt/boot/firmware</span></code> 。再次重启系统，就能够正常启动了。</p>
 </div>
-<div class="section" id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="section" id="pi-4-bootloader-configuration">
+<h3>Pi 4 Bootloader Configuration<a class="headerlink" href="#pi-4-bootloader-configuration" title="永久链接至标题">¶</a></h3>
+<p>参考 <a class="reference external" href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/booteeprom.md">Raspberry Pi 4 boot EEPROM</a> 指出 <a class="reference external" href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md">Pi 4 Bootloader Configuration</a> 需要通过树莓派的官方镜像中工具 <code class="docutils literal notranslate"><span class="pre">vcgencmd</span></code> 来检查 eeprom 中配置的bootloader。</p>
+<p>使用树莓派官方镜像启动，然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vcgencmd</span> <span class="n">bootloader_config</span>
+</pre></div>
+</div>
+<p>可以看到输出信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="nb">all</span><span class="p">]</span>
+<span class="n">BOOT_UART</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">WAKE_ON_GPIO</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">POWER_OFF_ON_HALT</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">DHCP_TIMEOUT</span><span class="o">=</span><span class="mi">45000</span>
+<span class="n">DHCP_REQ_TIMEOUT</span><span class="o">=</span><span class="mi">4000</span>
+<span class="n">TFTP_FILE_TIMEOUT</span><span class="o">=</span><span class="mi">30000</span>
+<span class="n">ENABLE_SELF_UPDATE</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">DISABLE_HDMI</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">BOOT_ORDER</span><span class="o">=</span><span class="mh">0xf41</span>
+</pre></div>
+</div>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">BOOT_ORDER=0xf41</span></code> 表示:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0x1</span></code> - SD CARD</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0x4</span></code> - USB mass storage boot (since 2020-09-03)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0xf</span></code> - RESTART (loop) - start again with the first boot order field. (since 2020-09-03)</p></li>
+</ul>
+<p>这里的组合 <code class="docutils literal notranslate"><span class="pre">0xf41</span></code> 顺序是从右到左，也就是先SD卡，然后USB存储，不断循环。</p>
+<p>看起来我使用最新的eeprom没有问题，启动顺序是正确的。</p>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4">USB Boot Ubuntu Server 20.04 on Raspberry Pi 4</a> - 这篇文章非常详尽解说了从外接USB存储启动Ubuntu Server for Raspberry Pi的方法，比通过工具无脑操作要更有技术性</p></li>
 <li><p><a class="reference external" href="https://www.tomshardware.com/how-to/boot-raspberry-pi-4-usb">How to Boot Raspberry Pi 4 From a USB SSD or Flash Drive</a> 采用了 raspi-config 工具来设置Raspberry Pi OS，是树莓派官方解决方案，比较简单傻瓜化，不过只能用于树莓派官方操作系统</p></li>
+<li><p>有关树莓派分区：</p>
+<ul>
+<li><p><a class="reference external" href="https://www.raspberrypi.org/forums/viewtopic.php?t=205418">booting from a GPT mass storage device</a></p></li>
+<li><p><a class="reference external" href="https://www.raspberrypi.org/forums/viewtopic.php?t=241914">Does the Pi support booting from GPT drives?</a></p></li>
+<li><p><a class="reference external" href="https://www.rodsbooks.com/gdisk/hybrid.html">Hybrid MBRs: The Good, the Bad, and the So Ugly You’ll Tear Your Eyes Out</a> - 详细的Hybrid MBR原理和操作</p></li>
+<li><p><a class="reference external" href="https://wiki.gentoo.org/wiki/Hybrid_partition_table">Gentoo Hybrid partition table</a></p></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>

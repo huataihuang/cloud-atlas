@@ -76,8 +76,27 @@
 
    现在我们已经不再需要树莓派官方提供的 Raspbian 运行TF卡了，请把该存储卡保存好，今后可能还会再次使用用来更新firmware。
 
-划分SSD存储
-==============
+复制系统到SSD存储
+==================
+
+通过dd复制系统
+----------------
+
+- 采用 ``dd`` 命令完整复制磁盘::
+
+   dd if=/dev/mmcblk0 of=/dev/sda bs=100M
+
+- 然后挂载SSD磁盘分区::
+
+   mount /dev/sda2 /mnt
+   mount /dev/sda1 /mnt/boot/firmware
+
+通过tar复制系统(失败)
+----------------------
+
+.. note::
+
+   我一直想采用tar包方式clone系统，这样可以灵活调整磁盘分区，但是我的尝试目前没有成功。所以还是采用 ``dd`` 方式来复制系统
 
 我的规划是使用SSD存储30G空间部署系统，启用空间划分给 :ref:`gluster` 和 :ref:`ceph` ，以及构建本地 :ref:`docker` 运行存储。
 
@@ -86,13 +105,14 @@
 .. literalinclude:: parted_pi_ssd
    :linenos:
 
+.. warning::
+
+   一定要将磁盘分区表创建成MBR(msdos)，当前树莓派不支持GPT分区表磁盘启动。我尝试采用Hybrid partition table，但是没有成功。
+
 - 格式化文件系统::
 
    mkfs.fat -F32 /dev/sda1
    mkfs.ext4 /dev/sda2
-
-挂载SSD存储的系统启动分区
-============================
 
 - Ubuntu for Raspberry Pi 分区挂载如下::
 
@@ -102,27 +122,274 @@
 需要对应复制到新的SSD存储中，采用 ``tar`` 打包::
 
    cd /
+   #tar打包系统不包含跨磁盘目录，所以/boot/firmware需要单独复制
    tar -cpzf pi.tar.gz --exclude=/pi.tar.gz --one-file-system /
+   
+   mount /dev/sda2 /mnt
+   sudo tar -xpzf /pi.tar.gz -C /mnt --numeric-owner
 
+   mount /dev/sda1 /mnt/boot/firmware
+   (cd /boot/firmware && tar cf - .)|(cd /mnt/boot/firmware && tar xf -)
+
+以上已经完整将原先在TF卡上运行的 :ref:`ubuntu64bit_pi` 复制到了USB外接的SSD移动硬盘上。
+
+- 检查SSD磁盘的UUID，我们需要将PARTUUID配置到启动命令 ``cmdline.txt`` 配置文件以及 ``fstab`` 配置文件，正确反映磁盘挂载和启动分区::
+
+   # blkid /dev/sda
+   /dev/sda: PTUUID="b541639f" PTTYPE="dos"
+   # blkid /dev/sda1
+   /dev/sda1: UUID="6E36-5E03" TYPE="vfat" PARTUUID="b541639f-01"
+   # blkid /dev/sda2
+   /dev/sda2: UUID="f4d2caed-9b2c-4645-99b4-8b406eb7d3f1" TYPE="ext4" PARTUUID="b541639f-02"
+
+这里的 ``PARTUUID`` 需要修改对应配置。
+
+- 编辑 ``/mnt/boot/firmware/cmdline.txt`` 将::
+
+   net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=LABEL=writable rootfstype=ext4 elevator=deadline rootwait fixrtc
+
+修改成::
+
+   net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=PARTUUID="b541639f-02" rootfstype=ext4 elevator=deadline rootwait fixrtc
+
+.. note::
+
+   这里 ``PARTUUID=`` 是USB外接SSD磁盘的分区2的PARTUUID。注意，是SSD磁盘，所以 ``elevator=`` 参数保持和原先TF卡配置一样，还是 ``deadline`` 。不过，如果你的外接磁盘是机械硬盘，则参数改为 ``cfq`` 。
+
+- 编辑 ``/mnt/etc/fstab`` ，将::
+
+   LABEL=writable	/	 ext4	defaults	0 0
+   LABEL=system-boot       /boot/firmware  vfat    defaults        0       1
+
+修改成::
+
+   PARTUUID="b541639f-01"	/	 ext4	defaults	0 0
+   PARTUUID="b541639f-02"  /boot/firmware  vfat    defaults        0       1
+
+.. note::
+
+   以上是通过tar方式复制系统，目前多次尝试都没有成功。
+
+有关树莓派分区表
+----------------
+
+注意到SD卡使用的分区表是msdos，但是我在划分USB外接移动硬盘时候，使用了 ``parted`` 将磁盘的分区表构建成了GPT。参考 `booting from a GPT mass storage device <https://www.raspberrypi.org/forums/viewtopic.php?t=205418>`_ 了解到树莓派不支持GPT分区表的磁盘启动，而是要使用2TB以下磁盘，采用msdos分区表启动。有人尝试将MBR转换成GPT(使用 ``gdisk`` 工具的选项 ``r-f-y-w`` )，虽然GPT分区正确并且数据能够在Mac/Windows/Linux上读取，但是树莓派3不能从磁盘启动，始终看到的是彩虹屏幕。解决的方法是添加hybrid MBR(包含第一个启动分区，或者包含第一、第二分区，或者包含第一、第二和空闲分区)，都能够解决这个问题。
+
+我参考 `Hybrid MBRs: The Good, the Bad, and the So Ugly You'll Tear Your Eyes Out <https://www.rodsbooks.com/gdisk/hybrid.html>`_ 使用 ``gdisk`` 转换分区表::
+
+   # gdisk /dev/sda
+   GPT fdisk (gdisk) version 1.0.5
+   
+   Partition table scan:
+     MBR: protective
+     BSD: not present
+     APM: not present
+     GPT: present
+   
+   Found valid GPT with protective MBR; using GPT.
+   
+   Command (? for help): r
+   
+   Recovery/transformation command (? for help): p
+   Disk /dev/sda: 2000343040 sectors, 953.8 GiB
+   Model: My Passport 25F3
+   Sector size (logical/physical): 512/4096 bytes
+   Disk identifier (GUID): A0ACD939-81CF-4874-B5E3-45B51A11B1B5
+   Partition table holds up to 128 entries
+   Main partition table begins at sector 2 and ends at sector 33
+   First usable sector is 34, last usable sector is 2000343006
+   Partitions will be aligned on 2048-sector boundaries
+   Total free space is 1941751741 sectors (925.9 GiB)
+   
+   Number  Start (sector)    End (sector)  Size       Code  Name
+      1            2048          499711   243.0 MiB   EF00  primary
+      2          499712        58593279   27.7 GiB    8300  primary
+   
+   Recovery/transformation command (? for help): h
+   
+   WARNING! Hybrid MBRs are flaky and dangerous! If you decide not to use one,
+   just hit the Enter key at the below prompt and your MBR partition table will
+   be untouched.
+   
+   Type from one to three GPT partition numbers, separated by spaces, to be
+   added to the hybrid MBR, in sequence: 1 2
+   Place EFI GPT (0xEE) partition first in MBR (good for GRUB)? (Y/N): y
+   
+   Creating entry for GPT partition #1 (MBR partition #2)
+   Enter an MBR hex code (default EF):
+   Set the bootable flag? (Y/N): y
+   
+   Creating entry for GPT partition #2 (MBR partition #3)
+   Enter an MBR hex code (default 83):
+   Set the bootable flag? (Y/N): n
+   
+   Unused partition space(s) found. Use one to protect more partitions? (Y/N): n
+   
+   Recovery/transformation command (? for help): o
+   
+   Disk size is 2000343040 sectors (953.8 GiB)
+   MBR disk identifier: 0x16F2A91F
+   MBR partitions:
+   
+   Number  Boot  Start Sector   End Sector   Status      Code
+      1                     1         2047   primary     0xEE
+      2      *           2048       499711   primary     0xEF
+      3                499712     58593279   primary     0x83
+   
+   Recovery/transformation command (? for help): w
+   
+   Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING
+   PARTITIONS!!
+   
+   Do you want to proceed? (Y/N): y
+   OK; writing new GUID partition table (GPT) to /dev/sda.
+   The operation has completed successfully.
+
+.. note::
+
+   转换完成后，使用 ``fdisk -l`` 和 ``parted /dev/sda`` 检查，可以看到分区表依然是GPT(暂时没有探索明白)，后续我准备再采购新设备时重新实践一下。
+
+解压缩内核
+============
+
+.. note::
+
+   每次Ubuntu更新内核都需要重复执行这个步骤。
+
+当前不支持压缩版本的64位arm内核启动，所以我们需要将 ``vmlinuz`` 解压成 ``vmlinux`` 。
+
+- 找出镜像中gzip压缩的内容起点::
+
+   cd /mnt/boot
+   od -A d -t x1 vmlinuz | grep '1f 8b 08 00'
+
+输出类似::
+
+   0000000 1f 8b 08 00 00 00 00 00 02 03 ec 5c 0d 74 14 55
+
+这里第一串数字 ``0000000`` 就是起点，也就是镜像的开始位置。
+
+- 使用 ``dd`` 命令展开数据然后用 ``zcat`` 解压缩到一个文件::
+
+   dd if=vmlinuz bs=1 skip=0000000 | zcat > vmlinux
+
+更新启动config.txt
+===================
+
+- 配置 ``config.txt`` 文件告知树莓派如何启动::
+
+   vi /mnt/boot/firmware/config.txt
+
+注释掉所有 ``[pi*]`` 段落，然后添加 ``kernel=vmlinux`` 和 ``initramfs initrd.img followkernel`` 到 ``[all]`` 段落::
+
+   #[pi4]
+   #kernel=uboot_rpi_4.bin
+   #max_framebuffers=2
+   
+   #[pi2]
+   #kernel=uboot_rpi_2.bin
+   
+   #[pi3]
+   #kernel=uboot_rpi_3.bin
+   
+   [all]
+   arm_64bit=1
+   device_tree_address=0x03000000
+   kernel=vmlinux
+   initramfs initrd.img followkernel
 
 更新 .dat 和 .elf 文件
 ============================
 
-- 下载最新的raspberry pi的firmware::
+- 下载最新的raspberry pi的firmware，但是这个库非常巨大(10G+)，所以不建议直接clone，而是采用chrome插件 `GitZip <https://gitzip.org/>`_ 来指定只下载部分文件。
 
-   git clone git@github.com:raspberrypi/firmware.git
+.. note::
 
- 不过，这个仓库非常巨大，所以如果你要节约下载时间，可以采用chrome插件 `GitZip <https://gitzip.org/>`_ 来指定只下载部分文件。
+   GitZip插件刚开始使用有点让我疑惑，实际上这个插件使用有两步：
 
-可以直接从 raspbian 的 目录 ``/boot`` 复制 .dat 和 .elf 文件到Ubuntu的 ``/boot`` 分区::
+   - 点击GitZip插件按钮，在弹出浮动窗口点 ``Get Token:Normal/Private`` 的 ``Normal`` 链接，转到GitHub授权页面给这个插件授权(即获得Github API Access Token)
 
-   sudo cp /boot/*.dat /mnt/boot/
-   sudo cp /boot/*.elf /mnt/boot/
+   .. figure:: ../../../_static/arm/raspberry_pi/storage/gitzip_token.png
+      :scale: 75
 
-也可以从 GitHub 获取 `raspberrypi/firmware <https://github.com/raspberrypi/firmware/tree/master/boot>`_ 获取。
+   - 然后在GitHub的文件中，选择文件或者目录，不要直接点文件或目录的url(这样还是转跳)而是在这一行中点空白处，并且连点2下。此时在这行的开头就会浮现一个勾选符号，并且页面右下角会浮现出下载按钮
+
+.. figure:: ../../../_static/arm/raspberry_pi/storage/gitzip_download.png
+   :scale: 75
+
+- 将下载的最新Raspberry pi firmware 的 ``boot`` 目录下 ``.dat`` 和 ``.elf`` 文件到Ubuntu的 ``/boot`` 分区::
+
+   sudo cp ~/Downloads/boot/*.dat /mnt/boot/firmware
+   sudo cp ~/Downloads/boot/*.elf /mnt/boot/firmware
+
+启动
+==========
+
+关机，将TF卡拔出，只连接USB外接的SSD移动硬盘，然后重启系统，观察Raspberry Pi从USB移动硬盘启动。
+
+启动报错
+----------
+
+按照上述操作步骤，启动页面显示::
+
+   lba: 2048 oem: 'mkfs.fat' volume: ' system-boot'
+   rsc 32 fat-sectors 4033 c-count 516190 c-size 1 r-dir 2 r-sec 0
+   Read config.txt bytes     1173 hnd 0x0001eb9c hash 'fafd37aa6348be46'
+   recovery4.elf not found (6)
+   recovery.elf not found
+
+然后就是彩虹页面
+
+这个报错看起来和我之前在做tar备份恢复的报错相同。
+
+我仔细核对了一下 `USB Boot Ubuntu Server 20.04 on Raspberry Pi 4 <https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4>`_
+
+我发现这个文档中就没有挂载过 ``/dev/sda2`` ，只是挂载 ``/dev/sda1`` 到 ``/mnt/ssdboot`` 目录下，然后所有操作都是在 ``/mnt/ssdboot`` 下进行的。我最初以为文章中所指的 ``vmlinuz`` 是指 ``/boot`` 目录下的 ``vmlinuz`` ( ``/dev/sda2`` 磁盘中的 ``/boot`` 目录)，但是核对以后发现实际操作的是SSD磁盘 ``/dev/sda1`` 对应的 ``/boot/firmware`` 目录下的 ``vmlinuz`` 。
+
+原因是Ubuntu for Raspberry实际上在 ``/boot`` 和 ``/boot/firmware`` 目录下各有一个 ``vmlinuz`` 文件。看来是我操作错误了。
+
+重新回到 ``/mnt/boot`` 目录，将这个目录下的 ``vmlinuz`` 解压的 ``vmlinux`` 复制到子目录 ``/mnt/boot/firmware`` ，并相应复制 ``initrd.img`` 到 ``/mnt/boot/firmware`` 。再次重启系统，就能够正常启动了。
+
+Pi 4 Bootloader Configuration
+-------------------------------
+
+参考 `Raspberry Pi 4 boot EEPROM <https://www.raspberrypi.org/documentation/hardware/raspberrypi/booteeprom.md>`_ 指出 `Pi 4 Bootloader Configuration <https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md>`_ 需要通过树莓派的官方镜像中工具 ``vcgencmd`` 来检查 eeprom 中配置的bootloader。
+
+使用树莓派官方镜像启动，然后执行::
+
+   vcgencmd bootloader_config
+
+可以看到输出信息::
+
+   [all]
+   BOOT_UART=0
+   WAKE_ON_GPIO=1
+   POWER_OFF_ON_HALT=0
+   DHCP_TIMEOUT=45000
+   DHCP_REQ_TIMEOUT=4000
+   TFTP_FILE_TIMEOUT=30000
+   ENABLE_SELF_UPDATE=1
+   DISABLE_HDMI=0
+   BOOT_ORDER=0xf41
+
+这里 ``BOOT_ORDER=0xf41`` 表示:
+
+- ``0x1`` - SD CARD
+- ``0x4`` - USB mass storage boot (since 2020-09-03)
+- ``0xf`` - RESTART (loop) - start again with the first boot order field. (since 2020-09-03)
+
+这里的组合 ``0xf41`` 顺序是从右到左，也就是先SD卡，然后USB存储，不断循环。
+
+看起来我使用最新的eeprom没有问题，启动顺序是正确的。
 
 参考
 ======
 
 - `USB Boot Ubuntu Server 20.04 on Raspberry Pi 4 <https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4>`_ - 这篇文章非常详尽解说了从外接USB存储启动Ubuntu Server for Raspberry Pi的方法，比通过工具无脑操作要更有技术性
 - `How to Boot Raspberry Pi 4 From a USB SSD or Flash Drive <https://www.tomshardware.com/how-to/boot-raspberry-pi-4-usb>`_ 采用了 raspi-config 工具来设置Raspberry Pi OS，是树莓派官方解决方案，比较简单傻瓜化，不过只能用于树莓派官方操作系统
+- 有关树莓派分区：
+
+  - `booting from a GPT mass storage device <https://www.raspberrypi.org/forums/viewtopic.php?t=205418>`_
+  - `Does the Pi support booting from GPT drives? <https://www.raspberrypi.org/forums/viewtopic.php?t=241914>`_
+  - `Hybrid MBRs: The Good, the Bad, and the So Ugly You'll Tear Your Eyes Out <https://www.rodsbooks.com/gdisk/hybrid.html>`_ - 详细的Hybrid MBR原理和操作
+  - `Gentoo Hybrid partition table <https://wiki.gentoo.org/wiki/Hybrid_partition_table>`_

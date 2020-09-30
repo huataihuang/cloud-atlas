@@ -8,6 +8,7 @@ Linux桌面
    :maxdepth: 1
 
    remote_linux_desktop.rst
+   xpra.rst
    light_browser.rst
    netsurf.rst 
 
