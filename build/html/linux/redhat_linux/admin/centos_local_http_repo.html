@@ -226,7 +226,8 @@
 <p>当一次次通过Internet安装和更新CentOS，当运维当服务器越来越多，你一定会有一个强烈的愿望，构建一个本地CentOS软件仓库。这样只要同步一次集中的软件仓库，就可以提供本地局域网所有CentOS服务器更新到相同版本。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>本实践是在CentOS 8上完成，使用安装命令是 <code class="docutils literal notranslate"><span class="pre">dnf</span></code> ，如果你使用CentOS 7或更低版本，则使用 <code class="docutils literal notranslate"><span class="pre">yum</span></code> 代替 <code class="docutils literal notranslate"><span class="pre">dnf</span></code> 命令。</p>
+<p>强烈推荐使用 <code class="docutils literal notranslate"><span class="pre">reposync</span></code> 工具进行软件仓库同步，这个工具是通用工具，不仅适合CentOS发行版的软件仓库，也可以用于其他符合Red Hat YUM仓库规范的软件仓库同步。例如，我也使用这个工具来同步Docker CE和Kubernetes仓库，可以提供给本地局域网服务器公用安装。</p>
+<p>如果要同步不同软件版本，例如，要同步CentOS 7/6/5或者不同架构。我觉得可以采用Docker方式来运行专用同步客户端，甚至可以采用 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 运行 <a class="reference internal" href="../../../kubernetes/concepts/workloads/controllers/daemonset.html#daemonset"><span class="std std-ref">DaemonSet</span></a> 来完成。后续我可能会再部署一整套同步方案，来适用于不同Red Hat发行版，Ubuntu发行版，SUSE发行版以及ARM架构的Fedora/Ubuntu同步。构建一个完整的仓库镜像方案。</p>
 </div>
 <p>CentOS 8包含2个仓库: <code class="docutils literal notranslate"><span class="pre">BaseOS</span></code> 和 <code class="docutils literal notranslate"><span class="pre">AppStream</span></code> (Application Stream):</p>
 <ul class="simple">
@@ -239,6 +240,11 @@
 <li><p>安装Nginx软件包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">epel</span><span class="o">-</span><span class="n">release</span>
 <span class="n">dnf</span> <span class="n">install</span> <span class="n">nginx</span>
+</pre></div>
+</div>
+</li>
+<li><p>配置nginx允许index浏览(非必须，仅为了方便查看):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xxx</span>
 </pre></div>
 </div>
 </li>
@@ -326,18 +332,22 @@
 <p class="admonition-title">注解</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">&lt;download-path&gt;,</span> <span class="pre">--download-path=&lt;download-path&gt;</span></code> 指定下载目录，如果没有提供参数就会下载到当前目录。每个下载仓库都会在这个目录下有一个自己ID的子目录</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">&lt;architecture&gt;,</span> <span class="pre">--arch=&lt;architecture&gt;</span></code> 下载指定架构的软件包(默认是下载所有架构)。这个参数可以同时使用多次以便指定多个架构。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">&lt;architecture&gt;,</span> <span class="pre">--arch=&lt;architecture&gt;</span></code> 下载指定架构的软件包(默认是下载所有架构)。这个参数可以同时使用多次以便指定多个架构。 <strong>注意</strong> 即使是 <code class="docutils literal notranslate"><span class="pre">x86_64</span></code> 架构的软件仓库，也有很多软件包是 <code class="docutils literal notranslate"><span class="pre">noarch</span></code> 的，所以必须同时使用 <code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">x86_64</span> <span class="pre">-a</span> <span class="pre">noarch</span></code> 。不过，我觉得可能不需要指定 <code class="docutils literal notranslate"><span class="pre">-a</span></code> 参数，实际上软件仓库下载都是按照同步服务器的所需软件包来下载的。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--newest-only</span></code> 只下载每个仓库中最新的软件包</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--delete</span></code> 删除不在仓库中的本地软件包</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--norepopath</span></code> 不在下载目录下添加repo名字，例如再添加一个 <code class="docutils literal notranslate"><span class="pre">BaseOS</span></code> <strong>不过这个参数需要 dnf-plugins-core-4.0.14 以上版本才支持</strong> ( <a class="reference external" href="https://dnf-plugins-core.readthedocs.io/_/downloads/en/latest/pdf/">dnf-plugins-core release notes</a> )之前的reposync会强制在同步目录下创建一个 <code class="docutils literal notranslate"><span class="pre">repoid</span></code> 子目录，实际上就会和默认的repo目录不一致。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--download-metadata</span></code> 下载所有repository meatadata，这样就不需要再使用 <code class="docutils literal notranslate"><span class="pre">createrepo</span></code> 命令再创建metadata</p></li>
 </ul>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">repoid</span></code> 可以通过 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">replist</span></code> 看到，例如用来同步的服务器，请使用 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">replist</span></code> 检查需要的仓库列表，选择必要同步的仓库同步。详细请参考 <a class="reference internal" href="dnf.html#dnf"><span class="std std-ref">DNF包管理器</span></a></p>
+</div>
 <ul class="simple">
 <li><p>为了能够方便进行多个repo同步，实际我采用以下脚本 <code class="docutils literal notranslate"><span class="pre">reposync.sh</span></code></p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">reposync_sh</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">yum.repos.d/reposync_sh</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -353,28 +363,113 @@
 13
 14
 15
-16</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env bash</span>
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env bash</span>
 
 <span class="nv">VER</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
 <span class="nv">ARCH</span><span class="o">=</span><span class="s1">&#39;x86_64&#39;</span>
-<span class="nv">REPOS</span><span class="o">=(</span>BaseOS AppStream extras<span class="o">)</span>
+<span class="nv">REPOS</span><span class="o">=(</span>AppStream BaseOS PowerTools centos-gluster7 docker-ce-stable epel epel-modular extras kubernetes<span class="o">)</span>
 
 <span class="k">for</span> repoid in <span class="si">${</span><span class="nv">REPOS</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span> <span class="k">do</span>
     <span class="nv">repo_path</span><span class="o">=</span><span class="s2">&quot;/usr/share/nginx/html/centos/</span><span class="si">${</span><span class="nv">VER</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">repoid</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span><span class="s2">/os&quot;</span>
 
     <span class="c1"># After dnf-plugins-core-4.0.14 ,will use &quot;--norepopath&quot;</span>
-    <span class="c1">#dnf reposync -p ${repo_path} -a x86_64 --newest-only --delete --norepopath --download-metadata --repoid=${repoid}</span>
+    <span class="c1">#dnf reposync -p ${repo_path} -a x86_64 -a noarch --newest-only --delete \</span>
+		<span class="c1">#--norepopath --download-metadata --repoid=${repoid}</span>
 
     <span class="c1"># only use before dnf-plugins-core-4.0.14</span>
-    dnf reposync -p <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span> -a x86_64 --newest-only --delete --download-metadata --repoid<span class="o">=</span><span class="si">${</span><span class="nv">repoid</span><span class="si">}</span> <span class="o">&amp;&amp;</span> mv <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/<span class="si">${</span><span class="nv">repoid</span><span class="si">}</span>/* <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/ <span class="o">&amp;&amp;</span> rm -r <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/<span class="si">${</span><span class="nv">repoid</span><span class="si">}</span>
-
+    <span class="c1"># if ${repo_path}/Packages link exists, mean we had right directory structure</span>
+    <span class="k">if</span> <span class="o">[[</span> -L <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/Packages <span class="o">&amp;&amp;</span> -d <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/Packages <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+        dnf reposync -p <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span> -a x86_64 -a noarch --newest-only <span class="se">\</span>
+			--delete --download-metadata --repoid<span class="o">=</span><span class="si">${</span><span class="nv">repoid</span><span class="si">}</span>
+    <span class="k">else</span>
+        dnf reposync -p <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span> -a x86_64 -a noarch --newest-only <span class="se">\</span>
+			--delete --download-metadata --repoid<span class="o">=</span><span class="si">${</span><span class="nv">repoid</span><span class="si">}</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+        ln -s <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/<span class="si">${</span><span class="nv">repoid</span><span class="si">}</span>/* <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/
+    <span class="k">fi</span>
 <span class="k">done</span>
 </pre></div>
 </td></tr></table></div>
 </div>
 </div>
 <div class="section" id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>客户端repo配置<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>客户端的配置是修订发行版软件仓库配置来实现的，基本方式就是注释掉 <code class="docutils literal notranslate"><span class="pre">mirrorlist=</span></code> 配置，然后启用 <code class="docutils literal notranslate"><span class="pre">baseurl=</span></code> 配置，但是采用本地局域网提供软件仓库的服务器IP地址或者内部域名。举例：</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">yum.repos.d/CentOS-Base.repo</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># CentOS-Base.repo</span>
+<span class="c1">#</span>
+<span class="c1"># The mirror system uses the connecting IP address of the client and the</span>
+<span class="c1"># update status of each mirror to pick mirrors that are updated to and</span>
+<span class="c1"># geographically close to the client.  You should use this for CentOS updates</span>
+<span class="c1"># unless you are manually picking other mirrors.</span>
+<span class="c1">#</span>
+<span class="c1"># If the mirrorlist= does not work for you, as a fall back you can try the</span>
+<span class="c1"># remarked out baseurl= line instead.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+<span class="o">[</span>BaseOS<span class="o">]</span>
+<span class="nv">name</span><span class="o">=</span>CentOS-<span class="nv">$releasever</span> - Base
+<span class="c1">#mirrorlist=http://mirrorlist.centos.org/?release=$releasever&amp;arch=$basearch&amp;repo=BaseOS&amp;infra=$infra</span>
+<span class="c1">#baseurl=http://mirror.centos.org/$contentdir/$releasever/BaseOS/$basearch/os/</span>
+<span class="nv">baseurl</span><span class="o">=</span>http://worker7/<span class="nv">$contentdir</span>/<span class="nv">$releasever</span>/BaseOS/<span class="nv">$basearch</span>/os/
+<span class="nv">gpgcheck</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">enabled</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">gpgkey</span><span class="o">=</span>file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>安装软件需要GPG密钥，请单独从官方服务器下载，存放到内网软件仓库下载服务器上提供下载。</p>
+</div>
+<p>我为了方便分发客户端配置，采用了脚本:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">yum.repos.d/replace_repo_file</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nv">repo_list</span><span class="o">=</span><span class="sb">`</span>ls *.repo<span class="sb">`</span>
+ssh root@<span class="nv">$1</span> <span class="s2">&quot;if [ ! -d /etc/yum.repos.d/backup ];then mkdir /etc/yum.repos.d/backup;fi &amp;&amp; cp /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup/&quot;</span>
+
+<span class="k">for</span> repo in <span class="nv">$repo_list</span><span class="p">;</span><span class="k">do</span>
+    scp <span class="nv">$repo</span> root@<span class="nv">$1</span>:/etc/yum.repos.d/
+<span class="k">done</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://access.redhat.com/solutions/23016">How to create a local mirror of the latest update for Red Hat Enterprise Linux 5, 6, 7, 8 without using Satellite server?</a></p></li>
 <li><p><a class="reference external" href="https://www.server-world.info/en/note?os=CentOS_8&amp;p=localrepo">Configure DNF/Yum Mirror Server</a></p></li>

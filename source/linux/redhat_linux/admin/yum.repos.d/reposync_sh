@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+VER='8'
+ARCH='x86_64'
+REPOS=(AppStream BaseOS PowerTools centos-gluster7 docker-ce-stable epel epel-modular extras kubernetes)
+
+for repoid in ${REPOS[@]}; do
+    repo_path="/usr/share/nginx/html/centos/${VER}/${repoid}/${ARCH}/os"
+
+    # After dnf-plugins-core-4.0.14 ,will use "--norepopath"
+    #dnf reposync -p ${repo_path} -a x86_64 -a noarch --newest-only --delete \
+		#--norepopath --download-metadata --repoid=${repoid}
+
+    # only use before dnf-plugins-core-4.0.14
+    # if ${repo_path}/Packages link exists, mean we had right directory structure
+    if [[ -L ${repo_path}/Packages && -d ${repo_path}/Packages ]]; then
+        dnf reposync -p ${repo_path} -a x86_64 -a noarch --newest-only \
+			--delete --download-metadata --repoid=${repoid}
+    else
+        dnf reposync -p ${repo_path} -a x86_64 -a noarch --newest-only \
+			--delete --download-metadata --repoid=${repoid} && \
+        ln -s ${repo_path}/${repoid}/* ${repo_path}/
+    fi
+done

@@ -171,6 +171,21 @@ YUM可以通过通过设置环境变量来使用代理安装软件包::
    proxy_username=yum-user
    proxy_password=qwerty
 
+对特定repo启用代理
+-------------------
+
+在实际使用中，并不是所有软件仓库都需要代理，通常国内CentOS镜像网站速度很快，如果仅仅因为需要访问google软件仓库而将所有yum仓库都通过代理访问会大大拖累同步效率。
+
+有两种方式可以实现上述功能：
+
+- 如果只有少数repo需要使用代理，则可以将全局 ``yum.conf`` 中的代理设置改到只在这个软件仓库配置中，例如 ``kubernetes.repo`` 配置中需要添加代理设置
+
+- 如果大多数repo都需要使用代理，仅少数repo是直接访问，则把代理设置如上直接配置在全局配置 ``yum.conf`` 中，但是在不需要代理的软件仓库配置中添加一行忽略proxy的配置::
+
+   proxy=_none_
+
+不过，在 `dnf最新参考 <https://dnf.readthedocs.io/en/latest/conf_ref.html>`_ 中指出可以使用 ``proxy=`` 空白配置，为了向后兼容，依然可以使用 ``proxy=_none_``
+
 SUSE zypper/YaST使用代理
 ==========================
 
@@ -199,3 +214,4 @@ SUSE的zypper和YaST的代理配置文件是 ``/etc/sysconfig/proxy`` ，可以�
 - `The Polipo Manual <http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/polipo.html>`_
 - `SUSE Linux Enterprise : How to setup a Proxy manually <https://www.suse.com/support/kb/doc/?id=000017441>`_
 - `How to use openSUSE zypper behind a proxy (with authentication) <https://www.claudiokuenzler.com/blog/515/use-opensuse-zypper-behind-with-http-proxy-authenticiation>`_
+- `How to configure a proxy for specific repository only? <https://access.redhat.com/solutions/2272171>`_
