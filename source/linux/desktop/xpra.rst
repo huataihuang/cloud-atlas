@@ -75,9 +75,10 @@ macOS安装
 Linux使用xpra
 --------------
 
-在Linux上使用xpra非常简单：
+通过SSH转发
+~~~~~~~~~~~~
 
-有两种方式启动xpra会话::
+在Linux上使用xpra非常简单，有两种方式启动xpra会话:
 
 - 一种是合二为一，即从本地主机ssh到远程服务器上直接启动需要启动的X程序::
 
@@ -100,6 +101,45 @@ Linux使用xpra
   如果本地相同用户相同主机，并且只有一个xpra会话，则命令可以简化成::
 
      xpra attach
+
+直接TCP访问
+~~~~~~~~~~~~
+
+- 如果内部网络非常安全，可以采用直接TCP访问，设置xpra直接监听TCP端口::
+
+   xpra start --start=xterm --bind-tcp=0.0.0.0:10000
+
+- 然后客户端就直接访问TCP端口::
+
+   xpra attach tcp://SERVERHOST:10000/
+
+- 如果要增加安全性，可以在服务器端启动时加上密码认证 ``--tcp-auth=file,filename=mypassword.txt``
+
+完整桌面转发
+~~~~~~~~~~~~~
+
+Xpra也支持将整个桌面输出，类似VNC访问。以下是启动fluxbox桌面方法::
+
+   xpra start-desktop --start-child=fluxbox
+
+克隆已经存在显示
+~~~~~~~~~~~~~~~~~
+
+Xpra的 ``shadow`` 方式可以用来访问已经存在的桌面::
+
+   xpra shadow ssh://SERVERHOST/
+
+这样就可以看到远程桌面。默认是X11的会话 ``:0`` 或者 ``:1`` 。如果有多个会话，也可以指定访问桌面::
+
+   xpra shadow ssh://SERVERHOST/DISPLAY
+
+默认Xpra可以转发声音、剪贴板和光标，就好像应用程序的窗口，不过这些功能也可以关闭但是保留剪贴同步，例如::
+
+   xpra shadow --no-printing --no-windows --no-speaker --no-cursors ssh://SERVERHOST/
+
+甚至可以将打印机转发到另一个服务器上，只需要启动一个远程会话但是不启动应用程序，并确保打印机转发激活::
+
+   xpra shadow --no-windows --no-speaker --no-cursors ssh://SERVERHOST/ --printing=yes
 
 macOS
 ---------
