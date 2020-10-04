@@ -139,6 +139,19 @@ CentOS 8仓库
     :linenos:
     :caption:
 
+.. note::
+
+   我这里的案例 ``CentOS-Base.repo`` 和 ``replace_repo_file`` 都使用了一个主机域名 ``worker7`` ，这是我内部测试使用服务器主机名，内部做了域名解析。你的配置请按照实际情况进行修改。
+
+- 如果你在软件仓库存放了自己编译的rpm软件包，则需要使用 ``createrepo`` 命令来生成索引::
+
+   sudo createrepo /usr/share/nginx/html/my_repo
+
+每天定时执行仓库更新
+======================
+
+为了能够每天更新软件仓库，可以将 ``reposync.sh`` 脚本复制到 ``/etc/cron.daily`` 目录下，这样每天会执行一次同步。
+
 参考
 ====
 

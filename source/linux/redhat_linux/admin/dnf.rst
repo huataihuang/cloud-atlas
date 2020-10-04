@@ -81,6 +81,42 @@ DNF包管理器使用
 
    dnf list available
 
+- 列出仓库中module (软件包组合) ::
+
+   dnf module list
+
+显示不同仓库中软件包组合套装，类似::
+
+   CentOS-8 - AppStream
+   Name                  Stream           Profiles                                  Summary
+   ...
+   go-toolset            rhel8 [d]        common [d]                                Go
+   httpd                 2.4 [d]          common [d], devel, minimal                Apache HTTP Server
+   ...
+
+注意，module的状态： ``[d]efault, [e]nabled, [x]disabled, [i]nstalled`` ，如果是 ``[x]`` 状态，需要首先激活::
+
+   dnf module enable Name:Stream
+
+安装module有以下几种模式::
+
+   dnf module install NAME
+   dnf module install NAME:STREAM
+   dnf module install NAME/PROFILE
+   dnf module install NAME:STREAM/PROFILE
+
+请注意，有些软件是有不同Stream的，例如nodejs::
+
+   nodejs                10 [d][e]        common [d], development, minimal, s2i     Javascript runtime
+   nodejs                12               common [d], development, minimal, s2i     Javascript runtime
+
+则默认安装 ``dnf install nodejs`` 就会安装版本 ``10`` 。如果你要切换 Stream，需要使用 ``reset`` 指令::
+
+   dnf module reset nodejs
+   dnf module install nodejs:10
+
+注意，不推荐切换Stream，因为不是所有module都支持切换。
+
 - 搜索软件库中的软件包::
 
    dnf search syslog-ng
