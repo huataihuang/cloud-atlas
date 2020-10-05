@@ -297,7 +297,7 @@
 </ul>
 </div>
 <div class="section" id="tar">
-<h3>通过tar复制系统(失败)<a class="headerlink" href="#tar" title="永久链接至标题">¶</a></h3>
+<h3>通过tar复制系统(失败,但我觉得可以成功，待试)<a class="headerlink" href="#tar" title="永久链接至标题">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>我一直想采用tar包方式clone系统，这样可以灵活调整磁盘分区，但是我的尝试目前没有成功。所以还是采用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 方式来复制系统</p>
@@ -717,10 +717,144 @@ The operation has completed successfully.
 </ul>
 <p>这里的组合 <code class="docutils literal notranslate"><span class="pre">0xf41</span></code> 顺序是从右到左，也就是先SD卡，然后USB存储，不断循环。</p>
 <p>看起来我使用最新的eeprom没有问题，启动顺序是正确的。</p>
+<div class="section" id="eeprom">
+<h4>修订eeprom<a class="headerlink" href="#eeprom" title="永久链接至标题">¶</a></h4>
+<p>虽然最新的eeprom版本 (since 2020-09-03) 可以正确从USB外接存储启动(默认配置 <code class="docutils literal notranslate"><span class="pre">BOOT_ORDER=0xf41</span></code> )，但是我发现启动后树莓派4即使没有任何运行程序，也始终显示 Load Average 是1。使用 <code class="docutils literal notranslate"><span class="pre">top</span></code> 命令可以观察到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">-</span> <span class="mi">22</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">18</span> <span class="n">up</span> <span class="mi">1</span> <span class="n">day</span><span class="p">,</span>  <span class="mi">5</span><span class="p">:</span><span class="mi">02</span><span class="p">,</span>  <span class="mi">2</span> <span class="n">users</span><span class="p">,</span>  <span class="n">load</span> <span class="n">average</span><span class="p">:</span> <span class="mf">1.00</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">,</span> <span class="mf">1.00</span>
+<span class="n">Tasks</span><span class="p">:</span> <span class="mi">129</span> <span class="n">total</span><span class="p">,</span>   <span class="mi">1</span> <span class="n">running</span><span class="p">,</span> <span class="mi">128</span> <span class="n">sleeping</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">stopped</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">zombie</span>
+<span class="o">%</span><span class="n">Cpu</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="mf">0.1</span> <span class="n">us</span><span class="p">,</span>  <span class="mf">0.1</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span> <span class="mf">99.8</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="n">MiB</span> <span class="n">Mem</span> <span class="p">:</span>   <span class="mf">7810.3</span> <span class="n">total</span><span class="p">,</span>   <span class="mf">7246.5</span> <span class="n">free</span><span class="p">,</span>    <span class="mf">173.0</span> <span class="n">used</span><span class="p">,</span>    <span class="mf">390.8</span> <span class="n">buff</span><span class="o">/</span><span class="n">cache</span>
+<span class="n">MiB</span> <span class="n">Swap</span><span class="p">:</span>      <span class="mf">0.0</span> <span class="n">total</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">free</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">used</span><span class="o">.</span>   <span class="mf">7522.3</span> <span class="n">avail</span> <span class="n">Mem</span>
+
+    <span class="n">PID</span> <span class="n">USER</span>      <span class="n">PR</span>  <span class="n">NI</span>    <span class="n">VIRT</span>    <span class="n">RES</span>    <span class="n">SHR</span> <span class="n">S</span>  <span class="o">%</span><span class="n">CPU</span>  <span class="o">%</span><span class="n">MEM</span>     <span class="n">TIME</span><span class="o">+</span> <span class="n">COMMAND</span>
+   <span class="mi">4079</span> <span class="n">ubuntu</span>    <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">10700</span>   <span class="mi">3176</span>   <span class="mi">2720</span> <span class="n">R</span>   <span class="mf">0.7</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.15</span> <span class="n">top</span>
+   <span class="mi">3852</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.10</span> <span class="p">[</span><span class="n">kworker</span><span class="o">/</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="o">-</span><span class="n">events</span><span class="p">]</span>
+      <span class="mi">1</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">167624</span>  <span class="mi">10796</span>   <span class="mi">7336</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.1</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">06.50</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span> <span class="n">fixrtc</span>
+      <span class="mi">2</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.06</span> <span class="p">[</span><span class="n">kthreadd</span><span class="p">]</span>
+      <span class="mi">3</span> <span class="n">root</span>       <span class="mi">0</span> <span class="o">-</span><span class="mi">20</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.0</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.00</span> <span class="p">[</span><span class="n">rcu_gp</span><span class="p">]</span>
+      <span class="mi">4</span> <span class="n">root</span>       <span class="mi">0</span> <span class="o">-</span><span class="mi">20</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.0</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.00</span> <span class="p">[</span><span class="n">rcu_par_gp</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>为何系统没有任何运行进程，但是始终存在Laod Average = 1呢？</p>
+<p>原因是系统始终有一个 <code class="docutils literal notranslate"><span class="pre">D</span></code> 住的进程(在等待IO)，通过以下命令可以检查系统所有 <code class="docutils literal notranslate"><span class="pre">R</span></code> 和 <code class="docutils literal notranslate"><span class="pre">D</span></code> 的进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="o">-</span><span class="n">e</span> <span class="n">v</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">E</span> <span class="s1">&#39; R | D &#39;</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">v</span> <span class="n">grep</span>
+</pre></div>
+</div>
+<p>输出显示D住的系统进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>7195 ?        D      0:01      0     0     0     0  0.0 [kworker/2:1+events_freezable]
+</pre></div>
+</div>
+<p>检查这个D住进程的堆栈，可以看到在等待 <code class="docutils literal notranslate"><span class="pre">mmc</span></code> 存储设备(也就是SD卡):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">__switch_to</span><span class="o">+</span><span class="mh">0x104</span><span class="o">/</span><span class="mh">0x170</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">mmc_wait_for_req_done</span><span class="o">+</span><span class="mh">0x30</span><span class="o">/</span><span class="mh">0x170</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">mmc_wait_for_req</span><span class="o">+</span><span class="mh">0xb0</span><span class="o">/</span><span class="mh">0x108</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">mmc_wait_for_cmd</span><span class="o">+</span><span class="mh">0x7c</span><span class="o">/</span><span class="mh">0xb0</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">mmc_io_rw_direct_host</span><span class="o">+</span><span class="mh">0xa0</span><span class="o">/</span><span class="mh">0x138</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">sdio_reset</span><span class="o">+</span><span class="mh">0x74</span><span class="o">/</span><span class="mh">0x98</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">mmc_rescan</span><span class="o">+</span><span class="mh">0x33c</span><span class="o">/</span><span class="mh">0x3b8</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">process_one_work</span><span class="o">+</span><span class="mh">0x1c0</span><span class="o">/</span><span class="mh">0x458</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">worker_thread</span><span class="o">+</span><span class="mh">0x50</span><span class="o">/</span><span class="mh">0x428</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">kthread</span><span class="o">+</span><span class="mh">0x104</span><span class="o">/</span><span class="mh">0x130</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">]</span> <span class="n">ret_from_fork</span><span class="o">+</span><span class="mh">0x10</span><span class="o">/</span><span class="mh">0x1c</span>
+</pre></div>
+</div>
+<p>我反复重启了系统，情况相同，每次 <code class="docutils literal notranslate"><span class="pre">kworker</span></code> 系统进程都会D住。</p>
+<p>联想到启动树莓派时，屏幕提示没有找到SD卡。所以怀疑虽然从USB存储启动，但是eeprom依然发起访问SD卡，由于SD卡缺失，导致IO等待。</p>
+<p>解决的思路应该是尝试优先从USB存储启动，如果不行，再尝试只从USB存储启动(关闭从TF卡启动)。</p>
+<p><strong>以下是我处理排查过程</strong></p>
+<ul>
+<li><p>读取当前eeprom配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vcgencmd</span> <span class="n">bootloader_config</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="nb">all</span><span class="p">]</span>
+<span class="n">BOOT_UART</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">WAKE_ON_GPIO</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">POWER_OFF_ON_HALT</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">DHCP_TIMEOUT</span><span class="o">=</span><span class="mi">45000</span>
+<span class="n">DHCP_REQ_TIMEOUT</span><span class="o">=</span><span class="mi">4000</span>
+<span class="n">TFTP_FILE_TIMEOUT</span><span class="o">=</span><span class="mi">30000</span>
+<span class="n">ENABLE_SELF_UPDATE</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">DISABLE_HDMI</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">BOOT_ORDER</span><span class="o">=</span><span class="mh">0xf41</span>
+</pre></div>
+</div>
+<p>根据 <code class="docutils literal notranslate"><span class="pre">BOOT_ORDER</span></code> 配置，当前启动顺序是先SD卡然后USB存储，不断循环。</p>
+<ul>
+<li><p>检查版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vcgencmd</span> <span class="n">bootloader_version</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sep</span>  <span class="mi">3</span> <span class="mi">2020</span> <span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">43</span>
+<span class="n">version</span> <span class="n">c305221a6d7e532693cc7ff57fddfc8649def167</span> <span class="p">(</span><span class="n">release</span><span class="p">)</span>
+<span class="n">timestamp</span> <span class="mi">1599135103</span>
+</pre></div>
+</div>
+<ul>
+<li><p>修改启动顺序 - 参考 <a class="reference external" href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md">Pi 4 Bootloader Configuration</a></p></li>
+<li><p>先将EEPROM镜像从 <code class="docutils literal notranslate"><span class="pre">/lib/firmware/raspberrypi/bootloader/</span></code> 目录下复制出来准备修改</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">firmware</span><span class="o">/</span><span class="n">raspberrypi</span><span class="o">/</span><span class="n">bootloader</span><span class="o">/</span><span class="n">stable</span><span class="o">/</span><span class="n">pieeprom</span><span class="o">-</span><span class="mi">2020</span><span class="o">-</span><span class="mi">09</span><span class="o">-</span><span class="mf">03.</span><span class="n">bin</span> <span class="o">./</span><span class="n">pieeprom</span><span class="o">.</span><span class="n">bin</span>
+</pre></div>
+</div>
+</li>
+<li><p>导出配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpi</span><span class="o">-</span><span class="n">eeprom</span><span class="o">-</span><span class="n">config</span> <span class="n">pieeprom</span><span class="o">.</span><span class="n">bin</span> <span class="o">&gt;</span> <span class="n">bootconf</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改配置 <code class="docutils literal notranslate"><span class="pre">bootconf.txt</span></code> 将最后一行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BOOT_ORDER</span><span class="o">=</span><span class="mh">0xf41</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>修改成(表示先外接USB存储再SD卡):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BOOT_ORDER</span><span class="o">=</span><span class="mh">0xf14</span>
+</pre></div>
+</div>
+<ul>
+<li><p>将配置修改加入到EEPROM镜像文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpi</span><span class="o">-</span><span class="n">eeprom</span><span class="o">-</span><span class="n">config</span> <span class="o">--</span><span class="n">out</span> <span class="n">pieeprom</span><span class="o">-</span><span class="n">new</span><span class="o">.</span><span class="n">bin</span> <span class="o">--</span><span class="n">config</span> <span class="n">bootconf</span><span class="o">.</span><span class="n">txt</span> <span class="n">pieeprom</span><span class="o">.</span><span class="n">bin</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后刷入bootloader EEPROM:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rpi</span><span class="o">-</span><span class="n">eeprom</span><span class="o">-</span><span class="n">update</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">f</span> <span class="o">./</span><span class="n">pieeprom</span><span class="o">-</span><span class="n">new</span><span class="o">.</span><span class="n">bin</span>
+</pre></div>
+</div>
+</li>
+<li><p>拔掉SD卡，尝试从USB存储启动(优先)</p></li>
+</ul>
+<p>但是，启动以后，发现依然是存在 <code class="docutils literal notranslate"><span class="pre">[kworker/1:2+events_freezable]</span></code> 进程D住（是的，启动时终端还是显示mmc没有响应)</p>
+<p>我尝试了以下组合:</p>
+<ul class="simple">
+<li><p>启动顺序 <code class="docutils literal notranslate"><span class="pre">0xf14</span></code> ，没有插入TF卡。测试结果：能够从USB存储启动，但是系统依然存在D住的 <code class="docutils literal notranslate"><span class="pre">kworker</span></code> 进程在等待 MMC卡返回，依然Load Average持续1。</p></li>
+<li><p>将一块TF卡(可启动raspbian)插，但是我发现依然是优先从TF卡启动。这说明启动顺序 <code class="docutils literal notranslate"><span class="pre">0xf14</span></code> 没有效果，依然是 <code class="docutils literal notranslate"><span class="pre">0xf41</span></code> 优先从SD开启动。</p></li>
+<li><p>修改成 <code class="docutils literal notranslate"><span class="pre">0x14</span></code> 也就是只做一次，先从USB存储启动，然后是TF卡，但不循环。问题依旧存在，然是存在 <code class="docutils literal notranslate"><span class="pre">[kworker/1:2+events_freezable]</span></code> 进程D住，Load Average持续1。</p></li>
+<li><p>综上，只要启动顺序中有 <code class="docutils literal notranslate"><span class="pre">0x1</span></code> ，即启动顺序中有SD卡，即使从USB存储启动，只要SD卡不存在，就会导致系统进程 <code class="docutils literal notranslate"><span class="pre">kworker</span></code> D住等待 MMC 存储返回，系统始终存在 Load Average 1。</p></li>
+</ul>
+<p>最终，我一狠心，将启动顺序改成只从USB存储启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BOOT_ORDER</span><span class="o">=</span><span class="mh">0x4</span>
+</pre></div>
+</div>
+<p>此时启动时发现，如果不插SD卡，启动自检不过，屏幕提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Failed</span> <span class="n">to</span> <span class="nb">open</span> <span class="n">device</span><span class="p">:</span> <span class="s1">&#39;sdcard&#39;</span> <span class="p">(</span><span class="n">cmd</span> <span class="mi">371</span><span class="n">a0010</span> <span class="n">status</span> <span class="mi">1</span><span class="n">fff0001</span><span class="p">)</span>
+<span class="n">Insert</span> <span class="n">SD</span><span class="o">-</span><span class="n">CARD</span>
+</pre></div>
+</div>
+<p>所以，我插入一块TF卡，保持 <code class="docutils literal notranslate"><span class="pre">BOOT_ORDER=0x4</span></code> 配置，则系统顺利从USB存储启动，而且系统中不再出现 <code class="docutils literal notranslate"><span class="pre">kworker</span></code> 进程 <code class="docutils literal notranslate"><span class="pre">D</span></code> 住现象。</p>
+<p>这个异常我觉得是树莓派 EEPROM 的bug，准备再进行一些验证后提交一个issue。</p>
 </div>
 </div>
-<div class="section" id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4">USB Boot Ubuntu Server 20.04 on Raspberry Pi 4</a> - 这篇文章非常详尽解说了从外接USB存储启动Ubuntu Server for Raspberry Pi的方法，比通过工具无脑操作要更有技术性</p></li>
 <li><p><a class="reference external" href="https://www.tomshardware.com/how-to/boot-raspberry-pi-4-usb">How to Boot Raspberry Pi 4 From a USB SSD or Flash Drive</a> 采用了 raspi-config 工具来设置Raspberry Pi OS，是树莓派官方解决方案，比较简单傻瓜化，不过只能用于树莓派官方操作系统</p></li>

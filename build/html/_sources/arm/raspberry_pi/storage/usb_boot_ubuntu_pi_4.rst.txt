@@ -91,8 +91,8 @@
    mount /dev/sda2 /mnt
    mount /dev/sda1 /mnt/boot/firmware
 
-通过tar复制系统(失败)
-----------------------
+通过tar复制系统(失败,但我觉得可以成功，待试)
+----------------------------------------------
 
 .. note::
 
@@ -381,6 +381,136 @@ Pi 4 Bootloader Configuration
 这里的组合 ``0xf41`` 顺序是从右到左，也就是先SD卡，然后USB存储，不断循环。
 
 看起来我使用最新的eeprom没有问题，启动顺序是正确的。
+
+修订eeprom
+~~~~~~~~~~~
+
+虽然最新的eeprom版本 (since 2020-09-03) 可以正确从USB外接存储启动(默认配置 ``BOOT_ORDER=0xf41`` )，但是我发现启动后树莓派4即使没有任何运行程序，也始终显示 Load Average 是1。使用 ``top`` 命令可以观察到::
+
+   top - 22:54:18 up 1 day,  5:02,  2 users,  load average: 1.00, 1.00, 1.00
+   Tasks: 129 total,   1 running, 128 sleeping,   0 stopped,   0 zombie
+   %Cpu(s):  0.1 us,  0.1 sy,  0.0 ni, 99.8 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+   MiB Mem :   7810.3 total,   7246.5 free,    173.0 used,    390.8 buff/cache
+   MiB Swap:      0.0 total,      0.0 free,      0.0 used.   7522.3 avail Mem
+   
+       PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+      4079 ubuntu    20   0   10700   3176   2720 R   0.7   0.0   0:00.15 top
+      3852 root      20   0       0      0      0 I   0.3   0.0   0:00.10 [kworker/0:1-events]
+         1 root      20   0  167624  10796   7336 S   0.0   0.1   0:06.50 /sbin/init fixrtc
+         2 root      20   0       0      0      0 S   0.0   0.0   0:00.06 [kthreadd]
+         3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 [rcu_gp]
+         4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 [rcu_par_gp]
+
+为何系统没有任何运行进程，但是始终存在Laod Average = 1呢？
+
+原因是系统始终有一个 ``D`` 住的进程(在等待IO)，通过以下命令可以检查系统所有 ``R`` 和 ``D`` 的进程::
+
+   ps -e v | grep -E ' R | D ' | grep -v grep
+
+输出显示D住的系统进程::
+
+   7195 ?        D      0:01      0     0     0     0  0.0 [kworker/2:1+events_freezable]
+
+检查这个D住进程的堆栈，可以看到在等待 ``mmc`` 存储设备(也就是SD卡)::
+
+   [<0>] __switch_to+0x104/0x170
+   [<0>] mmc_wait_for_req_done+0x30/0x170
+   [<0>] mmc_wait_for_req+0xb0/0x108
+   [<0>] mmc_wait_for_cmd+0x7c/0xb0
+   [<0>] mmc_io_rw_direct_host+0xa0/0x138
+   [<0>] sdio_reset+0x74/0x98
+   [<0>] mmc_rescan+0x33c/0x3b8
+   [<0>] process_one_work+0x1c0/0x458
+   [<0>] worker_thread+0x50/0x428
+   [<0>] kthread+0x104/0x130
+   [<0>] ret_from_fork+0x10/0x1c
+
+我反复重启了系统，情况相同，每次 ``kworker`` 系统进程都会D住。
+
+联想到启动树莓派时，屏幕提示没有找到SD卡。所以怀疑虽然从USB存储启动，但是eeprom依然发起访问SD卡，由于SD卡缺失，导致IO等待。
+
+解决的思路应该是尝试优先从USB存储启动，如果不行，再尝试只从USB存储启动(关闭从TF卡启动)。
+
+**以下是我处理排查过程**
+
+- 读取当前eeprom配置::
+
+   vcgencmd bootloader_config
+
+输出内容::
+
+   [all]
+   BOOT_UART=0
+   WAKE_ON_GPIO=1
+   POWER_OFF_ON_HALT=0
+   DHCP_TIMEOUT=45000
+   DHCP_REQ_TIMEOUT=4000
+   TFTP_FILE_TIMEOUT=30000
+   ENABLE_SELF_UPDATE=1
+   DISABLE_HDMI=0
+   BOOT_ORDER=0xf41
+
+根据 ``BOOT_ORDER`` 配置，当前启动顺序是先SD卡然后USB存储，不断循环。
+
+- 检查版本::
+
+   vcgencmd bootloader_version
+
+输出::
+
+   Sep  3 2020 13:11:43
+   version c305221a6d7e532693cc7ff57fddfc8649def167 (release)
+   timestamp 1599135103
+
+- 修改启动顺序 - 参考 `Pi 4 Bootloader Configuration <https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md>`_
+
+- 先将EEPROM镜像从 ``/lib/firmware/raspberrypi/bootloader/`` 目录下复制出来准备修改 ::
+
+   cp /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2020-09-03.bin ./pieeprom.bin
+
+- 导出配置:: 
+
+   rpi-eeprom-config pieeprom.bin > bootconf.txt
+
+- 修改配置 ``bootconf.txt`` 将最后一行::
+
+   BOOT_ORDER=0xf41
+
+修改成(表示先外接USB存储再SD卡)::
+
+   BOOT_ORDER=0xf14
+
+- 将配置修改加入到EEPROM镜像文件::
+
+   rpi-eeprom-config --out pieeprom-new.bin --config bootconf.txt pieeprom.bin
+
+- 然后刷入bootloader EEPROM::
+
+   sudo rpi-eeprom-update -d -f ./pieeprom-new.bin
+
+- 拔掉SD卡，尝试从USB存储启动(优先)
+
+但是，启动以后，发现依然是存在 ``[kworker/1:2+events_freezable]`` 进程D住（是的，启动时终端还是显示mmc没有响应)
+
+我尝试了以下组合:
+
+- 启动顺序 ``0xf14`` ，没有插入TF卡。测试结果：能够从USB存储启动，但是系统依然存在D住的 ``kworker`` 进程在等待 MMC卡返回，依然Load Average持续1。
+- 将一块TF卡(可启动raspbian)插，但是我发现依然是优先从TF卡启动。这说明启动顺序 ``0xf14`` 没有效果，依然是 ``0xf41`` 优先从SD开启动。
+- 修改成 ``0x14`` 也就是只做一次，先从USB存储启动，然后是TF卡，但不循环。问题依旧存在，然是存在 ``[kworker/1:2+events_freezable]`` 进程D住，Load Average持续1。
+- 综上，只要启动顺序中有 ``0x1`` ，即启动顺序中有SD卡，即使从USB存储启动，只要SD卡不存在，就会导致系统进程 ``kworker`` D住等待 MMC 存储返回，系统始终存在 Load Average 1。
+
+最终，我一狠心，将启动顺序改成只从USB存储启动::
+
+   BOOT_ORDER=0x4
+   
+此时启动时发现，如果不插SD卡，启动自检不过，屏幕提示::
+
+   Failed to open device: 'sdcard' (cmd 371a0010 status 1fff0001)
+   Insert SD-CARD
+
+所以，我插入一块TF卡，保持 ``BOOT_ORDER=0x4`` 配置，则系统顺利从USB存储启动，而且系统中不再出现 ``kworker`` 进程 ``D`` 住现象。
+
+这个异常我觉得是树莓派 EEPROM 的bug，准备再进行一些验证后提交一个issue。
 
 参考
 ======
