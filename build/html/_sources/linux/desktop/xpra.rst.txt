@@ -102,6 +102,36 @@ Linux使用xpra
 
      xpra attach
 
+其他分步骤建立xpra的方法：
+
+- 启动xpra服务器使用显示屏 ``:7`` ::
+
+   xpra start :7
+
+- 将firefox运行在xpra server中::
+
+   DISPALY=:7 firefox
+
+- 显示当前主机运行的xpra服务器::
+
+   xpra list
+
+- 连接到xpra服务器，使用本地 ``:7`` 显示，所有在这个显示服务器中的应用程序都会显示在你的屏幕上::
+
+   xpra attach :7
+
+- ssh访问远程xpra服务器主机frodo的 ``:7`` 显示器，所有运行在服务器上的应用都会显示在本地屏幕::
+
+   xpra attach ssh:frodo:7
+
+- 启动xpra服务器和screen会话，所有在screen中的应用程序都是使用X，将定向到xpra服务器::
+
+   xpra start :7 && DISPLAY=:7 screen
+
+- 停止 xpra 显示屏 ``:7`` ::
+
+   xpra stop :7
+
 直接TCP访问
 ~~~~~~~~~~~~
 

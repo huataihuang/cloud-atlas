@@ -11,6 +11,7 @@ SUSE Linux
    install_suse.rst
    zypper.rst
    suse_local_setup.rst
+   suse_local_repo.rst
 
 
 .. only::  subproject and html
