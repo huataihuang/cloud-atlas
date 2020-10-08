@@ -1,18 +1,13 @@
-.. _suse_linux:
+.. _bind:
 
 =================================
-SUSE Linux
+BIND
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_suse_linux.rst
-   install_suse.rst
-   zypper.rst
-   suse_local_setup.rst
-   suse_local_repo.rst
-
+   introduce_bind.rst
 
 .. only::  subproject and html
 

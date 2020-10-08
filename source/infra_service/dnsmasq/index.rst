@@ -1,18 +1,14 @@
-.. _suse_linux:
+.. _dnsmasq:
 
 =================================
-SUSE Linux
+DNSmasq
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_suse_linux.rst
-   install_suse.rst
-   zypper.rst
-   suse_local_setup.rst
-   suse_local_repo.rst
-
+   introduce_dnsmasq.rst
+   deploy_dnsmasq.rst
 
 .. only::  subproject and html
 
