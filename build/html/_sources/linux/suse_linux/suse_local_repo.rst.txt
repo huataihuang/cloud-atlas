@@ -15,7 +15,20 @@ SUSE采用的是Red Hat相同的rpm包管理，所以实际上构建软件仓库
 复制产品介质仓库
 ===================
 
+在产品介质仓库中的文件是固定不变的(从DVD复制)，不需要从远程源同步，只需要复制文件，然后通过NFS挂载产品仓库，或者直接挂载安装介质iso镜像文件就可以。
 
+.. note::
+
+   SUSE Linux Enterprise Server product repository必须直接从本地直接访问，不可以创建目录的符号软链接，否则会导致通过PXE启动失败。
+
+- 产品介质必须复制到特定目录:
+
+  - SUSE Linux Enterprise Server 12 SP4 DVD #1: 复制到 ``/srv/tftpboot/suse-12.4/x86_64/install`` 目录
+  - SUSE OpenStack Cloud Crowbar 9 DVD #1: 复制到 ``/srv/tftpboot/suse-12.4/x86_64/repos/Cloud``
+
+.. note::
+
+   我的实践是 SLES 12 sp3 ，所以我复制目录是 ``/srv/tftpboot/suse-12.3/x86_64/install``
 
 参考
 =====

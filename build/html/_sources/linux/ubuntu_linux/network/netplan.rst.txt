@@ -13,6 +13,15 @@ netplan简介
 
 .. _netplan_static_ip:
 
+激活netplan
+==============
+
+Ubuntu在服务器版本默认激活了netplan来配置管理网络，但是在桌面版本，则默认使用NetworkManager管理网络。例如 :ref:`jetson_nano_startup` 可以看到Jetson使用Ubuntu的18.04桌面版本，所以我们需要安装并激活netplan。
+
+- 安装netplan::
+
+   apt install netplan
+
 使用netplan配置静态IP
 ==========================
 
@@ -279,3 +288,4 @@ bonding上增加VLAN
 - `Netplan configuration examples <https://netplan.io/examples>`_
 - `Netplan not spoofing MAC as expected <https://serverfault.com/questions/920020/netplan-not-spoofing-mac-as-expected>`_
 - `Netplan reference <https://netplan.io/reference/>`_
+- `How to configure networking with Netplan on Ubuntu <https://vitux.com/how-to-configure-networking-with-netplan-on-ubuntu/>`_

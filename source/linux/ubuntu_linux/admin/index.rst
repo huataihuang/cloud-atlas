@@ -7,6 +7,7 @@ Ubuntu系统管理
 .. toctree::
    :maxdepth: 1
 
+   apt.rst
    snap.rst
    disable_snap.rst
    tar_multi_boot_ubuntu.rst
