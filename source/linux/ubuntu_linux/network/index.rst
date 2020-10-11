@@ -7,6 +7,7 @@ Ubuntu网络
 .. toctree::
    :maxdepth: 1
 
+   switch_networkmanager.rst
    netplan.rst
    wpa_supplicant.rst
 

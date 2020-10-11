@@ -1,17 +1,18 @@
-.. _ubuntu_admin:
+.. _jetson_develop:
 
 =================================
-Ubuntu系统管理
+NVIDIA Jetson开发
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   apt.rst
-   snap.rst
-   disable_snap.rst
-   tar_multi_boot_ubuntu.rst
-   recover_system_by_tar.rst
+   jetpack_sdk.rst
+   jetson_cuda.rst
+   jetson_pycuda.rst
+   tensorrt/index
+
 
 .. only::  subproject and html
 

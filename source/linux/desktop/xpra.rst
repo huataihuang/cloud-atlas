@@ -45,6 +45,10 @@ Ubuntu安装
    sudo apt-get update
    sudo apt-get install xpra
 
+.. note::
+
+   Debian/Ubuntu版本Codename是通过命令 ``lsb_release -a`` 获得的，例如 Ubuntu 18.04 LTS的codename就是 bionic 。
+
 macOS安装
 ------------
 

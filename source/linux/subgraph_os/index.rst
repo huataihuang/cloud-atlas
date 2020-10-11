@@ -1,17 +1,13 @@
-.. _ubuntu_admin:
+.. _subgraph_os:
 
 =================================
-Ubuntu系统管理
+Subgraph OS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   apt.rst
-   snap.rst
-   disable_snap.rst
-   tar_multi_boot_ubuntu.rst
-   recover_system_by_tar.rst
+   introduce_subgraph_os.rst
 
 .. only::  subproject and html
 

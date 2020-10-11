@@ -20,7 +20,7 @@ Xfce和Xubuntu区别
 
    sudo apt install xfce4
 
-- 安装完整XUbuntu::
+- (我没有选择)安装完整XUbuntu::
 
    sudo apt install xubuntu-desktop
 
@@ -39,7 +39,7 @@ Ubuntu自带的Unity是一个深度定制的Gnome3环境，对于我来说使用
 
    sudo apt remove nautilus gnome-power-manager gnome-screensaver gnome-termina* gnome-pane* gnome-applet* gnome-bluetooth gnome-desktop* gnome-sessio* gnome-user* gnome-shell-common compiz compiz* unity unity* hud zeitgeist zeitgeist* python-zeitgeist libzeitgeist* activity-log-manager-common gnome-control-center gnome-screenshot overlay-scrollba* && sudo apt-get install xubuntu-community-wallpapers
 
-安装lightdm显示管理器::
+安装lightdm显示管理器(可选，我现在已经默认采用字符终端启动，所以不再需要显示管理器)::
 
    sudo apt install lightdm
 
@@ -47,8 +47,8 @@ Ubuntu自带的Unity是一个深度定制的Gnome3环境，对于我来说使用
 
    sudo apt autoremove
 
-lightdm登陆
-------------
+lightdm登陆(不再使用)
+----------------------
 
 lightdm登陆时，虽然密码输入正确，但是提示 ``Failed to start session`` ，不过 :ref:`jetson_remote` 还能够正常工作。
 
@@ -80,6 +80,20 @@ lightdm登陆时，虽然密码输入正确，但是提示 ``Failed to start ses
    autologin-user=<your-username>
    autologin-user-timeout=0
 
+配置默认字符启动
+------------------
+
+为了能够尽可能节约系统资源，并且采用 :ref:`xpra` 远程访问Jetson服务器，我将系统修订成默认字符终端启动::
+
+   rm /etc/systemd/system/default.target
+   ln -s /lib/systemd/system/runlevel3.target /etc/systemd/system/default.target
+
+- 在用户目录添加 ``~/.xinitrc``  内容如下::
+
+   exec startxfce4
+
+- 在字符界面通过 ``startx`` 命令启动图形系统可以解决窗口管理器消耗的系统资源(节约内存)。
+
 移除xfce4
 ============
 
@@ -103,6 +117,10 @@ lightdm登陆时，虽然密码输入正确，但是提示 ``Failed to start ses
 中文输入
 ==========
 
+.. note::
+
+   我现在使用 :ref:`jetson_xpra`  ，没有特别的中文输入需求，则可以忽略这段配置。 
+   
 默认安装的Xfce4已经很好显示中文，字体也非常美观。和 :ref:`xfce` 一样安装fcitx中文输入法::
 
    #apt install fcitx fcitx-sunpinyin

@@ -32,16 +32,73 @@ Jetson Nano有3种供电方式：
 
 NVIDIA Jetson Nano首次启动速度比较慢，应该是有很多初始化操作在进行。登陆界面是Gnome 3，所以图形界面比较沉重，甚至我觉得在ARM处理器的4G内存规格下，运行这么复杂的图形桌面实在是浪费了系统资源。
 
-.. note::
 
-   后面改为轻量级桌面， :ref:`jetson_xfce4`
 
 登陆初始化提供了选择键盘、时区以及初始账号功能，并且提供了通过网络连接Internet进行更新的选项。如果设备安装了无线网卡，则会提示设置连接WiFi。建议连接网络进行更新。
 
 我的初始设置比较简单，就是将有线网卡设置为固定IP地址 ``192.168.6.10`` ，这样我就可以通过笔记本的有线网络连接到Jetson系统中，并进行远程操作。这样可以不需要连接显示器。
 
-无线网络
+桌面修改
+=========
+
+桌面改为轻量级桌面， :ref:`jetson_xfce4` :
+
+- 这个步骤首先完成，可以节约大量磁盘空间和内存占用，同时也避免了大量桌面软件更新
+- 默认启动到字符界面，可以按需使用 ``startx`` 命令启动桌面；也可以使用 :ref:`xpra` 远程运行图形程序，可以最大程度节约系统资源
+
+瘦身
+======
+
+NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使用并没有用处的Office软件，所以我准备清理掉不需要的软件包::
+
+   sudo apt remove --purge libreoffice* -y
+   sudo apt remove --purge thunderbird* -y
+   sudo apt clean -y
+   sudo apt autoremove -y
+   sudo apt update
+
+安装必要工具软件::
+
+   sudo apt install curl screen nmon lsof dnsmasq
+   sudo apt install xfce4 xfce4-terminal
+   # 以下可选
+   sudo apt install fcitx-bin fcitx-googlepinyin
+   sudo apt install bluez-tools blueman
+   sudo apt install synergy keepassx
+
+网络
 ==========
+
+使用Netplan配置网络
+--------------------
+
+:ref:`netplan` 是Ubuntu 20.04开始主要的网络配置工具，比较简单易用。使用netplan作为前端配置工具，后端可以使用NetworkManager，也可以使用 ``syatemd-networkd`` 进行网络配置。对于比较简单的网络配置，特别是在 :ref:`arm` 运行环境，我希望尽量少占用系统资源，所以倾向于使用 ``systemd-networkd`` 避免再多安装一个 ``NetwrokManager`` 服务。
+
+.. note::
+
+   NetworkManager通常用于桌面，对于服务器版本Ubuntu，这个组件不是必须的。
+
+- 安装netplan::
+
+   apt install netplan
+
+提示::
+
+    The netplan daemon, for IP servicing of calendar data, is currently
+    disabled. Create or edit /etc/default/netplan to enable.
+
+    Set ENABLED=1 to turn on the netplan daemon upon reboot. Please check
+    the netplan(8) manpage carefully for configuration details. The
+    default configuration file, /etc/plan/netplan-acl is currently empty.
+
+- 激活netplan
+
+使用Network Manager配置无线
+-----------------------------
+
+.. note::
+
+   当前我已经改为采用 :ref:`netplan` 来配置管理网络，主要原因是最新的Ubuntu 20.04默认采用netplan配置，我在 :ref:`ubuntu64bit_pi` 就采用了netplan，所以在Jetson上部署的Ubuntu也同样转向了netplan。
 
 Jetson Nano主板没有集成无线网卡，不过，主板m2接口可以安装笔记本通用的无线网卡。我选购的是Intel 8265AC NGW无线网卡，同时集成了蓝牙 4.2。
 
@@ -112,26 +169,24 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 
    sudo apt autoremove
 
-瘦身
-======
-
-NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使用并没有用处的Office软件，所以我准备清理掉不需要的软件包::
-
-   sudo apt remove --purge libreoffice* -y
-   sudo apt remove --purge thunderbird* -y
-   sudo apt-get clean -y
-   sudo apt autoremove -y
-   sudo apt-get update
-
-安装必要工具软件::
-
-   sudo apt install curl screen nmon machager lsof dnsmasq
-   sudo apt install xfce4 xfce4-terminal fcitx fcitx-sunpinyin
-   sudo apt install bluez-tools blueman
-   sudo apt install synergy keepassx
-
 远程访问
 ===========
+
+Xpra远程X应用(推荐)
+----------------------
+
+为了能够随时进入开发状态，我现在采用 :ref:`xpra` 来实现远程X window程序运行，非常轻量级的融合VNC和X window的远程图形运行方案。
+
+我在 :ref:`jetson_xpra` 中详细记录在ARM架构下实践。
+
+远程桌面(可选)
+----------------
+
+.. note::
+
+   如果你需要完整的桌面系统，可以选择采用xrdp方式的远程桌面，如本小节概述。这是我最初远程访问Jetson的方法，并且也是比较通用桌面访问方法(客户端跨平台，特别是对Windows用户非常友好)。
+
+   不过，我现在比较喜欢采用 :ref:`xpra` 方式，可以单个或多个应用程序无缝融合到本地桌面操作系统，类似于 :ref:`seamless_rdp` 实现。
 
 虽然Jetson nano可以通过直接连接键盘鼠标和显示器进行操作，但是我更希望将这个设备作为远程访问的的边缘AI设备。所以， :ref:`jetson_remote` 可以方便我们以图形界面方式使用。
 
@@ -145,3 +200,5 @@ NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使�
 - `Getting Started With Jetson Nano Developer Kit <https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit>`_
 - `Jetson Nano Developer Kit User Guide <https://developer.nvidia.com/embedded/dlc/jetson-nano-developer-kit-user-guide>`_
 - `Raspberry Valley: NVIDIA Jetson Nano <https://raspberry-valley.azurewebsites.net/NVIDIA-Jetson-Nano/>`_
+- `How to configure networking with Netplan on Ubuntu <https://vitux.com/how-to-configure-networking-with-netplan-on-ubuntu/>`_
+- `Have a Plan for Netplan <https://www.linuxjournal.com/content/have-plan-netplan>`_
