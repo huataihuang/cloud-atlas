@@ -38,7 +38,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="Kali Linux" href="../kali_linux/index.html" />
+    <link rel="next" title="SUSE本地更新和软件池仓库" href="suse_update_pool_repo.html" />
     <link rel="prev" title="部署SUSE本地软件仓库" href="suse_local_setup.html" /> 
 </head>
 
@@ -114,9 +114,11 @@
 <li class="toctree-l3"><a class="reference internal" href="suse_local_setup.html">部署SUSE本地软件仓库</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">SUSE本地软件仓库</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">复制产品介质仓库</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">使用本地仓库</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="suse_update_pool_repo.html">SUSE本地更新和软件池仓库</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../kali_linux/index.html">Kali Linux</a></li>
@@ -126,6 +128,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../chromium_os/index.html">Chromium OS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../container_linux/index.html">container linux (CoreOS)容器操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../alpine/index.html">Alpine Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../subgraph_os/index.html">Subgraph OS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../compute/index.html">Linux计算</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Linux存储</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../network/index.html">Linux网络</a></li>
@@ -244,12 +247,66 @@
 <p class="admonition-title">注解</p>
 <p>我的实践是 SLES 12 sp3 ，所以我复制目录是 <code class="docutils literal notranslate"><span class="pre">/srv/tftpboot/suse-12.3/x86_64/install</span></code></p>
 </div>
+<ul>
+<li><p>在服务器端创建目录并挂载ISO镜像进行(只读):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span>
+<span class="n">mount</span> <span class="o">-</span><span class="n">o</span> <span class="n">loop</span> <span class="n">SLE</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="n">Server</span><span class="o">-</span><span class="n">DVD</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">GM</span><span class="o">-</span><span class="n">DVD1</span><span class="o">.</span><span class="n">iso</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span>
+</pre></div>
+</div>
+</li>
+<li><p>服务器端安装NFS支持:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">nfs</span><span class="o">-</span><span class="n">utils</span>
+</pre></div>
+</div>
+</li>
+<li><p>服务器端启动NFS服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span>
+</pre></div>
+</div>
+</li>
+<li><p>在服务器端创建NFS输出，即编辑 <code class="docutils literal notranslate"><span class="pre">/etc/exports</span></code> 添加内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span> <span class="o">*</span><span class="p">(</span><span class="n">ro</span><span class="p">,</span><span class="n">sync</span><span class="p">,</span><span class="n">no_root_squash</span><span class="p">,</span><span class="n">no_subtree_check</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>服务器端输出配置的NFS共享:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exportfs</span> <span class="o">-</span><span class="n">a</span>
+</pre></div>
+</div>
+</li>
+<li><p>需要NFS服务器输出的软件仓库的SUSE客户机执行以下命令挂载远程服务器NFS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span><span class="o">/</span>
+<span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">nfs</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">1.10</span><span class="p">:</span><span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span><span class="o">/</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>挂载以后，在客户机上执行 <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> 可以看到挂载的目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.10</span><span class="p">:</span><span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span>  <span class="mf">3.6</span><span class="n">G</span>  <span class="mf">3.6</span><span class="n">G</span>     <span class="mi">0</span> <span class="mi">100</span><span class="o">%</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上zypper可以直接添加 nfs 的仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zypper</span> <span class="n">addrepo</span> <span class="n">nfs</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.10</span><span class="p">:</span><span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">tftpboot</span><span class="o">/</span><span class="n">suse</span><span class="o">-</span><span class="mf">12.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">install</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>使用本地仓库<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>添加仓库方法待实践，我当前采用每个主机直接</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://documentation.suse.com/soc/9/html/suse-openstack-cloud-crowbar-all/cha-depl-repo-conf.html">Software Repository Setup</a>
-- <a class="reference external" href="https://docs.datafabric.hpe.com/61/AdvancedInstallation/CreatingLocalReposSUSE.html">Creating a Local Repository on SUSE</a></p></li>
+<li><p><a class="reference external" href="https://documentation.suse.com/soc/9/html/suse-openstack-cloud-crowbar-all/cha-depl-repo-conf.html">Software Repository Setup</a></p></li>
+<li><p><a class="reference external" href="https://docs.datafabric.hpe.com/61/AdvancedInstallation/CreatingLocalReposSUSE.html">Creating a Local Repository on SUSE</a></p></li>
+<li><p><a class="reference external" href="https://www.golinuxhub.com/2018/06/how-to-configure-local-custom-repo-zypper-sles/">How to configure local customised repository for zypper based installation in SuSE Enterprise Linux</a></p></li>
 </ul>
 </div>
 </div>
@@ -262,7 +319,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../kali_linux/index.html" class="btn btn-neutral float-right" title="Kali Linux" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="suse_update_pool_repo.html" class="btn btn-neutral float-right" title="SUSE本地更新和软件池仓库" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="suse_local_setup.html" class="btn btn-neutral float-left" title="部署SUSE本地软件仓库" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

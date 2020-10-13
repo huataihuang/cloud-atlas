@@ -11,6 +11,7 @@ Gluster Atlas
    gluster_vs_ceph.rst
    startup/index
    deploy/index
+   build/index
    admin/index
    performance/index
    debug/index
