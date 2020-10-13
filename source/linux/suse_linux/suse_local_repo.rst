@@ -30,8 +30,54 @@ SUSE采用的是Red Hat相同的rpm包管理，所以实际上构建软件仓库
 
    我的实践是 SLES 12 sp3 ，所以我复制目录是 ``/srv/tftpboot/suse-12.3/x86_64/install``
 
+
+- 在服务器端创建目录并挂载ISO镜像进行(只读)::
+
+   mkdir -p /srv/tftpboot/suse-12.3/x86_64/install
+   mount -o loop SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso /srv/tftpboot/suse-12.3/x86_64/install
+
+- 服务器端安装NFS支持::
+
+   yum install nfs-utils
+
+- 服务器端启动NFS服务::
+
+   systemctl enable nfs-server
+   systemctl start nfs-server
+
+- 在服务器端创建NFS输出，即编辑 ``/etc/exports`` 添加内容::
+
+   /srv/tftpboot/suse-12.3/x86_64/install *(ro,sync,no_root_squash,no_subtree_check)
+
+- 服务器端输出配置的NFS共享::
+
+   exportfs -a
+
+- 需要NFS服务器输出的软件仓库的SUSE客户机执行以下命令挂载远程服务器NFS::
+
+   mkdir -p /srv/tftpboot/suse-12.3/x86_64/install/
+   mount -t nfs 192.168.1.10:/srv/tftpboot/suse-12.3/x86_64/install/ /srv/tftpboot/suse-12.3/x86_64/install/
+
+挂载以后，在客户机上执行 ``df -h`` 可以看到挂载的目录::
+
+   192.168.1.10:/srv/tftpboot/suse-12.3/x86_64/install  3.6G  3.6G     0 100% /srv/tftpboot/suse-12.3/x86_64/install
+
+.. note::
+
+   实际上zypper可以直接添加 nfs 的仓库::
+
+      zypper addrepo nfs://192.168.1.10:/srv/tftpboot/suse-12.3/x86_64/install
+
+使用本地仓库
+==============
+
+.. note::
+
+   添加仓库方法待实践，我当前采用每个主机直接
+
 参考
 =====
 
 - `Software Repository Setup <https://documentation.suse.com/soc/9/html/suse-openstack-cloud-crowbar-all/cha-depl-repo-conf.html>`_
-  - `Creating a Local Repository on SUSE <https://docs.datafabric.hpe.com/61/AdvancedInstallation/CreatingLocalReposSUSE.html>`_
+- `Creating a Local Repository on SUSE <https://docs.datafabric.hpe.com/61/AdvancedInstallation/CreatingLocalReposSUSE.html>`_
+- `How to configure local customised repository for zypper based installation in SuSE Enterprise Linux <https://www.golinuxhub.com/2018/06/how-to-configure-local-custom-repo-zypper-sles/>`_

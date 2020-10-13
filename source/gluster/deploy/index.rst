@@ -11,5 +11,4 @@ GlusterFS部署实践，将不断完善和改进，所以最终方案会和最�
 
    deploy_gluster6.rst
    deploy_suse_gluster_client.rst
-   build_install_gluster.rst
 

@@ -12,6 +12,9 @@ SUSE Linux
    zypper.rst
    suse_local_setup.rst
    suse_local_repo.rst
+   suse_update_pool_repo.rst
+   suse_iso_repo.rst
+   suse_cust_repo.rst
 
 
 .. only::  subproject and html
