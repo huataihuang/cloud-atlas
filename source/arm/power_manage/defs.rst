@@ -47,6 +47,18 @@ DVFS简介
 
    在Android手机上执行 ``cat /proc/cpuinfo`` 通常会看到多核心采用了不同的处理器架构，也就是常说的大小核。
 
+- 对于 :ref:`jetson_nano` 处理器::
+
+   processor: 0
+   model name: ARMv8 Processor rev 1 (v8l)
+   BogoMIPS: 38.4           0
+   Features: fp asimd evtstrm aes pmull sha1 sha2 crc32
+   CPU implementer      : 0x41
+   CPU architecture: 8
+   CPU variant: 0x1
+   CPU part: 0xd07
+   CPU revi     sion: 1
+
 将进程绑定(pinning)到CPU
 ==========================
 
@@ -144,7 +156,7 @@ cpu频率调节策略定义了系统CPU的电源管理特性，会直接影响�
 
 .. note::
 
-   在 :ref:`pi_4` 上4个CPU核心的cpu频率调节策略是完全同步的，也就是修改 cpu0 的调节策略会立即在其他cpu核心同步生效。
+   在 :ref:`pi_4` 和 :ref:`jetson_nano` 上4个CPU核心的cpu频率调节策略是完全同步的，也就是修改 cpu0 的调节策略会立即在其他cpu核心同步生效。
 
 - 现在我们检查CPU当前核心频率::
 
@@ -154,7 +166,26 @@ cpu频率调节策略定义了系统CPU的电源管理特性，会直接影响�
 
    1500000
 
+我在 :ref:`jetson_nano` 上调整 ``scaling_governor`` 设置成 ``performance`` 之后，频率从原先 ``518400`` 上升到 ``1479000``
+
 不过设置cpufreq scaling governor为performance可能会带来CPU温度上升。
+
+.. note::
+
+   我在 :ref:`pi_cluster` 中组建 :ref:`kubernetes` 集群，希望能够尽可能压榨出处理器性能，所以我设置 governor 都是 ``performance`` 。注意，需要配备好散热风扇，并且部署好监控，随时应对处理器国人风险。
+
+governor系统配置
+===================
+
+虽然可以通过 ``rc.local`` 这样的启动脚本来人为设置处理器运行策略，但是最好的方式还是采用系统发行版约定熟成的配置方式。所以，在Ubuntu中，可以采用如下方法::
+
+   sudo apt-get install cpufrequtils
+   echo 'GOVERNOR="performance"' | sudo tee /etc/default/cpufrequtils
+   sudo systemctl disable ondemand
+
+.. note::
+
+   CPU电源管理对系统性能影响重大，在服务器运维领域，我需要系统学习和整理
 
 参考
 =====

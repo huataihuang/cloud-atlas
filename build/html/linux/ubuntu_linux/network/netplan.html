@@ -39,7 +39,7 @@
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="使用wpa_supplicant连接无线网络" href="wpa_supplicant.html" />
-    <link rel="prev" title="切换NetworkManager" href="switch_networkmanager.html" /> 
+    <link rel="prev" title="切换NetworkManager" href="switch_nm.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -115,7 +115,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../ubuntu_hibernate.html">Ubuntu Hibernate休眠</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../admin/index.html">Ubuntu系统管理</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Ubuntu网络</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="switch_networkmanager.html">切换NetworkManager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="switch_nm.html">切换NetworkManager</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">netplan网络配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="wpa_supplicant.html">使用wpa_supplicant连接无线网络</a></li>
 </ul>
@@ -130,6 +130,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../chromium_os/index.html">Chromium OS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../container_linux/index.html">container linux (CoreOS)容器操作系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../alpine/index.html">Alpine Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../subgraph_os/index.html">Subgraph OS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../compute/index.html">Linux计算</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../storage/index.html">Linux存储</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Linux网络</a></li>
@@ -519,7 +520,197 @@
 </div>
 </div>
 <div class="section" id="id9">
-<h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<h2>netplan问题排查<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>netplan似乎不需要作为服务启动，而仅仅是作为一个前端工具，实际调用的是 networkd 和 NetworkManager来完成配置。我在Jetson Nano的Ubuntu 18.04使用netplan失败，似乎这个版本比较老，和现有netplan文档不能对齐，并且使用也很怪异，所以我还是使用 <a class="reference internal" href="switch_nm.html#switch-nm"><span class="std std-ref">切换NetworkManager</span></a> 重新切回NetworkManager进行管理。</p>
+<p>以下是一些debug经验记录，仅供参考。</p>
+</div>
+<p><a class="reference internal" href="switch_nm.html#switch-nm"><span class="std std-ref">切换NetworkManager</span></a> 之后，我在 <a class="reference internal" href="../../../machine_learning/jetson/index.html#jetson"><span class="std std-ref">NVIDIA Jetson</span></a> 上将NetworkManager切换成netplan。但是，我发现 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 之后，网卡上并没有绑定静态配置的IP地址。虽然看上去 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/01-netcfg.yaml</span></code> 和原先在树莓派上运行的Ubuntu 20.04没有什么区别:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
+  <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">renderer</span><span class="p">:</span> <span class="n">networkd</span>
+  <span class="n">ethernets</span><span class="p">:</span>
+    <span class="n">eth0</span><span class="p">:</span>
+      <span class="n">dhcp4</span><span class="p">:</span> <span class="n">no</span>
+      <span class="n">dhcp6</span><span class="p">:</span> <span class="n">no</span>
+      <span class="n">addresses</span><span class="p">:</span> <span class="p">[</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span><span class="o">/</span><span class="mi">24</span><span class="p">,</span> <span class="p">]</span>
+      <span class="n">nameservers</span><span class="p">:</span>
+        <span class="n">addresses</span><span class="p">:</span> <span class="p">[</span><span class="mf">202.96</span><span class="o">.</span><span class="mf">209.133</span><span class="p">,</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>既然使用 <code class="docutils literal notranslate"><span class="pre">networkd</span></code> 作为 <code class="docutils literal notranslate"><span class="pre">renderer</span></code> ，就应该生成 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 使用的配置文件，但是在 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/network</span></code> 目录下没有生成任何配置文件。</p>
+<p>参考 <a class="reference external" href="https://bugs.launchpad.net/ubuntu/+source/netplan.io/+bug/1775566">networkd not applying config - missing events?</a> 可以看到，需要使用 <code class="docutils literal notranslate"><span class="pre">networkctl</span> <span class="pre">list</span></code> 查看一下网卡是否受到管理:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networkctl</span> <span class="nb">list</span>
+</pre></div>
+</div>
+<p>果然，我输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IDX</span> <span class="n">LINK</span>             <span class="n">TYPE</span>               <span class="n">OPERATIONAL</span> <span class="n">SETUP</span>
+  <span class="mi">1</span> <span class="n">lo</span>               <span class="n">loopback</span>           <span class="n">carrier</span>     <span class="n">unmanaged</span>
+  <span class="mi">2</span> <span class="n">dummy0</span>           <span class="n">ether</span>              <span class="n">off</span>         <span class="n">unmanaged</span>
+  <span class="mi">3</span> <span class="n">eth0</span>             <span class="n">ether</span>              <span class="n">routable</span>    <span class="n">unmanaged</span>
+  <span class="mi">4</span> <span class="n">wlan0</span>            <span class="n">wlan</span>               <span class="n">off</span>         <span class="n">unmanaged</span>
+  <span class="mi">5</span> <span class="n">l4tbr0</span>           <span class="n">ether</span>              <span class="n">off</span>         <span class="n">unmanaged</span>
+  <span class="mi">6</span> <span class="n">rndis0</span>           <span class="n">ether</span>              <span class="n">no</span><span class="o">-</span><span class="n">carrier</span>  <span class="n">unmanaged</span>
+  <span class="mi">7</span> <span class="n">usb0</span>             <span class="n">ether</span>              <span class="n">no</span><span class="o">-</span><span class="n">carrier</span>  <span class="n">unmanaged</span>
+</pre></div>
+</div>
+<p>对比树莓派上 <code class="docutils literal notranslate"><span class="pre">networkctl</span> <span class="pre">list</span></code> 显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IDX</span> <span class="n">LINK</span>  <span class="n">TYPE</span>     <span class="n">OPERATIONAL</span> <span class="n">SETUP</span>
+  <span class="mi">1</span> <span class="n">lo</span>    <span class="n">loopback</span> <span class="n">carrier</span>     <span class="n">unmanaged</span>
+  <span class="mi">2</span> <span class="n">eth0</span>  <span class="n">ether</span>    <span class="n">routable</span>    <span class="n">configured</span>
+  <span class="mi">3</span> <span class="n">wlan0</span> <span class="n">wlan</span>     <span class="n">routable</span>    <span class="n">configured</span>
+</pre></div>
+</div>
+<div class="section" id="networkctl">
+<h3>networkctl<a class="headerlink" href="#networkctl" title="永久链接至标题">¶</a></h3>
+<p>参考 <a class="reference external" href="https://www.freedesktop.org/software/systemd/man/networkctl.html">networkctl — Query the status of network links</a> <code class="docutils literal notranslate"><span class="pre">networkctl</span></code> 可以用于检查网络连线的状态是否被 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 看到。参考 <a class="reference external" href="https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html#">systemd-networkd.service, systemd-networkd — Network manager</a> :</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 会管理在 <code class="docutils literal notranslate"><span class="pre">[Match]</span></code> 段落找到的 <code class="docutils literal notranslate"><span class="pre">.network</span></code> 文件中的任何连接来管理网络地址和路由。</p></li>
+<li><p>由于我执行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 没有生成对应的 networkd 配置文件，所以导致网络没有配置</p></li>
+</ul>
+<p>我尝试先创建空的 <code class="docutils literal notranslate"><span class="pre">/etc/netplan</span></code> 目录，然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netplan</span> <span class="o">-</span><span class="n">d</span> <span class="n">generate</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netplan</span><span class="p">:</span> <span class="n">netplan</span> <span class="n">version</span> <span class="mf">2.2</span> <span class="n">starting</span> <span class="n">at</span> <span class="n">Tue</span> <span class="n">Oct</span> <span class="mi">13</span> <span class="mi">22</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">14</span> <span class="mi">2020</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">database</span> <span class="n">directory</span> <span class="ow">is</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">.</span><span class="n">dir</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">user</span> <span class="s2">&quot;netplan&quot;</span> <span class="ow">is</span> <span class="n">uid</span> <span class="mi">63434</span> <span class="n">gid</span> <span class="mi">63434</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">switching</span> <span class="kn">from</span> <span class="nn">user</span> <span class="o">&lt;</span><span class="n">root</span><span class="o">&gt;</span> <span class="n">to</span> <span class="o">&lt;</span><span class="n">uid</span> <span class="mi">63434</span> <span class="n">gid</span> <span class="mi">63434</span><span class="o">&gt;</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">running</span> <span class="k">with</span> <span class="n">uid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">gid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">euid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">egid</span><span class="o">=</span><span class="mi">63434</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">reading</span> <span class="n">access</span> <span class="nb">list</span> <span class="n">file</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">.</span><span class="n">dir</span><span class="o">/.</span><span class="n">netplan</span><span class="o">-</span><span class="n">acl</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">netplan</span><span class="o">/</span><span class="n">tcp</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">services</span><span class="p">,</span> <span class="n">using</span> <span class="n">ports</span> <span class="mi">2983</span> <span class="ow">and</span> <span class="mi">5444</span>
+</pre></div>
+</div>
+<ul>
+<li><p>仔细检查了 <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">status</span> <span class="pre">netplan</span></code> ，发现原因了：没有激活netplan daemon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● netplan.service - LSB: Netplan calendar service.
+   Loaded: loaded (/etc/init.d/netplan; generated)
+   Active: active (exited) since Tue 2020-10-13 21:12:52 CST; 1h 47min ago
+     Docs: man:systemd-sysv-generator(8)
+  Process: 4631 ExecStart=/etc/init.d/netplan start (code=exited, status=0/SUCCESS)
+
+10月 13 21:12:51 jetson systemd[1]: Starting LSB: Netplan calendar service....
+10月 13 21:12:52 jetson netplan[4631]: Netplan daemon not enabled in /etc/init.d/netplan.
+10月 13 21:12:52 jetson systemd[1]: Started LSB: Netplan calendar service..
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述日志显示在 <code class="docutils literal notranslate"><span class="pre">/etc/init.d/netplan</span></code> 中没有激活netplan服务，所以实际该服务状态是 <code class="docutils literal notranslate"><span class="pre">active(exited)</span></code> ，也就是退出状态。</p>
+<p>编辑 <code class="docutils literal notranslate"><span class="pre">/etc/init.d/netplan</span></code> 文件，将:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set ENABLED=0 to disable, ENABLED=1 to enable.</span>
+<span class="n">ENABLED</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set ENABLED=0 to disable, ENABLED=1 to enable.</span>
+<span class="n">ENABLED</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后再次执行启动 <code class="docutils literal notranslate"><span class="pre">netplan</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">netplan</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span><span class="p">:</span> <span class="n">The</span> <span class="n">unit</span> <span class="n">file</span><span class="p">,</span> <span class="n">source</span> <span class="n">configuration</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">drop</span><span class="o">-</span><span class="n">ins</span> <span class="n">of</span> <span class="n">netplan</span><span class="o">.</span><span class="n">service</span> <span class="n">changed</span> <span class="n">on</span> <span class="n">disk</span><span class="o">.</span> <span class="n">Run</span> <span class="s1">&#39;systemctl daemon-reload&#39;</span> <span class="n">to</span> <span class="n">reload</span> <span class="n">units</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>所以按照提示执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">netplan</span>
+</pre></div>
+</div>
+<p>启动之后再次检查 <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">status</span> <span class="pre">netplan</span></code> 则可以看到状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● netplan.service - LSB: Netplan calendar service.
+   Loaded: loaded (/etc/init.d/netplan; generated)
+   Active: active (running) since Tue 2020-10-13 23:07:44 CST; 1min 8s ago
+     Docs: man:systemd-sysv-generator(8)
+  Process: 8386 ExecStop=/etc/init.d/netplan stop (code=exited, status=0/SUCCESS)
+  Process: 8430 ExecStart=/etc/init.d/netplan start (code=exited, status=0/SUCCESS)
+    Tasks: 1 (limit: 4174)
+   CGroup: /system.slice/netplan.service
+           └─8464 /usr/sbin/netplan
+
+10月 13 23:07:43 jetson systemd[1]: Starting LSB: Netplan calendar service....
+10月 13 23:07:44 jetson systemd[1]: Started LSB: Netplan calendar service..
+</pre></div>
+</div>
+<ul>
+<li><p>但是比较奇怪，我执行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">-d</span> <span class="pre">generate</span></code> 始终不生成配置文件，仅提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netplan</span><span class="p">:</span> <span class="n">netplan</span> <span class="n">version</span> <span class="mf">2.2</span> <span class="n">starting</span> <span class="n">at</span> <span class="n">Tue</span> <span class="n">Oct</span> <span class="mi">13</span> <span class="mi">23</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">29</span> <span class="mi">2020</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">database</span> <span class="n">directory</span> <span class="ow">is</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">.</span><span class="n">dir</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">user</span> <span class="s2">&quot;netplan&quot;</span> <span class="ow">is</span> <span class="n">uid</span> <span class="mi">63434</span> <span class="n">gid</span> <span class="mi">63434</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">switching</span> <span class="kn">from</span> <span class="nn">user</span> <span class="o">&lt;</span><span class="n">root</span><span class="o">&gt;</span> <span class="n">to</span> <span class="o">&lt;</span><span class="n">uid</span> <span class="mi">63434</span> <span class="n">gid</span> <span class="mi">63434</span><span class="o">&gt;</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">running</span> <span class="k">with</span> <span class="n">uid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">gid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">euid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">egid</span><span class="o">=</span><span class="mi">63434</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">reading</span> <span class="n">access</span> <span class="nb">list</span> <span class="n">file</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">.</span><span class="n">dir</span><span class="o">/.</span><span class="n">netplan</span><span class="o">-</span><span class="n">acl</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">netplan</span><span class="o">/</span><span class="n">tcp</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">services</span><span class="p">,</span> <span class="n">using</span> <span class="n">ports</span> <span class="mi">2983</span> <span class="ow">and</span> <span class="mi">5444</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>根据 <a class="reference external" href="http://manpages.ubuntu.com/manpages/cosmic/man8/netplan-generate.8.html">netplan-generate - generate backend configuration from netplan YAML files</a> 说明：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">generate</span></code> 是根据 netplan 的 yaml配置来调用networkd后端或者NetworkManager后端来生成对应后端服务的配置文件</p></li>
+<li><p>通常不需要独立运行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">generate</span></code> ，只需要运行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 就可以，因为 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 会自动调用 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">generate</span></code> ，而 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">generate</span></code> 只是为了验证配置生成</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">netplan</span></code> 会一次从以下3个位置读取配置文件，并且按照优先级，仅有一个位置的配置文件生效:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/run/netplan</span></code> 优先级最高</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/etc/netplan</span></code> 次优先级</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/lib/netplan</span></code> 最低优先级</p></li>
+</ul>
+</li>
+</ul>
+<p>参考 <a class="reference external" href="https://netplan.io/troubleshooting/">netplan - Troubleshooting networking issues</a> 当出现配置不能生成，需要将后端服务器启动成debug模式。例如，我使用 <code class="docutils literal notranslate"><span class="pre">systemd-netowrkd</span></code> 则需要启用 <a class="reference external" href="https://wiki.ubuntu.com/DebuggingSystemd">DebuggingSystemd</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+<span class="n">SYSTEMD_LOG_LEVEL</span><span class="o">=</span><span class="n">debug</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+</pre></div>
+</div>
+<p>但是我发现我执行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">generate</span></code> 和 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 都没有任何影响，似乎就没有连接上。</p>
+<p>虽然手工可以创建一个 <code class="docutils literal notranslate"><span class="pre">/run/systemd/network/10-netplan-eth0.network</span></code> 填写内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Match</span><span class="p">]</span>
+<span class="n">Name</span><span class="o">=</span><span class="n">eth0</span>
+
+<span class="p">[</span><span class="n">Network</span><span class="p">]</span>
+<span class="n">LinkLocalAddressing</span><span class="o">=</span><span class="n">ipv6</span>
+<span class="n">Address</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span><span class="o">/</span><span class="mi">24</span>
+<span class="n">DNS</span><span class="o">=</span><span class="mf">202.96</span><span class="o">.</span><span class="mf">209.133</span>
+</pre></div>
+</div>
+<p>配置创建后，执行 <code class="docutils literal notranslate"><span class="pre">networkctl</span></code> 就可以看到该eth0网卡是 <code class="docutils literal notranslate"><span class="pre">configured</span></code> ，似乎状态正常了。但是重启主机则网卡又是 <code class="docutils literal notranslate"><span class="pre">unmanaged</span></code> 并且 <code class="docutils literal notranslate"><span class="pre">/run/systemd/network</span></code> 目录又空了。</p>
+<p>发现一个蹊跷，执行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">-d</span> <span class="pre">-v</span> <span class="pre">generate</span></code> 显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netplan</span><span class="p">:</span> <span class="n">netplan</span> <span class="n">version</span> <span class="mf">2.2</span> <span class="n">starting</span> <span class="n">at</span> <span class="n">Wed</span> <span class="n">Oct</span> <span class="mi">14</span> <span class="mi">09</span><span class="p">:</span><span class="mi">46</span><span class="p">:</span><span class="mi">03</span> <span class="mi">2020</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">database</span> <span class="n">directory</span> <span class="ow">is</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">.</span><span class="n">dir</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>为何显示数据库目录是 <code class="docutils literal notranslate"><span class="pre">/var/lib/plan/netplan.dir</span></code> ?</p>
+<p>我这个版本的netplan默认去读取了空白的 <code class="docutils literal notranslate"><span class="pre">/var/lib/plan/netplan.dir</span></code> ，这个和官方文档不同。我尝试移除这个目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span>
+<span class="n">mv</span> <span class="n">plan</span> <span class="n">plan</span><span class="o">.</span><span class="n">bak</span>
+</pre></div>
+</div>
+<p>再次启动 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">-d</span> <span class="pre">-v</span> <span class="pre">generate</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netplan</span><span class="p">:</span> <span class="n">netplan</span> <span class="n">version</span> <span class="mf">2.2</span> <span class="n">starting</span> <span class="n">at</span> <span class="n">Wed</span> <span class="n">Oct</span> <span class="mi">14</span> <span class="mi">09</span><span class="p">:</span><span class="mi">49</span><span class="p">:</span><span class="mi">16</span> <span class="mi">2020</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">database</span> <span class="n">directory</span> <span class="ow">is</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">.</span><span class="n">dir</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">user</span> <span class="s2">&quot;netplan&quot;</span> <span class="ow">is</span> <span class="n">uid</span> <span class="mi">63434</span> <span class="n">gid</span> <span class="mi">63434</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">switching</span> <span class="kn">from</span> <span class="nn">user</span> <span class="o">&lt;</span><span class="n">root</span><span class="o">&gt;</span> <span class="n">to</span> <span class="o">&lt;</span><span class="n">uid</span> <span class="mi">63434</span> <span class="n">gid</span> <span class="mi">63434</span><span class="o">&gt;</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">running</span> <span class="k">with</span> <span class="n">uid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">gid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">euid</span><span class="o">=</span><span class="mi">63434</span> <span class="n">egid</span><span class="o">=</span><span class="mi">63434</span>
+<span class="n">netplan</span><span class="p">:</span> <span class="n">no</span> <span class="n">read</span><span class="o">/</span><span class="n">write</span> <span class="n">access</span> <span class="n">to</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">.</span><span class="n">dir</span><span class="o">/.</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<p>这个版本的netplan可能是早期版本，只能固定读取 <code class="docutils literal notranslate"><span class="pre">/var/lib/plan/netplan.dir/</span></code> ，不使用 <code class="docutils literal notranslate"><span class="pre">/etc/netplan</span></code> 目录，导致我配置无效。我还发现在 <code class="docutils literal notranslate"><span class="pre">/var/lib/plan/netplan.dir/</span></code> 有一个隐含文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span><span class="n">netplan</span><span class="o">-</span><span class="n">acl</span> <span class="o">-&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">plan</span><span class="o">/</span><span class="n">netplan</span><span class="o">-</span><span class="n">acl</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id10">
+<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.tecmint.com/configure-network-static-ip-address-in-ubuntu/">How to Configure Network Static IP Address in Ubuntu 18.04</a></p></li>
 <li><p><a class="reference external" href="https://netplan.io/examples">Netplan configuration examples</a></p></li>
@@ -541,7 +732,7 @@
         <a href="wpa_supplicant.html" class="btn btn-neutral float-right" title="使用wpa_supplicant连接无线网络" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="switch_networkmanager.html" class="btn btn-neutral float-left" title="切换NetworkManager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="switch_nm.html" class="btn btn-neutral float-left" title="切换NetworkManager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

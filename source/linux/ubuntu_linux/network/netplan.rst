@@ -281,6 +281,191 @@ bonding上增加VLAN
 
    有关 VLAN over bonding配置请参考 `Netplan - configuring 2 vlan on same bonding <https://askubuntu.com/questions/1112288/netplan-configuring-2-vlan-on-same-bonding>`_
 
+netplan问题排查
+================
+
+.. warning::
+
+   netplan似乎不需要作为服务启动，而仅仅是作为一个前端工具，实际调用的是 networkd 和 NetworkManager来完成配置。我在Jetson Nano的Ubuntu 18.04使用netplan失败，似乎这个版本比较老，和现有netplan文档不能对齐，并且使用也很怪异，所以我还是使用 :ref:`switch_nm` 重新切回NetworkManager进行管理。
+
+   以下是一些debug经验记录，仅供参考。
+
+:ref:`switch_nm` 之后，我在 :ref:`jetson` 上将NetworkManager切换成netplan。但是，我发现 ``netplan apply`` 之后，网卡上并没有绑定静态配置的IP地址。虽然看上去 ``/etc/netplan/01-netcfg.yaml`` 和原先在树莓派上运行的Ubuntu 20.04没有什么区别::
+
+   network:
+     version: 2
+     renderer: networkd
+     ethernets:
+       eth0:
+         dhcp4: no
+         dhcp6: no
+         addresses: [192.168.6.10/24, ]
+         nameservers:
+           addresses: [202.96.209.133, ]
+
+既然使用 ``networkd`` 作为 ``renderer`` ，就应该生成 ``systemd-networkd`` 使用的配置文件，但是在 ``/etc/systemd/network`` 目录下没有生成任何配置文件。
+
+参考 `networkd not applying config - missing events? <https://bugs.launchpad.net/ubuntu/+source/netplan.io/+bug/1775566>`_ 可以看到，需要使用 ``networkctl list`` 查看一下网卡是否受到管理::
+
+   networkctl list
+
+果然，我输出显示::
+
+   IDX LINK             TYPE               OPERATIONAL SETUP
+     1 lo               loopback           carrier     unmanaged
+     2 dummy0           ether              off         unmanaged
+     3 eth0             ether              routable    unmanaged
+     4 wlan0            wlan               off         unmanaged
+     5 l4tbr0           ether              off         unmanaged
+     6 rndis0           ether              no-carrier  unmanaged
+     7 usb0             ether              no-carrier  unmanaged
+
+对比树莓派上 ``networkctl list`` 显示输出::
+
+   IDX LINK  TYPE     OPERATIONAL SETUP
+     1 lo    loopback carrier     unmanaged
+     2 eth0  ether    routable    configured
+     3 wlan0 wlan     routable    configured
+
+networkctl
+------------
+
+参考 `networkctl — Query the status of network links <https://www.freedesktop.org/software/systemd/man/networkctl.html>`_ ``networkctl`` 可以用于检查网络连线的状态是否被 ``systemd-networkd`` 看到。参考 `systemd-networkd.service, systemd-networkd — Network manager <https://www.freedesktop.org/software/systemd/man/systemd-networkd.service.html#>`_ :
+
+- ``systemd-networkd`` 会管理在 ``[Match]`` 段落找到的 ``.network`` 文件中的任何连接来管理网络地址和路由。
+- 由于我执行 ``netplan apply`` 没有生成对应的 networkd 配置文件，所以导致网络没有配置
+
+我尝试先创建空的 ``/etc/netplan`` 目录，然后执行::
+
+   netplan -d generate
+
+显示::
+
+   netplan: netplan version 2.2 starting at Tue Oct 13 22:54:14 2020
+   netplan: database directory is /var/lib/plan/netplan.dir
+   netplan: user "netplan" is uid 63434 gid 63434
+   netplan: switching from user <root> to <uid 63434 gid 63434>
+   netplan: running with uid=63434 gid=63434 euid=63434 egid=63434
+   netplan: reading access list file /var/lib/plan/netplan.dir/.netplan-acl
+   netplan: netplan/tcp not found in /etc/services, using ports 2983 and 5444
+
+- 仔细检查了 ``systemctl status netplan`` ，发现原因了：没有激活netplan daemon::
+
+   ● netplan.service - LSB: Netplan calendar service.
+      Loaded: loaded (/etc/init.d/netplan; generated)
+      Active: active (exited) since Tue 2020-10-13 21:12:52 CST; 1h 47min ago
+        Docs: man:systemd-sysv-generator(8)
+     Process: 4631 ExecStart=/etc/init.d/netplan start (code=exited, status=0/SUCCESS)
+   
+   10月 13 21:12:51 jetson systemd[1]: Starting LSB: Netplan calendar service....
+   10月 13 21:12:52 jetson netplan[4631]: Netplan daemon not enabled in /etc/init.d/netplan.
+   10月 13 21:12:52 jetson systemd[1]: Started LSB: Netplan calendar service..
+
+上述日志显示在 ``/etc/init.d/netplan`` 中没有激活netplan服务，所以实际该服务状态是 ``active(exited)`` ，也就是退出状态。
+
+编辑 ``/etc/init.d/netplan`` 文件，将::
+
+   # Set ENABLED=0 to disable, ENABLED=1 to enable.
+   ENABLED=0
+
+修改成::
+
+   # Set ENABLED=0 to disable, ENABLED=1 to enable.
+   ENABLED=1
+
+- 然后再次执行启动 ``netplan`` ::
+
+   systemctl start netplan
+
+此时提示::
+
+   Warning: The unit file, source configuration file or drop-ins of netplan.service changed on disk. Run 'systemctl daemon-reload' to reload units.
+
+所以按照提示执行::
+
+   systemctl daemon-reload
+   systemctl restart netplan
+
+启动之后再次检查 ``systemctl status netplan`` 则可以看到状态::
+
+   ● netplan.service - LSB: Netplan calendar service.
+      Loaded: loaded (/etc/init.d/netplan; generated)
+      Active: active (running) since Tue 2020-10-13 23:07:44 CST; 1min 8s ago
+        Docs: man:systemd-sysv-generator(8)
+     Process: 8386 ExecStop=/etc/init.d/netplan stop (code=exited, status=0/SUCCESS)
+     Process: 8430 ExecStart=/etc/init.d/netplan start (code=exited, status=0/SUCCESS)
+       Tasks: 1 (limit: 4174)
+      CGroup: /system.slice/netplan.service
+              └─8464 /usr/sbin/netplan
+   
+   10月 13 23:07:43 jetson systemd[1]: Starting LSB: Netplan calendar service....
+   10月 13 23:07:44 jetson systemd[1]: Started LSB: Netplan calendar service..
+
+- 但是比较奇怪，我执行 ``netplan -d generate`` 始终不生成配置文件，仅提示::
+
+   netplan: netplan version 2.2 starting at Tue Oct 13 23:25:29 2020
+   netplan: database directory is /var/lib/plan/netplan.dir
+   netplan: user "netplan" is uid 63434 gid 63434
+   netplan: switching from user <root> to <uid 63434 gid 63434>
+   netplan: running with uid=63434 gid=63434 euid=63434 egid=63434
+   netplan: reading access list file /var/lib/plan/netplan.dir/.netplan-acl
+   netplan: netplan/tcp not found in /etc/services, using ports 2983 and 5444
+
+根据 `netplan-generate - generate backend configuration from netplan YAML files <http://manpages.ubuntu.com/manpages/cosmic/man8/netplan-generate.8.html>`_ 说明：
+
+- ``netplan generate`` 是根据 netplan 的 yaml配置来调用networkd后端或者NetworkManager后端来生成对应后端服务的配置文件
+- 通常不需要独立运行 ``netplan generate`` ，只需要运行 ``netplan apply`` 就可以，因为 ``netplan apply`` 会自动调用 ``netplan generate`` ，而 ``netplan generate`` 只是为了验证配置生成
+- ``netplan`` 会一次从以下3个位置读取配置文件，并且按照优先级，仅有一个位置的配置文件生效:
+
+  - ``/run/netplan`` 优先级最高
+  - ``/etc/netplan`` 次优先级
+  - ``/lib/netplan`` 最低优先级
+
+参考 `netplan - Troubleshooting networking issues <https://netplan.io/troubleshooting/>`_ 当出现配置不能生成，需要将后端服务器启动成debug模式。例如，我使用 ``systemd-netowrkd`` 则需要启用 `DebuggingSystemd <https://wiki.ubuntu.com/DebuggingSystemd>`_ ::
+
+   sudo systemctl stop systemd-networkd
+   SYSTEMD_LOG_LEVEL=debug /lib/systemd/systemd-networkd
+
+但是我发现我执行 ``netplan generate`` 和 ``netplan apply`` 都没有任何影响，似乎就没有连接上。
+
+虽然手工可以创建一个 ``/run/systemd/network/10-netplan-eth0.network`` 填写内容::
+
+   [Match]
+   Name=eth0
+   
+   [Network]
+   LinkLocalAddressing=ipv6
+   Address=192.168.6.10/24
+   DNS=202.96.209.133
+
+配置创建后，执行 ``networkctl`` 就可以看到该eth0网卡是 ``configured`` ，似乎状态正常了。但是重启主机则网卡又是 ``unmanaged`` 并且 ``/run/systemd/network`` 目录又空了。
+
+发现一个蹊跷，执行 ``netplan -d -v generate`` 显示输出::
+
+   netplan: netplan version 2.2 starting at Wed Oct 14 09:46:03 2020
+   netplan: database directory is /var/lib/plan/netplan.dir
+   ...
+
+为何显示数据库目录是 ``/var/lib/plan/netplan.dir`` ?
+
+我这个版本的netplan默认去读取了空白的 ``/var/lib/plan/netplan.dir`` ，这个和官方文档不同。我尝试移除这个目录::
+
+   cd /var/lib
+   mv plan plan.bak
+
+再次启动 ``netplan -d -v generate`` 显示::
+
+   netplan: netplan version 2.2 starting at Wed Oct 14 09:49:16 2020
+   netplan: database directory is /var/lib/plan/netplan.dir
+   netplan: user "netplan" is uid 63434 gid 63434
+   netplan: switching from user <root> to <uid 63434 gid 63434>
+   netplan: running with uid=63434 gid=63434 euid=63434 egid=63434
+   netplan: no read/write access to /var/lib/plan/netplan.dir/.: No such file or directory
+
+这个版本的netplan可能是早期版本，只能固定读取 ``/var/lib/plan/netplan.dir/`` ，不使用 ``/etc/netplan`` 目录，导致我配置无效。我还发现在 ``/var/lib/plan/netplan.dir/`` 有一个隐含文件::
+
+   .netplan-acl -> /etc/plan/netplan-acl
+
 参考
 =======
 

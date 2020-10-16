@@ -66,39 +66,33 @@ NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使�
    sudo apt install bluez-tools blueman
    sudo apt install synergy keepassx
 
+详细设置参考 :ref:`xfce` 
+
+电源管理
+========
+
+为能够获得较好的桌面性能，按照 :ref:`defs` 设置CPU按照performance模式运行::
+
+   sudo apt-get install cpufrequtils
+   echo 'GOVERNOR="performance"' | sudo tee /etc/default/cpufrequtils
+   sudo systemctl disable ondemand
+
 网络
 ==========
 
-使用Netplan配置网络
---------------------
+使用Netplan配置网络(未成功)
+----------------------------
 
 :ref:`netplan` 是Ubuntu 20.04开始主要的网络配置工具，比较简单易用。使用netplan作为前端配置工具，后端可以使用NetworkManager，也可以使用 ``syatemd-networkd`` 进行网络配置。对于比较简单的网络配置，特别是在 :ref:`arm` 运行环境，我希望尽量少占用系统资源，所以倾向于使用 ``systemd-networkd`` 避免再多安装一个 ``NetwrokManager`` 服务。
 
-.. note::
-
-   NetworkManager通常用于桌面，对于服务器版本Ubuntu，这个组件不是必须的。
-
-- 安装netplan::
-
-   apt install netplan
-
-提示::
-
-    The netplan daemon, for IP servicing of calendar data, is currently
-    disabled. Create or edit /etc/default/netplan to enable.
-
-    Set ENABLED=1 to turn on the netplan daemon upon reboot. Please check
-    the netplan(8) manpage carefully for configuration details. The
-    default configuration file, /etc/plan/netplan-acl is currently empty.
-
-- 激活netplan
+按照 :ref:`netplan` 配置网络，但是目前遇到无法调用systemd-networkd生成正确配置，暂时放弃。
 
 使用Network Manager配置无线
 -----------------------------
 
 .. note::
 
-   当前我已经改为采用 :ref:`netplan` 来配置管理网络，主要原因是最新的Ubuntu 20.04默认采用netplan配置，我在 :ref:`ubuntu64bit_pi` 就采用了netplan，所以在Jetson上部署的Ubuntu也同样转向了netplan。
+   当前我已经改为采用 :ref:`netplan` 来配置管理网络，主要原因是最新的Ubuntu 20.04默认采用netplan配置，我在 :ref:`ubuntu64bit_pi` 就采用了netplan，所以在Jetson上尝试netplan没有成功，所以目前还使用 :ref:`networkmanager` 配置网络。
 
 Jetson Nano主板没有集成无线网卡，不过，主板m2接口可以安装笔记本通用的无线网卡。我选购的是Intel 8265AC NGW无线网卡，同时集成了蓝牙 4.2。
 
@@ -125,12 +119,18 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 
    nmcli con up MYHOME
 
+- 增加公司无线配置 ``OFFICE`` 的AP上（配置设置成名为 ``MYOFFICE`` ）::
+
+   nmcli con add con-name MYOFFICE ifname wlp3s0 type wifi ssid OFFICE \
+   wifi-sec.key-mgmt wpa-eap 802-1x.eap peap 802-1x.phase2-auth mschapv2 \
+   802-1x.identity "USERNAME" 802-1x.password "MYPASSWORD"
+
 .. note::
 
    详细配置可参考 :ref:`set_ubuntu_wifi`
 
-蓝牙
-=======
+蓝牙(可选)
+===========
 
 - 安装蓝牙管理工具::
 
@@ -141,6 +141,10 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
    systemctl start bluetooth
 
 在 :ref:`jetson_xfce4` 中可以使用blueman图形管理工具直接管理蓝牙设备。
+
+.. note::
+
+   如果使用蓝牙键盘，可以采用上述简单的方式在图形系统中支持使用蓝牙键盘。
 
 初始设置
 ===========

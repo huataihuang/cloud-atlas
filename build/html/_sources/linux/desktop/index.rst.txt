@@ -11,6 +11,7 @@ Linux桌面
    xpra.rst
    light_browser.rst
    netsurf.rst 
+   vs_code.rst
 
 .. only::  subproject and html
 

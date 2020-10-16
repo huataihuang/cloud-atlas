@@ -115,6 +115,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#pinning-cpu">将进程绑定(pinning)到CPU</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">动态电压和频率调整</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#scaling-governor">Scaling governor(主频调节)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#governor">governor系统配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
@@ -246,6 +247,21 @@
 <p class="admonition-title">注解</p>
 <p>在Android手机上执行 <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/cpuinfo</span></code> 通常会看到多核心采用了不同的处理器架构，也就是常说的大小核。</p>
 </div>
+<ul>
+<li><p>对于 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 处理器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="p">:</span> <span class="mi">0</span>
+<span class="n">model</span> <span class="n">name</span><span class="p">:</span> <span class="n">ARMv8</span> <span class="n">Processor</span> <span class="n">rev</span> <span class="mi">1</span> <span class="p">(</span><span class="n">v8l</span><span class="p">)</span>
+<span class="n">BogoMIPS</span><span class="p">:</span> <span class="mf">38.4</span>           <span class="mi">0</span>
+<span class="n">Features</span><span class="p">:</span> <span class="n">fp</span> <span class="n">asimd</span> <span class="n">evtstrm</span> <span class="n">aes</span> <span class="n">pmull</span> <span class="n">sha1</span> <span class="n">sha2</span> <span class="n">crc32</span>
+<span class="n">CPU</span> <span class="n">implementer</span>      <span class="p">:</span> <span class="mh">0x41</span>
+<span class="n">CPU</span> <span class="n">architecture</span><span class="p">:</span> <span class="mi">8</span>
+<span class="n">CPU</span> <span class="n">variant</span><span class="p">:</span> <span class="mh">0x1</span>
+<span class="n">CPU</span> <span class="n">part</span><span class="p">:</span> <span class="mh">0xd07</span>
+<span class="n">CPU</span> <span class="n">revi</span>     <span class="n">sion</span><span class="p">:</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </div>
 </div>
 <div class="section" id="pinning-cpu">
@@ -357,7 +373,7 @@
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>在 <a class="reference internal" href="../raspberry_pi/startup/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 上4个CPU核心的cpu频率调节策略是完全同步的，也就是修改 cpu0 的调节策略会立即在其他cpu核心同步生效。</p>
+<p>在 <a class="reference internal" href="../raspberry_pi/startup/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 和 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 上4个CPU核心的cpu频率调节策略是完全同步的，也就是修改 cpu0 的调节策略会立即在其他cpu核心同步生效。</p>
 </div>
 <ul>
 <li><p>现在我们检查CPU当前核心频率:</p>
@@ -370,7 +386,25 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1500000</span>
 </pre></div>
 </div>
+<p>我在 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 上调整 <code class="docutils literal notranslate"><span class="pre">scaling_governor</span></code> 设置成 <code class="docutils literal notranslate"><span class="pre">performance</span></code> 之后，频率从原先 <code class="docutils literal notranslate"><span class="pre">518400</span></code> 上升到 <code class="docutils literal notranslate"><span class="pre">1479000</span></code></p>
 <p>不过设置cpufreq scaling governor为performance可能会带来CPU温度上升。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我在 <a class="reference internal" href="../raspberry_pi/pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> 中组建 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 集群，希望能够尽可能压榨出处理器性能，所以我设置 governor 都是 <code class="docutils literal notranslate"><span class="pre">performance</span></code> 。注意，需要配备好散热风扇，并且部署好监控，随时应对处理器国人风险。</p>
+</div>
+</div>
+<div class="section" id="governor">
+<h2>governor系统配置<a class="headerlink" href="#governor" title="永久链接至标题">¶</a></h2>
+<p>虽然可以通过 <code class="docutils literal notranslate"><span class="pre">rc.local</span></code> 这样的启动脚本来人为设置处理器运行策略，但是最好的方式还是采用系统发行版约定熟成的配置方式。所以，在Ubuntu中，可以采用如下方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">cpufrequtils</span>
+<span class="n">echo</span> <span class="s1">&#39;GOVERNOR=&quot;performance&quot;&#39;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">default</span><span class="o">/</span><span class="n">cpufrequtils</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">disable</span> <span class="n">ondemand</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>CPU电源管理对系统性能影响重大，在服务器运维领域，我需要系统学习和整理</p>
+</div>
 </div>
 <div class="section" id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
