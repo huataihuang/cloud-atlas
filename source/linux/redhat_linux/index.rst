@@ -12,6 +12,8 @@ RedHat Linux
    admin/index
    systemd/index
    cgroup/index
+   kernel/index
+   performance/index
 
 .. only::  subproject and html
 
