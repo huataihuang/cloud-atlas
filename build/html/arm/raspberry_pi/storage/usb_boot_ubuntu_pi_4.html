@@ -855,7 +855,81 @@ The operation has completed successfully.
 </div>
 </div>
 <div class="section" id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<h2>磁盘分区调整问题<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<p>后续我在使用过程中遇到一个异常问题，偶然发现服务器无法登陆，就断电重启了一次。但是发现重启后无法ssh登陆树莓派主机，接上显示器以后发现，启动没有找到根文件系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Begin: Loading essential drivers ... done.
+Begin: Running /scripts/init-premount ... done.
+Begin: Mounting root file system .. Begin: Running /script/local-top ... done
+Begin: Running /scripts/local-premount ...
+...
+mdadm: No devices listed in conf file were found.
+mdadm: No devices listed in conf file were found.
+done.
+Gave up waiting for root file system device. Common problems:
+ - Boot args (cat /proc/cmdline)
+   - Check rootdelay= (did the system wait long enough?)
+ - Missing modules (cat /proc/modules; ls /dev)
+ALERT! LABEL=writable does not exist.  Dropping to a shell!
+
+BusyBox v1.30.1 (Ubuntu 1:1.30.1-4ubuntu6.2) built-in shell (ash)
+Enter &#39;help&#39; for a list of built-in commands.
+
+(initramfs)
+</pre></div>
+</div>
+<p>从提示中可以看到，系统启动找不傲标记为 <code class="docutils literal notranslate"><span class="pre">LABEL=writalbe</span></code> 的根文件系统。我记得我在将Ubuntu操作系统从TF卡复制到USB外接SSD磁盘时，已经将文件系统中 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 以及启动 <code class="docutils literal notranslate"><span class="pre">cmdline.txt</span></code> 修订成使用 <code class="docutils literal notranslate"><span class="pre">PARTUUID</span></code> ，不应该出现查找上述标签的文件系统。实际上 <code class="docutils literal notranslate"><span class="pre">LABEL=writalbe</span></code> 是树莓派上安装Ubuntu默认的文件系统分区命名，我已经做过修订为何还会出现。</p>
+<p>将移动硬盘接到另一台树莓派上检查，蓦然发现，原来通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令复制的磁盘分区，从原先 <code class="docutils literal notranslate"><span class="pre">128G</span></code> 自动扩展到完全占满了整个SSD磁盘。</p>
+<p>这说明通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令复制磁盘，树莓派操作系统有一个机制自动扩展了文件系统分区，并且将分区挂载命名自动调整成默认配置。由于这个SSD磁盘是通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令从TF卡完整复制的，所以分区的label和原先TF卡完全一致。例如，使用 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">lsblk</span> <span class="o">-</span><span class="n">o</span> <span class="n">name</span><span class="p">,</span><span class="n">mountpoint</span><span class="p">,</span><span class="n">label</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">uuid</span>
+</pre></div>
+</div>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NAME        MOUNTPOINT     LABEL         SIZE UUID
+sda                                    953.9G
+├─sda1                     system-boot   256M B726-57E2
+└─sda2                     writable    953.6G 483efb12-d682-4daf-9b34-6e2f774b56f7
+mmcblk0                                119.1G
+├─mmcblk0p1 /boot/firmware system-boot   256M B726-57E2
+└─mmcblk0p2 /              writable    118.9G 483efb12-d682-4daf-9b34-6e2f774b56f7
+</pre></div>
+</div>
+<p>我不知道为何文件系统 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 文件系统从 128G 扩展到整个磁盘就导致启动时无法读取。</p>
+<p>我想到的一个修复方式是重建文件系统，之前通过 <code class="docutils literal notranslate"><span class="pre">tar</span></code> 命令没能把系统成功启动，并不是操作系统不能通过 <code class="docutils literal notranslate"><span class="pre">tar</span></code> 命令备份和恢复，而是我最初实践时候尚未完全了解树莓派eeprom启动设置导致的。既然我已经通过了eeprom正确设置成功从USB启动，我相信再次通过tar方式完成系统重建也是可行的。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>操作步骤中有一步有所调整，就是我对磁盘分区的label设置了和默认配置相同的参数，这样，可以免去修改分区相关的配置。</p>
+</div>
+<ul>
+<li><p>格式化磁盘，注意，我这里格式化对分区进行了label，采用的label和原先树莓派默认的label完全一样，以便重建系统后不需要修订分区信息(不需要修改label或PARTUUID):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">vfat</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>
+<span class="n">fatlabel</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span> <span class="s2">&quot;system-boot&quot;</span>
+<span class="n">mkfs</span><span class="o">.</span><span class="n">ext4</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">-</span><span class="n">L</span> <span class="s2">&quot;writable&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后通过 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令检查，确保label和TF卡(mmcblk0)完全一致:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">lsblk</span> <span class="o">-</span><span class="n">o</span> <span class="n">name</span><span class="p">,</span><span class="n">mountpoint</span><span class="p">,</span><span class="n">label</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">uuid</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NAME        MOUNTPOINT     LABEL         SIZE UUID
+sda                                    953.9G
+├─sda1                     system-boot   243M 893D-7E79
+└─sda2                     writable     27.7G 39b0338f-f3c3-4080-a979-b80e8f8ed327
+mmcblk0                                119.1G
+├─mmcblk0p1 /boot/firmware system-boot   256M B726-57E2
+└─mmcblk0p2 /              writable    118.9G 483efb12-d682-4daf-9b34-6e2f774b56f7
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>不过这次操作我疏忽了，整个过程完成后依然无法启动。我忽然想到，实际上我忘记ubuntu在树莓派上不能使用压缩过的内核，应该如上所述，先把内核解压缩才能启动。我怀疑上次重启无法启动是因为我做了操作系统升级，有可能升级了内核自己没有注意，重启就导致错误。有待下次实践再验证。</p>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4">USB Boot Ubuntu Server 20.04 on Raspberry Pi 4</a> - 这篇文章非常详尽解说了从外接USB存储启动Ubuntu Server for Raspberry Pi的方法，比通过工具无脑操作要更有技术性</p></li>
 <li><p><a class="reference external" href="https://www.tomshardware.com/how-to/boot-raspberry-pi-4-usb">How to Boot Raspberry Pi 4 From a USB SSD or Flash Drive</a> 采用了 raspi-config 工具来设置Raspberry Pi OS，是树莓派官方解决方案，比较简单傻瓜化，不过只能用于树莓派官方操作系统</p></li>
@@ -867,6 +941,10 @@ The operation has completed successfully.
 <li><p><a class="reference external" href="https://wiki.gentoo.org/wiki/Hybrid_partition_table">Gentoo Hybrid partition table</a></p></li>
 </ul>
 </li>
+<li><p>有关磁盘文件系统label参考:
+- <cite>List partition labels from the command line &lt;https://unix.stackexchange.com/questions/14165/list-partition-labels-from-the-command-line&gt;</cite>
+- <cite>How to change the volume name of a FAT32 filesystem? &lt;https://unix.stackexchange.com/questions/44095/how-to-change-the-volume-name-of-a-fat32-filesystem&gt;</cite>
+- <a class="reference external" href="https://linuxconfig.org/how-to-name-label-a-partition-or-volume-on-linux">How to name/label a partition or volume on Linux</a></p></li>
 </ul>
 </div>
 </div>

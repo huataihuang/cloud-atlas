@@ -232,13 +232,25 @@
 <div class="section" id="id2">
 <h2>启动<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>我选择安装的是Ubuntu Server for Raspberry Pi，这个版本安装没有任何交互，直接启动以后，通过终端使用账号 <code class="docutils literal notranslate"><span class="pre">ubuntu</span></code> 登陆即可使用(密码和账号名相同，首次登陆会强制修改)。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Ubuntu镜像刷到TF卡或者USB外接存储磁盘以后，首次启动会把 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 挂载的根目录自动扩展到整个磁盘空间。对于我部署 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 和 <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 并构建 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 来说，存储分区不合理。所以，我采用 <a class="reference internal" href="../../../linux/storage/filesystem/resize_ext4_rootfs.html#resize-ext4-rootfs"><span class="std std-ref">调整ext4根文件系统大小</span></a> 调整文件系统分区。</p>
+</div>
 </div>
 <div class="section" id="id3">
 <h2>网络<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>在我的 <a class="reference internal" href="../pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> 中，我将有线网络通过千兆桌面交换机连接，构建一个内部高速网络，以便实现分布式环境，部署 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 以及 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> / <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 。</p>
 <div class="section" id="ip">
 <h3>静态IP地址配置<a class="headerlink" href="#ip" title="永久链接至标题">¶</a></h3>
-<p>有线网口的静态IP地址采用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 配置，设置方法见 <a class="reference internal" href="../network/pi_4_network.html#pi-4-network"><span class="std std-ref">树莓派网络设置</span></a></p>
+<ul>
+<li><p>初次启动，如果没有DHCP提供网络IP地址，可以手工设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">addr</span> <span class="n">add</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span><span class="o">/</span><span class="mi">25</span> <span class="n">dev</span> <span class="n">eth0</span>
+<span class="n">ip</span> <span class="n">route</span> <span class="n">add</span> <span class="n">default</span> <span class="n">via</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.9</span>
+</pre></div>
+</div>
+</li>
+<li><p>完成基本的操作系统升级之后，有线网口的静态IP地址采用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 配置，设置方法见 <a class="reference internal" href="../network/pi_4_network.html#pi-4-network"><span class="std std-ref">树莓派网络设置</span></a></p></li>
+</ul>
 </div>
 <div class="section" id="id4">
 <h3>无线网络<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
@@ -249,7 +261,7 @@
   <span class="n">optional</span><span class="p">:</span> <span class="n">true</span>
   <span class="n">access</span><span class="o">-</span><span class="n">points</span><span class="p">:</span>
     <span class="o">&lt;</span><span class="n">wifi</span> <span class="n">network</span> <span class="n">name</span><span class="o">&gt;</span><span class="p">:</span>
-      <span class="n">password</span><span class="p">:</span> <span class="s2">&quot;&lt;wifi password&gt;&quot;</span>
+    <span class="n">password</span><span class="p">:</span> <span class="s2">&quot;&lt;wifi password&gt;&quot;</span>
 </pre></div>
 </div>
 <p>然后保存。然后用这个SD卡首次启动树莓派，就会自动连接WiFi。</p>
@@ -266,6 +278,14 @@
 </div>
 </li>
 </ul>
+</div>
+<div class="section" id="unattended-upgrades">
+<h3>停用unattended-upgrades(可选)<a class="headerlink" href="#unattended-upgrades" title="永久链接至标题">¶</a></h3>
+<p>当前为了能够控制升级，特别是 <a class="reference internal" href="../storage/usb_boot_ubuntu_pi_4.html#usb-boot-ubuntu-pi-4"><span class="std std-ref">树莓派4 USB启动Ubuntu Server 20.04</span></a> 需要手工处理内核解压缩，同时为了能够降低系统内存消耗。我关闭了 <a class="reference internal" href="../../../linux/ubuntu_linux/admin/unattended_upgrade.html#unattended-upgrade"><span class="std std-ref">Ubuntu无人值守升级</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">disable</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="id6">
