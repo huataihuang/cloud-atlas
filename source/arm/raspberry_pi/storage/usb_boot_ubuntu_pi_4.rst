@@ -512,6 +512,80 @@ Pi 4 Bootloader Configuration
 
 这个异常我觉得是树莓派 EEPROM 的bug，准备再进行一些验证后提交一个issue。
 
+磁盘分区调整问题
+===================
+
+后续我在使用过程中遇到一个异常问题，偶然发现服务器无法登陆，就断电重启了一次。但是发现重启后无法ssh登陆树莓派主机，接上显示器以后发现，启动没有找到根文件系统::
+
+   Begin: Loading essential drivers ... done.
+   Begin: Running /scripts/init-premount ... done.
+   Begin: Mounting root file system .. Begin: Running /script/local-top ... done
+   Begin: Running /scripts/local-premount ...
+   ...
+   mdadm: No devices listed in conf file were found.
+   mdadm: No devices listed in conf file were found.
+   done.
+   Gave up waiting for root file system device. Common problems:
+    - Boot args (cat /proc/cmdline)
+      - Check rootdelay= (did the system wait long enough?)
+    - Missing modules (cat /proc/modules; ls /dev)
+   ALERT! LABEL=writable does not exist.  Dropping to a shell!
+
+   BusyBox v1.30.1 (Ubuntu 1:1.30.1-4ubuntu6.2) built-in shell (ash)
+   Enter 'help' for a list of built-in commands.
+
+   (initramfs)
+
+从提示中可以看到，系统启动找不傲标记为 ``LABEL=writalbe`` 的根文件系统。我记得我在将Ubuntu操作系统从TF卡复制到USB外接SSD磁盘时，已经将文件系统中 ``/etc/fstab`` 以及启动 ``cmdline.txt`` 修订成使用 ``PARTUUID`` ，不应该出现查找上述标签的文件系统。实际上 ``LABEL=writalbe`` 是树莓派上安装Ubuntu默认的文件系统分区命名，我已经做过修订为何还会出现。
+
+将移动硬盘接到另一台树莓派上检查，蓦然发现，原来通过 ``dd`` 命令复制的磁盘分区，从原先 ``128G`` 自动扩展到完全占满了整个SSD磁盘。
+
+这说明通过 ``dd`` 命令复制磁盘，树莓派操作系统有一个机制自动扩展了文件系统分区，并且将分区挂载命名自动调整成默认配置。由于这个SSD磁盘是通过 ``dd`` 命令从TF卡完整复制的，所以分区的label和原先TF卡完全一致。例如，使用 ``lsblk`` 命令可以看到::
+
+   sudo lsblk -o name,mountpoint,label,size,uuid
+
+显示输出::
+
+   NAME        MOUNTPOINT     LABEL         SIZE UUID
+   sda                                    953.9G
+   ├─sda1                     system-boot   256M B726-57E2
+   └─sda2                     writable    953.6G 483efb12-d682-4daf-9b34-6e2f774b56f7
+   mmcblk0                                119.1G
+   ├─mmcblk0p1 /boot/firmware system-boot   256M B726-57E2
+   └─mmcblk0p2 /              writable    118.9G 483efb12-d682-4daf-9b34-6e2f774b56f7
+
+我不知道为何文件系统 ``/dev/sda2`` 文件系统从 128G 扩展到整个磁盘就导致启动时无法读取。
+
+我想到的一个修复方式是重建文件系统，之前通过 ``tar`` 命令没能把系统成功启动，并不是操作系统不能通过 ``tar`` 命令备份和恢复，而是我最初实践时候尚未完全了解树莓派eeprom启动设置导致的。既然我已经通过了eeprom正确设置成功从USB启动，我相信再次通过tar方式完成系统重建也是可行的。
+
+.. note::
+
+   操作步骤中有一步有所调整，就是我对磁盘分区的label设置了和默认配置相同的参数，这样，可以免去修改分区相关的配置。
+
+- 格式化磁盘，注意，我这里格式化对分区进行了label，采用的label和原先树莓派默认的label完全一样，以便重建系统后不需要修订分区信息(不需要修改label或PARTUUID)::
+
+   mkfs.vfat /dev/sda1
+   fatlabel /dev/sda1 "system-boot"
+   mkfs.ext4 /dev/sda2 -L "writable"
+
+- 然后通过 ``lsblk`` 命令检查，确保label和TF卡(mmcblk0)完全一致::
+
+   sudo lsblk -o name,mountpoint,label,size,uuid
+
+输出显示::
+
+   NAME        MOUNTPOINT     LABEL         SIZE UUID
+   sda                                    953.9G 
+   ├─sda1                     system-boot   243M 893D-7E79
+   └─sda2                     writable     27.7G 39b0338f-f3c3-4080-a979-b80e8f8ed327
+   mmcblk0                                119.1G 
+   ├─mmcblk0p1 /boot/firmware system-boot   256M B726-57E2
+   └─mmcblk0p2 /              writable    118.9G 483efb12-d682-4daf-9b34-6e2f774b56f7
+
+.. note::
+
+   不过这次操作我疏忽了，整个过程完成后依然无法启动。我忽然想到，实际上我忘记ubuntu在树莓派上不能使用压缩过的内核，应该如上所述，先把内核解压缩才能启动。我怀疑上次重启无法启动是因为我做了操作系统升级，有可能升级了内核自己没有注意，重启就导致错误。有待下次实践再验证。
+
 参考
 ======
 
@@ -523,3 +597,7 @@ Pi 4 Bootloader Configuration
   - `Does the Pi support booting from GPT drives? <https://www.raspberrypi.org/forums/viewtopic.php?t=241914>`_
   - `Hybrid MBRs: The Good, the Bad, and the So Ugly You'll Tear Your Eyes Out <https://www.rodsbooks.com/gdisk/hybrid.html>`_ - 详细的Hybrid MBR原理和操作
   - `Gentoo Hybrid partition table <https://wiki.gentoo.org/wiki/Hybrid_partition_table>`_
+- 有关磁盘文件系统label参考:
+  - `List partition labels from the command line <https://unix.stackexchange.com/questions/14165/list-partition-labels-from-the-command-line>`
+  - `How to change the volume name of a FAT32 filesystem? <https://unix.stackexchange.com/questions/44095/how-to-change-the-volume-name-of-a-fat32-filesystem>`
+  - `How to name/label a partition or volume on Linux <https://linuxconfig.org/how-to-name-label-a-partition-or-volume-on-linux>`_

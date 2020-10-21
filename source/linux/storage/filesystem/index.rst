@@ -14,6 +14,7 @@ Linux文件系统
    xfs_tunning.rst
    btrfs_in_studio.rst
    dropbox_ext4.rst
+   resize_ext4_rootfs.rst
 
 .. only::  subproject and html
 
