@@ -12,9 +12,11 @@ ARM架构在存储上似乎落后于x86体系，毕竟我们熟悉的各种存�
    :maxdepth: 1
 
    choice_pi_storage.rst
+   usb_3.rst
    wd_passport_ssd.rst
    usb_boot_pi_3.rst
    usb_boot_ubuntu_pi_4.rst
+   disable_auto_resize.rst
 
 .. only::  subproject and html
 

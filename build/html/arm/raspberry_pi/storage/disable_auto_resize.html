@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>树莓派存储设备选择 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>关闭自动resize根文件系统 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -38,8 +38,8 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="USB标准3.x" href="usb_3.html" />
-    <link rel="prev" title="Raspberry Pi 存储" href="index.html" /> 
+    <link rel="next" title="树莓派异常排查" href="../debug/index.html" />
+    <link rel="prev" title="树莓派4 USB启动Ubuntu Server 20.04" href="usb_boot_ubuntu_pi_4.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -116,12 +116,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../admin/index.html">树莓派系统管理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../network/index.html">树莓派网络</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Raspberry Pi 存储</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">树莓派存储设备选择</a></li>
-<li class="toctree-l4"><a class="reference internal" href="usb_3.html">USB标准3.x</a></li>
+<li class="toctree-l4"><a class="reference internal" href="choice_pi_storage.html">树莓派存储设备选择</a></li>
 <li class="toctree-l4"><a class="reference internal" href="wd_passport_ssd.html">西部数据Passport SSD移动硬盘</a></li>
 <li class="toctree-l4"><a class="reference internal" href="usb_boot_pi_3.html">USB移动存储启动和运行树莓派3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="usb_boot_ubuntu_pi_4.html">树莓派4 USB启动Ubuntu Server 20.04</a></li>
-<li class="toctree-l4"><a class="reference internal" href="disable_auto_resize.html">关闭自动resize根文件系统</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">关闭自动resize根文件系统</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../debug/index.html">树莓派异常排查</a></li>
@@ -195,13 +194,13 @@
         
           <li><a href="index.html">Raspberry Pi 存储</a> &raquo;</li>
         
-      <li>树莓派存储设备选择</li>
+      <li>关闭自动resize根文件系统</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../../_sources/arm/raspberry_pi/storage/choice_pi_storage.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/arm/raspberry_pi/storage/disable_auto_resize.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -214,34 +213,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="choice-pi-storage">
-<span id="id1"></span><h1>树莓派存储设备选择<a class="headerlink" href="#choice-pi-storage" title="永久链接至标题">¶</a></h1>
+  <div class="section" id="resize">
+<span id="disable-auto-resize"></span><h1>关闭自动resize根文件系统<a class="headerlink" href="#resize" title="永久链接至标题">¶</a></h1>
+<p>在使用 <a class="reference internal" href="../index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 和 <a class="reference internal" href="../startup/ubuntu64bit_pi.html#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 时，你会发现当系统启动时，会自动把根文件系统扩展成占用整个磁盘系统。</p>
+<p>这对我部署 <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 和 <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 不利，因为我需要自定义文件系统，准备独立的存储卷给存储服务使用。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>我感觉树莓派为了降低生产成本，没有集成能够满足桌面性能的存储芯片和接口实在是阉割了做作桌面或者服务器的能力。实际上，ARM的存储性能很弱，我不知道即将推出的苹果ARM架构笔记本/桌面设备如何解决这个存储性能问题。但至少，目前在树莓爱，外接USB的移动存储设备是提升系统性能非常重要的环节。</p>
+<p>可能首次镜像安装以后，需要删除掉 <code class="docutils literal notranslate"><span class="pre">/.first_boot</span></code> 标记文件，避免第一次启动自动扩展文件系统。</p>
 </div>
-<p>树莓派主板没有集成存储控制芯片，没有我们熟悉的SATA或m2存储接口，所以需要借用USB接口来实现硬盘存储访问。好在当前树莓派4b已经支持USB3.0接口，至少在访问接口上已经接近 500MB/s ，具有一定的实用性。</p>
-<p>默认情况下树莓派Raspberry Pi是从SD卡启动系统的，但是SD卡存储容量有限，如果能够转换成磁盘启动（SSD/HDD）则可以实现一个海量的存储系统。</p>
-<p>最初我以为树莓派可以通过扩展卡来支持SATA磁盘，后来参考 <a class="reference external" href="http://www.zdnet.com/article/raspberry-pi-adding-an-ssd-drive-to-the-pi-desktop-kit/">Raspberry Pi: Adding an SSD drive to the Pi-Desktop kit</a> 发现类似的解决方案是通过一种USB连接卡转换成 mSATA 或者 SATA接口，这样就类似于常用的USB接口移动硬盘连接。早期外接机械移动硬盘比较累赘，通过外接转接卡可以获得比较紧凑充满机械风的存储设备。</p>
-<p>随着SSD技术进步，现在的外接SSD移动硬盘已经越做越小，摆脱了早期2.5寸移动硬盘的身影。我发现现在已经没有必要购买外接转接卡了，直接连接USB SSD存储器已经非常轻巧紧凑。推荐使用SSD移动存储作为树莓派存储设备。</p>
-<p><a class="reference external" href="https://baike.baidu.com/item/mSATA">mSATA</a> 是SATA技术整合在小尺寸装置的接口控制器规范。目前笔记本电脑开始使用这种接口用于固态硬盘。</p>
-<p>如果存储连续性数据，例如视频，则需要大量的空间，并且顺序读取情况下机械硬盘和固态存储差距较小，出于成本考虑，依然可以采用传统的机械硬盘。</p>
-<div class="section" id="id2">
-<h2>存储转接卡<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>2018年我购买树莓派3b的时候，SSD存储还比较昂贵并且缺乏大容量规格。那时机械硬盘性价比较高(廉价)，所以我组建树莓派存储时候选择了2.5寸机械硬盘。</p>
-<p>另外，为了能够营造出服务器的风格，我选择了 <a class="reference external" href="http://www.suptronics.com/miniPCkits/x820-hardware.html">SupTronics X820扩展卡</a> 作为机械硬盘转接器。</p>
-</div>
-<div class="section" id="usbssd">
-<h2>USB外接SSD移动硬盘<a class="headerlink" href="#usbssd" title="永久链接至标题">¶</a></h2>
-<p>根据经验和测试 <a class="reference internal" href="wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 可以看到通过USB外接SSD移动硬盘是最佳的存储设备，随机4k写入性能是TF卡的46倍。</p>
-<p>所以，作为 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 在ARM设备上部署实现，强烈建议Raspberry Pi采用外接SSD移动硬盘来实现最佳存储性能。</p>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>当前固态存储技术主流已经采用NvME存储，性能比几年前的SSD存储有很大提高。不过，根据 <a class="reference internal" href="usb_3.html#usb-3"><span class="std std-ref">USB标准3.x</span></a> 标准，当前树莓派只提供了USB 3.0接口，接口速度限制是无法充分发挥NvME存储性能的，适合匹配性能弱一个级别的SSD存储(售价也会低很多)。</p>
-</div>
-</div>
-<div class="section" id="usb">
-<h2>USB外接机械移动硬盘<a class="headerlink" href="#usb" title="永久链接至标题">¶</a></h2>
+<p>暂时没有实践，等下次新设备使用时测试。</p>
+<div class="section" id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://raspberrypi.stackexchange.com/questions/56621/temporarily-disable-expand-filesystem-during-first-boot">Temporarily disable expand filesystem during first boot</a></p></li>
+<li><p><a class="reference external" href="https://raspberrypi.stackexchange.com/questions/47773/disable-auto-file-system-expansion-in-new-jessie-image-2016-05-10">Disable auto file system expansion in new Jessie image 2016-05-10</a></p></li>
+<li><p><a class="reference external" href="https://github.com/guysoft/OctoPi/issues/335">Option to disable automatic “expand File System”? #335</a></p></li>
+<li><p><a class="reference external" href="https://forum.odroid.com/viewtopic.php?f=95&amp;t=24592">How to resize root partition in 16.04?</a></p></li>
+</ul>
 </div>
 </div>
 
@@ -253,10 +241,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="usb_3.html" class="btn btn-neutral float-right" title="USB标准3.x" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../debug/index.html" class="btn btn-neutral float-right" title="树莓派异常排查" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Raspberry Pi 存储" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="usb_boot_ubuntu_pi_4.html" class="btn btn-neutral float-left" title="树莓派4 USB启动Ubuntu Server 20.04" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
