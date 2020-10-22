@@ -282,7 +282,7 @@
 <div class="section" id="ssd">
 <h2>复制系统到SSD存储<a class="headerlink" href="#ssd" title="永久链接至标题">¶</a></h2>
 <div class="section" id="dd">
-<h3>通过dd复制系统<a class="headerlink" href="#dd" title="永久链接至标题">¶</a></h3>
+<h3>通过dd复制系统(可选)<a class="headerlink" href="#dd" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>采用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令完整复制磁盘:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">bs</span><span class="o">=</span><span class="mi">100</span><span class="n">M</span>
@@ -298,10 +298,10 @@
 </ul>
 </div>
 <div class="section" id="tar">
-<h3>通过tar复制系统(失败,但我觉得可以成功，待试)<a class="headerlink" href="#tar" title="永久链接至标题">¶</a></h3>
+<h3>通过tar复制系统(推荐)<a class="headerlink" href="#tar" title="永久链接至标题">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>我一直想采用tar包方式clone系统，这样可以灵活调整磁盘分区，但是我的尝试目前没有成功。所以还是采用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 方式来复制系统</p>
+<p>采用tar包方式clone系统，可以灵活调整磁盘分区。</p>
 </div>
 <p>我的规划是使用SSD存储30G空间部署系统，启用空间划分给 <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 和 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> ，以及构建本地 <a class="reference internal" href="../../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 运行存储。</p>
 <ul class="simple">
@@ -430,7 +430,7 @@ Information: You may need to update /etc/fstab.
 </td></tr></table></div>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
-<p>一定要将磁盘分区表创建成MBR(msdos)，当前树莓派不支持GPT分区表磁盘启动。我尝试采用Hybrid partition table，但是没有成功。</p>
+<p>虽然根据网上信息，树莓派不支持GPT分区表启动，但是我实践下来发现GPT分区表是可行的，也就是可以非常容易支持超过2T的磁盘。</p>
 </div>
 <ul>
 <li><p>格式化文件系统:</p>
@@ -439,6 +439,12 @@ Information: You may need to update /etc/fstab.
 </pre></div>
 </div>
 </li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果你格式化磁盘加上了原先TF卡分区的label，就可以使得SSD磁盘标识和原先TF卡一致，这样就可以省去启动配置中有关磁盘PARTUUID的麻烦。所以，我推荐你采用格式化磁盘时加上label。详细见下文。</p>
+</div>
+<ul>
 <li><p>Ubuntu for Raspberry Pi 分区挂载如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span>  <span class="mi">117</span><span class="n">G</span>  <span class="mf">4.1</span><span class="n">G</span>  <span class="mi">109</span><span class="n">G</span>   <span class="mi">4</span><span class="o">%</span> <span class="o">/</span>
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p1</span>  <span class="mi">253</span><span class="n">M</span>   <span class="mi">97</span><span class="n">M</span>  <span class="mi">156</span><span class="n">M</span>  <span class="mi">39</span><span class="o">%</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
@@ -502,13 +508,14 @@ Information: You may need to update /etc/fstab.
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>以上是通过tar方式复制系统，目前多次尝试都没有成功。</p>
+<p>以上是通过tar方式复制系统，我在最初尝试时没有成功。我还以为是这个方法存在问题，后来才发现实际上是因为内核没有解压缩导致的。详见下文</p>
 </div>
 </div>
 <div class="section" id="id1">
 <h3>有关树莓派分区表<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
-<p>注意到SD卡使用的分区表是msdos，但是我在划分USB外接移动硬盘时候，使用了 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 将磁盘的分区表构建成了GPT。参考 <a class="reference external" href="https://www.raspberrypi.org/forums/viewtopic.php?t=205418">booting from a GPT mass storage device</a> 了解到树莓派不支持GPT分区表的磁盘启动，而是要使用2TB以下磁盘，采用msdos分区表启动。有人尝试将MBR转换成GPT(使用 <code class="docutils literal notranslate"><span class="pre">gdisk</span></code> 工具的选项 <code class="docutils literal notranslate"><span class="pre">r-f-y-w</span></code> )，虽然GPT分区正确并且数据能够在Mac/Windows/Linux上读取，但是树莓派3不能从磁盘启动，始终看到的是彩虹屏幕。解决的方法是添加hybrid MBR(包含第一个启动分区，或者包含第一、第二分区，或者包含第一、第二和空闲分区)，都能够解决这个问题。</p>
-<p>我参考 <a class="reference external" href="https://www.rodsbooks.com/gdisk/hybrid.html">Hybrid MBRs: The Good, the Bad, and the So Ugly You’ll Tear Your Eyes Out</a> 使用 <code class="docutils literal notranslate"><span class="pre">gdisk</span></code> 转换分区表:</p>
+<p>注意到SD卡使用的分区表是msdos，但是我在划分USB外接移动硬盘时候，使用了 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 将磁盘的分区表构建成了GPT。参考 <a class="reference external" href="https://www.raspberrypi.org/forums/viewtopic.php?t=205418">booting from a GPT mass storage device</a> 了解到树莓派不支持GPT分区表的磁盘启动，而是要使用2TB以下磁盘，采用msdos分区表启动。有人尝试将MBR转换成GPT(使用 <code class="docutils literal notranslate"><span class="pre">gdisk</span></code> 工具的选项 <code class="docutils literal notranslate"><span class="pre">r-f-y-w</span></code> )，虽然GPT分区正确并且数据能够在Mac/Windows/Linux上读取，但是树莓派3不能从磁盘启动，始终看到的是彩虹屏幕。</p>
+<p>我在树莓派4上最后测试验证GPT分区表是可以支持启动的，树莓派3后续有机会再测试。</p>
+<p><a class="reference external" href="https://www.rodsbooks.com/gdisk/hybrid.html">Hybrid MBRs: The Good, the Bad, and the So Ugly You’ll Tear Your Eyes Out</a> 使用 <code class="docutils literal notranslate"><span class="pre">gdisk</span></code> 转换分区表来实现混合分区表(方法待参考):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span># gdisk /dev/sda
 GPT fdisk (gdisk) version 1.0.5
 
@@ -593,7 +600,7 @@ The operation has completed successfully.
 <p>当前不支持压缩版本的64位arm内核启动，所以我们需要将 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> 解压成 <code class="docutils literal notranslate"><span class="pre">vmlinux</span></code> 。</p>
 <ul>
 <li><p>找出镜像中gzip压缩的内容起点:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
 <span class="n">od</span> <span class="o">-</span><span class="n">A</span> <span class="n">d</span> <span class="o">-</span><span class="n">t</span> <span class="n">x1</span> <span class="n">vmlinuz</span> <span class="o">|</span> <span class="n">grep</span> <span class="s1">&#39;1f 8b 08 00&#39;</span>
 </pre></div>
 </div>
@@ -604,6 +611,32 @@ The operation has completed successfully.
 </pre></div>
 </div>
 <p>这里第一串数字 <code class="docutils literal notranslate"><span class="pre">0000000</span></code> 就是起点，也就是镜像的开始位置。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意 /boot 目录和 /boot/firmware 目录下都有一个 vmlinuz 文件，前者是软链接，指向 <code class="docutils literal notranslate"><span class="pre">/boot/vmlinuz-5.4.0-1021-raspi</span></code> ，后者是实际文件 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> 。一定要操作 <code class="docutils literal notranslate"><span class="pre">/boot/firmware</span></code> 目录下的 <code class="docutils literal notranslate"><span class="pre">vmlinuz</span></code> ，而不是 <code class="docutils literal notranslate"><span class="pre">/boot/vminuz</span></code> ，否则从USB移动硬盘启动会报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">sdhci_send_command</span><span class="p">:</span> <span class="n">MMC</span><span class="p">:</span> <span class="mi">1</span> <span class="n">busy</span> <span class="n">timeout</span><span class="o">.</span>
+<span class="n">starting</span> <span class="n">USB</span><span class="o">...</span>
+<span class="n">No</span> <span class="n">working</span> <span class="n">controllers</span> <span class="n">found</span>
+<span class="n">USB</span> <span class="ow">is</span> <span class="n">stopped</span><span class="o">.</span> <span class="n">Please</span> <span class="n">issue</span> <span class="s1">&#39;usb start&#39;</span> <span class="n">first</span><span class="o">.</span>
+<span class="n">starting</span> <span class="n">USB</span><span class="o">...</span>
+<span class="n">No</span> <span class="n">working</span> <span class="n">controllers</span> <span class="n">found</span>
+<span class="n">No</span> <span class="n">ethernet</span> <span class="n">found</span><span class="o">.</span>
+<span class="n">missing</span> <span class="n">environment</span> <span class="n">variable</span><span class="p">:</span> <span class="n">pxeuuid</span>
+<span class="n">missing</span> <span class="n">environment</span> <span class="n">variable</span><span class="p">:</span> <span class="n">bootfile</span>
+<span class="n">Retrieving</span> <span class="n">file</span><span class="p">:</span> <span class="n">pxelinux</span><span class="o">.</span><span class="n">cfg</span><span class="o">/</span><span class="mi">00000000</span>
+<span class="n">No</span> <span class="n">ethernet</span> <span class="n">found</span><span class="o">.</span>
+<span class="o">...</span>
+<span class="n">Config</span> <span class="n">file</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">starting</span> <span class="n">USB</span><span class="o">...</span>
+<span class="n">No</span> <span class="n">working</span> <span class="n">controllers</span> <span class="n">found</span>
+<span class="n">No</span> <span class="n">ethernet</span> <span class="n">found</span><span class="o">.</span>
+<span class="n">No</span> <span class="n">ethernet</span> <span class="n">found</span><span class="o">.</span>
+<span class="n">U</span><span class="o">-</span><span class="n">Boot</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>然后停止响应。</p>
+</div>
 <ul>
 <li><p>使用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令展开数据然后用 <code class="docutils literal notranslate"><span class="pre">zcat</span></code> 解压缩到一个文件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">vmlinuz</span> <span class="n">bs</span><span class="o">=</span><span class="mi">1</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0000000</span> <span class="o">|</span> <span class="n">zcat</span> <span class="o">&gt;</span> <span class="n">vmlinux</span>
@@ -849,8 +882,7 @@ The operation has completed successfully.
 <span class="n">Insert</span> <span class="n">SD</span><span class="o">-</span><span class="n">CARD</span>
 </pre></div>
 </div>
-<p>所以，我插入一块TF卡，保持 <code class="docutils literal notranslate"><span class="pre">BOOT_ORDER=0x4</span></code> 配置，则系统顺利从USB存储启动，而且系统中不再出现 <code class="docutils literal notranslate"><span class="pre">kworker</span></code> 进程 <code class="docutils literal notranslate"><span class="pre">D</span></code> 住现象。</p>
-<p>这个异常我觉得是树莓派 EEPROM 的bug，准备再进行一些验证后提交一个issue。</p>
+<p>等待一会超时后， 则系统顺利从USB存储启动，而且系统中不再出现 <code class="docutils literal notranslate"><span class="pre">kworker</span></code> 进程 <code class="docutils literal notranslate"><span class="pre">D</span></code> 住现象。</p>
 </div>
 </div>
 </div>
@@ -878,8 +910,7 @@ Enter &#39;help&#39; for a list of built-in commands.
 </pre></div>
 </div>
 <p>从提示中可以看到，系统启动找不傲标记为 <code class="docutils literal notranslate"><span class="pre">LABEL=writalbe</span></code> 的根文件系统。我记得我在将Ubuntu操作系统从TF卡复制到USB外接SSD磁盘时，已经将文件系统中 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 以及启动 <code class="docutils literal notranslate"><span class="pre">cmdline.txt</span></code> 修订成使用 <code class="docutils literal notranslate"><span class="pre">PARTUUID</span></code> ，不应该出现查找上述标签的文件系统。实际上 <code class="docutils literal notranslate"><span class="pre">LABEL=writalbe</span></code> 是树莓派上安装Ubuntu默认的文件系统分区命名，我已经做过修订为何还会出现。</p>
-<p>将移动硬盘接到另一台树莓派上检查，蓦然发现，原来通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令复制的磁盘分区，从原先 <code class="docutils literal notranslate"><span class="pre">128G</span></code> 自动扩展到完全占满了整个SSD磁盘。</p>
-<p>这说明通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令复制磁盘，树莓派操作系统有一个机制自动扩展了文件系统分区，并且将分区挂载命名自动调整成默认配置。由于这个SSD磁盘是通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令从TF卡完整复制的，所以分区的label和原先TF卡完全一致。例如，使用 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令可以看到:</p>
+<p>由于这个SSD磁盘是通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令从TF卡完整复制的，所以分区的label和原先TF卡完全一致。例如，使用 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令可以看到:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">lsblk</span> <span class="o">-</span><span class="n">o</span> <span class="n">name</span><span class="p">,</span><span class="n">mountpoint</span><span class="p">,</span><span class="n">label</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">uuid</span>
 </pre></div>
 </div>
@@ -897,9 +928,80 @@ mmcblk0                                119.1G
 <p>我想到的一个修复方式是重建文件系统，之前通过 <code class="docutils literal notranslate"><span class="pre">tar</span></code> 命令没能把系统成功启动，并不是操作系统不能通过 <code class="docutils literal notranslate"><span class="pre">tar</span></code> 命令备份和恢复，而是我最初实践时候尚未完全了解树莓派eeprom启动设置导致的。既然我已经通过了eeprom正确设置成功从USB启动，我相信再次通过tar方式完成系统重建也是可行的。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
+<p>这个重启后无法进入系统的问题，我后来回想了一下，应该是操作系统升级了内核，我没有注意到升级内核以后必须重新用 <code class="docutils literal notranslate"><span class="pre">zcat</span></code> 命令将压缩内核解压成 <code class="docutils literal notranslate"><span class="pre">vmlinux</span></code> 导致的，所以我再次挑战从tar包clone系统。`</p>
+</div>
+</div>
+<div class="section" id="tarclone">
+<h2>通过tar命令clone系统<a class="headerlink" href="#tarclone" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
 <p>操作步骤中有一步有所调整，就是我对磁盘分区的label设置了和默认配置相同的参数，这样，可以免去修改分区相关的配置。</p>
 </div>
 <ul>
+<li><p>对USB外接移动SSD硬盘分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># parted -a optimal /dev/sda
+GNU Parted 3.3
+Using /dev/sda
+Welcome to GNU Parted! Type &#39;help&#39; to view a list of commands.
+(parted) mklabel gpt
+Warning: The existing disk label on /dev/sda will be destroyed and all data on
+this disk will be lost. Do you want to continue?
+Yes/No? yes
+(parted) print
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 1024GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start  End  Size  File system  Name  Flags
+
+(parted) mkpart primary fat32 2048s 256M
+(parted) align-check optimal 1
+1 aligned
+(parted) unit s
+(parted) print
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 2000343040s
+Sector size (logical/physical): 512B/4096B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start  End      Size     File system  Name     Flags
+ 1      2048s  499711s  497664s  fat32        primary
+
+(parted) mkpart primary ext4 499712 30G
+(parted) print
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 2000343040s
+Sector size (logical/physical): 512B/4096B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start    End        Size       File system  Name     Flags
+ 1      2048s    499711s    497664s    fat32        primary
+ 2      499712s  58593279s  58093568s  ext4         primary
+
+(parted) align-check optimal 2
+2 aligned
+(parted) unit MB
+(parted) set 1 boot on
+(parted) print
+Model: WD My Passport 25F3 (scsi)
+Disk /dev/sda: 1024176MB
+Sector size (logical/physical): 512B/4096B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End      Size     File system  Name     Flags
+ 1      1.05MB  256MB    255MB    fat32        primary  boot, esp
+ 2      256MB   30000MB  29744MB  ext4         primary
+
+(parted) q
+Information: You may need to update /etc/fstab.
+</pre></div>
+</div>
+</li>
 <li><p>格式化磁盘，注意，我这里格式化对分区进行了label，采用的label和原先树莓派默认的label完全一样，以便重建系统后不需要修订分区信息(不需要修改label或PARTUUID):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">vfat</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>
 <span class="n">fatlabel</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span> <span class="s2">&quot;system-boot&quot;</span>
@@ -916,8 +1018,8 @@ mmcblk0                                119.1G
 <p>输出显示:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NAME        MOUNTPOINT     LABEL         SIZE UUID
 sda                                    953.9G
-├─sda1                     system-boot   243M 893D-7E79
-└─sda2                     writable     27.7G 39b0338f-f3c3-4080-a979-b80e8f8ed327
+├─sda1                     system-boot   243M 85F3-6F6C
+└─sda2                     writable     27.7G 3991189f-1bda-4f0f-b81a-bf46fd05ddfa
 mmcblk0                                119.1G
 ├─mmcblk0p1 /boot/firmware system-boot   256M B726-57E2
 └─mmcblk0p2 /              writable    118.9G 483efb12-d682-4daf-9b34-6e2f774b56f7
@@ -925,8 +1027,70 @@ mmcblk0                                119.1G
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>不过这次操作我疏忽了，整个过程完成后依然无法启动。我忽然想到，实际上我忘记ubuntu在树莓派上不能使用压缩过的内核，应该如上所述，先把内核解压缩才能启动。我怀疑上次重启无法启动是因为我做了操作系统升级，有可能升级了内核自己没有注意，重启就导致错误。有待下次实践再验证。</p>
+<p>由于SSD移动硬盘所有分区和原先TF卡的对应分区label完全一致，就避免了需要修订磁盘挂载和标识的麻烦。</p>
 </div>
+<ul>
+<li><p>通过tar复制整个系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span>
+<span class="c1">#tar打包系统不包含跨磁盘目录，所以/boot/firmware需要单独复制</span>
+<span class="n">tar</span> <span class="o">-</span><span class="n">cpzf</span> <span class="n">pi</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">--</span><span class="n">exclude</span><span class="o">=/</span><span class="n">pi</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">--</span><span class="n">one</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">system</span> <span class="o">/</span>
+
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">sudo</span> <span class="n">tar</span> <span class="o">-</span><span class="n">xpzf</span> <span class="o">/</span><span class="n">pi</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">mnt</span> <span class="o">--</span><span class="n">numeric</span><span class="o">-</span><span class="n">owner</span>
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+<span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">cf</span> <span class="o">-</span> <span class="o">.</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">xf</span> <span class="o">-</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>解压缩内核:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+<span class="n">od</span> <span class="o">-</span><span class="n">A</span> <span class="n">d</span> <span class="o">-</span><span class="n">t</span> <span class="n">x1</span> <span class="n">vmlinuz</span> <span class="o">|</span> <span class="n">grep</span> <span class="s1">&#39;1f 8b 08 00&#39;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0000000</span> <span class="mi">1</span><span class="n">f</span> <span class="mi">8</span><span class="n">b</span> <span class="mi">08</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">02</span> <span class="mi">03</span> <span class="n">ec</span> <span class="mi">5</span><span class="n">c</span> <span class="mi">0</span><span class="n">d</span> <span class="mi">74</span> <span class="mi">14</span> <span class="n">d7</span>
+</pre></div>
+</div>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 和 <code class="docutils literal notranslate"><span class="pre">zcat</span></code> 解压缩内核:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">vmlinuz</span> <span class="n">bs</span><span class="o">=</span><span class="mi">1</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0000000</span> <span class="o">|</span> <span class="n">zcat</span> <span class="o">&gt;</span> <span class="n">vmlinux</span>
+</pre></div>
+</div>
+<ul>
+<li><p>更新 <code class="docutils literal notranslate"><span class="pre">config.txt</span></code> 配置设置从解压后内核启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#[pi4]</span>
+<span class="c1">#kernel=uboot_rpi_4.bin</span>
+<span class="c1">#max_framebuffers=2</span>
+
+<span class="c1">#[pi2]</span>
+<span class="c1">#kernel=uboot_rpi_2.bin</span>
+
+<span class="c1">#[pi3]</span>
+<span class="c1">#kernel=uboot_rpi_3.bin</span>
+
+<span class="p">[</span><span class="nb">all</span><span class="p">]</span>
+<span class="n">arm_64bit</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">device_tree_address</span><span class="o">=</span><span class="mh">0x03000000</span>
+<span class="n">kernel</span><span class="o">=</span><span class="n">vmlinux</span>
+<span class="n">initramfs</span> <span class="n">initrd</span><span class="o">.</span><span class="n">img</span> <span class="n">followkernel</span>
+</pre></div>
+</div>
+</li>
+<li><p>下载最新raspberry pi的firmware，将 <code class="docutils literal notranslate"><span class="pre">boot</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">.dat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">.elf</span></code> 文件复制到 <code class="docutils literal notranslate"><span class="pre">/boot/firmware</span></code> 对应目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">~/</span><span class="n">Downloads</span><span class="o">/</span><span class="n">boot</span><span class="o">/*.</span><span class="n">dat</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+<span class="n">sudo</span> <span class="n">cp</span> <span class="o">~/</span><span class="n">Downloads</span><span class="o">/</span><span class="n">boot</span><span class="o">/*.</span><span class="n">elf</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+</pre></div>
+</div>
+</li>
+<li><p>将USB外接SSD移动硬盘连接到树莓派，启动系统，观察Raspberry Pi从USB移动硬盘启动。</p></li>
+</ul>
+<p><strong>成功</strong></p>
+<p>验证成功:</p>
+<ul class="simple">
+<li><p>树莓派存储磁盘可以使用GPT分区表</p></li>
+<li><p>不需要使用dd来复制磁盘，使用tar命令也可以复制系统，而且灵活调整磁盘分区大小</p></li>
+</ul>
 </div>
 <div class="section" id="id8">
 <h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
