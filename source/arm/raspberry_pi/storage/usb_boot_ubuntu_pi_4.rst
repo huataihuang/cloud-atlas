@@ -79,8 +79,8 @@
 复制系统到SSD存储
 ==================
 
-通过dd复制系统
-----------------
+通过dd复制系统(可选)
+---------------------
 
 - 采用 ``dd`` 命令完整复制磁盘::
 
@@ -91,12 +91,12 @@
    mount /dev/sda2 /mnt
    mount /dev/sda1 /mnt/boot/firmware
 
-通过tar复制系统(失败,但我觉得可以成功，待试)
+通过tar复制系统(推荐)
 ----------------------------------------------
 
 .. note::
 
-   我一直想采用tar包方式clone系统，这样可以灵活调整磁盘分区，但是我的尝试目前没有成功。所以还是采用 ``dd`` 方式来复制系统
+   采用tar包方式clone系统，可以灵活调整磁盘分区。
 
 我的规划是使用SSD存储30G空间部署系统，启用空间划分给 :ref:`gluster` 和 :ref:`ceph` ，以及构建本地 :ref:`docker` 运行存储。
 
@@ -107,12 +107,16 @@
 
 .. warning::
 
-   一定要将磁盘分区表创建成MBR(msdos)，当前树莓派不支持GPT分区表磁盘启动。我尝试采用Hybrid partition table，但是没有成功。
+   虽然根据网上信息，树莓派不支持GPT分区表启动，但是我实践下来发现GPT分区表是可行的，也就是可以非常容易支持超过2T的磁盘。
 
 - 格式化文件系统::
 
    mkfs.fat -F32 /dev/sda1
    mkfs.ext4 /dev/sda2
+
+.. note::
+
+   如果你格式化磁盘加上了原先TF卡分区的label，就可以使得SSD磁盘标识和原先TF卡一致，这样就可以省去启动配置中有关磁盘PARTUUID的麻烦。所以，我推荐你采用格式化磁盘时加上label。详细见下文。
 
 - Ubuntu for Raspberry Pi 分区挂载如下::
 
@@ -168,14 +172,16 @@
 
 .. note::
 
-   以上是通过tar方式复制系统，目前多次尝试都没有成功。
+   以上是通过tar方式复制系统，我在最初尝试时没有成功。我还以为是这个方法存在问题，后来才发现实际上是因为内核没有解压缩导致的。详见下文
 
 有关树莓派分区表
 ----------------
 
-注意到SD卡使用的分区表是msdos，但是我在划分USB外接移动硬盘时候，使用了 ``parted`` 将磁盘的分区表构建成了GPT。参考 `booting from a GPT mass storage device <https://www.raspberrypi.org/forums/viewtopic.php?t=205418>`_ 了解到树莓派不支持GPT分区表的磁盘启动，而是要使用2TB以下磁盘，采用msdos分区表启动。有人尝试将MBR转换成GPT(使用 ``gdisk`` 工具的选项 ``r-f-y-w`` )，虽然GPT分区正确并且数据能够在Mac/Windows/Linux上读取，但是树莓派3不能从磁盘启动，始终看到的是彩虹屏幕。解决的方法是添加hybrid MBR(包含第一个启动分区，或者包含第一、第二分区，或者包含第一、第二和空闲分区)，都能够解决这个问题。
+注意到SD卡使用的分区表是msdos，但是我在划分USB外接移动硬盘时候，使用了 ``parted`` 将磁盘的分区表构建成了GPT。参考 `booting from a GPT mass storage device <https://www.raspberrypi.org/forums/viewtopic.php?t=205418>`_ 了解到树莓派不支持GPT分区表的磁盘启动，而是要使用2TB以下磁盘，采用msdos分区表启动。有人尝试将MBR转换成GPT(使用 ``gdisk`` 工具的选项 ``r-f-y-w`` )，虽然GPT分区正确并且数据能够在Mac/Windows/Linux上读取，但是树莓派3不能从磁盘启动，始终看到的是彩虹屏幕。
 
-我参考 `Hybrid MBRs: The Good, the Bad, and the So Ugly You'll Tear Your Eyes Out <https://www.rodsbooks.com/gdisk/hybrid.html>`_ 使用 ``gdisk`` 转换分区表::
+我在树莓派4上最后测试验证GPT分区表是可以支持启动的，树莓派3后续有机会再测试。
+
+`Hybrid MBRs: The Good, the Bad, and the So Ugly You'll Tear Your Eyes Out <https://www.rodsbooks.com/gdisk/hybrid.html>`_ 使用 ``gdisk`` 转换分区表来实现混合分区表(方法待参考)::
 
    # gdisk /dev/sda
    GPT fdisk (gdisk) version 1.0.5
@@ -260,7 +266,7 @@
 
 - 找出镜像中gzip压缩的内容起点::
 
-   cd /mnt/boot
+   cd /mnt/boot/firmware
    od -A d -t x1 vmlinuz | grep '1f 8b 08 00'
 
 输出类似::
@@ -268,6 +274,32 @@
    0000000 1f 8b 08 00 00 00 00 00 02 03 ec 5c 0d 74 14 55
 
 这里第一串数字 ``0000000`` 就是起点，也就是镜像的开始位置。
+
+.. note::
+
+   注意 /boot 目录和 /boot/firmware 目录下都有一个 vmlinuz 文件，前者是软链接，指向 ``/boot/vmlinuz-5.4.0-1021-raspi`` ，后者是实际文件 ``vmlinuz`` 。一定要操作 ``/boot/firmware`` 目录下的 ``vmlinuz`` ，而不是 ``/boot/vminuz`` ，否则从USB移动硬盘启动会报错::
+
+      ...
+      sdhci_send_command: MMC: 1 busy timeout.
+      starting USB...
+      No working controllers found
+      USB is stopped. Please issue 'usb start' first.
+      starting USB...
+      No working controllers found
+      No ethernet found.
+      missing environment variable: pxeuuid
+      missing environment variable: bootfile
+      Retrieving file: pxelinux.cfg/00000000
+      No ethernet found.
+      ...
+      Config file not found
+      starting USB...
+      No working controllers found
+      No ethernet found.
+      No ethernet found.
+      U-Boot>
+
+   然后停止响应。
 
 - 使用 ``dd`` 命令展开数据然后用 ``zcat`` 解压缩到一个文件::
 
@@ -508,9 +540,7 @@ Pi 4 Bootloader Configuration
    Failed to open device: 'sdcard' (cmd 371a0010 status 1fff0001)
    Insert SD-CARD
 
-所以，我插入一块TF卡，保持 ``BOOT_ORDER=0x4`` 配置，则系统顺利从USB存储启动，而且系统中不再出现 ``kworker`` 进程 ``D`` 住现象。
-
-这个异常我觉得是树莓派 EEPROM 的bug，准备再进行一些验证后提交一个issue。
+等待一会超时后， 则系统顺利从USB存储启动，而且系统中不再出现 ``kworker`` 进程 ``D`` 住现象。
 
 磁盘分区调整问题
 ===================
@@ -538,9 +568,7 @@ Pi 4 Bootloader Configuration
 
 从提示中可以看到，系统启动找不傲标记为 ``LABEL=writalbe`` 的根文件系统。我记得我在将Ubuntu操作系统从TF卡复制到USB外接SSD磁盘时，已经将文件系统中 ``/etc/fstab`` 以及启动 ``cmdline.txt`` 修订成使用 ``PARTUUID`` ，不应该出现查找上述标签的文件系统。实际上 ``LABEL=writalbe`` 是树莓派上安装Ubuntu默认的文件系统分区命名，我已经做过修订为何还会出现。
 
-将移动硬盘接到另一台树莓派上检查，蓦然发现，原来通过 ``dd`` 命令复制的磁盘分区，从原先 ``128G`` 自动扩展到完全占满了整个SSD磁盘。
-
-这说明通过 ``dd`` 命令复制磁盘，树莓派操作系统有一个机制自动扩展了文件系统分区，并且将分区挂载命名自动调整成默认配置。由于这个SSD磁盘是通过 ``dd`` 命令从TF卡完整复制的，所以分区的label和原先TF卡完全一致。例如，使用 ``lsblk`` 命令可以看到::
+由于这个SSD磁盘是通过 ``dd`` 命令从TF卡完整复制的，所以分区的label和原先TF卡完全一致。例如，使用 ``lsblk`` 命令可以看到::
 
    sudo lsblk -o name,mountpoint,label,size,uuid
 
@@ -560,7 +588,77 @@ Pi 4 Bootloader Configuration
 
 .. note::
 
+   这个重启后无法进入系统的问题，我后来回想了一下，应该是操作系统升级了内核，我没有注意到升级内核以后必须重新用 ``zcat`` 命令将压缩内核解压成 ``vmlinux`` 导致的，所以我再次挑战从tar包clone系统。`
+
+通过tar命令clone系统
+======================
+
+.. note::
+
    操作步骤中有一步有所调整，就是我对磁盘分区的label设置了和默认配置相同的参数，这样，可以免去修改分区相关的配置。
+
+- 对USB外接移动SSD硬盘分区::
+
+   # parted -a optimal /dev/sda
+   GNU Parted 3.3
+   Using /dev/sda
+   Welcome to GNU Parted! Type 'help' to view a list of commands.
+   (parted) mklabel gpt
+   Warning: The existing disk label on /dev/sda will be destroyed and all data on
+   this disk will be lost. Do you want to continue?
+   Yes/No? yes
+   (parted) print
+   Model: WD My Passport 25F3 (scsi)
+   Disk /dev/sda: 1024GB
+   Sector size (logical/physical): 512B/4096B
+   Partition Table: gpt
+   Disk Flags:
+   
+   Number  Start  End  Size  File system  Name  Flags
+   
+   (parted) mkpart primary fat32 2048s 256M
+   (parted) align-check optimal 1
+   1 aligned
+   (parted) unit s
+   (parted) print
+   Model: WD My Passport 25F3 (scsi)
+   Disk /dev/sda: 2000343040s
+   Sector size (logical/physical): 512B/4096B
+   Partition Table: gpt
+   Disk Flags:
+   
+   Number  Start  End      Size     File system  Name     Flags
+    1      2048s  499711s  497664s  fat32        primary
+   
+   (parted) mkpart primary ext4 499712 30G
+   (parted) print
+   Model: WD My Passport 25F3 (scsi)
+   Disk /dev/sda: 2000343040s
+   Sector size (logical/physical): 512B/4096B
+   Partition Table: gpt
+   Disk Flags:
+   
+   Number  Start    End        Size       File system  Name     Flags
+    1      2048s    499711s    497664s    fat32        primary
+    2      499712s  58593279s  58093568s  ext4         primary
+   
+   (parted) align-check optimal 2
+   2 aligned
+   (parted) unit MB
+   (parted) set 1 boot on
+   (parted) print
+   Model: WD My Passport 25F3 (scsi)
+   Disk /dev/sda: 1024176MB
+   Sector size (logical/physical): 512B/4096B
+   Partition Table: gpt
+   Disk Flags:
+   
+   Number  Start   End      Size     File system  Name     Flags
+    1      1.05MB  256MB    255MB    fat32        primary  boot, esp
+    2      256MB   30000MB  29744MB  ext4         primary
+   
+   (parted) q
+   Information: You may need to update /etc/fstab.
 
 - 格式化磁盘，注意，我这里格式化对分区进行了label，采用的label和原先树莓派默认的label完全一样，以便重建系统后不需要修订分区信息(不需要修改label或PARTUUID)::
 
@@ -576,15 +674,71 @@ Pi 4 Bootloader Configuration
 
    NAME        MOUNTPOINT     LABEL         SIZE UUID
    sda                                    953.9G 
-   ├─sda1                     system-boot   243M 893D-7E79
-   └─sda2                     writable     27.7G 39b0338f-f3c3-4080-a979-b80e8f8ed327
+   ├─sda1                     system-boot   243M 85F3-6F6C
+   └─sda2                     writable     27.7G 3991189f-1bda-4f0f-b81a-bf46fd05ddfa
    mmcblk0                                119.1G 
    ├─mmcblk0p1 /boot/firmware system-boot   256M B726-57E2
    └─mmcblk0p2 /              writable    118.9G 483efb12-d682-4daf-9b34-6e2f774b56f7
 
 .. note::
 
-   不过这次操作我疏忽了，整个过程完成后依然无法启动。我忽然想到，实际上我忘记ubuntu在树莓派上不能使用压缩过的内核，应该如上所述，先把内核解压缩才能启动。我怀疑上次重启无法启动是因为我做了操作系统升级，有可能升级了内核自己没有注意，重启就导致错误。有待下次实践再验证。
+   由于SSD移动硬盘所有分区和原先TF卡的对应分区label完全一致，就避免了需要修订磁盘挂载和标识的麻烦。
+
+- 通过tar复制整个系统::
+
+   cd /
+   #tar打包系统不包含跨磁盘目录，所以/boot/firmware需要单独复制
+   tar -cpzf pi.tar.gz --exclude=/pi.tar.gz --one-file-system /
+
+   mount /dev/sda2 /mnt
+   sudo tar -xpzf /pi.tar.gz -C /mnt --numeric-owner
+   mount /dev/sda1 /mnt/boot/firmware
+   (cd /boot/firmware && tar cf - .)|(cd /mnt/boot/firmware && tar xf -)
+
+- 解压缩内核::
+
+   cd /mnt/boot/firmware
+   od -A d -t x1 vmlinuz | grep '1f 8b 08 00'
+
+输出类似::
+
+   0000000 1f 8b 08 00 00 00 00 00 02 03 ec 5c 0d 74 14 d7
+
+使用 ``dd`` 和 ``zcat`` 解压缩内核::
+
+   dd if=vmlinuz bs=1 skip=0000000 | zcat > vmlinux
+
+- 更新 ``config.txt`` 配置设置从解压后内核启动::
+
+   #[pi4]
+   #kernel=uboot_rpi_4.bin
+   #max_framebuffers=2
+   
+   #[pi2]
+   #kernel=uboot_rpi_2.bin
+   
+   #[pi3]
+   #kernel=uboot_rpi_3.bin
+   
+   [all]
+   arm_64bit=1
+   device_tree_address=0x03000000
+   kernel=vmlinux
+   initramfs initrd.img followkernel
+
+- 下载最新raspberry pi的firmware，将 ``boot`` 目录下 ``.dat`` 和 ``.elf`` 文件复制到 ``/boot/firmware`` 对应目录::
+
+   sudo cp ~/Downloads/boot/*.dat /mnt/boot/firmware
+   sudo cp ~/Downloads/boot/*.elf /mnt/boot/firmware 
+
+- 将USB外接SSD移动硬盘连接到树莓派，启动系统，观察Raspberry Pi从USB移动硬盘启动。
+
+**成功**
+
+验证成功:
+
+- 树莓派存储磁盘可以使用GPT分区表
+- 不需要使用dd来复制磁盘，使用tar命令也可以复制系统，而且灵活调整磁盘分区大小
 
 参考
 ======
