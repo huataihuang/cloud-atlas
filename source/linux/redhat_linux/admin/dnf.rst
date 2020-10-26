@@ -81,6 +81,18 @@ DNF包管理器使用
 
    dnf list available
 
+- 如果要查看多个版本，可以使用参数 ``--showduplicates`` ::
+
+   dnf --showduplicates list openssl
+
+此外，如果有多个release版本，还可以指定relase版本来展示。例如，同时在主机上启动用CentOS8和CentOS7的软件仓库，我们可以使用以下命令检查CentOS7的软件包::
+
+   dnf --relasever=7 --showduplicates list openssl
+
+而使用Fedora 30版本，同时使用Fedora 29版本，则可以使用::
+
+   dnf --releasever=29 --showduplicates list $pkgname
+
 - 列出仓库中module (软件包组合) ::
 
    dnf module list

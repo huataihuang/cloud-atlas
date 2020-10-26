@@ -281,6 +281,25 @@ bonding上增加VLAN
 
    有关 VLAN over bonding配置请参考 `Netplan - configuring 2 vlan on same bonding <https://askubuntu.com/questions/1112288/netplan-configuring-2-vlan-on-same-bonding>`_
 
+没有netplan配置systemd-networkd
+=================================
+
+实际上你可以不使用netplan也不使用NetworkManager就可以配置网络，因为 :ref:`systemd` 实际上提供了完整的系统配置功能。默认启动的 ``systemd-networkd`` 接管了所有网络配置，所以手工添加配置也可以实现配置。
+
+所有的 ``systemd-networkd`` 配置位于 ``/etc/systemd/network/`` 目录下，例如， ``enp0s25.network`` 配置内容::
+
+   [Match]
+   Name=enp0s25
+
+   [Network]
+   Address=192.168.6.9/24
+   GATEWAY=192.168.6.10
+   DNS=192.168.6.10
+
+此时只需要重新加载一次 ``systemd-networkd`` 就可以::
+
+   systemctl restart systemd-networkd
+
 netplan问题排查
 ================
 
