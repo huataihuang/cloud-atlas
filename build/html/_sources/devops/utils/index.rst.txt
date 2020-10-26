@@ -1,17 +1,13 @@
-.. _devops:
+.. _devops_utils:
 
 =================================
-DevOps Atlas
+DevOps 工具集
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   thought/index
-   sre/index
-   jenkins/index
-   terraform/index
-   utils/index
+   pssh.rst
 
 .. only::  subproject and html
 
