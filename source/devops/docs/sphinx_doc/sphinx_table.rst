@@ -1,0 +1,75 @@
+.. _sphinx_table:
+
+===================
+Sphinx表格
+===================
+
+使用reStructured Text和Sphinx，可以有多种方法创建表格。在文档中使用表格，可以表现复杂的信息。
+
+列表表格指令(List Table Directive)
+=====================================
+
+``.. list-table::`` 指令就是将常规的 ``list`` 转换成表格，每个表格有一定的列，以及指定表格列宽度的tag。
+
+为了恰当地格式化，星号 ``*`` 标记每行必须是垂直对齐(align vertically)，而连字符 ``-`` 则表示每一列也要对齐。空白的单元必须记录，所以一行中每个列都需要标记，即使这个单元没有内容::
+
+   .. list-table:: Title
+      :widths: 25 25 50
+      :header-rows: 1
+   
+      * - Heading row 1, column 1
+        - Heading row 1, column 2
+        - Heading row 1, column 3
+      * - Row 1, column 1
+        -
+        - Row 1, column 3
+      * - Row 2, column 1
+        - Row 2, column 2
+        - Row 2, column 3
+
+则显示如下
+
+.. list-table:: Title
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - Heading row 1, column 1
+     - Heading row 1, column 2
+     - Heading row 1, column 3
+   * - Row 1, column 1
+     -
+     - Row 1, column 3
+   * - Row 2, column 1
+     - Row 2, column 2
+     - Row 2, column 3
+
+CSV文件
+===========
+
+通常使用Excel比RST语法更容易创建表格，所以你可使用Excel将表格保存成CSV文件，然后在Sphinx的reStructured Text文件中引用这个CSV文件，就能够展示表格。
+
+要使用CSV文件，则使用 ``.. csv-table::`` 指令，对于列宽度，则制定百分比(但是不需要 ``%`` 符号)，对于行头，则通常使用1::
+
+   .. csv-table:: CSV案例展示
+      :file: csv_example.csv
+      :widths: 30, 30, 40
+      :header-rows: 1
+
+``csv_example.csv`` 文件内容:
+
+.. literalinclude:: csv_example.csv
+   :language: bash
+   :linenos:
+   :caption:
+
+以上代码案例显示效果：
+
+.. csv-table:: CSV案例展示
+   :file: csv_example.csv
+   :widths: 30, 30, 40
+   :header-rows: 1
+
+参考
+======
+
+- `sublime and sphinx guide - Use Table <https://sublime-and-sphinx-guide.readthedocs.io/en/latest/tables.html>`_

@@ -12,6 +12,7 @@ DevOps Atlas
    jenkins/index
    terraform/index
    utils/index
+   docs/index
 
 .. only::  subproject and html
 

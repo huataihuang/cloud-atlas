@@ -8,7 +8,8 @@
    :maxdepth: 1
 
    pi_zero_net_gadget.rst
-   pi_4_network.rst
+   pi_ubuntu_network.rst
+   raspbian_static_ip.rst
 
 .. only::  subproject and html
 
