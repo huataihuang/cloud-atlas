@@ -17,7 +17,7 @@ Python Atlas
 .. toctree::
    :maxdepth: 1
 
-   python_doc.rst
+   startup/index
 
 .. only::  subproject and html
 

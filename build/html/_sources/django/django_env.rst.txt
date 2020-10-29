@@ -19,8 +19,6 @@ Django开发环境
 
    brew install python3
 
-.. _virtualenv:
-
 安装Virtualenv
 ================
 
