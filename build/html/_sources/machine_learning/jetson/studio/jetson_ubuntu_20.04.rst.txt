@@ -1,4 +1,4 @@
-.. jetson_ubuntu_20.04:
+.. _jetson_ubuntu_20.04:
 
 ===============================
 在Jetson Nano运行Ubuntu 20.04

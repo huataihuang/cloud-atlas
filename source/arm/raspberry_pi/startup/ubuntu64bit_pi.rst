@@ -18,6 +18,10 @@
 
    dd if=ubuntu-20.04.1-preinstalled-server-arm64+raspi.img of=/dev/rdisk2 bs=100m
 
+.. note::
+
+   实际上TF卡性能远不如HDD或SSD，所以为了能够充分发挥树莓派性能，建议采用 :ref:`usb_boot_ubuntu_pi_4` ，这样可以充分发挥64位ARM处理器性能。
+
 启动
 =======
 
@@ -27,10 +31,19 @@
 
    Ubuntu镜像刷到TF卡或者USB外接存储磁盘以后，首次启动会把 ``/dev/sda2`` 挂载的根目录自动扩展到整个磁盘空间。对于我部署 :ref:`ceph` 和 :ref:`gluster` 并构建 :ref:`kubernetes` 来说，存储分区不合理。所以，我采用 :ref:`resize_ext4_rootfs` 调整文件系统分区。
 
+存储磁盘
+==========
+
+TF卡性能和SSD比较起来性能差很多，所以建议参考 :ref:`usb_boot_ubuntu_pi_4` 将系统迁移到外接SSD移动硬盘运行，这样io性能有数量级提高。
+
 网络
 =====
 
 在我的 :ref:`pi_cluster` 中，我将有线网络通过千兆桌面交换机连接，构建一个内部高速网络，以便实现分布式环境，部署 :ref:`kubernetes` 以及 :ref:`ceph` / :ref:`gluster` 。
+
+.. note::
+
+   经过对比 :ref:`networkmanager` 和 :ref:`netplan` 不同的网络配置管理工具，我选择使用netplan来完成配置管理，主要原因是我的主要是作为服务器运行，不需要支持桌面图形管理，可以不必使用功能更为复杂的NetworkManager。
 
 静态IP地址配置
 -----------------
@@ -40,7 +53,7 @@
    ip addr add 192.168.6.15/25 dev eth0
    ip route add default via 192.168.6.9
 
-- 完成基本的操作系统升级之后，有线网口的静态IP地址采用 :ref:`netplan` 配置，设置方法见 :ref:`pi_4_network`
+- 完成基本的操作系统升级之后，有线网口的静态IP地址采用 :ref:`netplan` 配置，设置方法见 :ref:`pi_ubuntu_network`
 
 无线网络
 ----------
@@ -59,7 +72,7 @@
 
 Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在 :ref:`ubuntu_on_mbp` 和 :ref:`ubuntu_on_thinkpad_x220` 都使用了NetworkManager :ref:`set_ubuntu_wifi` 。但是这种方式实际上多安装了组件，并且和默认netplan使用的 ``systemd-networkd`` 是完成相同工作，浪费系统内存资源。
 
-所以，建议采用系统已经安装的 ``netplan`` + ``networkd`` 后端来完成无线设置。请参考 :ref:`pi_4_network` 完成设置。
+所以，建议采用系统已经安装的 ``netplan`` + ``networkd`` 后端来完成无线设置。请参考 :ref:`pi_ubuntu_network` 完成设置。
 
 时区
 -------
@@ -76,6 +89,22 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
 
    systemctl disable unattended-upgrades
    systemctl stop unattended-upgrades
+
+停用snapd(可选)
+------------------
+
+ubuntu默认启用snapd来提供沙箱运行环境，但是我主要使用 :ref:`docker` 运行 :ref:`kubernetes` ，所以 :ref:`disable_snap` ::
+
+   snap list
+   sudo snap remove lxd
+   sudo snap remove core18
+   sudo snap remove snapd
+   sudo apt purge snapd
+   sudo apt autoremove
+   rm -rf ~/snap
+   sudo rm -rf /snap
+   sudo rm -rf /var/snap
+   sudo rm -rf /var/lib/snapd
 
 桌面系统(不建议)
 ==================

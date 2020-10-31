@@ -4,7 +4,7 @@
 netplan网络配置
 ================
 
-Ubuntu发行版默认使用 `Netplan网络配置工具 <https://netplan.io>`_ 配置网络接口，例如我在在 :ref:`pi_4_network` 中就使用了netplan。netplan支持后端使用 ``networkd`` 或者 ``network-manager`` 进行管理配置。
+Ubuntu发行版默认使用 `Netplan网络配置工具 <https://netplan.io>`_ 配置网络接口，例如我在在 :ref:`pi_ubuntu_network` 中就使用了netplan。netplan支持后端使用 ``networkd`` 或者 ``network-manager`` 进行管理配置。
 
 netplan简介
 =============

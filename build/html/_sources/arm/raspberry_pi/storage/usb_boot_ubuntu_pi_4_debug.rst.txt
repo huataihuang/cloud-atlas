@@ -17,13 +17,6 @@ debug: 树莓派4 USB启动Ubuntu Server 20.04
 
    树莓派官方提供的raspbian系统包含了 ``rpi-eeprom`` 和 ``rpi-eeprom-images`` ，用于更新树莓派firmware。可以直接使用官方提供的32位Raspbian系统就可以，我们只是使用官方镜像来更新firmware，完成后，我们依然安装Ubuntu 64位Server版本。
 
-使用树莓派官方镜像启动系统后，进入操作系统，执行以下命令进行系统更新::
-
-   sudo apt update
-   sudo apt upgrade
-   sudo rpi-update
-   sudo reboot
-
 如果你的firmware是beta版本，则需要修改 ``/etc/default/rpi-eeprom-update`` 配置文件，将::
 
    FIRMWARE_RELEASE_STATUS="critical"
@@ -33,6 +26,13 @@ debug: 树莓派4 USB启动Ubuntu Server 20.04
    FIRMWARE_RELEASE_STATUS="stable"
 
 如果你的firmware是beta版本，则修改上述 ``/etc/default/rpi-eeprom-update`` ，从 ``beta`` 参数 修改成 ``stable`` ，也是一样的方法。
+
+使用树莓派官方镜像启动系统后，进入操作系统，执行以下命令进行系统更新::
+
+   sudo apt update
+   sudo apt upgrade
+   sudo rpi-update
+   sudo reboot
 
 然后执行以下命令更新bootloader(具体需要根据实际当时提供的软件版本来定)::
 
@@ -66,6 +66,45 @@ debug: 树莓派4 USB启动Ubuntu Server 20.04
    只需要在第一台树莓派上完成firmware和bootloader更新，然后把这个TF卡放到其他没有升级过的树莓派上，只需要第一次启动，存储在TF卡中最新的firmware就会自动更新硬件，因为默认就配置了启动时自动更新firmwre，所以只要操作系统存储着最新的firmware就会在启动时更新。
 
    所以，上述操作只需要做一次，其他树莓派只需要用这个TF卡插入开机重启一次就可以升级好。(树莓派每次启动都会检查本机最新的firmware进行升级)
+
+rpi-update异常排查
+--------------------
+
+执行 ``rpi-update`` 遇到如下报错::
+
+   *** Raspberry Pi firmware updater by Hexxeh, enhanced by AndrewS and Dom
+   *** Performing self-update
+   !!! Failed to download update for rpi-update!
+   !!! Make sure you have ca-certificates installed and that the time is set correctly
+
+由于确定时间正确并且已经更新过系统，所以ca证书应该也正确安装。
+
+参考 `Failed to down update for rpi-update #206 <https://github.com/Hexxeh/rpi-update/issues/206>`_ ，我发现和issue不同的是，我能够解析DNS，并且能够正确执行 ``curl --head https://github.com/`` 。但是执行 ``sudo CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt rpi-update`` 确实没有下载任何内容。
+
+按照 `Failed to down update for rpi-update #206 <https://github.com/Hexxeh/rpi-update/issues/206>`_ 进行排查，发现实际是因为电信DNS解析 ``raw.githubusercontent.com`` 这个域名异常::
+
+   $ curl -Lfs --output /tmp/rpi-update https://raw.githubusercontent.com/Hexxeh/rpi-update/master/rpi-update
+   $ ls -lh /tmp/rpi-update
+   ls: cannot access '/tmp/rpi-update': No such file or directory
+   $ curl https://raw.githubusercontent.com/Hexxeh/rpi-update/master/rpi-update
+   curl: (7) Failed to connect to raw.githubusercontent.com port 443: Connection refused
+   $ host raw.githubusercontent.com
+   raw.githubusercontent.com has address 0.0.0.0
+   raw.githubusercontent.com has IPv6 address ::
+   raw.githubusercontent.com is an alias for github.map.fastly.net.
+
+而在修改 ``/etc/resolv.conf`` 配置使用公司内网DNS解析::
+
+   $ host raw.githubusercontent.com
+   raw.githubusercontent.com is an alias for github.map.fastly.net.
+   github.map.fastly.net has address 151.101.228.133
+
+通过 ``dnsutils`` 软件包中的dig命令可以看到，通过电信DNS解析是错误的，显示该域名已经被电信DNS污染::
+
+   $ dig @202.96.209.133 raw.githubusercontent.com
+   ...
+   ;; ANSWER SECTION:
+   raw.githubusercontent.com. 300  IN    A    0.0.0.0
 
 安装64位Ubuntu Server
 ========================
@@ -330,10 +369,12 @@ debug: 树莓派4 USB启动Ubuntu Server 20.04
    kernel=vmlinux
    initramfs initrd.img followkernel
 
+.. _gitzip:
+
 更新 .dat 和 .elf 文件
 ============================
 
-- 下载最新的raspberry pi的firmware，但是这个库非常巨大(10G+)，所以不建议直接clone，而是采用chrome插件 `GitZip <https://gitzip.org/>`_ 来指定只下载部分文件。
+- 下载最新的raspberry pi的firmware，但是这个库非常巨大(10G+)，所以不建议直接clone，而是采用 `chrome插件 GitZip <https://gitzip.org/>`_ 来指定只下载部分文件。
 
 .. note::
 

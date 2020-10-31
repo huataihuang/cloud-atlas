@@ -18,6 +18,7 @@ Python Atlas
    :maxdepth: 1
 
    startup/index
+   network/index
 
 .. only::  subproject and html
 
