@@ -463,10 +463,19 @@ Syncing disks.
 </div>
 <div class="section" id="id1">
 <h2>离线收缩rootfs<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>收缩文件系统风险很大，至少我的实践是失败的(在线扩容则每次都能够成功)。所以我强烈建议你在尝试收缩文件系统之前做好数据备份，随时做好从备份中恢复的准备。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Ext4文件系统只支持离线收缩，不能在线挂载情况下收缩文件系统，所以限制比较多。对于数据量较少的情况，我觉得还是通过备份恢复方式更简便(既然已经离线了，用备份恢复方式和收缩文件系统差别不大了)。</p>
+</div>
 <p>在 <a class="reference internal" href="../../../arm/raspberry_pi/startup/ubuntu64bit_pi.html#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 会发现首次启动操作系统，就会自动扩展根文件系统占据整个磁盘的剩余空间。对于部署服务器来说，合理的分区方式是根文件系统只占用较少空间，将主要存储空间保留给LVM卷管理，或者 <a class="reference internal" href="../btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> / <a class="reference internal" href="../zfs/index.html#zfs"><span class="std std-ref">ZFS - Linux存储系统</span></a> 实现动态存储分配管理。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>在通过resize2fs缩小文件系统时，我特意先选择比目标磁盘空间小1G的大小，这样可以确保fdisk调整文件系统分区时不会出现冲突。等fdisk调整到目标磁盘空间后，再次执行resize2fs，让EXT4文件系统恰好扩展到完整的分区大小。</p>
+<p>我先后做过两次磁盘ext4 resizefs，第一次是直接对 <a class="reference internal" href="../../../arm/raspberry_pi/startup/ubuntu64bit_pi.html#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 的安装后磁盘分区进行调整，此时文件系统分区表是树莓派默认的dos分区; 第二次是我实现 <a class="reference internal" href="../../../arm/raspberry_pi/storage/usb_boot_ubuntu_pi_4.html#usb-boot-ubuntu-pi-4"><span class="std std-ref">树莓派4 USB启动Ubuntu Server 20.04</span></a> 采用最近安装的Ubuntu for Raspberry Pi，此时文件系统分区表是GPT。所以两者在分区的扇区上有细微的差别。</p>
 </div>
 <ul>
 <li><p>检查当前磁盘分区:</p>
@@ -476,17 +485,16 @@ Syncing disks.
 </li>
 </ul>
 <p>显示输出当前整个 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 大约占用了 <code class="docutils literal notranslate"><span class="pre">953.6G</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">953.86</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024175636480</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000343040</span> <span class="n">sectors</span>
-<span class="n">Disk</span> <span class="n">model</span><span class="p">:</span> <span class="n">My</span> <span class="n">Passport</span> <span class="mi">25</span><span class="n">F3</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">953.9</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024175636480</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000343040</span> <span class="n">sectors</span>
 <span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
 <span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">4096</span> <span class="nb">bytes</span>
 <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">1048576</span> <span class="nb">bytes</span>
-<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">dos</span>
-<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mh">0xab86aefd</span>
+<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">gpt</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="n">F727B1EE</span><span class="o">-</span><span class="n">B292</span><span class="o">-</span><span class="mi">40</span><span class="n">DF</span><span class="o">-</span><span class="n">ACB0</span><span class="o">-</span><span class="n">AAAD6A763492</span>
 
-<span class="n">Device</span>     <span class="n">Boot</span>  <span class="n">Start</span>        <span class="n">End</span>    <span class="n">Sectors</span>   <span class="n">Size</span> <span class="n">Id</span> <span class="n">Type</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>  <span class="o">*</span>      <span class="mi">2048</span>     <span class="mi">526335</span>     <span class="mi">524288</span>   <span class="mi">256</span><span class="n">M</span>  <span class="n">c</span> <span class="n">W95</span> <span class="n">FAT32</span> <span class="p">(</span><span class="n">LBA</span><span class="p">)</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>       <span class="mi">526336</span> <span class="mi">2000343006</span> <span class="mi">1999816671</span> <span class="mf">953.6</span><span class="n">G</span> <span class="mi">83</span> <span class="n">Linux</span>
+<span class="n">Device</span>      <span class="n">Start</span>        <span class="n">End</span>    <span class="n">Sectors</span>   <span class="n">Size</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>    <span class="mi">2048</span>     <span class="mi">499711</span>     <span class="mi">497664</span>   <span class="mi">243</span><span class="n">M</span> <span class="n">EFI</span> <span class="n">System</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>  <span class="mi">499712</span> <span class="mi">2000343006</span> <span class="mi">1999843295</span> <span class="mf">953.6</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">filesystem</span>
 </pre></div>
 </div>
 <ul>
@@ -514,13 +522,13 @@ Syncing disks.
 </li>
 </ul>
 <p>输出显示文件系统是干净的:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e2fsck</span> <span class="mf">1.45</span><span class="o">.</span><span class="mi">5</span> <span class="p">(</span><span class="mi">07</span><span class="o">-</span><span class="n">Jan</span><span class="o">-</span><span class="mi">2020</span><span class="p">)</span>
-<span class="n">writable</span><span class="p">:</span> <span class="n">clean</span><span class="p">,</span> <span class="mi">108085</span><span class="o">/</span><span class="mi">60421680</span> <span class="n">files</span><span class="p">,</span> <span class="mi">4457356</span><span class="o">/</span><span class="mi">249977083</span> <span class="n">blocks</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e2fsck</span> <span class="mf">1.44</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="mi">24</span><span class="o">-</span><span class="n">Mar</span><span class="o">-</span><span class="mi">2018</span><span class="p">)</span>
+<span class="n">writable</span><span class="p">:</span> <span class="n">clean</span><span class="p">,</span> <span class="mi">142569</span><span class="o">/</span><span class="mi">62496768</span> <span class="n">files</span><span class="p">,</span> <span class="mi">5140329</span><span class="o">/</span><span class="mi">249980411</span> <span class="n">blocks</span>
 </pre></div>
 </div>
 <ul>
 <li><p>使用 <code class="docutils literal notranslate"><span class="pre">resize2fs</span></code> 命令收缩文件系统:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="mi">30</span><span class="n">G</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="mi">32</span><span class="n">G</span>
 </pre></div>
 </div>
 </li>
@@ -532,18 +540,17 @@ Syncing disks.
 </div>
 <ul>
 <li><p>按照提示再次执行 <code class="docutils literal notranslate"><span class="pre">e2fsck</span> <span class="pre">-f</span> <span class="pre">/dev/sda2</span></code> 显示输出:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>e2fsck 1.45.5 (07-Jan-2020)
-Pass 1: Checking inodes, blocks, and sizes
-Pass 2: Checking directory structure
-Pass 3: Checking directory connectivity
-Pass 3A: Optimizing directories
-Inode 2522 extent tree (at level 1) could be shorter.  Optimize&lt;y&gt;? yes
-Inode 28259 extent tree (at level 1) could be shorter.  Optimize&lt;y&gt;? yes
-Pass 4: Checking reference counts
-Pass 5: Checking group summary information
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="mf">1.44</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="mi">24</span><span class="o">-</span><span class="n">Mar</span><span class="o">-</span><span class="mi">2018</span><span class="p">)</span>
+<span class="n">Please</span> <span class="n">run</span> <span class="s1">&#39;e2fsck -f /dev/sda2&#39;</span> <span class="n">first</span><span class="o">.</span>
 
-writable: ***** FILE SYSTEM WAS MODIFIED *****
-writable: 108085/60421680 files (0.1% non-contiguous), 4457366/249977083 blocks
+<span class="n">root</span><span class="nd">@jetson</span><span class="p">:</span><span class="o">/</span><span class="c1"># e2fsck -f /dev/sda2</span>
+<span class="n">e2fsck</span> <span class="mf">1.44</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="mi">24</span><span class="o">-</span><span class="n">Mar</span><span class="o">-</span><span class="mi">2018</span><span class="p">)</span>
+<span class="n">Pass</span> <span class="mi">1</span><span class="p">:</span> <span class="n">Checking</span> <span class="n">inodes</span><span class="p">,</span> <span class="n">blocks</span><span class="p">,</span> <span class="ow">and</span> <span class="n">sizes</span>
+<span class="n">Pass</span> <span class="mi">2</span><span class="p">:</span> <span class="n">Checking</span> <span class="n">directory</span> <span class="n">structure</span>
+<span class="n">Pass</span> <span class="mi">3</span><span class="p">:</span> <span class="n">Checking</span> <span class="n">directory</span> <span class="n">connectivity</span>
+<span class="n">Pass</span> <span class="mi">4</span><span class="p">:</span> <span class="n">Checking</span> <span class="n">reference</span> <span class="n">counts</span>
+<span class="n">Pass</span> <span class="mi">5</span><span class="p">:</span> <span class="n">Checking</span> <span class="n">group</span> <span class="n">summary</span> <span class="n">information</span>
+<span class="n">writable</span><span class="p">:</span> <span class="mi">142569</span><span class="o">/</span><span class="mi">62496768</span> <span class="n">files</span> <span class="p">(</span><span class="mf">0.2</span><span class="o">%</span> <span class="n">non</span><span class="o">-</span><span class="n">contiguous</span><span class="p">),</span> <span class="mi">5140329</span><span class="o">/</span><span class="mi">249980411</span> <span class="n">blocks</span>
 </pre></div>
 </div>
 </li>
@@ -554,37 +561,101 @@ writable: 108085/60421680 files (0.1% non-contiguous), 4457366/249977083 blocks
 </div>
 <ul>
 <li><p>再次收缩文件系统:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="mi">30</span><span class="n">G</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="mi">32</span><span class="n">G</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p>提示信息:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="mf">1.45</span><span class="o">.</span><span class="mi">5</span> <span class="p">(</span><span class="mi">07</span><span class="o">-</span><span class="n">Jan</span><span class="o">-</span><span class="mi">2020</span><span class="p">)</span>
-<span class="n">Resizing</span> <span class="n">the</span> <span class="n">filesystem</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="n">to</span> <span class="mi">7864320</span> <span class="p">(</span><span class="mi">4</span><span class="n">k</span><span class="p">)</span> <span class="n">blocks</span><span class="o">.</span>
-<span class="n">The</span> <span class="n">filesystem</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="ow">is</span> <span class="n">now</span> <span class="mi">7864320</span> <span class="p">(</span><span class="mi">4</span><span class="n">k</span><span class="p">)</span> <span class="n">blocks</span> <span class="n">long</span><span class="o">.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="mf">1.44</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="mi">24</span><span class="o">-</span><span class="n">Mar</span><span class="o">-</span><span class="mi">2018</span><span class="p">)</span>
+<span class="n">Resizing</span> <span class="n">the</span> <span class="n">filesystem</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="n">to</span> <span class="mi">8388608</span> <span class="p">(</span><span class="mi">4</span><span class="n">k</span><span class="p">)</span> <span class="n">blocks</span><span class="o">.</span>
+<span class="n">resize2fs</span><span class="p">:</span> <span class="n">A</span> <span class="n">block</span> <span class="n">group</span> <span class="ow">is</span> <span class="n">missing</span> <span class="n">an</span> <span class="n">inode</span> <span class="n">table</span> <span class="k">while</span> <span class="n">trying</span> <span class="n">to</span> <span class="n">resize</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+<span class="n">Please</span> <span class="n">run</span> <span class="s1">&#39;e2fsck -fy /dev/sda2&#39;</span> <span class="n">to</span> <span class="n">fix</span> <span class="n">the</span> <span class="n">filesystem</span>
+<span class="n">after</span> <span class="n">the</span> <span class="n">aborted</span> <span class="n">resize</span> <span class="n">operation</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>看似有些问题，这次resize2fs有问题，需要fack了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e2fsck</span> <span class="o">-</span><span class="n">fy</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+</pre></div>
+</div>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e2fsck</span> <span class="mf">1.44</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="mi">24</span><span class="o">-</span><span class="n">Mar</span><span class="o">-</span><span class="mi">2018</span><span class="p">)</span>
+<span class="n">ext2fs_check_desc</span><span class="p">:</span> <span class="n">Corrupt</span> <span class="n">group</span> <span class="n">descriptor</span><span class="p">:</span> <span class="n">bad</span> <span class="n">block</span> <span class="k">for</span> <span class="n">block</span> <span class="n">bitmap</span>
+<span class="n">e2fsck</span><span class="p">:</span> <span class="n">Group</span> <span class="n">descriptors</span> <span class="n">look</span> <span class="n">bad</span><span class="o">...</span> <span class="n">trying</span> <span class="n">backup</span> <span class="n">blocks</span><span class="o">...</span>
+<span class="n">writable</span><span class="p">:</span> <span class="n">recovering</span> <span class="n">journal</span>
+<span class="n">e2fsck</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="nb">set</span> <span class="n">superblock</span> <span class="n">flags</span> <span class="n">on</span> <span class="n">writable</span>
+
+
+<span class="n">writable</span><span class="p">:</span> <span class="o">*****</span> <span class="n">FILE</span> <span class="n">SYSTEM</span> <span class="n">WAS</span> <span class="n">MODIFIED</span> <span class="o">*****</span>
+
+<span class="n">writable</span><span class="p">:</span> <span class="o">**********</span> <span class="n">WARNING</span><span class="p">:</span> <span class="n">Filesystem</span> <span class="n">still</span> <span class="n">has</span> <span class="n">errors</span> <span class="o">**********</span>
 </pre></div>
 </div>
 <ul>
-<li><p>现在我们可以使用 fdisk 命令重建分区 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># fdisk /dev/sda</span>
-<span class="n">Welcome</span> <span class="n">to</span> <span class="n">fdisk</span> <span class="p">(</span><span class="n">util</span><span class="o">-</span><span class="n">linux</span> <span class="mf">2.34</span><span class="p">)</span><span class="o">.</span>
+<li><p>我再次尝试 fsck</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e2fsck</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示文件系统是干净的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e2fsck</span> <span class="mf">1.44</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="mi">24</span><span class="o">-</span><span class="n">Mar</span><span class="o">-</span><span class="mi">2018</span><span class="p">)</span>
+<span class="n">Setting</span> <span class="n">free</span> <span class="n">inodes</span> <span class="n">count</span> <span class="n">to</span> <span class="mi">62473043</span> <span class="p">(</span><span class="n">was</span> <span class="mi">62386733</span><span class="p">)</span>
+<span class="n">Setting</span> <span class="n">free</span> <span class="n">blocks</span> <span class="n">count</span> <span class="n">to</span> <span class="mi">245963688</span> <span class="p">(</span><span class="n">was</span> <span class="mi">244930381</span><span class="p">)</span>
+<span class="n">writable</span><span class="p">:</span> <span class="n">clean</span><span class="p">,</span> <span class="mi">23725</span><span class="o">/</span><span class="mi">62496768</span> <span class="n">files</span><span class="p">,</span> <span class="mi">4016723</span><span class="o">/</span><span class="mi">249980411</span> <span class="n">blocks</span>
+</pre></div>
+</div>
+<ul>
+<li><p>但是确实比较奇怪，此时我尝试挂在分区显示文件系统只有236M:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">df</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>       <span class="mi">939</span><span class="n">G</span>  <span class="mi">236</span><span class="n">M</span>  <span class="mi">900</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">mnt</span>
+</pre></div>
+</div>
+<p>OMG，难道数据丢失了？</p>
+<p>不过，进入 <code class="docutils literal notranslate"><span class="pre">/mnt</span></code> 目录下使用 <code class="docutils literal notranslate"><span class="pre">du</span> <span class="pre">-sh</span></code> 看到数据还存在:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">du</span> <span class="o">-</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>输出还是之前的 4.5G ，看似数据没有丢失，只是当前收缩以后 <code class="docutils literal notranslate"><span class="pre">df</span></code> 显示不正确。</p>
+<ul>
+<li><p>再次卸载文件系统，然后fsck以后，看看是否正确:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">umount</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">fsck</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示还是clean:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fsck</span> <span class="kn">from</span> <span class="nn">util</span><span class="o">-</span><span class="n">linux</span> <span class="mf">2.31</span><span class="o">.</span><span class="mi">1</span>
+<span class="n">e2fsck</span> <span class="mf">1.44</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="mi">24</span><span class="o">-</span><span class="n">Mar</span><span class="o">-</span><span class="mi">2018</span><span class="p">)</span>
+<span class="n">writable</span><span class="p">:</span> <span class="n">clean</span><span class="p">,</span> <span class="mi">23725</span><span class="o">/</span><span class="mi">62496768</span> <span class="n">files</span><span class="p">,</span> <span class="mi">4016723</span><span class="o">/</span><span class="mi">249980411</span> <span class="n">blocks</span>
+</pre></div>
+</div>
+<ul>
+<li><p>现在尝试使用 fdisk 命令重建分区 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Welcome</span> <span class="n">to</span> <span class="n">fdisk</span> <span class="p">(</span><span class="n">util</span><span class="o">-</span><span class="n">linux</span> <span class="mf">2.31</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span>
 <span class="n">Changes</span> <span class="n">will</span> <span class="n">remain</span> <span class="ow">in</span> <span class="n">memory</span> <span class="n">only</span><span class="p">,</span> <span class="n">until</span> <span class="n">you</span> <span class="n">decide</span> <span class="n">to</span> <span class="n">write</span> <span class="n">them</span><span class="o">.</span>
 <span class="n">Be</span> <span class="n">careful</span> <span class="n">before</span> <span class="n">using</span> <span class="n">the</span> <span class="n">write</span> <span class="n">command</span><span class="o">.</span>
 
 
 <span class="n">Command</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">help</span><span class="p">):</span> <span class="n">p</span>
-<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">953.86</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024175636480</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000343040</span> <span class="n">sectors</span>
-<span class="n">Disk</span> <span class="n">model</span><span class="p">:</span> <span class="n">My</span> <span class="n">Passport</span> <span class="mi">25</span><span class="n">F3</span>
+<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">953.9</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024175636480</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000343040</span> <span class="n">sectors</span>
 <span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
 <span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">4096</span> <span class="nb">bytes</span>
 <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">1048576</span> <span class="nb">bytes</span>
-<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">dos</span>
-<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mh">0xab86aefd</span>
+<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">gpt</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="n">F727B1EE</span><span class="o">-</span><span class="n">B292</span><span class="o">-</span><span class="mi">40</span><span class="n">DF</span><span class="o">-</span><span class="n">ACB0</span><span class="o">-</span><span class="n">AAAD6A763492</span>
 
-<span class="n">Device</span>     <span class="n">Boot</span>  <span class="n">Start</span>        <span class="n">End</span>    <span class="n">Sectors</span>   <span class="n">Size</span> <span class="n">Id</span> <span class="n">Type</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>  <span class="o">*</span>      <span class="mi">2048</span>     <span class="mi">526335</span>     <span class="mi">524288</span>   <span class="mi">256</span><span class="n">M</span>  <span class="n">c</span> <span class="n">W95</span> <span class="n">FAT32</span> <span class="p">(</span><span class="n">LBA</span><span class="p">)</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>       <span class="mi">526336</span> <span class="mi">2000343006</span> <span class="mi">1999816671</span> <span class="mf">953.6</span><span class="n">G</span> <span class="mi">83</span> <span class="n">Linux</span>
+<span class="n">Device</span>      <span class="n">Start</span>        <span class="n">End</span>    <span class="n">Sectors</span>   <span class="n">Size</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>    <span class="mi">2048</span>     <span class="mi">499711</span>     <span class="mi">497664</span>   <span class="mi">243</span><span class="n">M</span> <span class="n">EFI</span> <span class="n">System</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>  <span class="mi">499712</span> <span class="mi">2000343006</span> <span class="mi">1999843295</span> <span class="mf">953.6</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">filesystem</span>
 </pre></div>
 </div>
 </li>
@@ -598,32 +669,31 @@ writable: 108085/60421680 files (0.1% non-contiguous), 4457366/249977083 blocks
 </pre></div>
 </div>
 <p>然后再加回来，加回来时候分区只设置32G:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Command</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">help</span><span class="p">):</span> <span class="n">n</span>
-<span class="n">Partition</span> <span class="nb">type</span>
-   <span class="n">p</span>   <span class="n">primary</span> <span class="p">(</span><span class="mi">1</span> <span class="n">primary</span><span class="p">,</span> <span class="mi">0</span> <span class="n">extended</span><span class="p">,</span> <span class="mi">3</span> <span class="n">free</span><span class="p">)</span>
-   <span class="n">e</span>   <span class="n">extended</span> <span class="p">(</span><span class="n">container</span> <span class="k">for</span> <span class="n">logical</span> <span class="n">partitions</span><span class="p">)</span>
-<span class="n">Select</span> <span class="p">(</span><span class="n">default</span> <span class="n">p</span><span class="p">):</span> <span class="n">p</span>
-<span class="n">Partition</span> <span class="n">number</span> <span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">default</span> <span class="mi">2</span><span class="p">):</span>
-<span class="n">First</span> <span class="n">sector</span> <span class="p">(</span><span class="mi">526336</span><span class="o">-</span><span class="mi">2000343039</span><span class="p">,</span> <span class="n">default</span> <span class="mi">526336</span><span class="p">):</span>
-<span class="n">Last</span> <span class="n">sector</span><span class="p">,</span> <span class="o">+/-</span><span class="n">sectors</span> <span class="ow">or</span> <span class="o">+/-</span><span class="n">size</span><span class="p">{</span><span class="n">K</span><span class="p">,</span><span class="n">M</span><span class="p">,</span><span class="n">G</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">P</span><span class="p">}</span> <span class="p">(</span><span class="mi">526336</span><span class="o">-</span><span class="mi">2000343039</span><span class="p">,</span> <span class="n">default</span> <span class="mi">2000343039</span><span class="p">):</span> <span class="o">+</span><span class="mi">32</span><span class="n">G</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Command (m for help): n
+Partition number (2-128, default 2):
+First sector (499712-2000343006, default 499712):
+Last sector, +sectors or +size{K,M,G,T,P} (499712-2000343006, default 2000343006): +32G
 
-<span class="n">Created</span> <span class="n">a</span> <span class="n">new</span> <span class="n">partition</span> <span class="mi">2</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;Linux&#39;</span> <span class="ow">and</span> <span class="n">of</span> <span class="n">size</span> <span class="mi">32</span> <span class="n">GiB</span><span class="o">.</span>
+Created a new partition 2 of type &#39;Linux filesystem&#39; and of size 32 GiB.
+Partition #2 contains a ext4 signature.
+
+Do you want to remove the signature? [Y]es/[N]o: n
 </pre></div>
 </div>
 <ul>
 <li><p>再次检查分区信息是否正确:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Command</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">help</span><span class="p">):</span> <span class="n">p</span>
-<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">953.86</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024175636480</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000343040</span> <span class="n">sectors</span>
-<span class="n">Disk</span> <span class="n">model</span><span class="p">:</span> <span class="n">My</span> <span class="n">Passport</span> <span class="mi">25</span><span class="n">F3</span>
+
+<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">953.9</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024175636480</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000343040</span> <span class="n">sectors</span>
 <span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
 <span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">4096</span> <span class="nb">bytes</span>
 <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">1048576</span> <span class="nb">bytes</span>
-<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">dos</span>
-<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mh">0xab86aefd</span>
+<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">gpt</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="n">F727B1EE</span><span class="o">-</span><span class="n">B292</span><span class="o">-</span><span class="mi">40</span><span class="n">DF</span><span class="o">-</span><span class="n">ACB0</span><span class="o">-</span><span class="n">AAAD6A763492</span>
 
-<span class="n">Device</span>     <span class="n">Boot</span>  <span class="n">Start</span>      <span class="n">End</span>  <span class="n">Sectors</span>  <span class="n">Size</span> <span class="n">Id</span> <span class="n">Type</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>  <span class="o">*</span>      <span class="mi">2048</span>   <span class="mi">526335</span>   <span class="mi">524288</span>  <span class="mi">256</span><span class="n">M</span>  <span class="n">c</span> <span class="n">W95</span> <span class="n">FAT32</span> <span class="p">(</span><span class="n">LBA</span><span class="p">)</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>       <span class="mi">526336</span> <span class="mi">67635199</span> <span class="mi">67108864</span>   <span class="mi">32</span><span class="n">G</span> <span class="mi">83</span> <span class="n">Linux</span>
+<span class="n">Device</span>      <span class="n">Start</span>      <span class="n">End</span>  <span class="n">Sectors</span>  <span class="n">Size</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>    <span class="mi">2048</span>   <span class="mi">499711</span>   <span class="mi">497664</span>  <span class="mi">243</span><span class="n">M</span> <span class="n">EFI</span> <span class="n">System</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>  <span class="mi">499712</span> <span class="mi">67608575</span> <span class="mi">67108864</span>   <span class="mi">32</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">filesystem</span>
 </pre></div>
 </div>
 </li>
@@ -632,20 +702,45 @@ writable: 108085/60421680 files (0.1% non-contiguous), 4457366/249977083 blocks
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Command</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">help</span><span class="p">):</span> <span class="n">w</span>
 <span class="n">The</span> <span class="n">partition</span> <span class="n">table</span> <span class="n">has</span> <span class="n">been</span> <span class="n">altered</span><span class="o">.</span>
 <span class="n">Calling</span> <span class="n">ioctl</span><span class="p">()</span> <span class="n">to</span> <span class="n">re</span><span class="o">-</span><span class="n">read</span> <span class="n">partition</span> <span class="n">table</span><span class="o">.</span>
-<span class="n">Syncing</span> <span class="n">disks</span><span class="o">.</span>
+<span class="n">Re</span><span class="o">-</span><span class="n">reading</span> <span class="n">the</span> <span class="n">partition</span> <span class="n">table</span> <span class="n">failed</span><span class="o">.</span><span class="p">:</span> <span class="n">Device</span> <span class="ow">or</span> <span class="n">resource</span> <span class="n">busy</span>
+
+<span class="n">The</span> <span class="n">kernel</span> <span class="n">still</span> <span class="n">uses</span> <span class="n">the</span> <span class="n">old</span> <span class="n">table</span><span class="o">.</span> <span class="n">The</span> <span class="n">new</span> <span class="n">table</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span> <span class="n">at</span> <span class="n">the</span> <span class="nb">next</span> <span class="n">reboot</span> <span class="ow">or</span> <span class="n">after</span> <span class="n">you</span> <span class="n">run</span> <span class="n">partprobe</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="ow">or</span> <span class="n">kpartx</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span>
 </pre></div>
 </div>
 <ul>
-<li><p>注意，我们前面收缩 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 上的ext4文件系统是30G，比我们分区要小一些，现在我们把这个分区的文件系统扩容成和分区大小一致，所以 <code class="docutils literal notranslate"><span class="pre">resize2fs</span></code> 不需要加容量大小:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resize2fs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+<li><p>按照提示刷新内核中sda分区表信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">partprobe</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</li>
+<li><p>尝试挂载磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>完成后就可以挂载文件系统了。</p>
+<p>很不幸失败了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span><span class="p">:</span> <span class="o">/</span><span class="n">mnt</span><span class="p">:</span> <span class="n">wrong</span> <span class="n">fs</span> <span class="nb">type</span><span class="p">,</span> <span class="n">bad</span> <span class="n">option</span><span class="p">,</span> <span class="n">bad</span> <span class="n">superblock</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span><span class="p">,</span> <span class="n">missing</span> <span class="n">codepage</span> <span class="ow">or</span> <span class="n">helper</span> <span class="n">program</span><span class="p">,</span> <span class="ow">or</span> <span class="n">other</span> <span class="n">error</span><span class="o">.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>fsck:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e2fsck</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示superblock记录和实际设备记录块不一致:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>e2fsck 1.44.1 (24-Mar-2018)
+The filesystem size (according to the superblock) is 249980411 blocks
+The physical size of the device is 8388608 blocks
+Either the superblock or the partition table is likely to be corrupt!
+Abort&lt;y&gt;?
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>这里我实际上犯了一个错误，把 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 作为系统磁盘创建了一次分区，结果破坏了 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 文件系统，操作失败。但是，整个步骤方法应该没有问题，下次设备重建时我再验证一次。</p>
+<p>最终我没有shrink成功，很遗憾，后续再看有没有机会实践了。</p>
 </div>
 </div>
 <div class="section" id="id2">

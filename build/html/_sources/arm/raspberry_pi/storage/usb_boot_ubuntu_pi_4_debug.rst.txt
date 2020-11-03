@@ -395,6 +395,55 @@ rpi-update异常排查
    sudo cp ~/Downloads/boot/*.dat /mnt/boot/firmware
    sudo cp ~/Downloads/boot/*.elf /mnt/boot/firmware
 
+废弃:更新Ubuntu操作系统(chroot方式)
+====================================
+
+.. note::
+
+   这步跳过!!!
+
+.. warning::
+
+   我在使用chroot模式更新操作系统时候遇到一个错误，因为host主机的操作系统是 :ref:`jetson_nano` 的 L4T 定制版本Ubuntu 18.04 LTS，在内核上有差异，更新系统时候有一步需要更新 ``initramfs-tools`` 出现报错::
+
+      ...
+      Processing triggers for systemd (245.4-4ubuntu3.2) ...
+      Running in chroot, ignoring request: daemon-reload
+      Processing triggers for man-db (2.9.1-1) ...
+      Processing triggers for ca-certificates (20201027ubuntu0.20.04.1) ...
+      Updating certificates in /etc/ssl/certs...
+      0 added, 0 removed; done.
+      Running hooks in /etc/ca-certificates/update.d...
+      done.
+      Processing triggers for linux-image-5.4.0-1022-raspi (5.4.0-1022.25) ...
+      /etc/kernel/postinst.d/initramfs-tools:
+      update-initramfs: Generating /boot/initrd.img-5.4.0-1022-raspi
+      W: mkconf: MD subsystem is not loaded, thus I cannot scan for arrays.
+      W: mdadm: failed to auto-generate temporary mdadm.conf file.
+      flash-kernel: deferring update (trigger activated)
+      /etc/kernel/postinst.d/zz-flash-kernel:
+      flash-kernel: deferring update (trigger activated)
+      Processing triggers for initramfs-tools (0.136ubuntu6.3) ...
+      update-initramfs: Generating /boot/initrd.img-5.4.0-1022-raspi
+      W: mkconf: MD subsystem is not loaded, thus I cannot scan for arrays.
+      W: mdadm: failed to auto-generate temporary mdadm.conf file.
+      Unsupported platform.
+      run-parts: /etc/initramfs/post-update.d//flash-kernel exited with return code 1
+      dpkg: error processing package initramfs-tools (--configure):
+       installed initramfs-tools package post-installation script subprocess returned error exit status 1
+      Errors were encountered while processing:
+       initramfs-tools
+      E: Sub-process /usr/bin/dpkg returned an error code (1)
+
+    所以，我后续放弃直接在chroot中更新操作系统，改为在启动Ubuntu之后再做更新。
+
+由于我们已经chroot到移动硬盘的Ubuntu系统中，所以我们可以非常方便更新移动硬盘的操作系统，这也方便后续对内核进行解压缩。
+
+- 升级Ubuntu系统::
+
+   apt update
+   apt upgrade
+
 启动
 ==========
 

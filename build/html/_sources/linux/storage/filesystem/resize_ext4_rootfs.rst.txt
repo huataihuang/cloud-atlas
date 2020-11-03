@@ -231,11 +231,21 @@ RHEL 6等早期使用SysVinit和Debian使用Upstart早期版本，都支持在�
 离线收缩rootfs
 =================
 
+.. warning::
+
+   收缩文件系统风险很大，至少我的实践是失败的(在线扩容则每次都能够成功)。所以我强烈建议你在尝试收缩文件系统之前做好数据备份，随时做好从备份中恢复的准备。
+
+.. note::
+
+   Ext4文件系统只支持离线收缩，不能在线挂载情况下收缩文件系统，所以限制比较多。对于数据量较少的情况，我觉得还是通过备份恢复方式更简便(既然已经离线了，用备份恢复方式和收缩文件系统差别不大了)。
+
 在 :ref:`ubuntu64bit_pi` 会发现首次启动操作系统，就会自动扩展根文件系统占据整个磁盘的剩余空间。对于部署服务器来说，合理的分区方式是根文件系统只占用较少空间，将主要存储空间保留给LVM卷管理，或者 :ref:`btrfs` / :ref:`zfs` 实现动态存储分配管理。
 
 .. note::
 
    在通过resize2fs缩小文件系统时，我特意先选择比目标磁盘空间小1G的大小，这样可以确保fdisk调整文件系统分区时不会出现冲突。等fdisk调整到目标磁盘空间后，再次执行resize2fs，让EXT4文件系统恰好扩展到完整的分区大小。
+
+   我先后做过两次磁盘ext4 resizefs，第一次是直接对 :ref:`ubuntu64bit_pi` 的安装后磁盘分区进行调整，此时文件系统分区表是树莓派默认的dos分区; 第二次是我实现 :ref:`usb_boot_ubuntu_pi_4` 采用最近安装的Ubuntu for Raspberry Pi，此时文件系统分区表是GPT。所以两者在分区的扇区上有细微的差别。 
 
 - 检查当前磁盘分区::
 
@@ -243,17 +253,16 @@ RHEL 6等早期使用SysVinit和Debian使用Upstart早期版本，都支持在�
 
 显示输出当前整个 ``/dev/sda2`` 大约占用了 ``953.6G`` ::
 
-   Disk /dev/sda: 953.86 GiB, 1024175636480 bytes, 2000343040 sectors
-   Disk model: My Passport 25F3
+   Disk /dev/sda: 953.9 GiB, 1024175636480 bytes, 2000343040 sectors
    Units: sectors of 1 * 512 = 512 bytes
    Sector size (logical/physical): 512 bytes / 4096 bytes
    I/O size (minimum/optimal): 4096 bytes / 1048576 bytes
-   Disklabel type: dos
-   Disk identifier: 0xab86aefd
-   
-   Device     Boot  Start        End    Sectors   Size Id Type
-   /dev/sda1  *      2048     526335     524288   256M  c W95 FAT32 (LBA)
-   /dev/sda2       526336 2000343006 1999816671 953.6G 83 Linux
+   Disklabel type: gpt
+   Disk identifier: F727B1EE-B292-40DF-ACB0-AAAD6A763492
+
+   Device      Start        End    Sectors   Size Type
+   /dev/sda1    2048     499711     497664   243M EFI System
+   /dev/sda2  499712 2000343006 1999843295 953.6G Linux filesystem
 
 - 检查当前磁盘空间::
 
@@ -274,12 +283,12 @@ RHEL 6等早期使用SysVinit和Debian使用Upstart早期版本，都支持在�
 
 输出显示文件系统是干净的::
 
-   e2fsck 1.45.5 (07-Jan-2020)
-   writable: clean, 108085/60421680 files, 4457356/249977083 blocks
+   e2fsck 1.44.1 (24-Mar-2018)
+   writable: clean, 142569/62496768 files, 5140329/249980411 blocks
 
 - 使用 ``resize2fs`` 命令收缩文件系统::
 
-   resize2fs /dev/sda2 30G
+   resize2fs /dev/sda2 32G
 
 提示信息::
 
@@ -288,18 +297,17 @@ RHEL 6等早期使用SysVinit和Debian使用Upstart早期版本，都支持在�
 
 - 按照提示再次执行 ``e2fsck -f /dev/sda2`` 显示输出::
 
-   e2fsck 1.45.5 (07-Jan-2020)
+   resize2fs 1.44.1 (24-Mar-2018)
+   Please run 'e2fsck -f /dev/sda2' first.
+
+   root@jetson:/# e2fsck -f /dev/sda2
+   e2fsck 1.44.1 (24-Mar-2018)
    Pass 1: Checking inodes, blocks, and sizes
    Pass 2: Checking directory structure
    Pass 3: Checking directory connectivity
-   Pass 3A: Optimizing directories
-   Inode 2522 extent tree (at level 1) could be shorter.  Optimize<y>? yes
-   Inode 28259 extent tree (at level 1) could be shorter.  Optimize<y>? yes
    Pass 4: Checking reference counts
    Pass 5: Checking group summary information
-   
-   writable: ***** FILE SYSTEM WAS MODIFIED *****
-   writable: 108085/60421680 files (0.1% non-contiguous), 4457366/249977083 blocks
+   writable: 142569/62496768 files (0.2% non-contiguous), 5140329/249980411 blocks
 
 .. note::
 
@@ -307,34 +315,91 @@ RHEL 6等早期使用SysVinit和Debian使用Upstart早期版本，都支持在�
 
 - 再次收缩文件系统::
 
-   resize2fs /dev/sda2 30G
+   resize2fs /dev/sda2 32G
 
 提示信息::
 
-   resize2fs 1.45.5 (07-Jan-2020)
-   Resizing the filesystem on /dev/sda2 to 7864320 (4k) blocks.
-   The filesystem on /dev/sda2 is now 7864320 (4k) blocks long.
+   resize2fs 1.44.1 (24-Mar-2018)
+   Resizing the filesystem on /dev/sda2 to 8388608 (4k) blocks.
+   resize2fs: A block group is missing an inode table while trying to resize /dev/sda2
+   Please run 'e2fsck -fy /dev/sda2' to fix the filesystem
+   after the aborted resize operation.
 
-- 现在我们可以使用 fdisk 命令重建分区 ``/dev/sda2`` ::
+看似有些问题，这次resize2fs有问题，需要fack了::
 
-   # fdisk /dev/sda
-   Welcome to fdisk (util-linux 2.34).
+   e2fsck -fy /dev/sda2
+
+提示信息::
+
+   e2fsck 1.44.1 (24-Mar-2018)
+   ext2fs_check_desc: Corrupt group descriptor: bad block for block bitmap
+   e2fsck: Group descriptors look bad... trying backup blocks...
+   writable: recovering journal
+   e2fsck: unable to set superblock flags on writable
+
+
+   writable: ***** FILE SYSTEM WAS MODIFIED *****
+
+   writable: ********** WARNING: Filesystem still has errors **********
+
+- 我再次尝试 fsck ::
+
+   e2fsck /dev/sda2
+
+提示文件系统是干净的::
+
+   e2fsck 1.44.1 (24-Mar-2018)
+   Setting free inodes count to 62473043 (was 62386733)
+   Setting free blocks count to 245963688 (was 244930381)
+   writable: clean, 23725/62496768 files, 4016723/249980411 blocks
+
+- 但是确实比较奇怪，此时我尝试挂在分区显示文件系统只有236M::
+
+   mount /dev/sda2 /mnt
+   df -h
+
+显示::
+
+   /dev/sda2       939G  236M  900G   1% /mnt
+
+OMG，难道数据丢失了？
+
+不过，进入 ``/mnt`` 目录下使用 ``du -sh`` 看到数据还存在::
+
+   cd /mnt
+   du -sh
+
+输出还是之前的 4.5G ，看似数据没有丢失，只是当前收缩以后 ``df`` 显示不正确。
+
+- 再次卸载文件系统，然后fsck以后，看看是否正确::
+
+   umount /mnt
+   fsck /dev/sda2
+
+显示还是clean::
+
+   fsck from util-linux 2.31.1
+   e2fsck 1.44.1 (24-Mar-2018)
+   writable: clean, 23725/62496768 files, 4016723/249980411 blocks
+
+- 现在尝试使用 fdisk 命令重建分区 ``/dev/sda2`` ::
+
+   Welcome to fdisk (util-linux 2.31.1).
    Changes will remain in memory only, until you decide to write them.
    Be careful before using the write command.
-   
-   
+
+
    Command (m for help): p
-   Disk /dev/sda: 953.86 GiB, 1024175636480 bytes, 2000343040 sectors
-   Disk model: My Passport 25F3
+   Disk /dev/sda: 953.9 GiB, 1024175636480 bytes, 2000343040 sectors
    Units: sectors of 1 * 512 = 512 bytes
    Sector size (logical/physical): 512 bytes / 4096 bytes
    I/O size (minimum/optimal): 4096 bytes / 1048576 bytes
-   Disklabel type: dos
-   Disk identifier: 0xab86aefd
-   
-   Device     Boot  Start        End    Sectors   Size Id Type
-   /dev/sda1  *      2048     526335     524288   256M  c W95 FAT32 (LBA)
-   /dev/sda2       526336 2000343006 1999816671 953.6G 83 Linux
+   Disklabel type: gpt
+   Disk identifier: F727B1EE-B292-40DF-ACB0-AAAD6A763492
+
+   Device      Start        End    Sectors   Size Type
+   /dev/sda1    2048     499711     497664   243M EFI System
+   /dev/sda2  499712 2000343006 1999843295 953.6G Linux filesystem
    
 - 现在先删除 ``/dev/sda2`` 然后再把它加回来，只不过加回来时候分区结束位置提前(缩小)
 
@@ -348,47 +413,66 @@ RHEL 6等早期使用SysVinit和Debian使用Upstart早期版本，都支持在�
 然后再加回来，加回来时候分区只设置32G::
 
    Command (m for help): n
-   Partition type
-      p   primary (1 primary, 0 extended, 3 free)
-      e   extended (container for logical partitions)
-   Select (default p): p
-   Partition number (2-4, default 2):
-   First sector (526336-2000343039, default 526336):
-   Last sector, +/-sectors or +/-size{K,M,G,T,P} (526336-2000343039, default 2000343039): +32G
+   Partition number (2-128, default 2): 
+   First sector (499712-2000343006, default 499712): 
+   Last sector, +sectors or +size{K,M,G,T,P} (499712-2000343006, default 2000343006): +32G
    
-   Created a new partition 2 of type 'Linux' and of size 32 GiB.
+   Created a new partition 2 of type 'Linux filesystem' and of size 32 GiB.
+   Partition #2 contains a ext4 signature.
+   
+   Do you want to remove the signature? [Y]es/[N]o: n
 
 - 再次检查分区信息是否正确::
 
    Command (m for help): p
-   Disk /dev/sda: 953.86 GiB, 1024175636480 bytes, 2000343040 sectors
-   Disk model: My Passport 25F3
+   
+   Disk /dev/sda: 953.9 GiB, 1024175636480 bytes, 2000343040 sectors
    Units: sectors of 1 * 512 = 512 bytes
    Sector size (logical/physical): 512 bytes / 4096 bytes
    I/O size (minimum/optimal): 4096 bytes / 1048576 bytes
-   Disklabel type: dos
-   Disk identifier: 0xab86aefd
+   Disklabel type: gpt
+   Disk identifier: F727B1EE-B292-40DF-ACB0-AAAD6A763492
    
-   Device     Boot  Start      End  Sectors  Size Id Type
-   /dev/sda1  *      2048   526335   524288  256M  c W95 FAT32 (LBA)
-   /dev/sda2       526336 67635199 67108864   32G 83 Linux
+   Device      Start      End  Sectors  Size Type
+   /dev/sda1    2048   499711   497664  243M EFI System
+   /dev/sda2  499712 67608575 67108864   32G Linux filesystem
 
 和之前对比，只是 ``/dev/sda2`` 空间缩小了，其他一致，所以我们保存退出::
 
    Command (m for help): w
    The partition table has been altered.
    Calling ioctl() to re-read partition table.
-   Syncing disks.
+   Re-reading the partition table failed.: Device or resource busy
+   
+   The kernel still uses the old table. The new table will be used at the next reboot or after you run partprobe(8) or kpartx(8).
 
-- 注意，我们前面收缩 ``/dev/sda2`` 上的ext4文件系统是30G，比我们分区要小一些，现在我们把这个分区的文件系统扩容成和分区大小一致，所以 ``resize2fs`` 不需要加容量大小::
+- 按照提示刷新内核中sda分区表信息::
 
-   resize2fs /dev/sda2
+   partprobe /dev/sda
 
-完成后就可以挂载文件系统了。
+- 尝试挂载磁盘::
 
+   mount /dev/sda2 /mnt
+
+很不幸失败了::
+
+   mount: /mnt: wrong fs type, bad option, bad superblock on /dev/sda2, missing codepage or helper program, or other error.
+
+- fsck::
+
+   e2fsck /dev/sda2
+
+提示superblock记录和实际设备记录块不一致::
+
+   e2fsck 1.44.1 (24-Mar-2018)
+   The filesystem size (according to the superblock) is 249980411 blocks
+   The physical size of the device is 8388608 blocks
+   Either the superblock or the partition table is likely to be corrupt!
+   Abort<y>?
+   
 .. note::
 
-   这里我实际上犯了一个错误，把 ``/dev/sda2`` 作为系统磁盘创建了一次分区，结果破坏了 ``/dev/sda2`` 文件系统，操作失败。但是，整个步骤方法应该没有问题，下次设备重建时我再验证一次。
+   最终我没有shrink成功，很遗憾，后续再看有没有机会实践了。
 
 参考
 =====

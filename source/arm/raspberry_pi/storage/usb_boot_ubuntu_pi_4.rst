@@ -47,6 +47,90 @@ Raspbian和firmware
 
 完成上述通过raspbian的TF卡启动树莓派之后，进入Raspberry Pi OS(即Raspbian)，我们可以通过ssh登陆到系统中，就不需要外接显示器，方便操作。
 
+更新树莓派firmware支持USB启动
+================================
+
+现在依然还是Raspberry Pi OS系统，我们需要用官方系统来更新firmware。
+
+- 设置正确的本地时间(将默认伦敦时间修改成上海时间)::
+
+   unlink /etc/localtime
+   ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+- 检查firmware更新配置 ``/etc/default/rpi-eeprom-update`` ，确保采用 ``stable`` 版本，如果是 ``cirtical`` 或者 ``beta`` 版本，都需要修改成 ``stable`` ::
+
+   FIRMWARE_RELEASE_STATUS="stable"
+
+- 进行系统更新::
+
+   sudo apt update
+   sudo apt upgrade
+   sudo rpi-update
+   sudo reboot
+
+- 更新了系统和firmware之后，执行以下命令更新bootloader(具体需要根据实际当时提供的软件版本来定)::
+
+   sudo rpi-eeprom-update -d -f /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2020-09-03.bin
+
+提示信息::
+
+   BCM2711 detected
+   VL805 firmware in bootloader EEPROM
+   *** INSTALLING /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2020-09-03.bin  ***
+   BOOTFS /boot
+   EEPROM update pending. Please reboot to apply the update.
+
+.. note::
+
+   更新firmware和bootloader前后检查bootlader版本::
+
+      vcgencmd bootloader_version
+
+   更新前后输出内容相同，也就是表明更新之前已经是最新版本::
+
+      Sep  3 2020 13:11:43
+      version c305221a6d7e532693cc7ff57fddfc8649def167 (release)
+      timestamp 1599135103
+      update-time 0
+      capabilities 0x00000000
+
+- 检查 bootloader 配置::
+
+   vcgencmd bootloader_config
+
+输出信息显示启动顺序是先TF卡，后USB存储::
+
+   ...
+   BOOT_ORDER=0xf41
+
+修改树莓派启动顺序
+====================
+
+- 将最新都EEPROM镜像复制到临时目录下::
+
+   cd /tmp
+   cp /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2020-09-03.bin ./pieeprom.bin
+
+- 导出配置::
+
+   rpi-eeprom-config pieeprom.bin > bootconf.txt
+
+- 修改 ``bootconf.txt`` 的最后一行::
+
+   BOOT_ORDER=0xf41
+
+将启动顺序改成从外接USB存储启动(如果包含TF卡启动的顺序目前发现会有D进程)::
+
+   BOOT_ORDER=0x4
+
+- 然后将修改的配置加入到EEPROM镜像文件::
+
+   rpi-eeprom-config --out pieeprom-new.bin --config bootconf.txt pieeprom.bin
+
+- 然后刷入修改过bootloader顺序的 EEPROM::
+
+   sudo rpi-eeprom-update -d -f ./pieeprom-new.bin
+
 Ubuntu for Raspberry Pi
 ========================
 
@@ -197,6 +281,7 @@ Ubuntu for Raspberry Pi
 
 或者内核启动参数加上 ``cloud-init=disabled`` 。
 
+
 配置Ubuntu的网络
 =================
 
@@ -206,6 +291,18 @@ Ubuntu for Raspberry Pi
 
    mount /dev/sda2 /mnt
    mount /dev/sda1 /mnt/boot/firmware
+
+- 切换chroot，进入外接SSD移动硬盘中的Ubuntu系统，这样方便后续我们对操作系统进行全面修订::
+
+   for f in dev dev/pts proc sys; do mount --bind /$f /mnt/$f;done
+   chroot /mnt/
+   export PS1="(chroot) $PS1"
+
+.. note::
+
+   请注意：从这里开始，我们已经chroot方式切换到移动硬盘的Ubuntu系统上，所有后面所有操作都是直接作用于移动硬盘文件系统。即操作 ``/etc/netplan/01-netcfg.yaml`` 实际上相当于没有chroot之前的Raspbian系统目录 ``/mnt/etc/netplan/01-netcfg.yaml`` 。
+
+   ``请一定要注意这个差别!!!``
 
 - 在移动硬盘的Ubuntu系统的 ``/etc/netplan`` 目录下添加配置文件
 
@@ -225,91 +322,16 @@ Ubuntu for Raspberry Pi
          nameservers:
            addresses: [202.96.209.133, ]
 
-并删除掉 ``50-cloud-init.yaml`` 配置文件。
+并删除掉 ``50-cloud-init.yaml`` 配置文件，然后执行生效配置::
 
-更新树莓派firmware支持USB启动
-================================
+   netplan apply
 
-现在依然还是Raspberry Pi OS系统，我们需要用官方系统来更新firmware。
+很神奇，netplan工具完全支持chroot，可以跳过不必要步骤，提示如下::
 
-- 设置正确的本地时间(将默认伦敦时间修改成上海时间)::
-
-   unlink /etc/localtime
-   ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-- 检查firmware更新配置 ``/etc/default/rpi-eeprom-update`` ，确保采用 ``stable`` 版本，如果是 ``cirtical`` 或者 ``beta`` 版本，都需要修改成 ``stable`` ::
-
-   FIRMWARE_RELEASE_STATUS="stable"
-
-- 进行系统更新::
-
-   sudo apt update
-   sudo apt upgrade
-   sudo rpi-update
-   sudo reboot
-
-- 更新了系统和firmware之后，执行以下命令更新bootloader(具体需要根据实际当时提供的软件版本来定)::
-
-   sudo rpi-eeprom-update -d -f /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2020-09-03.bin
-
-提示信息::
-
-   BCM2711 detected
-   VL805 firmware in bootloader EEPROM
-   *** INSTALLING /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2020-09-03.bin  ***
-   BOOTFS /boot
-   EEPROM update pending. Please reboot to apply the update.
-
-.. note::
-
-   更新firmware和bootloader前后检查bootlader版本::
-
-      vcgencmd bootloader_version
-
-   更新前后输出内容相同，也就是表明更新之前已经是最新版本::
-
-      Sep  3 2020 13:11:43
-      version c305221a6d7e532693cc7ff57fddfc8649def167 (release)
-      timestamp 1599135103
-      update-time 0
-      capabilities 0x00000000
-
-- 检查 bootloader 配置::
-
-   vcgencmd bootloader_config
-
-输出信息显示启动顺序是先TF卡，后USB存储::
-
-   ...
-   BOOT_ORDER=0xf41
-
-修改树莓派启动顺序
-====================
-
-- 将最新都EEPROM镜像复制到临时目录下::
-
-   cd /tmp
-   cp /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2020-09-03.bin ./pieeprom.bin
-
-- 导出配置::
-
-   rpi-eeprom-config pieeprom.bin > bootconf.txt
-
-- 修改 ``bootconf.txt`` 的最后一行::
-
-   BOOT_ORDER=0xf41
-
-将启动顺序改成从外接USB存储启动(如果包含TF卡启动的顺序目前发现会有D进程)::
-
-   BOOT_ORDER=0x4
-
-- 然后将修改的配置加入到EEPROM镜像文件::
-
-   rpi-eeprom-config --out pieeprom-new.bin --config bootconf.txt pieeprom.bin
-
-- 然后刷入修改过bootloader顺序的 EEPROM::
-
-   sudo rpi-eeprom-update -d -f ./pieeprom-new.bin
+   Running in chroot, ignoring request: is-active
+   Running in chroot, ignoring request: stop
+   Running in chroot, ignoring request.
+   Running in chroot, ignoring request: start
 
 解压缩内核(重要关键)
 ========================
@@ -320,14 +342,9 @@ Ubuntu for Raspberry Pi
 
 当前Ubuntu不支持压缩版本的64位arm内核启动，所以我们需要将 ``vmlinuz`` 解压成 ``vmlinux`` 。
 
-- 将移动硬盘上的Ubuntu挂载到raspbian系统的 ``/mnt`` 目录::
+- 找出移动硬盘中Ubuntu启动镜像中gzip压缩的内容起点::
 
-   mount /dev/sda2 /mnt
-   mount /dev/sda1 /mnt/boot/firmware
-
-- 找出镜像中gzip压缩的内容起点::
-
-   cd /mnt/boot/firmware
+   cd /boot/firmware
    od -A d -t x1 vmlinuz | grep '1f 8b 08 00'
 
 输出显示::
@@ -343,7 +360,7 @@ Ubuntu for Raspberry Pi
 
 - 配置 ``config.txt`` 文件告知树莓派如何启动::
 
-   vi /mnt/boot/firmware/config.txt
+   vi /boot/firmware/config.txt
 
 注释掉所有 ``[pi*]`` 段落，然后添加 ``kernel=vmlinux`` 和 ``initramfs initrd.img followkernel`` 到 ``[all]`` 段落::
 
