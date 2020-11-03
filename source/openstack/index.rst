@@ -19,6 +19,7 @@ OpenStack是开源的AWS系统的clone，目前在小规模云计算场景下应
    devstack.rst
    installation/index
    deployment/index
+   cloud_init/index
 
 .. only::  subproject and html
 

@@ -10,6 +10,7 @@ systemd最早是Red Hat主推开发，目前已经成为各大发行版最主要
    :maxdepth: 1
 
    introduce_systemd.rst
+   systemd_resolved.rst
    systemd_rc_local.rst
    systemd_dissuspend.rst
    networkctl.rst
