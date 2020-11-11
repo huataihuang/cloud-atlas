@@ -78,6 +78,17 @@ Studio环境创建KVM虚拟机
      --graphics vnc \
      --cdrom=/var/lib/libvirt/images/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
 
+这里输出有一个警告提示::
+
+   WARNING  Graphics requested but DISPLAY is not set. Not running virt-viewer.
+   WARNING  No console to launch for the guest, defaulting to --wait -1
+
+   Starting install...
+   Allocating 'sles12-sp3.qcow2'                             |  16 GB  00:00
+
+   Domain is still running. Installation may be in progress.
+   Waiting for the installation to complete.
+
 .. note::
 
    参数 ``--graphics vnc`` 会在服务器本地回环地址 ``127.0.0.1`` 上启动VNC监听，可以通过 ``virsh vncdisplay <vm_name>`` 查看::
@@ -91,6 +102,26 @@ Studio环境创建KVM虚拟机
    则可以使用ssh端口转发登陆服务器::
 
       ssh -L 5900:127.0.0.1:5900 <username>@<server_ip>
+
+   也可以配置 ``~/.ssh/config`` 中添加配置::
+
+      Host server_name
+          HostName server_ip
+          User huatai
+          LocalForward 5900 127.0.0.1:5900
+
+   然后执行::
+
+      ssh -C server_name
+
+   就可以实现同样的ssh端口转发。
+
+.. note::
+
+   KVM提供的VNC访问方式在macOS上需要使用第三方VNC客户端来访问，例如 `TigerVNC <https://tigervnc.org>`_ ，使用macOS内置的vnc无法打开访问。使用VNC客户端访问本地 ``127.0.0.1:5900`` 则可以看到远程虚拟机的终端界面，就可以开始进一步安装:
+
+   .. figure:: ../_static/kvm/tigervnc_install_sles12.png
+      :scale: 75
 
 虚拟机串口设置
 =================

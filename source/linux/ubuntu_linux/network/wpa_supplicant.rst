@@ -80,6 +80,38 @@
 
 如果一切正常，使用 ``ifconfig wlp3s0`` 将看到无线网卡获得IP地址并能够正常上网。
 
+802.1x和EAP
+===============
+
+IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP，所以在配置 `wpa_supplicant-wired.conf` 使用如下配置::
+
+   ctrl_interface=/run/wpa_supplicant
+   ap_scan=0
+   network={
+     key_mgmt=IEEE8021X
+     eap=PEAP
+     identity="user_name"
+     password="user_password"
+     phase2="autheap=MSCHAPV2"
+   }
+
+而无线网络则替换 ``IEEE8021X`` 成 ``WPA-EAP`` 并且移除 ``ap_scan=0`` :
+
+.. literalinclude:: wpa_supplicant-office.conf
+   :language: bash
+   :linenos:
+   :caption:
+
+简单的wpa_supplicant脚本
+========================
+
+- 一个非常简单的wpa_supplicant脚本，结合前面配置文件启动并连接无线:
+
+.. literalinclude:: start_wifi
+   :language: bash
+   :linenos:
+   :caption:
+
 连接隐藏的无线网络
 ==================
 
@@ -192,3 +224,4 @@ avahi-daemon监听在UDP端口5353，所以防火墙需要打开这个端口。�
 =======
 
 - `Using WPA_Supplicant to Connect to WPA2 Wi-fi from Terminal on Ubuntu 16.04 Server <https://www.linuxbabe.com/command-line/ubuntu-server-16-04-wifi-wpa-supplicant>`_
+- `archlinux - wpa_supplicant <https://wiki.archlinux.org/index.php/Wpa_supplicant>`_
