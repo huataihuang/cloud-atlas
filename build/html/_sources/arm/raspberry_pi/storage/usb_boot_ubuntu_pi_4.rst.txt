@@ -333,6 +333,13 @@ Ubuntu for Raspberry Pi
    Running in chroot, ignoring request.
    Running in chroot, ignoring request: start
 
+修订ubuntu帐号密码
+====================
+
+ubuntu帐号初始密码在首次登录时会强制修改，但是由于为了避免连接显示器使用(因为我是将树莓派作为服务器)，所以通过ssh首次登录修订密码会失败。(每次ssh登录都提示修订密码，但是输入新密码后ssh连接立即被断开，导致没有更新 ``/etc/passwd`` 配置文件中帐号密码失效规则，就会每次登录都要求修改密码每次都失败)
+
+解决方法是在 ubuntu 帐号的 ``/home/ubuntu/.ssh`` 目录下增加帐号公钥，这样登录ubuntu系统可以绕开密码认证，通过密钥认证ssh登录服务器后，再修订ubuntu帐号密码，就不会导致ssh断开触发密码修改失败。
+
 解压缩内核(重要关键)
 ========================
 

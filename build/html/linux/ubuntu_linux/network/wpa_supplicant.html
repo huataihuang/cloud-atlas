@@ -320,15 +320,85 @@
 </ul>
 <p>如果一切正常，使用 <code class="docutils literal notranslate"><span class="pre">ifconfig</span> <span class="pre">wlp3s0</span></code> 将看到无线网卡获得IP地址并能够正常上网。</p>
 </div>
+<div class="section" id="xeap">
+<h2>802.1x和EAP<a class="headerlink" href="#xeap" title="永久链接至标题">¶</a></h2>
+<p>IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP，所以在配置 <cite>wpa_supplicant-wired.conf</cite> 使用如下配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ctrl_interface</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">wpa_supplicant</span>
+<span class="n">ap_scan</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">network</span><span class="o">=</span><span class="p">{</span>
+  <span class="n">key_mgmt</span><span class="o">=</span><span class="n">IEEE8021X</span>
+  <span class="n">eap</span><span class="o">=</span><span class="n">PEAP</span>
+  <span class="n">identity</span><span class="o">=</span><span class="s2">&quot;user_name&quot;</span>
+  <span class="n">password</span><span class="o">=</span><span class="s2">&quot;user_password&quot;</span>
+  <span class="n">phase2</span><span class="o">=</span><span class="s2">&quot;autheap=MSCHAPV2&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>而无线网络则替换 <code class="docutils literal notranslate"><span class="pre">IEEE8021X</span></code> 成 <code class="docutils literal notranslate"><span class="pre">WPA-EAP</span></code> 并且移除 <code class="docutils literal notranslate"><span class="pre">ap_scan=0</span></code> :</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">wpa_supplicant-office.conf</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nv">ctrl_interface</span><span class="o">=</span>/var/run/wpa_supplicant
+<span class="nv">ap_scan</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">network</span><span class="o">={</span>
+<span class="c1">#  key_mgmt=IEEE8021X</span>
+<span class="c1">#  eap=TTLS</span>
+<span class="c1">#  ca_cert=&quot;/etc/wpa_supplicant/office_lan_ca.crt&quot;</span>
+  <span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;SSID-OFFICE&quot;</span>
+  <span class="nv">key_mgmt</span><span class="o">=</span>WPA-EAP
+  <span class="nv">eap</span><span class="o">=</span>PEAP
+  <span class="nv">phase1</span><span class="o">=</span><span class="s2">&quot;peaplabel=0&quot;</span>
+  <span class="nv">phase2</span><span class="o">=</span><span class="s2">&quot;auth=MSCHAPV2&quot;</span>
+  <span class="nv">identity</span><span class="o">=</span><span class="s2">&quot;user_name&quot;</span>
+  <span class="nv">password</span><span class="o">=</span><span class="s2">&quot;user_password&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
 <div class="section" id="id5">
-<h2>连接隐藏的无线网络<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<h2>简单的wpa_supplicant脚本<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>一个非常简单的wpa_supplicant脚本，结合前面配置文件启动并连接无线:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">start_wifi</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span>sudo ifconfig wlp3s0 down
+sleep <span class="m">1</span>
+sudo ifconfig wlp3s0 up
+sudo wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant-office.conf -i wlp3s0 <span class="p">&amp;</span>
+sleep <span class="m">5</span>
+sudo dhcpcd wlp3s0
+</pre></div>
+</td></tr></table></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>连接隐藏的无线网络<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>有些无线网络SSID并不广播，所以需要在 <code class="docutils literal notranslate"><span class="pre">/etc/wpa_supplicant.conf</span></code> 配置中添加:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scan_ssid</span><span class="o">=</span><span class="mi">1</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id6">
-<h2>启动时自动运行<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id7">
+<h2>启动时自动运行<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <p>为了能在操作系统启动时自动连接无线网络，我们需要编辑 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant.service</span></code> 配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">service</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">service</span>
 </pre></div>
@@ -427,10 +497,11 @@
 <li><p>macOS不需要安装任何软件，默认已经激活了Bonjour</p></li>
 </ul>
 </div>
-<div class="section" id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.linuxbabe.com/command-line/ubuntu-server-16-04-wifi-wpa-supplicant">Using WPA_Supplicant to Connect to WPA2 Wi-fi from Terminal on Ubuntu 16.04 Server</a></p></li>
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Wpa_supplicant">archlinux - wpa_supplicant</a></p></li>
 </ul>
 </div>
 </div>

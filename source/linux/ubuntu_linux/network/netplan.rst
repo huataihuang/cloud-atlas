@@ -485,6 +485,54 @@ networkctl
 
    .netplan-acl -> /etc/plan/netplan-acl
 
+netplan无线排查
+===================
+
+在树莓派上配置了netplan的无线配置，配置文件 ``/etc/netplan/02-wifi.yaml``::
+
+   network:
+     version: 2
+     renderer: networkd
+     wifis:
+       wlan0:
+         optional: true
+         dhcp4: yes
+         dhcp6: no
+         access-points:
+           "SSID-HOME":
+             password: "home-passwd"
+           "SSID-OFFICE":
+             auth:
+               key-management: eap
+               identity: "office.id"
+               password: "office-passwd"
+
+但是发现无线始终无法连接， ``ip addr`` 显示::
+
+   3: wlan0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel state DOWN group default qlen 1000
+       link/ether xx:xx:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+
+- 使用 ``iwconfig`` 检查::
+
+   wlan0     IEEE 802.11  ESSID:off/any
+             Mode:Managed  Access Point: Not-Associated   Tx-Power=31 dBm
+             Retry short limit:7   RTS thr:off   Fragment thr:off
+             Encryption key:off
+             Power Management:on
+
+- 使用 ``networkctl list`` 检查发现::
+
+   IDX LINK  TYPE     OPERATIONAL SETUP      
+     1 lo    loopback carrier     unmanaged
+     2 eth0  ether    routable    configured
+     3 wlan0 wlan     no-carrier  configuring
+   
+   3 links listed.
+
+为何 ``wlan0`` 始终处于配置状态？
+
+
+
 参考
 =======
 

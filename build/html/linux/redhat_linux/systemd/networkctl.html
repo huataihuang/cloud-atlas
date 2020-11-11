@@ -38,7 +38,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="RedHat Linux 资源管理(cgroup)" href="../cgroup/index.html" />
+    <link rel="next" title="journalctl" href="journalctl.html" />
     <link rel="prev" title="systemd禁止笔记本suspend" href="systemd_dissuspend.html" /> 
 </head>
 
@@ -112,6 +112,7 @@
 <li class="toctree-l4"><a class="reference internal" href="systemd_rc_local.html">Systemd的rc.local配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="systemd_dissuspend.html">systemd禁止笔记本suspend</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">networkctl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="journalctl.html">journalctl</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../cgroup/index.html">RedHat Linux 资源管理(cgroup)</a></li>
@@ -227,6 +228,76 @@
             
   <div class="section" id="networkctl">
 <span id="id1"></span><h1>networkctl<a class="headerlink" href="#networkctl" title="永久链接至标题">¶</a></h1>
+<p>networkctl是一个命令行检查网络设备和连接状态的命令行工具，可以用来查询或者控制Linux网络子系统。这是在systemd中引入的新命令。</p>
+<p>在运行 <code class="docutils literal notranslate"><span class="pre">networkctl</span></code> 之前，需要确保 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 服务已经运行，否则会出现错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="p">:</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">running</span><span class="p">,</span> <span class="n">output</span> <span class="n">will</span> <span class="n">be</span> <span class="n">incomplete</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>如果没有启动systemd-networkd，则通过以下命令启动和激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+<span class="n">sudo</span> <span class="n">systemctlenable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查所有网络链接和设备额状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networkctl</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IDX</span> <span class="n">LINK</span>  <span class="n">TYPE</span>     <span class="n">OPERATIONAL</span> <span class="n">SETUP</span>
+  <span class="mi">1</span> <span class="n">lo</span>    <span class="n">loopback</span> <span class="n">carrier</span>     <span class="n">unmanaged</span>
+  <span class="mi">2</span> <span class="n">eth0</span>  <span class="n">ether</span>    <span class="n">routable</span>    <span class="n">configured</span>
+  <span class="mi">3</span> <span class="n">wlan0</span> <span class="n">wlan</span>     <span class="n">no</span><span class="o">-</span><span class="n">carrier</span>  <span class="n">configuring</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>可以通过 networkctl 的 status 命令来查看指定连接的类型，状态，内核模块，硬件和IP地址，配置DNS等等。如果没有指定特定连接，则默认只显示可路由连接。</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networkctl</span> <span class="n">status</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>●   State: routable
+  Address: 192.168.6.15 on eth0
+           fe80::dea6:32ff:fec5:489c on eth0
+  Gateway: 192.168.6.9 (Wistron Infocomm (Zhongshan) Corporation) on eth0
+      DNS: 30.11.17.1
+           30.17.16.1
+           30.17.16.2
+
+Nov 03 21:47:04 pi-worker1 systemd-networkd[1600]: wlan0: Link DOWN
+Nov 03 21:47:04 pi-worker1 systemd[1]: Started Network Service.
+Nov 03 21:47:04 pi-worker1 systemd-networkd[1600]: wlan0: Link UP
+Nov 03 21:47:04 pi-worker1 systemd[1]: Starting Wait for Network to be Configured...
+Nov 03 21:47:04 pi-worker1 systemd-networkd[1600]: wlan0: IPv6 successfully enabled
+Nov 03 21:47:05 pi-worker1 systemd-networkd[1600]: eth0: IPv6 successfully enabled
+Nov 03 21:47:05 pi-worker1 systemd-networkd[1600]: eth0: Link UP
+Nov 03 21:47:05 pi-worker1 systemd[1]: Finished Wait for Network to be Configured.
+Nov 03 21:47:10 pi-worker1 systemd-networkd[1600]: eth0: Gained carrier
+Nov 03 21:47:11 pi-worker1 systemd-networkd[1600]: eth0: Gained IPv6LL
+</pre></div>
+</div>
+<ul>
+<li><p>检查链路层发现协议(LLDP, Link Diecovery Discovery Protocol)，则使用 lldp 命令””</p>
+<blockquote>
+<div><p>networkctl lldp</p>
+</div></blockquote>
+</li>
+</ul>
+<div class="section" id="systemd-networkddebug">
+<h2>systemd-networkd的debug日志<a class="headerlink" href="#systemd-networkddebug" title="永久链接至标题">¶</a></h2>
+<p>要排查 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 问题，可以配置该服务开启日志debug，编辑 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/systemd-networkd.service.d/override.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">Environment</span><span class="o">=</span><span class="n">SYSTEMD_LOG_LEVEL</span><span class="o">=</span><span class="n">debug</span>
+</pre></div>
+</div>
+<p>然后执行journalctl 的 <code class="docutils literal notranslate"><span class="pre">-u</span></code> 参数指定服务单元，并加上 <code class="docutils literal notranslate"><span class="pre">-f</span></code> 进行tail:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span> <span class="o">-</span><span class="n">f</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
@@ -244,7 +315,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../cgroup/index.html" class="btn btn-neutral float-right" title="RedHat Linux 资源管理(cgroup)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="journalctl.html" class="btn btn-neutral float-right" title="journalctl" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="systemd_dissuspend.html" class="btn btn-neutral float-left" title="systemd禁止笔记本suspend" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

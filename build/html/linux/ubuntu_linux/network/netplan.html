@@ -729,7 +729,56 @@
 </div>
 </div>
 <div class="section" id="id10">
-<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<h2>netplan无线排查<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<p>在树莓派上配置了netplan的无线配置，配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/02-wifi.yaml</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
+  <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">renderer</span><span class="p">:</span> <span class="n">networkd</span>
+  <span class="n">wifis</span><span class="p">:</span>
+    <span class="n">wlan0</span><span class="p">:</span>
+      <span class="n">optional</span><span class="p">:</span> <span class="n">true</span>
+      <span class="n">dhcp4</span><span class="p">:</span> <span class="n">yes</span>
+      <span class="n">dhcp6</span><span class="p">:</span> <span class="n">no</span>
+      <span class="n">access</span><span class="o">-</span><span class="n">points</span><span class="p">:</span>
+        <span class="s2">&quot;SSID-HOME&quot;</span><span class="p">:</span>
+          <span class="n">password</span><span class="p">:</span> <span class="s2">&quot;home-passwd&quot;</span>
+        <span class="s2">&quot;SSID-OFFICE&quot;</span><span class="p">:</span>
+          <span class="n">auth</span><span class="p">:</span>
+            <span class="n">key</span><span class="o">-</span><span class="n">management</span><span class="p">:</span> <span class="n">eap</span>
+            <span class="n">identity</span><span class="p">:</span> <span class="s2">&quot;office.id&quot;</span>
+            <span class="n">password</span><span class="p">:</span> <span class="s2">&quot;office-passwd&quot;</span>
+</pre></div>
+</div>
+<p>但是发现无线始终无法连接， <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="p">:</span> <span class="n">wlan0</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">NO</span><span class="o">-</span><span class="n">CARRIER</span><span class="p">,</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">fq_codel</span> <span class="n">state</span> <span class="n">DOWN</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="n">xx</span><span class="p">:</span><span class="n">xx</span><span class="p">:</span><span class="n">xx</span><span class="p">:</span><span class="n">xx</span><span class="p">:</span><span class="n">xx</span><span class="p">:</span><span class="n">xx</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+</pre></div>
+</div>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">iwconfig</span></code> 检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wlan0</span>     <span class="n">IEEE</span> <span class="mf">802.11</span>  <span class="n">ESSID</span><span class="p">:</span><span class="n">off</span><span class="o">/</span><span class="nb">any</span>
+          <span class="n">Mode</span><span class="p">:</span><span class="n">Managed</span>  <span class="n">Access</span> <span class="n">Point</span><span class="p">:</span> <span class="n">Not</span><span class="o">-</span><span class="n">Associated</span>   <span class="n">Tx</span><span class="o">-</span><span class="n">Power</span><span class="o">=</span><span class="mi">31</span> <span class="n">dBm</span>
+          <span class="n">Retry</span> <span class="n">short</span> <span class="n">limit</span><span class="p">:</span><span class="mi">7</span>   <span class="n">RTS</span> <span class="n">thr</span><span class="p">:</span><span class="n">off</span>   <span class="n">Fragment</span> <span class="n">thr</span><span class="p">:</span><span class="n">off</span>
+          <span class="n">Encryption</span> <span class="n">key</span><span class="p">:</span><span class="n">off</span>
+          <span class="n">Power</span> <span class="n">Management</span><span class="p">:</span><span class="n">on</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">networkctl</span> <span class="pre">list</span></code> 检查发现:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IDX</span> <span class="n">LINK</span>  <span class="n">TYPE</span>     <span class="n">OPERATIONAL</span> <span class="n">SETUP</span>
+  <span class="mi">1</span> <span class="n">lo</span>    <span class="n">loopback</span> <span class="n">carrier</span>     <span class="n">unmanaged</span>
+  <span class="mi">2</span> <span class="n">eth0</span>  <span class="n">ether</span>    <span class="n">routable</span>    <span class="n">configured</span>
+  <span class="mi">3</span> <span class="n">wlan0</span> <span class="n">wlan</span>     <span class="n">no</span><span class="o">-</span><span class="n">carrier</span>  <span class="n">configuring</span>
+
+<span class="mi">3</span> <span class="n">links</span> <span class="n">listed</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>为何 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 始终处于配置状态？</p>
+</div>
+<div class="section" id="id11">
+<h2>参考<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.tecmint.com/configure-network-static-ip-address-in-ubuntu/">How to Configure Network Static IP Address in Ubuntu 18.04</a></p></li>
 <li><p><a class="reference external" href="https://netplan.io/examples">Netplan configuration examples</a></p></li>
