@@ -112,6 +112,15 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
 
    netplan apply
 
+5G Hz无线网络
+==============
+
+在树莓派上运行Ubuntu Server，我曾经遇到一个非常诡异的无线网络问题：
+
+- 最初通过 :ref:`netplan` 配置了 PEAP 认证无线网络连接，发现偶尔有不能连接上无线AP的问题。但是最近一次升级重启以后，再也无法连接。可以确定账号密码正确，因为同样的配置，在ThinkPad上运行的Arch Linux完全工作正常。
+
+- 完全相同的 ``wpa_supplicant-office.conf`` 配置
+
 报错排查
 ===========
 

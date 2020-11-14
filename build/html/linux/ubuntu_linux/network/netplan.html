@@ -728,8 +728,8 @@
 </div>
 </div>
 </div>
-<div class="section" id="id10">
-<h2>netplan无线排查<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<div class="section" id="g-hz">
+<h2>5G Hz无线网络连接<a class="headerlink" href="#g-hz" title="永久链接至标题">¶</a></h2>
 <p>在树莓派上配置了netplan的无线配置，配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/02-wifi.yaml</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
   <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
@@ -774,11 +774,48 @@
 </pre></div>
 </div>
 </li>
-</ul>
-<p>为何 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 始终处于配置状态？</p>
+<li><p>检查无线网络连接服务配置状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">netplan</span><span class="o">-</span><span class="n">wpa</span><span class="o">-</span><span class="n">wlan0</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
 </div>
-<div class="section" id="id11">
-<h2>参考<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
+</li>
+</ul>
+<p>显示连接了一个明显错误的 <code class="docutils literal notranslate"><span class="pre">bssid=00:00:00:00:00:00</span></code> 的无线AP，导致认证错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● netplan-wpa-wlan0.service - WPA supplicant for netplan wlan0
+     Loaded: loaded (/run/systemd/system/netplan-wpa-wlan0.service; enabled-runtime; vendor preset: enabled)
+     Active: active (running) since Thu 2020-11-05 16:17:34 CST; 2min 7s ago
+   Main PID: 1932 (wpa_supplicant)
+      Tasks: 1 (limit: 9257)
+     CGroup: /system.slice/netplan-wpa-wlan0.service
+             └─1932 /sbin/wpa_supplicant -c /run/netplan/wpa-wlan0.conf -iwlan0
+
+Nov 05 16:18:51 pi-worker2 wpa_supplicant[1932]: wlan0: CTRL-EVENT-ASSOC-REJECT bssid=00:00:00:00:00:00 status_code=16
+Nov 05 16:10:27 pi-worker2 wpa_supplicant[1849]: wlan0: Trying to associate with SSID &#39;SSID-OFFICE&#39;
+Nov 05 16:10:30 pi-worker2 wpa_supplicant[1849]: wlan0: CTRL-EVENT-ASSOC-REJECT bssid=00:00:00:00:00:00 status_code=16
+Nov 05 16:10:30 pi-worker2 wpa_supplicant[1849]: wlan0: CTRL-EVENT-SSID-TEMP-DISABLED id=0 ssid=&quot;SSID-OFFICE&quot; auth_failures=1 duration=23 reason=CONN_FAILED
+</pre></div>
+</div>
+<p>经过一周 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/redhat/system_administration/systemd/debug_systemd_networkd.md">排查wpa_supplicant无法连接5GHz无线问题</a> 终于发现对于5G Hz无线网络连接，必须在 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant.conf</span></code> 中指定 <code class="docutils literal notranslate"><span class="pre">Country</span> <span class="pre">Code</span></code> 。</p>
+<p>不过，netplan的配置中当前不支持配置 <code class="docutils literal notranslate"><span class="pre">country=</span></code> ，所以可以采用两种方法：</p>
+<ul>
+<li><p>在执行 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code> 之前，先通过 <code class="docutils literal notranslate"><span class="pre">wireless-tools</span></code> 工具包中的 <code class="docutils literal notranslate"><span class="pre">iw</span></code> 命令设置 <code class="docutils literal notranslate"><span class="pre">regdomain</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iw</span> <span class="n">reg</span> <span class="nb">set</span> <span class="n">CN</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code> 就可以连接5G Hz的无线AP。</p>
+<ul>
+<li><p>为了能够持久化上述 <code class="docutils literal notranslate"><span class="pre">regdomain</span></code> 配置，在Ubuntu中，可以修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/crda</span></code> 配置设置如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REGDOMAIN</span><span class="o">=</span><span class="n">CN</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后重启就能够正常连接5G Hz无线网络。</p>
+</div>
+<div class="section" id="id10">
+<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.tecmint.com/configure-network-static-ip-address-in-ubuntu/">How to Configure Network Static IP Address in Ubuntu 18.04</a></p></li>
 <li><p><a class="reference external" href="https://netplan.io/examples">Netplan configuration examples</a></p></li>

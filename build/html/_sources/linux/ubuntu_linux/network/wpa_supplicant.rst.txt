@@ -119,6 +119,24 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
 
    scan_ssid=1
 
+5G Hz无线网络
+==============
+
+如果使用了5G Hz无线AP，一定要在配置中添加 ``country=CN`` 或者对应国家Code，否则会导致 ``wpa_supplicant`` 运行时错误连接 ``bssid=00:00:00:00:00:00`` 的AP，日志显示类似::
+
+   Nov 05 16:18:51 pi-worker2 wpa_supplicant[1932]: wlan0: CTRL-EVENT-ASSOC-REJECT bssid=00:00:00:00:00:00 status_code=16
+   Nov 05 16:10:27 pi-worker2 wpa_supplicant[1849]: wlan0: Trying to associate with SSID 'SSID-OFFICE'
+   Nov 05 16:10:30 pi-worker2 wpa_supplicant[1849]: wlan0: CTRL-EVENT-ASSOC-REJECT bssid=00:00:00:00:00:00 status_code=16
+   Nov 05 16:10:30 pi-worker2 wpa_supplicant[1849]: wlan0: CTRL-EVENT-SSID-TEMP-DISABLED id=0 ssid="SSID-OFFICE" auth_failures=1 duration=23 reason=CONN_FAILED
+
+这是因为5GHz是一个受控频率，需要根据不同国家进行调整country code，否则无法连接。
+
+.. note::
+
+   我曾经在 :ref:`pi_ubuntu_network` 反复折腾了一周时间 `排查wpa_supplicant无法连接5GHz无线问题 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/redhat/system_administration/systemd/debug_systemd_networkd.md>`_ 。
+
+   如果使用 :ref:`netplan` 配置管理 ``systemd-networkd`` ，则同样设置 ``REGDOMAIN=CN`` 。
+
 启动时自动运行
 ================
 

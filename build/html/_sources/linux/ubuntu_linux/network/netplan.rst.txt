@@ -485,7 +485,7 @@ networkctl
 
    .netplan-acl -> /etc/plan/netplan-acl
 
-netplan无线排查
+5G Hz无线网络连接
 ===================
 
 在树莓派上配置了netplan的无线配置，配置文件 ``/etc/netplan/02-wifi.yaml``::
@@ -529,9 +529,40 @@ netplan无线排查
    
    3 links listed.
 
-为何 ``wlan0`` 始终处于配置状态？
+- 检查无线网络连接服务配置状态::
 
+   systemctl status netplan-wpa-wlan0.service
 
+显示连接了一个明显错误的 ``bssid=00:00:00:00:00:00`` 的无线AP，导致认证错误::
+
+   ● netplan-wpa-wlan0.service - WPA supplicant for netplan wlan0
+        Loaded: loaded (/run/systemd/system/netplan-wpa-wlan0.service; enabled-runtime; vendor preset: enabled)
+        Active: active (running) since Thu 2020-11-05 16:17:34 CST; 2min 7s ago
+      Main PID: 1932 (wpa_supplicant)
+         Tasks: 1 (limit: 9257)
+        CGroup: /system.slice/netplan-wpa-wlan0.service
+                └─1932 /sbin/wpa_supplicant -c /run/netplan/wpa-wlan0.conf -iwlan0
+   
+   Nov 05 16:18:51 pi-worker2 wpa_supplicant[1932]: wlan0: CTRL-EVENT-ASSOC-REJECT bssid=00:00:00:00:00:00 status_code=16
+   Nov 05 16:10:27 pi-worker2 wpa_supplicant[1849]: wlan0: Trying to associate with SSID 'SSID-OFFICE'
+   Nov 05 16:10:30 pi-worker2 wpa_supplicant[1849]: wlan0: CTRL-EVENT-ASSOC-REJECT bssid=00:00:00:00:00:00 status_code=16
+   Nov 05 16:10:30 pi-worker2 wpa_supplicant[1849]: wlan0: CTRL-EVENT-SSID-TEMP-DISABLED id=0 ssid="SSID-OFFICE" auth_failures=1 duration=23 reason=CONN_FAILED   
+
+经过一周 `排查wpa_supplicant无法连接5GHz无线问题 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/redhat/system_administration/systemd/debug_systemd_networkd.md>`_ 终于发现对于5G Hz无线网络连接，必须在 ``wpa_supplicant.conf`` 中指定 ``Country Code`` 。
+
+不过，netplan的配置中当前不支持配置 ``country=`` ，所以可以采用两种方法：
+
+- 在执行 ``wpa_supplicant`` 之前，先通过 ``wireless-tools`` 工具包中的 ``iw`` 命令设置 ``regdomain`` ::
+
+   iw reg set CN
+
+然后 ``wpa_supplicant`` 就可以连接5G Hz的无线AP。
+
+- 为了能够持久化上述 ``regdomain`` 配置，在Ubuntu中，可以修改 ``/etc/default/crda`` 配置设置如下::
+
+   REGDOMAIN=CN
+
+然后重启就能够正常连接5G Hz无线网络。
 
 参考
 =======
