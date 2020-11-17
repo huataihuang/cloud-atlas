@@ -9,6 +9,8 @@ SUSE Linux
 
    introduce_suse_linux.rst
    install_suse.rst
+   suse_static_ip.rst
+   suse_iptables.rst
    zypper.rst
    suse_local_setup.rst
    suse_local_repo.rst

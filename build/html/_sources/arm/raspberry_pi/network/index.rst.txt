@@ -9,6 +9,7 @@
 
    pi_zero_net_gadget.rst
    pi_ubuntu_network.rst
+   pi4_usb3_wifi2.4ghz.rst
    raspbian_static_ip.rst
 
 .. only::  subproject and html

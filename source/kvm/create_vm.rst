@@ -123,6 +123,73 @@ Studio环境创建KVM虚拟机
    .. figure:: ../_static/kvm/tigervnc_install_sles12.png
       :scale: 75
 
+虚拟机bridge网络
+==================
+
+上述创建虚拟机都采用了 ``--network bridge:virbr0`` 参数，这个参数是 :ref:`libvirt_nat_network` ，设置简单，但是不方便对外提供服务，并且性能不如 :ref:`libvirt_bridged_network` 。为了方便模拟生产环境，我在服务器内部管理网段 ``192.168.6.x`` 采用bridge网络，并且采用 :ref:`systemd_networkd` 创建网桥 ``br0`` 。
+
+创建网桥br0
+------------
+
+需要配置3个 ``/etc/systemd/network`` 目录下网桥和bind配置:
+
+- ``mybridge.netdev`` :
+
+.. literalinclude:: ../linux/redhat_linux/systemd/networkd_conf/mybridge.netdev
+       :language: bash
+       :linenos:
+
+- ``bind.network`` :
+
+.. literalinclude:: ../linux/redhat_linux/systemd/networkd_conf/bind.network
+       :language: bash
+       :linenos:
+
+- ``mybridge.network`` :
+
+.. literalinclude:: ../linux/redhat_linux/systemd/networkd_conf/mybridge.network
+       :language: bash
+       :linenos:
+
+- 然后重启一次 ``systemd-netowrkd`` ::
+
+   systemctl restart systemd-networkd.service
+
+- 检查 ``brctl show`` 显示如下::
+
+   bridge name  bridge id       STP enabled interfaces
+   br0      8000.7e33f1ea9ee3   no          enp0s25
+
+修订libvirt配置绑定br0
+-----------------------
+
+- 执行 ``virsh edit sles12-sp3`` 修订虚拟机配置::
+
+    <interface type='bridge'>
+      <mac address='52:54:00:00:91:62'/>
+      <source bridge='virbr0'/>
+      <model type='virtio'/>
+      <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
+    </interface>
+
+修改成::
+
+    <interface type='bridge'>
+      <mac address='52:54:00:00:91:62'/>
+      <source bridge='br0'/>
+      <model type='virtio'/>
+      <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
+    </interface>
+
+也就是只需要修改 ``<source bridge='xxx'>`` 就可以修改绑定的网桥
+
+- 重启虚拟机::
+
+   virsh shutdown sles12-sp3
+   virsh start sles12-sp3
+
+- 通过VNC登陆，修订网络配置
+
 虚拟机串口设置
 =================
 

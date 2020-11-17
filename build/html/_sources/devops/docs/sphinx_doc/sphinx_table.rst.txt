@@ -92,7 +92,33 @@ CSV文件
 ``--numeric-owner``    tar恢复文件的owner帐号数字，不匹配恢复系统的用户名帐号
 =====================  ======================================================
 
+Read the Docs Sphinx theme表格wrap
+=====================================
+
+Read the Docs Sphinx theme 有一个bug会导致表格单元中的文字不能换行，这导致出现带有水平滚动条的非常宽的表格。
+
+可以通过定义CSS override来修复这个问题：
+
+- 在文档源码目录下 ``_static`` 子目录下创建一个 ``theme_overrides.css`` :
+
+.. literalinclude:: ../../../_static/theme_overrides.css
+   :language: css
+   :linenos:
+
+- 修改文档源代码目录下 ``conf.py`` 配置文件添加如下配置选项::
+
+   html_static_path = ['_static']
+   
+   html_context = {
+       'css_files': [
+           '_static/theme_overrides.css',  # override wide tables in RTD theme
+           ],
+        }
+
+- 然后重新build文档，这样看到的文档表格文字就能自动换行。
+
 参考
 ======
 
 - `sublime and sphinx guide - Use Table <https://sublime-and-sphinx-guide.readthedocs.io/en/latest/tables.html>`_
+- `Table width fix for Read the Docs Sphinx theme <https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html>`_ 

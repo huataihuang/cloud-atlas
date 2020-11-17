@@ -32,7 +32,7 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
 - 安装ocserv::
 
-   apt install ovserv
+   apt install ocserv
 
 安装完成后，OpenConnect VPN服务自动启动，可以通过 ``systemctl status ocserv`` 检查。
 
