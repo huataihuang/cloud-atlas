@@ -7,6 +7,7 @@ KVM Atlas
 .. toctree::
    :maxdepth: 1
 
+   startup/index
    hypervisor.rst
    kvm_architecture.rst
    cloud-init.rst
@@ -16,10 +17,6 @@ KVM Atlas
    performance/index
    hardware_virtual.rst
    intel_vmcs.rst
-   create_vm.rst
-   deploy_win_vm.rst
-   backup_vm.rst
-   clone_vm.rst
    kvm_nested_virtual.rst
    add_resize_virtual_disk_to_guest_on_fly.rst
    libvirt_static_ip_in_studio.rst

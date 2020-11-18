@@ -61,7 +61,7 @@ Studio环境创建KVM虚拟机
 
 - 安装过程的 ``installation source`` 设置为 ``http://mirrors.163.com/centos/8.0.1905/BaseOS/x86_64/os/`` (URL type是 ``repository URL`` ) 然后点击 ``Done`` 则自动刷新验证，最后显示的安装源如下：
 
-.. figure:: ../_static/kvm/centos8_installation_source.png
+.. figure:: ../../_static/kvm/startup/centos8_installation_source.png
 
 创建SUSE虚拟机
 ================
@@ -120,7 +120,7 @@ Studio环境创建KVM虚拟机
 
    KVM提供的VNC访问方式在macOS上需要使用第三方VNC客户端来访问，例如 `TigerVNC <https://tigervnc.org>`_ ，使用macOS内置的vnc无法打开访问。使用VNC客户端访问本地 ``127.0.0.1:5900`` 则可以看到远程虚拟机的终端界面，就可以开始进一步安装:
 
-   .. figure:: ../_static/kvm/tigervnc_install_sles12.png
+   .. figure:: ../../_static/kvm/startup/tigervnc_install_sles12.png
       :scale: 75
 
 虚拟机bridge网络
@@ -135,19 +135,19 @@ Studio环境创建KVM虚拟机
 
 - ``mybridge.netdev`` :
 
-.. literalinclude:: ../linux/redhat_linux/systemd/networkd_conf/mybridge.netdev
+.. literalinclude:: ../../linux/redhat_linux/systemd/networkd_conf/mybridge.netdev
        :language: bash
        :linenos:
 
 - ``bind.network`` :
 
-.. literalinclude:: ../linux/redhat_linux/systemd/networkd_conf/bind.network
+.. literalinclude:: ../../linux/redhat_linux/systemd/networkd_conf/bind.network
        :language: bash
        :linenos:
 
 - ``mybridge.network`` :
 
-.. literalinclude:: ../linux/redhat_linux/systemd/networkd_conf/mybridge.network
+.. literalinclude:: ../../linux/redhat_linux/systemd/networkd_conf/mybridge.network
        :language: bash
        :linenos:
 

@@ -51,3 +51,4 @@ SuSE的配置交互方式都可以通过YaST2来完成，防火墙的配置也�
 =====
 
 - `Basic iptables Tutorial <https://www.suse.com/c/basic-iptables-tutorial/>`_
+- `Simple Firewall Configuration Using NetFilter/iptables <https://www.suse.com/c/simple-firewall-configuration-using-netfilteriptables/>`_

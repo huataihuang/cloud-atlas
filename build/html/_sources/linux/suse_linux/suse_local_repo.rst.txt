@@ -68,12 +68,12 @@ SUSE采用的是Red Hat相同的rpm包管理，所以实际上构建软件仓库
 
       zypper addrepo nfs://192.168.1.10:/srv/tftpboot/suse-12.3/x86_64/install
 
-使用本地仓库
-==============
+更新和池仓库
+===============
 
-.. note::
+Update and Pool Repositories是在管理服务器上用于设置和维护所有软件包的仓库，由SUSE Customer Center提供，包含所有更新和补丁。在部署大型应用软件，例如部署SUSE OpenStack，就需要使用最新软件版本的更新和池仓库。
 
-   添加仓库方法待实践，我当前采用每个主机直接
+- :ref:`suse_deploy_smt`
 
 参考
 =====
@@ -81,3 +81,4 @@ SUSE采用的是Red Hat相同的rpm包管理，所以实际上构建软件仓库
 - `Software Repository Setup <https://documentation.suse.com/soc/9/html/suse-openstack-cloud-crowbar-all/cha-depl-repo-conf.html>`_
 - `Creating a Local Repository on SUSE <https://docs.datafabric.hpe.com/61/AdvancedInstallation/CreatingLocalReposSUSE.html>`_
 - `How to configure local customised repository for zypper based installation in SuSE Enterprise Linux <https://www.golinuxhub.com/2018/06/how-to-configure-local-custom-repo-zypper-sles/>`_
+- `4 Installing and Setting Up an SMT Server on the Administration Server (Optional)  <https://documentation.suse.com/soc/9/html/suse-openstack-cloud-crowbar-all/app-deploy-smt.html>`_
