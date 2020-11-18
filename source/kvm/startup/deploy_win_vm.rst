@@ -94,43 +94,43 @@ virt-install会创建一个对应虚拟机的XML配置文件，位于 ``/etc/lib
 
 就可以开始正式安装Windows操作系统了。在安装过程中，最初无法识别的virtio设备，请参考下图添加驱动，注意在提示驱动加载时直接点ok，windows安装程序会自动搜索到可能的驱动，你只需要选择win10驱动就可以了：
 
-.. figure:: ../_static/kvm/win10_install_load_driver.png
+.. figure:: ../../_static/kvm/startup/win10_install_load_driver.png
    :scale: 75%   
 
-.. figure:: ../_static/kvm/win10_install_load_driver_choice.png
+.. figure:: ../../_static/kvm/startup/win10_install_load_driver_choice.png
    :scale: 75%   
 
-.. figure:: ../_static/kvm/win10_install_load_driver_install.png
+.. figure:: ../../_static/kvm/startup/win10_install_load_driver_install.png
    :scale: 75%   
 
-.. figure:: ../_static/kvm/win10_install_load_driver_get_disk.png
+.. figure:: ../../_static/kvm/startup/win10_install_load_driver_get_disk.png
    :scale: 75%   
 
 安装完毕在重启windows操作系统之前，请务必重新 ``virsh edit win10`` 去除优先从cdrom启动设置。
 
 安装完操Windows之后，需要注意这个虚拟机的硬件，包括虚拟网卡，虚拟串口等设备都是virtio类型的，默认的Windows系统都没有驱动，所以还需要在Windows中使用鼠标右击启动按钮，选择 ``Computer Management`` ，然后选择 ``Device Manager`` ，再选择驱动没有正确安装的设备，例如 ``Ethernet Controller`` 。鼠标右击没有正确安装驱动的设备图标，选择 ``Update Driver Softwre`` 
 
-.. figure:: ../_static/kvm/win10_update_driver.png
+.. figure:: ../../_static/kvm/startup/win10_update_driver.png
    :scale: 75%   
 
 然后选择 ``Browser my computer for driver software``
 
-.. figure:: ../_static/kvm/win10_update_driver_locate.png
+.. figure:: ../../_static/kvm/startup/win10_update_driver_locate.png
    :scale: 75%   
 
 点击 ``Browse...`` 浏览选择包含virtio驱动的cdrom，并确认。注意，这里搜索驱动的选项选择了 ``Include subfolers`` 这样才能搜索整个cdrom，找到cdrom子目录中正确的驱动
 
-.. figure:: ../_static/kvm/win10_update_driver_locate_cdrom.png
+.. figure:: ../../_static/kvm/startup/win10_update_driver_locate_cdrom.png
    :scale: 75%   
 
 Windows会搜索到正确的驱动，请点击确认安装，注意选择了 ``Always trust software form "Red Hat, Inc"``
 
-.. figure:: ../_static/kvm/win10_update_driver_install.png
+.. figure:: ../../_static/kvm/startup/win10_update_driver_install.png
    :scale: 75%   
 
 安装成功
 
-.. figure:: ../_static/kvm/win10_update_driver_install_success.png
+.. figure:: ../../_static/kvm/startup/win10_update_driver_install_success.png
    :scale: 75%   
 
 建议启用windows远程桌面，然后安装 xrdp 客户端，方便从Linux上访问Windows桌面。

@@ -17,6 +17,7 @@ SUSE Linux
    suse_update_pool_repo.rst
    suse_iso_repo.rst
    suse_cust_repo.rst
+   suse_deploy_smt.rst
 
 
 .. only::  subproject and html
