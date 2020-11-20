@@ -11,6 +11,7 @@ KVM 快速起步
    deploy_win_vm.rst
    backup_vm.rst
    clone_vm.rst
+   vm_attach_dev.rst
 
 .. only::  subproject and html
 
