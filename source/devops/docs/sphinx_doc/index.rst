@@ -11,6 +11,7 @@ Sphinx文档
 .. toctree::
    :maxdepth: 1
 
+   sphinx_show_code.rst
    sphinx_table.rst
 
 .. only::  subproject and html

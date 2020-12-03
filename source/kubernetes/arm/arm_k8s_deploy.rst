@@ -1,0 +1,462 @@
+.. _arm_k8s_deploy:
+
+========================
+部署ARM架构Kubernetes
+========================
+
+部署环境
+===========
+
+树莓派4操作系统采用Ubuntu 20.04(Focal Fossa)，提供了64位ARM操作系统，可以非常完美运行AArch64容器镜像，这样可以避免很多32位镜像的软件问题。通过树莓派实现微型Kubernetes集群，可以充分演练新的云原生技术。
+
+.. note::
+
+   从技术上来说 ``AArch64`` 和 ``ARM64`` 是同一种架构，是64位系统。ARM和x86的指令集不同，所以不能在x86服务器上运行ARM65镜像，反之也不行。
+
+准备工作
+==========
+
+- 准备3个(或更多) :ref:`raspberry_pi` ，我采用了:
+  - 1台 2G 规格树莓派4：用于管控 ``pi-master1``
+  - 2台 8G 规格树莓派4：用于工作节点 ``pi-worker1`` 和 ``pi-worker2``
+- 此外，我也使用了一台 :ref:`jetson_nano` 设备作为GPU工作节点
+
+在构建Kubernetes集群之前，主要需要解决树莓派访问TF卡性能低下的问题，采用 :ref:`usb_boot_ubuntu_pi_4` 可以极大提高树莓派存储IO性能。
+
+安装和配置Docker
+==================
+
+我使用 :ref:`ubuntu64bit_pi` ，使用的Ubuntu 20.04 提供了非常新的Docker版本，v19.03，可以直接通过 ``apt`` 命令安装::
+
+   sudo apt install -y docker.io
+
+设置systemd管理cgroups
+--------------------------
+
+安装完docker之后，需要做一些配置确保激活 cgroups (Control Groups)。cgroups是内核用用限制和隔离资源，可以让Kubernetes更好地管理容器运行时使用地资源，并且通过隔离容器来增加安全性。
+
+- 执行 ``docker info`` 检查::
+
+   # Check `docker info`
+   # Some output omitted
+   $ sudo docker info
+   (...)
+   Cgroup Driver: cgroups
+   (...)
+   WARNING: No memory limit support
+   WARNING: No swap limit support
+   WARNING: No kernel memory limit support
+   WARNING: No kernel memory TCP limit support
+   WARNING: No oom kill disable support
+
+这里显示 cgroups 驱动需要修改成 :ref:`systemd` 作为 cgroups 管理器，并且确保只使用一个cgroup manager。所以修改或者创建 ``/etc/docker/daemon.json`` 如下::
+
+   $ sudo cat > /etc/docker/daemon.json <<EOF
+   {
+     "exec-opts": ["native.cgroupdriver=systemd"],
+     "log-driver": "json-file",
+     "log-opts": {
+       "max-size": "100m"
+     },
+     "storage-driver": "overlay2"
+   }
+   EOF
+
+激活cgroups limit支持
+-------------------------
+
+上述 ``docker info`` 输出中显示了cgroups limit没有激活，需要修改内核来激活这些选项。对于树莓派4，需要在 ``/boot/firmware/cmdline.txt`` 文件中添加以下配置::
+
+   cgroup_enable=cpuset
+   cgroup_enable=memory
+   cgroup_memory=1
+   swapaccount=1
+
+确保将上述配置添加到 ``cmdline.txt`` 文件到末尾，可以通过以下 ``sed`` 命令完成::
+
+   sudo sed -i '$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1/' /boot/firmware/cmdline.txt
+
+接下来重启一次系统，就会看到 ``docker info`` 输出显示 ``cgroups driver`` 是 ``systemd`` 并且有关 cgroup limits 的警告消失了。
+
+允许iptables查看bridged流量
+-----------------------------
+
+Kubernetes需要使用iptables来配置查看bridged网络流量，可以通过以下命令修改 ``sysctl`` 配置::
+
+   cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+   net.bridge.bridge-nf-call-ip6tables = 1
+   net.bridge.bridge-nf-call-iptables = 1
+   EOF
+
+   sudo sysctl --system
+
+安装Kubernetes软件包
+=======================
+
+- 添加Kubernetes repo::
+
+   curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+   cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+   deb https://apt.kubernetes.io/ kubernetes-xenial main
+   EOF
+
+.. note::
+
+   Ubuntu 20.04的版本代号是Focal，Ubuntu 18.04代号是Xenial。你需要检查kubernetes.io的Apt软件仓库提供的对应Ubuntu LTS仓库版本号。当前，在 https://packages.cloud.google.com/apt/dists 中查询还仅仅有 ``kubernetes-xenial`` 尚未提供 focal 版本，所以上述配置apt源仅配置针对 Ubuntu 18.04 的 ``kubernetes-xenial`` 。后续可以关注该网站提供的软件仓库，在适当时切换到 Focal 版本。
+
+- 安装以下3个必要的Kubernetes软件包::
+
+   sudo apt update && sudo apt install -y kubelet kubeadm kubectl
+
+- 安装完成后使用 ``apt-mark hold`` 命令来锁定上述3个软件版本，因为更新Kubernetes需要很多手工处理和关注，不要使用通用的更新方式更新::
+
+   sudo apt-mark hold kubelet kubeadm kubectl
+
+创建Kubernetes集群
+====================
+
+在创建Kubernetes集群前，需要确定:
+
+- 有一个树莓派节点角色是控制平面节点(Control Plane node)，其余节点则作为计算节点。
+- 需要选择一个网络的CIDR作为Kubernetes集群的pods使用，这里的案例使用 :ref:`flannel` CNI，是一种比较功能简单但是性能较为卓越的容器网络接口(Container Network Interface, CNI)。需要确保Kubernetes使用的CIDR没有被路由器或者DHCP服务器所管理的网段冲突。
+  - 请确保规划足够大大网段，因为会使用大量的pods，往往超出最初的规划 - 使用 10.244.0.0/16
+
+.. note::
+
+   我在模拟环境中使用了树莓派的无线网卡和有线网卡，无线网段可以方便我们调试服务，所以我采用指定BSSID方式确保客户端和服务器端通过同一个无线AP，就不需要使用可路由网段，只需要确保这个Kubernetes的CIDR和路由器DHCP分配的网段不冲突就行。
+
+初始化控制平面
+----------------
+
+Kubernetes使用bootstrap token来认证加入集群的节点，这个token需要在 ``kubeadm init`` 命令中传递来初始化控制平面节点。
+
+- 使用 ``kubeadm token generate`` 命令创建token::
+
+   TOKEN=$(sudo kubeadm token generate)
+   echo $TOKEN
+
+这里 ``$TOKEN`` 输出需要记录下来，后续命令行需要::
+
+   sudo kubeadm init --token=${TOKEN} --kubernetes-version=v1.19.4 --pod-network-cidr=10.244.0.0/16
+
+输出信息:
+
+.. literalinclude:: arm_kubeadm_init.output
+   :linenos:
+
+多网卡困扰
+-----------
+
+在执行 ``kubeadm init`` 初始化Kubernetes集群时，我发现对于具有2块网卡( ``wlan0`` 和 ``eth0`` )的树莓派系统， ``etcd`` 系统默认使用了 ``wlan0`` 地址 ``192.168.166.91`` ::
+
+    [certs] Generating "etcd/server" certificate and key
+    [certs] etcd/server serving cert is signed for DNS names [localhost pi-         master1] and IPs [192.168.166.91 127.0.0.1 ::1]
+    [certs] Generating "etcd/peer" certificate and key
+    [certs] etcd/peer serving cert is signed for DNS names [localhost pi-master1]   and IPs [192.168.166.91 127.0.0.1 ::1]
+
+而 ``apiserver`` 服务则同时提供两个接口的DNS名字证书(其中 10.96.0.1 并非当前服务器网卡IP地址)::
+
+   [certs] apiserver serving cert is signed for DNS names [kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local pi-master1]
+   and IPs [10.96.0.1 192.168.166.91]
+
+.. note::
+
+   需要注意的是无线网卡的IP地址是DHCP分配，这导致服务器重启会出现IP变化问题，需要解决。
+
+由于没有携带参数的 ``kubeadmin init`` 会使用默认路由的网卡IP地址，这导致和我设想的使用有线网卡上的固定IP地址不同，所以我需要重新初始化。注意，再次初始化使用 ``--apiserver-advertise-address string`` 参数来指定公告IP地址。
+
+采用的方法请参考我之前的实践 :ref:`change_master_ip` 重新初始化
+
+.. code-block:: bash
+
+   systemctl stop kubelet docker
+
+   cd /etc/
+
+   # backup old kubernetes data
+   mv kubernetes kubernetes-backup
+   mv /var/lib/kubelet /var/lib/kubelet-backup
+
+   # restore certificates
+   mkdir -p kubernetes
+   cp -r kubernetes-backup/pki kubernetes
+   rm kubernetes/pki/{apiserver.*,etcd/peer.*}
+
+   systemctl start docker
+
+   # reinit master with data in etcd
+   # add --kubernetes-version, --pod-network-cidr and --token options if needed
+   # 原文使用如下命令:
+   # kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd
+   # 但是由于我使用的是Flannel网络，所以一定要加上参数，否则后续安装 flannel addon无法启动pod
+
+   kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address 192.168.6.11
+
+- 初始化以后等待一些实践，删除掉旧的节点
+
+.. code-block:: bash
+
+   sleep 120
+   kubectl get nodes --sort-by=.metadata.creationTimestamp
+
+这里可以看到一个master节点存在问题::
+
+   NAME         STATUS     ROLES    AGE     VERSION
+   pi-master1   NotReady   master   2d10h   v1.19.4
+
+- 删除问题节点
+
+.. code-block:: bash
+
+   kubectl delete node $(kubectl get nodes -o jsonpath='{.items[?(@.status.conditions[0].status=="Unknown")].metadata.name}')
+
+这里提示::
+
+   error: resource(s) were provided, but no name, label selector, or --all flag specified
+
+检查pod
+
+.. code-block:: bash
+
+   # check running pods
+   kubectl get pods --all-namespaces -o wide
+
+输出信息::
+
+   NAMESPACE     NAME                                 READY   STATUS    RESTARTS   AGE     IP             NODE         NOMINATED NODE   READINESS GATES
+   kube-system   coredns-f9fd979d6-gd94x              0/1     Pending   0          2d10h   <none>         <none>       <none>           <none>
+   kube-system   coredns-f9fd979d6-hbqx9              0/1     Pending   0          2d10h   <none>         <none>       <none>           <none>
+   kube-system   etcd-pi-master1                      1/1     Running   0          11h     192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-apiserver-pi-master1            1/1     Running   0          11h     192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-controller-manager-pi-master1   1/1     Running   1          2d10h   192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-proxy-525kd                     1/1     Running   1          2d10h   192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-scheduler-pi-master1            1/1     Running   1          2d10h   192.168.6.11   pi-master1   <none>           <none>
+
+- 不过检查集群apiserver访问正常::
+
+   kubectl cluster-info
+
+显示输出::
+
+   Kubernetes master is running at https://192.168.6.11:6443
+   KubeDNS is running at https://192.168.6.11:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+   
+   To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+排查解决node NotReady
+----------------------
+
+- 检查 ``pending`` 的pod原因
+
+.. code-block:: bash
+
+   kubectl -n kube-system describe pods coredns-f9fd979d6-gd94x
+
+可以看到是由于调度不成功导致
+
+.. code-block:: console
+
+   Events:
+     Type     Reason            Age                    From               Message
+     ----     ------            ----                   ----               -------
+     Warning  FailedScheduling  58s (x215 over 5h21m)  default-scheduler  0/1 nodes are available: 1 node(s) had taint {node.kubernetes.io/not-ready: }, that the pod didn't tolerate.
+
+- 检查节点 NotReady 的原因::
+
+   kubectl describe nodes pi-master1
+
+输出显示::
+
+   Conditions:
+     Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+     ----             ------  -----------------                 ------------------                ------                       -------
+     MemoryPressure   False   Wed, 02 Dec 2020 22:59:43 +0800   Sun, 29 Nov 2020 23:53:52 +0800   KubeletHasSufficientMemory   kubelet has sufficient memory available
+     DiskPressure     False   Wed, 02 Dec 2020 22:59:43 +0800   Sun, 29 Nov 2020 23:53:52 +0800   KubeletHasNoDiskPressure     kubelet has no disk pressure
+     PIDPressure      False   Wed, 02 Dec 2020 22:59:43 +0800   Sun, 29 Nov 2020 23:53:52 +0800   KubeletHasSufficientPID      kubelet has sufficient PID available
+     Ready            False   Wed, 02 Dec 2020 22:59:43 +0800   Sun, 29 Nov 2020 23:53:52 +0800   KubeletNotReady              runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:docker: network plugin is not ready: cni config uninitialized   
+
+可以看到 ``KubeletNotReady`` 的原因是 ``runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:docker: network plugin is not ready: cni config uninitialized`` ，也就是说，我们指定使用 flannel网络的CNI没有就绪，导致docker的runtime network不能工作。
+
+安装CNI插件
+-------------
+
+CNI插件处理pod网络的配置和清理，这里使用最简单的flannel CNI插件，只需要下载和 ``kubeclt apply`` Flannel YAML就可以安装好::
+
+   # Download the Flannel YAML data and apply it
+   # (output omitted)
+   #$ curl -sSL https://raw.githubusercontent.com/coreos/flannel/v0.12.0/Documentation/kube-flannel.yml | kubectl apply -f -
+
+   # 从Kubernetes v1.17+可以使用以下命令
+   kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+- 果然，正确安装了 Flannel 网络插件之后再检查节点状态就恢复 ``Ready`` ::
+
+   kubectl get nodes
+
+已经恢复正常状态::
+
+   NAME         STATUS   ROLES    AGE     VERSION
+   pi-master1   Ready    master   2d23h   v1.19.4
+
+- 同时检查pod状态::
+
+   kubectl get pods --all-namespaces -o wide
+
+可以看到 coredns 也恢复正航运行::
+
+   NAMESPACE     NAME                                 READY   STATUS    RESTARTS   AGE     IP             NODE         NOMINATED NODE   READINESS GATES
+   kube-system   coredns-f9fd979d6-gd94x              1/1     Running   0          2d23h   10.244.0.3     pi-master1   <none>           <none>
+   kube-system   coredns-f9fd979d6-hbqx9              1/1     Running   0          2d23h   10.244.0.2     pi-master1   <none>           <none>
+   kube-system   etcd-pi-master1                      1/1     Running   1          23h     192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-apiserver-pi-master1            1/1     Running   1          23h     192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-controller-manager-pi-master1   1/1     Running   2          2d23h   192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-flannel-ds-arm64-5c2kf          1/1     Running   0          3m21s   192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-proxy-525kd                     1/1     Running   2          2d23h   192.168.6.11   pi-master1   <none>           <none>
+   kube-system   kube-scheduler-pi-master1            1/1     Running   2          2d23h   192.168.6.11   pi-master1   <none>           <none>
+
+将计算节点加入到集群
+=====================
+
+在完成了CNI add-on部署之后，就可以向集群增加计算节点
+
+- 登陆到工作节点，例如 ``pi-worker1`` 上使用命令 ``kubeadm join`` ::
+
+   kubeadm join 192.168.6.11:6443 --token <TOKEN> \
+       --discovery-token-ca-cert-hash sha256:<DISCOVERY-TOKEN>
+
+这里出现了报错::
+
+   [preflight] Running pre-flight checks
+       [WARNING Service-Docker]: docker service is not enabled, please run 'systemctl enable docker.service'
+       [WARNING SystemVerification]: missing optional cgroups: hugetlb
+   
+   error execution phase preflight: couldn't validate the identity of the API Server: could not find a JWS signature in the cluster-info ConfigMap for token ID "8pile8"
+   To see the stack trace of this error execute with --v=5 or higher
+
+这个问题参考 `Kubernetes: unable to join a remote master node <https://stackoverflow.com/questions/61352209/kubernetes-unable-to-join-a-remote-master-node>`_ 原因是token已经过期或者已经移除，所以可以通过以下方法重新创建并提供命令::
+
+   kubeadm token create --print-join-command
+
+输出可以看到::
+
+   W1203 11:50:33.907625  484892 kubelet.go:200] cannot automatically set CgroupDriver when starting the Kubelet: cannot execute 'docker info -f {{.CgroupDriver}}': exit status 2
+   W1203 11:50:33.918553  484892 configset.go:348] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
+   kubeadm join 192.168.6.11:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<DISCOVERY-TOKEN>
+
+.. note::
+
+   默认生成的token都有一个有效期，所以导致上述token过期无法使用的问题。
+
+   可以通过以下命令生成一个无期限的token(但是存在安全风险)::
+
+      kubeadm token create --ttl 0
+
+   查看token的方法如下::
+
+      kubeadm token list
+
+   然后根据token重新生成证书摘要(即hash)::
+
+      openssl x509 -pubkey -in /etc/kubenetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+
+   这样就能拼接出一个添加节点的join命令::
+
+      kubeadm join 192.168.6.11:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<DISCOVERY-TOKEN>
+
+- 根据提示重新在 ``pi-worker1`` 上执行节点添加::
+
+   kubeadm join 192.168.6.11:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<DISCOVERY-TOKEN>
+
+输出信息::
+
+   [preflight] Running pre-flight checks
+           [WARNING SystemVerification]: missing optional cgroups: hugetlb
+   [preflight] Reading configuration from the cluster...
+   [preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+   [kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+   [kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+   [kubelet-start] Starting the kubelet
+   [kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+   
+   This node has joined the cluster:
+   * Certificate signing request was sent to apiserver and a response was received.
+   * The Kubelet was informed of the new secure connection details.
+   
+   Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+
+- 等待一会，在管控节点上检查::
+
+   kubectl get nodes -o wide
+
+输出信息如下::
+
+   NAME         STATUS   ROLES    AGE     VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+   pi-master1   Ready    master   3d12h   v1.19.4   192.168.6.11   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+   pi-worker1   Ready    <none>   2m10s   v1.19.4   192.168.6.15   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+
+jetson节点(GPU)
+----------------
+
+我在 :ref:`arm_k8s` 说明了我部署ARM架构的设备中还有一个 :ref:`jetson_nano` 设备，用来实现验证GPU容器在Kubernetes的部署，并学习 :ref:`machine_learning` 。
+
+jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03版本，满足了运行kubernetes要求，不过，也同样需要做Cgroup Driver调整:
+
+- 通过 ``docker info`` 检查显示
+
+.. literalinclude:: jetson_docker_info.output
+   :linenos:
+
+- 注意，Jetson Nano的Docker激活了 ``nvidia`` runtime，所以默认的 ``daemon.json`` 配置如下
+
+.. literalinclude:: jetson_daemon.json_default
+   :linenos:
+
+修订成:
+
+.. literalinclude:: jetson_daemon.json_systemd
+   :linenos:
+
+然后重启docker服务::
+
+   systemctl resatrt docker
+
+并通过 ``docker info`` 验证确保 ``Cgroup Driver: systemd`` 。
+
+- Jetson的L4T系统内核 ``sysctl`` 配置默认已经启动允许iptables查看bridge流量::
+
+   sysctl -a | grep net.bridge.bridge-nf-call-ip
+
+可以看到::
+
+   net.bridge.bridge-nf-call-ip6tables = 1
+   net.bridge.bridge-nf-call-iptables = 1
+
+- 添加Kubernetes repo::
+
+   curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+   cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+   deb https://apt.kubernetes.io/ kubernetes-xenial main
+   EOF
+
+- Kubernetes软件包::
+
+   sudo apt update && sudo apt install -y kubelet kubeadm kubectl
+
+- 锁定Kubernetes版本::
+
+   sudo apt-mark hold kubelet kubeadm kubectl
+
+- 关闭swap:
+
+验证集群
+===========
+
+现在一个基于
+
+参考
+=====
+
+- `Build a Kubernetes cluster with the Raspberry Pi <https://opensource.com/article/20/6/kubernetes-raspberry-pi>`_ - 完整的部署指南
+- `解决k8s执行kubeadm join遇到could not find a JWS signature的问题 <https://segmentfault.com/a/1190000023107314>`_

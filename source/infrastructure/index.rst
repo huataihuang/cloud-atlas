@@ -13,6 +13,7 @@ Infrastructure Atlas
 
    wikipedia_base.rst
    fedoraproject_base.rst
+   cpu/index
 
 .. only::  subproject and html
 
