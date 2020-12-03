@@ -18,9 +18,7 @@ Infra-Service Atlas
 .. toctree::
    :maxdepth: 1
 
-   compare_dns_software.rst
-   dnsmasq/index
-   bind/index
+   dns/index
 
 .. only::  subproject and html
 

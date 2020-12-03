@@ -4,6 +4,10 @@
 Flink简介
 ============
 
+.. note::
+
+   `Flink中文社区直播教程 <https://github.com/flink-china/flink-training-course>`_ 提供入门和进阶的指南，可以参考学习。
+
 在大规模流数据处理中，需要对不断无限产生对数据实时计算分析。在这个领域， :ref:`spark` , strom 和 Flink 都提供了各自的解决方案。
 
 流数据处理难题
