@@ -243,9 +243,12 @@
 <div class="section" id="id2">
 <h2>准备工作<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
-<li><p>准备3个(或更多) <a class="reference internal" href="../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> ，我采用了:
-- 1台 2G 规格树莓派4：用于管控 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code>
-- 2台 8G 规格树莓派4：用于工作节点 <code class="docutils literal notranslate"><span class="pre">pi-worker1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">pi-worker2</span></code></p></li>
+<li><p>准备3个(或更多) <a class="reference internal" href="../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> ，我采用了:</p>
+<ul>
+<li><p>1台 2G 规格树莓派4：用于管控 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code></p></li>
+<li><p>2台 8G 规格树莓派4：用于工作节点 <code class="docutils literal notranslate"><span class="pre">pi-worker1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">pi-worker2</span></code></p></li>
+</ul>
+</li>
 <li><p>此外，我也使用了一台 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 设备作为GPU工作节点</p></li>
 </ul>
 <p>在构建Kubernetes集群之前，主要需要解决树莓派访问TF卡性能低下的问题，采用 <a class="reference internal" href="../../arm/raspberry_pi/storage/usb_boot_ubuntu_pi_4.html#usb-boot-ubuntu-pi-4"><span class="std std-ref">树莓派4 USB启动Ubuntu Server 20.04</span></a> 可以极大提高树莓派存储IO性能。</p>
@@ -973,18 +976,230 @@ kubectl get pods --all-namespaces -o wide
 </pre></div>
 </div>
 </li>
-<li><p>关闭swap:</p></li>
+<li><p>关闭swap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># 关闭系统默认启动的4个zram swap文件
+for i in {0..3};do swapoff /dev/zram${i};echo $i &gt; /sys/class/zram-control/hot_remove;done
+
+# 禁用启动swap
+systemctl disable nvzramconfig.service
+</pre></div>
+</div>
+</li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Jetson的定制L4T操作系统使用了 <a class="reference internal" href="../../linux/redhat_linux/kernel/zram.html#zram"><span class="std std-ref">zram - 基于内存的压缩块存储设备</span></a> 来构建swap，详细参考 <a class="reference internal" href="../../machine_learning/jetson/studio/jetson_swap.html#jetson-swap"><span class="std std-ref">Jetson Nano的swap</span></a> 。</p>
+</div>
+<ul>
+<li><p>在管控服务器获取当前添加节点命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span> <span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">join</span><span class="o">-</span><span class="n">command</span>
+</pre></div>
+</div>
+</li>
+<li><p>回到Jetson服务器节点执行添加节点命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> \
+    <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">HASH_TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>完成以后执行命令检查节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我们会看到如下输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">m47s</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">5</span><span class="n">d21h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">d9h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">d9h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="id7">
 <h2>验证集群<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
-<p>现在一个基于</p>
+<p>现在一个基于ARM的Kubernetes集群已经部署完成，可以运行pods，创建deployments和jobs。</p>
+<p>为了验证集群的正确运行，可以执行验证步骤：</p>
+<ul class="simple">
+<li><p>创建新的namespace</p></li>
+<li><p>创建deployment</p></li>
+<li><p>创建serice</p></li>
+<li><p>验证运行在deployment中的pods能够正确响应</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里使用的验证镜像是从RED HAT维护的 quay.io 镜像仓库提供的，你也可以使用其他镜像仓库，例如Docker Hub提供的镜像进行验证。</p>
+</div>
+<ul>
+<li><p>创建一个名为 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 的namespace:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">create</span> <span class="n">namespace</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">namespace</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查namespace:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">namespaces</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>              <span class="n">STATUS</span>   <span class="n">AGE</span>
+<span class="n">default</span>           <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">node</span><span class="o">-</span><span class="n">lease</span>   <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">public</span>       <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>       <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>       <span class="n">Active</span>   <span class="mi">36</span><span class="n">s</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>创建一个deployment用于这个新的namespace:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre></div></td><td class="code"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt;EOF | kubectl create -f -</span>
+<span class="s">apiVersion: apps/v1</span>
+<span class="s">kind: Deployment</span>
+<span class="s">metadata:</span>
+<span class="s">  name: kube-verify</span>
+<span class="s">  namespace: kube-verify</span>
+<span class="s">  labels:</span>
+<span class="s">    app: kube-verify</span>
+<span class="s">spec:</span>
+<span class="s">  replicas: 3</span>
+<span class="s">  selector:</span>
+<span class="s">    matchLabels:</span>
+<span class="s">      app: kube-verify</span>
+<span class="s">  template:</span>
+<span class="s">    metadata:</span>
+<span class="s">      labels:</span>
+<span class="s">        app: kube-verify</span>
+<span class="s">    spec:</span>
+<span class="s">      containers:</span>
+<span class="s">      - name: nginx</span>
+<span class="s">        image: quay.io/clcollins/kube-verify:01</span>
+<span class="s">        ports:</span>
+<span class="s">        - containerPort: 8080</span>
+<span class="s">EOF</span>
+</pre></div>
+</td></tr></table></div>
+<p>此时提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">deployment</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">created</span>
+</pre></div>
+</div>
+<p>上述deployment配置了3个副本 <code class="docutils literal notranslate"><span class="pre">replicas:</span> <span class="pre">3</span></code> pods，每个pod都运行了 <code class="docutils literal notranslate"><span class="pre">quay.io/clcollins/kube-verify:01</span></code> 镜像。</p>
+<ul>
+<li><p>检查在 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 中的所有资源:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="nb">all</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                               <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">nvnhl</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m8s</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">s5qb5</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m8s</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">v9zxt</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m8s</span>
+
+<span class="n">NAME</span>                          <span class="n">READY</span>   <span class="n">UP</span><span class="o">-</span><span class="n">TO</span><span class="o">-</span><span class="n">DATE</span>   <span class="n">AVAILABLE</span>   <span class="n">AGE</span>
+<span class="n">deployment</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="mi">3</span><span class="o">/</span><span class="mi">3</span>     <span class="mi">3</span>            <span class="mi">3</span>           <span class="mi">2</span><span class="n">m8s</span>
+
+<span class="n">NAME</span>                                     <span class="n">DESIRED</span>   <span class="n">CURRENT</span>   <span class="n">READY</span>   <span class="n">AGE</span>
+<span class="n">replicaset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span>   <span class="mi">3</span>         <span class="mi">3</span>         <span class="mi">3</span>       <span class="mi">2</span><span class="n">m8s</span>
+</pre></div>
+</div>
+<p>可以看到有一个新的deployment <code class="docutils literal notranslate"><span class="pre">deployment.apps/kube-verify</span></code> ，这个deployment配置 <code class="docutils literal notranslate"><span class="pre">replicas:</span> <span class="pre">3</span></code> 的请求下有3个pods被创建。</p>
+<ul class="simple">
+<li><p>创建服务来输出 Nginx 应用，这个操作是一个单一入口 <code class="docutils literal notranslate"><span class="pre">single</span> <span class="pre">endpoint</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt;EOF | kubectl create -f -</span>
+<span class="s">apiVersion: v1</span>
+<span class="s">kind: Service</span>
+<span class="s">metadata:</span>
+<span class="s">  name: kube-verify</span>
+<span class="s">  namespace: kube-verify</span>
+<span class="s">spec:</span>
+<span class="s">  selector:</span>
+<span class="s">    app: kube-verify</span>
+<span class="s">  ports:</span>
+<span class="s">    - protocol: TCP</span>
+<span class="s">      port: 80</span>
+<span class="s">      targetPort: 8080</span>
+<span class="s">EOF</span>
+</pre></div>
+</td></tr></table></div>
+<p>提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">service</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>现在服务已经创建，我们可以检查新服务的IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">service</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>   <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">ClusterIP</span>   <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">90</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>你可以看到 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 服务被设置到一个 ClusterIP <code class="docutils literal notranslate"><span class="pre">10.107.123.31</span></code> 上，但是这个IP地址是集群内部使用的，所以你可以在集群的任何node节点上访问，但是在集群外部就不能访问。</p>
+<ul>
+<li><p>选择一个集群节点，执行以下命令验证deployment的容器是正常工作的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>你会看到一个完整输出的html文件内容。</p>
+<p>到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。你需要使用 <a class="reference internal" href="../concepts/services_networking/ingress.html#ingress"><span class="std std-ref">Ingress</span></a> 来管理外部访问集群的服务。</p>
 </div>
 <div class="section" id="id8">
 <h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://opensource.com/article/20/6/kubernetes-raspberry-pi">Build a Kubernetes cluster with the Raspberry Pi</a> - 完整的部署指南</p></li>
+<li><p><a class="reference external" href="https://opensource.com/article/20/6/kubernetes-raspberry-pi">Build a Kubernetes cluster with the Raspberry Pi</a> - 完整的部署指南，作者 Chris Collins 撰写了一系列在Raspberry Pi上构建homelab的文章，可以实现基于K8s的NFS服务</p></li>
 <li><p><a class="reference external" href="https://segmentfault.com/a/1190000023107314">解决k8s执行kubeadm join遇到could not find a JWS signature的问题</a></p></li>
 </ul>
 </div>
