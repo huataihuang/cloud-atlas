@@ -90,6 +90,113 @@ zram块设备初始化成基于RAM的压缩swap，只需要使用 ``mkswap`` 初
 检查设备
 =========
 
+``util-linux`` 软件包提供了一个工具 ``zramctl`` 可以用来检查设备的真实压缩率以及其他信息，这些信息也可以通过 ``/sys/block/zram{devicenumber}/`` 目录下的文件提供。
+
+使用zram作为swap的脚本
+=======================
+
+以下是一个简单的脚本用来创建zram swap设备，注意，这个脚本假设你还没有使用zram，并提供了启动的systemd配置:
+
+- ``/usr/local/bin/zramswap-on`` :
+
+.. literalinclude:: zramswap/zramswap-on
+   :language: bash
+   :linenos:
+
+- ``/usr/local/bin/zramswap-off`` :
+
+.. literalinclude:: zramswap/zramswap-off
+   :language: bash
+   :linenos:
+
+- ``/etc/systemd/system/create-zram-swap.service`` :
+
+.. literalinclude:: zramswap/create-zram-swap.service
+   :language: bash
+   :linenos:
+
+- 然后执行服务配置加载和激活::
+
+   systemctl daemon-reload
+   systemctl enable --now create-zram-swap.service
+
+zram压缩算法对比
+===================
+
+- 比较zram压缩算法的简单方法是向zram设备文件系统中复制大文件或者大量文件，观察不同压缩算法的zram设备耗时、压缩后空间
+
+- 也可以通过设置zram设备作为swap，然后编译大型软件(如Chromium)来对比观察，例如在6GB总系统内存虚拟机中设置3GB zram swap，并添加HDD后端的swap来观察编译时间
+
+性能影响
+---------
+
+根据 `LinuxReviews docs: Zram <https://linuxreviews.org/Zram>`_ 的测试，使用缓慢的旧型号Athlon 5350 APU with a slow HDD as a swap device in addition to a zram swap device 测试:
+
+- 使用50%的物理内存配置为zram swap，得到的编译收益最大，不过zstd和lzo-rle两种算法差别不大
+
+但是，使用新型 Ryzen 2600, 6 Cores/Threads (QEMU VM), 8 GiB RAM 设备，则配置2G zram swap得到性能收益(虽然不多)，但配置4G zram swap则性能下降。
+
+.. note::
+
+   使用zram的swap配置和具体硬件相关，可能需要做不断的验证测试才能找到合适比例。
+
+zram工具
+============
+
+``util-linux`` 软件包提供的zramctl提供了设置和配置zram的功能
+
+- 检查设备::
+
+   zramctl
+
+显示输出::
+
+   NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
+   /dev/zram3 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram2 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram1 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram0 lzo         495.5M   4K   76B   12K       4 [SWAP]
+
+- zramctl提供了 ``-f`` 或 ``--find`` 选项可以用来找到第一个没有使用的zram设备，或创建一个新的zram设备。此外提供了 ``-s`` 或 ``--size`` 选项以及 ``-s`` 或 ``--algorithm`` 选项::
+
+   zramctl --find --size 512M --algorithm zstd
+
+zram-generator
+---------------
+
+从Fedora 33+ 开始默认提供了一个 ``zram-generator`` 的工具 ，这个工具是 `systemd/zram-generator <https://github.com/systemd/zram-generator>`_
+
+zram-generator 用于配置最大4GB zram ，或者是系统内存的一半。默认使用 ``lzo-rle`` 压缩算法。可以通过 ``/etc/systemd/zram-generator.conf`` 来覆盖默认的 ``/usr/lib/systemd/zram-generator.conf`` 配置。
+
+- 举例 ``/etc/systemd/zram-generator.conf`` ::
+
+   [zram0]
+   # Use 20% of system memory for zswap. Default: 0.5
+   zram-fraction = 0.2
+   # Limits the maximum size. Set in MiB. 2048 means
+   # it will never be larger than 2 GiB. Default: 4096
+   max-zram-size = 2048
+
+   # Fedora defaults to lzo-rle which is very inefficient
+   # compared to vastly superior zstd compression
+   compression-algorithm = zstd
+
+zram-generator可以通过以下3种方式之一来禁用:
+
+- 屏蔽运行::
+
+   systemctl mask swap-create@.service
+
+是的，确实是 ``swap-create@.service`` 而不是 ``zram-generator``
+
+- 创建一个空的配置::
+
+   echo > /etc/systemd/zram-generator.conf
+
+- 卸载 ``zram-generator`` 和 ``zram-generator-defaults`` 软件包::
+
+   dnf -y remove zram-generator zram-generator-defaults
+   
 参考
 ======
 
