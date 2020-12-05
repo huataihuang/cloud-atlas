@@ -17,8 +17,10 @@
 ==========
 
 - 准备3个(或更多) :ref:`raspberry_pi` ，我采用了:
+
   - 1台 2G 规格树莓派4：用于管控 ``pi-master1``
   - 2台 8G 规格树莓派4：用于工作节点 ``pi-worker1`` 和 ``pi-worker2``
+
 - 此外，我也使用了一台 :ref:`jetson_nano` 设备作为GPU工作节点
 
 在构建Kubernetes集群之前，主要需要解决树莓派访问TF卡性能低下的问题，采用 :ref:`usb_boot_ubuntu_pi_4` 可以极大提高树莓派存储IO性能。
@@ -448,15 +450,138 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 
    sudo apt-mark hold kubelet kubeadm kubectl
 
-- 关闭swap:
+- 关闭swap::
+
+   # 关闭系统默认启动的4个zram swap文件
+   for i in {0..3};do swapoff /dev/zram${i};echo $i > /sys/class/zram-control/hot_remove;done
+
+   # 禁用启动swap
+   systemctl disable nvzramconfig.service
+
+.. note::
+
+   Jetson的定制L4T操作系统使用了 :ref:`zram` 来构建swap，详细参考 :ref:`jetson_swap` 。
+
+- 在管控服务器获取当前添加节点命令::
+
+   kubeadm token create --print-join-command
+
+- 回到Jetson服务器节点执行添加节点命令::
+
+   kubeadm join 192.168.6.11:6443 --token <TOKEN> \
+       --discovery-token-ca-cert-hash sha256:<HASH_TOKEN>
+
+- 完成以后执行命令检查节点::
+
+   kubectl get nodes
+
+我们会看到如下输出::
+
+   NAME         STATUS   ROLES    AGE     VERSION
+   jetson       Ready    <none>   2m47s   v1.19.4
+   pi-master1   Ready    master   5d21h   v1.19.4
+   pi-worker1   Ready    <none>   2d9h    v1.19.4
+   pi-worker2   Ready    <none>   2d9h    v1.19.4
 
 验证集群
 ===========
 
-现在一个基于
+现在一个基于ARM的Kubernetes集群已经部署完成，可以运行pods，创建deployments和jobs。
+
+为了验证集群的正确运行，可以执行验证步骤：
+
+- 创建新的namespace
+- 创建deployment
+- 创建serice
+- 验证运行在deployment中的pods能够正确响应
+
+.. note::
+
+   这里使用的验证镜像是从RED HAT维护的 quay.io 镜像仓库提供的，你也可以使用其他镜像仓库，例如Docker Hub提供的镜像进行验证。
+
+- 创建一个名为 ``kube-verify`` 的namespace::
+
+   kubectl create namespace kube-verify
+
+提示信息::
+
+   namespace/kube-verify created
+
+- 检查namespace::
+
+   kubectl get namespaces
+
+显示输出::
+
+   NAME              STATUS   AGE
+   default           Active   5d21h
+   kube-node-lease   Active   5d21h
+   kube-public       Active   5d21h
+   kube-system       Active   5d21h
+   kube-verify       Active   36s
+
+- 创建一个deployment用于这个新的namespace:
+
+.. literalinclude:: arm_k8s_deploy/create_deployment.sh
+   :language: bash
+   :linenos:
+
+此时提示信息::
+
+   deployment.apps/kube-verify created
+
+上述deployment配置了3个副本 ``replicas: 3`` pods，每个pod都运行了 ``quay.io/clcollins/kube-verify:01`` 镜像。
+
+- 检查在 ``kube-verify`` 中的所有资源::
+
+   kubectl get all -n kube-verify
+
+输出显示::
+
+   NAME                               READY   STATUS    RESTARTS   AGE
+   pod/kube-verify-69dd569645-nvnhl   1/1     Running   0          2m8s
+   pod/kube-verify-69dd569645-s5qb5   1/1     Running   0          2m8s
+   pod/kube-verify-69dd569645-v9zxt   1/1     Running   0          2m8s
+
+   NAME                          READY   UP-TO-DATE   AVAILABLE   AGE
+   deployment.apps/kube-verify   3/3     3            3           2m8s
+
+   NAME                                     DESIRED   CURRENT   READY   AGE
+   replicaset.apps/kube-verify-69dd569645   3         3         3       2m8s
+
+可以看到有一个新的deployment ``deployment.apps/kube-verify`` ，这个deployment配置 ``replicas: 3`` 的请求下有3个pods被创建。
+
+- 创建服务来输出 Nginx 应用，这个操作是一个单一入口 ``single endpoint`` :
+
+.. literalinclude:: arm_k8s_deploy/create_service.sh
+   :language: bash
+   :linenos:
+
+提示::
+
+   service/kube-verify created
+
+- 现在服务已经创建，我们可以检查新服务的IP地址::
+
+   kubectl get -n kube-verify service/kube-verify
+
+显示输出::
+
+   NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+   kube-verify   ClusterIP   10.107.123.31   <none>        80/TCP    90s
+
+你可以看到 ``kube-verify`` 服务被设置到一个 ClusterIP ``10.107.123.31`` 上，但是这个IP地址是集群内部使用的，所以你可以在集群的任何node节点上访问，但是在集群外部就不能访问。
+
+- 选择一个集群节点，执行以下命令验证deployment的容器是正常工作的::
+
+   curl 10.107.123.31
+
+你会看到一个完整输出的html文件内容。
+
+到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。你需要使用 :ref:`ingress` 来管理外部访问集群的服务。
 
 参考
 =====
 
-- `Build a Kubernetes cluster with the Raspberry Pi <https://opensource.com/article/20/6/kubernetes-raspberry-pi>`_ - 完整的部署指南
+- `Build a Kubernetes cluster with the Raspberry Pi <https://opensource.com/article/20/6/kubernetes-raspberry-pi>`_ - 完整的部署指南，作者 Chris Collins 撰写了一系列在Raspberry Pi上构建homelab的文章，可以实现基于K8s的NFS服务
 - `解决k8s执行kubeadm join遇到could not find a JWS signature的问题 <https://segmentfault.com/a/1190000023107314>`_
