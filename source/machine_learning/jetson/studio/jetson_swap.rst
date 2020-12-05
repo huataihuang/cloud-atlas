@@ -22,32 +22,62 @@ Jetson Nano使用的L4T定制版Ubuntu操作系统，默认启用了2G大小的s
 
    JetsonHacksNano网站提供了一个 `installSwapfile脚本 <https://github.com/JetsonHacksNano/installSwapfile>`_ 帮助解决这个问题。
 
-- 检查zram磁盘可以通过 ``fdisk -l`` 查看到::
+zram在Fedora 33+之后引入，请参考 :ref:`zram` 配置。
 
-   Disk /dev/zram0: 495.5 MiB, 519585792 bytes, 126852 sectors
-   Units: sectors of 1 * 4096 = 4096 bytes
-   Sector size (logical/physical): 4096 bytes / 4096 bytes
-   I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+在Jetson上，可以看到配置了一个 ``/etc/systemd/system/nvzramconfig.service`` 服务，使用了 ``/etc/systemd/nvzramconfig.sh`` 脚本在启动时设置的zram swap。
+
+- 检查zram swap::
+
+   zramctl
+
+可以看到输出显示有4个设备::
+
+   NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
+   /dev/zram3 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram2 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram1 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram0 lzo         495.5M   4K   76B   12K       4 [SWAP]
+
+关闭 zram swap ::
+
+   swapoff /dev/zram3
+
+然后检查 ``zramctl`` 可以看到已经卸载了 ``/dev/zram3`` ::
+
+   NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
+   /dev/zram3 lzo         495.5M   4K   76B   12K       4
+   /dev/zram2 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram1 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram0 lzo         495.5M   4K   76B   12K       4 [SWAP]
+
+然后我们热移除上述zram3::
+
+   echo 3 > /sys/class/zram-control/hot_remove
+
+再次检查 ``zramctl`` 输出可以看到 ``zram3`` 已经消失::
+
+   NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
+   /dev/zram2 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram1 lzo         495.5M   4K   76B   12K       4 [SWAP]
+   /dev/zram0 lzo         495.5M   4K   76B   12K       4 [SWAP]
+
+重复以上命令卸载掉所有zram swap::
+
+   swapoff /dev/zram2
+   echo 2 > /sys/class/zram-control/hot_remove
+   swapoff /dev/zram1
+   echo 1 > /sys/class/zram-control/hot_remove
+   swapoff /dev/zram0
+   echo 0 > /sys/class/zram-control/hot_remove
 
 
-   Disk /dev/zram1: 495.5 MiB, 519585792 bytes, 126852 sectors
-   Units: sectors of 1 * 4096 = 4096 bytes
-   Sector size (logical/physical): 4096 bytes / 4096 bytes
-   I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+最后检查 ``zramctl`` 输出就是空白的。
 
+使用 ``top`` 命令检查也就看不到swap
 
-   Disk /dev/zram2: 495.5 MiB, 519585792 bytes, 126852 sectors
-   Units: sectors of 1 * 4096 = 4096 bytes
-   Sector size (logical/physical): 4096 bytes / 4096 bytes
-   I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+- 最后不要忘记关闭掉systemd启动的服务::
 
-
-   Disk /dev/zram3: 495.5 MiB, 519585792 bytes, 126852 sectors
-   Units: sectors of 1 * 4096 = 4096 bytes
-   Sector size (logical/physical): 4096 bytes / 4096 bytes
-   I/O size (minimum/optimal): 4096 bytes / 4096 bytes
-
-
+   systemctl disable nvzramconfig.service
 
 参考
 ======

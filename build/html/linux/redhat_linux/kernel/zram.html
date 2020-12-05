@@ -312,9 +312,191 @@
 </div>
 <div class="section" id="id5">
 <h2>检查设备<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">util-linux</span></code> 软件包提供了一个工具 <code class="docutils literal notranslate"><span class="pre">zramctl</span></code> 可以用来检查设备的真实压缩率以及其他信息，这些信息也可以通过 <code class="docutils literal notranslate"><span class="pre">/sys/block/zram{devicenumber}/</span></code> 目录下的文件提供。</p>
+</div>
+<div class="section" id="zramswap">
+<h2>使用zram作为swap的脚本<a class="headerlink" href="#zramswap" title="永久链接至标题">¶</a></h2>
+<p>以下是一个简单的脚本用来创建zram swap设备，注意，这个脚本假设你还没有使用zram，并提供了启动的systemd配置:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/local/bin/zramswap-on</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1"># Disable zswap</span>
+<span class="nb">echo</span> <span class="m">0</span> &gt; /sys/module/zswap/parameters/enabled
+
+<span class="c1"># Load zram module</span>
+modprobe zram
+
+<span class="c1"># use zstd compression</span>
+<span class="nb">echo</span> zstd &gt; /sys/block/zram0/comp_algorithm
+
+<span class="c1"># echo 512M &gt; /sys/block/zram0/disksize</span>
+<span class="nb">echo</span> 2G &gt; /sys/block/zram0/disksize
+
+mkswap /dev/zram0
+
+<span class="c1"># Priority can have values between -1 and 32767</span>
+swapon /dev/zram0 -p <span class="m">32767</span>
+</pre></div>
+</td></tr></table></div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/local/bin/zramswap-off</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+swapoff /dev/zram0
+<span class="nb">echo</span> <span class="m">0</span> &gt; /sys/class/zram-control/hot_remove
+<span class="c1"># Not required, but creating a blank uninitalzed drive</span>
+<span class="c1"># after removing one may be desired</span>
+cat /sys/class/zram-control/hot_add
+</pre></div>
+</td></tr></table></div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/create-zram-swap.service</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>Unit<span class="o">]</span>
+<span class="nv">Description</span><span class="o">=</span>Configures zram swap device
+<span class="nv">After</span><span class="o">=</span>local-fs.target
+
+<span class="o">[</span>Service<span class="o">]</span>
+<span class="nv">Type</span><span class="o">=</span>oneshot
+<span class="nv">ExecStart</span><span class="o">=</span>/usr/local/bin/zramswap-on
+<span class="nv">ExecStop</span><span class="o">=</span>/usr/local/bin/zramswap-off
+<span class="nv">RemainAfterExit</span><span class="o">=</span>yes
+
+<span class="o">[</span>Install<span class="o">]</span>
+<span class="nv">WantedBy</span> <span class="o">=</span> multi-user.target
+</pre></div>
+</td></tr></table></div>
+<ul>
+<li><p>然后执行服务配置加载和激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">create</span><span class="o">-</span><span class="n">zram</span><span class="o">-</span><span class="n">swap</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </div>
 <div class="section" id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<h2>zram压缩算法对比<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>比较zram压缩算法的简单方法是向zram设备文件系统中复制大文件或者大量文件，观察不同压缩算法的zram设备耗时、压缩后空间</p></li>
+<li><p>也可以通过设置zram设备作为swap，然后编译大型软件(如Chromium)来对比观察，例如在6GB总系统内存虚拟机中设置3GB zram swap，并添加HDD后端的swap来观察编译时间</p></li>
+</ul>
+<div class="section" id="id7">
+<h3>性能影响<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<p>根据 <a class="reference external" href="https://linuxreviews.org/Zram">LinuxReviews docs: Zram</a> 的测试，使用缓慢的旧型号Athlon 5350 APU with a slow HDD as a swap device in addition to a zram swap device 测试:</p>
+<ul class="simple">
+<li><p>使用50%的物理内存配置为zram swap，得到的编译收益最大，不过zstd和lzo-rle两种算法差别不大</p></li>
+</ul>
+<p>但是，使用新型 Ryzen 2600, 6 Cores/Threads (QEMU VM), 8 GiB RAM 设备，则配置2G zram swap得到性能收益(虽然不多)，但配置4G zram swap则性能下降。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>使用zram的swap配置和具体硬件相关，可能需要做不断的验证测试才能找到合适比例。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>zram工具<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">util-linux</span></code> 软件包提供的zramctl提供了设置和配置zram的功能</p>
+<ul>
+<li><p>检查设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zramctl</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>       <span class="n">ALGORITHM</span> <span class="n">DISKSIZE</span> <span class="n">DATA</span> <span class="n">COMPR</span> <span class="n">TOTAL</span> <span class="n">STREAMS</span> <span class="n">MOUNTPOINT</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">zram3</span> <span class="n">lzo</span>         <span class="mf">495.5</span><span class="n">M</span>   <span class="mi">4</span><span class="n">K</span>   <span class="mi">76</span><span class="n">B</span>   <span class="mi">12</span><span class="n">K</span>       <span class="mi">4</span> <span class="p">[</span><span class="n">SWAP</span><span class="p">]</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">zram2</span> <span class="n">lzo</span>         <span class="mf">495.5</span><span class="n">M</span>   <span class="mi">4</span><span class="n">K</span>   <span class="mi">76</span><span class="n">B</span>   <span class="mi">12</span><span class="n">K</span>       <span class="mi">4</span> <span class="p">[</span><span class="n">SWAP</span><span class="p">]</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">zram1</span> <span class="n">lzo</span>         <span class="mf">495.5</span><span class="n">M</span>   <span class="mi">4</span><span class="n">K</span>   <span class="mi">76</span><span class="n">B</span>   <span class="mi">12</span><span class="n">K</span>       <span class="mi">4</span> <span class="p">[</span><span class="n">SWAP</span><span class="p">]</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">zram0</span> <span class="n">lzo</span>         <span class="mf">495.5</span><span class="n">M</span>   <span class="mi">4</span><span class="n">K</span>   <span class="mi">76</span><span class="n">B</span>   <span class="mi">12</span><span class="n">K</span>       <span class="mi">4</span> <span class="p">[</span><span class="n">SWAP</span><span class="p">]</span>
+</pre></div>
+</div>
+<ul>
+<li><p>zramctl提供了 <code class="docutils literal notranslate"><span class="pre">-f</span></code> 或 <code class="docutils literal notranslate"><span class="pre">--find</span></code> 选项可以用来找到第一个没有使用的zram设备，或创建一个新的zram设备。此外提供了 <code class="docutils literal notranslate"><span class="pre">-s</span></code> 或 <code class="docutils literal notranslate"><span class="pre">--size</span></code> 选项以及 <code class="docutils literal notranslate"><span class="pre">-s</span></code> 或 <code class="docutils literal notranslate"><span class="pre">--algorithm</span></code> 选项:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zramctl</span> <span class="o">--</span><span class="n">find</span> <span class="o">--</span><span class="n">size</span> <span class="mi">512</span><span class="n">M</span> <span class="o">--</span><span class="n">algorithm</span> <span class="n">zstd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="section" id="zram-generator">
+<h3>zram-generator<a class="headerlink" href="#zram-generator" title="永久链接至标题">¶</a></h3>
+<p>从Fedora 33+ 开始默认提供了一个 <code class="docutils literal notranslate"><span class="pre">zram-generator</span></code> 的工具 ，这个工具是 <a class="reference external" href="https://github.com/systemd/zram-generator">systemd/zram-generator</a></p>
+<p>zram-generator 用于配置最大4GB zram ，或者是系统内存的一半。默认使用 <code class="docutils literal notranslate"><span class="pre">lzo-rle</span></code> 压缩算法。可以通过 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/zram-generator.conf</span></code> 来覆盖默认的 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/zram-generator.conf</span></code> 配置。</p>
+<ul>
+<li><p>举例 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/zram-generator.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">zram0</span><span class="p">]</span>
+<span class="c1"># Use 20% of system memory for zswap. Default: 0.5</span>
+<span class="n">zram</span><span class="o">-</span><span class="n">fraction</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="c1"># Limits the maximum size. Set in MiB. 2048 means</span>
+<span class="c1"># it will never be larger than 2 GiB. Default: 4096</span>
+<span class="nb">max</span><span class="o">-</span><span class="n">zram</span><span class="o">-</span><span class="n">size</span> <span class="o">=</span> <span class="mi">2048</span>
+
+<span class="c1"># Fedora defaults to lzo-rle which is very inefficient</span>
+<span class="c1"># compared to vastly superior zstd compression</span>
+<span class="n">compression</span><span class="o">-</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">zstd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>zram-generator可以通过以下3种方式之一来禁用:</p>
+<ul>
+<li><p>屏蔽运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">mask</span> <span class="n">swap</span><span class="o">-</span><span class="n">create</span><span class="o">@.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>是的，确实是 <code class="docutils literal notranslate"><span class="pre">swap-create&#64;.service</span></code> 而不是 <code class="docutils literal notranslate"><span class="pre">zram-generator</span></code></p>
+<ul>
+<li><p>创建一个空的配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">zram</span><span class="o">-</span><span class="n">generator</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+</li>
+<li><p>卸载 <code class="docutils literal notranslate"><span class="pre">zram-generator</span></code> 和 <code class="docutils literal notranslate"><span class="pre">zram-generator-defaults</span></code> 软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">remove</span> <span class="n">zram</span><span class="o">-</span><span class="n">generator</span> <span class="n">zram</span><span class="o">-</span><span class="n">generator</span><span class="o">-</span><span class="n">defaults</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://linuxreviews.org/Zram">LinuxReviews docs: Zram</a></p></li>
 </ul>
