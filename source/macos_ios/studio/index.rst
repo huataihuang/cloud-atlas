@@ -10,6 +10,7 @@ macOS Studio
    :maxdepth: 1
 
    introduce_macos_studio.rst
+   macos_install_drive.rst
    macos_studio_startup.rst
    homebrew.rst
    multi_jdk_on_macos.rst

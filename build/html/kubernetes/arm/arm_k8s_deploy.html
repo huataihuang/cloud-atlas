@@ -130,7 +130,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#id3">创建Kubernetes集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id6">将计算节点加入到集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id7">验证集群</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">访问服务</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -1016,6 +1017,11 @@ systemctl disable nvzramconfig.service
 <span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">d9h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意如果worker主机有多个网卡接口，kubelet执行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">join</span></code> 命令时候有可能注册采用了默认有路由的网卡接口，也可能使用和apiserver指定IP所在相同网段的IP。这点让我很疑惑，例如上述注册worker节点，3个树莓派注册的 <code class="docutils literal notranslate"><span class="pre">INTERNAL-IP</span></code> 是正确的内网IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> ，但是 <code class="docutils literal notranslate"><span class="pre">jetson</span></code> 就注册成了外网无线网卡上的IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.0.x</span></code> 。</p>
+<p>这个问题修订，请参考 <a class="reference internal" href="../administer/set_k8s_worker_internal_ip.html#set-k8s-worker-internal-ip"><span class="std std-ref">指定Kubernetes工作节点内网IP</span></a> 明确配置worker的 <code class="docutils literal notranslate"><span class="pre">INTERNAL-IP</span></code> 避免出现混乱。</p>
+</div>
 </div>
 </div>
 <div class="section" id="id7">
@@ -1194,10 +1200,97 @@ systemctl disable nvzramconfig.service
 </li>
 </ul>
 <p>你会看到一个完整输出的html文件内容。</p>
-<p>到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。你需要使用 <a class="reference internal" href="../concepts/services_networking/ingress.html#ingress"><span class="std std-ref">Ingress</span></a> 来管理外部访问集群的服务。</p>
 </div>
 <div class="section" id="id8">
-<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<h2>访问服务<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<p>到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。</p>
+<p>你可以有多种方法：</p>
+<ul class="simple">
+<li><p>输出部署( <code class="docutils literal notranslate"><span class="pre">expose</span> <span class="pre">deployments</span></code> )通过简单的负载均衡方式(指定 <code class="docutils literal notranslate"><span class="pre">external-ip</span></code>)将服务映射输出到集群外部</p></li>
+<li><p>部署 <a class="reference internal" href="../concepts/services_networking/ingress.html#ingress"><span class="std std-ref">Ingress</span></a> 来管理外部访问集群的服务，例如， <a class="reference internal" href="../deployment/nginx_ingress.html#nginx-ingress"><span class="std std-ref">部署Nginx Ingress Controller</span></a> 对外提供服务</p></li>
+</ul>
+<p>这里我们采用最简单的方法，使用 <code class="docutils literal notranslate"><span class="pre">expose</span> <span class="pre">deployments</span></code> 方法输出服务：</p>
+<ul>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> namespace的服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">services</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出可以看到当前服务有内部 <code class="docutils literal notranslate"><span class="pre">cluster-ip</span></code> 但是没有 <code class="docutils literal notranslate"><span class="pre">external-ip</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>   <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">ClusterIP</span>   <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">19</span><span class="n">h</span>
+</pre></div>
+</div>
+<ul>
+<li><p>我们的woker工作节点如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>             <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>     <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">19</span><span class="n">h</span>     <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">18.04</span><span class="o">.</span><span class="mi">5</span> <span class="n">LTS</span>   <span class="mf">4.9</span><span class="o">.</span><span class="mi">140</span><span class="o">-</span><span class="n">tegra</span>      <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">6</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">6</span><span class="n">d17h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">3</span><span class="n">d5h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">3</span><span class="n">d5h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.16</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+</pre></div>
+</div>
+<p>问题来了，我们需要把服务输出到外部无线网卡上，该如何实现？实际上 <code class="docutils literal notranslate"><span class="pre">pi-worker1</span></code> 上无线网卡上IP地址 192.168.0.81:</p>
+<ul class="simple">
+<li><p>无线网卡的外网地址是动态的，假设我直接输出到这个无线网卡IP地址，则下次主机重启如果获取到不同IP地址，则有可能和局域网其他IP地址冲突</p>
+<ul>
+<li><p>我考虑到解决方法是采用一个自己控制的IP地址段作为演示，然后需要访问的客户机也绑定同一个网段，这样只要连接到相同的无线AP上，就可以访问服务</p></li>
+</ul>
+</li>
+</ul>
+<p>当前我简化这个配置，暂时先使用有线网络网段 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code></p>
+<ul>
+<li><p>检查当前service:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">service</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>   <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">ClusterIP</span>   <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">26</span><span class="n">h</span>
+</pre></div>
+</div>
+<ul>
+<li><p>删除掉这个service:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">service</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重建一个负载均衡类型的输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployments</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span> <span class="o">--</span><span class="n">protocol</span><span class="o">=</span><span class="n">TCP</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span> \
+    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">--</span><span class="n">external</span><span class="o">-</span><span class="n">ip</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">LoadBalancer</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">service</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">exposed</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，这里负载均衡类型的输出 <code class="docutils literal notranslate"><span class="pre">target-ports</span></code> 和之前 service 是一样的，只不过多了一个 <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code> 对外</p>
+</div>
+<ul>
+<li><p>现在我们检查 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">service</span> <span class="pre">-n</span> <span class="pre">kube-verify</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>           <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>     <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>        <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">LoadBalancer</span>   <span class="mf">10.96</span><span class="o">.</span><span class="mf">31.186</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span>   <span class="mi">80</span><span class="p">:</span><span class="mi">30586</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">61</span><span class="n">s</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>奇怪，这里 <code class="docutils literal notranslate"><span class="pre">--target-port=8080</span></code> 怎么没有生效么？怎么显示 <code class="docutils literal notranslate"><span class="pre">PORT(S)</span></code> 是 <code class="docutils literal notranslate"><span class="pre">80:30586/TCP</span></code> ，但是直接对该IP地址访问 <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">http://192.168.6.10</span></code> 是能够正常获取到页面输出的。待查…</p>
+</div>
+<div class="section" id="id9">
+<h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://opensource.com/article/20/6/kubernetes-raspberry-pi">Build a Kubernetes cluster with the Raspberry Pi</a> - 完整的部署指南，作者 Chris Collins 撰写了一系列在Raspberry Pi上构建homelab的文章，可以实现基于K8s的NFS服务</p></li>
 <li><p><a class="reference external" href="https://segmentfault.com/a/1190000023107314">解决k8s执行kubeadm join遇到could not find a JWS signature的问题</a></p></li>
