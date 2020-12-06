@@ -483,6 +483,12 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
    pi-worker1   Ready    <none>   2d9h    v1.19.4
    pi-worker2   Ready    <none>   2d9h    v1.19.4
 
+.. note::
+
+   注意如果worker主机有多个网卡接口，kubelet执行 ``kubeadm join`` 命令时候有可能注册采用了默认有路由的网卡接口，也可能使用和apiserver指定IP所在相同网段的IP。这点让我很疑惑，例如上述注册worker节点，3个树莓派注册的 ``INTERNAL-IP`` 是正确的内网IP地址 ``192.168.6.x`` ，但是 ``jetson`` 就注册成了外网无线网卡上的IP地址 ``192.168.0.x`` 。
+
+   这个问题修订，请参考 :ref:`set_k8s_worker_internal_ip` 明确配置worker的 ``INTERNAL-IP`` 避免出现混乱。
+
 验证集群
 ===========
 
@@ -578,7 +584,80 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 
 你会看到一个完整输出的html文件内容。
 
-到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。你需要使用 :ref:`ingress` 来管理外部访问集群的服务。
+访问服务
+============
+
+到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。
+
+你可以有多种方法：
+
+- 输出部署( ``expose deployments`` )通过简单的负载均衡方式(指定 ``external-ip``)将服务映射输出到集群外部
+- 部署 :ref:`ingress` 来管理外部访问集群的服务，例如， :ref:`nginx_ingress` 对外提供服务
+
+这里我们采用最简单的方法，使用 ``expose deployments`` 方法输出服务：
+
+- 检查 ``kube-verify`` namespace的服务::
+
+   kubectl get services -n kube-verify
+
+输出可以看到当前服务有内部 ``cluster-ip`` 但是没有 ``external-ip`` ::
+
+   NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+   kube-verify   ClusterIP   10.107.123.31   <none>        80/TCP    19h
+
+- 我们的woker工作节点如下::
+
+   kubectl get nodes -o wide
+
+显示::
+
+   NAME         STATUS   ROLES    AGE     VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+   jetson       Ready    <none>   19h     v1.19.4   192.168.6.10   <none>        Ubuntu 18.04.5 LTS   4.9.140-tegra      docker://19.3.6
+   pi-master1   Ready    master   6d17h   v1.19.4   192.168.6.11   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+   pi-worker1   Ready    <none>   3d5h    v1.19.4   192.168.6.15   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+   pi-worker2   Ready    <none>   3d5h    v1.19.4   192.168.6.16   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+
+问题来了，我们需要把服务输出到外部无线网卡上，该如何实现？实际上 ``pi-worker1`` 上无线网卡上IP地址 192.168.0.81:
+
+- 无线网卡的外网地址是动态的，假设我直接输出到这个无线网卡IP地址，则下次主机重启如果获取到不同IP地址，则有可能和局域网其他IP地址冲突
+
+  - 我考虑到解决方法是采用一个自己控制的IP地址段作为演示，然后需要访问的客户机也绑定同一个网段，这样只要连接到相同的无线AP上，就可以访问服务
+
+
+当前我简化这个配置，暂时先使用有线网络网段 ``192.168.6.x``
+
+- 检查当前service::
+
+   kubectl get service -n kube-verify
+
+可以看到::
+
+   NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+   kube-verify   ClusterIP   10.107.123.31   <none>        80/TCP    26h
+
+- 删除掉这个service::
+
+   kubectl delete service kube-verify -n kube-verify
+
+- 然后重建一个负载均衡类型的输出::
+
+   kubectl expose deployments kube-verify -n kube-verify --port=80 --protocol=TCP --target-port=8080 \
+       --name=kube-verify --external-ip=192.168.6.10 --type=LoadBalancer
+
+提示信息::
+
+   service/kube-verify exposed
+
+.. note::
+
+   注意，这里负载均衡类型的输出 ``target-ports`` 和之前 service 是一样的，只不过多了一个 ``EXTERNAL-IP`` 对外
+
+- 现在我们检查 ``kubectl get service -n kube-verify`` 显示::
+
+   NAME          TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)        AGE
+   kube-verify   LoadBalancer   10.96.31.186   192.168.6.10   80:30586/TCP   61s
+
+奇怪，这里 ``--target-port=8080`` 怎么没有生效么？怎么显示 ``PORT(S)`` 是 ``80:30586/TCP`` ，但是直接对该IP地址访问 ``curl http://192.168.6.10`` 是能够正常获取到页面输出的。待查...
 
 参考
 =====
