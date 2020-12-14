@@ -1,14 +1,13 @@
-.. _linux_tracing:
+.. _redis:
 
 =================================
-Linux内核追踪
+Redis Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   debug_system_crash.rst
-   kdump/index
+   intrudoce_redis.rst
 
 .. only::  subproject and html
 

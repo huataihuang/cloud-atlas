@@ -1,14 +1,11 @@
-.. _linux_tracing:
+.. _kdump:
 
 =================================
-Linux内核追踪
+Linux内核Kdump
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   debug_system_crash.rst
-   kdump/index
 
 .. only::  subproject and html
 

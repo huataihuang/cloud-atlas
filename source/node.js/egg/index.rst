@@ -1,14 +1,13 @@
-.. _linux_tracing:
+.. _egg:
 
 =================================
-Linux内核追踪
+Node.js企业级开源框架egg
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   debug_system_crash.rst
-   kdump/index
+   introduce_egg.rst
 
 .. only::  subproject and html
 

@@ -9,4 +9,10 @@ Kubernetes存储
 
    kubernetes_volumes.rst
    k8s_persistent_volumes.rst
-   kadalu/index
+
+.. only::  subproject and html
+
+   Indices
+   =======
+
+   * :ref:`genindex`

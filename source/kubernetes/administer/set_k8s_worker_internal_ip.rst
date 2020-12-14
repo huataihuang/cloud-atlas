@@ -34,6 +34,13 @@
 
    systemctl restart kubelet
 
+.. note::
+
+   如果是直接修改 systemd 配置文件 ``/etc/systemd/system/kubelet.service`` 则需要重新加载配置并重启::
+
+      sudo systemctl daemon-reload
+      sudo systemctl restart kubelet
+
 再检查进程 ``ps aux | grep kubelet`` 就会看到参数最后添加了 ``--node-ip=192.168.6.10`` ::
 
    /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --config=/var/lib/kubelet/config.yaml --network-plugin=cni --pod-infra-container-image=k8s.gcr.io/pause:3.2 --node-ip=192.168.6.10

@@ -13,12 +13,14 @@
 捐助方式
 =========
 
-.. figure:: _static/donate_alipay.jpg
-   :scale: 60
-
 .. note::
 
-   微信支付默认不显示转账者信息，请在转账留言中备注姓名或昵称，我好记在 :ref:`thanks` 页面中。
+   由于默认不显示转账者信息，请在转账留言中备注姓名或昵称，并且包含 ``云图`` 关键字，方便我记在 :ref:`thanks` 页面中。
+
+   感谢阅读 :ref:`cloud_atlas` 和支持我，谢谢!
+
+.. figure:: _static/donate_alipay.jpg
+   :scale: 60
 
 .. figure:: _static/donate_wx.jpg
    :scale: 30

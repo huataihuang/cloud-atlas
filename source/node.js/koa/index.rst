@@ -1,14 +1,12 @@
-.. _linux_tracing:
+.. _koa:
 
 =================================
-Linux内核追踪
+Node.js开源框架koa
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   debug_system_crash.rst
-   kdump/index
 
 .. only::  subproject and html
 

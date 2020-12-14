@@ -19,6 +19,11 @@ Collins撰写了一篇非常详尽的step-by-step指南，方便我们在3个或
 - 3台 :ref:`raspberry_pi` 树莓派4: 其中 1台作为master管控服务器(2G配置)，另外2台是worker节点(8G配置)
 - 1台 :ref:`jetson` 作为worker节点，提供GPU设备构建GPU Docker容器，支持 :ref:`machine_learning`
 
+部署和实践
+============
+
+通过上述ARM硬件组合 :ref:`arm_k8s_deploy` ，并完成 :ref:`kubernetes_in_action`
+
 参考
 ======
 
