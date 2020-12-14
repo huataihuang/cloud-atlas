@@ -657,7 +657,32 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
    NAME          TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)        AGE
    kube-verify   LoadBalancer   10.96.31.186   192.168.6.10   80:30586/TCP   61s
 
-奇怪，这里 ``--target-port=8080`` 怎么没有生效么？怎么显示 ``PORT(S)`` 是 ``80:30586/TCP`` ，但是直接对该IP地址访问 ``curl http://192.168.6.10`` 是能够正常获取到页面输出的。待查...
+奇怪，这里 ``--target-port=8080`` 怎么没有生效么？怎么显示 ``PORT(S)`` 是 ``80:30586/TCP`` ，但是直接对该IP地址访问 ``curl http://192.168.6.10`` 是能够正常获取到页面输出的。
+
+现在我们得到的验证环境::
+
+   kubectl get all -n kube-verify
+
+输出显示::
+
+   NAME                           READY   STATUS    RESTARTS   AGE
+   kube-verify-69dd569645-q9hzc   1/1     Running   0          33h
+   kube-verify-69dd569645-s5qb5   1/1     Running   0          2d12h
+   kube-verify-69dd569645-v9zxt   1/1     Running   0          2d12h
+   ubuntu@pi-master1:~$ kubectl get all -n kube-verify
+   NAME                               READY   STATUS    RESTARTS   AGE
+   pod/kube-verify-69dd569645-q9hzc   1/1     Running   0          33h
+   pod/kube-verify-69dd569645-s5qb5   1/1     Running   0          2d12h
+   pod/kube-verify-69dd569645-v9zxt   1/1     Running   0          2d12h
+
+   NAME                  TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)        AGE
+   service/kube-verify   LoadBalancer   10.96.31.186   192.168.6.10   80:30586/TCP   32h
+
+   NAME                          READY   UP-TO-DATE   AVAILABLE   AGE
+   deployment.apps/kube-verify   3/3     3            3           2d12h
+
+   NAME                                     DESIRED   CURRENT   READY   AGE
+   replicaset.apps/kube-verify-69dd569645   3         3         3       2d12h
 
 参考
 =====

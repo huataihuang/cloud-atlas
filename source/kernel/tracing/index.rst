@@ -8,6 +8,7 @@ Linux内核追踪
    :maxdepth: 1
 
    debug_system_crash.rst
+   kdump/index
 
 .. only::  subproject and html
 

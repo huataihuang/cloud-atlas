@@ -35,7 +35,7 @@ kubernetes管理了容器规模，从边缘计算的微小集群到数据中心�
    access_application/index
    configure/index
    network/index
-   storage/index
+   in_action/index
    rook/index
    production/index
    service_mesh/index
