@@ -55,6 +55,10 @@ Jetson Nano开发版没有提供WiFi和蓝牙功能，不过支持通过M.2卡�
 .. figure:: ../../../_static/machine_learning/jetson/hardware/jetson_shell.png
    :scale: 75
 
+.. note::
+
+   为了方便构建一个个人使用的无线网络，我采用Jetson Nano部署 :ref:`soft_ap` ，实现 :ref:`jetson_soft_ap`
+
 参考
 =======
 

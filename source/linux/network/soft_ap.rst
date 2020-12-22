@@ -1,7 +1,7 @@
 .. _soft_ap:
 
 ================
-Linux实现无线AP
+Linux无线AP
 ================
 
 Linux可以实现软件方式的无线访问节点(software access point)，也称为虚拟路由器(virtual router)或虚拟Wi-Fi，这种方式可以将一台主机的无线网卡转换成一个Wi-Fi access point。

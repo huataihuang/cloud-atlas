@@ -13,17 +13,15 @@ Store中选择最新操作系统安装升级，但是在下载了安装软件之
 
    macOS的不同版本都支持自制启动安装U盘，但是执行的命令有可能有细微差异，例如目录，参数等。详细记录可以参考我以前的一些实践记录 `创建macOS启动安装U盘 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/develop/mac/create_macos_boot_install_drive.md>`_ ，本文则仅仅记录最新的 macOS Big Sur Version 11 的安装U盘制作。
 
-我准备等近期 11.1 发布后制作安装U盘时再更新本文，待续 ......
-
 制作启动安装U盘
 ================
 
-- 使用Disk Utility将U盘格式化成 Mac OS Extended(Jorunaled) 文件系统
+- 使用Disk Utility将U盘格式化成 Mac OS Extended(Jorunaled) 文件系统 - 这里假设格式化磁盘命名为 ``macos_installer`` ，则后续制作U盘的卷名就是 ``/Volumes/macos_installer``
 
 - 在终端执行以下命令创建启动安装U盘::
 
    sudo /Applications/Install\ macOS\ Big\ Sur.app/Contents/Resources/createinstallmedia \
-      --volume /Volumes/Untitled -- /Applications/Install\ macOS\ Big\ Sur.app
+      --volume /Volumes/macos_installer -- /Applications/Install\ macOS\ Big\ Sur.app
 
 修改安全设置
 ================
