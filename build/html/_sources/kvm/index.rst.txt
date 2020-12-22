@@ -18,11 +18,11 @@ KVM Atlas
    hardware_virtual.rst
    intel_vmcs.rst
    kvm_nested_virtual.rst
-   add_resize_virtual_disk_to_guest_on_fly.rst
+   kvm_vdisk_live.rst
    libvirt_static_ip_in_studio.rst
    kvm_live_migration.rst
    qemu_images.rst
-   kvm_image_access_with_libguestfs.rst
+   kvm_libguestfs.rst
    memballoon.rst
    pci_passthrough.rst
    gpu_passthrough_with_kvm.rst

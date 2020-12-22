@@ -19,6 +19,8 @@ SUSE Linux
    suse_iso_repo.rst
    suse_cust_repo.rst
    suse_deploy_smt.rst
+   suse_update_dev_tool.rst
+   suse_12_install_gcc.rst
 
 
 .. only::  subproject and html

@@ -18,6 +18,7 @@ NVIDIA Jetson工作室构建
    jetson_xfce4.rst
    jetson_ubuntu_20.04.rst
    jetson_swap.rst
+   jetson_soft_ap.rst
 
 .. only::  subproject and html
 
