@@ -16,6 +16,7 @@ Docker存储
    docker_storage_driver.rst
    docker_btrfs_driver.rst
    docker_overlay_driver.rst
+   docker_size_quota.rst
    docker_run_add_host_device.rst
    docker_container_nfs.rst
 

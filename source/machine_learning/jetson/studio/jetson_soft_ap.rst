@@ -146,6 +146,62 @@ Jetson Nano安装了外接的Intel无线模块以后，非常类似一个无线�
    :language: bash
    :linenos:
 
+Thinkpad x86环境create_ap
+===========================
+
+在zcloud主机(Thinkpad X220笔记本运行Arch Linux)上执行遇到问题::
+
+   sudo iw dev wlp3s0 interface add wlp3s0_sta  type managed addr 02:68:b3:29:da:99
+   sudo iw dev wlp3s0 interface add wlp3s0_ap  type managed addr 02:68:b3:29:da:98
+   sudo create_ap --daemon --hidden wlp3s0_ap wlp3s0_sta MyAccessPoint MyPassPhrase
+
+报错::
+
+   ...
+   WARN: Low entropy detected. We recommend you to install `haveged'`
+   Failed to set beacon parameters
+   Interface initialization failed
+   ...
+
+检查网卡接口::
+
+   iw list
+
+可以看到这块无线网卡的参数::
+
+    valid interface combinations:
+             * #{ managed  } <= 1, #{ AP  } <= 1,
+               total <= 2, #channels <= 1, STA/AP BI must match
+             * #{ managed  } <= 2,
+               total <= 2, #channels <= 1
+
+其中 ``#channels <= 1, STA/AP BI must match`` 参考 `hostapd not working anymore <https://serverfault.com/questions/966352/hostapd-not-working-anymore>`_ 可知，要求sta网卡和ap网卡使用相同的channel。
+
+所以需要先检查当前使用的通道::
+
+   iw wlp3s0 info
+
+可以看到输出信息::
+
+   Interface wlp3s0
+           ...
+           channel 44 (5220 MHz), width: 20 MHz, center1: 5220 MHz
+           ...
+
+所以尝试添加 ``-c 44`` 参数::
+
+   sudo create_ap -c 44 --daemon --hidden wlp3s0_ap wlp3s0_sta MyAccessPoint MyPassPhrase
+
+但是报错::
+
+   ERROR: Your adapter can not transmit to channel 44, frequency band 5GHz.
+
+这个问题可能可以参考 `oblique/create_ap Error while trying to establish a connection #75 <https://github.com/oblique/create_ap/issues/75>`_ 
+
+.. note::
+
+   `Turn any computer into a wireless access point with Hostapd <https://linuxnatives.net/2014/create-wireless-access-point-hostapd>`_ 介绍了更为详细的手工配置方法，可以作为参考
+
 参考
 ======
 
