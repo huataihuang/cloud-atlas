@@ -18,9 +18,7 @@ macOS故障恢复
 
 我反复使用Disk Utility进行磁盘检查都没有发现问题，甚至使用U盘安装系统时，重新格式化磁盘(没有报错)，依然在安装过程中提示磁盘S.M.A.R.T. error。
 
-我有些不太相信我的硬件已经故障了，毕竟在之前的旧版本macOS中运行很久也没有遇到问题，磁盘检测也看不到错误。
-
-参考 `S.M.A.R.T. Status is: "Unsupported" on my Internal Hard Drive <https://discussions.apple.com/thread/251209469>`_ 中HWTech说不是所有的Apple SSD都支持SMART，并且对于USB设备，由于macOS没有包含必要的驱动，也会不支持USB磁盘的SMART功能。
+我有些不太相信我的硬件已经故障了，毕竟在之前的旧版本macOS中运行很久也没有遇到问题，磁盘检测也看不到错误。 参考 `S.M.A.R.T. Status is: "Unsupported" on my Internal Hard Drive <https://discussions.apple.com/thread/251209469>`_ 中HWTech说不是所有的Apple SSD都支持SMART，并且对于USB设备，由于macOS没有包含必要的驱动，也会不支持USB磁盘的SMART功能。
 
 .. note::
 
@@ -38,6 +36,19 @@ macOS故障恢复
 - ``Command (⌘)-R`` 重装你Mac最近安装的最新macOS系统(推荐)
 - ``Option-⌘-R`` 更新到Mac硬件系统能够兼容的最新的macOS系统
 - ``Shift-Option-⌘-R`` 重新安装你购买Mac硬件的随机相同版本的macOS（也就是旧版本）
+
+后记
+======
+
+很不幸，通过 macOS Internet Recovery 安装Mavericks版本，也是同样提示 S.M.A.R.T. Fails，无法选择内置SSD存储进行安装。看来，这台使用了7年的MacBook Pro笔记本硬件寿命到期了，已经无法安装macOS操作系统。
+
+我准备死马当活马，通过Linux系统再延续一段时间:
+
+- 部署 :ref:`lfs_linux`
+- 验证完整的 :ref:`kvm` 虚拟化和 :ref:`openstack` ，实现一种随时可以拉起整个系统的运行节点，所有运行数据都在远程 :ref:`pi_cluster` 构建的分布式存储中
+
+  - 主机作为计算节点，不存储持久化数据
+  - 本地存储只做缓存和docker镜像存储
 
 参考
 =====

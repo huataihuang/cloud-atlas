@@ -368,6 +368,60 @@ sudo create_ap --daemon --hidden wlan0_ap wlan0_sta MyAccessPoint MyPassPhrase
 </pre></div>
 </td></tr></table></div>
 </div>
+<div class="section" id="thinkpad-x86create-ap">
+<h2>Thinkpad x86环境create_ap<a class="headerlink" href="#thinkpad-x86create-ap" title="永久链接至标题">¶</a></h2>
+<p>在zcloud主机(Thinkpad X220笔记本运行Arch Linux)上执行遇到问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">iw</span> <span class="n">dev</span> <span class="n">wlp3s0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlp3s0_sta</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">99</span>
+<span class="n">sudo</span> <span class="n">iw</span> <span class="n">dev</span> <span class="n">wlp3s0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlp3s0_ap</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">98</span>
+<span class="n">sudo</span> <span class="n">create_ap</span> <span class="o">--</span><span class="n">daemon</span> <span class="o">--</span><span class="n">hidden</span> <span class="n">wlp3s0_ap</span> <span class="n">wlp3s0_sta</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
+</pre></div>
+</div>
+<p>报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>...
+WARN: Low entropy detected. We recommend you to install `haveged&#39;`
+Failed to set beacon parameters
+Interface initialization failed
+...
+</pre></div>
+</div>
+<p>检查网卡接口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iw</span> <span class="nb">list</span>
+</pre></div>
+</div>
+<p>可以看到这块无线网卡的参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">valid</span> <span class="n">interface</span> <span class="n">combinations</span><span class="p">:</span>
+         <span class="o">*</span> <span class="c1">#{ managed  } &lt;= 1, #{ AP  } &lt;= 1,</span>
+           <span class="n">total</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="c1">#channels &lt;= 1, STA/AP BI must match</span>
+         <span class="o">*</span> <span class="c1">#{ managed  } &lt;= 2,</span>
+           <span class="n">total</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="c1">#channels &lt;= 1</span>
+</pre></div>
+</div>
+<p>其中 <code class="docutils literal notranslate"><span class="pre">#channels</span> <span class="pre">&lt;=</span> <span class="pre">1,</span> <span class="pre">STA/AP</span> <span class="pre">BI</span> <span class="pre">must</span> <span class="pre">match</span></code> 参考 <a class="reference external" href="https://serverfault.com/questions/966352/hostapd-not-working-anymore">hostapd not working anymore</a> 可知，要求sta网卡和ap网卡使用相同的channel。</p>
+<p>所以需要先检查当前使用的通道:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iw</span> <span class="n">wlp3s0</span> <span class="n">info</span>
+</pre></div>
+</div>
+<p>可以看到输出信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Interface</span> <span class="n">wlp3s0</span>
+        <span class="o">...</span>
+        <span class="n">channel</span> <span class="mi">44</span> <span class="p">(</span><span class="mi">5220</span> <span class="n">MHz</span><span class="p">),</span> <span class="n">width</span><span class="p">:</span> <span class="mi">20</span> <span class="n">MHz</span><span class="p">,</span> <span class="n">center1</span><span class="p">:</span> <span class="mi">5220</span> <span class="n">MHz</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>所以尝试添加 <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">44</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">create_ap</span> <span class="o">-</span><span class="n">c</span> <span class="mi">44</span> <span class="o">--</span><span class="n">daemon</span> <span class="o">--</span><span class="n">hidden</span> <span class="n">wlp3s0_ap</span> <span class="n">wlp3s0_sta</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
+</pre></div>
+</div>
+<p>但是报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="n">Your</span> <span class="n">adapter</span> <span class="n">can</span> <span class="ow">not</span> <span class="n">transmit</span> <span class="n">to</span> <span class="n">channel</span> <span class="mi">44</span><span class="p">,</span> <span class="n">frequency</span> <span class="n">band</span> <span class="mi">5</span><span class="n">GHz</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>这个问题可能可以参考 <a class="reference external" href="https://github.com/oblique/create_ap/issues/75">oblique/create_ap Error while trying to establish a connection #75</a></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://linuxnatives.net/2014/create-wireless-access-point-hostapd">Turn any computer into a wireless access point with Hostapd</a> 介绍了更为详细的手工配置方法，可以作为参考</p>
+</div>
+</div>
 <div class="section" id="id4">
 <h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
