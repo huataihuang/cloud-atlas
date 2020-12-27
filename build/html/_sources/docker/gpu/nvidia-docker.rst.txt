@@ -267,7 +267,7 @@ NVIDIA持久化服务
 
 .. warning::
 
-   TensorFlow发行版本对CUDA要求3.5，即对GPU硬件有要求，当前MacBook Pro 2015 later使用的NVIDIA GeForce GT 750M仅支持CUDA 3.0。所以上述测试会出现报错，解决方法是 :ref:`build_tensorflow_from_source`
+   TensorFlow发行版本对CUDA要求3.5，即对GPU硬件有要求，当前MacBook Pro 2015 later使用的NVIDIA GeForce GT 750M仅支持CUDA 3.0。所以上述测试会出现报错，解决方法是 :ref:`build_tensorflow`
 
 升级Nvidia驱动
 =================

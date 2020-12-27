@@ -63,7 +63,7 @@ VMware Tools是用于增强虚拟机的Guest操作系统性能并改进虚拟机
 macOS虚拟化的限制
 ==================
 
-其实我最需要的虚拟化技术是SR-IOV (退而求其次则使用 PCI passthrough)，即通过VT-d技术使得虚拟机能够直接访问笔记本硬件，特别是AMD Randeon Pro 555X GPU，这样就能够在虚拟机内部 :ref:`build_tensorflow_from_source` ，验证和学习 :ref:`machine_learning` 。
+其实我最需要的虚拟化技术是SR-IOV (退而求其次则使用 PCI passthrough)，即通过VT-d技术使得虚拟机能够直接访问笔记本硬件，特别是AMD Randeon Pro 555X GPU，这样就能够在虚拟机内部 :ref:`build_tensorflow` ，验证和学习 :ref:`machine_learning` 。
 
 但是很不幸，我Google发现，问题在macOS上：PCI passthrough需要硬件和软件同时支持，虽然现代的Mac硬件上支持VT-d，但是在macOS操作系统并不支持IOMMU，这样就不能把PCI设备（包括GPU）直接给虚拟机使用。解决的方法是在MacBook上安装Linux或Windows，这样才能实现虚拟机操作系统使用GPU。( `VM: Mac OSX Host, Windows Guest: Use VT-d so that the fast GPU is available for the VM? <https://superuser.com/questions/917296/vm-mac-osx-host-windows-guest-use-vt-d-so-that-the-fast-gpu-is-available-for>`_ ) ( 不仅VMware无法实现PCI passthrough， :ref:`xhyve` 也可能因为同样原因无法实现 `Device Passthrough ( Most notably, GPU ) #108 <https://github.com/machyve/xhyve/issues/108>`_ )
 

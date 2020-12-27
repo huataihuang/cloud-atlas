@@ -11,10 +11,10 @@ Machine Learning Atlas
 .. toctree::
    :maxdepth: 1
 
-   deep_learning_hardware_guide.rst
+   studio/index
+   hardware/index
    jetson/index
-   build_tensorflow_from_source.rst
-   tensorflow_quickstart.rst
+   tensorflow/index
 
 .. only::  subproject and html
 

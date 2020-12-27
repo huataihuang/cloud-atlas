@@ -62,6 +62,14 @@ Python 3 venv
 
    source venv3/bin/active
 
+升级Virtualenv环境
+====================
+
+一段时间之后，可能需要升级pip以及安装的所有软件包::
+
+   pip install --upgrade pip
+   pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U
+
 参考
 =====
 

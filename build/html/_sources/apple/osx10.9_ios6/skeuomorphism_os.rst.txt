@@ -10,10 +10,10 @@
 
 大约10年前的2010年前后，苹果生态系统采用了一种非常古典的拟物风格，每个精美的图标和操作界面都模拟现实生活中经典的物品，让人不经意间凭着直觉就可以进行交互。这个时代随着iPhone 5的谢幕，已经长久地消失在我们的世界中。然而，人总是容易怀旧，审美总是会轮回。经过这么多年扁平化的现代简洁交互界面的浸染，拿起当年经典的移动设备，依然莫名喜欢。
 
-.. figure:: ../../_static/macos_ios/osx10.9_ios6/ios6_style.jpg
+.. figure:: ../../_static/apple/osx10.9_ios6/ios6_style.jpg
    :scale: 75
 
-.. figure:: ../../_static/macos_ios/osx10.9_ios6/ios6_recorder.jpg
+.. figure:: ../../_static/apple/osx10.9_ios6/ios6_recorder.jpg
    :scale: 75
 
 .. note::
