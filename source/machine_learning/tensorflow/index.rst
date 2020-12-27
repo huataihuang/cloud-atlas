@@ -1,15 +1,14 @@
-.. _node.js:
+.. _tensorflow:
 
 =================================
-Node.js Atlas
+Tensorflow
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_node.js.rst
-   koa/index
-   egg/index
+   tensorflow_quickstart.rst
+   build_tensorflow.rst
 
 .. only::  subproject and html
 

@@ -1,15 +1,14 @@
-.. _node.js:
+.. _ml_studio:
 
 =================================
-Node.js Atlas
+机器学习工作室
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_node.js.rst
-   koa/index
-   egg/index
+   conda_anaconda.rst
 
 .. only::  subproject and html
 

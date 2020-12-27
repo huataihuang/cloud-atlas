@@ -25,7 +25,7 @@ macOS软件安装和设置
 
 * Magnet - 非常推荐的一款桌面窗口平铺化工具，弥补了macOS无法像Win10那样提供窗口并排的缺憾。
 
-.. figure:: ../../_static/macos_ios/studio/magnet.png
+.. figure:: ../../_static/apple/studio/magnet.png
    :scale: 75
 
 * iTerm2 - 替代默认Terminal的工具，功能非常强大，对于需要远程访问Linux服务器必备。

@@ -1,4 +1,4 @@
-.. _deep_learning_hardware_guide:
+.. _dl_hardware:
 
 ======================
 深度学习硬件指南

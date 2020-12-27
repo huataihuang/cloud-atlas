@@ -1,4 +1,4 @@
-.. _build_tensorflow_from_source:
+.. _build_tensorflow:
 
 ============================
 源代码编译安装TensorFlow

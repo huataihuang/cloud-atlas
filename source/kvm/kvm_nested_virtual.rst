@@ -89,4 +89,4 @@ KVM嵌套虚拟化
 
 为了能够稳定运行 :ref:`openstack` 的开发测试环境 :ref:`devstack` ，我们需要为 ``devstack`` 增加一块大容量的磁盘：
 
-- :ref:`add_resize_virtual_disk_to_guest_on_fly`
+- :ref:`kvm_vdisk_live`

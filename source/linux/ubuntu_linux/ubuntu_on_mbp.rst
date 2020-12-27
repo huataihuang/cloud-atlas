@@ -79,7 +79,7 @@ MacBook Pro上运行Ubuntu
 安装显卡驱动
 ===================
 
-MacBook Pro使用的显卡是NVIDIA GeForce GT 750M Mac Edition ，默认安装的显卡驱动是开源的 ``nouveau`` ，但是开源驱动一方面性能较差，另一方面我希望在 :ref:`nvidia-docker` 以便能够支持 :ref:`build_tensorflow_from_source` 进行机器学习。所以，安装完基础操作系统之后，将开源显卡驱动替换成Nvidia官方的GPU驱动。
+MacBook Pro使用的显卡是NVIDIA GeForce GT 750M Mac Edition ，默认安装的显卡驱动是开源的 ``nouveau`` ，但是开源驱动一方面性能较差，另一方面我希望在 :ref:`nvidia-docker` 以便能够支持 :ref:`build_tensorflow` 进行机器学习。所以，安装完基础操作系统之后，将开源显卡驱动替换成Nvidia官方的GPU驱动。
 
 - 安装 ``ubuntu-drivers`` 工具包::
 

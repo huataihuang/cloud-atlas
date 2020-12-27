@@ -1,15 +1,13 @@
-.. _node.js:
+.. _ml_hardware:
 
 =================================
-Node.js Atlas
+机器学习硬件
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_node.js.rst
-   koa/index
-   egg/index
+   dl_hardware.rst
 
 .. only::  subproject and html
 
