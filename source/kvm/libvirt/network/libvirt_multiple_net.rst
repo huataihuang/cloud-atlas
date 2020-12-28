@@ -1,4 +1,4 @@
-.. _libvirt_multiple_network:
+.. _libvirt_multiple_net:
 
 ======================
 libvirt复合网络案例 

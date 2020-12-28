@@ -1,4 +1,4 @@
-.. _libvirt_passthrough_network:
+.. _libvirt_passthrough_net:
 
 =====================
 Libvirt直通型网络
