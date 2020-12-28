@@ -87,74 +87,14 @@ KVM虚拟机动态添加、调整磁盘
 
    qemu-img resize /var/lib/libvirt/images/sles12_data.qcow2 +10G
 
-但是 ``qemu-img`` 命令显然不能在线调整磁盘大小(虚拟关闭则可以执行)，出现报错::
+   virsh qemu-monitor-command sles12-sp3 --hmp "info block"
 
-   qemu-img: Could not open '/var/lib/libvirt/images/sles12_data.qcow2': Failed to get "write" lock
-   Is another process using the image [/var/lib/libvirt/images/sles12_data.qcow2]?
+显示输出有关 ``sles12_data.qcow2`` 虚拟磁盘信息如下::
 
-- 检查虚拟机的块设备列表::
+   libvirt-3-format: /var/lib/libvirt/images/sles12_data.qcow2 (qcow2)
+       Attached to:      /machine/peripheral/virtio-disk1/virtio-backend
+       Cache mode:       writeback
 
-   virsh domblklist
+- 通过 :ref:`qemu_monitor` 同样可以在线修改虚拟磁盘大小::
 
-显示输出::
-
-    Target   Source
-   -----------------------------------------------------
-    vda      /var/lib/libvirt/images/sles12-sp3.qcow2
-    vdb      /var/lib/libvirt/images/sles12_data.qcow2
-    sda      -
-
-- ``virsh blockresize`` 命令支持在线调整虚拟镜像，实际是通过底层 :ref:`qemu_monitor` 指令实现::
-
-   virsh blockresize sles12-sp3 vdb --size 15G
-
-提示信息::
-
-   Block device 'vdb' is resized
-
-- 此时在虚拟机 ``sles12-sp3`` 内部执行 ``lsblk`` 命令可以看到原先5G磁盘改成了15G::
-
-   NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-   ...
-   vdb    253:16   0   15G  0 disk /data
-
-注意，此时文件系统显示挂载的磁盘还是5G空间::
-
-   Filesystem      Size  Used Avail Use% Mounted on
-   ...
-   /dev/vdb        5.0G  3.7G  1.4G  73% /data
-
-.. note::
-
-   对于最新的Guest内核， ``virtio-blk`` 设备大小是自动更新的，所以会马上看到容量改变。对于旧内核需要重启guest系统。对于SCSI设备，需要在guest操作系统中触发一次扫描::
-
-      echo > /sys/class/scsi_device/0:0:0:0/device/rescan
-
-   对于IDE设备，则需要重启一次guest操作系统才能刷新。
-
-- XFS文件系统支持在线调整::
-
-   xfs_growfs /data
-
-输出信息::
-
-   meta-data=/dev/vdb               isize=256    agcount=4, agsize=327680 blks
-            =                       sectsz=512   attr=2, projid32bit=1
-            =                       crc=0        finobt=0 spinodes=0
-   data     =                       bsize=4096   blocks=1310720, imaxpct=25
-            =                       sunit=0      swidth=0 blks
-   naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
-   log      =internal               bsize=4096   blocks=2560, version=2
-            =                       sectsz=512   sunit=0 blks, lazy-count=1
-   realtime =none                   extsz=4096   blocks=0, rtextents=0
-   data blocks changed from 1310720 to 3932160
-
-可以看到最后一行信息显示XFS文件系统块增长。
-
-通过 ``df -h`` 可以验证文件系统已经增大到15G::
-
-   Filesystem      Size  Used Avail Use% Mounted on
-   ...
-   /dev/vdb         15G  3.7G   12G  25% /data
-
-- 并且我们可以验证在文件系统挂载目录 ``/data/iso`` 目录下原文件依然存在，并且可以复制新的文件到扩容后的文件系统中。
+   virsh qemu-monitor-command sles12-sp3 --hmp "block_resize libvirt-3-format 13G"
