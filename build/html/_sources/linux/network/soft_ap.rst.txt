@@ -120,9 +120,9 @@ create_ap
 
 .. note::
 
-   目前我实践发现DHCP动态分配IP地址没有成功，不过手工在客户端配置静态IP，访问没有问题，能够共享有线网络方访问Internet。并且，这种模式可以共享VPN连接，为局域网直接访问Google带来极大的便利。
-
    这也是我 :ref:`android_10_pixel_xl` 时解决首次启动Android强制连接Google服务的方法。
+
+   第一次实践发现hostapd分配dhcp地址有问题，这个可能和我环境部署了比较复杂的虚拟化以及 :ref:`anbox` 有关。第二次实践 :ref:`jetson_soft_ap` 则工作正常。
 
 下一步
 =========

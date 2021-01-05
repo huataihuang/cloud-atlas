@@ -12,6 +12,8 @@ DevOps 文档
    :maxdepth: 1
 
    sphinx_doc/index
+   hugo/index
+   kindle/index
 
 .. only::  subproject and html
 

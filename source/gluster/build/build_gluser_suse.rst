@@ -4,7 +4,13 @@
 SUSE编译glusterfs
 =======================
 
-源代码编译安装
+.. note::
+
+   我最初实践是在一个封闭网络环境的SELS 12 SP3环境中编译glusterfs，由于无法连结internet导致，导致编译依赖包安装非常麻烦，通过搜索和下载iso文件进行依赖软件包部署。
+
+   但是编译一直存在问题，所以我第二次实践采用了在 :ref:`kvm` 虚拟化环境中重新安装了SLES 12 SP3，然后类似挂载了安装镜像iso文件和SDK镜像iso文件，然后重新开始。
+
+第一次实践
 ================
 
 - 下载源代码::
@@ -114,6 +120,20 @@ SUSE编译glusterfs
    2 | SLES 12 SP3 SDK-1 | SLES 12 SP3 SDK-1 | Yes     | ( p) Yes  | No     
    3 | SLES 12 SP3 SDK-2 | SLES 12 SP3 SDK-2 | Yes     | ( p) Yes  | No     
    4 | SLES12-SP3-12.3-0 | SLES12-SP3-12.3-0 | No      | ----      | ----
+
+我在第二次KVM环境实践时，重新安装了SLES 12 SP3，通过上述iso仓库添加，然后检查 ``zypper repos`` 显示::
+
+   # | Alias                                                                   | Name                         | Enabled | GPG Check | Refresh
+   --+-------------------------------------------------------------------------+------------------------------+---------+-----------+--------
+   1 | SLES 12 SP3                                                             | SLES 12 SP3                  | Yes     | (r ) Yes  | No
+   2 | SLES 12 SP3 SDK-1                                                       | SLES 12 SP3 SDK-1            | Yes     | (r ) Yes  | No
+   3 | SLES 12 SP3 SDK-2                                                       | SLES 12 SP3 SDK-2            | Yes     | (r ) Yes  | No
+   4 | SLES12-SP3-12.3-0                                                       | SLES12-SP3-12.3-0            | Yes     | (r ) Yes  | No
+   5 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Debuginfo-Pool    | SLES12-SP3-Debuginfo-Pool    | No      | ----      | ----
+   6 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Debuginfo-Updates | SLES12-SP3-Debuginfo-Updates | No      | ----      | ----
+   7 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Pool              | SLES12-SP3-Pool              | Yes     | (r ) Yes  | No
+   8 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Source-Pool       | SLES12-SP3-Source-Pool       | No      | ----      | ----
+   9 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Updates           | SLES12-SP3-Updates           | Yes     | (r ) Yes  | Yes
 
 - 安装需要的软件依赖::
 
@@ -341,8 +361,9 @@ liburce是RCU(read-copy-update)库，这个数据同步库提供了随着核心�
 
 `GitHub urcu/userspace-rcu项目 <https://github.com/urcu/userspace-rcu>`_ 提供软件包源代码::
 
-   tar xfz userspace-rcu-0.12.1.tar.gz
-   cd userspace-rcu-0.12.1
+   git clone git@github.com:urcu/userspace-rcu.git
+   # 编译
+   ./bootstrap # skip if using tarball
    ./configure
    make
    make install
@@ -549,6 +570,298 @@ ugly修复方式:
    + /usr/bin/gzip -dc /root/huatai.huang/glusterfs/extras/LinuxRPM/rpmbuild/SOURCES/glusterfs-7.8.tar.gz
    + /bin/tar -xf -
    + STATUS=0
+
+第二次实践
+==============
+
+准备工作
+--------------
+
+虚拟机环境
+~~~~~~~~~~~~
+
+由于第一次实践在无法上网的封闭环境中，安装依赖软件包非常困难，所以第二次编译实践，我采用在 :ref:`kvm` 环境中 :ref:`create_vm` 。创建完虚拟机，还采用了 :ref:`libvirt_bridged_network` 配置了 :ref:`suse_static_ip` 。
+
+完成上述准备工作之后，具备了一台能够访问internet的SLES 12 SP3虚拟机。然后，我采用 :ref:`kvm_vdisk_live` 为虚拟机扩容了一个足够容纳SLES安装光盘和SDK光盘的镜像iso文件，初步具备了编译工作环境。
+
+安装镜像和SDK镜像仓库
+~~~~~~~~~~~~~~~~~~~~~~
+
+根据之前经验，编译软件需要具备SDK工具，添加以下本地iso仓库 :ref:`suse_iso_repo` ::
+
+   # 安装盘
+   zypper ar -c -t yast2 "iso:/?iso=/home/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso" "SLES 12 SP3"
+   # SDK盘
+   zypper ar -c -t yast2 "iso:/?iso=/home/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso" "SLES 12 SP3 SDK-1"
+   zypper ar -c -t yast2 "iso:/?iso=/home/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD2.iso" "SLES 12 SP3 SDK-2"
+
+然后检查仓库::
+
+   zypper repos
+
+仓库显示如下::
+
+   Repository priorities are without effect. All enabled repositories share the same priority.
+
+   # | Alias                                                                   | Name                         | Enabled | GPG Check | Refresh
+   --+-------------------------------------------------------------------------+------------------------------+---------+-----------+--------
+   1 | SLES 12 SP3                                                             | SLES 12 SP3                  | Yes     | ( p ) Yes  | No
+   2 | SLES 12 SP3 SDK-1                                                       | SLES 12 SP3 SDK-1            | Yes     | ( p ) Yes  | No
+   3 | SLES 12 SP3 SDK-2                                                       | SLES 12 SP3 SDK-2            | Yes     | ( p ) Yes  | No
+   4 | SLES12-SP3-12.3-0                                                       | SLES12-SP3-12.3-0            | Yes     | (r ) Yes  | No
+   5 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Debuginfo-Pool    | SLES12-SP3-Debuginfo-Pool    | No      | ----      | ----
+   6 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Debuginfo-Updates | SLES12-SP3-Debuginfo-Updates | No      | ----      | ----
+   7 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Pool              | SLES12-SP3-Pool              | Yes     | (r ) Yes  | No
+   8 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Source-Pool       | SLES12-SP3-Source-Pool       | No      | ----      | ----
+   9 | SUSE_Linux_Enterprise_Server_12_SP3_x86_64:SLES12-SP3-Updates           | SLES12-SP3-Updates           | Yes     | (r ) Yes  | Yes
+
+安装编译依赖
+~~~~~~~~~~~~~
+
+- 安装编译依赖::
+
+   zypper in -y autoconf automake bison flex gcc gettext-tools \
+       libasan0 libatomic1 libgomp1 libitm1 libopenssl-devel libtsan0 \
+       linux-glibc-devel python-netifaces python-simplejson python-xattr \
+       rpm-build systemd-rpm-macros zlib-devel sqlite3 \
+       fdupes libtool pkgconfig python3 fuse glibc-devel libaio-devel \
+       git
+
+   zypper in -y libuuid-devel acl-devel libxml2-devel liburcu-devel
+
+.. note::
+
+   这次安装编译依赖没有遇到问题
+
+源代码编译
+------------
+
+.. note::
+
+   为方便部署，第二次实践尝试编译rpm包，以便能够在不同环境中部署。
+
+   我经过实践发现编译RPM包时执行 ``make glusterrpms`` 如果目录不是git clone出来的目录，则会提示报错::
+
+      (cd . && git diff && echo ===== git log ==== && git log) > glusterfs-6.10/ChangeLog
+      Not a git repository
+      To compare two paths outside a working tree:
+      usage: git diff [--no-index] <path> <path>
+      Makefile:1009: recipe for target 'gen-ChangeLog' failed
+      make[3]: *** [gen-ChangeLog] Error 129
+      Makefile:675: recipe for target 'distdir' failed
+      make[2]: *** [distdir] Error 2
+      Makefile:771: recipe for target 'dist' failed
+      make[1]: *** [dist] Error 2
+      make[1]: Leaving directory '/root/glusterfs-6.10'
+      Makefile:546: recipe for target 'prep' failed
+      make: *** [prep] Error 2
+
+   所以我最终采用的是git clone出来的源代码仓库进行编译。
+
+- 下载代码::
+
+   git clone git@github.com:gluster/glusterfs.git
+   cd glusterfs
+   git checkout v6.10
+
+- 运行 ``autogen`` 生成configure脚本::
+
+   ./autogen.sh
+
+- 运行configure脚本生成make文件::
+
+   ./configure
+
+- 根据第一次实践经验，在执行编译前需要安装开发依赖包::
+
+   zypper in -y python2-devel libtirpc-devel libcurl-devel \
+       fuse-devel libibverbs-devel librdmacm-devel
+
+SLES12 SP3没有提供 ``userspace-rcu-devel`` ，我在第一次实践中遇到这个问题没有解决(通过修改编译脚本)。 在SUSE官方 `Open Build Service <https://build.opensuse.org/>`_ 提供了所有软件包的spec配置，可以搜索到 `devel:libraries:c_c++ userspace-rcu <https://build.opensuse.org/package/show/devel:libraries:c_c++/userspace-rcu>`_
+
+对比了 `devel:libraries:c_c++ / userspace-rcu / userspace-rcu.spec <https://build.opensuse.org/package/view_file/devel:libraries:c_c++/userspace-rcu/userspace-rcu.spec?expand=1>`_ 配置文件，我发现SUSE实际上时提供了 userspace-rcu 软件包的，只不过包名字命名和Red Hat不同，采用名字 ``liburcu`` 而不是 ``userspace-rcu`` (Red Hat)。这导致GlusterFs编译检测脚本不能通过。
+
+::
+
+   rpm -qa | grep rcu
+
+显示已经安装 ``liburcu`` ::
+
+   liburcu-devel-0.8.8-3.2.x86_64
+   liburcu0-0.8.8-3.2.x86_64
+
+- 在源代码目录下grep引用 ``userspace-rcu-devel`` 的配置文件::
+
+   grep -R userspace-rcu-devel *
+
+可以看到有如下涉及配置::
+
+   extras/devel-tools/devel-vagrant/ansible/roles/install-pkgs/tasks/main.yml:    - userspace-rcu-devel
+   extras/LinuxRPM/rpmbuild/SPECS/glusterfs.spec:BuildRequires:    userspace-rcu-devel >= 0.7
+   Binary file extras/LinuxRPM/glusterfs-6.10-0.0.src.rpm matches
+   glusterfs.spec:BuildRequires:    userspace-rcu-devel >= 0.7
+   glusterfs.spec.in:BuildRequires:    userspace-rcu-devel >= 0.7
+   tests/vagrant/vagrant-template-centos6/roles/install-pkgs/tasks/main.yml:    - userspace-rcu-devel
+   tests/vagrant/vagrant-template-fedora/roles/install-pkgs/tasks/main.yml:    - userspace-rcu-devel
+
+``glusterfs.spec.in`` 是源代码包含的原始配置，在rpmbuild过程中会生成 ``glusterfs.spec`` 以及 ``extras/LinuxRPM/rpmbuild/SPECS/glusterfs.spec`` ，所以只需要修订源代码根目录下 ``glusterfs.spec.in`` ，将 ``BuildRequires:    userspace-rcu-devel >= 0.7`` 修订成 ``BuildRequires:    liburcu-devel >= 0.7`` 。这样再次执行编译就可以避免第一次实践中遇到的无法找到 ``userspace-rcu-devel`` 依赖包的问题。
+
+- 编译RPM包::
+
+   cd extras/LinuxRPM
+
+在这个目录下，前面执行的 ``./configure`` 已经生成了 ``Makefile`` ，所以可以执行以下命令编译RPM::
+
+   make glusterrpms
+
+这里遇到一个报错::
+
+   + make
+   make[1]: Entering directory '/home/huatai/glusterfs/extras/LinuxRPM/rpmbuild/BUILD/glusterfs-6.10'
+   Makefile:80: *** missing separator.  Stop.
+   make[1]: Leaving directory '/home/huatai/glusterfs/extras/LinuxRPM/rpmbuild/BUILD/glusterfs-6.10'
+   error: Bad exit status from /var/tmp/rpm-tmp.JO2Pdt (%build)
+   
+   
+   RPM build errors:
+       Bad exit status from /var/tmp/rpm-tmp.JO2Pdt (%build)
+   Makefile:561: recipe for target 'rpms' failed
+   make: *** [rpms] Error 1
+
+这是最初在执行 ``./configure`` 脚本没有传递参数，生成的 ``Makefile`` 内容无法判断 ``dist`` 所以在变量部分填写了报错信息::
+
+   build_triplet = It is not expected to execute this script. When you are building from a
+   released tarball (generated with 'make dist'), you are expected to pass
+   --build=... and --host=... to ./configure or replace this config.sub script in
+   the sources with an updated version.
+   host_triplet = It is not expected to execute this script. When you are building from a
+   released tarball (generated with 'make dist'), you are expected to pass
+   --build=... and --host=... to ./configure or replace this config.sub script in
+   the sources with an updated version.
+
+回到源代码根目录下执行 ``./configure --help | grep build`` 可以看到::
+
+     --build=BUILD     configure for building on BUILD [guessed]
+     --host=HOST       cross-compile to build programs to run on HOST [BUILD].
+
+所以重新在源代码根目录下执行一次::
+
+   ./configure --build=x86_64
+
+然后返回 ``extras/LinuxRPM`` 目录下再次执行 ``make glusterrpms`` ，则生成的Makefile包含::
+
+   build_triplet = x86_64-pc-none
+   host_triplet = x86_64-pc-none 
+
+- 再次报错::
+
+   rpmbuild --define '_topdir /home/huatai/glusterfs/extras/LinuxRPM/rpmbuild' --with gnfs -bb rpmbuild/SPECS/glusterfs.spec
+   Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.ehc2mi
+   + umask 022
+   + cd /home/huatai/glusterfs/extras/LinuxRPM/rpmbuild/BUILD
+   + cd /home/huatai/glusterfs/extras/LinuxRPM/rpmbuild/BUILD
+   + rm -rf glusterfs-6.10
+   + /bin/tar -xf -
+   + /usr/bin/gzip -dc /home/huatai/glusterfs/extras/LinuxRPM/rpmbuild/SOURCES/glusterfs-6.10.tar.gz
+   + STATUS=0
+   + '[' 0 -ne 0 ']'
+   + cd glusterfs-6.10
+   + /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .
+   + echo 'fixing python shebangs...'
+   fixing python shebangs...
+   + for f in api events extras geo-replication libglusterfs tools xlators
+   + find api -type f -exec sed -i 's|/usr/bin/python3|/usr/bin/python2|' '{}' ';'
+   + for f in api events extras geo-replication libglusterfs tools xlators
+   + find events -type f -exec sed -i 's|/usr/bin/python3|/usr/bin/python2|' '{}' ';'
+   + for f in api events extras geo-replication libglusterfs tools xlators
+   + find extras -type f -exec sed -i 's|/usr/bin/python3|/usr/bin/python2|' '{}' ';'
+   + for f in api events extras geo-replication libglusterfs tools xlators
+   + find geo-replication -type f -exec sed -i 's|/usr/bin/python3|/usr/bin/python2|' '{}' ';'
+   find: 'geo-replication': No such file or directory
+   error: Bad exit status from /var/tmp/rpm-tmp.ehc2mi (%prep)
+   
+   
+   RPM build errors:
+       Bad exit status from /var/tmp/rpm-tmp.ehc2mi (%prep)
+   Makefile:561: recipe for target 'rpms' failed
+   make: *** [rpms] Error 1
+
+检查了 ``extras/LinuxRPM/rpmbuild/BUILD/glusterfs-6.10`` 目录下，确实没有 ``geo-replication`` ；但是在源代码根目录下是包含了 ``geo-replication`` 子目录的，看起来是打包 ``glusterfs-6.10.tar.gz`` 没有包含。我重新把操作步骤执行了一遍，发现在 ``./configure --build=x86_64`` 生成提示显示::
+
+   GlusterFS configure summary
+   ===========================
+   FUSE client          : yes
+   ...
+   georeplication       : no
+   ...
+
+尝试 ``./configure --build=x86_64 --disable-georeplication`` 但是报错依旧。既然实际不编译 georeplication ，能否去掉这个检查呢？
+
+修订源代码目录下 ``glusterfs.spec.in`` 将::
+
+   %prep
+   %setup -q -n %{name}-%{version}%{?prereltag}
+   %if ( ! %{_usepython3} )
+   echo "fixing python shebangs..."
+   for f in api events extras geo-replication libglusterfs tools xlators; do
+   find $f -type f -exec sed -i 's|/usr/bin/python3|/usr/bin/python2|' {} \;
+   done
+   %endif
+
+中的::
+
+   for f in api events extras geo-replication libglusterfs tools xlators; do
+
+修改成::
+
+   for f in api events extras libglusterfs tools xlators; do
+
+但是，虽然绕过了这个问题，但是编译时候依然会需要 ``geo-replication`` 所以提示错误::
+
+   checking that generated files are newer than configure... done
+   configure: creating ./config.status
+   config.status: creating Makefile
+   config.status: creating libglusterfs/Makefile
+   config.status: creating libglusterfs/src/Makefile
+   config.status: error: cannot find input file: `geo-replication/src/peer_gsec_create.in'
+   configure: WARNING: cache variable ac_cv_build contains a newline
+   configure: WARNING: cache variable ac_cv_host contains a newline
+   error: Bad exit status from /var/tmp/rpm-tmp.O4BOny (%build)
+
+第三次实践
+=============
+
+.. note::
+
+   根据Gluster官网 `Gluster Release Status <https://www.gluster.org/release-schedule/>`_ 当前Relase 7处于维护状态，属于比较稳定的版本，所以尝试这个版本的编译。
+
+- 下载代码::
+
+   git clone git@github.com:gluster/glusterfs.git
+   cd glusterfs
+   git checkout v6.10
+
+- 修改 ``glusterfs.spec.in`` ，将 ``BuildRequires:    userspace-rcu-devel >= 0.7`` 修订成 ``BuildRequires:    liburcu-devel >= 0.7``
+
+- 运行 ``autogen`` 生成configure脚本::
+
+   ./autogen.sh
+
+- 运行configure脚本生成make文件::
+
+   ./configure --build=x86_64
+
+- 编译rpm::
+
+   cd extras/LinuxRPM
+   make glusterrpms
+
+报错依旧，看起来还是tar.gz无法将 ``geo-replication`` 加入到 tgz 包，导致编译预处理无法完成，后续编译也会报错。
+
+解决思路
+=========
+
+由于SUSE提供的obs服务是能够正确制作不同版本的软件包，我部署了 :ref:`suse_obs` 来尝试自己构建完整的软件生态。
 
 参考
 ======
