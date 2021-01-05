@@ -21,6 +21,7 @@ SUSE Linux
    suse_deploy_smt.rst
    suse_update_dev_tool.rst
    suse_12_install_gcc.rst
+   obs/index
 
 
 .. only::  subproject and html
