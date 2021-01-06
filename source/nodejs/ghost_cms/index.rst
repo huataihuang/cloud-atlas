@@ -1,17 +1,12 @@
-.. _nodejs:
+.. _ghost_cms:
 
 =================================
-Node.js Atlas
+Ghost CMS系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_nodejs.rst
-   startup/index
-   koa/index
-   egg/index
-   ghost_cms/index
 
 .. only::  subproject and html
 
