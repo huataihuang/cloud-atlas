@@ -17,9 +17,14 @@ Kindle以朴素的黑白文字世界让我们能够专注于相当有价值的�
 
    2021年伊始，我尝试以 :ref:`iphone_zen` 的方式来使用必要的电子设备。
 
+.. note::
+
+   Kindle阅读推荐 `书伴 <https://bookfere.com>`_ 网站，提供很多关于Kindle使用技巧以及书籍推荐，特别是提供了完整的 `Kindle字典下载 <https://bookfere.com/post/9.html>`_ ，方便我们更好地使用Kindle。
+
 .. toctree::
    :maxdepth: 1
 
+   calibre_remove_drm.rst
    use_kindle_read_pdf.rst
 
 .. only::  subproject and html
