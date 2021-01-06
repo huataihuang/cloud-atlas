@@ -1,17 +1,13 @@
-.. _nodejs:
+.. _javascript:
 
 =================================
-Node.js Atlas
+JavaScript Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_nodejs.rst
-   startup/index
-   koa/index
-   egg/index
-   ghost_cms/index
+   js_var_const.rst
 
 .. only::  subproject and html
 

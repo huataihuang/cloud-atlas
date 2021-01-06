@@ -1,17 +1,13 @@
-.. _nodejs:
+.. _nodejs_startup:
 
 =================================
-Node.js Atlas
+Node.js起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_nodejs.rst
-   startup/index
-   koa/index
-   egg/index
-   ghost_cms/index
+   run_nodejs.rst
 
 .. only::  subproject and html
 
