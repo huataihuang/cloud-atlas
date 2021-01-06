@@ -1,4 +1,4 @@
-.. _intrudoce_node.js:
+.. _intrudoce_nodejs:
 
 =================
 Node.js 简介

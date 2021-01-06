@@ -1,4 +1,4 @@
-.. _node.js:
+.. _nodejs:
 
 =================================
 Node.js Atlas
@@ -7,7 +7,7 @@ Node.js Atlas
 .. toctree::
    :maxdepth: 1
 
-   introduce_node.js.rst
+   introduce_nodejs.rst
    koa/index
    egg/index
 
