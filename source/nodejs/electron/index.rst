@@ -1,14 +1,11 @@
-.. _ghost_cms:
+.. _electron:
 
 =================================
-Ghost CMS系统
+Electron桌面开发框架
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   introduce_ghost_cms.rst
-   deploy_ghost_cms.rst
 
 .. only::  subproject and html
 

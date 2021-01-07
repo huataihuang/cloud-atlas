@@ -216,6 +216,8 @@ Electron框架使用Node作为后台来访问硬盘和网络::
    npm install && npm start
    curl localhost:8081
 
+上述简单的步骤就可以在你的桌面操作系统中运行一个图形界面程序，虽然目前什么都做不了，但是展示了一个桌面应用开发的可能性，后续在此基础上可以进一步开发 :ref:`electron`
+
 .. note::
 
    传统的模型-视图-控制器(MVC) Web应用，例如 :ref:`ghost_cms` 博客引擎就是使用Node构建的。

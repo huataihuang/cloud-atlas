@@ -9,9 +9,11 @@ Node.js Atlas
 
    introduce_nodejs.rst
    startup/index
+   electron/index
    koa/index
    egg/index
    ghost_cms/index
+
 
 .. only::  subproject and html
 
