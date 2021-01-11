@@ -10,8 +10,7 @@ Kernel Atlas
    :maxdepth: 1
 
    kernel_overview.rst
-   cgroups_v1.rst   
-   cgroups_v2.rst   
+   cgroup/index
    intel_rdt.rst
    flame_graph.rst
    ebpf.rst

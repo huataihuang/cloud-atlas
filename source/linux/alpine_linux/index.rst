@@ -1,18 +1,15 @@
-.. _redhat_linux:
+.. _alpine_linux:
 
 =================================
-RedHat Linux
+Alpine Linux
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   centos/index
-   admin/index
-   systemd/index
-   cgroup/index
-   kernel/index
-   performance/index
+   introduce_alpine.rst
+   init_alpine.rst
+   alpine_apk.rst
 
 .. only::  subproject and html
 

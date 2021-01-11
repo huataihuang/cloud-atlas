@@ -1,18 +1,14 @@
-.. _redhat_linux:
+.. _ceph_deploy:
 
 =================================
-RedHat Linux
+Ceph 部署
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   centos/index
-   admin/index
-   systemd/index
-   cgroup/index
-   kernel/index
-   performance/index
+   centos_sig_ceph.rst
+   install_ceph_manual.rst
 
 .. only::  subproject and html
 

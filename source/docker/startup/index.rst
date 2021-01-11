@@ -17,6 +17,7 @@ Docker 起步
    docker_infrastructure.rst
    oci_pouch.rst
    docker_compose.rst
+   dockerfile_from_image.rst
 
 .. only::  subproject and html
 

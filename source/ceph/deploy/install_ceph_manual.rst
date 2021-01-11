@@ -108,7 +108,7 @@ Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量�
 
 本案例采用3个节点：
 
-.. figure:: ../_static/ceph/simple_3nodes_cluster.png
+.. figure:: ../../_static/ceph/deploy/simple_3nodes_cluster.png
 
    Figure 1: 三节点Ceph集群
 

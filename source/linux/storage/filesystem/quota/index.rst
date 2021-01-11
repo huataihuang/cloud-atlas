@@ -1,18 +1,12 @@
-.. _redhat_linux:
+.. _linux_disk_quota:
 
 =================================
-RedHat Linux
+Linux文件系统Disk Quota
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   centos/index
-   admin/index
-   systemd/index
-   cgroup/index
-   kernel/index
-   performance/index
 
 .. only::  subproject and html
 

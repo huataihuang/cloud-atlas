@@ -1,11 +1,14 @@
 .. _install_mysql:
 
 =================
-MySQL安装
+安装MySQL
 =================
 
 macOS上安装MySQL
 ===================
+
+MySQL官方安装包
+----------------
 
 MySQL官方提供了MySQL on macOS Native Packages，可以非常方便直接安装。
 
@@ -19,6 +22,29 @@ MySQL官方提供了MySQL on macOS Native Packages，可以非常方便直接安
 
 否则Python使用 ``mysqlclient`` 模块会报无法找到动态库错误(请参考 :ref:`django_app` )
 
+Homebrew安装
+-------------
+
+- 首先安装 :ref:`homebrew`
+
+- 安装mysql::
+
+   brew install mysql
+
+- 在用户路径中添加mysql::
+
+   export PATH=$PATH:/usr/local/mysql/bin
+
+- 启动数据库::
+
+   brew services start mysql
+
+- 数据库安全初始化::
+
+   mysql_secure_installation
+
+移除测试数据库和匿名账号，并设置一个复杂密码。
+
 数据库初始化
 ==============
 
@@ -29,7 +55,7 @@ MySQL官方提供了MySQL on macOS Native Packages，可以非常方便直接安
 
 前者通过 :ref:`docker` 的官方镜像，支持传递环境变量就可以自动配置好MySQL数据库；但是后者则是传统的数据库维护方式，需要我们做数据库初始化才能用于 :ref:`django` 开发。
 
-- 在MySQL中床架数据库 ``mydb`` 并创建 ``myapp_user`` 账号及对应密码 ``myapp_passwd`` ::
+- 在MySQL中创建数据库 ``mydb`` 并创建 ``myapp_user`` 账号及对应密码 ``myapp_passwd`` ::
 
    create database mydb characterset utf8;
 

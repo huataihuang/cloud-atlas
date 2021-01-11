@@ -1,4 +1,4 @@
-.. _cgroups_v1:
+.. _cgroup_v1:
 
 ==================
 Control Group v1

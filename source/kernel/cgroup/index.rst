@@ -1,15 +1,15 @@
-.. _alpine:
+.. _cgroups:
 
 =================================
-Alpine Linux
+Kernel Cgroups
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_alpine.rst
-   init_alpine.rst
-   alpine_apk.rst
+   cgroup_v1.rst
+   cgroup_v2.rst
+   cgroup_v2_facebook.rst
 
 .. only::  subproject and html
 
