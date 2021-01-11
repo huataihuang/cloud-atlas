@@ -11,7 +11,7 @@ OS包含了一个yum兼容的，基于包生命周期管理系统，称为 ``tdn
 
 .. note::
 
-   在 :ref:`install_docker_macos` 时， :ref:`docker` 采用了 :ref:`hyperkit` 来运行一个精简的 :ref:`alpine` 操作系统。与此类似，运行容器环境并不需要完整的Linux操作系统，采用定制精简的Linux系统，更能够节约系统资源，并且降低安全风险。
+   在 :ref:`install_docker_macos` 时， :ref:`docker` 采用了 :ref:`hyperkit` 来运行一个精简的 :ref:`alpine_linux` 操作系统。与此类似，运行容器环境并不需要完整的Linux操作系统，采用定制精简的Linux系统，更能够节约系统资源，并且降低安全风险。
 
    此外，还有Red Hat推出的精简容器运行操作系统 :ref:`atomic`
 

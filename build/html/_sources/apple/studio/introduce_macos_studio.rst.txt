@@ -28,7 +28,7 @@ hyperkit也是在macOS上运行Docker的基础，并且Ubuntu提供了基于hype
 
 .. note::
 
-   :ref:`install_docker_macos` 使用的Docker Desktop on Mac，实际上就是 :ref:`xhyve` 所运行的一个虚拟机。不过，这个部署只运行了一台 :ref:`alpine` 虚拟机来运行 :ref:`docker` ，所以类似 :ref:`install_run_minikube` 只是单机版本，如果要在一个虚拟机中体验Kubernetes，可以采用 :ref:`docker_in_docker` 。
+   :ref:`install_docker_macos` 使用的Docker Desktop on Mac，实际上就是 :ref:`xhyve` 所运行的一个虚拟机。不过，这个部署只运行了一台 :ref:`alpine_linux` 虚拟机来运行 :ref:`docker` ，所以类似 :ref:`install_run_minikube` 只是单机版本，如果要在一个虚拟机中体验Kubernetes，可以采用 :ref:`docker_in_docker` 。
 
 - :ref:`vmware_fusion` - VMware Fusion是商用软件，虽然不是macOS内置的虚拟化技术，略微沉重，但是，设置非常方便，并且不仅支持硬件虚拟化(当然hyperkit也支持)而且支持 :ref:`vmware_nested_virtual` ，这项技术和 :ref:`kvm_nested_virtual` 类似，通过嵌套虚拟化技术在一台物理主机上运行多个支持虚拟化的虚拟机，可以构建复杂的云计算集群。
 

@@ -15,7 +15,7 @@ Ceph Atlas
    bluestore.rst
    rdma.rst
    ceph_docker_in_studio.rst
-   install_ceph_manual.rst
+   deploy/index
 
 .. only::  subproject and html
 

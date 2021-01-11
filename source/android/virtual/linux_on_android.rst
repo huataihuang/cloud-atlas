@@ -28,7 +28,7 @@ Linux Deploy将完整的Linux操作系统放到Android中，这是因为这个�
 Deploy Linux账号密码重置
 ==========================
 
-我遇到一个问题是安装部署了 :ref:`alpine` 之后，启动后ssh发现账号密码不正确(虽然我在config的时候指定了账号密码)，所以通过挂载 img 文件，进入该Linux系统重置密码::
+我遇到一个问题是安装部署了 :ref:`alpine_linux` 之后，启动后ssh发现账号密码不正确(虽然我在config的时候指定了账号密码)，所以通过挂载 img 文件，进入该Linux系统重置密码::
 
    adb shell
    su

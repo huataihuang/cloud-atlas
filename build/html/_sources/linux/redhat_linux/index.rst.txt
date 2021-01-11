@@ -7,8 +7,7 @@ RedHat Linux
 .. toctree::
    :maxdepth: 1
 
-   upgrade_centos_7_to_8.rst
-   install_centos8.rst
+   centos/index
    admin/index
    systemd/index
    cgroup/index

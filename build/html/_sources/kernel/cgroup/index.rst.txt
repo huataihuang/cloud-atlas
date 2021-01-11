@@ -1,0 +1,19 @@
+.. _cgroups:
+
+=================================
+Kernel Cgroups
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   cgroup_v1.rst
+   cgroup_v2.rst
+   cgroup_v2_facebook.rst
+
+.. only::  subproject and html
+
+   Indices
+   =======
+
+   * :ref:`genindex`

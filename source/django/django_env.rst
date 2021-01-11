@@ -6,9 +6,9 @@ Django开发环境
 
 作为Python Web框架，Django需要Python支持才能运行。目前Python 2.x已经终止开发，如果你的项目刚刚开始，请从Python 3开始(Python 3不兼容Python 2)。请首先安装Python 3。
 
-建议从 `Python官网下载 <https://www.python.org/downloads/>`_ 最新版本，或者从发行版安装。当前稳定版本Python 3.8.1支持Mac OS X 10.9及以上环境运行。
+建议从 `Python官网下载 <https://www.python.org/downloads/>`_ 最新版本，或者从发行版安装。
 
-对于macOS系统默认安装了Python 2.7为了兼容遗留代码，最新的Catalina(10.15.x)也安装了Python 3，不过需要注意执行命令是 ``python3`` 。
+对于macOS系统默认安装了Python 2.7为了兼容遗留代码，最新的Catalina(10.15.x)也安装了Python 3，不过需要注意执行命令是 ``python3`` 。但是需要注意的是，即使macOS Big Sur 11.1内建的Python 3也不支持GUI的 :ref:`python_tkinter` ，所以建议从官方网站安装最新版本(包含了完整的库支持)。
 
 也可以通过 `Homebrew <http://brew.sh/>`_ 安装Python3::
 
