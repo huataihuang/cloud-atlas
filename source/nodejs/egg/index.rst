@@ -8,6 +8,7 @@ Node.js企业级开源框架egg
    :maxdepth: 1
 
    introduce_egg.rst
+   run_egg.rst
 
 .. only::  subproject and html
 

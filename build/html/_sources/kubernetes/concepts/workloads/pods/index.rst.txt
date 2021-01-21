@@ -1,4 +1,4 @@
-.. _kubernetes_workloads_pods:
+.. _k8s_workloads_pods:
 
 ======================
 Kubernetes Pods
@@ -9,3 +9,4 @@ Kubernetes Pods
 
    pod_overview.rst
    pod_lifecycle.rst
+   sidecar.rst

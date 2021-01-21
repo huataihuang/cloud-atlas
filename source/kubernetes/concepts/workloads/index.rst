@@ -1,4 +1,4 @@
-.. _kubernetes_workloads:
+.. _k8s_workloads:
 
 ======================
 Kubernetes负载

@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Docker多进程容器init进程简介 &mdash; Cloud Atlas 0.1 文档</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Docker tini进程管理器" href="docker_tini.html" />
+    <link rel="prev" title="Docker init进程管理器" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Docker Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">Docker 起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../docker_in_docker/index.html">Docker in Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../moby/index.html">Docker Moby</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../linuxserver/index.html">Docker LinuxServer.io</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker init进程管理器</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Docker多进程容器init进程简介</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">不同的进程管理器</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="docker_tini.html">Docker tini进程管理器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_systemd.html">Docker systemd进程管理器</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html">Docker 管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/index.html">Docker 环境运行应用程序案例</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Docker存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network/index.html">Docker网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">Docker GPU设备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logs/index.html">Docker 日志</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Docker Atlas</a> &raquo;</li>
+        
+          <li><a href="index.html">Docker init进程管理器</a> &raquo;</li>
+        
+      <li>Docker多进程容器init进程简介</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/docker/init/introduce_docker_init.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dockerinit">
+<span id="introduce-docker-init"></span><h1>Docker多进程容器init进程简介<a class="headerlink" href="#dockerinit" title="永久链接至标题">¶</a></h1>
+<p>在容器技术领域，有一个咒语 <code class="docutils literal notranslate"><span class="pre">每个容器一个进程</span></code> ，也就是说你不应该将容器视为传统的 <code class="docutils literal notranslate"><span class="pre">大而全的虚拟机</span></code> ，而是轻量级专用容器。</p>
+<p>然而，事实上，在一个容器中确实运行了多个进程，例如 <code class="docutils literal notranslate"><span class="pre">ENTRYPOINT</span></code> 就是一个不折不扣的 <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">process</span></code> 。有时我们需要在容器中运行多个相互依赖的进程(例如 <a class="reference internal" href="../../kubernetes/concepts/workloads/pods/sidecar.html#sidecar"><span class="std std-ref">sidecar概念和应用</span></a> ) 或者将历史应用程序迁移到容器环境中，此时我们需要一个传统的进程管理器以便在容器中运行多个进程。</p>
+<div class="section" id="id1">
+<h2>不同的进程管理器<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd管理</span></a> - 大而全的系统进程管理器，功能复杂且强大，对于Docker容器环境 <a class="reference internal" href="docker_systemd.html#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 是比较重的解决方案，但是符合传统运维管理模式</p></li>
+<li><p><a class="reference internal" href="../../linux/compute/supervisord.html#supervisord"><span class="std std-ref">supervisord进程管理器</span></a> - 易于使用的进程管理器</p></li>
+<li><p><a class="reference external" href="https://mmonit.com/monit/">monit</a> 小型的进程管理器</p></li>
+<li><p><a class="reference external" href="http://smarden.org/runit/">runit</a></p></li>
+<li><p><a class="reference external" href="https://skarnet.org/software/s6/">s6</a> 非常著名的进程管理器，在 <a class="reference external" href="https://github.com/just-containers/s6-overlay">s6-overlay</a> 项目提供了精彩的文档，并被很多用户推崇。我将在 <a class="reference internal" href="docker_s6.html#docker-s6"><span class="std std-ref">Docker s6进程管理器</span></a> 中实践。</p></li>
+<li><p><a class="reference internal" href="docker_tini.html#docker-tini"><span class="std std-ref">Docker tini进程管理器</span></a> 是Docker默认进程管理器</p></li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://ahmet.im/blog/minimal-init-process-for-containers/">Choosing an init process for multi-process containers</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="docker_tini.html" class="btn btn-neutral float-right" title="Docker tini进程管理器" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Docker init进程管理器" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; <a href="../../copyright.html"> 版权所有</a> 2019, Huatai Huang.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

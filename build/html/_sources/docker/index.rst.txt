@@ -10,6 +10,8 @@ Docker Atlas
    startup/index
    docker_in_docker/index
    moby/index
+   linuxserver/index
+   init/index
    admin/index
    applications/index
    storage/index

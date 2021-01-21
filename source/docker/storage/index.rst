@@ -19,6 +19,7 @@ Docker存储
    docker_size_quota.rst
    docker_run_add_host_device.rst
    docker_container_nfs.rst
+   docker_images_on_nfs.rst
 
 .. only::  subproject and html
 

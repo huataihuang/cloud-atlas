@@ -13,7 +13,6 @@ Docker 起步
    install_docker_macos.rst
    docker_run.rst
    docker_concept.rst
-   tini.rst
    docker_infrastructure.rst
    oci_pouch.rst
    docker_compose.rst
