@@ -1,14 +1,11 @@
-.. _linux_compute:
+.. _wireshark:
 
 =================================
-Linux计算
+Wire网络分析
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   supervisord.rst
-   memory/index
 
 .. only::  subproject and html
 

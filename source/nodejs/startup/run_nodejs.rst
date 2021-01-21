@@ -17,7 +17,43 @@ Linux安装Node.js
 
    sudo apt install nodejs
 
+macOS安装Node.js
+====================
+
 - macOS从Nodejs官网下载pkg进行安装，非常简单
+
+- 另一种方式是使用 :ref:`homebrew` 安装::
+
+   brew install node
+
+卸载Node
+---------
+
+- 通过brew安装的node可以如下卸载::
+
+   brew uninstall node; 
+   # or `brew uninstall --force node` which removes all versions
+   brew cleanup;
+   rm -f /usr/local/bin/npm /usr/local/lib/dtrace/node.d;
+   rm -rf ~/.npm;
+
+- 使用官方pkg安装包，则使用如下命令卸载::
+
+   cd /
+   lsbom -f -l -s -pf /var/db/receipts/org.nodejs.node.pkg.bom \
+   | while read i; do
+     sudo rm ${i}
+   done
+   sudo rm -rf /usr/local/lib/node \
+        /usr/local/lib/node_modules \
+        /var/db/receipts/org.nodejs.*
+
+.. warning::
+
+   这里删除命令是 ``sudo`` 方式非常危险，所以务必检查 ``lsbom -f -l -s -pf /var/db/receipts/org.nodejs.node.pkg.bom`` 输出内容，确保是删除node相关文件。
+
+验证Node
+==========
 
 - 验证node:
 
@@ -222,3 +258,7 @@ Electron框架使用Node作为后台来访问硬盘和网络::
 
    传统的模型-视图-控制器(MVC) Web应用，例如 :ref:`ghost_cms` 博客引擎就是使用Node构建的。
 
+参考
+======
+
+- `How to Uninstall Node.js from Mac OSX <https://stackabuse.com/how-to-uninstall-node-js-from-mac-osx/>`_

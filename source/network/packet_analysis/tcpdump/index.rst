@@ -1,14 +1,11 @@
-.. _linux_compute:
+.. _tcpdump:
 
 =================================
-Linux计算
+tcpdump网络分析
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   supervisord.rst
-   memory/index
 
 .. only::  subproject and html
 

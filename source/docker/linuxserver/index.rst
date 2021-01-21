@@ -1,14 +1,13 @@
-.. _linux_compute:
+.. _docker_linuxserver:
 
 =================================
-Linux计算
+Docker LinuxServer.io 
 =================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   supervisord.rst
-   memory/index
+   linuxserver_image.rst
 
 .. only::  subproject and html
 

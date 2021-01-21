@@ -1,14 +1,13 @@
-.. _linux_compute:
+.. _knowledge_management:
 
 =================================
-Linux计算
+知识管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   supervisord.rst
-   memory/index
+   personal_km.rst
 
 .. only::  subproject and html
 

@@ -36,6 +36,25 @@
 
 .. figure:: ../../_static/python/startup/vscode_pythonpath.png
 
+这两个配置完成后，检查 ``$HOME/Library/Application\ Support/Code/User/settings.json`` 可以看到如下配置::
+
+   ...
+   "python.venvPath": "~/venv3",
+   "python.pythonPath": "~/venv3/bin/python",
+   ...
+
+- 完成以上 ``python.venvPath`` 和 ``python.pythonPath`` 设置之后， ``需要重启一次VS Code`` ，然后使用 ``Python:Select Interpreter`` 就会看到默认的解释器就是虚拟环境中的Python了： ``~/venv3/bin/python``
+
+.. figure:: ../../_static/python/startup/current_python_interpreter.png
+
+上述设置之后，在 VS Code中启动一个内建的Terminal可以看到如下输出::
+
+   source /Users/huatai/venv3/bin/activate
+   huatai@my-studio onesre % source /Users/huatai/venv3/bin/activate
+   (venv3) huatai@my-studio onesre %
+
+则证明已经启动Python Virtualenv环境，并且在Terminal中执行 ``python`` 进入交互模式，并执行 ``import 模块名`` 检查你之前安装过的模块，例如 :ref:`django` 不应该有任何报错。
+
 
 参考
 ======

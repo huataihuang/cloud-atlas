@@ -1,14 +1,13 @@
-.. _linux_compute:
+.. _ethtool:
 
 =================================
-Linux计算
+ethtool - 控制网络驱动和硬件
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   supervisord.rst
-   memory/index
+   introduce_ethtool.rst
 
 .. only::  subproject and html
 

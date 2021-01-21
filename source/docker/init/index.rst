@@ -1,14 +1,16 @@
-.. _linux_compute:
+.. _docker_init:
 
 =================================
-Linux计算
+Docker init进程管理器
 =================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   supervisord.rst
-   memory/index
+   introduce_docker_init.rst
+   docker_tini.rst
+   docker_systemd.rst
+   docker_s6.rst
 
 .. only::  subproject and html
 
