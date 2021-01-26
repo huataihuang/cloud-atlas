@@ -15,6 +15,7 @@ Ubuntu Linux
    ubuntu_hibernate.rst
    admin/index
    network/index
+   storage/index
 
 .. only::  subproject and html
 

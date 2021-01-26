@@ -29,7 +29,7 @@ Docker容器中的systemd
 
 - 在Docker容器中，默认的PID 1进程是作为容器的 ``Entrypoint`` 指定的，通常是一个 ``bash`` ，但是我们要使用 ``systemd`` 
 
-- systemd需要 ``CAP_SYS_ADMIN`` 能力( ``当前已经不再需要指定这个参数，该参数可能过度分配了权限`` ):
+- systemd需要 ``CAP_SYS_ADMIN`` 能力( ``当前运行systemd已经不再需要指定这个参数，但是如果要在容器内部使用NFS，即 mount.nfs 还是需要启用这个能力`` ):
 
 Docker默认在非特权容器( ``non privileged container`` )中关闭了这个能力。也就是说，如果需要在 ``privileged`` 容器中才能运行systemd，这样的特权容器不会过滤掉任何能力。
 
@@ -86,7 +86,7 @@ CAP_SYS_ADMIN 和 cgroupfs
 - 现在我们启动一个新的运行systemd的容器，注意，参数中增加了 ``--cap-add SYS_ADMIN`` 赋予 ``CAP_SYS_ADMIN`` 能力，并且将主机的cgroup文件系统只读映射到容器内部::
 
    docker run -tid -p 1222:22 --hostname centos8-systemd --name centos8-systemd -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-     --cap-add SYS_ADMIN local:centos8 /sbin/init
+     --cap-add=sys_admin local:centos8 /sbin/init
 
 注意， ``docker run`` 命令最后的执行命令是 ``/sbin/init`` ，在容器中，这个 ``/sbin/init`` 是软链接到 ``/lib/systemd/systemd`` 进程管理器::
 
@@ -173,7 +173,56 @@ tmpfs / fuse / sysinit.target
 Dockerfile构建systemd+sshd
 ===========================
 
-待续
+dockerfile构建
+------------------
+
+- 在工作目录下创建以下 ``centos8-systemd-sshd`` 作为Dockerfile ，并在目录下存放一个用于 admin 用户的公钥文件 ``authorized_keys``
+
+.. literalinclude:: docker_systemd/centos8-systemd-sshd.dockerfile
+   :language: bash
+   :linenos:
+
+- 执行以下命令构建镜像::
+
+   docker build -f centos8-systemd-sshd -t local:centos8-systemd-sshd .
+
+- 执行以下命令创建运行systemd的容器::
+
+   docker run -itd -p 1122:22 --hostname centos8-ssh --name centos8-ssh \
+     --cap-add=sys_admin \
+     --entrypoint=/usr/lib/systemd/systemd \
+     --env container=docker \
+     --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \
+     --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
+     --mount type=tmpfs,destination=/tmp \
+     --mount type=tmpfs,destination=/run \
+     --mount type=tmpfs,destination=/run/lock \
+       local:centos8-systemd-sshd --log-level=info --unit=sysinit.target
+
+.. note::
+
+   完成后运行的容器已经启动了systemd，并且已经准备好了sshd运行环境，包括创建了 ``admin`` 账号。不过，目前我遇到问题还有可能需要手工启动一次sshd以及删除 ``/var/run/nologin`` 。
+
+buildkit构建(尚未实践)
+-------------------------
+
+- 如果你安装使用 :ref:`buildkit` ，则可以使用以下 Dockerfile
+
+.. literalinclude:: docker_systemd/centos8-systemd-sshd.dockerfile
+   :language: bash
+   :linenos:
+
+执行以下命令构建镜像::
+
+   buildctl build \
+       --frontend=dockerfile.v0 \
+       --local context=. \
+       --local dockerfile=. 
+
+podman
+========
+
+Red Hat公司开发了另外一个符合OCI规范的容器和pods管理工具 podman ( `GitHub podman <https://github.com/containers/podman>`_ )。这个工具也直接支持在容器中运行systemd ( `How to run systemd in a container <https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/>`_ )
 
 参考
 ======

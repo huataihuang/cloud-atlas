@@ -29,6 +29,31 @@ VMware Fusion基于 Intel 的 macOS操作系统运行的虚拟机系统，通过
 - 使用 Rest API
 - 启用 UEFI 安全引导
 
+VMware Fusion Player
+----------------------
+
+对于个人使用，VMware提供了一个简化版本的免费license，称为 VMware Fusion Player。
+
+我在升级macOS版本到到最新的Big Sur 11.1 版本之后，就无法使用原先购买的VMware Fusion Pro 11.x ，所以升级到 VMware Fusion 12。不过，由于目前较少使用macOS上的VMware，所以考虑个人使用要求不高，就改为在安装时申请一个个人使用的免费license。使用个人license安装的VMware Fusion，是Player版本，功能简化，不过对于运行单机少量虚拟机也足够。
+
+Fusion 12
+-------------
+
+2020年底推出的Fusion 12适配了最新的macOS 11.1 Big Sur，不过启动虚拟机时候会提示::
+
+   You are running this virtual machine with side channel mitigations enabled.
+
+   Side channel mitigations provide enhanced security but also lower performance.
+
+   To disable mitigations, change the side channel mitigations setting in the advanced panel of the virtual machine settings.
+   
+   Refer to VMware KB article 79832 at https://kb.vmware.com/s/article/79832 for more details.
+
+这个问题可在虚拟机关闭状态下，选择菜单 ``Virtual Machine > Settings > Advanced`` 然后选择 ``Disable Side Channel Mitigations``
+
+.. figure::  ../../_static/apple/vmware/disable_side_channel_mitigations.png
+   :scale: 70
+
 VMware Fusion克隆虚拟机
 =========================
 

@@ -115,6 +115,8 @@ Kubernetes需要使用iptables来配置查看bridged网络流量，可以通过�
 
    sudo apt-mark hold kubelet kubeadm kubectl
 
+如果要解除 ``hold`` 则使用 ``sudo apt-mark unhold kubelet kubeadm kubectl``
+
 创建Kubernetes集群
 ====================
 
