@@ -80,6 +80,34 @@ pssh实际上是一个python程序，所以可以通过 Python pip方式安装�
 
 参考 `pssh的安装和问题 <https://blog.csdn.net/wjzholmes/article/details/102239639>`_ 改为使用 Python 2的virtualenv环境就可以解决。
 
+在virtualenv中安装pssh(强烈推荐)
+---------------------------------
+
+上文已经推荐了通过 ``pip`` 安装pssh，不过是全局安装需要root权限。实际上pssh是一个python程序，所以可以通过 :ref:`virtualenv` 来安装部署::
+
+   yum -y update
+   yum -y install python-pip
+   
+   pip2 install virtualenv
+   virtualenv venv2
+
+- 如果没有系统root权限，无法通过yum安装 python-pip ，就可以通过互联网安装pip，安装到自己工作目录下 ``/home/admin/.local/bin`` ::
+
+   curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+   python2 get-pip.py
+
+   # 不要忘记添加 /home/admin/.local/bin 到 profile中
+   echo "export PATH=$HOME/.local/bin:$PATH" >> $HOME/.bashrc
+
+   . $HOME/.bashrc
+   pip2 install virtualenv
+   virtualenv venv2
+
+- 在virtualenv中安装pssh::
+
+   source venv2/bin/activate
+   pip install pssh
+
 命令说明
 ==========
 

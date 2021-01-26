@@ -11,6 +11,7 @@ Docker Moby
    nsenter.rst
    containerd/index
    runc/index
+   buildkit/index
    linuxkit/index
    hyperkit/index
    infrakit/index
