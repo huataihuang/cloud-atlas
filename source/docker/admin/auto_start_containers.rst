@@ -1,4 +1,4 @@
-.. _start_containers_automatically:
+.. _auto_start_containers:
 
 =========================
 自动启动Docker容器
