@@ -68,7 +68,7 @@
 安装docker-compose(可选)
 =========================
 
-docker-compose可以帮助管理多容器应用，类似 :ref:`kubernetes_workloads_pods` ，组合多个容器形成应用服务架构。不过，需要独立手工安装::
+docker-compose可以帮助管理多容器应用，类似 :ref:`k8s_workloads_pods` ，组合多个容器形成应用服务架构。不过，需要独立手工安装::
 
    curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o docker-compose
    sudo mv docker-compose /usr/local/bin && sudo chmod +x /usr/local/bin/docker-compose

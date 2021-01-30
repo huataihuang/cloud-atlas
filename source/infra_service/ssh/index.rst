@@ -1,16 +1,14 @@
-.. _cgroups:
+.. _ssh:
 
 =================================
-Kernel Cgroups
+ssh服务
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   cgroups_v1.rst
-   cgroups_v2.rst
-   cgroups_v2_facebook.rst
-
+   entropy_random.rst
+   
 .. only::  subproject and html
 
    Indices

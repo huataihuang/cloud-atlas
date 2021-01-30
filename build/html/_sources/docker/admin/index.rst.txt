@@ -13,8 +13,9 @@ Docker 管理
    container_live_restore.rst
    container_static_ip.rst
    docker_ssh.rst
+   debug_docker_ssh_crash.rst
    dockerfile.rst
-   start_containers_automatically.rst
+   auto_start_containers.rst
    docker_timezone.rst
 
 .. only::  subproject and html

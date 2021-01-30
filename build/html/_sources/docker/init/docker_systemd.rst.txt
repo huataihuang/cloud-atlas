@@ -170,6 +170,40 @@ tmpfs / fuse / sysinit.target
         30 root      20   0    3876   3048   2568 S   0.0   0.2   0:00.14 bash
        103 root      20   0    9104   3324   2788 R   0.0   0.2   0:00.02 top
 
+安装ssh服务和制作镜像
+======================
+
+- 既然我们已经实现了将systemd作为进程管理器，显然我们可以像传统的VM一样，在容器中部署多个服务，例如，之前我实践过 :ref:`docker_ssh` 是借助了Docker执行 ``/    bin/bash -c "/usr/sbin/sshd && /bin/bash"`` 方法，显然原先的方法不优雅。现在我们有了完整的systemd进程管理器，就可以部署sshd服务了。
+
+  - 在容器内部执行ssh安装::
+
+     dnf install openssh-server
+
+  - 启动sshd服务::
+
+     systemctl start sshd
+
+  - 激活sshd服务::
+
+     systemctl enable sshd
+
+  - 为方便使用，建议同时安装ssh客户端::
+
+     dnf install openssh-clients
+
+- 制作镜像::
+
+   docker commit centos8-systemd-sshd
+   docker tag centos8-systemd-sshd huataihuang/centos8-systemd-sshd
+   docker login
+   docker push huataihuang/centos8-systemd-sshd
+
+.. note::
+
+   上述命令采用了 :ref:`docker_run` 中案例方法，将我制作的镜像推送的Docker Hub的huataihuang账号下，以便后续通过以下方法随时运行新容器::
+
+      docker run -p 1122:22 -d huataihuang/centos8-systemd-sshd --hostname myserver --name myserver
+
 Dockerfile构建systemd+sshd
 ===========================
 

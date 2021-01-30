@@ -108,6 +108,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Docker systemd进程管理器</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dockersystemd">Docker容器中的systemd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">Docker容器运行systemd实践</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssh">安装ssh服务和制作镜像</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dockerfilesystemd-sshd">Dockerfile构建systemd+sshd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#podman">podman</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
@@ -414,6 +415,50 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </div>
 </li>
 </ul>
+</div>
+</div>
+<div class="section" id="ssh">
+<h2>安装ssh服务和制作镜像<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>既然我们已经实现了将systemd作为进程管理器，显然我们可以像传统的VM一样，在容器中部署多个服务，例如，之前我实践过 <a class="reference internal" href="../admin/docker_ssh.html#docker-ssh"><span class="std std-ref">Docker容器中运行ssh服务</span></a> 是借助了Docker执行 <code class="docutils literal notranslate"><span class="pre">/</span>&#160;&#160;&#160; <span class="pre">bin/bash</span> <span class="pre">-c</span> <span class="pre">&quot;/usr/sbin/sshd</span> <span class="pre">&amp;&amp;</span> <span class="pre">/bin/bash&quot;</span></code> 方法，显然原先的方法不优雅。现在我们有了完整的systemd进程管理器，就可以部署sshd服务了。</p>
+<ul>
+<li><p>在容器内部执行ssh安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">openssh</span><span class="o">-</span><span class="n">server</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动sshd服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">sshd</span>
+</pre></div>
+</div>
+</li>
+<li><p>激活sshd服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">sshd</span>
+</pre></div>
+</div>
+</li>
+<li><p>为方便使用，建议同时安装ssh客户端:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">openssh</span><span class="o">-</span><span class="n">clients</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>制作镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">commit</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span>
+<span class="n">docker</span> <span class="n">tag</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span> <span class="n">huataihuang</span><span class="o">/</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span>
+<span class="n">docker</span> <span class="n">login</span>
+<span class="n">docker</span> <span class="n">push</span> <span class="n">huataihuang</span><span class="o">/</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>上述命令采用了 <a class="reference internal" href="../startup/docker_run.html#docker-run"><span class="std std-ref">在Docker容器中运行命令</span></a> 中案例方法，将我制作的镜像推送的Docker Hub的huataihuang账号下，以便后续通过以下方法随时运行新容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span><span class="p">:</span><span class="mi">22</span> <span class="o">-</span><span class="n">d</span> <span class="n">huataihuang</span><span class="o">/</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">myserver</span> <span class="o">--</span><span class="n">name</span> <span class="n">myserver</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="dockerfilesystemd-sshd">

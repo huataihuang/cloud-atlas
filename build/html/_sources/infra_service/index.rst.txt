@@ -19,6 +19,7 @@ Infra-Service Atlas
    :maxdepth: 1
 
    dns/index
+   ssh/index
 
 .. only::  subproject and html
 

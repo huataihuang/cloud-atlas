@@ -163,7 +163,7 @@ Docker容器
    作为基础服务运行的Docker容器，需要具备如下能力:
 
    - 即使 docker 服务升级也能保持容器持续运行，这需要设置 :ref:`keep_containers_alive_during_daemon_downtime` 的运行参数 ``live restore``
-   - 物理服务器操作系统重启，在Docker服务启动时自动启动容器，以确保基础分布式文件系统可用，这需要设置 :ref:`start_containers_automatically` 的 ``docker run`` 运行参数 ``--restart always``
+   - 物理服务器操作系统重启，在Docker服务启动时自动启动容器，以确保基础分布式文件系统可用，这需要设置 :ref:`atuo_start_containers` 的 ``docker run`` 运行参数 ``--restart always``
 
 - 在 ``/etc/docker/daemon.json`` 中添加如下配置::
 
@@ -197,7 +197,7 @@ Docker容器
    - ``-v data:/data`` - :ref:`docker_volume` 映射提供给容器共享的Host主机卷 ``data``
    - ``--net ceph-net --ip 172.18.0.1$i`` - :ref:`container_static_ip`
    - ``-p 221$i:22`` - 在 :ref:`docker_ssh` ，通过将容器中运行端口22输出到host主机221x方便外部登陆
-   - ``--restart always`` - 设置 :ref:`start_containers_automatically` 确保物理主机重启时自动恢复容器运行
+   - ``--restart always`` - 设置 :ref:`auto_start_containers` 确保物理主机重启时自动恢复容器运行
    - ``--device=/dev/mapper/ceph-data$i:/dev/xvdc`` - 通过 :ref:`docker_run_add_host_device` 方式将物理主机LVM卷映射为容器中的磁盘设备，这样可以基于磁盘设备来构建 :ref:`bluestore`
 
 .. note::
