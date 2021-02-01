@@ -11,11 +11,8 @@ Django是Python编写的开源Web应用框架，结构清晰，应用广泛。�
 .. toctree::
    :maxdepth: 1
 
-   django_env.rst
-   django_mysql.rst
-   run_django.rst
-   unittest_simple_app.rst
-   django_app.rst
+   startup/index
+   rest_framework/index
 
 .. only::  subproject and html
 
