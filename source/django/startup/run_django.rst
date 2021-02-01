@@ -4,6 +4,14 @@
 运行Django
 ===============
 
+.. note::
+
+   对于Django，初始化整个项目称为 ``startproject`` ，此时默认会在项目下生成一个和项目同名的 ``app``
+
+   初始化项目下的某个应用功能，例如 ``api`` ，则在项目目录下执行 ``startapp`` ，例如，如果要使用 :ref:`drf_quickstart` 则执行::
+
+       django-admin.py startapp api
+
 - 创建开发项目
 
 Djang提供了一个命令行工具来创建一个项目，这里我们构建的是一个清单程序，所以命名项目 ``superlists`` ::
