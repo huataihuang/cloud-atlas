@@ -8,6 +8,7 @@ Docker 环境运行应用程序案例
    :maxdepth: 1
 
    docker_compose_django.rst
+   docker_django.rst
 
 .. only::  subproject and html
 
