@@ -23,7 +23,7 @@
 
 .. note::
 
-   安装列表中显示docker-ce是为el7编译的
+   2021年初验证发现Docker已经提供了CentOS 8版本，已经不再需要强制安装原先针对CentOS 7的containerd了。
 
 安装docker-ce
 ==============
@@ -34,7 +34,7 @@
 
    sudo dnf install --nobest docker-ce
 
-* 方法二：安装最新可用版本
+* 方法二：安装最新可用版本(现在已经不用指定了，所以这个方法建议忽略)
 
 安装最新可用版本需要先安装必要的containerd.io，不过有多个containerd.io版本，执行 ``dnf install docker-ce`` 时会提示::
 
@@ -55,7 +55,7 @@
 
 .. note::
 
-   我当前在 :ref:`docker_in_docker` 环境部署持续集成系统，采用的是最新版本，即方法2。
+   之前2020年中，我在 :ref:`docker_in_docker` 环境部署持续集成系统，采用的方法2。到2021年初验证，已经可以直接采用方法1了，因为Docker已经提供了CentOS 8的原生版本。
 
 * 关闭firewalld::
 

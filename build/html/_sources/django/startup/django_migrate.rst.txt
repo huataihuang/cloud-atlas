@@ -93,3 +93,4 @@ Migrations屏蔽了Django使用的数据库后端差异，通过完全相同的 
 
 - `Django Documentation: Migrations <https://docs.djangoproject.com/en/3.1/topics/migrations/>`_
 - `Django清空所有数据或重置migrations同步 <https://www.jianshu.com/p/7aa23f044cef>`_
+- `Django Migrations: A Primer <https://realpython.com/django-migrations-a-primer/>`_

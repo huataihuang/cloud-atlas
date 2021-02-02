@@ -166,8 +166,8 @@ CentOS 8.2
    # 将所有docker-ce版本列出
    dnf list docker-ce --showduplicates | sort -r
 
-   # 安装containerd.io
-   sudo dnf install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.13-3.2.el7.x86_64.rpm
+   # 安装containerd.io - 2021年初验证，Docker已经直接提供了CentOS 8版本 containerd.io ，不需要强制指定安装
+   # sudo dnf install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.13-3.2.el7.x86_64.rpm
 
    # 安装docker-ce
    sudo dnf install docker-ce
