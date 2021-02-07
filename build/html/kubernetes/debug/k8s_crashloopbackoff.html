@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Kubernetes pod CrashLoopBackOff错误排查 &mdash; Cloud Atlas 0.1 文档</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Knative - Serverless计算" href="../knative/index.html" />
+    <link rel="prev" title="Apiserver证书过期" href="apiserver_cert_expire.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Kubernetes Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../kubernetes_overview.html">Kubernetes概览</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../startup_prepare/index.html">Kubernetes起步准备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">Kubernetes快速起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/index.html">Kubernetes概念辨析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deployment/index.html">Kubernetes部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../manage_object/index.html">Kubernetes管理对象</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Kubernetes管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../access_application/index.html">Kubernetes访问应用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../configure/index.html">Kubernetes 配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network/index.html">Kubernetes网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../in_action/index.html">Kubernetes实践</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rook/index.html">Rook - 云原生存储调度器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../production/index.html">Kubernetes生产环境</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../service_mesh/index.html">Service Mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../istio/index.html">Istio服务网格</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../serverless/index.html">Kubernetes Severless</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ci_cd/index.html">Kubernetes持续集成和持续部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../monitor/index.html">Kubernetes监控</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../self_healing/index.html">Kubernetes 自愈</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Kubernetes排查</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="crictl.html">crictl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="get_container_shell.html">获得容器shell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="get_container_logs.html">获取容器日志</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kubelet_cert_expire.html">Kubelet证书过期</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apiserver_cert_expire.html">Apiserver证书过期</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes pod CrashLoopBackOff错误排查</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#crashloopbackoff">CrashLoopBackOff错误解析</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">排查方法</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">实践案例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../knative/index.html">Knative - Serverless计算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cloud/index.html">Kubernetes云厂商</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../develop/index.html">Kubernetes开发</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Kubernetes Atlas</a> &raquo;</li>
+        
+          <li><a href="index.html">Kubernetes排查</a> &raquo;</li>
+        
+      <li>Kubernetes pod CrashLoopBackOff错误排查</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/kubernetes/debug/k8s_crashloopbackoff.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="kubernetes-pod-crashloopbackoff">
+<span id="k8s-crashloopbackoff"></span><h1>Kubernetes pod CrashLoopBackOff错误排查<a class="headerlink" href="#kubernetes-pod-crashloopbackoff" title="永久链接至标题">¶</a></h1>
+<p>很多时候部署Kubernetes应用容器，经常会遇到pod进入 <code class="docutils literal notranslate"><span class="pre">CrashLoopBackOff</span></code> 状态，但是由于容器没有启动，很难排查问题原因。</p>
+<div class="section" id="crashloopbackoff">
+<h2>CrashLoopBackOff错误解析<a class="headerlink" href="#crashloopbackoff" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">CrashloopBackOff</span></code> 表示pod经历了 <code class="docutils literal notranslate"><span class="pre">starting</span></code> , <code class="docutils literal notranslate"><span class="pre">crashing</span></code> 然后再次 <code class="docutils literal notranslate"><span class="pre">starting</span></code> 并再次 <code class="docutils literal notranslate"><span class="pre">crashing</span></code> 。</p>
+<p>这个失败的容器会被kubelet不断重启，并且按照几何级数(exponentially)延迟(10s,20s,40s…)直到5分钟，最后一次是10分钟后重置。默认使用的是 <a class="reference external" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy">podRestartPolicy</a></p>
+<p><code class="docutils literal notranslate"><span class="pre">PodSpec</span></code> 有一个 <code class="docutils literal notranslate"><span class="pre">restartPolicy</span></code> 字段，值可以是 <code class="docutils literal notranslate"><span class="pre">Always</span></code> , <code class="docutils literal notranslate"><span class="pre">OnFailure</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Never</span></code> ，默认是 <code class="docutils literal notranslate"><span class="pre">Always</span></code></p>
+<p>导致 <code class="docutils literal notranslate"><span class="pre">CrashLoopBackOff</span></code> 的原因通常有:</p>
+<ul class="simple">
+<li><p>容器中应用程序持续crash</p></li>
+<li><p>pod/container的参数配置错误</p></li>
+<li><p>当部署Kubernetes pod是出现错误</p></li>
+</ul>
+<p>观察方法如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">NameSpace</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>排查方法<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>首先通过 <code class="docutils literal notranslate"><span class="pre">describe</span></code> pod获取信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">pod</span> <span class="o">&lt;</span><span class="n">podname</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果要非常详细的信息，则可以加上一个 <code class="docutils literal notranslate"><span class="pre">-v=9</span></code> 参数</p>
+<ul>
+<li><p>此外，可以通过 <code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">events</span></code> 来获得上述 <code class="docutils literal notranslate"><span class="pre">describe</span></code> 的事件部分信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">event</span> <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">NameSpace</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意，Docker容器必须保持PID 1进程持续运行，否则容器就会退出(也就是主进程退出)。对于Docker而言PID 1退出就是容器停止，此时如果容器在Kubernetes中就会重启容器。</p>
+<p>当容器重启后，Kubernetes就会申明这个Pod进入 <code class="docutils literal notranslate"><span class="pre">Back-off</span></code> 状态。此时通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">pods</span> <span class="pre">-n</span> <span class="pre">&lt;NameSpace&gt;</span></code> 就会看到容器重启计数增加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ kubectl get pods -n test-kube
+NAME                         READY   STATUS             RESTARTS   AGE
+challenge-7b97fd8b7f-cdvh4   0/1     CrashLoopBackOff   2          60s
+</pre></div>
+</div>
+<ul>
+<li><p>接下来检查pod的日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">logs</span> <span class="o">&lt;</span><span class="n">podname</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">NameSpace</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意，容器运行需要有输出，通常是容器中运行程序的日志输出(容器通常就是运行一个应用)</p>
+<ul>
+<li><p>最后查看 <code class="docutils literal notranslate"><span class="pre">Liveness/Readiness</span></code> probe:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">pod</span> <span class="o">&lt;</span><span class="n">podname</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">NameSpace</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>为了能够让容器不退出，你可以在运行命令中添加一段死循环:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="n">true</span><span class="p">;</span> <span class="n">do</span> <span class="n">sleep</span> <span class="mi">20</span><span class="p">;</span> <span class="n">done</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>这样就可以保持容器持续运行，方便你查看日志</p>
+</div>
+<div class="section" id="id2">
+<h2>实践案例<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>我在制作 <a class="reference internal" href="../../docker/init/docker_tini.html#docker-tini"><span class="std std-ref">Docker tini进程管理器</span></a> 镜像之后，已经能够在docker运行。但是我通过以下简单的 <code class="docutils literal notranslate"><span class="pre">deployments.yaml</span></code> 部署到Kubernetes集群时，发现pod不断重启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                           <span class="n">READY</span>   <span class="n">STATUS</span>             <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">onesre</span><span class="o">-</span><span class="n">core</span><span class="o">-</span><span class="mi">5</span><span class="n">d4d4d8b5f</span><span class="o">-</span><span class="n">zn7lg</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">CrashLoopBackOff</span>   <span class="mi">6</span>          <span class="mi">9</span><span class="n">m1s</span>
+</pre></div>
+</div>
+<p>此时检查events显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">--</span><span class="n">kubeconfig</span> <span class="n">meta</span><span class="o">/</span><span class="n">admin</span><span class="o">.</span><span class="n">kubeconfig</span> <span class="o">-</span><span class="n">n</span> <span class="n">onesre</span> <span class="n">describe</span> <span class="n">pods</span> <span class="n">onesre</span><span class="o">-</span><span class="n">core</span><span class="o">-</span><span class="mi">5</span><span class="n">d4d4d8b5f</span><span class="o">-</span><span class="n">zn7lg</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span>  <span class="n">BackOff</span>               <span class="mi">9</span><span class="n">s</span> <span class="p">(</span><span class="n">x4</span> <span class="n">over</span> <span class="mi">24</span><span class="n">s</span><span class="p">)</span>   <span class="n">kubelet</span>            <span class="n">Back</span><span class="o">-</span><span class="n">off</span> <span class="n">restarting</span> <span class="n">failed</span> <span class="n">containe</span>
+</pre></div>
+</div>
+<p>为何会判断容器失败呢？</p>
+<p>参考 <a class="reference external" href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">配置存活、就绪和启动探测器</a> 添加侦测 <code class="docutils literal notranslate"><span class="pre">args</span></code> 部分:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">image</span><span class="p">:</span> <span class="n">onesre</span><span class="p">:</span><span class="mi">20210205</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">args</span><span class="p">:</span>
+    <span class="o">-</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span>
+    <span class="o">-</span> <span class="o">-</span><span class="n">c</span>
+    <span class="o">-</span> <span class="n">touch</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">healthy</span>
+    <span class="n">livenessProbe</span><span class="p">:</span>
+      <span class="n">exec</span><span class="p">:</span>
+        <span class="n">command</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">cat</span>
+        <span class="o">-</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">healthy</span>
+      <span class="n">initialDelaySeconds</span><span class="p">:</span> <span class="mi">5</span>
+      <span class="n">periodSeconds</span><span class="p">:</span> <span class="mi">60</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">pods</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">onesre</span> <span class="n">get</span> <span class="n">pods</span> <span class="n">onesre</span><span class="o">-</span><span class="n">core</span><span class="o">-</span><span class="mi">7697868</span><span class="n">c67</span><span class="o">-</span><span class="n">pmhng</span> <span class="o">-</span><span class="n">o</span> <span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">status</span><span class="p">:</span>
+  <span class="n">conditions</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">lastProbeTime</span><span class="p">:</span> <span class="n">null</span>
+    <span class="n">lastTransitionTime</span><span class="p">:</span> <span class="s2">&quot;2021-02-05T16:10:49Z&quot;</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s2">&quot;True&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Initialized</span>
+  <span class="o">-</span> <span class="n">lastProbeTime</span><span class="p">:</span> <span class="n">null</span>
+    <span class="n">lastTransitionTime</span><span class="p">:</span> <span class="s2">&quot;2021-02-05T16:10:49Z&quot;</span>
+    <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;containers with unready status: [onesre]&#39;</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="n">ContainersNotReady</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Ready</span>
+  <span class="o">-</span> <span class="n">lastProbeTime</span><span class="p">:</span> <span class="n">null</span>
+    <span class="n">lastTransitionTime</span><span class="p">:</span> <span class="s2">&quot;2021-02-05T16:10:49Z&quot;</span>
+    <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;containers with unready status: [onesre]&#39;</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="n">ContainersNotReady</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">ContainersReady</span>
+  <span class="o">-</span> <span class="n">lastProbeTime</span><span class="p">:</span> <span class="n">null</span>
+    <span class="n">lastTransitionTime</span><span class="p">:</span> <span class="s2">&quot;2021-02-05T16:10:49Z&quot;</span>
+    <span class="n">status</span><span class="p">:</span> <span class="s2">&quot;True&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">PodScheduled</span>
+</pre></div>
+</div>
+<p>实际原因是Kubernetes启动pod一定要在container中运行一个程序，并根据运行程序返回来判断容器是否启动。最初我没有配置执行命令，考虑的是等容器启动之后，手工去部署。但是这不符合k8s定义。</p>
+<p>所以添加以下内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">command</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;/bin/bash&quot;</span><span class="p">,</span> <span class="s2">&quot;-ec&quot;</span><span class="p">]</span>
+<span class="n">args</span><span class="p">:</span> <span class="p">[</span> <span class="n">date</span><span class="p">;</span> <span class="n">sleep</span> <span class="mi">10</span><span class="p">;</span> <span class="n">echo</span> <span class="s1">&#39;Hello from the Kubernetes cluster&#39;</span><span class="p">;</span> <span class="n">sleep</span> <span class="mi">1</span><span class="p">;</span> <span class="k">while</span> <span class="n">true</span><span class="p">;</span> <span class="n">do</span> <span class="n">sleep</span> <span class="mi">20</span><span class="p">;</span> <span class="n">done</span><span class="p">;]</span>
+</pre></div>
+</div>
+<p>但是遇到问题，发现没有启动 tini</p>
+<p>实际上我的案例是因为没有在Kubernetes启动pod时运行任何主程序，所以导致无法判断容器状态。</p>
+</div>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://beanexpert.co.in/troubleshoot-pod-crashloopbackoff-error-kubernetes/">Troubleshoot pod CrashLoopBackOff error:: Kubernetes</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../knative/index.html" class="btn btn-neutral float-right" title="Knative - Serverless计算" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="apiserver_cert_expire.html" class="btn btn-neutral float-left" title="Apiserver证书过期" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; <a href="../../copyright.html"> 版权所有</a> 2019, Huatai Huang.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

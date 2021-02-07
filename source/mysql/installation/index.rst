@@ -8,6 +8,7 @@ MySQL 安装
    :maxdepth: 1
 
    install_mysql.rst
+   install_mariadb.rst
 
 .. only::  subproject and html
 

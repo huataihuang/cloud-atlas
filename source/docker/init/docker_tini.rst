@@ -22,7 +22,7 @@ Tini的优点:
 在Docker中，只需要加载Tini并传递运行的程序和参数给Tini就可以::
 
    # Add Tini
-   ENV TINI_VERSION v0.18.0
+   ENV TINI_VERSION v0.19.0
    ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
    RUN chmod +x /tini
    ENTRYPOINT ["/tini", "--"]
@@ -33,4 +33,104 @@ Tini的优点:
 
 上述Dockerfile中，通过 ``ENTRYPOINT`` 启动 ``tini`` 作为进程管理器，然后再通过 ``tini`` 运行 ``CMD`` 指定的程序命令。
 
+.. note::
+
+   `tini release download <https://github.com/krallin/tini/releases>`_ 提供了不同处理器架构的
+
 如果要使用tini签名，请参考 `tini 容器init <https://github.com/krallin/tini>`_ 发行文档
+
+构建基于Tini的ssh容器
+=======================
+
+- 创建一个 Dockerfile 如下
+
+.. literalinclude:: docker_tini/Dockerfile.ssh_exit_0
+   :language: dockerfile
+   :linenos:
+   :caption:
+
+- 构建镜像::
+
+   docker build -t local:ssh - < Dockerfile.ssh_exit_0
+
+- 运行容器::
+
+   docker run -itd --hostname myssh --name myssh local:ssh
+
+但是，此时检查 ``docker ps`` 却看不到 ``myssh`` 这个容器。这是为什么呢？
+
+- 执行检查::
+
+   docker ps --all
+
+可以看到原来容器结束了，并且退出返回值是 ``0`` ，这意味着执行成功::
+
+   CONTAINER ID   IMAGE               COMMAND                  CREATED         STATUS                     PORTS     NAMES
+   21fb4926ac47   local:ssh           "/tini -- /usr/sbin/…"   4 minutes ago   Exited (0) 4 minutes ago             myssh
+
+WHY?
+
+原因是docker只检测前台程序是否结束，对于 ``sshd`` 这样的后台服务，运行以后返回终端，则docker认为顺利结束了，就停止了容器。解决的方法，一般是运行一个前台程序，例如服务不放到后台运行，或者索性再执行一个 ``bash`` ，甚至我们可以编译一个 ``pause`` 执行程序(通过c的pause实现) 避免前台程序结束
+
+- 尝试添加 ``bash`` 作为结尾::
+
+   CMD ["/usr/sbin/sshd && /bin/bash"]
+
+但是很不幸，执行以后退出返回码是错误的 127 
+
+我参考了一下之前的 :ref:`docker_ssh` 方法修订成::
+
+   CMD ["bash -c '/usr/sbin/sshd && /bin/bash'"]
+
+依然错误，比较难处理 ``' '`` ，所以还是改写成脚本来执行比较方便
+
+- 创建一个 ``entrypoint.sh`` 脚本
+
+.. literalinclude:: docker_tini/entrypoint_ssh_bash
+   :language: dockerfile
+   :linenos:
+   :caption:
+
+- 修订 Dockerfile 如下，将这个脚本复制到镜像内部并作为entrypoint
+
+.. literalinclude:: docker_tini/Dockerfile.ssh_bash
+   :language: bash
+   :linenos:
+   :caption:
+
+- 现在我们重新构建镜像::
+
+   docker rm myssh
+   docker rmi local:ssh
+   docker build -t local:ssh - < Dockerfile.ssh_bash
+   
+   docker run -itd --hostname myssh --name myssh local:ssh
+
+现在就可以可以正常运行ssh了。
+
+不过，你会觉得，这样有什么优势呢？我们不能直接执行shell脚本么
+
+原因是 ``tini`` 提供了很好到进程管理功能，能够转发信号给管理的子进程，这样就方便在 :ref:`kubernetes` 中调度管理。
+
+需要注意的是，如果在 ``entrypoint`` 最后调用了 ``bash`` ，则通过 ``docker attach <contianer>`` 访问终端时，和 ``docke run ... /bin/bash`` 一样，绝对不能执行 ``ctrl-d`` 退出，否则会直接结束容器。
+
+上面我也提到了，如果不使用 ``bash`` 结束，我们也可以编译一个 ``pause`` 程序，请参考 `Void (Linux) distribution <https://voidlinux.org>`_ (一个完全独立的发行版)提供的工具集 `void-runit <https://github.com/void-linux/void-runit>`_ 中的 `pauese.c <https://github.com/void-linux/void-runit/blob/master/pause.c>`_
+
+
+构建Tini的多服务容器
+=======================
+
+上面我们已经实现了一个在tini下启动sshd的方法，那么我们现在来构建多个服务
+
+- 构建一个多服务启动的脚本，这里我们启动案例是 ``ssh`` 和 ``cron``
+
+.. literalinclude:: docker_tini/entrypoint_ssh_cron_bash
+   :language: bash
+   :linenos:
+   :caption:
+
+- 修订 Dockerfile 如下，将这个脚本复制到镜像内部并作为entrypoint
+
+.. literalinclude:: docker_tini/Dockerfile.ssh_cron_bash
+   :language: bash
+   :linenos:

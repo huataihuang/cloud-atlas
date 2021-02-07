@@ -18,6 +18,28 @@ Django配置MySQL数据库
    grant all privileges on myappdb.* to myapp@'%';
    flush privileges;
 
+安装mysqlclient模块
+====================
+
+在安装 :ref:`virtualenv` 之后，通过 ``pip``  安装 ``mysqlclient`` 模块::
+
+   pip install mysqlclient
+
+如果出现报错::
+
+    ERROR: Command errored out with exit status 1:
+     command: /home/admin/venv3/bin/python -c 'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/tmp/pip-install-3m5z471x/mysqlclient_891b537df843484ba930dc9520c76710/setup.py'"'"'; __file__='"'"'/tmp/pip-install-3m5z471x/mysqlclient_891b537df843484ba930dc9520c76710/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' egg_info --egg-base /tmp/pip-pip-egg-info-1mbvlvf_
+         cwd: /tmp/pip-install-3m5z471x/mysqlclient_891b537df843484ba930dc9520c76710/
+    Complete output (15 lines):
+    /bin/sh: mysql_config: command not found
+    /bin/sh: mariadb_config: command not found
+    /bin/sh: mysql_config: command not found
+    mysql_config --version
+    mariadb_config --version
+    mysql_config --libs 
+
+则需要安装 mysql 开发包，例如 ``mariadb-devel`` ，安装以后系统会有 ``mysql_config`` 工具
+
 配置Django连接数据库
 =====================
 

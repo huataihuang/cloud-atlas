@@ -7,5 +7,6 @@ Kubernetes对象
 .. toctree::
    :maxdepth: 1
 
-   understanding_kubernetes_objects.rst
+   understand_k8s_objects.rst
    labels_and_selectors.rst
+   k8s_labels_suggests.rst

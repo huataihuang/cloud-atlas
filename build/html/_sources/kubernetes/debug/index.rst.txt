@@ -12,3 +12,4 @@ Kubernetes排查
    get_container_logs.rst
    kubelet_cert_expire.rst
    apiserver_cert_expire.rst
+   k8s_crashloopbackoff.rst
