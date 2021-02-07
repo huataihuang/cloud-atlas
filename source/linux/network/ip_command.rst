@@ -183,3 +183,4 @@ ip命令还支持对象语法缩写，例如 ``link`` 缩写成 ``l`` ， ``addr
 - `Linux ip Command Examples <https://www.cyberciti.biz/faq/linux-ip-command-examples-usage-syntax/>`_
 - `Linux Set Up Routing with ip Command <https://www.cyberciti.biz/faq/howto-linux-configuring-default-route-with-ipcommand/>`_
 - `ip command in Linux with examples <https://www.geeksforgeeks.org/ip-command-in-linux-with-examples/>`_
+- `ip COMMAND CHEAT SHEET for Red Hat Enterprise Linux <https://access.redhat.com/sites/default/files/attachments/rh_ip_command_cheatsheet_1214_jcs_print.pdf>`_ - Red Hat提供的ip命令简明查询手册，基本覆盖了常用使用案例

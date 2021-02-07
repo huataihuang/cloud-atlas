@@ -1,0 +1,16 @@
+FROM docker.io/centos:7
+
+RUN yum clean all && yum -y update && yum install -y net-tools iproute openssh-clients openssh-server which sudo
+RUN groupadd -g 500 admin && useradd -g 500 -u 500 -d /home/admin -m admin
+RUN echo 'admin ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Add Tini
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
+
+RUN ssh-keygen -A
+# Run your program under Tini
+# CMD ["/your/program", "-and", "-its", "arguments"]
+CMD ["/usr/sbin/sshd"]

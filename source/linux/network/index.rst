@@ -8,6 +8,7 @@ Linux网络
    :maxdepth: 1
 
    ring_buffer_dma_mmio.rst
+   ip_command.rst
    ethtool/index
    soft_ap.rst
 

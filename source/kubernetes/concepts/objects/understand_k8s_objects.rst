@@ -1,4 +1,4 @@
-.. _understanding_kubernetes_objects:
+.. _understand_k8s_objects:
 
 ===================
 理解Kubernetes对象
