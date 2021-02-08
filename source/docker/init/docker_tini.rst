@@ -14,6 +14,8 @@ Tini的优点:
 - tini可以避免应用程序生成僵尸进程
 - tini可以处理Docker进程中运行的程序的信号，例如，通过Tini， ``SIGTERM`` 可以终止进程，不需要你明确安装一个信号处理器
 
+我们为什么要使用Tini，可以参考 `What is advantage of Tini? <https://github.com/krallin/tini/issues/8>`_ 后续我再整理一下
+
 使用Tini
 ===========
 

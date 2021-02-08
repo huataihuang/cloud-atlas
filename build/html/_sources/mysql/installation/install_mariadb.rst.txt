@@ -15,6 +15,12 @@ MariaDB是开源关系型数据库，和MySQL兼容并且用于替代MySQL。这
 
 建议同时安装 ``mariadb`` 和 ``mariadb-devel`` 软件包，方便后续开发
 
+.. note::
+
+   CentOS 7操作系统通过EPEL安装mariadb，需要注意EPEL提供的mariadb的版本很低，和最新的版本不兼容，带来很多开发移植上的不变。所以，我建议不要使用EPEL提供的版本，而是采用 `MariaDB官方软件仓库 <https://mariadb.org/download/#mariadb-repositories>`_ 安装。即将网站提供的 ``MariaDB.repo`` 存放到 ``/etc/yum.repos.d`` 目录下，然后执行安装::
+
+      sudo yum install MariaDB-server MariaDB-client
+
 - 启动数据库::
 
    sudo systemctl start mariadb
@@ -33,7 +39,9 @@ MariaDB是开源关系型数据库，和MySQL兼容并且用于替代MySQL。这
 
    /usr/bin/mysqld_safe
 
-不过，我在容器中运行 ``mysqld_safe`` 不返回终端提示，虽然不影响mysqld运行。
+- 通过 ``mysqld_safe`` 启动启动的数据库可以通过 ``mysqladmin`` 关闭::
+
+   mysqladmin shutdown
 
 启动数据库报错排查
 ~~~~~~~~~~~~~~~~~~~

@@ -105,7 +105,7 @@
 <li class="toctree-l3"><a class="reference internal" href="install_mysql.html">安装MySQL</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">安装MariaDB</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">安装</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -224,6 +224,13 @@
 </li>
 </ul>
 <p>建议同时安装 <code class="docutils literal notranslate"><span class="pre">mariadb</span></code> 和 <code class="docutils literal notranslate"><span class="pre">mariadb-devel</span></code> 软件包，方便后续开发</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>CentOS 7操作系统通过EPEL安装mariadb，需要注意EPEL提供的mariadb的版本很低，和最新的版本不兼容，带来很多开发移植上的不变。所以，我建议不要使用EPEL提供的版本，而是采用 <a class="reference external" href="https://mariadb.org/download/#mariadb-repositories">MariaDB官方软件仓库</a> 安装。即将网站提供的 <code class="docutils literal notranslate"><span class="pre">MariaDB.repo</span></code> 存放到 <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d</span></code> 目录下，然后执行安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">MariaDB</span><span class="o">-</span><span class="n">server</span> <span class="n">MariaDB</span><span class="o">-</span><span class="n">client</span>
+</pre></div>
+</div>
+</div>
 <ul>
 <li><p>启动数据库:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">mariadb</span>
@@ -232,8 +239,8 @@
 </div>
 </li>
 </ul>
-<div class="section" id="id2">
-<h3>手工启动数据库<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id3">
+<h3>手工启动数据库<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>首先初始化系统数据库目录和系统表:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">mysql</span> <span class="n">mysql_install_db</span>
@@ -248,10 +255,14 @@
 </pre></div>
 </div>
 </li>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">mysqld_safe</span></code> 启动启动的数据库可以通过 <code class="docutils literal notranslate"><span class="pre">mysqladmin</span></code> 关闭:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysqladmin</span> <span class="n">shutdown</span>
+</pre></div>
+</div>
+</li>
 </ul>
-<p>不过，我在容器中运行 <code class="docutils literal notranslate"><span class="pre">mysqld_safe</span></code> 不返回终端提示，虽然不影响mysqld运行。</p>
-<div class="section" id="id3">
-<h4>启动数据库报错排查<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h4>
+<div class="section" id="id4">
+<h4>启动数据库报错排查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h4>
 <p>我遇到一个问题，发现数据库启动失败， <code class="docutils literal notranslate"><span class="pre">/var/log/mariadb/mariadb.log</span></code> 记录:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">210207</span> <span class="mi">14</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">06</span> <span class="p">[</span><span class="n">ERROR</span><span class="p">]</span> <span class="n">mysqld</span><span class="p">:</span> <span class="n">Can</span><span class="s1">&#39;t find file: &#39;</span><span class="o">./</span><span class="n">mysql</span><span class="o">/</span><span class="n">plugin</span><span class="o">.</span><span class="n">frm</span><span class="s1">&#39; (errno: 13)</span>
 <span class="mi">210207</span> <span class="mi">14</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">06</span> <span class="p">[</span><span class="n">ERROR</span><span class="p">]</span> <span class="n">Can</span><span class="s1">&#39;t open the mysql.plugin table. Please run mysql_upgrade to create it.</span>
@@ -265,8 +276,8 @@
 <p>实际上仔细查看了文件权限发现，原来 <code class="docutils literal notranslate"><span class="pre">mysql_install_db</span></code> 命令必须使用 <code class="docutils literal notranslate"><span class="pre">mysql</span></code> 用户来执行，否则创建的 <code class="docutils literal notranslate"><span class="pre">/var/lib/mysql/mysql</span></code> 目录以及该目录下文件都是属于root用户的。不过，mysql用户账号默认是 <code class="docutils literal notranslate"><span class="pre">nologin</span></code> ，所以需要使用 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">-u</span> <span class="pre">mysql</span></code> 方式来运行。</p>
 </div>
 </div>
-<div class="section" id="id4">
-<h3>数据库安全加固<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<div class="section" id="id5">
+<h3>数据库安全加固<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>数据库默认安全加固:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">mysql_secure_installation</span>
@@ -281,8 +292,8 @@
 </div>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://linuxize.com/post/install-mariadb-on-centos-7/">Install MariaDB on CentOS 7</a></p></li>
 <li><p><a class="reference external" href="https://mariadb.com/kb/en/starting-and-stopping-mariadb-automatically/">Starting and Stopping MariaDB</a></p></li>

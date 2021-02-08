@@ -12,6 +12,7 @@ Django是Python编写的开源Web应用框架，结构清晰，应用广泛。�
    :maxdepth: 1
 
    startup/index
+   deploy/index
    rest_framework/index
 
 .. only::  subproject and html
