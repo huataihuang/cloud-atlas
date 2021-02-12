@@ -90,9 +90,9 @@ Gunicorn是一个纯Python程序，安装通过 ``pip`` 非常简单::
 
    sudo yum install nginx
 
-- 检查 ``/etc/nginx/nginx.conf`` 查看配置默认会包含哪些配置目录，有的配置版本是包含 ``/etc/nginx/sites-available/`` ，有的则是包含 ``/etc/nginx/conf.d/`` 目录。在配置目录下添加项目配置 ``onesre-core`` (案例项目名)
+- 检查 ``/etc/nginx/nginx.conf`` 查看配置默认会包含哪些配置目录，有的配置版本是包含 ``/etc/nginx/sites-available/`` ，有的则是包含 ``/etc/nginx/conf.d/`` 目录。在配置目录下添加项目配置 ``onesre-core.conf`` (案例项目名)
 
-.. literalinclude:: nginx_gunicorn_django/onesre-core
+.. literalinclude:: nginx_gunicorn_django/onesre-core.conf
    :language: bash
    :linenos:
    :caption:
