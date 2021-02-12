@@ -37,7 +37,7 @@ MariaDB是开源关系型数据库，和MySQL兼容并且用于替代MySQL。这
 
 - 启动数据库::
 
-   /usr/bin/mysqld_safe
+   /usr/bin/mysqld_safe 
 
 - 通过 ``mysqld_safe`` 启动启动的数据库可以通过 ``mysqladmin`` 关闭::
 
@@ -70,6 +70,10 @@ MariaDB是开源关系型数据库，和MySQL兼容并且用于替代MySQL。这
 
    '/usr/bin/mysqladmin' -u root password 'new-password'
    '/usr/bin/mysqladmin' -u root -h `hostname` password 'new-password'
+
+.. note::
+
+   在MariaDB的高版本中默认安全策略只允许操作系统的 ``root`` 用户执行上述 ``mysql_secure_installation`` 安全加固脚本，以便首次以无密码方式登陆mysql的root账号。
 
 参考
 ======

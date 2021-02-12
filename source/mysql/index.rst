@@ -15,6 +15,7 @@ MySQL是使用最广泛的开源数据库，很多开源项目都会在后端使
    :maxdepth: 1
 
    installation/index
+   troubleshoot/index
    database_sharding.rst
    vitess/index
 

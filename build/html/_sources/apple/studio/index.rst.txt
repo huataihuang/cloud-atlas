@@ -15,6 +15,7 @@ macOS Studio
    homebrew.rst
    multi_jdk_on_macos.rst
    macos_keyboard_customize.rst
+   missing_xcrun.rst
 
 .. only::  subproject and html
 

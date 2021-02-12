@@ -20,6 +20,7 @@ Web是Internet最主要的服务，也是汇集主要云计算技术的应用服
 .. toctree::
    :maxdepth: 1
 
+   nginx/index
    cache/index
    proxy/index
    load_balancer/index

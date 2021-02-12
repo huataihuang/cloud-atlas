@@ -10,6 +10,7 @@ Django REST framework(DRF)
 
    introduce_drf.rst
    drf_quickstart.rst
+   get_drf_last_element.rst
 
 .. only::  subproject and html
 
