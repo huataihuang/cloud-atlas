@@ -1,16 +1,13 @@
-.. _django_rest_framework:
+.. _nginx:
 
 =================================
-Django REST framework(DRF)
+Nginx
 =================================
-
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_drf.rst
-   drf_quickstart.rst
-   get_drf_last_element.rst
+   self_signed_ssl_nginx.rst
 
 .. only::  subproject and html
 

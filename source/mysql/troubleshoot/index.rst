@@ -1,16 +1,13 @@
-.. _django_rest_framework:
+.. _mysql_troubleshoot:
 
 =================================
-Django REST framework(DRF)
+MySQL 问题排查
 =================================
-
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_drf.rst
-   drf_quickstart.rst
-   get_drf_last_element.rst
+   reset_mysql_password.rst
 
 .. only::  subproject and html
 

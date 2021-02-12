@@ -97,6 +97,19 @@ Gunicorn是一个纯Python程序，安装通过 ``pip`` 非常简单::
    :linenos:
    :caption:
 
+上述配置中引用了 ``proxy_params`` 可能在某些早期版本nginx中没有包含，参考 `Setup nginx Reverse Proxy <https://www.vionblog.com/setup-nginx-reverse-proxy/>`_ :
+
+.. literalinclude:: nginx_gunicorn_django/proxy_params
+   :language: bash
+   :linenos:
+   :caption:
+
+.. note::
+
+   需要注意要点:
+
+   - nginx的运行进程账号需要和Django进程账号、gunicorn运行账号相同，或者需要确保读写 socket 具备权限。推荐账号采用 ``/sbin/nologin`` 降低安全隐患
+
 - 启动nginx::
 
    sudo /usr/sbin/nginx
