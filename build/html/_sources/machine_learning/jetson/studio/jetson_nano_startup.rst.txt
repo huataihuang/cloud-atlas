@@ -14,6 +14,15 @@ NVIDIA :ref:`jetson_nano` Developer Kit是一个小型AI计算机，面向创客
    unzip nv-jetson-nano-sd-card-image-r32.3.1.zip
    sudo dd if=sd-blob-b01.img of=/dev/rdisk2 bs=100m
 
+.. note::
+
+   2021年初，也就是我接触Jetson Nano大约一年左右，我重新下载安装了最新版本的Jetson Nano Developer Kit安装镜像，安装过程遇到一个曲折。就是直接通过 ``wget`` 命令下载的安装镜像文件名是 ``jetson-nano-sd-card-image`` ，但实际上是一个 ``.zip`` 文件，需要执行一次::
+
+      mv jetson-nano-sd-card-image jetson-nano-sd-card-image.zip
+      unzip jetson-nano-sd-card-image.zip
+
+   然后再使用 ``dd`` 命令复制到TF卡。
+
 电源跳线
 ===========
 
@@ -30,9 +39,9 @@ Jetson Nano有3种供电方式：
 初始化
 ========
 
-NVIDIA Jetson Nano首次启动速度比较慢，应该是有很多初始化操作在进行。登陆界面是Gnome 3，所以图形界面比较沉重，甚至我觉得在ARM处理器的4G内存规格下，运行这么复杂的图形桌面实在是浪费了系统资源。
+NVIDIA Jetson Nano Developer Kit操作系统首次启动就需要连接Internet进行初始化，所以一定要确保Jetson Nano的主机已经连接到能够访问Internet的局域网，并且通过DHCP获得主机IP地址。这个过程是自动化的，并且如果不能获得互联网连接，就会导致启动任务死循环无法结束。
 
-
+登陆界面是Gnome 3，所以图形界面比较沉重，甚至我觉得在ARM处理器的4G内存规格下，运行这么复杂的图形桌面实在是浪费了系统资源。
 
 登陆初始化提供了选择键盘、时区以及初始账号功能，并且提供了通过网络连接Internet进行更新的选项。如果设备安装了无线网卡，则会提示设置连接WiFi。建议连接网络进行更新。
 
@@ -67,6 +76,10 @@ NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使�
    sudo apt install synergy keepassx
 
 详细设置参考 :ref:`xfce` 
+
+.. note::
+
+   实际上我是将Jetson作为 :ref:`kubernetes` 的工作节点来运行的，所以不需要图形桌面系统。我在2021年初再次重装时，选择移除Gnome桌面，但是也不安装任何桌面系统。系统保留了一些基础的X window程序，供后续通过 :ref:`remote_linux_desktop` 和 :ref:`xpra` 来实现远程桌面访问。或者，我可以部署一个 :ref:`jupyter` 的Hub模式，通过浏览器来使用图形系统。
 
 电源管理
 ========

@@ -128,6 +128,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../hardware/index.html">NVIDIA Jetson硬件</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../storage/index.html">Jetson 存储</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../develop/index.html">NVIDIA Jetson开发</a></li>
 </ul>
 </li>
@@ -237,6 +238,15 @@
 <span class="n">sudo</span> <span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">sd</span><span class="o">-</span><span class="n">blob</span><span class="o">-</span><span class="n">b01</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">rdisk2</span> <span class="n">bs</span><span class="o">=</span><span class="mi">100</span><span class="n">m</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>2021年初，也就是我接触Jetson Nano大约一年左右，我重新下载安装了最新版本的Jetson Nano Developer Kit安装镜像，安装过程遇到一个曲折。就是直接通过 <code class="docutils literal notranslate"><span class="pre">wget</span></code> 命令下载的安装镜像文件名是 <code class="docutils literal notranslate"><span class="pre">jetson-nano-sd-card-image</span></code> ，但实际上是一个 <code class="docutils literal notranslate"><span class="pre">.zip</span></code> 文件，需要执行一次:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="n">jetson</span><span class="o">-</span><span class="n">nano</span><span class="o">-</span><span class="n">sd</span><span class="o">-</span><span class="n">card</span><span class="o">-</span><span class="n">image</span> <span class="n">jetson</span><span class="o">-</span><span class="n">nano</span><span class="o">-</span><span class="n">sd</span><span class="o">-</span><span class="n">card</span><span class="o">-</span><span class="n">image</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">unzip</span> <span class="n">jetson</span><span class="o">-</span><span class="n">nano</span><span class="o">-</span><span class="n">sd</span><span class="o">-</span><span class="n">card</span><span class="o">-</span><span class="n">image</span><span class="o">.</span><span class="n">zip</span>
+</pre></div>
+</div>
+<p>然后再使用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令复制到TF卡。</p>
+</div>
 </div>
 <div class="section" id="id2">
 <h2>电源跳线<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
@@ -252,7 +262,8 @@
 </div>
 <div class="section" id="id3">
 <h2>初始化<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
-<p>NVIDIA Jetson Nano首次启动速度比较慢，应该是有很多初始化操作在进行。登陆界面是Gnome 3，所以图形界面比较沉重，甚至我觉得在ARM处理器的4G内存规格下，运行这么复杂的图形桌面实在是浪费了系统资源。</p>
+<p>NVIDIA Jetson Nano Developer Kit操作系统首次启动就需要连接Internet进行初始化，所以一定要确保Jetson Nano的主机已经连接到能够访问Internet的局域网，并且通过DHCP获得主机IP地址。这个过程是自动化的，并且如果不能获得互联网连接，就会导致启动任务死循环无法结束。</p>
+<p>登陆界面是Gnome 3，所以图形界面比较沉重，甚至我觉得在ARM处理器的4G内存规格下，运行这么复杂的图形桌面实在是浪费了系统资源。</p>
 <p>登陆初始化提供了选择键盘、时区以及初始账号功能，并且提供了通过网络连接Internet进行更新的选项。如果设备安装了无线网卡，则会提示设置连接WiFi。建议连接网络进行更新。</p>
 <p>我的初始设置比较简单，就是将有线网卡设置为固定IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.6.10</span></code> ，这样我就可以通过笔记本的有线网络连接到Jetson系统中，并进行远程操作。这样可以不需要连接显示器。</p>
 </div>
@@ -284,6 +295,10 @@
 </pre></div>
 </div>
 <p>详细设置参考 <a class="reference internal" href="../../../linux/arch_linux/xfce.html#xfce"><span class="std std-ref">Xfce</span></a></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上我是将Jetson作为 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 的工作节点来运行的，所以不需要图形桌面系统。我在2021年初再次重装时，选择移除Gnome桌面，但是也不安装任何桌面系统。系统保留了一些基础的X window程序，供后续通过 <a class="reference internal" href="../../../linux/desktop/remote_linux_desktop.html#remote-linux-desktop"><span class="std std-ref">远程访问Linux桌面</span></a> 和 <a class="reference internal" href="../../../linux/desktop/xpra.html#xpra"><span class="std std-ref">Xpra - X持久化远程应用</span></a> 来实现远程桌面访问。或者，我可以部署一个 <a class="reference internal" href="../../../big_data/jupyter.html#jupyter"><span class="std std-ref">Jupyter</span></a> 的Hub模式，通过浏览器来使用图形系统。</p>
+</div>
 </div>
 <div class="section" id="id6">
 <h2>电源管理<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>

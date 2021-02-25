@@ -17,6 +17,9 @@ Chromium OS基于 :ref:`gentoo_linux` 开发，结合了开源的Chromium浏览�
 .. toctree::
    :maxdepth: 1
 
+   chromium_os_arch.rst
+   fydeos_pi.rst
+
 .. only::  subproject and html
 
    Indices
