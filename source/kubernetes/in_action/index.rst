@@ -13,4 +13,5 @@ Kubernetes实践
 .. toctree::
    :maxdepth: 1
 
+   kubectl_get.rst
    storage/index
