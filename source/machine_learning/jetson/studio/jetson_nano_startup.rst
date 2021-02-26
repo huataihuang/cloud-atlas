@@ -6,6 +6,10 @@ Jetson Nano快速起步
 
 NVIDIA :ref:`jetson_nano` Developer Kit是一个小型AI计算机，面向创客、学习者和开发者。使用这个mini设备，可以构建AI应用，超酷的AI机器人，甚至更多的 `Jetson 社区项目 <https://developer.nvidia.com/embedded/community/jetson-projects>`_ 。
 
+.. note::
+
+   2021年初，我重新 :ref:`deploy_jetson_server` 来作为 :ref:`kubernetes_arm` 集群工作节点。有一些部署改进和调整，请参考。
+
 下载和准备启动
 =================
 
@@ -13,15 +17,6 @@ NVIDIA :ref:`jetson_nano` Developer Kit是一个小型AI计算机，面向创客
 
    unzip nv-jetson-nano-sd-card-image-r32.3.1.zip
    sudo dd if=sd-blob-b01.img of=/dev/rdisk2 bs=100m
-
-.. note::
-
-   2021年初，也就是我接触Jetson Nano大约一年左右，我重新下载安装了最新版本的Jetson Nano Developer Kit安装镜像，安装过程遇到一个曲折。就是直接通过 ``wget`` 命令下载的安装镜像文件名是 ``jetson-nano-sd-card-image`` ，但实际上是一个 ``.zip`` 文件，需要执行一次::
-
-      mv jetson-nano-sd-card-image jetson-nano-sd-card-image.zip
-      unzip jetson-nano-sd-card-image.zip
-
-   然后再使用 ``dd`` 命令复制到TF卡。
 
 电源跳线
 ===========

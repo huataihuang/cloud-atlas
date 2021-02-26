@@ -9,6 +9,7 @@ NVIDIA Jetson工作室构建
    :maxdepth: 1
 
    jetson_nano_startup.rst
+   deploy_jetson_server.rst
    backup_restore_jetson.rst
    clone_jetson_system.rst
    jetson_usb_hd.rst
