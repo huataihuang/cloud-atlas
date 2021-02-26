@@ -32,3 +32,73 @@
 ==============
 
 首次启动Jetson Nano一定要把设备连接到能够访问Internet的局域网，也即是确保主机能够通过DHCP获得IP地址并访问Internet，否则会导致启动初始化脚本死循环。
+
+初始化结束之后，重启一次登陆进行图形桌面，可以看到是Gnome桌面。默认已经安装了chromium浏览器以及libreoffice办公软件。我的目标是部署服务器话的GPU运行环境，所以会做清理和简化。
+
+配置默认字符启动
+==================
+
+安装完成后，我首先将桌面环境切换到字符模式，以便节约资源，并为下一步瘦身做好准备::
+
+   systemctl disable gdm3
+   systemctl set-default multi-user.target
+
+卸载Desktop
+============
+
+- 清理桌面应用程序::
+
+   sudo apt remove --purge libreoffice* -y
+   sudo apt remove --purge thunderbird* -y
+   sudo apt clean -y
+   sudo apt autoremove -y
+
+- 卸载窗口登陆管理器gdm3和gnome桌面::
+
+   sudo apt remove --purge ubuntu-desktop gdm3
+   sudo apt autoremove
+
+不过，使用 ``apt list --installed`` 检查已经安装的软件包，依然可以看到大量的图形界面应用程序
+
+所以进一步清理 Unity (深度定制的Gnome)::
+
+   sudo apt remove nautilus gnome-power-manager gnome-screensaver gnome-termina* gnome-pane* gnome-applet* gnome-bluetooth gnome-desktop* gnome-sessio* gnome-user* gnome-shell-common compiz compiz* unity unity* hud zeitgeist zeitgeist* python-zeitgeist libzeitgeist* activity-log-manager-common gnome-control-center gnome-screenshot overlay-scrollba*
+
+   sudo apt autoremove
+
+.. note::
+
+   如果卸载了Gnome Unity桌面之后，默认桌面会切换到LXDE。这说明Jetson Nano默认安装了2个图形桌面 Unity(Gnome) 和 LXDE。不过，我更喜欢轻量级桌面 :ref:`xfce`
+
+- 其他比较占用磁盘空间的是 chromium ，也可以卸载掉::
+
+   sudo apt remove --purge chromium*
+   sudo apt autoremove
+
+- 安装应用工具::
+
+   sudo apt install curl screen nmon lsof dnsmasq
+
+网络
+======
+
+默认Ubuntu桌面版本(Jetson Nano使用定制版Ubuntu)使用 :ref:`networkmanager` 管理网络，但是对于服务器使用 :ref:`netplan` 更为方便。所以我采用 :ref:`switch_nm` 方式，将网络管理切换到netplan。
+
+- 禁用NetworkManager::
+
+   sudo systemctl stop NetworkManager
+   sudo systemctl disable NetworkManager
+   sudo systemctl mask NetworkManager
+
+- 启动和激活 ``systemd-networkd`` ::
+
+   sudo systemctl unmask systemd-networkd.service
+   sudo systemctl enable systemd-networkd.service
+   sudo systemctl start systemd-networkd.service
+
+
+参考
+=======
+
+- `Make NVIDIA Jetson Nano Developer Kit Headless <https://lunar.computer/posts/nvidia-jetson-nano-headless/>`_
+- `How to Configure Network on Ubuntu 18.04 LTS with Netplan? <https://linuxhint.com/install_netplan_ubuntu/>`_
