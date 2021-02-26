@@ -308,31 +308,11 @@ ssh设置
 screen设置
 -------------
 
-- 在服务器维护过程中，经常需要启用 ``screen`` 以便在服务器端保持工作状态，建议在 ``xcloud`` 主机上添加 ``~/.screenrc`` ::
+- 在服务器维护过程中，经常需要启用 ``screen`` 以便在服务器端保持工作状态，建议在 ``xcloud`` 主机上添加 ``~/.screenrc`` :
 
-   source /etc/screenrc
-   altscreen off
-   hardstatus none
-   caption always "%{= wk}%{wk}%-Lw%{rw} %n+%f %t %{wk}%+Lw %=%c%{= R}%{-}"
-
-   shelltitle "$ |bash"
-   defscrollback 50000
-   startup_message off
-   escape ^aa
-
-   termcapinfo xterm|xterms|xs|rxvt ti@:te@ # scroll bar support
-   term rxvt # mouse support
-
-   bindkey -k k; screen
-   bindkey -k F1 prev
-   bindkey -k F2 next
-   bindkey -d -k kb stuff ^H
-   bind x remove
-   bind j eval "focus down"
-   bind k eval "focus up"
-   bind s eval "split" "focus down" "prev"
-   vbell off
-   shell -bash
+.. literalinclude:: screenrc
+   :language: bash
+   :linenos:
 
 .. note::
 
