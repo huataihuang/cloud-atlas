@@ -256,6 +256,85 @@
 <div class="section" id="id2">
 <h2>初始化过程概述<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>首次启动Jetson Nano一定要把设备连接到能够访问Internet的局域网，也即是确保主机能够通过DHCP获得IP地址并访问Internet，否则会导致启动初始化脚本死循环。</p>
+<p>初始化结束之后，重启一次登陆进行图形桌面，可以看到是Gnome桌面。默认已经安装了chromium浏览器以及libreoffice办公软件。我的目标是部署服务器话的GPU运行环境，所以会做清理和简化。</p>
+</div>
+<div class="section" id="id3">
+<h2>配置默认字符启动<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>安装完成后，我首先将桌面环境切换到字符模式，以便节约资源，并为下一步瘦身做好准备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">disable</span> <span class="n">gdm3</span>
+<span class="n">systemctl</span> <span class="nb">set</span><span class="o">-</span><span class="n">default</span> <span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="desktop">
+<h2>卸载Desktop<a class="headerlink" href="#desktop" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>清理桌面应用程序:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="o">--</span><span class="n">purge</span> <span class="n">libreoffice</span><span class="o">*</span> <span class="o">-</span><span class="n">y</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="o">--</span><span class="n">purge</span> <span class="n">thunderbird</span><span class="o">*</span> <span class="o">-</span><span class="n">y</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">clean</span> <span class="o">-</span><span class="n">y</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+</li>
+<li><p>卸载窗口登陆管理器gdm3和gnome桌面:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="o">--</span><span class="n">purge</span> <span class="n">ubuntu</span><span class="o">-</span><span class="n">desktop</span> <span class="n">gdm3</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>不过，使用 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">list</span> <span class="pre">--installed</span></code> 检查已经安装的软件包，依然可以看到大量的图形界面应用程序</p>
+<p>所以进一步清理 Unity (深度定制的Gnome):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="n">nautilus</span> <span class="n">gnome</span><span class="o">-</span><span class="n">power</span><span class="o">-</span><span class="n">manager</span> <span class="n">gnome</span><span class="o">-</span><span class="n">screensaver</span> <span class="n">gnome</span><span class="o">-</span><span class="n">termina</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">pane</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">applet</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">bluetooth</span> <span class="n">gnome</span><span class="o">-</span><span class="n">desktop</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">sessio</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">user</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">shell</span><span class="o">-</span><span class="n">common</span> <span class="n">compiz</span> <span class="n">compiz</span><span class="o">*</span> <span class="n">unity</span> <span class="n">unity</span><span class="o">*</span> <span class="n">hud</span> <span class="n">zeitgeist</span> <span class="n">zeitgeist</span><span class="o">*</span> <span class="n">python</span><span class="o">-</span><span class="n">zeitgeist</span> <span class="n">libzeitgeist</span><span class="o">*</span> <span class="n">activity</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">common</span> <span class="n">gnome</span><span class="o">-</span><span class="n">control</span><span class="o">-</span><span class="n">center</span> <span class="n">gnome</span><span class="o">-</span><span class="n">screenshot</span> <span class="n">overlay</span><span class="o">-</span><span class="n">scrollba</span><span class="o">*</span>
+
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果卸载了Gnome Unity桌面之后，默认桌面会切换到LXDE。这说明Jetson Nano默认安装了2个图形桌面 Unity(Gnome) 和 LXDE。不过，我更喜欢轻量级桌面 <a class="reference internal" href="../../../linux/arch_linux/xfce.html#xfce"><span class="std std-ref">Xfce</span></a></p>
+</div>
+<ul>
+<li><p>其他比较占用磁盘空间的是 chromium ，也可以卸载掉:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="o">--</span><span class="n">purge</span> <span class="n">chromium</span><span class="o">*</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装应用工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">curl</span> <span class="n">screen</span> <span class="n">nmon</span> <span class="n">lsof</span> <span class="n">dnsmasq</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>网络<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>默认Ubuntu桌面版本(Jetson Nano使用定制版Ubuntu)使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 管理网络，但是对于服务器使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 更为方便。所以我采用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/switch_nm.html#switch-nm"><span class="std std-ref">切换NetworkManager</span></a> 方式，将网络管理切换到netplan。</p>
+<ul>
+<li><p>禁用NetworkManager:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">NetworkManager</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">disable</span> <span class="n">NetworkManager</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">mask</span> <span class="n">NetworkManager</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动和激活 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">unmask</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://lunar.computer/posts/nvidia-jetson-nano-headless/">Make NVIDIA Jetson Nano Developer Kit Headless</a></p></li>
+<li><p><a class="reference external" href="https://linuxhint.com/install_netplan_ubuntu/">How to Configure Network on Ubuntu 18.04 LTS with Netplan?</a></p></li>
+</ul>
 </div>
 </div>
 
