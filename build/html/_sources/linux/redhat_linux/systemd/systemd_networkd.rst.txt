@@ -4,6 +4,26 @@
 Systemd Networkd服务
 =====================
 
+systemd配置静态IP地址
+========================
+
+``systemd-networkd`` 配置静态IP地址非常简单，创建一个和网卡接口名相同配置文件，例如 ``eth0`` 创建 ``/etc/systemd/network/10-eth0.network`` 内容如下:
+
+.. literalinclude:: 10-eth0.network
+   :language: bash
+   :linenos:
+   :caption:
+
+- 执行以下命令将默认NetworkManager切换成 ``systemd-networkd`` ::
+
+   systemctl stop NetworkManager.service
+   systemctl start systemd-networkd.service
+   systemctl restart systemd-resolved.service
+
+   systemctl disable NetworkManager.service
+   systemctl enable systemd-networkd.service
+
+
 systemd创建网桥
 =================
 
@@ -89,3 +109,4 @@ systemd创建网桥
 ======
 
 - `arch linxu wiki: systemd-networkd <https://wiki.archlinux.org/index.php/Systemd-networkd>`_
+- `18.04 - does it force netplan or can I still use resolved.conf? <https://askubuntu.com/questions/1098052/18-04-does-it-force-netplan-or-can-i-still-use-resolved-conf>`_ 引用了 `systemd.network Examples <https://www.freedesktop.org/software/systemd/man/systemd.network.html#Examples>`_

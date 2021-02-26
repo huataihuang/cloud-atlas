@@ -310,8 +310,85 @@
 </ul>
 </div>
 <div class="section" id="id4">
-<h2>网络<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
-<p>默认Ubuntu桌面版本(Jetson Nano使用定制版Ubuntu)使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 管理网络，但是对于服务器使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 更为方便。所以我采用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/switch_nm.html#switch-nm"><span class="std std-ref">切换NetworkManager</span></a> 方式，将网络管理切换到netplan。</p>
+<h2>服务器配置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~/.screenrc</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nb">source</span> /etc/screenrc
+altscreen off
+hardstatus none
+caption always <span class="s2">&quot;%{= wk}%{wk}%-Lw%{rw} %n+%f %t %{wk}%+Lw %=%c%{= R}%{-}&quot;</span>
+
+shelltitle <span class="s2">&quot;</span>$<span class="s2"> |bash&quot;</span>
+defscrollback <span class="m">50000</span>
+startup_message off
+escape ^aa
+
+termcapinfo xterm<span class="p">|</span>xterms<span class="p">|</span>xs<span class="p">|</span>rxvt ti@:te@ <span class="c1"># scroll bar support</span>
+term rxvt <span class="c1"># mouse support</span>
+
+bindkey -k k<span class="p">;</span> screen
+bindkey -k F1 prev
+bindkey -k F2 next
+bindkey -d -k kb stuff ^H
+<span class="nb">bind</span> x remove
+<span class="nb">bind</span> j <span class="nb">eval</span> <span class="s2">&quot;focus down&quot;</span>
+<span class="nb">bind</span> k <span class="nb">eval</span> <span class="s2">&quot;focus up&quot;</span>
+<span class="nb">bind</span> s <span class="nb">eval</span> <span class="s2">&quot;split&quot;</span> <span class="s2">&quot;focus down&quot;</span> <span class="s2">&quot;prev&quot;</span>
+vbell off
+shell -bash
+</pre></div>
+</td></tr></table></div>
+<p>然后执行命令 <code class="docutils literal notranslate"><span class="pre">screen</span> <span class="pre">-S</span> <span class="pre">works</span></code> 启动远程screen后再执行进一步配置，以免网络抖动影响操作。</p>
+</div>
+<div class="section" id="id5">
+<h2>网络<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>默认Ubuntu桌面版本(Jetson Nano使用定制版Ubuntu)使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 管理网络，但是对于服务器使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 更为方便。不过，我在18.04系列Ubuntu使用netplan一直非常蹉跎，所以还是直接使用 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 配置静态IP地址。</p>
+<ul class="simple">
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/network/10-eth0.network</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">../../../linux/redhat_linux/systemd/10-eth0.network</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>Match<span class="o">]</span>
+<span class="nv">MACAddress</span><span class="o">=</span><span class="m">00</span>:00:00:00:00:01
+
+<span class="o">[</span>Network<span class="o">]</span>
+<span class="nv">Address</span><span class="o">=</span><span class="m">192</span>.168.6.10/24
+<span class="nv">Gateway</span><span class="o">=</span><span class="m">192</span>.168.6.200
+<span class="nv">DNS</span><span class="o">=</span><span class="m">192</span>.168.6.1
+<span class="nv">DNS</span><span class="o">=</span><span class="m">192</span>.168.6.2
+</pre></div>
+</td></tr></table></div>
+</div>
 <ul>
 <li><p>禁用NetworkManager:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">NetworkManager</span>
@@ -329,8 +406,8 @@
 </li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://lunar.computer/posts/nvidia-jetson-nano-headless/">Make NVIDIA Jetson Nano Developer Kit Headless</a></p></li>
 <li><p><a class="reference external" href="https://linuxhint.com/install_netplan_ubuntu/">How to Configure Network on Ubuntu 18.04 LTS with Netplan?</a></p></li>

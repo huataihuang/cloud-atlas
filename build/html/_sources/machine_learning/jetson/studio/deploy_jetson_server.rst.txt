@@ -79,10 +79,28 @@
 
    sudo apt install curl screen nmon lsof dnsmasq
 
+服务器配置
+===========
+
+- ``~/.screenrc`` :
+
+.. literalinclude:: ../../../linux/ubuntu_linux/screenrc
+   :language: bash
+   :linenos:
+
+然后执行命令 ``screen -S works`` 启动远程screen后再执行进一步配置，以免网络抖动影响操作。
+
 网络
 ======
 
-默认Ubuntu桌面版本(Jetson Nano使用定制版Ubuntu)使用 :ref:`networkmanager` 管理网络，但是对于服务器使用 :ref:`netplan` 更为方便。所以我采用 :ref:`switch_nm` 方式，将网络管理切换到netplan。
+默认Ubuntu桌面版本(Jetson Nano使用定制版Ubuntu)使用 :ref:`networkmanager` 管理网络，但是对于服务器使用 :ref:`netplan` 更为方便。不过，我在18.04系列Ubuntu使用netplan一直非常蹉跎，所以还是直接使用 :ref:`systemd_networkd` 配置静态IP地址。
+
+- 创建 ``/etc/systemd/network/10-eth0.network`` :
+
+.. literalinclude:: ../../../linux/redhat_linux/systemd/10-eth0.network
+   :language: bash
+   :linenos:
+   :caption:
 
 - 禁用NetworkManager::
 
