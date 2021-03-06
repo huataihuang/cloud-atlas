@@ -34,6 +34,10 @@ systemd-resolved有4种不同方式来处理DNS解析，其中有2中是主要�
 
    resolvectl status
 
+也可以执行::
+
+   systemd-resolve --status
+
 自动管理DNS
 ------------
 

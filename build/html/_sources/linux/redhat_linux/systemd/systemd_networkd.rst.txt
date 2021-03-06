@@ -4,12 +4,24 @@
 Systemd Networkd服务
 =====================
 
+systemd-networkd设置MAC地址欺骗
+================================
+
+``systemd-networkd`` 支持通过 ``systemd.link`` 配置实现MAC地址欺骗。
+
+- 配置 ``/etc/systemd/network/00-wlan0.link`` 或者 ``00-wlan0.network`` :
+
+.. literalinclude:: systemd_networkd/00-wlan0.network
+   :language: bash
+   :linenos:
+   :caption:
+
 systemd配置静态IP地址
 ========================
 
 ``systemd-networkd`` 配置静态IP地址非常简单，创建一个和网卡接口名相同配置文件，例如 ``eth0`` 创建 ``/etc/systemd/network/10-eth0.network`` 内容如下:
 
-.. literalinclude:: 10-eth0.network
+.. literalinclude:: systemd_networkd/10-eth0.network
    :language: bash
    :linenos:
    :caption:

@@ -105,4 +105,71 @@ DNS解析器配置
 
 - 然后执行 ``screen -S works`` 启用一个远程控制台，就可以继续执行系统升级更新等操作
 
+操作系统更新
+===============
 
+- 操作系统更新::
+
+   apt update
+   apt upgrade
+
+备份镜像
+==========
+
+安装和更新树莓派操作系统是一个比较繁琐的过程(墙内更新树莓派网速非常慢)，由于我考虑可能会不断推倒重装，所以考虑在更新完成后先做一次镜像备份。另外，如果需要维护大量的服务器，则可以采用自建Ubuntu软件仓库镜像或者 :ref:`centos_local_http_repo` 来实现大规模操作系统更新。
+
+- 将TF卡再次插入读卡器，通过以下命令进行备份::
+
+   dd if=/dev/sdc bs=100M status=progress | xz | dd of=raspios-lite.img.xz
+
+不过，上述方法对于128G的U盘并不友好，实际上是完全浪费了大量的空间(实际备份数据只有1.3GB)。我想到一个比较好的方法是，直接通过修改官方下载的镜像：先将镜像挂载到本地，然后通过chroot方式进入，更新和修订配置。这样得到的镜像可以直接使用。
+
+.. note::
+
+   `How to dd a remote disk using SSH on local machine and save to a local disk <https://unix.stackexchange.com/questions/132797/how-to-dd-a-remote-disk-using-ssh-on-local-machine-and-save-to-a-local-disk>`_ 提供了一个远程dd备份的方法可以参考::
+
+      ssh user@remote "dd if=/dev/sda | gzip -1 -" | dd of=image.gz
+
+.. warning::
+
+   实践发现这种 ``dd`` 方式备份效率实在太低，最终我放弃了这个方法。备份建议采用 :ref:`recover_system_by_tar`
+
+修订时区localtime
+===================
+
+默认安装完成raspios系统， ``localtime`` 时区是 ``London`` 修改修订成本地时区，例如 ``Shanghai`` ::
+
+   unlink /etc/localtime
+   ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+然后通过 ``date`` 命令检查一下时间，看看是否正确显示本地时间。
+
+基础桌面
+===========
+
+我最中意的桌面是轻巧兼功能的 :ref:`xfce` ，同样在 :ref:`jetson_xfce4` ，现在在Raspberry Pi 400上我也采用Xfce4 ::
+
+   apt install xfce4
+
+- 在用户目录添加 ``~/.xinitrc``  内容如下::
+
+   exec startxfce4
+
+- 这样就可以通过 ``startx`` 命令启动进入桌面
+
+无线设置
+=========
+
+首次使用Raspberry Pi 400，终端会提示::
+
+   Wi-Fi is currently blocked by rfkill.
+   Use raspi-config to set the country before use.
+
+:ref:`raspi_config` 是一个终端交互配置工具，非常方便设置一些系统功能。上述提示表明，在启用Wi-Fi之前，首先需要设置 ``WLAN Contry`` ，这是因为 5GHz WiFi需要明确设置 ``country=CN`` 才能激活使用。 ( :ref:`wpa_supplicant` 实践中可以看到必须设置 ``country=CN`` ，如果使用 :ref:`netplan` 配置，则需要配置 ``/etc/default/crda`` 设置项 ``REGDOMAIN=CN`` )
+
+- 启动WiFi接口::
+
+   rfkill list
+   rfkill unblock wifi
+   
+- 通过 :ref:`systemd_networkd_wlan` 连接无线

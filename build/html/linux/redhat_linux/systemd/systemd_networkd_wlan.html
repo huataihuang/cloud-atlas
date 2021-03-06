@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>systemd-resolved &mdash; Cloud Atlas 0.1 文档</title>
+  <title>使用systemd-networkd配置无线 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -41,8 +41,8 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Systemd Networkd服务" href="systemd_networkd.html" />
-    <link rel="prev" title="systemd简介" href="introduce_systemd.html" /> 
+    <link rel="next" title="Systemd的rc.local配置" href="systemd_rc_local.html" />
+    <link rel="prev" title="Systemd Networkd服务" href="systemd_networkd.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -115,9 +115,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../admin/index.html">RedHat Linux 系统管理</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Systemd进程管理器</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="introduce_systemd.html">systemd简介</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">systemd-resolved</a></li>
+<li class="toctree-l4"><a class="reference internal" href="systemd_resolved.html">systemd-resolved</a></li>
 <li class="toctree-l4"><a class="reference internal" href="systemd_networkd.html">Systemd Networkd服务</a></li>
-<li class="toctree-l4"><a class="reference internal" href="systemd_networkd_wlan.html">使用systemd-networkd配置无线</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">使用systemd-networkd配置无线</a></li>
 <li class="toctree-l4"><a class="reference internal" href="systemd_rc_local.html">Systemd的rc.local配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="systemd_env.html">Systemd环境变量</a></li>
 <li class="toctree-l4"><a class="reference internal" href="systemd_dissuspend.html">systemd禁止笔记本suspend</a></li>
@@ -224,13 +224,13 @@
         
           <li><a href="index.html">Systemd进程管理器</a> &raquo;</li>
         
-      <li>systemd-resolved</li>
+      <li>使用systemd-networkd配置无线</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../../../_sources/linux/redhat_linux/systemd/systemd_resolved.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/linux/redhat_linux/systemd/systemd_networkd_wlan.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -243,74 +243,102 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="systemd-resolved">
-<span id="id1"></span><h1>systemd-resolved<a class="headerlink" href="#systemd-resolved" title="永久链接至标题">¶</a></h1>
-<p>systemd-resolved 是通过D-Bus接口向本地应用程序提供网络名字解析的systemd服务，包括解析(resolve) NSS服务(nss-resolve)和一个在127.0.0.53上监听的本地DNS stub监听器。不需要单独安装systemd-resolved，因为当前Linux主流发行版默认使用的systemd已经包含了这个组件，并且默认启用。</p>
+  <div class="section" id="systemd-networkd">
+<span id="systemd-networkd-wlan"></span><h1>使用systemd-networkd配置无线<a class="headerlink" href="#systemd-networkd" title="永久链接至标题">¶</a></h1>
+<p>本质上，无线网络的配置都是通过 <a class="reference internal" href="../../ubuntu_linux/network/wpa_supplicant.html#wpa-supplicant"><span class="std std-ref">使用wpa_supplicant连接无线网络</span></a> 来实现的，网络配置管理工具 <a class="reference internal" href="../../ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 、 <a class="reference internal" href="../../ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 在管理无线网络底层都是使用 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code> ，区别只是配置方式，底层都是调用 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code> 。</p>
+<p><a class="reference internal" href="systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 也是一种配置管理工具，同样可以结合 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code> 管理无线网络。</p>
+<p>由于当前 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 已经成为主要的系统管理框架和组件集，所以使用 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 结合 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code> 实现无线网络管理，就是一种非常简洁并且不需要第三方管理工具的实现方法。</p>
+<div class="section" id="id1">
+<h2>systemd-networkd配置<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>所有位于 <code class="docutils literal notranslate"><span class="pre">/etc/system/network/</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">.network</span></code> 配置文件都会匹配一个设备实现网络配置。我已经展示了 <a class="reference internal" href="systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 配置有线网络，相似的，我们可以启用无线接口 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 对应配置文件 <code class="docutils literal notranslate"><span class="pre">20-wlan0.network</span></code> (这个文件名只要以 <code class="docutils literal notranslate"><span class="pre">.network</span></code> 结尾即可，文件名无要求)</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">systemd_networkd/20-wlan0.network</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>Match<span class="o">]</span>
+<span class="nv">Name</span><span class="o">=</span>wlan0
+<span class="o">[</span>Network<span class="o">]</span>
+<span class="nv">DHCP</span><span class="o">=</span>yes
+</pre></div>
+</td></tr></table></div>
+</div>
+<ul>
+<li><p>配置5GHz无线网络的国家代码 <code class="docutils literal notranslate"><span class="pre">/etc/default/crda</span></code> (重要：对于使用5GHz无线必须配置)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REGDOMAIN</span><span class="o">=</span><span class="n">CN</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/wpa_supplicant/wpa_supplicant-wlan0.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">systemd_networkd/wpa_supplicant-wlan0.conf</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nv">ctrl_interface</span><span class="o">=</span><span class="nv">DIR</span><span class="o">=</span>/var/run/wpa_supplicant <span class="nv">GROUP</span><span class="o">=</span>netdev
+<span class="nv">update_config</span><span class="o">=</span><span class="m">1</span>
+
+<span class="nv">network</span><span class="o">={</span>
+  <span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;office&quot;</span>
+  <span class="nv">key_mgmt</span><span class="o">=</span>WPA-EAP
+  <span class="nv">identity</span><span class="o">=</span><span class="s2">&quot;USERNAME&quot;</span>
+  <span class="nv">password</span><span class="o">=</span><span class="s2">&quot;PASSWORD&quot;</span>
+<span class="o">}</span>
+<span class="nv">network</span><span class="o">={</span>
+  <span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;home&quot;</span>
+  <span class="nv">key_mgmt</span><span class="o">=</span>WPA-PSK
+  <span class="nv">psk</span><span class="o">=</span><span class="s2">&quot;PASSWORD&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<ul>
+<li><p>启用 systemd-neworkd wpa_supplicant 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">wpa_supplicant</span><span class="nd">@wlan0</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">wpa_supplicant</span><span class="nd">@wlan0</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后检查systemd服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">wpa_supplicant</span><span class="nd">@wlan0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant&#64;wlan0.service</span></code> 对应读取配置是 <code class="docutils literal notranslate"><span class="pre">/etc/wpa_supplicant/wpa_supplicant-wlan0.conf</span></code> 就是我们上面配置的wpa_suplicant对应配置文件</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● wpa_supplicant@wlan0.service - WPA supplicant daemon (interface-specific version)
+   Loaded: loaded (/lib/systemd/system/wpa_supplicant@.service; enabled; vendor preset: enabled)
+   Active: active (running) since Sun 2021-03-07 00:02:30 CST; 4s ago
+ Main PID: 7738 (wpa_supplicant)
+    Tasks: 1 (limit: 4915)
+   CGroup: /system.slice/system-wpa_supplicant.slice/wpa_supplicant@wlan0.service
+           └─7738 /sbin/wpa_supplicant -c/etc/wpa_supplicant/wpa_supplicant-wlan0.conf -Dnl80211,wext -iwlan0
+
+Mar 07 00:02:30 pi400 systemd[1]: Started WPA supplicant daemon (interface-specific version).
+Mar 07 00:02:30 pi400 wpa_supplicant[7738]: Successfully initialized wpa_supplicant
+Mar 07 00:02:33 pi400 wpa_supplicant[7738]: wlan0: Trying to associate with SSID &#39;office&#39;
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>然后检查 <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span></code> 就可以看到无线网卡获得的IP地址并能够连接internet。</p></li>
+</ul>
+</div>
 <div class="section" id="id2">
-<h2>配置<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>systemd-resolved为域名系统(Domain Name System, DNS)(包括DNSSEC和DNS over TLS)，多播DNS(Multicast DNS, mDNS) 以及链接本地多播域名解析(Link-Local Multicast Name Resolution, LLMNR)提供解析服务。</p>
-<p>这个解析起可以通过编辑 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf</span></code> 或者 添加/删除 位于 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf.d/</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">.conf</span></code> 配置文件来管理。注意，需要启动并激活 <code class="docutils literal notranslate"><span class="pre">systemd-resolved.service</span></code> 。</p>
-<div class="section" id="dns">
-<h3>DNS<a class="headerlink" href="#dns" title="永久链接至标题">¶</a></h3>
-<p>systemd-resolved有4种不同方式来处理DNS解析，其中有2中是主要使用模式：</p>
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
-<li><p>local DNS stub模式</p></li>
-</ul>
-<p>使用systemd DNS stub文件 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/stub-resolv.conf</span></code> ，这个文件只包含local stub <code class="docutils literal notranslate"><span class="pre">127.0.0.53</span></code> 作为唯一DNS服务器，以及一系列search domains。这是 <strong>建议使用</strong> 的操作模式：原先传统的 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 已经由systemd-resolved管理改成为软链接到systemd DNS stub文件:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lrwxrwxrwx</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">39</span> <span class="n">Jul</span> <span class="mi">31</span> <span class="mi">16</span><span class="p">:</span><span class="mi">37</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span> <span class="o">-&gt;</span> <span class="o">../</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">resolve</span><span class="o">/</span><span class="n">stub</span><span class="o">-</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span>
-</pre></div>
-</div>
-<p>而且，在 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/</span></code> 目录下还有一个 <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> 配置，则是 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 使用的上级DNS服务器，也就是转发(forward)DNS解析请求给上级DNS。</p>
-<ul class="simple">
-<li><p>保护resolv.conf模式</p></li>
-</ul>
-<p>在保护模式下 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 则依然存在，而且可以由其他软件包管理，此时systemd-resolved仅仅是这个文件的客户端。</p>
-<p>要检查DNS当前由systemd-resolved管理状态，执行以下命令:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resolvectl</span> <span class="n">status</span>
-</pre></div>
-</div>
-<p>也可以执行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemd</span><span class="o">-</span><span class="n">resolve</span> <span class="o">--</span><span class="n">status</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="id3">
-<h3>自动管理DNS<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
-<p>systemd-resolved默认就可以和 <a class="reference internal" href="../../ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 协作管理 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> ，不需要单独配置。不过，如果使用DHCP和VPN客户端，则会使用 <code class="docutils literal notranslate"><span class="pre">resolvconf</span></code> 程序设置DNS和search domains，则需要安装一个 <code class="docutils literal notranslate"><span class="pre">systemd-resolvconf</span></code> 软件包来提供 <code class="docutils literal notranslate"><span class="pre">/usr/bin/resolvconf</span></code> 软链接，以便和VPN客户端和DHCP一起协作。</p>
-</div>
-<div class="section" id="id4">
-<h3>手工配置DNS<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
-<p>在local DNS stub模式，要定制DNS服务器，需要设置 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf.d/dns_servers.conf</span></code> 配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Resolve</span><span class="p">]</span>
-<span class="n">DNS</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">35.1</span> <span class="n">fd7b</span><span class="p">:</span><span class="n">d0bd</span><span class="p">:</span><span class="mi">7</span><span class="n">a6e</span><span class="p">::</span><span class="mi">1</span>
-<span class="n">Domains</span><span class="o">=~.</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="fallback">
-<h3>Fallback<a class="headerlink" href="#fallback" title="永久链接至标题">¶</a></h3>
-<p>如果systemd-resolved没有从 <a class="reference internal" href="../../ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 收到DNS服务器地址，并且没有手工配置 <code class="docutils literal notranslate"><span class="pre">dns_servers.conf</span></code> ，那么systemd-resolved将fall back回fallback DNS地址以确保DNS解析可以工作。</p>
-<p>这个fallback dns地址在 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf.d/fallback_dns.conf</span></code> 配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Resolve</span><span class="p">]</span>
-<span class="n">FallbackDNS</span><span class="o">=</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="p">::</span><span class="mi">1</span>
-</pre></div>
-</div>
-<p>如果要禁止fallback DNS功能，则将 <code class="docutils literal notranslate"><span class="pre">FallbackDNS</span></code> 参数是设置为空:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Resolve</span><span class="p">]</span>
-<span class="n">FallbackDNS</span><span class="o">=</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>systemd-resolved还有支持 DNSSEC, DNS over TLS, mDNS 等功能，有待后续在研究DNS服务 <a class="reference internal" href="../../../infra_service/dns/bind/index.html#bind"><span class="std std-ref">BIND</span></a> 时候学习实践。</p>
-</div>
-</div>
-</div>
-<div class="section" id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Systemd-resolved">archlinux - systemd-resolved</a></p></li>
-<li><p><a class="reference external" href="https://www.freedesktop.org/software/systemd/man/systemd-resolved.service.html">systemd-resolved.service</a></p></li>
+<li><p><a class="reference external" href="https://remy.grunblatt.org/using-systemd-networkd-with-wpa_supplicant-to-manage-wireless-network-configuration.html">Using systemd-networkd with wpa_supplicant to manage wireless network configuration</a></p></li>
+<li><p><a class="reference external" href="https://bbs.archlinux.org/viewtopic.php?id=178625">Managing WPA wireless with systemd-networkd ?</a></p></li>
 </ul>
 </div>
 </div>
@@ -321,8 +349,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="systemd_networkd.html" class="btn btn-neutral float-right" title="Systemd Networkd服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="introduce_systemd.html" class="btn btn-neutral float-left" title="systemd简介" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="systemd_rc_local.html" class="btn btn-neutral float-right" title="Systemd的rc.local配置" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="systemd_networkd.html" class="btn btn-neutral float-left" title="Systemd Networkd服务" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
