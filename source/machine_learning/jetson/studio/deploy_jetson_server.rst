@@ -97,7 +97,7 @@
 
 - 创建 ``/etc/systemd/network/10-eth0.network`` :
 
-.. literalinclude:: ../../../linux/redhat_linux/systemd/10-eth0.network
+.. literalinclude:: ../../../linux/redhat_linux/systemd/systemd_networkd/10-eth0.network
    :language: bash
    :linenos:
    :caption:

@@ -1,8 +1,40 @@
-.. _pi_hdmi:
+.. _pi_4_4k_display:
 
-=================
-树莓派HDMI接口
-=================
+=======================
+Raspberry Pi 4的4K显示
+=======================
+
+从 :ref:`pi_4` 的技术规格可以看到支持双路4K显示，这对于软件开发者来说是非常完美的，因为我们阅读代码需要有非常大显示器以及高分辨率来提高效率。 :ref:`pi_400` 虽然价格低廉，但是丝毫没有降低 :ref:`pi_4` 显示配置，同样支持双4K显示，所以我购买了4K显示器来用于树莓派400。
+
+4k显示器
+=========
+
+.. note::
+
+   所谓4k显示器通常指 3840*2160像素的分辨率
+
+在选购4k显示器的时候主要考虑因素:
+
+- 显示尺寸
+
+3840*2160像素的分辨率，对于28英寸4k像素密度为157ppi，在30厘米左右的观赏距离下是非常适合的一个标准。相对来说，32英寸4K会将像素密度降低至140ppi左右，清晰度降低。
+
+可以参考一下 27英寸5K屏幕的苹果iMac视网膜版，像素密度为220ppi。既然苹果选择推出27英寸的5K显示器，可以推测在28英寸规格下，4K分辨率应该是比较合适的。
+
+- 刷新率
+
+理论上刷新率越高对于动态显示图形越流畅，不过对于编程没有太大要求，常规的60Hz应该能够满足。高刷新率对于显卡要求极高，树莓派虽然是支持4K输出，但是规格参考 `树莓派HDMI配置 <https://www.lxx1.com/pi/basis/HDMI_config.html>`_ :
+
+  - Raspberry Pi 4可以驱动最多两个显示器
+  - 4K分辨率下，如果连接两个显示器，则刷新率将限制为30Hz
+  - 以60Hz的刷新率以4K驱动单个显示器要求:
+    - 显示器连接到与UCB-C电源输入（标记为HDMI0）相邻的HDMI端口
+    - config.txt中设置标志来启用4Kp60输出: ``hdmi_enable_4kp60=1``
+
+我的选择： AOC U28P2U/BS 28英寸4K
+
+hdmi0
+========
 
 我在使用 :ref:`pi_400` 来尝试 :ref:`fydeos_pi` ，遇到的第一个问题就是启动后只看到树莓派的著名的彩虹方块，然后显示器就黑屏指示没有输入信号。这个问题和HDMI的配置相关，促使我学习树莓派的启动配置 ``config.txt`` 有关HDMI输出设置。
 
@@ -33,9 +65,11 @@ hdmi_safe
 参考
 ======
 
+- `数显之家快讯：4K超清分辨率显示器尺寸多少合适？ <https://zhuanlan.zhihu.com/p/320555314>`_
 - `Rasp <https://www.raspberrypi.org/documentation/configuration/config-txt/pi4-hdmi.md>`_
 - `No HDMI output on my Raspberry Pi 4 <https://support.thepihut.com/hc/en-us/articles/360008687257-No-HDMI-output-on-my-Raspberry-Pi-4>`_
 - `Raspberry Pi HDMI not working? Follow these simple solutions <https://windowsreport.com/raspberry-pi-hdmi-not-working/>`_
 - `How to enable 4K output on Raspberry Pi 400? <https://forum.endeavouros.com/t/how-to-enable-4k-output-on-raspberry-pi-400/9632/12>`_
 - `Video options in config.txt <https://www.raspberrypi.org/documentation/configuration/config-txt/video.md>`_
 - `HDMI monitors says NO SIGNAL (solved) <https://www.raspberrypi.org/forums/viewtopic.php?t=34061>`_
+

@@ -27,7 +27,7 @@
 
 则使用以下命令启用无线(unblock)::
 
-   rfkill unlock wifi
+   rfkill unblock wifi
 
 - 如果使用桌面版本Ubuntu，默认是启用了NetworkManager，则会和手工设置 ``wpa_supplicant`` 冲突，所以需要停止NetworkManager::
 
