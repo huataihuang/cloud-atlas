@@ -1,14 +1,14 @@
-.. _share_mouse_keyboard:
+.. _synergy:
 
-=======================
-主机间共享键盘鼠标
-=======================
+===========================
+Synergy:主机间共享键盘鼠标
+===========================
 
 .. note::
 
    Synergy是我购买的一款非常有价值的软件：对于类似我这样跨平台工作的人来说，能够无缝在多台电脑(不同操作系统)共享一套键盘鼠标，极大提高了工作效率：
 
-   - 多屏幕显示内容，等我有时间排好最强屏幕给大家秀一下
+   - 多屏幕显示内容
    - 支持跨系统剪贴板共享：这点非常重要，我需要能够在Linux,macOS,Windows之间剪贴板内容，方便使用不同平台的软件
    - 解决了一些特定商用软件没有Linux版本的缺陷：例如，我在macOS上运行的钉钉(没有Linux版本)，我可以一边和同事沟通，一边用我的Linux笔记本ssh登陆服务器维护。而且可以在两个平台之间复制粘贴共享文本内容，基本解决了运维协作问题。
 
@@ -20,11 +20,11 @@
 
    我试过使用iPad作为第二块屏幕，甚至购买过能耦将macOS的屏幕扩展到iPad上的商用软件，然而，这种通过Lighten线输出屏幕绘制图形窗口非常消耗系统资源，实用性很差。
 
-`Synergy <https://symless.com/synergy>`_ 是一款通过网络共享键盘和鼠标的软件，跨操作系统平台，这样只需要一套键盘鼠标，可以非常容易在不同的图形界面上操作。这样，我就可以把运行Ubuntu桌面的MacBook Pro架设起来，运行浏览器和阅读PDF，而运行macOS的MacBook Pro作为日常开发和运维工作，不仅方便输入，而且还支持剪贴板操作。
+`Synergy工具 <https://symless.com/synergy>`_ 是一款通过网络共享键盘和鼠标的软件，跨操作系统平台，这样只需要一套键盘鼠标，可以非常容易在不同的图形界面上操作。这样，我就可以把运行Ubuntu桌面的MacBook Pro架设起来，运行浏览器和阅读PDF，而运行macOS的MacBook Pro作为日常开发和运维工作，不仅方便输入，而且还支持剪贴板操作。
 
 .. note::
 
-   `Synergy <https://symless.com/synergy>`_ 最初是开源软件，并且现在也在GitHub上提供源代码。不过，作为商用软件销售的版本非常容易使用，作为支持开发者，非常建议购买。
+   `Synergy工具 <https://symless.com/synergy>`_ 最初是开源软件，并且现在也在GitHub上提供源代码。不过，作为商用软件销售的版本非常容易使用，作为支持开发者，非常建议购买。
 
 .. warning::
 
@@ -36,6 +36,9 @@
 =================
 
 - 在macOS上安装好Synergy，启动后作为Server端（共享出键盘鼠标）
+
+Ubuntu安装Synergy
+-------------------
 
 - Ubuntu的系统作为Client（提供屏幕）
   
@@ -64,9 +67,25 @@
 
    sudo dpkg -i synergy_1.10.1.stable_b81+8941241e_ubuntu_amd64.deb
 
+Arch安装Synergy
+------------------
+
 - Arch Linux也可以通过 :ref:`archlinux_aur` 安装 synergy::
 
    yay -S synergy
+
+Raspberry Pi OS安装Synergy
+----------------------------
+
+我现在工作桌面使用 :ref:`pi_400` ，安装的图形桌面系统是 :ref:`xfce` 。在Synergy官网也提供了针对树莓派ARM版本。
+
+- 安装依赖库::
+
+   apt install
+
+- 安装下载的软件包::
+
+   dpkg -i synergy_1.13.1-stable.063519a8_raspios_armhf.deb
 
 使用Synergy
 ===============
