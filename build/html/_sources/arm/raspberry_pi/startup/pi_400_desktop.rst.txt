@@ -6,12 +6,21 @@ Raspberry Pi 400桌面定制
 
 终于入手了 :ref:`pi_400` ，我最初的想法是 :ref:`fydeos_pi` ，但是似乎目前的FydeOS的显示输出对我的显示器支持存在问题。加上我主要的目标是想研究 :ref:`chromium_os` 的结构，所以我准备改成直接在 :ref:`pi_4` 上编译和构建chromium os。但是，Raspberry Pi 400则想先运行轻量级的精简Linux桌面系统，同时编译 :ref:`anbox` 来运行Android程序(ARM架构)。
 
+.. note::
+
+   当前Raspberry Pi OS没有提供官方64位操作系统，所以 :ref:`pi_400` 运行的是32位操作系统。为了能够充分发挥 :ref:`pi_4` 的64位架构能力( :ref:`pi_cluster` 使用的是 :ref:`pi_4` 的8G内存硬件 )，同时构建 :ref:`kubernetes_arm` 集群，在服务器端我使用的是64位Ubuntu ARM版本。
+
 目标
 ======
 
 - 使用官方原生Raspberry Pi OS，但是从 ``Raspberry Pi OS Lite`` (字符终端版本) 开始定制，只安装最精简的必要软件
 - 在主机上构建 :ref:`anbox` 来运行基础的Android应用程序，以便通过 :ref:`android` 来弥补Linux的一些商业应用程序不足
+
+  - 由于虚拟化非常消耗资源，实际我把所有ARM虚拟机都运行在 :ref:`pi_cluster` ，远程运行Android程序
+
 - 本地开发环境通过Docker来构建
+  
+  - 为了能够降低客户端资源消耗，我使用多台树莓派和Jetson Nano构建 :ref:`kubernetes_arm` ，所以容器都运行在服务器端，桌面电脑几乎不需要消耗资源
 
 安装
 =====
@@ -215,3 +224,7 @@ DNS解析器配置
    exec startxfce4
 
 - 重新登陆Xfce4桌面，然后执行 ``fcitx-configtool`` 命令进行配置。
+
+- 安装 :ref:`synergy`
+
+- 安装 :ref:`vs_code`

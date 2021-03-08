@@ -56,9 +56,13 @@ VS Code官方也提供x86_64的yum仓库，所以可以直接安装::
 ARM版本VS Code
 =================
 
-我在 :ref:`jetson_nano` 上使用了 VS Code for ARM 64版本，直接下载deb软件包就可以安装::
+- 在 :ref:`jetson_nano` 上使用了 VS Code for ARM 64版本，直接下载deb软件包就可以安装::
 
    sudo dpkg -i code_1.50.1-1602600638_arm64.deb
+
+- 在 :ref:`pi_400` 上安装 32位 ARM版本 VS Code::
+
+   sudo dpkg -i code_1.54.1-1614897556_armhf.deb
 
 社区构建VS Code
 =================

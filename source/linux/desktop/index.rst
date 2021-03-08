@@ -12,6 +12,7 @@ Linux桌面
    light_browser.rst
    netsurf.rst 
    vs_code.rst
+   synergy.rst
 
 .. only::  subproject and html
 

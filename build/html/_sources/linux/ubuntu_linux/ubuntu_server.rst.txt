@@ -188,7 +188,7 @@ Ubuntu 18.04.2 以及更新的版本在Desktop版本提供了一个保持更新�
 
 .. note::
 
-   实际上在部署云计算模拟仿真集群测试环境是不需要安装图形桌面的，不过，考虑到MacBook Pro的Retina屏幕可以作为桌面工作的 第二块屏幕，所以我还是安装了图形桌面，并通过Syngrey :ref:`share_mouse_keyboard` 。
+   实际上在部署云计算模拟仿真集群测试环境是不需要安装图形桌面的，不过，考虑到MacBook Pro的Retina屏幕可以作为桌面工作的 第二块屏幕，所以我还是安装了图形桌面，并通过 :ref:`synergy` 。
 
    `Manjaro LXDE vs XFCE讨论 <https://forum.manjaro.org/t/manjaro-lxde-vs-xfce/48738/6>`_ 提供了不同桌面内存的占用对比 。`LXDE vs Xfce这篇blog <http://mygeekopinions.blogspot.com/2011/08/lxde-vs-xfce.html>`_ 对比了两种轻量级平台的软件差>异。
 
