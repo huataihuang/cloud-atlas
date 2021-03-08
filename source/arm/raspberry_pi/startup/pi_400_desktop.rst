@@ -144,6 +144,11 @@ DNS解析器配置
 
 然后通过 ``date`` 命令检查一下时间，看看是否正确显示本地时间。
 
+键盘布局
+==========
+
+在国内购买的树莓派默认使用US键盘布局，但是树莓派是英国开发的，默认操作系统键盘布局是UK。请参考 `How to Change your Keyboard Layout on Raspberry Pi? (Raspbian) <How to Change your Keyboard Layout on Raspberry Pi? (Raspbian)>`_ 调整键盘布局。
+
 基础桌面
 ===========
 
@@ -173,3 +178,40 @@ DNS解析器配置
    rfkill unblock wifi
    
 - 通过 :ref:`systemd_networkd_wlan` 连接无线
+
+应用软件
+==========
+
+- 终端
+
+默认安装的终端是 ``uxterm`` ，但是对中文字体显示不友好。所以还是安装Xfce4的默认终端::
+
+   apt install xfce4-terminal
+
+- 浏览器
+
+默认安装的Xfce4桌面已经具备了一些基础软件，不过还需要浏览器。我比较倾向于使用开源的firefox，但是实际工作中很多业务网站已经完全chrome化了(就像当年微软的IE强制使用特殊的功能)，导致不得不同时安装两个浏览器::
+
+   apt install firefox-esr chromium
+
+``firefox-esr`` 是 ``Extended Support Release (ESR)`` 
+
+如果需要切换默认浏览器，则执行::
+
+   sudo update-alternatives --config x-www-browser
+
+- 安装中文字体(文泉驿微米黑)和输入法fcitx::
+
+   apt install fonts-wqy-microhei fcitx fcitx-googlepinyin
+
+安装fcitx会安装很多依赖软件包，主要是针对qt和gtk的库，非常庞大。如果不需要中文输入，仅仅作为中文浏览可以不安装。
+
+- 修订 ``.xinitrc`` ::
+
+   export GTK_IM_MODULE=fcitx
+   export QT_IM_MODULE=fcitx
+   export XMODIFIERS=@im=fcitx
+   exec fcitx &
+   exec startxfce4
+
+- 重新登陆Xfce4桌面，然后执行 ``fcitx-configtool`` 命令进行配置。
