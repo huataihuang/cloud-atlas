@@ -1,14 +1,14 @@
-.. _iphone:
+.. _apple_music:
 
 =================================
-iPhone
+Apple Music
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   iphone_zen.rst
-   iphone12_mini.rst
+   homepod_mini.rst
+   airpods_pro.rst
 
 .. only::  subproject and html
 
