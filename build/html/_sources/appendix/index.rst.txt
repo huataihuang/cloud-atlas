@@ -21,9 +21,6 @@
    :maxdepth: 1
 
    write_doc.rst
-   intel_core_i7_4850hq.rst
-   thinkpad_x220.rst
-   intel_core_i5_2410m.rst
    desktop_base_os.rst
    efi_system_partition.rst
    using_btrfs_in_studio.rst

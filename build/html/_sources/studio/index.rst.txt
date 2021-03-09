@@ -14,6 +14,7 @@ Studio Atlas
    :maxdepth: 1
 
    introduce_my_studio.rst
+   hardware/index
    base_os.rst
    kvm_docker_in_studio.rst
    kubenetes_in_studio.rst
