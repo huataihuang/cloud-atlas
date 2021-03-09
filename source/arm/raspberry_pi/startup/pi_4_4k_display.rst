@@ -89,6 +89,21 @@ hdmi_safe
 
 高分辨率下应用程序字体较小导致不够清晰，请参考 :ref:`xfce` 中 ``高分辨率调优``
 
+屏幕黑边
+=============
+
+有可能图形桌面不能全屏(在桌面周围有一圈黑边)，我在AOC 28“显示器就遇到这个问题。这是因为错误设置了 ``Underscan/overscan`` 导致的，可以通过 ``raspi-config`` 工具修改::
+
+   sudo raspi-config
+
+选择::
+
+   Display Options => Underscan
+
+然后选择不激活 compensation for dispalys with overscan
+
+详细参考 `Install the XFCE desktop on your Raspberry PI <https://www.pragmaticlinux.com/2020/11/install-the-xfce-desktop-on-your-raspberry-pi/>`_
+
 
 参考
 ======

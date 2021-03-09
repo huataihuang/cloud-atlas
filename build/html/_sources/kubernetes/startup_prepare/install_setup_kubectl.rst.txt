@@ -12,17 +12,18 @@
 在Linux平台使用curl安装kubectl执行程序
 ----------------------------------------
 
-- 通过命令行可以直接下载Linux版本执行程序::
+- 通过命令行可以直接下载64位X86 Linux版本执行程序::
 
-   curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 
-- 设置kubectl程序可执行::
+- 验证(可选)::
 
-   chmod +x ./kubectl
+   curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+   echo "$(<kubectl.sha256) kubectl" | sha256sum --check
 
-- 将执行程序移动到系统路径目录::
+- 执行安装::
 
-   sudo mv ./kubectl /usr/local/bin/kubectl
+   sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 - 验证::
 
@@ -53,15 +54,23 @@ Ubuntu, Debian 安装kubectl
 
 - 通过官方软件仓库安装kubectl::
 
-   sudo apt-get update && sudo apt-get install -y apt-transport-https
+   sudo apt update && sudo apt install -y apt-transport-https gnupg2 curl
    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
    echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-   sudo apt-get update
-   sudo apt-get install -y kubectl
+   sudo apt update
+   sudo apt install -y kubectl
 
 .. note::
 
    由于我在 :ref:`studio` 环境采用了Ubuntu，并且 :ref:`kubenetes_in_studio` 为了能够提高运行效率，我 :ref:`install_run_minikube` 直接在物理主机运行 minikube 来学习和验证kubernetes技术。目前，采用通过官方软件仓库来安装kubectl。
+
+.. note::
+
+   Ubuntu/Debian有不同版本代号，请参考 https://packages.cloud.google.com/apt/dists 选择适合你的发行版，例如，我在 :ref:`pi_400` 上使用的是32位ARM的Raspberry Pi OS，当前是 ``debian 10.8`` 版本代码是 ``buster`` ，对应的Ubuntu版本是 ``18.04 bionic`` 到 ``19.10 eoan`` ，取Ubuntu LTS版本代号 ``bionic`` ::
+
+      echo "deb https://apt.kubernetes.io/ kubernetes-bionic main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+
+   不过，也可能当前Google并没有针对这个Ubuntu/Debian发布对应版本，例如，目前还只能使用 ``kubernetes-xenial``
 
 macOS 安装kubectl
 -------------------
