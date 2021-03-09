@@ -20,7 +20,6 @@
 .. toctree::
    :maxdepth: 1
 
-   write_doc.rst
    desktop_base_os.rst
    efi_system_partition.rst
    using_btrfs_in_studio.rst
