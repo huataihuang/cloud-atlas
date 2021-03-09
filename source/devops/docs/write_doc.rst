@@ -98,7 +98,9 @@ Arch Linux默认安装了Python3，所以仅需要安装pip::
 
  安装virtualenv::
 
-    sudo pip3 install virtualenv
+    sudo apt install python3-venv
+
+
 
 设置virtualenv
 ----------------
@@ -106,7 +108,7 @@ Arch Linux默认安装了Python3，所以仅需要安装pip::
 - 创建工作目录下的Python 3 Virtualenv::
 
    cd ~
-   virutalenv venv3
+   python3 -m venv venv3
 
 - 使用Virtualenv (每次使用Python3 Virtualenv之前要激活，后续所有基于文档撰写都使用此环境) ::
 

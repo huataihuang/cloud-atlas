@@ -90,6 +90,8 @@ Theme
 
    我在 :ref:`jetson_xfce4` 中没有安装其他第三方theme，主要是为了精简和减轻系统负担。不过，默认安装的xfce4 theme也有比较精巧的界面，例如，我选择 ``Greybird-compact`` 作为窗口管理器风格： ``Settings >> Window Manager`` 然后选择 ``Greybird-compact`` 可以使得窗口标题条占用较少的屏幕空间。
 
+   我在 :ref:`pi_400_desktop` 中同样也没有安装附加的theme，也是为了减轻系统压力。我直接采用了 ``Window Manager`` 中的 ``Kokodi`` 风格，这个风格在高分屛上大小比较合适，并且提供了窗口的边缘立体阴影，非常有macOS的窗口风格。
+
 .. note::
 
    对于高分辨率屏幕，字体有可能会显示较小，看起来比较吃力。在不修改显示器分辨率(不使用默认显示器分辨率虽然能够使得字体放大但是显示会模糊)，可以通过修改显示DPI来解决: ``Settings >> Appearance >> Fonts`` 然后调整 ``DPI`` 使用 ``Custom DPI settings`` 进行调整，例如，对于2K屏幕，调整为 ``108`` 可以达到普通屏幕 ``96`` DPI的显示效果。
@@ -128,6 +130,19 @@ Theme
          Measurements >>
            Row Size (pixels) : 33 (默认是?，该数值调小可以使得工具条变窄)
 
+高分辨率调优
+----------------
+
+高分辨率显示器下主要调整如下：
+
+- 修改显示DPI来放大字体 120%: ``Settings >> Appearance >> Fonts`` 然后调整 ``DPI`` 使用 ``Custom DPI settings`` 进行调整，例如，对于2K屏幕，调整为 ``108`` 可以达到普通屏幕 ``96`` DPI的显示效果。
+- Firefox通过放大 120%: 
+
+  - 在浏览器地址栏输入 ``about:config`` 并回车
+  - 搜索 ``layout.css.devPixelsPerPx`` ，默认参数是 ``-1`` 表示不调整。可以修改成 ``1.0`` 则对应标准的96 dpi字体。要设置放大20%，则设置 ``1.2``
+
+- mupdf阅读器调整字体也是放大 120%就足够清晰
+
 平铺窗口
 ===========
 
@@ -140,7 +155,7 @@ Theme
 注意：系统默认没有给平铺窗口预设快捷键，需要使用 ``Setting >> Window Manger >> Keyboard`` 设置，我为了和macOS使用的第三方软件快捷键一致，采用如下快捷键
 
 ================================   ===================== 
- 平铺方式                          快捷键                  
+平铺方式                             快捷键                  
 ================================   ===================== 
  Tile window to the top            ``Ctrl+Super+Up``       
  Tile window to the bottom         ``Ctrl+Super+Down``     
@@ -199,14 +214,18 @@ xfce4-terminal
 
 xfce4-terminal兼顾了轻量级和功能丰富，可以在xfce桌面替代常用的uxterm/xterm。
 
-GoldenDict
-------------
+GoldenDict(取消)
+-------------------
 
 `GoldenDict <http://goldendict.org/>`_ 是使用WebKit引擎的字典软件，支持各种字典文件，也支持在线字典查询。不过软件以来qt5-webkit，会占用较大的系统资源(安装占用140MB磁盘空间)。
 
 - 安装::
 
    pacman -S goldendict
+
+.. note::
+
+   现在已经不再单独安装字典软件，而是采用在线的google translate。
 
 flameshot
 ---------------
@@ -226,9 +245,13 @@ mupdf
 
 mupdf非常简洁，甚至没有提供菜单，但是基本功能完备。使用 ``ctrl`` 键结合鼠标滚轮可以方法缩小页面（对于MacBook Pro的Retina屏幕，epub和pdf显示的字体都太小了)。
 
-midori
-----------
+midori(取消)
+----------------
 
 虽然chrome已经成为浏览器的事实标准，但是chromium实在太庞大沉重了。xfce项目推荐的集成的浏览器是midori。虽然midori一度停止开发，但是现在再次活跃开发。作为轻量级的 webkit 引擎浏览器，比chromium消耗资源少，也能兼容大多数网站。
 
 在 :ref:`jetson_nano` 上使用的默认浏览器是chromium，可以通过 :ref:`arm_build_midori` 方式安装。
+
+.. note::
+
+   我实践发现midori兼容性不能满足日常使用，所以还是只结合采用firefox和chromium: chromium主要用于工作(大量的工作网站只兼容chrome)，个人使用则主要采用firefox(感觉更为轻巧)

@@ -8,6 +8,21 @@ pip是Python包管理器，用于安装和更新软件包，需要确保系统�
 
 使用pip可以安装Python虚拟环境管理器：对于Python 3使用venv，对于Python 2使用virtualenv。
 
+pip
+=========
+
+Ubuntu/Debian安装pip和venv
+----------------------------
+
+在 :ref:`pi_400` 作为日常开发环境，ARM架构的Ubuntu/Debian安装pip3::
+
+   apt install python3-pip
+   apt install python3-venv
+
+如果安装pip2则执行::
+
+   apt install python-pip
+
 .. note::
 
    在 :ref:`django_env` 同样也使用virtualenv来构建Django开发环境
@@ -53,7 +68,7 @@ CentOS 8通过dnf安装python 2virtualenv
 Python 3 venv
 ====================
 
-- :ref:`python_in_rhel8` 默认安装Python 3，所以构建虚拟沙箱环境非常简单::
+- :ref:`python_in_rhel8` 默认安装Python 3，或者在Ubuntu/Debian系统中按照上文方法完成 ``pip3`` 和 ``venv`` 安装，所以构建虚拟沙箱环境非常简单::
 
    cd ~
    python3 -m venv venv3
