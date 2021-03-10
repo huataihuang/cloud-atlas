@@ -4,6 +4,21 @@
 Xfce
 ============
 
+Xfce是我最喜欢的轻量级桌面，兼顾了Gnome丰富的功能和LXDE资源节约，达到了够用好用的平衡。这个桌面系统开发历史悠久，交互方式非常稳定。整个桌面仅包含必要的组件，但能够完成日常工作的方方面面，是最适合硬件性能有限或者专注于充分发挥系统性能到关键目标的开发者。
+
+.. figure:: ../../_static/linux/desktop/xfce_layers.png
+   :scale: 80
+
+.. note::
+
+   另外也推荐使用LXDE轻量级桌面，例如，树莓派默认的桌面就是基于LXDE定制的PIXEL桌面，对资源使用极少，适合硬件性能有限的平台。
+
+安装Xfce
+==========
+
+Arch
+------
+
 - 安装XFce4::
 
    sudo pacman -S xfce4
@@ -18,11 +33,43 @@ Xfce
 
    startxfce4
 
-- 中文设置
+Ubuntu/Debian/Raspberry Pi OS
+---------------------------------
 
-只需要安装一种中文字体'文泉驿'就可以正常在图形界面显示中文，并且这个字体非常小巧::
+- 安装::
+
+   sudo apt install xserver-xorg xfce4 
+
+.. note::
+
+   如果需要一些Xfce的桌面小组件，还可以安装 `xfce4-goodies <https://packages.debian.org/stretch/xfce/xfce4-goodies>`_ 提供了诸如CPU见识，邮件查看，Notes以及lm-sensors插件等。此外还包括mousepad编辑器，xfce4-dict字典，任务管理器等等。不过，这些独立应用也可以手动安装，例如我就安装了 ``xfce4-terminal`` 。
+
+- 我在 :ref:`pi_400` 上安装 Raspberry Pi OS Lite版本，所以Xfce4安装以后，默认还是字符界面启动，可以通过以下命令检查是否默认启动图形界面::
+
+   sudo systemctl get-default
+
+如果不是 ``graphical.target`` 可以通过以下命令切换::
+
+   sudo systemctl set-default graphical.target
+
+中文设置
+==========
+
+中文字体
+---------
+
+只需要安装一种中文字体'文泉驿'就可以正常在图形界面显示中文，并且这个字体非常小巧
+
+- Arch安装命令::
 
    pacman -S wqy-microhei
+
+- Debian安装::
+
+   apt install fonts-wqy-microhei
+
+中文输入法
+-----------
 
 安装输入法fcitx(主要考虑轻量级)::
 
@@ -97,6 +144,8 @@ Theme
    对于高分辨率屏幕，字体有可能会显示较小，看起来比较吃力。在不修改显示器分辨率(不使用默认显示器分辨率虽然能够使得字体放大但是显示会模糊)，可以通过修改显示DPI来解决: ``Settings >> Appearance >> Fonts`` 然后调整 ``DPI`` 使用 ``Custom DPI settings`` 进行调整，例如，对于2K屏幕，调整为 ``108`` 可以达到普通屏幕 ``96`` DPI的显示效果。
 
    注意，DPI调整只影响字体显示，对图标显示不影响，适合编码工作放大字体。请参考 `DPI Calculator / PPI Calculator <https://www.sven.de/dpi/>`_ 进行计算以及常用显示器配置参考。
+
+- 在 :ref:`pi_400` 上运行 Xfce4 我选择 ``arc-theme`` + ``moka-icon-theme`` ，这个风格非常现代化，采用一种平面化的柔和配色，也是现代Gnome采用的风格。是的，Xfce4可以使用Gnome的桌面风格。
 
 以下是我在 :ref:`jetson` 中使用xfce4的设置::
 
@@ -255,3 +304,8 @@ midori(取消)
 .. note::
 
    我实践发现midori兼容性不能满足日常使用，所以还是只结合采用firefox和chromium: chromium主要用于工作(大量的工作网站只兼容chrome)，个人使用则主要采用firefox(感觉更为轻巧)
+
+参考
+========
+
+- `Install the XFCE desktop on your Raspberry PI <https://www.pragmaticlinux.com/2020/11/install-the-xfce-desktop-on-your-raspberry-pi/>`_

@@ -6,6 +6,10 @@ NetSurf轻量级浏览器
 
 NetSurf是一个开源的使用C编写的浏览器，和其他套用chrome/firefox/QtWebEngine/WebKit引擎的浏览器不同，NetSurf是完全自己实现浏览器引擎，保持了小巧的核心，并支持大多数现代的web标准。
 
+.. note::
+
+   NetSurf是我的一个轻量级应用尝试，但是现代WEB技术发展太快了，即使只有些许的并不兼容也会导致浏览器无法使用。所以，除了chrome和firefox，其他浏览器或多或少都存在无法使用的场景。我最终还是回归使用 ``firefox+chromium`` 。
+
 编译安装
 ==============
 

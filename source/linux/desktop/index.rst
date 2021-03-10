@@ -7,6 +7,8 @@ Linux桌面
 .. toctree::
    :maxdepth: 1
 
+   vim.rst
+   xfce.rst
    remote_linux_desktop.rst
    xpra.rst
    light_browser.rst

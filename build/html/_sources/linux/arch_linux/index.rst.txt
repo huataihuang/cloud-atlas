@@ -18,7 +18,6 @@ Arch Linux
    archlinux_hibernates.rst
    alien_convert_package.rst
    archlinux_developer.rst
-   xfce.rst
    xmodmap.rst
    dropbox.rst
    xrdp.rst
