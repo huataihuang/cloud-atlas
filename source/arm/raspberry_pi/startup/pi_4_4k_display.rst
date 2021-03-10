@@ -6,11 +6,9 @@ Raspberry Pi 4的4K显示
 
 从 :ref:`pi_4` 的技术规格可以看到支持双路4K显示，这对于软件开发者来说是非常完美的，因为我们阅读代码需要有非常大显示器以及高分辨率来提高效率。
 
-.. warning::
+从 :ref:`pi_400` 的 `Raspberry Pi 400 Tech Specs <https://www.raspberrypi.org/products/raspberry-pi-400/specifications/>`_ 可以看到： ``2 × micro HDMI ports (supports up to 4Kp60)`` 和 :ref:`pi_4` 完全一致。由于Raspberry Pi 400支持4k显示输出，并且有完整的外壳和键盘，作为轻量级开发桌面非常适合Linux爱好者。
 
-   经过实践和仔细阅读 `Video options in config.txt <https://www.raspberrypi.org/documentation/configuration/config-txt/video.md>`_ ，并参考 `How to enable 4K output on Raspberry Pi 400? <https://forum.endeavouros.com/t/how-to-enable-4k-output-on-raspberry-pi-400/9632/12>`_ 关于 :ref:`pi_4` 和 :ref:`pi_400` 芯片型号对比，我发现 Raspberry Pi 400 的显示性能比Raspberry Pi 4有所缩水：
 
-   虽然Raspberry Pi 400也支持4k显示输出，但是设置4K分辨率时，刷新率只有 ``30Hz`` ，无法达到树莓派4B的60Hz刷新率。
 
 树莓派4B和400差异
 ==================
@@ -27,10 +25,12 @@ Raspberry Pi 4的4K显示
 
 而Raspberry Pi 400提高了处理器主频到 1.8GHz - ``Broadcom BCM2711 quad-core Cortex-A72(ARM v8) 64-bit SoC @ 1.8GHz`` ，但是在官方 `Video options in config.txt <https://www.raspberrypi.org/documentation/configuration/config-txt/video.md>`_ 配置激活 ``4k@60Hz`` 的参数 ``hdmi_enable_4kp60`` 有一个括号注明 ``Pi 4B only`` 。
 
-我的实践发现:
+当我在YouTube上看到能够在 :ref:`pi_400` 上运行
 
 - 在Raspberry Pi 400上如果配置了 ``hdmi_enable_4kp60=1`` ，则重启系统后，4K显示器在 :ref:`xfce` 的Display配置中，虽然刷新率确实是 ``60Hz`` ，但是分辨率最高只有 ``1920x1080`` ，无法设置更高的分辨率。
 - 如果去掉 ``hdmi_enable_4kp60=1`` ，则Raspberry Pi 400能够自动检测到4K显示器并且设置最高分辨率 ``3840*2160`` ，但是很不幸，刷新率只有 ``30Hz``
+
+   经过实践和仔细阅读 `Video options in config.txt <https://www.raspberrypi.org/documentation/configuration/config-txt/video.md>`_ ，并参考 `How to enable 4K output on Raspberry Pi 400? <https://forum.endeavouros.com/t/how-to-enable-4k-output-on-raspberry-pi-400/9632/12>`_ 关于 :ref:`pi_4` 和 :ref:`pi_400` 芯片型号对比，我发现 Raspberry Pi 400 的显示性能比Raspberry Pi 4有所缩水：
 
 4k显示器
 =========
