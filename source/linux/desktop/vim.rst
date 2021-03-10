@@ -81,6 +81,9 @@ Vundle插件管理器
 YouCompleteMe插件
 ------------------
 
+编译vim
+~~~~~~~~~
+
 YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中提供的vim版本不能满足。可以参考 `Building Vim from source <https://github.com/ycm-core/YouCompleteMe/wiki/Building-Vim-from-source>`_ 进行编译安装
 
 - 首先安装依赖::
@@ -94,9 +97,104 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
    sudo apt install libncurses5-dev python2-dev \
    python3-dev ruby-dev lua5.3 liblua5.3-dev git
    
-- 编译 Vim
+- 删除已经安装的vim::
 
+   sudo apt remove vim vim-runtime gvim
    
+- 编译 Vim ::
+
+   git clone https://github.com/vim/vim.git
+   cd vim
+   ./configure --with-features=huge \
+               --enable-multibyte \
+               --enable-rubyinterp=yes \
+               --enable-python3interp=yes \
+               --with-python3-config-dir=$(python3-config --configdir) \
+               --enable-perlinterp=yes \
+               --enable-luainterp=yes \
+               --enable-gui=gtk2 \
+               --enable-cscope \
+               --prefix=/usr/local
+
+我的编译选项做了精简如下::
+
+   ./configure --with-features=huge \
+               --enable-multibyte \
+               --enable-rubyinterp=yes \
+               --enable-python3interp=yes \
+               --with-python3-config-dir=$(python3-config --configdir) \
+               --enable-luainterp=yes \
+               --enable-cscope \
+               --prefix=/usr/local   
+
+.. note::
+
+   对于Ubuntu用户，只能使用Python 2或Python 3，所以不能同时使用 ``python-config-dir`` 和 ``python3-config-dir`` ，否则 YouCompleteMe 会在启动vim时提示 ``YouCompleteMe unavailable: requires Vim compiled with Python (2.6+ or 3.3+) support`` 。
+
+- 编译::
+
+   make VIMRUNTIMEDIR=/usr/local/share/vim/vim82
+
+- 为了方便卸载，先安装 `checkinstall <https://wiki.debian.org/CheckInstall>`_ 再进行安装(会按照系统包管理器生成包进行安装，这样就方便卸载)::
+
+   sudo apt install checkinstall
+   sudo checkinstall
+
+- 也可以直接安装::
+
+   sudo make install
+
+- 设置vim作为默认编辑器::
+
+   sudo update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1
+   sudo update-alternatives --set editor /usr/local/bin/vim
+   sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim 1
+   sudo update-alternatives --set vi /usr/local/bin/vim
+
+编译安装YouCompleteMe
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+在编译YouCompleteMe之前，首先需要把你需要支持的语言开发工具安装好，然后才能在编译安装YouCompleteMe时候开启参数。
+
+- 安装语言工具::
+
+   apt install golang nodejs default-jdk npm
+
+如果需要开发 c# ，还需要安装 ``mono-complete``
+
+- 安装YCM编译工具::
+
+   apt install build-essential cmake python3-dev
+
+- 编译YCM::
+
+   cd ~/.vim/bundle/youcompleteme
+   python3 install.py --all
+
+这里可以不使用 ``--all`` 参数，而单独指定需要支持的语言：
+
+  - 需要支持 C一族语言使用 ``--clangd-completer``
+  - 支持C# 则安装mono 然后使用 ``--cs-completer``
+  - 支持Go 则安装Go然后使用 ``--go-completer``
+  - 支持JavaScript和TypeScript 则安装 node.js 和 npm ，然后使用 ``--ts-completer``
+  - 支持Rust 则使用 ``--rust-completer``
+  - 支持Java 则安装JDK 8 然后使用 ``--java-completer``
+
+我使用如下编译方法::
+
+   python3 install.py --clangd-completer --go-completer \
+       --ts-completer --rust-completer --java-completer
+
+遇到报错::
+
+   ...
+   reading manifest file 'src/watchdog.egg-info/SOURCES.txt'
+   reading manifest template 'MANIFEST.in'
+   warning: no files found matching '*.h' under directory 'src'
+   writing manifest file 'src/watchdog.egg-info/SOURCES.txt'
+   go: finding mvdan.cc/xurls/v2 v2.2.0
+   go: mvdan.cc/xurls/v2@v2.2.0: unknown revision mvdan.cc/xurls/v2.2.0
+   go: error loading module requirements
 
 参考
 ======
