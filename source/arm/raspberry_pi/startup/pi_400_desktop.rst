@@ -158,6 +158,10 @@ DNS解析器配置
 
 在国内购买的树莓派默认使用US键盘布局，但是树莓派是英国开发的，默认操作系统键盘布局是UK。请参考 `How to Change your Keyboard Layout on Raspberry Pi? (Raspbian) <How to Change your Keyboard Layout on Raspberry Pi? (Raspbian)>`_ 调整键盘布局。
 
+但是，我遇到一个非常奇怪的 :ref:`keyboard_layout` ，虽然我通过 ``raspi-config`` 配置了 ``us`` 类型键盘，但是英文输入时却发现键盘表现为 ``uk`` 布局。
+
+原因是输入法 ``fcitx`` 默认添加了一个 ``uk`` 类型的keyboard，这个配置不在系统配置中，所以不管我怎么调整都无效。详细设置见 :ref:`keyboard_layout`
+
 基础桌面
 ===========
 
