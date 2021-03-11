@@ -1,21 +1,13 @@
-.. _linux_desktop:
+.. _vim:
 
 =================================
-Linux桌面
+Vim
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   vim/index
-   golang.rst
-   xfce.rst
-   remote_linux_desktop.rst
-   xpra.rst
-   light_browser.rst
-   netsurf.rst 
-   vs_code.rst
-   synergy.rst
+   install_vim.rst
 
 .. only::  subproject and html
 
