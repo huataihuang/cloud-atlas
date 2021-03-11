@@ -1,7 +1,7 @@
-.. _vim:
+.. _install_vim:
 
 ==============
-Vim
+Vim安装
 ==============
 
 Vim是传奇编辑器vi的继承者，功能强大但需要使用者不断训练形成 ``肌肉记忆`` 。在所有的Unix/Linux系统上都能够方便安装和使用，特别适合没有图形界面的远程终端开发环境。
@@ -29,7 +29,7 @@ Vim是传奇编辑器vi的继承者，功能强大但需要使用者不断训练
 
 - 初始你可以使用以下简单的 ``.vimrc`` :
 
-.. literalinclude:: vim/vimrc_base
+.. literalinclude:: install_vim/vimrc_base
    :language: bash
    :linenos:
    :caption:
@@ -48,7 +48,7 @@ Vundle插件管理器
 
 然后在 ``.vimrc`` 的开头添加:
 
-.. literalinclude:: vim/vimrc_vundle
+.. literalinclude:: install_vim/vimrc_vundle
    :language: bash
    :linenos:
    :caption:
@@ -68,7 +68,7 @@ Vundle插件管理器
 
 - 在 ``.vimrc`` 中添加 ``Plugin`` 行:
 
-.. literalinclude:: vim/vimrc_plugins
+.. literalinclude:: install_vim/vimrc_plugins
    :language: bash
    :linenos:
    :caption:
@@ -173,11 +173,11 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
 
 - 配置 ``vim-go`` , ``Tagbar`` 和 ``NERDTree``
 
-.. literalinclude:: vim/vimrc_golang
+.. literalinclude:: install_vim/vimrc_golang
    :language: bash
    :linenos:
    :caption:
-   :emphasize-lines: 31-81
+   :emphasize-lines: 34-84
 
 编译安装YouCompleteMe
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -249,7 +249,7 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
 
 当输入时，YCM会自动提示最接近的可选输入内容，可以持续输入直到真正匹配内容高亮，此时按下 ``tab`` 键自动完成输入:
 
-.. figure:: ../../_static/linux/desktop/ycm.gif
+.. figure:: ../../../_static/linux/desktop/vim/ycm.gif
 
 参考
 ======
