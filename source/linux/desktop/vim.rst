@@ -180,6 +180,8 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
   - 支持Rust 则使用 ``--rust-completer``
   - 支持Java 则安装JDK 8 然后使用 ``--java-completer``
 
+如果不指定任何参数，则编译的YCM仅支持Python代码补全。
+
 我使用如下编译方法::
 
    python3 install.py --clangd-completer --go-completer \
@@ -195,6 +197,8 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
    go: finding mvdan.cc/xurls/v2 v2.2.0
    go: mvdan.cc/xurls/v2@v2.2.0: unknown revision mvdan.cc/xurls/v2.2.0
    go: error loading module requirements
+
+`xurls <https://pkg.go.dev/mvdan.cc/xurls/v2>`_ 是使用正则表达式解析url的工具，在Go 1.13开始使用。
 
 参考
 ======
