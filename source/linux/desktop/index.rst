@@ -8,6 +8,7 @@ Linux桌面
    :maxdepth: 1
 
    vim.rst
+   golang.rst
    xfce.rst
    remote_linux_desktop.rst
    xpra.rst

@@ -81,6 +81,10 @@ Vundle插件管理器
 YouCompleteMe插件
 ------------------
 
+.. note::
+
+   YouCompleteMe 安装是非常繁琐的过程，特别是编译支持golang，需要下载大量依赖模块，而GFW阻塞
+
 编译vim
 ~~~~~~~~~
 
@@ -151,6 +155,30 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
    sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim 1
    sudo update-alternatives --set vi /usr/local/bin/vim
 
+安装其他插件
+--------------
+
+为了开发golang，另外安装 `vim-go插件 <https://github.com/fatih/vim-go>`_ 和 `Tagbar插件 <https://github.com/preservim/tagbar>`_ ::
+
+   Plugin 'fatih/vim-go'
+   Plugin 'Tagbar'
+
+其中  ``Tagbar`` 需要 ``ctags/gotags`` 支持，依赖 ``Exuberant Ctags`` 和 ``Universal Ctags`` ，安装::
+
+   sudo apt install exuberant-ctags universal-ctags
+   go get -u github.com/jstemmer/gotags
+
+配置golang的.vimrc
+---------------------
+
+- 配置 ``vim-go`` , ``Tagbar`` 和 ``NERDTree``
+
+.. literalinclude:: vim/vimrc_golang
+   :language: bash
+   :linenos:
+   :caption:
+   :emphasize-lines: 31-81
+
 编译安装YouCompleteMe
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -198,9 +226,33 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
    go: mvdan.cc/xurls/v2@v2.2.0: unknown revision mvdan.cc/xurls/v2.2.0
    go: error loading module requirements
 
-`xurls <https://pkg.go.dev/mvdan.cc/xurls/v2>`_ 是使用正则表达式解析url的工具，在Go 1.13开始使用。
+`xurls <https://pkg.go.dev/mvdan.cc/xurls/v2>`_ 是使用正则表达式解析url的工具，在Go 1.13开始使用。上述报错可以参考 `Getting: go: error loading module requirements <https://stackoverflow.com/questions/58253972/getting-go-error-loading-module-requirements>`_ ，主要是go模块下载问题，手工单独安装::
+
+   go get mvdan.cc/xurls/v2@v2.2.0
+
+提示::
+
+   go: finding mvdan.cc/xurls/v2 v2.2.0
+   go: downloading mvdan.cc/xurls v0.0.0-20200417124523-1707d8b9d1bb
+   go get mvdan.cc/xurls/v2@v2.2.0: go.mod has post-v0 module path "mvdan.cc/xurls/v2" at revision 1707d8b9d1bb
+
+但是我发现当前 :ref:`pi_400` 的Raspberry Pi OS提供的golang版本是 ``1.11`` ，可能低于 ``xurls`` 版本  ``1.13``  要求，使用以下命令检查仓库提供的golang版本::
+
+   sudo apt-cache search golang|grep golang-1.*
+
+可以看到软件仓库提供的最高版本只有 1.12 ，不能满足要求。
+
+卸载Raspberry Pi OS tigong
+
+使用YouCompleteMe
+--------------------
+
+当输入时，YCM会自动提示最接近的可选输入内容，可以持续输入直到真正匹配内容高亮，此时按下 ``tab`` 键自动完成输入:
+
+.. figure:: ../../_static/linux/desktop/ycm.gif
 
 参考
 ======
 
 - `Install and Use Vim on Raspberry Pi <https://roboticsbackend.com/install-use-vim-raspberry-pi/>`_
+- `CentOS 8 搭建Vim golang环境 && YouCompleteMe Golang安装支持 <https://blog.csdn.net/Wind4study/article/details/104565482>`_

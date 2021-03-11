@@ -89,7 +89,7 @@ Ubuntu/Debian/Raspberry Pi OS
 
    输入法fcitx参考 `arch linux 文档 - Fcitx (简体中文) <https://wiki.archlinux.org/index.php/Fcitx_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)>`_
 
-安装了fcitx之后，重新登陆Xfce桌面会自动启动fcitx(这里利用了session恢复)。不过还是建议还是采用在 ``.xinitrc`` 中明确配置启动fcitx::
+安装了fcitx之后，重新登陆Xfce桌面会自动启动fcitx(这里利用了session恢复)，如果使用了显示管理器 LightDM 则会自动启动fcitx。如果是字符界面使用 ``startx`` 启动桌面，则采用在 ``.xinitrc`` 中明确配置启动fcitx::
 
    export GTK_IM_MODULE=fcitx
    export QT_IM_MODULE=fcitx
@@ -106,18 +106,56 @@ Ubuntu/Debian/Raspberry Pi OS
 
 这样就可以简单执行 ``startx`` 启动桌面。
 
-- 或者更方便使用显示管理器 LightDM (不过，我感觉多占用一个系统服务也是资源，所以没有安装)::
+- 更方便使用显示管理器 LightDM ::
 
    sudo pacman -S lightdm
+
+- 切换默认字符或默认图形桌面管理::
+
+   # 切换图形桌面
+   systemctl set-default graphical.target
+
+   # 切换字符界面
+   systemctl set-default multi-user.target
+
+.. _keyboard_layout:
+
+Keyboard Layout之谜
+--------------------
+
+我 :ref:`pi_400_desktop` 安装使用Xfce4曾经遇到非常奇怪的键盘布局问题。
+
+- 通过 ``respi-config`` 交互工具可以设置 (参考 `Changing the Keyboard Layout for your Raspberry Pi <https://pimylifeup.com/raspberry-pi-keyboard-layout/>`_ ) 键盘布局，这个交互设置实际上就是调整 ``/etc/default/keyboard`` :
+
+.. literalinclude:: xfce/keyboard
+   :language: bash
+   :linenos:
+   :caption:
+
+这个配置是全局生效，此时在字符终端中测试键盘，可以看到键盘是按照US键盘布局，完全匹配我购买的US键盘树莓派400。
+
+但是，当我启动Xfce4桌面，我意外发现键盘布局悄悄变成了UK布局。我反复检查Xfce的配置 ``keyboard`` 确实是使用 ``Use system defaults`` :
+
+.. figure::  ../../_static/linux/desktop/xfce_keyboard_layout.png
+   :scale: 50
+
+我尝试了使用参考 `debian wiki - keyboard <https://wiki.debian.org/Keyboard>`_ 方法通过 ``setxkbmap us`` 调整，但是只是设置瞬间正常，一会就又变成UK布局。折腾好久，我偶然发现输入法 ``fcitx`` 没有启动时候在Xfce中keyboard layout是正常的，一旦启动 ``fcitx`` 就立即切换成了UK布局。
+
+打开 ``fcitx-config-gtk3`` 我恍然发现，原来 ``fcitx`` 启动时候加载了 ``UK`` 布局键盘作为英文输入:
+
+.. figure::  ../../_static/linux/desktop/fcitx_keyboard.png
+   :scale: 50
+
+解决方法就是删除 ``fcitx`` 输入设置中的UK布局键盘，添加一个US布局键盘。
+
+Theme
+-----------
 
 .. note::
 
    `7 Great XFCE Themes for Linux <https://www.maketecheasier.com/xfce4-desktop-themes-linux/>`_ 介绍了不同的XFCE themes，可以选择一个喜欢的安装。
 
    不过，我发现默认安装的theme，选择 Apperance 中的 Adwaita-dark Style就已经非常美观简洁，除了图标比较简陋以外，其他似乎不需要再做调整。
-
-Theme
------------
 
 以下文档可参考Xfce theme:
 
@@ -185,11 +223,7 @@ Theme
 高分辨率显示器下主要调整如下：
 
 - 修改显示DPI来放大字体 120%: ``Settings >> Appearance >> Fonts`` 然后调整 ``DPI`` 使用 ``Custom DPI settings`` 进行调整，例如，对于2K屏幕，调整为 ``108`` 可以达到普通屏幕 ``96`` DPI的显示效果。
-- Firefox通过放大 120%: 
-
-  - 在浏览器地址栏输入 ``about:config`` 并回车
-  - 搜索 ``layout.css.devPixelsPerPx`` ，默认参数是 ``-1`` 表示不调整。可以修改成 ``1.0`` 则对应标准的96 dpi字体。要设置放大20%，则设置 ``1.2``
-
+- Firefox和chromium放大 120%: 浏览器支持Preference调整zoom
 - mupdf阅读器调整字体也是放大 120%就足够清晰
 
 平铺窗口
@@ -233,6 +267,10 @@ Theme
 slock还可以结合 ``xautolock`` 来使用，例如，没有交互10分钟自动锁屏::
 
    xautolock -time 10 -locker slock
+
+.. note::
+
+   如果采用了 LightDM 图形界面管理器，则默认加载了screen lock，就不必采用上述方法。直接点菜单锁定屏幕即可。
 
 快捷键输入字符串
 =================
