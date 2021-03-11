@@ -10,8 +10,9 @@
    pi_3.rst
    pi_4.rst
    pi_400.rst
-   pi_4_4k_display.rst
+   pi_400_4k_display.rst
    pi_400_desktop.rst
+   pi_4b_4k_display.rst
    clone_pi.rst
    raspi_config.rst
    noobs.rst
