@@ -134,6 +134,7 @@
 <li class="toctree-l4"><a class="reference internal" href="noobs.html">NOOBS (New Out of Box Software)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_quick_start.html">树莓派(Raspberry Pi)快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ubuntu64bit_pi.html">树莓派4b运行64位Ubuntu</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pi_vnc.html">Raspberry Pi VNC远程访问</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../admin/index.html">树莓派系统管理</a></li>
@@ -244,6 +245,43 @@
 </div>
 <div class="section" id="id1">
 <h2>架构<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="k-60hz">
+<h2>配置4K&#64;60Hz<a class="headerlink" href="#k-60hz" title="永久链接至标题">¶</a></h2>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">raspi-config</span></code> 配置工具启用 <code class="docutils literal notranslate"><span class="pre">4K&#64;60Hz</span></code> ，即在 <code class="docutils literal notranslate"><span class="pre">/boot/config.txt</span></code> 中添加以下配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hdmi_enable_4kp60</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>重启Raspberry Pi 4B，果然看到了启动时字符显示高分辨率。但是，很不幸，启动服务显示过后，屏幕突然转黑，并且显示器显示没有信号。</p>
+<p>我通过ssh登陆到系统，检查系统 <code class="docutils literal notranslate"><span class="pre">dmesg</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">drm</span><span class="p">:</span><span class="n">drm_atomic_helper_wait_for_flip_done</span> <span class="p">[</span><span class="n">drm_kms_helper</span><span class="p">]]</span> <span class="o">*</span><span class="n">ERROR</span><span class="o">*</span> <span class="p">[</span><span class="n">CRTC</span><span class="p">:</span><span class="mi">87</span><span class="p">:</span><span class="n">crtc</span><span class="o">-</span><span class="mi">0</span><span class="p">]</span> <span class="n">flip_done</span> <span class="n">timed</span> <span class="n">out</span>
+</pre></div>
+</div>
+<p>这个问题是可能是因为 <a class="reference external" href="https://github.com/raspberrypi/firmware/issues/1392">Fake KMS and 4K60 cannot co-exist</a></p>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">/boot/config.txt</span></code> 配置了 <code class="docutils literal notranslate"><span class="pre">hdmi_enable_4kp60=1</span></code> 同时添加以下行配置 <code class="docutils literal notranslate"><span class="pre">4K30</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hdmi_group</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">hdmi_mode</span><span class="o">=</span><span class="mi">95</span>
+<span class="n">hdmi_enable_4kp60</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>这样再次重启时候字符终端就是 <code class="docutils literal notranslate"><span class="pre">4K&#64;30Hz</span></code></p></li>
+<li><p>在主机上启动VNC，然后通过远程VNC访问桌面。此时在桌面上撇着显示刷新率 <code class="docutils literal notranslate"><span class="pre">60.00Hz</span></code> ，这时就能够在显示器上看到正常图形输出了</p></li>
+<li><p>不过，此时TTY1到TTY6还没有输出信号，所以修改 <code class="docutils literal notranslate"><span class="pre">config.txt</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hdmi_group</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">hdmi_mode</span><span class="o">=</span><span class="mi">16</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述模式是 <code class="docutils literal notranslate"><span class="pre">1080p60</span></code> 也就是字符终端不要设置4K，同时保持图形界面 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a></p>
+</div>
+<div class="section" id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://raspberrypi.stackexchange.com/questions/104533/cannot-set-60hz-4k-with-raspi-4b">Cannot set 60Hz &#64;4k with Raspi 4B</a></p></li>
+</ul>
 </div>
 </div>
 

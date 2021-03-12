@@ -7,6 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
+   clone_pi.rst
    backup_restore_pi.rst
    pi_4_lm_sensor.rst
 
