@@ -18,6 +18,7 @@
    noobs.rst
    pi_quick_start.rst
    ubuntu64bit_pi.rst
+   pi_vnc.rst
 
 .. only::  subproject and html
 
