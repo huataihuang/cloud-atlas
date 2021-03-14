@@ -48,12 +48,16 @@
    pishrink.sh: Shrinking image ...
    pishrink.sh: Shrunk /backup/raspi_studio.img from 120G to 6.6G ...
 
+- 收缩后的存储镜像还可以通过压缩来实现更小的存储消耗::
+
+   tar cfz raspi_studio.img.tar.gz raspi_studio.img
+
 恢复镜像
 =========
 
-我主要想通过将TF卡替换成USB 3.0接口上的U盘，来加速存储访问性能。所以通过上述方法制作的镜像，可以通过以下命令 ``dd`` 复制到U盘，然后 :ref:`usb_boot_pi_400` ::
+我主要想通过将TF卡替换成USB 3.0接口上的外接存储，来加速存储访问性能。所以通过上述方法制作的镜像，可以通过以下命令 ``dd`` 复制到U盘，然后 :ref:`usb_boot_pi_400` ::
 
-   dd if=raspi_studio.img of=/dev/sdc bs=100M
+   dd if=raspi_studio.img of=/dev/sdc bs=100M conv=fsync
 
 参考
 =======

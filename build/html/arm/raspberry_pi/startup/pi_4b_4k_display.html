@@ -41,7 +41,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Clone树莓派系统" href="clone_pi.html" />
+    <link rel="next" title="raspi-config树莓派工具" href="raspi_config.html" />
     <link rel="prev" title="Raspberry Pi 400桌面定制" href="pi_400_desktop.html" /> 
 </head>
 
@@ -129,7 +129,6 @@
 <li class="toctree-l4"><a class="reference internal" href="pi_400_4k_display.html">Raspberry Pi 400的4K显示</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_400_desktop.html">Raspberry Pi 400桌面定制</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Raspberry Pi 4B的4K显示</a></li>
-<li class="toctree-l4"><a class="reference internal" href="clone_pi.html">Clone树莓派系统</a></li>
 <li class="toctree-l4"><a class="reference internal" href="raspi_config.html">raspi-config树莓派工具</a></li>
 <li class="toctree-l4"><a class="reference internal" href="noobs.html">NOOBS (New Out of Box Software)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_quick_start.html">树莓派(Raspberry Pi)快速起步</a></li>
@@ -237,17 +236,54 @@
             
   <div class="section" id="raspberry-pi-4b4k">
 <span id="pi-4b-4k-display"></span><h1>Raspberry Pi 4B的4K显示<a class="headerlink" href="#raspberry-pi-4b4k" title="永久链接至标题">¶</a></h1>
-<p>在 <a class="reference internal" href="pi_400_4k_display.html#pi-400-4k-display"><span class="std std-ref">Raspberry Pi 400的4K显示</span></a> 实践中，我尝试使用Raspberry Pi 400来实现一个能够使用4K显示器的工作平台。但是，实践发现Raspberry Pi 400没有实现60Hz刷新率的4K输出(至少目前我实践没有成功)。</p>
-<p>不过，既然我有3台Raspberry Pi 4B，硬件架构和Raspberry Pi 400几乎完全一致，所以我把TF卡从 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">pi400</span></code> 互换，将2GB规格的Raspberry Pi 4B连接到4K显示器上作为工作桌面。</p>
+<p>在 <a class="reference internal" href="pi_400_4k_display.html#pi-400-4k-display"><span class="std std-ref">Raspberry Pi 400的4K显示</span></a> 实践中，我尝试使用Raspberry Pi 400来实现一个能够使用4K显示器的工作平台。但是，实践发现Raspberry Pi 400没有实现60Hz刷新率的4K输出(至少目前我实践没有成功)。不过，既然我有3台Raspberry Pi 4B，硬件架构和Raspberry Pi 400几乎完全一致，所以我把TF卡从 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">pi400</span></code> 互换，将2GB规格的Raspberry Pi 4B连接到4K显示器上作为工作桌面。</p>
+<div class="section" id="b4k-60hz">
+<h2>树莓派4B实现4K&#64;60Hz要点<a class="headerlink" href="#b4k-60hz" title="永久链接至标题">¶</a></h2>
+<p>树莓派4B的显示核心硬件支持4K&#64;60Hz，但是默认Raspberry Pi OS没有启用这个设置，主要是为了降低内存消耗和设备温度 - 参考 <a class="reference external" href="https://www.raspberrypi.org/documentation/configuration/config-txt/video.md">Video options in config.txt</a> 。</p>
+<p>启用 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a> 设置需要注意以下要点:</p>
+<ul class="simple">
+<li><p>只有一个视频输出接口支持 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a> - <code class="docutils literal notranslate"><span class="pre">microHDMI-0</span></code> ，这个显示接口靠近USB type C电源接口</p></li>
+<li><p>必须使用高速HDMI视频线，至少要求 <code class="docutils literal notranslate"><span class="pre">HDMI</span> <span class="pre">2.0</span></code> 线缆</p></li>
+<li><p>显示器必须能够支持4K</p></li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>不过，Raspberry Pi 4B当时为了省钱，购买了入门规格2GB，所以不能运行大量的桌面程序。理想的架构是作为瘦客户端，把所有的计算都调度到 <a class="reference internal" href="../../../kubernetes/arm/arm_k8s.html#arm-k8s"><span class="std std-ref">ARM部署Kubernetes概述</span></a> 来完成。甚至把重度应用调度到远程云服务器上运行的x86容器中运行。</p>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">raspi-config</span></code> 交互设置可以通过:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Advanced</span> <span class="n">Options</span> <span class="o">=&gt;</span> <span class="n">HDMI</span> <span class="o">/</span> <span class="n">Composite</span> <span class="o">=&gt;</span> <span class="n">Enable</span> <span class="mi">4</span><span class="n">Kp60</span> <span class="n">HDMI</span> <span class="n">Enable</span> <span class="mi">4</span><span class="n">Kp60</span> <span class="n">resolution</span> <span class="n">on</span> <span class="n">HDMI0</span>
+</pre></div>
 </div>
-<div class="section" id="id1">
-<h2>架构<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>激活 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a> ，不过这个配置仅添加了 <code class="docutils literal notranslate"><span class="pre">hdmi_enable_4kp60=1</span></code> 配置。实践发现还需要关闭 <code class="docutils literal notranslate"><span class="pre">dtoverlay=vc4-fkms-v3d</span></code></p>
+<p>可选设置 <code class="docutils literal notranslate"><span class="pre">Resolution</span> <span class="pre">=&gt;</span> <span class="pre">CEA</span> <span class="pre">Mode</span> <span class="pre">97</span> <span class="pre">3840x2160</span> <span class="pre">60Hz</span> <span class="pre">16:9</span></code> ，实际不设置也会保持这个显示分辨率。</p>
+</div>
+<p>配置完成后通过以下命令检查连接设备和显示分辨率模式:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tvservice</span> <span class="o">-</span><span class="n">l</span>
+
+<span class="n">tvservice</span> <span class="o">-</span><span class="n">s</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="k-60hz">
 <h2>配置4K&#64;60Hz<a class="headerlink" href="#k-60hz" title="永久链接至标题">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>我实测下来在树莓派4B上还是无法同时启用 <code class="docutils literal notranslate"><span class="pre">hdmi_enable_4kp60=1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">dtoverlay=vc4-fkms-v3d</span></code> ，一旦同时启用这两个配置就会导致字符终端启动过程就转为黑屏。</p>
+</div>
+<div class="section" id="id1">
+<h3>树莓派4B启用4K&#64;60Hz方法<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
+<p>经过我的实践验证，参考 <a class="reference external" href="https://github.com/raspberrypi/firmware/issues/1392">Fake KMS and 4K60 cannot co-exist</a> 配置建议，在树莓派4B上配置 <code class="docutils literal notranslate"><span class="pre">/boot/config.txt</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">pi4</span><span class="p">]</span>
+<span class="c1"># 启用 4kp60 不能启用 vc4-fkms-v3d</span>
+<span class="c1">#dtoverlay=vc4-fkms-v3d</span>
+<span class="n">max_framebuffers</span><span class="o">=</span><span class="mi">2</span>
+
+<span class="p">[</span><span class="nb">all</span><span class="p">]</span>
+<span class="n">hdmi_enable_4kp60</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>然后重启就可以实现 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a> ，不过这个模式下在 <a class="reference internal" href="../../../linux/desktop/xfce.html#xfce"><span class="std std-ref">Xfce</span></a> 桌面下检查会发现只有一个分辨率和刷新率可以选择，即固定为 <code class="docutils literal notranslate"><span class="pre">3840x2160</span></code> <code class="docutils literal notranslate"><span class="pre">60Hz</span></code></p>
+</div>
+<div class="section" id="id2">
+<h3>尝试记录<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <p>通过 <code class="docutils literal notranslate"><span class="pre">raspi-config</span></code> 配置工具启用 <code class="docutils literal notranslate"><span class="pre">4K&#64;60Hz</span></code> ，即在 <code class="docutils literal notranslate"><span class="pre">/boot/config.txt</span></code> 中添加以下配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hdmi_enable_4kp60</span><span class="o">=</span><span class="mi">1</span>
 </pre></div>
@@ -257,7 +293,8 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">drm</span><span class="p">:</span><span class="n">drm_atomic_helper_wait_for_flip_done</span> <span class="p">[</span><span class="n">drm_kms_helper</span><span class="p">]]</span> <span class="o">*</span><span class="n">ERROR</span><span class="o">*</span> <span class="p">[</span><span class="n">CRTC</span><span class="p">:</span><span class="mi">87</span><span class="p">:</span><span class="n">crtc</span><span class="o">-</span><span class="mi">0</span><span class="p">]</span> <span class="n">flip_done</span> <span class="n">timed</span> <span class="n">out</span>
 </pre></div>
 </div>
-<p>这个问题是可能是因为 <a class="reference external" href="https://github.com/raspberrypi/firmware/issues/1392">Fake KMS and 4K60 cannot co-exist</a></p>
+<p>这个问题是因为 <a class="reference external" href="https://github.com/raspberrypi/firmware/issues/1392">Fake KMS and 4K60 cannot co-exist</a></p>
+<p><a class="reference external" href="https://raspberrypi.stackexchange.com/questions/104533/cannot-set-60hz-4k-with-raspi-4b">Cannot set 60Hz &#64;4k with Raspi 4B</a> 提供了一个解决思路，我尝试采用以下步骤：</p>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">/boot/config.txt</span></code> 配置了 <code class="docutils literal notranslate"><span class="pre">hdmi_enable_4kp60=1</span></code> 同时添加以下行配置 <code class="docutils literal notranslate"><span class="pre">4K30</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hdmi_group</span><span class="o">=</span><span class="mi">1</span>
@@ -275,11 +312,13 @@
 </div>
 </li>
 </ul>
-<p>上述模式是 <code class="docutils literal notranslate"><span class="pre">1080p60</span></code> 也就是字符终端不要设置4K，同时保持图形界面 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a></p>
+<p>上述模式是 <code class="docutils literal notranslate"><span class="pre">1080p60</span></code> 也就是字符终端不要设置4K，同时保持图形界面 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a>。</p>
 </div>
-<div class="section" id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference external" href="https://blog.codetitans.pl/post/howto-enable-4k60hz-on-raspberry-pi-4/">HowTo: Enable video 4k&#64;60Hz on Raspberry Pi 4</a></p></li>
 <li><p><a class="reference external" href="https://raspberrypi.stackexchange.com/questions/104533/cannot-set-60hz-4k-with-raspi-4b">Cannot set 60Hz &#64;4k with Raspi 4B</a></p></li>
 </ul>
 </div>
@@ -291,7 +330,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="clone_pi.html" class="btn btn-neutral float-right" title="Clone树莓派系统" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="raspi_config.html" class="btn btn-neutral float-right" title="raspi-config树莓派工具" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="pi_400_desktop.html" class="btn btn-neutral float-left" title="Raspberry Pi 400桌面定制" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
