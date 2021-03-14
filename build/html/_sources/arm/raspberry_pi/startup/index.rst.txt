@@ -13,7 +13,6 @@
    pi_400_4k_display.rst
    pi_400_desktop.rst
    pi_4b_4k_display.rst
-   clone_pi.rst
    raspi_config.rst
    noobs.rst
    pi_quick_start.rst
