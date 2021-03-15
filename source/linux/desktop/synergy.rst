@@ -32,6 +32,12 @@ Synergy:主机间共享键盘鼠标
 
    推荐购买官方提供的Pro版本，内置了SSL加密通讯。
 
+.. warning::
+
+   注意，synergy有一个比较大的缺憾：目前不支持 :ref:`wayland` 。由于很多发行版已经逐步开始将显示服务器从Xorg切换到wayland，这会导致synergy不能正常工作。
+
+   Synergy官方KM `I can’t see the cursor on the Linux client computer <https://symless.com/help-articles/cant-see-the-cursor-on-linux-client-computer>`_ 介绍了一个变通方法，就是 `切换Wayland到Xorg <https://askubuntu.com/questions/961304/how-do-you-switch-from-wayland-back-to-xorg-in-ubuntu-17-10>`_ 。不过，这种方法使得显示服务技术倒退，是比较遗憾的解决方法。Synergy官方issue说在下一个版本会支持wayland，但目前没有看到进一步信息。
+
 安装Synergy
 =================
 
