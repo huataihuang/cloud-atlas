@@ -226,6 +226,21 @@ Theme
 - Firefox和chromium放大 120%: 浏览器支持Preference调整zoom
 - mupdf阅读器调整字体也是放大 120%就足够清晰
 
+性能优化(降低资源使用)
+========================
+
+在 :ref:`pi_400` 有限的硬件资源下使用xfce4，我希望窗口管理器消耗资源越少越好
+
+隐藏窗口内容(Hide content of windows)
+--------------------------------------
+
+当移动窗口和调整窗口大小，窗口管理器需要重绘窗口，非常消耗资源。可以配置成在移动窗口时不重绘移动窗口的内容，会部分降低Xorg的CPU消耗(在 :ref:`pi_400` 上可以把单核CPU使用率从37%降低到25%)::
+
+   Settings Manager => Window Manager
+                         => Advanced 面板
+                           => Hide content of windows
+                             => 勾选 When moving 和 When resizing
+
 平铺窗口
 ===========
 
@@ -343,7 +358,12 @@ midori(取消)
 
    我实践发现midori兼容性不能满足日常使用，所以还是只结合采用firefox和chromium: chromium主要用于工作(大量的工作网站只兼容chrome)，个人使用则主要采用firefox(感觉更为轻巧)
 
+.. warning::
+
+   在树莓派上，默认Raspberry Pi OS提供了chromium浏览器，没有直接提供firefox。我实践发现在滚动页面时，firefox非常消耗CPU资源(Xorg把整个CPU资源都用完了)，而chromium使用Xorg的CPU资源只有firefox的1/4。应该是chromium采用了图形硬件加速。这方面后续有机会再研究对比一下。
+
 参考
 ========
 
 - `Install the XFCE desktop on your Raspberry PI <https://www.pragmaticlinux.com/2020/11/install-the-xfce-desktop-on-your-raspberry-pi/>`_
+- `How to disable windows' contents to be moved on dragging, so that only a frame is draggend and window redrawed at drop? <https://askubuntu.com/questions/574024/how-to-disable-windows-contents-to-be-moved-on-dragging-so-that-only-a-frame-i>`_

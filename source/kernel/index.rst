@@ -13,6 +13,7 @@ Kernel Atlas
    cgroup/index
    intel_rdt.rst
    flame_graph.rst
+   kms.rst
    ebpf.rst
    admin/index
    memory/index

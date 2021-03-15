@@ -54,7 +54,7 @@ HDMI线缆
 
    不过，我有3台树莓派4B设备，其中2G版本的Raspberry Pi 4B作为 :ref:`arm_k8s` 的管控主机 ``pi-master1`` 。既然Raspberry Pi 4B是明确支持 ``4Kp60`` ，那么我要充分发挥硬件性能，就用 2G版本的Raspberry Pi 4B 连接新购买的4K显示器，验证我的假设。
 
-   新的实践记录在 :ref:
+   新的实践记录在
 
 4k显示器
 =========
@@ -154,6 +154,22 @@ hdmi_safe
 
 详细参考 `Install the XFCE desktop on your Raspberry PI <https://www.pragmaticlinux.com/2020/11/install-the-xfce-desktop-on-your-raspberry-pi/>`_
 
+Raspberry Pi 400 4K@60Hz (失败)
+=================================
+
+我反复测试了 Raspberry Pi 400 的4K设置，发现只能达到 30Hz显示刷新率。配置模仿 :ref:`pi_4b_4k_display` 并且参考::
+
+   [all]
+
+   #dtoverlay=vc4-fkms-v3d 
+   dtoverlay=vc4-kms-v3d 
+   max_framebuffers=2 
+   gpu_mem=128 
+   #hdmi_group=1
+   #hdmi_mode=97
+   hdmi_enable_4kp60=1
+
+激活 ``hdmi_enable_4kp60=1`` 就能够显示 4K 但是只有最高刷新率 30Hz。然后我尝试使用 ``dtoverlay=vc4-fkms-v3d`` 则不能显示最高分辨率，同时设置了 ``hdmi_group=1`` 和 ``hdmi_mode=97`` 也不行。尝试了修改成闭源的 ``dtoverlay=vc4-kms-v3d`` 则又能够显示最高分辨率4K，但是同时刷新率落回了 30Hz。
 
 参考
 ======
@@ -165,4 +181,4 @@ hdmi_safe
 - `How to enable 4K output on Raspberry Pi 400? <https://forum.endeavouros.com/t/how-to-enable-4k-output-on-raspberry-pi-400/9632/12>`_
 - `Video options in config.txt <https://www.raspberrypi.org/documentation/configuration/config-txt/video.md>`_
 - `HDMI monitors says NO SIGNAL (solved) <https://www.raspberrypi.org/forums/viewtopic.php?t=34061>`_
-
+- `RPI4 & Ubuntu MATE - How to enable video acceleration <https://www.dedoimedo.com/computers/rpi4-ubuntu-mate-hw-video-acceleration.html>`_
