@@ -169,13 +169,13 @@ Raspberry Pi 400 4K@60Hz (失败)
    #hdmi_mode=97
    hdmi_enable_4kp60=1
 
-激活 ``hdmi_enable_4kp60=1`` 就能够显示 4K 但是只有最高刷新率 30Hz。然后我尝试使用 ``dtoverlay=vc4-fkms-v3d`` 则不能显示最高分辨率，同时设置了 ``hdmi_group=1`` 和 ``hdmi_mode=97`` 也不行。尝试了修改成闭源的 ``dtoverlay=vc4-kms-v3d`` 则又能够显示最高分辨率4K，但是同时刷新率落回了 30Hz。
+激活 ``hdmi_enable_4kp60=1`` 就能够显示 4K 但是只有最高刷新率 30Hz。然后我尝试使用 ``dtoverlay=vc4-fkms-v3d`` 则不能显示最高分辨率，同时设置了 ``hdmi_group=1`` 和 ``hdmi_mode=97`` (指定分辨率3840x2160)也不行。尝试了修改成闭源的 ``dtoverlay=vc4-kms-v3d`` 则又能够显示最高分辨率4K，但是同时刷新率落回了 30Hz。
 
 参考
 ======
 
 - `数显之家快讯：4K超清分辨率显示器尺寸多少合适？ <https://zhuanlan.zhihu.com/p/320555314>`_
-- `Rasp <https://www.raspberrypi.org/documentation/configuration/config-txt/pi4-hdmi.md>`_
+- `Raspberry Pi 4 HDMI pipeline <https://www.raspberrypi.org/documentation/configuration/config-txt/pi4-hdmi.md>`_
 - `No HDMI output on my Raspberry Pi 4 <https://support.thepihut.com/hc/en-us/articles/360008687257-No-HDMI-output-on-my-Raspberry-Pi-4>`_
 - `Raspberry Pi HDMI not working? Follow these simple solutions <https://windowsreport.com/raspberry-pi-hdmi-not-working/>`_
 - `How to enable 4K output on Raspberry Pi 400? <https://forum.endeavouros.com/t/how-to-enable-4k-output-on-raspberry-pi-400/9632/12>`_

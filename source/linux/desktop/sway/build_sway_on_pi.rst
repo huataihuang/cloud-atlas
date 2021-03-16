@@ -98,15 +98,13 @@ wlroots需要使用最新的meson::
 
    meson.build:99:0: ERROR: Invalid version of dependency, need 'wayland-server' ['>=1.18'] found '1.16.0'.
 
-源代码编译wayland
---------------------
+- 为解决sway的wayland版本要求， 在 :ref:`build_wayland_on_pi`
 
-由于树莓派400的 Raspberry Pi OS提供的 wayland 版本过低，所以从源代码编译安装wayland。
 
 - 首先卸载刚才安装的系统提供的wayland::
 
-  sudo apt remove wayland-protocols libwayland-dev
-  sudo apt autoremove
+   sudo apt remove wayland-protocols libwayland-dev
+   sudo apt autoremove
 
 .. note::
 

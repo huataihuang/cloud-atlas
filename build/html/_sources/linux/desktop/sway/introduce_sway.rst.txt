@@ -14,6 +14,16 @@ sway继承了i3简洁的窗口管理能力，并且提供了基于现代化 :ref
 .. figure:: ../../../_static/linux/desktop/sway/ubuntu-sway.jpg
    :scale: 30
 
+参考 Arch Linux的Manjaro发行版，Manjaro Sway包含了在底部共用键盘快捷键的对话框，并且使用应用程序launcher(Wofi)来使用快捷键。可以结合一些轻量级应用来完成日常工作:
+
+- Pamac Manager
+- Firefox
+- Thunar
+- Ranger
+- Neovim
+- Foliate
+- MPV Media Player
+
 Sway使用要点
 ===============
 
@@ -30,7 +40,6 @@ Sway使用要点
    mkdir -p ~/.config/sway
    cp /etc/sway/config ~/.config/sway/
    $EDITOR ~/.config/sway/config
-
 
 参考
 ========
