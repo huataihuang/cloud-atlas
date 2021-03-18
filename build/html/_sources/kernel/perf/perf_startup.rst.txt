@@ -50,7 +50,7 @@ perf记录和火焰图
 
 参数说明:
 
-  ``-F 99`` : 每秒采样99次
+  ``-F 99`` : 每秒采样99次 - 使用99而不是100，是为了防止采样周期与某些系统周期事件重合，影响采样结果
   ``sleep 60`` : 持续采样60秒
   ``-g`` : 记录调用栈
   ``-p 504843`` : 进程号，表示对哪个进程进行分析
@@ -84,7 +84,25 @@ CPU核心数量越多，则采样记录的调用栈就越多
 
    FlameGraph/flamegraph.pl out.folded > out.svg
 
-生成火焰图可以指定参数， ``–width`` 可以指定图片宽度， ``–height`` 指定每一个调用栈的高度 
+生成火焰图可以指定参数， ``–width`` 可以指定图片宽度， ``–height`` 指定每一个调用栈的高度；还可以针对语言设置火焰图颜色，例如 ``--color=js`` 是针对JavaScript配色svg， ``--color=java`` 则是针对Java配色svg。
+
+上述两个生成火焰图的命令步骤也可以合并成一个命令::
+
+   FlameGraph/stackcollapse-perf.pl < out.perf | FlameGraph/flamegraph.pl out.folded > out.svg
+
+其他的案例命令::
+
+   FlameGraph/stackcollapse-perf.pl --kernel < out.perf | FlameGraph/flamegraph.pl --color=js --hash > out.svg
+
+综合步骤
+---------
+
+如果对系统进行观察，可以将上述火焰图数据采集和操作步骤合并成以下命令::
+
+   git clone https://github.com/brendangregg/FlameGraph 
+   cd FlameGraph 
+   perf record -F 99 -a -g -- sleep 60 
+   perf script | ./stackcollapse-perf.pl | ./flamegraph.pl > out.svg
 
 火焰图观察简介
 ==============
@@ -119,3 +137,4 @@ CPU核心数量越多，则采样记录的调用栈就越多
 - `如何读懂火焰图 <http://www.ruanyifeng.com/blog/2017/09/flame-graph.html>`_
 - `系统级性能分析工具perf的介绍与使用 <https://www.cnblogs.com/arnoldlu/p/6241297.html>`_
 - `在Linux下做性能分析3：perf <https://zhuanlan.zhihu.com/p/22194920>`_
+- `《性能之巅》学习笔记之火焰图 其之一 <https://zhuanlan.zhihu.com/p/73385693>`_

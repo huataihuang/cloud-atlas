@@ -235,7 +235,7 @@ AMD PQoS 和ARM MPAM
 
 AMD在Zen处理器二代架构支持和RDT对等技术PQoS，并且已经被内核支持 - `AMD Publishes Platform QoS Patches For Next-Gen Processors <https://www.phoronix.com/scan.php?page=news_item&px=AMD-Platform-QoS-RFC-Patches>`_ 。如上文所述， ``pqos`` 工具是同时支持Intel RDT和AMD PQoS技术的，两者兼容。
 
-ARM架构处理器对应有MPAM技术(Memory Partitioning and Monitoring)，不过该技术起步较晚，目前尚未有完善的用户空间管控工具。
+ARM架构处理器对应有MPAM技术(Memory Partitioning and Monitoring)，不过该技术起步较晚，目前尚未有完善的用户空间管控工具( ``resctrl`` 还不支持ARM架构 )。
 
 参考
 =====
