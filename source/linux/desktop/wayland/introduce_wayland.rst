@@ -12,6 +12,12 @@ Wayland是一个显示服务器协议，目标是替代X Window System，实现�
 
 目前主流的Gnome和KDE都支持运行在Wayland上，不过 :ref:`xfce` 还没有实现Wayland（即使最新的4.16版本也不支持，但是社区计划follow gnome和kde社区迁移到Wayland。目前，我比较倾向在这个先进的显示服务器上运行 :ref:`sway` ，实现轻量级的桌面管理。
 
+.. note::
+
+   参考 `Enlightenment on Raspberry Pi 3 in Wayland mode is pretty smooth <http://www.rasterman.com/index.php?news=2017.12.27-Enlightenment_on_Raspberry_Pi_and_Wayland_Smoothness>`_ 可以了解到，Wayland现代化的图形显示架构，可以加速图形并降低硬件需求：
+
+   Enlightenment with no X11 (running as a wayland compositor) at a smooth 60fps even with a live miniature pager preview updating to match, a full desktop all smooth at 60fps. Terminology running and Rage playing movies smoothly. On a stock Rasperry Pi 3 running 32bit Arch Linux with Mesa VC4 drivers.
+
 要求
 ========
 
