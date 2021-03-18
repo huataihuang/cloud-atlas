@@ -151,6 +151,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bsd/index.html">BSD Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apple/index.html">Apple Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../windows/index.html">Windows Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../real/index.html">Real Atlas</a></li>
@@ -237,8 +238,90 @@
             
   <div class="section" id="pi-display-accelerate">
 <span id="id1"></span><h1>树莓派显示加速<a class="headerlink" href="#pi-display-accelerate" title="永久链接至标题">¶</a></h1>
+<p>在 <a class="reference internal" href="pi_400_4k_display.html#pi-400-4k-display"><span class="std std-ref">Raspberry Pi 400的4K显示</span></a> 和 <a class="reference internal" href="pi_4b_4k_display.html#pi-4b-4k-display"><span class="std std-ref">Raspberry Pi 4B的4K显示</span></a> 我们尝试激活 <a class="reference external" href="mailto:4K&#37;&#52;&#48;60Hz">4K<span>&#64;</span>60Hz</a> 显示分辨率，涉及到有关显示加速的配置优化。从操作系统整体上加速显示，不仅有启动配置，也有桌面应用的加速。本文汇总相关设置，提供一个整体建议。</p>
 <div class="section" id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>升级系统和安装系统库<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>在调优系统之前，首先要将系统升级到最新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">dist</span><span class="o">-</span><span class="n">upgrade</span>
+</pre></div>
+</div>
+<ul>
+<li><p>安装必要库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libgles2</span><span class="o">-</span><span class="n">mesa</span> <span class="n">libgles2</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">xorg</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>配置显示<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">raspi-config</span></code> 配置或直接修改 <code class="docutils literal notranslate"><span class="pre">/boot/config.txt</span></code> （树莓派3的32位系统) 或 <code class="docutils literal notranslate"><span class="pre">/boot/firmware/usercfg.txt</span></code> (树莓派4的64位系统)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dtoverlay</span><span class="o">=</span><span class="n">vc4</span><span class="o">-</span><span class="n">fkms</span><span class="o">-</span><span class="n">v3d</span>
+<span class="n">max_framebuffers</span><span class="o">=</span><span class="mi">2</span>
+<span class="n">gpu_mem</span><span class="o">=</span><span class="mi">128</span>
+<span class="n">hdmi_enable_4kp60</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述配置中启用了开源 <code class="docutils literal notranslate"><span class="pre">vc4-fkms-v3d</span></code> 3D显示驱动(Fake KMS)，并且配置 129MB 内存给GPU内存管理。 ( 有关GPU需要预分配内存可以参考 <a class="reference external" href="https://www.raspberrypi.org/documentation/configuration/config-txt/memory.md">Raspberry Pi OS Memory options in config.txt</a> )</p>
+</div>
+<div class="section" id="cma">
+<h2>内存分离和CMA分配<a class="headerlink" href="#cma" title="永久链接至标题">¶</a></h2>
+<p>虽然我们配置了有多少内存分配给GPU，剩余内存分配给CPU，但是这个内存分配默认是动态的。为了能够提升性能，可以采用内存分离配置来优化。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>不过，我现在在 <a class="reference internal" href="pi_400.html#pi-400"><span class="std std-ref">树莓派Raspberry Pi 400</span></a> 上使用 <code class="docutils literal notranslate"><span class="pre">raspi-config</span></code> 找不到 <code class="docutils literal notranslate"><span class="pre">memory</span> <span class="pre">splitting</span></code> 选项了。</p>
+</div>
+<ul>
+<li><p>可以手工修订 <code class="docutils literal notranslate"><span class="pre">/boot/config.txt</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dtoverlay</span><span class="o">=</span><span class="n">vc4</span><span class="o">-</span><span class="n">fkms</span><span class="o">-</span><span class="n">v3d</span><span class="p">,</span> <span class="n">cma</span><span class="o">-</span><span class="mi">128</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">cma-128</span></code> 就是预分配给GPU内存量。</p>
+</div>
+<div class="section" id="id4">
+<h2>重启和检查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>重启系统通过以下命令检查3D驱动是否已经加载和工作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">device</span><span class="o">-</span><span class="n">tree</span><span class="o">/</span><span class="n">soc</span><span class="o">/</span><span class="n">firmwarekms</span><span class="o">@</span><span class="mf">7e600000</span><span class="o">/</span><span class="n">status</span>
+<span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">device</span><span class="o">-</span><span class="n">tree</span><span class="o">/</span><span class="n">v3dbus</span><span class="o">/</span><span class="n">v3d</span><span class="o">@</span><span class="mi">7</span><span class="n">ec04000</span><span class="o">/</span><span class="n">status</span>
+</pre></div>
+</div>
+<p>如果两个返回值都是 <code class="docutils literal notranslate"><span class="pre">okay</span></code> 则已经启用了硬件加速。如果结果是 <code class="docutils literal notranslate"><span class="pre">disabled</span></code> 则尝试其他 <code class="docutils literal notranslate"><span class="pre">dtoverlay</span></code> 选项，然后重启检查。</p>
+</div>
+<div class="section" id="firefox">
+<h2>启用Firefox硬件加速<a class="headerlink" href="#firefox" title="永久链接至标题">¶</a></h2>
+<p>需要注意，虽然系统硬件加速已经启用，但是Firefox或chromium默认是没有配置使用硬件加速。</p>
+<ul>
+<li><p>在Firefox中地址栏输入 <code class="docutils literal notranslate"><span class="pre">about:support</span></code> ，然后检查 <code class="docutils literal notranslate"><span class="pre">Compositing</span></code> 配置项，如果是 <code class="docutils literal notranslate"><span class="pre">Basic</span></code> 就表明没有启用硬件加速</p></li>
+<li><p>在Firefox中地址栏输入 <code class="docutils literal notranslate"><span class="pre">about:config</span></code> ，然后选择以下配置项:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">layers</span><span class="o">.</span><span class="n">acceleration</span><span class="o">.</span><span class="n">force</span><span class="o">-</span><span class="n">enabled</span>
+</pre></div>
+</div>
+</li>
+<li><p>点击触发设置该值为 <code class="docutils literal notranslate"><span class="pre">true</span></code> ，然后重启Firefox。再次打开 <code class="docutils literal notranslate"><span class="pre">about:support</span></code> 页面，检查 <code class="docutils literal notranslate"><span class="pre">Compositing</span></code> 配置项是否是 <code class="docutils literal notranslate"><span class="pre">OpenGL</span></code> 的话就表明激活了硬件加速。</p></li>
+</ul>
+<p>在使用上的感受区别就是，当滚动Firefox的WEB页面时，不再出现 <code class="docutils literal notranslate"><span class="pre">Xorg</span></code> 进程大量占用CPU资源情况(几乎不增加CPU)。</p>
+</div>
+<div class="section" id="chromium">
+<h2>启用Chromium硬件加速<a class="headerlink" href="#chromium" title="永久链接至标题">¶</a></h2>
+<p>Chromium硬件加速配置检查位于 <code class="docutils literal notranslate"><span class="pre">chrome://gpu</span></code> ，配置修改则在 <code class="docutils literal notranslate"><span class="pre">chrome://flags</span></code> 。</p>
+<ul class="simple">
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">chrome://flags</span></code> 中找到 <code class="docutils literal notranslate"><span class="pre">Override</span> <span class="pre">software</span> <span class="pre">rendering</span> <span class="pre">list</span></code> 将参数值从 <code class="docutils literal notranslate"><span class="pre">Default</span></code> 修改为 <code class="docutils literal notranslate"><span class="pre">Enabled</span></code> ，这样就覆盖了内建的软件渲染列表，并且在unsupported system configurations上激活了GPU加速。</p></li>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">chrome://gup</span></code> 页面再次检查，就会看到 <code class="docutils literal notranslate"><span class="pre">Hardware</span> <span class="pre">Protected</span> <span class="pre">Video</span> <span class="pre">Decode:</span> <span class="pre">Hardware</span> <span class="pre">accelerated</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="vlc">
+<h2>VLC激活硬件加速<a class="headerlink" href="#vlc" title="永久链接至标题">¶</a></h2>
+<p>在VLC软件的配置 <code class="docutils literal notranslate"><span class="pre">Tools</span> <span class="pre">&gt;</span> <span class="pre">Preferences</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">Video</span></code> 面板的 <code class="docutils literal notranslate"><span class="pre">Video</span> <span class="pre">Settings</span> <span class="pre">&gt;</span> <span class="pre">Output</span></code> 中可以选择 OpenGL video output。</p>
+<p>注意，如果VLC没有编译OpenGL支持，这该选项设置不会生效。</p>
+</div>
+<div class="section" id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.dedoimedo.com/computers/rpi4-ubuntu-mate-hw-video-acceleration.html">RPI4 &amp; Ubuntu MATE - How to enable video acceleration</a></p></li>
 </ul>
