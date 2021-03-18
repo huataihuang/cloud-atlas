@@ -131,11 +131,14 @@
 <li class="toctree-l4"><a class="reference internal" href="#id8">内核方式使用RDT</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#amd-pqos-arm-mpam">AMD PQoS 和ARM MPAM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id9">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="flame_graph.html">火焰图</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ebpf.html">Linux扩展BPF(eBPF)跟踪工具</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kms.html">KMS (Kernel mode setting)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ebpf/index.html">Linux扩展BPF(eBPF)跟踪工具</a></li>
+<li class="toctree-l2"><a class="reference internal" href="perf/index.html">Linux perf性能分析工具</a></li>
 <li class="toctree-l2"><a class="reference internal" href="admin/index.html">Linux内核管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="memory/index.html">Linux内存管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="power/index.html">内核电源管理</a></li>
@@ -247,7 +250,7 @@
 </div>
 <div class="section" id="rdt">
 <h2>RDT技术架构<a class="headerlink" href="#rdt" title="永久链接至标题">¶</a></h2>
-<p>缓存分配技术CAT(Cache Allocation Technology)的核心目标是基于服务级别(Class of Service, COS 或 CLOS)来实现资源分配。应用程序或者独立线程可以按照处理器提供的一系列服务级别来标记。这样救护按照应用程序和线程的服务分类来限制和分配其使用的缓存。每个CLOS可以使用能力掩码(capacity bitmasks, CBMs)来标志并在服务分类中指定覆盖(overlap)或隔离(isolation)的程度。</p>
+<p>缓存分配技术CAT(Cache Allocation Technology)的核心目标是基于服务级别(Class of Service, COS 或 CLOS)来实现资源分配。应用程序或者独立线程可以按照处理器提供的一系列服务级别来标记。这样就会按照应用程序和线程的服务分类来限制和分配其使用的缓存。每个CLOS可以使用能力掩码(capacity bitmasks, CBMs)来标志并在服务分类中指定覆盖(overlap)或隔离(isolation)的程度。</p>
 <p>对于每个逻辑处理器，都有一个寄存器(被称为 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR或PQR)来允许操作系统(OS)或虚拟机管理器(VMM)在应用程序、线程、虚拟机(VM)调度(scheduled)的时候指定它的CLOS。</p>
 <p>RDT分为5个功能模块：</p>
 <ul class="simple">
@@ -409,7 +412,7 @@
 </pre></div>
 </div>
 <p>如果找不到动态链接库，则指定: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">LD_LIBRARY_PATH=/usr/local/lib</span></code></p>
-<p>RDT工具只要是 <code class="docutils literal notranslate"><span class="pre">pqos</span></code> ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户琴弦。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。</p>
+<p>RDT工具 <code class="docutils literal notranslate"><span class="pre">pqos</span></code> ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户琴弦。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。目前在 RHEL 7操作系统，通过 <code class="docutils literal notranslate"><span class="pre">intel-cmt-cat</span></code> 软件包提供了 <code class="docutils literal notranslate"><span class="pre">pqos</span></code> 工具，用于控制Intel处理器CPU缓存和内存带宽。( <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-performance_monitoring_tools-pqos">Red Hat Enterprise Linux 7 Performance Tuning Guide 2.14. pqos</a> ) 。根据 <a class="reference external" href="https://manpages.debian.org/unstable/intel-cmt-cat/pqos.8.en.html">pqos manual(8)</a> 可以看到， <code class="docutils literal notranslate"><span class="pre">pqos</span></code> 工具同时支持 Intel RDT 和 AMD PQoS。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>具体实践待进行</p>
@@ -427,6 +430,11 @@
 </ul>
 </div>
 </div>
+<div class="section" id="amd-pqos-arm-mpam">
+<h2>AMD PQoS 和ARM MPAM<a class="headerlink" href="#amd-pqos-arm-mpam" title="永久链接至标题">¶</a></h2>
+<p>AMD在Zen处理器二代架构支持和RDT对等技术PQoS，并且已经被内核支持 - <a class="reference external" href="https://www.phoronix.com/scan.php?page=news_item&amp;px=AMD-Platform-QoS-RFC-Patches">AMD Publishes Platform QoS Patches For Next-Gen Processors</a> 。如上文所述， <code class="docutils literal notranslate"><span class="pre">pqos</span></code> 工具是同时支持Intel RDT和AMD PQoS技术的，两者兼容。</p>
+<p>ARM架构处理器对应有MPAM技术(Memory Partitioning and Monitoring)，不过该技术起步较晚，目前尚未有完善的用户空间管控工具。</p>
+</div>
 <div class="section" id="id9">
 <h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
@@ -438,6 +446,8 @@
 <li><p><a class="reference external" href="https://www.intel.cn/content/www/cn/zh/architecture-and-technology/resource-director-technology.html">英特尔® 资源调配技术 (英特尔® RDT)</a></p></li>
 <li><p><a class="reference external" href="https://software.intel.com/zh-cn/articles/introduction-to-cache-allocation-technology?_ga=2.21223931.1997524624.1555917558-1194351684.1555901060">英特尔® 至强™ 处理器 E5 v4 产品家族的高速缓存分配技术简介</a></p></li>
 <li><p><a class="reference external" href="https://blog.csdn.net/force_eagle/article/details/77197833">Intel CMT &amp; CAT &amp; CDP 技术</a> 这篇blog提供了很多技术文档参考链接</p></li>
+<li><p><a class="reference external" href="https://developer.amd.com/wp-content/resources/56375.pdf">AMD64 Technology Platform Quality of Service Extensions</a></p></li>
+<li><p><a class="reference external" href="https://zhuanlan.zhihu.com/p/92125001">Kernel 4.14+ Intel RDT / AMD PQOS配置</a></p></li>
 </ul>
 </div>
 </div>

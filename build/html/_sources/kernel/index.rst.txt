@@ -14,7 +14,8 @@ Kernel Atlas
    intel_rdt.rst
    flame_graph.rst
    kms.rst
-   ebpf.rst
+   ebpf/index
+   perf/index
    admin/index
    memory/index
    power/index

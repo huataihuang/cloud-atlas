@@ -28,7 +28,7 @@ Intel志强处理器 E5-xxxx v4系列(即Broadwell)提供了L3缓存的配置以
 RDT技术架构
 ==============
 
-缓存分配技术CAT(Cache Allocation Technology)的核心目标是基于服务级别(Class of Service, COS 或 CLOS)来实现资源分配。应用程序或者独立线程可以按照处理器提供的一系列服务级别来标记。这样救护按照应用程序和线程的服务分类来限制和分配其使用的缓存。每个CLOS可以使用能力掩码(capacity bitmasks, CBMs)来标志并在服务分类中指定覆盖(overlap)或隔离(isolation)的程度。
+缓存分配技术CAT(Cache Allocation Technology)的核心目标是基于服务级别(Class of Service, COS 或 CLOS)来实现资源分配。应用程序或者独立线程可以按照处理器提供的一系列服务级别来标记。这样就会按照应用程序和线程的服务分类来限制和分配其使用的缓存。每个CLOS可以使用能力掩码(capacity bitmasks, CBMs)来标志并在服务分类中指定覆盖(overlap)或隔离(isolation)的程度。
 
 对于每个逻辑处理器，都有一个寄存器(被称为 ``IA32_PQR_ASSOC`` MSR或PQR)来允许操作系统(OS)或虚拟机管理器(VMM)在应用程序、线程、虚拟机(VM)调度(scheduled)的时候指定它的CLOS。
 
@@ -215,7 +215,7 @@ Intel开源RDT工具intel-cmt-cat
 
 如果找不到动态链接库，则指定: ``export LD_LIBRARY_PATH=/usr/local/lib``
 
-RDT工具只要是 ``pqos`` ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户琴弦。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。
+RDT工具 ``pqos`` ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户琴弦。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。目前在 RHEL 7操作系统，通过 ``intel-cmt-cat`` 软件包提供了 ``pqos`` 工具，用于控制Intel处理器CPU缓存和内存带宽。( `Red Hat Enterprise Linux 7 Performance Tuning Guide 2.14. pqos <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-performance_monitoring_tools-pqos>`_ ) 。根据 `pqos manual(8) <https://manpages.debian.org/unstable/intel-cmt-cat/pqos.8.en.html>`_ 可以看到， ``pqos`` 工具同时支持 Intel RDT 和 AMD PQoS。
 
 .. note::
 
@@ -230,7 +230,12 @@ RDT工具只要是 ``pqos`` ，运行在用户层，通过标准Linux工具访�
 
    cat /proc/cpuinfo | grep cat_l3
 
+AMD PQoS 和ARM MPAM
+=====================
 
+AMD在Zen处理器二代架构支持和RDT对等技术PQoS，并且已经被内核支持 - `AMD Publishes Platform QoS Patches For Next-Gen Processors <https://www.phoronix.com/scan.php?page=news_item&px=AMD-Platform-QoS-RFC-Patches>`_ 。如上文所述， ``pqos`` 工具是同时支持Intel RDT和AMD PQoS技术的，两者兼容。
+
+ARM架构处理器对应有MPAM技术(Memory Partitioning and Monitoring)，不过该技术起步较晚，目前尚未有完善的用户空间管控工具。
 
 参考
 =====
@@ -243,3 +248,5 @@ RDT工具只要是 ``pqos`` ，运行在用户层，通过标准Linux工具访�
 - `英特尔® 资源调配技术 (英特尔® RDT) <https://www.intel.cn/content/www/cn/zh/architecture-and-technology/resource-director-technology.html>`_
 - `英特尔® 至强™ 处理器 E5 v4 产品家族的高速缓存分配技术简介 <https://software.intel.com/zh-cn/articles/introduction-to-cache-allocation-technology?_ga=2.21223931.1997524624.1555917558-1194351684.1555901060>`_
 - `Intel CMT & CAT & CDP 技术 <https://blog.csdn.net/force_eagle/article/details/77197833>`_ 这篇blog提供了很多技术文档参考链接
+- `AMD64 Technology Platform Quality of Service Extensions <https://developer.amd.com/wp-content/resources/56375.pdf>`_
+- `Kernel 4.14+ Intel RDT / AMD PQOS配置 <https://zhuanlan.zhihu.com/p/92125001>`_
