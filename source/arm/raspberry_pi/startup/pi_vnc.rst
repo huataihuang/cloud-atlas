@@ -26,6 +26,18 @@ Raspberry Pi VNC远程访问
    <14> 2021-03-12T03:16:59.067Z pi400 vncserver-x11[480]: getUserPermissions: Permissions for huatai are []
    <13> 2021-03-12T03:16:59.070Z pi400 vncserver-x11[480]: Connections: disconnected: 192.168.6.1::59589 (TCP) ([AuthDenied] Access is denied)
 
+解决方法参考 `[VNC] Enable access for new user? <https://www.raspberrypi.org/forums/viewtopic.php?t=241978L>`_ 修改 ``/root/.vnc/config.d/vncserver-x11`` 添加一行允许用户账号，例如 ``huatai`` 访问::
+
+   Permissions=huatai:f
+
+然后重启vnc::
+
+   systemctl restart vncserver-x11-serviced.service
+
+连接以后显示::
+
+   VNC Viewer requires access to the local computer's accessibility features to send media keys such as Play and Volume Up to the remote computer.
+
 参考
 =======
 
