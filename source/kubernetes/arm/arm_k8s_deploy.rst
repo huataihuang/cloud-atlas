@@ -493,6 +493,91 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 
    这个问题修订，请参考 :ref:`set_k8s_worker_internal_ip` 明确配置worker的 ``INTERNAL-IP`` 避免出现混乱。
 
+arch linux节点(zcloud)
+-----------------------
+
+- 安装docker::
+
+   panman -Sy docker
+
+- 启动docker::
+
+   systemctl start docker
+   systemctl enable docker
+
+- 检查 ``docker info`` 输出信息，可以看到 ``Cgroup Driver: cgroupsf`` 不是 ``systemd`` ，所以修订成 :ref:`systemd` 作为 cgroups 管理器，并且确保只使用一个cgroup manager。修改或者创建 ``/etc/docker/daemon.json`` 如下::
+
+   $ sudo cat > /etc/docker/daemon.json <<EOF
+   {
+     "exec-opts": ["native.cgroupdriver=systemd"],
+     "log-driver": "json-file",
+     "log-opts": {
+       "max-size": "100m"
+     },
+     "storage-driver": "overlay2"
+   }
+   EOF
+
+- 然后再次检查 ``docker info`` 可以看到还有一个报错::
+
+   WARNING: bridge-nf-call-iptables is disabled
+   WARNING: bridge-nf-call-ip6tables is disabled
+
+修复::
+
+   cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+   net.bridge.bridge-nf-call-ip6tables = 1
+   net.bridge.bridge-nf-call-iptables = 1
+   EOF
+
+   sudo sysctl --system
+
+.. note::
+
+   arch linux安装kubernetes参考 `arch linux文档 - Kubernetes <https://wiki.archlinux.org/index.php/Kubernetes>`_
+
+- 安装软件包::
+
+   pacmsn -Syu && pacman -Sy kubelet kubeadm kubectl
+
+- 关闭swap
+
+- 在管控服务器获取当前添加节点命令::
+
+   kubeadm token create --print-join-command
+
+- 回到Jetson服务器节点执行添加节点命令::
+
+   kubeadm join 192.168.6.11:6443 --token <TOKEN> \
+       --discovery-token-ca-cert-hash sha256:<HASH_TOKEN>
+
+.. note::
+
+   如果遇到节点一直 ``NotReady`` ，请在节点上执行检查kubelet日志命令::
+
+      journalctl -xeu --no-pager kubelet
+
+   我遇到的问题是无法下载镜像，提示错误::
+
+      Mar 23 00:25:15 zcloud kubelet[3682]: E0323 00:25:15.851566    3682 pod_workers.go:191] Error syncing pod 062199e4-6351-4ff9-9e55-91db9ac8884f ("kube-proxy-jms58_kube-system(062199e4-6351-4ff9-9e55-91db9ac8884f)"), skipping: failed to "CreatePodSandbox" for "kube-proxy-jms58_kube-system(062199e4-6351-4ff9-9e55-91db9ac8884f)" with CreatePodSandboxError: "CreatePodSandbox for pod \"kube-proxy-jms58_kube-system(062199e4-6351-4ff9-9e55-91db9ac8884f)\" failed: rpc error: code = Unknown desc = failed pulling image \"k8s.gcr.io/pause:3.2\": Error response from daemon: Get \"https://k8s.gcr.io/v2/\": dial tcp: lookup k8s.gcr.io: no such host"
+
+   这个问题是因为我启动主机时候未连接无线网络，导致没有默认路由可以访问internet，此时启动的dnsmasq无法解析地址。虽然后面用手工脚本命令启动了wifi，但是dnsmasq依然无法提供本地主机域名解析。我是通过重启dnsmasq解决的，你的情况可能和我不同。不过，观察 kubelet 日志是一个比较好的排查问题方法。
+
+- 现在，我们终于可以拥有一个混合架构的Kubernetes集群::
+
+   kubectl get nodes --show-labels
+
+可以看到 ARM 节点的标签有 ``kubernetes.io/arch=arm64`` ，而 X86 节点标签有 ``kubernetes.io/arch=amd64`` ::
+
+   NAME         STATUS   ROLES    AGE     VERSION   LABELS
+   jetson       Ready    <none>   14h     v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=jetson,kubernetes.io/os=linux
+   pi-master1   Ready    master   113d    v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-master1,kubernetes.io/os=linux,node-role.kubernetes.io/master=
+   pi-worker1   Ready    <none>   109d    v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,disktype=ssd,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-worker1,kubernetes.io/os=linux
+   pi-worker2   Ready    <none>   109d    v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-worker2,kubernetes.io/os=linux
+   zcloud       Ready    <none>   9m49s   v1.20.2   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=zcloud,kubernetes.io/os=linux
+
+后面我们部署应用，所使用的镜像需要区分不同架构。我将实践异构应用部署。
+
 验证集群
 ===========
 
