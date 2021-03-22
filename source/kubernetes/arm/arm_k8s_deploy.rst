@@ -21,9 +21,11 @@
   - 1台 2G 规格树莓派4：用于管控 ``pi-master1``
   - 2台 8G 规格树莓派4：用于工作节点 ``pi-worker1`` 和 ``pi-worker2``
 
-- 此外，我也使用了一台 :ref:`jetson_nano` 设备作为GPU工作节点
+- 我也使用了一台 :ref:`jetson_nano` 设备作为GPU工作节点
 
 在构建Kubernetes集群之前，主要需要解决树莓派访问TF卡性能低下的问题，采用 :ref:`usb_boot_ubuntu_pi_4` 可以极大提高树莓派存储IO性能。
+
+- 为了测试和验证Kubernetes混合不同架构，在ARM集群中添加一台 :ref:`thinkpad_x220` 运行 :ref:`arch_linux` 作为模拟X86异构Kubernetes工作节点
 
 安装和配置Docker
 ==================
@@ -423,7 +425,7 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 
 然后重启docker服务::
 
-   systemctl resatrt docker
+   systemctl restart docker
 
 并通过 ``docker info`` 验证确保 ``Cgroup Driver: systemd`` 。
 
@@ -448,7 +450,7 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 
    sudo apt update && sudo apt install -y kubelet kubeadm kubectl
 
-- 锁定Kubernetes版本::
+- 锁定Kubernetes版本(可选，对于测试验证集群没有业务连续性要求，可以跳过)::
 
    sudo apt-mark hold kubelet kubeadm kubectl
 
