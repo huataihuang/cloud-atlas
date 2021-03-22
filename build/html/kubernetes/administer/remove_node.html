@@ -111,6 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="delete_cluster.html">删除Kubernetes集群</a></li>
 <li class="toctree-l3"><a class="reference internal" href="drain_node.html">安全地清空一个Kubernetes节点</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">从Kubernetes集群删除节点</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#jeson">删除 <code class="docutils literal notranslate"><span class="pre">jeson</span></code> 节点</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
 </ul>
 </li>
@@ -159,6 +160,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
@@ -255,11 +257,37 @@
 </pre></div>
 </div>
 <p>我们需要将节点 <code class="docutils literal notranslate"><span class="pre">jetson</span></code> 安全删除并重新加入，所以请参考 <a class="reference internal" href="#remove-node"><span class="std std-ref">从Kubernetes集群删除节点</span></a> 执行操作:</p>
+<div class="section" id="jeson">
+<h2>删除 <code class="docutils literal notranslate"><span class="pre">jeson</span></code> 节点<a class="headerlink" href="#jeson" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>所谓删除节点，首先需要清空节点上所有业务pod。这个清理pod通常不需要包含daemonset(和节点相关的运维辅助pods)，所以使用参数 <code class="docutils literal notranslate"><span class="pre">--ignore-daemonsets</span></code> 。</p>
+</div>
+<p>由于jetson节点挂掉了，所以首先通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">nodes</span></code> 看到节点是 <code class="docutils literal notranslate"><span class="pre">NotReady</span></code> 状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>     <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>
+<span class="n">jetson</span>       <span class="n">NotReady</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">104</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>
+<span class="o">...</span>
+</pre></div>
+</div>
 <ul>
-<li><p>删除 <code class="docutils literal notranslate"><span class="pre">jeson</span></code> 节点:</p>
-<blockquote>
-<div><ul>
-<li><p>首先清空(drain)节点:</p>
+<li><p>关闭节点调度(cordon):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">cordon</span> <span class="n">jetson</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>关闭调度可以通过标签过滤选择，使用参数 <code class="docutils literal notranslate"><span class="pre">-l,</span> <span class="pre">--selector=&quot;&quot;</span></code></p>
+</div>
+<p>关闭节点调度以后，再次使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">nodes</span></code> 检查节点状态如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>                        <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>
+<span class="n">jetson</span>       <span class="n">NotReady</span><span class="p">,</span><span class="n">SchedulingDisabled</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">104</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>清空(drain)节点(注意，这个步骤仅在节点 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 状态下才需要执行，如果节点已经 <code class="docutils literal notranslate"><span class="pre">NotReady</span></code> 了，则 <code class="docutils literal notranslate"><span class="pre">drain</span></code> 命令会卡住无法完成):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">drain</span> <span class="n">jetson</span> <span class="o">--</span><span class="n">delete</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">data</span> <span class="o">--</span><span class="n">force</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">daemonsets</span>
 </pre></div>
 </div>
@@ -276,13 +304,13 @@
 </div>
 <p>不过实际上，我发现 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">drain</span></code> 并没有清理掉jetson节点上的 <code class="docutils literal notranslate"><span class="pre">cni0</span></code> ，使用 <code class="docutils literal notranslate"><span class="pre">ifconfig</span></code> 依然会看到:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cni0</span><span class="p">:</span> <span class="n">flags</span><span class="o">=</span><span class="mi">4099</span><span class="o">&lt;</span><span class="n">UP</span><span class="p">,</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="o">&gt;</span>  <span class="n">mtu</span> <span class="mi">1500</span>
-        <span class="n">inet</span> <span class="mf">10.244</span><span class="o">.</span><span class="mf">3.1</span>  <span class="n">netmask</span> <span class="mf">255.255</span><span class="o">.</span><span class="mf">255.0</span>  <span class="n">broadcast</span> <span class="mf">10.244</span><span class="o">.</span><span class="mf">3.255</span>
-        <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="n">d476</span><span class="p">:</span><span class="n">bff</span><span class="p">:</span><span class="n">fe23</span><span class="p">:</span><span class="n">b011</span>  <span class="n">prefixlen</span> <span class="mi">64</span>  <span class="n">scopeid</span> <span class="mh">0x20</span><span class="o">&lt;</span><span class="n">link</span><span class="o">&gt;</span>
-        <span class="n">ether</span> <span class="n">d6</span><span class="p">:</span><span class="mi">76</span><span class="p">:</span><span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="n">b0</span><span class="p">:</span><span class="mi">11</span>  <span class="n">txqueuelen</span> <span class="mi">1000</span>  <span class="p">(</span><span class="n">Ethernet</span><span class="p">)</span>
-        <span class="n">RX</span> <span class="n">packets</span> <span class="mi">160</span>  <span class="nb">bytes</span> <span class="mi">4480</span> <span class="p">(</span><span class="mf">4.4</span> <span class="n">KB</span><span class="p">)</span>
-        <span class="n">RX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span>  <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">frame</span> <span class="mi">0</span>
-        <span class="n">TX</span> <span class="n">packets</span> <span class="mi">412</span>  <span class="nb">bytes</span> <span class="mi">39406</span> <span class="p">(</span><span class="mf">39.4</span> <span class="n">KB</span><span class="p">)</span>
-        <span class="n">TX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span> <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">carrier</span> <span class="mi">0</span>  <span class="n">collisions</span> <span class="mi">0</span>
+       <span class="n">inet</span> <span class="mf">10.244</span><span class="o">.</span><span class="mf">3.1</span>  <span class="n">netmask</span> <span class="mf">255.255</span><span class="o">.</span><span class="mf">255.0</span>  <span class="n">broadcast</span> <span class="mf">10.244</span><span class="o">.</span><span class="mf">3.255</span>
+       <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="n">d476</span><span class="p">:</span><span class="n">bff</span><span class="p">:</span><span class="n">fe23</span><span class="p">:</span><span class="n">b011</span>  <span class="n">prefixlen</span> <span class="mi">64</span>  <span class="n">scopeid</span> <span class="mh">0x20</span><span class="o">&lt;</span><span class="n">link</span><span class="o">&gt;</span>
+       <span class="n">ether</span> <span class="n">d6</span><span class="p">:</span><span class="mi">76</span><span class="p">:</span><span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="n">b0</span><span class="p">:</span><span class="mi">11</span>  <span class="n">txqueuelen</span> <span class="mi">1000</span>  <span class="p">(</span><span class="n">Ethernet</span><span class="p">)</span>
+       <span class="n">RX</span> <span class="n">packets</span> <span class="mi">160</span>  <span class="nb">bytes</span> <span class="mi">4480</span> <span class="p">(</span><span class="mf">4.4</span> <span class="n">KB</span><span class="p">)</span>
+       <span class="n">RX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span>  <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">frame</span> <span class="mi">0</span>
+       <span class="n">TX</span> <span class="n">packets</span> <span class="mi">412</span>  <span class="nb">bytes</span> <span class="mi">39406</span> <span class="p">(</span><span class="mf">39.4</span> <span class="n">KB</span><span class="p">)</span>
+       <span class="n">TX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span> <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">carrier</span> <span class="mi">0</span>  <span class="n">collisions</span> <span class="mi">0</span>
 </pre></div>
 </div>
 <p>这导致节点再次加入时候会出现无法分配 <code class="docutils literal notranslate"><span class="pre">cni0</span></code> 的IP地址。所以我这里手工做了清理:</p>
@@ -307,13 +335,19 @@
 </pre></div>
 </div>
 </li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果jetson节点是意外故障，则会看到新的容器已经调度到其他节点上，但是 jetson节点上容器一直处于 <code class="docutils literal notranslate"><span class="pre">Terminating</span></code> 状态无法结束。不过没有关系，后面直接执行 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">delete</span> <span class="pre">node</span> <span class="pre">jetson</span></code> 会清理掉残留pod信息。</p>
+</div>
+<ul>
 <li><p>如果检查所有namespaces，可以看到 jetson 节点只剩下一些系统pods，这样我们就能够安全删除该节点(没有业务pods):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">namespaces</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">jetson</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>输出类似:</p>
+<p>输出类似(如果节点jetson是 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 正常状态，则会看到类似如下输出):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">arm64</span><span class="o">-</span><span class="n">z544l</span>          <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">25</span><span class="n">h</span>     <span class="mf">30.73</span><span class="o">.</span><span class="mf">166.34</span>   <span class="n">jetson</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
 <span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">twhgk</span>                <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">25</span><span class="n">h</span>     <span class="mf">30.73</span><span class="o">.</span><span class="mf">166.34</span>   <span class="n">jetson</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
 <span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="mi">49</span><span class="n">qlz</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">25</span><span class="n">h</span>     <span class="mf">30.73</span><span class="o">.</span><span class="mf">166.34</span>   <span class="n">jetson</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
@@ -330,9 +364,6 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span>
 </pre></div>
 </div>
-</div></blockquote>
-</li>
-</ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>假设我们修复好了jetson节点故障，需要重新将节点加入回集群。</p>
@@ -384,10 +415,13 @@ To see the stack trace of this error execute with --v=5 or higher
 </div>
 </li>
 </ul>
+</div>
 <div class="section" id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://stackoverflow.com/questions/56064537/how-to-remove-broken-nodes-in-kubernetes/56289161">How to remove broken nodes in Kubernetes</a></p></li>
+<li><p><a class="reference external" href="https://docs.mirantis.com/mcp/q4-18/mcp-operations-guide/kubernetes-operations/k8s-node-ops/k8s-node-remove.html">Remove a Kubernetes Node</a></p></li>
+<li><p><a class="reference external" href="https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/">Safely Drain a Node</a></p></li>
 </ul>
 </div>
 </div>

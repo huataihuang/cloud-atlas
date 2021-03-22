@@ -17,69 +17,98 @@
 
 我们需要将节点 ``jetson`` 安全删除并重新加入，所以请参考 :ref:`remove_node` 执行操作:
 
-- 删除 ``jeson`` 节点:
+删除 ``jeson`` 节点
+=====================
 
-   - 首先清空(drain)节点::
+.. note::
 
-      kubectl drain jetson --delete-local-data --force --ignore-daemonsets
+   所谓删除节点，首先需要清空节点上所有业务pod。这个清理pod通常不需要包含daemonset(和节点相关的运维辅助pods)，所以使用参数 ``--ignore-daemonsets`` 。
 
-   这里只要 ``drain`` 没有报错返回就表明节点已经清理干净。
+由于jetson节点挂掉了，所以首先通过 ``kubectl get nodes`` 看到节点是 ``NotReady`` 状态::
 
-   此时检查节点 ``kubectl get nodes -o wide`` 会看到节点状态是 ``SchedulingDisabled`` ::
+   NAME         STATUS     ROLES    AGE    VERSION
+   jetson       NotReady   <none>   104d   v1.20.2
+   ...
 
-      NAME         STATUS                     ROLES    AGE     VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
-      jetson       Ready,SchedulingDisabled   <none>   56m     v1.19.4   192.168.6.10   <none>        Ubuntu 18.04.5 LTS   4.9.140-tegra      docker://19.3.6
-      pi-master1   Ready                      master   7d1h    v1.19.4   192.168.6.11   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
-      pi-worker1   Ready                      <none>   3d13h   v1.19.4   192.168.6.15   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
-      pi-worker2   Ready                      <none>   3d13h   v1.19.4   192.168.6.16   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+- 关闭节点调度(cordon)::
 
-   不过实际上，我发现 ``kubectl drain`` 并没有清理掉jetson节点上的 ``cni0`` ，使用 ``ifconfig`` 依然会看到::
+   kubectl cordon jetson
 
-      cni0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
-              inet 10.244.3.1  netmask 255.255.255.0  broadcast 10.244.3.255
-              inet6 fe80::d476:bff:fe23:b011  prefixlen 64  scopeid 0x20<link>
-              ether d6:76:0b:23:b0:11  txqueuelen 1000  (Ethernet)
-              RX packets 160  bytes 4480 (4.4 KB)
-              RX errors 0  dropped 0  overruns 0  frame 0
-              TX packets 412  bytes 39406 (39.4 KB)
-              TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+.. note::
 
-   这导致节点再次加入时候会出现无法分配 ``cni0`` 的IP地址。所以我这里手工做了清理::
+   关闭调度可以通过标签过滤选择，使用参数 ``-l, --selector=""``
 
-      ip link delete cni0      
+关闭节点调度以后，再次使用 ``kubectl get nodes`` 检查节点状态如下::
 
-   注意，如果确实修复好节点，可以恢复节点调度::
+   NAME         STATUS                        ROLES    AGE    VERSION
+   jetson       NotReady,SchedulingDisabled   <none>   104d   v1.20.2
+   ...
 
-      kubectl uncordon jetson
+- 清空(drain)节点(注意，这个步骤仅在节点 ``Ready`` 状态下才需要执行，如果节点已经 ``NotReady`` 了，则 ``drain`` 命令会卡住无法完成)::
 
-   - 再次执行检查pods::
+   kubectl drain jetson --delete-local-data --force --ignore-daemonsets
 
-      kubectl -n kube-verify get pods -o wide
+这里只要 ``drain`` 没有报错返回就表明节点已经清理干净。
 
-   - 可以看到当前运行的pod被驱逐(evict)到其他节点上(这里是 ``kube-verify-69dd569645-nvnhl`` 被驱逐改到 ``pi-worker2`` 节点上的 ``kube-verify-69dd569645-9msjb`` )::
+此时检查节点 ``kubectl get nodes -o wide`` 会看到节点状态是 ``SchedulingDisabled`` ::
 
-      NAME                           READY   STATUS    RESTARTS   AGE   IP           NODE         NOMINATED NODE   READINESS GATES
-      kube-verify-69dd569645-9msjb   1/1     Running   0          39s   10.244.2.3   pi-worker2   <none>           <none>
-      kube-verify-69dd569645-s5qb5   1/1     Running   0          24h   10.244.2.2   pi-worker2   <none>           <none>
-      kube-verify-69dd569645-v9zxt   1/1     Running   0          24h   10.244.1.2   pi-worker1   <none>           <none>
+   NAME         STATUS                     ROLES    AGE     VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+   jetson       Ready,SchedulingDisabled   <none>   56m     v1.19.4   192.168.6.10   <none>        Ubuntu 18.04.5 LTS   4.9.140-tegra      docker://19.3.6
+   pi-master1   Ready                      master   7d1h    v1.19.4   192.168.6.11   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+   pi-worker1   Ready                      <none>   3d13h   v1.19.4   192.168.6.15   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
+   pi-worker2   Ready                      <none>   3d13h   v1.19.4   192.168.6.16   <none>        Ubuntu 20.04.1 LTS   5.4.0-1022-raspi   docker://19.3.8
 
-   - 如果检查所有namespaces，可以看到 jetson 节点只剩下一些系统pods，这样我们就能够安全删除该节点(没有业务pods)::
+不过实际上，我发现 ``kubectl drain`` 并没有清理掉jetson节点上的 ``cni0`` ，使用 ``ifconfig`` 依然会看到::
 
-      kubectl get pods --all-namespaces -o wide | grep jetson
+   cni0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+          inet 10.244.3.1  netmask 255.255.255.0  broadcast 10.244.3.255
+          inet6 fe80::d476:bff:fe23:b011  prefixlen 64  scopeid 0x20<link>
+          ether d6:76:0b:23:b0:11  txqueuelen 1000  (Ethernet)
+          RX packets 160  bytes 4480 (4.4 KB)
+          RX errors 0  dropped 0  overruns 0  frame 0
+          TX packets 412  bytes 39406 (39.4 KB)
+          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
-   输出类似::
+这导致节点再次加入时候会出现无法分配 ``cni0`` 的IP地址。所以我这里手工做了清理::
 
-      kube-system   kube-flannel-ds-arm64-z544l          1/1     Running   0          25h     30.73.166.34   jetson       <none>           <none>
-      kube-system   kube-flannel-ds-twhgk                1/1     Running   0          25h     30.73.166.34   jetson       <none>           <none>
-      kube-system   kube-proxy-49qlz                     1/1     Running   0          25h     30.73.166.34   jetson       <none>           <none>
+   ip link delete cni0      
 
-   - 删除(delete node)::
+注意，如果确实修复好节点，可以恢复节点调度::
 
-      kubectl delete node jetson
+   kubectl uncordon jetson
 
-   然后验证确保节点已经删除::
+- 再次执行检查pods::
 
-      kubectl get nodes
+   kubectl -n kube-verify get pods -o wide
+
+- 可以看到当前运行的pod被驱逐(evict)到其他节点上(这里是 ``kube-verify-69dd569645-nvnhl`` 被驱逐改到 ``pi-worker2`` 节点上的 ``kube-verify-69dd569645-9msjb`` )::
+
+   NAME                           READY   STATUS    RESTARTS   AGE   IP           NODE         NOMINATED NODE   READINESS GATES
+   kube-verify-69dd569645-9msjb   1/1     Running   0          39s   10.244.2.3   pi-worker2   <none>           <none>
+   kube-verify-69dd569645-s5qb5   1/1     Running   0          24h   10.244.2.2   pi-worker2   <none>           <none>
+   kube-verify-69dd569645-v9zxt   1/1     Running   0          24h   10.244.1.2   pi-worker1   <none>           <none>
+
+.. note::
+
+   如果jetson节点是意外故障，则会看到新的容器已经调度到其他节点上，但是 jetson节点上容器一直处于 ``Terminating`` 状态无法结束。不过没有关系，后面直接执行 ``kubectl delete node jetson`` 会清理掉残留pod信息。
+
+- 如果检查所有namespaces，可以看到 jetson 节点只剩下一些系统pods，这样我们就能够安全删除该节点(没有业务pods)::
+
+   kubectl get pods --all-namespaces -o wide | grep jetson
+
+输出类似(如果节点jetson是 ``Ready`` 正常状态，则会看到类似如下输出)::
+
+   kube-system   kube-flannel-ds-arm64-z544l          1/1     Running   0          25h     30.73.166.34   jetson       <none>           <none>
+   kube-system   kube-flannel-ds-twhgk                1/1     Running   0          25h     30.73.166.34   jetson       <none>           <none>
+   kube-system   kube-proxy-49qlz                     1/1     Running   0          25h     30.73.166.34   jetson       <none>           <none>
+
+- 删除(delete node)::
+
+   kubectl delete node jetson
+
+然后验证确保节点已经删除::
+
+   kubectl get nodes
 
 .. note::
 
@@ -129,3 +158,5 @@
 =======
 
 - `How to remove broken nodes in Kubernetes <https://stackoverflow.com/questions/56064537/how-to-remove-broken-nodes-in-kubernetes/56289161>`_
+- `Remove a Kubernetes Node <https://docs.mirantis.com/mcp/q4-18/mcp-operations-guide/kubernetes-operations/k8s-node-ops/k8s-node-remove.html>`_
+- `Safely Drain a Node <https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/>`_

@@ -11,6 +11,7 @@ Infrastructure Atlas
 .. toctree::
    :maxdepth: 1
 
+   best_open_source.rst
    wikipedia_base.rst
    fedoraproject_base.rst
    cpu/index

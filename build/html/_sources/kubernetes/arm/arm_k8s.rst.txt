@@ -22,7 +22,9 @@ Collins撰写了一篇非常详尽的step-by-step指南，方便我们在3个或
 
 - 1台 :ref:`jetson` 作为worker节点，提供GPU设备构建GPU Docker容器，支持 :ref:`machine_learning`
 
-- 若干台在远程服务器上运行 :ref:`kvm` 虚拟机，作为X86异构的Kubernetes工作节点，实现模拟现实数据中心Kubernetes集群异构。
+- 1台 :ref:`thinkpad_x220` 运行 :ref:`arch_linux` 作为模拟X86异构Kubernetes工作节点
+
+- 若干台在远程服务器上运行 :ref:`kvm` 虚拟机，作为X86异构的Kubernetes工作节点，实现模拟现实数据中心Kubernetes集群异构。(这里有一个跨机房以及外网网段和内网网段问题，我在思考如何解决，或许需要采用复杂的VPC架构来解决)
 
 部署和实践
 ============

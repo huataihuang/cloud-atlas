@@ -14,7 +14,7 @@
 
 - 创建ubuntu实例pod::
 
-     kubectl run my-dev --rm -i --tty --image ubuntu -- bash
+   kubectl run my-dev --rm -i --tty --image ubuntu -- bash
 
 .. note::
 

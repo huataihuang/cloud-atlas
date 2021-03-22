@@ -19,6 +19,9 @@ Linux桌面
    netsurf.rst 
    vs_code.rst
    synergy.rst
+   terminal_emulator.rst
+   uxvrt_ch_font.rst
+   tmux.rst
 
 .. only::  subproject and html
 
