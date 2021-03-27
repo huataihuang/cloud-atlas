@@ -12,5 +12,7 @@ ARM架构Kubernetes
 .. toctree::
    :maxdepth: 1
 
+   multi_arch_k8s.rst
    arm_k8s.rst
    arm_k8s_deploy.rst
+   perfmance_arm_x86.rst
