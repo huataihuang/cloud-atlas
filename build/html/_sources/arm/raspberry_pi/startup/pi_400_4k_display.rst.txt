@@ -54,7 +54,7 @@ HDMI线缆
 
    不过，我有3台树莓派4B设备，其中2G版本的Raspberry Pi 4B作为 :ref:`arm_k8s` 的管控主机 ``pi-master1`` 。既然Raspberry Pi 4B是明确支持 ``4Kp60`` ，那么我要充分发挥硬件性能，就用 2G版本的Raspberry Pi 4B 连接新购买的4K显示器，验证我的假设。
 
-   新的实践记录在
+   新的实践记录在 :ref:`pi_4b_4k_display` ，已经验证 Raspberry Pi 4B可以实现 ``4K@60Hz`` ，可以较为完美使用4K显示器。 
 
 4k显示器
 =========

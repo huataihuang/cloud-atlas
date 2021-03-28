@@ -42,7 +42,27 @@ proxy.conf
    Acquire::http::Proxy "http://user:password@proxy.server:port/";
    Acquire::https::Proxy "http://user:password@proxy.server:port/";
 
+文件查找
+=========
+
+我们经常需要找到某个程序文件属于哪个软件包，例如需要安装或者卸载某个文件。
+
+- 对于已经安装的软件包，可以通过 ``dpkg`` 工具查找::
+
+   dpkg -S /bin/ls
+
+这个命令有点类似 :ref:`redhat_linux` 中的 ``rpm -q /bin/ls``
+
+- 对于尚未安装的软件包，我们需要搜索软件仓库，则建议安装 ``apt-file`` 工具来搜索::
+
+   sudo apt install apt-file
+   sudo apt-file update
+   apt-file find kwallet.h
+
+此外，你可以可以通过 `Ubuntu Packages Search <http://packages.ubuntu.com/>`_ 网站来查找软件包。
+
 参考
 ========
 
 - `Configure proxy for APT? <https://askubuntu.com/questions/257290/configure-proxy-for-apt>`_
+- `How do I find the package that provides a file? <https://askubuntu.com/questions/481/how-do-i-find-the-package-that-provides-a-file>`_
