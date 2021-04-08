@@ -256,3 +256,4 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
 
 - `Install and Use Vim on Raspberry Pi <https://roboticsbackend.com/install-use-vim-raspberry-pi/>`_
 - `CentOS 8 搭建Vim golang环境 && YouCompleteMe Golang安装支持 <https://blog.csdn.net/Wind4study/article/details/104565482>`_
+- `配置vim,打造自己的C IDE <https://blog.csdn.net/liangsir_l/article/details/50608350>`_ - 这篇文档还没有实践，待完善

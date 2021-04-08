@@ -23,6 +23,7 @@ Big Data Atlas
    hadoop/index
    spark/index
    flink/index
+   presto/index
    elasticsearch/index
    log_analysis.rst
    tsdb.rst

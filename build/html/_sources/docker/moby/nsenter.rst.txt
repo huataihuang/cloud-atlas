@@ -34,6 +34,13 @@ nsenter使用
 
    在 :ref:`install_docker_macos` 所使用的是Docker Desktop，采用的是macOS系统的HyperKit运行的Linux系统。
 
+上述命令也可以通过一条命令结合起来::
+
+   sudo nsenter -t $(docker inspect --format '{{ .State.Pid  }}' $(docker ps -lq)) -m -u -i -n -p -w
+
+其中 ``$(docker inspect --format '{{ .State.Pid  }}' [container_id])`` 命令可以返回指定容器的PID，这样就能够通过 ``nsenter -t`` 命令进入指定PID的namespace。
+
+``docker ps -lq`` 命令则是返回最新运行的容器的container ID
 
 参考
 ======

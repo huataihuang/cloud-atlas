@@ -353,10 +353,77 @@
 - 虽然Prometheus非常稳定，但是并不能保证数据百分百精确
 - Prometheus不适合需要通过分析数据来记账的场景</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Prometheus主要提供近实时的、基于云和容器以及服务和应用服务器的内部监控，专注于当前发生事件，而不是跟踪历史数据。注意，Prometheus的使用假设是大多数监控查询和报警都是最近数据中生成的(通常一天以内)。</p>
+<p>Prometheus的查询非常强大，但是监控数据保留期一般有限。</p>
+</div>
 </div>
 </div>
 <div class="section" id="id10">
-<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<h2>架构<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<p>Prometheus通过抓取应用程序中暴露的时间序列数据来实现监控。所谓时间序列数据通常是应用程序客户端库或者exporter(导出器)的代理作为HTTP端点暴露。</p>
+<p>当前已经有很多exporter和客户端库，支持多种编程语言、框架和应用程序，例如Apache WEB服务器和MySQL数据库。</p>
+<p>Prometheus还可以使用推送网关(push gateway)来接收少量无法拉取数据的监控目标发出的数据（例如防火墙后面的监控目标）。</p>
+<div class="section" id="id11">
+<h3>指标搜集<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h3>
+<p>在Prometheus中，被采集的指标来源称为endpoint(端点)，所谓端点通常对应是进程、主机、服务或应用程序。Prometheus定义目标(target) 配置：</p>
+<ul class="simple">
+<li><p>连接方式</p></li>
+<li><p>元数据</p></li>
+<li><p>身份验证</p></li>
+</ul>
+<p>一组目标则被称为job，一般job是具有相同角色的目标组，例如Apache服务器集群，也就是一组相似的进程。</p>
+<p>生成的时间序列数据被搜集并存储到Prometheus服务器本地或者外部存储器、第三方时间序列数据库。</p>
+</div>
+<div class="section" id="id12">
+<h3>服务发现<a class="headerlink" href="#id12" title="永久链接至标题">¶</a></h3>
+<p>对于要监控的对象，可以:</p>
+<ul class="simple">
+<li><p>静态配置被监控资源列表</p></li>
+<li><p>基于文件：如使用配置管理工具定时自动生成Prometheus可以更新的资源列表</p></li>
+<li><p>自动发现</p></li>
+</ul>
+</div>
+<div class="section" id="id13">
+<h3>聚合&amp;报警<a class="headerlink" href="#id13" title="永久链接至标题">¶</a></h3>
+<p>通过查询出的数据再聚合，可以计算变化率、比率、求和等聚合，并且根据计算结果定义报警规则:</p>
+<ul class="simple">
+<li><p>异常的CPU使用率</p></li>
+<li><p>存储、网络使用率</p></li>
+<li><p>…</p></li>
+</ul>
+<p>Prometheus没有内置报警工具，而是将报警推送到 Alertmanager(报警管理器)，由alertmanager管理、整合以及分发报警到不同目标。</p>
+</div>
+<div class="section" id="promql">
+<h3>PromQL<a class="headerlink" href="#promql" title="永久链接至标题">¶</a></h3>
+<p>Prometheus内置了查询语句PromQL以及表达式浏览器和浏览服务器上数据的图形界面。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>为了性能和稳定性，建议在Prometheus服务器配置大容量内存和SSD磁盘。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id14">
+<h2>冗余和高可用<a class="headerlink" href="#id14" title="永久链接至标题">¶</a></h2>
+<p>Prometheus不是分布式系统，实际上还是单机运行。不过，通过部署多台服务器，可以提供冗余(每个服务器都是一样的数据)。部署冗余的Prometheus服务器可以在某个服务器故障时继续维持监控。注意，多个Prometheus会产生重复的报警，此时需要高可用Alertmanager消除重复报警。</p>
+</div>
+<div class="section" id="id15">
+<h2>可视化<a class="headerlink" href="#id15" title="永久链接至标题">¶</a></h2>
+<p>通常Prometheus会结合开源监控仪表盘Grafana来提供可视化。</p>
+</div>
+<div class="section" id="id16">
+<h2>数据存储<a class="headerlink" href="#id16" title="永久链接至标题">¶</a></h2>
+<p>Prometheus搜集时间序列数据，采用标签纬度为时间序列添加上下文。</p>
+<p>标签会结合到时间序列进行存储，这样可以通过标签进行查询。时间序列由名称和标签标识。</p>
+<p>由于Prometheus是为短期监控和报警需求设计的，所以默认情况下，只在数据库中保留15天时间序列数据。要保留更长时间数据，则建议将数据发送到第三方平台存储，例如，大数据存储，供后续进行消费分析。</p>
+</div>
+<div class="section" id="id17">
+<h2>安全性<a class="headerlink" href="#id17" title="永久链接至标题">¶</a></h2>
+<p>Prometheus不提供任何服务器端身份验证、授权或加密。所以要加强安全，请使用反向代理访问Prometheus服务器，通过反向代理服务器上配置认证授权。</p>
+</div>
+<div class="section" id="id18">
+<h2>参考<a class="headerlink" href="#id18" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://prometheus.io/docs/introduction/overview/">Prometheus Overview</a></p></li>
 <li><p><a class="reference external" href="https://www.amazon.com/Prometheus-Infrastructure-Application-Performance-Monitoring-ebook-dp-B07FCV2VVG/dp/B07FCV2VVG/ref=mt_kindle?_encoding=UTF8&amp;me=&amp;qid=1560303117">Prometheus - Up &amp; Running: Infrastructure and Application Performance Monitoring</a></p></li>

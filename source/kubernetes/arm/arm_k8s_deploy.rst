@@ -109,6 +109,21 @@ Kubernetes需要使用iptables来配置查看bridged网络流量，可以通过�
 
    Ubuntu 20.04的版本代号是Focal，Ubuntu 18.04代号是Xenial。你需要检查kubernetes.io的Apt软件仓库提供的对应Ubuntu LTS仓库版本号。当前，在 https://packages.cloud.google.com/apt/dists 中查询还仅仅有 ``kubernetes-xenial`` 尚未提供 focal 版本，所以上述配置apt源仅配置针对 Ubuntu 18.04 的 ``kubernetes-xenial`` 。后续可以关注该网站提供的软件仓库，在适当时切换到 Focal 版本。
 
+.. note::
+
+   如果 ``apt update`` 出现以下报错::
+
+      Err:2 https://packages.cloud.google.com/apt kubernetes-xenial InRelease
+        The following signatures couldn't be verified because the public key is not available: NO_PUBKEY FEEA9169307EA071 NO_PUBKEY 8B57C5C2836F4BEB
+      ...
+      W: An error occurred during the signature verification. The repository is not updated and the previous index files will be used. GPG error: https://packages.cloud.google.com/apt kubernetes-xenial InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY FEEA9169307EA071 NO_PUBKEY 8B57C5C2836F4BEB
+      W: Failed to fetch https://apt.kubernetes.io/dists/kubernetes-xenial/InRelease  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY FEEA9169307EA071 NO_PUBKEY 8B57C5C2836F4BEB
+      W: Some index files failed to download. They have been ignored, or old ones used instead.
+
+   则需要再次执行::
+
+      curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
 - 安装以下3个必要的Kubernetes软件包::
 
    sudo apt update && sudo apt install -y kubelet kubeadm kubectl

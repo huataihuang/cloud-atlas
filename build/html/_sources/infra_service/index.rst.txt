@@ -18,6 +18,7 @@ Infra-Service Atlas
 .. toctree::
    :maxdepth: 1
 
+   ntp/index
    dns/index
    ssh/index
 
