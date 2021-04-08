@@ -1,14 +1,13 @@
-.. _vim:
+.. _presto:
 
 =================================
-Vim
+Presto分布式大数据查询
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install_vim.rst
-   vim_basic.rst
+   introduce_presto.rst
 
 .. only::  subproject and html
 

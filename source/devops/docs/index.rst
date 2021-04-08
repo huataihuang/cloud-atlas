@@ -12,6 +12,7 @@ DevOps 文档
    :maxdepth: 1
 
    write_doc.rst
+   joplin.rst
    sphinx_doc/index
    hugo/index
    kindle/index

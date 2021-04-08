@@ -1,14 +1,13 @@
-.. _vim:
+.. _webdav:
 
 =================================
-Vim
+WebDAV
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install_vim.rst
-   vim_basic.rst
+   introduce_webdav.rst
 
 .. only::  subproject and html
 
