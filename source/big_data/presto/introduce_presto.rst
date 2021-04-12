@@ -4,6 +4,13 @@
 Presto简介
 =====================
 
+Presto是Facebook开源的分布式SQL查询执行引擎，可以从不同的数据源进行分布式海量数据处理。
+
+需要注意的是:
+
+- Presto不是通常意义的关系型数据库，也不提供标准数据库功能，所以不能用来替代MySQL，PostgreSQL或Oracle。Presto不是设计作为Online Transaction Processing (OLTP)的。
+- 
+
 参考
 ======
 
