@@ -21,6 +21,7 @@ Infra-Service Atlas
    ntp/index
    dns/index
    ssh/index
+   asciinema/index
 
 .. only::  subproject and html
 
