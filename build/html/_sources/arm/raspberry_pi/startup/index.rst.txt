@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    pi_3.rst
+   pi_zero.rst
    pi_4.rst
    pi_400.rst
    pi_400_4k_display.rst

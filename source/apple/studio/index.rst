@@ -11,6 +11,7 @@ macOS Studio
 
    introduce_macos_studio.rst
    mbp15_late_2013.rst
+   macbook_nvme.rst
    macos_install_drive.rst
    macos_studio_startup.rst
    homebrew.rst

@@ -28,6 +28,9 @@ asciinema工作原理
 
 终端模拟器接口在用户和shell之间按照以下方式工作：
 
+- 终端模拟器负责和用户交互，将用户输入发送给shell所使用的master pseudo设备(master pseudo设备和slave pseudo设备连接)并且读取从master pseudo设备发回的字符，转发给用户
+- 
+
 
 使用方法简介
 =============
