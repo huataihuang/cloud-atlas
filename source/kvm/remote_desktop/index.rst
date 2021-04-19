@@ -8,7 +8,6 @@
    :maxdepth: 1
 
    remote_desktop_classify.rst
-   guacamole.rst
    spice.rst
 
 .. only::  subproject and html

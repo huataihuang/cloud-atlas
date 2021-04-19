@@ -8,8 +8,8 @@ Kali Linux
    :maxdepth: 1
 
    introduce_kali_linux.rst
-   startup_prepare/index
    startup/index
+   admin/index
 
 .. only::  subproject and html
 
