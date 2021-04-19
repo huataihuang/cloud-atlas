@@ -1,13 +1,13 @@
-.. _kali_linux_startup_prepare:
+.. _kali_linux_admin:
 
 =================================
-Kali Linux 起步准备
+Kali Linux 系统管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   run_kali_on_pi_zero.rst
+   kali_novnc.rst
 
 .. only::  subproject and html
 

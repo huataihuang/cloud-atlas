@@ -9,6 +9,7 @@ Linux磁盘
 
    linux_partition.rst
    parted.rst
+   mount_img.rst
 
 .. only::  subproject and html
 

@@ -80,6 +80,11 @@ nmcli命令的规律是尽可能使用 ``help`` ，每一级命令都有help可�
    ali     3bdf8189-6c9b-4d35-a83b-71441b22ba92  wifi      wlan0  
    manage  a94fa1de-b290-3b83-9f49-137981396543  ethernet  eth0
 
+- 如果之前没有用NetworkManager管理网络，则可以添加::
+
+   nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 192.168.6.7/24 gw4 192.168.6.200
+   nmcli con mod "static-eth0" ipv4.dns "xxx.xxx.120.1,8.8.8.8"
+
 - 很多修改需要看一下属性案例，例如需要修改IP地址::
 
    nmcli connection modify "manage" ipv4.method manual
@@ -156,6 +161,23 @@ nmcli命令案例
 
    `How to use USB device networking <https://developer.ridgerun.com/wiki/index.php/How_to_use_USB_device_networking>`_
 
+配置静态IP地址
+===============
+
+- 检查连接::
+
+   nmcli
+
+- 配置静态IP地址::
+
+   nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 192.168.6.7/24 gw4 192.168.6.200
+   nmcli con mod "static-eth0" ipv4.dns "xxx.xxx.120.1,8.8.8.8"
+   nmcli con up id "static-eth0"
+
+配置无线网络
+===============
+
+我在 :ref:`kali_network` 实践中有一个配置无线网络的案例
 
 MAC Spoofing
 ===============
@@ -186,3 +208,4 @@ NetworkManager的Mac Spoofing是通过 ``ethernet.cloned-mac-address`` 和 ``wif
 - `nmcli - command-line tool for controlling NetworkManager <https://developer.gnome.org/NetworkManager/stable/nmcli.html>`_
 - `CONFIGURING IP NETWORKING WITH NMCLI <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_nmcli>`_
 - `MAC Address Spoofing in NetworkManager 1.4.0 <https://blogs.gnome.org/thaller/2016/08/26/mac-address-spoofing-in-networkmanager-1-4-0/>`_
+- `Configuring Wi-Fi on Debian 10 <https://linuxhint.com/wi-fi_configuring_debian_10/>`_

@@ -17,11 +17,15 @@ X window
 VNC
 -----
 
+- :ref:`guacamole` : 完整的基于浏览器的远程桌面网关
+
 Spice
 -------
 
 RDP
 -----
+
+- :ref:`guacamole` : 完整的基于浏览器的远程桌面网关
 
 参考
 =======

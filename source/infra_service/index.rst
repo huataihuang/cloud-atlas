@@ -22,6 +22,7 @@ Infra-Service Atlas
    dns/index
    ssh/index
    asciinema/index
+   guacamole/index
 
 .. only::  subproject and html
 

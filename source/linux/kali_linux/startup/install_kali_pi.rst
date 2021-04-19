@@ -24,6 +24,12 @@ ARM版本的Kali Linux安装和其他ARM Linux操作系统安装方法类似，�
 
 首次启动Kali Linux，系统会自动扩展文件系统到整个SD卡，默认启动到图形登陆界面。
 
+和 :ref:`pi_400_4k_display` 相似，默认时显示器周边有黑边，这和 ``Underscan/overscan`` 相关，不过Kali Linux Raspberry Pi没有提供 ``raspi-config`` ，所以我参考 :ref:`pi_400_4k_display` 通过 ``raspi-config`` 工具生成的 ``/boot/config.txt`` 修改如下::
+
+   disable_overscan=1   
+
+然后重启一次系统生效
+
 Kali Linux 2021.1 Release
 ==========================
 
@@ -33,6 +39,17 @@ Kali Linux 2021.1 Release
 
 .. figure:: ../../../_static/linux/kali_linux/startup/xfce-414-new.png
    :scale: 40
+
+- 提供了可选的 KDE 5.20 (Plasma) 作为Kali官方支持的桌面，安装过程也可以选择GNOME。此外，系统安装完成后，还可以选择安装Enlightenment, i3, LXDE 和 MATE
+
+- 提供了不同终端工具
+
+- 提供了 ``command-not-found`` 工具来帮助使用(当输入命令错误时会提供相近命令提示)，激活方法如下::
+
+   # enable command-not-found if installed
+   if [ -f /etc/zsh_command_not_found  ]; then
+       . /etc/zsh_command_not_found
+   fi
 
 参考
 =====
