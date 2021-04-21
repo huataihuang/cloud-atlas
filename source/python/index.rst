@@ -20,6 +20,7 @@ Python Atlas
    startup/index
    network/index
    gui/index
+   deploy/index
 
 .. only::  subproject and html
 

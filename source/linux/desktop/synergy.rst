@@ -85,13 +85,14 @@ Raspberry Pi OS安装Synergy
 
 我现在工作桌面使用 :ref:`pi_400` ，安装的图形桌面系统是 :ref:`xfce` 。在Synergy官网也提供了针对树莓派ARM版本。
 
-- 安装依赖库::
-
-   apt install
-
 - 安装下载的软件包::
 
    dpkg -i synergy_1.13.1-stable.063519a8_raspios_armhf.deb
+
+Kali Linux ARM安装Synergy
+----------------------------
+
+我在 :ref:`pi_400` 运行 :ref:`kali_linux` ，验证可以直接使用 Synergy官网 提供的树莓派64位ARM版本
 
 使用Synergy
 ===============
