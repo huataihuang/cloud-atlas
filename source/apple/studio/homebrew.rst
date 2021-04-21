@@ -93,6 +93,15 @@ Homebrew Cask
 
 然后你就可以使用atom编辑器了。
 
+不过，2021年时候，使用上述命令会出现报错::
+
+   Updating Homebrew...
+   Error: Unknown command: cask
+
+这是因为最新版本brew已经改编成::
+
+   brew install --cask atom
+
 .. note::
 
    你可以通过 `Homebrew Formulae <https://formulae.brew.sh/cask/>`_ 查看所有cask tap列表。
