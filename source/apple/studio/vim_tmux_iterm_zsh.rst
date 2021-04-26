@@ -87,6 +87,19 @@ zsh已经是macOS推荐的内置shell，Oh-my-zsh提供了定制框架，能够�
    cd ~/.vim/bundle/YouCompleteMe
    ./install.py
 
+我遇到报错显示我的操作系统是 10.13 但是编译目标确实10.9::
+
+   building '_watchdog_fsevents' extension
+   creating /Users/huatai/.vim/bundle/youcompleteme/third_party/ycmd/third_party/watchdog_deps/watchdog/build/3
+   ...
+   .../watchdog_fsevents.c:191:25: warning: 'kFSEventStreamEventFlagItemCloned' is only
+      available on macOS 10.13 or newer [-Wunguarded-availability-new]
+   ...
+
+解决的方法可能是手工安装一次 ``watchdog`` 模块::
+
+   sudo python3 -m pip install -U watchdog
+
 参考
 ======
 

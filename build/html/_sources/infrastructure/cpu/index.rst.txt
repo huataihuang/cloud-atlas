@@ -9,4 +9,6 @@ CPU架构
 .. toctree::
    :maxdepth: 1
 
-
+   intel/index
+   amd/index
+   arm/index

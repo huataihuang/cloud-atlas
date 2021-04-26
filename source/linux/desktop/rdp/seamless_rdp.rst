@@ -50,7 +50,7 @@ Windows 10操作系统需要开启远程桌面访问，设置方法：
 
 - 在 ``System Properties`` 设置的 ``Remote`` 面板，有一个 ``Remote Desktop`` 设置区域，选择 ``Allow remote connections to this computer`` 。注意：一定要去除 ``Allow connections only from computers running Remote Desktop with Network Level Authentication (recommended)`` ，否则Linux客户端的rdesktop无法访问。
 
-.. figure:: ../../_static/kvm/win10_rdp_setting.png
+.. figure:: ../../../_static/kvm/win10_rdp_setting.png
    :scale: 60%
 
 MacBook Pro高分辨率显示
@@ -64,7 +64,7 @@ MacBook Pro高分辨率显示
 
 .. note::
 
-   修改Windows桌面的显示比例会导致 :ref:`rdesktop_mouse_cursor_appear` 问题，请参考 :ref:`rdesktop_mouse_cursor_appear` 解决方法。
+   修改Windows桌面的显示比例会导致 :ref:`xrdp_mouse` 问题，请参考 :ref:`xrdp_mouse` 解决方法。
 
 SeamlessRDP
 ================

@@ -30,6 +30,27 @@ ARM版本的Kali Linux安装和其他ARM Linux操作系统安装方法类似，�
 
 然后重启一次系统生效
 
+初始设置
+=========
+
+Kali Linux 2021.1 发行版默认优化已经非常完善，无论Xfce 4.16的界面风格和终端模拟器QTerminal结合zsh，已经让我非常顺手了。
+
+- 修订一下默认的时区::
+
+   unlink /etc/localtime
+   ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+这样默认本地时间就能够正确显示。
+
+- :ref:`kali_network`
+
+- 为了方便开发学习，设置 :ref:`virtualenv` 完成Python 3开发环境::
+
+   sudo apt install python3-venv
+   cd ~
+   python3 -m venv venv3
+   source venv3/bin/active
+
 Kali Linux 2021.1 Release
 ==========================
 

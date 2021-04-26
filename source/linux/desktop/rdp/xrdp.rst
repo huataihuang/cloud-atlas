@@ -37,12 +37,12 @@ xrdp.ini
    sending login info session manager, please wait...
    login failed for display 0
 
-.. figure:: ../../_static/appendix/xrdp_login_err.png
+.. figure:: ../../../_static/linux/desktop/rdp/xrdp_login_err.png
    :scale: 50%
 
 此时确认OK以后，会弹出一个让你选择会话的窗口，选择 ``Xvnc`` 会话，然后输入用户名和密码就可以访问图形桌面：
 
-.. figure:: ../../_static/appendix/xrdp_login_choice.png
+.. figure:: ../../../_static/linux/desktop/rdp/xrdp_login_choice.png
    :scale: 50%
 
 实际上这个可选Session配置全部在服务器的 ``/etc/xrdp/xrdp.ini``

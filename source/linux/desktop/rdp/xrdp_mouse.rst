@@ -1,4 +1,4 @@
-.. _rdesktop_mouse_cursor_appear:
+.. _xrdp_mouse:
 
 ==============================
 rdesktop远程桌面鼠标图标显示

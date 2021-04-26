@@ -9,9 +9,11 @@ Python起步
 
    virtualenv.rst
    python_in_rhel8.rst
+   python_in_kali.rst
    python_doc.rst
    vs_code_python.rst
    vs_code_virtualenv.rst
+   pep_8.rst
 
 .. only::  subproject and html
 

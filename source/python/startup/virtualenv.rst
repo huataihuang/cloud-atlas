@@ -77,6 +77,10 @@ Python 3 venv
 
    source venv3/bin/active
 
+.. note::
+
+   我使用 :ref:`kali_linux` 作为开发环境，采用上述方式完成环境设置。
+
 升级Virtualenv环境
 ====================
 
