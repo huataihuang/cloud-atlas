@@ -21,7 +21,7 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'Cloud Atlas'
-copyright = '2019, Huatai Huang'
+copyright = '2021, Huatai Huang'
 author = 'Huatai Huang'
 
 # The short X.Y version

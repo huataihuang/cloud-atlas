@@ -1,19 +1,15 @@
-.. _python_startup:
+.. _rdp:
 
 =================================
-Python起步
+Linux桌面
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   virtualenv.rst
-   python_in_rhel8.rst
-   python_in_kali.rst
-   python_doc.rst
-   vs_code_python.rst
-   vs_code_virtualenv.rst
-   pep_8.rst
+   xrdp.rst
+   xrdp_mouse.rst
+   seamless_rdp.rst
 
 .. only::  subproject and html
 

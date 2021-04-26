@@ -13,10 +13,10 @@ Linux桌面
    xfce.rst
    oh_my_zsh.rst
    tmux.rst
-   vim_tmux_iterm_zsh.rst
    vim/index
    golang.rst
    remote_linux_desktop.rst
+   rdp/index
    xpra.rst
    light_browser.rst
    netsurf.rst 

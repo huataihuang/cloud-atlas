@@ -8,6 +8,32 @@ chroot Raspbian维护更新
 
 这个世界的进步是由"懒人"推动的，我不想这么麻烦，所以我把树莓派Raspbian系统复制到Ubuntu中，通过chroot来运行。类似于 :ref:`docker` ，除了内核不切换，其他都可以自如修改。
 
+.. note::
+
+   最近一次在更新 :ref:`usb_boot_ubuntu_pi_4` :ref:`ubuntu64bit_pi` ，意外遇到磁盘无法写入(主要是内核安装过程无法写入FAT32分区)更新后无法启动。所以将SSD磁盘连接到另外一个工作正常到Raspberry Pi设备上，通过本文方法尝试修复::
+
+      sudo apt install --reinstall linux-raspi-headers-5.4.0-1034 linux-image-5.4.0-1034-raspi linux-modules-5.4.0-1034-raspi linux-headers-5.4.0-1034-raspi ubuntu-drivers-common
+
+   注意，我使用的是Ubuntu for Raspberry Pi，挂载目录不同::
+
+      # Ubuntu把sda1挂载到/mnt/boot/firmware，这个分区是VFAT
+      # 然后在/mnt/boot 目录下创建软链接(EXT4)，请仔细对比正常的Ubuntu系统
+      mount /dev/sda2 /mnt
+      mount /dev/sda1 /mnt/boot/firmware
+
+      # 挂载磁盘
+      rootfs=/mnt
+      mount -t proc proc ${rootfs}/proc
+      mount --rbind /sys ${rootfs}/sys
+      mount --make-rslave ${rootfs}/sys
+      mount --rbind /dev ${rootfs}/dev
+      mount --make-rslave ${rootfs}/dev
+
+      # 进入系统
+      chroot ${rootfs} /bin/bash
+      source /etc/profile
+      export PS1="(chroot) $PS1"
+
 制作Raspbian系统备份
 =======================
 

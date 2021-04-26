@@ -14,11 +14,13 @@ macOS Studio
    macbook_nvme.rst
    macos_install_drive.rst
    macos_studio_startup.rst
+   macos_share_file.rst
    homebrew.rst
    multi_jdk_on_macos.rst
    macos_keyboard_customize.rst
    monitorcontrol.rst
    missing_xcrun.rst
+   vim_tmux_iterm_zsh.rst
 
 .. only::  subproject and html
 

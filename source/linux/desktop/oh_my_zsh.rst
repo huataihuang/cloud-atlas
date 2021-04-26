@@ -52,6 +52,13 @@ theme
 
 `Oh My Zsh支持不同themes <https://github.com/ohmyzsh/ohmyzsh/wiki/Themes>`_ ，如果你不知道如何选择，可以参考一下 `What's the best theme for Oh My Zsh? 投票 <https://www.slant.co/topics/7553/~theme-for-oh-my-zsh>`_ 选择票数最高的几项进行尝试。
 
+.. note::
+
+   我在尝试了不同themes之后，还是回归到Oh My Zsh默认的theme ``robbyrussell`` ，原因是:
+
+   - 大多数themes都需要安装字体，虽然比较炫酷，但是得到的收益有限
+   - 我的日常工作都是通过 ``screen`` 和 :ref:`tmux` 来完成的，为的是确保随时能够回到中断的工作界面，但是附加字体不能显示
+
 Powerlevel10k
 ~~~~~~~~~~~~~~~
 

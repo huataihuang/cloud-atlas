@@ -15,6 +15,10 @@ Vim是传奇编辑器vi的继承者，功能强大但需要使用者不断训练
 
    一直以来，我都没有系统学习过Vi，虽然不断使用，但是仅限于非常基本的使用操作。不过，对于服务器开发者，这个编辑器对于提高开发效率有极大帮助，依然值得投入学习。
 
+.. note::
+
+   本文是在树莓派的Raspberry Pi OS上实践，也即是Debian Linux系统上编译安装 ``vim`` + ``you-complete-me`` 以及vim插件；对于macOS环境通过 :ref:`homebrew` 组合多个工具配置相同环境请参考 :ref:`vim_tmux_iterm_zsh` 。
+
 安装
 ======
 
