@@ -9,6 +9,7 @@ iPhone
 
    iphone_zen.rst
    iphone12_mini.rst
+   update_awatch_nospace.rst
 
 .. only::  subproject and html
 
