@@ -1,10 +1,24 @@
-.. _soft_ap:
+.. _create_ap:
 
-================
-Linux无线AP
-================
+===========================
+使用create_ap工具创建软AP
+===========================
 
 Linux可以实现软件方式的无线访问节点(software access point)，也称为虚拟路由器(virtual router)或虚拟Wi-Fi，这种方式可以将一台主机的无线网卡转换成一个Wi-Fi access point。
+
+`oblique/create_ap <https://github.com/oblique/create_ap>`_ 是一个脚本帮助快速创建Linux上的无线AP。
+
+.. note::
+
+   目前create_ap项目已经不再维护，建议采用以下两个fork出来的开源项目:
+
+   - `linux-wifi-hotspot <https://github.com/lakinduakash/linux-wifi-hotspot>`_ 聚焦在提供GUI以及一些增强
+   - `linux-router <https://github.com/garywill/linux-router>`_ 致力于提供新功能以及增强，并且不限于WiFi。一些有用的功能包括：通过有线网络接口共享Internet，通过使用redsocks提供透明代理共享Internet。
+
+   我的实践:
+
+   - :ref:`linux_wifi_hotspot`
+   - :ref:`linux_router`
 
 硬件要求
 ==========

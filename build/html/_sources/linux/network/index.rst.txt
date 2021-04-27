@@ -10,7 +10,11 @@ Linux网络
    ring_buffer_dma_mmio.rst
    ip_command.rst
    ethtool/index
-   soft_ap.rst
+   create_ap.rst
+   linux_router.rst
+   linux_wifi_hotspot.rst
+   setup_hostapd.rst
+   setup_hostapd_failed.rst
 
 .. only::  subproject and html
 
