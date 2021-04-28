@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="zh-CN" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Kubernetes卷 &mdash; Cloud Atlas 0.1 文档</title>
@@ -247,7 +248,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kubernetes">
+  <section id="kubernetes">
 <span id="kubernetes-volumes"></span><h1>Kubernetes卷<a class="headerlink" href="#kubernetes" title="永久链接至标题">¶</a></h1>
 <p>在容器环境中，容器内部的数据层( 见 <a class="reference internal" href="../../../docker/storage/docker_storage_driver.html#docker-storage-driver"><span class="std std-ref">Docker存储驱动</span></a> )存在以下限制(缺点):</p>
 <ul class="simple">
@@ -272,13 +273,13 @@
 <li><p>卷中不能有硬连接到其他卷</p></li>
 <li><p>每个Pod中容器必须和挂载的任何一个卷都没有依赖关系</p></li>
 </ul>
-<div class="section" id="id1">
+<section id="id1">
 <h2>Kubernetes卷类型<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>我只摘录和实践我在学习和生产中所使用的Kubernetes卷，所以本文不会包含所有Kubernetes支持的卷类型。详细信息请参考官方原文 <a class="reference external" href="https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes">Kubernetes Types of Volumes</a></p>
 </div>
-<div class="section" id="cephfs">
+<section id="cephfs">
 <h3>cephfs<a class="headerlink" href="#cephfs" title="永久链接至标题">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">cephfs</span></code> 卷是现有的CephFS卷挂载到Pod中。和 <code class="docutils literal notranslate"><span class="pre">emptyDir</span></code> 不同， <code class="docutils literal notranslate"><span class="pre">emptyDir</span></code> 在Pod销毁的时候消失，而 <code class="docutils literal notranslate"><span class="pre">cephfs</span></code> 卷则始终存在，只是卸载了卷。这意味着CephFS可以预先填充数据，并且这些数据可以在不同的Pods之间共享。CephFS可以挂载成被多个写入器并发写入。</p>
 <div class="admonition note">
@@ -286,15 +287,15 @@
 <p>这里cephfs可以并发写入我还不理解原理，有待实践…</p>
 <p>官方有一个 <a class="reference external" href="https://github.com/kubernetes/examples/tree/master/volumes/cephfs/">CephFS example</a></p>
 </div>
-</div>
-<div class="section" id="cinder">
+</section>
+<section id="cinder">
 <h3>cinder<a class="headerlink" href="#cinder" title="永久链接至标题">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>cinder 是 <a class="reference internal" href="../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 的对象存储，对于Kubernetes需要基于 OpenStack Cloud Provider配置，请参考 <a class="reference internal" href="../cluster_administration/cloud_providers.html#cloud-providers"><span class="std std-ref">Kubernetes底层云服务</span></a> 中OpenStack部分。</p>
 </div>
-</div>
-<div class="section" id="configmap">
+</section>
+<section id="configmap">
 <h3>configMap卷<a class="headerlink" href="#configmap" title="永久链接至标题">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">configMap</span></code> 资源提供了一种将配置数据插入Pod的方法。存储在一个 <code class="docutils literal notranslate"><span class="pre">ConfigMap</span></code> 对象中的数据可以被引用为类型 <code class="docutils literal notranslate"><span class="pre">configMap</span></code> 的卷，然后被容器化应用在Pod中使用。</p>
 <p>当引用一个 <code class="docutils literal notranslate"><span class="pre">configMap</span></code> 对象，你可以简单提供在卷中的它的名字来引用。可以可以定制自定义路径来用于ConfigMap中特定入口。例如，要挂载 <code class="docutils literal notranslate"><span class="pre">log-config</span></code> ConfigMap 到名为 <code class="docutils literal notranslate"><span class="pre">configmap-pod</span></code> 的Pod，可以配置YAML如下:</p>
@@ -324,8 +325,8 @@
 <p class="admonition-title">注解</p>
 <p>似乎 ConfigMap 在容器内外是完全一一对应的？只要指定 <code class="docutils literal notranslate"><span class="pre">mountPath</span></code> ，则该目录下子目录如果设定 <code class="docutils literal notranslate"><span class="pre">configMap</span></code> 就会从容器外映射到容器内部。</p>
 </div>
-</div>
-<div class="section" id="hostpath">
+</section>
+<section id="hostpath">
 <h3>hostPath<a class="headerlink" href="#hostpath" title="永久链接至标题">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">hostPath</span></code> 卷用于将主机节点文件系统上的文件或目录挂载到Pod中。使用 <code class="docutils literal notranslate"><span class="pre">hostPath</span></code> 的局限性在于：如果你要保证调度的pod不错乱(例如访问到不同节点的相同命名的hostPath卷)，你需要在 PodTemplate 中设置 <code class="docutils literal notranslate"><span class="pre">spec.nodeSelector</span></code> 来指定服务器分配pod，这样通常可以避免错乱:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1beta1</span>
@@ -357,8 +358,8 @@
 </pre></div>
 </div>
 <p>由于 <code class="docutils literal notranslate"><span class="pre">hostPath</span></code> 限制较多，所以通常只用于所有node节点都一致都目录映射，并且应用可以自己避免数据错乱的场景。所以，通常使用本地存储会采用 <code class="docutils literal notranslate"><span class="pre">local</span></code> 持久化卷。</p>
-</div>
-<div class="section" id="local">
+</section>
+<section id="local">
 <h3>local<a class="headerlink" href="#local" title="永久链接至标题">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">local</span></code> 卷特点:</p>
 <ul class="simple">
@@ -382,16 +383,16 @@
 </ul>
 <p>通常我们持久化应用要使用 <code class="docutils literal notranslate"><span class="pre">local</span></code> 卷，只有所有服务器一致的配置文件(目录)才可以作为 <code class="docutils literal notranslate"><span class="pre">hostPath</span></code> 挂载到pod内部。</p>
 </div>
-</div>
-</div>
-<div class="section" id="id2">
+</section>
+</section>
+<section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/zh/docs/concepts/storage/volumes/">Kubernetes文档/概念/存储/卷</a></p></li>
 <li><p><a class="reference external" href="https://kubernetes.io/blog/2019/04/04/kubernetes-1.14-local-persistent-volumes-ga/">Kubernetes 1.14: Local Persistent Volumes GA</a> 的 “How is it different from a HostPath Volume?”</p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

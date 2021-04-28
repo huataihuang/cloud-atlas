@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="zh-CN" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>“云原生”吐槽 &mdash; Cloud Atlas 0.1 文档</title>
@@ -224,7 +225,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="roast-cloud-native">
+  <section id="roast-cloud-native">
 <span id="id1"></span><h1>“云原生”吐槽<a class="headerlink" href="#roast-cloud-native" title="永久链接至标题">¶</a></h1>
 <p>吐槽是因为我觉得我们技术解决方案中还有很多不足，我想要思考和辨析这些方案中有哪些优势和不足，并且我想用我的实践来解决和改善它。</p>
 <p>在梳理 “云原生” 的 “缺陷” 时，其实我意识到，很多场景并不是 Cloud Native 的不足，而是我们背负了太多的历史包袱和陈旧的技术观念，导致无法获得技术收益，甚至付出了沉重的代价。</p>
@@ -232,7 +233,7 @@
 <p class="admonition-title">注解</p>
 <p>虽然PPT把很多有一些亮点但存在不少缺陷的技术包装得光鲜靓丽，但是作为实际部署和实现技术的技术工作者，正视不足和改进技术实现才是正途。</p>
 </div>
-<div class="section" id="id2">
+<section id="id2">
 <h2>基础镜像之罪<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p><a class="reference internal" href="../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 容器技术采用了镜像了分发程序运行环境，带来的好处是应用程序运行环境一致性，可以很容易快速部署成千上万完全一致的App运行环境。</p>
 <p>镜像技术有一个非常重要的概念，就是”层”：上层文件系统在下层文件系统之上，继承了下层文件系统所有内容继承之上，修改必要的部分实现新的部署。这使得在同一个物理服务器上部署的不同容器可以共用相同的基础，降低了存储和分发的成本。可以说文件系统层是容器技术的”杀手锏”之一。</p>
@@ -246,7 +247,7 @@
 </div>
 <p>如果你的修改，是一个和业务无关但又非常关键的底层操作系统修订，例如 <code class="docutils literal notranslate"><span class="pre">syslog</span></code> 配置修改，原本通过配置管理工具 <code class="docutils literal notranslate"><span class="pre">puppet</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">ansible</span></code> 可以轻而易举在数分钟或数十分钟内完成海量应用容器更新。</p>
 <p>但是，线上数百万的容器翻一遍可行么？答案在于你有没有合理组合技术栈。一定要将应用无关的服务剥离出容器镜像，才能够实现基础服务的共享和随时更新。</p>
-<div class="section" id="id3">
+<section id="id3">
 <h3>基础镜像解决之道<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <p>实际上我们是错误使用了基础镜像： <strong>基础镜像不应该包含任何与运行应用无关的软件</strong></p>
 <p>最理想的镜像，应该是只包含应用运行的库文件。受到传统的操作系统运维模式影响，我们常常会不自觉地复刻传统的运维模式:</p>
@@ -279,13 +280,13 @@
 <p class="admonition-title">注解</p>
 <p>在生产环境中维护基础镜像成本极高，所以正确的方向应该是推进整个技术栈的转换，而不是为了容器化而复刻原有的技术栈，否则带来的结果甚至不如原先虚拟化的云计算。</p>
 </div>
-</div>
-</div>
-<div class="section" id="id4">
+</section>
+</section>
+<section id="id4">
 <h2>臃肿的镜像绝不是云原生<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>号称轻量级的Docker在生产环境中使用往往会让人跌破眼镜：不是说秒级启动么？现实是等待了数分钟，甚至十数分钟，都没有见到应用容器启动，时不时还出现因为启动超时而导致容器被销毁。</p>
 <p>导致这个奇葩的现象是因为对镜像的滥用，导致不断在镜像中堆积文件层，加上初始镜像无节制的安装各种无用的软件包。一个简单运行服务的镜像需要几个G的容量，在生产环境中大规模并发部署，导致网络阻塞，更拖慢了容器创建的进程。</p>
-<div class="section" id="id5">
+<section id="id5">
 <h3>镜像瘦身<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <p>实际上，在Docker容器化一定要坚持功能单一和镜像简：</p>
 <ul class="simple">
@@ -297,18 +298,18 @@
 <p class="admonition-title">注解</p>
 <p>我将在 <a class="reference internal" href="../../docker/moby/index.html#docker-moby"><span class="std std-ref">Docker Moby</span></a> 深入探讨镜像制作，并在镜像精简上做更多实践。</p>
 </div>
-</div>
-</div>
-<div class="section" id="id6">
+</section>
+</section>
+<section id="id6">
 <h2>安全？<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>容器的隔离和数据安全是极大的挑战，从一个容器逃逸到host主机，进而侵入到其他非授权容器，是云原生技术需要解决的最大问题。</p>
 <p>对于host主机，容器不过是操作系统中运行的一个进程，通过namespace切换，可以进入不同容器内部。这带来了运维的全新上帝视角，也带来了安全隔离的挑战。</p>
-</div>
-<div class="section" id="id7">
+</section>
+<section id="id7">
 <h2>热迁移的遗憾<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <p>当前容器技术有一个非常”致命”的短板，就是缺乏类似虚拟化的 <a class="reference internal" href="../../kvm/kvm_live_migration.html#kvm-live-migration"><span class="std std-ref">KVM热迁移</span></a> 技术，所以在修补底层缺陷(安全漏洞)上具有很大的局限性。</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

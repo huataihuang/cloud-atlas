@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="zh-CN" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>部署ARM架构Kubernetes &mdash; Cloud Atlas 0.1 文档</title>
@@ -247,17 +248,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="armkubernetes">
+  <section id="armkubernetes">
 <span id="arm-k8s-deploy"></span><h1>部署ARM架构Kubernetes<a class="headerlink" href="#armkubernetes" title="永久链接至标题">¶</a></h1>
-<div class="section" id="id1">
+<section id="id1">
 <h2>部署环境<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <p>树莓派4操作系统采用Ubuntu 20.04(Focal Fossa)，提供了64位ARM操作系统，可以非常完美运行AArch64容器镜像，这样可以避免很多32位镜像的软件问题。通过树莓派实现微型Kubernetes集群，可以充分演练新的云原生技术。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>从技术上来说 <code class="docutils literal notranslate"><span class="pre">AArch64</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ARM64</span></code> 是同一种架构，是64位系统。ARM和x86的指令集不同，所以不能在x86服务器上运行ARM65镜像，反之也不行。</p>
 </div>
-</div>
-<div class="section" id="id2">
+</section>
+<section id="id2">
 <h2>准备工作<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>准备3个(或更多) <a class="reference internal" href="../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> ，我采用了:</p>
@@ -272,14 +273,14 @@
 <ul class="simple">
 <li><p>为了测试和验证Kubernetes混合不同架构，在ARM集群中添加一台 <a class="reference internal" href="../../studio/hardware/thinkpad_x220.html#thinkpad-x220"><span class="std std-ref">ThinkPad X220笔记本</span></a> 运行 <a class="reference internal" href="../../linux/arch_linux/index.html#arch-linux"><span class="std std-ref">Arch Linux</span></a> 作为模拟X86异构Kubernetes工作节点</p></li>
 </ul>
-</div>
-<div class="section" id="docker">
+</section>
+<section id="docker">
 <h2>安装和配置Docker<a class="headerlink" href="#docker" title="永久链接至标题">¶</a></h2>
 <p>我使用 <a class="reference internal" href="../../arm/raspberry_pi/startup/ubuntu64bit_pi.html#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> ，使用的Ubuntu 20.04 提供了非常新的Docker版本，v19.03，可以直接通过 <code class="docutils literal notranslate"><span class="pre">apt</span></code> 命令安装:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span>
 </pre></div>
 </div>
-<div class="section" id="systemdcgroups">
+<section id="systemdcgroups">
 <h3>设置systemd管理cgroups<a class="headerlink" href="#systemdcgroups" title="永久链接至标题">¶</a></h3>
 <p>安装完docker之后，需要做一些配置确保激活 cgroups (Control Groups)。cgroups是内核用用限制和隔离资源，可以让Kubernetes更好地管理容器运行时使用地资源，并且通过隔离容器来增加安全性。</p>
 <ul>
@@ -312,8 +313,8 @@ WARNING: No oom kill disable support
 EOF
 </pre></div>
 </div>
-</div>
-<div class="section" id="cgroups-limit">
+</section>
+<section id="cgroups-limit">
 <h3>激活cgroups limit支持<a class="headerlink" href="#cgroups-limit" title="永久链接至标题">¶</a></h3>
 <p>上述 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 输出中显示了cgroups limit没有激活，需要修改内核来激活这些选项。对于树莓派4，需要在 <code class="docutils literal notranslate"><span class="pre">/boot/firmware/cmdline.txt</span></code> 文件中添加以下配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cgroup_enable</span><span class="o">=</span><span class="n">cpuset</span>
@@ -327,8 +328,8 @@ EOF
 </pre></div>
 </div>
 <p>接下来重启一次系统，就会看到 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 输出显示 <code class="docutils literal notranslate"><span class="pre">cgroups</span> <span class="pre">driver</span></code> 是 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 并且有关 cgroup limits 的警告消失了。</p>
-</div>
-<div class="section" id="iptablesbridged">
+</section>
+<section id="iptablesbridged">
 <h3>允许iptables查看bridged流量<a class="headerlink" href="#iptablesbridged" title="永久链接至标题">¶</a></h3>
 <p>Kubernetes需要使用iptables来配置查看bridged网络流量，可以通过以下命令修改 <code class="docutils literal notranslate"><span class="pre">sysctl</span></code> 配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span>
@@ -339,9 +340,9 @@ EOF
 <span class="n">sudo</span> <span class="n">sysctl</span> <span class="o">--</span><span class="n">system</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="kubernetes">
+</section>
+</section>
+<section id="kubernetes">
 <h2>安装Kubernetes软件包<a class="headerlink" href="#kubernetes" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>添加Kubernetes repo:</p>
@@ -387,8 +388,8 @@ EOF
 </li>
 </ul>
 <p>如果要解除 <code class="docutils literal notranslate"><span class="pre">hold</span></code> 则使用 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-mark</span> <span class="pre">unhold</span> <span class="pre">kubelet</span> <span class="pre">kubeadm</span> <span class="pre">kubectl</span></code></p>
-</div>
-<div class="section" id="id3">
+</section>
+<section id="id3">
 <h2>创建Kubernetes集群<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>在创建Kubernetes集群前，需要确定:</p>
 <ul class="simple">
@@ -400,7 +401,7 @@ EOF
 <p class="admonition-title">注解</p>
 <p>我在模拟环境中使用了树莓派的无线网卡和有线网卡，无线网段可以方便我们调试服务，所以我采用指定BSSID方式确保客户端和服务器端通过同一个无线AP，就不需要使用可路由网段，只需要确保这个Kubernetes的CIDR和路由器DHCP分配的网段不冲突就行。</p>
 </div>
-<div class="section" id="id4">
+<section id="id4">
 <h3>初始化控制平面<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <p>Kubernetes使用bootstrap token来认证加入集群的节点，这个token需要在 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 命令中传递来初始化控制平面节点。</p>
 <ul>
@@ -563,8 +564,8 @@ kubeadm join 192.168.166.91:6443 --token &lt;TOKEN&gt; \
     --discovery-token-ca-cert-hash sha256:&lt;DISCOVERY-TOKEN&gt;
 </pre></div>
 </td></tr></table></div>
-</div>
-<div class="section" id="id5">
+</section>
+<section id="id5">
 <h3>多网卡困扰<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <p>在执行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 初始化Kubernetes集群时，我发现对于具有2块网卡( <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 和 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> )的树莓派系统， <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 系统默认使用了 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 地址 <code class="docutils literal notranslate"><span class="pre">192.168.166.91</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">Generating</span> <span class="s2">&quot;etcd/server&quot;</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">key</span>
@@ -660,8 +661,8 @@ kubectl get pods --all-namespaces -o wide
 <span class="n">To</span> <span class="n">further</span> <span class="n">debug</span> <span class="ow">and</span> <span class="n">diagnose</span> <span class="n">cluster</span> <span class="n">problems</span><span class="p">,</span> <span class="n">use</span> <span class="s1">&#39;kubectl cluster-info dump&#39;</span><span class="o">.</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="node-notready">
+</section>
+<section id="node-notready">
 <h3>排查解决node NotReady<a class="headerlink" href="#node-notready" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>检查 <code class="docutils literal notranslate"><span class="pre">pending</span></code> 的pod原因</p></li>
@@ -694,8 +695,8 @@ kubectl get pods --all-namespaces -o wide
 </pre></div>
 </div>
 <p>可以看到 <code class="docutils literal notranslate"><span class="pre">KubeletNotReady</span></code> 的原因是 <code class="docutils literal notranslate"><span class="pre">runtime</span> <span class="pre">network</span> <span class="pre">not</span> <span class="pre">ready:</span> <span class="pre">NetworkReady=false</span> <span class="pre">reason:NetworkPluginNotReady</span> <span class="pre">message:docker:</span> <span class="pre">network</span> <span class="pre">plugin</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">ready:</span> <span class="pre">cni</span> <span class="pre">config</span> <span class="pre">uninitialized</span></code> ，也就是说，我们指定使用 flannel网络的CNI没有就绪，导致docker的runtime network不能工作。</p>
-</div>
-<div class="section" id="cni">
+</section>
+<section id="cni">
 <h3>安装CNI插件<a class="headerlink" href="#cni" title="永久链接至标题">¶</a></h3>
 <p>CNI插件处理pod网络的配置和清理，这里使用最简单的flannel CNI插件，只需要下载和 <code class="docutils literal notranslate"><span class="pre">kubeclt</span> <span class="pre">apply</span></code> Flannel YAML就可以安装好:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the Flannel YAML data and apply it</span>
@@ -737,9 +738,9 @@ kubectl get pods --all-namespaces -o wide
 <span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">2</span>          <span class="mi">2</span><span class="n">d23h</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="id6">
+</section>
+</section>
+<section id="id6">
 <h2>将计算节点加入到集群<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>在完成了CNI add-on部署之后，就可以向集群增加计算节点</p>
 <ul>
@@ -826,7 +827,7 @@ kubectl get pods --all-namespaces -o wide
 <span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">m10s</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
 </pre></div>
 </div>
-<div class="section" id="jetson-gpu">
+<section id="jetson-gpu">
 <h3>jetson节点(GPU)<a class="headerlink" href="#jetson-gpu" title="永久链接至标题">¶</a></h3>
 <p>我在 <a class="reference internal" href="arm_k8s.html#arm-k8s"><span class="std std-ref">ARM部署Kubernetes</span></a> 说明了我部署ARM架构的设备中还有一个 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 设备，用来实现验证GPU容器在Kubernetes的部署，并学习 <a class="reference internal" href="../../machine_learning/index.html#machine-learning"><span class="std std-ref">Machine Learning Atlas</span></a> 。</p>
 <p>jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03版本，满足了运行kubernetes要求，不过，也同样需要做Cgroup Driver调整:</p>
@@ -1058,8 +1059,8 @@ systemctl disable nvzramconfig.service
 <p>注意如果worker主机有多个网卡接口，kubelet执行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">join</span></code> 命令时候有可能注册采用了默认有路由的网卡接口，也可能使用和apiserver指定IP所在相同网段的IP。这点让我很疑惑，例如上述注册worker节点，3个树莓派注册的 <code class="docutils literal notranslate"><span class="pre">INTERNAL-IP</span></code> 是正确的内网IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> ，但是 <code class="docutils literal notranslate"><span class="pre">jetson</span></code> 就注册成了外网无线网卡上的IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.0.x</span></code> 。</p>
 <p>这个问题修订，请参考 <a class="reference internal" href="../administer/set_k8s_worker_internal_ip.html#set-k8s-worker-internal-ip"><span class="std std-ref">指定Kubernetes工作节点内网IP</span></a> 明确配置worker的 <code class="docutils literal notranslate"><span class="pre">INTERNAL-IP</span></code> 避免出现混乱。</p>
 </div>
-</div>
-<div class="section" id="arch-linux-zcloud">
+</section>
+<section id="arch-linux-zcloud">
 <h3>arch linux节点(zcloud)<a class="headerlink" href="#arch-linux-zcloud" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>安装docker:</p>
@@ -1155,9 +1156,9 @@ EOF
 </pre></div>
 </div>
 <p>后面我们部署应用，所使用的镜像需要区分不同架构。我将实践异构应用部署。</p>
-</div>
-</div>
-<div class="section" id="id7">
+</section>
+</section>
+<section id="id7">
 <h2>验证集群<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <p>现在一个基于ARM的Kubernetes集群已经部署完成，可以运行pods，创建deployments和jobs。</p>
 <p>为了验证集群的正确运行，可以执行验证步骤：</p>
@@ -1333,8 +1334,8 @@ EOF
 </li>
 </ul>
 <p>你会看到一个完整输出的html文件内容。</p>
-</div>
-<div class="section" id="id8">
+</section>
+<section id="id8">
 <h2>访问服务<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <p>到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。</p>
 <p>你可以有多种方法：</p>
@@ -1446,15 +1447,15 @@ NAME                                     DESIRED   CURRENT   READY   AGE
 replicaset.apps/kube-verify-69dd569645   3         3         3       2d12h
 </pre></div>
 </div>
-</div>
-<div class="section" id="id9">
+</section>
+<section id="id9">
 <h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://opensource.com/article/20/6/kubernetes-raspberry-pi">Build a Kubernetes cluster with the Raspberry Pi</a> - 完整的部署指南，作者 Chris Collins 撰写了一系列在Raspberry Pi上构建homelab的文章，可以实现基于K8s的NFS服务；另外，如果需要通过Kubernetes对外提供HTTP路由和反向代理(ingress)，可以参考 <a class="reference external" href="https://opensource.com/article/20/4/http-kubernetes-skipper">Try this Kubernetes HTTP router and reverse proxy</a></p></li>
 <li><p><a class="reference external" href="https://segmentfault.com/a/1190000023107314">解决k8s执行kubeadm join遇到could not find a JWS signature的问题</a></p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
