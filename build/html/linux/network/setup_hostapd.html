@@ -137,8 +137,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#apwifi">激活AP和管理模式并用的WiFi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dnsmasqhostapd">安装DNSmasq和Hostapd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">手工启动</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">自动化脚本</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">自动化脚本</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="setup_hostapd_failed.html">配置hostapd实现无线热点(失败记录)</a></li>
@@ -257,6 +257,14 @@
 </li>
 </ul>
 <p>注意，这里的mac地址必须是无线网卡的mac地址，通过 <code class="docutils literal notranslate"><span class="pre">iw</span> <span class="pre">dev</span></code> 命令可以查看mac地址，这里创建的虚拟网络设备是 <code class="docutils literal notranslate"><span class="pre">ap0</span></code> 。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这步我没有成功，所以我最后还是手工执行命令来激活ap0:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">iw</span> <span class="n">phy</span> <span class="n">phy0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">ap0</span> <span class="nb">type</span> <span class="n">__ap</span>
+<span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">ip</span> <span class="n">link</span> <span class="nb">set</span> <span class="n">ap0</span> <span class="n">address</span> <span class="n">b8</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="n">eb</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="dnsmasqhostapd">
 <h2>安装DNSmasq和Hostapd<a class="headerlink" href="#dnsmasqhostapd" title="永久链接至标题">¶</a></h2>
@@ -271,7 +279,7 @@
 <p>这里默认启动的dnsmasq服务只启动了dns服务，不会启动dhcp，所以下一步我们需要配置</p>
 <ul>
 <li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.conf</span></code> 添加如下配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span><span class="o">=</span><span class="n">lo</span><span class="p">,</span><span class="n">ap0</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span><span class="o">=</span><span class="n">lo</span><span class="p">,</span><span class="n">ap0</span><span class="p">,</span><span class="n">eth0</span>
 <span class="n">no</span><span class="o">-</span><span class="n">dhcp</span><span class="o">-</span><span class="n">interface</span><span class="o">=</span><span class="n">lo</span><span class="p">,</span><span class="n">wlan0</span>
 <span class="n">bind</span><span class="o">-</span><span class="n">interfaces</span>
 <span class="n">server</span><span class="o">=</span><span class="mf">8.8</span><span class="o">.</span><span class="mf">8.8</span>
@@ -300,6 +308,12 @@
 </pre></div>
 </div>
 </li>
+</ul>
+<p>如果要隐藏SSID，可以添加一行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ignore_broadcast_ssid</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<ul>
 <li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/hostapd</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DAEMON_CONF</span><span class="o">=</span><span class="s2">&quot;/etc/hostapd/hostapd.conf&quot;</span>
 </pre></div>
@@ -319,7 +333,14 @@
 </div>
 </li>
 </ul>
-<p>注意：这里没有配置 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> 和 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> ，因为我已经配置了使用 <a class="reference internal" href="../ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 来管理这两个设备。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里没有配置 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> 和 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> ，因为我已经配置了使用 <a class="reference internal" href="../ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 来管理这两个设备。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>不需要单独启动hostapd服务，这个服务是通过启动网络接口来启动的。</p>
+</div>
 </div>
 <div class="section" id="id1">
 <h2>手工启动<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
@@ -418,9 +439,78 @@ sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j M
 </div>
 </li>
 </ul>
-</div>
 <div class="section" id="id2">
-<h2>自动化脚本<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h3>问题排查<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<p>我遇到一个问题，客户端可以正确连接到AP并且获得IP地址，也能够ping通网关(即无线AP的地址 192.168.10.1)，而且检查DNS解析也正确(DNS是192.168.10.1，即通过该路由器的dnsmasq代理解析正确)。</p>
+<p>但是，无法ping通外网，也无法和外网通讯</p>
+<ul>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">iptables</span> <span class="pre">-t</span> <span class="pre">nat</span> <span class="pre">-L</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination
+KUBE-POSTROUTING  all  --  anywhere             anywhere             /* kubernetes postrouting rules */
+MASQUERADE  all  --  172.17.0.0/16        anywhere
+RETURN     all  --  pi-master1/16        pi-master1/16
+MASQUERADE  all  --  pi-master1/16       !base-address.mcast.net/4  random-fully
+RETURN     all  -- !pi-master1/16        pi-master1/24
+MASQUERADE  all  -- !pi-master1/16        pi-master1/16        random-fully
+MASQUERADE  all  --  192.168.10.0/24     !192.168.10.0/24
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里可以看到很多NTA规则，原因是这台服务器同时是kubernetes集群的master管控主机。</p>
+<p>我怀疑是顺序原因，所以改为在头部插入:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">L</span> <span class="n">POSTROUTING</span> <span class="o">--</span><span class="n">line</span><span class="o">-</span><span class="n">numbers</span> <span class="o">-</span><span class="n">n</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Chain POSTROUTING (policy ACCEPT)
+num  target     prot opt source               destination
+1    KUBE-POSTROUTING  all  --  0.0.0.0/0            0.0.0.0/0            /* kubernetes postrouting rules */
+2    MASQUERADE  all  --  172.17.0.0/16        0.0.0.0/0
+3    RETURN     all  --  10.244.0.0/16        10.244.0.0/16
+4    MASQUERADE  all  --  10.244.0.0/16       !224.0.0.0/4          random-fully
+5    RETURN     all  -- !10.244.0.0/16        10.244.0.0/24
+6    MASQUERADE  all  -- !10.244.0.0/16        10.244.0.0/16        random-fully
+7    MASQUERADE  all  --  192.168.10.0/24     !192.168.10.0/24
+</pre></div>
+</div>
+<ul>
+<li><p>在第二行插入:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>iptables -t nat -I POSTROUTING 2 -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是依然无效</p>
+<ul>
+<li><p>我尝试了清理nat规则:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">F</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是发现系统会自动恢复添加以下NAT规则:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>RETURN     all  --  pi-master1/16        pi-master1/16
+MASQUERADE  all  --  pi-master1/16       !base-address.mcast.net/4  random-fully
+RETURN     all  -- !pi-master1/16        pi-master1/24
+MASQUERADE  all  -- !pi-master1/16        pi-master1/16        random-fully
+</pre></div>
+</div>
+<p>然后即使加了以下nat规则也没有效果:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MASQUERADE  all  --  192.168.10.0/24     !192.168.10.0/24
+</pre></div>
+</div>
+<p>我尝试删除:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">D</span> <span class="n">POSTROUTING</span> <span class="mi">1</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>但是系统不断自动刷新添加，最终么有成功解决</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>自动化脚本<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>以上手工命令我们可以综合成一个脚本 <code class="docutils literal notranslate"><span class="pre">/home/pi/start-ap-managed-wifi.sh</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
 sleep 30
@@ -439,10 +529,10 @@ sudo systemctl restart dnsmasq
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@reboot</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">start</span><span class="o">-</span><span class="n">ap</span><span class="o">-</span><span class="n">managed</span><span class="o">-</span><span class="n">wifi</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>这样每次重启都会执行上述脚本</p>
+<p>这样每次重启都会执行上述脚本(脚本第一行添加 <code class="docutils literal notranslate"><span class="pre">sleep</span> <span class="pre">30</span></code> 是为了估算启动到网卡时间)</p>
 </div>
-<div class="section" id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<div class="section" id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://blog.thewalr.us/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/">Raspberry Pi Zero W Simultaneous AP and Managed Mode Wifi</a></p></li>
 </ul>

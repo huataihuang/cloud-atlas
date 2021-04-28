@@ -21,6 +21,13 @@ hostapd实现无线热点
 
 注意，这里的mac地址必须是无线网卡的mac地址，通过 ``iw dev`` 命令可以查看mac地址，这里创建的虚拟网络设备是 ``ap0`` 。
 
+.. note::
+
+   这步我没有成功，所以我最后还是手工执行命令来激活ap0::
+
+      /sbin/iw phy phy0 interface add ap0 type __ap
+      /bin/ip link set ap0 address b8:27:eb:ff:ff:ff
+
 安装DNSmasq和Hostapd
 =======================
 
@@ -35,7 +42,7 @@ hostapd实现无线热点
 
 - 修改 ``/etc/dnsmasq.conf`` 添加如下配置::
 
-   interface=lo,ap0
+   interface=lo,ap0,eth0
    no-dhcp-interface=lo,wlan0
    bind-interfaces
    server=8.8.8.8
@@ -61,6 +68,10 @@ hostapd实现无线热点
    wpa_pairwise=TKIP CCMP
    rsn_pairwise=CCMP
 
+如果要隐藏SSID，可以添加一行::
+
+   ignore_broadcast_ssid=1
+
 - 修改 ``/etc/default/hostapd`` ::
 
    DAEMON_CONF="/etc/hostapd/hostapd.conf"
@@ -77,7 +88,14 @@ hostapd实现无线热点
        netmask 255.255.255.0
        hostapd /etc/hostapd/hostapd.conf
 
-注意：这里没有配置 ``eth0`` 和 ``wlan0`` ，因为我已经配置了使用 :ref:`netplan` 来管理这两个设备。
+.. note::
+
+   这里没有配置 ``eth0`` 和 ``wlan0`` ，因为我已经配置了使用 :ref:`netplan` 来管理这两个设备。
+
+.. note::
+
+   不需要单独启动hostapd服务，这个服务是通过启动网络接口来启动的。
+
 
 手工启动
 ============
@@ -165,6 +183,71 @@ hostapd实现无线热点
    sudo sysctl -w net.ipv4.ip_forward=1
    sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
 
+问题排查
+-----------
+
+我遇到一个问题，客户端可以正确连接到AP并且获得IP地址，也能够ping通网关(即无线AP的地址 192.168.10.1)，而且检查DNS解析也正确(DNS是192.168.10.1，即通过该路由器的dnsmasq代理解析正确)。
+
+但是，无法ping通外网，也无法和外网通讯
+
+- 检查 ``iptables -t nat -L`` 显示::
+
+   Chain POSTROUTING (policy ACCEPT)
+   target     prot opt source               destination
+   KUBE-POSTROUTING  all  --  anywhere             anywhere             /* kubernetes postrouting rules */
+   MASQUERADE  all  --  172.17.0.0/16        anywhere
+   RETURN     all  --  pi-master1/16        pi-master1/16
+   MASQUERADE  all  --  pi-master1/16       !base-address.mcast.net/4  random-fully
+   RETURN     all  -- !pi-master1/16        pi-master1/24
+   MASQUERADE  all  -- !pi-master1/16        pi-master1/16        random-fully
+   MASQUERADE  all  --  192.168.10.0/24     !192.168.10.0/24
+
+这里可以看到很多NTA规则，原因是这台服务器同时是kubernetes集群的master管控主机。
+
+我怀疑是顺序原因，所以改为在头部插入::
+
+   iptables -t nat -L POSTROUTING --line-numbers -n
+
+显示::
+
+   Chain POSTROUTING (policy ACCEPT)
+   num  target     prot opt source               destination
+   1    KUBE-POSTROUTING  all  --  0.0.0.0/0            0.0.0.0/0            /* kubernetes postrouting rules */
+   2    MASQUERADE  all  --  172.17.0.0/16        0.0.0.0/0
+   3    RETURN     all  --  10.244.0.0/16        10.244.0.0/16
+   4    MASQUERADE  all  --  10.244.0.0/16       !224.0.0.0/4          random-fully
+   5    RETURN     all  -- !10.244.0.0/16        10.244.0.0/24
+   6    MASQUERADE  all  -- !10.244.0.0/16        10.244.0.0/16        random-fully
+   7    MASQUERADE  all  --  192.168.10.0/24     !192.168.10.0/24
+
+- 在第二行插入::
+
+   iptables -t nat -I POSTROUTING 2 -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
+
+但是依然无效
+
+- 我尝试了清理nat规则::
+
+   iptables -t nat -F
+
+但是发现系统会自动恢复添加以下NAT规则::
+
+   RETURN     all  --  pi-master1/16        pi-master1/16
+   MASQUERADE  all  --  pi-master1/16       !base-address.mcast.net/4  random-fully
+   RETURN     all  -- !pi-master1/16        pi-master1/24
+   MASQUERADE  all  -- !pi-master1/16        pi-master1/16        random-fully
+
+然后即使加了以下nat规则也没有效果::
+
+   MASQUERADE  all  --  192.168.10.0/24     !192.168.10.0/24
+
+我尝试删除::
+
+   iptables -t nat -D POSTROUTING 1
+   ...
+
+但是系统不断自动刷新添加，最终么有成功解决
+
 自动化脚本
 ============
 
@@ -186,7 +269,7 @@ hostapd实现无线热点
 
    @reboot /home/pi/start-ap-managed-wifi.sh
 
-这样每次重启都会执行上述脚本
+这样每次重启都会执行上述脚本(脚本第一行添加 ``sleep 30`` 是为了估算启动到网卡时间)
 
 参考
 ======
