@@ -1,16 +1,16 @@
-.. _server_hardware:
+.. _arm_kvm:
 
 =================================
-服务器硬件
+ARM硬件环境KVM虚拟化
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
-   
+   arm_kvm_support.rst
+   arm_kvm_startup.rst
+
+
 .. only::  subproject and html
 
    Indices

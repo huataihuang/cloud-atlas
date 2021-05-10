@@ -51,7 +51,7 @@
 
 .. note::
 
-   使用原生Android有一个非常麻烦的地方是，首次启动系统需要注册Google服务，这对墙内用户是一个障碍。解决方法请参考 :ref:`disable_setupwizard` ，不过，实际我并没有解决跳过SetupWizard，而是通过 :ref:`soft_ap` 结合 :ref:`openconnect_vpn` 翻墙完成注册。
+   使用原生Android有一个非常麻烦的地方是，首次启动系统需要注册Google服务，这对墙内用户是一个障碍。解决方法请参考 :ref:`disable_setupwizard` ，不过，实际我并没有解决跳过SetupWizard，而是通过 :ref:`create_ap` 结合 :ref:`openconnect_vpn` 翻墙完成注册。
 
 .. note::
 

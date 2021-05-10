@@ -1,15 +1,16 @@
-.. _server_hardware:
+.. _ipmi:
 
 =================================
-服务器硬件
+IPMI
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
+   use_ipmi.rst
+   ipmitool_tips.rst
+   quick_config_ipmi.rst
+   conman.rst
    
 .. only::  subproject and html
 

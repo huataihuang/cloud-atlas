@@ -1,16 +1,14 @@
-.. _server_hardware:
+.. _arm_mpam:
 
 =================================
-服务器硬件
+ARM内存系统资源分区和监控(MPAM)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
-   
+   introduce_arm_mpam.rst
+
 .. only::  subproject and html
 
    Indices

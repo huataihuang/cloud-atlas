@@ -98,6 +98,15 @@ netplan实现mac spoof
 
 现代的Ubuntu发行版采用了 :ref:`netplan` 来配置网络，这个netplan工具后端实现是通过 systemd 的 networkd 或者 NetworkManager 来实现的，同样支持 :ref:`netplan_mac_spoof` 。
 
+NetworkManager实现mac spoof
+===========================
+
+:ref:`networkmanager` 也支持MAC地址伪装 ``cloned-mac-addres`` ::
+
+    nmcli con modify <con_name> wifi.cloned-mac-address XX:XX:XX:XX:XX:X
+
+这样配置的连接可以自动调整MAC地址
+
 参考
 =======
 

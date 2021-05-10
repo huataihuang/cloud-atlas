@@ -52,6 +52,18 @@
    
 这个安装将会卸载掉 ``python-is-python2`` 软件包，安装以后执行 ``python`` 命令可以看到默认python已经是 python 3 了。对于日常运行使用没有影响。
 
+python virtulenv
+------------------
+
+在开发工作中，需要安装很多模块。为了不干扰整个操作系统环境，强烈建议采用 :ref:`virtualenv` 来构建一个独立的python运行环境::
+
+   sudo apt install python3-venv
+   cd ~
+   python3 -m venv venv3
+   source venv3/bin/activate
+
+然后在这个环境中执行 ``python`` 就是最新的的python3环境
+
 如何运行Python 2脚本
 =====================
 
