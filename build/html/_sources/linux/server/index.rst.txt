@@ -10,6 +10,7 @@ Linux系统管理的通用性技术：实际上Linux各个发行版主要差异�
    :maxdepth: 1
 
    hardware/index 
+   ipmi/index
    cockpit/index
    collectd/index
 

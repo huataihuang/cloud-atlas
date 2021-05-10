@@ -12,8 +12,11 @@ Studio环境创建KVM虚拟机
 
    Studio环境采用Ubuntu作为host和guest的OS，在 :ref:`real` 中， :ref:`priv_kvm` 则采用CentOS作为OS。
 
-创建CentOS 7虚拟机
-------------------
+创建Ubuntu虚拟机
+=======================
+
+X86环境Ubuntu虚拟机
+---------------------
 
 - 创建虚拟机安装Guest操作系统::
 
@@ -33,7 +36,10 @@ Studio环境创建KVM虚拟机
    - 使用 ``osinfo-query os`` 可以查询出 ``--os-variant`` 所有支持的参数，这样可以精确指定操作系统版本以便优化运行参数。
    - ``--graphics none`` 表示不使用VNC来访问VM的控制台，而是使用VM串口的字符控制台。
    - ```--location`` 指定通过网络安装，如果使用本地iso安装，则使用 ``--cdrom /var/lib/libvirt/images/ubuntu-18.04.2-live-server-amd64.iso``
-   - 只有通过网络安装才可以使用 ``--extra-args="console=tty0 console=ttyS0,115200"`` 以便能够通过串口控制台安装
+   - 只有通过网络安装才可以使用 ``--extra-args="console=tty0 console=ttyS0,115200"`` 以便能够通过串口控制台安装。也就是说，如果使用 iso镜像安装，则不能传递内核参数，否则提示报错::
+
+      ERROR    Kernel arguments are only supported with location or kernel installs.
+
    - 要模拟UEFI，需要安装 ``ovmf`` 软件包，并使用参数 ``--boot uefi``
    - root分区采用EXT4文件系统，占据整个磁盘
    - 软件包只选择 ``OpenSSH server`` 以便保持最小化安装，后续clone出的镜像再按需安装
@@ -44,8 +50,45 @@ Studio环境创建KVM虚拟机
 
    在KVM中部署和运行Windows虚拟机相对复杂，请参考 :ref:`deploy_win_vm`
 
+ARM环境Ubuntu虚拟机
+----------------------
+
+我在 :ref:`arm_kvm_startup` 中使用以下命令安装Ubuntu 20.04.2 LTS虚拟机::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name ubuntu20.04 \
+     --ram=2048 \
+     --vcpus=2 \
+     --os-type=ubuntu20.04 \
+     --disk path=/var/lib/libvirt/images/ubuntu20.04.qcow2,format=qcow2,bus=virtio,cache=none,size=16 \
+     --graphics none \
+     --cdrom=/var/lib/libvirt/images/ubuntu-20.04.2-live-server-arm64.iso
+
+.. note::
+
+   使用iso镜像安装时，不能传递内核参数 ``--extra-args="console=tty0 console=ttyS0,115200`` ，不过，只要关闭图形输出 ``--graphics none`` 似乎就能够从串口输出，不传递参数也能成功(可能是新版本已经支持)。
+
+安装提示::
+
+   As the installer is running on a serial console, it has started in basic
+   mode, using only the ASCII character set and black and white colours.
+
+   If you are connecting from a terminal emulator such as gnome-terminal that
+   supports unicode and rich colours you can switch to "rich mode" which uses
+   unicode, colours and supports many languages.
+
+   You can also connect to the installer over the network via SSH, which will
+   allow use of rich mode.
+
+选择 ``rich mode`` 以后，提供了交互模式配置网络，可以选择默认DHCP获得IP地址，后续再切换成 :ref:`libvirt_bridged_network`
+
+默认磁盘是LVM划分卷管理
+
+安装过程请选择安装SSH Server，其他软件包不需要安装，等服务器运行起来之后，可以按需安装。
+
 创建CentOS 8虚拟机
-------------------
+======================
 
 - CentOS 8虚拟机安装::
 
@@ -63,8 +106,9 @@ Studio环境创建KVM虚拟机
 
 .. figure:: ../../_static/kvm/startup/centos8_installation_source.png
 
+
 创建SUSE虚拟机
-================
+===================
 
 - 部署suse server 12 sp3::
 

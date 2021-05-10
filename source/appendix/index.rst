@@ -24,7 +24,6 @@
    efi_system_partition.rst
    using_btrfs_in_studio.rst
    reduce_laptop_overheat.rst
-   ipmitool_tips.rst
    win10_ssh_server.rst
    ssh_tunnel_gfw_autoproxy.rst
    anbox_scratch.rst

@@ -20,7 +20,7 @@ Debian/Ubuntu
 Arch
 --------
 
-:ref:`arch_linux` 可以通过 :ref:`yay` 安装::
+:ref:`arch_linux` 可以通过 :ref:`archlinux_aur` 安装::
 
    yay -S linux-wifi-hotspot
 

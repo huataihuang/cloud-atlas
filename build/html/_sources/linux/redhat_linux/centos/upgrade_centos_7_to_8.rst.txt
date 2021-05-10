@@ -62,9 +62,13 @@
 
 - 然后安装CentOS 8的release软件包::
 
-   dnf -y install http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm \
-   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-release-8.2-2.2004.0.1.el8.x86_64.rpm \
-   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm
+   #dnf -y install http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm \
+   #http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-release-8.2-2.2004.0.1.el8.x86_64.rpm \
+   #http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm
+
+   dnf -y install http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-linux-repos-8-2.el8.noarch.rpm \
+   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-linux-release-8.3-1.2011.el8.noarch.rpm \
+   http://mirrors.163.com/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8-2.el8.noarch.rpm
 
 - 升级EPEL仓库::
 
@@ -122,8 +126,10 @@
 
    rpm -e --justdb python36-rpmconf-1.0.22-1.el7.noarch rpmconf-1.0.22-1.el7.noarch
    rpm -e --justdb --nodeps python3-setuptools-39.2.0-10.el7.noarch
-   rpm -e --justdb --nodeps python3-pip-9.0.3-7.el7_7.noarch
-   rpm -e --justdb --nodeps iptables-1.4.21-34.el7.x86_64
+   #rpm -e --justdb --nodeps python3-pip-9.0.3-7.el7_7.noarch
+   rpm -e --justdb --nodeps python3-pip-9.0.3-8.el7.noarch
+   #rpm -e --justdb --nodeps iptables-1.4.21-34.el7.x86_64
+   rpm -e --justdb --nodeps iptables-1.4.21-35.el7.x86_64
    rpm -e --justdb --nodeps vim-minimal
 
 .. note::

@@ -7,7 +7,6 @@
 .. toctree::
    :maxdepth: 1
 
-   ipmi.rst
    edac.rst
    lm_sensor.rst
    check_server_temp.rst

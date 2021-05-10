@@ -42,6 +42,61 @@ Kali Linux 2021.1 发行版默认优化已经非常完善，无论Xfce 4.16的�
 
 这样默认本地时间就能够正确显示。
 
+- 设置本地编码 ``locale`` ::
+
+   echo "en_US.UTF-8 UTF-8" | sudo tee -a /etc/locale.gen
+   sudo locale-gen
+
+.. note::
+
+   如果不正确设置 ``locale`` ，则很多命令执行时候会出现设置locale报错，类似::
+
+      perl: warning: Setting locale failed.
+      perl: warning: Please check that your locale settings:
+              LANGUAGE = (unset),
+              LC_ALL = (unset),
+              LC_CTYPE = "UTF-8",
+              LC_TERMINAL = "iTerm2",
+              LANG = (unset)
+          are supported and installed on your system.
+      perl: warning: Falling back to the standard locale ("C").
+      ...
+
+   不过，在执行 ``virsh list`` 依然提示信息::
+
+      setlocale: No such file or directory
+
+   通过执行 ``LANG=en_US.UTF-8 locale`` 查看可以看到::
+
+      locale: Cannot set LC_CTYPE to default locale: No such file or directory
+      locale: Cannot set LC_ALL to default locale: No such file or directory
+      LANG=en_US.UTF-8
+      LANGUAGE=
+      LC_CTYPE=UTF-8
+      LC_NUMERIC="en_US.UTF-8"
+      LC_TIME="en_US.UTF-8"
+      LC_COLLATE="en_US.UTF-8"
+      LC_MONETARY="en_US.UTF-8"
+      LC_MESSAGES="en_US.UTF-8"
+      LC_PAPER="en_US.UTF-8"
+      LC_NAME="en_US.UTF-8"
+      LC_ADDRESS="en_US.UTF-8"
+      LC_TELEPHONE="en_US.UTF-8"
+      LC_MEASUREMENT="en_US.UTF-8"
+      LC_IDENTIFICATION="en_US.UTF-8"
+      LC_ALL=
+
+   可以看到 ``LC_CTYPE`` 和 ``LC_ALL`` 没有调整成 ``en_US.UTF-8`` ，你可以通过设置环境变量 ``LC_CTYPE`` 和 ``LC_ALL`` 来解决这个问题::
+
+      export LC_CTYPE=en_US.UTF-8
+      export LC_ALL=en_US.UTF-8
+
+   则再执行 ``virsh list`` 就不再报错。
+
+   或者重启主机也可以解决。
+
+   以上参考 `"setlocale: No such file or directory" on clean Debian installation #144 <https://github.com/mobile-shell/mosh/issues/144>`_
+
 - :ref:`kali_network`
 
 - 为了方便开发学习，设置 :ref:`virtualenv` 完成Python 3开发环境::

@@ -23,6 +23,9 @@ Raspberry Pi 4是一个非常小巧的多显示输出桌面级计算机，刚拿
    :scale: 75
 
 - Broadcom BCM2711处理器：4核心Cortex-A72(ARM v8) 64位处理器，主频1.5GHz - 树莓派4b的处理器属于A72架构，比 :ref:`jetson` 的A57架构要先进一代，据评测性能提升了1.8倍。(不过，NVIDIA是买GPU送CPU，所以也不能要求太高)
+
+  - Cortex-A72(ARM v8) 支持 :ref:`arm_kvm` 
+
 - 提供2GB, 4GB 或 8GB LPDDR4-3200 SDRAM 三种规格
 - 2.4GHz和5.0GHz IEEE 802.11ac无线以及蓝牙5.0
 - 一个千兆以太网 - 据说已经能够跑满千兆网速，待测试
