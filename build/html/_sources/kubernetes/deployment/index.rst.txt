@@ -11,6 +11,7 @@ Kubernetes部署
 .. toctree::
    :maxdepth: 1
 
+   kubebox/index
    k8s_hosts.rst
    container_runtimes.rst
    bootstrap_kubernetes/index

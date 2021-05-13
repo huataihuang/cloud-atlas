@@ -1,4 +1,4 @@
-.. _kubernetes_deployment_operator:
+.. _k8s_operator:
 
 =================================
 Kubernetes应用部署方法Operator

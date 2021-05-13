@@ -63,6 +63,18 @@ Fedora for ARM
 
    sudo reboot
 
+CentOS/RHEL for ARM
+-----------------------
+
+.. note::
+
+   暂未实践，本段落摘自 「Red Hat Enterprise Linux 7 Virtualization Deployment and Administration Guide > B.3 Using KVM Virtualization on ARM」
+
+- 使用以下命令安装ARM虚拟化软件堆栈(注意：需要激活 ``Optional`` 通道)::
+
+   yum install qemu-kvm-ma libvirt libvirt-client virt-install AAVMF
+
+
 NAT网络
 ==========
 
