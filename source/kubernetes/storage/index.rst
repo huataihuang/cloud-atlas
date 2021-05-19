@@ -8,6 +8,7 @@ Kubernetes存储
    :maxdepth: 1
 
    rook/index
+   gluster_k8s.rst
    heketi/index
 
 .. only::  subproject and html
