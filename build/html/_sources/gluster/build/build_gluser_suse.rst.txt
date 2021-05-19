@@ -70,11 +70,8 @@ SUSE SDK
 
    zypper in -y libuuid-devel acl-devel libxml2-devel liburcu-devel
 
-   zypper in -y python2-devel libtirpc-devel userspace-rcu-devel \
-     libcurl-devel fuse-devel libibverbs-devel librdmacm-devel
-
    zypper in -y python2-devel libtirpc-devel \
-         libcurl-devel fuse-devel libibverbs-devel
+     libcurl-devel fuse-devel libibverbs-devel librdmacm-devel
 
 .. note::
 

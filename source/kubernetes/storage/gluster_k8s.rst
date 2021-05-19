@@ -1,8 +1,8 @@
-.. _deploy_arm_gluster:
+.. _gluster_k8s:
 
-======================
-部署ARM架构GlusterFS
-======================
+=============================
+在Kubernetes中部署GlusterFS
+=============================
 
 我在 :ref:`arm_k8s_deploy` 后，需要为Kubernetes提供基于GlusterFS的持久化存储。
 
@@ -180,7 +180,7 @@ gluserfs-client
 
 - 创建Service和Endpoints
 
-.. literalinclude:: deploy_arm_gluster/gluster-endpoints.yaml
+.. literalinclude:: gluster_k8s/gluster-endpoints.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -221,7 +221,7 @@ gluserfs-client
 
 - 创建一个持久化卷(presistence volume, pv)
 
-.. literalinclude:: deploy_arm_gluster/gluster-pv.yaml
+.. literalinclude:: gluster_k8s/gluster-pv.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -240,7 +240,7 @@ gluserfs-client
 
 - 创建持久化卷声明(persistent volume claim, PVC): 所谓PVC就是指定访问模式和存储容量，这里PVC绑定到前面创建的PV。一旦PV被绑定到一个PVC，这个PV就被绑定到了这个PVC所属项目，也就不能被绑到其他PVC上。这就是 ``一对一`` 映射PVs和PVCs，不过，在相同项目中的多个Pods可以使用相同PVC。
 
-.. literalinclude:: deploy_arm_gluster/gluster-pvc.yaml
+.. literalinclude:: gluster_k8s/gluster-pvc.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -276,7 +276,7 @@ gluserfs-client
 使用Gluster存储
 ================
 
-我在 :ref:`deploy_arm_gluster` 中部署了3个测试容器 ``kube-verify`` ::
+我在 :ref:`arm_k8s_deploy` 中部署了3个测试容器 ``kube-verify`` ::
 
    kubectl -n kube-verify get pods -o wide
 
@@ -296,7 +296,7 @@ gluserfs-client
 
 修订上述deployment，添加卷挂载:
 
-.. literalinclude:: deploy_arm_gluster/kube_verify_gluster_deployment.yaml
+.. literalinclude:: gluster_k8s/kube_verify_gluster_deployment.yaml
    :language: yaml
    :emphasize-lines: 23-30
    :linenos:
@@ -358,17 +358,17 @@ gluserfs-client
 
 重新修订 service, endpoint, PV 和 PVC (原先在 default namespace 的 service,endpoint,pv,pvc 需要删除) ，添加上 ``namespace: kube-verify`` 
 
-.. literalinclude:: deploy_arm_gluster/gluster-endpoints_kube-verify.yaml
+.. literalinclude:: gluster_k8s/gluster-endpoints_kube-verify.yaml
    :language: yaml
    :linenos:
    :caption:
 
-.. literalinclude:: deploy_arm_gluster/gluster-pv_kube-verify.yaml
+.. literalinclude:: gluster_k8s/gluster-pv_kube-verify.yaml
    :language: yaml
    :linenos:
    :caption:
 
-.. literalinclude:: deploy_arm_gluster/gluster-pvc_kube-verify.yaml
+.. literalinclude:: gluster_k8s/gluster-pvc_kube-verify.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -416,6 +416,8 @@ GlusterFS卷权限
    uid=1001 gid=0(root) groups=0(root)
 
 我们需要根据挂载GlusterFS卷的容器的运行uid/gid修订我们的GlusterFS的PVC
+
+
 
 参考
 =======
