@@ -21,7 +21,7 @@ Type 2 hypervisor通常需要修改现有操作系统来运行虚拟机，这就
 
 通常，Type 1 hypervisor需要为所有支持的硬件重新实现以便设备驱动。不过，Xen的Type 1 hypervisor是通过在hypervisor中实现一个最小化硬件集并且运行一个特殊的私有VM(Dom0)来实现一个Linux系统使用所有实际存在硬件。这样Xen就通过使用Dom0来驱动I/O使用硬件设备，实现了所有虚拟机DomUs的硬件使用。
 
-从
+
 
 参考
 =======

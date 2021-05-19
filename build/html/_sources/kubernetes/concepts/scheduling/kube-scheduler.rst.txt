@@ -4,6 +4,28 @@
 Kubernetes调度器
 =================
 
+在 :ref:`kubernetes_overview` 已经初步介绍了Kubernetes组件的关系，其中提到了Kubernetes Scheduler调度器工作原理：调度器通过Kubernetes的监视(Watch)机制来发现Controller Manager新创建的但是尚未调度到Node上的Pod。调度器会将发现的每一个未调度的Pod调度到合适的Node上运行。
+
+kube-scheduler
+===============
+
+kube-scheduler是Kubernetes集群默认调度器。如果有需求，Kubernetes设计是可以允许自己写一个调度组件并替换原有的kube-scheculer。
+
+在一个集群中，所有满足Pod调度的节点(Node)被称为 **可调度节点** 。如果没有任何一个节点满足Pod的资源请求，那么这个Pod将一直停留在Pending(未调度)状态直到直到能够找到合适的节点。
+
+调度器会在集群中找到一个Pod的所有可调度节点，然后通过一系列函数对这些可调度节点打分，选出最高得分的节点来运行Pod。然后调度器会将这个调度决定通知给kube-apiserver，整个过程称为绑定(binding)。
+
+调度据测的考虑因素有：
+
+* 单独和整体的资源要求
+* 硬件/软件/策略限制
+* 亲和以及反亲和要求 :ref:`assign_pod_node`
+* 数据局限性(data locality)
+* 负载间的干扰
+* 等等
+
+kube-
+
 为什么调度系统不支持横向扩展架构
 ==================================
 
@@ -38,6 +60,6 @@ Kubernetes调度器
 参考
 =======
 
-- `Kubernetes 调度器 <https://kubernetes.io/zh/docs/concepts/scheduling/kube-scheduler/>`_
+- `kube-scheduler调度器 <https://kubernetes.io/zh/docs/concepts/scheduling-eviction/kube-scheduler/>`_
 - `Why is the architecture of Kubernetes like this now? <https://medium.com/@shaomq/why-is-the-architecture-of-kubernetes-like-this-now-281b4ba0b037>`_
 - `The Kubernetes Scheduler <https://medium.com/@dominik.tornow/the-kubernetes-scheduler-cd429abac02f>`_

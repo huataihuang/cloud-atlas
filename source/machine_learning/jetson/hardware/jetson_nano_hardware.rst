@@ -18,6 +18,10 @@ CPU        Quad-core ARM Cortex-A57 MPCore processor @1.43GHz
 USB        4x USB 3.0, USB 2.0 Micro-B
 ========== ===========================================================================
 
+.. note::
+
+   Jetson Nano的GPU微内核是Maxwell架构，算力性能参考 :ref:`nvidia_gpu`
+
 .. figure:: ../../../_static/machine_learning/jetson/hardware/nvidia-jetson-nano-module-standing.jpg
    :scale: 50
 

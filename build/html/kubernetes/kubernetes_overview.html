@@ -107,19 +107,20 @@
 <li class="toctree-l4"><a class="reference internal" href="#nodes">节点（nodes）</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">在Kubernetes中运行应用</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id4">描述对于运行的容器的作用</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">保持容器始终运行</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">运行副本的伸缩性</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">稳定的服务访问入口</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Kubernetes工作流程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">在Kubernetes中运行应用</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">描述对于运行的容器的作用</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">保持容器始终运行</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">运行副本的伸缩性</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">稳定的服务访问入口</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id8">Kubernetes的优势</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id9">简化应用部署</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id10">充分发挥硬件能力</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id11">健康检查和自愈</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id12">自动伸缩性</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id13">简化应用程序部署</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Kubernetes的优势</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id10">简化应用部署</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">充分发挥硬件能力</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">健康检查和自愈</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13">自动伸缩性</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">简化应用程序部署</a></li>
 </ul>
 </li>
 </ul>
@@ -290,12 +291,22 @@
 <h3>管控平台（Control Plane)<a class="headerlink" href="#control-plane" title="永久链接至标题">¶</a></h3>
 <p>管控平台（Control Plane）是管控整个集群并使之工作的组成，包含了多个组件。这些组件可以运行在单一的master节点，也可以分散在多个节点并互相复制以确保高可用。管控平台的组件包括:</p>
 <ul class="simple">
-<li><p>Kubernetes API Server (API服务): 交互所访问或者其他管控平台通讯的中心</p></li>
-<li><p>Scheduler (调度器): 调度应用到不同工作节点</p></li>
-<li><p>Controller Manager (控制管理器): 执行集群级别的功能，例如复制组件，跟踪工作节点，处理节点失效等等</p></li>
 <li><p>etcd : 一个可靠的分布式数据存储，用于持久化存户集群配置</p></li>
 </ul>
-<p>管控平台的组件负责获取和控制集群的状态，但不会用于运行应用程序。应用程序（的容器）由worker节点负责。</p>
+<p>etcd不仅是一个状态存储，也同时负责事件描述和leader选举。不同组件可以通过读写etcd中存储的状态来互相通讯以及顺序处理任务。例如组件leader选举，如调度器就是通过etcd来实现高可用，即只有一个scheduler是master处于工作状态，其他scheduler都是standby状态。</p>
+<ul class="simple">
+<li><p>Kubernetes API Server (API服务): 交互所访问或者其他管控平台通讯的中心</p></li>
+</ul>
+<p>虽然etcd是整个系统的核心(存储)，但是所有组件相互通讯并不是直接访问etcd，而是通过一个代理，这个代理包装了etcd接口对外表现为一个标准的RESTFul API。此外，这个代理还实现了一些附加功能，例如认证，缓存等。这个代理就是 <code class="docutils literal notranslate"><span class="pre">API</span> <span class="pre">Server</span></code></p>
+<ul class="simple">
+<li><p>Controller Manager (控制管理器): 执行集群级别的功能，例如复制组件，跟踪工作节点，处理节点失效等等</p></li>
+</ul>
+<p>Controller Manager是实现任务的调度(implementing the scheduling of a task)。总之一句话，所有直接请求Kubernetes要求调度的都是任务(task)，例如Deployment, Daemon Set 或者 Job。每个任务请求被发送给Kubernetes之后，都是由Controller Manager处理的。每个任务类型都由一个Controller Manager负责。例如，一个Deployment则由Deployment Controller负责，而一个DaemonSet则由一个DaemonSet Controller负责。</p>
+<ul class="simple">
+<li><p>Scheduler (调度器): 调度应用到不同工作节点</p></li>
+</ul>
+<p>调度器是负责资源调度(resource scheduling)。当Controler Manager将资源请求写入到etcd，例如启动pod，此时调度器监视到需要调度一个新的Pod，就立即根据整个集群的状态来分配相应的节点来指派给这个Pod。</p>
+<p><strong>管控平台的组件负责获取和控制集群的状态，但不会用于运行应用程序。应用程序（的容器）由worker节点负责。</strong></p>
 </section>
 <section id="nodes">
 <h3>节点（nodes）<a class="headerlink" href="#nodes" title="永久链接至标题">¶</a></h3>
@@ -303,55 +314,75 @@
 <ul class="simple">
 <li><p>docker、rkt或者其他容器运行环境，负责运行容器</p></li>
 <li><p>kubelet 负责和API服务器通讯以及管理各自节点上的容器</p></li>
+</ul>
+<p>在每个worker node上都运行了一个kubelet代理：kubelet监视ETCD中的Pod信息，并在节点上运行相应的Pod，以及当Pod被指定到该节点运行后更新ETCD中的状态信息。</p>
+<ul class="simple">
 <li><p>kube-proxy (Kubernetes Service Proxy) 负责在不同的应用组件负载均衡网络流量</p></li>
 </ul>
 </section>
 </section>
 <section id="id3">
-<h2>在Kubernetes中运行应用<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>Kubernetes工作流程<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>以下举例创建Nginx的Pod过程：</p>
+<ul class="simple">
+<li><p>Kubectl命令行，发出一个包含Ngninx创建的Deployment对象，kubectl将调用API Server，将这个Deployment对象写入到ETCD</p></li>
+<li><p>Deployment Controller监视到ETCD中有一个新的Deployment对象已经创建，就会获取这个对象信息。接下来Deployment Controller指挥任务调度到相应到对象信息，然后创建一个正确的Replica Set对象</p></li>
+<li><p>Replica Set Controller监视到一个新的对象创建了，就会读取对象信息来完成任务调度并创建相应的Pod</p></li>
+<li><p>调度器Scheduler监视到新的Pod已经创建，就会读取这个Pod的对象信息，将这个Pod调度到基于集群状态分配的一系列节点，然后更新Pod（也就是将Pod绑定到Node上）</p></li>
+<li><p>Kubelet监视到对应节点的新Pod，就根据对象信息运行Pod，并回写更新ETCD中Pod状态</p></li>
+</ul>
+<figure class="align-default" id="id15">
+<a class="reference internal image-reference" href="../_images/pod_lifecycle.png"><img alt="../_images/pod_lifecycle.png" src="../_images/pod_lifecycle.png" style="width: 555.75px; height: 557.1px;" /></a>
+<figcaption>
+<p><span class="caption-text">时序图参考 BANZA CLOUD <a class="reference external" href="https://banzaicloud.com/blog/k8s-custom-scheduler/">Writing custom Kubernetes schedulers</a></span><a class="headerlink" href="#id15" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id4">
+<h2>在Kubernetes中运行应用<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>要在Kubernetes中运行一个应用程序，首先需要将应用程序打包到一个或多个容器镜像，将镜像推送到镜像中心（image registry），然后通过提交一个应用到描述给Kubernetes API服务器来实现。</p>
 <p>这个描述信息包括诸如容器镜像或包含应用组件的镜像，组件互相之间的关系，组件之间的依赖（例如需要需要运行在同一个节点或者不能运行在同一个节点）。对于每个组件，也可以指定副本数量（或 <code class="docutils literal notranslate"><span class="pre">replicas</span></code> ）。此外，描述也可以包括这些组件提供给内部或外部客户的服务，以及如何通过一个单一IP地址输出，或者组件对于其他组件如何能够被发现。</p>
-<section id="id4">
-<h3>描述对于运行的容器的作用<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<section id="id5">
+<h3>描述对于运行的容器的作用<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <p>当API服务器处理应用的描述，则调度器（seheduler）会基于每个组请求的计算资源编排指定组的容器到可用的工作节点，并且释放需要的资源。每个节点上的Kubelet就会命令容器运行环境（例如Docker）去下载需要的容器镜像，然后运行容器。</p>
 <a class="reference internal image-reference" href="../_images/kubernetes_run_application.png"><img alt="../_images/kubernetes_run_application.png" src="../_images/kubernetes_run_application.png" style="width: 615.0px; height: 444.0px;" /></a>
 <p>上述示意图中，app descriptor（应用描述）列出了4个容器，划分为3个集合（set），这些集合在Kubernetes中称为 <code class="docutils literal notranslate"><span class="pre">pods</span></code> 。前两个pods每个只包含一个单一容器，而最后一个pod则包含了2个容器（这意味着这两个容器必须一起运行相互不能隔离）。每个pod在描述中还包括了副本数量，也就是需要并行运行的同一个pod的副本数量。</p>
 <p>当描述发送给Kubernetes，Kubernetes就会调度每个pod的指定数量副本部署到可用的工作节点。在集群节点上运行的Kubelet服务则会调用Docker来下载容器镜像并运行容器。</p>
 </section>
-<section id="id5">
-<h3>保持容器始终运行<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<section id="id6">
+<h3>保持容器始终运行<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
 <p>一旦应用开始运行，Kubernetes会一直确保应用的部署状态和你提供的描述相一致。例如，如果你指定希望web服务器保持5个实例，则Kubernetes就会确保有5个实例运行。如果某个实例停止意外停止，例如crash或者停止响应，Kubernetes会自动重启该容器。类似，如果整个worker节点都死掉或者不可访问，Kubernetes将为所有运行在该节点上的容器选择新的节点来运行。</p>
 </section>
-<section id="id6">
-<h3>运行副本的伸缩性<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
+<section id="id7">
+<h3>运行副本的伸缩性<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
 <p>当应用运行时，可以决定增加或缩减运行副本数量，Kubernetes会相应增加或停止副本。这个伸缩操作可以基于实时监控，例如CPU负载，内存消耗，每秒的查询量以及其他指定的应用监控项。</p>
 </section>
-<section id="id7">
-<h3>稳定的服务访问入口<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<section id="id8">
+<h3>稳定的服务访问入口<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
 <p>由于Kubernetes可能会在集群中不断调度容器实例，所以需要Kubernetes对外输出稳定的服务，例如固定的IP地址并将地址输出给运行在集群中的其他应用。这可以通过环境变量，或者DNS解析。Kube-proxy可以确保服务被负载均衡分发到所有提供这个服务的容器上，这样的对外输出IP地址是不变的，以便客户端能够稳定连接。</p>
 </section>
 </section>
-<section id="id8">
-<h2>Kubernetes的优势<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <section id="id9">
-<h3>简化应用部署<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h3>
+<h2>Kubernetes的优势<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<section id="id10">
+<h3>简化应用部署<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h3>
 <p>Kubernetes将所有的工作节点输出成一个单一的部署平台，应用程序开发者可以自行启动部署应用而不需要了解集群中服务器如何部署应用。</p>
 <p>Kubernetes通过标签分类使得集群底层的服务器能够按照不同的共性进行分组抽象，使得部署只需要按照分组就可以找到合适的资源。</p>
 </section>
-<section id="id10">
-<h3>充分发挥硬件能力<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h3>
+<section id="id11">
+<h3>充分发挥硬件能力<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h3>
 <p>Kubernetes能够基于应用程序的资源描述以及节点的可用资源，自动编排应用程序到最合适的节点运行应用。这个过程是自动完成，所以不需要开发者或部署者人工干预。由于避免了人工在繁杂的资源类型中排列组合，Kubernetes通过自动优化组合实现了应用的最佳部署。</p>
 </section>
-<section id="id11">
-<h3>健康检查和自愈<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h3>
+<section id="id12">
+<h3>健康检查和自愈<a class="headerlink" href="#id12" title="永久链接至标题">¶</a></h3>
 <p>Kubernetes监控应用组件以及运行的节点，在节点故障时可以自动重排应用运行节点。这种自动修复的能力使得系统管理员无需手工迁移应用，在资源充足的情况下，完全可以让系统自动修复，并在合适的时候集中人工处理。</p>
 </section>
-<section id="id12">
-<h3>自动伸缩性<a class="headerlink" href="#id12" title="永久链接至标题">¶</a></h3>
+<section id="id13">
+<h3>自动伸缩性<a class="headerlink" href="#id13" title="永久链接至标题">¶</a></h3>
 <p>通过监控应用负载，Kubernetes提供了自动伸缩应用程序的运行实例数量，可以基于监控资源的使用自动调整每个应用的运行实例数量。</p>
 </section>
-<section id="id13">
-<h3>简化应用程序部署<a class="headerlink" href="#id13" title="永久链接至标题">¶</a></h3>
+<section id="id14">
+<h3>简化应用程序部署<a class="headerlink" href="#id14" title="永久链接至标题">¶</a></h3>
 <p>Kubernetes内置了通过Kubernetes API方式获取应用环境以及依赖关系，这样应用部署可以简化。应用服务器可以查询Kubernetes API服务器获取环境变量或执行DNS查询。</p>
 </section>
 </section>

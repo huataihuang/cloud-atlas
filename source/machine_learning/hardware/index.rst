@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    dl_hardware.rst
+   nvidia_gpu.rst
 
 .. only::  subproject and html
 

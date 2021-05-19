@@ -166,6 +166,29 @@ SUSE SDK
 
    sudo make install
 
+- 将编译后的 ``glusterfs`` 源代码目录复制到相同操作系统环境中，并且按照上文方式安装了所有依赖库，就可以同样执行 ``sudo make install`` 进行安装。
+
+运行库问题
+------------
+
+我发现有些服务器上按照上文方法安装了glusterfs之后，执行 ``gluster`` 命令会出现库文件找不到报错::
+
+   gluster: error while loading shared libraries: libglusterfs.so.0: cannot open shared object file: No such file or directory
+
+在正常的服务器上执行 ``ldd /usr/local/sbin/gluster`` 可以看到库文件::
+
+   ...
+           libglusterfs.so.0 => /usr/local/lib/libglusterfs.so.0 (0x00007f6f29573000)
+   ...
+
+观察了报错服务器，实际上也已经安装成功了 ``/usr/local/lib/libglusterfs.so.0`` 。这说明是动态库加载没有刷新。
+
+检查 ``/etc/ld.so.conf`` 内容已经包含了 ``/usr/local/lib/`` 目录，所以只需要刷新一次就可以::
+
+   ldconfig
+
+然后就可以正常运行
+
 编译RPM(尚未完全成功)
 ======================
 

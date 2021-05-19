@@ -55,21 +55,56 @@ Kubernetes集群的架构
 
 管控平台（Control Plane）是管控整个集群并使之工作的组成，包含了多个组件。这些组件可以运行在单一的master节点，也可以分散在多个节点并互相复制以确保高可用。管控平台的组件包括:
 
-- Kubernetes API Server (API服务): 交互所访问或者其他管控平台通讯的中心
-- Scheduler (调度器): 调度应用到不同工作节点
-- Controller Manager (控制管理器): 执行集群级别的功能，例如复制组件，跟踪工作节点，处理节点失效等等
-- etcd : 一个可靠的分布式数据存储，用于持久化存户集群配置
+* etcd : 一个可靠的分布式数据存储，用于持久化存户集群配置
 
-管控平台的组件负责获取和控制集群的状态，但不会用于运行应用程序。应用程序（的容器）由worker节点负责。
+etcd不仅是一个状态存储，也同时负责事件描述和leader选举。不同组件可以通过读写etcd中存储的状态来互相通讯以及顺序处理任务。例如组件leader选举，如调度器就是通过etcd来实现高可用，即只有一个scheduler是master处于工作状态，其他scheduler都是standby状态。
+
+* Kubernetes API Server (API服务): 交互所访问或者其他管控平台通讯的中心
+
+虽然etcd是整个系统的核心(存储)，但是所有组件相互通讯并不是直接访问etcd，而是通过一个代理，这个代理包装了etcd接口对外表现为一个标准的RESTFul API。此外，这个代理还实现了一些附加功能，例如认证，缓存等。这个代理就是 ``API Server``
+
+* Controller Manager (控制管理器): 执行集群级别的功能，例如复制组件，跟踪工作节点，处理节点失效等等
+
+Controller Manager是实现任务的调度(implementing the scheduling of a task)。总之一句话，所有直接请求Kubernetes要求调度的都是任务(task)，例如Deployment, Daemon Set 或者 Job。每个任务请求被发送给Kubernetes之后，都是由Controller Manager处理的。每个任务类型都由一个Controller Manager负责。例如，一个Deployment则由Deployment Controller负责，而一个DaemonSet则由一个DaemonSet Controller负责。
+
+* Scheduler (调度器): 调度应用到不同工作节点
+
+调度器是负责资源调度(resource scheduling)。当Controler Manager将资源请求写入到etcd，例如启动pod，此时调度器监视到需要调度一个新的Pod，就立即根据整个集群的状态来分配相应的节点来指派给这个Pod。
+
+**管控平台的组件负责获取和控制集群的状态，但不会用于运行应用程序。应用程序（的容器）由worker节点负责。**
 
 节点（nodes）
 --------------
 
 worker节点是运行容器化应用程序的服务器。负责运行、监控和向应用程序提供服务的任务由以下组件负责：
 
-- docker、rkt或者其他容器运行环境，负责运行容器
-- kubelet 负责和API服务器通讯以及管理各自节点上的容器
-- kube-proxy (Kubernetes Service Proxy) 负责在不同的应用组件负载均衡网络流量
+* docker、rkt或者其他容器运行环境，负责运行容器
+
+* kubelet 负责和API服务器通讯以及管理各自节点上的容器
+
+在每个worker node上都运行了一个kubelet代理：kubelet监视ETCD中的Pod信息，并在节点上运行相应的Pod，以及当Pod被指定到该节点运行后更新ETCD中的状态信息。
+
+* kube-proxy (Kubernetes Service Proxy) 负责在不同的应用组件负载均衡网络流量
+
+Kubernetes工作流程
+=====================
+
+以下举例创建Nginx的Pod过程：
+
+- Kubectl命令行，发出一个包含Ngninx创建的Deployment对象，kubectl将调用API Server，将这个Deployment对象写入到ETCD
+
+- Deployment Controller监视到ETCD中有一个新的Deployment对象已经创建，就会获取这个对象信息。接下来Deployment Controller指挥任务调度到相应到对象信息，然后创建一个正确的Replica Set对象
+
+- Replica Set Controller监视到一个新的对象创建了，就会读取对象信息来完成任务调度并创建相应的Pod
+
+- 调度器Scheduler监视到新的Pod已经创建，就会读取这个Pod的对象信息，将这个Pod调度到基于集群状态分配的一系列节点，然后更新Pod（也就是将Pod绑定到Node上）
+
+- Kubelet监视到对应节点的新Pod，就根据对象信息运行Pod，并回写更新ETCD中Pod状态
+
+.. figure:: ../_static/kubernetes/pod_lifecycle.png
+   :scale: 45
+
+   时序图参考 BANZA CLOUD `Writing custom Kubernetes schedulers <https://banzaicloud.com/blog/k8s-custom-scheduler/>`_
 
 在Kubernetes中运行应用
 =========================

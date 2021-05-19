@@ -108,7 +108,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id4">编译准备</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id5">编译</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rpm">编译RPM(尚未完全成功)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="build_gluser_scratch.html">SUSE编译glusterfs尝试</a></li>
@@ -407,7 +407,27 @@
 </pre></div>
 </div>
 </li>
+<li><p>将编译后的 <code class="docutils literal notranslate"><span class="pre">glusterfs</span></code> 源代码目录复制到相同操作系统环境中，并且按照上文方式安装了所有依赖库，就可以同样执行 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">make</span> <span class="pre">install</span></code> 进行安装。</p></li>
 </ul>
+<section id="id6">
+<h3>运行库问题<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
+<p>我发现有些服务器上按照上文方法安装了glusterfs之后，执行 <code class="docutils literal notranslate"><span class="pre">gluster</span></code> 命令会出现库文件找不到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span><span class="p">:</span> <span class="n">error</span> <span class="k">while</span> <span class="n">loading</span> <span class="n">shared</span> <span class="n">libraries</span><span class="p">:</span> <span class="n">libglusterfs</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">0</span><span class="p">:</span> <span class="n">cannot</span> <span class="nb">open</span> <span class="n">shared</span> <span class="nb">object</span> <span class="n">file</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<p>在正常的服务器上执行 <code class="docutils literal notranslate"><span class="pre">ldd</span> <span class="pre">/usr/local/sbin/gluster</span></code> 可以看到库文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+        <span class="n">libglusterfs</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">0</span> <span class="o">=&gt;</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libglusterfs</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mh">0x00007f6f29573000</span><span class="p">)</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>观察了报错服务器，实际上也已经安装成功了 <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/libglusterfs.so.0</span></code> 。这说明是动态库加载没有刷新。</p>
+<p>检查 <code class="docutils literal notranslate"><span class="pre">/etc/ld.so.conf</span></code> 内容已经包含了 <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/</span></code> 目录，所以只需要刷新一次就可以:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ldconfig</span>
+</pre></div>
+</div>
+<p>然后就可以正常运行</p>
+</section>
 </section>
 <section id="rpm">
 <h2>编译RPM(尚未完全成功)<a class="headerlink" href="#rpm" title="永久链接至标题">¶</a></h2>
@@ -494,8 +514,8 @@
 <p>但是在  <code class="docutils literal notranslate"><span class="pre">configure</span></code> 增加 <code class="docutils literal notranslate"><span class="pre">--disable-georeplication</span></code> 还是不能解决，我预计需要修订 <code class="docutils literal notranslate"><span class="pre">glusterfs-geo-replicatio</span></code> 的 <code class="docutils literal notranslate"><span class="pre">.spec</span></code> 配置来fix。</p>
 <p>待实践…</p>
 </section>
-<section id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://build.opensuse.org/package/view_file/openSUSE:Factory/glusterfs/glusterfs.spec?expand=0">File glusterfs.spec of Package glusterfs</a></p></li>
 <li><p><a class="reference external" href="https://docs.gluster.org/en/latest/Developer-guide/Building-GlusterFS/">Building GlusterFS</a></p></li>
