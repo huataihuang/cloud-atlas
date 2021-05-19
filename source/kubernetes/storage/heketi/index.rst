@@ -1,14 +1,13 @@
-.. _ml_hardware:
+.. _heketi:
 
 =================================
-机器学习硬件
+Heketi - 云原生GlusterFS管理框架
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   dl_hardware.rst
-   nvidia_gpu.rst
+   deploy_gluster_heketi.rst
 
 .. only::  subproject and html
 

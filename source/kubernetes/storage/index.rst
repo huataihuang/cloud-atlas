@@ -1,14 +1,14 @@
-.. _ml_hardware:
+.. _k8s_storage:
 
 =================================
-机器学习硬件
+Kubernetes存储
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   dl_hardware.rst
-   nvidia_gpu.rst
+   rook/index
+   heketi/index
 
 .. only::  subproject and html
 

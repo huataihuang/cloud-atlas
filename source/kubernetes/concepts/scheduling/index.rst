@@ -8,6 +8,7 @@ Kubernetes调度
    :maxdepth: 1
 
    kube-scheduler.rst
+   assign_pod_node.rst
    kube-scheduling-framework.rst
    kube-scheduling-tuning.rst
 
