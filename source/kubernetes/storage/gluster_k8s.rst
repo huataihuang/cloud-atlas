@@ -117,6 +117,16 @@ Ubuntu添加软件仓库
 
    mkdir -p /data/brick1/gv0
 
+- (重要步骤)修订GluserFS卷的brick目录属主uid/gid，这个uid/gid将和后续容器中运行进程uid/gid匹配，这样才能确保容器挂载的GluserFS卷能够读写::
+
+   groupadd -g 590 hadoop
+   useradd -g 590 -u 592 -d /home/yarn -s /bin/bash -m yarn
+   chown yarn:hadoop /data/brick1/gv0
+
+.. note::
+
+   上述修订GlusterFS卷属主是假设我们后续读写该卷的pod的运行属主使用相同的 ``uid/gid`` (592/590) ，我们假设这个容器中运行的是yarn服务，作为演示。后续定义Pod运行角色的 ``uid/gid`` 一定要和上述配置一致。
+
 - 选择 **任意一台服务器** 创建双副本卷::
 
    gluster volume create gv0 replica 2 \
@@ -174,6 +184,232 @@ gluserfs-client
 - 在 ``pi-master1`` 服务器(管控)上执行以下命令安装::
 
    sudo apt install glusterfs-client
+
+.. note::
+
+   我这里案例worker节点也是GlusterFS的服务器节点，所以worker节点也就已经在上述部署GlusterFS服务器版本时同时安装了 ``glusterfs-client`` ，就不需要单独安装了。实际上，在Docker容器中使用GlustrerFS挂载是通过worker服务器先挂载好GlusterFS卷，然后映射到容器内部，所以实际GlusterFS客户端是运行在worker服务器上的。必须在worker服务器上确保安装好 ``glusterfs-client`` 。
+
+持久化卷
+--------------
+
+- 创建Service和Endpoints
+
+.. literalinclude:: gluster_k8s/gluster-endpoints_kube-verify.yaml
+   :language: yaml
+   :emphasize-lines: 5,6,14,15,18,20,22,24
+   :linenos:
+   :caption:
+
+参数解析:
+
+  - 注意 ``name`` 必须在各个配置中完全匹配
+  - 一定要正确配置 ``namespace`` (这里案例假设Pod的namespace是kube-verify) : 确保 ``service`` , ``endpoints`` 和 Pod 的 ``namespace`` 完全匹配，因为Pod启动后挂载卷需要找到相同namespace中的 ``endpoints`` 才能挂载
+  - ``ip`` 必须是Gluster存储服务器的实际IP地址，而不是主机名。这里的IP地址可以配置多个GlusterFS服务器节点的IP
+  - ``port`` 号是忽略的，所以这里填写1
+
+执行创建::
+
+   kubectl create -f gluster-endpoints_kube-verify.yaml
+
+检查service::
+
+   kubectl -n kube-verify get service
+
+显示输出::
+
+   NAME              TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)        AGE
+   gluster-cluster   ClusterIP      10.106.245.123   <none>         1/TCP          24h
+
+.. note::
+
+   需要注意每个项目都需要唯一的endpoints，每个项目访问GlusterFS卷都需要自己的Endpoints。
+
+- 创建一个持久化卷(presistence volume, pv)
+
+.. literalinclude:: gluster_k8s/gluster-pv_kube-verify.yaml
+   :language: yaml
+   :emphasize-lines: 5,6,10,16,18,20,23-25
+   :linenos:
+   :caption:
+
+解析参数:
+
+   - ``metadata.name`` 是在pod定义中使用的卷名字
+   - ``metadata.namespace`` 是PV所在的namespace，同样要确保和前面定义的 ``sevice`` , ``endpoints`` 以及之后定义的 Pod 的 ``namespace`` 完全一致
+   - ``spec.capacity.storage`` 配置卷容量大小
+   - ``spec.accessMode`` 是用于PV和PVC的标签，定义需要相同，不过当前没有定义任何访问控制
+   - ``spec.glusterfs.endpoints`` 是访问GlusterFS入口
+   - ``spec.glusterfs.path`` 定义就是GlusterFS的卷，见上文 ``pv0``
+   - ``spec.claimRef`` 可以不配置，但是为了能够确保和PVC正确关联(虽然默认也能关联)，不重复多个PV链接相同PVC，建议配置
+
+执行创建PV::
+
+   kubectl create -f gluster-pv_kube-verify.yaml
+
+- 创建持久化卷声明(persistent volume claim, PVC): 所谓PVC就是指定访问模式和存储容量，这里PVC绑定到前面创建的PV。一旦PV被绑定到一个PVC，这个PV就被绑定到了这个PVC所属项目，也就不能被绑到其他PVC上。这就是 ``一对一`` 映射PVs和PVCs，不过，在相同项目中的多个Pods可以使用相同PVC。
+
+.. literalinclude:: gluster_k8s/gluster-pvc_kube-verify.yaml
+   :language: yaml
+   :emphasize-lines: 4,5,8
+   :linenos:
+   :caption:
+
+解析参数:
+
+   - ``metadata.name`` 是在pod定义的 ``volume`` 段落引用
+   - ``metadata.namespace`` 是PVC所在的namespace，要确保和前面定义的 ``sevice`` , ``endpoints`` 以及之后定义的 Pod 的 ``namespace`` 完全一致
+   - ``spec.accessModes`` 必须和PV的对应一致
+   - PVC中 ``spec.resources.requests.storage`` 请求PV提供1G或其他容量
+
+- 检查PV和PVC
+
+检查PV::
+
+   kubectl -n kube-verify get pv
+
+显示输出::
+
+   NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                       STORAGECLASS   REASON   AGE
+   gluster-pv   1Gi        RWX            Retain           Bound    kube-verify/gluster-claim                           25h
+
+检查PVC::
+
+   kubectl -n kube-verify get pvc
+
+显示输出::
+
+   NAME            STATUS   VOLUME       CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+   gluster-claim   Bound    gluster-pv   1Gi        RWX                           25h
+
+可以看到PVC已经和PV绑定起来了
+
+使用Gluster存储
+-----------------
+
+我在 :ref:`arm_k8s_deploy` 中部署了3个测试容器 ``kube-verify`` ::
+
+   kubectl -n kube-verify get pods -o wide
+
+显示输出::
+
+   NAME                           READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+   kube-verify-7d4878dfdc-9rv6m   1/1     Running   0          25h   10.244.2.13   pi-worker2   <none>           <none>
+   kube-verify-7d4878dfdc-fgc4m   1/1     Running   0          25h   10.244.1.26   pi-worker1   <none>           <none>
+   kube-verify-7d4878dfdc-k7sv5   1/1     Running   0          25h   10.244.2.14   pi-worker2   <none>           <none>
+
+对应的 ``kube-verify`` 的deployment:
+
+.. literalinclude:: ../../kubernetes/arm/arm_k8s_deploy/kube_verify_deployment.yaml
+   :language: yaml
+   :linenos:
+   :caption:
+
+修订上述deployment，添加卷挂载:
+
+.. literalinclude:: gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml
+   :language: yaml
+   :emphasize-lines: 23-33
+   :linenos:
+   :caption:
+
+解析参数:
+
+  - ``spec.containers.volumeMounts`` 是容器挂载的卷
+    
+    - ``name`` 是容器内挂载目录命名
+    - ``mountPath`` 是容器中的映射目录，对应了 PV 中设置的 ``path`` 映射 
+
+  - ``securityContex`` 是非常重要的设置容器运行 ``uid/pid`` ，也决定了进程如何读写GlusterFS卷，所以必须和前文创建GlusterFS卷的属主一致
+
+    - ``runAsUser`` 进程uid，请确保容器内 ``/etc/passwd`` 配置了用户
+    - ``supplementalGroup`` 进程gid
+
+  - ``volumes`` 定义了可以被挂载的卷，这里可以配置多个卷
+
+    - ``persistentVolumeClai`` 定义和PVC中定义名关联
+
+执行deployments修订::
+
+   kubectl apply -f kube_verify_gluster-pvc_pid-gid_deployment.yaml
+
+完成后最终检查容器重建::
+
+   kubectl -n kube-verify get pods -o wide
+
+如果一切正常，则会替换生成新容器::
+
+   NAME                          READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+   kube-verify-cc7bd8ff8-vc6bl   1/1     Running   0          84m   10.244.2.17   pi-worker2   <none>           <none>
+   kube-verify-cc7bd8ff8-wn99p   1/1     Running   0          84m   10.244.2.16   pi-worker2   <none>           <none>
+   kube-verify-cc7bd8ff8-xzjv4   1/1     Running   0          84m   10.244.1.29   pi-worker1   <none>           <none>
+
+登陆其中一个容器::
+
+   kubectl -n kube-verify exec -it kube-verify-cc7bd8ff8-vc6bl -- /bin/bash
+
+在容器中检查::
+
+   df -h
+
+可以看到正确挂载了GlusterFS卷 ``192.168.6.16:/gv0   32G  6.3G   24G  21% /var/dbdata`` ::
+
+   Filesystem         Size  Used Avail Use% Mounted on
+   overlay             32G  5.9G   24G  20% /
+   tmpfs               64M     0   64M   0% /dev
+   tmpfs              3.9G     0  3.9G   0% /sys/fs/cgroup
+   /dev/sda2           32G  5.9G   24G  20% /etc/hosts
+   192.168.6.16:/gv0   32G  6.3G   24G  21% /var/dbdata
+   shm                 64M     0   64M   0% /dev/shm
+   tmpfs              3.9G   12K  3.9G   1% /run/secrets/kubernetes.io/serviceaccount
+   tmpfs              3.9G     0  3.9G   0% /proc/scsi
+   tmpfs              3.9G     0  3.9G   0% /sys/firmware
+
+- 进入 ``/var/dbdata`` 目录进行读写测试::
+
+   time dd if=/dev/zero of=/var/dbdata/testfile bs=10M count=10
+
+显示输出::
+
+   10+0 records in
+   10+0 records out
+   104857600 bytes (105 MB, 100 MiB) copied, 1.80953 s, 57.9 MB/s
+   
+   real	0m1.829s
+   user	0m0.000s
+   sys	0m0.452s
+
+这就证明GlusterFS卷写入正常
+
+- 在物理服务器 ``pi-worker2`` 上检查 ``df -h`` 输出可以看到，实际上GlusterFS卷挂载到了容器内部目录，在 ``pi-worker2`` 上运行了2个 ``kube-verify`` 容器，可以看到挂载了2次::
+
+   Filesystem         Size  Used Avail Use% Mounted on
+   ...
+   192.168.6.15:/gv0   32G  6.4G   24G  21% /var/lib/kubelet/pods/f9627a9b-4661-4fb3-bd1d-ccaf7d990cc6/volumes/kubernetes.io~glusterfs/gluster-pv
+   ...
+   192.168.6.16:/gv0   32G  6.4G   24G  21% /var/lib/kubelet/pods/0cbb2c9d-39a2-48b4-a472-694b8692aaf4/volumes/kubernetes.io~glusterfs/gluster-pv
+
+由于是镜像模式的GlusterFS，所以在 ``pi-worker1`` 和 ``pi-worker2`` 的 ``/data/brick1/gv0`` 目录下，有完全相同的文件::
+
+   root@pi-worker1:/data/brick1/gv0# pwd
+   /data/brick1/gv0
+   root@pi-worker1:/data/brick1/gv0# ls -lh
+   total 101M
+   -rw-r--r-- 2 yarn root 100M May 20 00:58 testfile
+   
+   root@pi-worker2:/data/brick1/gv0# pwd
+   /data/brick1/gv0
+   root@pi-worker2:/data/brick1/gv0# ls -lh
+   total 101M
+   -rw-r--r-- 2 yarn root 100M May 20 00:58 testfile
+
+Kubernetes使用GlusterFS卷(探索记录)
+=====================================
+
+.. note::
+
+   以下步骤是我探索GlusterFS卷的步骤，所以有一个渐进的排查过程，如果你一步步按照我的步骤来做，会有一点点挫折。不过这个挫折会让你能够排查和找出为什么会出错以及解决方法，所以我完整保留了这个步骤。
+
+   如果你只想快速完成部署，避免走弯路，请参考上文 ``Kubernetes使用GlusterFS卷`` 段落，我一次性提供正确配置步骤，并且做了配置注释。
 
 持久化卷
 --------------
@@ -234,7 +470,7 @@ gluserfs-client
   - ``endpoints`` 是前面创建的Endppints
   - ``path`` 定义就是GlusterFS的卷
 
-- 执行创建PV::
+执行创建PV::
 
    kubectl create -f gluster-pv.yaml
 
@@ -417,7 +653,51 @@ GlusterFS卷权限
 
 我们需要根据挂载GlusterFS卷的容器的运行uid/gid修订我们的GlusterFS的PVC
 
+- 在定义 ``kube-verify`` deployment时，可以为pod运行设置 ``spec.securityContext.supplementalGroups`` 来匹配访问GlusterFS的gid，并且设置GlusterFS的卷的目录 ``775`` 权限就可以解决这个问题::
 
+   spec:
+     containers:
+       - name:
+       ...
+     securityContext: 
+       runAsUser: 592
+       supplementalGroups: [590] 
+
+这里假设 GlusterFS 卷挂载后的目录 ``uid/gid`` 分别是 ``592/590`` (在创建brick目录时，就在GlusterFS服务器上配置好目录属主) ，这样只要配置了pod的运行pid/gid，就可以实现写入
+
+所以修订 Pod 配置如下:
+
+.. literalinclude:: gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml
+   :language: yaml
+   :linenos:
+   :caption:
+
+并且，需要注意，在GlusterFS的服务器上通过以下方式添加用户账号以及修订GlusterFS卷目录::
+
+   groupadd -g 590 hadoop
+   useradd -g 590 -u 592 -d /home/yarn -s /bin/bash -m yarn
+   chown yarn:hadoop /data/brick1/gv0
+
+这样，GlusterFS服务器上存储卷就会修订成用户 ``yarn`` (uid=592) 以及组 ``hadoop`` (gid=590)。
+
+根据上述Pod的yaml重新创建的Pod::
+
+   $ kubectl -n kube-verify get pods
+   NAME                          READY   STATUS    RESTARTS   AGE
+   kube-verify-cc7bd8ff8-vc6bl   1/1     Running   0          9m5s
+   kube-verify-cc7bd8ff8-wn99p   1/1     Running   0          9m11s
+   kube-verify-cc7bd8ff8-xzjv4   1/1     Running   0          9m8s
+
+登陆pod::
+
+   kubectl -n kube-verify exec -it kube-verify-cc7bd8ff8-vc6bl -- /bin/bash
+
+在容器中检查进程id::
+
+   $ id
+   uid=592 gid=0(root) groups=0(root),590
+
+现在该用户就能够自如地读写挂载的GlusterFS卷。
 
 参考
 =======
@@ -427,3 +707,4 @@ GlusterFS卷权限
 - `Kubernetes and GlusterFS <https://ralph.blog.imixs.com/2020/03/03/kubernetes-and-glusterfs/>`_
 - `k8s配置GlusterFS存储 <https://my.oschina.net/yx571304/blog/3043065>`_
 - `Persistent Storage Using GlusterFS <https://docs.okd.io/1.2/install_config/persistent_storage/persistent_storage_glusterfs.html>`_
+- `Complete Example Using GlusterFS <https://docs.openshift.com/container-platform/3.3/install_config/storage_examples/gluster_example.html>`_
