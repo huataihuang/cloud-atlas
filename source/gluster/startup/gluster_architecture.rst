@@ -6,6 +6,9 @@ GlusterFS架构
 
 在 :ref:`introduce_gluster` 中，我们初步了解了GlusterFS能够提供哪些功能，现在我们来解析组成GlusterFS分布式存储的底层技术。
 
+.. figure:: ../../_static/gluster/startup/glusterfs_stack.png
+   :scale: 25
+
 GlusterFS卷类型
 ================
 
@@ -84,7 +87,7 @@ Distributed Replicated GlusterFS Volume用于要求高可用数据同时要求�
 
    注意，文件分布是首先实现多副本存储(replicas)，然后再实现分布式存储(distributed)，所以需要关注创建GlusterFS时候设置的bricks的顺序。见下文图示。
 
-.. figure:: ../../_static/gluster/startup/replicated_gluster_volume.png
+.. figure:: ../../_static/gluster/startup/distributed_replicated_gluster_volume.png
    :scale: 80
 
 上图是 ``replicas 2`` 的分布结构。如果在创建卷的时候，提供了8个bricks，则结构就是 2x4 。同理，如果在8个bricks上创建 ``replicas 4`` 卷，则结构就是 4x2 。
@@ -107,14 +110,42 @@ Dispersed Volume是基于ErasureCodes（纠错码）的一种新类型的Volume�
 冗余信息
 ~~~~~~~~~
 
-每个纠错卷都有一个在创建卷的时候定义的redundancy value(冗余值)，这个值决定了多少bricks丢失情况下都不会终端卷的操作。卷的使用空间取决于以下计算公式::
+每个纠错卷都有一个在创建卷的时候定义的redundancy value(冗余值)，这个值决定了多少bricks丢失情况下都不会中断卷的操作。卷的使用空间取决于以下计算公式::
 
    <Usable size> = <Brick size> * (#Bricks - Redundancy)
+
+.. figure:: ../../_static/gluster/startup/dispersed_gluster_volume.png
+   :scale: 80
+
+- 创建纠错卷::
+
+   gluster volume create test-volume [disperse [<COUNT>]] [disperse-data <COUNT>] [redundancy <COUNT>] [transport tcp | rdma | tcp,rdma] <NEW-BRICK>
+
+- 就创建3节点纠错卷，冗余数据level 1（2+1）::
+
+   gluster volume create test-volume disperse 3 redundancy 1 server1:/exp1 server2:/exp2 server3:/exp3
 
 分布式纠错卷(Distributed Dispersed Volume)
 --------------------------------------------
 
-待补充
+分布式纠错卷(Distributed Dispersed Volume)类似分布式复制卷，只不过将复制的副本替换为纠错子卷。分布式纠错卷必须使用第一个子卷的复数个数的bricks。这样的分布式纠错卷比较容易扩展卷大小，并且将负载分不到不同bricks上。
+
+.. figure:: ../../_static/gluster/startup/distributed_dispersed_gluster_volume.png
+   :scale: 80
+
+- 创建分布式纠错卷::
+
+   gluster volume create [disperse [<COUNT>]] [disperse-data <COUNT>] [redundancy <COUNT>] [transport tcp | rdma | tcp,rdma] <NEW-BRICK>
+
+举例，6节点分布式纠错卷，冗余度1，也就是 2x(2+1)=6 ::
+
+   gluster volume create test-volume disperse 3 redundancy 1 server1:/exp1 server2:/exp2 server3:/exp3 server4:/exp4 server5:/exp5 server6:/exp6
+
+.. note::
+
+   - 纠错卷可以指定在纠错集中的bricks数量，指定冗余bricks中数量，或者同时指定
+   - 如果没有指定纠错，或者 ``<count>`` 缺失，则整个交卷就是被视为一个单独纠错集
+   - 如果没有指定冗余，则自动计算优化值
 
 FUSE
 ======
