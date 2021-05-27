@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>结合SSH Tunnel和AutoProxy插件翻墙</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="ssh-tunnelautoproxy">
+<span id="ssh-tunnel-gfw-autoproxy"></span><h1>结合SSH Tunnel和AutoProxy插件翻墙</h1>
+<p>为了能够安装部署Kubernetes，我们需要部署 <a class="reference internal" href="../linux/security/vpn/openconnect_vpn.xhtml#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 翻墙从Google软件仓库下载软件包。日常工作和生活，我们也需要能够在桌面操作系统上翻过GFW，自由地获取信息。不过，部署VPN服务器确实存在一定的技术门槛，也比较繁琐复杂，有没有比较简单易用的个人翻墙利器呢?</p>
+<p>答案就是: SSH Tunnel - 你仅仅需要在海外租用一个最小规格的VPS虚拟机，能够ssh登陆这台服务器就可以实现自由访问因特网的目标。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>翻越GFW，不仅仅是能够自由地获取技术类信息，也是一个自由的灵魂需要获取真实的历史、文化、思想，使得自己能够成为一个有独立思考能力人。</p>
+</div>
+<section id="id1">
+<h2>快速起步</h2>
+<section id="ssh-tunnel">
+<h3>SSH Tunnel</h3>
+<p>假设你已经在云计算厂商这里租用了一台最小规格Linux虚拟机，并且已经能够ssh登陆新创建的虚拟机。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://aws.amazon.com/">AWS</a><span class="link-target"> [https://aws.amazon.com/]</span> , <a class="reference external" href="https://cloud.google.com/">Google Cloud</a><span class="link-target"> [https://cloud.google.com/]</span> , <a class="reference external" href="https://azure.microsoft.com/">Microsoft Azure</a><span class="link-target"> [https://azure.microsoft.com/]</span> 甚至提供了一定期限的免费虚拟机，合理使用可以适当节约一些费用。</p>
+</div>
+<p>使用以下命令登陆虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">C</span> <span class="o">-</span><span class="n">D</span> <span class="mi">1080</span> <span class="o">&lt;</span><span class="n">SERVER_IP</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>参数 <code class="docutils literal notranslate"><span class="pre">-C</span></code> 表示启用压缩，可以加快访问速度</p></li>
+<li><p>参数 <code class="docutils literal notranslate"><span class="pre">-D</span></code> 则是关键，表示启用local “dynamic”应用级别的端口转发，本地会分配一个socket监听指定端口1080（实际上你可以指定任何端口，这里1080仅仅是举例）</p></li>
+</ul>
+<p>接下来，你只需要在chrome或firefox浏览器中设置socks代理就可以自由访问因特网，方法如下：</p>
+</section>
+<section id="firefox-socks-proxy">
+<h3>Firefox Socks Proxy</h3>
+<p>打开 FireFox 浏览器，打开 <code class="docutils literal notranslate"><span class="pre">Preferences</span></code> 设置选项，点击 “Network Settings” 栏的 <code class="docutils literal notranslate"><span class="pre">Setting</span></code> 按钮，设置网络代理，共需设置两个选项:</p>
+<ul class="simple">
+<li><p>“Manual proxy configuration” 设置为 “SOCKS Host” 是 <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> Port <code class="docutils literal notranslate"><span class="pre">1080</span></code> 。注意，SOCKS类型要选择 <code class="docutils literal notranslate"><span class="pre">SOCKS</span> <span class="pre">v5</span></code></p></li>
+<li><p>勾选 <code class="docutils literal notranslate"><span class="pre">Proxy</span> <span class="pre">DNS</span> <span class="pre">when</span> <span class="pre">using</span> <span class="pre">SOCKS</span> <span class="pre">v5</span></code> - 这是因为在中国大陆，DNS污染使得你无法正确解析被屏蔽域名对应的IP地址，所以需要把DNS解析也通过SSH Tunnel转发到没有欺诈的DNS服务器进行查询</p></li>
+<li><p>勾选 <code class="docutils literal notranslate"><span class="pre">Enable</span> <span class="pre">DNS</span> <span class="pre">over</span> <span class="pre">HTTPS</span></code> - 这是为了使用受信任的DNS服务器而不是本地的DNS服务商(国内电信运营商的DNS是污染的)。当然，如果你操作系统已经设置了采用Google的DNS 8.8.8.8并且已经勾选过 <code class="docutils literal notranslate"><span class="pre">Proxy</span> <span class="pre">DNS</span> <span class="pre">when</span> <span class="pre">using</span> <span class="pre">SOCKS</span> <span class="pre">v5</span></code> ，则这步可以省略。</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../_images/firefox_socks_proxy.png" src="../_images/firefox_socks_proxy.png" style="width: 607.2px; height: 360.0px;" />
+</figure>
+<figure class="align-default">
+<img alt="../_images/firefox_socks_proxy_dns.png" src="../_images/firefox_socks_proxy_dns.png" style="width: 588.0px; height: 167.20000000000002px;" />
+</figure>
+</section>
+<section id="switchyomega">
+<h3>SwitchyOmega</h3>
+<p>SwitchyOmega是一个浏览器插件，用于自动切换代理。即部分被屏蔽的网站指定Proxy访问，其他则direct访问。这个插件有Chrome版本，也有firefox版本，设置方法相同。</p>
+<p>这是一个非常有用的浏览器插件，可以极大提高上网效率，兼顾了跨越防火墙以及避免无谓的代理网速下降。</p>
+<ul class="simple">
+<li><p>设置 <code class="docutils literal notranslate"><span class="pre">proxy</span></code> profile，调整成自己实际的Proxy设置，别忘记最后还要 <code class="docutils literal notranslate"><span class="pre">Apply</span> <span class="pre">changes</span></code></p></li>
+</ul>
+<figure class="align-default">
+<img alt="../_images/switchy_omega_import_online_rule_setup_proxy.png" src="../_images/switchy_omega_import_online_rule_setup_proxy.png" style="width: 693.5500000000001px; height: 278.85px;" />
+</figure>
+<ul>
+<li><p>点击 <code class="docutils literal notranslate"><span class="pre">auto</span> <span class="pre">switch</span></code> 导航：</p>
+<ul class="simple">
+<li><p>添加在线规则列表，这个规则列表是以前网友搜集的被屏蔽地址列表，虽然是几年前的地址列表，但是可以作为配置的起步基础：</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../_images/switchy_omega_import_online_rule.png" src="../_images/switchy_omega_import_online_rule.png" style="width: 720.5000000000001px; height: 278.85px;" />
+</figure>
+</li>
+</ul>
+<p>地址从 <a class="reference external" href="https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt">https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt</a> 获取：</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../_images/switchy_omega_import_online_rule_setup.png" src="../_images/switchy_omega_import_online_rule_setup.png" style="width: 717.2px; height: 308.0px;" />
+</figure>
+<ul class="simple">
+<li><p>注意：上面截图中 <code class="docutils literal notranslate"><span class="pre">Rule</span> <span class="pre">list</span> <span class="pre">rules</span></code> 对应的动作要修改成 <code class="docutils literal notranslate"><span class="pre">proxy</span></code> ，因为我们添加的地址列表都是被屏蔽地址，需要启用代理。另外，案例的2条记录可选删除。</p></li>
+<li><p>以上设置完成后，点击 <code class="docutils literal notranslate"><span class="pre">Apply</span> <span class="pre">change</span></code> 保存。</p></li>
+</ul>
+</div></blockquote>
+<ul>
+<li><p>上述 <code class="docutils literal notranslate"><span class="pre">auto</span> <span class="pre">switch</span></code> 设置的最终结果截图如下，如果匹配 <code class="docutils literal notranslate"><span class="pre">gfwlist.txt</span></code> 则使用proxy规则，其余默认则直接访问:</p>
+<figure class="align-default">
+<img alt="../_images/switchy_omega_import_online_rule_setup_proxy_result.png" src="../_images/switchy_omega_import_online_rule_setup_proxy_result.png" style="width: 730.8000000000001px; height: 448.40000000000003px;" />
+</figure>
+</li>
+<li><p>如果在使用过程中，发现有页面资源不能加载，则点击 SigmaOmega 图标按钮，补充添加规则。</p></li>
+</ul>
+</section>
+</section>
+<section id="id2">
+<h2>SSH Tunnel</h2>
+<p>SSH Tunnel 原理请参考 <a class="reference external" href="https://www.ssh.com/ssh/tunneling/">SSH TUNNEL</a><span class="link-target"> [https://www.ssh.com/ssh/tunneling/]</span></p>
+<figure class="align-default">
+<img alt="../_images/ssh_tunnel.png" src="../_images/ssh_tunnel.png" style="width: 683.0px; height: 208.0px;" />
+</figure>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.ssh.com/ssh/tunneling/">SSH TUNNEL</a><span class="link-target"> [https://www.ssh.com/ssh/tunneling/]</span></p></li>
+<li><p><a class="reference external" href="https://help.ubuntu.com/community/SSH/OpenSSH/PortForwarding">SSH/OpenSSH/PortForwarding</a><span class="link-target"> [https://help.ubuntu.com/community/SSH/OpenSSH/PortForwarding]</span></p></li>
+<li><p><a class="reference external" href="https://github.com/FelisCatus/SwitchyOmega/wiki/GFWList">SwitchyOmega GFWList</a><span class="link-target"> [https://github.com/FelisCatus/SwitchyOmega/wiki/GFWList]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

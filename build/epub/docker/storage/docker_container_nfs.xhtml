@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Docker容器使用NFS</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="dockernfs">
+<span id="docker-container-nfs"></span><h1>Docker容器使用NFS</h1>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference internal" href="../../kubernetes/index.xhtml#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 在Docker基础上采用了 <a class="reference internal" href="../../kubernetes/concepts/storage/k8s_persistent_volumes.xhtml#k8s-persistent-volumes"><span class="std std-ref">Kubernetes持久化存储卷</span></a> 实现更为抽象化的持久化存储。</p>
+</div>
+<p>简单来说，Docker使用NFS存储有两种形式：</p>
+<ul class="simple">
+<li><p>方法一：在容器内部安装 <code class="docutils literal notranslate"><span class="pre">nfs-utils</span></code> ，就如同常规到NFS客户端一样，在容器内部直接通过rpcbind方式挂载NFS共享输出，这种方式需要每个容器独立运行rpcbind服务，并且要使用 <a class="reference internal" href="../init/docker_systemd.xhtml#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> ，复杂且消耗较多资源。不过，优点是完全在容器内部控制，符合传统SA运维方式。</p></li>
+<li><p>方法二：Host主机上创建NFS类型的Docker Volume，然后将docker volume映射到容器内部，这样容器就可以直接使用Docker共享卷，这种方式最为简洁优雅。</p></li>
+<li><p>方法三：使用Docker volume plugin，例如 <a class="reference external" href="https://github.com/ContainX/docker-volume-netshare">ContainX/docker-volume-netshare</a><span class="link-target"> [https://github.com/ContainX/docker-volume-netshare]</span> 可以直接将NFS共享卷作为容器卷挂载(就不需要在host主机上去执行挂载NFS命令了)</p></li>
+</ul>
+<section id="nfs">
+<h2>方法一：在容器内部使用NFS</h2>
+<p>要知道，容器并不是完整的虚拟机，天然就是瘦客户端并且有意削减了部分操作系统功能。</p>
+<p>为了能够在容器中挂载NFS，我们需要同时运行多个服务，这样我们就需要有一个容器内部运行的 <a class="reference internal" href="../init/index.xhtml#docker-init"><span class="std std-ref">Docker init进程管理器</span></a> 以便启动多个服务来支持NFS挂载。例如，我们可以选择 <a class="reference internal" href="../init/docker_systemd.xhtml#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 。</p>
+<p>这里的案例假设我们已经构建了一个使用 <a class="reference internal" href="../init/docker_systemd.xhtml#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 的容器 <code class="docutils literal notranslate"><span class="pre">centos8-ssh</span></code> ，然后我们来实践NFS挂载部署。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果使用 NFSv4 ，就不需要安装 <code class="docutils literal notranslate"><span class="pre">nfs-utils</span></code> ，也不需要设置 <code class="docutils literal notranslate"><span class="pre">systemd</span></code></p>
+</div>
+<section id="id1">
+<h3>NFS服务器</h3>
+<p>我的测试NFS服务部署在运行Docker服务的物理主机上，该物理服务器是 <a class="reference internal" href="../../linux/ubuntu_linux/index.xhtml#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，已完成 <a class="reference internal" href="../../linux/ubuntu_linux/storage/ubunut_nfs.xhtml#ubunut-nfs"><span class="std std-ref">Ubuntu NFS部署</span></a> ，共享目录设置如下:</p>
+<ul>
+<li><p><cite>/etc/exportfs</cite></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">data</span>   <span class="o">*</span><span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">sync</span><span class="p">,</span><span class="n">no_root_squash</span><span class="p">,</span><span class="n">no_subtree_check</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>详细部署方法和解释见 <a class="reference internal" href="../../linux/ubuntu_linux/storage/ubunut_nfs.xhtml#ubunut-nfs"><span class="std std-ref">Ubuntu NFS部署</span></a></p>
+</section>
+<section id="id2">
+<h3>NFS客户端</h3>
+<ul>
+<li><p>在容器内部安装 <code class="docutils literal notranslate"><span class="pre">nfs-utils</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">nfs</span><span class="o">-</span><span class="n">utils</span>
+</pre></div>
+</div>
+</li>
+<li><p>在容器内部配置 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span>  <span class="o">/</span><span class="n">data</span>  <span class="n">nfs</span>  <span class="n">rw</span><span class="p">,</span><span class="n">soft</span><span class="p">,</span><span class="n">intr</span><span class="p">,</span><span class="n">vers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">proto</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span><span class="n">rsize</span><span class="o">=</span><span class="mi">32768</span><span class="p">,</span><span class="n">wsize</span><span class="o">=</span><span class="mi">32768</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>在容器内部执行挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">data</span>
+<span class="n">mount</span> <span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">Operation</span> <span class="ow">not</span> <span class="n">permitted</span>
+</pre></div>
+</div>
+<p>这个问题和 <a class="reference internal" href="../init/docker_systemd.xhtml#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 相同，需要赋予运行容器 <code class="docutils literal notranslate"><span class="pre">CAP_SYS_ADMIN</span></code> 能力，所以需要重新创建运行容器，并传递参数 <code class="docutils literal notranslate"><span class="pre">--cap-add</span> <span class="pre">sys_admin</span></code></p>
+</section>
+<section id="mount-nfs-access-denied">
+<h3>mount.nfs: access denied</h3>
+<ul>
+<li><p>重新增加了 <code class="docutils literal notranslate"><span class="pre">CAP_SYS_ADMIN</span></code> 能力创建容器后，再次挂载NFS卷，提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">access</span> <span class="n">denied</span> <span class="n">by</span> <span class="n">server</span> <span class="k">while</span> <span class="n">mounting</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是，服务器端命名已经设置了 <code class="docutils literal notranslate"><span class="pre">/data</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;world&gt;</span></code> 输出给所有客户端，为何会拒绝？</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">-v</span></code> 参数挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">timeout</span> <span class="nb">set</span> <span class="k">for</span> <span class="n">Fri</span> <span class="n">Jan</span> <span class="mi">22</span> <span class="mi">08</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">08</span> <span class="mi">2021</span>
+<span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">trying</span> <span class="n">text</span><span class="o">-</span><span class="n">based</span> <span class="n">options</span> <span class="s1">&#39;rw,soft,intr,vers=3,proto=tcp,rsize=32768,wsize=32768,addr=172.17.0.1&#39;</span>
+<span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">prog</span> <span class="mi">100003</span><span class="p">,</span> <span class="n">trying</span> <span class="n">vers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">prot</span><span class="o">=</span><span class="mi">6</span>
+<span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">trying</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">prog</span> <span class="mi">100003</span> <span class="n">vers</span> <span class="mi">3</span> <span class="n">prot</span> <span class="n">TCP</span> <span class="n">port</span> <span class="mi">2049</span>
+<span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">prog</span> <span class="mi">100005</span><span class="p">,</span> <span class="n">trying</span> <span class="n">vers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">prot</span><span class="o">=</span><span class="mi">6</span>
+<span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">trying</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">prog</span> <span class="mi">100005</span> <span class="n">vers</span> <span class="mi">3</span> <span class="n">prot</span> <span class="n">TCP</span> <span class="n">port</span> <span class="mi">43999</span>
+<span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">mount</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span> <span class="n">Permission</span> <span class="n">denied</span>
+<span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">access</span> <span class="n">denied</span> <span class="n">by</span> <span class="n">server</span> <span class="k">while</span> <span class="n">mounting</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查服务器的rpc输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpcinfo</span> <span class="o">-</span><span class="n">p</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">program</span> <span class="n">vers</span> <span class="n">proto</span>   <span class="n">port</span>  <span class="n">service</span>
+ <span class="mi">100000</span>    <span class="mi">4</span>   <span class="n">tcp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>
+ <span class="mi">100000</span>    <span class="mi">3</span>   <span class="n">tcp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>
+ <span class="mi">100000</span>    <span class="mi">2</span>   <span class="n">tcp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>
+ <span class="mi">100000</span>    <span class="mi">4</span>   <span class="n">udp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>
+ <span class="mi">100000</span>    <span class="mi">3</span>   <span class="n">udp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>
+ <span class="mi">100000</span>    <span class="mi">2</span>   <span class="n">udp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>
+ <span class="mi">100005</span>    <span class="mi">1</span>   <span class="n">udp</span>  <span class="mi">43059</span>  <span class="n">mountd</span>
+ <span class="mi">100005</span>    <span class="mi">1</span>   <span class="n">tcp</span>  <span class="mi">46359</span>  <span class="n">mountd</span>
+ <span class="mi">100005</span>    <span class="mi">2</span>   <span class="n">udp</span>  <span class="mi">37724</span>  <span class="n">mountd</span>
+ <span class="mi">100005</span>    <span class="mi">2</span>   <span class="n">tcp</span>  <span class="mi">39809</span>  <span class="n">mountd</span>
+ <span class="mi">100005</span>    <span class="mi">3</span>   <span class="n">udp</span>  <span class="mi">41232</span>  <span class="n">mountd</span>
+ <span class="mi">100005</span>    <span class="mi">3</span>   <span class="n">tcp</span>  <span class="mi">43999</span>  <span class="n">mountd</span>
+ <span class="mi">100003</span>    <span class="mi">3</span>   <span class="n">tcp</span>   <span class="mi">2049</span>  <span class="n">nfs</span>
+ <span class="mi">100003</span>    <span class="mi">4</span>   <span class="n">tcp</span>   <span class="mi">2049</span>  <span class="n">nfs</span>
+ <span class="mi">100227</span>    <span class="mi">3</span>   <span class="n">tcp</span>   <span class="mi">2049</span>  <span class="n">nfs_acl</span>
+ <span class="mi">100003</span>    <span class="mi">3</span>   <span class="n">udp</span>   <span class="mi">2049</span>  <span class="n">nfs</span>
+ <span class="mi">100227</span>    <span class="mi">3</span>   <span class="n">udp</span>   <span class="mi">2049</span>  <span class="n">nfs_acl</span>
+ <span class="mi">100021</span>    <span class="mi">1</span>   <span class="n">udp</span>  <span class="mi">34464</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">3</span>   <span class="n">udp</span>  <span class="mi">34464</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">4</span>   <span class="n">udp</span>  <span class="mi">34464</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">1</span>   <span class="n">tcp</span>  <span class="mi">35037</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">3</span>   <span class="n">tcp</span>  <span class="mi">35037</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">4</span>   <span class="n">tcp</span>  <span class="mi">35037</span>  <span class="n">nlockmgr</span>
+</pre></div>
+</div>
+<ul>
+<li><p>在容器内部检查服务器端输出的NFS共享:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">showmount</span> <span class="o">-</span><span class="n">e</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Export</span> <span class="nb">list</span> <span class="k">for</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span>
+<span class="o">/</span><span class="n">data</span> <span class="o">*</span>
+</pre></div>
+</div>
+<ul>
+<li><p>通过tcpdump抓包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tcpdump</span> <span class="o">-</span><span class="n">s0</span> <span class="o">-</span><span class="n">i</span> <span class="n">eth0</span> <span class="n">host</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">pcap</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后通过wireshark分析:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tshark</span> <span class="o">-</span><span class="n">tad</span> <span class="o">-</span><span class="n">n</span> <span class="o">-</span><span class="n">r</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">pcap</span> <span class="o">-</span><span class="n">Y</span> <span class="s1">&#39;frame.number == 500&#39;</span> <span class="o">-</span><span class="n">O</span> <span class="n">rpc</span> <span class="o">|</span> <span class="n">sed</span> <span class="s1">&#39;/^Re/,$ !d&#39;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Running</span> <span class="k">as</span> <span class="n">user</span> <span class="s2">&quot;root&quot;</span> <span class="ow">and</span> <span class="n">group</span> <span class="s2">&quot;root&quot;</span><span class="o">.</span> <span class="n">This</span> <span class="n">could</span> <span class="n">be</span> <span class="n">dangerous</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>tcpdump的分析 <code class="docutils literal notranslate"><span class="pre">nfs.status!=0</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tshark</span> <span class="o">-</span><span class="n">tad</span> <span class="o">-</span><span class="n">nr</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">pcap</span> <span class="o">-</span><span class="n">Y</span> <span class="n">nfs</span><span class="o">.</span><span class="n">status</span><span class="o">!=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>同样显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Running</span> <span class="k">as</span> <span class="n">user</span> <span class="s2">&quot;root&quot;</span> <span class="ow">and</span> <span class="n">group</span> <span class="s2">&quot;root&quot;</span><span class="o">.</span> <span class="n">This</span> <span class="n">could</span> <span class="n">be</span> <span class="n">dangerous</span><span class="o">.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>在NFS服务器端检查输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">etab</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">data</span>        <span class="o">*</span><span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">sync</span><span class="p">,</span><span class="n">wdelay</span><span class="p">,</span><span class="n">hide</span><span class="p">,</span><span class="n">nocrossmnt</span><span class="p">,</span><span class="n">secure</span><span class="p">,</span><span class="n">no_root_squash</span><span class="p">,</span><span class="n">no_all_squash</span><span class="p">,</span><span class="n">no_subtree_check</span><span class="p">,</span><span class="n">secure_locks</span><span class="p">,</span><span class="n">acl</span><span class="p">,</span><span class="n">no_pnfs</span><span class="p">,</span><span class="n">anonuid</span><span class="o">=</span><span class="mi">65534</span><span class="p">,</span><span class="n">anongid</span><span class="o">=</span><span class="mi">65534</span><span class="p">,</span><span class="n">sec</span><span class="o">=</span><span class="n">sys</span><span class="p">,</span><span class="n">rw</span><span class="p">,</span><span class="n">secure</span><span class="p">,</span><span class="n">no_root_squash</span><span class="p">,</span><span class="n">no_all_squash</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>暂时还没有解决容器内部直接mount NFS问题，待进一步排查</p>
+</div>
+</section>
+</section>
+<section id="docker-nfs-volume">
+<h2>方法二：Docker NFS volume(推荐)</h2>
+<p>采用Docker NFS volume的方式更为简单明了，实际上也就是先在host主机上挂载NFS卷，然后通过卷映射方式映射到容器内部。这种方式不需要给容器特殊的权限，也不需要运行systemd这样沉重的进程管理器，特别适合轻量级运行容器。当然，你也可以构建 <a class="reference internal" href="../init/docker_tini.xhtml#docker-tini"><span class="std std-ref">Docker tini进程管理器</span></a> 来运行一个轻量级的进程管理器，甚至使用 <a class="reference internal" href="../init/docker_systemd.xhtml#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 来构建复杂的 “富容器” 。</p>
+<ul>
+<li><p>在Host主机上挂载NFS卷，即编辑host主机 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 添加如下配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span>  <span class="o">/</span><span class="n">container</span><span class="o">-</span><span class="n">data</span>  <span class="n">nfs</span>  <span class="n">rw</span><span class="p">,</span><span class="n">soft</span><span class="p">,</span><span class="n">intr</span><span class="p">,</span><span class="n">vers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">proto</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span><span class="n">rsize</span><span class="o">=</span><span class="mi">32768</span><span class="p">,</span><span class="n">wsize</span><span class="o">=</span><span class="mi">32768</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后在host主机上挂载NFS卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">container</span><span class="o">-</span><span class="n">data</span>
+<span class="n">mount</span> <span class="o">/</span><span class="n">container</span><span class="o">-</span><span class="n">data</span>
+</pre></div>
+</div>
+</li>
+<li><p>挂载以后在host主机上检查 <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> 可以看到NFS已经挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span>  <span class="mi">117</span><span class="n">G</span>   <span class="mi">12</span><span class="n">G</span>  <span class="mi">101</span><span class="n">G</span>  <span class="mi">11</span><span class="o">%</span> <span class="o">/</span><span class="n">container</span><span class="o">-</span><span class="n">data</span>
+</pre></div>
+</div>
+</li>
+<li><p>现在我们启动一个容器并且映射这个挂载的NFS卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1222</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos8</span><span class="o">-</span><span class="n">nfs</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span><span class="o">-</span><span class="n">nfs</span> \
+  <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">container</span><span class="o">-</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">container</span><span class="o">-</span><span class="n">data</span> <span class="n">centos</span><span class="p">:</span><span class="mi">8</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">centos8-nfs</span></code> 检查可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">7</span><span class="n">a9e6663a988</span>        <span class="n">centos</span><span class="p">:</span><span class="mi">8</span>                     <span class="s2">&quot;/bin/bash&quot;</span>              <span class="mi">9</span> <span class="n">seconds</span> <span class="n">ago</span>       <span class="n">Up</span> <span class="mi">7</span> <span class="n">seconds</span>        <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">1222</span><span class="o">-&gt;</span><span class="mi">22</span><span class="o">/</span><span class="n">tcp</span>             <span class="n">centos8</span><span class="o">-</span><span class="n">nfs</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后我们进入这个 <code class="docutils literal notranslate"><span class="pre">centos8-nfs</span></code> 容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">centos8</span><span class="o">-</span><span class="n">nfs</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+<li><p>在容器内部检查磁盘 <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Filesystem</span>        <span class="n">Size</span>  <span class="n">Used</span> <span class="n">Avail</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="o">...</span>
+<span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span>  <span class="mi">117</span><span class="n">G</span>   <span class="mi">12</span><span class="n">G</span>  <span class="mi">101</span><span class="n">G</span>  <span class="mi">11</span><span class="o">%</span> <span class="o">/</span><span class="n">container</span><span class="o">-</span><span class="n">data</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="docker-volume-plugin">
+<h2>方法三：使用Docker volume plugin</h2>
+<p><a class="reference external" href="https://github.com/ContainX/docker-volume-netshare">ContainX/docker-volume-netshare</a><span class="link-target"> [https://github.com/ContainX/docker-volume-netshare]</span> 是一个Docker plugin，可以用来挂载NFS v3/4, AWS EFS 或者 CIFS到容器内部。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>使用netshare插件部署安装比较麻烦，没有集成到发行版中，并且随着Kubernetes发展，较少采用Docker volume plugin方式。所以我没有具体实践这个方法，仅供参考。后续如果有实践需求，例如需要在简单的Docker环境挂载不同的NFS/CIFS等卷情况，我再实践。</p>
+</div>
+<ul>
+<li><p>安装netshare插件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">go</span> <span class="n">get</span> <span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ContainX</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">netshare</span>
+<span class="n">go</span> <span class="n">build</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>也可以通过二进制安装，提供Ubuntu/Debian安装包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ContainX</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">netshare</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="mi">36</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">netshare_0</span><span class="o">.</span><span class="mi">36</span><span class="n">_amd64</span><span class="o">.</span><span class="n">deb</span>
+<span class="n">sudo</span> <span class="n">dpkg</span> <span class="o">-</span><span class="n">i</span> <span class="n">docker</span><span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">netshare_0</span><span class="o">.</span><span class="mi">36</span><span class="n">_amd64</span><span class="o">.</span><span class="n">deb</span>
+</pre></div>
+</div>
+<ul>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/docker-volume-netshare</span></code> 启动参数</p></li>
+<li><p>启动服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">service</span> <span class="n">docker</span><span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">netshare</span> <span class="n">start</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="id4">
+<h3>使用</h3>
+<ul>
+<li><p>运行插件 - 可以添加到systemd或者在后台运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">docker</span><span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">netshare</span> <span class="n">nfs</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">t</span> <span class="o">--</span><span class="n">volume</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">nfs</span> <span class="o">-</span><span class="n">v</span> <span class="n">nfshost</span><span class="o">/</span><span class="n">path</span><span class="p">:</span><span class="o">/</span><span class="n">mount</span> <span class="n">ubuntu</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="id5">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://whyistheinternetbroken.wordpress.com/2015/05/12/techusing-nfs-with-docker-where-does-it-fit-in/">TECH::Using NFS with Docker – Where does it fit in?</a><span class="link-target"> [https://whyistheinternetbroken.wordpress.com/2015/05/12/techusing-nfs-with-docker-where-does-it-fit-in/]</span> - 原作者另外写了两篇有关使用NetApp FlexGroup volumes和加密NFS mount文章，可以进一步参考</p></li>
+<li><p><a class="reference external" href="https://access.redhat.com/solutions/3773891">Mount failed with mount: mount.nfs: access denied by server while mounting error</a><span class="link-target"> [https://access.redhat.com/solutions/3773891]</span> Red Hat提供了非常好的debug方法，建议参考</p></li>
+<li><p><a class="reference external" href="https://www.thegeekdiary.com/mount-nfs-access-denied-by-server-while-mounting-how-to-resolve/">“mount.nfs: access denied by server while mounting” – how to resolve</a><span class="link-target"> [https://www.thegeekdiary.com/mount-nfs-access-denied-by-server-while-mounting-how-to-resolve/]</span></p></li>
+<li><p><a class="reference external" href="https://stackoverflow.com/questions/39922161/mounting-nfs-shares-inside-docker-container">Mounting nfs shares inside docker container</a><span class="link-target"> [https://stackoverflow.com/questions/39922161/mounting-nfs-shares-inside-docker-container]</span> 提供了docker挂载NFS的多种方法概述</p></li>
+<li><p><a class="reference external" href="https://github.com/ContainX/docker-volume-netshare">ContainX/docker-volume-netshare</a><span class="link-target"> [https://github.com/ContainX/docker-volume-netshare]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>从Kubernetes集群删除节点</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kubernetes">
+<span id="remove-node"></span><h1>从Kubernetes集群删除节点</h1>
+<p>在 <a class="reference internal" href="../arm/arm_k8s_deploy.xhtml#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 我在3个worker节点上部署了 <code class="docutils literal notranslate"><span class="pre">replicas:</span> <span class="pre">3</span></code> 的 <code class="docutils literal notranslate"><span class="pre">name:</span> <span class="pre">kube-verify</span></code> 的 <code class="docutils literal notranslate"><span class="pre">Deployment</span></code> ，所以，我们会看到有3个pod，分别运行在3个worker节点上:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                           <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>         <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">nvnhl</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">23</span><span class="n">h</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">3.2</span>   <span class="n">jetson</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">s5qb5</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">23</span><span class="n">h</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">2.2</span>   <span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">v9zxt</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">23</span><span class="n">h</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">1.2</span>   <span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>我们需要将节点 <code class="docutils literal notranslate"><span class="pre">jetson</span></code> 安全删除并重新加入，所以请参考 <a class="reference internal" href="#remove-node"><span class="std std-ref">从Kubernetes集群删除节点</span></a> 执行操作:</p>
+<section id="jeson">
+<h2>删除 <code class="docutils literal notranslate"><span class="pre">jeson</span></code> 节点</h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>所谓删除节点，首先需要清空节点上所有业务pod。这个清理pod通常不需要包含daemonset(和节点相关的运维辅助pods)，所以使用参数 <code class="docutils literal notranslate"><span class="pre">--ignore-daemonsets</span></code> 。</p>
+</div>
+<p>由于jetson节点挂掉了，所以首先通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">nodes</span></code> 看到节点是 <code class="docutils literal notranslate"><span class="pre">NotReady</span></code> 状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>     <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>
+<span class="n">jetson</span>       <span class="n">NotReady</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">104</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>关闭节点调度(cordon):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">cordon</span> <span class="n">jetson</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>关闭调度可以通过标签过滤选择，使用参数 <code class="docutils literal notranslate"><span class="pre">-l,</span> <span class="pre">--selector=&quot;&quot;</span></code></p>
+</div>
+<p>关闭节点调度以后，再次使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">nodes</span></code> 检查节点状态如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>                        <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>
+<span class="n">jetson</span>       <span class="n">NotReady</span><span class="p">,</span><span class="n">SchedulingDisabled</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">104</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>清空(drain)节点(注意，这个步骤仅在节点 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 状态下才需要执行，如果节点已经 <code class="docutils literal notranslate"><span class="pre">NotReady</span></code> 了，则 <code class="docutils literal notranslate"><span class="pre">drain</span></code> 命令会卡住无法完成):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">drain</span> <span class="n">jetson</span> <span class="o">--</span><span class="n">delete</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">data</span> <span class="o">--</span><span class="n">force</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">daemonsets</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里只要 <code class="docutils literal notranslate"><span class="pre">drain</span></code> 没有报错返回就表明节点已经清理干净。</p>
+<p>此时检查节点 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">nodes</span> <span class="pre">-o</span> <span class="pre">wide</span></code> 会看到节点状态是 <code class="docutils literal notranslate"><span class="pre">SchedulingDisabled</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>                     <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>             <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>     <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">jetson</span>       <span class="n">Ready</span><span class="p">,</span><span class="n">SchedulingDisabled</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">56</span><span class="n">m</span>     <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">18.04</span><span class="o">.</span><span class="mi">5</span> <span class="n">LTS</span>   <span class="mf">4.9</span><span class="o">.</span><span class="mi">140</span><span class="o">-</span><span class="n">tegra</span>      <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">6</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>                      <span class="n">master</span>   <span class="mi">7</span><span class="n">d1h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>                      <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">3</span><span class="n">d13h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>                      <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">3</span><span class="n">d13h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.16</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+</pre></div>
+</div>
+<p>不过实际上，我发现 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">drain</span></code> 并没有清理掉jetson节点上的 <code class="docutils literal notranslate"><span class="pre">cni0</span></code> ，使用 <code class="docutils literal notranslate"><span class="pre">ifconfig</span></code> 依然会看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cni0</span><span class="p">:</span> <span class="n">flags</span><span class="o">=</span><span class="mi">4099</span><span class="o">&lt;</span><span class="n">UP</span><span class="p">,</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="o">&gt;</span>  <span class="n">mtu</span> <span class="mi">1500</span>
+       <span class="n">inet</span> <span class="mf">10.244</span><span class="o">.</span><span class="mf">3.1</span>  <span class="n">netmask</span> <span class="mf">255.255</span><span class="o">.</span><span class="mf">255.0</span>  <span class="n">broadcast</span> <span class="mf">10.244</span><span class="o">.</span><span class="mf">3.255</span>
+       <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="n">d476</span><span class="p">:</span><span class="n">bff</span><span class="p">:</span><span class="n">fe23</span><span class="p">:</span><span class="n">b011</span>  <span class="n">prefixlen</span> <span class="mi">64</span>  <span class="n">scopeid</span> <span class="mh">0x20</span><span class="o">&lt;</span><span class="n">link</span><span class="o">&gt;</span>
+       <span class="n">ether</span> <span class="n">d6</span><span class="p">:</span><span class="mi">76</span><span class="p">:</span><span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="n">b0</span><span class="p">:</span><span class="mi">11</span>  <span class="n">txqueuelen</span> <span class="mi">1000</span>  <span class="p">(</span><span class="n">Ethernet</span><span class="p">)</span>
+       <span class="n">RX</span> <span class="n">packets</span> <span class="mi">160</span>  <span class="nb">bytes</span> <span class="mi">4480</span> <span class="p">(</span><span class="mf">4.4</span> <span class="n">KB</span><span class="p">)</span>
+       <span class="n">RX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span>  <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">frame</span> <span class="mi">0</span>
+       <span class="n">TX</span> <span class="n">packets</span> <span class="mi">412</span>  <span class="nb">bytes</span> <span class="mi">39406</span> <span class="p">(</span><span class="mf">39.4</span> <span class="n">KB</span><span class="p">)</span>
+       <span class="n">TX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span> <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">carrier</span> <span class="mi">0</span>  <span class="n">collisions</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>这导致节点再次加入时候会出现无法分配 <code class="docutils literal notranslate"><span class="pre">cni0</span></code> 的IP地址。所以我这里手工做了清理:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="n">delete</span> <span class="n">cni0</span>
+</pre></div>
+</div>
+<p>注意，如果确实修复好节点，可以恢复节点调度:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">uncordon</span> <span class="n">jetson</span>
+</pre></div>
+</div>
+<ul>
+<li><p>再次执行检查pods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+<li><p>可以看到当前运行的pod被驱逐(evict)到其他节点上(这里是 <code class="docutils literal notranslate"><span class="pre">kube-verify-69dd569645-nvnhl</span></code> 被驱逐改到 <code class="docutils literal notranslate"><span class="pre">pi-worker2</span></code> 节点上的 <code class="docutils literal notranslate"><span class="pre">kube-verify-69dd569645-9msjb</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                           <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>         <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="mi">9</span><span class="n">msjb</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">39</span><span class="n">s</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">2.3</span>   <span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">s5qb5</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">24</span><span class="n">h</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">2.2</span>   <span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">v9zxt</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">24</span><span class="n">h</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">1.2</span>   <span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果jetson节点是意外故障，则会看到新的容器已经调度到其他节点上，但是 jetson节点上容器一直处于 <code class="docutils literal notranslate"><span class="pre">Terminating</span></code> 状态无法结束。不过没有关系，后面直接执行 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">delete</span> <span class="pre">node</span> <span class="pre">jetson</span></code> 会清理掉残留pod信息。</p>
+</div>
+<ul>
+<li><p>如果检查所有namespaces，可以看到 jetson 节点只剩下一些系统pods，这样我们就能够安全删除该节点(没有业务pods):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">namespaces</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">jetson</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似(如果节点jetson是 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 正常状态，则会看到类似如下输出):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">arm64</span><span class="o">-</span><span class="n">z544l</span>          <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">25</span><span class="n">h</span>     <span class="mf">30.73</span><span class="o">.</span><span class="mf">166.34</span>   <span class="n">jetson</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">twhgk</span>                <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">25</span><span class="n">h</span>     <span class="mf">30.73</span><span class="o">.</span><span class="mf">166.34</span>   <span class="n">jetson</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="mi">49</span><span class="n">qlz</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">25</span><span class="n">h</span>     <span class="mf">30.73</span><span class="o">.</span><span class="mf">166.34</span>   <span class="n">jetson</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul>
+<li><p>删除(delete node):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">node</span> <span class="n">jetson</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后验证确保节点已经删除:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>假设我们修复好了jetson节点故障，需要重新将节点加入回集群。</p>
+</div>
+<ul>
+<li><p>登陆jetson节点，重新执行加入jetson节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> \
+    <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">HASH_TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里会报错显示已经存在配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>W1206 23:35:48.174471   12598 join.go:377] [preflight] WARNING: --control-plane is also required when passing control-plane related flags such as [certificate-key, apiserver-advertise-address, apiserver-bind-port]
+[preflight] Running pre-flight checks
+error execution phase preflight: [preflight] Some fatal errors occurred:
+     [ERROR FileAvailable--etc-kubernetes-kubelet.conf]: /etc/kubernetes/kubelet.conf already exists
+     [ERROR Port-10250]: Port 10250 is in use
+     [ERROR FileAvailable--etc-kubernetes-pki-ca.crt]: /etc/kubernetes/pki/ca.crt already exists
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+To see the stack trace of this error execute with --v=5 or higher
+</pre></div>
+</div>
+<p>这是因为遗漏了清理 jetson 节点的步骤，所以补上操作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">reset</span>
+</pre></div>
+</div>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[reset] WARNING: Changes made to this host by &#39;kubeadm init&#39; or &#39;kubeadm join&#39; will be reverted.
+[reset] Are you sure you want to proceed? [y/N]:
+</pre></div>
+</div>
+<p>输入 <code class="docutils literal notranslate"><span class="pre">y</span></code> 确认机会执行本地节点清理工作。</p>
+<ul>
+<li><p>上述reset指令并不重置或清理iptables规则或IPVS表，如果要reset iptables，则需要手工执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">F</span> <span class="o">&amp;&amp;</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">F</span> <span class="o">&amp;&amp;</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">mangle</span> <span class="o">-</span><span class="n">F</span> <span class="o">&amp;&amp;</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">X</span>
+</pre></div>
+</div>
+</li>
+<li><p>注意，如果集群设置使用了 <code class="docutils literal notranslate"><span class="pre">IPVS</span></code> 则还需要执行 <code class="docutils literal notranslate"><span class="pre">ipvsadm</span> <span class="pre">--clear</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ipvsadm</span> <span class="o">-</span><span class="n">C</span>
+</pre></div>
+</div>
+</li>
+<li><p>完成清理节点之后，再次执行节点加入就可以成功:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> \
+    <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">HASH_TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id1">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://stackoverflow.com/questions/56064537/how-to-remove-broken-nodes-in-kubernetes/56289161">How to remove broken nodes in Kubernetes</a><span class="link-target"> [https://stackoverflow.com/questions/56064537/how-to-remove-broken-nodes-in-kubernetes/56289161]</span></p></li>
+<li><p><a class="reference external" href="https://docs.mirantis.com/mcp/q4-18/mcp-operations-guide/kubernetes-operations/k8s-node-ops/k8s-node-remove.html">Remove a Kubernetes Node</a><span class="link-target"> [https://docs.mirantis.com/mcp/q4-18/mcp-operations-guide/kubernetes-operations/k8s-node-ops/k8s-node-remove.html]</span></p></li>
+<li><p><a class="reference external" href="https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/">Safely Drain a Node</a><span class="link-target"> [https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

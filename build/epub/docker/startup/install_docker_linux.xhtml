@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Linux环境安装Docker</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="linuxdocker">
+<span id="install-docker-linux"></span><h1>Linux环境安装Docker</h1>
+<section id="docker">
+<h2>模拟环境的Docker</h2>
+<p>为了能够在测试环境中不断模拟各种实验，我采用两种模式运行Docker:</p>
+<ul class="simple">
+<li><p>在KVM虚拟机中运行Docker</p></li>
+</ul>
+<p><a class="reference internal" href="../../kvm/startup/clone_vm.xhtml#clone-vm"><span class="std std-ref">复制KVM虚拟机</span></a> 构建了一个名为 <code class="docutils literal notranslate"><span class="pre">dockerstack</span></code> 的KVM虚拟机，在KVM虚拟机内部测试各种Docker的功能。这种方式可以保持Host物理主机纯净，不容易搞坏基础环境。虚拟机可以不断clone重建，即使偶尔失误异常也能快速恢复测试环境。</p>
+<ul class="simple">
+<li><p>在物理主机MacBook Pro上运行Docker</p></li>
+</ul>
+<p>在MacBook Pro笔记本上，在 <a class="reference internal" href="../../ceph/ceph_docker_in_studio.xhtml#ceph-docker-in-studio"><span class="std std-ref">Stuido环境Docker容器运行Ceph</span></a> ，主要原因是获得接近物理主机运行性能，并且轻量级易维护。这种Docker运行基础服务，保持稳定减少折腾。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>大多数Docker测试都在 <code class="docutils literal notranslate"><span class="pre">dockerstack</span></code> 中完成。</p>
+</div>
+</section>
+<section id="rhel-centosdocker">
+<h2>RHEL/CentOS平台安装Docker</h2>
+<ul>
+<li><p>通过发行版安装docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动docker服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置docker在操作系统启动时启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference internal" href="install_docker_centos8.xhtml#install-docker-centos8"><span class="std std-ref">在CentOS 8上安装Docker CE</span></a> 方法略有不同。</p>
+</div>
+</section>
+<section id="debian-ubuntudocker">
+<h2>Debian/Ubuntu平台安装Docker</h2>
+<section id="ubuntudocker">
+<h3>使用Ubuntu发行版的软件仓库安装Docker</h3>
+<p>Ubuntu默认发行版本 <code class="docutils literal notranslate"><span class="pre">docker.io</span></code> 是可以兼容在Ubuntu主推的LXD系统中，但是版本会较Docker官方低一些。安装非常简便:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span>
+</pre></div>
+</div>
+<p>安装完成后docker服务就已经启动，此时可以使用以下命令查看docker容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span>
+</pre></div>
+</div>
+</section>
+<section id="dockerdocker-cedocker">
+<h3>使用Docker官方提供的Docker CE安装Docker</h3>
+<ul>
+<li><p>Docker官方提供了 <a class="reference external" href="https://docs.docker.com/install/linux/docker-ce/ubuntu/">Docker CE for Ubuntu</a><span class="link-target"> [https://docs.docker.com/install/linux/docker-ce/ubuntu/]</span> ，需要删除掉Ubuntu系统自带 <code class="docutils literal notranslate"><span class="pre">docker.io</span></code> 软件之后才可以安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">remove</span> <span class="n">docker</span> <span class="n">docker</span><span class="o">-</span><span class="n">engine</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Docker CE on Ubuntu支持 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">aufs</span></code> 存储驱动</p>
+</div>
+<ul>
+<li><p>设置软件仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="c1"># 设置apt使用HTTPS访问软件仓库</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> \
+    <span class="n">apt</span><span class="o">-</span><span class="n">transport</span><span class="o">-</span><span class="n">https</span> \
+    <span class="n">ca</span><span class="o">-</span><span class="n">certificates</span> \
+    <span class="n">curl</span> \
+    <span class="n">software</span><span class="o">-</span><span class="n">properties</span><span class="o">-</span><span class="n">common</span>
+</pre></div>
+</div>
+</li>
+<li><p>添加Docker官方GPG key:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">fsSL</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">docker</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">linux</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="n">gpg</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="o">-</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置Docker官方的 <code class="docutils literal notranslate"><span class="pre">stable</span></code> 仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">add</span><span class="o">-</span><span class="n">apt</span><span class="o">-</span><span class="n">repository</span> \
+    <span class="s2">&quot;deb [arch=amd64] https://download.docker.com/linux/ubuntu </span><span class="se">\</span>
+<span class="s2">    $(lsb_release -cs) </span><span class="se">\</span>
+<span class="s2">    stable&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装Docker CE:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">docker</span><span class="o">-</span><span class="n">ce</span>
+</pre></div>
+</div>
+</li>
+<li><p>验证Docker CE:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">docker</span> <span class="n">run</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="arch-linuxdocker">
+<h2>Arch Linux安装Docker</h2>
+<p>Arch Linux发行版的 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 软件包就是Docker CE版本，可以直接安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<ul>
+<li><p>安装完成后检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">info</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Docker支持不同的 <a class="reference internal" href="../storage/docker_storage_driver.xhtml#docker-storage-driver"><span class="std std-ref">Docker存储驱动</span></a> ，不同的存储驱动一个影响到容器镜像的存储层(多个镜像共享存储层)性能。</p>
+<p><code class="docutils literal notranslate"><span class="pre">devicemapper</span></code> 性能较弱，特别在传统磁盘上，所以不建议在生产环境使用 <code class="docutils literal notranslate"><span class="pre">devicemapper</span></code> 。</p>
+<p>由于Arch Linux使用了较新的内核，所以不需要使用兼容选线，通常的较好选项是 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 可以看到存储驱动类型，例如:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Storage</span> <span class="n">Driver</span><span class="p">:</span> <span class="n">overlay2</span>
+  <span class="n">Backing</span> <span class="n">Filesystem</span><span class="p">:</span> <span class="n">extfs</span>
+  <span class="n">Supports</span> <span class="n">d_type</span><span class="p">:</span> <span class="n">true</span>
+  <span class="n">Native</span> <span class="n">Overlay</span> <span class="n">Diff</span><span class="p">:</span> <span class="n">false</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，这里 <code class="docutils literal notranslate"><span class="pre">storage</span> <span class="pre">driver</span></code> 不是Docker用于数据持久化存储的 <a class="reference internal" href="../storage/docker_volume.xhtml#docker-volume"><span class="std std-ref">Docker 卷</span></a> ，而是用于存储容器镜像的层次型文件系统。</p>
+<p>我在 <a class="reference internal" href="../../linux/ubuntu_linux/index.xhtml#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 上采用 <a class="reference internal" href="../storage/docker_btrfs_driver.xhtml#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> (虽然现在我更倾向于生产环境使用XFS) ；在 <a class="reference internal" href="../../linux/arch_linux/index.xhtml#arch-linux"><span class="std std-ref">Arch Linux</span></a> 我采用 <a class="reference internal" href="../../linux/storage/filesystem/lvm_xfs_in_studio.xhtml#lvm-xfs-in-studio"><span class="std std-ref">Studio环境的LVM+XFS存储</span></a> 文件系统，所以对应Docker的storage driver是 <a class="reference internal" href="../storage/docker_overlay_driver.xhtml#docker-overlay-driver"><span class="std std-ref">Docker OverlayFS存储引擎</span></a> 。</p>
+</div>
+</section>
+<section id="sudodocker">
+<span id="run-docker-without-sudo"></span><h2>无需sudo运行docker</h2>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 指令连接docker服务默认是通过sock，所以用户需要有对 <code class="docutils literal notranslate"><span class="pre">/var/run/docker.sock</span></code> 读写的权限。</p>
+<ul>
+<li><p>检查操作系统中 <code class="docutils literal notranslate"><span class="pre">docker.sock</span></code> 文件权限:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ls -lh /var/run/docker.sock
+srw-rw---- 1 root docker 0 Feb 11 11:21 /var/run/docker.sock
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到 <code class="docutils literal notranslate"><span class="pre">/var/run/docker.sock</span></code> 属于 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 用户组（ubuntu系统），如果你使用的操作系统不同，可能是其他用户组，如 <code class="docutils literal notranslate"><span class="pre">root</span></code> ，则对应加入到相应用户组:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo usermod -aG docker $USER
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实践发现上述将用户添加到 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 用户组不能立即生效。我尝试直接重启 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 服务未生效，实际是重启了操作系统之后才生效。</p>
+</div>
+</section>
+<section id="id1">
+<h2>快速起步</h2>
+<p>当你安装完docker运行环境，我们就可以开始快速 <a class="reference internal" href="docker_run.xhtml#docker-run"><span class="std std-ref">在Docker容器中运行命令</span></a> ，体验docker神奇的魔力。当然，如果你使用的操纵系统比较特殊，例如macOS，或者你使用了最新的CentOS 8操作系统，请参考对应环境的安装:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="install_docker_macos.xhtml#install-docker-macos"><span class="std std-ref">macOS安装Docker</span></a></p></li>
+<li><p><a class="reference internal" href="install_docker_centos8.xhtml#install-docker-centos8"><span class="std std-ref">在CentOS 8上安装Docker CE</span></a></p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.docker.com/install/linux/docker-ce/ubuntu/">Get Docker CE for Ubuntu</a><span class="link-target"> [https://docs.docker.com/install/linux/docker-ce/ubuntu/]</span></p></li>
+<li><p><a class="reference external" href="https://medium.com/&#64;Grigorkh/how-to-install-docker-on-ubuntu-16-04-3f509070d29c">How To Install Docker on Ubuntu 16.04</a><span class="link-target"> [https://medium.com/&#64;Grigorkh/how-to-install-docker-on-ubuntu-16-04-3f509070d29c]</span></p></li>
+<li><p><a class="reference external" href="https://www.ubuntu.com/containers/docker-ubuntu">Docker Engine on Ubuntu</a><span class="link-target"> [https://www.ubuntu.com/containers/docker-ubuntu]</span> - Ubuntu主推LXC容器(LXD)，不过也同时支持Docker Engine</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

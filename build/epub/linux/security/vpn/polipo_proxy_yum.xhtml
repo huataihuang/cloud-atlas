@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Polipo代理和YUM代理配置</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="polipoyum">
+<span id="polipo-proxy-yum"></span><h1>Polipo代理和YUM代理配置</h1>
+<p>在部署 <a class="reference internal" href="../../../kubernetes/index.xhtml#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 时我们需要使用 <a class="reference internal" href="openconnect_vpn.xhtml#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 来搭建翻墙的梯子，以便能够从Google仓库安装Kubernetes。这在最初 <a class="reference internal" href="../../../studio/kvm_docker_in_studio.xhtml#kvm-docker-in-studio"><span class="std std-ref">Studio环境KVM和Docker</span></a> 模拟构建使用 <a class="reference internal" href="../../../kvm/libvirt/network/libvirt_nat_network.xhtml#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> 是可行的：</p>
+<ul class="simple">
+<li><p>在物理主机上使用openconnect打通VPN</p></li>
+<li><p>所有运行在libvirt的NAT网络中的KVM虚拟机通过物理主机的IP masquerade模式共享物理主机的VPN链路</p></li>
+</ul>
+<p>但是，在物理主机上部署kubernetes时，如果同时物理机上启用了VPN接口会导致困扰，因为kubeadm初始化会使用 <code class="docutils literal notranslate"><span class="pre">tun0</span></code> VPN接口(包括了默认路由)进行配置，所以一旦关闭VPN会触发Kubernetes无法使用。详见 <a class="reference internal" href="../../../kubernetes/deployment/bootstrap_kubernetes/kubeadm.xhtml#prepare-for-k8s-install"><span class="std std-ref">安装kubernetes前准备</span></a> 遇到的问题，解决的方法就是本文思路：</p>
+<ul class="simple">
+<li><p>在局域网内部选择一台物理服务器部署openconnect VPN客户端，架好梯子</p></li>
+<li><p>在这台物理服务器上部署polipo代理软件</p></li>
+<li><p>配置所有部署Kubernetes的主机YUM使用polipo代理访问Internet进行软件包安装</p></li>
+</ul>
+<section id="polipo">
+<h2>Polipo</h2>
+<p><a class="reference external" href="http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/">Polipo代理服务器</a><span class="link-target"> [http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/]</span> 是一个非常小巧快速的缓存型web代理服务器。虽然Polipo被设计成个人或者小型团队私用，但是也可以用于大型组织。</p>
+<p>Polipo具有以下一些特点：</p>
+<ul class="simple">
+<li><p>如果确定远程服务器支持的话，Polipo就会使用HTTP/1.1 <code class="docutils literal notranslate"><span class="pre">pipelining</span></code> ，这样进入的请求将管道化或者再多个连接进入并行模式（这个比简单使用持久化连接的代理服务器，如Squid，要更高效）</p></li>
+<li><p>如果一个下载被中断，Polipo会缓存这个会话的 <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">segement</span></code> ，这样后续如果需要，可以使用 <code class="docutils literal notranslate"><span class="pre">Range</span></code> 请求来继续完成</p></li>
+<li><p>Polipo可以在客户端发送HTTP/1.0请求转发给后端服务器时升级为HTTP/1.1请求，并且自动转换</p></li>
+<li><p>Polipo支持IPv6</p></li>
+<li><p>Polipo可选使用 <code class="docutils literal notranslate"><span class="pre">Poor</span> <span class="pre">Man's</span> <span class="pre">Multiplexing</span></code> 来减少进一步延迟。</p></li>
+<li><p>由于支持SOCKS协议，Polipo可以和 <code class="docutils literal notranslate"><span class="pre">tor</span></code> 匿名网络一起使用</p></li>
+<li><p>Polipo支持简单的过滤，可以用来移除一些广告和增加私密性。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">pipelining</span></code> - 使用持久化连接时，有可能转换成管道化或流化请求，例如，在一个连接中发送多个请求而不用等待请求返回。这种技术使得服务器更快响应减少延迟。另外，由于多个请求在一个数据包中发送，管道化减少网络流量。管道化已经是一种常用技术，但是HTTP 1.0不支持管道化。HTTP 1.1在使用持久化连接的服务器实现要求管道化支持，但是有些存在bug的服务器虽然声称自己支持HTTP/1.1但却不支持管道化。Polipo会小心地侦测服务器是否支持管道化，如果确认服务器支持就会启用管道化。</p>
+<p><code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">segement</span></code> - 一个部分会话表示会话只有部分被缓存在本地缓存中。有三种方式会导致部分会话：客户端只请求会话的一部分（如Adobe Acrobat Reader插件），服务器端在传输中途丢弃连接（如服务器缺少资源，或者存在bug），客户端丢弃连接（例如用户点击停止）。当一个会话只有部分缓存，它仍然可以使用HTTP的称为 <code class="docutils literal notranslate"><span class="pre">range</span></code> 请求来请求缺失部分的数据。Polipo缓存部分会话在内存中，只存储部分会话的initial分片在磁盘缓存，然后会尝试使用 <code class="docutils literal notranslate"><span class="pre">range</span></code> 请求来获取缺失部分。</p>
+</div>
+</section>
+<section id="id2">
+<h2>安装Polipo</h2>
+<ul>
+<li><p>从Git软件仓库扩取源代码:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jech</span><span class="o">/</span><span class="n">polipo</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后编译:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">polipo</span>
+<span class="n">make</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>编译之后，当前目录下就有一个可执行文件 <code class="docutils literal notranslate"><span class="pre">polipo</span></code></p>
+<p>如果想使用二进制执行代码，Debian系有直接发行包，RedHat软件包需要从第三方获取，Mac OS X可以使用  <a class="reference external" href="http://www.macports.org/">DarwinPorts</a><span class="link-target"> [http://www.macports.org/]</span></p>
+<ul>
+<li><p>复制执行文件到系统目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="n">polipo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>使用Polipo</h2>
+<p>polipo默认启动只监听 <code class="docutils literal notranslate"><span class="pre">127.0.0.1:8123</span></code> ，这样可以防止被非法利用。如果要对外提供服务监听所有接口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">polipo</span> <span class="n">proxyAddress</span><span class="o">=</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span>
+</pre></div>
+</div>
+<section id="systemdpolipo">
+<h3>设置systemd启动polipo</h3>
+<p>参考 <a class="reference external" href="https://linuxconfig.org/how-to-create-systemd-service-unit-in-linux">How to create systemd service unit in Linux</a><span class="link-target"> [https://linuxconfig.org/how-to-create-systemd-service-unit-in-linux]</span></p>
+<ul>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system/polipo.service</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Unit</span><span class="p">]</span>
+<span class="n">Description</span><span class="o">=</span><span class="n">Polipo</span> <span class="n">Proxy</span>
+<span class="n">Requires</span><span class="o">=</span><span class="n">network</span><span class="o">.</span><span class="n">target</span>
+<span class="n">After</span><span class="o">=</span><span class="n">network</span><span class="o">.</span><span class="n">target</span>
+
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">Type</span><span class="o">=</span><span class="n">oneshot</span>
+<span class="n">RemainAfterExit</span><span class="o">=</span><span class="n">yes</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">polipo</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">polipo</span><span class="o">/</span><span class="n">config</span>
+<span class="n">ExecStop</span><span class="o">=</span><span class="n">pkill</span> <span class="n">polipo</span>
+
+<span class="p">[</span><span class="n">Install</span><span class="p">]</span>
+<span class="n">WantedBy</span><span class="o">=</span><span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/polipo/config</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">proxyAddress</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>    <span class="c1"># IPv4 only</span>
+<span class="n">daemonise</span> <span class="o">=</span> <span class="n">true</span>
+<span class="n">logFile</span> <span class="o">=</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">polipo</span>
+<span class="n">pidFile</span> <span class="o">=</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">polipo</span><span class="o">.</span><span class="n">pid</span>
+</pre></div>
+</div>
+</li>
+<li><p>激活启动系统时启用服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">polipo</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">polipo</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="unit-not-found">
+<h4>‘Unit not found’错误排查</h4>
+<p>最初我配置 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system/polipo.service</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Unit</span><span class="p">]</span>
+<span class="n">Description</span><span class="o">=</span><span class="n">Polipo</span> <span class="n">Proxy</span>
+<span class="n">Requires</span><span class="o">=</span><span class="n">Network</span><span class="o">.</span><span class="n">target</span>
+<span class="n">After</span><span class="o">=</span><span class="n">Network</span><span class="o">.</span><span class="n">target</span>
+
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">Type</span><span class="o">=</span><span class="n">oneshot</span>
+<span class="n">RemainAfterExit</span><span class="o">=</span><span class="n">yes</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">polipo</span> <span class="n">proxyAddress</span><span class="o">=</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span>
+<span class="n">ExecStop</span><span class="o">=</span><span class="n">pkill</span> <span class="n">polipo</span>
+
+<span class="p">[</span><span class="n">Install</span><span class="p">]</span>
+<span class="n">WantedBy</span><span class="o">=</span><span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+<p>此时执行 <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">start</span> <span class="pre">polipo</span></code> 出现一个报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Failed</span> <span class="n">to</span> <span class="n">start</span> <span class="n">polipo</span><span class="o">.</span><span class="n">service</span><span class="p">:</span> <span class="n">Unit</span> <span class="ow">not</span> <span class="n">found</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>但是，这个systemd配置已经软链接到 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/multi-user.target.wants</span></code> 目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">polipo</span><span class="o">.</span><span class="n">service</span> <span class="o">-&gt;</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">polipo</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>我尝试了修改:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;/bin/nohup /usr/local/sbin/polipo proxyAddress=0.0.0.0 &amp;&#39;</span>
+</pre></div>
+</div>
+<p>但是报错依旧。</p>
+<p>后来我发现，这个 <code class="docutils literal notranslate"><span class="pre">Unit</span> <span class="pre">not</span> <span class="pre">found</span></code> 实际上是我写错了 <code class="docutils literal notranslate"><span class="pre">network.target</span></code> ，我错误写成了 <code class="docutils literal notranslate"><span class="pre">Network.target</span></code> ，这个大写 <code class="docutils literal notranslate"><span class="pre">N</span></code> 没有匹配上 systemd 中的网络配置。</p>
+<p>修正成正确 <code class="docutils literal notranslate"><span class="pre">network.target</span></code> 之后，则能够启动服务，但是 <code class="docutils literal notranslate"><span class="pre">polipo</span></code> 没有放到后台运行，导致 <code class="docutils literal notranslate"><span class="pre">syatemdctl</span></code> 命令不能返回。所以还需要修订:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;/bin/nohup /usr/local/sbin/polipo proxyAddress=0.0.0.0 &amp;&#39;</span>
+</pre></div>
+</div>
+<p>这样脚本命令就可以在后台运行。不过，polipo支持daemon方式的，所以可以采用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">polipo</span> <span class="n">proxyAddress</span><span class="o">=</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span> <span class="n">daemonise</span><span class="o">=</span><span class="n">true</span>
+</pre></div>
+</div>
+<ul>
+<li><p>参考 <a class="reference external" href="https://github.com/jech/polipo/blob/master/config.sample">polipo config.sample</a><span class="link-target"> [https://github.com/jech/polipo/blob/master/config.sample]</span> 创建配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/polipo/config</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">proxyAddress</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>    <span class="c1"># IPv4 only</span>
+<span class="n">daemonise</span> <span class="o">=</span> <span class="n">true</span>
+<span class="n">logFile</span> <span class="o">=</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">polipo</span>
+<span class="n">pidFile</span> <span class="o">=</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">polipo</span><span class="o">.</span><span class="n">pid</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后配置systemd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">polipo</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">polipo</span><span class="o">/</span><span class="n">config</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="yum">
+<h2>YUM使用代理</h2>
+<p>YUM可以通过通过设置环境变量来使用代理安装软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">http_proxy</span><span class="o">=</span><span class="s2">&quot;http://PROXY_IP:8123&quot;</span>
+<span class="n">yum</span> <span class="n">upgrade</span>
+<span class="n">yum</span> <span class="n">install</span> <span class="n">XXXX</span>
+</pre></div>
+</div>
+<p>对于一直使用代理服务，则配置 <code class="docutils literal notranslate"><span class="pre">/etc/yum.conf</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># The proxy server - proxy server:port number</span>
+<span class="n">proxy</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">PROXY_IP</span><span class="p">:</span><span class="mi">8123</span>
+<span class="c1"># The account details for yum connections</span>
+<span class="n">proxy_username</span><span class="o">=</span><span class="n">yum</span><span class="o">-</span><span class="n">user</span>
+<span class="n">proxy_password</span><span class="o">=</span><span class="n">qwerty</span>
+</pre></div>
+</div>
+<section id="repo">
+<h3>对特定repo启用代理</h3>
+<p>在实际使用中，并不是所有软件仓库都需要代理，通常国内CentOS镜像网站速度很快，如果仅仅因为需要访问google软件仓库而将所有yum仓库都通过代理访问会大大拖累同步效率。</p>
+<p>有两种方式可以实现上述功能：</p>
+<ul>
+<li><p>如果只有少数repo需要使用代理，则可以将全局 <code class="docutils literal notranslate"><span class="pre">yum.conf</span></code> 中的代理设置改到只在这个软件仓库配置中，例如 <code class="docutils literal notranslate"><span class="pre">kubernetes.repo</span></code> 配置中需要添加代理设置</p></li>
+<li><p>如果大多数repo都需要使用代理，仅少数repo是直接访问，则把代理设置如上直接配置在全局配置 <code class="docutils literal notranslate"><span class="pre">yum.conf</span></code> 中，但是在不需要代理的软件仓库配置中添加一行忽略proxy的配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">proxy</span><span class="o">=</span><span class="n">_none_</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>不过，在 <a class="reference external" href="https://dnf.readthedocs.io/en/latest/conf_ref.html">dnf最新参考</a><span class="link-target"> [https://dnf.readthedocs.io/en/latest/conf_ref.html]</span> 中指出可以使用 <code class="docutils literal notranslate"><span class="pre">proxy=</span></code> 空白配置，为了向后兼容，依然可以使用 <code class="docutils literal notranslate"><span class="pre">proxy=_none_</span></code></p>
+</section>
+</section>
+<section id="suse-zypper-yast">
+<h2>SUSE zypper/YaST使用代理</h2>
+<p>SUSE的zypper和YaST的代理配置文件是 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/proxy</span></code> ，可以设置以下类型配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PROXY_ENABLED</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span>
+<span class="n">HTTP_PROXY</span><span class="o">=</span><span class="s2">&quot;http://192.168.0.1:3128&quot;</span>
+<span class="n">HTTPS_PROXY</span><span class="o">=</span><span class="s2">&quot;http://192.168.0.1:3128&quot;</span>
+<span class="n">FTP_PROXY</span><span class="o">=</span><span class="s2">&quot;http://192.168.0.1:3128&quot;</span>
+<span class="n">NO_PROXY</span><span class="o">=</span><span class="s2">&quot;localhost, 127.0.0.1&quot;</span>
+</pre></div>
+</div>
+<p>如果需要账号认证，采用以下形式:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HTTP_PROXY</span><span class="o">=</span><span class="s2">&quot;http://myusername:mypassword@myproxy.example.com:8080&quot;</span>
+</pre></div>
+</div>
+<p>如果要临时生效，也可以在shell中执行以下命令(或者 <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">http_proxy</span><span class="o">=</span><span class="s2">&quot;http://192.168.0.1&quot;</span>
+<span class="n">export</span> <span class="n">ftp_proxy</span><span class="o">=</span><span class="s2">&quot;http://192.168.0.1&quot;</span>
+<span class="n">export</span> <span class="n">https_proxy</span><span class="o">=</span><span class="s2">&quot;http://192.168.0.1&quot;</span>
+<span class="n">export</span> <span class="n">no_proxy</span><span class="o">=</span><span class="s2">&quot;localhost, 127.0.0.1&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/polipo.html">The Polipo Manual</a><span class="link-target"> [http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/polipo.html]</span></p></li>
+<li><p><a class="reference external" href="https://www.suse.com/support/kb/doc/?id=000017441">SUSE Linux Enterprise : How to setup a Proxy manually</a><span class="link-target"> [https://www.suse.com/support/kb/doc/?id=000017441]</span></p></li>
+<li><p><a class="reference external" href="https://www.claudiokuenzler.com/blog/515/use-opensuse-zypper-behind-with-http-proxy-authenticiation">How to use openSUSE zypper behind a proxy (with authentication)</a><span class="link-target"> [https://www.claudiokuenzler.com/blog/515/use-opensuse-zypper-behind-with-http-proxy-authenticiation]</span></p></li>
+<li><p><a class="reference external" href="https://access.redhat.com/solutions/2272171">How to configure a proxy for specific repository only?</a><span class="link-target"> [https://access.redhat.com/solutions/2272171]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

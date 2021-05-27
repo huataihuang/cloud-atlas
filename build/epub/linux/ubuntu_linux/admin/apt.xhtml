@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>APT包管理</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="apt">
+<span id="id1"></span><h1>APT包管理</h1>
+<section id="contrib-non-free">
+<h2>contrib/non-free软件包</h2>
+<p>有些厂商提供的软件包是存放在”捐献”(contrib)和”非自由”(non-free)范畴的，默认没有激活。例如，在NVIDIA CUDA提供了PyCUDA ( <a class="reference internal" href="../../../machine_learning/jetson/develop/jetson_pycuda.xhtml#jetson-pycuda"><span class="std std-ref">Jetson Nano安装pycuda</span></a> ) 就属于 contrib area 。</p>
+<ul>
+<li><p>编辑 <code class="docutils literal notranslate"><span class="pre">/etc/apt/sources.lst</span></code> ，将 <code class="docutils literal notranslate"><span class="pre">contrib</span></code> 和 <code class="docutils literal notranslate"><span class="pre">non-free</span></code> 的配置行激活就可以使用 contrib 和 non-free 仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">deb</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">deb</span><span class="o">.</span><span class="n">debian</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">debian</span> <span class="n">buster</span> <span class="n">main</span> <span class="n">contrib</span> <span class="n">non</span><span class="o">-</span><span class="n">free</span>
+<span class="n">deb</span><span class="o">-</span><span class="n">src</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">deb</span><span class="o">.</span><span class="n">debian</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">debian</span> <span class="n">buster</span> <span class="n">main</span> <span class="n">contrib</span> <span class="n">non</span><span class="o">-</span><span class="n">free</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>APT代理</h2>
+<p>在墙内很多软件仓库由于GFW屏蔽，导致系统部署存在很大障碍。主要的解决方法是构建 <a class="reference internal" href="../../security/vpn/index.xhtml#linux-vpn"><span class="std std-ref">Linux VPN</span></a> 结合 <a class="reference internal" href="../../../web/proxy/squid/index.xhtml#squid"><span class="std std-ref">Squid代理服务</span></a> 代理来翻墙，例如我在部署CentOS/SUSE的系统就采用 <a class="reference internal" href="../../security/vpn/polipo_proxy_yum.xhtml#polipo-proxy-yum"><span class="std std-ref">Polipo代理和YUM代理配置</span></a> 。</p>
+<p>Ubuntu/Debian使用的APT软件包管理也支持代理配置，这里我结合 <a class="reference internal" href="../../../web/proxy/squid/squid_socks_peer.xhtml#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 实现完美翻墙代理。</p>
+<p>在Ubuntu上安装软件时，如果需要使用代理服务器，可以在 <code class="docutils literal notranslate"><span class="pre">/etc/apt/apt.conf</span></code> 中设置，添加如下行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Acquire</span><span class="p">::</span><span class="n">http</span><span class="p">::</span><span class="n">Proxy</span> <span class="s2">&quot;http://yourproxyaddress:proxyport&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>如果代理服务器需要密码和账号登陆，则将:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;http://yourproxyaddress:proxyport&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;http://username:password@yourproxyaddress:proxyport&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="proxy-conf">
+<h2>proxy.conf</h2>
+<p>现在比较新的Ubuntu版本，有关apt的配置都存放在 <code class="docutils literal notranslate"><span class="pre">/etc/apt/apt.conf.d</span></code> 目录下，所以建议将代理配置设置为 <code class="docutils literal notranslate"><span class="pre">/etc/apt/apt.conf.d/proxy.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Acquire</span><span class="p">::</span><span class="n">http</span><span class="p">::</span><span class="n">Proxy</span> <span class="s2">&quot;http://user:password@proxy.server:port/&quot;</span><span class="p">;</span>
+<span class="n">Acquire</span><span class="p">::</span><span class="n">https</span><span class="p">::</span><span class="n">Proxy</span> <span class="s2">&quot;http://user:password@proxy.server:port/&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>文件查找</h2>
+<p>我们经常需要找到某个程序文件属于哪个软件包，例如需要安装或者卸载某个文件。</p>
+<ul>
+<li><p>对于已经安装的软件包，可以通过 <code class="docutils literal notranslate"><span class="pre">dpkg</span></code> 工具查找:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dpkg</span> <span class="o">-</span><span class="n">S</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">ls</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这个命令有点类似 <a class="reference internal" href="../../redhat_linux/index.xhtml#redhat-linux"><span class="std std-ref">RedHat Linux</span></a> 中的 <code class="docutils literal notranslate"><span class="pre">rpm</span> <span class="pre">-q</span> <span class="pre">/bin/ls</span></code></p>
+<ul>
+<li><p>对于尚未安装的软件包，我们需要搜索软件仓库，则建议安装 <code class="docutils literal notranslate"><span class="pre">apt-file</span></code> 工具来搜索:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">apt</span><span class="o">-</span><span class="n">file</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">file</span> <span class="n">update</span>
+<span class="n">apt</span><span class="o">-</span><span class="n">file</span> <span class="n">find</span> <span class="n">kwallet</span><span class="o">.</span><span class="n">h</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此外，你可以可以通过 <a class="reference external" href="http://packages.ubuntu.com/">Ubuntu Packages Search</a><span class="link-target"> [http://packages.ubuntu.com/]</span> 网站来查找软件包。</p>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://askubuntu.com/questions/257290/configure-proxy-for-apt">Configure proxy for APT?</a><span class="link-target"> [https://askubuntu.com/questions/257290/configure-proxy-for-apt]</span></p></li>
+<li><p><a class="reference external" href="https://askubuntu.com/questions/481/how-do-i-find-the-package-that-provides-a-file">How do I find the package that provides a file?</a><span class="link-target"> [https://askubuntu.com/questions/481/how-do-i-find-the-package-that-provides-a-file]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

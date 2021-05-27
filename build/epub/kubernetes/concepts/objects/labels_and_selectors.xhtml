@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>标签和选择器(labels and selectors)</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="labels-and-selectors">
+<span id="id1"></span><h1>标签和选择器(labels and selectors)</h1>
+<section id="node">
+<h2>Node的众所周知标签、申明、瑕疵</h2>
+<p>虽然标签可以任意命名，只要能够正确选择即可。但是， <a class="reference external" href="https://kubernetes.io/docs/reference/labels-annotations-taints/">kubernetes保留了一些总所周知的标签(Labels),申明(Annotations)和瑕疵(Taints)</a><span class="link-target"> [https://kubernetes.io/docs/reference/labels-annotations-taints/]</span> ，例如:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">kubernetes.io/arch</span></code> 这个参数在Go语言中定义为 <code class="docutils literal notranslate"><span class="pre">runtime.GOARCH</span></code> 可以用于混合arm和x86节点的集群</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kubernetes.io/os</span></code> 这个参数在Go语言中定义为 <code class="docutils literal notranslate"><span class="pre">runtime.GOOS</span></code> ，在混合不同操作系统(例如Linux和Windows节点)时使用</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kubernetes.io/hostname</span></code> 需要注意hostname可以在 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 传递参数 <code class="docutils literal notranslate"><span class="pre">--hostname-override</span></code> 参数覆盖</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/instance-type</span></code> 在 <code class="docutils literal notranslate"><span class="pre">cloudprovider</span></code> 中定义虚拟机规格类型，这个是云计算常用的规格，例如 <code class="docutils literal notranslate"><span class="pre">g2.2xlarge</span></code> , <code class="docutils literal notranslate"><span class="pre">m3.medium</span></code> 等等</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">topology.kubernetes.io/zone</span></code> 这个标签是云计算厂商用于标记不同zone的机房拓扑，例如 <code class="docutils literal notranslate"><span class="pre">topology.kubernetes.io/zone=us-east-1c</span></code> 。这个标签在 <code class="docutils literal notranslate"><span class="pre">节点</span></code> (Node) 和 <code class="docutils literal notranslate"><span class="pre">持久化卷</span></code> (PersistentVolume)非常有用。</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>标签实践</h2>
+<ul>
+<li><p>首先需要准备一个Kubernetes集群，我采用 <a class="reference internal" href="../../arm/index.xhtml#kubernetes-arm"><span class="std std-ref">ARM架构Kubernetes</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span> <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">labels</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>   <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>             <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>     <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>   <span class="n">LABELS</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">61</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">18.04</span><span class="o">.</span><span class="mi">5</span> <span class="n">LTS</span>   <span class="mf">4.9</span><span class="o">.</span><span class="mi">140</span><span class="o">-</span><span class="n">tegra</span>      <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">6</span>     <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">jetson</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">68</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1028</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>     <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="o">=</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">65</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1028</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>     <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">65</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.16</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1028</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>     <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker2</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+</pre></div>
+</div>
+<p>这里可以看到重复的标签，例如 <code class="docutils literal notranslate"><span class="pre">beta.kubernetes.io/arch=arm64</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kubernetes.io/arch=arm64</span></code> 应该和我最初部署Kubernetes版本较低，逐步升级到最新版本，向后兼容。</p>
+<ul>
+<li><p>树莓派worker节点配置了SSD硬盘，所以添加标签:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">label</span> <span class="n">nodes</span> <span class="n">pi</span><span class="o">-</span><span class="n">worker1</span> <span class="n">disktype</span><span class="o">=</span><span class="n">ssd</span>
+<span class="n">kubectl</span> <span class="n">label</span> <span class="n">nodes</span> <span class="n">pi</span><span class="o">-</span><span class="n">worker2</span> <span class="n">disktype</span><span class="o">=</span><span class="n">ssd</span>
+</pre></div>
+</div>
+</li>
+<li><p>Jetson节点配置了GPU，所以添加标签:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">label</span> <span class="n">nodes</span> <span class="n">jetson</span> <span class="n">model</span><span class="o">=</span><span class="n">gpu</span>
+</pre></div>
+</div>
+</li>
+<li><p>现在我们deploy时候，指定节点选择:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">nodeSelector</span><span class="p">:</span>
+    <span class="n">disktype</span><span class="p">:</span> <span class="n">ssd</span>
+</pre></div>
+</div>
+</li>
+<li><p>注意，并不是只要设置 <code class="docutils literal notranslate"><span class="pre">nodeSelector</span></code> 就可以完成调度选择，如果没有在deployment中配置 <code class="docutils literal notranslate"><span class="pre">svc</span></code> 指定的pod <code class="docutils literal notranslate"><span class="pre">selector</span></code> 就会导致以下错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">error</span> <span class="n">validating</span> <span class="s2">&quot;deployment_arm.yaml&quot;</span><span class="p">:</span> <span class="n">error</span> <span class="n">validating</span> <span class="n">data</span><span class="p">:</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">Deployment</span><span class="o">.</span><span class="n">spec</span><span class="p">):</span> <span class="n">missing</span> <span class="n">required</span> <span class="n">field</span> <span class="s2">&quot;selector&quot;</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">apps</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">DeploymentSpec</span><span class="p">;</span> <span class="k">if</span> <span class="n">you</span> <span class="n">choose</span> <span class="n">to</span> <span class="n">ignore</span> <span class="n">these</span> <span class="n">errors</span><span class="p">,</span> <span class="n">turn</span> <span class="n">validation</span> <span class="n">off</span> <span class="k">with</span> <span class="o">--</span><span class="n">validate</span><span class="o">=</span><span class="n">false</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这是因为，不仅pod需要通过标签能够选择节点，服务 <code class="docutils literal notranslate"><span class="pre">svc</span></code> 也需要通过标签来选择pod。所以需要注意 <code class="docutils literal notranslate"><span class="pre">deployment.yaml</span></code> 包含以下内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">name</span><span class="p">:</span> <span class="n">onesre</span><span class="o">-</span><span class="n">core</span>
+<span class="o">...</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">app</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">name</span><span class="p">:</span> <span class="n">onesre</span><span class="o">-</span><span class="n">core</span>
+</pre></div>
+</div>
+<p>这样对应的 <code class="docutils literal notranslate"><span class="pre">svc.yaml</span></code> 中配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">app</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">name</span><span class="p">:</span> <span class="n">onesre</span><span class="o">-</span><span class="n">core</span>
+<span class="o">...</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="nb">type</span><span class="p">:</span> <span class="n">ClusterIP</span>
+  <span class="n">clusterIP</span><span class="p">:</span> <span class="kc">None</span>
+  <span class="n">selector</span><span class="p">:</span>
+      <span class="n">app</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">name</span><span class="p">:</span> <span class="n">onesre</span><span class="o">-</span><span class="n">core</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a><span class="link-target"> [https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/]</span></p></li>
+<li><p><a class="reference external" href="https://stackoverflow.com/questions/59480373/validationerror-missing-required-field-selector-in-io-k8s-api-v1-deploymentsp">ValidationError: missing required field “selector” in io.k8s.api.v1.DeploymentSpec</a><span class="link-target"> [https://stackoverflow.com/questions/59480373/validationerror-missing-required-field-selector-in-io-k8s-api-v1-deploymentsp]</span></p></li>
+<li></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>排查Raspberry Pi 4存储测试fio出现crash</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="raspberry-pi-4fiocrash">
+<span id="debug-pi-fio-crash"></span><h1>排查Raspberry Pi 4存储测试fio出现crash</h1>
+<ul>
+<li><p>随机写IOPS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randwrite</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> \
+<span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">1000</span> <span class="o">-</span><span class="n">group_reporting</span> \
+<span class="o">-</span><span class="n">filename</span><span class="o">=</span><span class="n">fio</span><span class="o">.</span><span class="n">img</span> <span class="o">-</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="n">g</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test_fio</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>从测试时性能数据来看，SSD移动硬盘的写入IOPS确实非常高，能够达到 3w IOPS，并且带宽达到 100+MB/s（最高有150MB/s，并且有4w IOPS）。</p>
+<p>但是，测试不到一分钟，树莓派突然重启。</p>
+<p>重启时系统似乎hang在SYS上，没有任何 iowait</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">-</span> <span class="mi">23</span><span class="p">:</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span> <span class="n">up</span> <span class="mi">20</span> <span class="nb">min</span><span class="p">,</span>  <span class="mi">2</span> <span class="n">users</span><span class="p">,</span>  <span class="n">load</span> <span class="n">average</span><span class="p">:</span> <span class="mf">2.45</span><span class="p">,</span> <span class="mf">0.67</span><span class="p">,</span> <span class="mf">0.23</span>
+<span class="n">Tasks</span><span class="p">:</span> <span class="mi">144</span> <span class="n">total</span><span class="p">,</span>   <span class="mi">5</span> <span class="n">running</span><span class="p">,</span> <span class="mi">139</span> <span class="n">sleeping</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">stopped</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">zombie</span>
+<span class="o">%</span><span class="n">Cpu0</span>  <span class="p">:</span>  <span class="mf">3.2</span> <span class="n">us</span><span class="p">,</span> <span class="mf">23.7</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span>  <span class="mf">7.3</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span> <span class="mf">65.8</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="o">%</span><span class="n">Cpu1</span>  <span class="p">:</span>  <span class="mf">7.9</span> <span class="n">us</span><span class="p">,</span> <span class="mf">88.4</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span>  <span class="mf">3.6</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="o">%</span><span class="n">Cpu2</span>  <span class="p">:</span>  <span class="mf">7.9</span> <span class="n">us</span><span class="p">,</span> <span class="mf">90.5</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span>  <span class="mf">1.6</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="o">%</span><span class="n">Cpu3</span>  <span class="p">:</span>  <span class="mf">8.3</span> <span class="n">us</span><span class="p">,</span> <span class="mf">89.0</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span>  <span class="mf">2.7</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="n">MiB</span> <span class="n">Mem</span> <span class="p">:</span>   <span class="mf">1848.2</span> <span class="n">total</span><span class="p">,</span>    <span class="mf">951.3</span> <span class="n">free</span><span class="p">,</span>    <span class="mf">180.9</span> <span class="n">used</span><span class="p">,</span>    <span class="mf">716.1</span> <span class="n">buff</span><span class="o">/</span><span class="n">cache</span>
+<span class="n">MiB</span> <span class="n">Swap</span><span class="p">:</span>      <span class="mf">0.0</span> <span class="n">total</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">free</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">used</span><span class="o">.</span>   <span class="mf">1230.8</span> <span class="n">avail</span> <span class="n">Mem</span>
+
+    <span class="n">PID</span> <span class="n">USER</span>      <span class="n">PR</span>  <span class="n">NI</span>    <span class="n">VIRT</span>    <span class="n">RES</span>    <span class="n">SHR</span> <span class="n">S</span>  <span class="o">%</span><span class="n">CPU</span>  <span class="o">%</span><span class="n">MEM</span>     <span class="n">TIME</span><span class="o">+</span> <span class="n">COMMAND</span>
+   <span class="mi">1918</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">790140</span>   <span class="mi">5020</span>    <span class="mi">976</span> <span class="n">R</span>  <span class="mf">93.0</span>   <span class="mf">0.3</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">28.70</span> <span class="n">fio</span>
+   <span class="mi">1916</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">790132</span>   <span class="mi">4980</span>    <span class="mi">936</span> <span class="n">R</span>  <span class="mf">87.4</span>   <span class="mf">0.3</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">28.58</span> <span class="n">fio</span>
+   <span class="mi">1917</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">790136</span>   <span class="mi">4992</span>    <span class="mi">948</span> <span class="n">R</span>  <span class="mf">87.4</span>   <span class="mf">0.3</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">28.63</span> <span class="n">fio</span>
+   <span class="mi">1919</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">790144</span>   <span class="mi">5052</span>   <span class="mi">1008</span> <span class="n">R</span>  <span class="mf">86.8</span>   <span class="mf">0.3</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">28.27</span> <span class="n">fio</span>
+      <span class="mi">9</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">S</span>   <span class="mf">5.6</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">01.81</span> <span class="n">ksoftirqd</span><span class="o">/</span><span class="mi">0</span>
+   <span class="mi">1921</span> <span class="n">root</span>       <span class="mi">0</span> <span class="o">-</span><span class="mi">20</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">3.0</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">10.73</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="n">H</span><span class="o">-</span><span class="n">kblockd</span>
+   <span class="mi">1914</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">790140</span> <span class="mi">428532</span> <span class="mi">424512</span> <span class="n">S</span>   <span class="mf">2.0</span>  <span class="mf">22.6</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">02.03</span> <span class="n">fio</span>
+   <span class="mi">1913</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">10684</span>   <span class="mi">3124</span>   <span class="mi">2712</span> <span class="n">R</span>   <span class="mf">0.7</span>   <span class="mf">0.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.28</span> <span class="n">top</span>
+</pre></div>
+</div>
+<p>我怀疑是内核bug，high sys可能和内核锁有关</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

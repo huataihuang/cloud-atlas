@@ -246,6 +246,11 @@ Ubuntu for Raspberry Pi
    /dev/sda2        32G  1.8G   29G   6% /mnt
    /dev/sda1       253M   61M  193M  24% /mnt/boot/firmware
 
+.. _disable_cloud_init:
+
+关闭cloud-init
+------------------
+
 - 注意，默认首次启动Ubuntu是会扩展根文件系统的，所以我们需要禁用这个自动扩展功能
 
 对于 Raspbian 镜像，参考 `Disable auto file system expansion in new Jessie image 2016-05-10 <https://raspberrypi.stackexchange.com/questions/47773/disable-auto-file-system-expansion-in-new-jessie-image-2016-05-10>`_ 是修改启动命令行配置文件 ``cmdline.txt`` 将::
@@ -406,3 +411,4 @@ Ubuntu发行版的firmware版本不如树莓派官方版本新，所以需要使
 =====
 
 - `USB Boot Ubuntu Server 20.04 on Raspberry Pi 4 <https://eugenegrechko.com/blog/USB-Boot-Ubuntu-Server-20.04-on-Raspberry-Pi-4>`_
+- `How to disable cloud-init in Ubuntu <https://gist.github.com/zoilomora/f862f76335f5f53644a1b8e55fe98320>`_

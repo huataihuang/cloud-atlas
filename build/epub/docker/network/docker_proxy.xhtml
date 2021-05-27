@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>配置Docker使用代理</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="docker">
+<span id="docker-proxy"></span><h1>配置Docker使用代理</h1>
+<p>如果你也苦于GFW的阻塞，无法正常更新软件，并且在docker需要pull images时候发现无法下载Docker镜像，则可以部署 <a class="reference internal" href="../../web/proxy/squid/index.xhtml#squid"><span class="std std-ref">Squid代理服务</span></a> 的 <a class="reference internal" href="../../web/proxy/squid/squid_socks_peer.xhtml#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 来实现代理翻墙。这里介绍如何配置docker客户端，以便能够通过代理加速镜像下载。</p>
+<section id="dockerproxy">
+<h2>Docker客户端的Proxy</h2>
+<p>Docker客户端支持使用代理服务器，主要有两种方式配置：</p>
+<ul class="simple">
+<li><p>从Docker 17.07和更高版本，可以配置 Docker可短自动传递代理信息给容器</p></li>
+<li><p>Docker 17.06或低版本，则需要在容器中设置相应的环境变量</p></li>
+</ul>
+<section id="id1">
+<h3>配置Docker客户端</h3>
+<ul>
+<li><p>在Docker客户端，创建或配置 <code class="docutils literal notranslate"><span class="pre">~/.docker/config.json</span></code> 设置以下json格式配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+ <span class="s2">&quot;proxies&quot;</span><span class="p">:</span>
+ <span class="p">{</span>
+   <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+   <span class="p">{</span>
+     <span class="s2">&quot;httpProxy&quot;</span><span class="p">:</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;httpsProxy&quot;</span><span class="p">:</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;noProxy&quot;</span><span class="p">:</span> <span class="s2">&quot;*.test.example.com,.example2.com&quot;</span>
+   <span class="p">}</span>
+ <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后创建的新容器，在容器中的环境变量会自动设置代理</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>Docker客户端环境变量</h3>
+<p>可以在 dockerfile 中配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ENV</span> <span class="n">HTTP_PROXY</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span>
+<span class="n">ENV</span> <span class="n">HTTP_PROXY</span> <span class="s2">&quot;http://127.0.0.1:3001&quot;</span>
+<span class="n">ENV</span> <span class="n">FTP_PROXY</span> <span class="s2">&quot;ftp://127.0.0.1:3001&quot;</span>
+<span class="n">ENV</span> <span class="n">NO_PROXY</span> <span class="s2">&quot;*.test.example.com,.example2.com&quot;</span>
+</pre></div>
+</div>
+<p>也可以在运行命令行使用参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">env</span> <span class="n">HTTP_PROXY</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:3001&quot;</span>
+<span class="o">--</span><span class="n">env</span> <span class="n">HTTPS_PROXY</span><span class="o">=</span><span class="s2">&quot;https://127.0.0.1:3001&quot;</span>
+<span class="o">--</span><span class="n">env</span> <span class="n">FTP_PROXY</span><span class="o">=</span><span class="s2">&quot;ftp://127.0.0.1:3001&quot;</span>
+<span class="o">--</span><span class="n">env</span> <span class="n">NO_PROXY</span><span class="o">=</span><span class="s2">&quot;*.test.example.com,.example2.com&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id3">
+<h2>Docker服务器Proxy</h2>
+<section id="systemddockerproxy">
+<h3>systemd配置Docker服务器Proxy</h3>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>配置Docker服务器使用Proxy是成功的，但是访问Docker Hub证书存在问题，见后文参考官方设置。</p>
+</div>
+<p>对于主机上的dockerd服务，在下载镜像等工作使用代理，则需要配置服务的环境变量。</p>
+<ul>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/docker.service.d/http-proxy.conf</span></code> 配置文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;HTTP_PROXY=http://user01:password@10.10.10.10:8080/&quot;</span>
+<span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;HTTPS_PROXY=https://user01:password@10.10.10.10:8080/&quot;</span>
+<span class="n">Environment</span><span class="o">=</span><span class="s2">&quot;NO_PROXY= hostname.example.com,172.10.10.10&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重新加载配置并重启服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后检查加载的配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">show</span> <span class="n">docker</span> <span class="o">--</span><span class="nb">property</span> <span class="n">Environment</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Environment</span><span class="o">=</span><span class="n">GOTRACEBACK</span><span class="o">=</span><span class="n">crash</span> <span class="n">HTTP_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">10.10</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span> <span class="n">HTTPS_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">10.10</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span> <span class="n">NO_PROXY</span><span class="o">=</span> <span class="n">hostname</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="p">,</span><span class="mf">172.10</span><span class="o">.</span><span class="mf">10.10</span>
+</pre></div>
+</div>
+</section>
+<section id="ubuntudockerproxy">
+<h3>Ubuntu配置Docker服务器Proxy</h3>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>暂时没有环境验证，本段落待实践。</p>
+</div>
+<p>在Ubuntu上配置Docker服务器Proxy非常简单，只需要编辑 <code class="docutils literal notranslate"><span class="pre">/etc/default/docker</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># If you need Docker to use an HTTP proxy, it can also be specified here.</span>
+<span class="n">export</span> <span class="n">http_proxy</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:3128/&quot;</span>
+</pre></div>
+</div>
+<p>按照上述配置完成后重启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>Docker官方解决方案</h3>
+<p>参考 Docker官方文档 <a class="reference external" href="https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy">Running a Docker daemon behind an HTTPS_PROXY</a><span class="link-target"> [https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy]</span> 配置局域网在https代理后使用docker服务:</p>
+<ul class="simple">
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">ca-certificates</span></code> 软件包</p></li>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">/etc/pki/tls/certs/ca-bundle.crt</span></code> 中添加代理服务器证书</p></li>
+<li><p>启动 Docker 时使用参数 <code class="docutils literal notranslate"><span class="pre">HTTPS_PROXY=http://username:password&#64;proxy:port/</span></code></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这也是前述配置代理后出现证书错误的解决方法：需要在服务器上添加代理服务器证书</p>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.docker.com/network/proxy/">Configure Docker to use a proxy server</a><span class="link-target"> [https://docs.docker.com/network/proxy/]</span></p></li>
+<li><p><a class="reference external" href="https://www.thegeekdiary.com/how-to-configure-docker-to-use-proxy/">How to configure docker to use proxy</a><span class="link-target"> [https://www.thegeekdiary.com/how-to-configure-docker-to-use-proxy/]</span></p></li>
+<li><p><a class="reference external" href="https://docs.docker.com/network/proxy/">Configure Docker to use a proxy server</a><span class="link-target"> [https://docs.docker.com/network/proxy/]</span></p></li>
+<li><p>Docker官方文档 <a class="reference external" href="https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy">Running a Docker daemon behind an HTTPS_PROXY</a><span class="link-target"> [https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

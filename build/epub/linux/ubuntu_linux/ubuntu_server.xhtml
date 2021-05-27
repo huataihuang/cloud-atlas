@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Ubuntu Server</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="ubuntu-server">
+<span id="id1"></span><h1>Ubuntu Server</h1>
+<section id="id2">
+<h2>安装</h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>Ubuntu Server版本的安装是非常死板的，会抹掉整个磁盘，重新创建GPT磁盘分区表。所以，即使原先磁盘空闲空间，并且想保留&gt;数据磁盘的分区也是不可能的。</p>
+</div>
+<ul class="simple">
+<li><p>最小化安装</p></li>
+</ul>
+<p>最小化安装对于运行云计算平台OpenStack，以及兼顾一些日常工作已经足够。没有必要完整安装大量的应用软件。</p>
+<section id="shell">
+<h3>软件包和shell</h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 需要设置主机名反向解析(添加 <code class="docutils literal notranslate"><span class="pre">xcloud</span></code> )，否则会导致很多操作命令响应缓慢:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>    <span class="n">localhost</span><span class="o">.</span><span class="n">localdomain</span>    <span class="n">localhost</span> <span class="n">xcloud</span>
+<span class="c1"># 如果有固定IP，则设置类似</span>
+<span class="c1"># 192.168.1.24  xcloud</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置sudo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">udo   ALL=(ALL:ALL) NOPASSWD:ALL&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sudoers</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装Server版本之后，有一些必要的软件包推荐安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">parted</span> <span class="n">nmon</span> <span class="n">network</span><span class="o">-</span><span class="n">manager</span> <span class="n">zsh</span> <span class="n">openconnect</span> <span class="n">ipmitool</span> <span class="n">lm</span><span class="o">-</span><span class="n">sensors</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在安装 <a class="reference internal" href="../../arm/raspberry_pi/startup/ubuntu64bit_pi.xhtml#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 我发现对于Ubuntu Server版本，不需要安装桌面版常用但 <code class="docutils literal notranslate"><span class="pre">NetworkManager</span></code> 网络配置工具，而只需要使用内建的 <a class="reference internal" href="network/netplan.xhtml#netplan"><span class="std std-ref">netplan网络配置</span></a> 就可以完成网络配置。这样可以轻量级运行，降低使用资源。</p>
+</div>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">oh</span> <span class="pre">my</span> <span class="pre">zsh</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oh</span> <span class="pre">my</span> <span class="pre">zsh</span></code> 添加用户名和主机提示，在 <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code> 最后添加一行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">PROMPT</span><span class="o">=</span><span class="s1">&#39;%(!.%{</span><span class="si">%F{yellow}</span><span class="s1">%}.)$USER@%{$fg[white]%}%M $</span><span class="si">{ret_status}</span><span class="s1"> %{$fg[cyan]%}</span><span class="si">%c</span><span class="s1">%{$reset_color%} $(git_prompt_info)&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~/.screenrc</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#source /etc/screenrc</span>
+<span class="n">altscreen</span> <span class="n">off</span>
+<span class="n">hardstatus</span> <span class="n">none</span>
+<span class="n">caption</span> <span class="n">always</span> <span class="s2">&quot;%{= wk}%</span><span class="si">{wk}</span><span class="s2">%-Lw%</span><span class="si">{rw}</span><span class="s2"> %n+</span><span class="si">%f</span><span class="s2"> %t %</span><span class="si">{wk}</span><span class="s2">%+Lw %=</span><span class="si">%c</span><span class="s2">%{= R}%{-}&quot;</span>
+
+<span class="n">shelltitle</span> <span class="s2">&quot;$ |zsh&quot;</span>
+<span class="n">defscrollback</span> <span class="mi">50000</span>
+<span class="n">startup_message</span> <span class="n">off</span>
+<span class="n">escape</span> <span class="o">^</span><span class="n">aa</span>
+
+<span class="n">termcapinfo</span> <span class="n">xterm</span><span class="o">|</span><span class="n">xterms</span><span class="o">|</span><span class="n">xs</span><span class="o">|</span><span class="n">rxvt</span> <span class="n">ti</span><span class="o">@</span><span class="p">:</span><span class="n">te</span><span class="o">@</span> <span class="c1"># scroll bar support</span>
+<span class="n">term</span> <span class="n">rxvt</span> <span class="c1"># mouse support</span>
+
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">k</span><span class="p">;</span> <span class="n">screen</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">F1</span> <span class="n">prev</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">k</span> <span class="n">F2</span> <span class="nb">next</span>
+<span class="n">bindkey</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">k</span> <span class="n">kb</span> <span class="n">stuff</span> <span class="o">^</span><span class="n">H</span>
+<span class="n">bind</span> <span class="n">x</span> <span class="n">remove</span>
+<span class="n">bind</span> <span class="n">j</span> <span class="nb">eval</span> <span class="s2">&quot;focus down&quot;</span>
+<span class="n">bind</span> <span class="n">k</span> <span class="nb">eval</span> <span class="s2">&quot;focus up&quot;</span>
+<span class="n">bind</span> <span class="n">s</span> <span class="nb">eval</span> <span class="s2">&quot;split&quot;</span> <span class="s2">&quot;focus down&quot;</span> <span class="s2">&quot;prev&quot;</span>
+<span class="n">vbell</span> <span class="n">off</span>
+<span class="n">shell</span> <span class="o">-</span><span class="n">zsh</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="ip">
+<h3>配置静态IP</h3>
+<p>请参考 <a class="reference internal" href="network/netplan.xhtml#netplan-static-ip"><span class="std std-ref">激活netplan</span></a> 配置服务器静态IP地址，如果采用多网卡bonding，则参考 <a class="reference internal" href="network/netplan.xhtml#netplan-bonding"><span class="std std-ref">netplan配置bonding</span></a></p>
+</section>
+<section id="id3">
+<h3>串口通讯</h3>
+<p>物理服务器通常支持串口管理，可以通过 <a class="reference internal" href="../server/ipmi/ipmitool_tips.xhtml#ipmitool-tips"><span class="std std-ref">IPMI工具ipmitool</span></a> 实现远程管理和维护，但是需要操作系统内核配置。编辑 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;ipv6.disable=1 crashkernel=auto console=tty0 console=ttyS0,115200n8&quot;</span>
+</pre></div>
+</div>
+<p>然后更新grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+</section>
+<section id="timezone">
+<h3>timezone</h3>
+<p>安装完成Unbuntu Server会发现系统时钟不是本地时钟（东8区），这个解决方法是修改 <code class="docutils literal notranslate"><span class="pre">/etc/localtime</span></code> 这个软链接文件的指向:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">unlink</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">localtime</span>
+<span class="n">sudo</span> <span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">zoneinfo</span><span class="o">/</span><span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">localtime</span>
+</pre></div>
+</div>
+<p>完成后再使用 <code class="docutils literal notranslate"><span class="pre">date</span></code> 命令检查时间就是本地时间了。</p>
+</section>
+</section>
+<section id="ubuntu-lts-enablement-stacks">
+<span id="ubuntu-lts-hwe"></span><h2>Ubuntu LTS Enablement Stacks</h2>
+<p>Ubuntu LTS enablement（也称为 HWE 或 Hardware Enablement）stacks为Ubuntu LTS版本提供了较新的内核以及X支持。这些enablement stacks可以手工安装。</p>
+<p>Ubuntu 18.04.2 以及更新的版本在Desktop版本提供了一个保持更新的内核以及X堆栈。服务器架构则默认采用GA内核，并提供了可选的增强内核。</p>
+<section id="hwe">
+<h3>安装HWE软件栈</h3>
+<p>安装HWE软件栈非常简单：</p>
+<ul>
+<li><p>Desktop版本安装HWE:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">--</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> <span class="n">linux</span><span class="o">-</span><span class="n">generic</span><span class="o">-</span><span class="n">hwe</span><span class="o">-</span><span class="mf">18.04</span> <span class="n">xserver</span><span class="o">-</span><span class="n">xorg</span><span class="o">-</span><span class="n">hwe</span><span class="o">-</span><span class="mf">18.04</span>
+</pre></div>
+</div>
+</li>
+<li><p>Server版本安装HWE:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">--</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> <span class="n">linux</span><span class="o">-</span><span class="n">generic</span><span class="o">-</span><span class="n">hwe</span><span class="o">-</span><span class="mf">18.04</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在Ubuntu 18.04 LTS上安装了HWE之后，可以看到内核版本从原先的 4.15.x 系列更改成了 4.18.x 系列，和当前的 Ubuntu 18.10 发行版相当。</p>
+<p>Ubuntu 18.04 LTS也可以安装 <code class="docutils literal notranslate"><span class="pre">xserver-xorg-hwe-18.04</span></code> 。</p>
+<p>实际安装了HWE之后，Ubuntu LTS版本和最新的Stable版本差别不大(内核和Xorg)。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参考： <a class="reference external" href="https://wiki.ubuntu.com/Kernel/LTSEnablementStack">LTS Enablement Stacks</a><span class="link-target"> [https://wiki.ubuntu.com/Kernel/LTSEnablementStack]</span></p>
+</div>
+</section>
+</section>
+<section id="id4">
+<h2>无线网卡</h2>
+<p>我在安装Ubuntu Server时，采用了一块USB网卡连接有线网络，这样可以完整把整个安装过程进行结束。安装完成之后，通过以下方式安装驱动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="o">--</span><span class="n">reinstall</span> <span class="n">install</span> <span class="n">bcmwl</span><span class="o">-</span><span class="n">kernel</span><span class="o">-</span><span class="n">source</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>设置合上笔记本屏幕</h2>
+<p>在Server字符终端方式使用中，实际上都是通过远程登陆服务器方式维护，所以通常会合上笔记本屏幕。和桌面版 <a class="reference internal" href="ubuntu_hibernate.xhtml#ubuntu-hibernate"><span class="std std-ref">Ubuntu Hibernate休眠</span></a> 不同，我期望合上笔记本时候不要休眠继续工作，所以配置 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/logind.conf</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HandleLidSwitch</span><span class="o">=</span><span class="n">ignore</span>
+<span class="n">HandleLidSwitchDocked</span><span class="o">=</span><span class="n">ignore</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>不过，上述ignore配置不会关闭屏幕，所以还有一个参数 <code class="docutils literal notranslate"><span class="pre">lock</span></code> 可以在字符终端合上笔记本屏幕时自动关闭屏幕电源，可以更加节约电能，也降低了笔记本的热量。</p>
+</div>
+<p>然后重启 <code class="docutils literal notranslate"><span class="pre">logind</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">systemd</span><span class="o">-</span><span class="n">logind</span>
+</pre></div>
+</div>
+<p>这样就可以把笔记本合上屏幕，放置在办公桌角落静静使用。</p>
+<p>不过上述设置并没有关闭笔记本屏幕（显示器），所以会导致消耗电能并且发热，解决的方法是执行如下命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">sh</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;vbetool dpms off; read ans; vbetool dpms on&#39;</span>
+</pre></div>
+</div>
+<p>这样关闭屏幕之后，只要按回车键能够恢复屏幕使用。</p>
+</section>
+<section id="fbvesa">
+<h2>字符终端关闭fbvesa</h2>
+<p>我感觉在服务器上启用fbvesa似乎价值不大，并且我反复遇到屏幕花屏问题，似乎是由于混合了设置hibernate休眠以及设置了kms相关。但是由于太多的配置修改，难以恢复到最初的纯净状态。后续再次安装模拟系统，我将完全采用最简单的字符终端模式，关闭fbvesa。</p>
+<p>请参考 <a class="reference external" href="https://support.digium.com/s/article/How-to-disable-the-Linux-frame-buffer-if-it-s-causing-problems">How to disable the Linux frame buffer if it’s causing problems</a><span class="link-target"> [https://support.digium.com/s/article/How-to-disable-the-Linux-frame-buffer-if-it-s-causing-problems]</span> 关闭fbvesa驱动。</p>
+<p>可能的方法（待验证）是修改 <code class="docutils literal notranslate"><span class="pre">/etc/grub.d/10_linux</span></code> ，将以下行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>linux   ${rel_dirname}/${basename} root=${linux_root_device_thisversion} ro ${args}
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>linux   ${rel_dirname}/${basename} root=${linux_root_device_thisversion} ro ${args} nomodeset
+</pre></div>
+</div>
+<p>然后重启系统。不过，当前我测试始终没有成功，似乎是因为安装了nvidia专用驱动导致。我尝试 <a class="reference external" href="https://ubuntuforums.org/showthread.php?t=2357949">I do not know how to Add this thing video=vesafb:off vga=normal’</a><span class="link-target"> [https://ubuntuforums.org/showthread.php?t=2357949]</span> 也没有成功。</p>
+</section>
+<section id="xfce4">
+<h2>安装Xfce4桌面(可选)</h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>默认安装桌面时使用的显卡驱动是 nouveau ，但是这个驱动性能不如官方闭源驱动。如果需要安装官方驱动，请参考 <a class="reference internal" href="ubuntu_desktop.xhtml#ubuntu-desktop-nvidia"><span class="std std-ref">显卡</span></a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上在部署云计算模拟仿真集群测试环境是不需要安装图形桌面的，不过，考虑到MacBook Pro的Retina屏幕可以作为桌面工作的 第二块屏幕，所以我还是安装了图形桌面，并通过 <a class="reference internal" href="../desktop/synergy.xhtml#synergy"><span class="std std-ref">Synergy:主机间共享键盘鼠标</span></a> 。</p>
+<p><a class="reference external" href="https://forum.manjaro.org/t/manjaro-lxde-vs-xfce/48738/6">Manjaro LXDE vs XFCE讨论</a><span class="link-target"> [https://forum.manjaro.org/t/manjaro-lxde-vs-xfce/48738/6]</span> 提供了不同桌面内存的占用对比 。<a class="reference external" href="http://mygeekopinions.blogspot.com/2011/08/lxde-vs-xfce.html">LXDE vs Xfce这篇blog</a><span class="link-target"> [http://mygeekopinions.blogspot.com/2011/08/lxde-vs-xfce.html]</span> 对比了两种轻量级平台的软件差&gt;异。</p>
+</div>
+<p><a class="reference external" href="https://xfce.org">Xfce4</a><span class="link-target"> [https://xfce.org]</span> 是我使用过较好兼容GTK（也就是Gnonme底层库）程序的轻量级桌面</p>
+<ul>
+<li><p>最小化安装Xfce4 GUI环境:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">xfce4</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果之前已经安装过其他桌面，只想安装一个最精简的Xfce4环境（复用其他桌面的终端程序浏览器等），可以添加 <code class="docutils literal notranslate"><span class="pre">--no-install-recommends</span></code> 参数。如果要转换成类似Xubuntu的完整桌面环境，可以使用 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">xfce4-desktop</span></code> 。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果之前已经安装过其他桌面，只想安装一个最精简的Xfce4环境（复用其他桌面的终端程序浏览器等），可以添加 <code class="docutils literal notranslate"><span class="pre">--no-install-recommends</span></code> 参数。如果要转换成类似Xubuntu的完整桌面环境，可以使用 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">xfce4-desktop</span></code> 。</p>
+</div>
+<ul>
+<li><p>可能需要补充安装(参考 <a class="reference external" href="https://docs.xfce.org">Xfce 4.12 Documentation</a><span class="link-target"> [https://docs.xfce.org]</span> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#电源管理、终端</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">xfce4</span><span class="o">-</span><span class="n">power</span><span class="o">-</span><span class="n">manager</span> \
+<span class="n">xfce4</span><span class="o">=</span><span class="n">terminal</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>另外也推荐使用轻量级桌面 <a class="reference external" href="https://lxde.org">LXDE</a><span class="link-target"> [https://lxde.org]</span></p>
+</div>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">xinit</span></code> (包含 <code class="docutils literal notranslate"><span class="pre">startx</span></code> 以及 <code class="docutils literal notranslate"><span class="pre">xserver-xorg-XXX</span></code>  ）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">xinit</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="startx">
+<h3>默认字符终端+startx</h3>
+<ul>
+<li><p>如果要尽可能节约系统资源，可以默认先进入字符终端，仅在需要时启动图形界面:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="nb">set</span><span class="o">-</span><span class="n">default</span> <span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>由于MacBook Pro的Retina屏幕分辨率极高，所以字符终端的字体非常细小。请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/change_tty_console_font_size.md">Ubuntu修改TTY字符终端字体</a><span class="link-target"> [https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/ubuntu/system_administration/change_tty_console_font_size.md]</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dpkg</span><span class="o">-</span><span class="n">reconfigure</span> <span class="n">console</span><span class="o">-</span><span class="n">setup</span>
+</pre></div>
+</div>
+<p>建议选择字符集 <code class="docutils literal notranslate"><span class="pre">Guess</span> <span class="pre">optimal</span> <span class="pre">character</span> <span class="pre">set</span></code> 的字体 <code class="docutils literal notranslate"><span class="pre">Terminus</span></code> ，字体大小可选择 <code class="docutils literal notranslate"><span class="pre">11x22</span></code> 或 <code class="docutils literal notranslate"><span class="pre">14x28</span></code> 。</p>
+</div>
+<ul>
+<li><p>编辑 <code class="docutils literal notranslate"><span class="pre">~/.xinitrc</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 如果要启动Budgie</span>
+<span class="c1">#export XDG_CURRENT_DESKTOP=Budgie:GNOME</span>
+<span class="c1">#exec budgie-desktop</span>
+
+<span class="c1"># 如果要启动Xfce</span>
+<span class="n">exec</span> <span class="n">startxfce4</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动桌面:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">startx</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上，完全手工在Ubuntu Server精简安装Xfce4非常麻烦，可能组件不全。所以如果要使用图形桌面还是直接使用Desktop版本以节约配置花费的实践。</p>
+<p>此外，在MacBook Pro上部署Server版本，字符界面 <code class="docutils literal notranslate"><span class="pre">startx</span></code> 启动桌面，但是退出黑屏，始终没有解决。</p>
+</div>
+</section>
+<section id="x">
+<h3>默认启动X</h3>
+<ul>
+<li><p>如果要默认启动X，需要安装一个Display Manager，例如SLiM:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">slim</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参考 <a class="reference external" href="https://askubuntu.com/questions/829108/what-is-gdm3-kdm-lightdm-how-to-install-and-remove-them">What is gdm3, kdm, lightdm? How to install and remove them?</a><span class="link-target"> [https://askubuntu.com/questions/829108/what-is-gdm3-kdm-lightdm-how-to-install-and-remove-them]</span> 通常发行版会选择LightDM作为显示管理器。不过，LightDM安装依赖非常多（ 所以和各个桌面切换结合完美)，我倾向于选择SLiM。(参考 <a class="reference external" href="https://www.slant.co/topics/2053/~best-linux-display-manager">What is the best Linux Display Manager?</a><span class="link-target"> [https://www.slant.co/topics/2053/~best-linux-display-manager]</span> )</p>
+<p>不过实践中遇到的问题较多</p>
+</div>
+</section>
+<section id="id7">
+<h3>调整xfce4桌面</h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Settings</span> <span class="pre">=&gt;</span> <span class="pre">Appearance</span></code></p>
+<ul>
+<li><p>选择 <code class="docutils literal notranslate"><span class="pre">Xfce-flat</span></code> 作为 Style</p></li>
+<li><p>选择 <code class="docutils literal notranslate"><span class="pre">Humanity-Dark</span></code> 作为 Icons（这样窗口按钮具有现代的扁平化风格，并且图标色彩艳丽）</p></li>
+<li><p>Fonts 从默认的10号修改成13号（解决Retina屏幕字体过小)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">重要关键</span></code> : 一定要取消掉Fonts面板中的 <code class="docutils literal notranslate"><span class="pre">DPI:</span> <span class="pre">Custom</span> <span class="pre">DPI</span> <span class="pre">Setting</span></code> 选项，这个选项默认是 <code class="docutils literal notranslate"><span class="pre">DPI=96</span></code> ，这会导致在Retina屏幕上的菜单和文件管理器中显示的字体放大极为丑陋（这个字体是根据屏幕像素密度计算的，不能直接调整）</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Settings</span> <span class="pre">=&gt;</span> <span class="pre">Preferred</span> <span class="pre">Applications</span></code> 需要设置终端使用 <code class="docutils literal notranslate"><span class="pre">xfce-termianl</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">xfce-termianl</span></code> 设置Preferences中，Colors我选择Presets中的 <code class="docutils literal notranslate"><span class="pre">Tango</span></code> 色彩比较柔和</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果要简化美化步骤，或许可以直接借用Xubuntu设置，即执行 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">xubuntu-default-settings</span></code> 安装。</p>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

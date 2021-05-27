@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Ubuntu无人值守升级</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="ubuntu">
+<span id="unattended-upgrade"></span><h1>Ubuntu无人值守升级</h1>
+<p>首次安装 <a class="reference internal" href="../../../arm/raspberry_pi/startup/ubuntu64bit_pi.xhtml#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 之后，执行升级命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">screen</span>
+</pre></div>
+</div>
+<p>提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Waiting</span> <span class="k">for</span> <span class="n">cache</span> <span class="n">lock</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">get</span> <span class="n">lock</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">dpkg</span><span class="o">/</span><span class="n">lock</span><span class="o">-</span><span class="n">frontend</span><span class="o">.</span> <span class="n">It</span> <span class="ow">is</span> <span class="n">held</span> <span class="n">by</span> <span class="n">process</span> <span class="mi">2542</span> <span class="p">(</span><span class="n">unattended</span><span class="o">-</span><span class="n">upgr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>可以看到系统中有一个进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python3</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">unattended</span><span class="o">-</span><span class="n">upgrade</span>
+</pre></div>
+</div>
+<p>也可能有多个进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root        1317  0.0  0.2 107792 19076 ?        Ssl  00:34   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root        2542 33.4  1.6 296300 134172 ?       Sl   00:39   1:19 /usr/bin/python3 /usr/bin/unattended-upgrade
+root        4534  1.0  1.0 296300 87332 ?        S    00:42   0:00 /usr/bin/python3 /usr/bin/unattended-upgrade
+</pre></div>
+</div>
+<ul>
+<li><p>检查状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● unattended-upgrades.service - Unattended Upgrades Shutdown
+     Loaded: loaded (/lib/systemd/system/unattended-upgrades.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2020-04-01 17:25:51 UTC; 6 months 19 days ago
+       Docs: man:unattended-upgrade(8)
+   Main PID: 1317 (unattended-upgr)
+      Tasks: 2 (limit: 9254)
+     CGroup: /system.slice/unattended-upgrades.service
+             └─1317 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+
+Apr 01 17:25:51 pi-worker1 systemd[1]: Started Unattended Upgrades Shutdown.
+</pre></div>
+</div>
+<ul>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">update</span></code> 命令显示的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Reading</span> <span class="n">package</span> <span class="n">lists</span><span class="o">...</span> <span class="n">Done</span>
+<span class="n">Building</span> <span class="n">dependency</span> <span class="n">tree</span>
+<span class="n">Reading</span> <span class="n">state</span> <span class="n">information</span><span class="o">...</span> <span class="n">Done</span>
+<span class="mi">69</span> <span class="n">packages</span> <span class="n">can</span> <span class="n">be</span> <span class="n">upgraded</span><span class="o">.</span> <span class="n">Run</span> <span class="s1">&#39;apt list --upgradable&#39;</span> <span class="n">to</span> <span class="n">see</span> <span class="n">them</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">XX</span> <span class="pre">packages</span> <span class="pre">can</span> <span class="pre">be</span> <span class="pre">upgraded</span></code> 数值不断减少，说明后台正在不断更新软件包。</p>
+<section id="unatted-upgrades">
+<h2>unatted-upgrades简介</h2>
+<p><code class="docutils literal notranslate"><span class="pre">unattended-upgrades</span></code> 服务提供了自动的安全补丁安装。</p>
+<ul>
+<li><p>如果 <code class="docutils literal notranslate"><span class="pre">unattended-upgrades</span></code> 软件包省委安装，可以通过命令安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装完成后激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dpkg</span><span class="o">-</span><span class="n">reconfigure</span> <span class="o">--</span><span class="n">priority</span><span class="o">=</span><span class="n">low</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述命令会创建 <code class="docutils literal notranslate"><span class="pre">/etc/apt/apt.conf.d/20auto-upgrades</span></code> 配置，包含一下内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">APT</span><span class="p">::</span><span class="n">Periodic</span><span class="p">::</span><span class="n">Update</span><span class="o">-</span><span class="n">Package</span><span class="o">-</span><span class="n">Lists</span> <span class="s2">&quot;1&quot;</span><span class="p">;</span>
+<span class="n">APT</span><span class="p">::</span><span class="n">Periodic</span><span class="p">::</span><span class="n">Unattended</span><span class="o">-</span><span class="n">Upgrade</span> <span class="s2">&quot;1&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>当apt任务启动时，它将随机在 0 到 <code class="docutils literal notranslate"><span class="pre">APT::Periodic::RandomSleep</span></code> 秒数之间休眠，默认是1800秒，也就是停止最多30分钟，这样可以避免大量用户同时访问镜像网站而导致压力过大。只有使用本地镜像才可以将这个值设为0。</p>
+<p>如果需要更多升级调试信息，则设置 <code class="docutils literal notranslate"><span class="pre">APT::Periodic::Verbose</span> <span class="pre">&quot;1&quot;;</span></code></p>
+<section id="unattended-upgrades">
+<h3>当前unattended-upgrades配置</h3>
+<p>执行一下命令可以获得当前apt配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">config</span> <span class="n">dump</span> <span class="n">APT</span><span class="p">::</span><span class="n">Periodic</span><span class="p">::</span><span class="n">Unattended</span><span class="o">-</span><span class="n">Upgrade</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="cronaptitude">
+<h2>设置cron和aptitude</h2>
+<ul>
+<li><p>可以设置每周更新安全补丁，增加一个 <code class="docutils literal notranslate"><span class="pre">/etc/cron.weekly/apt-security-updates</span></code> 配置如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>echo &quot;**************&quot; &gt;&gt; /var/log/apt-security-updates
+date &gt;&gt; /var/log/apt-security-updates
+aptitude update &gt;&gt; /var/log/apt-security-updates
+aptitude safe-upgrade -o Aptitude::Delete-Unused=false --assume-yes --target-release `lsb_release -cs`-security &gt;&gt; /var/log/apt-security-updates
+echo &quot;Security updates (if any) installed&quot;
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后注意这个文件必须设置为可执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">cron</span><span class="o">.</span><span class="n">weekly</span><span class="o">/</span><span class="n">apt</span><span class="o">-</span><span class="n">security</span><span class="o">-</span><span class="n">updates</span>
+</pre></div>
+</div>
+<p>这样就能够每周执行升级</p>
+<ul>
+<li><p>还需要配套设置升级日志轮转，编辑 <code class="docutils literal notranslate"><span class="pre">/etc/logrotate.d/apt-security-updates</span></code> 内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">apt</span><span class="o">-</span><span class="n">security</span><span class="o">-</span><span class="n">updates</span> <span class="p">{</span>
+  <span class="n">rotate</span> <span class="mi">2</span>
+  <span class="n">weekly</span>
+  <span class="n">size</span> <span class="mi">250</span><span class="n">k</span>
+  <span class="n">compress</span>
+  <span class="n">notifempty</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id1">
+<h2>停用unattended-upgrades</h2>
+<p>在启动或停止Ubuntu时，我注意到启动输出中有一个job会长时间停顿直到超时，类似输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="n">stop</span> <span class="n">job</span> <span class="ow">is</span> <span class="n">running</span> <span class="k">for</span> <span class="n">Unattended</span> <span class="n">Upgrades</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="mi">10</span><span class="n">s</span> <span class="o">/</span> <span class="mi">30</span> <span class="nb">min</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>特别是网络没有配置好，主机无法连接internet时候，这个超时时间非常长。</p>
+<ul>
+<li><p>停止:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>停止 <code class="docutils literal notranslate"><span class="pre">unattended-upgrades</span></code> 需要一些时间，后台当前在更新的软件包没有完成时不会退出。</p>
+<ul>
+<li><p>禁止 <code class="docutils literal notranslate"><span class="pre">unattended-upgrades</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">disable</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这样今后启动系统时就不会再出现长时间等待升级进程完成的延迟，关机也可以较为迅速。</p>
+<p>也可以通过交互方式关闭 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">dpkg-reconfigure</span> <span class="pre">unattended-upgrades</span></code></p>
+<ul>
+<li><p>如果你确实不需要自动升级，也可以移除这个软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="n">unattended</span><span class="o">-</span><span class="n">upgrades</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://help.ubuntu.com/community/AutomaticSecurityUpdates">AutomaticSecurityUpdates</a><span class="link-target"> [https://help.ubuntu.com/community/AutomaticSecurityUpdates]</span></p></li>
+<li><p><a class="reference external" href="https://phoenixnap.com/kb/automatic-security-updates-ubuntu">How To Setup And Enable Automatic Security Updates On Ubuntu</a><span class="link-target"> [https://phoenixnap.com/kb/automatic-security-updates-ubuntu]</span></p></li>
+<li><p><a class="reference external" href="https://ostechnix.com/how-to-disable-unattended-upgrades-on-ubuntu/">How To Disable Unattended Upgrades On Ubuntu</a><span class="link-target"> [https://ostechnix.com/how-to-disable-unattended-upgrades-on-ubuntu/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

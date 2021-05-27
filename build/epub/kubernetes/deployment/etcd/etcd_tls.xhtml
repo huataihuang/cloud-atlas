@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>etcd集群TLS设置</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="etcdtls">
+<span id="etcd-tls"></span><h1>etcd集群TLS设置</h1>
+<p>在完成了初步的 <a class="reference internal" href="deploy_etcd_cluster.xhtml#deploy-etcd-cluster"><span class="std std-ref">部署etcd集群</span></a> 之后，可以看到虽然部署了简单的etcd集群，但是etcd集群访问是完全没有安全限制的。所以我们需要将集群改造成使用TLS加密认证访问，以增强安全性。</p>
+<p>etcd支持通过TLS协议进行加密通讯，要使用自签名证书启动一个集群，集群的每个成员需要有有一个唯一密钥对( <code class="docutils literal notranslate"><span class="pre">member.crt</span></code> 和 <code class="docutils literal notranslate"><span class="pre">member.key</span></code> )被一个共享的集群CA证书( <code class="docutils literal notranslate"><span class="pre">ca.crt</span></code> )签名过，这个密钥对用于彼此通讯和客户端连接。</p>
+<section id="etcd">
+<h2>etcd集群证书生成</h2>
+<p>Cloudflare提供了一个 <a class="reference external" href="https://github.com/cloudflare/cfssl">cfssl</a><span class="link-target"> [https://github.com/cloudflare/cfssl]</span> 工具来帮助生成etcd集群的证书。默认生成 ECDSA-384 root和leaf证书给localhost。每个etcd节点使用相同的证书，但不需要客户端证书。</p>
+<ul>
+<li><p>安装 git , go, 和 make</p></li>
+<li><p>安装cfssl:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">cloudflare</span><span class="o">/</span><span class="n">cfssl</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">cfssl</span>
+<span class="n">make</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>编译以后生成的执行文件位于 <code class="docutils literal notranslate"><span class="pre">bin</span></code> 目录下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ tree bin
+bin
+├── cfssl
+├── cfssl-bundle
+├── cfssl-certinfo
+├── cfssl-newkey
+├── cfssl-scan
+├── cfssljson
+├── mkbundle
+├── multirootca
+└── rice
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>macOS的 <a class="reference internal" href="../../../apple/studio/homebrew.xhtml#homebrew"><span class="std std-ref">Homebrew</span></a> 提供了直接安装的简便方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">install</span> <span class="n">cfssl</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>也可以使用go直接安装单个命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">go</span> <span class="n">get</span> <span class="o">-</span><span class="n">u</span> <span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">cloudflare</span><span class="o">/</span><span class="n">cfssl</span><span class="o">/</span><span class="n">cmd</span><span class="o">/</span><span class="n">cfssl</span>
+</pre></div>
+</div>
+<p>依次类推，还可以安装cfssljson等工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">go</span> <span class="n">get</span> <span class="o">-</span><span class="n">u</span> <span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">cloudflare</span><span class="o">/</span><span class="n">cfssl</span><span class="o">/</span><span class="n">cmd</span><span class="o">/</span><span class="n">cfssljson</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id1">
+<h2>证书生成</h2>
+<p>在设置etcd集群时需要使用3种证书：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Client</span> <span class="pre">certificate</span></code> 是服务器用于认证客户端的证书，例如， etcdctl, etcd proxy 或者 docker客户端都需要使用</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Server</span> <span class="pre">certificate</span></code> 是服务器使用，客户端用来验证服务器真伪的。例如 docker服务器或者kube-apiserver使用这个证书。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Peer</span> <span class="pre">certificate</span></code> 是etcd服务器成员彼此通讯的证书。</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/etcd-io/etcd/tree/master/hack/tls-setup">etcd/hack/tls-setup</a><span class="link-target"> [https://github.com/etcd-io/etcd/tree/master/hack/tls-setup]</span></p></li>
+<li><p><a class="reference external" href="https://etcd.io/docs/v3.4.0/op-guide/clustering/">etcd Clustering Guide</a><span class="link-target"> [https://etcd.io/docs/v3.4.0/op-guide/clustering/]</span></p></li>
+<li><p><a class="reference external" href="https://medium.com/nirman-tech-blog/setting-up-etcd-cluster-with-tls-authentication-enabled-49c44e4151bb">Setting up Etcd Cluster with TLS Authentication Enabled</a><span class="link-target"> [https://medium.com/nirman-tech-blog/setting-up-etcd-cluster-with-tls-authentication-enabled-49c44e4151bb]</span> 这篇文档非常详细指导了如何使用cfssl工具来生成etcd服务器证书，以及签名客户端证书</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

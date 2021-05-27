@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>在Kubernetes中部署私有Docker镜像仓库</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kubernetesdocker">
+<span id="docker-registry"></span><h1>在Kubernetes中部署私有Docker镜像仓库</h1>
+<p>在生产环境中，不论是简单运行Docker容器还是部署Kubernetes集群，都需要使用私有镜像中心来实现中心化都镜像存储和分发:</p>
+<ul class="simple">
+<li><p>定制私有镜像，不需要把镜像推送到公共镜像服务器，避免安全隐患</p></li>
+<li><p>加速本地镜像的分发和容器部署</p></li>
+</ul>
+<section id="id1">
+<h2>私有镜像仓库架构</h2>
+<figure class="align-default">
+<img alt="../../_images/docker-registry-in-k8s.png" src="../../_images/docker-registry-in-k8s.png" style="width: 592.8000000000001px; height: 432.8px;" />
+</figure>
+</section>
+<section id="id2">
+<h2>准备工作</h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>部署需要使用Helm包管理器，分为两部分: 本地客户端安装Helm，远程Kubernetes集群安装Tiller。详细请参考 <a class="reference internal" href="helm.xhtml#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 。</p>
+</div>
+<section id="helmtiller">
+<h3>安装Helm和Tiller</h3>
+<ul>
+<li><p>本地安装helm工具（linux版本）</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">get</span><span class="o">.</span><span class="n">helm</span><span class="o">.</span><span class="n">sh</span><span class="o">/</span><span class="n">helm</span><span class="o">-</span><span class="n">v2</span><span class="o">.</span><span class="mf">14.1</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">tar</span> <span class="o">-</span><span class="n">zxvf</span> <span class="n">helm</span><span class="o">-</span><span class="n">v2</span><span class="o">.</span><span class="mf">14.1</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">sudo</span> <span class="n">mv</span> <span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="o">/</span><span class="n">helm</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">helm</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">config</span> <span class="pre">view</span></code> 确认当前连接的是目标 kubeernetes 集群</p></li>
+<li><p>在Kubernetes集群安装服务端组件 <code class="docutils literal notranslate"><span class="pre">tiller</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">create</span> <span class="n">serviceaccount</span> <span class="n">tiller</span>
+<span class="n">kubectl</span> <span class="n">create</span> <span class="n">clusterrolebinding</span> <span class="n">tiller</span> <span class="o">--</span><span class="n">clusterrole</span> <span class="n">cluster</span><span class="o">-</span><span class="n">admin</span> <span class="o">--</span><span class="n">serviceaccount</span><span class="o">=</span><span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="p">:</span><span class="n">tiller</span>
+<span class="n">helm</span> <span class="n">init</span> <span class="o">--</span><span class="n">service</span><span class="o">-</span><span class="n">account</span> <span class="n">tiller</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="nginx-ingress-controller">
+<h3>激活Nginx ingress controller</h3>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>本次部署采用的是 <a class="reference internal" href="nginx_ingress.xhtml#nginx-ingress"><span class="std std-ref">部署Nginx Ingress Controller</span></a> ，所以激活Nginx ingress controller非常简单。</p>
+</div>
+<ul>
+<li><p>执行以下命令激活NGINX Ingress controller:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">addons</span> <span class="n">enable</span> <span class="n">ingress</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>对于常规Kubernetes集群，可以使用以下 <code class="docutils literal notranslate"><span class="pre">helm</span></code> 命令安装 Nginx Ingress controller</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">install</span> <span class="n">stable</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">ingress</span> <span class="o">--</span><span class="n">name</span> <span class="n">quickstart</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>验证NGINX ingress controller已经运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>确认在 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace中正确运行了 <code class="docutils literal notranslate"><span class="pre">nginx-ingress-controller</span></code></p>
+</div>
+</section>
+</section>
+<section id="dns-provider">
+<h2>在DNS provider中创建域名</h2>
+<ul>
+<li><p>首先需要创建一个域名解析记录指向Kubernetes Cluste，这个IP地址是 <code class="docutils literal notranslate"><span class="pre">nginx-ingress-controller</span></code> 服务的 <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">svc</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这个IP地址我理解是 nginx-ingress 输出的对外IP地址，但是这个IP地址和Node节点的IP地址应该是不绑定的，而是Kubernetes对外输出负载均衡的访问VIP。</p>
+<p>待确认</p>
+</div>
+</section>
+<section id="cert-manager-addon">
+<h2>安装 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> addon</h2>
+<p>构建Docker Registry需要具备一个TLS证书。这个工作可以结合Let’s Encrypt和 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> Kubernetes addon来完成。这个addon自动管理和发布TLS证书，确保证书周期更新。并且会在证书过期之前尝试renew。</p>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> CRDs，这个步骤必须在Helm chart安装cert-manager之前完成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jetstack</span><span class="o">/</span><span class="n">cert</span><span class="o">-</span><span class="n">manager</span><span class="o">/</span><span class="n">release</span><span class="o">-</span><span class="mf">0.8</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">manifests</span><span class="o">/</span><span class="mi">00</span><span class="o">-</span><span class="n">crds</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+<li><p>将标签添加到 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace (对于已经存在的namespace此步骤必须)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">label</span> <span class="n">namespace</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">certmanager</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">disable</span><span class="o">-</span><span class="n">validation</span><span class="o">=</span><span class="s2">&quot;true&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>添加 <a class="reference external" href="https://hub.helm.sh/charts/jetstack">Jetstack Helm repository</a><span class="link-target"> [https://hub.helm.sh/charts/jetstack]</span> 到Helm，这个仓库包含了 cert-manager Helm chart</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">repo</span> <span class="n">add</span> <span class="n">jetstack</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">charts</span><span class="o">.</span><span class="n">jetstack</span><span class="o">.</span><span class="n">io</span>
+</pre></div>
+</div>
+</li>
+<li><p>更新 repo （如果已经存在)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">repo</span> <span class="n">update</span>
+</pre></div>
+</div>
+</li>
+<li><p>最后安装 chart 到 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">install</span> \
+ <span class="o">--</span><span class="n">name</span> <span class="n">cert</span><span class="o">-</span><span class="n">manager</span> \
+ <span class="o">--</span><span class="n">namespace</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> \
+ <span class="o">--</span><span class="n">version</span> <span class="n">v0</span><span class="o">.</span><span class="mf">8.1</span> \
+ <span class="n">jetstack</span><span class="o">/</span><span class="n">cert</span><span class="o">-</span><span class="n">manager</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>详细的解释和遇到过的异常排查过程，请参考 <a class="reference internal" href="nginx_ingress.xhtml#nginx-ingress"><span class="std std-ref">部署Nginx Ingress Controller</span></a></p>
+</div>
+</section>
+<section id="tls">
+<h2>获取TLS证书</h2>
+<p>通过 cert-manager 我们可以创建证书，创建以下文件 <code class="docutils literal notranslate"><span class="pre">acme-issuer.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">certmanager</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Issuer</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">acme</span><span class="o">-</span><span class="n">issuer</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">acme</span><span class="p">:</span>
+    <span class="n">email</span><span class="p">:</span> <span class="n">huatai</span><span class="nd">@huatai</span><span class="o">.</span><span class="n">me</span>
+    <span class="n">server</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">acme</span><span class="o">-</span><span class="n">v02</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">letsencrypt</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">directory</span>
+    <span class="n">privateKeySecretRef</span><span class="p">:</span>
+      <span class="n">name</span><span class="p">:</span> <span class="n">acme</span><span class="o">-</span><span class="n">issuer</span><span class="o">-</span><span class="n">account</span><span class="o">-</span><span class="n">key</span>
+    <span class="n">http01</span><span class="p">:</span> <span class="p">{}</span>
+</pre></div>
+</div>
+<p>Issuer表示一个证书通过签名的x509证书签发，例如Let’s Encrypt。这里需要设置ACME账号邮件地址，这个地址是从Let’s Encrypt获取过期通知和其他通知的。这允许在丢失证书私钥的时候回收证书。</p>
+<ul>
+<li><p>创建Issuer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">acme</span><span class="o">-</span><span class="n">issuer</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查创建的Issuer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">issuer</span> <span class="n">acme</span><span class="o">-</span><span class="n">issuer</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>acme-issuer 申请如果遇到错误，在上述 <code class="docutils literal notranslate"><span class="pre">describe</span> <span class="pre">issuer</span></code> 中会显示错误信息。例如， <a class="reference external" href="https://www.nearform.com/blog/how-to-run-a-public-docker-registry-in-kubernetes/">How to run a Public Docker Registry in Kubernetes</a><span class="link-target"> [https://www.nearform.com/blog/how-to-run-a-public-docker-registry-in-kubernetes/]</span> 原文使用的配置 <code class="docutils literal notranslate"><span class="pre">server:</span> <span class="pre">https://acme-v01.api.letsencrypt.org/directory</span></code> 现在已经不能使用，显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Message</span><span class="p">:</span>               <span class="n">Your</span> <span class="n">ACME</span> <span class="n">server</span> <span class="n">URL</span> <span class="ow">is</span> <span class="nb">set</span> <span class="n">to</span> <span class="n">a</span> <span class="n">v1</span> <span class="n">endpoint</span> <span class="p">(</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">acme</span><span class="o">-</span><span class="n">v01</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">letsencrypt</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">directory</span><span class="p">)</span><span class="o">.</span> <span class="n">You</span> <span class="n">should</span> <span class="n">update</span> <span class="n">the</span> <span class="n">spec</span><span class="o">.</span><span class="n">acme</span><span class="o">.</span><span class="n">server</span> <span class="n">field</span> <span class="n">to</span> <span class="s2">&quot;https://acme-v02.api.letsencrypt.org/directory&quot;</span>
+<span class="n">Reason</span><span class="p">:</span>                <span class="n">InvalidConfig</span>
+<span class="n">Status</span><span class="p">:</span>                <span class="kc">False</span>
+</pre></div>
+</div>
+<p>需要修订成 <code class="docutils literal notranslate"><span class="pre">https://acme-v02.api.letsencrypt.org/directory</span></code> 重新执行。最终成功后显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Status</span><span class="p">:</span>
+  <span class="n">Acme</span><span class="p">:</span>
+    <span class="n">Uri</span><span class="p">:</span>  <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">acme</span><span class="o">-</span><span class="n">v02</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">letsencrypt</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">acme</span><span class="o">/</span><span class="n">acct</span><span class="o">/</span><span class="mi">59821427</span>
+  <span class="n">Conditions</span><span class="p">:</span>
+    <span class="n">Last</span> <span class="n">Transition</span> <span class="n">Time</span><span class="p">:</span>  <span class="mi">2019</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">23</span><span class="n">T08</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">08</span><span class="n">Z</span>
+    <span class="n">Message</span><span class="p">:</span>               <span class="n">The</span> <span class="n">ACME</span> <span class="n">account</span> <span class="n">was</span> <span class="n">registered</span> <span class="k">with</span> <span class="n">the</span> <span class="n">ACME</span> <span class="n">server</span>
+    <span class="n">Reason</span><span class="p">:</span>                <span class="n">ACMEAccountRegistered</span>
+    <span class="n">Status</span><span class="p">:</span>                <span class="kc">True</span>
+    <span class="n">Type</span><span class="p">:</span>                  <span class="n">Ready</span>
+<span class="n">Events</span><span class="p">:</span>                    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>对于域名验证，我们有两种选项:</p>
+<ul class="simple">
+<li><p>http01 challenge</p></li>
+<li><p>dns01 challenge</p></li>
+</ul>
+<p>这里使用 http01 challenge机制因为它更简单。而Dns01 challenge需要进一步的DNS provideer来自动创建校验值的DNS记录。</p>
+</div>
+<ul>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">docker-registry-tls-certificate.yaml</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">certmanager</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Certificate</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">secretName</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">-</span><span class="n">tls</span><span class="o">-</span><span class="n">certificate</span>
+  <span class="n">issuerRef</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">acme</span><span class="o">-</span><span class="n">issuer</span>
+  <span class="n">dnsNames</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+  <span class="n">acme</span><span class="p">:</span>
+    <span class="n">config</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">http01</span><span class="p">:</span>
+        <span class="n">ingressClass</span><span class="p">:</span> <span class="n">nginx</span>
+      <span class="n">domains</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里的证书定义基础含义</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dnsNames</span></code> 是Issuer使用的用于签发TLS证书</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">secretName</span></code> 是TLS获得以后的存储</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">acme</span> <span class="pre">config</span></code> 是域名校验使用(http01 challenge机制)</p></li>
+</ul>
+<p>通过 HTTP-01 challenge 就可以通过一个在域名中的特定文件来提供域名的所有权证明。</p>
+</div>
+<ul>
+<li><p>通过执行上述 <code class="docutils literal notranslate"><span class="pre">docker-registry-tls-certificate.yaml</span></code> ，集群的 cert-manager-controller 会启动来验证证书:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">-</span><span class="n">tls</span><span class="o">-</span><span class="n">certificate</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查证书的处理情况:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">certificate</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>当前面 issuer <code class="docutils literal notranslate"><span class="pre">acme-issuer</span></code> 就绪以后，cert-manager正确生成了自签名证书:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Events</span><span class="p">:</span>
+  <span class="n">Type</span>     <span class="n">Reason</span>              <span class="n">Age</span>                  <span class="n">From</span>          <span class="n">Message</span>
+  <span class="o">----</span>     <span class="o">------</span>              <span class="o">----</span>                 <span class="o">----</span>          <span class="o">-------</span>
+  <span class="ne">Warning</span>  <span class="n">IssuerNotReady</span>      <span class="mi">7</span><span class="n">m33s</span> <span class="p">(</span><span class="n">x3</span> <span class="n">over</span> <span class="mi">62</span><span class="n">m</span><span class="p">)</span>  <span class="n">cert</span><span class="o">-</span><span class="n">manager</span>  <span class="n">Issuer</span> <span class="n">acme</span><span class="o">-</span><span class="n">issuer</span> <span class="ow">not</span> <span class="n">ready</span>
+  <span class="n">Normal</span>   <span class="n">Generated</span>           <span class="mi">7</span><span class="n">m22s</span>                <span class="n">cert</span><span class="o">-</span><span class="n">manager</span>  <span class="n">Generated</span> <span class="n">new</span> <span class="n">private</span> <span class="n">key</span>
+  <span class="n">Normal</span>   <span class="n">GenerateSelfSigned</span>  <span class="mi">7</span><span class="n">m21s</span>                <span class="n">cert</span><span class="o">-</span><span class="n">manager</span>  <span class="n">Generated</span> <span class="n">temporary</span> <span class="bp">self</span> <span class="n">signed</span> <span class="n">certificate</span>
+  <span class="n">Normal</span>   <span class="n">OrderCreated</span>        <span class="mi">7</span><span class="n">m20s</span>                <span class="n">cert</span><span class="o">-</span><span class="n">manager</span>  <span class="n">Created</span> <span class="n">Order</span> <span class="n">resource</span> <span class="s2">&quot;docker-registry-4118901981&quot;</span>
+</pre></div>
+</div>
+<p>当所有工作就绪以后，就能获得自己的证书:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">secret</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">-</span><span class="n">tls</span><span class="o">-</span><span class="n">certificate</span>
+</pre></div>
+</div>
+</section>
+<section id="htpasswd">
+<h2>设置htpasswd用于基本认证</h2>
+<p>对于Docker Registry基本认证，可以创建一个 htpasswd ，可以使用 apache-tuils 提供的 htpasswd 或者 docker registry contrainer。这里假设使用 admin 密码 admin123</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">entrypoint</span> <span class="n">htpasswd</span> <span class="o">--</span><span class="n">rm</span> <span class="n">registry</span><span class="p">:</span><span class="mi">2</span> <span class="o">-</span><span class="n">Bbn</span> <span class="n">admin</span> <span class="n">admin123</span> <span class="o">|</span> <span class="n">base64</span>
+</pre></div>
+</div>
+<p><strong>奇怪</strong> 每次执行上述指令获得的BASE64密文是不同的，待学习研究。</p>
+<ul>
+<li><p>创建加上htpasswd的BASE64格式密文的 <code class="docutils literal notranslate"><span class="pre">docker-registry-secret.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Secret</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+<span class="nb">type</span><span class="p">:</span> <span class="n">Opaque</span>
+<span class="n">data</span><span class="p">:</span>
+  <span class="n">HTPASSWD</span><span class="p">:</span> <span class="n">YWRtaW46JDJ5JDA1JDI5Ri95VlNhbDJsQkoxNGI1VmRycHVkREdKanV6SXBxU1Q1RTZhdDVZQTdEdWtObEN2RmM2Cgo</span><span class="o">=</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">--entrypoint</span> <span class="pre">htpasswd</span> <span class="pre">--rm</span> <span class="pre">registry:2</span> <span class="pre">-Bbn</span> <span class="pre">admin</span> <span class="pre">admin123</span> <span class="pre">|</span> <span class="pre">base64</span></code> 输出的是2行内容，这里我合在一行，待测试</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>通过 htpasswd 命令可以不断添加新的用户名和密码，我们通过检查 htpasswd_file 文件中对应行，就可以获得我们所需要的加密后密文。这个密文将用于后续创建 Docker registry时候修订 <code class="docutils literal notranslate"><span class="pre">chart_value.yaml</span></code> 的密文部分。这部分验证我暂时跳过:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 先安装 apache2-utils</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">apache2</span><span class="o">-</span><span class="n">utils</span> <span class="o">-</span><span class="n">y</span>
+
+<span class="c1"># 在 htpasswd_file 中添加用户名和密码</span>
+<span class="n">htpasswd</span> <span class="o">-</span><span class="n">B</span> <span class="n">htpasswd_file</span> <span class="n">username</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">secret/docker-registry</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">-</span><span class="n">secret</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>配置Docker Registry</h2>
+<p>配置文件 <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> 定义如何挂载 安全文件到我们的Pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">ConfigMap</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+<span class="n">data</span><span class="p">:</span>
+  <span class="n">registry</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">yml</span><span class="p">:</span> <span class="o">|</span>
+    <span class="n">version</span><span class="p">:</span> <span class="mf">0.1</span>
+    <span class="n">log</span><span class="p">:</span>
+      <span class="n">fields</span><span class="p">:</span>
+        <span class="n">service</span><span class="p">:</span> <span class="n">registry</span>
+    <span class="n">storage</span><span class="p">:</span>
+      <span class="n">cache</span><span class="p">:</span>
+        <span class="n">blobdescriptor</span><span class="p">:</span> <span class="n">inmemory</span>
+      <span class="n">filesystem</span><span class="p">:</span>
+        <span class="n">rootdirectory</span><span class="p">:</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">registry</span>
+    <span class="n">http</span><span class="p">:</span>
+      <span class="n">addr</span><span class="p">:</span> <span class="p">:</span><span class="mi">5000</span>
+      <span class="n">headers</span><span class="p">:</span>
+        <span class="n">X</span><span class="o">-</span><span class="n">Content</span><span class="o">-</span><span class="n">Type</span><span class="o">-</span><span class="n">Options</span><span class="p">:</span> <span class="p">[</span><span class="n">nosniff</span><span class="p">]</span>
+    <span class="n">auth</span><span class="p">:</span>
+      <span class="n">htpasswd</span><span class="p">:</span>
+        <span class="n">realm</span><span class="p">:</span> <span class="n">basic</span><span class="o">-</span><span class="n">realm</span>
+        <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">auth</span><span class="o">/</span><span class="n">htpasswd</span>
+    <span class="n">health</span><span class="p">:</span>
+      <span class="n">storagedriver</span><span class="p">:</span>
+        <span class="n">enabled</span><span class="p">:</span> <span class="n">true</span>
+        <span class="n">interval</span><span class="p">:</span> <span class="mi">10</span><span class="n">s</span>
+        <span class="n">threshold</span><span class="p">:</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>设置解析：</p>
+<p>这里使用了ConfigMap中的存储配置 <code class="docutils literal notranslate"><span class="pre">rootdirectory:</span> <span class="pre">/var/lib/docker/registry</span></code> 是为了能够使用之前使用btrfs存储卷 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 以便能够更好存储数据:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">registry</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>执行创建 <code class="docutils literal notranslate"><span class="pre">configmap/docker-registry</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>要验证是否正确:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">configmap</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+</pre></div>
+</div>
+</section>
+<section id="docker-registry-pod">
+<h2>Docker Registry Pod定义</h2>
+<p>定义Docker Registry Pod如下 <code class="docutils literal notranslate"><span class="pre">docker-registry.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">volumes</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">config</span>
+      <span class="n">configMap</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+        <span class="n">items</span><span class="p">:</span>
+          <span class="o">-</span> <span class="n">key</span><span class="p">:</span> <span class="n">registry</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">yml</span>
+            <span class="n">path</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">yml</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">htpasswd</span>
+      <span class="n">secret</span><span class="p">:</span>
+        <span class="n">secretName</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+        <span class="n">items</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">key</span><span class="p">:</span> <span class="n">HTPASSWD</span>
+          <span class="n">path</span><span class="p">:</span> <span class="n">htpasswd</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">storage</span>
+      <span class="n">emptyDir</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="n">containers</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+      <span class="n">image</span><span class="p">:</span> <span class="n">registry</span>
+      <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+      <span class="n">ports</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">http</span>
+          <span class="n">containerPort</span><span class="p">:</span> <span class="mi">5000</span>
+          <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+      <span class="n">volumeMounts</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">config</span>
+          <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">registry</span>
+          <span class="n">readOnly</span><span class="p">:</span> <span class="n">true</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">htpasswd</span>
+          <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">auth</span>
+          <span class="n">readOnly</span><span class="p">:</span> <span class="n">true</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">storage</span>
+          <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">registry</span>
+</pre></div>
+</div>
+<p>执行创建Docker Registry Pod命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">docker-registry.yaml</span></code> 包含引用了 <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configMap</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+  <span class="n">items</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">key</span><span class="p">:</span> <span class="n">registry</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">yml</span>
+      <span class="n">path</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<p>并且设置了 <code class="docutils literal notranslate"><span class="pre">key</span></code> 是 <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">registry-config.yml</span></code> 部分（嵌套）</p>
+</div>
+<p>请使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">describe</span> <span class="pre">pod</span> <span class="pre">docker-registry</span></code> 来检查创建过程是否报错，并相应做调整。例如，我发现有漏做创建 <code class="docutils literal notranslate"><span class="pre">configmap/docker-registry</span></code> 的异常。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意configMap类型卷中 <code class="docutils literal notranslate"><span class="pre">mountPath</span></code> 是从容器外映射到容器内的目录，而 <code class="docutils literal notranslate"><span class="pre">configMap</span></code> 则是该目录下的子目录映射。详细参考 <a class="reference internal" href="../concepts/storage/kubernetes_volumes.xhtml#kubernetes-volumes"><span class="std std-ref">Kubernetes卷</span></a></p>
+</div>
+<section id="id4">
+<h3>异常排查</h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">describe</span> <span class="pre">pod</span> <span class="pre">docker-registry</span></code> 显示Pod状态 <code class="docutils literal notranslate"><span class="pre">CrashLoopBackOff</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">registry</span>             <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">CrashLoopBackOff</span>   <span class="mi">6</span>          <span class="mi">6</span><span class="n">m19s</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">describe</span> <span class="pre">pod</span></code> 可以看到最后的消息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Events</span><span class="p">:</span>
+  <span class="n">Type</span>     <span class="n">Reason</span>     <span class="n">Age</span>                     <span class="n">From</span>               <span class="n">Message</span>
+  <span class="o">----</span>     <span class="o">------</span>     <span class="o">----</span>                    <span class="o">----</span>               <span class="o">-------</span>
+  <span class="o">...</span>
+  <span class="ne">Warning</span>  <span class="n">BackOff</span>    <span class="mi">4</span><span class="n">m35s</span> <span class="p">(</span><span class="n">x25</span> <span class="n">over</span> <span class="mi">9</span><span class="n">m42s</span><span class="p">)</span>  <span class="n">kubelet</span><span class="p">,</span> <span class="n">minikube</span>  <span class="n">Back</span><span class="o">-</span><span class="n">off</span> <span class="n">restarting</span> <span class="n">failed</span> <span class="n">container</span>
+</pre></div>
+</div>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">pod</span> <span class="pre">docker-registry</span> <span class="pre">-o</span> <span class="pre">yaml</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">message</span><span class="p">:</span> <span class="n">Back</span><span class="o">-</span><span class="n">off</span> <span class="mi">5</span><span class="n">m0s</span> <span class="n">restarting</span> <span class="n">failed</span> <span class="n">container</span><span class="o">=</span><span class="n">docker</span><span class="o">-</span><span class="n">registry</span> <span class="n">pod</span><span class="o">=</span><span class="n">docker</span><span class="o">-</span><span class="n">registry_default</span><span class="p">(</span><span class="n">f8a4eb4f</span><span class="o">-</span><span class="mi">95</span><span class="n">cb</span><span class="o">-</span><span class="mf">11e9</span><span class="o">-</span><span class="mi">9327</span><span class="o">-</span><span class="n">b8e85633e48a</span><span class="p">)</span>
+        <span class="n">reason</span><span class="p">:</span> <span class="n">CrashLoopBackOff</span>
+</pre></div>
+</div>
+<p>通过Kubernetes 的 GUI dashboard检查，发现pod有log报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configuration</span> <span class="n">error</span><span class="p">:</span> <span class="nb">open</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">registry</span><span class="o">/</span><span class="n">config</span><span class="o">.</span><span class="n">yml</span><span class="p">:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+ <span class="n">Usage</span><span class="p">:</span>
+  <span class="n">registry</span> <span class="n">serve</span> <span class="o">&lt;</span><span class="n">config</span><span class="o">&gt;</span> <span class="p">[</span><span class="n">flags</span><span class="p">]</span>
+<span class="n">Flags</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span><span class="o">=</span><span class="n">false</span><span class="p">:</span> <span class="n">help</span> <span class="k">for</span> <span class="n">serve</span>
+ <span class="n">Additional</span> <span class="n">help</span> <span class="n">topics</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>这说明前面我的配置存在错误，原来我误以为需要修改的部分实际上是默认配置部分不能修改:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configMap</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+  <span class="n">items</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">key</span><span class="p">:</span> <span class="n">registry</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">yml</span>
+      <span class="n">path</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<p>上述配置我推测应该是从 <code class="docutils literal notranslate"><span class="pre">ConfigMap</span></code> 中读取 <code class="docutils literal notranslate"><span class="pre">registry-config.yml</span></code> 注入到容器中成为 <code class="docutils literal notranslate"><span class="pre">config.yml</span></code> ，所以需要修正之前的 <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> 配置。</p>
+</section>
+</section>
+<section id="id5">
+<h2>输出Docker Registry</h2>
+<ul>
+<li><p>创建一个服务以及相应的端口绑定 <code class="docutils literal notranslate"><span class="pre">docker-registry-service.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="nb">type</span><span class="p">:</span> <span class="n">ClusterIP</span>
+  <span class="n">ports</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">http</span>
+      <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+      <span class="n">port</span><span class="p">:</span> <span class="mi">5000</span>
+      <span class="n">targetPort</span><span class="p">:</span> <span class="mi">5000</span>
+
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行创建 <code class="docutils literal notranslate"><span class="pre">docker-registry</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">-</span><span class="n">service</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="ingress">
+<h2>创建Ingress</h2>
+<ul>
+<li><p>最后（终于到了最后一步），创建 Ingress 配置 <code class="docutils literal notranslate"><span class="pre">docker-registry-ingress.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">extensions</span><span class="o">/</span><span class="n">v1beta1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Ingress</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+  <span class="n">annotations</span><span class="p">:</span>
+    <span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">ingress</span><span class="o">.</span><span class="n">class</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">nginx</span><span class="o">.</span><span class="n">ingress</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">proxy</span><span class="o">-</span><span class="n">body</span><span class="o">-</span><span class="n">size</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span>
+    <span class="n">certmanager</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">issuer</span><span class="p">:</span> <span class="n">acme</span><span class="o">-</span><span class="n">issuer</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">tls</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">hosts</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+    <span class="n">secretName</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">-</span><span class="n">tls</span><span class="o">-</span><span class="n">certificate</span>
+  <span class="n">rules</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">host</span><span class="p">:</span> <span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+    <span class="n">http</span><span class="p">:</span>
+      <span class="n">paths</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">backend</span><span class="p">:</span>
+          <span class="n">serviceName</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>
+          <span class="n">servicePort</span><span class="p">:</span> <span class="mi">5000</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行创建 <code class="docutils literal notranslate"><span class="pre">docker-registry</span></code> Ingress:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span><span class="o">-</span><span class="n">ingress</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id6">
+<h2>验证</h2>
+<ul>
+<li><p>测试访问:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">u</span> <span class="n">admin</span><span class="p">:</span><span class="n">admin123</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span><span class="n">v2</span><span class="o">/</span><span class="n">_catalog</span>
+</pre></div>
+</div>
+</li>
+<li><p>登陆到私有仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">login</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="o">-</span><span class="n">u</span> <span class="n">admin</span> <span class="o">-</span><span class="n">p</span> <span class="n">admin123</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+Error response from daemon: Get https://registry.xcloud.huatai.me/v2/: x509: certificate signed by unknown authority
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://github.com/moby/moby/issues/8849">access private registry: x509: certificate signed by unknown authority #8849</a><span class="link-target"> [https://github.com/moby/moby/issues/8849]</span> 可以采用 <code class="docutils literal notranslate"><span class="pre">--insecure-registry</span></code> 参数来用于私有没有自签名证书都镜像仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="o">--</span><span class="n">insecure</span><span class="o">-</span><span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="n">login</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="o">-</span><span class="n">u</span> <span class="n">admin</span> <span class="o">-</span><span class="n">p</span> <span class="n">admin123</span>
+</pre></div>
+</div>
+<p>不过，在新版本 docker 中，不能直接使用这个客户端参数，而是要修改docker启动脚本添加运行参数。例如，对于 CentOS 7.x 修改 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/system/docker.service</span></code> ，对于 Debian/Ubuntu 则修改 <code class="docutils literal notranslate"><span class="pre">/lib/systemd/system/docker.service</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">dockerd</span> <span class="o">-</span><span class="n">H</span> <span class="n">fd</span><span class="p">:</span><span class="o">//</span> <span class="o">--</span><span class="n">containerd</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">containerd</span><span class="o">/</span><span class="n">containerd</span><span class="o">.</span><span class="n">sock</span>
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">dockerd</span> <span class="o">--</span><span class="n">insecure</span><span class="o">-</span><span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="o">-</span><span class="n">H</span> <span class="n">fd</span><span class="p">:</span><span class="o">//</span> <span class="o">--</span><span class="n">containerd</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">containerd</span><span class="o">/</span><span class="n">containerd</span><span class="o">.</span><span class="n">sock</span>
+</pre></div>
+</div>
+<p>然后重新加载配置修改，并重启docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<p>对于不使用systemd的Debian/Ubuntu，可以通过修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/docker</span></code> (对于 CentOS/RHEL 则修改 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/docker</span></code> )</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use DOCKER_OPTS to modify the daemon startup options.</span>
+<span class="c1">#DOCKER_OPTS=&quot;--dns 8.8.8.8 --dns 8.8.4.4&quot;</span>
+<span class="n">DOCKER_OPTS</span><span class="o">=</span><span class="s2">&quot;--insecure-registry=registry.xcloud.huatai.me -H fd:// --containerd=/run/containerd/containerd.sock&quot;</span>
+</pre></div>
+</div>
+<p>这里遇到一个问题，发现 minikube 的大量 docker 容器crash了，并且minikube无法启动（实际应该和修改无关，因为发现去除参数也无法启动minikube），最后参考 <a class="reference external" href="https://github.com/kubernetes/minikube/issues/4137">Sorry that minikube crashed. #4137</a><span class="link-target"> [https://github.com/kubernetes/minikube/issues/4137]</span> 重新安装了一遍minikube。</p>
+<p>另外，可以参考 <a class="reference external" href="https://forums.docker.com/t/docker-private-registry-x509-certificate-signed-by-unknown-authority/21262">Docker Private Registry: x509: certificate signed by unknown authority</a><span class="link-target"> [https://forums.docker.com/t/docker-private-registry-x509-certificate-signed-by-unknown-authority/21262]</span> 注册主机的证书方法，还没有测试该方法。</p>
+</div>
+<ul>
+<li><p>测试推送一个docker镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">busybox</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">docker</span> <span class="n">tag</span> <span class="n">busybox</span><span class="p">:</span><span class="n">latest</span> <span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span><span class="n">busybox</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">docker</span> <span class="n">push</span> <span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span><span class="n">busybox</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="web-ui">
+<h2>WEB UI</h2>
+<p><a class="reference external" href="https://www.slant.co/topics/2436/~best-docker-image-private-registries">What are the best docker image private registries?</a><span class="link-target"> [https://www.slant.co/topics/2436/~best-docker-image-private-registries]</span> 提供了多种docker镜像仓库管理平台的对比，可以选择进行部署。待实践…</p>
+</section>
+<section id="id7">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.nearform.com/blog/how-to-run-a-public-docker-registry-in-kubernetes/">How to run a Public Docker Registry in Kubernetes</a><span class="link-target"> [https://www.nearform.com/blog/how-to-run-a-public-docker-registry-in-kubernetes/]</span></p></li>
+<li><p><a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-top-of-digitalocean-spaces-and-use-it-with-digitalocean-kubernetes">How To Set Up a Private Docker Registry on Top of DigitalOcean Spaces and Use It with DigitalOcean Kubernetes</a><span class="link-target"> [https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-top-of-digitalocean-spaces-and-use-it-with-digitalocean-kubernetes]</span></p></li>
+<li><p><a class="reference external" href="https://geekflare.com/docker-private-registry-ubuntu/">How to Setup Docker Private Registry on Ubuntu 18?</a><span class="link-target"> [https://geekflare.com/docker-private-registry-ubuntu/]</span> 简化配置，采用Docker运行Registry（无需kubernetes）</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Raspberry Pi VNC远程访问</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="raspberry-pi-vnc">
+<span id="pi-vnc"></span><h1>Raspberry Pi VNC远程访问</h1>
+<p>有时候我们需要通过VNC远程访问树莓派桌面，例如 <a class="reference internal" href="pi_4b_4k_display.xhtml#pi-4b-4k-display"><span class="std std-ref">Raspberry Pi 4B的4K显示</span></a> 无法正常屏幕输出时，需要通过远程桌面调整配置。</p>
+<ul>
+<li><p>安装VNC服务器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">realvnc</span><span class="o">-</span><span class="n">vnc</span><span class="o">-</span><span class="n">server</span> <span class="n">realvnc</span><span class="o">-</span><span class="n">vnc</span><span class="o">-</span><span class="n">viewer</span>
+</pre></div>
+</div>
+</li>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">raspi-config</span></code> 配置启用VNC:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Interfacing</span> <span class="n">Options</span> <span class="o">=&gt;</span> <span class="n">VNC</span> <span class="o">&gt;</span> <span class="n">Yes</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用 <a class="reference external" href="https://www.realvnc.com/en/connect/download/viewer/">RealVNC兼容客户端</a><span class="link-target"> [https://www.realvnc.com/en/connect/download/viewer/]</span> 访问</p></li>
+</ul>
+<section id="id1">
+<h2>访问</h2>
+<p>使用RealVNC客户端访问，理论上是可以直接使用系统用户账号登陆的(其他VNC客户端需要降级认证)，但是我正确输入账号密码之后依然被拒绝。</p>
+<p>检查服务器 <code class="docutils literal notranslate"><span class="pre">/var/log/vncserver.log</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="mi">14</span><span class="o">&gt;</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">12</span><span class="n">T03</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mf">59.067</span><span class="n">Z</span> <span class="n">pi400</span> <span class="n">vncserver</span><span class="o">-</span><span class="n">x11</span><span class="p">[</span><span class="mi">480</span><span class="p">]:</span> <span class="n">getUserPermissions</span><span class="p">:</span> <span class="n">Permissions</span> <span class="k">for</span> <span class="n">huatai</span> <span class="n">are</span> <span class="p">[]</span>
+<span class="o">&lt;</span><span class="mi">13</span><span class="o">&gt;</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">12</span><span class="n">T03</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mf">59.070</span><span class="n">Z</span> <span class="n">pi400</span> <span class="n">vncserver</span><span class="o">-</span><span class="n">x11</span><span class="p">[</span><span class="mi">480</span><span class="p">]:</span> <span class="n">Connections</span><span class="p">:</span> <span class="n">disconnected</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.1</span><span class="p">::</span><span class="mi">59589</span> <span class="p">(</span><span class="n">TCP</span><span class="p">)</span> <span class="p">([</span><span class="n">AuthDenied</span><span class="p">]</span> <span class="n">Access</span> <span class="ow">is</span> <span class="n">denied</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>解决方法参考 <a class="reference external" href="https://www.raspberrypi.org/forums/viewtopic.php?t=241978L">[VNC] Enable access for new user?</a><span class="link-target"> [https://www.raspberrypi.org/forums/viewtopic.php?t=241978L]</span> 修改 <code class="docutils literal notranslate"><span class="pre">/root/.vnc/config.d/vncserver-x11</span></code> 添加一行允许用户账号，例如 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> 访问:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Permissions</span><span class="o">=</span><span class="n">huatai</span><span class="p">:</span><span class="n">f</span>
+</pre></div>
+</div>
+<p>然后重启vnc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">vncserver</span><span class="o">-</span><span class="n">x11</span><span class="o">-</span><span class="n">serviced</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>连接以后显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">VNC</span> <span class="n">Viewer</span> <span class="n">requires</span> <span class="n">access</span> <span class="n">to</span> <span class="n">the</span> <span class="n">local</span> <span class="n">computer</span><span class="s1">&#39;s accessibility features to send media keys such as Play and Volume Up to the remote computer.</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.raspberrypi.org/documentation/remote-access/vnc/">Raspberry Pi VNC (Virtual Network Computing)</a><span class="link-target"> [https://www.raspberrypi.org/documentation/remote-access/vnc/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

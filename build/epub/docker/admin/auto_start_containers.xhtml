@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>自动启动Docker容器</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="docker">
+<span id="auto-start-containers"></span><h1>自动启动Docker容器</h1>
+<p>在 <a class="reference internal" href="../../ceph/ceph_docker_in_studio.xhtml#ceph-docker-in-studio"><span class="std std-ref">Stuido环境Docker容器运行Ceph</span></a> 时，Ceph是作为整个OpenStack集群的基础服务来运行的，所以需要设置操作系统启动时自动启动这些Ceph容器，以便能够为上层OpenStack提供基础。在生产环境中，如果是通过Docker容器来运行基础服务，往往也需要能够自动启动这些Docker容器。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>使用Kubernetes ( <a class="reference internal" href="../../kubernetes/index.xhtml#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> ) 的调度可以自动实现稳定的容器服务，但是在 <a class="reference internal" href="../../studio/introduce_my_studio.xhtml#introduce-my-studio"><span class="std std-ref">模拟云计算的Studio</span></a> ，直接采用Docker <a class="reference external" href="https://docs.docker.com/v17.09/engine/reference/run/#restart-policies---restart">restart policies</a><span class="link-target"> [https://docs.docker.com/v17.09/engine/reference/run/#restart-policies---restart]</span> 可以无需复杂的部署（消耗大量主机资源）实现底层分布式存储服务持续运行。</p>
+</div>
+<section id="id1">
+<h2>Docker重启策略</h2>
+<p>Docker 提供了 <code class="docutils literal notranslate"><span class="pre">restart</span> <span class="pre">policies</span></code> 来控制容器退出或者Docker重启时候是否自动启动容器。重启策略确保了链接的容器按照正确顺序启动。Docker建议使用restart策略而不是使用进程管理器（例如systemd）来启动容器。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Docker的重启策略和 <code class="docutils literal notranslate"><span class="pre">dockerd</span></code> 的 <code class="docutils literal notranslate"><span class="pre">--live-restore</span></code> 开关是不同的。 <code class="docutils literal notranslate"><span class="pre">--live-restore</span></code> 开关允许在Docker升级的时候保持容器继续运行，虽然升级过程中容器的网络和用户输入是中断的。请参考 <a class="reference internal" href="container_live_restore.xhtml#container-live-restore"><span class="std std-ref">Docker daemon停止时保持容器运行</span></a></p>
+</div>
+<section id="id2">
+<h3>使用重启策略</h3>
+<p>在执行 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 指令时，可以使用 <code class="docutils literal notranslate"><span class="pre">--restart</span></code> 参数来配置容器的重启策略，可用值：</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>参数值</p></th>
+<th class="head"><p>描述</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>no</p></td>
+<td><p>不自动重启容器（默认值）</p></td>
+</tr>
+<tr class="row-odd"><td><p>on-failure</p></td>
+<td><p>当容器发生错误退出（表现为非零的退出值）就重启容器</p></td>
+</tr>
+<tr class="row-even"><td><p>unless-stopped</p></td>
+<td><p>除非容器明确停止或者Docker自身停止或重启，否则自动重启容器</p></td>
+</tr>
+<tr class="row-odd"><td><p>always</p></td>
+<td><p>总是在容器停止时候重启容器</p></td>
+</tr>
+</tbody>
+</table>
+<p>举例，以下命令总是重启Redis容器，除非容器是明确停止或者Docker被重启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">--</span><span class="n">restart</span> <span class="n">unless</span><span class="o">-</span><span class="n">stopped</span> <span class="n">redis</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3>重启策略要点</h3>
+<p>在使用重启策略时要牢记以下要点：</p>
+<ul class="simple">
+<li><p>重启策略只有在容器成功启动之后才会生效。这种情况下，所谓成功启动是指容器启动至少10秒钟并且Docker已经开始监控容器。这种模式避免容器没有成功启动而不断循环重启的问题。</p></li>
+<li><p>如果你手工停止一个容器，则该容器的重启策略会被忽略直到Docker服务被重启或者容器被手工重启。这也是避免循环重启的策略。</p></li>
+<li><p>重启策略只作用于容器。通过swarm服务实现的重启策略配置方法不同。</p></li>
+</ul>
+</section>
+</section>
+<section id="id4">
+<h2>使用进程管理器自动重启容器</h2>
+<p>如果容器的内建重启策略不能满足需求，例如Docker之外的进程依赖Docker容器，你可以使用进程管理器例如 <a class="reference external" href="http://upstart.ubuntu.com/">upstart</a><span class="link-target"> [http://upstart.ubuntu.com/]</span> ， <a class="reference external" href="http://freedesktop.org/wiki/Software/systemd/">systemd</a><span class="link-target"> [http://freedesktop.org/wiki/Software/systemd/]</span> 或者 <a class="reference external" href="http://supervisord.org/">supervisor</a><span class="link-target"> [http://supervisord.org/]</span> 来管理容器重启。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>不要试图同时使用Docker内建的重启策略和host级别的进程管理器，这会导致两者冲突。</p>
+</div>
+<section id="id5">
+<h3>使用systemd自动启动容器</h3>
+<p>通过SystemD可以启动和停止服务，也可以跟踪依赖以及检查日志，对于docker，主要是wrap命令并正确命名。</p>
+<ul>
+<li><p>通过systemd启动redis服务(参考 <a class="reference external" href="https://karlstoney.com/2017/03/03/docker-containers-as-systemd-services/">Using Docker containers as Systemd services</a><span class="link-target"> [https://karlstoney.com/2017/03/03/docker-containers-as-systemd-services/]</span> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Unit</span><span class="p">]</span>
+<span class="n">Description</span><span class="o">=</span><span class="n">Redis</span> <span class="n">Key</span> <span class="n">Value</span> <span class="n">store</span>
+<span class="n">Requires</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span>
+
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">ExecStartPre</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sleep</span> <span class="mi">1</span>
+<span class="n">ExecStartPre</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">pull</span> <span class="n">redis</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="n">always</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">systemd_redis</span> <span class="o">-</span><span class="n">p</span><span class="o">=</span><span class="mi">6379</span><span class="p">:</span><span class="mi">6379</span> <span class="n">redis</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">ExecStop</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">stop</span> <span class="n">systemd_redis</span>
+<span class="n">ExecStopPost</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">systemd_redis</span>
+<span class="n">ExecReload</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">restart</span> <span class="n">systemd_redis</span>
+
+<span class="p">[</span><span class="n">Install</span><span class="p">]</span>
+<span class="n">WantedBy</span><span class="o">=</span><span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>将上述文件保存为 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/redis-in-docker.service</span></code> 然后执行 <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">daemon-reload</span></code> 。</p>
+<p>完成后就可以执行以下命令启动redis服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">redis</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">docker</span>
+</pre></div>
+</div>
+<p>启动正常后，就可以设置操作系统启动时启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">redis</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">docker</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://fardog.io/blog/2017/12/30/running-docker-containers-with-systemd/">Running Docker containers with systemd</a><span class="link-target"> [https://fardog.io/blog/2017/12/30/running-docker-containers-with-systemd/]</span> 提供了一个很好的启动nginx容器的案例可以参考:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Unit</span><span class="p">]</span>
+<span class="n">Description</span><span class="o">=</span><span class="n">nginx</span> <span class="p">(</span><span class="n">Docker</span><span class="p">)</span>
+<span class="c1"># start this unit only after docker has started</span>
+<span class="n">After</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span>
+<span class="n">Requires</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span>
+
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">TimeoutStartSec</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">Restart</span><span class="o">=</span><span class="n">always</span>
+<span class="c1"># The following lines start with &#39;-&#39; because they are allowed to fail without</span>
+<span class="c1"># causing startup to fail.</span>
+<span class="c1">#</span>
+<span class="c1"># Kill the old instance, if it&#39;s still running for some reason</span>
+<span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">kill</span> <span class="n">nginx</span>
+<span class="c1"># Remove the old instance, if it stuck around</span>
+<span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">rm</span> <span class="n">nginx</span>
+<span class="c1"># Pull the latest version of the container; NOTE you should be careful to</span>
+<span class="c1"># pull a tagged version, that way you won&#39;t accidentially pull a major-version</span>
+<span class="c1"># upgrade and break your service!</span>
+<span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">pull</span> <span class="s2">&quot;nginx:1.13&quot;</span>
+<span class="c1"># Start the actual service; note we remove the instance after it exits</span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="o">-</span><span class="n">p</span> <span class="mi">443</span><span class="p">:</span><span class="mi">443</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">service</span><span class="o">-</span><span class="n">configs</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">ro</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.13</span>
+<span class="c1"># On exit, stop the container</span>
+<span class="n">ExecStop</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span> <span class="n">stop</span> <span class="n">nginx</span>
+
+<span class="p">[</span><span class="n">Install</span><span class="p">]</span>
+<span class="n">WantedBy</span><span class="o">=</span><span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id6">
+<h2>在容器内部使用进程管理器</h2>
+<p>可以在容器内部运行进程管理器来检查一个进程是否运行或者进程没有运行时启动或重启进程。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>在容器内部使用进程管理器不是Docker可以感知的，并且仅仅在容器内部管理操作系统进程。这种方式不是Docker推荐的方法，因为这种方式和操作系统紧密相关，甚至在Linux发行版的不同版本也有差异。</p>
+</div>
+</section>
+<section id="id7">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.docker.com/config/containers/start-containers-automatically/">Start containers automatically</a><span class="link-target"> [https://docs.docker.com/config/containers/start-containers-automatically/]</span></p></li>
+<li><p><a class="reference external" href="https://karlstoney.com/2017/03/03/docker-containers-as-systemd-services/">Using Docker containers as Systemd services</a><span class="link-target"> [https://karlstoney.com/2017/03/03/docker-containers-as-systemd-services/]</span></p></li>
+<li><p><a class="reference external" href="https://fardog.io/blog/2017/12/30/running-docker-containers-with-systemd/">Running Docker containers with systemd</a><span class="link-target"> [https://fardog.io/blog/2017/12/30/running-docker-containers-with-systemd/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>在Kali Linux中使用Python</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kali-linuxpython">
+<span id="python-in-kali"></span><h1>在Kali Linux中使用Python</h1>
+<p>在 <a class="reference internal" href="../../linux/kali_linux/index.xhtml#kali-linux"><span class="std std-ref">Kali Linux</span></a> 中，默认系统为了兼容性提供的是Python 2，在终端登陆时会提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>We have kept /usr/bin/python pointing to Python 2 for backwards
+ compatibility. Learn how to change this and avoid this message:
+ ⇒ https://www.kali.org/docs/general-use/python3-transition/
+</pre></div>
+</div>
+<p>根据官方文档，Kali Linux已经完全切换到 Python 3，所以任何工具如果还使用Python 2就必须转换使用Python 3，或者就被舍弃掉了。</p>
+<p>不过，debian将Python 3使用 <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> 作为解释器入口，如果你的脚本依然使用 <code class="docutils literal notranslate"><span class="pre">python2</span></code> 执行包，需要修订解释器，否则会出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zsh</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">kali</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">py</span><span class="p">:</span> <span class="n">bad</span> <span class="n">interpreter</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span><span class="p">:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<p>这是因为debian并不提供 <code class="docutils literal notranslate"><span class="pre">/usr/bin/python</span></code> 作为软链接以避免更新问题。</p>
+<p>为避免上述报错，Kali依然提供了默认 Python 2作为解释器，并提供了 <code class="docutils literal notranslate"><span class="pre">/usr/bin/python</span></code> 软链接指向 <code class="docutils literal notranslate"><span class="pre">python2</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>➜  ~ ls -lh /usr/bin/python
+lrwxrwxrwx 1 root root 7 Mar  2 19:44 /usr/bin/python -&gt; python2
+</pre></div>
+</div>
+<p>但是，pip for Python2 (也就是 <code class="docutils literal notranslate"><span class="pre">python-pip</span></code> )已经没有了，查看 <code class="docutils literal notranslate"><span class="pre">/usr/bin/pip</span></code> 可以看到解释器实际上是 <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> ，也就是通过 <code class="docutils literal notranslate"><span class="pre">pip</span></code> 安装的所有模块都是 <code class="docutils literal notranslate"><span class="pre">python3</span></code> 模块。</p>
+<p>上述兼容是通过 <code class="docutils literal notranslate"><span class="pre">kali-linux-headless</span></code> 建议的 <code class="docutils literal notranslate"><span class="pre">python2</span></code> <code class="docutils literal notranslate"><span class="pre">python-is-python2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">offsec-awae-python2</span></code> 来实现的，所以默认安装。对于用户希望去除python2则可以删除。</p>
+<section id="python3">
+<h2>切换到Python3</h2>
+<ul>
+<li><p>通过删除 <code class="docutils literal notranslate"><span class="pre">python-is-python2</span></code> 可以消除掉上述提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="n">python</span><span class="o">-</span><span class="ow">is</span><span class="o">-</span><span class="n">python2</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果你希望转为完全使用Python 3，则安装 <code class="docutils literal notranslate"><span class="pre">python-is-python3</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">python</span><span class="o">-</span><span class="ow">is</span><span class="o">-</span><span class="n">python3</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果你依然希望默认的 <code class="docutils literal notranslate"><span class="pre">/usr/bin/python</span></code> 指向 <code class="docutils literal notranslate"><span class="pre">python2</span></code> 但是关闭上述警告提示，则可以手工操作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">~/.</span><span class="n">local</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">kali</span><span class="o">-</span><span class="n">motd</span>
+<span class="n">touch</span> <span class="o">~/.</span><span class="n">local</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">kali</span><span class="o">-</span><span class="n">motd</span><span class="o">/</span><span class="n">disable</span><span class="o">-</span><span class="n">old</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">warning</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="id1">
+<h3>我的实践</h3>
+<p>我在 <a class="reference internal" href="../../linux/kali_linux/index.xhtml#kali-linux"><span class="std std-ref">Kali Linux</span></a> 环境中决定完全使用Python 3，所以我执行安装 <code class="docutils literal notranslate"><span class="pre">python-is-python3</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">python</span><span class="o">-</span><span class="ow">is</span><span class="o">-</span><span class="n">python3</span>
+</pre></div>
+</div>
+<p>这个安装将会卸载掉 <code class="docutils literal notranslate"><span class="pre">python-is-python2</span></code> 软件包，安装以后执行 <code class="docutils literal notranslate"><span class="pre">python</span></code> 命令可以看到默认python已经是 python 3 了。对于日常运行使用没有影响。</p>
+</section>
+<section id="python-virtulenv">
+<h3>python virtulenv</h3>
+<p>在开发工作中，需要安装很多模块。为了不干扰整个操作系统环境，强烈建议采用 <a class="reference internal" href="virtualenv.xhtml#virtualenv"><span class="std std-ref">Python virtualenv</span></a> 来构建一个独立的python运行环境:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">venv</span>
+<span class="n">cd</span> <span class="o">~</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">venv3</span>
+<span class="n">source</span> <span class="n">venv3</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+</pre></div>
+</div>
+<p>然后在这个环境中执行 <code class="docutils literal notranslate"><span class="pre">python</span></code> 就是最新的的python3环境</p>
+</section>
+</section>
+<section id="python-2">
+<h2>如何运行Python 2脚本</h2>
+<p>对于依然是Python 2的脚本，Kali Linux提供了一个 <code class="docutils literal notranslate"><span class="pre">offsec-awae-python2</span></code> 兼容包，这样就可以使用 <code class="docutils literal notranslate"><span class="pre">pyenv</span></code> 来设置一个完全隔离的Python 2环境，然后使用 pip 来安装相应 模块，请参考 <a class="reference external" href="https://www.kali.org/docs/general-use/using-eol-python-versions/">Using EoL Python versions on Kali</a><span class="link-target"> [https://www.kali.org/docs/general-use/using-eol-python-versions/]</span></p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>在Ubuntu 20.04中禁用Snaps</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="ubuntu-20-04snaps">
+<span id="disable-snap"></span><h1>在Ubuntu 20.04中禁用Snaps</h1>
+<p>在 <a class="reference internal" href="snap.xhtml#snap"><span class="std std-ref">snap软件包管理</span></a> 我介绍了Ubuntu的容器方式运行桌面应用的包管理工具 snap ，这确实是一个神奇的工具，构建了安全的应用程序运行环境，且提供了不影响操作系统的无依赖安装应用。不过，在一些情况下可能会需要禁用snap:</p>
+<ul>
+<li><p>生产环境大量运行基于 <a class="reference internal" href="../../../docker/index.xhtml#docker"><span class="std std-ref">Docker Atlas</span></a> 的 <a class="reference internal" href="../../../kubernetes/index.xhtml#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> ，docker容器实现的是和snap相似目标</p></li>
+<li><p>在 <a class="reference internal" href="../../../arm/index.xhtml#arm"><span class="std std-ref">ARM Atlas</span></a> 架构的 <a class="reference internal" href="../../../arm/raspberry_pi/index.xhtml#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 硬件资源非常宝贵，我发现当网络启用时， <cite>snapd</cite> 会始终占用一个cpu核心的30%资源:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">-</span> <span class="mi">06</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">00</span> <span class="n">up</span> <span class="mi">1</span> <span class="nb">min</span><span class="p">,</span>  <span class="mi">1</span> <span class="n">user</span><span class="p">,</span>  <span class="n">load</span> <span class="n">average</span><span class="p">:</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.36</span><span class="p">,</span> <span class="mf">0.13</span>
+<span class="n">Tasks</span><span class="p">:</span> <span class="mi">138</span> <span class="n">total</span><span class="p">,</span>   <span class="mi">1</span> <span class="n">running</span><span class="p">,</span> <span class="mi">137</span> <span class="n">sleeping</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">stopped</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">zombie</span>
+<span class="o">%</span><span class="n">Cpu</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="mf">5.8</span> <span class="n">us</span><span class="p">,</span>  <span class="mf">1.8</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span> <span class="mf">89.2</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">3.2</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.1</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="n">MiB</span> <span class="n">Mem</span> <span class="p">:</span>   <span class="mf">1848.2</span> <span class="n">total</span><span class="p">,</span>   <span class="mf">1154.4</span> <span class="n">free</span><span class="p">,</span>    <span class="mf">199.4</span> <span class="n">used</span><span class="p">,</span>    <span class="mf">494.5</span> <span class="n">buff</span><span class="o">/</span><span class="n">cache</span>
+<span class="n">MiB</span> <span class="n">Swap</span><span class="p">:</span>      <span class="mf">0.0</span> <span class="n">total</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">free</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">used</span><span class="o">.</span>   <span class="mf">1612.2</span> <span class="n">avail</span> <span class="n">Mem</span>
+
+    <span class="n">PID</span> <span class="n">USER</span>      <span class="n">PR</span>  <span class="n">NI</span>    <span class="n">VIRT</span>    <span class="n">RES</span>    <span class="n">SHR</span> <span class="n">S</span>  <span class="o">%</span><span class="n">CPU</span>  <span class="o">%</span><span class="n">MEM</span>     <span class="n">TIME</span><span class="o">+</span> <span class="n">COMMAND</span>
+   <span class="mi">1651</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span> <span class="mi">1072380</span>  <span class="mi">34368</span>  <span class="mi">13640</span> <span class="n">S</span>  <span class="mf">28.1</span>   <span class="mf">1.8</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">08.00</span> <span class="n">snapd</span>
+   <span class="mi">2306</span> <span class="n">ubuntu</span>    <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">10680</span>   <span class="mi">3120</span>   <span class="mi">2708</span> <span class="n">R</span>   <span class="mf">0.7</span>   <span class="mf">0.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.09</span> <span class="n">top</span>
+      <span class="mi">6</span> <span class="n">root</span>       <span class="mi">0</span> <span class="o">-</span><span class="mi">20</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.08</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="n">H</span><span class="o">-</span><span class="n">mmc_complete</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这样即使待机状态 <a class="reference internal" href="../../server/hardware/check_server_temp.xhtml#check-server-temp"><span class="std std-ref">服务器温度检测</span></a> 也看到核心问题达到50度以上(未使用风扇情况下)。所以有必要禁用不使用的snapd。</p>
+<section id="snaps">
+<h2>移除现存Snaps</h2>
+<ul>
+<li><p>在新安装的Ubuntu中，已经默认安装了部分snaps，可以通过以下命令查看:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>例如，Raspberry Pi 4的Ubuntu Server 64位版本，输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Name    Version   Rev    Tracking       Publisher   Notes
+core18  20200707  1883   latest/stable  canonical✓  base
+lxd     4.0.2     16103  4.0/stable/…   canonical✓  -
+snapd   2.45.2    8543   latest/stable  canonical✓  snapd
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://snapcraft.io/core18">snap core18</a><span class="link-target"> [https://snapcraft.io/core18]</span> 是Ubuntu 18.04 ，提供了在Ubuntu 20.04系统中运行上一个LTS版本应用的能力</p></li>
+</ul>
+</div>
+<p>并且，如果你执行 <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> 命令可以看到已经挂载了snap的服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">loop0</span>       <span class="mi">49</span><span class="n">M</span>   <span class="mi">49</span><span class="n">M</span>     <span class="mi">0</span> <span class="mi">100</span><span class="o">%</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">core18</span><span class="o">/</span><span class="mi">1883</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">loop1</span>       <span class="mi">64</span><span class="n">M</span>   <span class="mi">64</span><span class="n">M</span>     <span class="mi">0</span> <span class="mi">100</span><span class="o">%</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">lxd</span><span class="o">/</span><span class="mi">16103</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">loop2</span>       <span class="mi">26</span><span class="n">M</span>   <span class="mi">26</span><span class="n">M</span>     <span class="mi">0</span> <span class="mi">100</span><span class="o">%</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">snapd</span><span class="o">/</span><span class="mi">8543</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">loop3</span>       <span class="mi">49</span><span class="n">M</span>   <span class="mi">49</span><span class="n">M</span>     <span class="mi">0</span> <span class="mi">100</span><span class="o">%</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">core18</span><span class="o">/</span><span class="mi">1888</span>
+</pre></div>
+</div>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">snap</span> <span class="pre">remove</span> <span class="pre">&lt;package&gt;</span></code> 命令移除:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">remove</span> <span class="n">lxd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是不能先移除 <code class="docutils literal notranslate"><span class="pre">snapd</span></code> ，如果你执行 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">snap</span> <span class="pre">remove</span> <span class="pre">snapd</span></code> 会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">remove</span> <span class="s2">&quot;snapd&quot;</span><span class="p">:</span> <span class="n">snap</span> <span class="s2">&quot;snapd&quot;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">removable</span><span class="p">:</span> <span class="n">remove</span> <span class="nb">all</span> <span class="n">other</span> <span class="n">snaps</span> <span class="n">first</span>
+</pre></div>
+</div>
+<p>所以先移除 <code class="docutils literal notranslate"><span class="pre">core18</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">remove</span> <span class="n">core18</span>
+</pre></div>
+</div>
+<p>最后移除 <code class="docutils literal notranslate"><span class="pre">snapd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">remove</span> <span class="n">snapd</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>此时 <code class="docutils literal notranslate"><span class="pre">snapd</span></code> 服务依然在运行，需要卸载 <code class="docutils literal notranslate"><span class="pre">snapd</span></code> 软件包来清理</p>
+</div>
+<ul>
+<li><p>检查文件系统挂载 <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> 可以看到所有snaps相关挂载都已经消除:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Filesystem</span>      <span class="n">Size</span>  <span class="n">Used</span> <span class="n">Avail</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="n">udev</span>            <span class="mi">876</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">876</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span>
+<span class="n">tmpfs</span>           <span class="mi">185</span><span class="n">M</span>  <span class="mf">2.7</span><span class="n">M</span>  <span class="mi">183</span><span class="n">M</span>   <span class="mi">2</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span>  <span class="mi">117</span><span class="n">G</span>  <span class="mf">5.0</span><span class="n">G</span>  <span class="mi">108</span><span class="n">G</span>   <span class="mi">5</span><span class="o">%</span> <span class="o">/</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">shm</span>
+<span class="n">tmpfs</span>           <span class="mf">5.0</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mf">5.0</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p1</span>  <span class="mi">253</span><span class="n">M</span>   <span class="mi">97</span><span class="n">M</span>  <span class="mi">156</span><span class="n">M</span>  <span class="mi">39</span><span class="o">%</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span>
+<span class="n">tmpfs</span>           <span class="mi">185</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">185</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="mi">1000</span>
+</pre></div>
+</div>
+</li>
+<li><p>删除和清理snapd软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">purge</span> <span class="n">snapd</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">autoremove</span></code> 清理所有无用软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span>
+</pre></div>
+</div>
+</li>
+<li><p>删除snap目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">~/</span><span class="n">snap</span>
+<span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">snap</span>
+<span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">snap</span>
+<span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">snapd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>现在，所有snaps已经清理干净，我们将使用 <a class="reference internal" href="../../../docker/index.xhtml#docker"><span class="std std-ref">Docker Atlas</span></a> 构建 <a class="reference internal" href="../../../kubernetes/index.xhtml#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 。</p>
+</section>
+<section id="id1">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.kevin-custer.com/blog/disabling-snaps-in-ubuntu-20-04/">Disabling Snaps in Ubuntu 20.04</a><span class="link-target"> [https://www.kevin-custer.com/blog/disabling-snaps-in-ubuntu-20-04/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

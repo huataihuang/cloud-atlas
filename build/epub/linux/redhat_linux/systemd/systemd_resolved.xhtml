@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>systemd-resolved</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="systemd-resolved">
+<span id="id1"></span><h1>systemd-resolved</h1>
+<p>systemd-resolved 是通过D-Bus接口向本地应用程序提供网络名字解析的systemd服务，包括解析(resolve) NSS服务(nss-resolve)和一个在127.0.0.53上监听的本地DNS stub监听器。不需要单独安装systemd-resolved，因为当前Linux主流发行版默认使用的systemd已经包含了这个组件，并且默认启用。</p>
+<section id="id2">
+<h2>配置</h2>
+<p>systemd-resolved为域名系统(Domain Name System, DNS)(包括DNSSEC和DNS over TLS)，多播DNS(Multicast DNS, mDNS) 以及链接本地多播域名解析(Link-Local Multicast Name Resolution, LLMNR)提供解析服务。</p>
+<p>这个解析起可以通过编辑 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf</span></code> 或者 添加/删除 位于 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf.d/</span></code> 目录下 <code class="docutils literal notranslate"><span class="pre">.conf</span></code> 配置文件来管理。注意，需要启动并激活 <code class="docutils literal notranslate"><span class="pre">systemd-resolved.service</span></code> 。</p>
+<section id="dns">
+<h3>DNS</h3>
+<p>systemd-resolved有4种不同方式来处理DNS解析，其中有2中是主要使用模式：</p>
+<ul class="simple">
+<li><p>local DNS stub模式</p></li>
+</ul>
+<p>使用systemd DNS stub文件 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/stub-resolv.conf</span></code> ，这个文件只包含local stub <code class="docutils literal notranslate"><span class="pre">127.0.0.53</span></code> 作为唯一DNS服务器，以及一系列search domains。这是 <strong>建议使用</strong> 的操作模式：原先传统的 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 已经由systemd-resolved管理改成为软链接到systemd DNS stub文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lrwxrwxrwx</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">39</span> <span class="n">Jul</span> <span class="mi">31</span> <span class="mi">16</span><span class="p">:</span><span class="mi">37</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span> <span class="o">-&gt;</span> <span class="o">../</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">resolve</span><span class="o">/</span><span class="n">stub</span><span class="o">-</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+<p>而且，在 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/</span></code> 目录下还有一个 <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> 配置，则是 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 使用的上级DNS服务器，也就是转发(forward)DNS解析请求给上级DNS。</p>
+<ul class="simple">
+<li><p>保护resolv.conf模式</p></li>
+</ul>
+<p>在保护模式下 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 则依然存在，而且可以由其他软件包管理，此时systemd-resolved仅仅是这个文件的客户端。</p>
+<p>要检查DNS当前由systemd-resolved管理状态，执行以下命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resolvectl</span> <span class="n">status</span>
+</pre></div>
+</div>
+<p>也可以执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemd</span><span class="o">-</span><span class="n">resolve</span> <span class="o">--</span><span class="n">status</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3>自动管理DNS</h3>
+<p>systemd-resolved默认就可以和 <a class="reference internal" href="../../ubuntu_linux/network/networkmanager.xhtml#networkmanager"><span class="std std-ref">NetworkManager</span></a> 协作管理 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> ，不需要单独配置。不过，如果使用DHCP和VPN客户端，则会使用 <code class="docutils literal notranslate"><span class="pre">resolvconf</span></code> 程序设置DNS和search domains，则需要安装一个 <code class="docutils literal notranslate"><span class="pre">systemd-resolvconf</span></code> 软件包来提供 <code class="docutils literal notranslate"><span class="pre">/usr/bin/resolvconf</span></code> 软链接，以便和VPN客户端和DHCP一起协作。</p>
+</section>
+<section id="id4">
+<h3>手工配置DNS</h3>
+<p>在local DNS stub模式，要定制DNS服务器，需要设置 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf.d/dns_servers.conf</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Resolve</span><span class="p">]</span>
+<span class="n">DNS</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">35.1</span> <span class="n">fd7b</span><span class="p">:</span><span class="n">d0bd</span><span class="p">:</span><span class="mi">7</span><span class="n">a6e</span><span class="p">::</span><span class="mi">1</span>
+<span class="n">Domains</span><span class="o">=~.</span>
+</pre></div>
+</div>
+</section>
+<section id="fallback">
+<h3>Fallback</h3>
+<p>如果systemd-resolved没有从 <a class="reference internal" href="../../ubuntu_linux/network/networkmanager.xhtml#networkmanager"><span class="std std-ref">NetworkManager</span></a> 收到DNS服务器地址，并且没有手工配置 <code class="docutils literal notranslate"><span class="pre">dns_servers.conf</span></code> ，那么systemd-resolved将fall back回fallback DNS地址以确保DNS解析可以工作。</p>
+<p>这个fallback dns地址在 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf.d/fallback_dns.conf</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Resolve</span><span class="p">]</span>
+<span class="n">FallbackDNS</span><span class="o">=</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="p">::</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>如果要禁止fallback DNS功能，则将 <code class="docutils literal notranslate"><span class="pre">FallbackDNS</span></code> 参数是设置为空:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Resolve</span><span class="p">]</span>
+<span class="n">FallbackDNS</span><span class="o">=</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>systemd-resolved还有支持 DNSSEC, DNS over TLS, mDNS 等功能，有待后续在研究DNS服务 <a class="reference internal" href="../../../infra_service/dns/bind/index.xhtml#bind"><span class="std std-ref">BIND</span></a> 时候学习实践。</p>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Systemd-resolved">archlinux - systemd-resolved</a><span class="link-target"> [https://wiki.archlinux.org/index.php/Systemd-resolved]</span></p></li>
+<li><p><a class="reference external" href="https://www.freedesktop.org/software/systemd/man/systemd-resolved.service.html">systemd-resolved.service</a><span class="link-target"> [https://www.freedesktop.org/software/systemd/man/systemd-resolved.service.html]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

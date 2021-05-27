@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>部署ARM架构Kubernetes</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="armkubernetes">
+<span id="arm-k8s-deploy"></span><h1>部署ARM架构Kubernetes</h1>
+<section id="id1">
+<h2>部署环境</h2>
+<p>树莓派4操作系统采用Ubuntu 20.04(Focal Fossa)，提供了64位ARM操作系统，可以非常完美运行AArch64容器镜像，这样可以避免很多32位镜像的软件问题。通过树莓派实现微型Kubernetes集群，可以充分演练新的云原生技术。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>从技术上来说 <code class="docutils literal notranslate"><span class="pre">AArch64</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ARM64</span></code> 是同一种架构，是64位系统。ARM和x86的指令集不同，所以不能在x86服务器上运行ARM65镜像，反之也不行。</p>
+</div>
+</section>
+<section id="id2">
+<h2>准备工作</h2>
+<ul class="simple">
+<li><p>准备3个(或更多) <a class="reference internal" href="../../arm/raspberry_pi/index.xhtml#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> ，我采用了:</p>
+<ul>
+<li><p>1台 2G 规格树莓派4：用于管控 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code></p></li>
+<li><p>2台 8G 规格树莓派4：用于工作节点 <code class="docutils literal notranslate"><span class="pre">pi-worker1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">pi-worker2</span></code></p></li>
+</ul>
+</li>
+<li><p>我也使用了一台 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.xhtml#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 设备作为GPU工作节点</p></li>
+</ul>
+<p>在构建Kubernetes集群之前，主要需要解决树莓派访问TF卡性能低下的问题，采用 <a class="reference internal" href="../../arm/raspberry_pi/storage/usb_boot_ubuntu_pi_4.xhtml#usb-boot-ubuntu-pi-4"><span class="std std-ref">树莓派4 USB启动Ubuntu Server 20.04</span></a> 可以极大提高树莓派存储IO性能。</p>
+<ul class="simple">
+<li><p>为了测试和验证Kubernetes混合不同架构，在ARM集群中添加一台 <a class="reference internal" href="../../studio/hardware/thinkpad_x220.xhtml#thinkpad-x220"><span class="std std-ref">ThinkPad X220笔记本</span></a> 运行 <a class="reference internal" href="../../linux/arch_linux/index.xhtml#arch-linux"><span class="std std-ref">Arch Linux</span></a> 作为模拟X86异构Kubernetes工作节点</p></li>
+</ul>
+</section>
+<section id="docker">
+<h2>安装和配置Docker</h2>
+<p>我使用 <a class="reference internal" href="../../arm/raspberry_pi/startup/ubuntu64bit_pi.xhtml#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> ，使用的Ubuntu 20.04 提供了非常新的Docker版本，v19.03，可以直接通过 <code class="docutils literal notranslate"><span class="pre">apt</span></code> 命令安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span>
+</pre></div>
+</div>
+<section id="systemdcgroups">
+<h3>设置systemd管理cgroups</h3>
+<p>安装完docker之后，需要做一些配置确保激活 cgroups (Control Groups)。cgroups是内核用用限制和隔离资源，可以让Kubernetes更好地管理容器运行时使用地资源，并且通过隔离容器来增加安全性。</p>
+<ul>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Check `docker info`
+# Some output omitted
+$ sudo docker info
+(...)
+Cgroup Driver: cgroups
+(...)
+WARNING: No memory limit support
+WARNING: No swap limit support
+WARNING: No kernel memory limit support
+WARNING: No kernel memory TCP limit support
+WARNING: No oom kill disable support
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里显示 cgroups 驱动需要修改成 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.xhtml#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 作为 cgroups 管理器，并且确保只使用一个cgroup manager。所以修改或者创建 <code class="docutils literal notranslate"><span class="pre">/etc/docker/daemon.json</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo cat &gt; /etc/docker/daemon.json &lt;&lt;EOF
+{
+  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],
+  &quot;log-driver&quot;: &quot;json-file&quot;,
+  &quot;log-opts&quot;: {
+    &quot;max-size&quot;: &quot;100m&quot;
+  },
+  &quot;storage-driver&quot;: &quot;overlay2&quot;
+}
+EOF
+</pre></div>
+</div>
+</section>
+<section id="cgroups-limit">
+<h3>激活cgroups limit支持</h3>
+<p>上述 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 输出中显示了cgroups limit没有激活，需要修改内核来激活这些选项。对于树莓派4，需要在 <code class="docutils literal notranslate"><span class="pre">/boot/firmware/cmdline.txt</span></code> 文件中添加以下配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cgroup_enable</span><span class="o">=</span><span class="n">cpuset</span>
+<span class="n">cgroup_enable</span><span class="o">=</span><span class="n">memory</span>
+<span class="n">cgroup_memory</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">swapaccount</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>确保将上述配置添加到 <code class="docutils literal notranslate"><span class="pre">cmdline.txt</span></code> 文件到末尾，可以通过以下 <code class="docutils literal notranslate"><span class="pre">sed</span></code> 命令完成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1/&#39;</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">firmware</span><span class="o">/</span><span class="n">cmdline</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>接下来重启一次系统，就会看到 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 输出显示 <code class="docutils literal notranslate"><span class="pre">cgroups</span> <span class="pre">driver</span></code> 是 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 并且有关 cgroup limits 的警告消失了。</p>
+</section>
+<section id="iptablesbridged">
+<h3>允许iptables查看bridged流量</h3>
+<p>Kubernetes需要使用iptables来配置查看bridged网络流量，可以通过以下命令修改 <code class="docutils literal notranslate"><span class="pre">sysctl</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">EOF</span>
+
+<span class="n">sudo</span> <span class="n">sysctl</span> <span class="o">--</span><span class="n">system</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="kubernetes">
+<h2>安装Kubernetes软件包</h2>
+<ul>
+<li><p>添加Kubernetes repo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">s</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">apt</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="o">-</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">list</span>
+<span class="n">deb</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">apt</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">xenial</span> <span class="n">main</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Ubuntu 20.04的版本代号是Focal，Ubuntu 18.04代号是Xenial。你需要检查kubernetes.io的Apt软件仓库提供的对应Ubuntu LTS仓库版本号。当前，在 <a class="reference external" href="https://packages.cloud.google.com/apt/dists">https://packages.cloud.google.com/apt/dists</a> 中查询还仅仅有 <code class="docutils literal notranslate"><span class="pre">kubernetes-xenial</span></code> 尚未提供 focal 版本，所以上述配置apt源仅配置针对 Ubuntu 18.04 的 <code class="docutils literal notranslate"><span class="pre">kubernetes-xenial</span></code> 。后续可以关注该网站提供的软件仓库，在适当时切换到 Focal 版本。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">update</span></code> 出现以下报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Err</span><span class="p">:</span><span class="mi">2</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">xenial</span> <span class="n">InRelease</span>
+  <span class="n">The</span> <span class="n">following</span> <span class="n">signatures</span> <span class="n">couldn</span><span class="s1">&#39;t be verified because the public key is not available: NO_PUBKEY FEEA9169307EA071 NO_PUBKEY 8B57C5C2836F4BEB</span>
+<span class="o">...</span>
+<span class="n">W</span><span class="p">:</span> <span class="n">An</span> <span class="n">error</span> <span class="n">occurred</span> <span class="n">during</span> <span class="n">the</span> <span class="n">signature</span> <span class="n">verification</span><span class="o">.</span> <span class="n">The</span> <span class="n">repository</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">updated</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">previous</span> <span class="n">index</span> <span class="n">files</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span><span class="o">.</span> <span class="n">GPG</span> <span class="n">error</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">xenial</span> <span class="n">InRelease</span><span class="p">:</span> <span class="n">The</span> <span class="n">following</span> <span class="n">signatures</span> <span class="n">couldn</span><span class="s1">&#39;t be verified because the public key is not available: NO_PUBKEY FEEA9169307EA071 NO_PUBKEY 8B57C5C2836F4BEB</span>
+<span class="n">W</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">fetch</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">apt</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">dists</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">xenial</span><span class="o">/</span><span class="n">InRelease</span>  <span class="n">The</span> <span class="n">following</span> <span class="n">signatures</span> <span class="n">couldn</span><span class="s1">&#39;t be verified because the public key is not available: NO_PUBKEY FEEA9169307EA071 NO_PUBKEY 8B57C5C2836F4BEB</span>
+<span class="n">W</span><span class="p">:</span> <span class="n">Some</span> <span class="n">index</span> <span class="n">files</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">download</span><span class="o">.</span> <span class="n">They</span> <span class="n">have</span> <span class="n">been</span> <span class="n">ignored</span><span class="p">,</span> <span class="ow">or</span> <span class="n">old</span> <span class="n">ones</span> <span class="n">used</span> <span class="n">instead</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>则需要再次执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">s</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">apt</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="o">-</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>安装以下3个必要的Kubernetes软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装完成后使用 <code class="docutils literal notranslate"><span class="pre">apt-mark</span> <span class="pre">hold</span></code> 命令来锁定上述3个软件版本，因为更新Kubernetes需要很多手工处理和关注，不要使用通用的更新方式更新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">mark</span> <span class="n">hold</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果要解除 <code class="docutils literal notranslate"><span class="pre">hold</span></code> 则使用 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-mark</span> <span class="pre">unhold</span> <span class="pre">kubelet</span> <span class="pre">kubeadm</span> <span class="pre">kubectl</span></code></p>
+</section>
+<section id="id3">
+<h2>创建Kubernetes集群</h2>
+<p>在创建Kubernetes集群前，需要确定:</p>
+<ul class="simple">
+<li><p>有一个树莓派节点角色是控制平面节点(Control Plane node)，其余节点则作为计算节点。</p></li>
+<li><p>需要选择一个网络的CIDR作为Kubernetes集群的pods使用，这里的案例使用 <a class="reference internal" href="../network/flannel/index.xhtml#flannel"><span class="std std-ref">Flannel网络</span></a> CNI，是一种比较功能简单但是性能较为卓越的容器网络接口(Container Network Interface, CNI)。需要确保Kubernetes使用的CIDR没有被路由器或者DHCP服务器所管理的网段冲突。
+- 请确保规划足够大大网段，因为会使用大量的pods，往往超出最初的规划 - 使用 10.244.0.0/16</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我在模拟环境中使用了树莓派的无线网卡和有线网卡，无线网段可以方便我们调试服务，所以我采用指定BSSID方式确保客户端和服务器端通过同一个无线AP，就不需要使用可路由网段，只需要确保这个Kubernetes的CIDR和路由器DHCP分配的网段不冲突就行。</p>
+</div>
+<section id="id4">
+<h3>初始化控制平面</h3>
+<p>Kubernetes使用bootstrap token来认证加入集群的节点，这个token需要在 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 命令中传递来初始化控制平面节点。</p>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">token</span> <span class="pre">generate</span></code> 命令创建token:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>TOKEN=$(sudo kubeadm token generate)
+echo $TOKEN
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">$TOKEN</span></code> 输出需要记录下来，后续命令行需要:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo kubeadm init --token=${TOKEN} --kubernetes-version=v1.19.4 --pod-network-cidr=10.244.0.0/16
+</pre></div>
+</div>
+<p>输出信息:</p>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>W1129 23:50:41.292869   27185 configset.go:348] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.
+io]
+[init] Using Kubernetes version: v1.19.4
+[preflight] Running pre-flight checks
+        [WARNING Service-Docker]: docker service is not enabled, please run &#39;systemctl enable docker.service&#39;
+        [WARNING SystemVerification]: missing optional cgroups: hugetlb
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action in beforehand using &#39;kubeadm config images pull&#39;
+[certs] Using certificateDir folder &quot;/etc/kubernetes/pki&quot;
+[certs] Generating &quot;ca&quot; certificate and key
+[certs] Generating &quot;apiserver&quot; certificate and key
+[certs] apiserver serving cert is signed for DNS names [kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local pi-master1]
+and IPs [10.96.0.1 192.168.166.91]
+[certs] Generating &quot;apiserver-kubelet-client&quot; certificate and key
+[certs] Generating &quot;front-proxy-ca&quot; certificate and key
+[certs] Generating &quot;front-proxy-client&quot; certificate and key
+[certs] Generating &quot;etcd/ca&quot; certificate and key
+[certs] Generating &quot;etcd/server&quot; certificate and key
+[certs] etcd/server serving cert is signed for DNS names [localhost pi-master1] and IPs [192.168.166.91 127.0.0.1 ::1]
+[certs] Generating &quot;etcd/peer&quot; certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [localhost pi-master1] and IPs [192.168.166.91 127.0.0.1 ::1]
+[certs] Generating &quot;etcd/healthcheck-client&quot; certificate and key
+[certs] Generating &quot;apiserver-etcd-client&quot; certificate and key
+[certs] Generating &quot;sa&quot; key and public key
+[kubeconfig] Using kubeconfig folder &quot;/etc/kubernetes&quot;
+[kubeconfig] Writing &quot;admin.conf&quot; kubeconfig file
+[kubeconfig] Writing &quot;kubelet.conf&quot; kubeconfig file
+[kubeconfig] Writing &quot;controller-manager.conf&quot; kubeconfig file
+[kubeconfig] Writing &quot;scheduler.conf&quot; kubeconfig file
+[kubelet-start] Writing kubelet environment file with flags to file &quot;/var/lib/kubelet/kubeadm-flags.env&quot;
+[kubelet-start] Writing kubelet configuration to file &quot;/var/lib/kubelet/config.yaml&quot;
+[kubelet-start] Starting the kubelet
+[control-plane] Using manifest folder &quot;/etc/kubernetes/manifests&quot;
+[control-plane] Creating static Pod manifest for &quot;kube-apiserver&quot;
+[control-plane] Creating static Pod manifest for &quot;kube-controller-manager&quot;
+[control-plane] Creating static Pod manifest for &quot;kube-scheduler&quot;
+[etcd] Creating static Pod manifest for local etcd in &quot;/etc/kubernetes/manifests&quot;
+[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory &quot;/etc/kubernetes/manifests&quot;. This can take up to 4m0s
+[apiclient] All control plane components are healthy after 37.509322 seconds
+[upload-config] Storing the configuration used in ConfigMap &quot;kubeadm-config&quot; in the &quot;kube-system&quot; Namespace
+[kubelet] Creating a ConfigMap &quot;kubelet-config-1.19&quot; in namespace kube-system with the configuration for the kubelets in the cluster
+[kubelet-check] Initial timeout of 40s passed.
+[upload-certs] Skipping phase. Please see --upload-certs
+[mark-control-plane] Marking the node pi-master1 as control-plane by adding the label &quot;node-role.kubernetes.io/master=&#39;&#39;&quot;
+[mark-control-plane] Marking the node pi-master1 as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule]
+[bootstrap-token] Using token: &lt;TOKEN&gt;
+[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to get nodes
+[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstrap-token] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstrap-token] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstrap-token] Creating the &quot;cluster-info&quot; ConfigMap in the &quot;kube-public&quot; namespace
+[kubelet-finalize] Updating &quot;/etc/kubernetes/kubelet.conf&quot; to point to a rotatable kubelet client certificate and key
+[addons] Applied essential addon: CoreDNS
+[addons] Applied essential addon: kube-proxy
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run &quot;kubectl apply -f [podnetwork].yaml&quot; with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.166.91:6443 --token &lt;TOKEN&gt; \
+    --discovery-token-ca-cert-hash sha256:&lt;DISCOVERY-TOKEN&gt;
+</pre></div>
+</td></tr></table></div>
+</section>
+<section id="id5">
+<h3>多网卡困扰</h3>
+<p>在执行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 初始化Kubernetes集群时，我发现对于具有2块网卡( <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 和 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> )的树莓派系统， <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 系统默认使用了 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 地址 <code class="docutils literal notranslate"><span class="pre">192.168.166.91</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">Generating</span> <span class="s2">&quot;etcd/server&quot;</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">key</span>
+<span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">etcd</span><span class="o">/</span><span class="n">server</span> <span class="n">serving</span> <span class="n">cert</span> <span class="ow">is</span> <span class="n">signed</span> <span class="k">for</span> <span class="n">DNS</span> <span class="n">names</span> <span class="p">[</span><span class="n">localhost</span> <span class="n">pi</span><span class="o">-</span>         <span class="n">master1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">IPs</span> <span class="p">[</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">166.91</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="p">::</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">Generating</span> <span class="s2">&quot;etcd/peer&quot;</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">key</span>
+<span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">etcd</span><span class="o">/</span><span class="n">peer</span> <span class="n">serving</span> <span class="n">cert</span> <span class="ow">is</span> <span class="n">signed</span> <span class="k">for</span> <span class="n">DNS</span> <span class="n">names</span> <span class="p">[</span><span class="n">localhost</span> <span class="n">pi</span><span class="o">-</span><span class="n">master1</span><span class="p">]</span>   <span class="ow">and</span> <span class="n">IPs</span> <span class="p">[</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">166.91</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="p">::</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>而 <code class="docutils literal notranslate"><span class="pre">apiserver</span></code> 服务则同时提供两个接口的DNS名字证书(其中 10.96.0.1 并非当前服务器网卡IP地址):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">certs</span><span class="p">]</span> <span class="n">apiserver</span> <span class="n">serving</span> <span class="n">cert</span> <span class="ow">is</span> <span class="n">signed</span> <span class="k">for</span> <span class="n">DNS</span> <span class="n">names</span> <span class="p">[</span><span class="n">kubernetes</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">default</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">svc</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span> <span class="n">pi</span><span class="o">-</span><span class="n">master1</span><span class="p">]</span>
+<span class="ow">and</span> <span class="n">IPs</span> <span class="p">[</span><span class="mf">10.96</span><span class="o">.</span><span class="mf">0.1</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">166.91</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>需要注意的是无线网卡的IP地址是DHCP分配，这导致服务器重启会出现IP变化问题，需要解决。</p>
+</div>
+<p>由于没有携带参数的 <code class="docutils literal notranslate"><span class="pre">kubeadmin</span> <span class="pre">init</span></code> 会使用默认路由的网卡IP地址，这导致和我设想的使用有线网卡上的固定IP地址不同，所以我需要重新初始化。注意，再次初始化使用 <code class="docutils literal notranslate"><span class="pre">--apiserver-advertise-address</span> <span class="pre">string</span></code> 参数来指定公告IP地址。</p>
+<p>采用的方法请参考我之前的实践 <a class="reference internal" href="../deployment/bootstrap_kubernetes/change_master_ip.xhtml#change-master-ip"><span class="std std-ref">修改Kubernetes Master IP</span></a> 重新初始化</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl stop kubelet docker
+
+<span class="nb">cd</span> /etc/
+
+<span class="c1"># backup old kubernetes data</span>
+mv kubernetes kubernetes-backup
+mv /var/lib/kubelet /var/lib/kubelet-backup
+
+<span class="c1"># restore certificates</span>
+mkdir -p kubernetes
+cp -r kubernetes-backup/pki kubernetes
+rm kubernetes/pki/<span class="o">{</span>apiserver.*,etcd/peer.*<span class="o">}</span>
+
+systemctl start docker
+
+<span class="c1"># reinit master with data in etcd</span>
+<span class="c1"># add --kubernetes-version, --pod-network-cidr and --token options if needed</span>
+<span class="c1"># 原文使用如下命令:</span>
+<span class="c1"># kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd</span>
+<span class="c1"># 但是由于我使用的是Flannel网络，所以一定要加上参数，否则后续安装 flannel addon无法启动pod</span>
+
+kubeadm init --ignore-preflight-errors<span class="o">=</span>DirAvailable--var-lib-etcd --pod-network-cidr<span class="o">=</span><span class="m">10</span>.244.0.0/16 --apiserver-advertise-address <span class="m">192</span>.168.6.11
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>初始化以后等待一些实践，删除掉旧的节点</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sleep <span class="m">120</span>
+kubectl get nodes --sort-by<span class="o">=</span>.metadata.creationTimestamp
+</pre></div>
+</div>
+<p>这里可以看到一个master节点存在问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>     <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">NotReady</span>   <span class="n">master</span>   <span class="mi">2</span><span class="n">d10h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>删除问题节点</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl delete node <span class="k">$(</span>kubectl get nodes -o <span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[?(@.status.conditions[0].status==&quot;Unknown&quot;)].metadata.name}&#39;</span><span class="k">)</span>
+</pre></div>
+</div>
+<p>这里提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">resource</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">were</span> <span class="n">provided</span><span class="p">,</span> <span class="n">but</span> <span class="n">no</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span> <span class="n">selector</span><span class="p">,</span> <span class="ow">or</span> <span class="o">--</span><span class="nb">all</span> <span class="n">flag</span> <span class="n">specified</span>
+</pre></div>
+</div>
+<p>检查pod</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># check running pods</span>
+kubectl get pods --all-namespaces -o wide
+</pre></div>
+</div>
+<p>输出信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAMESPACE</span>     <span class="n">NAME</span>                                 <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>     <span class="n">IP</span>             <span class="n">NODE</span>         <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">coredns</span><span class="o">-</span><span class="n">f9fd979d6</span><span class="o">-</span><span class="n">gd94x</span>              <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Pending</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">d10h</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>         <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">coredns</span><span class="o">-</span><span class="n">f9fd979d6</span><span class="o">-</span><span class="n">hbqx9</span>              <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Pending</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">d10h</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>         <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">etcd</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>                      <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="n">h</span>     <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="n">h</span>     <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">1</span>          <span class="mi">2</span><span class="n">d10h</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="mi">525</span><span class="n">kd</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">1</span>          <span class="mi">2</span><span class="n">d10h</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">1</span>          <span class="mi">2</span><span class="n">d10h</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul>
+<li><p>不过检查集群apiserver访问正常:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">cluster</span><span class="o">-</span><span class="n">info</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Kubernetes</span> <span class="n">master</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span>
+<span class="n">KubeDNS</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span><span class="n">namespaces</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">services</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">dns</span><span class="p">:</span><span class="n">dns</span><span class="o">/</span><span class="n">proxy</span>
+
+<span class="n">To</span> <span class="n">further</span> <span class="n">debug</span> <span class="ow">and</span> <span class="n">diagnose</span> <span class="n">cluster</span> <span class="n">problems</span><span class="p">,</span> <span class="n">use</span> <span class="s1">&#39;kubectl cluster-info dump&#39;</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="node-notready">
+<h3>排查解决node NotReady</h3>
+<ul class="simple">
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">pending</span></code> 的pod原因</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system describe pods coredns-f9fd979d6-gd94x
+</pre></div>
+</div>
+<p>可以看到是由于调度不成功导致</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Events:</span>
+<span class="go">  Type     Reason            Age                    From               Message</span>
+<span class="go">  ----     ------            ----                   ----               -------</span>
+<span class="go">  Warning  FailedScheduling  58s (x215 over 5h21m)  default-scheduler  0/1 nodes are available: 1 node(s) had taint {node.kubernetes.io/not-ready: }, that the pod didn&#39;t tolerate.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查节点 NotReady 的原因:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">nodes</span> <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Conditions</span><span class="p">:</span>
+  <span class="n">Type</span>             <span class="n">Status</span>  <span class="n">LastHeartbeatTime</span>                 <span class="n">LastTransitionTime</span>                <span class="n">Reason</span>                       <span class="n">Message</span>
+  <span class="o">----</span>             <span class="o">------</span>  <span class="o">-----------------</span>                 <span class="o">------------------</span>                <span class="o">------</span>                       <span class="o">-------</span>
+  <span class="n">MemoryPressure</span>   <span class="kc">False</span>   <span class="n">Wed</span><span class="p">,</span> <span class="mi">02</span> <span class="n">Dec</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">43</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Sun</span><span class="p">,</span> <span class="mi">29</span> <span class="n">Nov</span> <span class="mi">2020</span> <span class="mi">23</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">52</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletHasSufficientMemory</span>   <span class="n">kubelet</span> <span class="n">has</span> <span class="n">sufficient</span> <span class="n">memory</span> <span class="n">available</span>
+  <span class="n">DiskPressure</span>     <span class="kc">False</span>   <span class="n">Wed</span><span class="p">,</span> <span class="mi">02</span> <span class="n">Dec</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">43</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Sun</span><span class="p">,</span> <span class="mi">29</span> <span class="n">Nov</span> <span class="mi">2020</span> <span class="mi">23</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">52</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletHasNoDiskPressure</span>     <span class="n">kubelet</span> <span class="n">has</span> <span class="n">no</span> <span class="n">disk</span> <span class="n">pressure</span>
+  <span class="n">PIDPressure</span>      <span class="kc">False</span>   <span class="n">Wed</span><span class="p">,</span> <span class="mi">02</span> <span class="n">Dec</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">43</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Sun</span><span class="p">,</span> <span class="mi">29</span> <span class="n">Nov</span> <span class="mi">2020</span> <span class="mi">23</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">52</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletHasSufficientPID</span>      <span class="n">kubelet</span> <span class="n">has</span> <span class="n">sufficient</span> <span class="n">PID</span> <span class="n">available</span>
+  <span class="n">Ready</span>            <span class="kc">False</span>   <span class="n">Wed</span><span class="p">,</span> <span class="mi">02</span> <span class="n">Dec</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">43</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Sun</span><span class="p">,</span> <span class="mi">29</span> <span class="n">Nov</span> <span class="mi">2020</span> <span class="mi">23</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">52</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletNotReady</span>              <span class="n">runtime</span> <span class="n">network</span> <span class="ow">not</span> <span class="n">ready</span><span class="p">:</span> <span class="n">NetworkReady</span><span class="o">=</span><span class="n">false</span> <span class="n">reason</span><span class="p">:</span><span class="n">NetworkPluginNotReady</span> <span class="n">message</span><span class="p">:</span><span class="n">docker</span><span class="p">:</span> <span class="n">network</span> <span class="n">plugin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ready</span><span class="p">:</span> <span class="n">cni</span> <span class="n">config</span> <span class="n">uninitialized</span>
+</pre></div>
+</div>
+<p>可以看到 <code class="docutils literal notranslate"><span class="pre">KubeletNotReady</span></code> 的原因是 <code class="docutils literal notranslate"><span class="pre">runtime</span> <span class="pre">network</span> <span class="pre">not</span> <span class="pre">ready:</span> <span class="pre">NetworkReady=false</span> <span class="pre">reason:NetworkPluginNotReady</span> <span class="pre">message:docker:</span> <span class="pre">network</span> <span class="pre">plugin</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">ready:</span> <span class="pre">cni</span> <span class="pre">config</span> <span class="pre">uninitialized</span></code> ，也就是说，我们指定使用 flannel网络的CNI没有就绪，导致docker的runtime network不能工作。</p>
+</section>
+<section id="cni">
+<h3>安装CNI插件</h3>
+<p>CNI插件处理pod网络的配置和清理，这里使用最简单的flannel CNI插件，只需要下载和 <code class="docutils literal notranslate"><span class="pre">kubeclt</span> <span class="pre">apply</span></code> Flannel YAML就可以安装好:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the Flannel YAML data and apply it</span>
+<span class="c1"># (output omitted)</span>
+<span class="c1">#$ curl -sSL https://raw.githubusercontent.com/coreos/flannel/v0.12.0/Documentation/kube-flannel.yml | kubectl apply -f -</span>
+
+<span class="c1"># 从Kubernetes v1.17+可以使用以下命令</span>
+<span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">coreos</span><span class="o">/</span><span class="n">flannel</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">Documentation</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<ul>
+<li><p>果然，正确安装了 Flannel 网络插件之后再检查节点状态就恢复 <code class="docutils literal notranslate"><span class="pre">Ready</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>已经恢复正常状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">2</span><span class="n">d23h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+</pre></div>
+</div>
+<ul>
+<li><p>同时检查pod状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">namespaces</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到 coredns 也恢复正航运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAMESPACE</span>     <span class="n">NAME</span>                                 <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>     <span class="n">IP</span>             <span class="n">NODE</span>         <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">coredns</span><span class="o">-</span><span class="n">f9fd979d6</span><span class="o">-</span><span class="n">gd94x</span>              <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">d23h</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">0.3</span>     <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">coredns</span><span class="o">-</span><span class="n">f9fd979d6</span><span class="o">-</span><span class="n">hbqx9</span>              <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">d23h</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">0.2</span>     <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">etcd</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>                      <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">1</span>          <span class="mi">23</span><span class="n">h</span>     <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">1</span>          <span class="mi">23</span><span class="n">h</span>     <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">2</span>          <span class="mi">2</span><span class="n">d23h</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">arm64</span><span class="o">-</span><span class="mi">5</span><span class="n">c2kf</span>          <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">m21s</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="mi">525</span><span class="n">kd</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">2</span>          <span class="mi">2</span><span class="n">d23h</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">2</span>          <span class="mi">2</span><span class="n">d23h</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id6">
+<h2>将计算节点加入到集群</h2>
+<p>在完成了CNI add-on部署之后，就可以向集群增加计算节点</p>
+<ul>
+<li><p>登陆到工作节点，例如 <code class="docutils literal notranslate"><span class="pre">pi-worker1</span></code> 上使用命令 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">join</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> \
+    <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">DISCOVERY</span><span class="o">-</span><span class="n">TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里出现了报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">Running</span> <span class="n">pre</span><span class="o">-</span><span class="n">flight</span> <span class="n">checks</span>
+    <span class="p">[</span><span class="n">WARNING</span> <span class="n">Service</span><span class="o">-</span><span class="n">Docker</span><span class="p">]:</span> <span class="n">docker</span> <span class="n">service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">please</span> <span class="n">run</span> <span class="s1">&#39;systemctl enable docker.service&#39;</span>
+    <span class="p">[</span><span class="n">WARNING</span> <span class="n">SystemVerification</span><span class="p">]:</span> <span class="n">missing</span> <span class="n">optional</span> <span class="n">cgroups</span><span class="p">:</span> <span class="n">hugetlb</span>
+
+<span class="n">error</span> <span class="n">execution</span> <span class="n">phase</span> <span class="n">preflight</span><span class="p">:</span> <span class="n">couldn</span><span class="s1">&#39;t validate the identity of the API Server: could not find a JWS signature in the cluster-info ConfigMap for token ID &quot;8pile8&quot;</span>
+<span class="n">To</span> <span class="n">see</span> <span class="n">the</span> <span class="n">stack</span> <span class="n">trace</span> <span class="n">of</span> <span class="n">this</span> <span class="n">error</span> <span class="n">execute</span> <span class="k">with</span> <span class="o">--</span><span class="n">v</span><span class="o">=</span><span class="mi">5</span> <span class="ow">or</span> <span class="n">higher</span>
+</pre></div>
+</div>
+<p>这个问题参考 <a class="reference external" href="https://stackoverflow.com/questions/61352209/kubernetes-unable-to-join-a-remote-master-node">Kubernetes: unable to join a remote master node</a><span class="link-target"> [https://stackoverflow.com/questions/61352209/kubernetes-unable-to-join-a-remote-master-node]</span> 原因是token已经过期或者已经移除，所以可以通过以下方法重新创建并提供命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span> <span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">join</span><span class="o">-</span><span class="n">command</span>
+</pre></div>
+</div>
+<p>输出可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">W1203</span> <span class="mi">11</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mf">33.907625</span>  <span class="mi">484892</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">200</span><span class="p">]</span> <span class="n">cannot</span> <span class="n">automatically</span> <span class="nb">set</span> <span class="n">CgroupDriver</span> <span class="n">when</span> <span class="n">starting</span> <span class="n">the</span> <span class="n">Kubelet</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">execute</span> <span class="s1">&#39;docker info -f {{.CgroupDriver}}&#39;</span><span class="p">:</span> <span class="n">exit</span> <span class="n">status</span> <span class="mi">2</span>
+<span class="n">W1203</span> <span class="mi">11</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mf">33.918553</span>  <span class="mi">484892</span> <span class="n">configset</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">348</span><span class="p">]</span> <span class="n">WARNING</span><span class="p">:</span> <span class="n">kubeadm</span> <span class="n">cannot</span> <span class="n">validate</span> <span class="n">component</span> <span class="n">configs</span> <span class="k">for</span> <span class="n">API</span> <span class="n">groups</span> <span class="p">[</span><span class="n">kubelet</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span> <span class="n">kubeproxy</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="p">]</span>
+<span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">DISCOVERY</span><span class="o">-</span><span class="n">TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>默认生成的token都有一个有效期，所以导致上述token过期无法使用的问题。</p>
+<p>可以通过以下命令生成一个无期限的token(但是存在安全风险):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span> <span class="o">--</span><span class="n">ttl</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>查看token的方法如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="nb">list</span>
+</pre></div>
+</div>
+<p>然后根据token重新生成证书摘要(即hash):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">pubkey</span> <span class="o">-</span><span class="ow">in</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubenetes</span><span class="o">/</span><span class="n">pki</span><span class="o">/</span><span class="n">ca</span><span class="o">.</span><span class="n">crt</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="n">pubin</span> <span class="o">-</span><span class="n">outform</span> <span class="n">der</span> <span class="mi">2</span><span class="o">&gt;/</span><span class="n">dev</span><span class="o">/</span><span class="n">null</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">dgst</span> <span class="o">-</span><span class="n">sha256</span> <span class="o">-</span><span class="nb">hex</span> <span class="o">|</span> <span class="n">sed</span> <span class="s1">&#39;s/^.* //&#39;</span>
+</pre></div>
+</div>
+<p>这样就能拼接出一个添加节点的join命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">DISCOVERY</span><span class="o">-</span><span class="n">TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>根据提示重新在 <code class="docutils literal notranslate"><span class="pre">pi-worker1</span></code> 上执行节点添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">DISCOVERY</span><span class="o">-</span><span class="n">TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">Running</span> <span class="n">pre</span><span class="o">-</span><span class="n">flight</span> <span class="n">checks</span>
+        <span class="p">[</span><span class="n">WARNING</span> <span class="n">SystemVerification</span><span class="p">]:</span> <span class="n">missing</span> <span class="n">optional</span> <span class="n">cgroups</span><span class="p">:</span> <span class="n">hugetlb</span>
+<span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">Reading</span> <span class="n">configuration</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">cluster</span><span class="o">...</span>
+<span class="p">[</span><span class="n">preflight</span><span class="p">]</span> <span class="n">FYI</span><span class="p">:</span> <span class="n">You</span> <span class="n">can</span> <span class="n">look</span> <span class="n">at</span> <span class="n">this</span> <span class="n">config</span> <span class="n">file</span> <span class="k">with</span> <span class="s1">&#39;kubectl -n kube-system get cm kubeadm-config -oyaml&#39;</span>
+<span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">start</span><span class="p">]</span> <span class="n">Writing</span> <span class="n">kubelet</span> <span class="n">configuration</span> <span class="n">to</span> <span class="n">file</span> <span class="s2">&quot;/var/lib/kubelet/config.yaml&quot;</span>
+<span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">start</span><span class="p">]</span> <span class="n">Writing</span> <span class="n">kubelet</span> <span class="n">environment</span> <span class="n">file</span> <span class="k">with</span> <span class="n">flags</span> <span class="n">to</span> <span class="n">file</span> <span class="s2">&quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span>
+<span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">start</span><span class="p">]</span> <span class="n">Starting</span> <span class="n">the</span> <span class="n">kubelet</span>
+<span class="p">[</span><span class="n">kubelet</span><span class="o">-</span><span class="n">start</span><span class="p">]</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">the</span> <span class="n">kubelet</span> <span class="n">to</span> <span class="n">perform</span> <span class="n">the</span> <span class="n">TLS</span> <span class="n">Bootstrap</span><span class="o">...</span>
+
+<span class="n">This</span> <span class="n">node</span> <span class="n">has</span> <span class="n">joined</span> <span class="n">the</span> <span class="n">cluster</span><span class="p">:</span>
+<span class="o">*</span> <span class="n">Certificate</span> <span class="n">signing</span> <span class="n">request</span> <span class="n">was</span> <span class="n">sent</span> <span class="n">to</span> <span class="n">apiserver</span> <span class="ow">and</span> <span class="n">a</span> <span class="n">response</span> <span class="n">was</span> <span class="n">received</span><span class="o">.</span>
+<span class="o">*</span> <span class="n">The</span> <span class="n">Kubelet</span> <span class="n">was</span> <span class="n">informed</span> <span class="n">of</span> <span class="n">the</span> <span class="n">new</span> <span class="n">secure</span> <span class="n">connection</span> <span class="n">details</span><span class="o">.</span>
+
+<span class="n">Run</span> <span class="s1">&#39;kubectl get nodes&#39;</span> <span class="n">on</span> <span class="n">the</span> <span class="n">control</span><span class="o">-</span><span class="n">plane</span> <span class="n">to</span> <span class="n">see</span> <span class="n">this</span> <span class="n">node</span> <span class="n">join</span> <span class="n">the</span> <span class="n">cluster</span><span class="o">.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>等待一会，在管控节点上检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出信息如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>             <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>     <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">3</span><span class="n">d12h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">m10s</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+</pre></div>
+</div>
+<section id="jetson-gpu">
+<h3>jetson节点(GPU)</h3>
+<p>我在 <a class="reference internal" href="arm_k8s.xhtml#arm-k8s"><span class="std std-ref">ARM部署Kubernetes</span></a> 说明了我部署ARM架构的设备中还有一个 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.xhtml#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 设备，用来实现验证GPU容器在Kubernetes的部署，并学习 <a class="reference internal" href="../../machine_learning/index.xhtml#machine-learning"><span class="std std-ref">Machine Learning Atlas</span></a> 。</p>
+<p>jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03版本，满足了运行kubernetes要求，不过，也同样需要做Cgroup Driver调整:</p>
+<ul class="simple">
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 检查显示</p></li>
+</ul>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">Client</span><span class="p">:</span>
+ <span class="n">Debug</span> <span class="n">Mode</span><span class="p">:</span> <span class="n">false</span>
+
+<span class="n">Server</span><span class="p">:</span>
+ <span class="n">Containers</span><span class="p">:</span> <span class="mi">0</span>
+  <span class="n">Running</span><span class="p">:</span> <span class="mi">0</span>
+  <span class="n">Paused</span><span class="p">:</span> <span class="mi">0</span>
+  <span class="n">Stopped</span><span class="p">:</span> <span class="mi">0</span>
+ <span class="n">Images</span><span class="p">:</span> <span class="mi">0</span>
+ <span class="n">Server</span> <span class="n">Version</span><span class="p">:</span> <span class="mf">19.03</span><span class="o">.</span><span class="mi">6</span>
+ <span class="n">Storage</span> <span class="n">Driver</span><span class="p">:</span> <span class="n">overlay2</span>
+  <span class="n">Backing</span> <span class="n">Filesystem</span><span class="p">:</span> <span class="n">extfs</span>
+  <span class="n">Supports</span> <span class="n">d_type</span><span class="p">:</span> <span class="n">true</span>
+  <span class="n">Native</span> <span class="n">Overlay</span> <span class="n">Diff</span><span class="p">:</span> <span class="n">true</span>
+ <span class="n">Logging</span> <span class="n">Driver</span><span class="p">:</span> <span class="n">json</span><span class="o">-</span><span class="n">file</span>
+ <span class="n">Cgroup</span> <span class="n">Driver</span><span class="p">:</span> <span class="n">cgroupfs</span>
+ <span class="n">Plugins</span><span class="p">:</span>
+  <span class="n">Volume</span><span class="p">:</span> <span class="n">local</span>
+  <span class="n">Network</span><span class="p">:</span> <span class="n">bridge</span> <span class="n">host</span> <span class="n">ipvlan</span> <span class="n">macvlan</span> <span class="n">null</span> <span class="n">overlay</span>
+  <span class="n">Log</span><span class="p">:</span> <span class="n">awslogs</span> <span class="n">fluentd</span> <span class="n">gcplogs</span> <span class="n">gelf</span> <span class="n">journald</span> <span class="n">json</span><span class="o">-</span><span class="n">file</span> <span class="n">local</span> <span class="n">logentries</span> <span class="n">splunk</span> <span class="n">syslog</span>
+ <span class="n">Swarm</span><span class="p">:</span> <span class="n">inactive</span>
+ <span class="n">Runtimes</span><span class="p">:</span> <span class="n">nvidia</span> <span class="n">runc</span>
+ <span class="n">Default</span> <span class="n">Runtime</span><span class="p">:</span> <span class="n">runc</span>
+ <span class="n">Init</span> <span class="n">Binary</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">init</span>
+ <span class="n">containerd</span> <span class="n">version</span><span class="p">:</span>
+ <span class="n">runc</span> <span class="n">version</span><span class="p">:</span>
+ <span class="n">init</span> <span class="n">version</span><span class="p">:</span>
+ <span class="n">Security</span> <span class="n">Options</span><span class="p">:</span>
+  <span class="n">seccomp</span>
+   <span class="n">Profile</span><span class="p">:</span> <span class="n">default</span>
+ <span class="n">Kernel</span> <span class="n">Version</span><span class="p">:</span> <span class="mf">4.9</span><span class="o">.</span><span class="mi">140</span><span class="o">-</span><span class="n">tegra</span>
+ <span class="n">Operating</span> <span class="n">System</span><span class="p">:</span> <span class="n">Ubuntu</span> <span class="mf">18.04</span><span class="o">.</span><span class="mi">5</span> <span class="n">LTS</span>
+ <span class="n">OSType</span><span class="p">:</span> <span class="n">linux</span>
+ <span class="n">Architecture</span><span class="p">:</span> <span class="n">aarch64</span>
+ <span class="n">CPUs</span><span class="p">:</span> <span class="mi">4</span>
+ <span class="n">Total</span> <span class="n">Memory</span><span class="p">:</span> <span class="mf">3.871</span><span class="n">GiB</span>
+ <span class="n">Name</span><span class="p">:</span> <span class="n">jetson</span>
+ <span class="n">ID</span><span class="p">:</span> <span class="n">BWPJ</span><span class="p">:</span><span class="n">KNAY</span><span class="p">:</span><span class="mi">3</span><span class="n">DNY</span><span class="p">:</span><span class="n">DNPY</span><span class="p">:</span><span class="n">HZEU</span><span class="p">:</span><span class="n">OMMD</span><span class="p">:</span><span class="n">L7RB</span><span class="p">:</span><span class="mi">3</span><span class="n">TN2</span><span class="p">:</span><span class="n">PUDM</span><span class="p">:</span><span class="n">HEHQ</span><span class="p">:</span><span class="n">QURE</span><span class="p">:</span><span class="n">WCWP</span>
+ <span class="n">Docker</span> <span class="n">Root</span> <span class="n">Dir</span><span class="p">:</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
+ <span class="n">Debug</span> <span class="n">Mode</span><span class="p">:</span> <span class="n">false</span>
+ <span class="n">Registry</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">index</span><span class="o">.</span><span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span>
+ <span class="n">Labels</span><span class="p">:</span>
+ <span class="n">Experimental</span><span class="p">:</span> <span class="n">false</span>
+ <span class="n">Insecure</span> <span class="n">Registries</span><span class="p">:</span>
+  <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">8</span>
+ <span class="n">Live</span> <span class="n">Restore</span> <span class="n">Enabled</span><span class="p">:</span> <span class="n">false</span>
+</pre></div>
+</td></tr></table></div>
+<ul class="simple">
+<li><p>注意，Jetson Nano的Docker激活了 <code class="docutils literal notranslate"><span class="pre">nvidia</span></code> runtime，所以默认的 <code class="docutils literal notranslate"><span class="pre">daemon.json</span></code> 配置如下</p></li>
+</ul>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;runtimes&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;nvidia&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;nvidia-container-runtime&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;runtimeArgs&quot;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table></div>
+<p>修订成:</p>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;exec-opts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;native.cgroupdriver=systemd&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;log-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;log-opts&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;max-size&quot;</span><span class="p">:</span> <span class="s2">&quot;100m&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;storage-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;overlay2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;runtimes&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;nvidia&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;nvidia-container-runtime&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;runtimeArgs&quot;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table></div>
+<p>然后重启docker服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<p>并通过 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 验证确保 <code class="docutils literal notranslate"><span class="pre">Cgroup</span> <span class="pre">Driver:</span> <span class="pre">systemd</span></code> 。</p>
+<ul>
+<li><p>Jetson的L4T系统内核 <code class="docutils literal notranslate"><span class="pre">sysctl</span></code> 配置默认已经启动允许iptables查看bridge流量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sysctl</span> <span class="o">-</span><span class="n">a</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<ul>
+<li><p>添加Kubernetes repo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">s</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">apt</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="o">-</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">list</span>
+<span class="n">deb</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">apt</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">xenial</span> <span class="n">main</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+</li>
+<li><p>Kubernetes软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
+<li><p>锁定Kubernetes版本(可选，对于测试验证集群没有业务连续性要求，可以跳过):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">mark</span> <span class="n">hold</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
+<li><p>关闭swap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># 关闭系统默认启动的4个zram swap文件
+for i in {0..3};do swapoff /dev/zram${i};echo $i &gt; /sys/class/zram-control/hot_remove;done
+
+# 禁用启动swap
+systemctl disable nvzramconfig.service
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Jetson的定制L4T操作系统使用了 <a class="reference internal" href="../../linux/redhat_linux/kernel/zram.xhtml#zram"><span class="std std-ref">zram - 基于内存的压缩块存储设备</span></a> 来构建swap，详细参考 <a class="reference internal" href="../../machine_learning/jetson/studio/jetson_swap.xhtml#jetson-swap"><span class="std std-ref">Jetson Nano的swap</span></a> 。</p>
+</div>
+<ul>
+<li><p>在管控服务器获取当前添加节点命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span> <span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">join</span><span class="o">-</span><span class="n">command</span>
+</pre></div>
+</div>
+</li>
+<li><p>回到Jetson服务器节点执行添加节点命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> \
+    <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">HASH_TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>完成以后执行命令检查节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我们会看到如下输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">m47s</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">5</span><span class="n">d21h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">d9h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">2</span><span class="n">d9h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意如果worker主机有多个网卡接口，kubelet执行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">join</span></code> 命令时候有可能注册采用了默认有路由的网卡接口，也可能使用和apiserver指定IP所在相同网段的IP。这点让我很疑惑，例如上述注册worker节点，3个树莓派注册的 <code class="docutils literal notranslate"><span class="pre">INTERNAL-IP</span></code> 是正确的内网IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> ，但是 <code class="docutils literal notranslate"><span class="pre">jetson</span></code> 就注册成了外网无线网卡上的IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.0.x</span></code> 。</p>
+<p>这个问题修订，请参考 <a class="reference internal" href="../administer/set_k8s_worker_internal_ip.xhtml#set-k8s-worker-internal-ip"><span class="std std-ref">指定Kubernetes工作节点内网IP</span></a> 明确配置worker的 <code class="docutils literal notranslate"><span class="pre">INTERNAL-IP</span></code> 避免出现混乱。</p>
+</div>
+</section>
+<section id="arch-linux-zcloud">
+<h3>arch linux节点(zcloud)</h3>
+<ul>
+<li><p>安装docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panman</span> <span class="o">-</span><span class="n">Sy</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">docker</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 输出信息，可以看到 <code class="docutils literal notranslate"><span class="pre">Cgroup</span> <span class="pre">Driver:</span> <span class="pre">cgroupsf</span></code> 不是 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> ，所以修订成 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.xhtml#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 作为 cgroups 管理器，并且确保只使用一个cgroup manager。修改或者创建 <code class="docutils literal notranslate"><span class="pre">/etc/docker/daemon.json</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo cat &gt; /etc/docker/daemon.json &lt;&lt;EOF
+{
+  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],
+  &quot;log-driver&quot;: &quot;json-file&quot;,
+  &quot;log-opts&quot;: {
+    &quot;max-size&quot;: &quot;100m&quot;
+  },
+  &quot;storage-driver&quot;: &quot;overlay2&quot;
+}
+EOF
+</pre></div>
+</div>
+</li>
+<li><p>然后再次检查 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 可以看到还有一个报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="p">:</span> <span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="ow">is</span> <span class="n">disabled</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="ow">is</span> <span class="n">disabled</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>修复:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">EOF</span>
+
+<span class="n">sudo</span> <span class="n">sysctl</span> <span class="o">--</span><span class="n">system</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>arch linux安装kubernetes参考 <a class="reference external" href="https://wiki.archlinux.org/index.php/Kubernetes">arch linux文档 - Kubernetes</a><span class="link-target"> [https://wiki.archlinux.org/index.php/Kubernetes]</span></p>
+</div>
+<ul>
+<li><p>安装软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacmsn</span> <span class="o">-</span><span class="n">Syu</span> <span class="o">&amp;&amp;</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">Sy</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
+<li><p>关闭swap</p></li>
+<li><p>在管控服务器获取当前添加节点命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">token</span> <span class="n">create</span> <span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">join</span><span class="o">-</span><span class="n">command</span>
+</pre></div>
+</div>
+</li>
+<li><p>回到Jetson服务器节点执行添加节点命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> \
+    <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">HASH_TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果遇到节点一直 <code class="docutils literal notranslate"><span class="pre">NotReady</span></code> ，请在节点上执行检查kubelet日志命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">xeu</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">pager</span> <span class="n">kubelet</span>
+</pre></div>
+</div>
+<p>我遇到的问题是无法下载镜像，提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Mar</span> <span class="mi">23</span> <span class="mi">00</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">15</span> <span class="n">zcloud</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">3682</span><span class="p">]:</span> <span class="n">E0323</span> <span class="mi">00</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mf">15.851566</span>    <span class="mi">3682</span> <span class="n">pod_workers</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">191</span><span class="p">]</span> <span class="n">Error</span> <span class="n">syncing</span> <span class="n">pod</span> <span class="mf">062199e4</span><span class="o">-</span><span class="mi">6351</span><span class="o">-</span><span class="mi">4</span><span class="n">ff9</span><span class="o">-</span><span class="mf">9e55</span><span class="o">-</span><span class="mi">91</span><span class="n">db9ac8884f</span> <span class="p">(</span><span class="s2">&quot;kube-proxy-jms58_kube-system(062199e4-6351-4ff9-9e55-91db9ac8884f)&quot;</span><span class="p">),</span> <span class="n">skipping</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="s2">&quot;CreatePodSandbox&quot;</span> <span class="k">for</span> <span class="s2">&quot;kube-proxy-jms58_kube-system(062199e4-6351-4ff9-9e55-91db9ac8884f)&quot;</span> <span class="k">with</span> <span class="n">CreatePodSandboxError</span><span class="p">:</span> <span class="s2">&quot;CreatePodSandbox for pod </span><span class="se">\&quot;</span><span class="s2">kube-proxy-jms58_kube-system(062199e4-6351-4ff9-9e55-91db9ac8884f)</span><span class="se">\&quot;</span><span class="s2"> failed: rpc error: code = Unknown desc = failed pulling image </span><span class="se">\&quot;</span><span class="s2">k8s.gcr.io/pause:3.2</span><span class="se">\&quot;</span><span class="s2">: Error response from daemon: Get </span><span class="se">\&quot;</span><span class="s2">https://k8s.gcr.io/v2/</span><span class="se">\&quot;</span><span class="s2">: dial tcp: lookup k8s.gcr.io: no such host&quot;</span>
+</pre></div>
+</div>
+<p>这个问题是因为我启动主机时候未连接无线网络，导致没有默认路由可以访问internet，此时启动的dnsmasq无法解析地址。虽然后面用手工脚本命令启动了wifi，但是dnsmasq依然无法提供本地主机域名解析。我是通过重启dnsmasq解决的，你的情况可能和我不同。不过，观察 kubelet 日志是一个比较好的排查问题方法。</p>
+</div>
+<ul>
+<li><p>现在，我们终于可以拥有一个混合架构的Kubernetes集群:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">labels</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到 ARM 节点的标签有 <code class="docutils literal notranslate"><span class="pre">kubernetes.io/arch=arm64</span></code> ，而 X86 节点标签有 <code class="docutils literal notranslate"><span class="pre">kubernetes.io/arch=amd64</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>   <span class="n">LABELS</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">14</span><span class="n">h</span>     <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">jetson</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">113</span><span class="n">d</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="o">=</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">109</span><span class="n">d</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">disktype</span><span class="o">=</span><span class="n">ssd</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">109</span><span class="n">d</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker2</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">zcloud</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">9</span><span class="n">m49s</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">zcloud</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+</pre></div>
+</div>
+<p>后面我们部署应用，所使用的镜像需要区分不同架构。我将实践异构应用部署。</p>
+</section>
+</section>
+<section id="id7">
+<h2>验证集群</h2>
+<p>现在一个基于ARM的Kubernetes集群已经部署完成，可以运行pods，创建deployments和jobs。</p>
+<p>为了验证集群的正确运行，可以执行验证步骤：</p>
+<ul class="simple">
+<li><p>创建新的namespace</p></li>
+<li><p>创建deployment</p></li>
+<li><p>创建serice</p></li>
+<li><p>验证运行在deployment中的pods能够正确响应</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里使用的验证镜像是从RED HAT维护的 quay.io 镜像仓库提供的，你也可以使用其他镜像仓库，例如Docker Hub提供的镜像进行验证。</p>
+</div>
+<ul>
+<li><p>创建一个名为 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 的namespace:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">create</span> <span class="n">namespace</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">namespace</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查namespace:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">namespaces</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>              <span class="n">STATUS</span>   <span class="n">AGE</span>
+<span class="n">default</span>           <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">node</span><span class="o">-</span><span class="n">lease</span>   <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">public</span>       <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>       <span class="n">Active</span>   <span class="mi">5</span><span class="n">d21h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>       <span class="n">Active</span>   <span class="mi">36</span><span class="n">s</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>创建一个deployment用于这个新的namespace:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt;EOF | kubectl create -f -</span>
+<span class="s">apiVersion: apps/v1</span>
+<span class="s">kind: Deployment</span>
+<span class="s">metadata:</span>
+<span class="s">  name: kube-verify</span>
+<span class="s">  namespace: kube-verify</span>
+<span class="s">  labels:</span>
+<span class="s">    app: kube-verify</span>
+<span class="s">spec:</span>
+<span class="s">  replicas: 3</span>
+<span class="s">  selector:</span>
+<span class="s">    matchLabels:</span>
+<span class="s">      app: kube-verify</span>
+<span class="s">  template:</span>
+<span class="s">    metadata:</span>
+<span class="s">      labels:</span>
+<span class="s">        app: kube-verify</span>
+<span class="s">    spec:</span>
+<span class="s">      containers:</span>
+<span class="s">      - name: nginx</span>
+<span class="s">        image: quay.io/clcollins/kube-verify:01</span>
+<span class="s">        ports:</span>
+<span class="s">        - containerPort: 8080</span>
+<span class="s">EOF</span>
+</pre></div>
+</td></tr></table></div>
+<p>此时提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">deployment</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">created</span>
+</pre></div>
+</div>
+<p>上述deployment配置了3个副本 <code class="docutils literal notranslate"><span class="pre">replicas:</span> <span class="pre">3</span></code> pods，每个pod都运行了 <code class="docutils literal notranslate"><span class="pre">quay.io/clcollins/kube-verify:01</span></code> 镜像。</p>
+<ul>
+<li><p>检查在 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 中的所有资源:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="nb">all</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                               <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">nvnhl</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m8s</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">s5qb5</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m8s</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span><span class="o">-</span><span class="n">v9zxt</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m8s</span>
+
+<span class="n">NAME</span>                          <span class="n">READY</span>   <span class="n">UP</span><span class="o">-</span><span class="n">TO</span><span class="o">-</span><span class="n">DATE</span>   <span class="n">AVAILABLE</span>   <span class="n">AGE</span>
+<span class="n">deployment</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="mi">3</span><span class="o">/</span><span class="mi">3</span>     <span class="mi">3</span>            <span class="mi">3</span>           <span class="mi">2</span><span class="n">m8s</span>
+
+<span class="n">NAME</span>                                     <span class="n">DESIRED</span>   <span class="n">CURRENT</span>   <span class="n">READY</span>   <span class="n">AGE</span>
+<span class="n">replicaset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">dd569645</span>   <span class="mi">3</span>         <span class="mi">3</span>         <span class="mi">3</span>       <span class="mi">2</span><span class="n">m8s</span>
+</pre></div>
+</div>
+<p>可以看到有一个新的deployment <code class="docutils literal notranslate"><span class="pre">deployment.apps/kube-verify</span></code> ，这个deployment配置 <code class="docutils literal notranslate"><span class="pre">replicas:</span> <span class="pre">3</span></code> 的请求下有3个pods被创建。</p>
+<ul class="simple">
+<li><p>创建服务来输出 Nginx 应用，这个操作是一个单一入口 <code class="docutils literal notranslate"><span class="pre">single</span> <span class="pre">endpoint</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt;EOF | kubectl create -f -</span>
+<span class="s">apiVersion: v1</span>
+<span class="s">kind: Service</span>
+<span class="s">metadata:</span>
+<span class="s">  name: kube-verify</span>
+<span class="s">  namespace: kube-verify</span>
+<span class="s">spec:</span>
+<span class="s">  selector:</span>
+<span class="s">    app: kube-verify</span>
+<span class="s">  ports:</span>
+<span class="s">    - protocol: TCP</span>
+<span class="s">      port: 80</span>
+<span class="s">      targetPort: 8080</span>
+<span class="s">EOF</span>
+</pre></div>
+</td></tr></table></div>
+<p>提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">service</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>现在服务已经创建，我们可以检查新服务的IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">service</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>   <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">ClusterIP</span>   <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">90</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>你可以看到 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 服务被设置到一个 ClusterIP <code class="docutils literal notranslate"><span class="pre">10.107.123.31</span></code> 上，但是这个IP地址是集群内部使用的，所以你可以在集群的任何node节点上访问，但是在集群外部就不能访问。</p>
+<ul>
+<li><p>选择一个集群节点，执行以下命令验证deployment的容器是正常工作的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>你会看到一个完整输出的html文件内容。</p>
+</section>
+<section id="id8">
+<h2>访问服务</h2>
+<p>到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。</p>
+<p>你可以有多种方法：</p>
+<ul class="simple">
+<li><p>输出部署( <code class="docutils literal notranslate"><span class="pre">expose</span> <span class="pre">deployments</span></code> )通过简单的负载均衡方式(指定 <code class="docutils literal notranslate"><span class="pre">external-ip</span></code>)将服务映射输出到集群外部</p></li>
+<li><p>部署 <a class="reference internal" href="../concepts/services_networking/ingress.xhtml#ingress"><span class="std std-ref">Ingress</span></a> 来管理外部访问集群的服务，例如， <a class="reference internal" href="../deployment/nginx_ingress.xhtml#nginx-ingress"><span class="std std-ref">部署Nginx Ingress Controller</span></a> 对外提供服务</p></li>
+</ul>
+<p>这里我们采用最简单的方法，使用 <code class="docutils literal notranslate"><span class="pre">expose</span> <span class="pre">deployments</span></code> 方法输出服务：</p>
+<ul>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> namespace的服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">services</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出可以看到当前服务有内部 <code class="docutils literal notranslate"><span class="pre">cluster-ip</span></code> 但是没有 <code class="docutils literal notranslate"><span class="pre">external-ip</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>   <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">ClusterIP</span>   <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">19</span><span class="n">h</span>
+</pre></div>
+</div>
+<ul>
+<li><p>我们的woker工作节点如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>             <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>     <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">19</span><span class="n">h</span>     <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">18.04</span><span class="o">.</span><span class="mi">5</span> <span class="n">LTS</span>   <span class="mf">4.9</span><span class="o">.</span><span class="mi">140</span><span class="o">-</span><span class="n">tegra</span>      <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">6</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">6</span><span class="n">d17h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">3</span><span class="n">d5h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">3</span><span class="n">d5h</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">19.4</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.16</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">1</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1022</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+</pre></div>
+</div>
+<p>问题来了，我们需要把服务输出到外部无线网卡上，该如何实现？实际上 <code class="docutils literal notranslate"><span class="pre">pi-worker1</span></code> 上无线网卡上IP地址 192.168.0.81:</p>
+<ul class="simple">
+<li><p>无线网卡的外网地址是动态的，假设我直接输出到这个无线网卡IP地址，则下次主机重启如果获取到不同IP地址，则有可能和局域网其他IP地址冲突</p>
+<ul>
+<li><p>我考虑到解决方法是采用一个自己控制的IP地址段作为演示，然后需要访问的客户机也绑定同一个网段，这样只要连接到相同的无线AP上，就可以访问服务</p></li>
+</ul>
+</li>
+</ul>
+<p>当前我简化这个配置，暂时先使用有线网络网段 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code></p>
+<ul>
+<li><p>检查当前service:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">service</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>   <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">ClusterIP</span>   <span class="mf">10.107</span><span class="o">.</span><span class="mf">123.31</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">26</span><span class="n">h</span>
+</pre></div>
+</div>
+<ul>
+<li><p>删除掉这个service:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">service</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重建一个负载均衡类型的输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployments</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span> <span class="o">--</span><span class="n">protocol</span><span class="o">=</span><span class="n">TCP</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span> \
+    <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="o">--</span><span class="n">external</span><span class="o">-</span><span class="n">ip</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">LoadBalancer</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">service</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">exposed</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，这里负载均衡类型的输出 <code class="docutils literal notranslate"><span class="pre">target-ports</span></code> 和之前 service 是一样的，只不过多了一个 <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code> 对外</p>
+</div>
+<ul>
+<li><p>现在我们检查 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">service</span> <span class="pre">-n</span> <span class="pre">kube-verify</span></code> 显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>          <span class="n">TYPE</span>           <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>     <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>        <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">verify</span>   <span class="n">LoadBalancer</span>   <span class="mf">10.96</span><span class="o">.</span><span class="mf">31.186</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span>   <span class="mi">80</span><span class="p">:</span><span class="mi">30586</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">61</span><span class="n">s</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>奇怪，这里 <code class="docutils literal notranslate"><span class="pre">--target-port=8080</span></code> 怎么没有生效么？怎么显示 <code class="docutils literal notranslate"><span class="pre">PORT(S)</span></code> 是 <code class="docutils literal notranslate"><span class="pre">80:30586/TCP</span></code> ，但是直接对该IP地址访问 <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">http://192.168.6.10</span></code> 是能够正常获取到页面输出的。</p>
+<p>现在我们得到的验证环境:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="nb">all</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NAME                           READY   STATUS    RESTARTS   AGE
+kube-verify-69dd569645-q9hzc   1/1     Running   0          33h
+kube-verify-69dd569645-s5qb5   1/1     Running   0          2d12h
+kube-verify-69dd569645-v9zxt   1/1     Running   0          2d12h
+ubuntu@pi-master1:~$ kubectl get all -n kube-verify
+NAME                               READY   STATUS    RESTARTS   AGE
+pod/kube-verify-69dd569645-q9hzc   1/1     Running   0          33h
+pod/kube-verify-69dd569645-s5qb5   1/1     Running   0          2d12h
+pod/kube-verify-69dd569645-v9zxt   1/1     Running   0          2d12h
+
+NAME                  TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)        AGE
+service/kube-verify   LoadBalancer   10.96.31.186   192.168.6.10   80:30586/TCP   32h
+
+NAME                          READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/kube-verify   3/3     3            3           2d12h
+
+NAME                                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/kube-verify-69dd569645   3         3         3       2d12h
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://opensource.com/article/20/6/kubernetes-raspberry-pi">Build a Kubernetes cluster with the Raspberry Pi</a><span class="link-target"> [https://opensource.com/article/20/6/kubernetes-raspberry-pi]</span> - 完整的部署指南，作者 Chris Collins 撰写了一系列在Raspberry Pi上构建homelab的文章，可以实现基于K8s的NFS服务；另外，如果需要通过Kubernetes对外提供HTTP路由和反向代理(ingress)，可以参考 <a class="reference external" href="https://opensource.com/article/20/4/http-kubernetes-skipper">Try this Kubernetes HTTP router and reverse proxy</a><span class="link-target"> [https://opensource.com/article/20/4/http-kubernetes-skipper]</span></p></li>
+<li><p><a class="reference external" href="https://segmentfault.com/a/1190000023107314">解决k8s执行kubeadm join遇到could not find a JWS signature的问题</a><span class="link-target"> [https://segmentfault.com/a/1190000023107314]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>构建Android编译环境</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="android">
+<span id="android-build-env"></span><h1>构建Android编译环境</h1>
+<section id="id1">
+<h2>准备工作</h2>
+<p>我采用Android的编译环境是在 <a class="reference internal" href="../../docker/index.xhtml#docker"><span class="std std-ref">Docker Atlas</span></a> 部署，通过 <a class="reference internal" href="../../docker/admin/dockerfile.xhtml#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 创建一个CentOS 8纯净环境，然后从初始环境安装必要的编译工具链来构建Android编译环境。</p>
+<ul class="simple">
+<li><p>在本地创建一个 <code class="docutils literal notranslate"><span class="pre">studio</span></code> 目录，进入这个目录，然后
+- 如果你只是编译android系统，则存放以下名为 <code class="docutils literal notranslate"><span class="pre">android-build</span></code> 的Dockerfile
+- 如果你想开发android系统，则存放以下名为 <code class="docutils literal notranslate"><span class="pre">android-studio</span></code> 的Dockerfile</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">android-build</span></div>
+<div class="highlight-dockerfile notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c"># Build Android Studio image with ssh:</span>
+<span class="c"># ------------------------------------</span>
+<span class="c"># docker build - &lt; android-studio</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio local:android-studio</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio -v data:/data local:android-studio</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 local:android-studio</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 2222:22 -p 8080:80 local:android-studio</span>
+
+<span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span> dnf clean all
+<span class="k">RUN</span> dnf install epel-release
+<span class="k">RUN</span> dnf install dnf-plugins-core
+<span class="k">RUN</span> dnf config-manager --set-enabled PowerTools
+<span class="k">RUN</span> dnf -y update
+<span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server initscripts nmon nmap-ncat mlocate net-tools rsyslog file wget tar bzip2 screen sysstat unzip nfs-utils parted lsof man bind-utils gcc gcc-c++ make telnet flex autoconf automake ncurses-devel crontabs zlib-devel git
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span> ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span> usermod -aG wheel admin
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="s"> 22:2222</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">android-studio</span></div>
+<div class="highlight-dockerfile notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c"># Build Android Studio image with ssh:</span>
+<span class="c"># ------------------------------------</span>
+<span class="c"># docker build - &lt; android-studio</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio local:android-studio</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio -v data:/data local:android-studio</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 local:android-studio</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd --hostname android-studio --name android-studio -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 2222:22 -p 8080:80 local:android-studio</span>
+
+<span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span> dnf clean all
+<span class="k">RUN</span> dnf install epel-release
+<span class="k">RUN</span> dnf install dnf-plugins-core
+<span class="k">RUN</span> dnf config-manager --set-enabled PowerTools
+<span class="k">RUN</span> dnf -y update
+<span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server initscripts nmon nmap-ncat mlocate net-tools rsyslog file wget tar bzip2 screen sysstat unzip nfs-utils parted lsof man bind-utils gcc gcc-c++ make telnet flex autoconf automake ncurses-devel crontabs zlib-devel git
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span> ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span> usermod -aG wheel admin
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="s"> 22:2222</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+</pre></div>
+</td></tr></table></div>
+</div>
+<ul>
+<li><p>下载android开发工具包：</p>
+<blockquote>
+<div><p><a class="reference external" href="https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip">https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip</a></p>
+<p><a class="reference external" href="https://dl.google.com/android/studio/plugins/android-gradle/preview/offline-android-gradle-plugin-preview.zip">https://dl.google.com/android/studio/plugins/android-gradle/preview/offline-android-gradle-plugin-preview.zip</a>
+<a class="reference external" href="https://dl.google.com/android/studio/maven-google-com/stable/offline-gmaven-stable.zip">https://dl.google.com/android/studio/maven-google-com/stable/offline-gmaven-stable.zip</a></p>
+<p><a class="reference external" href="https://dl.google.com/android/studio/ide-zips/4.0.0.16/android-studio-ide-193.6514223-linux.tar.gz">https://dl.google.com/android/studio/ide-zips/4.0.0.16/android-studio-ide-193.6514223-linux.tar.gz</a></p>
+</div></blockquote>
+</li>
+<li><p>构建android编译环境镜像，执行以下命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">f</span> <span class="n">android</span><span class="o">-</span><span class="n">builder</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">android</span><span class="o">-</span><span class="n">builder</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">data</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">android</span><span class="o">-</span><span class="n">builder</span> <span class="o">--</span><span class="n">name</span> <span class="n">android</span><span class="o">-</span><span class="n">builder</span> <span class="o">-</span><span class="n">v</span> <span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">local</span><span class="p">:</span><span class="n">android</span><span class="o">-</span><span class="n">builder</span>
+</pre></div>
+</div>
+</li>
+<li><p>CentOS 8需要安装的编译环境软件包 - 参考 <a class="reference internal" href="../../linux/redhat_linux/admin/init_centos.xhtml#init-centos"><span class="std std-ref">CentOS系统管理初始化</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

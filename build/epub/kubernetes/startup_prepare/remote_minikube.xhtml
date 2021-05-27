@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>远程访问minikube</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="minikube">
+<span id="remote-minikube"></span><h1>远程访问minikube</h1>
+<p>由于我在 <a class="reference internal" href="../../studio/introduce_my_studio.xhtml#introduce-my-studio"><span class="std std-ref">模拟云计算的Studio</span></a> 中采用 <a class="reference internal" href="../../studio/kvm_docker_in_studio.xhtml#kvm-docker-in-studio"><span class="std std-ref">Studio环境KVM和Docker</span></a> 来模拟集群，并且在服务器上 <a class="reference internal" href="install_run_minikube.xhtml#install-run-minikube"><span class="std std-ref">安装和运行minikube</span></a> ，所以日常需要从个人笔记本电脑上通过远程访问服务器上的minikube系统。</p>
+<section id="kubectlminikube">
+<h2>kubectl访问远程裸物理机minikube</h2>
+<ul>
+<li><p>本地笔记本电脑上 <a class="reference internal" href="install_setup_kubectl.xhtml#install-setup-kubectl"><span class="std std-ref">安装和设置kubectl</span></a></p></li>
+<li><p>将远程服务器上的 <code class="docutils literal notranslate"><span class="pre">~/.minikube</span></code> 复制到本地 <code class="docutils literal notranslate"><span class="pre">~/xcloud/minikube</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">~/</span><span class="n">xcloud</span><span class="o">/</span><span class="n">minikube</span>
+<span class="n">cd</span> <span class="o">~/</span><span class="n">xcloud</span><span class="o">/</span><span class="n">minikube</span>
+<span class="n">scp</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">minikube</span><span class="o">/*.</span><span class="n">crt</span> <span class="o">./</span>
+<span class="n">scp</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">minikube</span><span class="o">/*.</span><span class="n">key</span> <span class="o">./</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改 kubectl 配置文件 <code class="docutils literal notranslate"><span class="pre">$HOME/.kube/config</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">clusters</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">cluster</span><span class="p">:</span>
+    <span class="n">certificate</span><span class="o">-</span><span class="n">authority</span><span class="p">:</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">xcloud</span><span class="o">/</span><span class="n">ca</span><span class="o">.</span><span class="n">crt</span>
+    <span class="n">server</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">:</span><span class="mi">8443</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">xminikube</span>
+<span class="n">contexts</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">context</span><span class="p">:</span>
+    <span class="n">cluster</span><span class="p">:</span> <span class="n">xminikube</span>
+    <span class="n">user</span><span class="p">:</span> <span class="n">minikube</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">xminikube</span>
+<span class="n">current</span><span class="o">-</span><span class="n">context</span><span class="p">:</span> <span class="n">xminikube</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Config</span>
+<span class="n">preferences</span><span class="p">:</span> <span class="p">{}</span>
+<span class="n">users</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">minikube</span>
+  <span class="n">user</span><span class="p">:</span>
+    <span class="n">client</span><span class="o">-</span><span class="n">certificate</span><span class="p">:</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">xcloud</span><span class="o">/</span><span class="n">minikube</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">crt</span>
+    <span class="n">client</span><span class="o">-</span><span class="n">key</span><span class="p">:</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">xcloud</span><span class="o">/</span><span class="n">minikube</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里对配置文件修改主要有:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">certificate-authority</span></code> / <code class="docutils literal notranslate"><span class="pre">client-certificate</span></code> / <code class="docutils literal notranslate"><span class="pre">client-key</span></code> 分别修改成远程服务器的证书
+- 如果对服务器证书没有要求（降低安全性），可以配置 <code class="docutils literal notranslate"><span class="pre">certificate-authority</span></code> 行配置可以修改成 <code class="docutils literal notranslate"><span class="pre">insecure-skip-tls-verify:</span> <span class="pre">true</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">server:</span> <span class="pre">https://192.168.101.81:8443</span></code> 是远程服务器的IP</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cluster</span></code> 修订成我在 <a class="reference internal" href="install_run_minikube.xhtml#install-run-minikube"><span class="std std-ref">安装和运行minikube</span></a> 中配置的远程服务器上裸物理机运行的minikube名字，相应的context名字也修订</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果在VPN环境和局域网环境切换，则IP地址可能变化，所以上述 <code class="docutils literal notranslate"><span class="pre">192.168.101.81</span></code> 可以修改成主机名 <code class="docutils literal notranslate"><span class="pre">xcloud</span></code> 并通过客户端 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 进行主机名IP解析，方便切换。</p>
+</div>
+<ul>
+<li><p>现在kubectl会根据配置 <code class="docutils literal notranslate"><span class="pre">$HOME/.kube/config</span></code> 默认访问远程服务器上的minikube，可以通过如下命令验证:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">cluster</span><span class="o">-</span><span class="n">info</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Kubernetes</span> <span class="n">master</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">:</span><span class="mi">8443</span>
+<span class="n">KubeDNS</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">:</span><span class="mi">8443</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span><span class="n">namespaces</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">services</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">dns</span><span class="p">:</span><span class="n">dns</span><span class="o">/</span><span class="n">proxy</span>
+</pre></div>
+</div>
+<p>检查服务器节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>       <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>       <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>      <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">minikube</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">3</span><span class="n">d8h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">14.0</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">18.10</span>   <span class="mf">4.18</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">20</span><span class="o">-</span><span class="n">generic</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">18.9</span><span class="o">.</span><span class="mi">6</span>
+</pre></div>
+</div>
+</section>
+<section id="kubectlkvmminikube">
+<h2>kubectl访问远程KVM虚拟机minikube</h2>
+<p>如果在远程服务器上通过KVM运行minikube，则默认是使用远程服务器上的Host虚拟网络，对外不暴露管控API端口。需要通过iptables映射或者，需要采用本地ssh登陆到服务器上开启端口转发来实现访问KVM虚拟机中端口。举例，本地端口18443转发到远程KVM虚拟机的8443:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="mi">18443</span><span class="p">:</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.81</span><span class="p">:</span><span class="mi">8443</span> <span class="o">-</span><span class="n">N</span> <span class="o">-</span><span class="n">f</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里物理服务器是 192.168.101.81 ，该服务器上运行的KVM虚拟机（minikube）的IP是 192.168.122.81</p>
+</div>
+<p>启用端口转发之后，就可以把 <code class="docutils literal notranslate"><span class="pre">~/.kube/config</span></code> 配置中 server 设置成 <code class="docutils literal notranslate"><span class="pre">server:</span> <span class="pre">https://127.0.0.1:18443</span></code> ，则访问到远程服务器上KVM的minikube。</p>
+</section>
+<section id="minikubeminikube">
+<h2>本地minikube命令访问远程minikube集群</h2>
+<p>现在本地的kubectl已经可以连接远程服务器上运行的minikube，不过，我们现在还没有办法像本地运行minikube一样，直接运行 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">dashborad</span></code> 访问服务器的仪表盘。虽然可以在服务器上执行 <code class="docutils literal notranslate"><span class="pre">minikube</span> <span class="pre">dashboard</span></code> 命令启动服务，但是会提示无法打开浏览器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span>   <span class="n">Enabling</span> <span class="n">dashboard</span> <span class="o">...</span>
+<span class="o">-</span>   <span class="n">Verifying</span> <span class="n">dashboard</span> <span class="n">health</span> <span class="o">...</span>
+<span class="o">-</span>   <span class="n">Launching</span> <span class="n">proxy</span> <span class="o">...</span>
+<span class="o">-</span>   <span class="n">Verifying</span> <span class="n">proxy</span> <span class="n">health</span> <span class="o">...</span>
+<span class="o">-</span>   <span class="n">Opening</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">40441</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span><span class="n">namespaces</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">services</span><span class="o">/</span><span class="n">http</span><span class="p">:</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span><span class="p">:</span><span class="o">/</span><span class="n">proxy</span><span class="o">/</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">default</span> <span class="n">browser</span><span class="o">...</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="mi">870</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="n">www</span><span class="o">-</span><span class="n">browser</span><span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="mi">870</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="n">links2</span><span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="mi">870</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="n">elinks</span><span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="mi">870</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="n">links</span><span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="mi">870</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="n">lynx</span><span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="mi">870</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="n">w3m</span><span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">xdg</span><span class="o">-</span><span class="nb">open</span><span class="p">:</span> <span class="n">no</span> <span class="n">method</span> <span class="n">available</span> <span class="k">for</span> <span class="n">opening</span> <span class="s1">&#39;http://127.0.0.1:40441/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/&#39;</span>
+<span class="n">X</span>   <span class="n">failed</span> <span class="n">to</span> <span class="nb">open</span> <span class="n">browser</span><span class="p">:</span> <span class="n">exit</span> <span class="n">status</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>实际上，此时已经启动了 dashboard ，只是无法通过服务器上的浏览器访问（默认会启动本地浏览器）。实际上，远程服务器启动dashboard的命令可以修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">minikube</span> <span class="n">dashboard</span> <span class="o">--</span><span class="n">url</span>
+</pre></div>
+</div>
+<p>此时就只会启动dashboard服务，并输出url，但是不会强制启动浏览器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Enabling</span> <span class="n">dashboard</span> <span class="o">...</span>
+<span class="n">Verifying</span> <span class="n">dashboard</span> <span class="n">health</span> <span class="o">...</span>
+<span class="n">Launching</span> <span class="n">proxy</span> <span class="o">...</span>
+<span class="n">Verifying</span> <span class="n">proxy</span> <span class="n">health</span> <span class="o">...</span>
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">35293</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span><span class="n">namespaces</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">services</span><span class="o">/</span><span class="n">http</span><span class="p">:</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span><span class="p">:</span><span class="o">/</span><span class="n">proxy</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>那么，我们怎么访问远程minikube的dashboard呢？</p>
+<p>方法是在本地电脑上运行指令 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ kubectl proxy
+Starting to serve on 127.0.0.1:8001
+</pre></div>
+</div>
+<p>由于本地 kubectl 已经配置了访问远程minikube，所以将之前服务器上输出的url中的端口修改成本地端口 8001 就可以访问，即本地浏览器访问:</p>
+<blockquote>
+<div><p><a class="reference external" href="http://127.0.0.1:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/">http://127.0.0.1:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/</a></p>
+</div></blockquote>
+<p>就可以打开远程服务器的dashboard。</p>
+<figure class="align-default">
+<img alt="../../_images/remote_minikube_dashboard.png" src="../../_images/remote_minikube_dashboard.png" style="width: 529.1999999999999px; height: 222.0px;" />
+</figure>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>要获取远程minikube运行的服务和pod，需要使用 <code class="docutils literal notranslate"><span class="pre">--all-namespaces</span></code> 参数</p>
+<ul>
+<li><p>获取服务端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">services</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">namespaces</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAMESPACE</span>     <span class="n">NAME</span>                   <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>     <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>                  <span class="n">AGE</span>
+<span class="n">default</span>       <span class="n">kubernetes</span>             <span class="n">ClusterIP</span>   <span class="mf">10.96</span><span class="o">.</span><span class="mf">0.1</span>      <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">443</span><span class="o">/</span><span class="n">TCP</span>                  <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">dns</span>               <span class="n">ClusterIP</span>   <span class="mf">10.96</span><span class="o">.</span><span class="mf">0.10</span>     <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">53</span><span class="o">/</span><span class="n">UDP</span><span class="p">,</span><span class="mi">53</span><span class="o">/</span><span class="n">TCP</span><span class="p">,</span><span class="mi">9153</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span>   <span class="n">ClusterIP</span>   <span class="mf">10.96</span><span class="o">.</span><span class="mf">48.109</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>                   <span class="mi">7</span><span class="n">h29m</span>
+</pre></div>
+</div>
+<ul>
+<li><p>获取所有pods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">namespaces</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出可以看到，当前所有的pod都是kubernetes的系统pod，都运行在 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> 名字空间:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAMESPACE</span>     <span class="n">NAME</span>                                    <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">coredns</span><span class="o">-</span><span class="n">fb8b8dccf</span><span class="o">-</span><span class="mi">9</span><span class="n">xq25</span>                 <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">coredns</span><span class="o">-</span><span class="n">fb8b8dccf</span><span class="o">-</span><span class="n">mtktl</span>                 <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">etcd</span><span class="o">-</span><span class="n">minikube</span>                           <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">addon</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">minikube</span>             <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">minikube</span>                 <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">minikube</span>        <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">zjl44</span>                        <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">-</span><span class="n">minikube</span>                 <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span><span class="o">-</span><span class="mi">79</span><span class="n">dd6bfc48</span><span class="o">-</span><span class="n">vj6jl</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">7</span><span class="n">h32m</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>   <span class="n">storage</span><span class="o">-</span><span class="n">provisioner</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">d9h</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id1">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.systemcodegeeks.com/devops/remote-access-to-minikube-with-kubectl/">Remote access to Minikube with Kubectl</a><span class="link-target"> [https://www.systemcodegeeks.com/devops/remote-access-to-minikube-with-kubectl/]</span></p></li>
+<li><p><a class="reference external" href="https://cwienczek.com/2017/09/reaching-minikube-from-other-devices/">Reaching minikube from other devices</a><span class="link-target"> [https://cwienczek.com/2017/09/reaching-minikube-from-other-devices/]</span></p></li>
+<li><p><a class="reference external" href="https://giehlman.de/2018/02/16/accessing-remote-minikube-ui-via-ssh-port-forwarding/">Accessing remote minikube UI via SSH port-forwarding</a><span class="link-target"> [https://giehlman.de/2018/02/16/accessing-remote-minikube-ui-via-ssh-port-forwarding/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

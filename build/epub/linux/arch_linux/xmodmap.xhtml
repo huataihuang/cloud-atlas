@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Xmodmap修改键盘映射</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="xmodmap">
+<span id="id1"></span><h1>Xmodmap修改键盘映射</h1>
+<p>作为技术码农，总是系统自己编码时能够行云流水，所以机械键盘往往是居家旅行、码字编程必备工具。出于颜值，我选择了61键的蓝牙键盘：</p>
+<figure class="align-default">
+<img alt="../../_images/keyboard_61.png" src="../../_images/keyboard_61.png" style="width: 600.0px; height: 558.75px;" />
+</figure>
+<p>不过，比较尴尬的是61键机械键盘由于缩略了很多按键，特别是我所购买的富勒61键G610机械键盘存在一个非常不合理的设计：2套键盘布局，默认键盘布局1无法输入 <code class="docutils literal notranslate"><span class="pre">/</span></code> 和 <code class="docutils literal notranslate"><span class="pre">?</span></code> ，但是布局2则不能输入数字。这对于程序编码非常不友好。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>可能在平衡易用性和轻便性，对于编程使用，选择87键机械键盘更为合适。</p>
+</div>
+<p>为了能够解决紧凑型61键机械键盘的输入限制，需要把不常用的键盘按键替换成常用键。例如，将 <code class="docutils literal notranslate"><span class="pre">向上键</span></code> 更换成 <code class="docutils literal notranslate"><span class="pre">/?</span></code> 。</p>
+<section id="id2">
+<h2>Xmodmap简介</h2>
+<p>在每次按下键盘时， Linux 内核都会生成一个 Code。 Code 同 keycodes表 比较，然后决定按下的是什么。</p>
+<p>而 Xorg 使用自己的 Keycodes表 来参与这个过程。 每一个 Keycode 属于一个 keysym。 一个 keysym 就像一个 function 被 Keycode 调用执行。 Xmodmap 允许你编辑 keycode-keysym 之间的关系。</p>
+</section>
+<section id="id3">
+<h2>Xmodmap映射修改</h2>
+<ul>
+<li><p>打印当前keymap表:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xmodmap</span> <span class="o">-</span><span class="n">pke</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这个命令输出的是可阅读的映射配置，例如 <code class="docutils literal notranslate"><span class="pre">keycode</span>&#160; <span class="pre">57</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">N</span></code> 表明 keycode <code class="docutils literal notranslate"><span class="pre">57</span></code> 被映射到小写 <code class="docutils literal notranslate"><span class="pre">n</span></code> , 同时大写 <code class="docutils literal notranslate"><span class="pre">N</span></code>  映射于 <code class="docutils literal notranslate"><span class="pre">57</span> <span class="pre">+</span> <span class="pre">Shift</span></code> 。</p>
+<section id="id4">
+<h3>自定义映射表</h3>
+<ul>
+<li><p>首先当前映射表输出记录到配置文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xmodmap</span> <span class="o">-</span><span class="n">pke</span> <span class="o">&gt;</span> <span class="o">~/.</span><span class="n">Xmodmap</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这个配置文件就是个人使用的定制配置，在这个配置文件中修订，重新登陆X环境都会生效。</p>
+<ul>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">~/.Xmodmap</span></code> 之后，执行以下命令进行刷新测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xmodmap</span> <span class="o">~/.</span><span class="n">Xmodmap</span>
+</pre></div>
+</div>
+</li>
+<li><p>对于通过 <code class="docutils literal notranslate"><span class="pre">startx</span></code> 命令启动Xorg时激活自己定制的映射表，请在 <code class="docutils literal notranslate"><span class="pre">~/.xinitrc</span></code> 添加以下内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if [ -f $HOME/.Xmodmap ]; then
+    /usr/bin/xmodmap $HOME/.Xmodmap
+fi
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="g610">
+<h3>我的修订案例(G610键盘)</h3>
+<ul>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">~/.Xmodmap</span></code> 修改:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">keycode</span>  <span class="mi">64</span> <span class="o">=</span> <span class="n">Alt_L</span> <span class="n">Meta_L</span> <span class="n">Alt_L</span> <span class="n">Meta_L</span>  <span class="c1"># 左Alt键</span>
+<span class="n">keycode</span> <span class="mi">133</span> <span class="o">=</span> <span class="n">Super_L</span> <span class="n">NoSymbol</span> <span class="n">Super_L</span>  <span class="c1"># command键(win键)</span>
+<span class="n">keycode</span> <span class="mi">114</span> <span class="o">=</span> <span class="n">Right</span> <span class="n">NoSymbol</span> <span class="n">Right</span>   <span class="c1"># 向右方向键</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 左Alt键和command键互换</span>
+<span class="n">keycode</span>  <span class="mi">64</span> <span class="o">=</span> <span class="n">Super_L</span> <span class="n">NoSymbol</span> <span class="n">Super_L</span>
+<span class="n">keycode</span> <span class="mi">133</span> <span class="o">=</span> <span class="n">Alt_L</span> <span class="n">Meta_L</span> <span class="n">Alt_L</span> <span class="n">Meta_L</span>
+
+<span class="c1"># 向右方向键改为`键</span>
+<span class="n">keycode</span> <span class="mi">114</span> <span class="o">=</span> <span class="n">grave</span> <span class="n">asciitilde</span> <span class="n">grave</span> <span class="n">asciitilde</span>
+
+<span class="c1"># 向上键修改成 /?</span>
+<span class="n">keycode</span>  <span class="mi">111</span> <span class="o">=</span> <span class="n">slash</span> <span class="n">question</span> <span class="n">slash</span> <span class="n">question</span>  <span class="c1"># /?</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述配置修改实现的是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>左Alt键 &lt;=&gt; command键(win键)
+向上键 =&gt; /?键
+向右方向键 =&gt; `键
+</pre></div>
+</div>
+</section>
+</section>
+<section id="macos">
+<h2>macOS的键盘映射</h2>
+<p>我也在macOS系统中使用上述G610机械键盘，同样也存在这个键盘映射的问题。不过，在macOS平台，这个问题解决比较方便，因为有一个开源的 <a class="reference internal" href="../../apple/studio/macos_keyboard_customize.xhtml#macos-keyboard-customize"><span class="std std-ref">macOS 键盘定制工具Kakabiner-Elements</span></a> 工具可以非常灵活定制键盘特性，而且是图形工具，使用非常简便。</p>
+</section>
+<section id="id5">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Xmodmap_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)">archlinux官方文档: Xmodmap (简体中文)</a><span class="link-target"> [https://wiki.archlinux.org/index.php/Xmodmap_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)]</span></p></li>
+<li><p><a class="reference external" href="https://harttle.land/2019/08/08/linux-keymap-on-macbook.html">Linux 键盘映射：交换 CapsLock 和 Ctrl</a><span class="link-target"> [https://harttle.land/2019/08/08/linux-keymap-on-macbook.html]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

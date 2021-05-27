@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Docker systemd进程管理器</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="docker-systemd">
+<span id="id1"></span><h1>Docker systemd进程管理器</h1>
+<p>在容器环境中，最佳的实践方式是采用完全轻量级的只运行应用进程的每个容器一个应用进程的模式。但是，很多情况下，我们依然会需要采用 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.xhtml#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 来实现以下功能:</p>
+<ul class="simple">
+<li><p>多服务容器</p></li>
+</ul>
+<p>很多在虚拟机云计算中部署的多服务应用程序，当前逐步迁移到容器中运行。由于架构复杂等原因，可能不会容易拆解成每个容器运行一个服务进程的理想模式。此时可以采用systemd作为进程管理器，继续沿用虚拟机部署方式。</p>
+<ul class="simple">
+<li><p>Systemd unit</p></li>
+</ul>
+<p>很多应用服务是通过虚拟机中的systemd管理进程的，使用了systemd unit配置文件，这种部署方式非常清晰定义了服务运行方式，而不太容易改造成Docker容器的init服务运行。</p>
+<ul class="simple">
+<li><p>Systemd作为进程管理器优势</p></li>
+</ul>
+<p>systemd提供了处理服务器进程的重启和起停等管理功能，比任何其他进程管理器更为稳定和经过实践验证</p>
+<p>不过，systemd也因为其设计架构原因，会沿用其 systemd/journald 来控制容器的输出，而这个容器的输出对于 <a class="reference internal" href="../../kubernetes/index.xhtml#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 和 <a class="reference internal" href="../../openshift/index.xhtml#openshift"><span class="std std-ref">OpenShift Atlas</span></a> 设计架构是需要直接将日志输出到标准输出stdout和stderr。所以，如果你希望通过Kubernetes和OpenShift这样的调度系统来管理容器，在需要谨慎使用基于systemd的容器。并且，Docker和 <a class="reference internal" href="../moby/index.xhtml#docker-moby"><span class="std std-ref">Docker Moby</span></a> 社区都不建议在容器中运行systemd。</p>
+<section id="dockersystemd">
+<h2>Docker容器中的systemd</h2>
+<p>由于docker容器通常只运行一个进程，当需要多个服务进程时，可以使用 <a class="reference internal" href="../startup/docker_compose.xhtml#docker-compose"><span class="std std-ref">Docker Compose</span></a> 来配置启动多个容器服务器来实现。所以，默认情况下docker并不需要 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.xhtml#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 来监视多个服务，这样默认关闭 systemd 不仅简化了部署也增强了安全性(不同容器可以隔离服务)。</p>
+<p>配置要点:</p>
+<ul class="simple">
+<li><p>在Docker容器中，默认的PID 1进程是作为容器的 <code class="docutils literal notranslate"><span class="pre">Entrypoint</span></code> 指定的，通常是一个 <code class="docutils literal notranslate"><span class="pre">bash</span></code> ，但是我们要使用 <code class="docutils literal notranslate"><span class="pre">systemd</span></code></p></li>
+<li><p>systemd需要 <code class="docutils literal notranslate"><span class="pre">CAP_SYS_ADMIN</span></code> 能力( <code class="docutils literal notranslate"><span class="pre">当前运行systemd已经不再需要指定这个参数，但是如果要在容器内部使用NFS，即</span> <span class="pre">mount.nfs</span> <span class="pre">还是需要启用这个能力</span></code> ):</p></li>
+</ul>
+<p>Docker默认在非特权容器( <code class="docutils literal notranslate"><span class="pre">non</span> <span class="pre">privileged</span> <span class="pre">container</span></code> )中关闭了这个能力。也就是说，如果需要在 <code class="docutils literal notranslate"><span class="pre">privileged</span></code> 容器中才能运行systemd，这样的特权容器不会过滤掉任何能力。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>(注：现在2020年不需要)现在Docker的补丁允许在docker容器中添加能力，这样就不需要在特权模式下运行容器，只需要简单添加一个 <code class="docutils literal notranslate"><span class="pre">CAP_SYS_ADMIN</span></code> 能力就可以了</p></li>
+</ul>
+</div></blockquote>
+<ul>
+<li><p>systemd需要能够在容器中查看cgroup文件系统</p>
+<ul>
+<li><p>需要通过卷挂载方式将cgroup文件系统添加到容器中(在容器中的systemd只能读取系统的cgroup):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">ro</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>tmpfs (unprivileged模式):</p></li>
+</ul>
+<p>为了安全性，现在Docker运行systemd建议运行在unprivileged模式，此时就可以让systemd使用 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> ，所以应该映射 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> ，映射 <code class="docutils literal notranslate"><span class="pre">/run</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/run/lock</span></code></p>
+<ul class="simple">
+<li><p>指定 <code class="docutils literal notranslate"><span class="pre">sysinit.target</span></code> 作为默认unit来启动，而不是启动 <code class="docutils literal notranslate"><span class="pre">multi-user.target</span></code> 或其他运行级别，因为你不会在容器内启动图形</p></li>
+<li><p>如果要在容器内运行基于 <code class="docutils literal notranslate"><span class="pre">fuse</span></code> 到软件，需要bind mount <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code></p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>Docker容器运行systemd实践</h2>
+<section id="cap-sys-admin-cgroupfs">
+<h3>CAP_SYS_ADMIN 和 cgroupfs</h3>
+<p>我们在 <a class="reference internal" href="../admin/dockerfile.xhtml#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中介绍了如何 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">build</span></code> 一个CentOS或Ubuntu系统，当时我的实践是在容器中运行 <code class="docutils literal notranslate"><span class="pre">sshd</span></code> ，现在我们则构建一个运行systemd的容器。</p>
+<ul class="simple">
+<li><p>首先我们用以下 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 构建一个CentOS 8系统</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>FROM docker.io/centos:8
+MAINTAINER vincent huatai &lt;vincent@huatai.me&gt;
+
+RUN dnf clean all
+RUN dnf -y update
+
+ENTRYPOINT /bin/bash
+</pre></div>
+</td></tr></table></div>
+<p>执行命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">centos8</span> <span class="o">.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后我们运行容器，为了对比，我们这里使用常规启动命令，不启动systemd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos8</span><span class="o">-</span><span class="n">tini</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span><span class="o">-</span><span class="n">tini</span> <span class="n">local</span><span class="p">:</span><span class="n">centos8</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动容器后，我们连接到容器 <code class="docutils literal notranslate"><span class="pre">centos8-tini</span></code> 控制台进行检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">centos8</span><span class="o">-</span><span class="n">tini</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+<li><p>在当前容器中，使用 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">systemd</span></code> 看不到systemd进程，并且执行 <code class="docutils literal notranslate"><span class="pre">systemctl</span></code> 命令显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">System</span> <span class="n">has</span> <span class="ow">not</span> <span class="n">been</span> <span class="n">booted</span> <span class="k">with</span> <span class="n">systemd</span> <span class="k">as</span> <span class="n">init</span> <span class="n">system</span> <span class="p">(</span><span class="n">PID</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span> <span class="n">Can</span><span class="s1">&#39;t operate.</span>
+<span class="n">Failed</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">bus</span><span class="p">:</span> <span class="n">Host</span> <span class="ow">is</span> <span class="n">down</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>并且，通过 <code class="docutils literal notranslate"><span class="pre">top</span></code> 命令可以看到这个容器中的 PID 1 进程是 <code class="docutils literal notranslate"><span class="pre">bash</span></code></p>
+<ul>
+<li><p>现在我们启动一个新的运行systemd的容器，注意，参数中增加了 <code class="docutils literal notranslate"><span class="pre">--cap-add</span> <span class="pre">SYS_ADMIN</span></code> 赋予 <code class="docutils literal notranslate"><span class="pre">CAP_SYS_ADMIN</span></code> 能力，并且将主机的cgroup文件系统只读映射到容器内部:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1222</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">ro</span> \
+  <span class="o">--</span><span class="n">cap</span><span class="o">-</span><span class="n">add</span><span class="o">=</span><span class="n">sys_admin</span> <span class="n">local</span><span class="p">:</span><span class="n">centos8</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意， <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令最后的执行命令是 <code class="docutils literal notranslate"><span class="pre">/sbin/init</span></code> ，在容器中，这个 <code class="docutils literal notranslate"><span class="pre">/sbin/init</span></code> 是软链接到 <code class="docutils literal notranslate"><span class="pre">/lib/systemd/systemd</span></code> 进程管理器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ls -lh /sbin/init</span>
+<span class="n">lrwxrwxrwx</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">22</span> <span class="n">Dec</span> <span class="mi">17</span> <span class="mi">23</span><span class="p">:</span><span class="mi">31</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span> <span class="o">-&gt;</span> <span class="o">../</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">systemd</span>
+</pre></div>
+</div>
+<ul>
+<li><p>我们连接到这个运行systemd的容器 <code class="docutils literal notranslate"><span class="pre">centos8-systemd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后检查发现 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 并没有启动，这是为何呢？</p>
+</section>
+<section id="systemd-container-interface">
+<h3>systemd container interface</h3>
+<p>要允许systemd(以及系列程序)能够感知到自己运行在一个容器中，需要在容器运行的PID 1进程上设置 <code class="docutils literal notranslate"><span class="pre">$container</span></code> 环境变量，这样systemd unit配置文件中的 <code class="docutils literal notranslate"><span class="pre">ConditionVirtualization=</span></code> 设置才能工作。例如设置环境 <code class="docutils literal notranslate"><span class="pre">container=lxc-libvirt</span></code> 。</p>
+<p>所以我们需要删除掉上述错误的容器 <code class="docutils literal notranslate"><span class="pre">centos8-systemd</span></code> ，然后重建一次，这次我们带上环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">stop</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span>
+<span class="n">docker</span> <span class="n">rm</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1222</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">ro</span> \
+  <span class="o">--</span><span class="n">cap</span><span class="o">-</span><span class="n">add</span> <span class="n">SYS_ADMIN</span> <span class="o">--</span><span class="n">env</span> <span class="n">container</span><span class="o">=</span><span class="n">docker</span> <span class="n">local</span><span class="p">:</span><span class="n">centos8</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span>
+</pre></div>
+</div>
+<p>不过上述方式依然不能正确启动 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> ，我们再进行下一步优化</p>
+</section>
+<section id="tmpfs-fuse-sysinit-target">
+<h3>tmpfs / fuse / sysinit.target</h3>
+<ul>
+<li><p>综合各个要点，我们按照以下方式重新启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">stop</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span>
+<span class="n">docker</span> <span class="n">rm</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1222</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span> \
+  <span class="o">--</span><span class="n">entrypoint</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">systemd</span> \
+  <span class="o">--</span><span class="n">env</span> <span class="n">container</span><span class="o">=</span><span class="n">docker</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">tmp</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">run</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span> \
+    <span class="n">local</span><span class="p">:</span><span class="n">centos8</span> <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span><span class="o">=</span><span class="n">info</span> <span class="o">--</span><span class="n">unit</span><span class="o">=</span><span class="n">sysinit</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>以上方法就是在当前(2020年)在容器内运行 systemd 的实践方法。</p>
+<p>如果需要在容器内运行 <code class="docutils literal notranslate"><span class="pre">ntpd</span></code> 服务，则需要添加 <code class="docutils literal notranslate"><span class="pre">--cap-add=SYS_TIME</span></code> 。</p>
+<ul>
+<li><p>最终完成后，在容器内部，你可以通过 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">systemd</span></code> 看到如下进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root           1  2.3  0.4  21568  9044 ?        Ss   11:36   0:00 /usr/lib/systemd/systemd --log-level=info --unit=sysinit.target
+root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/systemd/systemd-journald
+</pre></div>
+</div>
+</li>
+<li><p>在容器内检查文件系统 <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> 可以看到如下输出，显示挂载了tmpfs以及cgroup:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Filesystem</span>      <span class="n">Size</span>  <span class="n">Used</span> <span class="n">Avail</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="n">overlay</span>         <span class="mi">117</span><span class="n">G</span>   <span class="mi">11</span><span class="n">G</span>  <span class="mi">102</span><span class="n">G</span>  <span class="mi">10</span><span class="o">%</span> <span class="o">/</span>
+<span class="n">tmpfs</span>            <span class="mi">64</span><span class="n">M</span>     <span class="mi">0</span>   <span class="mi">64</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span>
+<span class="n">shm</span>              <span class="mi">64</span><span class="n">M</span>     <span class="mi">0</span>   <span class="mi">64</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">shm</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>  <span class="mf">8.1</span><span class="n">M</span>  <span class="mi">917</span><span class="n">M</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">tmp</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span>  <span class="mi">117</span><span class="n">G</span>   <span class="mi">11</span><span class="n">G</span>  <span class="mi">102</span><span class="n">G</span>  <span class="mi">10</span><span class="o">%</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">asound</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">scsi</span>
+<span class="n">tmpfs</span>           <span class="mi">925</span><span class="n">M</span>     <span class="mi">0</span>  <span class="mi">925</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">firmware</span>
+</pre></div>
+</div>
+</li>
+<li><p>在容器内部我们使用 <code class="docutils literal notranslate"><span class="pre">top</span></code> 命令可以看到PID 1进程是 <code class="docutils literal notranslate"><span class="pre">systemd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">-</span> <span class="mi">11</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">23</span> <span class="n">up</span> <span class="mi">34</span> <span class="n">days</span><span class="p">,</span>  <span class="mi">1</span><span class="p">:</span><span class="mi">53</span><span class="p">,</span>  <span class="mi">0</span> <span class="n">users</span><span class="p">,</span>  <span class="n">load</span> <span class="n">average</span><span class="p">:</span> <span class="mf">1.53</span><span class="p">,</span> <span class="mf">1.18</span><span class="p">,</span> <span class="mf">1.06</span>
+<span class="n">Tasks</span><span class="p">:</span>   <span class="mi">4</span> <span class="n">total</span><span class="p">,</span>   <span class="mi">1</span> <span class="n">running</span><span class="p">,</span>   <span class="mi">3</span> <span class="n">sleeping</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">stopped</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">zombie</span>
+<span class="o">%</span><span class="n">Cpu</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="mf">6.3</span> <span class="n">us</span><span class="p">,</span>  <span class="mf">6.6</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span> <span class="mf">86.8</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">0.2</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.2</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="n">MiB</span> <span class="n">Mem</span> <span class="p">:</span>   <span class="mf">1848.2</span> <span class="n">total</span><span class="p">,</span>     <span class="mf">52.3</span> <span class="n">free</span><span class="p">,</span>   <span class="mf">1015.1</span> <span class="n">used</span><span class="p">,</span>    <span class="mf">780.8</span> <span class="n">buff</span><span class="o">/</span><span class="n">cache</span>
+<span class="n">MiB</span> <span class="n">Swap</span><span class="p">:</span>      <span class="mf">0.0</span> <span class="n">total</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">free</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">used</span><span class="o">.</span>    <span class="mf">851.7</span> <span class="n">avail</span> <span class="n">Mem</span>
+
+    <span class="n">PID</span> <span class="n">USER</span>      <span class="n">PR</span>  <span class="n">NI</span>    <span class="n">VIRT</span>    <span class="n">RES</span>    <span class="n">SHR</span> <span class="n">S</span>  <span class="o">%</span><span class="n">CPU</span>  <span class="o">%</span><span class="n">MEM</span>     <span class="n">TIME</span><span class="o">+</span> <span class="n">COMMAND</span>
+      <span class="mi">1</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">21820</span>   <span class="mi">9112</span>   <span class="mi">7160</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.5</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.74</span> <span class="n">systemd</span>
+     <span class="mi">25</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">27148</span>   <span class="mi">6768</span>   <span class="mi">5832</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.4</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.32</span> <span class="n">systemd</span><span class="o">-</span><span class="n">journal</span>
+     <span class="mi">30</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>    <span class="mi">3876</span>   <span class="mi">3048</span>   <span class="mi">2568</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.14</span> <span class="n">bash</span>
+    <span class="mi">103</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>    <span class="mi">9104</span>   <span class="mi">3324</span>   <span class="mi">2788</span> <span class="n">R</span>   <span class="mf">0.0</span>   <span class="mf">0.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.02</span> <span class="n">top</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="ssh">
+<h2>安装ssh服务和制作镜像</h2>
+<ul>
+<li><p>既然我们已经实现了将systemd作为进程管理器，显然我们可以像传统的VM一样，在容器中部署多个服务，例如，之前我实践过 <a class="reference internal" href="../admin/docker_ssh.xhtml#docker-ssh"><span class="std std-ref">Docker容器中运行ssh服务</span></a> 是借助了Docker执行 <code class="docutils literal notranslate"><span class="pre">/</span>&#160;&#160;&#160; <span class="pre">bin/bash</span> <span class="pre">-c</span> <span class="pre">&quot;/usr/sbin/sshd</span> <span class="pre">&amp;&amp;</span> <span class="pre">/bin/bash&quot;</span></code> 方法，显然原先的方法不优雅。现在我们有了完整的systemd进程管理器，就可以部署sshd服务了。</p>
+<ul>
+<li><p>在容器内部执行ssh安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">openssh</span><span class="o">-</span><span class="n">server</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动sshd服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">sshd</span>
+</pre></div>
+</div>
+</li>
+<li><p>激活sshd服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">sshd</span>
+</pre></div>
+</div>
+</li>
+<li><p>为方便使用，建议同时安装ssh客户端:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">openssh</span><span class="o">-</span><span class="n">clients</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>制作镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">commit</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span>
+<span class="n">docker</span> <span class="n">tag</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span> <span class="n">huataihuang</span><span class="o">/</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span>
+<span class="n">docker</span> <span class="n">login</span>
+<span class="n">docker</span> <span class="n">push</span> <span class="n">huataihuang</span><span class="o">/</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>上述命令采用了 <a class="reference internal" href="../startup/docker_run.xhtml#docker-run"><span class="std std-ref">在Docker容器中运行命令</span></a> 中案例方法，将我制作的镜像推送的Docker Hub的huataihuang账号下，以便后续通过以下方法随时运行新容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span><span class="p">:</span><span class="mi">22</span> <span class="o">-</span><span class="n">d</span> <span class="n">huataihuang</span><span class="o">/</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">myserver</span> <span class="o">--</span><span class="n">name</span> <span class="n">myserver</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="dockerfilesystemd-sshd">
+<h2>Dockerfile构建systemd+sshd</h2>
+<section id="dockerfile">
+<h3>dockerfile构建</h3>
+<ul class="simple">
+<li><p>在工作目录下创建以下 <code class="docutils literal notranslate"><span class="pre">centos8-systemd-sshd</span></code> 作为Dockerfile ，并在目录下存放一个用于 admin 用户的公钥文件 <code class="docutils literal notranslate"><span class="pre">authorized_keys</span></code></p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Build centos 8 image with ssh:</span>
+<span class="c1"># ------------------------------</span>
+<span class="c1"># docker build -f centos8-systemd-sshd -t local:centos8-systemd-sshd .</span>
+
+<span class="c1"># create container with systemd</span>
+<span class="c1"># -------------------------------</span>
+<span class="c1"># docker run -itd -p 1122:22 --hostname myserver --name myserver \</span>
+<span class="c1">#   --entrypoint=/usr/lib/systemd/systemd \</span>
+<span class="c1">#   --env container=docker \</span>
+<span class="c1">#   --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \</span>
+<span class="c1">#   --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \</span>
+<span class="c1">#   --mount type=tmpfs,destination=/tmp \</span>
+<span class="c1">#   --mount type=tmpfs,destination=/run \</span>
+<span class="c1">#   --mount type=tmpfs,destination=/run/lock \</span>
+<span class="c1">#     local:centos8-systemd-sshd --log-level=info --unit=sysinit.target</span>
+
+FROM docker.io/centos:8
+MAINTAINER vincent huatai &lt;vincent@huatai.me&gt;
+
+ENV <span class="nv">continer</span><span class="o">=</span>docker
+
+RUN dnf clean all
+RUN dnf -y update
+
+RUN dnf -y install which sudo openssh-clients openssh-server
+
+RUN systemctl <span class="nb">enable</span> sshd
+
+<span class="c1"># add account &quot;admin&quot; and give sudo privilege</span>
+RUN groupadd -g <span class="m">505</span> admin
+RUN useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+RUN usermod -aG wheel admin
+RUN <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c1"># Add ssh public key for login</span>
+RUN mkdir -p /home/admin/.ssh
+COPY authorized_keys /home/admin/.ssh/authorized_keys
+RUN chown -R admin:admin /home/admin/.ssh
+RUN chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+RUN chmod <span class="m">700</span> /home/admin/.ssh
+<span class="c1"># default unprivileged users are not permitted to log in, so rm /var/run/nologin to let users log in</span>
+RUN mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c1"># run service when container started - sshd</span>
+EXPOSE <span class="m">22</span>:1122
+
+ENTRYPOINT /usr/lib/systemd/systemd
+</pre></div>
+</td></tr></table></div>
+<ul>
+<li><p>执行以下命令构建镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">f</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行以下命令创建运行systemd的容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span> \
+  <span class="o">--</span><span class="n">cap</span><span class="o">-</span><span class="n">add</span><span class="o">=</span><span class="n">sys_admin</span> \
+  <span class="o">--</span><span class="n">entrypoint</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">systemd</span> \
+  <span class="o">--</span><span class="n">env</span> <span class="n">container</span><span class="o">=</span><span class="n">docker</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">tmp</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">run</span> \
+  <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span> \
+    <span class="n">local</span><span class="p">:</span><span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">sshd</span> <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span><span class="o">=</span><span class="n">info</span> <span class="o">--</span><span class="n">unit</span><span class="o">=</span><span class="n">sysinit</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>完成后运行的容器已经启动了systemd，并且已经准备好了sshd运行环境，包括创建了 <code class="docutils literal notranslate"><span class="pre">admin</span></code> 账号。不过，目前我遇到问题还有可能需要手工启动一次sshd以及删除 <code class="docutils literal notranslate"><span class="pre">/var/run/nologin</span></code> 。</p>
+</div>
+</section>
+<section id="buildkit">
+<h3>buildkit构建(尚未实践)</h3>
+<ul class="simple">
+<li><p>如果你安装使用 <a class="reference internal" href="../moby/buildkit/index.xhtml#buildkit"><span class="std std-ref">BuildKit</span></a> ，则可以使用以下 Dockerfile</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Build centos 8 image with ssh:</span>
+<span class="c1"># ------------------------------</span>
+<span class="c1"># docker build -f centos8-systemd-sshd -t local:centos8-systemd-sshd .</span>
+
+<span class="c1"># create container with systemd</span>
+<span class="c1"># -------------------------------</span>
+<span class="c1"># docker run -itd -p 1122:22 --hostname myserver --name myserver \</span>
+<span class="c1">#   --entrypoint=/usr/lib/systemd/systemd \</span>
+<span class="c1">#   --env container=docker \</span>
+<span class="c1">#   --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \</span>
+<span class="c1">#   --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \</span>
+<span class="c1">#   --mount type=tmpfs,destination=/tmp \</span>
+<span class="c1">#   --mount type=tmpfs,destination=/run \</span>
+<span class="c1">#   --mount type=tmpfs,destination=/run/lock \</span>
+<span class="c1">#     local:centos8-systemd-sshd --log-level=info --unit=sysinit.target</span>
+
+FROM docker.io/centos:8
+MAINTAINER vincent huatai &lt;vincent@huatai.me&gt;
+
+ENV <span class="nv">continer</span><span class="o">=</span>docker
+
+RUN dnf clean all
+RUN dnf -y update
+
+RUN dnf -y install which sudo openssh-clients openssh-server
+
+RUN systemctl <span class="nb">enable</span> sshd
+
+<span class="c1"># add account &quot;admin&quot; and give sudo privilege</span>
+RUN groupadd -g <span class="m">505</span> admin
+RUN useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+RUN usermod -aG wheel admin
+RUN <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c1"># Add ssh public key for login</span>
+RUN mkdir -p /home/admin/.ssh
+COPY authorized_keys /home/admin/.ssh/authorized_keys
+RUN chown -R admin:admin /home/admin/.ssh
+RUN chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+RUN chmod <span class="m">700</span> /home/admin/.ssh
+<span class="c1"># default unprivileged users are not permitted to log in, so rm /var/run/nologin to let users log in</span>
+RUN mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c1"># run service when container started - sshd</span>
+EXPOSE <span class="m">22</span>:1122
+
+ENTRYPOINT /usr/lib/systemd/systemd
+</pre></div>
+</td></tr></table></div>
+<p>执行以下命令构建镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">buildctl</span> <span class="n">build</span> \
+    <span class="o">--</span><span class="n">frontend</span><span class="o">=</span><span class="n">dockerfile</span><span class="o">.</span><span class="n">v0</span> \
+    <span class="o">--</span><span class="n">local</span> <span class="n">context</span><span class="o">=.</span> \
+    <span class="o">--</span><span class="n">local</span> <span class="n">dockerfile</span><span class="o">=.</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="podman">
+<h2>podman</h2>
+<p>Red Hat公司开发了另外一个符合OCI规范的容器和pods管理工具 podman ( <a class="reference external" href="https://github.com/containers/podman">GitHub podman</a><span class="link-target"> [https://github.com/containers/podman]</span> )。这个工具也直接支持在容器中运行systemd ( <a class="reference external" href="https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/">How to run systemd in a container</a><span class="link-target"> [https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/]</span> )</p>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux">Running systemd inside a docker container (arch linux)</a><span class="link-target"> [https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux]</span> - 当前2020年，这篇解决方案最准确</p></li>
+<li><p><a class="reference external" href="https://medium.com/swlh/docker-and-systemd-381dfd7e4628">Docker and systemd</a><span class="link-target"> [https://medium.com/swlh/docker-and-systemd-381dfd7e4628]</span></p></li>
+<li><p><a class="reference external" href="https://systemd.io/CONTAINER_INTERFACE/">systemd - The Container Interface</a><span class="link-target"> [https://systemd.io/CONTAINER_INTERFACE/]</span></p></li>
+<li><p><a class="reference external" href="https://stackoverflow.com/questions/46800594/start-service-using-systemctl-inside-docker-conatiner">Start service using systemctl inside docker conatiner</a><span class="link-target"> [https://stackoverflow.com/questions/46800594/start-service-using-systemctl-inside-docker-conatiner]</span></p></li>
+<li><p><a class="reference external" href="https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/">How to run systemd in a container</a><span class="link-target"> [https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

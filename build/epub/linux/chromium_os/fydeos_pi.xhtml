@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>在树莓派上运行Chromium OS(FydeOS)</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="chromium-os-fydeos">
+<span id="fydeos-pi"></span><h1>在树莓派上运行Chromium OS(FydeOS)</h1>
+<p><a class="reference external" href="https://fydeos.com/">FydeOS</a><span class="link-target"> [https://fydeos.com/]</span> 是国内团队基于 <a class="reference internal" href="index.xhtml#chromium-os"><span class="std std-ref">Chromium OS</span></a> 定制的操作系统，类似于商业版本的Chrome OS，大致的关系如下：</p>
+<ul class="simple">
+<li><p>Chromium OS作为开源操作系统，是一个深度定制的Linux操作系统，主要是面向Web用户。通过精简内核和应用组件， <a class="reference internal" href="chromium_os_arch.xhtml#chromium-os-arch"><span class="std std-ref">Chromium OS架构</span></a> 实现了较高的安全特性</p></li>
+<li><p>FydeOS基于Chormium OS编译，并加入了非开源协议软件，所以类似Chrome OS，并不提供源代码</p></li>
+<li><p>FydeOS的GitHub网站提供了指导编译Chromium OS的文档，并且提供了在此基础上编译AnBox运行环境的指南。通过Anbox可以实现在Linux上运行Android应用程序，但是需要剥离Goolge Chrome的ARC+。FydeOS提供了一些开发指南。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我不确定FedeOS直接提供的镜像是不是也是采用AnBox来运行Android，也可能有其他解决方案。不过，我比较感兴趣的是实现的底层技术。所以我计划先安装FydeOS，然后自己编译Chromium OS和AnBox，进行对比。</p>
+</div>
+<section id="id1">
+<h2>安装FydeOS</h2>
+<p>FydeOS类似Chrome OS，采用了部分商业软件，所以不提供直接源代码。需要从 <a class="reference external" href="https://fydeos.com/download">FydeOS官方下载</a><span class="link-target"> [https://fydeos.com/download]</span> 安装镜像，下载以后解压缩为: <code class="docutils literal notranslate"><span class="pre">FydeOS_for_you_Pi400_v11.4_SP2.img</span></code></p>
+<ul>
+<li><p>制作TF卡镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">FydeOS_for_you_Pi400_v11</span><span class="o">.</span><span class="mi">4</span><span class="n">_SP2</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span> <span class="n">bs</span><span class="o">=</span><span class="mi">100</span><span class="n">M</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>启动</h2>
+<ul class="simple">
+<li><p>连接外接显示器(我的显示器是 <code class="docutils literal notranslate"><span class="pre">HP</span> <span class="pre">E273q</span></code> 分辨率 <code class="docutils literal notranslate"><span class="pre">2560x1440</span></code> )，开机后显示了树莓派著名的彩虹方块。但是很快就黑屏，显示没有信号输入。</p></li>
+</ul>
+<p>我采用如下方法排查：</p>
+<ul>
+<li><p>将TF卡通过读卡器连接到Linux主机上，通过 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span></code> 可以看到如下分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc</span><span class="p">:</span> <span class="mf">119.08</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">127865454592</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">249737216</span> <span class="n">sectors</span>
+<span class="n">Disk</span> <span class="n">model</span><span class="p">:</span> <span class="n">MassStorageClass</span>
+<span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">gpt</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mf">238E0445</span><span class="o">-</span><span class="mi">14</span><span class="n">A2</span><span class="o">-</span><span class="n">B84B</span><span class="o">-</span><span class="n">B604</span><span class="o">-</span><span class="mi">52</span><span class="n">D48974E97A</span>
+
+<span class="n">Device</span>       <span class="n">Start</span>       <span class="n">End</span>   <span class="n">Sectors</span>   <span class="n">Size</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc1</span>  <span class="mi">5996544</span> <span class="mi">249737115</span> <span class="mi">243740572</span> <span class="mf">116.2</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">filesystem</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc2</span>    <span class="mi">20480</span>     <span class="mi">69631</span>     <span class="mi">49152</span>    <span class="mi">24</span><span class="n">M</span> <span class="n">ChromeOS</span> <span class="n">kernel</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc3</span>   <span class="mi">417792</span>   <span class="mi">5996543</span>   <span class="mi">5578752</span>   <span class="mf">2.7</span><span class="n">G</span> <span class="n">ChromeOS</span> <span class="n">root</span> <span class="n">fs</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc4</span>    <span class="mi">69632</span>    <span class="mi">118783</span>     <span class="mi">49152</span>    <span class="mi">24</span><span class="n">M</span> <span class="n">ChromeOS</span> <span class="n">kernel</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc5</span>   <span class="mi">413696</span>    <span class="mi">417791</span>      <span class="mi">4096</span>     <span class="mi">2</span><span class="n">M</span> <span class="n">ChromeOS</span> <span class="n">root</span> <span class="n">fs</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc6</span>    <span class="mi">16448</span>     <span class="mi">16448</span>         <span class="mi">1</span>   <span class="mi">512</span><span class="n">B</span> <span class="n">ChromeOS</span> <span class="n">kernel</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc7</span>    <span class="mi">16449</span>     <span class="mi">16449</span>         <span class="mi">1</span>   <span class="mi">512</span><span class="n">B</span> <span class="n">ChromeOS</span> <span class="n">root</span> <span class="n">fs</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc8</span>   <span class="mi">118784</span>    <span class="mi">151551</span>     <span class="mi">32768</span>    <span class="mi">16</span><span class="n">M</span> <span class="n">Linux</span> <span class="n">filesystem</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc9</span>    <span class="mi">16450</span>     <span class="mi">16450</span>         <span class="mi">1</span>   <span class="mi">512</span><span class="n">B</span> <span class="n">ChromeOS</span> <span class="n">reserved</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc10</span>   <span class="mi">16451</span>     <span class="mi">16451</span>         <span class="mi">1</span>   <span class="mi">512</span><span class="n">B</span> <span class="n">ChromeOS</span> <span class="n">reserved</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc11</span>      <span class="mi">64</span>     <span class="mi">16447</span>     <span class="mi">16384</span>     <span class="mi">8</span><span class="n">M</span> <span class="n">unknown</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc12</span>  <span class="mi">282624</span>    <span class="mi">413695</span>    <span class="mi">131072</span>    <span class="mi">64</span><span class="n">M</span> <span class="n">EFI</span> <span class="n">System</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里可以看到Chromium OS使用了12个分区，我们需要调整的是启动分区，也就是分区12 <code class="docutils literal notranslate"><span class="pre">/dev/sdc12</span> <span class="pre">...</span> <span class="pre">EFI</span> <span class="pre">System</span></code></p>
+<section id="chromium-os-config-txt">
+<h3>调整Chromium OS config.txt</h3>
+<p>参考 <a class="reference external" href="https://github.com/FydeOS/chromium_os-raspberry_pi/issues/16">Latest build (r72) still does not work with 7in touch screen#16</a><span class="link-target"> [https://github.com/FydeOS/chromium_os-raspberry_pi/issues/16]</span> 中方法，挂载分区12后修改 <code class="docutils literal notranslate"><span class="pre">config.txt</span></code> :</p>
+<ul>
+<li><p>挂载第12分区EFI系统分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc12</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.hackster.io/news/fydeos-a-tweaked-chromium-os-for-chrome-os-fans-hits-the-raspberry-pi-400-raspberry-pi-4-range-13f678ed7882">FydeOS, a Tweaked Chromium OS for Chrome OS Fans, Hits the Raspberry Pi 400, Raspberry Pi 4 Range</a><span class="link-target"> [https://www.hackster.io/news/fydeos-a-tweaked-chromium-os-for-chrome-os-fans-hits-the-raspberry-pi-400-raspberry-pi-4-range-13f678ed7882]</span></p></li>
+<li><p><a class="reference external" href="https://raspberrytips.com/how-to-install-use-chromium-os-on-raspberry-pi-fydeos/">How to Install &amp; Use Chromium OS on Raspberry Pi? (FydeOS)</a><span class="link-target"> [https://raspberrytips.com/how-to-install-use-chromium-os-on-raspberry-pi-fydeos/]</span></p></li>
+<li><p><a class="reference external" href="https://github.com/FydeOS/chromium_os-raspberry_pi">GitHub - FydeOS / chromium_os-raspberry_pi</a><span class="link-target"> [https://github.com/FydeOS/chromium_os-raspberry_pi]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

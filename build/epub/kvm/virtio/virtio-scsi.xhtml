@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>virtio-scsi驱动</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="virtio-scsi">
+<span id="id1"></span><h1>virtio-scsi驱动</h1>
+<p>virtio-scsi 和 virtio 的性能相同，但是 virtio-scsi 提供了更多功能和更具伸缩性。最大的优势是，virtio-scsi可以在一个虚拟机中处理数百个磁盘设备，远超过 virtio-blk 只能处理25个设备的限制(另一个说法是30个设备，需要验证)。</p>
+<p>virtio-scsi提供了直接连接SCSI LUN的能力，并且也提供了继承目标设备特性的能力：</p>
+<p>通过virtio-scsi控制器连接的虚拟硬盘或CD，可以从host主机通过QEMU scsi-block设备实现物理SCSI设备的直通(pass-through)，这样就可以实现每个guest使用上百个设备，也提供了极高的存储性能。</p>
+<p>virtio-scsi从Red Hat Enterprise Linux 6.3进入Technology Preview，并且从RHEL 6.4开始完全支持，而Windows guests也支持最新的virtio-win驱动。</p>
+<p>virtio-scsi作为新型的para-virtualized SCSI控制器设备，性能和virtio-blk相当，但是提供了以下增强功能:</p>
+<ul class="simple">
+<li><p>提高了可伸缩性 - 虚拟机可以连接更多存储设备(通过虚拟化SCSI设备可以处理更多块设备)</p></li>
+<li><p>标准化的命令集 - virtio-scsi使用标准sCSI指令集，简化了新功能添加</p></li>
+<li><p>标准化的设备命名 - virtual-scsi磁盘使用和裸金属系统相同的设备路径，这样可以简化 物理机到虚拟机 (physical-to-virtual) 和 虚拟机到虚拟机 (virtual-to-virtual) 迁移</p></li>
+<li><p>SCSI设备直通 - virtio-scsi可以对guest系统使用物理磁盘设备直通</p></li>
+</ul>
+<p>virto-scsi提供了直接连接SCSI LUN的能力，并且比virtio-blk提供了显著的伸缩性增强(支持数百设备连接)。</p>
+<section id="id2">
+<h2>配置virtio-scsi</h2>
+<ul>
+<li><p>添加一个镜像磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">devices</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;file&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;disk&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span> <span class="n">dev</span><span class="o">=</span><span class="s1">&#39;sda&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;scsi&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;drive&#39;</span> <span class="n">controller</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="o">/&gt;</span>
+ <span class="o">&lt;/</span><span class="n">disk</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="n">controller</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;scsi&#39;</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;virtio-scsi&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">devices</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>添加一个直通磁盘设备(DirectLUN Disk / lun passthrough)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">devices</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;block&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;lun&#39;</span> <span class="n">rawio</span><span class="o">=</span><span class="s1">&#39;no&#39;</span> <span class="n">sgio</span><span class="o">=</span><span class="s1">&#39;unfiltered&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span> <span class="n">dev</span><span class="o">=</span><span class="s1">&#39;sda&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;scsi&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;drive&#39;</span> <span class="n">controller</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">target</span><span class="o">=</span><span class="mi">0</span><span class="s1">&#39; unit=&#39;</span><span class="mi">0</span><span class="s1">&#39;/&gt;</span>
+ <span class="o">&lt;/</span><span class="n">disk</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="n">controller</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;scsi&#39;</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;virtio-scsi&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">devices</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://access.redhat.com/solutions/300563">What is the support status of the virtio-scsi driver?</a><span class="link-target"> [https://access.redhat.com/solutions/300563]</span></p></li>
+<li><p><a class="reference external" href="https://www.ovirt.org/develop/release-management/features/storage/virtio-scsi.html">oVirt Virtio-SCSI</a><span class="link-target"> [https://www.ovirt.org/develop/release-management/features/storage/virtio-scsi.html]</span></p></li>
+<li><p><a class="reference external" href="https://mpolednik.github.io/2017/01/23/virtio-blk-vs-virtio-scsi/">virtio-blk vs virtio-scsi</a><span class="link-target"> [https://mpolednik.github.io/2017/01/23/virtio-blk-vs-virtio-scsi/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

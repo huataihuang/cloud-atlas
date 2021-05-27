@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Jetson Nano无线AP</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="jetson-nanoap">
+<span id="jetson-soft-ap"></span><h1>Jetson Nano无线AP</h1>
+<p>Jetson Nano安装了外接的Intel无线模块以后，非常类似一个无线路由器，所以我考虑利用这个现有硬件结合 <a class="reference internal" href="../../../linux/network/create_ap.xhtml#create-ap"><span class="std std-ref">使用create_ap工具创建软AP</span></a> 实现一个个人使用的无线路由器，方便我测试基于 <a class="reference internal" href="../../../arm/raspberry_pi/index.xhtml#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 的 <a class="reference internal" href="../../../kubernetes/arm/index.xhtml#kubernetes-arm"><span class="std std-ref">ARM架构Kubernetes</span></a> 。</p>
+<p>由于这是在ARM架构上实现无线AP，所以可以作为通用的低功耗路由器的实践基础，为后续实现无线路由交换设备做一个参考。</p>
+<section id="id1">
+<h2>硬件准备</h2>
+<ul>
+<li><p>无线网卡必须是 <code class="docutils literal notranslate"><span class="pre">nl80211</span></code> 兼容无线设备，以便支持 AP operating mode。执行 <code class="docutils literal notranslate"><span class="pre">iw</span> <span class="pre">list</span></code> 命令 <code class="docutils literal notranslate"><span class="pre">interface</span> <span class="pre">modes</span></code> 列表中包含 <code class="docutils literal notranslate"><span class="pre">AP</span></code> 支持:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Supported</span> <span class="n">interface</span> <span class="n">modes</span><span class="p">:</span>
+         <span class="o">*</span> <span class="n">IBSS</span>
+                 <span class="o">*</span> <span class="n">managed</span>
+                 <span class="o">*</span> <span class="n">AP</span>
+                 <span class="o">*</span> <span class="n">AP</span><span class="o">/</span><span class="n">VLAN</span>
+                 <span class="o">*</span> <span class="n">monitor</span>
+                 <span class="o">*</span> <span class="n">P2P</span><span class="o">-</span><span class="n">client</span>
+                 <span class="o">*</span> <span class="n">P2P</span><span class="o">-</span><span class="n">GO</span>
+                 <span class="o">*</span> <span class="n">P2P</span><span class="o">-</span><span class="n">device</span>
+</pre></div>
+</div>
+</li>
+<li><p>我的Jetson Nano已经连接了局域网的无线AP，我的目标是构建同时作为无线 <code class="docutils literal notranslate"><span class="pre">客户端</span></code> (连接现有无线局域网AP) 和无线 <code class="docutils literal notranslate"><span class="pre">AP</span></code> 的混合设备角色。这种模式是将软件AP作为无线中继器( <code class="docutils literal notranslate"><span class="pre">wireless</span> <span class="pre">repeater</span></code> )，就只需要一个无线设备。这个能力通过 <code class="docutils literal notranslate"><span class="pre">iw</span> <span class="pre">list</span></code> 可以检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">valid</span> <span class="n">interface</span> <span class="n">combinations</span><span class="p">:</span>
+         <span class="o">*</span> <span class="c1">#{ managed } &lt;= 1, #{ AP, P2P-client, P2P-GO } &lt;= 1, #{ P2P-device } &lt;= 1,</span>
+           <span class="n">total</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">,</span> <span class="c1">#channels &lt;= 2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>软件准备</h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Oblique开发了 <a class="reference external" href="https://github.com/oblique/create_ap">Oblique – GitHub</a><span class="link-target"> [https://github.com/oblique/create_ap]</span> ，是一个配置WiFi AP的脚本，不过现在已经不再维护。这个create_ap的优点是简洁，仅需要bash和相关基础工具支持。</p>
+<p>可以采用 lakinduakash 继续维护开发的 <a class="reference external" href="https://github.com/lakinduakash/linux-wifi-hotspot">linux-wifi-hotspot</a><span class="link-target"> [https://github.com/lakinduakash/linux-wifi-hotspot]</span> ，提供了终端和图形界面，并且支持hostspot服务运行。这个新版的linux-wifi-hotspot集成了oblique的create_ap工具逻辑，并提供了gtk图形界面配置工具。</p>
+<p>我在 <a class="reference internal" href="../../../linux/network/create_ap.xhtml#create-ap"><span class="std std-ref">使用create_ap工具创建软AP</span></a> 中已经使用过 <code class="docutils literal notranslate"><span class="pre">create_ap</span></code> 来创建WiFi AP，这里改为采用 <code class="docutils literal notranslate"><span class="pre">linux-wifi-hotspot</span></code> 来实现。</p>
+</div>
+<ul>
+<li><p>在Ubuntu/Debian系统中安装以下编译安装依赖:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">libgtk</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="n">dev</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">gcc</span> <span class="n">g</span><span class="o">++</span> <span class="n">pkg</span><span class="o">-</span><span class="n">config</span> <span class="n">make</span> <span class="n">hostapd</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装软件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">lakinduakash</span><span class="o">/</span><span class="n">linux</span><span class="o">-</span><span class="n">wifi</span><span class="o">-</span><span class="n">hotspot</span>
+<span class="n">cd</span> <span class="n">linux</span><span class="o">-</span><span class="n">wifi</span><span class="o">-</span><span class="n">hotspot</span>
+
+<span class="n">make</span>
+<span class="n">sudo</span> <span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="ap">
+<h2>配置AP</h2>
+<p>依然可以使用 <code class="docutils literal notranslate"><span class="pre">create_ap</span></code> 工具快速完成快速完成无线AP配置，并且支持bridge和NAT模式，能够自动结合 hostapd, dnsmasq 和 iptables 完成AP设置。最简单的命令如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">create_ap</span> <span class="n">wlp3s0</span> <span class="n">enp0s25</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
+</pre></div>
+</div>
+<p>不过，这次我们的案例要复杂一些，我们配置一个使用单一无线网卡接口实现同时连接局域网无线AP同时自己作为一个无线AP的模式。这种没有有线网络仅使用无线网卡的模式，需要先创建2个分离的虚拟接口，即这2个虚拟机接口是物理设备 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 的子接口，并且具有独立的MAC地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iw</span> <span class="n">dev</span> <span class="n">wlan0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlan0_sta</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">99</span>
+<span class="n">iw</span> <span class="n">dev</span> <span class="n">wlan0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlan0_ap</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">98</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>要随机生成一个MAC地址可以参考 <a class="reference external" href="https://serverfault.com/questions/299556/how-to-generate-a-random-mac-address-from-the-linux-command-line">how to generate a random MAC address from the Linux command line</a><span class="link-target"> [https://serverfault.com/questions/299556/how-to-generate-a-random-mac-address-from-the-linux-command-line]</span> 基于主机名FQDN来生成MAC地址。或者使用 <a class="reference external" href="https://wiki.archlinux.org/index.php/MAC_address_spoofing#Method_2:_macchanger">macchanger</a><span class="link-target"> [https://wiki.archlinux.org/index.php/MAC_address_spoofing#Method_2:_macchanger]</span> 来随机修改主机接口MAC地址。</p>
+</div>
+<ul>
+<li><p>配置一个NAT模式的隐藏SSID:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">create_ap</span> <span class="o">--</span><span class="n">hidden</span> <span class="n">wlan0_ap</span> <span class="n">wlan0_sta</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时终端会提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Config</span> <span class="nb">dir</span><span class="p">:</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">create_ap</span><span class="o">.</span><span class="n">wlan0_ap</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">SUJxqY8y</span>
+<span class="n">PID</span><span class="p">:</span> <span class="mi">10699</span>
+<span class="n">Network</span> <span class="n">Manager</span> <span class="n">found</span><span class="p">,</span> <span class="nb">set</span> <span class="n">ap0</span> <span class="k">as</span> <span class="n">unmanaged</span> <span class="n">device</span><span class="o">...</span> <span class="n">DONE</span>
+<span class="n">Creating</span> <span class="n">a</span> <span class="n">virtual</span> <span class="n">WiFi</span> <span class="n">interface</span><span class="o">...</span> <span class="n">ap0</span> <span class="n">created</span><span class="o">.</span>
+<span class="n">Access</span> <span class="n">Point</span><span class="s1">&#39;s SSID is hidden!</span>
+<span class="n">Sharing</span> <span class="n">Internet</span> <span class="n">using</span> <span class="n">method</span><span class="p">:</span> <span class="n">nat</span>
+<span class="n">hostapd</span> <span class="n">command</span><span class="o">-</span><span class="n">line</span> <span class="n">interface</span><span class="p">:</span> <span class="n">hostapd_cli</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">create_ap</span><span class="o">.</span><span class="n">wlan0_ap</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">SUJxqY8y</span><span class="o">/</span><span class="n">hostapd_ctrl</span>
+<span class="n">Configuration</span> <span class="n">file</span><span class="p">:</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">create_ap</span><span class="o">.</span><span class="n">wlan0_ap</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">SUJxqY8y</span><span class="o">/</span><span class="n">hostapd</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">Using</span> <span class="n">interface</span> <span class="n">ap0</span> <span class="k">with</span> <span class="n">hwaddr</span> <span class="mi">68</span><span class="p">:</span><span class="n">ec</span><span class="p">:</span><span class="n">c5</span><span class="p">:</span><span class="mi">62</span><span class="p">:</span><span class="mi">3</span><span class="n">f</span><span class="p">:</span><span class="mi">6</span><span class="n">d</span> <span class="ow">and</span> <span class="n">ssid</span> <span class="s2">&quot;MyAccessPoint&quot;</span>
+<span class="n">ap0</span><span class="p">:</span> <span class="n">interface</span> <span class="n">state</span> <span class="n">UNINITIALIZED</span><span class="o">-&gt;</span><span class="n">ENABLED</span>
+<span class="n">ap0</span><span class="p">:</span> <span class="n">AP</span><span class="o">-</span><span class="n">ENABLED</span>
+</pre></div>
+</div>
+<p>现在你拿出手机，就可以通过添加AP来连接到无线AP上。</p>
+<p>检查生成的 <code class="docutils literal notranslate"><span class="pre">/tmp/create_ap.wlan0_ap.conf.SUJxqY8y/hostapd.conf</span></code> 配置文件类似如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">beacon_int</span><span class="o">=</span><span class="mi">100</span>
+<span class="n">ssid</span><span class="o">=</span><span class="n">MyAccessPoint</span>
+<span class="n">interface</span><span class="o">=</span><span class="n">ap0</span>
+<span class="n">driver</span><span class="o">=</span><span class="n">nl80211</span>
+<span class="n">channel</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">ctrl_interface</span><span class="o">=/</span><span class="n">tmp</span><span class="o">/</span><span class="n">create_ap</span><span class="o">.</span><span class="n">wlan0_ap</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">xY8Tn75d</span><span class="o">/</span><span class="n">hostapd_ctrl</span>
+<span class="n">ctrl_interface_group</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">ignore_broadcast_ssid</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">ap_isolate</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">hw_mode</span><span class="o">=</span><span class="n">g</span>
+<span class="n">wpa</span><span class="o">=</span><span class="mi">3</span>
+<span class="n">wpa_passphrase</span><span class="o">=</span><span class="n">MyPassPhrase</span>
+<span class="n">wpa_key_mgmt</span><span class="o">=</span><span class="n">WPA</span><span class="o">-</span><span class="n">PSK</span>
+<span class="n">wpa_pairwise</span><span class="o">=</span><span class="n">TKIP</span> <span class="n">CCMP</span>
+<span class="n">rsn_pairwise</span><span class="o">=</span><span class="n">CCMP</span>
+</pre></div>
+</div>
+<section id="wlan0">
+<h3>尝试使用wlan0接口</h3>
+<p>不过，我发现，实际上 <code class="docutils literal notranslate"><span class="pre">create_ap</span></code> 会自动创建虚拟接口 <code class="docutils literal notranslate"><span class="pre">ap0</span></code> ，看上去实际上没有使用 <code class="docutils literal notranslate"><span class="pre">wlan0_ap</span></code> 和 <code class="docutils literal notranslate"><span class="pre">wlan_sta</span></code> 接口(这两个接口还是DOWN状态)，但是如果删除了这2个虚拟接口( <code class="docutils literal notranslate"><span class="pre">iw</span> <span class="pre">dev</span> <span class="pre">wlan0_sta</span> <span class="pre">del;</span> <span class="pre">iw</span> <span class="pre">dev</span> <span class="pre">wlan0_ap</span> <span class="pre">del</span></code> ) 再使用类似命令 <code class="docutils literal notranslate"><span class="pre">create_ap</span> <span class="pre">--hidden</span> <span class="pre">wlan0</span> <span class="pre">wlan0</span> <span class="pre">MyAccessPoint</span> <span class="pre">MyPassPhrase</span></code> 会出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Config</span> <span class="nb">dir</span><span class="p">:</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">create_ap</span><span class="o">.</span><span class="n">wlan0</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="mi">9</span><span class="n">DjnL09H</span>
+<span class="n">PID</span><span class="p">:</span> <span class="mi">22113</span>
+<span class="n">Network</span> <span class="n">Manager</span> <span class="n">found</span><span class="p">,</span> <span class="nb">set</span> <span class="n">ap0</span> <span class="k">as</span> <span class="n">unmanaged</span> <span class="n">device</span><span class="o">...</span> <span class="n">DONE</span>
+<span class="n">wlan0</span> <span class="ow">is</span> <span class="n">already</span> <span class="n">associated</span> <span class="k">with</span> <span class="n">channel</span> <span class="mi">44</span> <span class="p">(</span><span class="mi">5220</span> <span class="n">MHz</span><span class="p">)</span>
+<span class="n">multiple</span> <span class="n">channels</span> <span class="n">supported</span>
+<span class="n">Creating</span> <span class="n">a</span> <span class="n">virtual</span> <span class="n">WiFi</span> <span class="n">interface</span><span class="o">...</span> <span class="n">ap0</span> <span class="n">created</span><span class="o">.</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Your</span> <span class="n">adapter</span> <span class="n">can</span> <span class="ow">not</span> <span class="n">transmit</span> <span class="n">to</span> <span class="n">channel</span> <span class="mi">1</span><span class="p">,</span> <span class="n">frequency</span> <span class="n">band</span> <span class="mi">5</span><span class="n">GHz</span><span class="o">.</span>
+<span class="n">Doing</span> <span class="n">cleanup</span><span class="o">..</span> <span class="n">done</span>
+</pre></div>
+</div>
+<p>原因是对于5GHz无线，需要指定country code，并且由于 wlan0 已经绑定了channel 44，之前在 <code class="docutils literal notranslate"><span class="pre">iw</span> <span class="pre">list</span></code> 输出信息中显示 <code class="docutils literal notranslate"><span class="pre">#channels</span> <span class="pre">&lt;=</span> <span class="pre">2</span></code> 表明software AP必须和WiFi client连接使用相同通道，所以修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">create_ap</span> <span class="o">--</span><span class="n">hidden</span> <span class="o">--</span><span class="n">country</span> <span class="n">CN</span> <span class="o">-</span><span class="n">c</span> <span class="mi">44</span> <span class="n">wlan0</span> <span class="n">wlan0</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
+</pre></div>
+</div>
+<p>可惜依然报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Channel</span> <span class="n">number</span> <span class="ow">is</span> <span class="n">greater</span> <span class="n">than</span> <span class="mi">14</span><span class="p">,</span> <span class="n">assuming</span> <span class="mi">5</span><span class="n">GHz</span> <span class="n">frequency</span> <span class="n">band</span>
+<span class="n">Config</span> <span class="nb">dir</span><span class="p">:</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">create_ap</span><span class="o">.</span><span class="n">wlan0</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">qgNWN8UH</span>
+<span class="n">PID</span><span class="p">:</span> <span class="mi">11886</span>
+<span class="n">Network</span> <span class="n">Manager</span> <span class="n">found</span><span class="p">,</span> <span class="nb">set</span> <span class="n">ap0</span> <span class="k">as</span> <span class="n">unmanaged</span> <span class="n">device</span><span class="o">...</span> <span class="n">DONE</span>
+<span class="n">wlan0</span> <span class="ow">is</span> <span class="n">already</span> <span class="n">associated</span> <span class="k">with</span> <span class="n">channel</span> <span class="mi">56</span> <span class="p">(</span><span class="mi">5280</span> <span class="n">MHz</span><span class="p">)</span>
+<span class="n">multiple</span> <span class="n">channels</span> <span class="n">supported</span>
+<span class="n">Creating</span> <span class="n">a</span> <span class="n">virtual</span> <span class="n">WiFi</span> <span class="n">interface</span><span class="o">...</span> <span class="n">ap0</span> <span class="n">created</span><span class="o">.</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Your</span> <span class="n">adapter</span> <span class="n">can</span> <span class="ow">not</span> <span class="n">transmit</span> <span class="n">to</span> <span class="n">channel</span> <span class="mi">44</span><span class="p">,</span> <span class="n">frequency</span> <span class="n">band</span> <span class="mi">5</span><span class="n">GHz</span><span class="o">.</span>
+<span class="n">Doing</span> <span class="n">cleanup</span><span class="o">..</span> <span class="n">done</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id3">
+<h2>脚本</h2>
+<p>为了简化方法，我目前还是没有使用daemon方式，并不是十分优雅。采用了一个手工启动脚本 <code class="docutils literal notranslate"><span class="pre">hotspot</span></code></p>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>sudo iw dev wlan0 interface add wlan0_sta  <span class="nb">type</span> managed addr <span class="m">02</span>:68:b3:29:da:99
+sudo iw dev wlan0 interface add wlan0_ap  <span class="nb">type</span> managed addr <span class="m">02</span>:68:b3:29:da:98
+sudo create_ap --daemon --hidden wlan0_ap wlan0_sta MyAccessPoint MyPassPhrase
+</pre></div>
+</td></tr></table></div>
+</section>
+<section id="thinkpad-x86create-ap">
+<h2>Thinkpad x86环境create_ap</h2>
+<p>在zcloud主机(Thinkpad X220笔记本运行Arch Linux)上执行遇到问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">iw</span> <span class="n">dev</span> <span class="n">wlp3s0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlp3s0_sta</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">99</span>
+<span class="n">sudo</span> <span class="n">iw</span> <span class="n">dev</span> <span class="n">wlp3s0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlp3s0_ap</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">98</span>
+<span class="n">sudo</span> <span class="n">create_ap</span> <span class="o">--</span><span class="n">daemon</span> <span class="o">--</span><span class="n">hidden</span> <span class="n">wlp3s0_ap</span> <span class="n">wlp3s0_sta</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
+</pre></div>
+</div>
+<p>报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>...
+WARN: Low entropy detected. We recommend you to install `haveged&#39;`
+Failed to set beacon parameters
+Interface initialization failed
+...
+</pre></div>
+</div>
+<p>检查网卡接口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iw</span> <span class="nb">list</span>
+</pre></div>
+</div>
+<p>可以看到这块无线网卡的参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">valid</span> <span class="n">interface</span> <span class="n">combinations</span><span class="p">:</span>
+         <span class="o">*</span> <span class="c1">#{ managed  } &lt;= 1, #{ AP  } &lt;= 1,</span>
+           <span class="n">total</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="c1">#channels &lt;= 1, STA/AP BI must match</span>
+         <span class="o">*</span> <span class="c1">#{ managed  } &lt;= 2,</span>
+           <span class="n">total</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="c1">#channels &lt;= 1</span>
+</pre></div>
+</div>
+<p>其中 <code class="docutils literal notranslate"><span class="pre">#channels</span> <span class="pre">&lt;=</span> <span class="pre">1,</span> <span class="pre">STA/AP</span> <span class="pre">BI</span> <span class="pre">must</span> <span class="pre">match</span></code> 参考 <a class="reference external" href="https://serverfault.com/questions/966352/hostapd-not-working-anymore">hostapd not working anymore</a><span class="link-target"> [https://serverfault.com/questions/966352/hostapd-not-working-anymore]</span> 可知，要求sta网卡和ap网卡使用相同的channel。</p>
+<p>所以需要先检查当前使用的通道:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iw</span> <span class="n">wlp3s0</span> <span class="n">info</span>
+</pre></div>
+</div>
+<p>可以看到输出信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Interface</span> <span class="n">wlp3s0</span>
+        <span class="o">...</span>
+        <span class="n">channel</span> <span class="mi">44</span> <span class="p">(</span><span class="mi">5220</span> <span class="n">MHz</span><span class="p">),</span> <span class="n">width</span><span class="p">:</span> <span class="mi">20</span> <span class="n">MHz</span><span class="p">,</span> <span class="n">center1</span><span class="p">:</span> <span class="mi">5220</span> <span class="n">MHz</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>所以尝试添加 <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">44</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">create_ap</span> <span class="o">-</span><span class="n">c</span> <span class="mi">44</span> <span class="o">--</span><span class="n">daemon</span> <span class="o">--</span><span class="n">hidden</span> <span class="n">wlp3s0_ap</span> <span class="n">wlp3s0_sta</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
+</pre></div>
+</div>
+<p>但是报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="n">Your</span> <span class="n">adapter</span> <span class="n">can</span> <span class="ow">not</span> <span class="n">transmit</span> <span class="n">to</span> <span class="n">channel</span> <span class="mi">44</span><span class="p">,</span> <span class="n">frequency</span> <span class="n">band</span> <span class="mi">5</span><span class="n">GHz</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>这个问题可能可以参考 <a class="reference external" href="https://github.com/oblique/create_ap/issues/75">oblique/create_ap Error while trying to establish a connection #75</a><span class="link-target"> [https://github.com/oblique/create_ap/issues/75]</span></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://linuxnatives.net/2014/create-wireless-access-point-hostapd">Turn any computer into a wireless access point with Hostapd</a><span class="link-target"> [https://linuxnatives.net/2014/create-wireless-access-point-hostapd]</span> 介绍了更为详细的手工配置方法，可以作为参考</p>
+</div>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://theubuntuguide.wordpress.com/2016/08/03/creating-wifi-on-ubuntu/">Creating Wifi On Ubuntu</a><span class="link-target"> [https://theubuntuguide.wordpress.com/2016/08/03/creating-wifi-on-ubuntu/]</span></p></li>
+<li><p><a class="reference external" href="https://github.com/lakinduakash/linux-wifi-hotspot">linux-wifi-hotspot</a><span class="link-target"> [https://github.com/lakinduakash/linux-wifi-hotspot]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

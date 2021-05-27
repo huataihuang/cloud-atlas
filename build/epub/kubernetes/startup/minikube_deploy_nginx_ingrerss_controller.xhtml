@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>在Minikube部署NGINX Ingress Controller</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="minikubenginx-ingress-controller">
+<span id="minikube-deploy-nginx-ingrerss-controller"></span><h1>在Minikube部署NGINX Ingress Controller</h1>
+<p><a class="reference internal" href="../concepts/services_networking/ingress.xhtml#ingress"><span class="std std-ref">Ingress</span></a> 是定义允许外部访问集群服务的规则的API对象，而 <a class="reference internal" href="../concepts/services_networking/ingress_controller.xhtml#ingress-controller"><span class="std std-ref">Ingress控制器(controller)</span></a> 则是实现Ingress规则的组件。</p>
+<section id="ingress-controlleer">
+<h2>激活Ingress Controlleer</h2>
+<ul>
+<li><p>执行以下命令激活NGINX Ingress controller:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">addons</span> <span class="n">enable</span> <span class="n">ingress</span>
+</pre></div>
+</div>
+</li>
+<li><p>验证NGINX ingress controller已经运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                                        <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="o">...</span>
+<span class="n">default</span><span class="o">-</span><span class="n">http</span><span class="o">-</span><span class="n">backend</span><span class="o">-</span><span class="mi">6864</span><span class="n">bbb7db</span><span class="o">-</span><span class="n">kv2sm</span>       <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m56s</span>
+<span class="o">...</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">ingress</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="mi">586</span><span class="n">cdc477c</span><span class="o">-</span><span class="n">xj9rq</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m55s</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="hello-wold-app">
+<h2>部署hello,wold app</h2>
+<ul>
+<li><p>使用以下命令创建一个测试部署:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">run</span> <span class="n">web</span> <span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">google</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">hello</span><span class="o">-</span><span class="n">app</span><span class="p">:</span><span class="mf">1.0</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span>
+</pre></div>
+</div>
+</li>
+<li><p>直接输出部署(NodePort)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployment</span> <span class="n">web</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">NodePort</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查输出的服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">service</span> <span class="n">web</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>   <span class="n">TYPE</span>       <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>     <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>          <span class="n">AGE</span>
+<span class="n">web</span>    <span class="n">NodePort</span>   <span class="mf">10.97</span><span class="o">.</span><span class="mf">135.77</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">8080</span><span class="p">:</span><span class="mi">32030</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">23</span><span class="n">s</span>
+</pre></div>
+</div>
+<ul>
+<li><p>验证服务通过NodePort的输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">service</span> <span class="n">web</span> <span class="o">--</span><span class="n">url</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">:</span><span class="mi">32030</span>
+</pre></div>
+</div>
+<ul>
+<li><p>现在我们可以检查这个对外输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span><span class="p">:</span><span class="mi">32030</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Hello, world!
+Version: 1.0.0
+Hostname: web-ddb799d85-889fm
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>现在我们使用NodePort方式输出服务，对外的端口是随机的，所以并适合日常使用服务。下面我们正式采用 Ingress 来输出服务</p>
+</div>
+</section>
+<section id="ingress">
+<h2>创建Ingress资源</h2>
+<ul>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">example-ingress.yaml</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">extensions</span><span class="o">/</span><span class="n">v1beta1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Ingress</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">example</span><span class="o">-</span><span class="n">ingress</span>
+  <span class="n">annotations</span><span class="p">:</span>
+    <span class="n">nginx</span><span class="o">.</span><span class="n">ingress</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">rewrite</span><span class="o">-</span><span class="n">target</span><span class="p">:</span> <span class="o">/</span>
+<span class="n">spec</span><span class="p">:</span>
+ <span class="n">rules</span><span class="p">:</span>
+ <span class="o">-</span> <span class="n">host</span><span class="p">:</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">.</span><span class="n">info</span>
+   <span class="n">http</span><span class="p">:</span>
+     <span class="n">paths</span><span class="p">:</span>
+     <span class="o">-</span> <span class="n">path</span><span class="p">:</span> <span class="o">/*</span>
+       <span class="n">backend</span><span class="p">:</span>
+         <span class="n">serviceName</span><span class="p">:</span> <span class="n">web</span>
+         <span class="n">servicePort</span><span class="p">:</span> <span class="mi">8080</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用以下命令创建 Ingress 资源:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">example</span><span class="o">-</span><span class="n">ingress</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ingress</span><span class="o">.</span><span class="n">extensions</span><span class="o">/</span><span class="n">example</span><span class="o">-</span><span class="n">ingress</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>验证IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">ingress</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>当前还没有显示IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>              <span class="n">HOSTS</span>              <span class="n">ADDRESS</span>   <span class="n">PORTS</span>   <span class="n">AGE</span>
+<span class="n">example</span><span class="o">-</span><span class="n">ingress</span>   <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">.</span><span class="n">info</span>             <span class="mi">80</span>      <span class="mi">26</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>不过，几分钟之后再次使用该命令就可以看到服务对外低筒的IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>              <span class="n">HOSTS</span>              <span class="n">ADDRESS</span>          <span class="n">PORTS</span>   <span class="n">AGE</span>
+<span class="n">example</span><span class="o">-</span><span class="n">ingress</span>   <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">.</span><span class="n">info</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span>   <span class="mi">80</span>      <span class="mi">96</span><span class="n">s</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，Ingress对外输出的端口默认是HTTP端口，所以后端指定服务端口8080就会将对外输出的80端口反向代理到内部网络的应用服务器的8080端口。实际上这是我们很久以前就常用的Nginx反向代理部署，只不过Kubernetes高度抽象并自动化完成了这些部署。</p>
+</div>
+<ul>
+<li><p>在本次主机 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 中添加解析:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">.</span><span class="n">info</span>
+</pre></div>
+</div>
+</li>
+<li><p>现在我们就可以直接像平时访问WEB服务器一样访问kubernetes集群对外输出的WEB服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">.</span><span class="n">info</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出内容就是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Hello, world!
+Version: 1.0.0
+Hostname: web-ddb799d85-889fm
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>创建第二个部署</h2>
+<ul>
+<li><p>创建 v2 部署:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">run</span> <span class="n">web2</span> <span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">google</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">hello</span><span class="o">-</span><span class="n">app</span><span class="p">:</span><span class="mf">2.0</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span>
+</pre></div>
+</div>
+</li>
+<li><p>同样也将这个部署输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployment</span> <span class="n">web2</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">NodePort</span>
+</pre></div>
+</div>
+</li>
+<li><p>编辑刚才的 <code class="docutils literal notranslate"><span class="pre">example-ingress.yaml</span></code> 添加以下内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">v2</span><span class="o">/*</span>
+  <span class="n">backend</span><span class="p">:</span>
+    <span class="n">serviceName</span><span class="p">:</span> <span class="n">web2</span>
+    <span class="n">servicePort</span><span class="p">:</span> <span class="mi">8080</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后将修改生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">example</span><span class="o">-</span><span class="n">ingress</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>验证Ingress</h2>
+<ul>
+<li><p>现在可以有2个pod，都是运行在8080的端口，其中1st版本访问:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">.</span><span class="n">info</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Hello, world!
+Version: 1.0.0
+Hostname: web-ddb799d85-889fm
+</pre></div>
+</div>
+<ul>
+<li><p>访问 2nd 版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">.</span><span class="n">info</span><span class="o">/</span><span class="n">v2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Hello, world!
+Version: 2.0.0
+Hostname: web2-5cf6945d9b-v5fbq
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/">Set up Ingress on Minikube with the NGINX Ingress Controller</a><span class="link-target"> [https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

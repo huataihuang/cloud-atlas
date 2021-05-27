@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>服务器温度检测</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="check-server-temp">
+<span id="id1"></span><h1>服务器温度检测</h1>
+<section id="lm-sensor">
+<h2>lm_sensor</h2>
+<p>监控服务器温度最常用的方法是安装和使用 <a class="reference internal" href="lm_sensor.xhtml#lm-sensor"><span class="std std-ref">lm_sensors(Linux监控传感器)</span></a> ，安装以后，通过以下命令配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">sensors</span><span class="o">-</span><span class="n">detect</span>
+</pre></div>
+</div>
+<ul>
+<li><p>配置完成后，执行以下命令可以看到处理器温度:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sensors</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似</p>
+</section>
+<section id="porc">
+<h2>porc脚本检查</h2>
+<p>虽然第三方工具，例如 <code class="docutils literal notranslate"><span class="pre">lm_sensors</span></code> 能够非常方便地检查处理器温度，但是，实际上即使不安装工具，通过内核的 <code class="docutils literal notranslate"><span class="pre">/proc</span></code> 文件系统，也可以直接读取数据，并使用脚本命令处理。</p>
+<ul>
+<li><p>传感器类型和对应的数据记录位于:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">class</span><span class="o">/</span><span class="n">thermal</span><span class="o">/</span><span class="n">thermal_zone</span><span class="o">*/</span><span class="nb">type</span>
+<span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">class</span><span class="o">/</span><span class="n">thermal</span><span class="o">/</span><span class="n">thermal_zone</span><span class="o">*/</span><span class="n">temp</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行以下命令可以检查系统温度:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>paste &lt;(cat /sys/class/thermal/thermal_zone*/type) &lt;(cat /sys/class/thermal/thermal_zone*/temp) | column -s $&#39;\t&#39; -t | sed &#39;s/\(.\)..$/.\1°C/&#39;
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似(根据平台不同输出信息不同):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>acpitz        43.0°C
+x86_pkg_temp  53.0°C
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>硬盘温度</h2>
+<ul>
+<li><p>监控硬盘，可以安装 <code class="docutils literal notranslate"><span class="pre">hddtemp</span></code> 工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">hddtemp</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>图形界面温度监控</h2>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">psensor</span></code> 工具可以以图形界面方式观察温度:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">psensor</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="glances">
+<h2>glances</h2>
+<p>Glances是一个使用Python编写的跨平台系统监控工具，我最早接触这个工具还是在十几年前给电信维护HP小型机时，在远程终端上使用这个超级工具glances。</p>
+<ul>
+<li><p>安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">yes</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">pip</span>
+<span class="n">wget</span> <span class="o">-</span><span class="n">O</span><span class="o">-</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">bit</span><span class="o">.</span><span class="n">ly</span><span class="o">/</span><span class="n">glances</span> <span class="o">|</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+<li><p>也可以通过仓库安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">add</span><span class="o">-</span><span class="n">repository</span> <span class="n">ppa</span><span class="p">:</span><span class="n">arnaud</span><span class="o">-</span><span class="n">hartmann</span><span class="o">/</span><span class="n">glances</span><span class="o">-</span><span class="n">stable</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">glances</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="hardinfo">
+<h2>hardinfo</h2>
+<p>hardinfo是一个系统分析和性能评测工具，可以获得硬件和基本软件信息，并且使用GUI组织这些信息。</p>
+<p>大多数硬件可以通过hardinfo自动检测，也有部分硬件需要手工设置：</p>
+<ul class="simple">
+<li><p>lm-sensors: 需要如上使用 <code class="docutils literal notranslate"><span class="pre">sensors-detect</span></code> 先检测需要加载哪些内核模块</p></li>
+<li><p>hddtemp:  需要以daemon模式运行hddtemp并且使用默认端口，这样hardinfo就可以使用hddtemp</p></li>
+<li><p>模块 <code class="docutils literal notranslate"><span class="pre">eeprom</span></code> 必须加载用于显示当前安装的内存信息，所以需要先使用 <code class="docutils literal notranslate"><span class="pre">modprobe</span> <span class="pre">eeprom</span></code> 加载并刷新</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://ostechnix.com/view-cpu-temperature-linux/">How To View CPU Temperature On Linux</a><span class="link-target"> [https://ostechnix.com/view-cpu-temperature-linux/]</span></p></li>
+<li><p><a class="reference external" href="https://itsfoss.com/check-laptop-cpu-temperature-ubuntu/">itsfoss:How To Check CPU Temperature in Ubuntu Linux</a><span class="link-target"> [https://itsfoss.com/check-laptop-cpu-temperature-ubuntu/]</span></p></li>
+<li><p><a class="reference external" href="https://sourcedigit.com/25105-check-cpu-temperature-ubuntu-linux/">sourcedigit:How To Check CPU Temperature In Ubuntu Linux</a><span class="link-target"> [https://sourcedigit.com/25105-check-cpu-temperature-ubuntu-linux/]</span></p></li>
+<li><p><a class="reference external" href="https://www.addictivetips.com/ubuntu-linux-tips/check-cpu-temperature-on-linux/">How to check CPU temperature on Linux</a><span class="link-target"> [https://www.addictivetips.com/ubuntu-linux-tips/check-cpu-temperature-on-linux/]</span></p></li>
+<li><p><a class="reference external" href="https://askubuntu.com/questions/15832/how-do-i-get-the-cpu-temperature">How do I get the CPU temperature?</a><span class="link-target"> [https://askubuntu.com/questions/15832/how-do-i-get-the-cpu-temperature]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

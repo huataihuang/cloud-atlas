@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>探索Anbox运行Andorid程序</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="anboxandorid">
+<span id="anbox-scratch"></span><h1>探索Anbox运行Andorid程序</h1>
+<section id="id1">
+<h2>说明</h2>
+<p>本文记录的是我折腾数天，在Arch Linux中通过Anbox运行Android程序的经历。这个过程非常曲折，所以我把最终经验总结重新整理成 <a class="reference internal" href="../android/virtual/anbox.xhtml#anbox"><span class="std std-ref">Anbox运行Andorid程序</span></a> ，本文则依然有探索过程排查异常的经验，可以帮助我们了解Android和Anbox运行的原理以及问题排查的思路。</p>
+<p>记录比较散乱，也许对你排查会有启发，所以汇总如下。</p>
+<section id="anbox">
+<h3>Anbox</h3>
+<p>Anbox是开源兼容层，通过LXC容器构建Android运行环境，使得移动应用程序能偶运行在Linux环境。由于使用容器，采用原生Linux内核执行应用程序，所以非常轻量级并且保障了运行速度。</p>
+</section>
+</section>
+<section id="id2">
+<h2>安装Anbox</h2>
+<ul>
+<li><p>首先确保系统安装了Linux内核头文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">linux</span><span class="o">-</span><span class="n">headers</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装Anbox，如果镜像中不想包含Google apps和houdini，则用 anbox-image 替代 anbox-image-gapps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">S</span> <span class="n">anbox</span><span class="o">-</span><span class="n">git</span> <span class="n">anbox</span><span class="o">-</span><span class="n">image</span><span class="o">-</span><span class="n">gapps</span> <span class="n">anbox</span><span class="o">-</span><span class="n">modules</span><span class="o">-</span><span class="n">dkms</span><span class="o">-</span><span class="n">git</span> <span class="n">anbox</span><span class="o">-</span><span class="n">bridge</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参考 <a class="reference external" href="https://zhuanlan.zhihu.com/p/50994213">如何在 Anbox 上安装 Google Play 商店及启用 ARM 支持</a><span class="link-target"> [https://zhuanlan.zhihu.com/p/50994213]</span></p>
+<p>默认情况下，Anbox没有Google Play商店或者ARM应用支持。要安装应用，你必须下载每个应用的 APK 并使用 adb 手动安装。此外，默认情况下不能使用 Anbox 安装 ARM 应用或游戏 —— 尝试安装 ARM 应用会显示以下错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Failed</span> <span class="n">to</span> <span class="n">install</span> <span class="n">PACKAGE</span><span class="o">.</span><span class="n">NAME</span><span class="o">.</span><span class="n">apk</span><span class="p">:</span> <span class="n">Failure</span> <span class="p">[</span><span class="n">INSTALL_FAILED_NO_MATCHING_ABIS</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">extract</span> <span class="n">native</span> <span class="n">libraries</span><span class="p">,</span> <span class="n">res</span><span class="o">=-</span><span class="mi">113</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>通过 libhoudini 可以支持ARM应用。所以，建议上述安装Anbox时使用 <code class="docutils literal notranslate"><span class="pre">anbox-image-gapps</span></code></p>
+</div>
+<ul>
+<li><p>启动和激活服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果没有重启主机，则使用以下命令激活DKMS模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">modprobe</span> <span class="n">ashmem_linux</span>
+<span class="n">sudo</span> <span class="n">modprobe</span> <span class="n">binder_linux</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时检查设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ls</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="p">{</span><span class="n">ashmem</span><span class="p">,</span><span class="n">binder</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>应该看到如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">ashmem</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">binder</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>使用Anbox准备</h2>
+<ul>
+<li><p>在执行 <code class="docutils literal notranslate"><span class="pre">anbox</span></code> 之前，需要先执行 <code class="docutils literal notranslate"><span class="pre">anbox-bridge</span></code> 来激活网络，此时使用 <code class="docutils literal notranslate"><span class="pre">brctl</span> <span class="pre">show</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bridge</span> <span class="n">name</span>  <span class="n">bridge</span> <span class="nb">id</span>               <span class="n">STP</span> <span class="n">enabled</span>     <span class="n">interfaces</span>
+<span class="n">anbox0</span>               <span class="mf">8000.1</span><span class="n">edb3f6031c8</span>       <span class="n">no</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">adb</span></code> 工具(用于给虚拟机内部安装应用程序):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">android</span><span class="o">-</span><span class="n">tools</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>编译报错处理</h2>
+<ul>
+<li><p>编译报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">yay</span><span class="o">/</span><span class="n">anbox</span><span class="o">-</span><span class="n">git</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="n">logger</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="s2">&quot;BOOST_LOG_DYN_LINK&quot;</span> <span class="n">redefined</span> <span class="p">[</span><span class="o">-</span><span class="n">Werror</span><span class="p">]</span>
+   <span class="mi">20</span> <span class="o">|</span> <span class="c1">#define BOOST_LOG_DYN_LINK</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<blockquote>
+<div><p>这个报错解决方法见 <a class="reference external" href="https://bbs.archlinux.org/viewtopic.php?id=249747">https://bbs.archlinux.org/viewtopic.php?id=249747</a> ，其中有关patch的方法参考 <a class="reference internal" href="../linux/arch_linux/archlinux_aur.xhtml#archlinux-aur"><span class="std std-ref">Arch Linux AUR</span></a> 中补丁方法。</p>
+</div></blockquote>
+</section>
+<section id="id5">
+<h2>运行报错处理</h2>
+<ul class="simple">
+<li><p>先在菜单点击 <code class="docutils literal notranslate"><span class="pre">anbox-bridge</span></code> 启动网桥</p></li>
+<li><p>然后在菜单启动 <code class="docutils literal notranslate"><span class="pre">anbox</span></code></p></li>
+</ul>
+<p>但是我遇到界面停留在 <code class="docutils literal notranslate"><span class="pre">starting...</span></code> ，并且执行 <code class="docutils literal notranslate"><span class="pre">adb</span> <span class="pre">devices</span></code> 显示并没有启动模拟设备。</p>
+<p>使用命令行调试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ANBOX_LOG_LEVEL</span><span class="o">=</span><span class="n">debug</span>
+<span class="n">anbox</span> <span class="n">session</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">gles</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">translator</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">08</span> <span class="mi">14</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span> <span class="p">[</span><span class="n">Renderer</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">168</span><span class="nd">@initialize</span><span class="p">]</span> <span class="n">Using</span> <span class="n">a</span> <span class="n">surfaceless</span> <span class="n">EGL</span> <span class="n">context</span>
+<span class="p">[</span> <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">08</span> <span class="mi">14</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span> <span class="p">[</span><span class="n">Renderer</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">251</span><span class="nd">@initialize</span><span class="p">]</span> <span class="n">Successfully</span> <span class="n">initialized</span> <span class="n">EGL</span>
+<span class="p">[</span> <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">08</span> <span class="mi">14</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span> <span class="p">[</span><span class="n">service</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">41</span><span class="nd">@Service</span><span class="p">]</span> <span class="n">Successfully</span> <span class="n">acquired</span> <span class="n">DBus</span> <span class="n">service</span> <span class="n">name</span>
+<span class="p">[</span> <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">08</span> <span class="mi">14</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span> <span class="p">[</span><span class="n">client</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">49</span><span class="nd">@start</span><span class="p">]</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">start</span> <span class="n">container</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">start</span> <span class="n">container</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">start</span> <span class="n">container</span>
+<span class="p">[</span> <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">08</span> <span class="mi">14</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span> <span class="p">[</span><span class="n">session_manager</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">148</span><span class="nd">@operator</span><span class="p">()]</span> <span class="n">Lost</span> <span class="n">connection</span> <span class="n">to</span> <span class="n">container</span> <span class="n">manager</span><span class="p">,</span> <span class="n">terminating</span><span class="o">.</span>
+<span class="p">[</span> <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">08</span> <span class="mi">14</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span> <span class="p">[</span><span class="n">daemon</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">61</span><span class="nd">@Run</span><span class="p">]</span> <span class="n">Container</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">running</span>
+<span class="n">Stack</span> <span class="n">trace</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">thread</span> <span class="mi">9740</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>anbox的container日志位于 <code class="docutils literal notranslate"><span class="pre">/var/lib/anbox/logs/container.log</span></code> 可以看到以下报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.389</span> <span class="n">TRACE</span>    <span class="n">cgfsng</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgfsng</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cg_hybrid_init</span><span class="p">:</span><span class="mi">2562</span> <span class="o">-</span> <span class="n">No</span> <span class="n">controllers</span> <span class="n">are</span> <span class="n">enabled</span> <span class="k">for</span> <span class="n">delegation</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">unified</span> <span class="n">hierarchy</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.415</span> <span class="n">TRACE</span>    <span class="n">cgfsng</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgfsng</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cg_hybrid_init</span><span class="p">:</span><span class="mi">2589</span> <span class="o">-</span> <span class="n">Writable</span> <span class="n">cgroup</span> <span class="n">hierarchies</span><span class="p">:</span>
+<span class="o">...</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.458</span> <span class="n">TRACE</span>    <span class="n">cgroup</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cgroup_init</span><span class="p">:</span><span class="mi">61</span> <span class="o">-</span> <span class="n">Initialized</span> <span class="n">cgroup</span> <span class="n">driver</span> <span class="n">cgfsng</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.459</span> <span class="n">TRACE</span>    <span class="n">cgroup</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cgroup_init</span><span class="p">:</span><span class="mi">66</span> <span class="o">-</span> <span class="n">Running</span> <span class="k">with</span> <span class="n">hybrid</span> <span class="n">cgroup</span> <span class="n">layout</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.459</span> <span class="n">TRACE</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_init</span><span class="p">:</span><span class="mi">923</span> <span class="o">-</span> <span class="n">Initialized</span> <span class="n">cgroup</span> <span class="n">driver</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.460</span> <span class="n">TRACE</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_init</span><span class="p">:</span><span class="mi">930</span> <span class="o">-</span> <span class="n">Initialized</span> <span class="n">LSM</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.461</span> <span class="n">INFO</span>     <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_init</span><span class="p">:</span><span class="mi">932</span> <span class="o">-</span> <span class="n">Container</span> <span class="s2">&quot;default&quot;</span> <span class="ow">is</span> <span class="n">initialized</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.516</span> <span class="n">DEBUG</span>    <span class="n">cgfsng</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgfsng</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cg_legacy_filter_and_set_cpus</span><span class="p">:</span><span class="mi">499</span> <span class="o">-</span> <span class="n">No</span> <span class="n">isolated</span> <span class="ow">or</span> <span class="n">offline</span> <span class="n">cpus</span> <span class="n">present</span> <span class="ow">in</span> <span class="n">cpuset</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.568</span> <span class="n">INFO</span>     <span class="n">cgfsng</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgfsng</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cgfsng_monitor_create</span><span class="p">:</span><span class="mi">1405</span> <span class="o">-</span> <span class="n">The</span> <span class="n">monitor</span> <span class="n">process</span> <span class="n">uses</span> <span class="s2">&quot;lxc.monitor/default&quot;</span> <span class="k">as</span> <span class="n">cgroup</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.587</span> <span class="n">ERROR</span>    <span class="n">cgfsng</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgfsng</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">__do_cgroup_enter</span><span class="p">:</span><span class="mi">1500</span> <span class="o">-</span> <span class="n">No</span> <span class="n">space</span> <span class="n">left</span> <span class="n">on</span> <span class="n">device</span> <span class="o">-</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">enter</span> <span class="n">cgroup</span> <span class="s2">&quot;/sys/fs/cgroup/cpuset//lxc.monitor/default/cgroup.procs&quot;</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.589</span> <span class="n">ERROR</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">__lxc_start</span><span class="p">:</span><span class="mi">2009</span> <span class="o">-</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">enter</span> <span class="n">monitor</span> <span class="n">cgroup</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.596</span> <span class="n">TRACE</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_serve_state_socket_pair</span><span class="p">:</span><span class="mi">543</span> <span class="o">-</span> <span class="n">Sent</span> <span class="n">container</span> <span class="n">state</span> <span class="s2">&quot;STOPPING&quot;</span> <span class="n">to</span> <span class="mi">13</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.598</span> <span class="n">TRACE</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_serve_state_clients</span><span class="p">:</span><span class="mi">474</span> <span class="o">-</span> <span class="n">Set</span> <span class="n">container</span> <span class="n">state</span> <span class="n">to</span> <span class="n">STOPPING</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.600</span> <span class="n">TRACE</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_serve_state_clients</span><span class="p">:</span><span class="mi">477</span> <span class="o">-</span> <span class="n">No</span> <span class="n">state</span> <span class="n">clients</span> <span class="n">registered</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.600</span> <span class="n">DEBUG</span>    <span class="n">lxccontainer</span> <span class="o">-</span> <span class="n">lxccontainer</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">wait_on_daemonized_start</span><span class="p">:</span><span class="mi">861</span> <span class="o">-</span> <span class="n">First</span> <span class="n">child</span> <span class="mi">1862</span> <span class="n">exited</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.604</span> <span class="n">ERROR</span>    <span class="n">lxccontainer</span> <span class="o">-</span> <span class="n">lxccontainer</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">wait_on_daemonized_start</span><span class="p">:</span><span class="mi">872</span> <span class="o">-</span> <span class="n">Received</span> <span class="n">container</span> <span class="n">state</span> <span class="s2">&quot;STOPPING&quot;</span> <span class="n">instead</span> <span class="n">of</span> <span class="s2">&quot;RUNNING&quot;</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.694</span> <span class="n">DEBUG</span>    <span class="n">cgfsng</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgfsng</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cg_legacy_filter_and_set_cpus</span><span class="p">:</span><span class="mi">499</span> <span class="o">-</span> <span class="n">No</span> <span class="n">isolated</span> <span class="ow">or</span> <span class="n">offline</span> <span class="n">cpus</span> <span class="n">present</span> <span class="ow">in</span> <span class="n">cpuset</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.706</span> <span class="n">WARN</span>     <span class="n">cgfsng</span> <span class="o">-</span> <span class="n">cgroups</span><span class="o">/</span><span class="n">cgfsng</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">cgfsng_monitor_destroy</span><span class="p">:</span><span class="mi">1180</span> <span class="o">-</span> <span class="n">No</span> <span class="n">space</span> <span class="n">left</span> <span class="n">on</span> <span class="n">device</span> <span class="o">-</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">move</span> <span class="n">monitor</span> <span class="mi">1863</span> <span class="n">to</span> <span class="s2">&quot;/sys/fs/cgroup/cpuset//lxc.pivot/cgroup.procs&quot;</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.868</span> <span class="n">TRACE</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_fini</span><span class="p">:</span><span class="mi">1043</span> <span class="o">-</span> <span class="n">Closed</span> <span class="n">command</span> <span class="n">socket</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.873</span> <span class="n">TRACE</span>    <span class="n">start</span> <span class="o">-</span> <span class="n">start</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_fini</span><span class="p">:</span><span class="mi">1054</span> <span class="o">-</span> <span class="n">Set</span> <span class="n">container</span> <span class="n">state</span> <span class="n">to</span> <span class="s2">&quot;STOPPED&quot;</span>
+<span class="n">lxc</span> <span class="mf">20191009031012.567</span> <span class="n">TRACE</span>    <span class="n">commands</span> <span class="o">-</span> <span class="n">commands</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="n">lxc_cmd</span><span class="p">:</span><span class="mi">302</span> <span class="o">-</span> <span class="n">Connection</span> <span class="n">refused</span> <span class="o">-</span> <span class="n">Command</span> <span class="s2">&quot;get_state&quot;</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">command</span> <span class="n">socket</span>
+</pre></div>
+</div>
+<p>检查启动以后建立的 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup/cpuset/lxc.monitor/</span></code> 和子目录 <code class="docutils literal notranslate"><span class="pre">lxc.monitor</span></code> 的所有proc文件内容都是空的，例如 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup/cpuset/lxc.monitor/cpuset.cpus</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup/cpuset/lxc.monitor/default/cpuset.cpus</span></code> ，发现目录下所有的设置值都是空的。参考 <a class="reference external" href="https://serverfault.com/questions/579555/cgroup-no-space-left-on-device">Cgroup - no space left on device</a><span class="link-target"> [https://serverfault.com/questions/579555/cgroup-no-space-left-on-device]</span> ，实际上这些proc文件需要有初始值，否则就会出现 <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">space</span> <span class="pre">left</span> <span class="pre">on</span> <span class="pre">device</span></code> 。</p>
+<p>为何创建的cgroup配置没有默认继承上一级cgroup配置？</p>
+<p>参考 <a class="reference external" href="https://github.com/lxc/lxd/issues/6257">cgfsng - cgroups/cgfsng.c:__do_cgroup_enter:1500 - No space left on device - Failed to enter cgroup “/sys/fs/cgroup/cpuset//lxc.monitor/test/cgroup.procs” #6257</a><span class="link-target"> [https://github.com/lxc/lxd/issues/6257]</span> ，child cgroup继承parent的开关参数在 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup/cpuset/cgroup.clone_children</span></code> ，检查arch linux的默认配置，这个参数值是 <code class="docutils literal notranslate"><span class="pre">0</span></code> ，也就是没有继承:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cat /sys/fs/cgroup/cpuset/cgroup.clone_children
+0
+</pre></div>
+</div>
+<p>解决方法是在启动anbox之前，先执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mi">1</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpuset</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">clone_children</span>
+</pre></div>
+</div>
+<p>这样所有创建的cgroup子项默认继承上一级配置，就不会出现空值，也就不会出现 <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">space</span> <span class="pre">left</span> <span class="pre">on</span> <span class="pre">device</span></code> ，再检查 <code class="docutils literal notranslate"><span class="pre">/var/lib/anbox/logs/container.log</span></code> 就可以看到日志不再出现ERROR。</p>
+<p>启动anbox之后，在控制台使用 <code class="docutils literal notranslate"><span class="pre">adb</span> <span class="pre">devices</span></code> 检查可以看到系统运行了一个模拟器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">List</span> <span class="n">of</span> <span class="n">devices</span> <span class="n">attached</span>
+<span class="n">emulator</span><span class="o">-</span><span class="mi">5558</span>        <span class="n">device</span>
+</pre></div>
+</div>
+<p>但是现在的anbox也只是显示 <code class="docutils literal notranslate"><span class="pre">starting...</span></code> 然后退出。不过，此时可以看到，原先始终没有输出的 <code class="docutils literal notranslate"><span class="pre">/var/lib/anbox/logs/console.log</span></code> 现在有大量内容输出，可以看到报错信息了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">03.996</span>     <span class="mi">9</span>     <span class="mi">9</span> <span class="n">W</span>         <span class="p">:</span> <span class="n">debuggerd</span><span class="p">:</span> <span class="n">resuming</span> <span class="n">target</span> <span class="mi">8694</span>
+<span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">04.325</span>    <span class="mi">26</span>    <span class="mi">26</span> <span class="n">I</span> <span class="n">lowmemorykiller</span><span class="p">:</span> <span class="n">ActivityManager</span> <span class="n">disconnected</span>
+<span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">04.325</span>    <span class="mi">26</span>    <span class="mi">26</span> <span class="n">I</span> <span class="n">lowmemorykiller</span><span class="p">:</span> <span class="n">Closing</span> <span class="n">Activity</span> <span class="n">Manager</span> <span class="n">data</span> <span class="n">connection</span>
+<span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">04.337</span>    <span class="mi">34</span>    <span class="mi">34</span> <span class="n">E</span>         <span class="p">:</span> <span class="n">eof</span>
+<span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">04.338</span>    <span class="mi">34</span>    <span class="mi">34</span> <span class="n">E</span>         <span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">read</span> <span class="n">size</span>
+<span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">04.338</span>    <span class="mi">34</span>    <span class="mi">34</span> <span class="n">I</span>         <span class="p">:</span> <span class="n">closing</span> <span class="n">connection</span>
+<span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">04.338</span>    <span class="mi">27</span>    <span class="mi">27</span> <span class="n">I</span> <span class="n">ServiceManager</span><span class="p">:</span> <span class="n">service</span> <span class="s1">&#39;batterystats&#39;</span> <span class="n">died</span>
+<span class="mi">10</span><span class="o">-</span><span class="mi">09</span> <span class="mi">04</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">04.338</span>    <span class="mi">27</span>    <span class="mi">27</span> <span class="n">I</span> <span class="n">ServiceManager</span><span class="p">:</span> <span class="n">service</span> <span class="s1">&#39;appops&#39;</span> <span class="n">died</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>看来是分配内存过小了。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参考 <a class="reference external" href="https://blog.csdn.net/caohang103215/article/details/79493430">Android和Linux关系</a><span class="link-target"> [https://blog.csdn.net/caohang103215/article/details/79493430]</span> :</p>
+<p>低内存管理(Low Memory Killer) -</p>
+<blockquote>
+<div><p>Android中低内存管理和Linux标准OOM(Out of Memory)相比，机制更加灵活，可以根据需要杀死进程类释放需要的内存。Low Memory Killer代码非常简单，里面关键函数lowmem_shrinker()，作为一个模块初始化调用register_shrinke注册一个low_shrinker()，会被vm在内存紧张时候调用。lowmem_shrinker完成具体操作，简单寻找一个最合适进程杀死，从而释放它的占用内存。drivers/staging/android/lowmemorykiller.c</p>
+</div></blockquote>
+</div>
+<p>由于后台不断重启模拟器android系统，所以console.log会不断输出日志。所以采用如下命令停止:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="o">--</span><span class="n">user</span> <span class="n">stop</span> <span class="n">anbox</span><span class="o">-</span><span class="n">session</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>此时 <code class="docutils literal notranslate"><span class="pre">adb</span> <span class="pre">devices</span></code> 显示模拟器停止了。</p>
+<p><a class="reference external" href="https://github.com/anbox/anbox/issues/814">anbox splash screen disappears #814</a><span class="link-target"> [https://github.com/anbox/anbox/issues/814]</span> 提示修改 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/user/anbox-session-manager.service</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span> <span class="n">session</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">gles</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">host</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参考 <a class="reference external" href="https://github.com/anbox/anbox/issues/171">Anbox Does Not Running On Arch Linux #171</a><span class="link-target"> [https://github.com/anbox/anbox/issues/171]</span> 这里 <code class="docutils literal notranslate"><span class="pre">--gles-driver</span></code> 是允许你修改Anbox使用从物理主机获取libGL.so或者libGLES.so。如果是 <code class="docutils literal notranslate"><span class="pre">--gles-driver=translator</span></code> 就选择 libGL.so ，这样Anbox就会使用自己的 GL-to-GLES 转换来提供必要的GLES功能给 Android。</p>
+<p>另外，这个 <a class="reference external" href="https://github.com/anbox/anbox/issues/171">Anbox Does Not Running On Arch Linux #171</a><span class="link-target"> [https://github.com/anbox/anbox/issues/171]</span> 也提供一条线索 <a class="reference external" href="https://github.com/anbox/anbox/issues/305#issuecomment-306465578">How to install on archlinux or manjaro pls help me?? #305</a><span class="link-target"> [https://github.com/anbox/anbox/issues/305#issuecomment-306465578]</span> 就是我这里采用的方法。同样也存在应用程序不刷新窗口问题（只有resize才刷新），在 <a class="reference external" href="https://github.com/anbox/anbox/issues/437">app does not refresh/update #437</a><span class="link-target"> [https://github.com/anbox/anbox/issues/437]</span> 讨论过这个问题，是由于系统采用了较新的mesa库导致的，降级mesa库实在太麻烦了。所以还是推荐采用snap来安装Anbox</p>
+</div>
+<p>启动方式:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolved</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+
+<span class="n">systemctl</span> <span class="o">--</span><span class="n">user</span> <span class="n">start</span> <span class="n">anbox</span><span class="o">-</span><span class="n">session</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>最后再启动Anbox应用。果然，这个方法是正确的，现在可以完整的Android模拟器了：</p>
+<figure class="align-default">
+<img alt="../_images/anbox.png" src="../_images/anbox.png" style="width: 766.5px; height: 219.75px;" />
+</figure>
+<p>不过，无法接受鼠标操作 - 实际我发现是Anbox的应用程序不会刷新图形，只有窗口缩放时候才刷新一次。因为我发现Clock一直不更新时间显示，还以为程序是死掉的，实际不是，缩放一下窗口就看到时间是正确的，只是不会刷新窗口内容。这可能就是无法响应鼠标的原因。</p>
+<p>另外，程序启动后，后台console.log日志显示无法解析主机名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">resolve</span> <span class="n">host</span> <span class="s2">&quot;android.googleapis.com&quot;</span><span class="p">:</span> <span class="n">No</span> <span class="n">address</span> <span class="n">associated</span> <span class="k">with</span> <span class="n">hostname</span>
+</pre></div>
+</div>
+<p>不过，通过 <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span></code> 可以看到物理主机的虚拟网卡IP地址是 192.168.250.1 ，尝试 <code class="docutils literal notranslate"><span class="pre">ping</span> <span class="pre">-b</span> <span class="pre">192.168.250.255</span></code> 然后检查 <code class="docutils literal notranslate"><span class="pre">arp</span> <span class="pre">-a</span></code> 可以看到这个 anbox0 网络中有另外一个地址 192.168.250.2 ，是Anbox虚拟机的IP地址。 - 请参考 <a class="reference external" href="https://docs.anbox.io/userguide/advanced/network_configuration.html">Anbox Network Configuration</a><span class="link-target"> [https://docs.anbox.io/userguide/advanced/network_configuration.html]</span></p>
+<p>关闭窗口，尝试命令行运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ANBOX_LOG_LEVEL</span><span class="o">=</span><span class="n">debug</span>
+<span class="n">anbox</span> <span class="n">launch</span> <span class="o">--</span><span class="n">package</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">--</span><span class="n">component</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span><span class="o">.</span><span class="n">AppViewActivity</span>
+</pre></div>
+</div>
+</section>
+<section id="id7">
+<h2>完整设置</h2>
+<p>为了能够今后自动就绪环境，设置系统服务自动启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolved</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>准备一个个人用户脚本 anbox-setup.sh</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mi">1</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpuset</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">clone_children</span>
+<span class="n">anbox</span><span class="o">-</span><span class="n">bridge</span>
+<span class="n">systemctl</span> <span class="o">--</span><span class="n">user</span> <span class="n">start</span> <span class="n">anbox</span><span class="o">-</span><span class="n">session</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>然后就可以运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anbox</span> <span class="n">launch</span> <span class="o">--</span><span class="n">package</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">--</span><span class="n">component</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span><span class="o">.</span><span class="n">AppViewActivity</span>
+</pre></div>
+</div>
+<p>或者从菜单选择运行anbox</p>
+</section>
+<section id="snapanbox">
+<h2>改为snap来安装Anbox</h2>
+<p>如上所述，在Arch中确实很难解决运行Anbox问题，所以回退到采用snap来保障运行环境。</p>
+<ul>
+<li><p>停止服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="o">--</span><span class="n">user</span> <span class="n">stop</span> <span class="n">anbox</span><span class="o">-</span><span class="n">session</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">anbox</span><span class="o">-</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>卸载安装包，不过保留了anbox-dkms-git</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">Rns</span> <span class="n">anbox</span><span class="o">-</span><span class="n">git</span> <span class="n">anbox</span><span class="o">-</span><span class="n">image</span><span class="o">-</span><span class="n">gapps</span> <span class="n">anbox</span><span class="o">-</span><span class="n">bridge</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装snapd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">S</span> <span class="n">snapd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">snapd</span></code> 安装了一个 <code class="docutils literal notranslate"><span class="pre">/etc/profile.d/snapd.sh</span></code> 来输出snapd包和桌面的安装路径。需要重启一次系统来使之生效。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>从2.36开始， <code class="docutils literal notranslate"><span class="pre">snapd</span></code> 需要激活激活 AppArmr 来支持Arch Linux。如果没有激活AppArmor，则所有snaps都运行在 <code class="docutils literal notranslate"><span class="pre">devel</span></code> 模式，意味着它们运行在相同的不受限制访问系统，类似Arch Linux仓库安装的应用。</p>
+<p>要使用AppArmor:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">apparmor</span><span class="o">.</span><span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">snapd</span><span class="o">.</span><span class="n">apparmor</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>激活snapd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">snapd</span><span class="o">.</span><span class="n">socket</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>为了激活经典snap，执行以下命令创建链接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">snapd</span><span class="o">/</span><span class="n">snap</span> <span class="o">/</span><span class="n">snap</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>测试</p></li>
+</ul>
+<p>先安装一个简单的 hello-world snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">install</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span>
+</pre></div>
+</div>
+<p>这里报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">too</span> <span class="n">early</span> <span class="k">for</span> <span class="n">operation</span><span class="p">,</span> <span class="n">device</span> <span class="ow">not</span> <span class="n">yet</span> <span class="n">seeded</span> <span class="ow">or</span> <span class="n">device</span> <span class="n">model</span> <span class="ow">not</span> <span class="n">acknowledged</span>
+</pre></div>
+</div>
+<p>需要等一会等环境就绪再重新执行</p>
+<p>需要将 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/snap/bin</span></code> 添加到PATH环境(或者如前所述，先重启一次系统)</p>
+<p>然后测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hello</span><span class="o">-</span><span class="n">world</span>
+</pre></div>
+</div>
+<ul>
+<li><p>(可选)成功以后，通过snap安装snap-store应用商店:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">install</span> <span class="n">snap</span><span class="o">-</span><span class="n">store</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>通过snap-store可以安装很多重量级软件，具有独立的容器运行环境，不影响系统。</p>
+</div>
+<ul>
+<li><p>命令行安装anbox(没有位于正式的snap-store中):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">install</span> <span class="o">--</span><span class="n">devmode</span> <span class="o">--</span><span class="n">beta</span> <span class="n">anbox</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意， <code class="docutils literal notranslate"><span class="pre">--devmode</span></code> 安装的snap不会自动更新，需要使用胰腺癌命令更新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">refresh</span> <span class="o">--</span><span class="n">beta</span> <span class="o">--</span><span class="n">devmode</span> <span class="n">anbox</span>
+</pre></div>
+</div>
+<p>如果beta通道的anbox还不能正常工作，则可以尝试edge通道</p>
+<p>卸载方法如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">remove</span> <span class="n">anbox</span>
+</pre></div>
+</div>
+</section>
+<section id="snap">
+<h2>使用snap案例</h2>
+<ul>
+<li><p>查询Ubuntu Store:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">find</span> <span class="o">&lt;</span><span class="n">searchterm</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">install</span> <span class="o">&lt;</span><span class="n">snapname</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>安装将下载snap到 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/snaps</span></code> 并挂载成 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/snap/snapname</span></code> 来使之对系统可用。并且将创建每个snap的挂载点，并将它们加入到 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/multi-user.target.wants/</span></code> 软链接，以便系统嗯启动时素有snap可用。</p>
+<ul>
+<li><p>检查已经安装的snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Name         Version    Rev   Tracking  Publisher   Notes
+anbox        4-e1ecd04  158   beta      morphis     devmode
+core         16-2.41    7713  stable    canonical✓  core
+hello-world  6.4        29    stable    canonical✓  -
+</pre></div>
+</div>
+<ul>
+<li><p>更新snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">refresh</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查最新的刷新时间:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">refresh</span> <span class="o">--</span><span class="n">time</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置刷新时间，例如每天2次:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="nb">set</span> <span class="n">core</span> <span class="n">refresh</span><span class="o">.</span><span class="n">timer</span><span class="o">=</span><span class="mi">0</span><span class="p">:</span><span class="mi">00</span><span class="o">-</span><span class="mi">24</span><span class="p">:</span><span class="mi">00</span><span class="o">/</span><span class="mi">2</span>
+</pre></div>
+</div>
+</li>
+<li><p>删除snap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">remove</span> <span class="n">snapname</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="net-err-name-not-resolved">
+<h3>net::ERR_NAME_NOT_RESOLVED</h3>
+<p>使用snap来运行anbox，确实非常容易解决之前直接部署在arch linux主机模式无法刷新和相应键盘鼠标的问题。但是，使用webview浏览器就发现，实际上地址解析存在问题：</p>
+<figure class="align-default">
+<img alt="../_images/anbox_dns_error.png" src="../_images/anbox_dns_error.png" style="width: 330.0px; height: 171.75px;" />
+</figure>
+<p><code class="docutils literal notranslate"><span class="pre">net::ERR_NAME_NOT_RESOLVED</span></code> 报错表明Android系统无法解析DNS。</p>
+<p>在 <a class="reference external" href="https://zhuanlan.zhihu.com/p/50994213">如何在 Anbox 上安装 Google Play 商店及启用 ARM 支持</a><span class="link-target"> [https://zhuanlan.zhihu.com/p/50994213]</span> 提到了 <a class="reference external" href="https://github.com/anbox/anbox/issues/118#issuecomment-295270113">anbox需要主机安装DNSmasq</a><span class="link-target"> [https://github.com/anbox/anbox/issues/118#issuecomment-295270113]</span> ，应该就是提供IP地址分配，以及分配DNS解析。</p>
+<ul>
+<li><p>安装dnsmasq:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">dnsmasq</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span><span class="o">=</span><span class="n">anbox0</span>
+<span class="n">bind</span><span class="o">-</span><span class="n">interfaces</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="nb">range</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">250.50</span><span class="p">,</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">250.150</span><span class="p">,</span><span class="mf">255.255</span><span class="o">.</span><span class="mf">255.0</span><span class="p">,</span><span class="mi">12</span><span class="n">h</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>dnsmasq 默认就是设置default gw指向自身，以及dns也指向自身</p>
+</div>
+<p>不过，我还是没有解决这个问题。并且，我发现 anbox 项目实际上已经包含了 <a class="reference external" href="https://superuser.com/questions/1395384/internet-not-working-in-anbox-on-ubuntu-18-04">Internet not working in Anbox on Ubuntu 18.04</a><span class="link-target"> [https://superuser.com/questions/1395384/internet-not-working-in-anbox-on-ubuntu-18-04]</span> 介绍的 <a class="reference external" href="https://github.com/anbox/anbox/blob/master/scripts/anbox-bridge.sh">anbox-bridge.sh</a><span class="link-target"> [https://github.com/anbox/anbox/blob/master/scripts/anbox-bridge.sh]</span> 脚本。</p>
+<ul>
+<li><p>重启Anbox:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">snap</span><span class="o">.</span><span class="n">anbox</span><span class="o">.</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重启anbox网络:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="n">current</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span><span class="o">-</span><span class="n">bridge</span><span class="o">.</span><span class="n">sh</span> <span class="n">restart</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是我发现问题并没有解决。</p>
+<section id="id9">
+<h4>进一步排查</h4>
+<ul class="simple">
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">adb</span> <span class="pre">shell</span></code> 命令可以登陆到Android虚拟机内部</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span></code> 可以看到Android虚拟机的IP地址是 <code class="docutils literal notranslate"><span class="pre">192.168.250.2</span></code> ，对应的网关应该是host主机上的 <code class="docutils literal notranslate"><span class="pre">192.168.250.1</span></code> ，但是，在虚拟机内部检查路由:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">rn</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Destination</span>     <span class="n">Gateway</span>         <span class="n">Genmask</span>         <span class="n">Flags</span>   <span class="n">MSS</span> <span class="n">Window</span>  <span class="n">irtt</span> <span class="n">Iface</span>
+<span class="mf">192.168</span><span class="o">.</span><span class="mf">250.0</span>   <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span>         <span class="mf">255.255</span><span class="o">.</span><span class="mf">255.0</span>   <span class="n">U</span>         <span class="mi">0</span> <span class="mi">0</span>          <span class="mi">0</span> <span class="n">eth0</span>
+</pre></div>
+</div>
+<p>这表明虚拟机没有默认路由指向外网。</p>
+<p>参考 <a class="reference external" href="https://docs.anbox.io/userguide/advanced/network_configuration.html">anbox Networker Configuration</a><span class="link-target"> [https://docs.anbox.io/userguide/advanced/network_configuration.html]</span> 结合 ` DNS Problem - I do have connection on anbox but it is not resolving names #954 &lt;<a class="reference external" href="https://github.com/anbox/anbox/issues/954">https://github.com/anbox/anbox/issues/954</a>&gt;`_</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 以下两个默认正确，不需要重复设置</span>
+<span class="c1"># snap set anbox bridge.address=192.168.250.1</span>
+<span class="c1"># snap set anbox container.network.address=192.168.250.2</span>
+
+<span class="c1"># 以下设置网络默认路由</span>
+<span class="n">snap</span> <span class="nb">set</span> <span class="n">anbox</span> <span class="n">container</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">gateway</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">250.1</span>
+
+<span class="c1"># 检查物理主机当前使用的DNS</span>
+<span class="n">nmcli</span> <span class="n">dev</span> <span class="n">show</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">DNS</span>
+
+<span class="c1">#根据上述输出的DNS记录</span>
+<span class="c1">#设置anbox的DNS</span>
+<span class="n">snap</span> <span class="nb">set</span> <span class="n">anbox</span> <span class="n">container</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">dns</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.1</span>
+
+<span class="c1"># 然后重启，注意不能使用systemctl重启 snap.anbox.container-manager.service (会清空配制)，而是</span>
+<span class="n">sudo</span> <span class="n">killall</span> <span class="o">-</span><span class="mi">9</span> <span class="n">anbox</span>
+
+<span class="c1"># 此时检查服务会看到这些配制都在服务参数中:</span>
+<span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">anbox</span>
+<span class="c1"># 显示:</span>
+<span class="c1"># /snap/anbox/158/usr/bin/anbox container-manager --data-path=/var/snap/anbox/common/ --android-image=/snap/anbox/158/android.img --daemon --use-rootfs-overlay --container-network-gateway=192.168.250.1 --container-network-dns-servers=192.168.1.1</span>
+
+<span class="c1"># 现在可以启动虚拟机</span>
+<span class="n">snap</span> <span class="n">run</span> <span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span>
+</pre></div>
+</div>
+<p>不过，奇怪的是， <code class="docutils literal notranslate"><span class="pre">adb</span> <span class="pre">shell</span></code> 进入anbox虚拟机，依然没有看到正确的配制路由和DNS配制。</p>
+<p>参考 ` The anbox container can not connect to the network #443 &lt;<a class="reference external" href="https://github.com/anbox/anbox/issues/443">https://github.com/anbox/anbox/issues/443</a>&gt;`_ 使用以下命令可以手工解决网络连接问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">shell</span>
+<span class="n">su</span>
+<span class="n">ip</span> <span class="n">route</span> <span class="n">add</span> <span class="n">default</span> <span class="n">dev</span> <span class="n">eth0</span> <span class="n">via</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">250.1</span>
+<span class="n">ip</span> <span class="n">rule</span> <span class="n">add</span> <span class="n">pref</span> <span class="mi">32766</span> <span class="n">table</span> <span class="n">main</span>
+<span class="n">ip</span> <span class="n">rule</span> <span class="n">add</span> <span class="n">pref</span> <span class="mi">32767</span> <span class="n">table</span> <span class="n">local</span>
+</pre></div>
+</div>
+<p>然后再 ping 外部IP地址，就会发现虚拟机已经网络就绪了。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实践发现，实际上 <a class="reference external" href="https://docs.anbox.io/userguide/advanced/network_configuration.html">anbox Networker Configuration</a><span class="link-target"> [https://docs.anbox.io/userguide/advanced/network_configuration.html]</span> 是有效的，只不过我发现还是需要重启一次物理主机，重启以后anbox服务启动就具备了配制参数，并且新启动的anbox虚拟机的网络就是按照传递配制设置的IP路由。</p>
+<p>不过，遇到的DNS解析还是有问题，看起来不是配制问题，有可能是物理主机转发IP masquerade问题。</p>
+</div>
+<p>但此时使用浏览器 WebView 访问网站报错依旧，此时问题原因和DNS解析相关。DNS解析取决于 <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> ，参考 <a class="reference external" href="https://butterflydroid.wordpress.com/2011/10/19/how-to-set-dns-server-on-android-phone/">How to set DNS Server on Android Phone</a><span class="link-target"> [https://butterflydroid.wordpress.com/2011/10/19/how-to-set-dns-server-on-android-phone/]</span> ，可以看到Android的DNS配制位于 <code class="docutils literal notranslate"><span class="pre">/system/etc/resolv.conf</span></code> (系统的 <code class="docutils literal notranslate"><span class="pre">/etc</span></code> 是软链接到 <code class="docutils literal notranslate"><span class="pre">/system/etc</span></code> ，不过这个虚拟机中没有配制。</p>
+<p>注意， <code class="docutils literal notranslate"><span class="pre">/</span></code> 文件系统挂载是只读的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Filesystem</span>            <span class="n">Size</span>  <span class="n">Used</span> <span class="n">Avail</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="n">overlay</span>                <span class="mi">47</span><span class="n">G</span>   <span class="mi">28</span><span class="n">G</span>   <span class="mi">16</span><span class="n">G</span>  <span class="mi">64</span><span class="o">%</span> <span class="o">/</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://github.com/anbox/anbox/issues/118">Root permission for apps #118</a><span class="link-target"> [https://github.com/anbox/anbox/issues/118]</span> 的思路，所有的overlay可以从 anbox 进程的配制参数 <code class="docutils literal notranslate"><span class="pre">--data-path=/var/snap/anbox/common/</span></code> ，即 overlay 是位于 <code class="docutils literal notranslate"><span class="pre">rootfs-overlay/</span></code> 子目录。对应anbox虚拟机内部的 <code class="docutils literal notranslate"><span class="pre">/system/etc</span></code> 目录就是host物理主机的 <code class="docutils literal notranslate"><span class="pre">/var/snap/anbox/common/rootfs-overlay/system/etc</span></code> ，只需要将 <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> 配制在这个目录下，然后重启anbox就可以具有配制。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>详细磁盘文件说明见 <a class="reference external" href="https://docs.anbox.io/userguide/advanced/rootfs_overlay.html">Android rootfs overlay</a><span class="link-target"> [https://docs.anbox.io/userguide/advanced/rootfs_overlay.html]</span></p>
+<p>Android的DNS解析似乎不是使用 /etc/resolv.conf</p>
+</div>
+<p>比较奇怪，在虚拟机内部可以ping外网，但是DNS解析和直接http的IP地址访问显示不能访问目标地址。在WebView中显示报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="p">:</span><span class="n">ERR_ADDRESS_UNREACHABLE</span>
+</pre></div>
+</div>
+<p>检查Host物理机上 <code class="docutils literal notranslate"><span class="pre">iptables</span> <span class="pre">-t</span> <span class="pre">nat</span> <span class="pre">-L</span></code> 可以看到anbox-bridge已经添加了一个NAT:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MASQUERADE  all  --  192.168.250.0/24    !192.168.250.0/24     /* managed by anbox-bridge */
+</pre></div>
+</div>
+<p><a class="reference external" href="https://www.bountysource.com/issues/48879647-the-anbox-container-can-not-connect-to-the-network">The anbox container can not connect to the network</a><span class="link-target"> [https://www.bountysource.com/issues/48879647-the-anbox-container-can-not-connect-to-the-network]</span> 有一个调试的建议</p>
+<p><a class="reference external" href="https://www.rudraraj.net/internet-connection-sharing-ics-on-centos-7/">Internet Connection Sharing on CentOS 7</a><span class="link-target"> [https://www.rudraraj.net/internet-connection-sharing-ics-on-centos-7/]</span> 提示是由于网段原因导致防火墙阻碍。我想起来anbox是在设置过firewalld之后构建的，可能处于错误的zone被默认屏蔽了。</p>
+<ul>
+<li><p>检查zone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">get</span><span class="o">-</span><span class="n">active</span><span class="o">-</span><span class="n">zones</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">libvirt</span>
+  <span class="n">interfaces</span><span class="p">:</span> <span class="n">virbr0</span>
+<span class="n">public</span>
+  <span class="n">interfaces</span><span class="p">:</span> <span class="n">br0</span> <span class="n">wlp3s0</span>
+</pre></div>
+</div>
+<p>并没有包含anbox0接口。</p>
+<ul>
+<li><p>将接口 <code class="docutils literal notranslate"><span class="pre">anbox0</span></code> 加入到内部zone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">internal</span> <span class="o">--</span><span class="n">change</span><span class="o">-</span><span class="n">interface</span><span class="o">=</span><span class="n">anbox0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">get</span><span class="o">-</span><span class="n">active</span><span class="o">-</span><span class="n">zones</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">internal</span>
+  <span class="n">interfaces</span><span class="p">:</span> <span class="n">anbox0</span>
+<span class="n">libvirt</span>
+  <span class="n">interfaces</span><span class="p">:</span> <span class="n">virbr0</span>
+<span class="n">public</span>
+  <span class="n">interfaces</span><span class="p">:</span> <span class="n">br0</span> <span class="n">wlp3s0</span>
+</pre></div>
+</div>
+<p>此时anbox的浏览器还不能访问外部。</p>
+<ul>
+<li><p>检查public接口，就会发现没有启用masquerade - <code class="docutils literal notranslate"><span class="pre">masquerade:</span> <span class="pre">no</span></code> ，(奇怪，为何libvirt网络能访问外部)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">public</span> <span class="p">(</span><span class="n">active</span><span class="p">)</span>
+  <span class="n">target</span><span class="p">:</span> <span class="n">default</span>
+  <span class="n">icmp</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="n">inversion</span><span class="p">:</span> <span class="n">no</span>
+  <span class="n">interfaces</span><span class="p">:</span> <span class="n">br0</span> <span class="n">wlp3s0</span>
+  <span class="n">sources</span><span class="p">:</span>
+  <span class="n">services</span><span class="p">:</span> <span class="n">dhcpv6</span><span class="o">-</span><span class="n">client</span> <span class="n">rdp</span> <span class="n">ssh</span>
+  <span class="n">ports</span><span class="p">:</span> <span class="mi">24800</span><span class="o">/</span><span class="n">tcp</span>
+  <span class="n">protocols</span><span class="p">:</span>
+  <span class="n">masquerade</span><span class="p">:</span> <span class="n">no</span>
+  <span class="n">forward</span><span class="o">-</span><span class="n">ports</span><span class="p">:</span>
+  <span class="n">source</span><span class="o">-</span><span class="n">ports</span><span class="p">:</span>
+  <span class="n">icmp</span><span class="o">-</span><span class="n">blocks</span><span class="p">:</span>
+  <span class="n">rich</span> <span class="n">rules</span><span class="p">:</span>
+</pre></div>
+</div>
+<ul>
+<li><p>在public区域添加masquerade:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">masquerade</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>That’s It…!!! We are done…!!!</p>
+<p>现在可以访问外网了。</p>
+<ul>
+<li><p>将配制保存成永久:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">internal</span> <span class="o">--</span><span class="n">change</span><span class="o">-</span><span class="n">interface</span><span class="o">=</span><span class="n">anbox0</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">masquerade</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="google-play">
+<h3>安装Google Play</h3>
+<ul>
+<li><p>安装Google Play:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">geeks</span><span class="o">-</span><span class="n">r</span><span class="o">-</span><span class="n">us</span><span class="o">/</span><span class="n">anbox</span><span class="o">-</span><span class="n">playstore</span><span class="o">-</span><span class="n">installer</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">install</span><span class="o">-</span><span class="n">playstore</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">install</span><span class="o">-</span><span class="n">playstore</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">sudo</span> <span class="o">./</span><span class="n">install</span><span class="o">-</span><span class="n">playstore</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这样就可以直接访问Google Play安装应用程序，就和Android手机没有什么差异了。</p>
+</section>
+</section>
+<section id="id11">
+<h2>安装应用程序</h2>
+<p>最好是从Google Play应用商店安装，不过有很多国内应用提供apk包，可以通过adb命令安装到虚拟机中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">install</span> <span class="n">app</span><span class="o">.</span><span class="n">apk</span>
+</pre></div>
+</div>
+<p>安装完成后，在 Anbox Application Manager可以看到安装的应用程序。</p>
+<section id="id12">
+<h3>微信</h3>
+<p>微信虽然能够安装，但是无法启动。参考 <a class="reference external" href="https://github.com/anbox/anbox/issues/976">Although I installed wechat,but it can’t run #976</a><span class="link-target"> [https://github.com/anbox/anbox/issues/976]</span> ，有建议改成 <a class="reference external" href="https://docs.anbox.io/userguide/advanced/software_rendering.html">Anbox Software Rendering</a><span class="link-target"> [https://docs.anbox.io/userguide/advanced/software_rendering.html]</span> 来解决这个问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="nb">set</span> <span class="n">anbox</span> <span class="n">software</span><span class="o">-</span><span class="n">rendering</span><span class="o">.</span><span class="n">enable</span><span class="o">=</span><span class="n">true</span>
+<span class="n">snap</span> <span class="n">restart</span> <span class="n">anbox</span><span class="o">.</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span>
+</pre></div>
+</div>
+<p>上述操作会停止所有运行的Anbox进程，必须要重启anbox。</p>
+<p>如果要关闭software rendering，则:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="nb">set</span> <span class="n">anbox</span> <span class="n">software</span><span class="o">-</span><span class="n">rendering</span><span class="o">.</span><span class="n">enable</span><span class="o">=</span><span class="n">false</span>
+<span class="n">snap</span> <span class="n">restart</span> <span class="n">anbox</span><span class="o">.</span><span class="n">container</span><span class="o">-</span><span class="n">manager</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>修改成software rendering没有解决微信运行问题。但是我发现snap的edge通道的anbox版本可以运行钉钉，比之前beta版本通道要好很多。所以目前还是推荐使用edge通道的软件包。</p>
+</div>
+</section>
+</section>
+<section id="linux">
+<h2>微信Linux版本</h2>
+<p>微信有一个Linux版本，基于Qt开发，可以方便在linux下实现基本的沟通。通过snap可以安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">S</span> <span class="n">snapd</span> <span class="n">snapd</span><span class="o">-</span><span class="n">xdg</span><span class="o">-</span><span class="nb">open</span>
+</pre></div>
+</div>
+<p>然后安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snap</span> <span class="n">install</span> <span class="o">--</span><span class="n">devmode</span> <span class="o">--</span><span class="n">channel</span> <span class="n">edge</span> <span class="n">wechart</span>
+</pre></div>
+</div>
+<p>运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wechat</span><span class="o">.</span><span class="n">electronic</span><span class="o">-</span><span class="n">wechat</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>微信Linux版本支持托盘，就像原生程序一般，非常流畅。基本上和微信Mac版本一样简洁。</p>
+<p>参考 <a class="reference external" href="https://snapcraft.io/install/electronic-wechat/arch">How to install electronic-wechat on Arch Linux</a><span class="link-target"> [https://snapcraft.io/install/electronic-wechat/arch]</span></p>
+</div>
+</section>
+<section id="id13">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Anbox">Arch Linux社区文档 - Anbox</a><span class="link-target"> [https://wiki.archlinux.org/index.php/Anbox]</span></p></li>
+<li><p><a class="reference external" href="https://forum.manjaro.org/t/running-android-applications-on-arch-using-anbox/53332">Running Android applications on Arch using anbox</a><span class="link-target"> [https://forum.manjaro.org/t/running-android-applications-on-arch-using-anbox/53332]</span></p></li>
+<li><p><a class="reference external" href="https://blissroms.com/">Bliss ROMs</a><span class="link-target"> [https://blissroms.com/]</span> 是一个将Android改造成原生运行的操作系统，可以在PC或者KVM虚拟机中运行，或许有些类似ChromeBook，但是可以运行丰富的Android程序，可以在以后尝试一下。此外，类似还有 Phoenix OS 。</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

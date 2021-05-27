@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>KVM虚拟机添加设备</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kvm">
+<span id="vm-attach-dev"></span><h1>KVM虚拟机添加设备</h1>
+<p>KVM虚拟机可以在线(运行时)添加磁盘、CDROM、USB设备，这对在线维护非常有用，可以不停机修改设备。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>案例使用的虚拟机名字 <code class="docutils literal notranslate"><span class="pre">dev7</span></code> ，添加的磁盘文件命名为 <code class="docutils literal notranslate"><span class="pre">dev7-data.qcow2</span></code></p>
+</div>
+<section id="id1">
+<h2>添加磁盘文件</h2>
+<ul>
+<li><p>创建虚拟磁盘文件（qcow2类型）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span>
+<span class="n">qemu</span><span class="o">-</span><span class="n">img</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">qcow2</span> <span class="n">dev7</span><span class="o">-</span><span class="n">data</span><span class="o">.</span><span class="n">qcow2</span> <span class="mi">20</span><span class="n">G</span>
+</pre></div>
+</div>
+</li>
+<li><p>虚拟磁盘文件添加到虚拟机</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">qemu</span></code> 可以映射物理存储磁盘(例如 <code class="docutils literal notranslate"><span class="pre">/dev/sdb</span></code> )，或者虚拟磁盘文件到KVM虚拟机的虚拟磁盘( <code class="docutils literal notranslate"><span class="pre">vdb</span></code> )</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">disk</span> <span class="n">dev7</span> <span class="o">--</span><span class="n">source</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">dev7</span><span class="o">-</span><span class="n">data</span><span class="o">.</span><span class="n">qcow2</span> <span class="o">--</span><span class="n">target</span> <span class="n">vdb</span> <span class="o">--</span><span class="n">persistent</span> <span class="o">--</span><span class="n">drive</span> <span class="n">qemu</span> <span class="o">--</span><span class="n">subdriver</span> <span class="n">qcow2</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>一定要明确使用 <code class="docutils literal notranslate"><span class="pre">--driver</span> <span class="pre">qemu</span> <span class="pre">--subdriver</span> <span class="pre">qcow2</span></code> :</p>
+<p><code class="docutils literal notranslate"><span class="pre">libvirtd</span></code> 出于安全因素默认关闭了虚拟磁盘类型自动检测功能，并且默认使用的磁盘格式是 <code class="docutils literal notranslate"><span class="pre">raw</span></code> ，如果不指定磁盘驱动类型会导致被识别成 <code class="docutils literal notranslate"><span class="pre">raw</span></code> 格式，就会在虚拟机内部看到非常奇怪的极小的磁盘。</p>
+</div>
+</section>
+<section id="iso">
+<h2>添加iso光盘</h2>
+<p>cdrom/floppy 不支持热插拔，所以和上面动态插入一个磁盘设备不同，如果直接使用以下命令插入设备( 虚拟机名字是 <code class="docutils literal notranslate"><span class="pre">sles12-sp3</span></code> )映射:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">disk</span> <span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span> <span class="n">SLE</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="n">Server</span><span class="o">-</span><span class="n">DVD</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">GM</span><span class="o">-</span><span class="n">DVD1</span><span class="o">.</span><span class="n">iso</span> <span class="o">--</span><span class="n">target</span> <span class="n">hdc</span> <span class="o">--</span><span class="nb">type</span> <span class="n">cdrom</span> <span class="o">--</span><span class="n">mode</span> <span class="n">readonly</span>
+</pre></div>
+</div>
+<p>会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">attach</span> <span class="n">disk</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">Operation</span> <span class="ow">not</span> <span class="n">supported</span><span class="p">:</span> <span class="n">cdrom</span><span class="o">/</span><span class="n">floppy</span> <span class="n">device</span> <span class="n">hotplug</span> <span class="n">isn</span><span class="s1">&#39;t supported</span>
+</pre></div>
+</div>
+<ul>
+<li><p>但是，如果虚拟机定义时候已经定义过cdrom设备，则使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">dumpxml</span> <span class="pre">sles12-sp3</span></code> 可以看到如下设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;file&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cdrom&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">driver</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;qemu&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span> <span class="n">dev</span><span class="o">=</span><span class="s1">&#39;sda&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;sata&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">readonly</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">alias</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;sata0-0-0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;drive&#39;</span> <span class="n">controller</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">disk</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>则我们可以通过指定将iso文件插入到虚拟机中的 <code class="docutils literal notranslate"><span class="pre">sda</span></code> CDROM中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">disk</span> <span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">SLE</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="n">Server</span><span class="o">-</span><span class="n">DVD</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">GM</span><span class="o">-</span><span class="n">DVD1</span><span class="o">.</span><span class="n">iso</span> <span class="n">sda</span> <span class="o">--</span><span class="nb">type</span> <span class="n">cdrom</span> <span class="o">--</span><span class="n">mode</span> <span class="n">readonly</span>
+</pre></div>
+</div>
+<p>就会提示成功插入:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="n">attached</span> <span class="n">successfully</span>
+</pre></div>
+</div>
+<ul>
+<li><p>再次使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">dumpxml</span> <span class="pre">sles12-sp3</span></code> 可以看到iso文件加载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;file&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cdrom&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">driver</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;qemu&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;/var/lib/libvirt/images/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso&#39;</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">backingStore</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span> <span class="n">dev</span><span class="o">=</span><span class="s1">&#39;sda&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;sata&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">readonly</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">alias</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;sata0-0-0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;drive&#39;</span> <span class="n">controller</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">disk</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果要卸载这个iso文件，则创建一个相同结构的xml文件 <code class="docutils literal notranslate"><span class="pre">detach_iso.xml</span></code> ，但是保持 <code class="docutils literal notranslate"><span class="pre">&lt;source/&gt;</span></code> 行删除:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;file&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cdrom&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">driver</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;qemu&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">backingStore</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span> <span class="n">dev</span><span class="o">=</span><span class="s1">&#39;sda&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;sata&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">readonly</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">alias</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;sata0-0-0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;drive&#39;</span> <span class="n">controller</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">disk</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后执行设备更新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">update</span><span class="o">-</span><span class="n">device</span> <span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span> <span class="n">detach_iso</span><span class="o">.</span><span class="n">xml</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Device</span> <span class="n">updated</span> <span class="n">successfully</span>
+</pre></div>
+</div>
+<p>再检查虚拟机配置，就看到iso文件已经卸载了。</p>
+</section>
+<section id="id2">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.unixarena.com/category/redhat-linux/linux-kvm">UnixArena Linux KVM</a><span class="link-target"> [http://www.unixarena.com/category/redhat-linux/linux-kvm]</span></p></li>
+<li><p><a class="reference external" href="https://docs.fedoraproject.org/en-US/Fedora/18/html/Virtualization_Administration_Guide/sect-Attaching_and_updating_a_device_with_virsh.html">Attaching and updating a device with virsh</a><span class="link-target"> [https://docs.fedoraproject.org/en-US/Fedora/18/html/Virtualization_Administration_Guide/sect-Attaching_and_updating_a_device_with_virsh.html]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

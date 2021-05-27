@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Kubernetes部署服务器</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kubernetes">
+<span id="k8s-hosts"></span><h1>Kubernetes部署服务器</h1>
+<p>在部署模拟Kubernetes集群的环境中，我采用如下虚拟机部署:</p>
+<ul class="simple">
+<li><p>3台 Kubernetes Mster</p></li>
+<li><p>5台 Kubernetes Node</p></li>
+<li><p>2台 HAProxy</p></li>
+<li><p>3台 etcd</p></li>
+</ul>
+<section id="clone-k8s">
+<h2>clone k8s虚拟机</h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>本案例在单台物理主机上部署多个KVM虚拟机，这些虚拟机是在该物理主机的NAT网络中，所以外部不能直接访问（需要端口映射）。</p>
+</div>
+<ul>
+<li><p>clone虚拟就:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>virsh shutdown centos7
+
+for i in {1..4};do
+  virt-clone --connect qemu:///system --original centos7 --name kubemaster-${i} --file /var/lib/libvirt/images/kubemaster-${i}.qcow2
+  virt-sysprep -d kubemaster-${i} --hostname kubemaster-${i} --root-password password:CHANGE_ME
+  virsh start kubemaster-${i}
+done
+
+for i in {1..5};do
+  virt-clone --connect qemu:///system --original centos7 --name kubenode-${i} --file /var/lib/libvirt/images/kubenode-${i}.qcow2
+  virt-sysprep -d kubenode-${i} --hostname kubenode-${i} --root-password password:CHANGE_ME
+  virsh start kubenode-${i}
+done
+
+for i in {1..2};do
+  virt-clone --connect qemu:///system --original centos7 --name haproxy-${i} --file /var/lib/libvirt/images/haproxy-${i}.qcow2
+  virt-sysprep -d haproxy-${i} --hostname haproxy-${i} --root-password password:CHANGE_ME
+  virsh start haproxy-${i}
+done
+
+for i in {1..3};do
+  virt-clone --connect qemu:///system --original centos7 --name etcd-${i} --file /var/lib/libvirt/images/etcd-${i}.qcow2
+  virt-sysprep -d etcd-${i} --hostname etcd-${i} --root-password password:CHANGE_ME
+  virsh start etcd-${i}
+done
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>稳定运行的Kubernetes集群需要3台Master服务器，这里多创建多 <code class="docutils literal notranslate"><span class="pre">kubermaster-4</span></code> 是为了演练Master服务器故障替换所准备的。</p>
+<p>haproxy-X是用于构建 <a class="reference internal" href="bootstrap_kubernetes/ha_k8s.xhtml#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 时所需的负载均衡，用于提供apiserver的负载均衡能力。</p>
+</div>
+</section>
+<section id="id1">
+<h2>主机名解析</h2>
+<p>在运行KVM的物理主机上 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 配置模拟集群的hosts域名解析</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">../../studio/hosts</span></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Host启动时启动：</span>
+<span class="c1"># ceph-1 / ceph-2 / ceph-3 / ceph-4 / ceph -5 - 提供分布式存储</span>
+<span class="c1"># machine-1 / machine-2 / machine-3 - 提供物理主机模拟</span>
+<span class="c1"># 嵌套虚拟化 =&gt;  </span>
+<span class="c1"># devstack - 开发虚拟机</span>
+<span class="c1"># minikube- ubernetes开发虚拟机</span>
+
+<span class="hll"><span class="m">127</span>.0.0.1 localhost localhost.localdomain
+</span>
+<span class="c1"># KVM libvirt virbr0: 192.168.122.0/24</span>
+<span class="m">192</span>.168.122.1   myadmin myadmin.dev.huatai.me  <span class="c1">#物理主机</span>
+
+<span class="m">192</span>.168.122.2  win10 win10.dev.huatai.me
+<span class="c1"># 开发测试OpenStack/Kernel/Kata/Docker （单机运行多种功能节约虚拟化资源）</span>
+<span class="m">192</span>.168.122.3  devstack devstack.dev.huatai.me
+
+<span class="c1"># Kubernetes开发环境</span>
+<span class="m">192</span>.168.122.4   minikube minikube.dev.huatai.me
+<span class="hll">
+</span><span class="hll"><span class="c1"># KVM NAT内部 开发专用Kuberneetes集群</span>
+</span><span class="hll"><span class="m">192</span>.168.122.5   etcd-1 etcd-1.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.6   etcd-2 etcd-2.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.7   etcd-3 etcd-3.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.8   haproxy-1 haproxy-1.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.9   haproxy-2 haproxy-2.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.10  kubeapi kubeapi.dev.huatai.me            <span class="c1">#在HAProxy上构建apiserver的VIP</span>
+</span><span class="hll"><span class="m">192</span>.168.122.11  kubemaster-1 kubemaster-1.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.12  kubemaster-2 kubemaster-2.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.13  kubemaster-3 kubemaster-3.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.14  kubemaster-4 kubemaster-4.dev.huatai.me  <span class="c1">#测试替换轮转</span>
+</span><span class="hll"><span class="m">192</span>.168.122.15  kubenode-1 kubenode-1.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.16  kubenode-2 kubenode-2.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.17  kubenode-3 kubenode-3.dev.huatai.me
+</span><span class="hll"><span class="m">192</span>.168.122.18  kubenode-4 kubenode-4.dev.huatai.me
+</span><span class="m">192</span>.168.122.19  kubenode-5 kubenode-5.dev.huatai.me
+
+<span class="c1"># 模拟物理主机</span>
+<span class="c1"># 在物理主机上运行L-1的Kubernetes集群和L-2层KVM虚拟机（OpenStack）</span>
+<span class="m">192</span>.168.122.21  machine-1 machine-1.test.huatai.me
+<span class="m">192</span>.168.122.22  machine-2 machine-2.test.huatai.me
+<span class="m">192</span>.168.122.23  machine-3 machine-3.test.huatai.me
+
+<span class="c1"># 持续集成环境</span>
+<span class="m">192</span>.168.122.200  jenkins jenkins.test.huatai.me
+
+<span class="c1"># 模版操作系统</span>
+<span class="m">192</span>.168.122.252  centos8 centos8.test.huatai.me
+<span class="m">192</span>.168.122.253  ubuntu18-04 ubuntu18-04.test.huatai.me
+<span class="m">192</span>.168.122.254  centos7 centos7.test.huatai.me
+
+<span class="c1"># KVM nested virbr0:</span>
+
+<span class="c1"># Docker docker0: 172.17.0.0/16</span>
+
+<span class="c1"># Docker ceph-net: 172.18.0.0/16</span>
+<span class="m">172</span>.18.0.11 ceph-1 ceph-1.test.huatai.me
+<span class="m">172</span>.18.0.12 ceph-2 ceph-2.test.huatai.me
+<span class="m">172</span>.18.0.13 ceph-3 ceph-3.test.huatai.me
+<span class="m">172</span>.18.0.14 ceph-4 ceph-4.test.huatai.me
+<span class="m">172</span>.18.0.15 ceph-5 ceph-5.test.huatai.me
+
+<span class="c1"># 模版操作系统</span>
+<span class="m">172</span>.17.0.253  centos6-c centos6-c.test.huatai.me
+<span class="m">172</span>.17.0.252  centos7-c centos7-c.test.huatai.me
+<span class="m">172</span>.17.0.251  centos8-c centos8-c.test.huatai.me
+<span class="m">172</span>.17.0.239  ubunut18-c ubunut18-c.test.huatai.me
+<span class="m">172</span>.17.0.238  ubunut20-c ubunut20-c.test.huatai.me
+
+<span class="c1"># VMware虚拟化</span>
+<span class="m">172</span>.16.16.253  centos6
+<span class="m">172</span>.16.16.252  centos7
+<span class="m">172</span>.16.16.251  centos8
+<span class="m">172</span>.16.16.239  ubunut18
+<span class="m">172</span>.16.16.238  ubunut20
+
+
+<span class="c1"># Jetson Nano + Raspberry Pi</span>
+<span class="c1"># 构建ARM Kubernetes</span>
+<span class="m">192</span>.168.6.1  mbp13
+<span class="m">192</span>.168.6.2  mbp15
+<span class="m">192</span>.168.6.7  kali
+<span class="m">192</span>.168.6.8  pi4
+<span class="m">192</span>.168.6.9  pi400
+<span class="m">192</span>.168.6.10 jetson
+<span class="m">192</span>.168.6.11 pi-master1
+<span class="m">192</span>.168.6.12 pi-master2
+<span class="m">192</span>.168.6.13 pi-master3
+<span class="m">192</span>.168.6.15 pi-worker1
+<span class="m">192</span>.168.6.16 pi-worker2
+<span class="m">192</span>.168.6.17 pi-worker3
+<span class="m">192</span>.168.6.110 raspberrypi
+<span class="m">192</span>.168.6.200  zcloud
+<span class="c1"># Kuberntes CIDR 10.244.0.0/16</span>
+
+<span class="c1"># libvirt bridge网络</span>
+<span class="c1"># zcloud上KVM虚拟机直连网络，default gw 192.168.6.9</span>
+<span class="m">192</span>.168.6.200 br0
+<span class="m">192</span>.168.6.201 sles12-sp3
+
+<span class="c1"># 树莓派Zero</span>
+<span class="m">192</span>.168.7.10 kali
+
+<span class="c1">#-------------------------------------------------------------</span>
+
+<span class="c1"># 模拟环境(staging)采用物理服务器集群部署Openstack+Kubernetes</span>
+<span class="c1"># 局域网内部部署，在推送到生产环境前的模拟环境</span>
+<span class="c1"># 域名 staging.huatai.me </span>
+<span class="c1"># 物理主机共7台</span>
+<span class="c1"># 功能: ceph, etcd, glusterfs, database</span>
+<span class="c1"># # 功能: kubenode工作节点</span>
+<span class="m">192</span>.168.1.1 worker1
+<span class="m">192</span>.168.1.2 worker2
+<span class="m">192</span>.168.1.3 worker3
+<span class="m">192</span>.168.1.4 worker4
+<span class="m">192</span>.168.1.5 worker5
+<span class="m">192</span>.168.1.6 worker6
+<span class="m">192</span>.168.1.7 worker7 <span class="c1"># 运行独立的kind模拟kubernetes集群</span>
+
+<span class="c1"># kubemaster(KVM虚拟机/Brigde网络)</span>
+<span class="m">192</span>.168.1.251 kubemaster-1 kubemaster-1.staging.huatai.me
+<span class="m">192</span>.168.1.252 kubemaster-2 kubemaster-2.staging.huatai.me
+<span class="m">192</span>.168.1.253 kubemaster-3 kubemaster-3.staging.huatai.me
+
+<span class="c1">#-------------------------------------------------------------</span>
+
+<span class="c1"># 生产环境(production)采用云计算厂商提供的云服务器部署对外服务</span>
+<span class="c1"># 通过持续集成+持续部署自动推送</span>
+<span class="c1"># 域名 huatai.me</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<section id="libvirt-dnsmasq">
+<h3>libvirt dnsmasq</h3>
+<p>但是，在KVM虚拟机集群中，如何能够使得所有虚拟机都获得统一的DNS解析呢？显然，在集群中运行一个DNS服务器是一个解决方案。但是，请注意，在KVM libvirt的运行环境中，默认就在libvirt中运行了一个dnsmasq，实际上为 <code class="docutils literal notranslate"><span class="pre">virtbr0</span></code> 网络接口上连接的所有虚拟机提供了DNS解析服务。通过在物理服务器上检查 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">dnsmasq</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>nobody    13280  0.0  0.0  53884  1116 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
+root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
+</pre></div>
+</div>
+<p>检查libvirt的dnsmasq配置文件 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/default.conf</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">strict</span><span class="o">-</span><span class="n">order</span>
+<span class="n">pid</span><span class="o">-</span><span class="n">file</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">network</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">pid</span>
+<span class="k">except</span><span class="o">-</span><span class="n">interface</span><span class="o">=</span><span class="n">lo</span>
+<span class="n">bind</span><span class="o">-</span><span class="n">dynamic</span>
+<span class="n">interface</span><span class="o">=</span><span class="n">virbr0</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="nb">range</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.51</span><span class="p">,</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.254</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">no</span><span class="o">-</span><span class="n">override</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">authoritative</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">lease</span><span class="o">-</span><span class="nb">max</span><span class="o">=</span><span class="mi">204</span>
+<span class="n">dhcp</span><span class="o">-</span><span class="n">hostsfile</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">dnsmasq</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">hostsfile</span>
+<span class="n">addn</span><span class="o">-</span><span class="n">hosts</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">dnsmasq</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">addnhosts</span>
+</pre></div>
+</div>
+<p>上述配置:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">interface=virbr0</span></code> 表示libvirt dnsmasq只对 <code class="docutils literal notranslate"><span class="pre">virtbr0</span></code> 接口提供服务，所以也就只影响NAT网络中对虚拟机</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dhcp-range=192.168.122.51,192.168.122.254</span></code> 是我配置的DHCP范围</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dhcp-hostsfile=/var/lib/libvirt/dnsmasq/default.hostsfile</span></code> 是配置静态分配DHCP地址的配置文件</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">addn-hosts=/var/lib/libvirt/dnsmasq/default.addnhosts</span></code> 是配置dnsmasq的DNS解析配置文件，类似 <code class="docutils literal notranslate"><span class="pre">/etc/hots</span></code></p></li>
+</ul>
+<p>参考 <a class="reference external" href="https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/">KVM: Using dnsmasq for libvirt DNS resolution</a><span class="link-target"> [https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/]</span> ，执行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">net-edit</span> <span class="pre">default</span></code> 编辑 libvirt 网络，添加 <code class="docutils literal notranslate"><span class="pre">&lt;dns&gt;&lt;/dns&gt;</span></code> 段落:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">virsh net-edit default</span></div>
+<div class="highlight-xml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">&lt;network&gt;</span>
+  <span class="nt">&lt;name&gt;</span>default<span class="nt">&lt;/name&gt;</span>
+  <span class="nt">&lt;uuid&gt;</span>7cbc12d6-1899-4808-8d76-cdda780e3cc9<span class="nt">&lt;/uuid&gt;</span>
+  <span class="nt">&lt;forward</span> <span class="na">mode=</span><span class="s">&#39;nat&#39;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;bridge</span> <span class="na">name=</span><span class="s">&#39;virbr0&#39;</span> <span class="na">stp=</span><span class="s">&#39;on&#39;</span> <span class="na">delay=</span><span class="s">&#39;0&#39;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;mac</span> <span class="na">address=</span><span class="s">&#39;52:54:00:03:12:89&#39;</span><span class="nt">/&gt;</span>
+<span class="hll">  <span class="nt">&lt;dns&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.5&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>etcd-1.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.6&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>etcd-2.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.7&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>etcd-3.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.8&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>haproxy-1.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.9&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>haproxy-2.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.10&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubeapi.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.11&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubemaster-1.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.12&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubemaster-2.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.13&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubemaster-3.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.14&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubemaster-4.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.15&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubenode-1.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.16&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubenode-2.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.17&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubenode-3.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.18&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubenode-4.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;host</span> <span class="na">ip=</span><span class="s">&#39;192.168.122.19&#39;</span><span class="nt">&gt;</span>
+</span><span class="hll">      <span class="nt">&lt;hostname&gt;</span>kubenode-5.test.huatai.me<span class="nt">&lt;/hostname&gt;</span>
+</span><span class="hll">    <span class="nt">&lt;/host&gt;</span>
+</span><span class="hll">  <span class="nt">&lt;/dns&gt;</span>
+</span>  <span class="nt">&lt;ip</span> <span class="na">address=</span><span class="s">&#39;192.168.122.1&#39;</span> <span class="na">netmask=</span><span class="s">&#39;255.255.255.0&#39;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;dhcp&gt;</span>
+      <span class="nt">&lt;range</span> <span class="na">start=</span><span class="s">&#39;192.168.122.51&#39;</span> <span class="na">end=</span><span class="s">&#39;192.168.122.254&#39;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/dhcp&gt;</span>
+  <span class="nt">&lt;/ip&gt;</span>
+<span class="nt">&lt;/network&gt;</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<p>然后重启libvirt default网络:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="n">destroy</span> <span class="n">default</span>
+<span class="n">sudo</span> <span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="n">start</span> <span class="n">default</span>
+</pre></div>
+</div>
+<p>此时检查物理服务器的 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/default.addnhosts</span></code> 内容，原先空白的文件就会自动填写上类似 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 这样的配置静态IP解析:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168</span><span class="o">.</span><span class="mf">122.5</span>    <span class="n">etcd</span><span class="o">-</span><span class="mf">1.</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+<span class="mf">192.168</span><span class="o">.</span><span class="mf">122.6</span>    <span class="n">etcd</span><span class="o">-</span><span class="mf">2.</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>之前我的实践发现，直接修改 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/default.addnhosts</span></code> 添加静态解析内容，然后重建 <code class="docutils literal notranslate"><span class="pre">default</span></code> 网络也能够实现相同的DNS解析。但是，我发现过一段时间以后物理服务器的 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/default.addnhosts</span></code> 会被清空。不过，在虚拟机网络中，依然能够解析DNS。似乎直接修改文件不是好的方法，所以还是参考上述文档通过修订default网络的xml来完成配置。</p>
+</div>
+<p>注意，重启网络之后，所有虚拟机的虚拟网卡会脱离网桥 <code class="docutils literal notranslate"><span class="pre">virbr0</span></code> ，需要重新连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for i in {0..13};do sudo brctl addif virbr0 vnet${i};done
+</pre></div>
+</div>
+<p>随后登陆任意虚拟机，尝试解析DNS，例如，解析后续作为apiserver的VIP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dig</span> <span class="n">kubeapi</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+<p>输出应该类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeapi</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">.</span>    <span class="mi">0</span>    <span class="n">IN</span>    <span class="n">A</span>    <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span>
+</pre></div>
+</div>
+<p>而且可以使用短域名解析:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dig</span> <span class="n">kubeapi</span>
+</pre></div>
+</div>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeapi</span><span class="o">.</span>        <span class="mi">0</span>    <span class="n">IN</span>    <span class="n">A</span>    <span class="mf">192.168</span><span class="o">.</span><span class="mf">122.10</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果要使用独立的dnsmasq对外提供DNS解析服务，可以参考我之前的实践 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/service/dns/dnsmasq/dnsmasq_quick_startup.md">DNSmasq 快速起步</a><span class="link-target"> [https://github.com/huataihuang/cloud-atlas-draft/blob/master/service/dns/dnsmasq/dnsmasq_quick_startup.md]</span> 或者 <a class="reference external" href="https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/">KVM: Using dnsmasq for libvirt DNS resolution</a><span class="link-target"> [https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/]</span></p>
+</div>
+</section>
+</section>
+<section id="pssh">
+<h2>pssh配置</h2>
+<p>为了方便在集群多台服务器上同时安装软件包和进行基础配置，采用pssh方式执行命令，所以准备按照虚拟机用途进行分组如下：</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">kube</span></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="m">192</span>.168.122.11
+<span class="m">192</span>.168.122.12
+<span class="m">192</span>.168.122.13
+<span class="m">192</span>.168.122.14
+<span class="m">192</span>.168.122.15
+<span class="m">192</span>.168.122.16
+<span class="m">192</span>.168.122.17
+<span class="m">192</span>.168.122.18
+<span class="m">192</span>.168.122.19
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">kubemaster</span></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="m">192</span>.168.122.11
+<span class="m">192</span>.168.122.12
+<span class="m">192</span>.168.122.13
+<span class="m">192</span>.168.122.14
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">kubenode</span></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="m">192</span>.168.122.15
+<span class="m">192</span>.168.122.16
+<span class="m">192</span>.168.122.17
+<span class="m">192</span>.168.122.18
+<span class="m">192</span>.168.122.19
+</pre></div>
+</td></tr></table></div>
+</div>
+<p>这样，例如需要同时安装docker软件包，只需要执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pssh</span> <span class="o">-</span><span class="n">ih</span> <span class="n">kube</span> <span class="s1">&#39;yum install docker-ce -y&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

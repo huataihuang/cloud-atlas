@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Django Migrations</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="django-migrations">
+<span id="django-migrate"></span><h1>Django Migrations</h1>
+<p>我们已经开始运行了一个简单的Django应用，你会注意到为了构建应用数据库，我们使用了命令 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">migrate</span></code> 。</p>
+<section id="migrations">
+<h2>Migrations概念</h2>
+<p>所谓 <code class="docutils literal notranslate"><span class="pre">Migrations</span></code> 是指Django将models的修改(添加字段、删除模型)转换到数据库schema(模式)的方法。migrate通常设计是自动的，但是你需要如何创建migrations，何时需要运行migrate，以及出现问题时如何解决。</p>
+</section>
+<section id="id1">
+<h2>migrations流程</h2>
+<ul class="simple">
+<li><p>构建 model</p></li>
+</ul>
+<p>在Django中，我们不需要手工去创建数据库，而是先构建一个 model ，即在 <code class="docutils literal notranslate"><span class="pre">models.py</span></code> 中我们定义数据库结构</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">create_time</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;create_time&#39;</span><span class="p">,)</span>
+</pre></div>
+</td></tr></table></div>
+<ul>
+<li><p>然后我们执行 <code class="docutils literal notranslate"><span class="pre">makemigrations</span></code> 创建对应的数据库initial.py:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时会自动在 <code class="docutils literal notranslate"><span class="pre">migrations</span></code> 目录下生成生成一个 <code class="docutils literal notranslate"><span class="pre">0001_initial.py</span></code> 文件，类似</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">migrations</span><span class="p">,</span> <span class="n">models</span>
+
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">initial</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">CreateModel</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;GuestPanic&#39;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">AutoField</span><span class="p">(</span><span class="n">auto_created</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">serialize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">19</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">&#39;gruops&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">&#39;create_time&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()),</span>
+            <span class="p">],</span>
+            <span class="n">options</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;ordering&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;create_time&#39;</span><span class="p">,),</span>
+            <span class="p">},</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+<ul>
+<li><p>执行数据库操作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这个命令会根据生成的 <code class="docutils literal notranslate"><span class="pre">0001_initial.py</span></code> 对数据库进行操作，创建表格和对应字段。</p>
+<ul>
+<li><p>检查项目的migrations以及状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">showmigrations</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这个命令会输出所有的migrations以及状态(是否执行过)</p>
+</section>
+<section id="id2">
+<h2>Migrations后端支持</h2>
+<p>Migrations屏蔽了Django使用的数据库后端差异，通过完全相同的 model ，我们可以配置不同的数据库后端，实现对不同数据库的schema构建和修改。</p>
+</section>
+<section id="id3">
+<h2>清空数据和重新migrations同步</h2>
+<p>在开发过程中，我们可能会需要清空数据库并重新migrate，步骤如下</p>
+<ul>
+<li><p>删除项目的数据库表，这里举例是 <code class="docutils literal notranslate"><span class="pre">api</span></code> 项目(如果要保留数据，可以不执行这步)</p></li>
+<li><p>删除项目的migrations目录下所有文件，但保留 <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></p></li>
+<li><p>重建migrate初始化文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查migrate状态(这里 <code class="docutils literal notranslate"><span class="pre">api</span></code> 是项目名字):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">showmigrations</span> <span class="n">api</span>
+</pre></div>
+</div>
+</li>
+<li><p>因为之前已经执行过migrate命令，所以同名的migrate都是已经执行状态，我们需要重置成空的状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span> <span class="o">--</span><span class="n">fake</span> <span class="n">api</span> <span class="n">zero</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后再次检查migrate状态就会看到 <code class="docutils literal notranslate"><span class="pre">api</span></code> 对应的migrate状态是空的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">showmigrations</span> <span class="n">api</span>
+</pre></div>
+</div>
+<ul>
+<li><p>重新生成migrate文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span> <span class="n">api</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时重新生成的 <code class="docutils literal notranslate"><span class="pre">0001_initial.py</span></code> 文件会反映修订过的 <code class="docutils literal notranslate"><span class="pre">models.py</span></code> 内容(假如你调整了数据库表结构)</p>
+<ul>
+<li><p>重新执行数据库同步:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果你只想重新生成migrate文件，但是不执行到数据库，则使用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">fake</span><span class="o">-</span><span class="n">initial</span> <span class="n">api</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.djangoproject.com/en/3.1/topics/migrations/">Django Documentation: Migrations</a><span class="link-target"> [https://docs.djangoproject.com/en/3.1/topics/migrations/]</span></p></li>
+<li><p><a class="reference external" href="https://www.jianshu.com/p/7aa23f044cef">Django清空所有数据或重置migrations同步</a><span class="link-target"> [https://www.jianshu.com/p/7aa23f044cef]</span></p></li>
+<li><p><a class="reference external" href="https://realpython.com/django-migrations-a-primer/">Django Migrations: A Primer</a><span class="link-target"> [https://realpython.com/django-migrations-a-primer/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

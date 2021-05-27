@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>克隆Raspberry Pi SD卡</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="raspberry-pi-sd">
+<span id="clone-pi"></span><h1>克隆Raspberry Pi SD卡</h1>
+<p>经过一周的磨合，终于调整好 <a class="reference internal" href="../startup/pi_400_desktop.xhtml#pi-400-desktop"><span class="std std-ref">Raspberry Pi 400桌面定制</span></a> 也配置了 <a class="reference internal" href="../startup/pi_400_4k_display.xhtml#pi-400-4k-display"><span class="std std-ref">Raspberry Pi 400的4K显示</span></a> ，开始ARM环境的日常开发和运维工作。不过，既然初始化调整很多也很繁琐，如果能做一个快照保存，随时可以恢复系统，就像从树莓派网站下载一个image快速完成安装一样，那该多好。</p>
+<section id="tf">
+<h2>制作TF卡镜像</h2>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令可以完整制作磁盘镜像，将TF卡通过USB读卡器插到一台Linux主机上使用以下命令进行镜像复制:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="n">bs</span><span class="o">=</span><span class="mi">100</span><span class="n">M</span> <span class="k">if</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc</span> <span class="n">of</span><span class="o">=/</span><span class="n">backup</span><span class="o">/</span><span class="n">raspi_studio</span><span class="o">.</span><span class="n">img</span> <span class="n">conv</span><span class="o">=</span><span class="n">fsync</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>不过，上述命令虽然可以制作出完整的镜像，但是实际上只能bit-to-bit复制，也是就是说，即使我的树莓派TF卡只使用了128G容量中的5G容量，也要完整复制出一个128G的镜像文件（实际上大多数空间都是空闲的）</p>
+</section>
+<section id="id1">
+<h2>收缩镜像</h2>
+<p><a class="reference external" href="https://github.com/Drewsif/PiShrink">PiShrink</a><span class="link-target"> [https://github.com/Drewsif/PiShrink]</span> 是一个bash脚本可以自动收缩树莓派镜像，这样可以制作出较小的镜像文件，可以快速恢复到SD卡:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Usage: $0 [-adhrspvzZ] imagefile.img [newimagefile.img]
+
+  -s         Don&#39;t expand filesystem when image is booted the first time
+  -v         Be verbose
+  -r         Use advanced filesystem repair option if the normal one fails
+  -z         Compress image after shrinking with gzip
+  -Z         Compress image after shrinking with xz
+  -a         Compress image in parallel using multiple cores
+  -p         Remove logs, apt archives, dhcp leases and ssh hostkeys
+  -d         Write debug messages in a debug log file
+</pre></div>
+</div>
+<p>通常比较有用的组合是 <code class="docutils literal notranslate"><span class="pre">-Z</span></code> 和 <code class="docutils literal notranslate"><span class="pre">-a</span></code> ，可以在多核主机上使用 <code class="docutils literal notranslate"><span class="pre">xz</span></code> 压缩文件</p>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">pishrink.sh</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Drewsif</span><span class="o">/</span><span class="n">PiShrink</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">pishrink</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">pishrink</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">sudo</span> <span class="n">mv</span> <span class="n">pishrink</span><span class="o">.</span><span class="n">sh</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span>
+</pre></div>
+</div>
+</li>
+<li><p>收缩镜像文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pishrink</span><span class="o">.</span><span class="n">sh</span> <span class="o">/</span><span class="n">backup</span><span class="o">/</span><span class="n">raspi_studio</span><span class="o">.</span><span class="n">img</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>收缩效果显著:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pishrink</span><span class="o">.</span><span class="n">sh</span><span class="p">:</span> <span class="n">Shrinking</span> <span class="n">image</span> <span class="o">...</span>
+<span class="n">pishrink</span><span class="o">.</span><span class="n">sh</span><span class="p">:</span> <span class="n">Shrunk</span> <span class="o">/</span><span class="n">backup</span><span class="o">/</span><span class="n">raspi_studio</span><span class="o">.</span><span class="n">img</span> <span class="kn">from</span> <span class="mi">120</span><span class="n">G</span> <span class="n">to</span> <span class="mf">6.6</span><span class="n">G</span> <span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>收缩后的存储镜像还可以通过压缩来实现更小的存储消耗:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="n">cfz</span> <span class="n">raspi_studio</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="n">raspi_studio</span><span class="o">.</span><span class="n">img</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>恢复镜像</h2>
+<p>我主要想通过将TF卡替换成USB 3.0接口上的外接存储，来加速存储访问性能。所以通过上述方法制作的镜像，可以通过以下命令 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 复制到U盘，然后 <a class="reference internal" href="../storage/usb_boot_pi_400.xhtml#usb-boot-pi-400"><span class="std std-ref">USB存储启动Raspberry Pi 400</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="k">if</span><span class="o">=</span><span class="n">raspi_studio</span><span class="o">.</span><span class="n">img</span> <span class="n">of</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc</span> <span class="n">bs</span><span class="o">=</span><span class="mi">100</span><span class="n">M</span> <span class="n">conv</span><span class="o">=</span><span class="n">fsync</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.pragmaticlinux.com/2020/12/how-to-clone-your-raspberry-pi-sd-card-in-linux/">How to clone your Raspberry PI SD card in Linux</a><span class="link-target"> [https://www.pragmaticlinux.com/2020/12/how-to-clone-your-raspberry-pi-sd-card-in-linux/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

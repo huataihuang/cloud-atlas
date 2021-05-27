@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>CentOS本地HTTP软件仓库</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="centoshttp">
+<span id="centos-local-http-repo"></span><h1>CentOS本地HTTP软件仓库</h1>
+<p>当一次次通过Internet安装和更新CentOS，当运维当服务器越来越多，你一定会有一个强烈的愿望，构建一个本地CentOS软件仓库。这样只要同步一次集中的软件仓库，就可以提供本地局域网所有CentOS服务器更新到相同版本。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>强烈推荐使用 <code class="docutils literal notranslate"><span class="pre">reposync</span></code> 工具进行软件仓库同步，这个工具是通用工具，不仅适合CentOS发行版的软件仓库，也可以用于其他符合Red Hat YUM仓库规范的软件仓库同步。例如，我也使用这个工具来同步Docker CE和Kubernetes仓库，可以提供给本地局域网服务器公用安装。</p>
+<p>如果要同步不同软件版本，例如，要同步CentOS 7/6/5或者不同架构。我觉得可以采用Docker方式来运行专用同步客户端，甚至可以采用 <a class="reference internal" href="../../../kubernetes/index.xhtml#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 运行 <a class="reference internal" href="../../../kubernetes/concepts/workloads/controllers/daemonset.xhtml#daemonset"><span class="std std-ref">DaemonSet</span></a> 来完成。后续我可能会再部署一整套同步方案，来适用于不同Red Hat发行版，Ubuntu发行版，SUSE发行版以及ARM架构的Fedora/Ubuntu同步。构建一个完整的仓库镜像方案。</p>
+</div>
+<p>CentOS 8包含2个仓库: <code class="docutils literal notranslate"><span class="pre">BaseOS</span></code> 和 <code class="docutils literal notranslate"><span class="pre">AppStream</span></code> (Application Stream):</p>
+<ul class="simple">
+<li><p>BaseOS是最小化操作系统所需要的软件包</p></li>
+<li><p>AppStream则包含其余软件包，依赖和数据库</p></li>
+</ul>
+<section id="http-nginx">
+<h2>安装HTTP服务(Nginx)</h2>
+<ul>
+<li><p>安装Nginx软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">epel</span><span class="o">-</span><span class="n">release</span>
+<span class="n">dnf</span> <span class="n">install</span> <span class="n">nginx</span>
+</pre></div>
+</div>
+</li>
+<li><p>配置nginx允许index浏览(非必须，仅为了方便查看):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xxx</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动Nginx:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">nginx</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="n">nginx</span>
+</pre></div>
+</div>
+</li>
+<li><p>打开对外80端口和443端口允许外部访问Nginx服务，更新防火墙规则如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">service</span><span class="o">=</span><span class="n">http</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">service</span><span class="o">=</span><span class="n">https</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
+</pre></div>
+</div>
+</li>
+<li><p>现在在浏览器中通过 <a class="reference external" href="http:/">http:/</a>/&lt;SERVER_DOMAIN_NAME_OR_IP&gt; 能够正常访问Nginx的初始页面，就证明WEB服务器已经构建好。</p></li>
+</ul>
+</section>
+<section id="iso">
+<h2>镜像ISO文件创建仓库</h2>
+<ul>
+<li><p>如果你手边有安装光盘ISO文件，则采用以下方法挂载ISO文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">ro</span> <span class="n">loop</span> <span class="n">CentOS</span><span class="o">-</span><span class="mf">8.2</span><span class="o">.</span><span class="mi">2004</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">dvd1</span><span class="o">.</span><span class="n">iso</span> <span class="o">/</span><span class="n">mnt</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建centos8的iso_repo目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mf">8.2</span><span class="o">.</span><span class="mi">2004</span><span class="o">/</span><span class="n">iso_repo</span><span class="o">/</span><span class="n">x86_64</span>
+<span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mf">8.2</span><span class="o">.</span><span class="mi">2004</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span>
+</pre></div>
+</div>
+</li>
+<li><p>将ISO镜像文件复制到WEB目录下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">cvf</span> <span class="o">-.</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">iso_repo</span><span class="o">/</span><span class="n">x86_64</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">xvf</span> <span class="o">-</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果你不使用tar命令，也可以使用rsync命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rsync</span> <span class="o">-</span><span class="n">avHPS</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">iso_repo</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">iso_repo/x86_64</span></code> 应该和仓库镜像网站的 <code class="docutils literal notranslate"><span class="pre">BaseOS/x86_64/os/</span></code> 目录内容相同，如果你使用镜像网站同步，本步骤可以忽略。</p>
+</div>
+</section>
+<section id="repo">
+<h2>同步repo</h2>
+<p>DNF提供了 <code class="docutils literal notranslate"><span class="pre">reposync</span></code> 插件，这个插件在以前yum时候包含在 <code class="docutils literal notranslate"><span class="pre">yum-utils</span></code> 中，现在也是可以通过 <code class="docutils literal notranslate"><span class="pre">yum-utils</span></code> 获得:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">yum</span><span class="o">-</span><span class="n">utils</span> <span class="n">createrepo</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>yum-utils 包含了 <code class="docutils literal notranslate"><span class="pre">reopsync</span></code> 工具，而 createrepo 提供了在本地目录构建仓库索引功能。</p>
+</div>
+<p>执行 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">reposync</span> <span class="pre">[options]</span></code> 可以将Internet上的软件仓库镜像到本地。</p>
+</section>
+<section id="centos-8">
+<h2>CentOS 8仓库</h2>
+<ul>
+<li><p>在本地创建对应目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="p">{</span><span class="n">BaseOS</span><span class="p">,</span><span class="n">AppStream</span><span class="p">,</span><span class="n">extras</span><span class="p">}</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>之所以我选择创建这样的子目录 <code class="docutils literal notranslate"><span class="pre">centos/8/{BaseOS,AppStream,extras}/x86_64/os/</span></code> 是因为我参考 <a class="reference external" href="http://mirrors.163.com">http://mirrors.163.com</a> 来构建目录以区分不同架构。</p>
+<p>实际 <code class="docutils literal notranslate"><span class="pre">reposync</span></code> 下载会在指定目录下创建 <code class="docutils literal notranslate"><span class="pre">Packages</span></code> 和 <code class="docutils literal notranslate"><span class="pre">repodata</span></code> 子目录，这样可以和 mirrors.163.com 相仿。</p>
+</div>
+<ul>
+<li><p>同步激活的repo仓库和其包含的repodata:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">reposync</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">BaseOS</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> <span class="o">-</span><span class="n">a</span> <span class="n">x86_64</span> <span class="o">-</span><span class="n">n</span> <span class="o">--</span><span class="n">delete</span> <span class="o">--</span><span class="n">norepopath</span> <span class="o">--</span><span class="n">download</span><span class="o">-</span><span class="n">metadata</span> <span class="o">--</span><span class="n">repoid</span><span class="o">=</span><span class="n">BaseOS</span>
+<span class="n">dnf</span> <span class="n">reposync</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">AppStream</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> <span class="o">-</span><span class="n">a</span> <span class="n">x86_64</span> <span class="o">-</span><span class="n">n</span> <span class="o">--</span><span class="n">delete</span> <span class="o">--</span><span class="n">norepopath</span> <span class="o">--</span><span class="n">download</span><span class="o">-</span><span class="n">metadata</span> <span class="o">--</span><span class="n">repoid</span><span class="o">=</span><span class="n">AppStream</span>
+<span class="n">dnf</span> <span class="n">reposync</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">extras</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> <span class="o">-</span><span class="n">a</span> <span class="n">x86_64</span> <span class="o">-</span><span class="n">n</span> <span class="o">--</span><span class="n">delete</span> <span class="o">--</span><span class="n">norepopath</span> <span class="o">--</span><span class="n">download</span><span class="o">-</span><span class="n">metadata</span> <span class="o">--</span><span class="n">repoid</span><span class="o">=</span><span class="n">extras</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">&lt;download-path&gt;,</span> <span class="pre">--download-path=&lt;download-path&gt;</span></code> 指定下载目录，如果没有提供参数就会下载到当前目录。每个下载仓库都会在这个目录下有一个自己ID的子目录</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">&lt;architecture&gt;,</span> <span class="pre">--arch=&lt;architecture&gt;</span></code> 下载指定架构的软件包(默认是下载所有架构)。这个参数可以同时使用多次以便指定多个架构。 <strong>注意</strong> 即使是 <code class="docutils literal notranslate"><span class="pre">x86_64</span></code> 架构的软件仓库，也有很多软件包是 <code class="docutils literal notranslate"><span class="pre">noarch</span></code> 的，所以必须同时使用 <code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">x86_64</span> <span class="pre">-a</span> <span class="pre">noarch</span></code> 。不过，我觉得可能不需要指定 <code class="docutils literal notranslate"><span class="pre">-a</span></code> 参数，实际上软件仓库下载都是按照同步服务器的所需软件包来下载的。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--newest-only</span></code> 只下载每个仓库中最新的软件包</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--delete</span></code> 删除不在仓库中的本地软件包</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--norepopath</span></code> 不在下载目录下添加repo名字，例如再添加一个 <code class="docutils literal notranslate"><span class="pre">BaseOS</span></code> <strong>不过这个参数需要 dnf-plugins-core-4.0.14 以上版本才支持</strong> ( <a class="reference external" href="https://dnf-plugins-core.readthedocs.io/_/downloads/en/latest/pdf/">dnf-plugins-core release notes</a><span class="link-target"> [https://dnf-plugins-core.readthedocs.io/_/downloads/en/latest/pdf/]</span> )之前的reposync会强制在同步目录下创建一个 <code class="docutils literal notranslate"><span class="pre">repoid</span></code> 子目录，实际上就会和默认的repo目录不一致。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--download-metadata</span></code> 下载所有repository meatadata，这样就不需要再使用 <code class="docutils literal notranslate"><span class="pre">createrepo</span></code> 命令再创建metadata</p></li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">repoid</span></code> 可以通过 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">replist</span></code> 看到，例如用来同步的服务器，请使用 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">replist</span></code> 检查需要的仓库列表，选择必要同步的仓库同步。详细请参考 <a class="reference internal" href="dnf.xhtml#dnf"><span class="std std-ref">DNF包管理器</span></a></p>
+</div>
+<ul class="simple">
+<li><p>为了能够方便进行多个repo同步，实际我采用以下脚本 <code class="docutils literal notranslate"><span class="pre">reposync.sh</span></code></p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">yum.repos.d/reposync_sh</span></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env bash</span>
+
+<span class="nv">VER</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+<span class="nv">ARCH</span><span class="o">=</span><span class="s1">&#39;x86_64&#39;</span>
+<span class="nv">REPOS</span><span class="o">=(</span>AppStream BaseOS PowerTools centos-gluster7 docker-ce-stable epel epel-modular extras kubernetes<span class="o">)</span>
+
+<span class="k">for</span> repoid <span class="k">in</span> <span class="si">${</span><span class="nv">REPOS</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span> <span class="k">do</span>
+    <span class="nv">repo_path</span><span class="o">=</span><span class="s2">&quot;/usr/share/nginx/html/centos/</span><span class="si">${</span><span class="nv">VER</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">repoid</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span><span class="s2">/os&quot;</span>
+
+    <span class="c1"># After dnf-plugins-core-4.0.14 ,will use &quot;--norepopath&quot;</span>
+    <span class="c1">#dnf reposync -p ${repo_path} -a x86_64 -a noarch --newest-only --delete \</span>
+		<span class="c1">#--norepopath --download-metadata --repoid=${repoid}</span>
+
+    <span class="c1"># only use before dnf-plugins-core-4.0.14</span>
+    <span class="c1"># if ${repo_path}/Packages link exists, mean we had right directory structure</span>
+    <span class="k">if</span> <span class="o">[[</span> -L <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/Packages <span class="o">&amp;&amp;</span> -d <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/Packages <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+        dnf reposync -p <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span> -a x86_64 -a noarch --newest-only <span class="se">\</span>
+			--delete --download-metadata --repoid<span class="o">=</span><span class="si">${</span><span class="nv">repoid</span><span class="si">}</span>
+    <span class="k">else</span>
+        dnf reposync -p <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span> -a x86_64 -a noarch --newest-only <span class="se">\</span>
+			--delete --download-metadata --repoid<span class="o">=</span><span class="si">${</span><span class="nv">repoid</span><span class="si">}</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+        ln -s <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/<span class="si">${</span><span class="nv">repoid</span><span class="si">}</span>/* <span class="si">${</span><span class="nv">repo_path</span><span class="si">}</span>/
+    <span class="k">fi</span>
+<span class="k">done</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+</section>
+<section id="id1">
+<h2>客户端repo配置</h2>
+<p>客户端的配置是修订发行版软件仓库配置来实现的，基本方式就是注释掉 <code class="docutils literal notranslate"><span class="pre">mirrorlist=</span></code> 配置，然后启用 <code class="docutils literal notranslate"><span class="pre">baseurl=</span></code> 配置，但是采用本地局域网提供软件仓库的服务器IP地址或者内部域名。举例：</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">yum.repos.d/CentOS-Base.repo</span></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># CentOS-Base.repo</span>
+<span class="c1">#</span>
+<span class="c1"># The mirror system uses the connecting IP address of the client and the</span>
+<span class="c1"># update status of each mirror to pick mirrors that are updated to and</span>
+<span class="c1"># geographically close to the client.  You should use this for CentOS updates</span>
+<span class="c1"># unless you are manually picking other mirrors.</span>
+<span class="c1">#</span>
+<span class="c1"># If the mirrorlist= does not work for you, as a fall back you can try the</span>
+<span class="c1"># remarked out baseurl= line instead.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+<span class="o">[</span>BaseOS<span class="o">]</span>
+<span class="nv">name</span><span class="o">=</span>CentOS-<span class="nv">$releasever</span> - Base
+<span class="c1">#mirrorlist=http://mirrorlist.centos.org/?release=$releasever&amp;arch=$basearch&amp;repo=BaseOS&amp;infra=$infra</span>
+<span class="c1">#baseurl=http://mirror.centos.org/$contentdir/$releasever/BaseOS/$basearch/os/</span>
+<span class="nv">baseurl</span><span class="o">=</span>http://worker7/<span class="nv">$contentdir</span>/<span class="nv">$releasever</span>/BaseOS/<span class="nv">$basearch</span>/os/
+<span class="nv">gpgcheck</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">enabled</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">gpgkey</span><span class="o">=</span>file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>安装软件需要GPG密钥，请单独从官方服务器下载，存放到内网软件仓库下载服务器上提供下载。</p>
+</div>
+<p>我为了方便分发客户端配置，采用了脚本:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">yum.repos.d/replace_repo_file</span></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nv">repo_list</span><span class="o">=</span><span class="sb">`</span>ls *.repo<span class="sb">`</span>
+ssh root@<span class="nv">$1</span> <span class="s2">&quot;if [ ! -d /etc/yum.repos.d/backup ];then mkdir /etc/yum.repos.d/backup;fi &amp;&amp; cp /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup/&quot;</span>
+
+<span class="k">for</span> repo <span class="k">in</span> <span class="nv">$repo_list</span><span class="p">;</span><span class="k">do</span>
+    scp <span class="nv">$repo</span> root@<span class="nv">$1</span>:/etc/yum.repos.d/
+<span class="k">done</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我这里的案例 <code class="docutils literal notranslate"><span class="pre">CentOS-Base.repo</span></code> 和 <code class="docutils literal notranslate"><span class="pre">replace_repo_file</span></code> 都使用了一个主机域名 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> ，这是我内部测试使用服务器主机名，内部做了域名解析。你的配置请按照实际情况进行修改。</p>
+</div>
+<ul>
+<li><p>如果你在软件仓库存放了自己编译的rpm软件包，则需要使用 <code class="docutils literal notranslate"><span class="pre">createrepo</span></code> 命令来生成索引:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">createrepo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">my_repo</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>每天定时执行仓库更新</h2>
+<p>为了能够每天更新软件仓库，可以将 <code class="docutils literal notranslate"><span class="pre">reposync.sh</span></code> 脚本复制到 <code class="docutils literal notranslate"><span class="pre">/etc/cron.daily</span></code> 目录下，这样每天会执行一次同步。</p>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://access.redhat.com/solutions/23016">How to create a local mirror of the latest update for Red Hat Enterprise Linux 5, 6, 7, 8 without using Satellite server?</a><span class="link-target"> [https://access.redhat.com/solutions/23016]</span></p></li>
+<li><p><a class="reference external" href="https://www.server-world.info/en/note?os=CentOS_8&amp;p=localrepo">Configure DNF/Yum Mirror Server</a><span class="link-target"> [https://www.server-world.info/en/note?os=CentOS_8&amp;p=localrepo]</span></p></li>
+<li><p><a class="reference external" href="https://www.tecmint.com/create-local-yum-repository-on-centos-8/">How to Set Up a Local Yum/DNF Repository on CentOS 8</a><span class="link-target"> [https://www.tecmint.com/create-local-yum-repository-on-centos-8/]</span></p></li>
+<li><p><a class="reference external" href="https://dnf-plugins-core.readthedocs.io/en/latest/reposync.html">DNF reposync Plugin</a><span class="link-target"> [https://dnf-plugins-core.readthedocs.io/en/latest/reposync.html]</span></p></li>
+<li><p><a class="reference external" href="https://www.tecmint.com/setup-local-http-yum-repository-on-centos-7/">How to Setup Local HTTP Yum Repository on CentOS 7</a><span class="link-target"> [https://www.tecmint.com/setup-local-http-yum-repository-on-centos-7/]</span></p></li>
+<li><p><a class="reference external" href="https://wiki.centos.org/HowTos/CreateLocalMirror">Creating Local Mirrors for Updates or Installs</a><span class="link-target"> [https://wiki.centos.org/HowTos/CreateLocalMirror]</span></p></li>
+<li><p><a class="reference external" href="https://phoenixnap.com/kb/create-local-yum-repository-centos">How To Set Up Local Yum Repositories On CentOS 7</a><span class="link-target"> [https://phoenixnap.com/kb/create-local-yum-repository-centos]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

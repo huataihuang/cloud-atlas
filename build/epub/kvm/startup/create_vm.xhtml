@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Studio环境创建KVM虚拟机</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="studiokvm">
+<span id="create-vm"></span><h1>Studio环境创建KVM虚拟机</h1>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在Studio环境中，KVM虚拟化是实现模拟数据中心的核心。因为单纯的Docker+Kubernetes无法模拟多台物理服务器，虽然容器技术更为轻量级。</p>
+<p>为Studio选择的默认Guest操作系统是Ubuntu 18.04，这样可以获得Kernel 4.15，并且得到LTS长期支持。这个基础Guest系统将用于构建OpenStack。</p>
+<p>Studio环境采用Ubuntu作为host和guest的OS，在 <a class="reference internal" href="../../real/index.xhtml#real"><span class="std std-ref">Real Atlas</span></a> 中， <a class="reference internal" href="../../real/private_cloud/priv_kvm.xhtml#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 则采用CentOS作为OS。</p>
+</div>
+<section id="ubuntu">
+<h2>创建Ubuntu虚拟机</h2>
+<section id="x86ubuntu">
+<h3>X86环境Ubuntu虚拟机</h3>
+<ul>
+<li><p>创建虚拟机安装Guest操作系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">ubuntu18</span><span class="o">.</span><span class="mi">04</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">ubuntu18</span><span class="o">.</span><span class="mi">04</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">ubuntu18</span><span class="o">.</span><span class="mf">04.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
+  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="o">.</span><span class="mf">163.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="n">dists</span><span class="o">/</span><span class="n">bionic</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">installer</span><span class="o">-</span><span class="n">amd64</span><span class="o">/</span> \
+  <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">osinfo-query</span> <span class="pre">os</span></code> 可以查询出 <code class="docutils literal notranslate"><span class="pre">--os-variant</span></code> 所有支持的参数，这样可以精确指定操作系统版本以便优化运行参数。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--graphics</span> <span class="pre">none</span></code> 表示不使用VNC来访问VM的控制台，而是使用VM串口的字符控制台。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">`--location</span></code> 指定通过网络安装，如果使用本地iso安装，则使用 <code class="docutils literal notranslate"><span class="pre">--cdrom</span> <span class="pre">/var/lib/libvirt/images/ubuntu-18.04.2-live-server-amd64.iso</span></code></p></li>
+<li><p>只有通过网络安装才可以使用 <code class="docutils literal notranslate"><span class="pre">--extra-args=&quot;console=tty0</span> <span class="pre">console=ttyS0,115200&quot;</span></code> 以便能够通过串口控制台安装。也就是说，如果使用 iso镜像安装，则不能传递内核参数，否则提示报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span>    <span class="n">Kernel</span> <span class="n">arguments</span> <span class="n">are</span> <span class="n">only</span> <span class="n">supported</span> <span class="k">with</span> <span class="n">location</span> <span class="ow">or</span> <span class="n">kernel</span> <span class="n">installs</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>要模拟UEFI，需要安装 <code class="docutils literal notranslate"><span class="pre">ovmf</span></code> 软件包，并使用参数 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span></code></p></li>
+<li><p>root分区采用EXT4文件系统，占据整个磁盘</p></li>
+<li><p>软件包只选择 <code class="docutils literal notranslate"><span class="pre">OpenSSH</span> <span class="pre">server</span></code> 以便保持最小化安装，后续clone出的镜像再按需安装</p></li>
+</ul>
+<p>上述安装是通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span></code> 连接到虚拟机的串口控制台实现的，安装完成后，需要 <code class="docutils literal notranslate"><span class="pre">detach</span></code> 断开串口控制台: <code class="docutils literal notranslate"><span class="pre">CTRL+Shift+]</span></code> ，这就可以返回host主机的控制台。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在KVM中部署和运行Windows虚拟机相对复杂，请参考 <a class="reference internal" href="deploy_win_vm.xhtml#deploy-win-vm"><span class="std std-ref">部署Windows KVM虚拟机</span></a></p>
+</div>
+</section>
+<section id="armubuntu">
+<h3>ARM环境Ubuntu虚拟机</h3>
+<p>我在 <a class="reference internal" href="../arm_kvm/arm_kvm_startup.xhtml#arm-kvm-startup"><span class="std std-ref">ARM环境KVM快速起步</span></a> 中使用以下命令安装Ubuntu 20.04.2 LTS虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">ubuntu20</span><span class="o">.</span><span class="mi">04</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">2</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">ubuntu20</span><span class="o">.</span><span class="mi">04</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">ubuntu20</span><span class="o">.</span><span class="mf">04.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
+  <span class="o">--</span><span class="n">cdrom</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">-</span><span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span><span class="o">-</span><span class="n">live</span><span class="o">-</span><span class="n">server</span><span class="o">-</span><span class="n">arm64</span><span class="o">.</span><span class="n">iso</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>使用iso镜像安装时，不能传递内核参数 <code class="docutils literal notranslate"><span class="pre">--extra-args=&quot;console=tty0</span> <span class="pre">console=ttyS0,115200</span></code> ，不过，只要关闭图形输出 <code class="docutils literal notranslate"><span class="pre">--graphics</span> <span class="pre">none</span></code> 似乎就能够从串口输出，不传递参数也能成功(可能是新版本已经支持)。</p>
+</div>
+<p>安装提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">As</span> <span class="n">the</span> <span class="n">installer</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">on</span> <span class="n">a</span> <span class="n">serial</span> <span class="n">console</span><span class="p">,</span> <span class="n">it</span> <span class="n">has</span> <span class="n">started</span> <span class="ow">in</span> <span class="n">basic</span>
+<span class="n">mode</span><span class="p">,</span> <span class="n">using</span> <span class="n">only</span> <span class="n">the</span> <span class="n">ASCII</span> <span class="n">character</span> <span class="nb">set</span> <span class="ow">and</span> <span class="n">black</span> <span class="ow">and</span> <span class="n">white</span> <span class="n">colours</span><span class="o">.</span>
+
+<span class="n">If</span> <span class="n">you</span> <span class="n">are</span> <span class="n">connecting</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">terminal</span> <span class="n">emulator</span> <span class="n">such</span> <span class="k">as</span> <span class="n">gnome</span><span class="o">-</span><span class="n">terminal</span> <span class="n">that</span>
+<span class="n">supports</span> <span class="n">unicode</span> <span class="ow">and</span> <span class="n">rich</span> <span class="n">colours</span> <span class="n">you</span> <span class="n">can</span> <span class="n">switch</span> <span class="n">to</span> <span class="s2">&quot;rich mode&quot;</span> <span class="n">which</span> <span class="n">uses</span>
+<span class="n">unicode</span><span class="p">,</span> <span class="n">colours</span> <span class="ow">and</span> <span class="n">supports</span> <span class="n">many</span> <span class="n">languages</span><span class="o">.</span>
+
+<span class="n">You</span> <span class="n">can</span> <span class="n">also</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">the</span> <span class="n">installer</span> <span class="n">over</span> <span class="n">the</span> <span class="n">network</span> <span class="n">via</span> <span class="n">SSH</span><span class="p">,</span> <span class="n">which</span> <span class="n">will</span>
+<span class="n">allow</span> <span class="n">use</span> <span class="n">of</span> <span class="n">rich</span> <span class="n">mode</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>选择 <code class="docutils literal notranslate"><span class="pre">rich</span> <span class="pre">mode</span></code> 以后，提供了交互模式配置网络，可以选择默认DHCP获得IP地址，后续再切换成 <a class="reference internal" href="../libvirt/network/libvirt_bridged_network.xhtml#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a></p>
+<p>默认磁盘是LVM划分卷管理</p>
+<p>安装过程请选择安装SSH Server，其他软件包不需要安装，等服务器运行起来之后，可以按需安装。</p>
+</section>
+</section>
+<section id="centos-8">
+<h2>创建CentOS 8虚拟机</h2>
+<ul>
+<li><p>CentOS 8虚拟机安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">4096</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">2</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">rhel8</span><span class="o">.</span><span class="mi">0</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">centos8</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">8</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">spice</span> \
+  <span class="o">--</span><span class="n">cdrom</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">CentOS</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="mi">1905</span><span class="o">-</span><span class="n">boot</span><span class="o">.</span><span class="n">iso</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装过程的 <code class="docutils literal notranslate"><span class="pre">installation</span> <span class="pre">source</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">http://mirrors.163.com/centos/8.0.1905/BaseOS/x86_64/os/</span></code> (URL type是 <code class="docutils literal notranslate"><span class="pre">repository</span> <span class="pre">URL</span></code> ) 然后点击 <code class="docutils literal notranslate"><span class="pre">Done</span></code> 则自动刷新验证，最后显示的安装源如下：</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../../_images/centos8_installation_source.png" src="../../_images/centos8_installation_source.png" />
+</figure>
+</section>
+<section id="suse">
+<h2>创建SUSE虚拟机</h2>
+<ul>
+<li><p>部署suse server 12 sp3:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">sles12sp3</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">vnc</span> \
+  <span class="o">--</span><span class="n">cdrom</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">SLE</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="n">Server</span><span class="o">-</span><span class="n">DVD</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">GM</span><span class="o">-</span><span class="n">DVD1</span><span class="o">.</span><span class="n">iso</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里输出有一个警告提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span>  <span class="n">Graphics</span> <span class="n">requested</span> <span class="n">but</span> <span class="n">DISPLAY</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">set</span><span class="o">.</span> <span class="n">Not</span> <span class="n">running</span> <span class="n">virt</span><span class="o">-</span><span class="n">viewer</span><span class="o">.</span>
+<span class="n">WARNING</span>  <span class="n">No</span> <span class="n">console</span> <span class="n">to</span> <span class="n">launch</span> <span class="k">for</span> <span class="n">the</span> <span class="n">guest</span><span class="p">,</span> <span class="n">defaulting</span> <span class="n">to</span> <span class="o">--</span><span class="n">wait</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="n">Starting</span> <span class="n">install</span><span class="o">...</span>
+<span class="n">Allocating</span> <span class="s1">&#39;sles12-sp3.qcow2&#39;</span>                             <span class="o">|</span>  <span class="mi">16</span> <span class="n">GB</span>  <span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+
+<span class="n">Domain</span> <span class="ow">is</span> <span class="n">still</span> <span class="n">running</span><span class="o">.</span> <span class="n">Installation</span> <span class="n">may</span> <span class="n">be</span> <span class="ow">in</span> <span class="n">progress</span><span class="o">.</span>
+<span class="n">Waiting</span> <span class="k">for</span> <span class="n">the</span> <span class="n">installation</span> <span class="n">to</span> <span class="n">complete</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参数 <code class="docutils literal notranslate"><span class="pre">--graphics</span> <span class="pre">vnc</span></code> 会在服务器本地回环地址 <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> 上启动VNC监听，可以通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">vncdisplay</span> <span class="pre">&lt;vm_name&gt;</span></code> 查看:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vncdispaly</span> <span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span>
+</pre></div>
+</div>
+<p>例如输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>则可以使用ssh端口转发登陆服务器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="mi">5900</span><span class="p">:</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">5900</span> <span class="o">&lt;</span><span class="n">username</span><span class="o">&gt;@&lt;</span><span class="n">server_ip</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>也可以配置 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> 中添加配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">server_name</span>
+    <span class="n">HostName</span> <span class="n">server_ip</span>
+    <span class="n">User</span> <span class="n">huatai</span>
+    <span class="n">LocalForward</span> <span class="mi">5900</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">5900</span>
+</pre></div>
+</div>
+<p>然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">C</span> <span class="n">server_name</span>
+</pre></div>
+</div>
+<p>就可以实现同样的ssh端口转发。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>KVM提供的VNC访问方式在macOS上需要使用第三方VNC客户端来访问，例如 <a class="reference external" href="https://tigervnc.org">TigerVNC</a><span class="link-target"> [https://tigervnc.org]</span> ，使用macOS内置的vnc无法打开访问。使用VNC客户端访问本地 <code class="docutils literal notranslate"><span class="pre">127.0.0.1:5900</span></code> 则可以看到远程虚拟机的终端界面，就可以开始进一步安装:</p>
+<figure class="align-default">
+<img alt="../../_images/tigervnc_install_sles12.png" src="../../_images/tigervnc_install_sles12.png" style="width: 600.0px; height: 466.5px;" />
+</figure>
+</div>
+</section>
+<section id="bridge">
+<h2>虚拟机bridge网络</h2>
+<p>上述创建虚拟机都采用了 <code class="docutils literal notranslate"><span class="pre">--network</span> <span class="pre">bridge:virbr0</span></code> 参数，这个参数是 <a class="reference internal" href="../libvirt/network/libvirt_nat_network.xhtml#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> ，设置简单，但是不方便对外提供服务，并且性能不如 <a class="reference internal" href="../libvirt/network/libvirt_bridged_network.xhtml#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 。为了方便模拟生产环境，我在服务器内部管理网段 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> 采用bridge网络，并且采用 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_networkd.xhtml#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 创建网桥 <code class="docutils literal notranslate"><span class="pre">br0</span></code> 。</p>
+<section id="br0">
+<h3>创建网桥br0</h3>
+<p>需要配置3个 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/network</span></code> 目录下网桥和bind配置:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mybridge.netdev</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>NetDev<span class="o">]</span>
+<span class="nv">Name</span><span class="o">=</span>br0
+<span class="nv">Kind</span><span class="o">=</span>bridge
+</pre></div>
+</td></tr></table></div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bind.network</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>Match<span class="o">]</span>
+<span class="nv">Name</span><span class="o">=</span>enp0s25
+
+<span class="o">[</span>Network<span class="o">]</span>
+<span class="nv">Bridge</span><span class="o">=</span>br0
+</pre></div>
+</td></tr></table></div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mybridge.network</span></code> :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>Match<span class="o">]</span>
+<span class="nv">Name</span><span class="o">=</span>br0
+
+<span class="o">[</span>Network<span class="o">]</span>
+<span class="nv">Address</span><span class="o">=</span><span class="m">192</span>.168.6.200/24
+</pre></div>
+</td></tr></table></div>
+<ul>
+<li><p>然后重启一次 <code class="docutils literal notranslate"><span class="pre">systemd-netowrkd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">brctl</span> <span class="pre">show</span></code> 显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bridge</span> <span class="n">name</span>  <span class="n">bridge</span> <span class="nb">id</span>       <span class="n">STP</span> <span class="n">enabled</span> <span class="n">interfaces</span>
+<span class="n">br0</span>      <span class="mf">8000.7e33</span><span class="n">f1ea9ee3</span>   <span class="n">no</span>          <span class="n">enp0s25</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="libvirtbr0">
+<h3>修订libvirt配置绑定br0</h3>
+<ul>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">sles12-sp3</span></code> 修订虚拟机配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">interface</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;bridge&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">mac</span> <span class="n">address</span><span class="o">=</span><span class="s1">&#39;52:54:00:00:91:62&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span> <span class="n">bridge</span><span class="o">=</span><span class="s1">&#39;virbr0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">model</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;virtio&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;pci&#39;</span> <span class="n">domain</span><span class="o">=</span><span class="s1">&#39;0x0000&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0x01&#39;</span> <span class="n">slot</span><span class="o">=</span><span class="s1">&#39;0x00&#39;</span> <span class="n">function</span><span class="o">=</span><span class="s1">&#39;0x0&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">interface</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">interface</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;bridge&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">mac</span> <span class="n">address</span><span class="o">=</span><span class="s1">&#39;52:54:00:00:91:62&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span> <span class="n">bridge</span><span class="o">=</span><span class="s1">&#39;br0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">model</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;virtio&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;pci&#39;</span> <span class="n">domain</span><span class="o">=</span><span class="s1">&#39;0x0000&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0x01&#39;</span> <span class="n">slot</span><span class="o">=</span><span class="s1">&#39;0x00&#39;</span> <span class="n">function</span><span class="o">=</span><span class="s1">&#39;0x0&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">interface</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>也就是只需要修改 <code class="docutils literal notranslate"><span class="pre">&lt;source</span> <span class="pre">bridge='xxx'&gt;</span></code> 就可以修改绑定的网桥</p>
+<ul>
+<li><p>重启虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">shutdown</span> <span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span>
+<span class="n">virsh</span> <span class="n">start</span> <span class="n">sles12</span><span class="o">-</span><span class="n">sp3</span>
+</pre></div>
+</div>
+</li>
+<li><p>通过VNC登陆，修订网络配置</p></li>
+</ul>
+</section>
+</section>
+<section id="id1">
+<h2>虚拟机串口设置</h2>
+<ul class="simple">
+<li><p>设置虚拟机串口输出</p></li>
+</ul>
+<p>通过ssh登陆到刚才创建的虚拟机，然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">serial</span><span class="o">-</span><span class="n">getty</span><span class="nd">@ttyS0</span><span class="o">.</span><span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">serial</span><span class="o">-</span><span class="n">getty</span><span class="nd">@ttyS0</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>默认安装的虚拟机并没有提供串口输出，也就是无法通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">ubuntu18.04</span></code> 来访问虚拟机控制台。这样唯一登陆虚拟机的方法是依赖上述最小化安装时候附加安装的 <code class="docutils literal notranslate"><span class="pre">OpenSSH</span> <span class="pre">server</span></code> 通过网络登陆。注意，此时虚拟机的IP地址是通过 libvirt 的DHCP分配的，所以无法直接知道IP地址。</p>
+<p>可以通过 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">ping</span> <span class="pre">-b</span> <span class="pre">192.168.122.255</span></code> 此时在 <code class="docutils literal notranslate"><span class="pre">virbr0</span></code> 虚拟网络中广播地址，就可以再通过 <code class="docutils literal notranslate"><span class="pre">arp</span> <span class="pre">-a</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">virbr0</span></code> 找到运行中虚拟机的IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>? (192.168.122.186) at 52:54:00:8a:45:89 [ether] on virbr0
+</pre></div>
+</div>
+<p>此时就可以 <code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">192.168.122.186</span></code> 登陆到虚拟机内部，再调整虚拟机内核配置输出串口。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Host主机 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/virbr0.status</span></code> 提供了当前dnsmasq分配的IP地址情况。所以上述通过arp解析方法只适合在少数虚拟机时候使用，直接检查这个状态文件可以看到类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+  <span class="p">{</span>
+    <span class="s2">&quot;ip-address&quot;</span><span class="p">:</span> <span class="s2">&quot;192.168.122.186&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mac-address&quot;</span><span class="p">:</span> <span class="s2">&quot;52:54:00:8a:45:89&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;ubuntu18-04&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client-id&quot;</span><span class="p">:</span> <span class="s2">&quot;ff:32:39:f9:b5:00:02:00:00:ab:11:1a:49:39:51:4b:f1:45:b4&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;expiry-time&quot;</span><span class="p">:</span> <span class="mi">1551337558</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>详细的KVM虚拟机串口设置请参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/libvirt/devices/vm_serial_console.md">虚拟机串口控制台</a><span class="link-target"> [https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/libvirt/devices/vm_serial_console.md]</span></p>
+</div>
+</section>
+<section id="id3">
+<h2>虚拟机内部初始设置</h2>
+<ul>
+<li><p>修改Guest系统的 <code class="docutils literal notranslate"><span class="pre">/etc/sudoers</span></code> 允许 <code class="docutils literal notranslate"><span class="pre">sudo</span></code> 用户组可以无密码执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#%sudo    ALL=(ALL:ALL) ALL</span>
+<span class="o">%</span><span class="n">sudo</span>    <span class="n">ALL</span><span class="o">=</span><span class="p">(</span><span class="n">ALL</span><span class="p">:</span><span class="n">ALL</span><span class="p">)</span> <span class="n">NOPASSWD</span><span class="p">:</span><span class="n">ALL</span>
+</pre></div>
+</div>
+</li>
+<li><p>参考 <a class="reference internal" href="../../linux/ubuntu_linux/network/netplan.xhtml#netplan-static-ip"><span class="std std-ref">激活netplan</span></a> 设置好Guest虚拟机的静态IP地址，便于后续clone出虚拟机后调整</p></li>
+<li><p>在用户目录 <code class="docutils literal notranslate"><span class="pre">~/.ssh/authorized_keys</span></code> 中添加Host物理主机的公钥，以便能够方便登陆管理</p></li>
+<li><p>对齐物理主机、工作主机和虚拟机中同名账号的uid和gid</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>CentOS/RHEL 默认新开设的第一个账号的 <code class="docutils literal notranslate"><span class="pre">uid/gid</span></code> 是 <code class="docutils literal notranslate"><span class="pre">501/20</span></code> ，为方便各个虚拟机之间免密同账号登陆，将所有平台的自己个人账号的 <code class="docutils literal notranslate"><span class="pre">uid/gid</span></code> 对齐，以便避免权限错乱。</p>
+</div>
+<ul>
+<li><p>安装后登陆Guest系统内部更新系统并安装必要软件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">upgrade</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">screen</span> <span class="n">net</span><span class="o">-</span><span class="n">tools</span> <span class="n">nmon</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>准备虚拟机的动态调整</h2>
+<ul>
+<li><p>配置模版虚拟机的 <code class="docutils literal notranslate"><span class="pre">setmaxmem</span></code> 和手工修改配置，以便后续能够根据需要动态修改虚拟机的vcpu和mem:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">setmaxmem</span> <span class="n">ubuntu18</span><span class="o">.</span><span class="mi">04</span> <span class="mi">16</span><span class="n">G</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>不过，设置最大vcpu数量方法没有直接的virsh命令，所以采用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">ubuntu18.04</span></code> 方法，将以下配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">vcpu</span> <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;static&#39;</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">vcpu</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">vcpu</span> <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;static&#39;</span> <span class="n">current</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="o">&gt;</span><span class="mi">8</span><span class="o">&lt;/</span><span class="n">vcpu</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>详细的动态修改虚拟机vcpu和memory的方法参考 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/add_remove_vcpu_memory_to_guest_on_fly.md">动态调整KVM虚拟机内存和vcpu实战</a><span class="link-target"> [https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/kvm/startup/in_action/add_remove_vcpu_memory_to_guest_on_fly.md]</span></p>
+</div>
+</section>
+<section id="id5">
+<h2>下一步</h2>
+<p>现在我们已经创建了第一个可用的KVM虚拟机，并且对虚拟机做了调整。现在用这个虚拟机作为模版，我们可以快速clone出实验所需的虚拟机：</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="clone_vm.xhtml#clone-vm"><span class="std std-ref">复制KVM虚拟机</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

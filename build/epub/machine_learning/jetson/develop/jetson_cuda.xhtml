@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Jetson Nano安装CUDA</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="jetson-nanocuda">
+<span id="jetson-cuda"></span><h1>Jetson Nano安装CUDA</h1>
+<p>CUDA是NVIDIA开发的并行计算平台和编程模型。CUDA通过释放图形处理单元(graphics processing unit, GPU)的性能极大增强了计算能力。</p>
+<p>CUDA提供了一系列设计理念:</p>
+<ul class="simple">
+<li><p>提供一个标准语言扩展集，例如C，实现了直接的并行计算算法。通过CUDA C/C++，开发者可以集中精力去实现算法的并行执行而不是重新开发并行算法实现。</p></li>
+<li><p>支持混合计算：应用程序可以同时使用CPU和GPU。应用程序的部分工作在CPU上执行，并行部分则卸载到GPU上运行。这样CUDA可以增强现有程序。在内存空间，CPU和GPU视为不同设备，这个配置运行CPU和GPU协同计算，不需要竞争内存资源。</p></li>
+</ul>
+<section id="jetpackcuda">
+<h2>JetPack安装CUDA</h2>
+<p>Jatson Nano通过JetPack安装L4T操作系统，就已经包含了完整的CUDA稳定版本，所以不需要如本文做完整的检查和安装。</p>
+<p>Jetson Nano系统安装以后，在 <code class="docutils literal notranslate"><span class="pre">/etc/apt/sources.list.d/cuda-10-2-local-10.2.89.list</span></code> 包含了以下配置，表明软件仓库是本地安装的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">deb</span> <span class="n">file</span><span class="p">:</span><span class="o">///</span><span class="n">var</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">repo</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="mf">10.2</span><span class="o">.</span><span class="mi">89</span> <span class="o">/</span>
+</pre></div>
+</div>
+<p>这个本地软件仓库比较占用空间(1.9G)，必要时可以做迁移。</p>
+<p>只需要简单执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 查看版本</span>
+<span class="n">apt</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">cuda</span><span class="o">-</span><span class="n">core</span>
+<span class="c1"># 按照系统提供的版本直接安装</span>
+<span class="n">apt</span> <span class="n">install</span> <span class="n">cuda</span><span class="o">-</span><span class="n">core</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>完成安装以后执行以下命令检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="nb">list</span> <span class="o">--</span><span class="n">installed</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">cuda</span>
+</pre></div>
+</div>
+<p>可以看到系统已经安装完成的CUDA软件包组合。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>以下是完整的CUDA安装指南，适合主流Linux发行版安装。仅供参考。</p>
+</div>
+</section>
+<section id="id1">
+<h2>系统要求</h2>
+<p>要在系统中使用CUDA，需要安装以下:</p>
+<ul class="simple">
+<li><p>能够运行CUDA的GPU</p></li>
+<li><p>提供gcc编译器和工具链的受支持的Linux</p></li>
+<li><p>NVIDIA CUDA Toolkit - 可以从 <a class="reference external" href="https://developer.nvidia.com/cuda-downloads">CUDA Toolkit Downloads</a><span class="link-target"> [https://developer.nvidia.com/cuda-downloads]</span> 下载</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>运行CUDA需要内核版本支持，请参考 <a class="reference external" href="https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html">NVIDIA CUDA Installation Guide for Linux</a><span class="link-target"> [https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html]</span> 中有关内核版本要求</p>
+</div>
+</section>
+<section id="id2">
+<h2>安装前准备</h2>
+<ul>
+<li><p>验证CUDA兼容GPU:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">nvidia</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>对于Jetson Nano，输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">00</span><span class="p">:</span><span class="mf">01.0</span> <span class="n">PCI</span> <span class="n">bridge</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="mi">0</span><span class="n">fae</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+<span class="mi">00</span><span class="p">:</span><span class="mf">02.0</span> <span class="n">PCI</span> <span class="n">bridge</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="mi">0</span><span class="n">faf</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>请参考 <a class="reference external" href="https://developer.nvidia.com/cuda-gpus">CUDA GPUs</a><span class="link-target"> [https://developer.nvidia.com/cuda-gpus]</span> 文档列出的GPU进行验证核对。</p>
+<ul>
+<li><p>验证是否是支持的Linux版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">uname</span> <span class="o">-</span><span class="n">m</span> <span class="o">&amp;&amp;</span> <span class="n">cat</span> <span class="o">/</span><span class="n">etc</span><span class="o">/*</span><span class="n">release</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>对于Jetson Nano Jetpak 4.4输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">aarch64</span>
+<span class="n">DISTRIB_ID</span><span class="o">=</span><span class="n">Ubuntu</span>
+<span class="n">DISTRIB_RELEASE</span><span class="o">=</span><span class="mf">18.04</span>
+<span class="n">DISTRIB_CODENAME</span><span class="o">=</span><span class="n">bionic</span>
+<span class="n">DISTRIB_DESCRIPTION</span><span class="o">=</span><span class="s2">&quot;Ubuntu 18.04.5 LTS&quot;</span>
+<span class="c1"># R32 (release), REVISION: 4.3, GCID: 21589087, BOARD: t210ref, EABI: aarch64, DATE: Fri Jun 26 04:38:25 UTC 2020</span>
+<span class="n">NAME</span><span class="o">=</span><span class="s2">&quot;Ubuntu&quot;</span>
+<span class="n">VERSION</span><span class="o">=</span><span class="s2">&quot;18.04.5 LTS (Bionic Beaver)&quot;</span>
+<span class="n">ID</span><span class="o">=</span><span class="n">ubuntu</span>
+<span class="n">ID_LIKE</span><span class="o">=</span><span class="n">debian</span>
+<span class="n">PRETTY_NAME</span><span class="o">=</span><span class="s2">&quot;Ubuntu 18.04.5 LTS&quot;</span>
+<span class="n">VERSION_ID</span><span class="o">=</span><span class="s2">&quot;18.04&quot;</span>
+<span class="n">HOME_URL</span><span class="o">=</span><span class="s2">&quot;https://www.ubuntu.com/&quot;</span>
+<span class="n">SUPPORT_URL</span><span class="o">=</span><span class="s2">&quot;https://help.ubuntu.com/&quot;</span>
+<span class="n">BUG_REPORT_URL</span><span class="o">=</span><span class="s2">&quot;https://bugs.launchpad.net/ubuntu/&quot;</span>
+<span class="n">PRIVACY_POLICY_URL</span><span class="o">=</span><span class="s2">&quot;https://www.ubuntu.com/legal/terms-and-policies/privacy-policy&quot;</span>
+<span class="n">VERSION_CODENAME</span><span class="o">=</span><span class="n">bionic</span>
+<span class="n">UBUNTU_CODENAME</span><span class="o">=</span><span class="n">bionic</span>
+</pre></div>
+</div>
+<ul>
+<li><p>验证系统已经安装了gcc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gcc</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+</div>
+</li>
+<li><p>验证系统已经安装了正确的内核头部和开发包</p></li>
+</ul>
+<p>CUDA驱动需要Kernel headers和development packages用于驱动安装和驱动重新构建。需要确保安装的Kernel header和development package和当前内核匹配。</p>
+<p>检查运行内核:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">uname</span> <span class="o">-</span><span class="n">r</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">4.9</span><span class="o">.</span><span class="mi">140</span><span class="o">-</span><span class="n">tegra</span>
+</pre></div>
+</div>
+<p>上述显示的版本就是我们需要安装CUDA驱动对应的kernel headers和development packages。</p>
+<p>RHEL7/CentOS7安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo yum install kernel-devel-$(uname -r) kernel-headers-$(uname -r)
+</pre></div>
+</div>
+<p>Fedora/RHEL8/CentOS8安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo dnf install kernel-devel-$(uname -r) kernel-headers-$(uname -r)
+</pre></div>
+</div>
+<p>OpenSUSE/SLES安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">zypper</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">kernel</span><span class="o">-&lt;</span><span class="n">variant</span><span class="o">&gt;-</span><span class="n">devel</span><span class="o">=&lt;</span><span class="n">version</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Ubuntu安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo apt-get install linux-headers-$(uname -r)
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>选择安装方式</h2>
+<p>CUDA Toolkit提供两种安装方式:</p>
+<ul class="simple">
+<li><p>发行版软件包(RPM和Deb包)</p></li>
+<li><p>发行版无关(runfile包)</p></li>
+</ul>
+<p>建议使用 <code class="docutils literal notranslate"><span class="pre">发行版软件包(RPM和Deb包)</span></code> 进行安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">developer</span><span class="o">.</span><span class="n">download</span><span class="o">.</span><span class="n">nvidia</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">compute</span><span class="o">/</span><span class="n">cuda</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">ubuntu1804</span><span class="o">/</span><span class="n">sbsa</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">ubuntu1804</span><span class="o">.</span><span class="n">pin</span>
+<span class="n">sudo</span> <span class="n">mv</span> <span class="n">cuda</span><span class="o">-</span><span class="n">ubuntu1804</span><span class="o">.</span><span class="n">pin</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">preferences</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">repository</span><span class="o">-</span><span class="n">pin</span><span class="o">-</span><span class="mi">600</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">adv</span> <span class="o">--</span><span class="n">fetch</span><span class="o">-</span><span class="n">keys</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">developer</span><span class="o">.</span><span class="n">download</span><span class="o">.</span><span class="n">nvidia</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">compute</span><span class="o">/</span><span class="n">cuda</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">ubuntu1804</span><span class="o">/</span><span class="n">sbsa</span><span class="o">/</span><span class="mi">7</span><span class="n">fa2af80</span><span class="o">.</span><span class="n">pub</span>
+<span class="n">sudo</span> <span class="n">add</span><span class="o">-</span><span class="n">apt</span><span class="o">-</span><span class="n">repository</span> <span class="s2">&quot;deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/sbsa/ /&quot;</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">cuda</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html">NVIDIA CUDA Installation Guide for Linux</a><span class="link-target"> [https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html]</span></p></li>
+<li><p><a class="reference external" href="https://forums.developer.nvidia.com/t/how-to-to-install-cuda-10-0-on-jetson-nano-separately/82405">How to to install cuda 10.0 on jetson nano separately ?</a><span class="link-target"> [https://forums.developer.nvidia.com/t/how-to-to-install-cuda-10-0-on-jetson-nano-separately/82405]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -9,6 +9,8 @@ cloud-init是用于初始化云实例的工具包，最初是ubuntu引入，现�
 .. toctree::
    :maxdepth: 1
 
+   cloud_init_startup.rst
+
 
 .. only::  subproject and html
 

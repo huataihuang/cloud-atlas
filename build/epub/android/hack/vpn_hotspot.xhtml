@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>VPN Hotspot</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="vpn-hotspot">
+<span id="id1"></span><h1>VPN Hotspot</h1>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Linux平台VPN连接是可以通过NAT方式共享给局域网其他主机的，例如你可以使用 <a class="reference internal" href="../../linux/security/vpn/openconnect_vpn.xhtml#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 翻墙，然后局域网其他主机默认路由指向这台主机，只要在这个主机上启用NAT，则其他主机也能够流畅访问网络。</p>
+<p>MacOS设置共享VPN给热点非常方便，请参考 <a class="reference external" href="https://torguard.net/article/217/vpn-sharing-on-mac.html">How to share a VPN connection from your Mac OS</a><span class="link-target"> [https://torguard.net/article/217/vpn-sharing-on-mac.html]</span> ：只需要把 VPN PPTP/L2TP 连接通过 <code class="docutils literal notranslate"><span class="pre">Internet</span> <span class="pre">Sharing</span></code> 功能共享给 <code class="docutils literal notranslate"><span class="pre">Wi-Fi</span></code> 设备，就能够创建一个AP热点：</p>
+<figure class="align-default">
+<img alt="../../_images/share_vpn_hotspot.png" src="../../_images/share_vpn_hotspot.png" style="width: 600.0px; height: 474.75px;" />
+</figure>
+<p>由于iOS安全限制，即使手机通过蜂窝网络创建了VPN连接，但是手机的热点共享无法提供其他设备共享VPN上网。解决的方法目前还是通过Jailbreak越狱以后才能够实现。</p>
+<p>Android设备安全限制相对灵活，只要Android手机Root过了，就可以通过VPNHotspot应用共享VPN上网。本文就是在Pixel手机上实践共享VPN的记录。</p>
+</div>
+<section id="id2">
+<h2>原理</h2>
+<p><a class="reference external" href="https://github.com/Mygod/VPNHotspot">VPN Hotspot</a><span class="link-target"> [https://github.com/Mygod/VPNHotspot]</span> 是一个开源共享VPN连接给hotspot或repeater的Android程序，不过运行需要root过的Android环境。可以从 <a class="reference external" href="https://labs.xda-developers.com/store/app/be.mygod.vpnhotspot">XDA labs的vpnhotspot</a><span class="link-target"> [https://labs.xda-developers.com/store/app/be.mygod.vpnhotspot]</span> 下载，也可以直接从Goolge Play安装。</p>
+<p>VPN Hotspot程序默认设置是一种通用型并且最大兼容的设置，但是这个设置可能并没有为电池寿命做优化。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>共享热点也称为 <code class="docutils literal notranslate"><span class="pre">Tethering</span></code> 技术，特别是通过USB共享Internet连接，称为 <code class="docutils literal notranslate"><span class="pre">USB</span> <span class="pre">Tethering</span></code> 。不过，macOS默认没有包含Android USB Tethering驱动，所以在Android手机上激活USB Tethering后，通过USB连接到Mac电脑上是没有任何响应的，需要安装和设置 <a class="reference internal" href="android_usb_tethering.xhtml#android-usb-tethering"><span class="std std-ref">通过USB Tethering方式共享Android的Internet连接</span></a> 驱动。</p>
+</div>
+<section id="upstream">
+<h3>Upstream</h3>
+<ul class="simple">
+<li><p>Upstream network interface: 在VPN Hotspot中主要的upstream是用于重路由数据流量的。如果保持空白则表示自动检测系统VPN(允许/在使用VPN时不允许绕过本程序)。如果设置为 <code class="docutils literal notranslate"><span class="pre">none</span></code> 就阻止绑定VPN</p></li>
+<li><p>Fallback upstream: Fallack upstream是用于某些VPN将一些失效路由返到默认网卡。如果该设置空白就表示自动检测。如果设置 <code class="docutils literal notranslate"><span class="pre">none</span></code> 就禁止 fallback。你可以设置一个接口</p></li>
+<li><p>IP Masquerade Mode:
+* <code class="docutils literal notranslate"><span class="pre">None</span></code> : 从downstream来的数据不做任何地址/端口重映射。这个选贤更可能在一些dummy VPN，如ad-blocker或者socksifiers(Shadowsocks)有用。但是如果你使用真正的VPN，如OpenVPN就不要使用这个选项。
+* <code class="docutils literal notranslate"><span class="pre">Simple</span></code> : 从downstream来的数据包的源地址和源端口被重映射
+* <code class="docutils literal notranslate"><span class="pre">Android</span> <span class="pre">Netd</span> <span class="pre">Service</span></code> (从Android 9开始提供) : 允许你的系统来处理masquerade。Android系统将做一些额外的事情，如FTP以及绑定流量计数器。在移动运营商网络上隐藏你的绑定操作就可能不会使用这个选项。</p></li>
+</ul>
+</section>
+<section id="downstream">
+<h3>Downstream</h3>
+<ul class="simple">
+<li><p>Disable IPv6 tethering: 启用这个选项禁止系统绑定IPv6。这可以阻止IPv6泄漏，因为当前程序不能处理IPv6 VPN 绑定</p></li>
+<li><p>(从Android 8.1开始)Tethering hardware acceleration: 这个功能是系统开发者模式的相同设置的快捷方式。为了让VPN绑在系统绑定上工作可能必须关闭这个选项，但是当绑定激活时候可能降低电池寿命</p></li>
+<li><p>Enable DHCP workaround: 只在VPN开启时设备无法获得客户端IP地址时使用。这是一个全局设置，也就是只能全局使用一次。</p></li>
+</ul>
+</section>
+<section id="misc">
+<h3>Misc</h3>
+<ul class="simple">
+<li><p>Keep Wi-Fi alive: 当开启repeater, temporary hotspot 或 system VPN hotspot时，锁定Wi-Fi</p>
+<ul>
+<li><p>选择 <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">default</span></code> (从Android 10开始的默认设置)可以保护电池寿命</p></li>
+<li><p>选择 <code class="docutils literal notranslate"><span class="pre">On</span></code> (针对Android 10)(默认)主要是在repeater/hotspot仅用了一会儿就自动关闭或停止工作时用来解决这个问题。</p></li>
+<li><p>选择 <code class="docutils literal notranslate"><span class="pre">Disable</span> <span class="pre">power</span> <span class="pre">save</span></code> 是为了降低数据包延迟，例如在语音连接可能需要，或许可以提高通话质量。这个设置需要硬件支持，</p></li>
+<li><p>选择 <code class="docutils literal notranslate"><span class="pre">Low</span> <span class="pre">latency</span> <span class="pre">mode</span></code> 是降低数据包延迟(从Android 10提供)，但是可能会导致以下问题:</p>
+<ul>
+<li><p>降低电池寿命</p></li>
+<li><p>降低带宽</p></li>
+<li><p>降低Wi-Fi扫描频率 - 这可能导致设备移动或AP间切换的信号质量</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Start repeater on boot</p></li>
+<li><p>Network status monitor mode</p></li>
+</ul>
+</section>
+</section>
+<section id="id4">
+<h2>使用VPN HotSpot</h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果是使用移动数据网络建立的VPN连接，则可以使用 <code class="docutils literal notranslate"><span class="pre">Wi-Fi</span> <span class="pre">Hotspot</span></code> 。但是，如果是已经在Wi-Fi网络上启用了VPN，就不可以使用 <code class="docutils literal notranslate"><span class="pre">Wi-Fi</span> <span class="pre">Hotspot</span></code> ，否则会导致VPN断开(因为无线网卡被改为AP热点导致直联的WLAN断开)</p>
+</div>
+<p>通常有3步操作：</p>
+<ul class="simple">
+<li><p>启动VPN - 可以使用Cisco AnyConnect连接VPN，连接完成后，切换到VPN Hot Spot程序</p></li>
+<li><p>启用 <code class="docutils literal notranslate"><span class="pre">Wi-Fi</span> <span class="pre">Hotspot</span></code> 或 <code class="docutils literal notranslate"><span class="pre">USB</span> <span class="pre">Tethering</span></code> 或 <code class="docutils literal notranslate"><span class="pre">Bluetooth</span> <span class="pre">Tething</span></code> ，也可以组合这几种Tethering设置。这是调用Android系统内建的Tethering设置。</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../../_images/vpn_hotspot_1.png" src="../../_images/vpn_hotspot_1.png" style="width: 334.5px; height: 600.0px;" />
+</figure>
+<p>这里点击 <code class="docutils literal notranslate"><span class="pre">USB</span> <span class="pre">tethering</span></code> 将转跳到系统设置 <code class="docutils literal notranslate"><span class="pre">Hotspot</span> <span class="pre">&amp;</span> <span class="pre">tethering</span></code> 启动 <a class="reference internal" href="android_usb_tethering.xhtml#android-usb-tethering"><span class="std std-ref">通过USB Tethering方式共享Android的Internet连接</span></a> :</p>
+<figure class="align-default">
+<img alt="../../_images/vpn_hotspot_2.png" src="../../_images/vpn_hotspot_2.png" style="width: 307.5px; height: 549.0px;" />
+</figure>
+<ul class="simple">
+<li><p>然后返回 VPN Hotspot 程序，可以看到此时不仅显示 <code class="docutils literal notranslate"><span class="pre">USB</span> <span class="pre">tethering</span></code> 已经激活，而且多出了一个 <code class="docutils literal notranslate"><span class="pre">mdis0</span></code> 设置(这个设置就是共享USB上网的upstream)，请激活 <code class="docutils literal notranslate"><span class="pre">mdis0</span></code> 接口:</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../../_images/vpn_hotspot_3.png" src="../../_images/vpn_hotspot_3.png" style="width: 336.0px; height: 600.0px;" />
+</figure>
+<p>此时你就会发现你的电脑也能够和已经连接VPN的手机一样访问公司内网或者翻墙了。</p>
+</section>
+<section id="id5">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.technadu.com/share-vpn-connection/38816/">How to Share Your VPN Connection? – Step-By-Step Guide Covering Windows, MacOS, Android &amp; iOS!</a><span class="link-target"> [https://www.technadu.com/share-vpn-connection/38816/]</span></p></li>
+<li><p><a class="reference external" href="https://github.com/Mygod/VPNHotspot">VPN Hotspot</a><span class="link-target"> [https://github.com/Mygod/VPNHotspot]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

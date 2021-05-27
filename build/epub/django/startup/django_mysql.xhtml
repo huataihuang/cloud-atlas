@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Django配置MySQL数据库</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="djangomysql">
+<span id="django-mysql"></span><h1>Django配置MySQL数据库</h1>
+<p>在部署 <a class="reference internal" href="django_env.xhtml#django-env"><span class="std std-ref">Django开发环境</span></a> 后，我们可以开发Django。但是，默认使用的数据库是sqlite，和生产环境往往不同。所以，我们通常会把Django数据库后端替换成MySQL。</p>
+<p>但是，需要注意的是，我们不能把数据库访问账号密码直接配置在 <code class="docutils literal notranslate"><span class="pre">manage.py</span></code> 中，也不能把包含账号信息提交到git仓库中，所以需要有一定的配置方法来实现数据库连接。</p>
+<section id="id1">
+<h2>准备数据库</h2>
+<ul>
+<li><p>使用以下方式创建应用数据库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">create</span> <span class="n">database</span> <span class="n">myappdb</span> <span class="n">character</span> <span class="nb">set</span> <span class="n">utf8</span><span class="p">;</span>
+<span class="n">create</span> <span class="n">user</span> <span class="n">myapp</span><span class="o">@</span><span class="s1">&#39;%&#39;</span> <span class="n">identified</span> <span class="n">by</span> <span class="s1">&#39;MyPass&#39;</span><span class="p">;</span>
+<span class="n">grant</span> <span class="nb">all</span> <span class="n">privileges</span> <span class="n">on</span> <span class="n">myappdb</span><span class="o">.*</span> <span class="n">to</span> <span class="n">myapp</span><span class="o">@</span><span class="s1">&#39;%&#39;</span><span class="p">;</span>
+<span class="n">flush</span> <span class="n">privileges</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="mysqlclient">
+<h2>安装mysqlclient模块</h2>
+<p>在安装 <a class="reference internal" href="../../python/startup/virtualenv.xhtml#virtualenv"><span class="std std-ref">Python virtualenv</span></a> 之后，通过 <code class="docutils literal notranslate"><span class="pre">pip</span></code>  安装 <code class="docutils literal notranslate"><span class="pre">mysqlclient</span></code> 模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mysqlclient</span>
+</pre></div>
+</div>
+<p>如果出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="n">Command</span> <span class="n">errored</span> <span class="n">out</span> <span class="k">with</span> <span class="n">exit</span> <span class="n">status</span> <span class="mi">1</span><span class="p">:</span>
+ <span class="n">command</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">admin</span><span class="o">/</span><span class="n">venv3</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;import sys, setuptools, tokenize; sys.argv[0] = &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;/tmp/pip-install-3m5z471x/mysqlclient_891b537df843484ba930dc9520c76710/setup.py&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;; __file__=&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;/tmp/pip-install-3m5z471x/mysqlclient_891b537df843484ba930dc9520c76710/setup.py&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;;f=getattr(tokenize, &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;open&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;, open)(__file__);code=f.read().replace(&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;, &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;);f.close();exec(compile(code, __file__, &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;exec&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;))&#39;</span> <span class="n">egg_info</span> <span class="o">--</span><span class="n">egg</span><span class="o">-</span><span class="n">base</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">pip</span><span class="o">-</span><span class="n">pip</span><span class="o">-</span><span class="n">egg</span><span class="o">-</span><span class="n">info</span><span class="o">-</span><span class="mi">1</span><span class="n">mbvlvf_</span>
+     <span class="n">cwd</span><span class="p">:</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">pip</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="mi">3</span><span class="n">m5z471x</span><span class="o">/</span><span class="n">mysqlclient_891b537df843484ba930dc9520c76710</span><span class="o">/</span>
+<span class="n">Complete</span> <span class="n">output</span> <span class="p">(</span><span class="mi">15</span> <span class="n">lines</span><span class="p">):</span>
+<span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span><span class="p">:</span> <span class="n">mysql_config</span><span class="p">:</span> <span class="n">command</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span><span class="p">:</span> <span class="n">mariadb_config</span><span class="p">:</span> <span class="n">command</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span><span class="p">:</span> <span class="n">mysql_config</span><span class="p">:</span> <span class="n">command</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">mysql_config</span> <span class="o">--</span><span class="n">version</span>
+<span class="n">mariadb_config</span> <span class="o">--</span><span class="n">version</span>
+<span class="n">mysql_config</span> <span class="o">--</span><span class="n">libs</span>
+</pre></div>
+</div>
+<p>则需要安装 mysql 开发包，例如 <code class="docutils literal notranslate"><span class="pre">mariadb-devel</span></code> ，安装以后系统会有 <code class="docutils literal notranslate"><span class="pre">mysql_config</span></code> 工具</p>
+</section>
+<section id="django">
+<h2>配置Django连接数据库</h2>
+<ul class="simple">
+<li><p>django一般有2种方式获取数据库连接信息:</p>
+<ul>
+<li><p>直接读取 <code class="docutils literal notranslate"><span class="pre">/etc/my.cnf</span></code> (当前Django官方推荐)</p></li>
+<li><p>使用环境变量</p></li>
+</ul>
+</li>
+</ul>
+<section id="mysql-client">
+<h3>读取MySQL Client配置(推荐)</h3>
+<p>现在Django推荐采用直接读取操作系统安装的MySQL客户端配置来完成数据库连接配置。例如，通常我们的数据库访问配置 <code class="docutils literal notranslate"><span class="pre">/etc/my.cnf</span></code> 内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">client</span><span class="p">]</span>
+<span class="n">database</span> <span class="o">=</span> <span class="n">NAME</span>
+<span class="n">user</span> <span class="o">=</span> <span class="n">USER</span>
+<span class="n">password</span> <span class="o">=</span> <span class="n">PASSWORD</span>
+<span class="n">default</span><span class="o">-</span><span class="n">character</span><span class="o">-</span><span class="nb">set</span> <span class="o">=</span> <span class="n">utf8</span>
+</pre></div>
+</div>
+<ul>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">myapp/settings.py</span></code> 数据库配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.mysql&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+             <span class="s1">&#39;read_default_file&#39;</span><span class="p">:</span> <span class="s1">&#39;/etc/onesredb.cnf&#39;</span><span class="p">,</span>
+         <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h3>数据库环境变量</h3>
+<p>django支持从环境变量中读取配置，所以可以将密码相关变量保存到环境中。对于使用Python virtualenv，可以在进入虚拟环境的最后激活配置 <code class="docutils literal notranslate"><span class="pre">postactivate</span></code> 中设置环境，并在 <code class="docutils literal notranslate"><span class="pre">predeactivate</span></code> 文件中 <code class="docutils literal notranslate"><span class="pre">unset</span></code> 环境变量。</p>
+<ul>
+<li><p>修订django的 <code class="docutils literal notranslate"><span class="pre">myapp/settings.py</span></code> 将:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.sqlite3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;db.sqlite3&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.mysql&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="n">get_env_variable</span><span class="p">(</span><span class="s1">&#39;DATABASE_NAME&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;USER&#39;</span><span class="p">:</span> <span class="n">get_env_variable</span><span class="p">(</span><span class="s1">&#39;DATABASE_USER&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;PASSWORD&#39;</span><span class="p">:</span> <span class="n">get_env_variable</span><span class="p">(</span><span class="s1">&#39;DATABASE_PASSWORD&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;HOST&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PORT&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">myapp/settings.py</span></code> 开头加上:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ImproperlyConfigured</span>
+
+<span class="k">def</span> <span class="nf">get_env_variable</span><span class="p">(</span><span class="n">var_name</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Set the </span><span class="si">%s</span><span class="s2"> environment variable&quot;</span> <span class="o">%</span> <span class="n">var_name</span>
+        <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>最后在virtualenv虚拟机环境 <code class="docutils literal notranslate"><span class="pre">venv3/bin/postactive</span></code> 中加上数据库设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DATABASE_NAME</span><span class="o">=</span><span class="s1">&#39;myappdb&#39;</span>
+<span class="n">export</span> <span class="n">DATABASE_USER</span><span class="o">=</span><span class="s1">&#39;myapp&#39;</span>
+<span class="n">export</span> <span class="n">DATABASE_PASSWORD</span><span class="o">=</span><span class="s1">&#39;MyPass&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p>并在virtualenv虚拟机退出配置 <code class="docutils literal notranslate"><span class="pre">venv3/bin/predeactivate</span></code> 配置加上:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unset</span> <span class="n">DATABASE_NAME</span>
+<span class="n">unset</span> <span class="n">DATABASE_USER</span>
+<span class="n">unset</span> <span class="n">DATABASE_PASSWORD</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h3>数据库迁移</h3>
+<p>在完成上述两种数据库连接配置之一后，执行以下命令进行数据库migration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+</pre></div>
+</div>
+<p>最后测试应用启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id4">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.marinamele.com/taskbuster-django-tutorial/install-and-configure-mysql-for-django">Install and Configure MySQL for Django</a><span class="link-target"> [http://www.marinamele.com/taskbuster-django-tutorial/install-and-configure-mysql-for-django]</span> - 通过环境变量设置数据库连接</p></li>
+<li><p><a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-create-a-django-app-and-connect-it-to-a-database">How To Create a Django App and Connect it to a Database</a><span class="link-target"> [https://www.digitalocean.com/community/tutorials/how-to-create-a-django-app-and-connect-it-to-a-database]</span></p></li>
+<li><p><a class="reference external" href="https://docs.djangoproject.com/en/3.1/ref/databases/#connecting-to-the-database">Connecting to the database</a><span class="link-target"> [https://docs.djangoproject.com/en/3.1/ref/databases/#connecting-to-the-database]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

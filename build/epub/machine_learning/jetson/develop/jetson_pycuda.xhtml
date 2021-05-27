@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Jetson Nano安装pycuda</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="jetson-nanopycuda">
+<span id="jetson-pycuda"></span><h1>Jetson Nano安装pycuda</h1>
+<ul>
+<li><p>安装pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装pycuda:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">pycuda</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="n">file</span> <span class="n">included</span> <span class="kn">from</span> <span class="nn">src</span><span class="o">/</span><span class="n">cpp</span><span class="o">/</span><span class="n">cuda</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span>
+<span class="n">src</span><span class="o">/</span><span class="n">cpp</span><span class="o">/</span><span class="n">cuda</span><span class="o">.</span><span class="n">hpp</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span> <span class="n">fatal</span> <span class="n">error</span><span class="p">:</span> <span class="n">cuda</span><span class="o">.</span><span class="n">h</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+ <span class="c1">#include &lt;cuda.h&gt;</span>
+          <span class="o">^~~~~~~~</span>
+<span class="n">compilation</span> <span class="n">terminated</span><span class="o">.</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">command</span> <span class="s1">&#39;aarch64-linux-gnu-gcc&#39;</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">exit</span> <span class="n">status</span> <span class="mi">1</span>
+
+<span class="o">----------------------------------------</span>
+<span class="n">Failed</span> <span class="n">building</span> <span class="n">wheel</span> <span class="k">for</span> <span class="n">pycuda</span>
+</pre></div>
+</div>
+<p>实际上CUDA的头文件已经安装在 <code class="docutils literal notranslate"><span class="pre">/usr/local/cuda/targets/aarch64-linux/include/</span></code> ，需要让编译make能够找到这些头文件。参考 <a class="reference external" href="https://stackoverflow.com/questions/52195608/src-cpp-cuda-hpp1410-fatal-error-cuda-h-no-such-file-or-directory">src/cpp/cuda.hpp:14:10: fatal error: cuda.h: No such file or directory</a><span class="link-target"> [https://stackoverflow.com/questions/52195608/src-cpp-cuda-hpp1410-fatal-error-cuda-h-no-such-file-or-directory]</span> ，在 <code class="docutils literal notranslate"><span class="pre">/etc/profile</span></code> 中添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export CUDA_HOME=/usr/local/cuda
+export CPATH=${CUDA_HOME}/include:${CPATH}
+export LIBRARY_PATH=${CUDA_HOME}/lib64:$LIBRARY_PATH
+</pre></div>
+</div>
+<p>这里使用了 <code class="docutils literal notranslate"><span class="pre">CPATH</span></code> 变量而不是 <code class="docutils literal notranslate"><span class="pre">C_INCLUDE_PATH</span></code> ，因为这是一个更为通用的路径输出。我测试了使用 <code class="docutils literal notranslate"><span class="pre">C_INCLUDE_PATH</span></code> 报错依旧，似乎对于编译c++的 <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> 应该使用 <code class="docutils literal notranslate"><span class="pre">CPATH</span></code> 。</p>
+<section id="id1">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://forums.developer.nvidia.com/t/pycuda-installation-failure-on-jetson-nano/77152">pycuda installation failure on jetson nano</a><span class="link-target"> [https://forums.developer.nvidia.com/t/pycuda-installation-failure-on-jetson-nano/77152]</span></p></li>
+<li><p><a class="reference external" href="https://documen.tician.de/pycuda/">PyCUDA官方文档</a><span class="link-target"> [https://documen.tician.de/pycuda/]</span></p></li>
+<li><p><a class="reference external" href="https://medium.com/leadkaro/setting-up-pycuda-on-ubuntu-18-04-for-gpu-programming-with-python-830e03fc4b81">Setting up PyCUDA on Ubuntu 18.04 for GPU programming with Python</a><span class="link-target"> [https://medium.com/leadkaro/setting-up-pycuda-on-ubuntu-18-04-for-gpu-programming-with-python-830e03fc4b81]</span> 这篇文档提供了快速验证pycuda的方法</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>输出Kubernetes应用服务</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kubernetes">
+<span id="kubernetes-expose-service"></span><h1>输出Kubernetes应用服务</h1>
+<p>在 <a class="reference internal" href="../../concepts/objects/understand_k8s_objects.xhtml#understand-k8s-objects"><span class="std std-ref">理解Kubernetes对象</span></a> 章节我们参考Kubernetes官方案例创建了2个副本的nginx部署:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">application</span><span class="o">/</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">record</span>
+</pre></div>
+</div>
+<p>但是，部署只是确保容器pod在Kubernetes集群中运行，并没有对外提供（输出）服务，外部还不能访问我们的WEB服务器。</p>
+<p>本章节我们学习和测试如何输出Kubernetes集群的服务，把Nginx应用真正对外提供服务。</p>
+<section id="id1">
+<h2>服务输出尝试</h2>
+<ul>
+<li><p>将部署输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployments</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">expose</span><span class="o">-</span><span class="n">test1</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">LoadBalancer</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后我们检查输出的服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">services</span>
+</pre></div>
+</div>
+<p>可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>               <span class="n">TYPE</span>           <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>       <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>        <span class="n">AGE</span>
+<span class="n">expose</span><span class="o">-</span><span class="n">test1</span>       <span class="n">LoadBalancer</span>   <span class="mf">10.101</span><span class="o">.</span><span class="mf">32.198</span>   <span class="o">&lt;</span><span class="n">pending</span><span class="o">&gt;</span>         <span class="mi">80</span><span class="p">:</span><span class="mi">31482</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">5</span><span class="n">h36m</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>请注意，由于没有明确指定 <code class="docutils literal notranslate"><span class="pre">external-ip</span></code> ，所以这个服务没有绑定IP地址，实际上还无法对外提供服务。此时可以看到 <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code> 显示的是 <code class="docutils literal notranslate"><span class="pre">pending</span></code> 状态。从</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>上述输出服务命令（加上了 <code class="docutils literal notranslate"><span class="pre">--name=expose-test1</span></code> 是为了标识以便和其他配置区别）虽然能够创建服务输出，但是在dashboard上观察，可以看到服务是 <code class="docutils literal notranslate"><span class="pre">pending</span></code> 状态的，实际上并不能通过端口80访问。</p>
+<p>不过，kubernetes会在物理服务器（node）上创建一个随机的 <code class="docutils literal notranslate"><span class="pre">nodePort</span></code> 31482 ，实际上访问 <a class="reference external" href="http://xcloud:31482">http://xcloud:31482</a> 是可以打开nginx页面的(但和我们对外输出服务不同)。检查yaml:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;Service&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;apiVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;v1&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;expose-test1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;namespace&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;selfLink&quot;</span><span class="p">:</span> <span class="s2">&quot;/api/v1/namespaces/default/services/expose-test1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="s2">&quot;9b762258-87ff-11e9-a47b-b8e85633e48a&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;resourceVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;636271&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;creationTimestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-06-06T02:05:50Z&quot;</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;spec&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;ports&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;TCP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span>
+        <span class="s2">&quot;targetPort&quot;</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span>
+        <span class="s2">&quot;nodePort&quot;</span><span class="p">:</span> <span class="mi">31482</span>
+      <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;selector&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;app&quot;</span><span class="p">:</span> <span class="s2">&quot;nginx&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;clusterIP&quot;</span><span class="p">:</span> <span class="s2">&quot;10.101.32.198&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;LoadBalancer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sessionAffinity&quot;</span><span class="p">:</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;externalTrafficPolicy&quot;</span><span class="p">:</span> <span class="s2">&quot;Cluster&quot;</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;loadBalancer&quot;</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>通过负载均衡方式将pod上服务输出到外部网络:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployments</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span> <span class="o">--</span><span class="n">protocol</span><span class="o">=</span><span class="n">TCP</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">nginx</span><span class="o">-</span><span class="n">expose</span> <span class="o">--</span><span class="n">external</span><span class="o">-</span><span class="n">ip</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.81</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">LoadBalancer</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">service</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span> <span class="n">exposed</span>
+</pre></div>
+</div>
+<p>在Kubernetes中（实际上云计算平台的LoadBalancer都是如此）可以为负载均衡配置可用网段的任何IP地址，这个操作是告诉负载均衡监听哪个对外IP地址并做NAT转发负载均衡到后端real server。所以，我们可以创建真正对外服务IP地址（例如192.168.101.101），而不是复用当前我们运行pod的物理服务器（192.168.101.81）的IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployments</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span> <span class="o">--</span><span class="n">protocol</span><span class="o">=</span><span class="n">TCP</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span> <span class="o">--</span><span class="n">name</span><span class="o">=</span><span class="n">nginx</span><span class="o">-</span><span class="n">service</span> <span class="o">--</span><span class="n">external</span><span class="o">-</span><span class="n">ip</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">101.101</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">LoadBalancer</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里我们给输出的服务命名为 <code class="docutils literal notranslate"><span class="pre">nginx-service</span></code></p>
+</div>
+</section>
+<section id="id2">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/tutorials/stateless-application/expose-external-ip-address/">Exposing an External IP Address to Access an Application in a Cluster</a><span class="link-target"> [https://kubernetes.io/docs/tutorials/stateless-application/expose-external-ip-address/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

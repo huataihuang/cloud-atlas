@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>树莓派4的lm_sensor</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="lm-sensor">
+<span id="pi-4-lm-sensor"></span><h1>树莓派4的lm_sensor</h1>
+<p>树莓派4的处理器性能相较前代有很大提高，但是也带来了运行功耗和散热问题。我在淘宝上购买了铝合金散热铠甲，没有风扇的静音，但是比较担心散热问题，所以部署温度监控并进行实时检测。</p>
+<section id="id1">
+<h2>温控问题</h2>
+<p><a class="reference internal" href="../../../linux/server/hardware/check_server_temp.xhtml#check-server-temp"><span class="std std-ref">服务器温度检测</span></a> 介绍了一种命令行检查处理器问题方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>paste &lt;(cat /sys/class/thermal/thermal_zone*/type) &lt;(cat /sys/class/thermal/thermal_zone*/temp) | column -s $&#39;\t&#39; -t | sed &#39;s/\(.\)..$/.\1°C/&#39;
+</pre></div>
+</div>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cpu-thermal  52.5°C
+</pre></div>
+</div>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">top</span></code> 命令可以看到ubuntu默认启动的 <a class="reference internal" href="../../../linux/ubuntu_linux/admin/snap.xhtml#snap"><span class="std std-ref">snap软件包管理</span></a> 服务 <code class="docutils literal notranslate"><span class="pre">snapd</span></code> 持续消耗CPU资源:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">-</span> <span class="mi">03</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">12</span> <span class="n">up</span>  <span class="mi">2</span><span class="p">:</span><span class="mi">03</span><span class="p">,</span>  <span class="mi">1</span> <span class="n">user</span><span class="p">,</span>  <span class="n">load</span> <span class="n">average</span><span class="p">:</span> <span class="mf">0.92</span><span class="p">,</span> <span class="mf">0.79</span><span class="p">,</span> <span class="mf">0.80</span>
+<span class="n">Tasks</span><span class="p">:</span> <span class="mi">130</span> <span class="n">total</span><span class="p">,</span>   <span class="mi">1</span> <span class="n">running</span><span class="p">,</span> <span class="mi">129</span> <span class="n">sleeping</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">stopped</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">zombie</span>
+<span class="o">%</span><span class="n">Cpu</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="mf">6.3</span> <span class="n">us</span><span class="p">,</span>  <span class="mf">1.8</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span> <span class="mf">89.0</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">2.9</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="n">MiB</span> <span class="n">Mem</span> <span class="p">:</span>   <span class="mf">1848.2</span> <span class="n">total</span><span class="p">,</span>   <span class="mf">1118.2</span> <span class="n">free</span><span class="p">,</span>    <span class="mf">193.4</span> <span class="n">used</span><span class="p">,</span>    <span class="mf">536.5</span> <span class="n">buff</span><span class="o">/</span><span class="n">cache</span>
+<span class="n">MiB</span> <span class="n">Swap</span><span class="p">:</span>      <span class="mf">0.0</span> <span class="n">total</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">free</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">used</span><span class="o">.</span>   <span class="mf">1618.3</span> <span class="n">avail</span> <span class="n">Mem</span>
+
+    <span class="n">PID</span> <span class="n">USER</span>      <span class="n">PR</span>  <span class="n">NI</span>    <span class="n">VIRT</span>    <span class="n">RES</span>    <span class="n">SHR</span> <span class="n">S</span>  <span class="o">%</span><span class="n">CPU</span>  <span class="o">%</span><span class="n">MEM</span>     <span class="n">TIME</span><span class="o">+</span> <span class="n">COMMAND</span>
+   <span class="mi">1648</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span> <span class="mi">1219044</span>  <span class="mi">34104</span>  <span class="mi">14000</span> <span class="n">S</span>  <span class="mf">31.0</span>   <span class="mf">1.8</span>  <span class="mi">38</span><span class="p">:</span><span class="mf">08.39</span> <span class="n">snapd</span>
+   <span class="mi">2589</span> <span class="n">ubuntu</span>    <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">10680</span>   <span class="mi">3224</span>   <span class="mi">2660</span> <span class="n">R</span>   <span class="mf">0.7</span>   <span class="mf">0.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.07</span> <span class="n">top</span>
+      <span class="mi">9</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">S</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">20.04</span> <span class="n">ksoftirqd</span><span class="o">/</span><span class="mi">0</span>
+    <span class="mi">189</span> <span class="n">root</span>       <span class="mi">0</span> <span class="o">-</span><span class="mi">20</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">12.94</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">3</span><span class="p">:</span><span class="mi">1</span><span class="n">H</span><span class="o">-</span><span class="n">kblockd</span>
+    <span class="mi">200</span> <span class="n">root</span>       <span class="mi">0</span> <span class="o">-</span><span class="mi">20</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">25.15</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="n">H</span><span class="o">-</span><span class="n">mmc_complete</span>
+    <span class="mi">813</span> <span class="n">root</span>       <span class="mi">0</span> <span class="o">-</span><span class="mi">20</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">12.76</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span><span class="mi">1</span><span class="n">H</span><span class="o">-</span><span class="n">kblockd</span>
+    <span class="mi">815</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">S</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">30.88</span> <span class="n">jbd2</span><span class="o">/</span><span class="n">mmcblk0p2</span><span class="o">-</span>
+   <span class="mi">1644</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">80920</span>   <span class="mi">1572</span>   <span class="mi">1364</span> <span class="n">S</span>   <span class="mf">0.3</span>   <span class="mf">0.1</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">01.11</span> <span class="n">irqbalance</span>
+   <span class="mi">2500</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">02.96</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">-</span><span class="n">events</span>
+   <span class="mi">2561</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.37</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="o">-</span><span class="n">events</span>
+      <span class="mi">1</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">167688</span>  <span class="mi">10884</span>   <span class="mi">7292</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.6</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">03.30</span> <span class="n">systemd</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>lm_sensor安装配置</h2>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">lm_sensor</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">lm_sensor</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行检测配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sensors</span><span class="o">-</span><span class="n">detect</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在树莓派上执行遇到以下无法检测到传感器错误信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sorry</span><span class="p">,</span> <span class="n">no</span> <span class="n">sensors</span> <span class="n">were</span> <span class="n">detected</span><span class="o">.</span>
+<span class="n">Either</span> <span class="n">your</span> <span class="n">system</span> <span class="n">has</span> <span class="n">no</span> <span class="n">sensors</span><span class="p">,</span> <span class="ow">or</span> <span class="n">they</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">supported</span><span class="p">,</span> <span class="ow">or</span>
+<span class="n">they</span> <span class="n">are</span> <span class="n">connected</span> <span class="n">to</span> <span class="n">an</span> <span class="n">I2C</span> <span class="ow">or</span> <span class="n">SMBus</span> <span class="n">adapter</span> <span class="n">that</span> <span class="ow">is</span> <span class="ow">not</span>
+<span class="n">supported</span><span class="o">.</span> <span class="n">If</span> <span class="n">you</span> <span class="n">find</span> <span class="n">out</span> <span class="n">what</span> <span class="n">chips</span> <span class="n">are</span> <span class="n">on</span> <span class="n">your</span> <span class="n">board</span><span class="p">,</span> <span class="n">check</span>
+<span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">hwmon</span><span class="o">.</span><span class="n">wiki</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">device_support_status</span> <span class="k">for</span> <span class="n">driver</span> <span class="n">status</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

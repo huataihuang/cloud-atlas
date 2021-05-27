@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Kubernetes环境部署Django应用</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kubernetesdjango">
+<span id="k8s-django"></span><h1>Kubernetes环境部署Django应用</h1>
+<p>之前我部署了 <a class="reference internal" href="../../../docker/applications/docker_django.xhtml#docker-django"><span class="std std-ref">Docker环境运行Django</span></a> 开发环境，现在我们将Docker容器部署到Kubernetes集群，提供更灵活和强健的应用部署。</p>
+<section id="id1">
+<h2>准备</h2>
+<p>我部署了 <a class="reference internal" href="../../arm/index.xhtml#kubernetes-arm"><span class="std std-ref">ARM架构Kubernetes</span></a> 来完成自己的一系列学习和测试，所以在这里部署Django应用，也采用这个ARM集群。</p>
+<ul>
+<li><p>检查集群:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到我的测试集群有4个节点，其中3个是工作节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>   <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>    <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>             <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>     <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">61</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.10</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">18.04</span><span class="o">.</span><span class="mi">5</span> <span class="n">LTS</span>   <span class="mf">4.9</span><span class="o">.</span><span class="mi">140</span><span class="o">-</span><span class="n">tegra</span>      <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">6</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">68</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1028</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">65</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1028</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">65</span><span class="n">d</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.16</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1028</span><span class="o">-</span><span class="n">raspi</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">19.3</span><span class="o">.</span><span class="mi">8</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>部署</h2>
+<ul class="simple">
+<li><p>给节点添加标签</p></li>
+</ul>
+<p><a class="reference internal" href="../../concepts/objects/labels_and_selectors.xhtml#labels-and-selectors"><span class="std std-ref">标签和选择器(labels and selectors)</span></a> 是调度kubernetes Pod的指引，虽然没有标签也可以部署Pod，但是对于一个复杂的Kubernetes集群，不同的硬件软件组合以及服务器规划，没有一个精心设计的调度指引会导致混乱。例如，混合X86架构和ARM架构，如果错误调度了不正确架构的Pod会导致无法启动。</p>
+<p>这里我有3个woker节点： 其中 <code class="docutils literal notranslate"><span class="pre">pi-workerX</span></code> 节点上添加了 SSD 磁盘，另外一个 <code class="docutils literal notranslate"><span class="pre">jetson</span></code> 节点有NVIDIA GPU设备。所以添加标签如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">label</span> <span class="n">nodes</span> <span class="n">pi</span><span class="o">-</span><span class="n">worker1</span> <span class="n">disktype</span><span class="o">=</span><span class="n">ssd</span>
+<span class="n">kubectl</span> <span class="n">label</span> <span class="n">nodes</span> <span class="n">pi</span><span class="o">-</span><span class="n">worker2</span> <span class="n">disktype</span><span class="o">=</span><span class="n">ssd</span>
+<span class="n">kubectl</span> <span class="n">label</span> <span class="n">nodes</span> <span class="n">jetson</span> <span class="n">model</span><span class="o">=</span><span class="n">gpu</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeclt</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">labels</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

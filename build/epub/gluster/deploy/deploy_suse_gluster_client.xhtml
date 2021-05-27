@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>SUSE平台Gluster客户端部署</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="susegluster">
+<h1>SUSE平台Gluster客户端部署</h1>
+<p>SUSE系统环境可以使用 <code class="docutils literal notranslate"><span class="pre">lsb-release</span> <span class="pre">-a</span></code> 命令检查版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LSB</span> <span class="n">Version</span><span class="p">:</span>    <span class="n">n</span><span class="o">/</span><span class="n">a</span>
+<span class="n">Distributor</span> <span class="n">ID</span><span class="p">:</span> <span class="n">SUSE</span>
+<span class="n">Description</span><span class="p">:</span>    <span class="n">SUSE</span> <span class="n">Linux</span> <span class="n">Enterprise</span> <span class="n">Server</span> <span class="mi">12</span> <span class="n">SP3</span>
+<span class="n">Release</span><span class="p">:</span>        <span class="mf">12.3</span>
+<span class="n">Codename</span><span class="p">:</span>       <span class="n">n</span><span class="o">/</span><span class="n">a</span>
+</pre></div>
+</div>
+<p>在项目上使用的SUSE是作为GlusterFS客户端，访问在CentOS 7上所 <a class="reference internal" href="deploy_gluster6.xhtml#deploy-gluster6"><span class="std std-ref">部署Gluster 6</span></a> 。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>SUSE也使用rpm包进行软件安装，但是使用了独特的包管理工具 <a class="reference internal" href="../../linux/suse_linux/zypper.xhtml#zypper"><span class="std std-ref">zypper - SUSE包管理工具</span></a></p>
+</div>
+<section id="id1">
+<h2>软件包</h2>
+<p><a class="reference external" href="https://www.gluster.org/install/">官方提供 Install Gluster</a><span class="link-target"> [https://www.gluster.org/install/]</span> 提供：</p>
+<ul class="simple">
+<li><p>不同版本的源代码</p></li>
+<li><p>针对 <a class="reference external" href="https://www.gluster.org/download/">不同发行版的glusterfs二进制软件包</a><span class="link-target"> [https://www.gluster.org/download/]</span>
+- <a class="reference external" href="https://download.gluster.org/pub/gluster/glusterfs/LATEST/">最新版本glusterfs下载</a><span class="link-target"> [https://download.gluster.org/pub/gluster/glusterfs/LATEST/]</span>
+- <a class="reference external" href="https://download.gluster.org/pub/gluster/glusterfs/6/LATEST/">6.x系列旧稳定版本glusterfs下载</a><span class="link-target"> [https://download.gluster.org/pub/gluster/glusterfs/6/LATEST/]</span></p></li>
+</ul>
+<p>为了配合服务端版本，采用 6.x 系列:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RPMs</span> <span class="k">for</span> <span class="n">Tumbleweed</span><span class="p">,</span> <span class="n">SLES</span> <span class="mi">12</span><span class="n">SP4</span><span class="p">,</span> <span class="n">SLES</span> <span class="mi">15</span><span class="p">,</span> <span class="ow">and</span> <span class="n">OpenSUSE</span> <span class="n">Leap</span> <span class="mf">15.1</span> <span class="n">are</span> <span class="ow">in</span>
+<span class="n">the</span> <span class="n">repos</span> <span class="n">of</span> <span class="n">the</span> <span class="n">OpenSUSE</span> <span class="n">Build</span> <span class="n">Service</span> <span class="n">at</span>
+
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES12SP4</span><span class="o">-</span><span class="mi">6</span><span class="o">/</span>
+
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">Tumbleweed</span><span class="o">-</span><span class="mi">6</span><span class="o">/</span>
+
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES15</span><span class="o">-</span><span class="mi">6</span><span class="o">/</span><span class="n">SLE_15</span><span class="o">/</span>
+
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">Leap15</span><span class="o">.</span><span class="mi">1</span><span class="o">-</span><span class="mi">6</span><span class="o">/</span><span class="n">openSUSE_Leap_15</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>SUSE提供的软件包是按照 <code class="docutils literal notranslate"><span class="pre">SUSE版本+glusterfs版本</span></code> 命名目录的，例如 <code class="docutils literal notranslate"><span class="pre">SLES12SP3-3.13</span></code> 表示SUSE Enterprise Server 12 SP3 的 GlusterFS 3.13 版本。安装软件包对操作系统有版本要求，例如GlusterFS 6.x，则需要SUSE 12 SP4。</p>
+</div>
+</section>
+<section id="glusterfs-4-x">
+<h2>GlusterFS 4.x</h2>
+<p>可以用于SLES 12 SP3的GlusterFS最高版本 4.1.10-101.1 可以从 :</p>
+<p><a class="reference external" href="http://download.opensuse.org/repositories/home:/glusterfs:/SLES12SP3-4.1/SLE_12_SP3/x86_64/">http://download.opensuse.org/repositories/home:/glusterfs:/SLES12SP3-4.1/SLE_12_SP3/x86_64/</a></p>
+<p>下载对应软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES12SP3</span><span class="o">-</span><span class="mf">4.1</span><span class="o">/</span><span class="n">SLE_12_SP3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES12SP3</span><span class="o">-</span><span class="mf">4.1</span><span class="o">/</span><span class="n">SLE_12_SP3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES12SP3</span><span class="o">-</span><span class="mf">4.1</span><span class="o">/</span><span class="n">SLE_12_SP3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">libgfapi0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES12SP3</span><span class="o">-</span><span class="mf">4.1</span><span class="o">/</span><span class="n">SLE_12_SP3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">libgfchangelog0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES12SP3</span><span class="o">-</span><span class="mf">4.1</span><span class="o">/</span><span class="n">SLE_12_SP3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">libgfxdr0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">opensuse</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">repositories</span><span class="o">/</span><span class="n">home</span><span class="p">:</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span><span class="o">/</span><span class="n">SLES12SP3</span><span class="o">-</span><span class="mf">4.1</span><span class="o">/</span><span class="n">SLE_12_SP3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">libglusterfs0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>
+</pre></div>
+</div>
+<ul>
+<li><p>按照 <a class="reference internal" href="../../linux/suse_linux/suse_iso_repo.xhtml#suse-iso-repo"><span class="std std-ref">使用SUSE的DVD iso构建安装仓库</span></a> 设置好本地安装光盘镜像作为软件源</p></li>
+<li><p>一些依赖包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">librdmacm</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">1</span><span class="p">()(</span><span class="mi">64</span><span class="n">bit</span><span class="p">)</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">by</span> <span class="n">glusterfs</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span>
+<span class="n">librdmacm</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">1</span><span class="p">(</span><span class="n">RDMACM_1</span><span class="o">.</span><span class="mi">0</span><span class="p">)(</span><span class="mi">64</span><span class="n">bit</span><span class="p">)</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">by</span> <span class="n">glusterfs</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span>
+<span class="n">libacl</span><span class="o">-</span><span class="n">devel</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">by</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span>
+<span class="n">libuuid</span><span class="o">-</span><span class="n">devel</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">by</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span>
+<span class="n">pkgconfig</span><span class="p">(</span><span class="n">sqlite3</span><span class="p">)</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">by</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span>
+<span class="n">pkgconfig</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">by</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>由于 <code class="docutils literal notranslate"><span class="pre">libacl-devel</span></code> 和 <code class="docutils literal notranslate"><span class="pre">libuuid-devel</span></code> 没有包含在SLES 12 SP3安装光盘中，需要通过SDK和update安装源安装，暂时不能解决，所以我没有选择安装 <code class="docutils literal notranslate"><span class="pre">glusterfs-devel</span></code> 。</p>
+<p><code class="docutils literal notranslate"><span class="pre">librdmacm.so.1</span></code> 是支持 RDMA 的驱动，在 <a class="reference external" href="http://rpm.pbone.net/">RPM phone.net</a><span class="link-target"> [http://rpm.pbone.net/]</span> 搜索有openSUSE 12.2 的软件包，但是没有找到SUSE SLES 12 SP3的包。根据 mellanox 的官网文档 <a class="reference external" href="https://www.mellanox.com/pdf/prod_software/SUSE_Linux_Enterprise_Server_(SLES)_12_SP3_Driver_User_Manual.pdf">SUSE Linux Enterprise Server (SLES) 12 SP3 Driver
+User Manual</a><span class="link-target"> [https://www.mellanox.com/pdf/prod_software/SUSE_Linux_Enterprise_Server_(SLES)_12_SP3_Driver_User_Manual.pdf]</span> ， <code class="docutils literal notranslate"><span class="pre">librdmacm</span></code> 是 RDMA cm library:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">librdmacm</span><span class="o">-</span><span class="n">utils</span> <span class="o">-</span> <span class="n">Tools</span> <span class="ow">and</span> <span class="n">Example</span> <span class="n">test</span> <span class="n">programs</span> <span class="k">for</span> <span class="n">the</span> <span class="n">librdmacm</span> <span class="n">library</span>
+<span class="n">librdmacm1</span> <span class="o">-</span> <span class="n">librdmacm</span> <span class="n">provides</span> <span class="n">a</span> <span class="n">userspace</span> <span class="n">RDMA</span> <span class="n">Communication</span> <span class="n">Management</span> <span class="n">API</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>通过 zypper 安装glusterfs软件包会自动安装依赖的 <code class="docutils literal notranslate"><span class="pre">librdmacm1</span></code> 软件包</p>
+<ul>
+<li><p>只安装应用包不安装开发包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zypper</span> <span class="ow">in</span> <span class="n">glusterfs</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>  <span class="n">libgfchangelog0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span> \
+    <span class="n">libglusterfs0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span> <span class="n">libgfrpc0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span> \
+    <span class="n">libgfapi0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span> <span class="n">libgfxdr0</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span><span class="o">.</span><span class="n">rpm</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>客户端挂载</h2>
+<ul>
+<li><p>创建本地挂载目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">backup</span>
+</pre></div>
+</div>
+</li>
+<li><p>添加 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.11</span><span class="p">:</span><span class="o">/</span><span class="n">backup</span>  <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">backup</span> <span class="n">glusterfs</span> <span class="n">defaults</span><span class="p">,</span><span class="n">_netdev</span><span class="p">,</span><span class="n">direct</span><span class="o">-</span><span class="n">io</span><span class="o">-</span><span class="n">mode</span><span class="o">=</span><span class="n">enable</span><span class="p">,</span><span class="n">backupvolfile</span><span class="o">-</span><span class="n">server</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.12</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">backup</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="id4">
+<h3>异常排查</h3>
+<section id="mount-failed">
+<h4>Mount failed</h4>
+<ul>
+<li><p>提示报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Mount</span> <span class="n">failed</span><span class="o">.</span> <span class="n">Please</span> <span class="n">check</span> <span class="n">the</span> <span class="n">log</span> <span class="n">file</span> <span class="k">for</span> <span class="n">more</span> <span class="n">details</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查客户端日志 <code class="docutils literal notranslate"><span class="pre">/var/log/glusterfs/mnt-backup</span></code> 日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">12</span> <span class="mi">03</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mf">37.950022</span><span class="p">]</span> <span class="n">I</span> <span class="p">[</span><span class="n">MSGID</span><span class="p">:</span> <span class="mi">100030</span><span class="p">]</span> <span class="p">[</span><span class="n">glusterfsd</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="mi">2751</span><span class="p">:</span><span class="n">main</span><span class="p">]</span> <span class="mi">0</span><span class="o">-/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">glusterfs</span><span class="p">:</span> <span class="n">Started</span> <span class="n">running</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">glusterfs</span> <span class="n">version</span> <span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span> <span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">glusterfs</span> <span class="o">--</span><span class="n">direct</span><span class="o">-</span><span class="n">io</span><span class="o">-</span><span class="n">mode</span><span class="o">=</span><span class="n">enable</span> <span class="o">--</span><span class="n">process</span><span class="o">-</span><span class="n">name</span> <span class="n">fuse</span> <span class="o">--</span><span class="n">volfile</span><span class="o">-</span><span class="n">server</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.11</span> <span class="o">--</span><span class="n">volfile</span><span class="o">-</span><span class="n">server</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.12</span> <span class="o">--</span><span class="n">volfile</span><span class="o">-</span><span class="nb">id</span><span class="o">=/</span><span class="n">backup</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">backup</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">12</span> <span class="mi">03</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mf">37.955799</span><span class="p">]</span> <span class="n">I</span> <span class="p">[</span><span class="n">MSGID</span><span class="p">:</span> <span class="mi">101190</span><span class="p">]</span> <span class="p">[</span><span class="n">event</span><span class="o">-</span><span class="n">epoll</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="mi">617</span><span class="p">:</span><span class="n">event_dispatch_epoll_worker</span><span class="p">]</span> <span class="mi">0</span><span class="o">-</span><span class="n">epoll</span><span class="p">:</span> <span class="n">Started</span> <span class="n">thread</span> <span class="k">with</span> <span class="n">index</span> <span class="mi">1</span>
+<span class="n">pending</span> <span class="n">frames</span><span class="p">:</span>
+<span class="n">frame</span> <span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="n">op</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">patchset</span><span class="p">:</span> <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">git</span><span class="o">.</span><span class="n">gluster</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">.</span><span class="n">git</span>
+<span class="n">signal</span> <span class="n">received</span><span class="p">:</span> <span class="mi">11</span>
+<span class="n">time</span> <span class="n">of</span> <span class="n">crash</span><span class="p">:</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">12</span> <span class="mi">03</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">37</span>
+<span class="n">configuration</span> <span class="n">details</span><span class="p">:</span>
+<span class="n">argp</span> <span class="mi">1</span>
+<span class="n">backtrace</span> <span class="mi">1</span>
+<span class="n">dlfcn</span> <span class="mi">1</span>
+<span class="n">libpthread</span> <span class="mi">1</span>
+<span class="n">llistxattr</span> <span class="mi">1</span>
+<span class="n">setfsid</span> <span class="mi">1</span>
+<span class="n">spinlock</span> <span class="mi">1</span>
+<span class="n">epoll</span><span class="o">.</span><span class="n">h</span> <span class="mi">1</span>
+<span class="n">xattr</span><span class="o">.</span><span class="n">h</span> <span class="mi">1</span>
+<span class="n">st_atim</span><span class="o">.</span><span class="n">tv_nsec</span> <span class="mi">1</span>
+<span class="n">package</span><span class="o">-</span><span class="n">string</span><span class="p">:</span> <span class="n">glusterfs</span> <span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>参考 <a class="reference external" href="https://www.jianshu.com/p/07453caca0d4">glusterfs mount client crash</a><span class="link-target"> [https://www.jianshu.com/p/07453caca0d4]</span> 做一些排查</p>
+<ul>
+<li><p>设置 <code class="docutils literal notranslate"><span class="pre">/etc/security/limits.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#*               soft    core            0</span>
+<span class="o">*</span>               <span class="n">soft</span>    <span class="n">core</span>            <span class="n">unlimited</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置coredump目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># cat /proc/sys/kernel/core_pattern</span>
+<span class="c1"># |/usr/lib/systemd/systemd-coredump %P %u %g %s %t %e</span>
+
+<span class="n">echo</span> <span class="s2">&quot;/var/crash/core.</span><span class="si">%e</span><span class="s2">.%p&quot;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">kernel</span><span class="o">/</span><span class="n">core_pattern</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置 bashrc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ulimit</span> <span class="o">-</span><span class="n">c</span> <span class="mi">102400</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里这是允许core文件1G</p>
+<ul>
+<li><p>执行挂载命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">backup</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后检查 <code class="docutils literal notranslate"><span class="pre">/var/crash</span></code> 目录下，就可以看到生成了一个core文件 <code class="docutils literal notranslate"><span class="pre">core.glusterepoll0.59404</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">rw</span><span class="o">-------</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">64</span><span class="n">M</span> <span class="n">Oct</span> <span class="mi">13</span> <span class="mi">12</span><span class="p">:</span><span class="mi">01</span> <span class="n">core</span><span class="o">.</span><span class="n">glusterepoll0</span><span class="o">.</span><span class="mi">59404</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行gdb命令检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gdb</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">glusterfs</span> <span class="o">-</span><span class="n">c</span> <span class="n">core</span><span class="o">.</span><span class="n">glusterepoll0</span><span class="o">.</span><span class="mi">59404</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意，需要debuginfo软件包，否则提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Missing</span> <span class="n">separate</span> <span class="n">debuginfos</span><span class="p">,</span> <span class="n">use</span><span class="p">:</span> <span class="n">zypper</span> <span class="n">install</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">debuginfo</span><span class="o">-</span><span class="mf">4.1</span><span class="o">.</span><span class="mi">10</span><span class="o">-</span><span class="mf">101.1</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+<p>不过，opensuse提供的下载软件包没有dubuginfo，这步排查暂时放弃。后续我实际是通过自己编译源代码来完成部署( <a class="reference internal" href="../build/build_gluser_suse.xhtml#build-gluser-suse"><span class="std std-ref">SUSE编译glusterfs</span></a> )。</p>
+</section>
+</section>
+</section>
+<section id="id5">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.server-world.info/en/note?os=SUSE_Linux_Enterprise_15&amp;p=glusterfs&amp;f=1">GlusterFS : Install</a><span class="link-target"> [https://www.server-world.info/en/note?os=SUSE_Linux_Enterprise_15&amp;p=glusterfs&amp;f=1]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

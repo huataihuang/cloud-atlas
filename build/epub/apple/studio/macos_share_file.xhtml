@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>macOS共享文件</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="macos">
+<span id="macos-share-file"></span><h1>macOS共享文件</h1>
+<p>我在日常工作中同时使用2台MacBook Pro笔记本，采用 <a class="reference internal" href="../../linux/desktop/synergy.xhtml#synergy"><span class="std std-ref">Synergy:主机间共享键盘鼠标</span></a> 来共享键盘和鼠标，这样可以在一台主机上同时操作2台主机。不过，为了能够统一数据(其实也可以通过rsync准实时同步)，我主要将日常文档存放在随身笔记本上，通过ssh方式远程登陆笔记本进行文档撰写和开发工作。</p>
+<p>不过，通过 synergy 共享键盘鼠标，虽然也能够共享剪贴板中简单文字，但是无法共享图片和诸如word之类的文档，所以跨主机操作依然有些不便。我想到的就是在主文档MacBook Pro笔记本上开启共享文件，这样所有的文档、图片等都可以集中到一台主笔记本上，并被多个主机(使用synergy共用键盘鼠标)共用。</p>
+<section id="macossmb">
+<h2>macOS的SMB</h2>
+<p>macOS的文件共享实际上就是实现了Unix/Linux上通用的SMB服务( <a class="reference internal" href="../../infra_service/samba/index.xhtml#samba"><span class="std std-ref">Samba服务</span></a> )，也就是Windows的文件共享服务。</p>
+<section id="id1">
+<h3>设置文件共享</h3>
+<ul class="simple">
+<li><p>在作为共享服务的macOS主机上，启动 <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">Preferences</span></code> ，然后点击 <code class="docutils literal notranslate"><span class="pre">Sharing</span></code></p></li>
+<li><p>勾选 <code class="docutils literal notranslate"><span class="pre">File</span> <span class="pre">Sharing</span></code></p></li>
+</ul>
+<p>默认情况下 <code class="docutils literal notranslate"><span class="pre">Shared</span> <span class="pre">Folders</span></code> 已经添加了 <code class="docutils literal notranslate"><span class="pre">Downloads</span></code> 和 <code class="docutils literal notranslate"><span class="pre">xxxx公共文件夹</span></code> 目录作为共享，只要勾选了 <code class="docutils literal notranslate"><span class="pre">File</span> <span class="pre">Sharing</span></code> 功能立即生效</p>
+<ul class="simple">
+<li><p>点击 <code class="docutils literal notranslate"><span class="pre">Shared</span> <span class="pre">Folders</span></code> 框下面的 <code class="docutils literal notranslate"><span class="pre">+</span></code> 按钮</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../../_images/macos_share_file_1.png" src="../../_images/macos_share_file_1.png" style="width: 512.0px; height: 416.8px;" />
+</figure>
+<p>需要注意，默认添加的 <code class="docutils literal notranslate"><span class="pre">Shared</span> <span class="pre">Folders</span></code> 会有一个 <code class="docutils literal notranslate"><span class="pre">Everyone</span></code> 的 <code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">Only</span></code> 共享，如果不是你期望的配置，需要将这个 <code class="docutils literal notranslate"><span class="pre">Everyone</span></code> 的配置修改成 <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">Access</span></code> (因为 <code class="docutils literal notranslate"><span class="pre">Everyone</span></code> 不能删除)。上图中的 <code class="docutils literal notranslate"><span class="pre">Staff</span></code> 用户组是本人账号 <code class="docutils literal notranslate"><span class="pre">Huatai</span> <span class="pre">Huang</span></code> 所在的用户组，默认是 <code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">Only</span></code> 。</p>
+<ul class="simple">
+<li><p>你添加的共享目录还可以配置 <code class="docutils literal notranslate"><span class="pre">Advanced</span> <span class="pre">Options...</span></code> (高级选项)，是通过 <code class="docutils literal notranslate"><span class="pre">按住</span></code> <code class="docutils literal notranslate"><span class="pre">ctrl</span></code> 键，然后点击共享目录，就会弹出 <code class="docutils literal notranslate"><span class="pre">右键菜单</span></code> ，提供了以下配置选项:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Allow</span> <span class="pre">guest</span> <span class="pre">users</span></code> (也就是默认允许guest用户)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Only</span> <span class="pre">allow</span> <span class="pre">SMB</span> <span class="pre">encrypted</span> <span class="pre">connections</span></code> (只允许SMB加密连接)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Share</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">Time</span> <span class="pre">Machine</span> <span class="pre">bacckup</span> <span class="pre">destionation</span></code> (可以将共享目录作为Time Machine备份用途)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h3>客户端连接</h3>
+<ul class="simple">
+<li><p>在客户端打开 <code class="docutils literal notranslate"><span class="pre">Finder</span></code> 文件管理器，然后点击 <code class="docutils literal notranslate"><span class="pre">Network</span></code> ，找到共享文件的主机图标并点击，此时就会尝试连接，连接以后就会看到共享目录</p></li>
+<li><p>对于使用相同苹果账号登陆的用户，会直接通过认证，就可以直接使用。</p></li>
+</ul>
+</section>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://support.apple.com/guide/mac-help/set-up-file-sharing-on-mac-mh17131/mac">Set up file sharing on Mac</a><span class="link-target"> [https://support.apple.com/guide/mac-help/set-up-file-sharing-on-mac-mh17131/mac]</span></p></li>
+<li><p><a class="reference external" href="https://support.apple.com/guide/mac-help/connect-mac-shared-computers-servers-mchlp1140/11.0/mac/11.0">Connect your Mac to shared computers and servers</a><span class="link-target"> [https://support.apple.com/guide/mac-help/connect-mac-shared-computers-servers-mchlp1140/11.0/mac/11.0]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

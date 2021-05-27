@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>SUSE编译glusterfs</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="suseglusterfs">
+<span id="build-gluser-suse"></span><h1>SUSE编译glusterfs</h1>
+<p>GlusterFS官方文档 <a class="reference external" href="https://docs.gluster.org/en/latest/Install-Guide/Install/">GlusterFS Install Guide</a><span class="link-target"> [https://docs.gluster.org/en/latest/Install-Guide/Install/]</span> 介绍了gluster官方软件仓库中提供了主流发行版的安装软件包。其中Red Hat/CentOS和Ubuntu/Debian提供软件仓库方式自动安装，SUSE发行版则通过 <a class="reference internal" href="../../linux/suse_linux/obs/index.xhtml#suse-obs"><span class="std std-ref">SUSE Open Build Service (OBS)</span></a> 的下载仓库提供了不同SUSE版本的安装软件包。</p>
+<p>不过，SUSE的 <a class="reference internal" href="../../linux/suse_linux/obs/index.xhtml#suse-obs"><span class="std std-ref">SUSE Open Build Service (OBS)</span></a> 只提供了较新发布版本对应的 <a class="reference external" href="http://download.opensuse.org/repositories/home:/glusterfs:/">GlusterFS SUSE安装包</a><span class="link-target"> [http://download.opensuse.org/repositories/home:/glusterfs:/]</span> ，例如 Tumbleweed, SLES 15, and OpenSUSE Leap 15.1。</p>
+<p>但是实际上线上生产环境，依然运行着非常古老的SUSE Linux版本，例如 SELS 12 SP3，官方下载仓库只提供了非常陈旧的已经不再维护的发行包。为了能够在实际生产环境稳定运行，需要自己编译安装GlusterFS稳定版本。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我在SUSE Enterprise Linux Server SELS 12 SP3版本上折腾了很久才完成GlusterFS的软件包编译，过程曲折，也迫使我对SUSE Linux比较深入的学习和探索，积累了一些经验。整个探索过程我记录在 <a class="reference internal" href="build_gluser_scratch.xhtml#build-gluser-scratch"><span class="std std-ref">SUSE编译glusterfs尝试</span></a> ，不过太冗长了，所以我重新在这里整理一个完整的正确方法，提供一个简明指南。如果你对为何我采用这个步骤有疑问，也可以参考原始记录 <a class="reference internal" href="build_gluser_scratch.xhtml#build-gluser-scratch"><span class="std std-ref">SUSE编译glusterfs尝试</span></a> 。</p>
+</div>
+<section id="id1">
+<h2>编译准备工作</h2>
+<p>我的SUSE SLES 12 SP3环境是在 <a class="reference internal" href="../../kvm/index.xhtml#kvm"><span class="std std-ref">KVM Atlas</span></a> 虚拟环境中采用 <a class="reference internal" href="../../kvm/startup/create_vm.xhtml#create-vm"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a> 方法，创建了SLES 12 SP3环境，所有编译工作都在这个虚拟机中完成。最后再将编译得到的rpm包复制到 <a class="reference internal" href="../../linux/suse_linux/suse_local_repo.xhtml#suse-local-repo"><span class="std std-ref">SUSE本地软件仓库</span></a> 中提供在线服务器安装。</p>
+<p>在开始编译之前，首先要对编译工作环境进行配置:</p>
+<section id="suse-sdk">
+<h3>SUSE SDK</h3>
+<p>要在 <a class="reference internal" href="../../linux/suse_linux/index.xhtml#suse-linux"><span class="std std-ref">SUSE Linux</span></a> 环境编译软件，首先需要 SUSE 开发SDK。对于企业内部大规模批量部署，建议采用 <a class="reference internal" href="../../linux/suse_linux/suse_deploy_smt.xhtml#suse-deploy-smt"><span class="std std-ref">SUSE部署SMT服务器</span></a> 。不过，suse SMT需要订购服务，所以还是采用 直接下载 <a class="reference external" href="https://www.suse.com/download/sle-sdk/">SUSE Linux enterprise Software Development Kit Downloads</a><span class="link-target"> [https://www.suse.com/download/sle-sdk/]</span> ，将 下载 SLE SDK iso镜像，然后通过 <a class="reference internal" href="../../linux/suse_linux/suse_iso_repo.xhtml#suse-iso-repo"><span class="std std-ref">使用SUSE的DVD iso构建安装仓库</span></a> 方式添加到主机repo后，就可以通过 zypper安装依赖软件包。</p>
+<ul>
+<li><p>根据编译安装依赖包，添加以下本地iso仓库 <a class="reference internal" href="../../linux/suse_linux/suse_iso_repo.xhtml#suse-iso-repo"><span class="std std-ref">使用SUSE的DVD iso构建安装仓库</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 安装盘</span>
+<span class="n">zypper</span> <span class="n">ar</span> <span class="o">-</span><span class="n">c</span> <span class="o">-</span><span class="n">t</span> <span class="n">yast2</span> <span class="s2">&quot;iso:/?iso=/home/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso&quot;</span> <span class="s2">&quot;SLES 12 SP3&quot;</span>
+<span class="c1"># SDK盘</span>
+<span class="n">zypper</span> <span class="n">ar</span> <span class="o">-</span><span class="n">c</span> <span class="o">-</span><span class="n">t</span> <span class="n">yast2</span> <span class="s2">&quot;iso:/?iso=/home/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso&quot;</span> <span class="s2">&quot;SLES 12 SP3 SDK-1&quot;</span>
+<span class="n">zypper</span> <span class="n">ar</span> <span class="o">-</span><span class="n">c</span> <span class="o">-</span><span class="n">t</span> <span class="n">yast2</span> <span class="s2">&quot;iso:/?iso=/home/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD2.iso&quot;</span> <span class="s2">&quot;SLES 12 SP3 SDK-2&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后检查仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zypper</span> <span class="n">repos</span>
+</pre></div>
+</div>
+<p>显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># | Alias             | Name              | Enabled | GPG Check | Refresh</span>
+<span class="o">--+-------------------+-------------------+---------+-----------+--------</span>
+<span class="mi">1</span> <span class="o">|</span> <span class="n">SLES</span> <span class="mi">12</span> <span class="n">SP3</span>       <span class="o">|</span> <span class="n">SLES</span> <span class="mi">12</span> <span class="n">SP3</span>       <span class="o">|</span> <span class="n">Yes</span>     <span class="o">|</span> <span class="p">(</span><span class="n">r</span> <span class="p">)</span> <span class="n">Yes</span>  <span class="o">|</span> <span class="n">Yes</span>
+<span class="mi">2</span> <span class="o">|</span> <span class="n">SLES</span> <span class="mi">12</span> <span class="n">SP3</span> <span class="n">SDK</span><span class="o">-</span><span class="mi">1</span> <span class="o">|</span> <span class="n">SLES</span> <span class="mi">12</span> <span class="n">SP3</span> <span class="n">SDK</span><span class="o">-</span><span class="mi">1</span> <span class="o">|</span> <span class="n">Yes</span>     <span class="o">|</span> <span class="p">(</span> <span class="n">p</span><span class="p">)</span> <span class="n">Yes</span>  <span class="o">|</span> <span class="n">No</span>
+<span class="mi">3</span> <span class="o">|</span> <span class="n">SLES</span> <span class="mi">12</span> <span class="n">SP3</span> <span class="n">SDK</span><span class="o">-</span><span class="mi">2</span> <span class="o">|</span> <span class="n">SLES</span> <span class="mi">12</span> <span class="n">SP3</span> <span class="n">SDK</span><span class="o">-</span><span class="mi">2</span> <span class="o">|</span> <span class="n">Yes</span>     <span class="o">|</span> <span class="p">(</span> <span class="n">p</span><span class="p">)</span> <span class="n">Yes</span>  <span class="o">|</span> <span class="n">No</span>
+<span class="mi">4</span> <span class="o">|</span> <span class="n">SLES12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="mf">12.3</span><span class="o">-</span><span class="mi">0</span> <span class="o">|</span> <span class="n">SLES12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="mf">12.3</span><span class="o">-</span><span class="mi">0</span> <span class="o">|</span> <span class="n">No</span>      <span class="o">|</span> <span class="o">----</span>      <span class="o">|</span> <span class="o">----</span>
+</pre></div>
+</div>
+<p>接下来就可以安装所有编译GlusterFS所依赖的开发库以及开发工具了。</p>
+</section>
+<section id="id2">
+<h3>安装开发库和工具</h3>
+<ul>
+<li><p>根据GlusterFS官方 <a class="reference external" href="https://docs.gluster.org/en/latest/Developer-guide/Building-GlusterFS/">Building GlusterFS</a><span class="link-target"> [https://docs.gluster.org/en/latest/Developer-guide/Building-GlusterFS/]</span> 文档，在SUSE SELS 12 SP3的安装和Red Hat RHEL编译环境相似的软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zypper</span> <span class="ow">in</span> <span class="o">-</span><span class="n">y</span> <span class="n">autoconf</span> <span class="n">automake</span> <span class="n">bison</span> <span class="n">flex</span> <span class="n">gcc</span> <span class="n">gettext</span><span class="o">-</span><span class="n">tools</span> \
+    <span class="n">libasan0</span> <span class="n">libatomic1</span> <span class="n">libgomp1</span> <span class="n">libitm1</span> <span class="n">libopenssl</span><span class="o">-</span><span class="n">devel</span> <span class="n">libtsan0</span> \
+    <span class="n">linux</span><span class="o">-</span><span class="n">glibc</span><span class="o">-</span><span class="n">devel</span> <span class="n">python</span><span class="o">-</span><span class="n">netifaces</span> <span class="n">python</span><span class="o">-</span><span class="n">simplejson</span> <span class="n">python</span><span class="o">-</span><span class="n">xattr</span> \
+    <span class="n">rpm</span><span class="o">-</span><span class="n">build</span> <span class="n">systemd</span><span class="o">-</span><span class="n">rpm</span><span class="o">-</span><span class="n">macros</span> <span class="n">zlib</span><span class="o">-</span><span class="n">devel</span> <span class="n">sqlite3</span> \
+    <span class="n">fdupes</span> <span class="n">libtool</span> <span class="n">pkgconfig</span> <span class="n">python3</span> <span class="n">fuse</span> <span class="n">glibc</span><span class="o">-</span><span class="n">devel</span> <span class="n">libaio</span><span class="o">-</span><span class="n">devel</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>当后续在编译GlusterFS执行 <code class="docutils literal notranslate"><span class="pre">./configure</span></code> 时会提示某些头文件缺失，则对应安装软件包 <code class="docutils literal notranslate"><span class="pre">xxxx-devel</span></code></p>
+<p>GlusterFS的编译依赖 <code class="docutils literal notranslate"><span class="pre">userspace-rcu-devel</span></code> ，这个软件包仅见于 SUSE SELS 15 ，对于早期SUSE发行版对应软件包名是 <code class="docutils literal notranslate"><span class="pre">liburcu-devel</span></code> ，不过需要修订spec文件。见下文。</p>
+</div>
+<ul>
+<li><p>根据编译经验，还需要安装以下开发库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zypper</span> <span class="ow">in</span> <span class="o">-</span><span class="n">y</span> <span class="n">libuuid</span><span class="o">-</span><span class="n">devel</span> <span class="n">acl</span><span class="o">-</span><span class="n">devel</span> <span class="n">libxml2</span><span class="o">-</span><span class="n">devel</span> <span class="n">liburcu</span><span class="o">-</span><span class="n">devel</span>
+
+<span class="n">zypper</span> <span class="ow">in</span> <span class="o">-</span><span class="n">y</span> <span class="n">python2</span><span class="o">-</span><span class="n">devel</span> <span class="n">libtirpc</span><span class="o">-</span><span class="n">devel</span> \
+  <span class="n">libcurl</span><span class="o">-</span><span class="n">devel</span> <span class="n">fuse</span><span class="o">-</span><span class="n">devel</span> <span class="n">libibverbs</span><span class="o">-</span><span class="n">devel</span> <span class="n">librdmacm</span><span class="o">-</span><span class="n">devel</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在后续编译过程中，执行 <code class="docutils literal notranslate"><span class="pre">./configure</span></code> 时会提示某些头文件缺失，则对应安装软件包 <code class="docutils literal notranslate"><span class="pre">xxxx-devel</span></code></p>
+</div>
+</section>
+</section>
+<section id="id3">
+<h2>下载代码库</h2>
+<ul>
+<li><p>下载代码:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">gluster</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查软件代码仓库提供的所有release分支:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">glusterfs</span>
+<span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">a</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">release</span>
+</pre></div>
+</div>
+</li>
+<li><p>生产环境中，服务器端使用的RHEL/CentOS 7.x，部署的是GlusterFS 6.10版本，所以这里编译SUSE版本也同样使用 <code class="docutils literal notranslate"><span class="pre">release-6</span></code> 分支:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">release</span><span class="o">-</span><span class="mi">6</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>编译准备</h2>
+<ul>
+<li><p>编译配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">autogen</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">./</span><span class="n">configure</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">fusermount</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>配置输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GlusterFS</span> <span class="n">configure</span> <span class="n">summary</span>
+<span class="o">===========================</span>
+<span class="n">FUSE</span> <span class="n">client</span>          <span class="p">:</span> <span class="n">yes</span>
+<span class="n">Infiniband</span> <span class="n">verbs</span>     <span class="p">:</span> <span class="n">yes</span>
+<span class="n">epoll</span> <span class="n">IO</span> <span class="n">multiplex</span>   <span class="p">:</span> <span class="n">yes</span>
+<span class="n">fusermount</span>           <span class="p">:</span> <span class="n">yes</span>
+<span class="n">readline</span>             <span class="p">:</span> <span class="n">yes</span>
+<span class="n">georeplication</span>       <span class="p">:</span> <span class="n">yes</span>
+<span class="n">Linux</span><span class="o">-</span><span class="n">AIO</span>            <span class="p">:</span> <span class="n">yes</span>
+<span class="n">Enable</span> <span class="n">Debug</span>         <span class="p">:</span> <span class="n">no</span>
+<span class="n">Enable</span> <span class="n">ASAN</span>          <span class="p">:</span> <span class="n">no</span>
+<span class="n">Enable</span> <span class="n">TSAN</span>          <span class="p">:</span> <span class="n">no</span>
+<span class="n">Use</span> <span class="n">syslog</span>           <span class="p">:</span> <span class="n">yes</span>
+<span class="n">XML</span> <span class="n">output</span>           <span class="p">:</span> <span class="n">yes</span>
+<span class="n">Unit</span> <span class="n">Tests</span>           <span class="p">:</span> <span class="n">no</span>
+<span class="n">Track</span> <span class="n">priv</span> <span class="n">ports</span>     <span class="p">:</span> <span class="n">yes</span>
+<span class="n">POSIX</span> <span class="n">ACLs</span>           <span class="p">:</span> <span class="n">yes</span>
+<span class="n">SELinux</span> <span class="n">features</span>     <span class="p">:</span> <span class="n">yes</span>
+<span class="n">firewalld</span><span class="o">-</span><span class="n">config</span>     <span class="p">:</span> <span class="n">no</span>
+<span class="n">Events</span>               <span class="p">:</span> <span class="n">yes</span>
+<span class="n">EC</span> <span class="n">dynamic</span> <span class="n">support</span>   <span class="p">:</span> <span class="n">x64</span> <span class="n">sse</span> <span class="n">avx</span>
+<span class="n">Use</span> <span class="n">memory</span> <span class="n">pools</span>     <span class="p">:</span> <span class="n">yes</span>
+<span class="n">Nanosecond</span> <span class="n">m</span><span class="o">/</span><span class="n">atimes</span>  <span class="p">:</span> <span class="n">yes</span>
+<span class="n">Server</span> <span class="n">components</span>    <span class="p">:</span> <span class="n">yes</span>
+<span class="n">Legacy</span> <span class="n">gNFS</span> <span class="n">server</span>   <span class="p">:</span> <span class="n">no</span>
+<span class="n">IPV6</span> <span class="n">default</span>         <span class="p">:</span> <span class="n">no</span>
+<span class="n">Use</span> <span class="n">TIRPC</span>            <span class="p">:</span> <span class="n">yes</span>
+<span class="n">With</span> <span class="n">Python</span>          <span class="p">:</span> <span class="mf">3.4</span>
+<span class="n">Cloudsync</span>            <span class="p">:</span> <span class="n">yes</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>一些有用的 <code class="docutils literal notranslate"><span class="pre">configure</span></code> 参数:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--enable-debug</span></code> 对于开发过程调试特别有用</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--enable-gnfs</span></code> 用于支持传统的gNFS</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--enable-asan</span></code> 如果要帮助修复内存问题</p></li>
+</ul>
+</div>
+<ul>
+<li><p>编译准备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">dist</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id5">
+<h2>编译</h2>
+<ul>
+<li><p>编译:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span>
+</pre></div>
+</div>
+</li>
+<li><p>在SuSE SLES12 SP3上虽然编译可以顺利完成，但是源代码中缺少一个对应SuSE脚本，所以会导致 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">make</span> <span class="pre">install</span></code> 执行失败中断。由于SuSE运行环境接近RedHat，所以借用Redhat版本复制脚本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="n">extras</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">glustereventsd</span><span class="o">-</span><span class="n">Redhat</span> <span class="n">extras</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">glustereventsd</span><span class="o">-</span><span class="n">SuSE</span>
+<span class="n">cp</span> <span class="n">extras</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">glustereventsd</span><span class="o">-</span><span class="n">Redhat</span><span class="o">.</span><span class="ow">in</span> <span class="n">extras</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">glustereventsd</span><span class="o">-</span><span class="n">SuSE</span><span class="o">.</span><span class="ow">in</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述fix步骤重要，否则会导致安装不完整，会无法正常运行</p>
+<ul>
+<li><p>安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+</li>
+<li><p>将编译后的 <code class="docutils literal notranslate"><span class="pre">glusterfs</span></code> 源代码目录复制到相同操作系统环境中，并且按照上文方式安装了所有依赖库，就可以同样执行 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">make</span> <span class="pre">install</span></code> 进行安装。</p></li>
+</ul>
+<section id="id6">
+<h3>运行库问题</h3>
+<p>我发现有些服务器上按照上文方法安装了glusterfs之后，执行 <code class="docutils literal notranslate"><span class="pre">gluster</span></code> 命令会出现库文件找不到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span><span class="p">:</span> <span class="n">error</span> <span class="k">while</span> <span class="n">loading</span> <span class="n">shared</span> <span class="n">libraries</span><span class="p">:</span> <span class="n">libglusterfs</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">0</span><span class="p">:</span> <span class="n">cannot</span> <span class="nb">open</span> <span class="n">shared</span> <span class="nb">object</span> <span class="n">file</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<p>在正常的服务器上执行 <code class="docutils literal notranslate"><span class="pre">ldd</span> <span class="pre">/usr/local/sbin/gluster</span></code> 可以看到库文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+        <span class="n">libglusterfs</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">0</span> <span class="o">=&gt;</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libglusterfs</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mh">0x00007f6f29573000</span><span class="p">)</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>观察了报错服务器，实际上也已经安装成功了 <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/libglusterfs.so.0</span></code> 。这说明是动态库加载没有刷新。</p>
+<p>检查 <code class="docutils literal notranslate"><span class="pre">/etc/ld.so.conf</span></code> 内容已经包含了 <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/</span></code> 目录，所以只需要刷新一次就可以:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ldconfig</span>
+</pre></div>
+</div>
+<p>然后就可以正常运行</p>
+</section>
+</section>
+<section id="rpm">
+<h2>编译RPM(尚未完全成功)</h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上目前在SUSE SLES12 SP3上编译RPM还是遇到了尚未克服的困难，我还需要继续探索，以下步骤是目前探索比较可行的步骤记录，供参考。</p>
+</div>
+<p>在 SUSE SLES 12 SP3 环境下编译RPM还需要做一些修订</p>
+<ul>
+<li><p>GlusterFS源代码中 <code class="docutils literal notranslate"><span class="pre">glusterfs.spec</span></code> 配置了 <code class="docutils literal notranslate"><span class="pre">BuildRequires:</span>&#160;&#160;&#160; <span class="pre">userspace-rcu-devel</span> <span class="pre">&gt;=</span> <span class="pre">0.7</span></code> ，这个依赖需要修改成 SELS 12 SP3对应的 <code class="docutils literal notranslate"><span class="pre">liburcu-devel</span></code> (版本是 0.8)，所以修改源代码根目录下 <code class="docutils literal notranslate"><span class="pre">glusterfs.spec.in</span></code> ，将:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BuildRequires</span><span class="p">:</span>    <span class="n">userspace</span><span class="o">-</span><span class="n">rcu</span><span class="o">-</span><span class="n">devel</span> <span class="o">&gt;=</span> <span class="mf">0.7</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BuildRequires</span><span class="p">:</span>    <span class="n">liburcu</span><span class="o">-</span><span class="n">devel</span> <span class="o">&gt;=</span> <span class="mf">0.7</span>
+</pre></div>
+</div>
+<p>上述修改可以避免后续 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">glusterrpms</span></code> 出现以下报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">build</span> <span class="n">dependencies</span><span class="p">:</span>
+        <span class="n">userspace</span><span class="o">-</span><span class="n">rcu</span><span class="o">-</span><span class="n">devel</span> <span class="o">&gt;=</span> <span class="mf">0.7</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">by</span> <span class="n">glusterfs</span><span class="o">-</span><span class="mf">6.10</span><span class="o">-</span><span class="mf">0.0</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+<ul>
+<li><p>设置 <code class="docutils literal notranslate"><span class="pre">autoconf</span></code> 环境变量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ac_cv_build</span><span class="o">=</span><span class="n">x86_64</span><span class="o">-</span><span class="n">suse</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span>
+<span class="n">export</span> <span class="n">ac_cv_host</span><span class="o">=</span><span class="n">x86_64</span><span class="o">-</span><span class="n">suse</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在源代码根目录下有autoconf所依赖的 <code class="docutils literal notranslate"><span class="pre">config.guess</span></code> 脚本用来判断编译环境，执行 <code class="docutils literal notranslate"><span class="pre">./config.guess</span></code> 可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x86_64</span><span class="o">-</span><span class="n">suse</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span>
+</pre></div>
+</div>
+</div>
+<p>配置上述 <code class="docutils literal notranslate"><span class="pre">autoconf</span></code> 环境变量是因为我发现在源代码根目录下执行 <code class="docutils literal notranslate"><span class="pre">./autoconf</span></code> 是正确生成了 <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> 中的配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">build_triplet</span> <span class="o">=</span> <span class="n">x86_64</span><span class="o">-</span><span class="n">suse</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span>
+<span class="n">host_triplet</span> <span class="o">=</span> <span class="n">x86_64</span><span class="o">-</span><span class="n">suse</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span>
+</pre></div>
+</div>
+<p>但是在执行 <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">extras/LinuxRPM/;make</span> <span class="pre">glusterrpms</span></code> 生成的RPM源代码根目录 <code class="docutils literal notranslate"><span class="pre">extras/LinuxRPM/rpmbuild/BUILD/glusterfs-6.10</span></code> 下 <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> ( <code class="docutils literal notranslate"><span class="pre">Makefile.in</span></code> )中没有正确替换，依然是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">build_triplet</span> <span class="o">=</span> <span class="nd">@build</span><span class="o">@</span>
+<span class="n">host_triplet</span> <span class="o">=</span> <span class="nd">@host</span><span class="o">@</span>
+</pre></div>
+</div>
+<p>配置上述两个环境变量 <code class="docutils literal notranslate"><span class="pre">ac_cv_build</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ac_cv_host</span></code> 可以正确生成RPM源代码根目录 <code class="docutils literal notranslate"><span class="pre">extras/LinuxRPM/rpmbuild/BUILD/glusterfs-6.10</span></code> 下 <code class="docutils literal notranslate"><span class="pre">Makefile.in</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> ，也避免了 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">glusterrpms</span></code> 报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">configure</span><span class="p">:</span> <span class="n">WARNING</span><span class="p">:</span> <span class="n">cache</span> <span class="n">variable</span> <span class="n">ac_cv_build</span> <span class="n">contains</span> <span class="n">a</span> <span class="n">newline</span>
+<span class="n">configure</span><span class="p">:</span> <span class="n">WARNING</span><span class="p">:</span> <span class="n">cache</span> <span class="n">variable</span> <span class="n">ac_cv_host</span> <span class="n">contains</span> <span class="n">a</span> <span class="n">newline</span>
+</pre></div>
+</div>
+<p>这个报错实际上就会导致 <code class="docutils literal notranslate"><span class="pre">extras/LinuxRPM/rpmbuild/BUILD/glusterfs-6.10</span></code> 下 <code class="docutils literal notranslate"><span class="pre">Makefile.in</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> 错误生成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">build_triplet</span> <span class="o">=</span> <span class="n">It</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">expected</span> <span class="n">to</span> <span class="n">execute</span> <span class="n">this</span> <span class="n">script</span><span class="o">.</span> <span class="n">When</span> <span class="n">you</span> <span class="n">are</span> <span class="n">building</span> <span class="kn">from</span> <span class="nn">a</span>
+<span class="n">released</span> <span class="n">tarball</span> <span class="p">(</span><span class="n">generated</span> <span class="k">with</span> <span class="s1">&#39;make dist&#39;</span><span class="p">),</span> <span class="n">you</span> <span class="n">are</span> <span class="n">expected</span> <span class="n">to</span> <span class="k">pass</span>
+<span class="o">--</span><span class="n">build</span><span class="o">=...</span> <span class="ow">and</span> <span class="o">--</span><span class="n">host</span><span class="o">=...</span> <span class="n">to</span> <span class="o">./</span><span class="n">configure</span> <span class="ow">or</span> <span class="n">replace</span> <span class="n">this</span> <span class="n">config</span><span class="o">.</span><span class="n">sub</span> <span class="n">script</span> <span class="ow">in</span>
+<span class="n">the</span> <span class="n">sources</span> <span class="k">with</span> <span class="n">an</span> <span class="n">updated</span> <span class="n">version</span><span class="o">.</span>
+<span class="n">host_triplet</span> <span class="o">=</span> <span class="n">It</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">expected</span> <span class="n">to</span> <span class="n">execute</span> <span class="n">this</span> <span class="n">script</span><span class="o">.</span> <span class="n">When</span> <span class="n">you</span> <span class="n">are</span> <span class="n">building</span> <span class="kn">from</span> <span class="nn">a</span>
+<span class="n">released</span> <span class="n">tarball</span> <span class="p">(</span><span class="n">generated</span> <span class="k">with</span> <span class="s1">&#39;make dist&#39;</span><span class="p">),</span> <span class="n">you</span> <span class="n">are</span> <span class="n">expected</span> <span class="n">to</span> <span class="k">pass</span>
+<span class="o">--</span><span class="n">build</span><span class="o">=...</span> <span class="ow">and</span> <span class="o">--</span><span class="n">host</span><span class="o">=...</span> <span class="n">to</span> <span class="o">./</span><span class="n">configure</span> <span class="ow">or</span> <span class="n">replace</span> <span class="n">this</span> <span class="n">config</span><span class="o">.</span><span class="n">sub</span> <span class="n">script</span> <span class="ow">in</span>
+<span class="n">the</span> <span class="n">sources</span> <span class="k">with</span> <span class="n">an</span> <span class="n">updated</span> <span class="n">version</span><span class="o">.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>执行RPM编译:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">extras</span><span class="o">/</span><span class="n">LinuxRPM</span>
+<span class="n">make</span> <span class="n">glusterrpms</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>目前上述 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">glusterrpms</span></code> 还是会遇到有关 <code class="docutils literal notranslate"><span class="pre">glusterd-geo-rep</span></code> 错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Processing</span> <span class="n">files</span><span class="p">:</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">geo</span><span class="o">-</span><span class="n">replication</span><span class="o">-</span><span class="mf">6.10</span><span class="o">-</span><span class="mf">0.0</span><span class="o">.</span><span class="n">x86_64</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">File</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">/</span><span class="n">extras</span><span class="o">/</span><span class="n">LinuxRPM</span><span class="o">/</span><span class="n">rpmbuild</span><span class="o">/</span><span class="n">BUILDROOT</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">-</span><span class="mf">6.10</span><span class="o">-</span><span class="mf">0.0</span><span class="o">.</span><span class="n">x86_64</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">com</span><span class="o">/</span><span class="n">glusterd</span><span class="o">/</span><span class="n">hooks</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="n">gsync</span><span class="o">-</span><span class="n">create</span><span class="o">/</span><span class="n">post</span><span class="o">/</span><span class="n">S56glusterd</span><span class="o">-</span><span class="n">geo</span><span class="o">-</span><span class="n">rep</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="n">post</span><span class="o">.</span><span class="n">sh</span>
+
+<span class="n">RPM</span> <span class="n">build</span> <span class="n">errors</span><span class="p">:</span>
+    <span class="n">File</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">/</span><span class="n">extras</span><span class="o">/</span><span class="n">LinuxRPM</span><span class="o">/</span><span class="n">rpmbuild</span><span class="o">/</span><span class="n">BUILDROOT</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">-</span><span class="mf">6.10</span><span class="o">-</span><span class="mf">0.0</span><span class="o">.</span><span class="n">x86_64</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">com</span><span class="o">/</span><span class="n">glusterd</span><span class="o">/</span><span class="n">hooks</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="n">gsync</span><span class="o">-</span><span class="n">create</span><span class="o">/</span><span class="n">post</span><span class="o">/</span><span class="n">S56glusterd</span><span class="o">-</span><span class="n">geo</span><span class="o">-</span><span class="n">rep</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="n">post</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">Makefile</span><span class="p">:</span><span class="mi">561</span><span class="p">:</span> <span class="n">recipe</span> <span class="k">for</span> <span class="n">target</span> <span class="s1">&#39;rpms&#39;</span> <span class="n">failed</span>
+<span class="n">make</span><span class="p">:</span> <span class="o">***</span> <span class="p">[</span><span class="n">rpms</span><span class="p">]</span> <span class="n">Error</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>但是在  <code class="docutils literal notranslate"><span class="pre">configure</span></code> 增加 <code class="docutils literal notranslate"><span class="pre">--disable-georeplication</span></code> 还是不能解决，我预计需要修订 <code class="docutils literal notranslate"><span class="pre">glusterfs-geo-replicatio</span></code> 的 <code class="docutils literal notranslate"><span class="pre">.spec</span></code> 配置来fix。</p>
+<p>待实践…</p>
+</section>
+<section id="id7">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://build.opensuse.org/package/view_file/openSUSE:Factory/glusterfs/glusterfs.spec?expand=0">File glusterfs.spec of Package glusterfs</a><span class="link-target"> [https://build.opensuse.org/package/view_file/openSUSE:Factory/glusterfs/glusterfs.spec?expand=0]</span></p></li>
+<li><p><a class="reference external" href="https://docs.gluster.org/en/latest/Developer-guide/Building-GlusterFS/">Building GlusterFS</a><span class="link-target"> [https://docs.gluster.org/en/latest/Developer-guide/Building-GlusterFS/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

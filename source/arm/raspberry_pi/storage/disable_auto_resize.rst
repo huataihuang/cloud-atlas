@@ -12,7 +12,7 @@
 
    可能首次镜像安装以后，需要删除掉 ``/.first_boot`` 标记文件，避免第一次启动自动扩展文件系统。
 
-暂时没有实践，等下次新设备使用时测试。
+在 Ubuntu for Raspbery Pi 系统中，采用 :ref:`disable_cloud_init` 方法禁止 :ref:`cloud_init` 就可以关闭自动扩展，或者修改 ``cloud-init`` 配置关闭自动扩展。
 
 参考
 ======

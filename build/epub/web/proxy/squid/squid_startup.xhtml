@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Squid快速起步</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="squid">
+<span id="squid-startup"></span><h1>Squid快速起步</h1>
+<section id="id1">
+<h2>安装</h2>
+<ul>
+<li><p>arch linux安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">squid</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>默认配置的缓存目录是 <code class="docutils literal notranslate"><span class="pre">/var/cache/squid</span></code> ，配置文件是 <code class="docutils literal notranslate"><span class="pre">/etc/squid/squid.conf</span></code> 。</p>
+</section>
+<section id="id2">
+<h2>配置</h2>
+<p>配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/squid/squid.conf</span></code> 默认具备来开箱即用配置。</p>
+<ul>
+<li><p>监听端口默认是 <code class="docutils literal notranslate"><span class="pre">3128</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">3128</span>
+</pre></div>
+</div>
+</li>
+<li><p>注意，默认只允许本地局域网和本地主机访问，并拒绝所有其他主机访问代理:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_access</span> <span class="n">allow</span> <span class="n">localnet</span>
+<span class="n">http_access</span> <span class="n">allow</span> <span class="n">localhost</span>
+
+<span class="c1"># And finally deny all other access to this proxy</span>
+<span class="n">http_access</span> <span class="n">deny</span> <span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+<li><p>由于我们已经允许了 <code class="docutils literal notranslate"><span class="pre">localnet</span></code> ，所以我们还需要定义 <code class="docutils literal notranslate"><span class="pre">localnet</span></code> 的来源:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 默认已经配置了本地局域网的网段</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.1</span><span class="o">-</span><span class="mf">0.255</span><span class="o">.</span><span class="mf">255.255</span>  <span class="c1"># RFC 1122 &quot;this&quot; network (LAN)</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">8</span>             <span class="c1"># RFC 1918 local private network (LAN)</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="mf">100.64</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">10</span>          <span class="c1"># RFC 6598 shared address space (CGN)</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="mf">169.254</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">16</span>         <span class="c1"># RFC 3927 link-local (directly plugged) machines</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">12</span>          <span class="c1"># RFC 1918 local private network (LAN)</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">16</span>         <span class="c1"># RFC 1918 local private network (LAN)</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="n">fc00</span><span class="p">::</span><span class="o">/</span><span class="mi">7</span>               <span class="c1"># RFC 4193 local private network range</span>
+<span class="n">acl</span> <span class="n">localnet</span> <span class="n">src</span> <span class="n">fe80</span><span class="p">::</span><span class="o">/</span><span class="mi">10</span>              <span class="c1"># RFC 4291 link-local (directly plugged) machines</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>你可以再增加自己定义的网段段。</p>
+<ul>
+<li><p>重启服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">squid</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="n">squid</span>
+</pre></div>
+</div>
+</li>
+<li><p>对于使用了firewalld的防火墙主机，请设置允许访问端口 3128</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">3128</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.techrepublic.com/article/how-to-install-and-configure-squid-proxy-server-on-linux/">How to install and configure Squid proxy server on Linux</a><span class="link-target"> [https://www.techrepublic.com/article/how-to-install-and-configure-squid-proxy-server-on-linux/]</span></p></li>
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Squid">arch linux官方文档 - Squid</a><span class="link-target"> [https://wiki.archlinux.org/index.php/Squid]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

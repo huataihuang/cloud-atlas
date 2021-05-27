@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>加载kind镜像</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="kind">
+<span id="load-kind-image"></span><h1>加载kind镜像</h1>
+<p>Docker镜像可以通过以下命令加载到集群中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kind</span> <span class="n">load</span> <span class="n">docker</span><span class="o">-</span><span class="n">image</span> <span class="n">my</span><span class="o">-</span><span class="n">custom</span><span class="o">-</span><span class="n">image</span> <span class="o">--</span><span class="n">name</span> <span class="n">cluster</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
+</div>
+<p>此外，镜像打包也可以加载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kind</span> <span class="n">load</span> <span class="n">image</span><span class="o">-</span><span class="n">archive</span> <span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">image</span><span class="o">-</span><span class="n">archive</span><span class="o">.</span><span class="n">tar</span>
+</pre></div>
+</div>
+<section id="id1">
+<h2>kind镜像加载实战</h2>
+<p>kind提供了将docker镜像加载到集群每个node节点上的操作命令，加载镜像之后，集群的每个节点都会具备该镜像文件，就不需要再从docker hub仓库pull了，节约了下载带宽资源。当然，你使用kubectl命令创建pod也能够下载对应镜像，重复拉取镜像会拖慢pod创建速度。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里采用的镜像实战是 <a class="reference internal" href="../admin/dockerfile.xhtml#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 案例，我们将在kind集群中构架一个基础的自定义ssh服务的CentOS。</p>
+</div>
+<ul class="simple">
+<li><p>创建Dockerfile目录 <code class="docutils literal notranslate"><span class="pre">docker</span></code> ，然后进入该目录，在该目录下存放 <code class="docutils literal notranslate"><span class="pre">centos8-ssh</span></code> 文件</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">../admin/centos8-ssh</span></div>
+<div class="highlight-dockerfile notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c"># Build centos 8 image with ssh:</span>
+<span class="c"># ------------------------------</span>
+<span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
+
+<span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span> dnf clean all
+<span class="k">RUN</span> dnf -y update
+
+<span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server initscripts
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span> ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span> usermod -aG wheel admin
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="s"> 22:1122</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果你有需要复制到镜像中文件，例如我需要复制公钥文件 <code class="docutils literal notranslate"><span class="pre">authorized_keys</span></code></p>
+</div>
+<ul>
+<li><p>执行docker创建镜像命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">f</span> <span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>完成后检查镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">images</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REPOSITORY</span>          <span class="n">TAG</span>                 <span class="n">IMAGE</span> <span class="n">ID</span>            <span class="n">CREATED</span>             <span class="n">SIZE</span>
+<span class="n">local</span>               <span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span>         <span class="mi">80314</span><span class="n">bfa9eed</span>        <span class="mi">8</span> <span class="n">seconds</span> <span class="n">ago</span>       <span class="mi">286</span><span class="n">MB</span>
+</pre></div>
+</div>
+<ul>
+<li><p>将镜像加载到集群 <code class="docutils literal notranslate"><span class="pre">dev</span></code> 中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kind</span> <span class="n">load</span> <span class="n">docker</span><span class="o">-</span><span class="n">image</span> <span class="n">local</span><span class="p">:</span><span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span> <span class="o">--</span><span class="n">name</span> <span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Image</span><span class="p">:</span> <span class="s2">&quot;local:centos8-ssh&quot;</span> <span class="k">with</span> <span class="n">ID</span> <span class="s2">&quot;sha256:80314bfa9eeddd87d002cf89026089a084b9fd2e511bbc07f0fbc977e7f06ed3&quot;</span> <span class="ow">not</span> <span class="n">yet</span> <span class="n">present</span> <span class="n">on</span> <span class="n">node</span> <span class="s2">&quot;dev-worker2&quot;</span><span class="p">,</span> <span class="n">loading</span><span class="o">...</span>
+<span class="n">Image</span><span class="p">:</span> <span class="s2">&quot;local:centos8-ssh&quot;</span> <span class="k">with</span> <span class="n">ID</span> <span class="s2">&quot;sha256:80314bfa9eeddd87d002cf89026089a084b9fd2e511bbc07f0fbc977e7f06ed3&quot;</span> <span class="ow">not</span> <span class="n">yet</span> <span class="n">present</span> <span class="n">on</span> <span class="n">node</span> <span class="s2">&quot;dev-worker&quot;</span><span class="p">,</span> <span class="n">loading</span><span class="o">...</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>完成镜像上传后，kind集群的每个node节点都会具备分发的自定义镜像 <code class="docutils literal notranslate"><span class="pre">centos8-ssh</span></code> ，我们需要检查镜像的名字， <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">exec</span></code> 提供了检查集群节点(这里案例是检查集群节点 <code class="docutils literal notranslate"><span class="pre">dev-worker</span></code> )上镜像列表的命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">dev</span><span class="o">-</span><span class="n">worker</span> <span class="n">crictl</span> <span class="n">images</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示镜像列表如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MAGE</span>                                      <span class="n">TAG</span>                 <span class="n">IMAGE</span> <span class="n">ID</span>            <span class="n">SIZE</span>
+<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kindest</span><span class="o">/</span><span class="n">kindnetd</span>                 <span class="mf">0.5</span><span class="o">.</span><span class="mi">4</span>               <span class="mi">2186</span><span class="n">a1a396deb</span>       <span class="mi">113</span><span class="n">MB</span>
+<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">library</span><span class="o">/</span><span class="n">local</span>                    <span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span>         <span class="mi">80314</span><span class="n">bfa9eedd</span>       <span class="mi">294</span><span class="n">MB</span>
+<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">rancher</span><span class="o">/</span><span class="n">local</span><span class="o">-</span><span class="n">path</span><span class="o">-</span><span class="n">provisioner</span>   <span class="n">v0</span><span class="o">.</span><span class="mf">0.12</span>             <span class="n">db10073a6f829</span>       <span class="mi">42</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">coredns</span>                         <span class="mf">1.6</span><span class="o">.</span><span class="mi">7</span>               <span class="mi">67</span><span class="n">da37a9a360e</span>       <span class="mf">43.9</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">debian</span><span class="o">-</span><span class="n">base</span>                     <span class="n">v2</span><span class="o">.</span><span class="mf">0.0</span>              <span class="mi">9</span><span class="n">bd6154724425</span>       <span class="mf">53.9</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">etcd</span>                            <span class="mf">3.4</span><span class="o">.</span><span class="mi">3</span><span class="o">-</span><span class="mi">0</span>             <span class="mi">303</span><span class="n">ce5db0e90d</span>       <span class="mi">290</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span>                  <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">7</span><span class="n">df05884b1e25</span>       <span class="mi">147</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span>         <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">31</span><span class="n">fd71c85722f</span>       <span class="mi">133</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">proxy</span>                      <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">312</span><span class="n">d3d1cb6c72</span>       <span class="mi">133</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span>                  <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">121</span><span class="n">edc8356c58</span>       <span class="mi">113</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">pause</span>                           <span class="mf">3.2</span>                 <span class="mi">80</span><span class="n">d28bedfe5de</span>       <span class="mi">686</span><span class="n">kB</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference internal" href="../../kubernetes/debug/crictl.xhtml#crictl"><span class="std std-ref">crictl</span></a> 是CRI兼容的容器runtime命令行工具。在kind的Kubernetes集群节点上没有安装docker命令行工具，而是安装了Kubernetes的crictl工具。</p>
+<p>注意，kind配置的 <code class="docutils literal notranslate"><span class="pre">/etc/crictl.yaml</span></code> 只有一行配置，指向Kubernetes节点上的containerd的socket:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runtime</span><span class="o">-</span><span class="n">endpoint</span><span class="p">:</span> <span class="n">unix</span><span class="p">:</span><span class="o">///</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">containerd</span><span class="o">/</span><span class="n">containerd</span><span class="o">.</span><span class="n">sock</span>
+</pre></div>
+</div>
+<p>从节点上运行的 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 进程的参数也可以看到 <code class="docutils literal notranslate"><span class="pre">--container-runtime-endpoint=/run/containerd/containerd.sock</span></code> ，这就是 <code class="docutils literal notranslate"><span class="pre">crictl</span></code> 可以直接和 containerd 通讯的socks。</p>
+</div>
+<ul>
+<li><p>为了方便管理，我先创建一个独立的namespace，名为 <code class="docutils literal notranslate"><span class="pre">studio</span></code> 来容纳后续创建的pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">create</span> <span class="n">namespace</span> <span class="n">studio</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">namespace</span><span class="o">/</span><span class="n">studio</span> <span class="n">created</span>
+</pre></div>
+</div>
+<p>检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">namespaces</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                 <span class="n">STATUS</span>   <span class="n">AGE</span>
+<span class="n">default</span>              <span class="n">Active</span>   <span class="mi">2</span><span class="n">d</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">node</span><span class="o">-</span><span class="n">lease</span>      <span class="n">Active</span>   <span class="mi">2</span><span class="n">d</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">public</span>          <span class="n">Active</span>   <span class="mi">2</span><span class="n">d</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">system</span>          <span class="n">Active</span>   <span class="mi">2</span><span class="n">d</span>
+<span class="n">local</span><span class="o">-</span><span class="n">path</span><span class="o">-</span><span class="n">storage</span>   <span class="n">Active</span>   <span class="mi">2</span><span class="n">d</span>
+<span class="n">studio</span>               <span class="n">Active</span>   <span class="mi">16</span><span class="n">s</span>
+</pre></div>
+</div>
+<ul>
+<li><p>既然我们已经加载好镜像(注意：创建的docker镜像是具备了 <code class="docutils literal notranslate"><span class="pre">ENTRYPOINT</span></code> ，也就是最后会自动启动sshd和bash，所以我们的kubernetes不需要传递容器命令)，我们现在来创建pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">run</span> <span class="n">dev</span><span class="o">-</span><span class="n">studio</span> <span class="o">--</span><span class="n">image</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">library</span><span class="o">/</span><span class="n">local</span><span class="p">:</span><span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span> <span class="o">--</span><span class="n">namespace</span><span class="o">=</span><span class="n">studio</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后检查创建的pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">n</span> <span class="n">studio</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>糟糕，pod出现了crash:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">READY</span>   <span class="n">STATUS</span>             <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">dev</span><span class="o">-</span><span class="n">studio</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">CrashLoopBackOff</span>   <span class="mi">3</span>          <span class="mi">59</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>我们来检查以下pod失败的原因:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">pods</span> <span class="n">dev</span><span class="o">-</span><span class="n">studio</span> <span class="o">-</span><span class="n">n</span> <span class="n">studio</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span><span class="p">:</span>         <span class="n">dev</span><span class="o">-</span><span class="n">studio</span>
+<span class="n">Namespace</span><span class="p">:</span>    <span class="n">studio</span>
+<span class="n">Priority</span><span class="p">:</span>     <span class="mi">0</span>
+<span class="n">Node</span><span class="p">:</span>         <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span><span class="o">/</span><span class="mf">172.19</span><span class="o">.</span><span class="mf">0.4</span>
+<span class="n">Start</span> <span class="n">Time</span><span class="p">:</span>   <span class="n">Sun</span><span class="p">,</span> <span class="mi">19</span> <span class="n">Jul</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">36</span><span class="p">:</span><span class="mi">23</span> <span class="o">+</span><span class="mi">0800</span>
+<span class="n">Labels</span><span class="p">:</span>       <span class="n">run</span><span class="o">=</span><span class="n">dev</span><span class="o">-</span><span class="n">studio</span>
+<span class="n">Annotations</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">Status</span><span class="p">:</span>       <span class="n">Running</span>
+<span class="n">IP</span><span class="p">:</span>           <span class="mf">10.244</span><span class="o">.</span><span class="mf">5.2</span>
+<span class="n">IPs</span><span class="p">:</span>
+  <span class="n">IP</span><span class="p">:</span>  <span class="mf">10.244</span><span class="o">.</span><span class="mf">5.2</span>
+<span class="n">Containers</span><span class="p">:</span>
+  <span class="n">dev</span><span class="o">-</span><span class="n">studio</span><span class="p">:</span>
+    <span class="n">Container</span> <span class="n">ID</span><span class="p">:</span>   <span class="n">containerd</span><span class="p">:</span><span class="o">//</span><span class="mf">50e1</span><span class="n">df5e4464ede9f6cdb0e3b59bb5bcf93c02907cf0038732a0ff8fcfe882c2</span>
+    <span class="n">Image</span><span class="p">:</span>          <span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">library</span><span class="o">/</span><span class="n">local</span><span class="p">:</span><span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span>
+    <span class="n">Image</span> <span class="n">ID</span><span class="p">:</span>       <span class="n">sha256</span><span class="p">:</span><span class="mi">80314</span><span class="n">bfa9eeddd87d002cf89026089a084b9fd2e511bbc07f0fbc977e7f06ed3</span>
+    <span class="n">Port</span><span class="p">:</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+    <span class="n">Host</span> <span class="n">Port</span><span class="p">:</span>      <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+    <span class="n">State</span><span class="p">:</span>          <span class="n">Terminated</span>
+      <span class="n">Reason</span><span class="p">:</span>       <span class="n">Completed</span>
+      <span class="n">Exit</span> <span class="n">Code</span><span class="p">:</span>    <span class="mi">0</span>
+      <span class="n">Started</span><span class="p">:</span>      <span class="n">Sun</span><span class="p">,</span> <span class="mi">19</span> <span class="n">Jul</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">56</span> <span class="o">+</span><span class="mi">0800</span>
+      <span class="n">Finished</span><span class="p">:</span>     <span class="n">Sun</span><span class="p">,</span> <span class="mi">19</span> <span class="n">Jul</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">56</span> <span class="o">+</span><span class="mi">0800</span>
+    <span class="n">Last</span> <span class="n">State</span><span class="p">:</span>     <span class="n">Terminated</span>
+      <span class="n">Reason</span><span class="p">:</span>       <span class="n">Completed</span>
+      <span class="n">Exit</span> <span class="n">Code</span><span class="p">:</span>    <span class="mi">0</span>
+      <span class="n">Started</span><span class="p">:</span>      <span class="n">Sun</span><span class="p">,</span> <span class="mi">19</span> <span class="n">Jul</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">06</span> <span class="o">+</span><span class="mi">0800</span>
+      <span class="n">Finished</span><span class="p">:</span>     <span class="n">Sun</span><span class="p">,</span> <span class="mi">19</span> <span class="n">Jul</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mi">06</span> <span class="o">+</span><span class="mi">0800</span>
+    <span class="n">Ready</span><span class="p">:</span>          <span class="kc">False</span>
+    <span class="n">Restart</span> <span class="n">Count</span><span class="p">:</span>  <span class="mi">4</span>
+    <span class="n">Environment</span><span class="p">:</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+    <span class="n">Mounts</span><span class="p">:</span>
+      <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">secrets</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">serviceaccount</span> <span class="kn">from</span> <span class="nn">default</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">tpblw</span> <span class="p">(</span><span class="n">ro</span><span class="p">)</span>
+<span class="n">Conditions</span><span class="p">:</span>
+  <span class="n">Type</span>              <span class="n">Status</span>
+  <span class="n">Initialized</span>       <span class="kc">True</span>
+  <span class="n">Ready</span>             <span class="kc">False</span>
+  <span class="n">ContainersReady</span>   <span class="kc">False</span>
+  <span class="n">PodScheduled</span>      <span class="kc">True</span>
+<span class="n">Volumes</span><span class="p">:</span>
+  <span class="n">default</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">tpblw</span><span class="p">:</span>
+    <span class="n">Type</span><span class="p">:</span>        <span class="n">Secret</span> <span class="p">(</span><span class="n">a</span> <span class="n">volume</span> <span class="n">populated</span> <span class="n">by</span> <span class="n">a</span> <span class="n">Secret</span><span class="p">)</span>
+    <span class="n">SecretName</span><span class="p">:</span>  <span class="n">default</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">tpblw</span>
+    <span class="n">Optional</span><span class="p">:</span>    <span class="n">false</span>
+<span class="n">QoS</span> <span class="n">Class</span><span class="p">:</span>       <span class="n">BestEffort</span>
+<span class="n">Node</span><span class="o">-</span><span class="n">Selectors</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">Tolerations</span><span class="p">:</span>     <span class="n">node</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="ow">not</span><span class="o">-</span><span class="n">ready</span><span class="p">:</span><span class="n">NoExecute</span> <span class="k">for</span> <span class="mi">300</span><span class="n">s</span>
+                 <span class="n">node</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">unreachable</span><span class="p">:</span><span class="n">NoExecute</span> <span class="k">for</span> <span class="mi">300</span><span class="n">s</span>
+<span class="n">Events</span><span class="p">:</span>
+  <span class="n">Type</span>     <span class="n">Reason</span>     <span class="n">Age</span>               <span class="n">From</span>                  <span class="n">Message</span>
+  <span class="o">----</span>     <span class="o">------</span>     <span class="o">----</span>              <span class="o">----</span>                  <span class="o">-------</span>
+  <span class="n">Normal</span>   <span class="n">Scheduled</span>  <span class="o">&lt;</span><span class="n">unknown</span><span class="o">&gt;</span>         <span class="n">default</span><span class="o">-</span><span class="n">scheduler</span>     <span class="n">Successfully</span> <span class="n">assigned</span> <span class="n">studio</span><span class="o">/</span><span class="n">dev</span><span class="o">-</span><span class="n">studio</span> <span class="n">to</span> <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span>
+  <span class="n">Normal</span>   <span class="n">Pulled</span>     <span class="mi">2</span><span class="n">s</span> <span class="p">(</span><span class="n">x5</span> <span class="n">over</span> <span class="mi">94</span><span class="n">s</span><span class="p">)</span>  <span class="n">kubelet</span><span class="p">,</span> <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span>  <span class="n">Container</span> <span class="n">image</span> <span class="s2">&quot;docker.io/library/local:centos8-ssh&quot;</span> <span class="n">already</span> <span class="n">present</span> <span class="n">on</span> <span class="n">machine</span>
+  <span class="n">Normal</span>   <span class="n">Created</span>    <span class="mi">2</span><span class="n">s</span> <span class="p">(</span><span class="n">x5</span> <span class="n">over</span> <span class="mi">94</span><span class="n">s</span><span class="p">)</span>  <span class="n">kubelet</span><span class="p">,</span> <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span>  <span class="n">Created</span> <span class="n">container</span> <span class="n">dev</span><span class="o">-</span><span class="n">studio</span>
+  <span class="n">Normal</span>   <span class="n">Started</span>    <span class="mi">2</span><span class="n">s</span> <span class="p">(</span><span class="n">x5</span> <span class="n">over</span> <span class="mi">94</span><span class="n">s</span><span class="p">)</span>  <span class="n">kubelet</span><span class="p">,</span> <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span>  <span class="n">Started</span> <span class="n">container</span> <span class="n">dev</span><span class="o">-</span><span class="n">studio</span>
+  <span class="ne">Warning</span>  <span class="n">BackOff</span>    <span class="mi">1</span><span class="n">s</span> <span class="p">(</span><span class="n">x9</span> <span class="n">over</span> <span class="mi">92</span><span class="n">s</span><span class="p">)</span>  <span class="n">kubelet</span><span class="p">,</span> <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span>  <span class="n">Back</span><span class="o">-</span><span class="n">off</span> <span class="n">restarting</span> <span class="n">failed</span> <span class="n">container</span>
+</pre></div>
+</div>
+</section>
+<section id="pod">
+<h2>排查pod启动失败</h2>
+<ul>
+<li><p>登陆到服务器节点排查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+<li><p>在node节点 <code class="docutils literal notranslate"><span class="pre">dev-worker3</span></code> 上通过 <code class="docutils literal notranslate"><span class="pre">crictl</span></code> 排查，首先检查pods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crictl</span> <span class="n">pods</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里显示的信息是Ready的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POD</span> <span class="n">ID</span>              <span class="n">CREATED</span>             <span class="n">STATE</span>               <span class="n">NAME</span>                <span class="n">NAMESPACE</span>           <span class="n">ATTEMPT</span>
+<span class="mf">23e53447</span><span class="n">b90b3</span>       <span class="mi">13</span> <span class="n">minutes</span> <span class="n">ago</span>      <span class="n">Ready</span>               <span class="n">dev</span><span class="o">-</span><span class="n">studio</span>          <span class="n">studio</span>              <span class="mi">0</span>
+<span class="n">f4b1796209a86</span>       <span class="mi">2</span> <span class="n">days</span> <span class="n">ago</span>          <span class="n">Ready</span>               <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">qfrkl</span>    <span class="n">kube</span><span class="o">-</span><span class="n">system</span>         <span class="mi">0</span>
+<span class="mi">2</span><span class="n">ef62989002ca</span>       <span class="mi">2</span> <span class="n">days</span> <span class="n">ago</span>          <span class="n">Ready</span>               <span class="n">kindnet</span><span class="o">-</span><span class="n">ktjzr</span>       <span class="n">kube</span><span class="o">-</span><span class="n">system</span>         <span class="mi">0</span>
+</pre></div>
+</div>
+<p>但是容器启动失败:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crictl</span> <span class="n">ps</span> <span class="o">-</span><span class="n">a</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span>           <span class="n">IMAGE</span>               <span class="n">CREATED</span>             <span class="n">STATE</span>               <span class="n">NAME</span>                <span class="n">ATTEMPT</span>             <span class="n">POD</span> <span class="n">ID</span>
+<span class="mi">375</span><span class="n">a0e4fa36a8</span>       <span class="mi">80314</span><span class="n">bfa9eedd</span>       <span class="mi">25</span> <span class="n">seconds</span> <span class="n">ago</span>      <span class="n">Exited</span>              <span class="n">dev</span><span class="o">-</span><span class="n">studio</span>          <span class="mi">8</span>                   <span class="mf">23e53447</span><span class="n">b90b3</span>
+<span class="n">b8de653dd80ff</span>       <span class="mi">2186</span><span class="n">a1a396deb</span>       <span class="mi">2</span> <span class="n">days</span> <span class="n">ago</span>          <span class="n">Running</span>             <span class="n">kindnet</span><span class="o">-</span><span class="n">cni</span>         <span class="mi">0</span>                   <span class="mi">2</span><span class="n">ef62989002ca</span>
+<span class="mi">44</span><span class="n">b9a685912b6</span>       <span class="mi">312</span><span class="n">d3d1cb6c72</span>       <span class="mi">2</span> <span class="n">days</span> <span class="n">ago</span>          <span class="n">Running</span>             <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span>          <span class="mi">0</span>                   <span class="n">f4b1796209a86</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查容器日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crictl</span> <span class="n">logs</span> <span class="mi">375</span><span class="n">a0e4fa36a8</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>奇怪，日志始终是空的</p>
+<ul>
+<li><p>在node上inspect容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crictl</span> <span class="n">inspect</span> <span class="mi">375</span><span class="n">a0e4fa36a8</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+    <span class="s2">&quot;runtimeSpec&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;ociVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.1-dev&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;process&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+          <span class="s2">&quot;gid&quot;</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="s2">&quot;/bin/sh&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;-c&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;/usr/sbin/sshd </span><span class="se">\u0026\u0026</span><span class="s2"> /bin/bash&quot;</span>
+        <span class="p">],</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>是不是dockerfile的 <code class="docutils literal notranslate"><span class="pre">ENTRYPOINT</span> <span class="pre">/usr/sbin/sshd</span> <span class="pre">&amp;&amp;</span> <span class="pre">/bin/bash</span></code> 到Kubernetes中不能正常运行了？为何Dockerfile配置中 <code class="docutils literal notranslate"><span class="pre">&amp;&amp;</span></code> 符号到了Kubernetes中成了 <code class="docutils literal notranslate"><span class="pre">\u0026\u0026</span></code></p>
+<section id="id2">
+<h3>对比</h3>
+<ul>
+<li><p>尝试对比一个简单的httpd容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">run</span> <span class="n">test</span> <span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="n">httpd</span>
+</pre></div>
+</div>
+</li>
+<li><p>这个标准镜像启动是正常的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>   <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>          <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">test</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">43</span><span class="n">m</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">4.2</span>   <span class="n">dev</span><span class="o">-</span><span class="n">worker5</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id3">
+<h2>参考</h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind Quick Start - Loading an Image Into Your Cluster</a><span class="link-target"> [https://kind.sigs.k8s.io/docs/user/quick-start/]</span></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
