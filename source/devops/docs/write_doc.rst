@@ -128,11 +128,20 @@ Sphinx Doc
    cd cloud-atlas
    sphinx-quickstart
 
-接下来就是文档撰写了，撰写在 ``source`` 目录下，结构请参考 `我的云图项目 <https://github.com/huataihuang/cloud-atlas>`_`
+接下来就是文档撰写了，撰写在 ``source`` 目录下，结构请参考 `我的云图项目 <https://github.com/huataihuang/cloud-atlas>`_
 
 .. note::
 
    Sphinx撰写时经常需要引用代码片段，请参考 `sphinx插入代码 <https://www.cnblogs.com/youxin/p/3653027.html>`_ 和 `展示示例代码 <https://zh-sphinx-doc.readthedocs.io/en/latest/markup/code.html>`_
+
+- 撰写文档之后，通过以下命令生成html和epub最终文档(使用epub方便分发和移动设备阅读)::
+
+   make html
+   make epub
+
+.. note::
+
+   我发现epub不支持html中的一些图片格式，例如 ``.webp`` 和 ``.dms`` 图片，所以建议转换成 ``.png`` 格式较为通用，方便生成epub文件。
 
 MkDoc
 =========

@@ -16,7 +16,6 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    startup/index
    hypervisor.rst
    kvm_architecture.rst
-   cloud-init.rst
    virtio/index
    libvirt/index
    remote_desktop/index
