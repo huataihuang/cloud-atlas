@@ -249,8 +249,53 @@
   <section id="systemd-timesyncd">
 <span id="id1"></span><h1>Systemd Timesyncd服务<a class="headerlink" href="#systemd-timesyncd" title="永久链接至标题">¶</a></h1>
 <p>现代Linux发行版都采用systemd管理系统，systemd体系也提供了基础的 <code class="docutils literal notranslate"><span class="pre">timesyncd</span></code> 服务来实现SNTP客户端，可以替代传统的 <code class="docutils literal notranslate"><span class="pre">ntpd</span></code> 来实现主机NTP同步(客户端)。虽然不能作为NTP服务器，但是精简的 <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> 可以实现非常轻量级的时钟同步功能。</p>
+<p><code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> 是通过网络提供系统时钟同步的服务，实现了SNTP client。和NTP实现 <a class="reference internal" href="../../../infra_service/ntp/chrony/index.html#chrony"><span class="std std-ref">chrony ntp服务</span></a> 不同， <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> 只实现客户端功能，而不是实现完整的NTP，聚焦于从远程服务器查询时间并同步到本地时钟。除非你需要需要为网络中其他NTP客户端提供服务或者需要连接本地硬件时钟，否则一个简单的NTP客户端，例如 <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> ，往往是最好的解决方案。这个时钟同步客户端运行只需要最小的权限，并且只有网络连接可用时才会通过
+:ref:<code class="docutils literal notranslate"><span class="pre">systemd_networkd</span></code> hook up。每次新的NTP同步请求发起， <code class="docutils literal notranslate"><span class="pre">timesyncd</span></code> 服务就把当前时钟保存到磁盘，并使用它来矫正启动时的系统时钟，这样就适合用于缺少RTC的设备，例如 <a class="reference internal" href="../../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 或者嵌入设备，可以确保这些系统时钟正确(即使不是始终正确)。需要注意，在安装 <a class="reference internal" href="index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 时候需要确保创建一个名为 <code class="docutils literal notranslate"><span class="pre">systemd-timesync</span></code> 的用户和组。</p>
+<section id="id2">
+<h2>配置<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span>
+</pre></div>
+</div>
+</li>
+<li><p>激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span><span class="o">.</span><span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>当 <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> 启动时会读取 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/timesyncd.conf</span></code> 配置，所以如果要修订配置，例如更改时钟服务器，则类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Time</span><span class="p">]</span>
+<span class="n">NTP</span><span class="o">=</span><span class="mf">0.</span><span class="n">arch</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">1.</span><span class="n">arch</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">2.</span><span class="n">arch</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">3.</span><span class="n">arch</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span>
+<span class="n">FallbackNTP</span><span class="o">=</span><span class="mf">0.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">1.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">0.</span><span class="n">fr</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span>
+</pre></div>
+</div>
+<ul>
+<li><p>要验证配置，执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timedatectl</span> <span class="n">show</span><span class="o">-</span><span class="n">timesync</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LinkNTPServers</span><span class="o">=</span>
+<span class="n">SystemNTPServers</span><span class="o">=</span>
+<span class="n">FallbackNTPServers</span><span class="o">=</span><span class="mf">0.</span><span class="n">rhel</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">1.</span><span class="n">rhel</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">2.</span><span class="n">rhel</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="mf">3.</span><span class="n">rhel</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span>
+<span class="n">ServerName</span><span class="o">=</span><span class="mf">0.</span><span class="n">rhel</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span>
+<span class="n">ServerAddress</span><span class="o">=</span><span class="mf">124.108</span><span class="o">.</span><span class="mf">20.1</span>
+<span class="n">RootDistanceMaxUSec</span><span class="o">=</span><span class="mi">5</span><span class="n">s</span>
+<span class="n">PollIntervalMinUSec</span><span class="o">=</span><span class="mi">32</span><span class="n">s</span>
+<span class="n">PollIntervalMaxUSec</span><span class="o">=</span><span class="mi">34</span><span class="nb">min</span> <span class="mi">8</span><span class="n">s</span>
+<span class="n">PollIntervalUSec</span><span class="o">=</span><span class="mi">32</span><span class="n">s</span>
+<span class="n">NTPMessage</span><span class="o">=</span><span class="p">{</span> <span class="n">Leap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">Version</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">Mode</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">Stratum</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">Precision</span><span class="o">=-</span><span class="mi">25</span><span class="p">,</span> <span class="n">RootDelay</span><span class="o">=</span><span class="mf">19.866</span><span class="n">ms</span><span class="p">,</span> <span class="n">RootDispersion</span><span class="o">=</span><span class="mf">1.800</span><span class="n">ms</span><span class="p">,</span> <span class="n">Reference</span><span class="o">=</span><span class="n">D8DAC0CA</span><span class="p">,</span> <span class="n">OriginateTimestamp</span><span class="o">=</span><span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">16</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">26</span> <span class="n">CST</span><span class="p">,</span> <span class="n">ReceiveTimestamp</span><span class="o">=</span><span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">16</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">34</span> <span class="n">CST</span><span class="p">,</span> <span class="n">TransmitTimestamp</span><span class="o">=</span><span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">16</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">34</span> <span class="n">CST</span><span class="p">,</span> <span class="n">DestinationTimestamp</span><span class="o">=</span><span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">16</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">26</span> <span class="n">CST</span><span class="p">,</span> <span class="n">Ignored</span><span class="o">=</span><span class="n">no</span> <span class="n">PacketCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Jitter</span><span class="o">=</span><span class="mi">0</span>  <span class="p">}</span>
+<span class="n">Frequency</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+</section>
 <section id="timedatectltimesyncd">
-<h2>配置timedatectl和timesyncd<a class="headerlink" href="#timedatectltimesyncd" title="永久链接至标题">¶</a></h2>
+<h2>timedatectl和timesyncd<a class="headerlink" href="#timedatectltimesyncd" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>使用 <code class="docutils literal notranslate"><span class="pre">timedatectl</span> <span class="pre">status</span></code> 可以检查时钟状况:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timedatectl</span> <span class="n">status</span>
@@ -266,6 +311,74 @@
  <span class="n">Network</span> <span class="n">time</span> <span class="n">on</span><span class="p">:</span> <span class="n">yes</span>
 <span class="n">NTP</span> <span class="n">synchronized</span><span class="p">:</span> <span class="n">yes</span>
  <span class="n">RTC</span> <span class="ow">in</span> <span class="n">local</span> <span class="n">TZ</span><span class="p">:</span> <span class="n">no</span>
+</pre></div>
+</div>
+<p>如果上述显示输出中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>               <span class="n">Local</span> <span class="n">time</span><span class="p">:</span> <span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">16</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">59</span> <span class="n">CST</span>
+           <span class="n">Universal</span> <span class="n">time</span><span class="p">:</span> <span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">08</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">59</span> <span class="n">UTC</span>
+                 <span class="n">RTC</span> <span class="n">time</span><span class="p">:</span> <span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">16</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">57</span>
+                <span class="n">Time</span> <span class="n">zone</span><span class="p">:</span> <span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span> <span class="p">(</span><span class="n">CST</span><span class="p">,</span> <span class="o">+</span><span class="mi">0800</span><span class="p">)</span>
+<span class="n">System</span> <span class="n">clock</span> <span class="n">synchronized</span><span class="p">:</span> <span class="n">yes</span>
+              <span class="n">NTP</span> <span class="n">service</span><span class="p">:</span> <span class="n">inactive</span>
+          <span class="n">RTC</span> <span class="ow">in</span> <span class="n">local</span> <span class="n">TZ</span><span class="p">:</span> <span class="n">yes</span>
+
+<span class="ne">Warning</span><span class="p">:</span> <span class="n">The</span> <span class="n">system</span> <span class="ow">is</span> <span class="n">configured</span> <span class="n">to</span> <span class="n">read</span> <span class="n">the</span> <span class="n">RTC</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">local</span> <span class="n">time</span> <span class="n">zone</span><span class="o">.</span>
+         <span class="n">This</span> <span class="n">mode</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">fully</span> <span class="n">supported</span><span class="o">.</span> <span class="n">It</span> <span class="n">will</span> <span class="n">create</span> <span class="n">various</span> <span class="n">problems</span>
+         <span class="k">with</span> <span class="n">time</span> <span class="n">zone</span> <span class="n">changes</span> <span class="ow">and</span> <span class="n">daylight</span> <span class="n">saving</span> <span class="n">time</span> <span class="n">adjustments</span><span class="o">.</span> <span class="n">The</span> <span class="n">RTC</span>
+         <span class="n">time</span> <span class="ow">is</span> <span class="n">never</span> <span class="n">updated</span><span class="p">,</span> <span class="n">it</span> <span class="n">relies</span> <span class="n">on</span> <span class="n">external</span> <span class="n">facilities</span> <span class="n">to</span> <span class="n">maintain</span> <span class="n">it</span><span class="o">.</span>
+         <span class="n">If</span> <span class="n">at</span> <span class="nb">all</span> <span class="n">possible</span><span class="p">,</span> <span class="n">use</span> <span class="n">RTC</span> <span class="ow">in</span> <span class="n">UTC</span> <span class="n">by</span> <span class="n">calling</span>
+         <span class="s1">&#39;timedatectl set-local-rtc 0&#39;</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NTP</span> <span class="n">service</span><span class="p">:</span> <span class="n">inactive</span>
+</pre></div>
+</div>
+<p>实际上没有激活，所以我们通过以下命令激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timedatectl</span> <span class="nb">set</span><span class="o">-</span><span class="n">ntp</span> <span class="n">true</span>
+</pre></div>
+</div>
+<p>然后再次检查 <code class="docutils literal notranslate"><span class="pre">timedatectl</span> <span class="pre">status</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+              <span class="n">NTP</span> <span class="n">service</span><span class="p">:</span> <span class="n">active</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>此外，按照提示，关闭从本地时区读取RTC时间:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timedatectl</span> <span class="nb">set</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">rtc</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>完成后再次检查  <code class="docutils literal notranslate"><span class="pre">timedatectl</span> <span class="pre">status</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>               <span class="n">Local</span> <span class="n">time</span><span class="p">:</span> <span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">16</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="mi">18</span> <span class="n">CST</span>
+           <span class="n">Universal</span> <span class="n">time</span><span class="p">:</span> <span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">08</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="mi">18</span> <span class="n">UTC</span>
+                 <span class="n">RTC</span> <span class="n">time</span><span class="p">:</span> <span class="n">Fri</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">28</span> <span class="mi">08</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="mi">18</span>
+                <span class="n">Time</span> <span class="n">zone</span><span class="p">:</span> <span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span> <span class="p">(</span><span class="n">CST</span><span class="p">,</span> <span class="o">+</span><span class="mi">0800</span><span class="p">)</span>
+<span class="n">System</span> <span class="n">clock</span> <span class="n">synchronized</span><span class="p">:</span> <span class="n">yes</span>
+              <span class="n">NTP</span> <span class="n">service</span><span class="p">:</span> <span class="n">active</span>
+          <span class="n">RTC</span> <span class="ow">in</span> <span class="n">local</span> <span class="n">TZ</span><span class="p">:</span> <span class="n">no</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查服务详细信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timedatectl</span> <span class="n">timesync</span><span class="o">-</span><span class="n">status</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到类似输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>       <span class="n">Server</span><span class="p">:</span> <span class="mf">124.108</span><span class="o">.</span><span class="mf">20.1</span> <span class="p">(</span><span class="mf">0.</span><span class="n">rhel</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span><span class="p">)</span>
+<span class="n">Poll</span> <span class="n">interval</span><span class="p">:</span> <span class="mi">1</span><span class="nb">min</span> <span class="mi">4</span><span class="n">s</span> <span class="p">(</span><span class="nb">min</span><span class="p">:</span> <span class="mi">32</span><span class="n">s</span><span class="p">;</span> <span class="nb">max</span> <span class="mi">34</span><span class="nb">min</span> <span class="mi">8</span><span class="n">s</span><span class="p">)</span>
+         <span class="n">Leap</span><span class="p">:</span> <span class="n">normal</span>
+      <span class="n">Version</span><span class="p">:</span> <span class="mi">4</span>
+      <span class="n">Stratum</span><span class="p">:</span> <span class="mi">2</span>
+    <span class="n">Reference</span><span class="p">:</span> <span class="n">D8DAC0CA</span>
+    <span class="n">Precision</span><span class="p">:</span> <span class="mi">1</span><span class="n">us</span> <span class="p">(</span><span class="o">-</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">Root</span> <span class="n">distance</span><span class="p">:</span> <span class="mf">11.275</span><span class="n">ms</span> <span class="p">(</span><span class="nb">max</span><span class="p">:</span> <span class="mi">5</span><span class="n">s</span><span class="p">)</span>
+       <span class="n">Offset</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.956</span><span class="n">ms</span>
+        <span class="n">Delay</span><span class="p">:</span> <span class="mf">186.719</span><span class="n">ms</span>
+       <span class="n">Jitter</span><span class="p">:</span> <span class="mi">0</span>
+ <span class="n">Packet</span> <span class="n">count</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="n">Frequency</span><span class="p">:</span> <span class="o">+</span><span class="mf">28.703</span><span class="n">ppm</span>
 </pre></div>
 </div>
 <ul>
@@ -304,7 +417,7 @@ Apr 29 13:52:22 devstack systemd-timesyncd[910]: Synchronized to time server 91.
 </div>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/timesyncd.conf</span></code> 设置 <code class="docutils literal notranslate"><span class="pre">timedatectl</span></code> 和 <code class="docutils literal notranslate"><span class="pre">timesyncd</span></code> 获取时钟值的服务器，并且详细配置可以在 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/timesyncd.conf.d/</span></code> 目录下找到</p></li>
-<li><p>在 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/timesyncd.conf</span></code> 中配置了 <code class="docutils literal notranslate"><span class="pre">timedatectl</span></code> 访问的服务器，这里配置局域网中自建的 <span class="xref std std-ref">deploy_ntp</span></p>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/timesyncd.conf</span></code> 中配置了 <code class="docutils literal notranslate"><span class="pre">timedatectl</span></code> 访问的服务器，这里配置局域网中自建的 <a class="reference internal" href="../../../infra_service/ntp/deploy_ntp.html#deploy-ntp"><span class="std std-ref">部署NTP服务(集群)</span></a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Time</span><span class="p">]</span>
 <span class="n">NTP</span><span class="o">=</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>
 </pre></div>
@@ -328,6 +441,12 @@ Apr 29 13:52:22 devstack systemd-timesyncd[910]: Synchronized to time server 91.
 <span class="n">May</span> <span class="mi">01</span> <span class="mi">22</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mi">37</span> <span class="n">pi1</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span><span class="p">[</span><span class="mi">23922</span><span class="p">]:</span> <span class="n">Synchronized</span> <span class="n">to</span> <span class="n">time</span> <span class="n">server</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">123</span> <span class="p">(</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">)</span><span class="o">.</span>
 </pre></div>
 </div>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.archlinux.org/title/systemd-timesyncd">systemd-timesyncd</a></p></li>
+</ul>
 </section>
 </section>
 

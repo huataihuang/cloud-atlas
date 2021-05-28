@@ -10,6 +10,7 @@ ntp服务
    ntp_quickstart.rst
    ntpq_timeout.rst
    deploy_ntp.rst
+   chrony/index
 
 .. only::  subproject and html
 
