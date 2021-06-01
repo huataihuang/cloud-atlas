@@ -101,7 +101,11 @@ nmcli命令的规律是尽可能使用 ``help`` ，每一级命令都有help可�
 
 - 注意：修改配置以后不会直接生效，需要执行激活 ``nmcli connection up id <connection name>`` ::
 
-   nmcli connection up id manage
+   nmcli connection up id "manage"
+
+提示显示::
+
+   Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/3)
 
 nmcli命令案例
 ===============
