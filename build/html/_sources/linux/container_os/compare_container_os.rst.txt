@@ -6,9 +6,9 @@
 
 由于Docker需要操作系统尽可能轻量级，并且docker容器仅仅使用部分内核功能，所以如果你使用容器作为微服务的运行架构，则使用完整功能的Linux操作系统是非常不经济并且带来更多的安全隐患。无用的服务和功能会消耗CPU和内存，并且加大了被攻击面。所以，涌现出一批裁剪Linux操作系统作为容器特定操作系统。
 
-- :ref:`container_linux`
+- :ref:`container_linux` - 2020年5月26日终止，合并到 Fedora CoreOS 和 RHEL CoreOS
 
-著名的CoreOS公司被Red Hat收购以后，CoreOS改名为为container linux。由于融入Red Hat构建的容器架构战略，替代了Red Hat原先开发的 :ref:`atomic` 成为 :ref:`openshift` 的运行基础，并且结合了CoreOS开发的 :ref:`kubernetes` 核心组件 :ref:`etcd` ，所以我觉得是良好发展前景的容器化Linux发行版。
+著名的CoreOS公司被Red Hat收购以后，CoreOS改名为为container linux。由于融入Red Hat构建的容器架构战略，替代了Red Hat原先开发的 :ref:`atomic` 成为 :ref:`openshift` 的运行基础，并且结合了CoreOS开发的 :ref:`kubernetes` 核心组件 :ref:`etcd` ，所以我觉得是良好发展前景的容器化Linux发行版。不过，随着RedHat策略调整，已经扬弃了原先 :ref:`gentoo_linux` 基础，合并到Fedora，形成了新的Fedora CoreOS.
 
 - :ref:`chromium_os`
   - flint os: 基于 :ref:`chromium_os` 的二次开发

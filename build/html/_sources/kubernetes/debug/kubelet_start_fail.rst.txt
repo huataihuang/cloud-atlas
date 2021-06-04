@@ -6,6 +6,11 @@ Kubelet启动异常排查
 
 我在 :ref:`arm_k8s_deploy` 的一个 :ref:`jetson_nano` 工作节点，升级重启以后遇到 :ref:`systemd_service_mask` 导致 :ref:`networkmanager` 无法管理网络接口。虽然 ``unmask`` 之后并且恢复了NetworkManager管理网络接口。但是系统重启后， ``kubelet`` 服务没有正常启动。
 
+服务器启动异常排查的方法
+==========================
+
+这种kubelet启动失败的排查方法和所有systemd管理的服务排查方法相同，从检查服务状态和日志开始：
+
 - 检查 ``kubelet`` 服务状态::
 
    systemctl status kubelet
@@ -27,6 +32,10 @@ Kubelet启动异常排查
 - 检查journal日志::
 
    journalctl -u kubelet --no-pager
+
+.. note::
+
+   ``journalctl`` 的 ``-u`` 参数可以指定服务进行过滤，这样可以屏蔽掉其他无关日志。 ``--no-pager`` 参数可以一次性输出日志，当然如果你只是在线查看，则可以不用这个参数，只是输出日志受到屏幕宽度限制，需要通过方向键滚动。
 
 显示::
 
@@ -52,6 +61,9 @@ Kubelet启动异常排查
    6月 01 23:15:33 jetson kubelet[24176]: I0601 23:15:33.596482   24176 server.go:851] "Client rotation is on, will bootstrap in background"
 
 原因是 ``kubelet`` 默认不支持 ``swap`` ，所以需要关闭swap，或者在 kubelet 启动时传递 ``--fail-swap-on`` 参数。
+
+kubelet默认不支持swap
+=======================
 
 这里我使用的是 :ref:`jetson_nano` ， :ref:`jetson_swap` 默认用，并且由于NVIDIA定制了操作系统采用的是 zram ，是在内存中划分出部分作为swap，并且采用压缩方式存储的内存型swap。
 

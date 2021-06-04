@@ -108,3 +108,5 @@ Node Version Manager (nvm) 是 node.js 的版本管理器，可以工作在任�
 ========
 
 - `GitHub nvm README.md <https://github.com/nvm-sh/nvm>`_
+- `Installing Node.js via package manager <https://nodejs.org/en/download/package-manager/>`_
+- `How To Install Node.js on Ubuntu 20.04 <https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-20-04>`_

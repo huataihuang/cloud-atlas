@@ -19,7 +19,7 @@ Systemd Service Mask
 
 - 启动服务::
 
-  systemctl start NetworkManager
+   systemctl start NetworkManager
 
 可以看到服务能够正常启动，再次检查 ``systemctl status NetworkManager`` 也可以看到服务正常运行::
 

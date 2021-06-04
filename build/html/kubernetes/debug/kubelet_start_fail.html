@@ -124,7 +124,11 @@
 <li class="toctree-l3"><a class="reference internal" href="get_container_shell.html">获得容器shell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_container_logs.html">获取容器日志</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kubelet_cert_expire.html">Kubelet证书过期</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubelet启动异常排查</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubelet启动异常排查</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">服务器启动异常排查的方法</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kubeletswap">kubelet默认不支持swap</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="apiserver_cert_expire.html">Apiserver证书过期</a></li>
 <li class="toctree-l3"><a class="reference internal" href="k8s_crashloopbackoff.html">Kubernetes pod CrashLoopBackOff错误排查</a></li>
 <li class="toctree-l3"><a class="reference internal" href="apiserver_port_2379_refuse.html">apiserver服务器无法连接端口2379</a></li>
@@ -244,6 +248,9 @@
   <section id="kubelet">
 <span id="kubelet-start-fail"></span><h1>Kubelet启动异常排查<a class="headerlink" href="#kubelet" title="永久链接至标题">¶</a></h1>
 <p>我在 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 的一个 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 工作节点，升级重启以后遇到 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_service_mask.html#systemd-service-mask"><span class="std std-ref">Systemd Service Mask</span></a> 导致 <a class="reference internal" href="../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 无法管理网络接口。虽然 <code class="docutils literal notranslate"><span class="pre">unmask</span></code> 之后并且恢复了NetworkManager管理网络接口。但是系统重启后， <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 服务没有正常启动。</p>
+<section id="id1">
+<h2>服务器启动异常排查的方法<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>这种kubelet启动失败的排查方法和所有systemd管理的服务排查方法相同，从检查服务状态和日志开始：</p>
 <ul>
 <li><p>检查 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 服务状态:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">kubelet</span>
@@ -272,6 +279,10 @@
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">journalctl</span></code> 的 <code class="docutils literal notranslate"><span class="pre">-u</span></code> 参数可以指定服务进行过滤，这样可以屏蔽掉其他无关日志。 <code class="docutils literal notranslate"><span class="pre">--no-pager</span></code> 参数可以一次性输出日志，当然如果你只是在线查看，则可以不用这个参数，只是输出日志受到屏幕宽度限制，需要通过方向键滚动。</p>
+</div>
 <p>显示:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">6</span><span class="n">月</span> <span class="mi">01</span> <span class="mi">23</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">22</span> <span class="n">jetson</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">Started</span> <span class="n">kubelet</span><span class="p">:</span> <span class="n">The</span> <span class="n">Kubernetes</span> <span class="n">Node</span> <span class="n">Agent</span><span class="o">.</span>
 <span class="mi">6</span><span class="n">月</span> <span class="mi">01</span> <span class="mi">23</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">22</span> <span class="n">jetson</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">24037</span><span class="p">]:</span> <span class="n">Flag</span> <span class="o">--</span><span class="n">network</span><span class="o">-</span><span class="n">plugin</span> <span class="n">has</span> <span class="n">been</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">will</span> <span class="n">be</span> <span class="n">removed</span> <span class="n">along</span> <span class="k">with</span> <span class="n">dockershim</span><span class="o">.</span>
@@ -296,6 +307,9 @@
 </pre></div>
 </div>
 <p>原因是 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 默认不支持 <code class="docutils literal notranslate"><span class="pre">swap</span></code> ，所以需要关闭swap，或者在 kubelet 启动时传递 <code class="docutils literal notranslate"><span class="pre">--fail-swap-on</span></code> 参数。</p>
+</section>
+<section id="kubeletswap">
+<h2>kubelet默认不支持swap<a class="headerlink" href="#kubeletswap" title="永久链接至标题">¶</a></h2>
 <p>这里我使用的是 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> ， <a class="reference internal" href="../../machine_learning/jetson/studio/jetson_swap.html#jetson-swap"><span class="std std-ref">Jetson Nano的swap</span></a> 默认用，并且由于NVIDIA定制了操作系统采用的是 zram ，是在内存中划分出部分作为swap，并且采用压缩方式存储的内存型swap。</p>
 <p>需要注意，我之前实际上部署 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 已经关闭过swap，但是如果升级操作系统，可能会无意中重新开启了swap。</p>
 <ul>
@@ -327,6 +341,7 @@
 </div>
 </li>
 </ul>
+</section>
 </section>
 
 

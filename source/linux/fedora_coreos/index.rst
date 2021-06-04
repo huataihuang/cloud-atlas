@@ -1,13 +1,13 @@
-.. _container_linux:
+.. _fedora_coreos:
 
 ======================================
-container linux (CoreOS)容器操作系统
+Fedora CoreOS容器操作系统
 ======================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_container_linux.rst
+   fedora_coreos_startup.rst
 
 .. only::  subproject and html
 

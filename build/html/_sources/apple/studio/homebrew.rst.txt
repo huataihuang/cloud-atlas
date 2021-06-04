@@ -109,3 +109,23 @@ Homebrew Cask
    这省却了我很多查找下载软件的时间，例如，最常用的开发IDE Visual Studio Code就可以直接安装::
 
       brew cask install visual-studio-code
+
+升级
+========
+
+macOS升级系统，可能会导致brew的软件无法正常工作。例如，出现无法使用vim::
+
+   vim
+   dyld: Library not loaded: /System/Library/Perl/5.28/darwin-thread-multi-2level/CORE/libperl.dylib
+     Referenced from: /usr/local/Cellar/macvim/8.2-171/MacVim.app/Contents/MacOS/Vim
+     Reason: image not found
+   [1]    13046 abort      vim
+
+这个报错，我参考 `dyld: Library not loaded: libperl.dylib Referenced from: perl5.18 <https://stackoverflow.com/questions/39675929/dyld-library-not-loaded-libperl-dylib-referenced-from-perl5-18>`_ 升级 brew 来修复::
+
+   brew update
+   brew upgrade
+
+也可以单独升级某个异常软件::
+
+   brew upgrade macvim

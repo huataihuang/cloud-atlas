@@ -125,7 +125,12 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Ghost CMS系统</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="introduce_ghost_cms.html">Ghost CMS简介</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">部署Ghost CMS</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nodejs">安装nodejs运行环境</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">准备数据库</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ghost">Ghost安装</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssl">SSL设置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">维护</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -223,10 +228,168 @@
 <p class="admonition-title">注解</p>
 <p>2021年初，我准备重新恢复 <a class="reference external" href="https://huatai.me">我的个人网站</a> ，采用 <a class="reference internal" href="index.html#ghost-cms"><span class="std std-ref">Ghost CMS系统</span></a> 构建，以便分享所见所思。</p>
 </div>
+<section id="nodejs">
+<h2>安装nodejs运行环境<a class="headerlink" href="#nodejs" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>安装nvm:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">o</span><span class="o">-</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">nvm</span><span class="o">-</span><span class="n">sh</span><span class="o">/</span><span class="n">nvm</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="mf">38.0</span><span class="o">/</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span> <span class="o">|</span> <span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+<li><p>将以下环境配置添加到环境配置，例如 <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> (脚本会自动添加)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">NVM_DIR</span><span class="o">=</span><span class="s2">&quot;$HOME/.nvm&quot;</span>
+<span class="p">[</span> <span class="o">-</span><span class="n">s</span> <span class="s2">&quot;$NVM_DIR/nvm.sh&quot;</span>  <span class="p">]</span> <span class="o">&amp;&amp;</span> \<span class="o">.</span> <span class="s2">&quot;$NVM_DIR/nvm.sh&quot;</span>  <span class="c1"># This loads nvm</span>
+<span class="p">[</span> <span class="o">-</span><span class="n">s</span> <span class="s2">&quot;$NVM_DIR/bash_completion&quot;</span>  <span class="p">]</span> <span class="o">&amp;&amp;</span> \<span class="o">.</span> <span class="s2">&quot;$NVM_DIR/bash_completion&quot;</span>  <span class="c1"># This loads nvm bash_completion</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我在 Ubuntu 18.04.5 LTS上通过上述方法无法加载环境，所以我切换到zsh来运行安装。</p>
+</div>
+<ul>
+<li><p>检查node版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nvm</span> <span class="n">ls</span><span class="o">-</span><span class="n">remote</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装node(目前仅支持最高v14，请先参考 <a class="reference external" href="https://ghost.org/docs/faq/node-versions/">Ghost’s Supported Node versions</a> )</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nvm</span> <span class="n">install</span> <span class="mf">14.17</span><span class="o">.</span><span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>准备数据库<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>生产环境使用MySQL数据库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">mysql</span><span class="o">-</span><span class="n">server</span>
+</pre></div>
+</div>
+<ul>
+<li><p>设置MySQL数据库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># To set a password, run</span>
+<span class="n">sudo</span> <span class="n">mysql</span>
+
+<span class="c1"># Now update your user with this command</span>
+<span class="c1"># Replace &#39;password&#39; with your password, but keep the quote marks!</span>
+<span class="n">ALTER</span> <span class="n">USER</span> <span class="s1">&#39;root&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span> <span class="n">IDENTIFIED</span> <span class="n">WITH</span> <span class="n">mysql_native_password</span> <span class="n">BY</span> <span class="s1">&#39;password&#39;</span><span class="p">;</span>
+
+<span class="c1"># Then exit MySQL</span>
+<span class="n">quit</span>
+
+<span class="c1"># and login to your Ubuntu user again</span>
+<span class="n">su</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="ghost">
+<h2>Ghost安装<a class="headerlink" href="#ghost" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>安装ghost-cli (帮助安装ghost的工具)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">install</span> <span class="n">ghost</span><span class="o">-</span><span class="n">cli</span> <span class="o">-</span><span class="n">g</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后通过 <code class="docutils literal notranslate"><span class="pre">ghost</span> <span class="pre">help</span></code> 查看可用命令</p>
+<ul>
+<li><p>创建目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">blog</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置目录owner:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">chown</span> <span class="n">huatai</span><span class="p">:</span><span class="n">staff</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">blog</span>
+</pre></div>
+</div>
+</li>
+<li><p>设置权限:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">chmod</span> <span class="mi">775</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">blog</span>
+</pre></div>
+</div>
+</li>
+<li><p>进入目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">blog</span>
+</pre></div>
+</div>
+</li>
+<li><p>运行安装进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ghost</span> <span class="n">install</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>交互回答以下问题:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Blog URL: <a class="reference external" href="https://blog.huatai.me">https://blog.huatai.me</a></p></li>
+<li><p>MySQL hostname: <code class="docutils literal notranslate"><span class="pre">localhost</span></code> (默认本地主机，如果是安装在其他MySQL服务器，则输入实际主机名)</p></li>
+<li><p>MySQL username / password: 输入 <code class="docutils literal notranslate"><span class="pre">root</span></code> 以及前面配置的MySQL数据库密码`</p></li>
+<li><p>Ghost database name: 配置成推荐的 <code class="docutils literal notranslate"><span class="pre">blog_prod</span></code></p></li>
+<li><p>Set up a ghost MySQL user?: 推荐，所以回答 <code class="docutils literal notranslate"><span class="pre">Y</span></code> 则创建一个 <code class="docutils literal notranslate"><span class="pre">ghost</span></code> 的mysql用户</p></li>
+<li><p>Set up NGINX?: 推荐，所以回答 <code class="docutils literal notranslate"><span class="pre">Y</span></code> 会自动创建配置</p></li>
+<li><p>Set up SSL?: 推荐，所以回答 <code class="docutils literal notranslate"><span class="pre">Y</span></code> 会自动创建证书</p></li>
+<li><p>Set up systemd?: 推荐，所以回答 <code class="docutils literal notranslate"><span class="pre">Y</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>这里启动有一个报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="p">)</span> <span class="n">GhostError</span>
+
+<span class="n">Message</span><span class="p">:</span> <span class="n">Ghost</span> <span class="n">was</span> <span class="n">able</span> <span class="n">to</span> <span class="n">start</span><span class="p">,</span> <span class="n">but</span> <span class="n">errored</span> <span class="n">during</span> <span class="n">boot</span> <span class="k">with</span><span class="p">:</span> <span class="n">connect</span> <span class="n">ECONNREFUSED</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">3306</span>
+<span class="n">Help</span><span class="p">:</span> <span class="n">Unknown</span> <span class="n">database</span> <span class="n">error</span>
+<span class="n">Suggestion</span><span class="p">:</span> <span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">ghost_blog</span><span class="o">-</span><span class="n">huatai</span><span class="o">-</span><span class="n">me</span> <span class="o">-</span><span class="n">n</span> <span class="mi">50</span>
+</pre></div>
+</div>
+<p>原因是我租用的VPS内存只有512M，对于同时运行mysql和ghost内存不足，在没有设置swap情况下，导致mysql退出。我重新增加了swap空间以后才能够运行。</p>
+</section>
+<section id="ssl">
+<h2>SSL设置<a class="headerlink" href="#ssl" title="永久链接至标题">¶</a></h2>
+<blockquote>
+<div><p>我遇到一个问题是无法启动https，实际上:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ghost</span> <span class="n">setup</span> <span class="n">ssl</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>重新设置，就发现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>? Enter your email (For SSL Certificate) huataihuang@gmail.com
++ sudo /etc/letsencrypt/acme.sh --issue --home /etc/letsencrypt --domain blog.huatai.me --webroot /var/www/blog/system/nginx-root --reloadcmd &quot;nginx -s reload&quot; --accountemail huataihuang@gmail.com
+  ✖ Setting up SSL
+  One or more errors occurred.
+
+1) ProcessError
+
+Message: Command failed: /bin/sh -c sudo -S -p &#39;#node-sudo-passwd#&#39;  /etc/letsencrypt/acme.sh --issue --home /etc/letsencrypt --domain blog.huatai.me --webroot /var/www/blog/system/nginx-root --reloadcmd &quot;nginx -s reload&quot; --accountemail huataihuang@gmail.com
+[Sat Jun  5 00:41:44 CST 2021] blog.huatai.me:Verify error:Invalid response from http://blog.huatai.me/.well-known/acme-challenge/slTxXchSnR4hl51jnJyBq7ABdyUwvGwpHiKzwRqhsaA [185.199.111.153]:
+[Sat Jun  5 00:41:44 CST 2021] Please add &#39;--debug&#39; or &#39;--log&#39; to check more details.
+[Sat Jun  5 00:41:44 CST 2021] See: https://github.com/acmesh-official/acme.sh/wiki/How-to-debug-acme.sh
+</pre></div>
+</div>
+<p>我发现是域名解析错误，这里访问的 185.199.111.153 地址是我之前设置指向 github.io 的域名，需要调整成我实际当前服务器的IP地址</p>
+</section>
+<section id="id3">
+<h2>维护<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>停止服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">ghost_blog</span><span class="o">-</span><span class="n">huatai</span><span class="o">-</span><span class="n">me</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">start</span> <span class="n">ghost_blog</span><span class="o">-</span><span class="n">huatai</span><span class="o">-</span><span class="n">me</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/tryghost/ghost">GitHub TryGhost / Ghost README.md</a></p></li>
+<li><p><a class="reference external" href="https://ghost.org/docs/install/ubuntu/">How to install Ghost on Ubuntu</a></p></li>
 </ul>
 </section>
 </section>

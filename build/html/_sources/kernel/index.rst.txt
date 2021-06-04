@@ -11,7 +11,7 @@ Kernel Atlas
 
    kernel_overview.rst
    cgroup/index
-   intel_rdt.rst
+   intel_rdt/index
    flame_graph.rst
    kms.rst
    ebpf/index
