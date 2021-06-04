@@ -6,7 +6,7 @@ Multipass
 
 Multipass是Canonical公司(Ubuntu)开发的基于不同操作系统内建原生Hypervisor实现的工作站(Workstation) mini-cloud。由于Windows(Hyper-V)，macOS( :ref:`hyperkit`  )和Linux( :ref:`kvm` )都原生支持 :ref:`hypervisor` ，这样通过 ``multipass shell`` 命令就能够在一个shell中实现创建运行Ubuntu虚拟机。
 
-这是一种快速部署Ubuntu开发测试环境的便捷方法，并且和其他云上运行一样，支持通过 :ref:`cloud-init` 进行实例初始化 ( ``multipass launch --cloud-init`` )。
+这是一种快速部署Ubuntu开发测试环境的便捷方法，并且和其他云上运行一样，支持通过 :ref:`cloud_init` 进行实例初始化 ( ``multipass launch --cloud-init`` )。
 
 Multipass还支持卷挂载( ``multipass mount`` )，以便在host主机和虚拟机实例之间复制数据( ``multipass transfer`` )
 
@@ -40,7 +40,7 @@ macOS
 
    multipass launch
 
-可以指定启动实例名字( ``-n, --name <name>`` )，分配cpu数量( ``-c, --cpus <cpus>`` 默认是1)，设置磁盘容量( ``-d, --disk <disk>`` 默认5G，最小512M)，设置内存分配( ``-m, --mem <mem>`` 最小128M，默认1G)，并且可以指定 :ref:`cloud-init` ::
+可以指定启动实例名字( ``-n, --name <name>`` )，分配cpu数量( ``-c, --cpus <cpus>`` 默认是1)，设置磁盘容量( ``-d, --disk <disk>`` 默认5G，最小512M)，设置内存分配( ``-m, --mem <mem>`` 最小128M，默认1G)，并且可以指定 :ref:`cloud_init` ::
 
    multipass launch -c 2 -d 12G -m 2G -n devstack
 

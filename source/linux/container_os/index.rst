@@ -16,6 +16,7 @@
 
    compare_container_os.rst
    atomic.rst
+   container_linux.rst
    photon_os.rst
 
 .. only::  subproject and html
