@@ -140,8 +140,26 @@ SSL设置
 
    systemctl start ghost_blog-huatai-me.service
 
+起步
+======
+
+访问 https://blog.huatai.me/ghost/ 可以开始注册自己的账号。
+
+.. warning::
+
+   第一个注册的账号就是 ``owner`` ，可以完全掌控整个网站。所以第一个注册账号非常重要，一定要在网站开始运行的第一时间完成注册，否则会导致网站控制权丢失。
+
+调整注册
+----------
+
+如果是个人网站或者并非面向公众公开注册网站，建议首先关闭开放式注册，或者至少改为邀请式注册，否则会导致网站充斥着大量的垃圾。
+
+.. figure:: ../../_static/nodejs/ghost_cms/ghost_membership.png
+   :scale: 80
+
 参考
 =====
 
 - `GitHub TryGhost / Ghost README.md <https://github.com/tryghost/ghost>`_
 - `How to install Ghost on Ubuntu <https://ghost.org/docs/install/ubuntu/>`_
+

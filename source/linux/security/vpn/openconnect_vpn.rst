@@ -165,7 +165,34 @@ Cisco AnyConnect VPN Client
 
 `Cisco AnyConnnect VPN Client <https://software.cisco.com/download/home/286281283/type/282364313/release/4.8.02045>`_ 和OpenConnect VPN Server (ocserv) 兼容，所以可以从Cisco官方网站下载客户端。
 
+修改ocserv端口
+================
+
+如果在同一台主机上部署ocserv vpn server和WEB服务，例如 :ref:`deploy_ghost_cms` ，则会遇到端口冲突问题：因为VPN也同样使用了https端口443。
+
+解决的方法是：调整VPN Server的端口，修订成 ``404`` 端口：
+
+- 修改  ``/etc/ocserv/ocserv.conf`` ::
+
+   tcp-port = 404
+   udp-port = 404
+
+- 修改 ``/lib/systemd/system/ocserv.socket`` Socket端口对应监听::
+
+   [Socket]
+   ListenStream=404
+   ListenDatagram=404
+
+- 重新加载配置::
+
+   systemctl reload-daemon
+
+- 重启服务::
+
+   systemctl restart ocserv
+
 参考
 =======
 
 - `Set up OpenConnect VPN Server (ocserv) on Ubuntu 16.04/18.04 with Let’s Encrypt <https://www.linuxbabe.com/ubuntu/openconnect-vpn-server-ocserv-ubuntu-16-04-17-10-lets-encrypt>`_
+- `How to Set up an OpenConnect VPN Server <https://www.alibabacloud.com/blog/how-to-set-up-an-openconnect-vpn-server_595185>`_
