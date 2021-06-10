@@ -1,8 +1,8 @@
-.. _golang:
+.. _pi_golang:
 
-============
-Go语言环境
-============
+=================
+树莓派Go语言环境
+=================
 
 我现在使用 :ref:`pi_400` 作为工作平台，在编译安装 :ref:`vim` 的插件 ``YouCompleteMe`` 时候发现，如果要支持GoLang，需要使用 1.13 版本golang。但是Raspberry Pi OS发行版提供的GoLang版本较为陈旧，无法完成安装。
 
@@ -12,7 +12,7 @@ Go语言发展迅速，很多bug在新版本得到修复，并且新版本往往
 
 - 也可以使用安装脚本 ``go_installer.sh`` :
 
-.. literalinclude:: golang/go_install_sh
+.. literalinclude:: pi_golang/go_install_sh
       :language: bash
       :linenos:
       :caption:

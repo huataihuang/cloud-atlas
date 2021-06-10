@@ -1,18 +1,14 @@
-.. _redhat_linux_admin:
+.. _golang:
 
 =================================
-RedHat Linux 系统管理
+Go Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   init_centos.rst
-   dnf.rst
-   firewalld.rst
-   centos_local_repo.rst
-   centos_local_http_repo.rst
-   fedora_monitor.rst
+   go_on_fedora.rst
+   pi_golang.rst
 
 .. only::  subproject and html
 

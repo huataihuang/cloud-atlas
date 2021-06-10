@@ -1,18 +1,13 @@
-.. _redhat_linux_admin:
+.. _swift:
 
 =================================
-RedHat Linux 系统管理
+Swift Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   init_centos.rst
-   dnf.rst
-   firewalld.rst
-   centos_local_repo.rst
-   centos_local_http_repo.rst
-   fedora_monitor.rst
+   swift_on_linux.rst
 
 .. only::  subproject and html
 
