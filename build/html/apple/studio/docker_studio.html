@@ -117,13 +117,24 @@
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Apple Atlas</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">macOS Studio</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="introduce_macos_studio.html">macOS工作环境</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Docker运行Studio容器</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Docker运行Studio容器</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#docker">Docker镜像</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">初始化镜像</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssh-ssh">ssh服务容器(ssh)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dev">编译开发的软件安装(dev)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dev-data">容器持久化数据存储(dev-data)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#studio">开发环境框架搭建(studio)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="mbp15_late_2013.html">MacBook Pro 15” Late 2013</a></li>
 <li class="toctree-l3"><a class="reference internal" href="macbook_nvme.html">NvMe硬盘升级MacBook Pro SSD</a></li>
 <li class="toctree-l3"><a class="reference internal" href="macos_install_drive.html">macOS启动安装U盘</a></li>
@@ -135,6 +146,7 @@
 <li class="toctree-l3"><a class="reference internal" href="monitorcontrol.html">macOS显示器亮度和音量控制</a></li>
 <li class="toctree-l3"><a class="reference internal" href="missing_xcrun.html">升级macOS后”missing xcrun”处理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vim_tmux_iterm_zsh.html">结合Vim,Tmux,iTerm和Oh-my-Zsh开发环境</a></li>
+<li class="toctree-l3"><a class="reference internal" href="macos_nfs.html">macOS系统NFS服务和使用</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../iphone/index.html">iPhone</a></li>
@@ -228,6 +240,347 @@
             
   <section id="dockerstudio">
 <span id="docker-studio"></span><h1>Docker运行Studio容器<a class="headerlink" href="#dockerstudio" title="永久链接至标题">¶</a></h1>
+<p>基于Docker构建快速启用的开发环境，结合 github 保存的初始化配置以及脚本，来实现跨平台studio。</p>
+<section id="docker">
+<h2>Docker镜像<a class="headerlink" href="#docker" title="永久链接至标题">¶</a></h2>
+<p><a class="reference external" href="https://fedoraproject.org/wiki/Docker#Dockerfiles">fedoraproject Dockerfile</a> 在GitHub上提供的 <a class="reference external" href="https://github.com/fedora-cloud/Fedora-Dockerfiles">fedora-cloud/Fedora-Dockerfiles</a> 现在已经不在持续开发。不过提供的Dockerfile可以作为参考(实际也不复杂)。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>现在Fedora的容器构建都是通过 <a class="reference external" href="https://github.com/containerbuildsystem">containerbuildsystem</a> 实现的，需要在 <a class="reference internal" href="../../openshift/index.html#openshift"><span class="std std-ref">OpenShift Atlas</span></a> 中部署OpenShift Build System(基于koji)实现容器构建。</p>
+</div>
+<p>Fedora项目提供的Dockerfile可以方便我们快速部署不同的运行环境，你可以通过  <a class="reference external" href="https://github.com/fedora-cloud/Fedora-Dockerfiles">fedora-cloud/Fedora-Dockerfiles</a> git仓库clone，也可以直接安装软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">fedora</span><span class="o">-</span><span class="n">dockerfiles</span>
+<span class="n">ls</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">fedora</span><span class="o">-</span><span class="n">dockerfiles</span>
+</pre></div>
+</div>
+<ul>
+<li><p>快速启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">fedora</span><span class="o">-</span><span class="n">dockerfiles</span><span class="o">/</span><span class="n">ssh</span>
+<span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span> <span class="o">.</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span> <span class="o">--</span><span class="n">detach</span> <span class="o">-</span><span class="n">ti</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">ro</span> <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>初始化镜像<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>先部署一个最基础的镜像fedora，验证运行，只包含最小化运行环境：</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">docker_studio/fedora/Dockerfile</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">fedora:34</span>
+<span class="k">MAINTAINER</span><span class="s"> http://fedoraproject.org/wiki/Cloud</span>
+
+<span class="hll"><span class="k">ENV</span> container docker
+</span>
+<span class="k">RUN</span> dnf -y update <span class="o">&amp;&amp;</span> dnf clean all
+
+<span class="k">VOLUME</span> <span class="p">[</span> <span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;/run&quot;</span> <span class="p">]</span>
+<span class="k">CMD</span> <span class="p">[</span><span class="s2">&quot;/usr/bin/init&quot;</span><span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<p>解析:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ENV</span> <span class="pre">container</span> <span class="pre">docker</span></code> 提供了容器内环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> ，容器内运行的 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。</p></li>
+</ul>
+</div></blockquote>
+<ul>
+<li><p>构建镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">fedora</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>上述Dockerfile采用了 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 作为进程管理器，为后续通过容器运行ssh服务提供基础。这个环境是用来作为统一开发环境，所以并没有采用精简的容器运行模式。</p>
+<p>后续作为持续集成，将代码推送到运行容器中，将采用完全原生精简的Dockerfile</p>
+</div>
+<ul>
+<li><p>运行容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora</span> <span class="o">--</span><span class="n">detach</span> <span class="o">-</span><span class="n">ti</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">ro</span> <span class="n">fedora</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这个容器中没有常用的维护工具，所以我们下一步开始自己定制，然后将所有定制命令转换成Dockerfile配置，以便能够复用。</p>
+<p>软件包安装参考 <a class="reference internal" href="../../linux/redhat_linux/admin/init_centos.html#init-centos"><span class="std std-ref">CentOS系统管理初始化</span></a></p>
+</div>
+</section>
+<section id="ssh-ssh">
+<h2>ssh服务容器(ssh)<a class="headerlink" href="#ssh-ssh" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>由于fedora的容器镜像默认使用了systemd，安装和启动sshd服务非常容易:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">docker_studio/ssh/Dockerfile</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">fedora:34</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="hll"><span class="k">ENV</span> container docker
+</span>
+<span class="k">RUN</span> dnf -y update <span class="o">&amp;&amp;</span> dnf clean all
+
+<span class="k">RUN</span> dnf -y install openssh-server <span class="se">\</span>
+    which net-tools iputils
+
+<span class="c"># iputils: ping arping tracepath ...</span>
+<span class="c"># net-tools: arp ifconfig route ...</span>
+
+<span class="c">#RUN systemctl enable sshd</span>
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span> usermod -aG wheel admin
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+
+<span class="k">VOLUME</span> <span class="p">[</span> <span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;/run&quot;</span> <span class="p">]</span>
+<span class="k">CMD</span> <span class="p">[</span><span class="s2">&quot;/usr/bin/init&quot;</span><span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>ssh容器安装了系统工具，方便如同服务器一般进行 <a class="reference internal" href="../../linux/redhat_linux/admin/fedora_monitor.html#fedora-monitor"><span class="std std-ref">Fedora系统监控</span></a> 及维护。</p>
+</div>
+<ul>
+<li><p>构建带有ssh服务的镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="ssh">
+<h3>访问虚拟机ssh<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h3>
+<p>在macOS上运行的Docker容器实际上是运行在 <a class="reference internal" href="../../kvm/macos_xhyve/xhyve.html#xhyve"><span class="std std-ref">xhyve - macOS平台的KVM</span></a> 虚拟机中，这个虚拟机所运行的精简Linux操作系统 <a class="reference internal" href="../../linux/alpine_linux/index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> ，使得在macOS主机上无法直接ssh到容器内部(需要通过虚拟机操作系统转发)。</p>
+<p>这是比直接在Linux主机上运行docker容器要麻烦一些(多隔离了一层虚拟机)，不能像Linux主机上，能够直接看到一个NAT网络接口在Linux物理主机(Linux端IP通常是 <code class="docutils literal notranslate"><span class="pre">172.17.0.1</span></code> )，这个NAT网络接口现在在 <a class="reference internal" href="../../kvm/macos_xhyve/xhyve.html#xhyve"><span class="std std-ref">xhyve - macOS平台的KVM</span></a> 虚拟机的Linx系统上，所以如果要实现macOS能够访问到容器，需要做一个端口映射(Port Mapping)。</p>
+<p>你可以将这个Port Mapping看成Linux主机的端口映射，将容器内部端口映射到Linux虚拟机对外的网络接口上，由于Linux虚拟机对外网络接口和macOS是互通的，我们就能够通过映射访问到容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">网络流量</span> <span class="o">=&gt;</span> <span class="n">Linux虚拟机回环接口Port</span> <span class="o">=</span><span class="n">端口映射</span><span class="o">=&gt;</span> <span class="n">容器内部服务Port</span>
+</pre></div>
+</div>
+<ul>
+<li><p>我们修订以下运行容器命令，增加 <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">222:22</span></code> 把端口从回环地址映射到容器上:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span> <span class="o">-</span><span class="n">p</span> <span class="mi">222</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">detach</span> <span class="o">-</span><span class="n">ti</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">ro</span> <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>完成启动后检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>        <span class="n">COMMAND</span>            <span class="n">CREATED</span>         <span class="n">STATUS</span>         <span class="n">PORTS</span>                                 <span class="n">NAMES</span>
+<span class="n">b8b84a8fd4d9</span>   <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span>   <span class="s2">&quot;/usr/sbin/init&quot;</span>   <span class="mi">4</span> <span class="n">minutes</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">4</span> <span class="n">minutes</span>   <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">222</span><span class="o">-&gt;</span><span class="mi">22</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">222</span><span class="o">-&gt;</span><span class="mi">22</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">fedora</span><span class="o">-</span><span class="n">ssh</span>
+</pre></div>
+</div>
+<ul>
+<li><p>新创建容器就是能通过 <code class="docutils literal notranslate"><span class="pre">222</span></code> 端口访问到容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">admin</span><span class="o">@</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="o">-</span><span class="n">p</span> <span class="mi">222</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>则通过密钥认证可以登陆容器系统</p>
+</section>
+</section>
+<section id="dev">
+<h2>编译开发的软件安装(dev)<a class="headerlink" href="#dev" title="永久链接至标题">¶</a></h2>
+<p>接下来我们在这个 <code class="docutils literal notranslate"><span class="pre">fedora-ssh</span></code> 基础上，添加各种常用的开发软件包，以便构成一个非常容易使用的开发环境，预计安装:</p>
+<ul class="simple">
+<li><p>gcc</p></li>
+<li><p>automake, autoconf</p></li>
+<li><p>openjdk</p></li>
+<li><p>python</p></li>
+<li><p>go</p></li>
+<li><p>swift</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>swift语言开发包安装参考 <a class="reference internal" href="../../swift/swift_on_linux.html#swift-on-linux"><span class="std std-ref">在Linux环境开发Swift</span></a></p>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">docker_studio/dev/Dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">fedora:34</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">ENV</span> container docker
+
+<span class="k">RUN</span> dnf -y update <span class="o">&amp;&amp;</span> dnf clean all
+
+<span class="k">RUN</span> dnf -y install openssh-server which nmap-ncat mlocate net-tools file <span class="se">\</span>
+           iputils tmux bzip2 sysstat unzip nfs-utils parted lsof bind-utils crontabs
+
+<span class="k">RUN</span> dnf -y install gcc gcc-c++ make flex autoconf automake ncurses-devel zlib-devel git
+
+<span class="c"># Python 3.9 is installed default</span>
+
+<span class="k">RUN</span> dnf -y install java-latest-openjdk
+
+<span class="k">RUN</span> dnf -y install golang
+
+<span class="k">RUN</span> dnf -y install swift-lang
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span> usermod -aG wheel admin
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+
+<span class="c"># golang env</span>
+<span class="k">USER</span><span class="s"> admin</span>
+<span class="k">RUN</span> mkdir /home/admin/go
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s1">&#39;export GOPATH=$HOME/go&#39;</span> &gt;&gt; <span class="nv">$HOME</span>/.bashrc
+
+<span class="k">VOLUME</span> <span class="p">[</span> <span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;/run&quot;</span> <span class="p">]</span>
+<span class="k">CMD</span> <span class="p">[</span><span class="s2">&quot;/usr/bin/init&quot;</span><span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>请注意，当前这个Dockerfile仅仅是安装了开发所需的一些软件包，并没有解决容器销毁以后数据的丢失，这样小心翼翼使用尚可，但是非常容易丢失数据。所以，我们需要通过 <a class="reference internal" href="../../docker/storage/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 把开发环境的数据持久化，并且能够直接输出到物理主机(macOS环境)中，方便我们数据备份和在物理主机上同样共享数据。</p>
+</div>
+</section>
+<section id="dev-data">
+<h2>容器持久化数据存储(dev-data)<a class="headerlink" href="#dev-data" title="永久链接至标题">¶</a></h2>
+<p>为了能够在容器销毁并重建等常见操作情况下，不丢失自己辛苦开发工作的数据，我构想了一个方案:</p>
+<ul class="simple">
+<li><p>在macOS操作系统上配置 <a class="reference internal" href="macos_nfs.html#macos-nfs"><span class="std std-ref">macOS系统NFS服务和使用</span></a> ，将用户的 <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> 目录下子目录 <code class="docutils literal notranslate"><span class="pre">home_admin</span></code> 作为NFS服务卷输出给Docker环境(注意配置内部网络IP访问确保安全)</p></li>
+<li><p>在Docker中配置 <a class="reference internal" href="../../docker/storage/docker_container_nfs.html#docker-container-nfs"><span class="std std-ref">Docker容器使用NFS</span></a> ，将容器的 <code class="docutils literal notranslate"><span class="pre">/home/admin</span></code> 目录bind到NFS挂载的目录下，这样所有容器中数据都能够直接存储到物理主机的macOS系统的用户目录
+- 为了避免多个容器 <code class="docutils literal notranslate"><span class="pre">数据踩踏</span></code> ，需要每个容器单独创建一个子目录，分别映射，例如 <code class="docutils literal notranslate"><span class="pre">dev1</span></code> 容器使用的是 <code class="docutils literal notranslate"><span class="pre">home_admin/dev1</span></code> ； <code class="docutils literal notranslate"><span class="pre">dev2</span></code> 容器使用是 <code class="docutils literal notranslate"><span class="pre">home_admin/dev2</span></code></p></li>
+</ul>
+<p>…</p>
+</section>
+<section id="studio">
+<h2>开发环境框架搭建(studio)<a class="headerlink" href="#studio" title="永久链接至标题">¶</a></h2>
+<p>在开发环境中，还有非常重要的部署框架:</p>
+<ul class="simple">
+<li><p>数据库运行环境 - <a class="reference internal" href="../../mysql/index.html#mysql"><span class="std std-ref">MySQL Atlas</span></a> <a class="reference internal" href="../../postgresql/index.html#postgresql"><span class="std std-ref">PostgreSQL Atlas</span></a> ，也通过上述持久化数据存储到物理主机</p></li>
+<li><p>web服务 - 构建 <a class="reference internal" href="../../web/nginx/index.html#nginx"><span class="std std-ref">Nginx</span></a></p></li>
+<li><p>开发框架
+- <a class="reference internal" href="../../django/index.html#django"><span class="std std-ref">Django Atlas</span></a>
+- nodejs相关开发框架</p></li>
+</ul>
+<p>我希望能够快速完成很多我学习和使用的开发环境构建，这块我会不断补充</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>更为复杂的部署环境，可以集成到一个容器中，也可以分散到不同容器采用 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 实现，这块将不在studio段落展开，我将构建一个部署到生产环境到持续集成，并且结合:</p>
+<ul class="simple">
+<li><p>负载均衡</p></li>
+<li><p>反向代理</p></li>
+<li><p>缓存</p></li>
+<li><p>消息队列</p></li>
+</ul>
+</div>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://zhuanlan.zhihu.com/p/102385239">Docker+VSCode配置属于自己的炼丹炉</a></p></li>
+<li><p><a class="reference external" href="https://www.dogtagpki.org/wiki/Fedora_Container">Fedora Container</a></p></li>
+<li><p><a class="reference external" href="https://hub.docker.com/_/fedora/">Fedora Docker Official Images</a></p></li>
+<li><p><a class="reference external" href="https://docs.docker.com/docker-for-mac/networking/">Networking features in Docker Desktop for Mac</a></p></li>
+</ul>
+</section>
 </section>
 
 

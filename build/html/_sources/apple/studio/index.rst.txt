@@ -22,6 +22,7 @@ macOS Studio
    monitorcontrol.rst
    missing_xcrun.rst
    vim_tmux_iterm_zsh.rst
+   macos_nfs.rst
 
 .. only::  subproject and html
 

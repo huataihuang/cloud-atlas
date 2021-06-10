@@ -14,7 +14,6 @@ Linux桌面
    oh_my_zsh.rst
    tmux.rst
    vim/index
-   golang.rst
    remote_linux_desktop.rst
    rdp/index
    xpra.rst
