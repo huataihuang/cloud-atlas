@@ -4,6 +4,34 @@
 macOS系统NFS服务和使用
 ========================
 
+我在构建macOS系统中 :ref:`docker_studio` ，想要在物理主机(macOS)上能够直接存储容器的数据，以避免容器销毁导致开发环境的数据丢失。例如，我可以运行数据库，代码存储。
+
+将容器中的数据通过卷存储到远程NFS服务器上，也就是macOS物理主机上，能够方便进行数据备份和同步。
+
+通过NFS输出macOS上目录
+=======================
+
+- 首先在macOS主机上启动NFS服务::
+
+   sudo nfsd enable
+
+如果系统已经启用过nfsd，则可能提示::
+
+   The nfsd service is already enabled.
+
+- 和标准的Unix/Linux系统相似，macOS也是通过 ``/etc/exports`` 文件配置NFS输出::
+
+   /Users/huatai/home_admin/dev -rw
+
+防火墙
+==========
+
+macOS提供了一个防火墙，需要检查确认一下默认是否启用了防火墙（可能和版本相关，不同版本默认有可能开启也可能关闭了防火墙，目前最新的macOS都是默认关闭防火墙）。对于启用了防火墙的macOS系统，需要配置 ``System Preferences => Secuirty & Privancy => Firewall`` ，设置允许TCP端口 ``2049, 111`` 。
+
+.. note::
+
+   macOS的防火墙配置我还没有具体实践，
+
 参考
 ======
 
