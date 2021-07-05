@@ -77,6 +77,12 @@ create_ap
 
    上述环境中，无线网卡名为 wlp3s0 ，有线网卡名为 enp0s25 ，将自动配置共享无线AP，并通过有线网络连接Internet。
 
+这里可能报错::
+
+   ERROR: Failed to initialize lock
+
+则执行 ``rm /tmp/create_ap.all.lock``
+
 默认的 create_ap 所使用的摹本配置文件是 ``/etc/create_ap.conf`` ，你可以通过以下命令方式修订该配置并运行脚本::
 
    create_ap --config /etc/create_ap.conf
@@ -130,6 +136,22 @@ create_ap
    wlp3s0: interface state UNINITIALIZED->ENABLED
    wlp3s0: AP-ENABLED`
 
+也可能启动出现报错，例如我在Thinkpad 220上使用的是 ``Intel Corporation Centrino Advanced-N 6205`` ::
+
+   ...
+   wlp3s0: interface state UNINITIALIZED->ENABLED
+   wlp3s0: AP-ENABLED
+   wlp3s0: CTRL-EVENT-SCAN-FAILED ret=-95 retry=1
+   wlp3s0: CTRL-EVENT-SCAN-FAILED ret=-95 retry=1
+   ...
+
+如果是使用 :ref:`networkmanager` 管理网络，参考 `wpa_supplicant CTRL-EVENT-SCAN-FAILED error <https://askubuntu.com/questions/1255634/wpa-supplicant-ctrl-event-scan-failed-error>`_ 修改 ``/etc/NetworkManager/NetworkManager.conf`` ::
+
+   [device]
+   match-device=driver:wlp3s0
+   wifi.scan-rand-mac-address=no
+
+
 则在 ``/tmp/create_ap.wlp3s0.conf.VUfVqfZx/`` 目录下有一系列配置用于AP运行。
 
 .. note::
@@ -147,3 +169,4 @@ create_ap
 =======
 
 - `Software access point <https://wiki.archlinux.org/index.php/software_access_point>`_
+- `笔记本利用create_ap开启热点 <https://www.jianshu.com/p/0b753ebd63e0>`_

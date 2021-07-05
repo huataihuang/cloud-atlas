@@ -4,6 +4,10 @@
 Magisk
 ===============
 
+.. warning::
+
+   由于Andorid技术进展，在Pixel设备上，采用了动态分区以及双启动分区技术，特别是Android 10开始采用了内核安全加强，导致 :ref:`twrp` 已经无法在Pixel的Android 10上工作。所以，我会在
+
 .. note::
 
    本文是汇总网络上撰写较好的几篇文档，我整理汇总是为了方便自己今后参考:
@@ -38,7 +42,7 @@ Magisk可以实现的功能包括:
 
 .. note::
 
-   这个Magisk Hide功能可能比较有用，我记得在使用StarBucks软件，如果Android系统被root过，StarBucks应用软件会拒绝启动
+   这个Magisk Hide功能可能比较有用，在使用StarBucks、银行软件，如果Android系统被root过，StarBucks应用软件会拒绝启动，通过这个方法可以避免问题。
 
 - 为广告屏蔽应用提供 systemless hosts 支持
 - 通过 SafetyNet 检查
@@ -53,7 +57,7 @@ Magisk可以实现的功能包括:
 
 * 从 `Magisk GitHub release <https://github.com/topjohnwu/Magisk/releases/>`_ 下载 Magisk-v20.3.zip 和 MagiskManager-v7.5.1.apk
 
-* 首先安装 TWRP - 见 :ref:`root_pixel`
+* 首先安装 TWRP - 见 :ref:`root_pixel` 或者 :ref:`twrp`
 
 * 进入TWRP，点击 ``Advanced => ADB Sideload``                               进入sideload模式，就可以通过sideload方式安装 Magisk::
 

@@ -10,6 +10,8 @@ Android 安装
    lineageos_14.1_nexus_5.rst
    lineageos_16_nexus_5.rst
    android_10_pixel_xl.rst
+   android_11_pixel_3.rst
+   lineageos_18.1_pixel_3.rst
    disable_setupwizard.rst
 
 .. only::  subproject and html

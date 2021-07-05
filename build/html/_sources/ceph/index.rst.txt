@@ -16,6 +16,7 @@ Ceph Atlas
    rdma.rst
    ceph_docker_in_studio.rst
    deploy/index
+   arm/index
 
 .. only::  subproject and html
 

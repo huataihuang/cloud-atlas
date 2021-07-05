@@ -15,6 +15,8 @@ Android Debug Bridge (adb) 是一个多用途命令行工具，用于和设备�
    * Windows平台安装目录： ``%USERPROFILE%\AppData\Local\Android\sdk\platform-tools\``
    * Mac平台安装目录： ``~/Library/Android/sdk/platform-tools``
 
+你可以通过 Android Studio 安装来获得 ``adb`` ，也可以仅下载 `Android 调试桥 (adb) <https://developer.android.com/studio/command-line/adb>`_ 的 `SDK Platform Tools <https://developer.android.com/studio/releases/platform-tools>`_ 软件包，下载以后解压缩就是 ``platform-tools`` 目录，请移动到对应目录下。
+
 激活设备adb debugging
 =======================
 

@@ -15,6 +15,7 @@ Android 设备
 
    nexus_5.rst
    pixel.rst
+   pixel_3.rst
 
 .. only::  subproject and html
 
