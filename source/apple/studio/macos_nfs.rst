@@ -19,9 +19,24 @@ macOS系统NFS服务和使用
 
    The nfsd service is already enabled.
 
+- 可以检查nfs服务::
+
+   sudo rpcinfo -p
+
+输出显示::
+
+   program vers proto   port
+    ...
+    100003    2   udp   2049  nfs
+    100003    3   udp   2049  nfs
+    100003    2   tcp   2049  nfs
+    100003    3   tcp   2049  nfs
+
 - 和标准的Unix/Linux系统相似，macOS也是通过 ``/etc/exports`` 文件配置NFS输出::
 
    /Users/huatai/home_admin/dev -rw
+
+
 
 防火墙
 ==========

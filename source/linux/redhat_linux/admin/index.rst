@@ -12,7 +12,6 @@ RedHat Linux 系统管理
    firewalld.rst
    centos_local_repo.rst
    centos_local_http_repo.rst
-   fedora_monitor.rst
 
 .. only::  subproject and html
 
