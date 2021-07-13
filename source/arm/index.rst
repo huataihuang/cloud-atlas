@@ -17,6 +17,7 @@ ARM Atlas
    architecture/index
    power_manage/index
    blackberry/index
+   kaios/index
    raspberry_pi/index
    pine/index
    openwrt/index
