@@ -1,7 +1,7 @@
 .. _macos_nfs:
 
 ========================
-macOS系统NFS服务和使用
+macOS系统NFS服务
 ========================
 
 我在构建macOS系统中 :ref:`docker_studio` ，想要在物理主机(macOS)上能够直接存储容器的数据，以避免容器销毁导致开发环境的数据丢失。例如，我可以运行数据库，代码存储。
@@ -36,6 +36,16 @@ macOS系统NFS服务和使用
 
    /Users/huatai/home_admin/dev -rw
 
+- 重启一次服务::
+
+   nfsd restart
+
+NFS客户端访问
+================
+
+.. note::
+
+   在macOS上我曾经想 :ref:`macos_docker_shell` 在Docker VM上使用NFS来挂载macOS上的共享NFS卷，但是实践没有找到方法(难点在于 :ref:`alpine_linux` 软件包管理以及访问macOS的IP地址 )，有待探索。所以，我这里客户端改为在局域网上一台Linux
 
 
 防火墙

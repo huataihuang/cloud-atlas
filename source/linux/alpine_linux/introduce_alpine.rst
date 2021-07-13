@@ -14,7 +14,7 @@ Alpine Linux是针对安全目标的轻量级Linux发行版，基于musl libc和
 
    2016年当Docker把官方Docker镜像库从Ubuntu切换到Alpine，Alpine的创始人Copa加入了Docker公司。
    
-   Alpine是一个技术人为技术人创造的Linux，其目的是技术人能够自己修复问题并将技能反馈给社区。除了Docker意外，Alpine也被用于很多安全相关的项目。
+   Alpine是一个技术人为技术人创造的Linux，其目的是技术人能够自己修复问题并将技能反馈给社区。除了Docker，Alpine也被用于很多安全相关的项目。
 
 Alpine的一大特点是非常小巧，没有包含过多的内容。这种较小的发行版也更为安全和高效。
 

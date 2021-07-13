@@ -6,7 +6,7 @@ ENV container docker
 RUN dnf -y update && dnf clean all
 
 RUN dnf -y install openssh-server \
-    which net-tools iputils
+    which net-tools iputils procps-ng
 
 # iputils: ping arping tracepath ...
 # net-tools: arp ifconfig route ...

@@ -5,7 +5,7 @@ ENV container docker
 
 RUN dnf -y update && dnf clean all
 
-RUN dnf -y install openssh-server which nmap-ncat mlocate net-tools file \
+RUN dnf -y install openssh-server which procps-ng nmap-ncat mlocate net-tools file \
            iputils tmux bzip2 sysstat unzip nfs-utils parted lsof bind-utils crontabs
 
 RUN dnf -y install gcc gcc-c++ make flex autoconf automake ncurses-devel zlib-devel git

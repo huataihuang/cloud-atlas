@@ -6,8 +6,8 @@
 
 我们知道macOS上的Docker Desktop for macOS实际上是在Linux虚拟机中运行的Docker容器，这对于macOS主机上使用Docker多了一层虚拟化。有些情况下，我们需要能够访问这个Linux虚拟机，以便实现一些hack操作。
 
-方法一: netcat
-===================
+方法一: netcat(推荐)
+=============================
 
 使用 ``nc`` 命令连接Docker的debug-shell socket文件::
 
@@ -40,8 +40,16 @@
 
 使用命令 ``exit`` 可以推出这个shell
 
+进入shell，可以执行 ``. /etc/profile`` 获得环境
+
+:ref:`alpine_linux` 非常精简，没有找到 apk 安装工具，迷惑
+
 方法二：nsenter(推荐)
 =======================
+
+.. warning::
+
+   使用nsenter从容器内部进入host主机的名字空间，但是对文件系统是只读
 
 另外一种巧妙的方法是运行一个debian容器，然后在这个debian容器中执行 ``nsenter`` 通过 ``pid=host`` 来实现进入到运行 Docker4Mac 的mini VM的进程空间，这样就相当于进入了macOS的Docker虚拟机::
 
