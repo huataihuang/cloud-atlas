@@ -35,10 +35,17 @@
 
 初始化结束之后，重启一次登陆进行图形桌面，可以看到是Gnome桌面。默认已经安装了chromium浏览器以及libreoffice办公软件。我的目标是部署服务器话的GPU运行环境，所以会做清理和简化。
 
+sudo
+=========
+
+- 方便sudo切换，在 ``/etc/sudoers`` 中添加自己的账号::
+
+   echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 时钟和时区
 ============
 
-我在安装过程中发现Jetson Nano在长时间断电后启动，主机时间会丢失设置，回到了出厂 2018年 01月 29日 ，所以需要配置系统NTP服务和时钟同步，对于现代化Linux发行版，普遍采用 :ref:`systemd` 的自带服务 :ref:`systemd_timesyncd` ，所以配置如下
+我在安装过程中发现Jetson Nano在长时间断电后启动，主机时间会丢失设置，回到了出厂 2018年 01月 29日 ，所以需要确保主机和互联网联通，用 :ref:`systemd` 的自带服务 :ref:`systemd_timesyncd` 完成时间同步。
 
 - 检查时间同步状态::
 
