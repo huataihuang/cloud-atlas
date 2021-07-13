@@ -105,7 +105,7 @@
 <li class="toctree-l3"><a class="reference internal" href="introduce_moby.html">MoBy开源项目集</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nsenter.html">nsenter管理namespace</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">获取macOS平台Docker虚拟机shell</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#netcat">方法一: netcat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#netcat">方法一: netcat(推荐)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#nsenter">方法二：nsenter(推荐)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">方法三：从一个预制镜像运行nsenter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">实践</a></li>
@@ -239,7 +239,7 @@
 <span id="macos-docker-shell"></span><h1>获取macOS平台Docker虚拟机shell<a class="headerlink" href="#macosdockershell" title="永久链接至标题">¶</a></h1>
 <p>我们知道macOS上的Docker Desktop for macOS实际上是在Linux虚拟机中运行的Docker容器，这对于macOS主机上使用Docker多了一层虚拟化。有些情况下，我们需要能够访问这个Linux虚拟机，以便实现一些hack操作。</p>
 <section id="netcat">
-<h2>方法一: netcat<a class="headerlink" href="#netcat" title="永久链接至标题">¶</a></h2>
+<h2>方法一: netcat(推荐)<a class="headerlink" href="#netcat" title="永久链接至标题">¶</a></h2>
 <p>使用 <code class="docutils literal notranslate"><span class="pre">nc</span></code> 命令连接Docker的debug-shell socket文件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nc</span> <span class="o">-</span><span class="n">U</span> <span class="o">~/</span><span class="n">Library</span><span class="o">/</span><span class="n">Containers</span><span class="o">/</span><span class="n">com</span><span class="o">.</span><span class="n">docker</span><span class="o">.</span><span class="n">docker</span><span class="o">/</span><span class="n">Data</span><span class="o">/</span><span class="n">debug</span><span class="o">-</span><span class="n">shell</span><span class="o">.</span><span class="n">sock</span>
 </pre></div>
@@ -270,9 +270,15 @@
 </pre></div>
 </div>
 <p>使用命令 <code class="docutils literal notranslate"><span class="pre">exit</span></code> 可以推出这个shell</p>
+<p>进入shell，可以执行 <code class="docutils literal notranslate"><span class="pre">.</span> <span class="pre">/etc/profile</span></code> 获得环境</p>
+<p><a class="reference internal" href="../../linux/alpine_linux/index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> 非常精简，没有找到 apk 安装工具，迷惑</p>
 </section>
 <section id="nsenter">
 <h2>方法二：nsenter(推荐)<a class="headerlink" href="#nsenter" title="永久链接至标题">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>使用nsenter从容器内部进入host主机的名字空间，但是对文件系统是只读</p>
+</div>
 <p>另外一种巧妙的方法是运行一个debian容器，然后在这个debian容器中执行 <code class="docutils literal notranslate"><span class="pre">nsenter</span></code> 通过 <code class="docutils literal notranslate"><span class="pre">pid=host</span></code> 来实现进入到运行 Docker4Mac 的mini VM的进程空间，这样就相当于进入了macOS的Docker虚拟机:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">privileged</span> <span class="o">--</span><span class="n">pid</span><span class="o">=</span><span class="n">host</span> <span class="n">debian</span> <span class="n">nsenter</span> <span class="o">-</span><span class="n">t</span> <span class="mi">1</span> <span class="o">-</span><span class="n">m</span> <span class="o">-</span><span class="n">u</span> <span class="o">-</span><span class="n">n</span> <span class="o">-</span><span class="n">i</span> <span class="n">sh</span>
 </pre></div>
@@ -341,7 +347,7 @@
 </section>
 <section id="id2">
 <h2>实践<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>我感觉使用方法二最为理想，通过运行容器进入物理服务器的名字空间，也就实现了访问虚拟机的能力。这对我使用 <a class="reference internal" href="../../apple/studio/macos_nfs.html#macos-nfs"><span class="std std-ref">macOS系统NFS服务和使用</span></a> 挂载macOS物理主机上共享的NFS卷，实现存储持久化非常方便。</p>
+<p>我感觉使用方法二最为理想，通过运行容器进入物理服务器的名字空间，也就实现了访问虚拟机的能力。这对我使用 <a class="reference internal" href="../../apple/studio/macos_nfs.html#macos-nfs"><span class="std std-ref">macOS系统NFS服务</span></a> 挂载macOS物理主机上共享的NFS卷，实现存储持久化非常方便。</p>
 </section>
 <section id="id3">
 <h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>

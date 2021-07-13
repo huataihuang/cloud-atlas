@@ -259,11 +259,35 @@
 </section>
 <section id="id2">
 <h2>初始化过程概述<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>首次启动Jetson Nano一定要把设备连接到能够访问Internet的局域网，也即是确保主机能够通过DHCP获得IP地址并访问Internet，否则会导致启动初始化脚本死循环。</p>
+<p>早期版本需要首次启动Jetson Nano要把设备连接到能够访问Internet的局域网，也即是确保主机能够通过DHCP获得IP地址并访问Internet，否则会导致启动初始化脚本死循环。最近(2021年7月)，发行版已经允许离线初始化，在初始化之后手工配置网络。</p>
 <p>初始化结束之后，重启一次登陆进行图形桌面，可以看到是Gnome桌面。默认已经安装了chromium浏览器以及libreoffice办公软件。我的目标是部署服务器话的GPU运行环境，所以会做清理和简化。</p>
 </section>
 <section id="id3">
-<h2>配置默认字符启动<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>时钟和时区<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>我在安装过程中发现Jetson Nano在长时间断电后启动，主机时间会丢失设置，回到了出厂 2018年 01月 29日 ，所以需要配置系统NTP服务和时钟同步，对于现代化Linux发行版，普遍采用 <a class="reference internal" href="../../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 的自带服务 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_timesyncd.html#systemd-timesyncd"><span class="std std-ref">Systemd Timesyncd服务</span></a> ，所以配置如下</p>
+<ul>
+<li><p>检查时间同步状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timedatectl</span> <span class="n">status</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示时钟偏移:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                      <span class="n">Local</span> <span class="n">time</span><span class="p">:</span> <span class="n">一</span> <span class="mi">2018</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">29</span> <span class="mi">02</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">13</span> <span class="n">CST</span>
+                  <span class="n">Universal</span> <span class="n">time</span><span class="p">:</span> <span class="n">日</span> <span class="mi">2018</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">28</span> <span class="mi">18</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">13</span> <span class="n">UTC</span>
+                        <span class="n">RTC</span> <span class="n">time</span><span class="p">:</span> <span class="n">六</span> <span class="mi">2000</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span> <span class="mi">03</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">10</span>
+                       <span class="n">Time</span> <span class="n">zone</span><span class="p">:</span> <span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span> <span class="p">(</span><span class="n">CST</span><span class="p">,</span> <span class="o">+</span><span class="mi">0800</span><span class="p">)</span>
+       <span class="n">System</span> <span class="n">clock</span> <span class="n">synchronized</span><span class="p">:</span> <span class="n">no</span>
+<span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span><span class="o">.</span><span class="n">service</span> <span class="n">active</span><span class="p">:</span> <span class="n">yes</span>
+                 <span class="n">RTC</span> <span class="ow">in</span> <span class="n">local</span> <span class="n">TZ</span><span class="p">:</span> <span class="n">no</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>注意解决网络连接后， <code class="docutils literal notranslate"><span class="pre">systemd-timesysncd</span></code> 会自动同步时间</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>配置默认字符启动<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>安装完成后，我首先将桌面环境切换到字符模式，以便节约资源，并为下一步瘦身做好准备:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">disable</span> <span class="n">gdm3</span>
 <span class="n">systemctl</span> <span class="nb">set</span><span class="o">-</span><span class="n">default</span> <span class="n">multi</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">target</span>
@@ -291,8 +315,14 @@
 <p>不过，使用 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">list</span> <span class="pre">--installed</span></code> 检查已经安装的软件包，依然可以看到大量的图形界面应用程序</p>
 <p>所以进一步清理 Unity (深度定制的Gnome):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="n">nautilus</span> <span class="n">gnome</span><span class="o">-</span><span class="n">power</span><span class="o">-</span><span class="n">manager</span> <span class="n">gnome</span><span class="o">-</span><span class="n">screensaver</span> <span class="n">gnome</span><span class="o">-</span><span class="n">termina</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">pane</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">applet</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">bluetooth</span> <span class="n">gnome</span><span class="o">-</span><span class="n">desktop</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">sessio</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">user</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">shell</span><span class="o">-</span><span class="n">common</span> <span class="n">compiz</span> <span class="n">compiz</span><span class="o">*</span> <span class="n">unity</span> <span class="n">unity</span><span class="o">*</span> <span class="n">hud</span> <span class="n">zeitgeist</span> <span class="n">zeitgeist</span><span class="o">*</span> <span class="n">python</span><span class="o">-</span><span class="n">zeitgeist</span> <span class="n">libzeitgeist</span><span class="o">*</span> <span class="n">activity</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">common</span> <span class="n">gnome</span><span class="o">-</span><span class="n">control</span><span class="o">-</span><span class="n">center</span> <span class="n">gnome</span><span class="o">-</span><span class="n">screenshot</span> <span class="n">overlay</span><span class="o">-</span><span class="n">scrollba</span><span class="o">*</span>
-
-<span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span>
+</pre></div>
+</div>
+<p>近期发行版清理Unity使用上述命令会有一些组件无法找到，所以修改成命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">remove</span> <span class="n">nautilus</span> <span class="n">gnome</span><span class="o">-</span><span class="n">power</span><span class="o">-</span><span class="n">manager</span> <span class="n">gnome</span><span class="o">-</span><span class="n">screensaver</span> <span class="n">gnome</span><span class="o">-</span><span class="n">termina</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">pane</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">bluetooth</span> <span class="n">gnome</span><span class="o">-</span><span class="n">desktop</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">sessio</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">user</span><span class="o">*</span> <span class="n">gnome</span><span class="o">-</span><span class="n">shell</span><span class="o">-</span><span class="n">common</span> <span class="n">compiz</span> <span class="n">compiz</span><span class="o">*</span> <span class="n">unity</span> <span class="n">unity</span><span class="o">*</span> <span class="n">hud</span> <span class="n">zeitgeist</span> <span class="n">zeitgeist</span><span class="o">*</span> <span class="n">libzeitgeist</span><span class="o">*</span> <span class="n">activity</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">common</span> <span class="n">gnome</span><span class="o">-</span><span class="n">control</span><span class="o">-</span><span class="n">center</span> <span class="n">gnome</span><span class="o">-</span><span class="n">screenshot</span>
+</pre></div>
+</div>
+<p>然后再执行自动清理:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">autoremove</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -307,14 +337,25 @@
 </div>
 </li>
 <li><p>安装应用工具:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">curl</span> <span class="n">screen</span> <span class="n">nmon</span> <span class="n">lsof</span> <span class="n">dnsmasq</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="c1"># dnsmasq 默认已经安装启用</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">curl</span> <span class="n">screen</span> <span class="n">nmon</span> <span class="n">lsof</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在开始安装软件包之前，需要执行一次 <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">update</span></code> 以更新软件包索引，否则有可能因为找不到软件包而报错，例如 <code class="docutils literal notranslate"><span class="pre">curl</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Package</span> <span class="n">curl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">available</span><span class="p">,</span> <span class="n">but</span> <span class="ow">is</span> <span class="n">referred</span> <span class="n">to</span> <span class="n">by</span> <span class="n">another</span> <span class="n">package</span><span class="o">.</span>
+<span class="n">This</span> <span class="n">may</span> <span class="n">mean</span> <span class="n">that</span> <span class="n">the</span> <span class="n">package</span> <span class="ow">is</span> <span class="n">missing</span><span class="p">,</span> <span class="n">has</span> <span class="n">been</span> <span class="n">obsoleted</span><span class="p">,</span> <span class="ow">or</span>
+<span class="ow">is</span> <span class="n">only</span> <span class="n">available</span> <span class="kn">from</span> <span class="nn">another</span> <span class="n">source</span>
+</pre></div>
+</div>
+</div>
 </section>
-<section id="id4">
-<h2>服务器配置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="id5">
+<h2>服务器配置<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">~/.screenrc</span></code> :</p></li>
 </ul>
@@ -367,14 +408,14 @@ shell -bash
 </td></tr></table></div>
 <p>然后执行命令 <code class="docutils literal notranslate"><span class="pre">screen</span> <span class="pre">-S</span> <span class="pre">works</span></code> 启动远程screen后再执行进一步配置，以免网络抖动影响操作。</p>
 </section>
-<section id="id5">
-<h2>网络<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<section id="id6">
+<h2>网络<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>默认Ubuntu桌面版本(Jetson Nano使用定制版Ubuntu)使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 管理网络，但是对于服务器使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 更为方便。不过，我在18.04系列Ubuntu使用netplan一直非常蹉跎，所以还是直接使用 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 配置静态IP地址。</p>
 <ul class="simple">
 <li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/network/10-eth0.network</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">../../../linux/redhat_linux/systemd/systemd_networkd/10-eth0.network</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">../../../linux/redhat_linux/systemd/systemd_networkd/10-eth0.network</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -410,8 +451,8 @@ shell -bash
 </li>
 </ul>
 </section>
-<section id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://lunar.computer/posts/nvidia-jetson-nano-headless/">Make NVIDIA Jetson Nano Developer Kit Headless</a></p></li>
 <li><p><a class="reference external" href="https://linuxhint.com/install_netplan_ubuntu/">How to Configure Network on Ubuntu 18.04 LTS with Netplan?</a></p></li>

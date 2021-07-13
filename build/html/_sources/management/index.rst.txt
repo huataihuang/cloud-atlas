@@ -12,6 +12,7 @@ Management Atlas
    :maxdepth: 1
 
    knowledge/index
+   time/index
 
 .. only::  subproject and html
 

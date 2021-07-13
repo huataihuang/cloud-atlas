@@ -31,9 +31,30 @@
 初始化过程概述
 ==============
 
-首次启动Jetson Nano一定要把设备连接到能够访问Internet的局域网，也即是确保主机能够通过DHCP获得IP地址并访问Internet，否则会导致启动初始化脚本死循环。
+早期版本需要首次启动Jetson Nano要把设备连接到能够访问Internet的局域网，也即是确保主机能够通过DHCP获得IP地址并访问Internet，否则会导致启动初始化脚本死循环。最近(2021年7月)，发行版已经允许离线初始化，在初始化之后手工配置网络。
 
 初始化结束之后，重启一次登陆进行图形桌面，可以看到是Gnome桌面。默认已经安装了chromium浏览器以及libreoffice办公软件。我的目标是部署服务器话的GPU运行环境，所以会做清理和简化。
+
+时钟和时区
+============
+
+我在安装过程中发现Jetson Nano在长时间断电后启动，主机时间会丢失设置，回到了出厂 2018年 01月 29日 ，所以需要配置系统NTP服务和时钟同步，对于现代化Linux发行版，普遍采用 :ref:`systemd` 的自带服务 :ref:`systemd_timesyncd` ，所以配置如下
+
+- 检查时间同步状态::
+
+   timedatectl status
+
+显示时钟偏移::
+
+                         Local time: 一 2018-01-29 02:40:13 CST
+                     Universal time: 日 2018-01-28 18:40:13 UTC
+                           RTC time: 六 2000-01-01 03:42:10
+                          Time zone: Asia/Shanghai (CST, +0800)
+          System clock synchronized: no
+   systemd-timesyncd.service active: yes
+                    RTC in local TZ: no
+
+- 注意解决网络连接后， ``systemd-timesysncd`` 会自动同步时间
 
 配置默认字符启动
 ==================
@@ -64,6 +85,12 @@
 
    sudo apt remove nautilus gnome-power-manager gnome-screensaver gnome-termina* gnome-pane* gnome-applet* gnome-bluetooth gnome-desktop* gnome-sessio* gnome-user* gnome-shell-common compiz compiz* unity unity* hud zeitgeist zeitgeist* python-zeitgeist libzeitgeist* activity-log-manager-common gnome-control-center gnome-screenshot overlay-scrollba*
 
+近期发行版清理Unity使用上述命令会有一些组件无法找到，所以修改成命令::
+
+   sudo apt remove nautilus gnome-power-manager gnome-screensaver gnome-termina* gnome-pane* gnome-bluetooth gnome-desktop* gnome-sessio* gnome-user* gnome-shell-common compiz compiz* unity unity* hud zeitgeist zeitgeist* libzeitgeist* activity-log-manager-common gnome-control-center gnome-screenshot
+
+然后再执行自动清理::
+
    sudo apt autoremove
 
 .. note::
@@ -77,7 +104,17 @@
 
 - 安装应用工具::
 
-   sudo apt install curl screen nmon lsof dnsmasq
+   sudo apt update
+   # dnsmasq 默认已经安装启用
+   sudo apt install curl screen nmon lsof
+
+.. note::
+
+   在开始安装软件包之前，需要执行一次 ``apt update`` 以更新软件包索引，否则有可能因为找不到软件包而报错，例如 ``curl`` ::
+
+      Package curl is not available, but is referred to by another package.
+      This may mean that the package is missing, has been obsoleted, or
+      is only available from another source
 
 服务器配置
 ===========

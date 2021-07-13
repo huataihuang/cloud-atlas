@@ -136,12 +136,20 @@ ssh服务容器(ssh)
 
    请注意，当前这个Dockerfile仅仅是安装了开发所需的一些软件包，并没有解决容器销毁以后数据的丢失，这样小心翼翼使用尚可，但是非常容易丢失数据。所以，我们需要通过 :ref:`docker_volume` 把开发环境的数据持久化，并且能够直接输出到物理主机(macOS环境)中，方便我们数据备份和在物理主机上同样共享数据。
 
+- 初始化镜像::
+
+   docker build -t fedora-dev .
+
+- 启动容器::
+
+   docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro fedora-dev /usr/sbin/init
+
 容器持久化数据存储(dev-data)
 ===============================
 
 为了能够在容器销毁并重建等常见操作情况下，不丢失自己辛苦开发工作的数据，我构想了一个方案:
 
-- 在macOS操作系统上配置 :ref:`macos_nfs` ，将用户的 ``$HOME`` 目录下子目录 ``home_admin`` 作为NFS服务卷输出给Docker环境(注意配置内部网络IP访问确保安全)
+- 在macOS操作系统上配置 :ref:`macos_nfs` ，将用户的 ``$HOME`` 目录下子目录 ``home_admin`` 作为NFS服务卷输出给Docker环境(注意配置内部网络IP访问确保安全) - (遗憾，似乎不好实现)
 - 在Docker中配置 :ref:`docker_container_nfs` ，将容器的 ``/home/admin`` 目录bind到NFS挂载的目录下，这样所有容器中数据都能够直接存储到物理主机的macOS系统的用户目录
 
   - 为了避免多个容器 ``数据踩踏`` ，需要每个容器单独创建一个子目录，分别映射，例如 ``dev1`` 容器使用的是 ``home_admin/dev1`` ； ``dev2`` 容器使用是 ``home_admin/dev2``
@@ -149,7 +157,7 @@ ssh服务容器(ssh)
 
 - 在物理主机上采用定时备份同步方法，能够实现数据不丢失
 
-
+不过，我在实践中尚未找到如何在物理主机和Docker VM之间共享NFS的方法，所以本方案修订成 :ref:`docker_macos_file_share`
 
 开发环境框架搭建(studio)
 =========================

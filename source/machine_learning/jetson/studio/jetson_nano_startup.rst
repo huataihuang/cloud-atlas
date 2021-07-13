@@ -34,7 +34,13 @@ Jetson Nano有3种供电方式：
 初始化
 ========
 
-NVIDIA Jetson Nano Developer Kit操作系统首次启动就需要连接Internet进行初始化，所以一定要确保Jetson Nano的主机已经连接到能够访问Internet的局域网，并且通过DHCP获得主机IP地址。这个过程是自动化的，并且如果不能获得互联网连接，就会导致启动任务死循环无法结束。
+NVIDIA Jetson Nano Developer Kit操作系统提示问题：
+
+- ``APP Patition Size`` 配置，这是因为安装镜像初始时候只占据大约13G， ``dd`` 到SD卡之后，初始化时提示可以扩展到整个SD卡存储空间。不过，我为了能够后续通过磁盘卷管理更好分配磁盘空间，所以只设置扩展到 ``24G`` 空间 (28896MB)
+
+- ``Select Nvpmodel Mode`` - 该选项是电源管理，有两种模式 ``MAXN - (Default)`` (默认最大性能主频，使用4个CPU核心) / ``5W`` （节能模式，只使用2个CPU核心并且降低主频），选择默认就可以。这个配置在以后可以通过  ``nvpmodel`` 命令行或者GUI程序进行修改
+
+早期发行版本要求在线连接Internet进行初始化，所以要确保Jetson Nano的主机已经连接到能够访问Internet的局域网，并且通过DHCP获得主机IP地址。这个过程是自动化的，并且如果不能获得互联网连接，就会导致启动任务死循环无法结束。不过，2021年7月我下载的最新镜像已经可以离线初始化，也就是可以在完成初始设置之后，再设置网络联网进行更新。
 
 登陆界面是Gnome 3，所以图形界面比较沉重，甚至我觉得在ARM处理器的4G内存规格下，运行这么复杂的图形桌面实在是浪费了系统资源。
 
@@ -64,13 +70,14 @@ NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使�
 安装必要工具软件::
 
    sudo apt install curl screen nmon lsof dnsmasq
+   # 可选安装Xfce4桌面 - 我最终将jetson作为Kubernetes节点运行，所以没有安装任何桌面，配置成字符界面运行
    sudo apt install xfce4 xfce4-terminal
    # 以下可选
    sudo apt install fcitx-bin fcitx-googlepinyin
    sudo apt install bluez-tools blueman
    sudo apt install synergy keepassx
 
-详细设置参考 :ref:`xfce` 
+你可以选择轻量级 :ref:`xfce` ，也可以 :ref:`deploy_jetson_server` ，将主机加入到 :ref:`kubernetes` 作为worker节点。
 
 .. note::
 
