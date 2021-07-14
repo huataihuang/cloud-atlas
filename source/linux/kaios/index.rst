@@ -9,6 +9,7 @@ KaiOS - 世界第三手机操作系统
    :maxdepth: 1
 
    nokia_kaios.rst
+   nokia_6300_4g.rst
 
 .. only::  subproject and html
 

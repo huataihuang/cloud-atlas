@@ -215,11 +215,7 @@ Intel开源RDT工具intel-cmt-cat
 
 如果找不到动态链接库，则指定: ``export LD_LIBRARY_PATH=/usr/local/lib``
 
-RDT工具 ``pqos`` ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户琴弦。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。目前在 RHEL 7操作系统，通过 ``intel-cmt-cat`` 软件包提供了 ``pqos`` 工具，用于控制Intel处理器CPU缓存和内存带宽。( `Red Hat Enterprise Linux 7 Performance Tuning Guide 2.14. pqos <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-performance_monitoring_tools-pqos>`_ ) 。根据 `pqos manual(8) <https://manpages.debian.org/unstable/intel-cmt-cat/pqos.8.en.html>`_ 可以看到， ``pqos`` 工具同时支持 Intel RDT 和 AMD PQoS。
-
-.. note::
-
-   具体实践待进行
+RDT工具 ``pqos`` ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户权限。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。目前在 RHEL 7操作系统，通过 ``intel-cmt-cat`` 软件包提供了 ``pqos`` 工具，用于控制Intel处理器CPU缓存和内存带宽。( `Red Hat Enterprise Linux 7 Performance Tuning Guide 2.14. pqos <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-performance_monitoring_tools-pqos>`_ ) 。根据 `pqos manual(8) <https://manpages.debian.org/unstable/intel-cmt-cat/pqos.8.en.html>`_ 可以看到， ``pqos`` 工具同时支持 Intel RDT 和 AMD PQoS。
 
 内核方式使用RDT
 -----------------
@@ -240,7 +236,6 @@ ARM架构处理器对应有MPAM技术(Memory Partitioning and Monitoring)，不�
 参考
 =====
 
-- `Resource Allocation in Intel® Resource Director Technology <https://01.org/intel-rdt-linux/blogs/fyu1/2017/resource-allocation-intel%C2%AE-resource-director-technology>`_ - Intel的FengHua Yu撰写的RDT技术介绍文档，较为全面
 - `Resource Allocation: Intel Resource Director Technology (RDT) by Fenghua Yu, Intel <https://www.youtube.com/watch?v=rKe5_xWpH8o>`_ - Intel的FengHua Yu在Linux Foundation上演讲介绍RDT视频，可参考
 - `Resource Allocation: Intel Resource Director Technology (RDT) <https://events.static.linuxfound.org/sites/events/files/slides/cat8.pdf>`_ - Intel的FengHua Yu的演讲PPT，举了不少形象的例子
 - `Intel RDT 三级缓存管理技术 <https://zhuanlan.zhihu.com/p/29432536>`_

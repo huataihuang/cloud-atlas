@@ -52,6 +52,14 @@ Fedora项目提供的Dockerfile可以方便我们快速部署不同的运行环�
 
    后续作为持续集成，将代码推送到运行容器中，将采用完全原生精简的Dockerfile
 
+.. warning::
+
+   这里Dockerfile的最后倒数第二行配置的volume非常重要，如果没有这行配置，虽然 ``docker build`` 生成了image，但是使用这个image启动容器 ``docker run`` 会失败，用 ``docker logs`` 命令检查会看到报错::
+
+      Failed to mount tmpfs at /run: Operation not permitted
+      [!!!!!!] Failed to mount API filesystems.
+      Exiting PID 1...
+
 - 运行容器::
 
    docker run --name fedora --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro fedora /usr/sbin/init

@@ -31,6 +31,39 @@ File sharing
 
     docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /Users/huatai/home_admin/dev:/home/admin fedora-dev /usr/sbin/init
 
+但是启动立即终止，使用 ``docker ps --all`` 可以看到::
+
+   CONTAINER ID   IMAGE        COMMAND            CREATED          STATUS                        PORTS                                 NAMES
+   96677398766c   fedora-dev   "/usr/sbin/init"   20 seconds ago   Exited (255) 18 seconds ago                                         fedora-dev
+
+为何有返回错误码 255 呢？
+
+查看启动日志::
+
+   docker logs fedora-dev
+
+可以看到::
+
+   systemd v248.3-1.fc34 running in system mode. (+PAM +AUDIT +SELINUX -APPARMOR +IMA +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified)
+   Detected virtualization docker.
+   Detected architecture x86-64.
+   Failed to create symlink /sys/fs/cgroup/net_cls: File exists
+   Failed to create symlink /sys/fs/cgroup/net_prio: File exists
+   Failed to create symlink /sys/fs/cgroup/cpu: File exists
+   Failed to create symlink /sys/fs/cgroup/cpuacct: File exists
+
+   Welcome to Fedora 34 (Container Image)!
+
+   Failed to write /run/systemd/container, ignoring: Permission denied
+   Failed to create /docker/96677398766c1bdd1a48396d9c4db2c8a16a918bde715626cc3fb65e38986b64/init.scope control group: Permission denied
+   Failed to allocate manager object: Permission denied
+   [!!!!!!] Failed to allocate manager object.
+   Exiting PID 1...
+
+这个问题在 `Building multiple docker images using the same kaniko executor gives 'file exists' error <https://groups.google.com/g/kaniko-users/c/_7LivHdMdy0>`_ 有
+
+`Debian10 not working #168 <https://github.com/weaveworks/footloose/issues/168>`_ 提到是本地安装docker问题，需要重新安装一次docker初始化，我准备尝试一下
+
 参考
 =====
 
