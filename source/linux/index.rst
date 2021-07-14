@@ -38,6 +38,7 @@ Linux是运计算的主流基础操作系统，除了微软的Azure，其他主�
    chromium_os/index
    alpine_linux/index
    subgraph_os/index
+   kaios/index
    compute/index
    storage/index
    network/index

@@ -61,7 +61,15 @@ sudo
    systemd-timesyncd.service active: yes
                     RTC in local TZ: no
 
-- 注意解决网络连接后， ``systemd-timesysncd`` 会自动同步时间
+- 注意解决网络连接后， ``systemd-timesysncd`` 会自动同步时间，再次执行 ``timedatectl status`` 显示系统时钟已经铜鼓 ``System clock synchronized: yes`` ::
+
+                         Local time: Wed 2021-07-14 15:06:49 CST
+                     Universal time: Wed 2021-07-14 07:06:49 UTC
+                           RTC time: Wed 2021-07-14 07:06:50
+                          Time zone: Asia/Shanghai (CST, +0800)
+          System clock synchronized: yes
+   systemd-timesyncd.service active: yes
+                    RTC in local TZ: no
 
 配置默认字符启动
 ==================
