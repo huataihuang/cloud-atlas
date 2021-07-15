@@ -119,7 +119,10 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Intel RDT实践</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#linuxintel-rdt">在Linux上激活Intel RDT资源管理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#resctrl">resctrl文件系统</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">resctrl目录介绍</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#schemata">schemata文件通用概念</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rdt">RDT配置案例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -251,11 +254,261 @@
 </div>
 </li>
 </ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">cdp</span></code> 挂载选贤是激活 L3 缓存分配的 编码/数据 优先级 (code/data prioritization)</p>
+<ul>
+<li><p>挂载了 <code class="docutils literal notranslate"><span class="pre">resctrl</span></code> 文件系统后，我们可以观察以下目录结构:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span>
+<span class="n">tree</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我们可以看到结构如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>.
+├── cpus
+├── cpus_list
+├── info
+│   ├── L3
+│   │   ├── cbm_mask
+│   │   ├── min_cbm_bits
+│   │   ├── num_closids
+│   │   └── shareable_bits
+│   ├── L3_MON
+│   │   ├── max_threshold_occupancy
+│   │   ├── mon_features
+│   │   └── num_rmids
+│   └── MB
+│       ├── bandwidth_gran
+│       ├── delay_linear
+│       ├── min_bandwidth
+│       └── num_closids
+├── mon_data
+│   ├── mon_L3_00
+│   │   ├── llc_occupancy
+│   │   ├── mbm_local_bytes
+│   │   └── mbm_total_bytes
+│   └── mon_L3_01
+│       ├── llc_occupancy
+│       ├── mbm_local_bytes
+│       └── mbm_total_bytes
+├── mon_groups
+├── schemata
+...
+├── system-stream
+│   ├── cpus
+│   ├── cpus_list
+│   ├── mon_data
+│   │   ├── mon_L3_00
+│   │   │   ├── llc_occupancy
+│   │   │   ├── mbm_local_bytes
+│   │   │   └── mbm_total_bytes
+│   │   └── mon_L3_01
+│   │       ├── llc_occupancy
+│   │       ├── mbm_local_bytes
+│   │       └── mbm_total_bytes
+│   ├── mon_groups
+│   ├── schemata
+│   └── tasks
+├── system-agent
+│   ├── cpus
+│   ├── cpus_list
+│   ├── mon_data
+│   │   ├── mon_L3_00
+│   │   │   ├── llc_occupancy
+│   │   │   ├── mbm_local_bytes
+│   │   │   └── mbm_total_bytes
+│   │   └── mon_L3_01
+│   │       ├── llc_occupancy
+│   │       ├── mbm_local_bytes
+│   │       └── mbm_total_bytes
+│   ├── mon_groups
+│   ├── schemata
+│   └── tasks
+├── system-critical
+│   ├── cpus
+│   ├── cpus_list
+│   ├── mon_data
+│   │   ├── mon_L3_00
+│   │   │   ├── llc_occupancy
+│   │   │   ├── mbm_local_bytes
+│   │   │   └── mbm_total_bytes
+│   │   └── mon_L3_01
+│   │       ├── llc_occupancy
+│   │       ├── mbm_local_bytes
+│   │       └── mbm_total_bytes
+│   ├── mon_groups
+│   ├── schemata
+│   └── tasks
+└── tasks
+</pre></div>
+</div>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>resctrl目录介绍<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<section id="info">
+<h3>info目录<a class="headerlink" href="#info" title="永久链接至标题">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">info</span></code> 目录包含了激活资源的信息，每个资源都有自己的子目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── info
+│   ├── L3
+│   │   ├── cbm_mask
+│   │   ├── min_cbm_bits
+│   │   ├── num_closids
+│   │   └── shareable_bits
+│   ├── L3_MON
+│   │   ├── max_threshold_occupancy
+│   │   ├── mon_features
+│   │   └── num_rmids
+│   └── MB
+│       ├── bandwidth_gran
+│       ├── delay_linear
+│       ├── min_bandwidth
+│       └── num_closids
+</pre></div>
+</div>
+<p>子目录名字反映了资源名字，每个子目录包含了以下文件：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_closids</span></code> 这个资源的CLOSIDs的数量，内核使用所有激活资源的CLOSIDs的最小数量作为限制:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#cat num_closids</span>
+<span class="mi">16</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cbm_mask</span></code> 位掩码(bitmask)校验这个资源，掩码等同100%:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#cat cbm_mask</span>
+<span class="mi">7</span><span class="n">ff</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">7ff</span></code> 是16进制，转换成二进制就是 <code class="docutils literal notranslate"><span class="pre">11111111111</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_cbm_bits</span></code> 当写入一个掩码时候必须设置的连续位(consecutive bits)的最小值:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#cat min_cbm_bits</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h3>资源组<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<p>资源组就是对应 <code class="docutils literal notranslate"><span class="pre">resctrl</span></code> 文件系统的子目录。默认资源组就是 <code class="docutils literal notranslate"><span class="pre">resctrl</span></code> root目录。系统管理员通过 <code class="docutils literal notranslate"><span class="pre">mkdir</span></code> 和 <code class="docutils literal notranslate"><span class="pre">rmdir</span></code> 命令在这个文件系统中创建子目录来管理资源组。</p>
+<p>在每个资源组中有4个文件:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://01.org/intel-rdt-linux/blogs/fyu1/2017/resource-allocation-intel%C2%AE-resource-director-technology">RESOURCE ALLOCATION IN INTEL® RESOURCE DIRECTOR TECHNOLOGY</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tasks</span></code> : 属于这个资源组的所有任务(进程和线程)，通过将task ID写到这个文件或删除，可以控制任务是否属于这个资源组。当一个任务加入一个资源组，则会自动从之前的资源组中移除。一个通过 <code class="docutils literal notranslate"><span class="pre">fork</span></code> 和 <code class="docutils literal notranslate"><span class="pre">clone</span></code> 命令创建的任务自动添加到父任务所属资源组。如果一个PID不属于任何资源组(subpartition)，则自动属于root资源组(默认partition)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cpus</span></code> : 使用位掩码(bitmask)来表示属于这个资源组的逻辑CPU，添加到资源组的CPU会自动从之前的资源组中移除。被移除的CPU会添加到默认(root)资源组。你不能从默认资源组移除CPU。注意，这个配置文件中使用16进制bitmask</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cpus_list</span></code> : 和 <code class="docutils literal notranslate"><span class="pre">cpus</span></code> 是相同作用，用来表示分配到CPU，不过这个文件使用的是十进制</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">schemata</span></code> : 配置资源组所有资源，每个资源有一行配置和格式</p></li>
+</ul>
+<p>现在我们先来看看默认的根资源组配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#cat cpus</span>
+<span class="mi">0000</span><span class="p">,</span><span class="n">ffffffff</span><span class="p">,</span><span class="n">ffffffff</span><span class="p">,</span><span class="n">ffffffff</span>
+
+<span class="c1">#cat cpus_list</span>
+<span class="mi">0</span><span class="o">-</span><span class="mi">95</span>
+
+<span class="c1">#cat schemata</span>
+    <span class="n">L3</span><span class="p">:</span><span class="mi">0</span><span class="o">=</span><span class="mi">7</span><span class="n">ff</span><span class="p">;</span><span class="mi">1</span><span class="o">=</span><span class="mi">7</span><span class="n">ff</span>
+    <span class="n">MB</span><span class="p">:</span><span class="mi">0</span><span class="o">=</span><span class="mi">100</span><span class="p">;</span><span class="mi">1</span><span class="o">=</span><span class="mi">100</span>
+</pre></div>
+</div>
+<p>这里可以看到 <code class="docutils literal notranslate"><span class="pre">cpus</span></code> 配置中16进制转换成二进制就是 <code class="docutils literal notranslate"><span class="pre">96个1</span></code> ，也就是对应服务器的 <code class="docutils literal notranslate"><span class="pre">Intel(R)</span> <span class="pre">Xeon(R)</span> <span class="pre">Platinum</span> <span class="pre">8163</span> <span class="pre">CPU</span> <span class="pre">&#64;</span> <span class="pre">2.50GHz</span></code> 处理器的96个逻辑CPU，实际上和 <code class="docutils literal notranslate"><span class="pre">cpus_list</span></code> 配置内容 <code class="docutils literal notranslate"><span class="pre">0-95</span></code> 是一样的。</p>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">schemata</span></code> 配置是默认的配置 <code class="docutils literal notranslate"><span class="pre">7ff</span></code> (16进制) 转换成二进制是 <code class="docutils literal notranslate"><span class="pre">1111111</span></code></p>
+<p>对于运行任务的资源分配规则如下：</p>
+<ul class="simple">
+<li><p>如果任务属于非默认资源组，则使用该组的schemata</p></li>
+<li><p>如果一个任务属于默认资源组，但是它运行在被指定给特定资源组的CPU是，则使用这个CPU的资源组配置的schemata(也就是限制该任务的可用资源)</p></li>
+<li><p>其他情况则使用默认资源组的schemata</p></li>
+</ul>
+</section>
+</section>
+<section id="schemata">
+<h2>schemata文件通用概念<a class="headerlink" href="#schemata" title="永久链接至标题">¶</a></h2>
+<p>在 <code class="docutils literal notranslate"><span class="pre">schemata</span></code> 文件中每一行描述一个资源。配置行以资源的名字开始，对应的指定值就是作用在这个系统资源的每个会话。</p>
+<section id="cache-ids-id">
+<h3>Cache IDs (缓存ID)<a class="headerlink" href="#cache-ids-id" title="永久链接至标题">¶</a></h3>
+<p>现在通用Intel系统在每个 socket 包含一个 <code class="docutils literal notranslate"><span class="pre">L3</span></code> 缓存，并且每个物理核心(core)的超线程(hyperthreads)共享一个 <code class="docutils literal notranslate"><span class="pre">L2</span></code> 缓存。在一个socket中我们可以有多个独立的 <code class="docutils literal notranslate"><span class="pre">L3</span></code> 缓存，以及多个物理核心共享一个 <code class="docutils literal notranslate"><span class="pre">L2</span></code> 缓存。这种CPU架构决定了一组逻辑CPU如何共享资源，所以就使用 <code class="docutils literal notranslate"><span class="pre">Cache</span> <span class="pre">ID</span></code> 来表示。在一个给定的缓存层，对于整个系统只使用一个唯一标识的数字(但是不保证数字是连续的)。为了找出每个逻辑CPU的ID，请查看 <code class="docutils literal notranslate"><span class="pre">/sys/devices/system/cpu/cpu*/cache/index*/id</span></code> 。</p>
+</section>
+<section id="cache-bit-masks-cbm">
+<h3>Cache Bit Masks(CBM)<a class="headerlink" href="#cache-bit-masks-cbm" title="永久链接至标题">¶</a></h3>
+<p>对于每个缓存资源，我们使用一个bitmask(位掩码)来描述这个缓存的份额(portion)。对于每个CPU型号(不同的缓存层可能不同)定义了mask的最大值。这个值使用CPUID就可以找到，不过也通过 <code class="docutils literal notranslate"><span class="pre">resctrl</span></code> 文件系统的 <code class="docutils literal notranslate"><span class="pre">info</span></code> 目录下配置文件 <code class="docutils literal notranslate"><span class="pre">info/{resource}/cbm_mask</span></code> 可以查看。举例，我们查看 <code class="docutils literal notranslate"><span class="pre">L3</span></code> 缓存:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span><span class="o">/</span><span class="n">info</span><span class="o">/</span><span class="n">L3</span><span class="o">/</span><span class="n">cbm_mask</span>
+</pre></div>
+</div>
+<p>可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">7</span><span class="n">ff</span>
+</pre></div>
+</div>
+<p>上述十六进制 <code class="docutils literal notranslate"><span class="pre">7ff</span></code> 转换成二进制就是 11111111111 (11个1) ，这是默认配置，也就是所有缓存的所有部分(都是1)都可以访问</p>
+<p>在Intel RDT架构中，使用这些位掩码(bit masks)来在一个相邻块设置 <code class="docutils literal notranslate"><span class="pre">1</span></code> 数字。这样十六进制 <code class="docutils literal notranslate"><span class="pre">0x3</span></code> (11) <code class="docutils literal notranslate"><span class="pre">0x6</span></code> (110） 和 <code class="docutils literal notranslate"><span class="pre">0xC</span></code> (1100) 就是表示2位集，而 <code class="docutils literal notranslate"><span class="pre">0x5</span></code> (101) <code class="docutils literal notranslate"><span class="pre">0x9</span></code> (1001) 和 <code class="docutils literal notranslate"><span class="pre">0xA</span></code> (1010) 就不是。在一个使用20位掩码的系统，每一位表示缓存的 <code class="docutils literal notranslate"><span class="pre">5%</span></code> 。你可以将缓存划分成相等的4部分，使用以下掩码 <code class="docutils literal notranslate"><span class="pre">0x1f</span></code> (11111) , <code class="docutils literal notranslate"><span class="pre">0x3e0</span></code> (1111100000) , <code class="docutils literal notranslate"><span class="pre">0x7c00</span></code> (111110000000000), <code class="docutils literal notranslate"><span class="pre">0xf8000</span></code> (11111000000000000000)</p>
+</section>
+<section id="l3-code-data">
+<h3>L3缓存详情(关闭了code/data优先级)<a class="headerlink" href="#l3-code-data" title="永久链接至标题">¶</a></h3>
+<p>当CDP禁用时，L3的schemata格式如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L3</span><span class="p">:</span><span class="o">&lt;</span><span class="n">cache_id0</span><span class="o">&gt;=&lt;</span><span class="s1">&#39;cbm&gt;;&lt;cache_id1&gt;=&lt;cbm&gt;;...</span>
+</pre></div>
+</div>
+</section>
+<section id="l3-resctrlcdp">
+<h3>L3缓存详情(通过resctrl挂载参数启用了CDP)<a class="headerlink" href="#l3-resctrlcdp" title="永久链接至标题">¶</a></h3>
+<p>当激活了CDP时候，L3缓存会划分成2个独立部分:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L3data</span><span class="p">:</span><span class="o">&lt;</span><span class="n">cache_id0</span><span class="o">&gt;=&lt;</span><span class="n">cbm</span><span class="o">&gt;</span><span class="p">;</span><span class="o">&lt;</span><span class="n">cache_id1</span><span class="o">&gt;=&lt;</span><span class="n">cbm</span><span class="o">&gt;</span><span class="p">;</span><span class="o">...</span>
+<span class="n">L3code</span><span class="p">:</span><span class="o">&lt;</span><span class="n">cache_id0</span><span class="o">&gt;=&lt;</span><span class="n">cbm</span><span class="o">&gt;</span><span class="p">;</span><span class="o">&lt;</span><span class="n">cache_id1</span><span class="o">&gt;=&lt;</span><span class="n">cbm</span><span class="o">&gt;</span><span class="p">;</span><span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="l2">
+<h3>L2缓存详情<a class="headerlink" href="#l2" title="永久链接至标题">¶</a></h3>
+<p>L2缓存不支持代码和数据优先级，所以schemata始终如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L2</span><span class="p">:</span><span class="o">&lt;</span><span class="n">cache_id0</span><span class="o">&gt;=&lt;</span><span class="n">cbm</span><span class="o">&gt;</span><span class="p">;</span><span class="o">&lt;</span><span class="n">cache_id1</span><span class="o">&gt;=&lt;</span><span class="n">cbm</span><span class="o">&gt;</span><span class="p">;</span><span class="o">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="rdt">
+<h2>RDT配置案例<a class="headerlink" href="#rdt" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h3>案例1<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<p>在使用双socket的主机(每个socket一个L3缓存)，使用4位的缓存位掩码:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">resctrl</span> <span class="n">resctrl</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span>
+<span class="n">mkdir</span> <span class="n">p0</span> <span class="n">p1</span>
+<span class="n">echo</span> <span class="s2">&quot;L3:0=3;1=c&quot;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span><span class="o">/</span><span class="n">p0</span><span class="o">/</span><span class="n">schemata</span>
+<span class="n">echo</span> <span class="s2">&quot;L3:0=3;1=3&quot;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span><span class="o">/</span><span class="n">p1</span><span class="o">/</span><span class="n">schemata</span>
+</pre></div>
+</div>
+<p>进制转换说明 :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>16进制</p></th>
+<th class="head"><p>2进制</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>11</p></td>
+</tr>
+<tr class="row-odd"><td><p>c</p></td>
+<td><p>1100</p></td>
+</tr>
+</tbody>
+</table>
+<p>默认的资源组没有修改，所以我们可以访问所有缓存的所有部分(也就是在 root 根上的 <code class="docutils literal notranslate"><span class="pre">schemata</span></code> 配置值是默认的 <code class="docutils literal notranslate"><span class="pre">L3:0=f;1=f</span></code> )</p>
+<p>上述修改以后，分配到 <code class="docutils literal notranslate"><span class="pre">p0</span></code> 资源组的进程，就只能分配到 cache ID 0的低位50% (3) 和 cache ID 1的高位50% (c) ；而分配到 <code class="docutils literal notranslate"><span class="pre">p1</span></code> 资源组的进程，就能够使用两个socket中缓存的低位50% (都是3) 。</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/l3_schemata_1.png"><img alt="../../_images/l3_schemata_1.png" src="../../_images/l3_schemata_1.png" style="width: 449.6px; height: 120.80000000000001px;" /></a>
+</figure>
+</section>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://01.org/group/4685/blogs">RESOURCE ALLOCATION IN INTEL® RESOURCE DIRECTOR TECHNOLOGY</a></p></li>
+<li><p>如果你要进行数字进制转换，可以使用 <a class="reference external" href="https://www.sojson.com/hexconvert.html">在线进制转换工具</a></p></li>
 </ul>
 </section>
 </section>
