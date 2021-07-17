@@ -20,9 +20,11 @@ ARM容器技术
 
 在ARM上运行的Linux，本身是完美支持容器技术(cgroup,namespace,overlayfs)，所以在ARM架构上，运行Docker/Kubernetes，和Intel架构没有太大差异。
 
-我准备在 :ref:`jetson` 和 :ref:`pi_4` 硬件上构建Kubernetes集群，实现分布式存储、分布式计算以及各种基础架构。
+我在 :ref:`jetson` 和 :ref:`pi_4` 硬件上构建Kubernetes集群，实现分布式存储、分布式计算以及各种基础架构。
 
 ARM虚拟化
 =========
 
-`QEMU的Features/KVM <https://wiki.qemu.org/Features/KVM>`_ 是支持 `AArch64 virtualization <https://developer.arm.com/documentation/100942/0100/AArch64-virtualization?lang=en>`_ 。不过，一直以来生产实践都采用Intel体系架构，我还没有了解过具体的ARM架构的虚拟化，有待进一步学习和研究。
+`QEMU的Features/KVM <https://wiki.qemu.org/Features/KVM>`_ 是支持 `AArch64 virtualization <https://developer.arm.com/documentation/100942/0100/AArch64-virtualization?lang=en>`_ 。
+
+我在 :ref:`pi_400` 硬件上实践 :ref:`arm_kvm_startup` ，可以运行Ubuntu for ARM版本虚拟机。
