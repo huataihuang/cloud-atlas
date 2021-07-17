@@ -122,7 +122,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id1">resctrl目录介绍</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#schemata">schemata文件通用概念</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rdt">RDT配置案例</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -503,9 +503,64 @@
 <a class="reference internal image-reference" href="../../_images/l3_schemata_1.png"><img alt="../../_images/l3_schemata_1.png" src="../../_images/l3_schemata_1.png" style="width: 449.6px; height: 120.80000000000001px;" /></a>
 </figure>
 </section>
-</section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h3>案例2<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<p>这个案例依然是双sockets处理器，但是配置是更为真实的20位mask。</p>
+<p>两个实时任务， <code class="docutils literal notranslate"><span class="pre">pid=1234</span></code> 运行在处理器0， <code class="docutils literal notranslate"><span class="pre">pid=5678</span></code> 运行在处理器1，这两个处理器核心都是一个双socket的socket 0上，并且是双核心主机。为了避免 noisy neighbors ，这两个实时tasks要配置各自独占socket 0的L3缓存的1/4</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">resctrl</span> <span class="n">resctrl</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">resctrl</span>
+</pre></div>
+</div>
+<ul>
+<li><p>首先设置默认组最多占用socket 0的L3缓存最多 50%</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;L3:0=3ff;1=fffff&quot;</span> <span class="o">&gt;</span> <span class="n">schemata</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">3ff</span></code> 相当于 11,1111,1111</p>
+<ul>
+<li><p>然后我们创建第一个资源组，并设置访问socket 0的高 25%</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">p0</span>
+<span class="n">echo</span> <span class="s2">&quot;L3:0=f8000;1=fffff&quot;</span> <span class="o">&gt;</span> <span class="n">p0</span><span class="o">/</span><span class="n">schemata</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">f8000</span></code> 相当于 1111,1000,0000,0000,0000 : 这样我们就是配置了 socket 0 的L3 缓存的最高 25% (1/4) 空间给 socket 0</p>
+<ul>
+<li><p>最后，我们将进程加入到 tasks 中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mi">1234</span> <span class="o">&gt;</span> <span class="n">p0</span><span class="o">/</span><span class="n">tasks</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后我们就可以检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">taskset</span> <span class="o">-</span><span class="n">cp</span> <span class="mi">1</span> <span class="mi">1234</span>
+</pre></div>
+</div>
+<ul>
+<li><p>同样我们配置第二个实时任务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">p1</span>
+<span class="n">echo</span> <span class="s2">&quot;L3:0=7c00;1=fffff&quot;</span> <span class="o">&gt;</span> <span class="n">p1</span><span class="o">/</span><span class="n">schemata</span>
+<span class="n">echo</span> <span class="mi">5678</span> <span class="o">&gt;</span> <span class="n">p1</span><span class="o">/</span><span class="n">tasks</span>
+<span class="n">taskset</span> <span class="o">-</span><span class="n">cp</span> <span class="mi">2</span> <span class="mi">5678</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>最终结果图示如下:</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/l3_schemata_2.png"><img alt="../../_images/l3_schemata_2.png" src="../../_images/l3_schemata_2.png" style="width: 528.8000000000001px; height: 128.0px;" /></a>
+</figure>
+</section>
+<section id="id5">
+<h3>案例3<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<p>本案例是一个单socket系统，</p>
+</section>
+</section>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://01.org/group/4685/blogs">RESOURCE ALLOCATION IN INTEL® RESOURCE DIRECTOR TECHNOLOGY</a></p></li>
 <li><p>如果你要进行数字进制转换，可以使用 <a class="reference external" href="https://www.sojson.com/hexconvert.html">在线进制转换工具</a></p></li>

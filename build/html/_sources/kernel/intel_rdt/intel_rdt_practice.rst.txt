@@ -266,6 +266,54 @@ c             1100
 .. figure:: ../../_static/kernel/intel_rdt/l3_schemata_1.png
    :scale: 80
 
+案例2
+----------
+
+这个案例依然是双sockets处理器，但是配置是更为真实的20位mask。
+
+两个实时任务， ``pid=1234`` 运行在处理器0， ``pid=5678`` 运行在处理器1，这两个处理器核心都是一个双socket的socket 0上，并且是双核心主机。为了避免 noisy neighbors ，这两个实时tasks要配置各自独占socket 0的L3缓存的1/4 ::
+
+   mount -t resctrl resctrl /sys/fs/resctrl
+   cd /sys/fs/resctrl
+
+- 首先设置默认组最多占用socket 0的L3缓存最多 50% ::
+
+   echo "L3:0=3ff;1=fffff" > schemata
+
+``3ff`` 相当于 11,1111,1111 
+
+- 然后我们创建第一个资源组，并设置访问socket 0的高 25% ::
+
+   mkdir p0
+   echo "L3:0=f8000;1=fffff" > p0/schemata
+
+``f8000`` 相当于 1111,1000,0000,0000,0000 : 这样我们就是配置了 socket 0 的L3 缓存的最高 25% (1/4) 空间给 socket 0
+
+- 最后，我们将进程加入到 tasks 中::
+
+   echo 1234 > p0/tasks
+
+然后我们就可以检查::
+
+   taskset -cp 1 1234
+
+- 同样我们配置第二个实时任务::
+
+   mkdir p1
+   echo "L3:0=7c00;1=fffff" > p1/schemata
+   echo 5678 > p1/tasks
+   taskset -cp 2 5678
+
+最终结果图示如下:
+
+.. figure:: ../../_static/kernel/intel_rdt/l3_schemata_2.png
+   :scale: 80
+
+案例3
+-----------
+
+本案例是一个单socket系统，
+
 参考
 =======
 
