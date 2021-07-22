@@ -29,7 +29,8 @@ File sharing
 
 - 启动docker容器案例采用 :ref:`docker_studio` 的 ``dev`` 案例::
 
-    docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /Users/huatai/home_admin/dev:/home/admin fedora-dev /usr/sbin/init
+   docker build -t fedora-dev .
+   docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /Users/huatai/home_admin/dev:/home/admin fedora-dev /usr/sbin/init
 
 但是启动立即终止，使用 ``docker ps --all`` 可以看到::
 
@@ -62,7 +63,53 @@ File sharing
 
 这个问题在 `Building multiple docker images using the same kaniko executor gives 'file exists' error <https://groups.google.com/g/kaniko-users/c/_7LivHdMdy0>`_ 有
 
-`Debian10 not working #168 <https://github.com/weaveworks/footloose/issues/168>`_ 提到是本地安装docker问题，需要重新安装一次docker初始化，我准备尝试一下
+`Debian10 not working #168 <https://github.com/weaveworks/footloose/issues/168>`_ 提到是本地安装docker问题，需要重新安装一次docker初始。我参考 Docker Desktop for Mac 的 User manual ，尝试重置一次虚拟机：
+
+- 点击 ``Troubleshoot`` 按钮 (有一个 ``甲虫`` 形状) :
+
+  - ``Clean/Purge data`` : A disk image reset destroys all Docker containers and images local to the machine, preserving all settings.
+  - ``Reset Docker Desktop to factory defaults`` : A factory reset destroys all Docker containers and images local to the machine, and restores the application to its original state, as when it was first installed.
+
+.. figure:: ../../_static/docker/startup/docker_troubleshoot.png
+   :scale: 75
+
+我首先尝试 ``Clean/Purge data`` 这个过程实际上就是移除所有镜像和容器，完成以后，需要重新走以便镜像创建和容器创建，即再次执行::
+
+   docker build -t fedora-dev .
+   docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /Users/huatai/home_admin/dev:/home/admin fedora-dev /usr/sbin/init
+
+无效，则执行 ``Reset Docker Desktop to factory defaults`` ，然后再次重复上述步骤。   
+
+
+ARM环境Linux下尝试
+====================
+
+上述命令在ARM的Linux主机上执行::
+
+   docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /home/ubuntu/dev:/dev fedora-dev /usr/sbin/init
+
+出现报错::
+
+   docker: Error response from daemon: failed to create shim: OCI runtime create failed: container_linux.go:380: starting container process caused: process_linux.go:545: container init caused: open /dev/ptmx: no such file or directory: unknown.
+
+汗，低级错误 ``/dev`` 是容器内设备目录，不能映射覆盖，修正为::
+
+   docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /home/ubuntu/dev:/home-dev fedora-dev /usr/sbin/init
+
+启动失败，报错日志::
+
+   systemd v248.4-1.fc34 running in system mode. (+PAM +AUDIT +SELINUX -APPARMOR +IMA +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified)
+   Detected virtualization docker.
+   Detected architecture arm64.
+
+   Welcome to Fedora 34 (Container Image)!
+
+   Failed to write /run/systemd/container, ignoring: Permission denied
+   Failed to create /system.slice/docker-c11448d8691e10a0c89abd11dafd3d08e03dbbdec6bda771b4c93f943ab8daf8.scope/init.scope control group: Permission denied
+   Failed to allocate manager object: Permission denied
+   [!!!!!!] Failed to allocate manager object.
+   Exiting PID 1...
+
 
 参考
 =====

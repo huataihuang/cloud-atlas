@@ -444,6 +444,15 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 
 并通过 ``docker info`` 验证确保 ``Cgroup Driver: systemd`` 。
 
+- 上述 ``docker info`` 中显示有2个WARNING::
+
+   WARNING: No blkio weight support
+   WARNING: No blkio weight_device support
+
+.. note::
+
+   最初Ubuntu 20/18 提供的docker版本(19.x)都没有出现上述WARNING，但是最近升级docker到 ``20.10.2`` 出现。原因是Docker 从 Docker Engine 20.10开始，支持 :ref:`cgroup_v2` 。 :ref:`docker_cgroup_v2` 提供了更好的io隔离。如果非生产环境，可以暂时忽略上述警告。
+
 - Jetson的L4T系统内核 ``sysctl`` 配置默认已经启动允许iptables查看bridge流量::
 
    sysctl -a | grep net.bridge.bridge-nf-call-ip
@@ -464,6 +473,10 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 - Kubernetes软件包::
 
    sudo apt update && sudo apt install -y kubelet kubeadm kubectl
+
+.. note::
+
+   安装Kubernetes需要直接访问google服务，在墙内需要使用 :ref:`openconnect_vpn` 翻墙，或者 :ref:`squid_socks_peer` 构建代理。
 
 - 锁定Kubernetes版本(可选，对于测试验证集群没有业务连续性要求，可以跳过)::
 
@@ -489,6 +502,10 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
 
    kubeadm join 192.168.6.11:6443 --token <TOKEN> \
        --discovery-token-ca-cert-hash sha256:<HASH_TOKEN>
+
+.. note::
+
+   随着 ``kubeadm`` 软件版本不断升级，新安装的worker节点的版本可能高于原先构建 :ref:`kubernetes` 集群，这回导致无法加入集群，需要按照 :ref:`upgrade_kubeadm_cluster` 。
 
 - 完成以后执行命令检查节点::
 

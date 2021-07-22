@@ -11,6 +11,7 @@ ARM 硬件概述
 .. toctree::
    :maxdepth: 1
 
+   arm_server.rst
    ssd.rst
    sd_tf_card_speed_class.rst
 

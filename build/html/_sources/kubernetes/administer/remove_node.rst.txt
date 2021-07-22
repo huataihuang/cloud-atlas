@@ -44,7 +44,7 @@
    jetson       NotReady,SchedulingDisabled   <none>   104d   v1.20.2
    ...
 
-- 清空(drain)节点(注意，这个步骤仅在节点 ``Ready`` 状态下才需要执行，如果节点已经 ``NotReady`` 了，则 ``drain`` 命令会卡住无法完成)::
+- 清空( :ref:`drain_node` )节点(注意，这个步骤仅在节点 ``Ready`` 状态下才需要执行，如果节点已经 ``NotReady`` 了，则 ``drain`` 命令会卡住无法完成)::
 
    kubectl drain jetson --delete-local-data --force --ignore-daemonsets
 
@@ -113,6 +113,8 @@
 .. note::
 
    假设我们修复好了jetson节点故障，需要重新将节点加入回集群。
+
+   如果是重新安装系统修复jetson节点，则参考 :ref:`arm_k8s_deploy` 重新添加修复节点。
 
 - 登陆jetson节点，重新执行加入jetson节点::
 
