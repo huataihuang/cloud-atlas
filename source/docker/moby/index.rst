@@ -10,6 +10,7 @@ Docker Moby
    introduce_moby.rst
    nsenter.rst
    macos_docker_shell.rst
+   docker_cgroup_v2.rst
    containerd/index
    runc/index
    buildkit/index

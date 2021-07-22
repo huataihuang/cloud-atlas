@@ -152,6 +152,9 @@ ssh服务容器(ssh)
 
    docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro fedora-dev /usr/sbin/init
 
+这里我遇到的问题排查见 :ref:`docker_macos_file_share`
+
+
 容器持久化数据存储(dev-data)
 ===============================
 

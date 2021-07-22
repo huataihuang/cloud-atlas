@@ -4,7 +4,7 @@
 安全地清空一个Kubernetes节点
 ============================
 
-当我们需要下线一个Kubernetes节点前，我们需要先把节点上的pods都驱逐 ``evict`` 出去。Kubernetes提供了一个简单的不需要指定pods的驱逐方法，就是 ``drain`` 节点。Kubernetes提供了一个简单的不需要指定pods的驱逐方法，就是 ``drain`` 节点。
+当我们需要下线一个Kubernetes节点前，我们需要先把节点上的pods都驱逐 ``evict`` 出去。Kubernetes提供了一个简单的不需要指定pods的驱逐方法，就是 ``drain`` 节点。
 
 - 举例，我们清空节点 ``jetson`` ::
 
