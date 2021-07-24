@@ -71,6 +71,13 @@ APT无阻碍代理架构
    # 仅提供本地回环地址服务，避免安全隐患
    http_port 127.0.0.1:3128
 
+完整配置:
+
+.. literalinclude:: apt_proxy_arch/parent-squid.conf
+   :language: bash
+   :linenos:
+   :caption:
+
 - 启动squid服务::
 
    sudo systemctl start squid
@@ -88,12 +95,10 @@ APT无阻碍代理架构
 
 - 由于我们后面会使用 SSH Tunnel 将本地 ``4128`` 端口转发到远程VPS上回环地址 ``3128`` ，所以我们这里需要配置我们本地squid的父级squid监听是 ``127.0.0.1:4128`` ，完整配置如下
 
-.. literalinclude:: apt_proxy_arch/squid_internal.conf
+.. literalinclude:: apt_proxy_arch/client-squid.conf
    :language: bash
    :linenos:
    :caption:
-
-解析:
 
 SSH Tunnel
 ------------
@@ -137,3 +142,7 @@ APT代理配置
    sudo apt upgrade
 
 如果一切正常，则会通过二级代理自由访问因特网。
+
+现在，我们可以做我们想做的:
+
+- :ref:`arm_k8s_deploy`

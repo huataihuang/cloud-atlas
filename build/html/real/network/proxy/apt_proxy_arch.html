@@ -300,6 +300,63 @@
 </pre></div>
 </div>
 </li>
+</ul>
+<p>完整配置:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">apt_proxy_arch/parent-squid.conf</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>acl SSL_ports port <span class="m">443</span>
+acl Safe_ports port <span class="m">80</span>		<span class="c1"># http</span>
+acl Safe_ports port <span class="m">21</span>		<span class="c1"># ftp</span>
+acl Safe_ports port <span class="m">443</span>		<span class="c1"># https</span>
+acl Safe_ports port <span class="m">70</span>		<span class="c1"># gopher</span>
+acl Safe_ports port <span class="m">210</span>		<span class="c1"># wais</span>
+acl Safe_ports port <span class="m">1025</span>-65535	<span class="c1"># unregistered ports</span>
+acl Safe_ports port <span class="m">280</span>		<span class="c1"># http-mgmt</span>
+acl Safe_ports port <span class="m">488</span>		<span class="c1"># gss-http</span>
+acl Safe_ports port <span class="m">591</span>		<span class="c1"># filemaker</span>
+acl Safe_ports port <span class="m">777</span>		<span class="c1"># multiling http</span>
+acl CONNECT method CONNECT
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow localhost manager
+http_access deny manager
+http_access allow localhost
+http_access deny all
+http_port <span class="m">127</span>.0.0.1:3128
+coredump_dir /var/spool/squid
+refresh_pattern ^ftp:		<span class="m">1440</span>	<span class="m">20</span>%	<span class="m">10080</span>
+refresh_pattern ^gopher:	<span class="m">1440</span>	<span class="m">0</span>%	<span class="m">1440</span>
+refresh_pattern -i <span class="o">(</span>/cgi-bin/<span class="p">|</span><span class="se">\?</span><span class="o">)</span> <span class="m">0</span>	<span class="m">0</span>%	<span class="m">0</span>
+refresh_pattern <span class="o">(</span>Release<span class="p">|</span>Packages<span class="o">(</span>.gz<span class="o">)</span>*<span class="o">)</span>$      <span class="m">0</span>       <span class="m">20</span>%     <span class="m">2880</span>
+refresh_pattern .		<span class="m">0</span>	<span class="m">20</span>%	<span class="m">4320</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<ul>
 <li><p>启动squid服务:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">squid</span>
 </pre></div>
@@ -322,8 +379,8 @@
 </li>
 <li><p>由于我们后面会使用 SSH Tunnel 将本地 <code class="docutils literal notranslate"><span class="pre">4128</span></code> 端口转发到远程VPS上回环地址 <code class="docutils literal notranslate"><span class="pre">3128</span></code> ，所以我们这里需要配置我们本地squid的父级squid监听是 <code class="docutils literal notranslate"><span class="pre">127.0.0.1:4128</span></code> ，完整配置如下</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">apt_proxy_arch/squid_internal.conf</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">apt_proxy_arch/client-squid.conf</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
 <span class="normal">  2</span>
 <span class="normal">  3</span>
@@ -576,8 +633,8 @@ never_direct deny all
 <ul class="simple">
 <li><p>在本地树莓派 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code> 上配置 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">apt_proxy_arch/ssh_config</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">apt_proxy_arch/ssh_config</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -624,8 +681,8 @@ Host parent-squid
 <ul class="simple">
 <li><p><a class="reference internal" href="../../../linux/ubuntu_linux/admin/apt.html#apt"><span class="std std-ref">APT包管理</span></a> 程序支持代理，由于 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code> 上运行的本地squid允许局域网网段 <code class="docutils literal notranslate"><span class="pre">192.168.x.x</span></code> 访问，所以配置整个局域网使用代理作为APT访问方式，即 <code class="docutils literal notranslate"><span class="pre">/etc/apt/apt.conf.d/proxy.conf</span></code> 配置:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">apt_proxy_arch/proxy.conf</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">apt_proxy_arch/proxy.conf</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
 <span class="normal">2</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>Acquire::http::Proxy <span class="s2">&quot;http://192.168.6.11:3128/&quot;</span><span class="p">;</span>
 Acquire::https::Proxy <span class="s2">&quot;http://192.168.6.11:3128/&quot;</span><span class="p">;</span>
