@@ -17,6 +17,7 @@ Real Atlas
    real_concept.rst
    prepare/index
    private_cloud/index
+   network/index
 
 .. only::  subproject and html
 
