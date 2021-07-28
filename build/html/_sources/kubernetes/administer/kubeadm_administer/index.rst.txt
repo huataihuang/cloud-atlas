@@ -10,3 +10,4 @@
    :maxdepth: 1
 
    upgrade_kubeadm_cluster.rst
+   delete_kubeadm_cluster.rst

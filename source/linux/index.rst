@@ -24,6 +24,7 @@ Linux是运计算的主流基础操作系统，除了微软的Azure，其他主�
 .. toctree::
    :maxdepth: 1
 
+   best_linux.rst
    redhat_linux/index
    arch_linux/index
    gentoo_linux/index
