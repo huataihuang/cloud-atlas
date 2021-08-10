@@ -102,8 +102,8 @@ NVIDIA Jetson nano的官方发行版默认安装了实际上对于我平时使�
 
 按照 :ref:`netplan` 配置网络，但是目前遇到无法调用systemd-networkd生成正确配置，暂时放弃。
 
-使用Network Manager配置无线
------------------------------
+使用Network Manager配置无线(旧版)
+----------------------------------
 
 .. note::
 
@@ -143,6 +143,54 @@ NVIDIA的Jetson Nano官方镜像是基于Ubuntu 18.04.3 LT构建::
 .. note::
 
    详细配置可参考 :ref:`set_ubuntu_wifi`
+
+使用Network Manager配置无线(新版)
+----------------------------------
+
+2021年下半年，由于TF存储卡损坏，不得不重新安装了一次操作系统。此时我发现，网络配置管理默认已经改成了 :ref:`systemd_networkd` ，所以需要配置 :ref:`systemd_networkd` 和 :ref:`systemd_networkd_wlan`
+
+- 有线网卡配置 ``/etc/systemd/network/10-eth0.network`` 参考 :ref:`systemd_networkd` :
+
+.. literalinclude:: jetson_nano_startup/10-eth0.network
+   :language: bash
+   :linenos:
+   :caption:
+
+- 无线网卡配置 ``/etc/systemd/network/20-wlan0.network`` 参考 :ref:`systemd_networkd_wlan` :
+
+.. literalinclude:: jetson_nano_startup/20-wlan0.network
+   :language: bash
+   :linenos:
+   :caption:
+
+- 配置5GHz无线网络的国家代码 ``/etc/default/crda`` ::
+
+   REGDOMAIN=CN
+
+- 创建 ``/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`` :
+
+.. literalinclude:: jetson_nano_startup/wpa_supplicant-wlan0.conf
+   :language: bash
+   :linenos:
+   :caption:
+
+- 由于在 ``20-wlan0.network`` 中配置了MAC spoof，所以需要重启一次 ``systemd-networkd`` ::
+
+   systemctl daemon-reload
+   systemctl restart systemd-networkd
+
+完成后检查一下 ``wlan0`` 接口是否正确修正了MAC地址
+
+- 启用 ``systemd-networkd`` 的 ``wpa_supplicant`` 服务::
+
+   systemctl enable wpa_supplicant@wlan0
+   systemctl start wpa_supplicant@wlan0
+
+- 然后检查 ``systemd`` 服务::
+
+   systemctl status wpa_supplicant@wlan0
+
+然后检查 ``ip addr``
 
 蓝牙(可选)
 ===========

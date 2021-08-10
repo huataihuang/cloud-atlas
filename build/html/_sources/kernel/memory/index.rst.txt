@@ -7,6 +7,7 @@ Linux内存管理
 .. toctree::
    :maxdepth: 1
 
+   hugetlb_page.rst
    numa.rst
    oomd.rst
 

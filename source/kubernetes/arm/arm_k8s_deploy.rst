@@ -18,13 +18,13 @@
 
 - 准备3个(或更多) :ref:`raspberry_pi` ，我采用了:
 
-  - 1台 2G 规格树莓派4：用于管控 ``pi-master1``
-  - 2台 8G 规格树莓派4：用于工作节点 ``pi-worker1`` 和 ``pi-worker2``
-
-- 我也使用了一台 :ref:`jetson_nano` 设备作为GPU工作节点
+  - 1台 2G 规格 :ref:`pi_4` ：用于管控 ``pi-master1`` ( 操作系统采用 :ref:`ubuntu64bit_pi` )
+  - 2台 8G 规格 :ref:`pi_4` ：用于工作节点 ``pi-worker1`` 和 ``pi-worker2`` ( 操作系统采用 :ref:`ubuntu64bit_pi` )
+  - 1台 4G 规格 :ref:`pi_400` : 用于工作节点 ``kali`` ( 操作系统采用 :ref:`install_kali_pi` )
 
 在构建Kubernetes集群之前，主要需要解决树莓派访问TF卡性能低下的问题，采用 :ref:`usb_boot_ubuntu_pi_4` 可以极大提高树莓派存储IO性能。
 
+- 我也使用了一台 :ref:`jetson_nano` 设备作为GPU工作节点
 - 为了测试和验证Kubernetes混合不同架构，在ARM集群中添加一台 :ref:`thinkpad_x220` 运行 :ref:`arch_linux` 作为模拟X86异构Kubernetes工作节点
 
 安装和配置Docker
@@ -46,12 +46,17 @@
    $ sudo docker info
    (...)
    Cgroup Driver: cgroups
+   Cgroup Version: 1
    (...)
    WARNING: No memory limit support
    WARNING: No swap limit support
    WARNING: No kernel memory limit support
    WARNING: No kernel memory TCP limit support
    WARNING: No oom kill disable support
+
+.. note::
+
+   请注意默认使用 ``Cgroup Version: 1`` ，目前最新版本 :ref:`docker_cgroup_v2` ，可以提供精细的io隔离功能
 
 这里显示 cgroups 驱动需要修改成 :ref:`systemd` 作为 cgroups 管理器，并且确保只使用一个cgroup manager。所以修改或者创建 ``/etc/docker/daemon.json`` 如下::
 
@@ -65,6 +70,20 @@
      "storage-driver": "overlay2"
    }
    EOF
+
+.. note::
+
+   在 :ref:`install_kali_pi` 上安装的最新版本 docker.io 默认已经启用了 ``systemd`` 并且支持 :ref:`cgroup_v2` ，所以 ``docker info`` 显示::
+
+      ...
+      Cgroup Driver: systemd
+      Cgroup Version: 2
+      ...
+      WARNING: No memory limit support
+      WARNING: No swap limit support
+      WARNING: Support for cgroup v2 is experimental
+
+   我暂时不调整，采用默认设置，看看能否顺利运行kubernetes
 
 激活cgroups limit支持
 -------------------------
@@ -104,6 +123,12 @@ Kubernetes需要使用iptables来配置查看bridged网络流量，可以通过�
    cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
    deb https://apt.kubernetes.io/ kubernetes-xenial main
    EOF
+
+.. note::
+
+   在最新的 :ref:`kali_linux` 上执行 ``apt-key`` 命令会提示::
+
+      Warning: apt-key is deprecated. Manage keyring files in trusted.gpg.d instead (see apt-key(8)).
 
 .. note::
 
@@ -161,7 +186,9 @@ Kubernetes使用bootstrap token来认证加入集群的节点，这个token需�
    TOKEN=$(sudo kubeadm token generate)
    echo $TOKEN
 
-这里 ``$TOKEN`` 输出需要记录下来，后续命令行需要::
+这里 ``$TOKEN`` 输出需要记录下来，后续命令行需要
+
+- 设置 ``kubernetes-version`` 可以指定初始化的管控集群版本::
 
    sudo kubeadm init --token=${TOKEN} --kubernetes-version=v1.19.4 --pod-network-cidr=10.244.0.0/16
 
@@ -169,6 +196,21 @@ Kubernetes使用bootstrap token来认证加入集群的节点，这个token需�
 
 .. literalinclude:: arm_kubeadm_init.output
    :linenos:
+
+- 对于管理集群用户，执行以下命令完成配置::
+
+   mkdir -p $HOME/.kube
+   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+   sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+- 完成上述工作以后，执行节点检查::
+
+   kubectl get nodes
+
+可以看到节点就绪(以下输出案例是我第二次重建集群的输出信息，所以版本是 v1.22.0)::
+
+   NAME         STATUS   ROLES                  AGE   VERSION
+   pi-master1   Ready    control-plane,master   32m   v1.22.0
 
 多网卡困扰
 -----------
@@ -303,6 +345,27 @@ Kubernetes使用bootstrap token来认证加入集群的节点，这个token需�
 
 可以看到 ``KubeletNotReady`` 的原因是 ``runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:docker: network plugin is not ready: cni config uninitialized`` ，也就是说，我们指定使用 flannel网络的CNI没有就绪，导致docker的runtime network不能工作。
 
+重建集群实践
+--------------
+
+我在 :ref:`delete_kubeadm_cluster` 之后重新创建集群，吸取了双网卡对集群初始化的配置要求，所以命令改为::
+
+   sudo kubeadm init --token=${TOKEN} --kubernetes-version=v1.22.0 --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address 192.168.6.11
+
+输出信息:
+
+.. literalinclude:: arm_kubeadm_init_again.output
+   :linenos:
+
+.. note::
+
+   这里输出信息中有::
+
+      ...
+      [WARNING SystemVerification]: missing optional cgroups: hugetlb
+
+   这是在 :ref:`cgroup_v1` 中支持的 :ref:`cgroup_v1_hugetlb`
+
 安装CNI插件
 -------------
 
@@ -375,7 +438,7 @@ CNI插件处理pod网络的配置和清理，这里使用最简单的flannel CNI
 
    可以通过以下命令生成一个无期限的token(但是存在安全风险)::
 
-      kubeadm token create --ttl 0
+      kubeadm token create --ttl 1
 
    查看token的方法如下::
 
@@ -528,6 +591,28 @@ jetson nano使用的Ubuntu 18.04定制版本L4T默认已经安装了Docker 19.03
    注意如果worker主机有多个网卡接口，kubelet执行 ``kubeadm join`` 命令时候有可能注册采用了默认有路由的网卡接口，也可能使用和apiserver指定IP所在相同网段的IP。这点让我很疑惑，例如上述注册worker节点，3个树莓派注册的 ``INTERNAL-IP`` 是正确的内网IP地址 ``192.168.6.x`` ，但是 ``jetson`` 就注册成了外网无线网卡上的IP地址 ``192.168.0.x`` 。
 
    这个问题修订，请参考 :ref:`set_k8s_worker_internal_ip` 明确配置worker的 ``INTERNAL-IP`` 避免出现混乱。
+
+kali linux节点(kali)
+-----------------------
+
+:ref:`kali_linux` 也是基于 :ref:`ubuntu_linux` 的操作系统，所以安装和管理Kubernetes非常相似。不过，需要注意的是，默认安装::
+
+   apt install docker.io
+
+然后执行 ``docker info`` 可以看到已经启用了 ``systemd`` 和 :ref:`cgroup_v2` ::
+
+   ...
+   Cgroup Driver: systemd
+   Cgroup Version: 2
+   ...
+   WARNING: No memory limit support
+   WARNING: No swap limit support
+   WARNING: Support for cgroup v2 is experimental
+
+不过默认的docker配置是无法安装Kubernetes的，会提示报错
+
+   
+
 
 arch linux节点(zcloud)
 -----------------------

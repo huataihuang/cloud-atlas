@@ -323,7 +323,7 @@
 <p>按照 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 配置网络，但是目前遇到无法调用systemd-networkd生成正确配置，暂时放弃。</p>
 </section>
 <section id="network-manager">
-<h3>使用Network Manager配置无线<a class="headerlink" href="#network-manager" title="永久链接至标题">¶</a></h3>
+<h3>使用Network Manager配置无线(旧版)<a class="headerlink" href="#network-manager" title="永久链接至标题">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>当前我已经改为采用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 来配置管理网络，主要原因是最新的Ubuntu 20.04默认采用netplan配置，我在 <a class="reference internal" href="../../../arm/raspberry_pi/startup/ubuntu64bit_pi.html#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 就采用了netplan，所以在Jetson上尝试netplan没有成功，所以目前还使用 <a class="reference internal" href="../../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 配置网络。</p>
@@ -367,9 +367,122 @@
 <p>详细配置可参考 <a class="reference internal" href="../../../linux/ubuntu_linux/ubuntu_on_mbp.html#set-ubuntu-wifi"><span class="std std-ref">设置无线网络</span></a></p>
 </div>
 </section>
-</section>
 <section id="id8">
-<h2>蓝牙(可选)<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<h3>使用Network Manager配置无线(新版)<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
+<p>2021年下半年，由于TF存储卡损坏，不得不重新安装了一次操作系统。此时我发现，网络配置管理默认已经改成了 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> ，所以需要配置 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 和 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_networkd_wlan.html#systemd-networkd-wlan"><span class="std std-ref">使用systemd-networkd配置无线</span></a></p>
+<ul class="simple">
+<li><p>有线网卡配置 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/network/10-eth0.network</span></code> 参考 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">jetson_nano_startup/10-eth0.network</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>Match<span class="o">]</span>
+<span class="nv">MACAddress</span><span class="o">=</span><span class="m">00</span>:00:00:00:00:01
+
+<span class="o">[</span>Network<span class="o">]</span>
+<span class="nv">Address</span><span class="o">=</span><span class="m">192</span>.168.6.10/24
+<span class="c1">#Gateway=192.168.6.200</span>
+<span class="c1">#DNS=192.168.6.200</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<ul class="simple">
+<li><p>无线网卡配置 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/network/20-wlan0.network</span></code> 参考 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_networkd_wlan.html#systemd-networkd-wlan"><span class="std std-ref">使用systemd-networkd配置无线</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">jetson_nano_startup/20-wlan0.network</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="o">[</span>Match<span class="o">]</span>
+<span class="nv">MACAddress</span><span class="o">=</span>&lt;original MAC&gt;
+
+<span class="o">[</span>Link<span class="o">]</span>
+<span class="nv">MACAddress</span><span class="o">=</span>&lt;spoofed MAC&gt;
+<span class="nv">NamePolicy</span><span class="o">=</span>kernel database onboard slot path
+
+<span class="o">[</span>Network<span class="o">]</span>
+<span class="nv">DHCP</span><span class="o">=</span>yes
+</pre></div>
+</td></tr></table></div>
+</div>
+<ul>
+<li><p>配置5GHz无线网络的国家代码 <code class="docutils literal notranslate"><span class="pre">/etc/default/crda</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REGDOMAIN</span><span class="o">=</span><span class="n">CN</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/wpa_supplicant/wpa_supplicant-wlan0.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">jetson_nano_startup/wpa_supplicant-wlan0.conf</span><a class="headerlink" href="#id17" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nv">ctrl_interface</span><span class="o">=</span><span class="nv">DIR</span><span class="o">=</span>/var/run/wpa_supplicant <span class="nv">GROUP</span><span class="o">=</span>netdev
+<span class="nv">update_config</span><span class="o">=</span><span class="m">1</span>
+
+<span class="nv">network</span><span class="o">={</span>
+  <span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;office&quot;</span>
+  <span class="nv">key_mgmt</span><span class="o">=</span>WPA-EAP
+  <span class="nv">identity</span><span class="o">=</span><span class="s2">&quot;USERNAME&quot;</span>
+  <span class="nv">password</span><span class="o">=</span><span class="s2">&quot;PASSWORD&quot;</span>
+<span class="o">}</span>
+<span class="nv">network</span><span class="o">={</span>
+  <span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;home&quot;</span>
+  <span class="nv">key_mgmt</span><span class="o">=</span>WPA-PSK
+  <span class="nv">psk</span><span class="o">=</span><span class="s2">&quot;PASSWORD&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<ul>
+<li><p>由于在 <code class="docutils literal notranslate"><span class="pre">20-wlan0.network</span></code> 中配置了MAC spoof，所以需要重启一次 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>完成后检查一下 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 接口是否正确修正了MAC地址</p>
+<ul>
+<li><p>启用 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code> 的 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">wpa_supplicant</span><span class="nd">@wlan0</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">wpa_supplicant</span><span class="nd">@wlan0</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后检查 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">wpa_supplicant</span><span class="nd">@wlan0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后检查 <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span></code></p>
+</section>
+</section>
+<section id="id9">
+<h2>蓝牙(可选)<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>安装蓝牙管理工具:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">bluetools</span> <span class="n">blueman</span>
@@ -388,8 +501,8 @@
 <p>如果使用蓝牙键盘，可以采用上述简单的方式在图形系统中支持使用蓝牙键盘。</p>
 </div>
 </section>
-<section id="id9">
-<h2>初始设置<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<section id="id10">
+<h2>初始设置<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/sudoers</span></code> 将个人账号所在的 <code class="docutils literal notranslate"><span class="pre">sudo</span></code> 组设置为无需密码:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Allow members of group sudo to execute any command</span>
@@ -400,8 +513,8 @@
 </li>
 </ul>
 </section>
-<section id="id10">
-<h2>软件更新<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<section id="id11">
+<h2>软件更新<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
 <p>为了能够更好使用Jetson Nano，建议经常更新系统保持和官方软件版本同步。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -421,15 +534,15 @@
 </li>
 </ul>
 </section>
-<section id="id11">
-<h2>远程访问<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
+<section id="id12">
+<h2>远程访问<a class="headerlink" href="#id12" title="永久链接至标题">¶</a></h2>
 <section id="xprax">
 <h3>Xpra远程X应用(推荐)<a class="headerlink" href="#xprax" title="永久链接至标题">¶</a></h3>
 <p>为了能够随时进入开发状态，我现在采用 <a class="reference internal" href="../../../linux/desktop/xpra.html#xpra"><span class="std std-ref">Xpra - X持久化远程应用</span></a> 来实现远程X window程序运行，非常轻量级的融合VNC和X window的远程图形运行方案。</p>
 <p>我在 <a class="reference internal" href="jetson_xpra.html#jetson-xpra"><span class="std std-ref">Jetson Nano平台通过Xpra运行图形程序</span></a> 中详细记录在ARM架构下实践。</p>
 </section>
-<section id="id12">
-<h3>远程桌面(可选)<a class="headerlink" href="#id12" title="永久链接至标题">¶</a></h3>
+<section id="id13">
+<h3>远程桌面(可选)<a class="headerlink" href="#id13" title="永久链接至标题">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>如果你需要完整的桌面系统，可以选择采用xrdp方式的远程桌面，如本小节概述。这是我最初远程访问Jetson的方法，并且也是比较通用桌面访问方法(客户端跨平台，特别是对Windows用户非常友好)。</p>
@@ -442,8 +555,8 @@
 </div>
 </section>
 </section>
-<section id="id13">
-<h2>参考<a class="headerlink" href="#id13" title="永久链接至标题">¶</a></h2>
+<section id="id14">
+<h2>参考<a class="headerlink" href="#id14" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit">Getting Started With Jetson Nano Developer Kit</a></p></li>
 <li><p><a class="reference external" href="https://developer.nvidia.com/embedded/dlc/jetson-nano-developer-kit-user-guide">Jetson Nano Developer Kit User Guide</a></p></li>

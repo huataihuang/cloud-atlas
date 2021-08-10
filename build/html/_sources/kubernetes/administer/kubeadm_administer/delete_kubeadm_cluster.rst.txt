@@ -4,7 +4,7 @@
 删除kubeadm构建的Kubernetes集群
 =================================
 
-所有通过 :ref:`kubeadmn` 工具构建的Kubernetes集群以及节点，都可以通过 ``kubeadm`` 工具反向卸载(删除)，这是一个非常方便的操作。我的实践是因为在开发测试环境， :ref:`upgrade_kubeadm_cluster` 失败，为了快速开始下一阶段测试工作，所以准备重建Kubernetes集群。
+所有通过 :ref:`kubeadm` 工具构建的Kubernetes集群以及节点，都可以通过 ``kubeadm`` 工具反向卸载(删除)，这是一个非常方便的操作。我的实践是因为在开发测试环境， :ref:`upgrade_kubeadm_cluster` 失败，为了快速开始下一阶段测试工作，所以准备重建Kubernetes集群。
 
 - ``kubeadm reset`` 命令执行会提示::
 
@@ -109,6 +109,11 @@
    CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
    root@pi-master1:~# docker ps --all
    CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+重新部署k8s
+==============
+
+我在推倒了之前部署的 :ref:`arm_k8s` 之后再次 :ref:`arm_k8s_deploy` ，后续将规范部署方法(锁定k8s软件版本)，并将实践跟随软件版本升级同时升级Kubernetes管控集群，以确保平滑兼容。待实践...
 
 参考
 =====
