@@ -609,11 +609,61 @@ kali linux节点(kali)
    WARNING: No swap limit support
    WARNING: Support for cgroup v2 is experimental
 
-不过默认的docker配置是无法安装Kubernetes的，会提示报错
+不过默认的docker配置是无法安装Kubernetes的，会提示报错:
 
+.. literalinclude:: arm_k8s_deploy/kail_kubeadm_init.output
+   :linenos:
    
+可以看到，必须要设置 ``CGROUPS_MEMORY`` ，所以也如前设置：
 
+- 修订 :ref:`kali_linux` for Raspberry Pi的配置文件 ``/boot/cmdline.txt`` (原先只有一行配置，在配置行最后添加)::
 
+   ... cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1
+
+- 然后重启系统，再检查 ``docker info`` 后，只在最后提示::
+
+   ...
+   WARNING: Support for cgroup v2 is experimental
+
+- 然后重新开始将节点加入集群
+
+kali linux节点添加失败排查
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+在解决了kali linux节点的docker版本配置问题后，就可以执行 ``kubeadm join`` 指令了，但是发现添加的节点始终是 ``NotReady`` ，检查pod创建::
+
+   kubectl -n kube-system get pods
+
+可以看到kali linux节点上容器没有正确启动::
+
+   kube-flannel-ds-pkhch                0/1     Init:0/1            0          42m    30.73.167.10    kali         <none>           <none>
+   kube-proxy-6jt64                     0/1     ContainerCreating   0          42m    30.73.167.10    kali         <none>           <none>
+
+- 检查pod::
+
+   kubectl -n kube-system describe pods kube-flannel-ds-pkhch
+
+可以看到报错原因::
+
+   Warning  FailedCreatePodSandBox  2m29s (x186 over 42m)  kubelet            Failed to create pod sandbox: open /run/systemd/resolve/resolv.conf: no such file or directory
+
+- 检查kali linux节点，发现确实没有这个文件::
+
+   # ls /run/systemd/resolve/resolv.conf
+   ls: cannot access '/run/systemd/resolve/resolv.conf': No such file or directory
+
+对比正常节点，则有这个文件，这说明kali linux默认没有激活 :ref:`systemd_resolved` ::
+
+   systemctl enable systemd-resolved
+   systemctl start systemd-resolved
+
+然后再次检查就可以看到文件::
+
+   # ls /run/systemd/resolve/resolv.conf
+   /run/systemd/resolve/resolv.conf
+
+- 等待kali linux节点上kube-system namespace对应的pod创建成功，就可以看到该worker节点正常Ready了
+   
 arch linux节点(zcloud)
 -----------------------
 
@@ -684,18 +734,85 @@ arch linux节点(zcloud)
 
    这个问题是因为我启动主机时候未连接无线网络，导致没有默认路由可以访问internet，此时启动的dnsmasq无法解析地址。虽然后面用手工脚本命令启动了wifi，但是dnsmasq依然无法提供本地主机域名解析。我是通过重启dnsmasq解决的，你的情况可能和我不同。不过，观察 kubelet 日志是一个比较好的排查问题方法。
 
+再次添加zcloud节点(arch linux)
+-------------------------------
+
+我在重建了Kubernetes集群之后，发现当前google提供的kubernetes软件版本，也就是我构建的管控平面，已经是最新的 ``v1.22.0`` ，但是在 zcloud 节点使用的Arch Linux，则提供的是 ``v1.21.3`` 。
+
+- 尝试执行节点添加::
+
+   kubeadm join 192.168.6.11:6443 --token <TOKEN> \
+       --discovery-token-ca-cert-hash sha256:<HASH_TOKEN>
+
+出现报错::
+
+   ...
+   error execution phase preflight: unable to fetch the kubeadm-config ConfigMap: failed to decode cluster configuration data: no kind "ClusterConfiguration" is registered for version "kubeadm.k8s.io/v1beta3" in scheme "k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/scheme/scheme.go:31"
+   To see the stack trace of this error execute with --v=5 or higher
+
+看来低版本节点无法加入高版本集群(兼容性实在太差了)
+
+- 检查 `arch linux kubeadm package <https://archlinux.org/packages/?name=kubeadm>`_ 可以看到当前:
+
+  - ``1.21.3-1`` 为社区版本(正式)
+  - ``1.22.0-1`` 为社区测试版本
+
+- 修订 ``/etc/pacman.conf`` 配置文件，激活 ``commuity-testing`` 仓库::
+
+   [community-testing]
+   Include = /etc/pacman.d/mirrorlist
+
+- 然后执行指定版本安装::
+
+   # 同步 community-testing 仓库信息
+   pacman -Sy
+
+   # 安装指定版本
+   pacman -S kubelet=1.22.0-1 kubeadm=1.22.0-1 kubectl=1.22.0-1
+
+- 锁定版本是修改 ``/etc/pacman.conf`` ::
+
+   IgnorePkg   = kubelet kubeadm kubectl
+
+这样就不会升级上述版本。
+
+- 再次修订 ``/etc/pacman.conf`` 将 ``community-testing`` 仓库注释掉，避免其他软件版本升级到测试版本。
+
+
+最终结果
+==========
+
+- 最终节点如下::
+
+   kubectl get nodes -o wide
+
+显示如下::
+
+   NAME         STATUS   ROLES                  AGE    VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                 KERNEL-VERSION       CONTAINER-RUNTIME
+   jetson       Ready    <none>                 2d1h   v1.22.0   30.73.165.36    <none>        Ubuntu 18.04.5 LTS       4.9.201-tegra        docker://20.10.7
+   kali         Ready    <none>                 63m    v1.22.0   30.73.167.10    <none>        Kali GNU/Linux Rolling   5.4.83-Re4son-v8l+   docker://20.10.5+dfsg1
+   pi-master1   Ready    control-plane,master   2d2h   v1.22.0   192.168.6.11    <none>        Ubuntu 20.04.2 LTS       5.4.0-1041-raspi     docker://20.10.7
+   pi-worker1   Ready    <none>                 2d1h   v1.22.0   192.168.6.15    <none>        Ubuntu 20.04.2 LTS       5.4.0-1041-raspi     docker://20.10.7
+   pi-worker2   Ready    <none>                 2d1h   v1.22.0   192.168.6.16    <none>        Ubuntu 20.04.2 LTS       5.4.0-1041-raspi     docker://20.10.7
+   zcloud       Ready    <none>                 21m    v1.22.0   192.168.6.200   <none>        Arch Linux               5.13.9-arch1-1       docker://20.10.8
+
+.. note::
+
+   注意到有两个节点 ``jetson`` 和 ``kali`` 节点 ``INTERNAL-IP`` 采用了无线网卡上的IP地址，需要修订
+
 - 现在，我们终于可以拥有一个混合架构的Kubernetes集群::
 
    kubectl get nodes --show-labels
 
 可以看到 ARM 节点的标签有 ``kubernetes.io/arch=arm64`` ，而 X86 节点标签有 ``kubernetes.io/arch=amd64`` ::
 
-   NAME         STATUS   ROLES    AGE     VERSION   LABELS
-   jetson       Ready    <none>   14h     v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=jetson,kubernetes.io/os=linux
-   pi-master1   Ready    master   113d    v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-master1,kubernetes.io/os=linux,node-role.kubernetes.io/master=
-   pi-worker1   Ready    <none>   109d    v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,disktype=ssd,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-worker1,kubernetes.io/os=linux
-   pi-worker2   Ready    <none>   109d    v1.20.5   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-worker2,kubernetes.io/os=linux
-   zcloud       Ready    <none>   9m49s   v1.20.2   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=zcloud,kubernetes.io/os=linux
+   NAME         STATUS   ROLES                  AGE    VERSION   LABELS
+   jetson       Ready    <none>                 2d1h   v1.22.0   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=jetson,kubernetes.io/os=linux
+   kali         Ready    <none>                 61m    v1.22.0   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=kali,kubernetes.io/os=linux
+   pi-master1   Ready    control-plane,master   2d2h   v1.22.0   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-master1,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node-role.kubernetes.io/master=,node.kubernetes.io/exclude-from-external-load-balancers=
+   pi-worker1   Ready    <none>                 2d1h   v1.22.0   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-worker1,kubernetes.io/os=linux
+   pi-worker2   Ready    <none>                 2d1h   v1.22.0   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=pi-worker2,kubernetes.io/os=linux
+   zcloud       Ready    <none>                 20m    v1.22.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=zcloud,kubernetes.io/os=linux
 
 后面我们部署应用，所使用的镜像需要区分不同架构。我将实践异构应用部署。
 

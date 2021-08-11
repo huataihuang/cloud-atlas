@@ -134,9 +134,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#kubernetes">安装Kubernetes软件包</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">创建Kubernetes集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id7">将计算节点加入到集群</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">验证集群</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id9">访问服务</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id10">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">最终结果</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">验证集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">访问服务</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="perfmance_arm_x86.html">ARM和X86架构性能对比构想</a></li>
@@ -1329,7 +1330,157 @@ systemctl disable nvzramconfig.service
 <span class="n">WARNING</span><span class="p">:</span> <span class="n">Support</span> <span class="k">for</span> <span class="n">cgroup</span> <span class="n">v2</span> <span class="ow">is</span> <span class="n">experimental</span>
 </pre></div>
 </div>
-<p>不过默认的docker配置是无法安装Kubernetes的，会提示报错</p>
+<p>不过默认的docker配置是无法安装Kubernetes的，会提示报错:</p>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>[preflight] Running pre-flight checks
+[preflight] The system verification failed. Printing the output from the verification:
+KERNEL_VERSION: 5.4.83-Re4son-v8l+
+CONFIG_NAMESPACES: enabled
+CONFIG_NET_NS: enabled
+CONFIG_PID_NS: enabled
+CONFIG_IPC_NS: enabled
+CONFIG_UTS_NS: enabled
+CONFIG_CGROUPS: enabled
+CONFIG_CGROUP_CPUACCT: enabled
+CONFIG_CGROUP_DEVICE: enabled
+CONFIG_CGROUP_FREEZER: enabled
+CONFIG_CGROUP_PIDS: enabled
+CONFIG_CGROUP_SCHED: enabled
+CONFIG_CPUSETS: enabled
+CONFIG_MEMCG: enabled
+CONFIG_INET: enabled
+CONFIG_EXT4_FS: enabled
+CONFIG_PROC_FS: enabled
+CONFIG_NETFILTER_XT_TARGET_REDIRECT: enabled (as module)
+CONFIG_NETFILTER_XT_MATCH_COMMENT: enabled (as module)
+CONFIG_FAIR_GROUP_SCHED: enabled
+CONFIG_OVERLAY_FS: enabled (as module)
+CONFIG_AUFS_FS: not set - Required for aufs.
+CONFIG_BLK_DEV_DM: enabled (as module)
+CONFIG_CFS_BANDWIDTH: enabled
+CONFIG_CGROUP_HUGETLB: not set - Required for hugetlb cgroup.
+CONFIG_SECCOMP: enabled
+CONFIG_SECCOMP_FILTER: enabled
+DOCKER_VERSION: 20.10.5+dfsg1
+DOCKER_GRAPH_DRIVER: overlay2
+OS: Linux
+CGROUPS_CPU: enabled
+CGROUPS_CPUSET: enabled
+CGROUPS_DEVICES: enabled
+CGROUPS_FREEZER: enabled
+CGROUPS_MEMORY: missing
+CGROUPS_PIDS: enabled
+CGROUPS_HUGETLB: missing
+        [WARNING SystemVerification]: missing optional cgroups: hugetlb
+        [WARNING Service-Kubelet]: kubelet service is not enabled, please run &#39;systemctl enable kubelet.service&#39;
+error execution phase preflight: [preflight] Some fatal errors occurred:
+        [ERROR SystemVerification]: missing required cgroups: memory
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+To see the stack trace of this error execute with --v=5 or higher
+</pre></div>
+</td></tr></table></div>
+<p>可以看到，必须要设置 <code class="docutils literal notranslate"><span class="pre">CGROUPS_MEMORY</span></code> ，所以也如前设置：</p>
+<ul>
+<li><p>修订 <a class="reference internal" href="../../linux/kali_linux/index.html#kali-linux"><span class="std std-ref">Kali Linux</span></a> for Raspberry Pi的配置文件 <code class="docutils literal notranslate"><span class="pre">/boot/cmdline.txt</span></code> (原先只有一行配置，在配置行最后添加):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">cpuset</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">memory</span> <span class="n">cgroup_memory</span><span class="o">=</span><span class="mi">1</span> <span class="n">swapaccount</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重启系统，再检查 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 后，只在最后提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">Support</span> <span class="k">for</span> <span class="n">cgroup</span> <span class="n">v2</span> <span class="ow">is</span> <span class="n">experimental</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后重新开始将节点加入集群</p></li>
+</ul>
+<section id="kali-linux">
+<h4>kali linux节点添加失败排查<a class="headerlink" href="#kali-linux" title="永久链接至标题">¶</a></h4>
+<p>在解决了kali linux节点的docker版本配置问题后，就可以执行 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">join</span></code> 指令了，但是发现添加的节点始终是 <code class="docutils literal notranslate"><span class="pre">NotReady</span></code> ，检查pod创建:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">get</span> <span class="n">pods</span>
+</pre></div>
+</div>
+<p>可以看到kali linux节点上容器没有正确启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">pkhch</span>                <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Init</span><span class="p">:</span><span class="mi">0</span><span class="o">/</span><span class="mi">1</span>            <span class="mi">0</span>          <span class="mi">42</span><span class="n">m</span>    <span class="mf">30.73</span><span class="o">.</span><span class="mf">167.10</span>    <span class="n">kali</span>         <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="mi">6</span><span class="n">jt64</span>                     <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">ContainerCreating</span>   <span class="mi">0</span>          <span class="mi">42</span><span class="n">m</span>    <span class="mf">30.73</span><span class="o">.</span><span class="mf">167.10</span>    <span class="n">kali</span>         <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查pod:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">describe</span> <span class="n">pods</span> <span class="n">kube</span><span class="o">-</span><span class="n">flannel</span><span class="o">-</span><span class="n">ds</span><span class="o">-</span><span class="n">pkhch</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到报错原因:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span>  <span class="n">FailedCreatePodSandBox</span>  <span class="mi">2</span><span class="n">m29s</span> <span class="p">(</span><span class="n">x186</span> <span class="n">over</span> <span class="mi">42</span><span class="n">m</span><span class="p">)</span>  <span class="n">kubelet</span>            <span class="n">Failed</span> <span class="n">to</span> <span class="n">create</span> <span class="n">pod</span> <span class="n">sandbox</span><span class="p">:</span> <span class="nb">open</span> <span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">resolve</span><span class="o">/</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查kali linux节点，发现确实没有这个文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ls /run/systemd/resolve/resolv.conf</span>
+<span class="n">ls</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">access</span> <span class="s1">&#39;/run/systemd/resolve/resolv.conf&#39;</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>对比正常节点，则有这个文件，这说明kali linux默认没有激活 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_resolved.html#systemd-resolved"><span class="std std-ref">systemd-resolved</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolved</span>
+<span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolved</span>
+</pre></div>
+</div>
+<p>然后再次检查就可以看到文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ls /run/systemd/resolve/resolv.conf</span>
+<span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">resolve</span><span class="o">/</span><span class="n">resolv</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>等待kali linux节点上kube-system namespace对应的pod创建成功，就可以看到该worker节点正常Ready了</p></li>
+</ul>
+</section>
 </section>
 <section id="arch-linux-zcloud">
 <h3>arch linux节点(zcloud)<a class="headerlink" href="#arch-linux-zcloud" title="永久链接至标题">¶</a></h3>
@@ -1410,6 +1561,82 @@ EOF
 </div>
 <p>这个问题是因为我启动主机时候未连接无线网络，导致没有默认路由可以访问internet，此时启动的dnsmasq无法解析地址。虽然后面用手工脚本命令启动了wifi，但是dnsmasq依然无法提供本地主机域名解析。我是通过重启dnsmasq解决的，你的情况可能和我不同。不过，观察 kubelet 日志是一个比较好的排查问题方法。</p>
 </div>
+</section>
+<section id="zcloud-arch-linux">
+<h3>再次添加zcloud节点(arch linux)<a class="headerlink" href="#zcloud-arch-linux" title="永久链接至标题">¶</a></h3>
+<p>我在重建了Kubernetes集群之后，发现当前google提供的kubernetes软件版本，也就是我构建的管控平面，已经是最新的 <code class="docutils literal notranslate"><span class="pre">v1.22.0</span></code> ，但是在 zcloud 节点使用的Arch Linux，则提供的是 <code class="docutils literal notranslate"><span class="pre">v1.21.3</span></code> 。</p>
+<ul>
+<li><p>尝试执行节点添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span> \
+    <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="o">&lt;</span><span class="n">HASH_TOKEN</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">error</span> <span class="n">execution</span> <span class="n">phase</span> <span class="n">preflight</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">fetch</span> <span class="n">the</span> <span class="n">kubeadm</span><span class="o">-</span><span class="n">config</span> <span class="n">ConfigMap</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">decode</span> <span class="n">cluster</span> <span class="n">configuration</span> <span class="n">data</span><span class="p">:</span> <span class="n">no</span> <span class="n">kind</span> <span class="s2">&quot;ClusterConfiguration&quot;</span> <span class="ow">is</span> <span class="n">registered</span> <span class="k">for</span> <span class="n">version</span> <span class="s2">&quot;kubeadm.k8s.io/v1beta3&quot;</span> <span class="ow">in</span> <span class="n">scheme</span> <span class="s2">&quot;k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/scheme/scheme.go:31&quot;</span>
+<span class="n">To</span> <span class="n">see</span> <span class="n">the</span> <span class="n">stack</span> <span class="n">trace</span> <span class="n">of</span> <span class="n">this</span> <span class="n">error</span> <span class="n">execute</span> <span class="k">with</span> <span class="o">--</span><span class="n">v</span><span class="o">=</span><span class="mi">5</span> <span class="ow">or</span> <span class="n">higher</span>
+</pre></div>
+</div>
+<p>看来低版本节点无法加入高版本集群(兼容性实在太差了)</p>
+<ul>
+<li><p>检查 <a class="reference external" href="https://archlinux.org/packages/?name=kubeadm">arch linux kubeadm package</a> 可以看到当前:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">1.21.3-1</span></code> 为社区版本(正式)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.22.0-1</span></code> 为社区测试版本</p></li>
+</ul>
+</li>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/pacman.conf</span></code> 配置文件，激活 <code class="docutils literal notranslate"><span class="pre">commuity-testing</span></code> 仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">community</span><span class="o">-</span><span class="n">testing</span><span class="p">]</span>
+<span class="n">Include</span> <span class="o">=</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">mirrorlist</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后执行指定版本安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 同步 community-testing 仓库信息</span>
+<span class="n">pacman</span> <span class="o">-</span><span class="n">Sy</span>
+
+<span class="c1"># 安装指定版本</span>
+<span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">kubelet</span><span class="o">=</span><span class="mf">1.22</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubeadm</span><span class="o">=</span><span class="mf">1.22</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubectl</span><span class="o">=</span><span class="mf">1.22</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>锁定版本是修改 <code class="docutils literal notranslate"><span class="pre">/etc/pacman.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IgnorePkg</span>   <span class="o">=</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这样就不会升级上述版本。</p>
+<ul class="simple">
+<li><p>再次修订 <code class="docutils literal notranslate"><span class="pre">/etc/pacman.conf</span></code> 将 <code class="docutils literal notranslate"><span class="pre">community-testing</span></code> 仓库注释掉，避免其他软件版本升级到测试版本。</p></li>
+</ul>
+</section>
+</section>
+<section id="id8">
+<h2>最终结果<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>最终节点如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>    <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>     <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>                 <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>       <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">2</span><span class="n">d1h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">30.73</span><span class="o">.</span><span class="mf">165.36</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">18.04</span><span class="o">.</span><span class="mi">5</span> <span class="n">LTS</span>       <span class="mf">4.9</span><span class="o">.</span><span class="mi">201</span><span class="o">-</span><span class="n">tegra</span>        <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">7</span>
+<span class="n">kali</span>         <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">63</span><span class="n">m</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">30.73</span><span class="o">.</span><span class="mf">167.10</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Kali</span> <span class="n">GNU</span><span class="o">/</span><span class="n">Linux</span> <span class="n">Rolling</span>   <span class="mf">5.4</span><span class="o">.</span><span class="mi">83</span><span class="o">-</span><span class="n">Re4son</span><span class="o">-</span><span class="n">v8l</span><span class="o">+</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">5</span><span class="o">+</span><span class="n">dfsg1</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">2</span><span class="n">d2h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.11</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>       <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1041</span><span class="o">-</span><span class="n">raspi</span>     <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">7</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">2</span><span class="n">d1h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>       <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1041</span><span class="o">-</span><span class="n">raspi</span>     <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">7</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">2</span><span class="n">d1h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.16</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>       <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1041</span><span class="o">-</span><span class="n">raspi</span>     <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">7</span>
+<span class="n">zcloud</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">21</span><span class="n">m</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.200</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Arch</span> <span class="n">Linux</span>               <span class="mf">5.13</span><span class="o">.</span><span class="mi">9</span><span class="o">-</span><span class="n">arch1</span><span class="o">-</span><span class="mi">1</span>       <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">8</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意到有两个节点 <code class="docutils literal notranslate"><span class="pre">jetson</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kali</span></code> 节点 <code class="docutils literal notranslate"><span class="pre">INTERNAL-IP</span></code> 采用了无线网卡上的IP地址，需要修订</p>
+</div>
 <ul>
 <li><p>现在，我们终于可以拥有一个混合架构的Kubernetes集群:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">labels</span>
@@ -1418,19 +1645,19 @@ EOF
 </li>
 </ul>
 <p>可以看到 ARM 节点的标签有 <code class="docutils literal notranslate"><span class="pre">kubernetes.io/arch=arm64</span></code> ，而 X86 节点标签有 <code class="docutils literal notranslate"><span class="pre">kubernetes.io/arch=amd64</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>     <span class="n">VERSION</span>   <span class="n">LABELS</span>
-<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">14</span><span class="n">h</span>     <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">jetson</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
-<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">master</span>   <span class="mi">113</span><span class="n">d</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="o">=</span>
-<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">109</span><span class="n">d</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">disktype</span><span class="o">=</span><span class="n">ssd</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
-<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">109</span><span class="n">d</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">20.5</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker2</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
-<span class="n">zcloud</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">9</span><span class="n">m49s</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">20.2</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">zcloud</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>    <span class="n">VERSION</span>   <span class="n">LABELS</span>
+<span class="n">jetson</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">2</span><span class="n">d1h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">jetson</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">kali</span>         <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">61</span><span class="n">m</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">kali</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">master1</span>   <span class="n">Ready</span>    <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">2</span><span class="n">d2h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="o">=</span><span class="p">,</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="o">=</span><span class="p">,</span><span class="n">node</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">exclude</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">load</span><span class="o">-</span><span class="n">balancers</span><span class="o">=</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">2</span><span class="n">d1h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker2</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">2</span><span class="n">d1h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker2</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">zcloud</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">20</span><span class="n">m</span>    <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">zcloud</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
 </pre></div>
 </div>
 <p>后面我们部署应用，所使用的镜像需要区分不同架构。我将实践异构应用部署。</p>
 </section>
-</section>
-<section id="id8">
-<h2>验证集群<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<section id="id9">
+<h2>验证集群<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <p>现在一个基于ARM的Kubernetes集群已经部署完成，可以运行pods，创建deployments和jobs。</p>
 <p>为了验证集群的正确运行，可以执行验证步骤：</p>
 <ul class="simple">
@@ -1606,8 +1833,8 @@ EOF
 </ul>
 <p>你会看到一个完整输出的html文件内容。</p>
 </section>
-<section id="id9">
-<h2>访问服务<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<section id="id10">
+<h2>访问服务<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
 <p>到这里，你已经完整部署和验证了Kubernetes on Raspberry Pi集群，只是当前在集群外部还不能访问到集群pod提供的服务。</p>
 <p>你可以有多种方法：</p>
 <ul class="simple">
@@ -1719,8 +1946,8 @@ replicaset.apps/kube-verify-69dd569645   3         3         3       2d12h
 </pre></div>
 </div>
 </section>
-<section id="id10">
-<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<section id="id11">
+<h2>参考<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://opensource.com/article/20/6/kubernetes-raspberry-pi">Build a Kubernetes cluster with the Raspberry Pi</a> - 完整的部署指南，作者 Chris Collins 撰写了一系列在Raspberry Pi上构建homelab的文章，可以实现基于K8s的NFS服务；另外，如果需要通过Kubernetes对外提供HTTP路由和反向代理(ingress)，可以参考 <a class="reference external" href="https://opensource.com/article/20/4/http-kubernetes-skipper">Try this Kubernetes HTTP router and reverse proxy</a></p></li>
 <li><p><a class="reference external" href="https://segmentfault.com/a/1190000023107314">解决k8s执行kubeadm join遇到could not find a JWS signature的问题</a></p></li>
