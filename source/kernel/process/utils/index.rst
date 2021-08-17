@@ -1,16 +1,14 @@
-.. _cgroup:
+.. _process_utils:
 
 =================================
-Kernel Cgroup
+内核进程管理工具
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   cgroup_v1.rst
-   cgroup_v1_hugetlb.rst
-   cgroup_v2.rst
-   cgroup_v2_facebook.rst
+   top.rst
+   ps.rst
 
 .. only::  subproject and html
 

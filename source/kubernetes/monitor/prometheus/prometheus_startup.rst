@@ -7,7 +7,7 @@ Prometheus快速起步
 安装
 ====
 
-Prometheus官方网站提供下载 https://prometheus.io/download/ ，可以获得不同平台 （macOS, Linux, Windows）的版本:
+`Prometheus官方网站提供下载 <https://prometheus.io/download/>`_ ，可以获得不同平台 （macOS, Linux, Windows）的版本:
 
 * prometheus
 * alertmanager
@@ -137,4 +137,7 @@ Prometheus的PromQL提供了非常灵活的表达式语言，允许查询和聚�
 .. figure:: ../../../_static/kubernetes/monitor/prometheus/prometheus_graph_3.png
    :scale: 50
 
+参考
+========
 
+- `How To Install and Configure Prometheus On a Linux Server <https://devopscube.com/install-configure-prometheus-linux/>`_
