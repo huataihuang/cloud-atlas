@@ -111,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Linux Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../best_linux.html">最佳Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../redhat_linux/index.html">RedHat Linux</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Arch Linux</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="archlinux_on_mbp.html">MacBook Pro上运行Arch Linux</a></li>
@@ -119,10 +120,11 @@
 <li class="toctree-l3"><a class="reference internal" href="archlinux_ms_fonts.html">Arch Linux Windows字体</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Pacman</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id2">pacman简明使用</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">激活仓库,安装指定版本及锁定版本</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#break-dependency">break dependency</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#signature-error">signature error</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#conflicting-files">conflicting files</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="archlinux_aur.html">Arch Linux AUR</a></li>
@@ -257,6 +259,10 @@
 <p>pacman是arch linux的主要包管理工具。它包含了简单的二进制包格式和易于使用的编译体系。通过和主服务器同步pacman可以保持系统的软件包更新，其服务器/客户对模式允许用户下载和安装软件包以及所有依赖软件包。</p>
 <section id="id2">
 <h2>pacman简明使用<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>pacman 的 <code class="docutils literal notranslate"><span class="pre">-S</span></code> 参数表示 <code class="docutils literal notranslate"><span class="pre">--sync</span></code> 同步软件包，软件包将直接从远程仓库安装到本地主机，包括所有运行着软件包的依赖包。</p>
+</div>
 <ul>
 <li><p>安装软件包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">package_name1</span> <span class="n">package_name2</span> <span class="o">...</span>
@@ -332,6 +338,32 @@
 </li>
 </ul>
 </section>
+<section id="id3">
+<h2>激活仓库,安装指定版本及锁定版本<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>默认情况下， <code class="docutils literal notranslate"><span class="pre">testing</span></code> 和 <code class="docutils literal notranslate"><span class="pre">community-testing</span></code> 仓库没有激活，这个配置位于 <code class="docutils literal notranslate"><span class="pre">/etc/pacman.conf</span></code> 。例如，在 <a class="reference internal" href="../../kubernetes/arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 在加入Arch Linux节点时，为了能够安装 <code class="docutils literal notranslate"><span class="pre">community-testing</span></code> 仓库最新版本的Kubernetes 1.22.0 ，配置如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">community</span><span class="o">-</span><span class="n">testing</span><span class="p">]</span>
+<span class="n">Include</span> <span class="o">=</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">mirrorlist</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后执行仓库数据库同步:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">Sy</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装指定版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">kubelet</span><span class="o">=</span><span class="mf">1.22</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubeadm</span><span class="o">=</span><span class="mf">1.22</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubectl</span><span class="o">=</span><span class="mf">1.22</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>由于Kubernetes软件升级涉及到管控和工作节点升级，需要精心的手工操作，所以必须锁定软件版本不能滚动升级。锁定软件版本也是编辑 <code class="docutils literal notranslate"><span class="pre">/etc/pacman.conf</span></code> 将需要忽略升级到软件包配置如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IgnorePkg</span>   <span class="o">=</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
+<li><p>再次修订 <code class="docutils literal notranslate"><span class="pre">/etc/pacman.conf</span></code> 将 <code class="docutils literal notranslate"><span class="pre">community-testing</span></code> 仓库注释掉，避免其他软件版本升级到测试版本。</p></li>
+</ul>
+</section>
 <section id="break-dependency">
 <h2>break dependency<a class="headerlink" href="#break-dependency" title="永久链接至标题">¶</a></h2>
 <p>执行 <code class="docutils literal notranslate"><span class="pre">pacman</span> <span class="pre">-Syu</span></code> 时候遇到报错:</p>
@@ -378,8 +410,8 @@
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Pacman">archlinux - pacman</a></p></li>
 <li><p><a class="reference external" href="https://bbs.archlinux.org/viewtopic.php?id=251517">xorgproto issues..</a></p></li>

@@ -111,6 +111,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../configure/index.html">Kubernetes 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Kubernetes网络</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../in_action/index.html">Kubernetes实践</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../backup/index.html">Kubernetes备份与恢复</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../storage/index.html">Kubernetes存储</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../production/index.html">Kubernetes生产环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../service_mesh/index.html">Service Mesh</a></li>
@@ -123,13 +124,15 @@
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Prometheus监控</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Prometheus 简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="prometheus_startup.html">Prometheus快速起步</a></li>
+<li class="toctree-l4"><a class="reference internal" href="run_prometheus_in_k8s.html">在Kubernetes中安装运行Prometheus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="helm3_prometheus_grafana.html">使用Helm 3在Kubernetes集群部署Prometheus和Grafana</a></li>
 <li class="toctree-l4"><a class="reference internal" href="prometheus_node_exporter.html">Prometheus Node Exporter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="thanos.html">Thanos - Prometheus高可用</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../grafana/index.html">Grafana通用可视分析平台</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../jaeger/index.html">Jaeger分布式跟踪系统</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../node_health/index.html">节点健康度</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../grafana.html">Grafana 数据分析监控平台</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../netdata.html">Netdata监控系统</a></li>
 </ul>
 </li>
@@ -282,7 +285,7 @@
 <p>剖析是在不能获取所有时间的所有事件的所有上下文情况下，通过截取一定事件范围内部分数据来实现的分析。例如，Tcpdump是一种常用的通过特定过滤方式记录网络流量的剖析工具。这是一个基本的debuging工具，但是你不可能在所有时间范围都启用tcpdump来抓取所有网络数据包进行分析，因为需要消耗大量都计算资源和存储资源。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>在Linux内核中，增强型Berkely包过滤器(enhanced Berkeley Packet Filters, eBPF)允许详细剖析从文件系统操作到网络异常的内核事件。强烈建议阅读 <a class="reference external" href="http://www.brendangregg.com/ebpf.html">Linux Extended BPF (eBPF) Tracing Tools</a> 来学习如何通过BPF实现性能分析。</p>
+<p>在Linux内核中，增强型Berkely包过滤器(enhanced Berkeley Packet Filters, eBPF)允许详细剖析从文件系统操作到网络异常的内核事件。强烈建议阅读 <a class="reference external" href="http://www.brendangregg.com/ebpf.html">Linux Extended BPF (eBPF) Tracing Tools</a> 来学习如何通过 <a class="reference internal" href="../../../kernel/bpf/index.html#bpf"><span class="std std-ref">Linux BPF</span></a> 实现性能分析。</p>
 </div>
 <ul class="simple">
 <li><p>跟踪(Tracing)</p></li>
@@ -339,7 +342,7 @@
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../_images/prometheus_architecture.png"><img alt="../../../_images/prometheus_architecture.png" src="../../../_images/prometheus_architecture.png" style="width: 675.5px; height: 405.5px;" /></a>
 </figure>
-<p>Prometheus可以从编排任务中获取metrics，既支持直接获取也支持通过中间推送网管执行的短时间任务。所有抓取短样本都存储在本地并且基于这些数据运行归来在聚合或者从现有数据中记录下新的时序数据或生成告警。通常Prometheus会结合到 <a class="reference internal" href="../grafana.html#grafana"><span class="std std-ref">Grafana 数据分析监控平台</span></a> 或者其他API消费者平台来可视化采集的数据。</p>
+<p>Prometheus可以从编排任务中获取metrics，既支持直接获取也支持通过中间推送网管执行的短时间任务。所有抓取短样本都存储在本地并且基于这些数据运行归来在聚合或者从现有数据中记录下新的时序数据或生成告警。通常Prometheus会结合到 <a class="reference internal" href="../grafana/index.html#grafana"><span class="std std-ref">Grafana通用可视分析平台</span></a> 或者其他API消费者平台来可视化采集的数据。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>传统的监控系统，例如 <a class="reference external" href="https://www.nagios.org">Nagios</a> 是基于定时运行的检查脚本来检查服务异常返回值以确定是否告警；同时针对业务日志的监控和分析平台，例如Elasticsearh,Logstash和Kibana(ELK)提供了服务异常趋势分析。</p>
@@ -365,9 +368,14 @@
 </section>
 <section id="id10">
 <h2>架构<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
-<p>Prometheus通过抓取应用程序中暴露的时间序列数据来实现监控。所谓时间序列数据通常是应用程序客户端库或者exporter(导出器)的代理作为HTTP端点暴露。</p>
-<p>当前已经有很多exporter和客户端库，支持多种编程语言、框架和应用程序，例如Apache WEB服务器和MySQL数据库。</p>
-<p>Prometheus还可以使用推送网关(push gateway)来接收少量无法拉取数据的监控目标发出的数据（例如防火墙后面的监控目标）。</p>
+<ul class="simple">
+<li><p>Prometheus通过抓取应用程序中暴露的时间序列数据来实现监控。所谓时间序列数据通常是应用程序客户端库或者exporter(导出器)的代理作为HTTP端点暴露。</p></li>
+</ul>
+<p>pull模式可以通过HTTP方式接收metrics，对于需要监控的系统，通过在 <code class="docutils literal notranslate"><span class="pre">/metrics</span></code> endpoint 输出metrics，这样Prometheus就能从这个endpoint拉取metrics。</p>
+<ul class="simple">
+<li><p>当前已经有很多exporter和客户端库，支持多种编程语言、框架和应用程序，例如Apache WEB服务器和MySQL数据库。</p></li>
+<li><p>Prometheus还可以使用推送网关(push gateway)来接收少量无法拉取数据的监控目标发出的数据（例如防火墙后面的监控目标），此外也适合那种非常短暂存在的jobs和cronjobs。</p></li>
+</ul>
 <section id="id11">
 <h3>指标搜集<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h3>
 <p>在Prometheus中，被采集的指标来源称为endpoint(端点)，所谓端点通常对应是进程、主机、服务或应用程序。Prometheus定义目标(target) 配置：</p>

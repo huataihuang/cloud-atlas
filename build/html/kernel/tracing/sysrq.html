@@ -42,7 +42,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="“Bad RIP value”含义" href="bad_rip_value.html" />
+    <link rel="next" title="排查Linux系统Sys占用极高问题" href="debug_high_sys.html" />
     <link rel="prev" title="Linux内核追踪" href="index.html" /> 
 </head>
 
@@ -124,9 +124,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../power/index.html">内核电源管理</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Linux内核追踪</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Linux “魔力” 系统请求组合键 SysRq</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magic-sysrq-key">如何激活magic SysRq key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">使用SysRq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="debug_high_sys.html">排查Linux系统Sys占用极高问题</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bad_rip_value.html">“Bad RIP value”含义</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debug_system_crash.html">排查系统crash</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kdump/index.html">Linux内核Kdump</a></li>
@@ -228,8 +231,82 @@
             
   <section id="linux-sysrq">
 <span id="sysrq"></span><h1>Linux “魔力” 系统请求组合键 SysRq<a class="headerlink" href="#linux-sysrq" title="永久链接至标题">¶</a></h1>
+<p>所谓 <code class="docutils literal notranslate"><span class="pre">&quot;魔力&quot;</span> <span class="pre">系统请求组合键</span></code> 是指不论内核在做什么，都会响应这个组合键 <code class="docutils literal notranslate"><span class="pre">magical</span> <span class="pre">key</span> <span class="pre">combo</span></code> (除非内核完全锁死)。我们通常会使用 <code class="docutils literal notranslate"><span class="pre">magic</span> <span class="pre">SysRq</span> <span class="pre">key</span></code> 来实现内核级的调试信息输出。</p>
+<section id="magic-sysrq-key">
+<h2>如何激活magic SysRq key<a class="headerlink" href="#magic-sysrq-key" title="永久链接至标题">¶</a></h2>
+<p>首先在内核配置上，需要配置 <code class="docutils literal notranslate"><span class="pre">CONFIG_MAGIC_SYSRQ=Y</span></code> ，这样编译出来的支持SysRq的内核，启动后会提供一个 <code class="docutils literal notranslate"><span class="pre">/proc/sys/kernel/sysrq</span></code> 控制功能，允许使用SysRq键。</p>
+<p>其次，在内核 <code class="docutils literal notranslate"><span class="pre">CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE</span></code> 配置符号，默认设置是 <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 15%" />
+<col style="width: 63%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>SysRq配置值</p></td>
+<td><p>16进制</p></td>
+<td><p>说明</p></td>
+</tr>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0x0</p></td>
+<td><p>关闭所有sysrq功能</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>0x1</p></td>
+<td><p>激活所有sysrq功能</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0x2</p></td>
+<td><p>激活控制台日志级别控制</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>0x4</p></td>
+<td><p>激活键盘控制(SAK, unraw)</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>0x8</p></td>
+<td><p>激活进程的debug dump</p></td>
+</tr>
+<tr class="row-odd"><td><p>16</p></td>
+<td><p>0x10</p></td>
+<td><p>激活sync命令</p></td>
+</tr>
+<tr class="row-even"><td><p>32</p></td>
+<td><p>0x20</p></td>
+<td><p>激活remount read-only</p></td>
+</tr>
+<tr class="row-odd"><td><p>64</p></td>
+<td><p>0x40</p></td>
+<td><p>激活进程信号(term, kill, oom-kill)</p></td>
+</tr>
+<tr class="row-even"><td><p>128</p></td>
+<td><p>0x80</p></td>
+<td><p>允许重启/关机</p></td>
+</tr>
+<tr class="row-odd"><td><p>256</p></td>
+<td><p>0x100</p></td>
+<td><p>允许所有实时任务配置nice</p></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>执行启用sysrq所有功能:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">kernel</span><span class="o">/</span><span class="n">sysrq</span>
+</pre></div>
+</div>
+</li>
+<li><p>在完成sysrq的指令之后(见下文)，可能需要关闭sysrq功能，则可以输入0:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mi">0</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">kernel</span><span class="o">/</span><span class="n">sysrq</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>使用SysRq<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.kernel.org/doc/html/latest/admin-guide/sysrq.html">Linux Magic System Request Key Hacks</a></p></li>
 </ul>
@@ -242,7 +319,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="bad_rip_value.html" class="btn btn-neutral float-right" title="“Bad RIP value”含义" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="debug_high_sys.html" class="btn btn-neutral float-right" title="排查Linux系统Sys占用极高问题" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="index.html" class="btn btn-neutral float-left" title="Linux内核追踪" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

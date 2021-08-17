@@ -12,7 +12,7 @@ Kubernetes监控
    cadvisor.rst
    fluentd/index
    prometheus/index
+   grafana/index
    jaeger/index
    node_health/index
-   grafana.rst
    netdata.rst

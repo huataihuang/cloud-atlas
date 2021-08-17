@@ -111,6 +111,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../configure/index.html">Kubernetes 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../network/index.html">Kubernetes网络</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../in_action/index.html">Kubernetes实践</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../backup/index.html">Kubernetes备份与恢复</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Kubernetes存储</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../production/index.html">Kubernetes生产环境</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../service_mesh/index.html">Service Mesh</a></li>
@@ -125,6 +126,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">ARM架构Kubernetes</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">混合架构Kubernetes集群</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nodeselector">混合架构节点选择(nodeSelector)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
 </ul>
 </li>
@@ -244,6 +246,39 @@
             
   <section id="kubernetes">
 <span id="multi-arch-k8s"></span><h1>混合架构Kubernetes集群<a class="headerlink" href="#kubernetes" title="永久链接至标题">¶</a></h1>
+<section id="nodeselector">
+<h2>混合架构节点选择(nodeSelector)<a class="headerlink" href="#nodeselector" title="永久链接至标题">¶</a></h2>
+<p>在异构(混合架构)的kubernetes集群，需要确保部署的pod能够创建到对应架构的节点，即ARM镜像的pods创建到ARM节点，x86镜像的pods创建到x86节点。我们可以通过 <a class="reference internal" href="../deployment/deploy_pod/k8s_nodeselector.html#k8s-nodeselector"><span class="std std-ref">选择节点(nodeSelector部署Pod</span></a> 来实现部署。</p>
+<ul>
+<li><p>检查节点标签:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span> <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">labels</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到ARM节点和x86节点显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>         <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>     <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>     <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>                 <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>       <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>        <span class="n">LABELS</span>
+<span class="o">...</span>
+<span class="n">pi</span><span class="o">-</span><span class="n">worker1</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">6</span><span class="n">d23h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.15</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Ubuntu</span> <span class="mf">20.04</span><span class="o">.</span><span class="mi">2</span> <span class="n">LTS</span>       <span class="mf">5.4</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">1041</span><span class="o">-</span><span class="n">raspi</span>     <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">7</span>         <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">pi</span><span class="o">-</span><span class="n">worker1</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="o">...</span>
+<span class="n">zcloud</span>       <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">4</span><span class="n">d22h</span>   <span class="n">v1</span><span class="o">.</span><span class="mf">22.0</span>   <span class="mf">192.168</span><span class="o">.</span><span class="mf">6.200</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">Arch</span> <span class="n">Linux</span>               <span class="mf">5.13</span><span class="o">.</span><span class="mi">9</span><span class="o">-</span><span class="n">arch1</span><span class="o">-</span><span class="mi">1</span>       <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10</span><span class="o">.</span><span class="mi">8</span>         <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">zcloud</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+</pre></div>
+</div>
+<ul>
+<li><p>在ARM的deployment配置中使用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">arm64</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+  <span class="n">nodeSelector</span><span class="p">:</span>
+    <span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">arm64</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">

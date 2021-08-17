@@ -14,7 +14,6 @@ Infrastructure Atlas
    best_open_source.rst
    wikipedia_base.rst
    fedoraproject_base.rst
-   cpu/index
 
 .. only::  subproject and html
 

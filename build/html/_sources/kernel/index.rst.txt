@@ -10,11 +10,13 @@ Kernel Atlas
    :maxdepth: 1
 
    kernel_overview.rst
+   cpu/index
    cgroup/index
+   process/index
    intel_rdt/index
    flame_graph.rst
    kms.rst
-   ebpf/index
+   bpf/index
    perf/index
    admin/index
    memory/index

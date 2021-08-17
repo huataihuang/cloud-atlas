@@ -1,7 +1,7 @@
-.. _cgroups:
+.. _cgroup:
 
 =================================
-Kernel Cgroups
+Kernel Cgroup
 =================================
 
 .. toctree::

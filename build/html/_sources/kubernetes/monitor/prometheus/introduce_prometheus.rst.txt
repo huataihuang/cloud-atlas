@@ -37,7 +37,7 @@ Prometheus 简介
 
 .. note::
 
-   在Linux内核中，增强型Berkely包过滤器(enhanced Berkeley Packet Filters, eBPF)允许详细剖析从文件系统操作到网络异常的内核事件。强烈建议阅读 `Linux Extended BPF (eBPF) Tracing Tools <http://www.brendangregg.com/ebpf.html>`_ 来学习如何通过BPF实现性能分析。
+   在Linux内核中，增强型Berkely包过滤器(enhanced Berkeley Packet Filters, eBPF)允许详细剖析从文件系统操作到网络异常的内核事件。强烈建议阅读 `Linux Extended BPF (eBPF) Tracing Tools <http://www.brendangregg.com/ebpf.html>`_ 来学习如何通过 :ref:`bpf` 实现性能分析。
 
 - 跟踪(Tracing)
 
@@ -128,11 +128,13 @@ Prometheus可以从编排任务中获取metrics，既支持直接获取也支持
 架构
 ========
 
-Prometheus通过抓取应用程序中暴露的时间序列数据来实现监控。所谓时间序列数据通常是应用程序客户端库或者exporter(导出器)的代理作为HTTP端点暴露。
+- Prometheus通过抓取应用程序中暴露的时间序列数据来实现监控。所谓时间序列数据通常是应用程序客户端库或者exporter(导出器)的代理作为HTTP端点暴露。
 
-当前已经有很多exporter和客户端库，支持多种编程语言、框架和应用程序，例如Apache WEB服务器和MySQL数据库。
+pull模式可以通过HTTP方式接收metrics，对于需要监控的系统，通过在 ``/metrics`` endpoint 输出metrics，这样Prometheus就能从这个endpoint拉取metrics。
 
-Prometheus还可以使用推送网关(push gateway)来接收少量无法拉取数据的监控目标发出的数据（例如防火墙后面的监控目标）。
+- 当前已经有很多exporter和客户端库，支持多种编程语言、框架和应用程序，例如Apache WEB服务器和MySQL数据库。
+
+- Prometheus还可以使用推送网关(push gateway)来接收少量无法拉取数据的监控目标发出的数据（例如防火墙后面的监控目标），此外也适合那种非常短暂存在的jobs和cronjobs。
 
 指标搜集
 ---------

@@ -18,3 +18,4 @@ Kubernetes概念辨析
    configuration/index
    cluster_administration/index
    scheduling/index
+   extension/index

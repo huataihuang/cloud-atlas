@@ -7,4 +7,5 @@ Kubernetes部署Pod
 .. toctree::
    :maxdepth: 1
 
+   k8s_nodeselector.rst
    k8s_django.rst
