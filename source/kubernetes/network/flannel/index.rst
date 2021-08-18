@@ -9,3 +9,4 @@ Flannel是kubernetes中比较简单并且性能卓越的网络插件，适合组
 .. toctree::
    :maxdepth: 1
 
+   docker0_bridge_down_in_k8s_flannel.rst
