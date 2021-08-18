@@ -111,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../machine_learning/index.html">Machine Learning Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Linux Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../best_linux.html">最佳Linux</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">RedHat Linux</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../centos/index.html">CentOS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../admin/index.html">RedHat Linux 系统管理</a></li>
@@ -124,6 +125,7 @@
 <li class="toctree-l4"><a class="reference internal" href="systemd_env.html">Systemd环境变量</a></li>
 <li class="toctree-l4"><a class="reference internal" href="systemd_dissuspend.html">systemd禁止笔记本suspend</a></li>
 <li class="toctree-l4"><a class="reference internal" href="systemd_timesyncd.html">Systemd Timesyncd服务</a></li>
+<li class="toctree-l4"><a class="reference internal" href="systemctl.html">systemctl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="networkctl.html">networkctl</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">journalctl</a></li>
 </ul>
@@ -254,9 +256,42 @@
 <span id="id1"></span><h1>journalctl<a class="headerlink" href="#journalctl" title="永久链接至标题">¶</a></h1>
 <p>journalctl是一个从systemd日志服务journald查询和显示日志的工具。由于journald使用二进制格式存储日志取代了传统的文本格式，journalctl是标准的读取journald的日志消息的方法。</p>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>快速检查服务日志<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>要检查某个服务相关日志，请使用参数 <code class="docutils literal notranslate"><span class="pre">-u</span></code> ( <code class="docutils literal notranslate"><span class="pre">--unit</span></code> )</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">service</span><span class="o">-</span><span class="n">name</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>不过，上述 <code class="docutils literal notranslate"><span class="pre">-u</span></code> 参数会显示这个服务相关的所有日志，但是我们往往关注最近一次操作系统启动以后的服务日志，所以我们往往还会加上 <code class="docutils literal notranslate"><span class="pre">-b</span></code> 参数 ( <code class="docutils literal notranslate"><span class="pre">--boot</span></code> )</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">service</span><span class="o">-</span><span class="n">name</span><span class="o">.</span><span class="n">service</span> <span class="o">-</span><span class="n">b</span>
+</pre></div>
+</div>
+<ul>
+<li><p>其他类型的units ( sockets, targets, timers 等等 )，也是需要使用明确的单元类型，例如:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">socket</span><span class="o">-</span><span class="n">name</span><span class="o">.</span><span class="n">socket</span> <span class="o">-</span><span class="n">b</span>
+</pre></div>
+</div>
+</li>
+<li><p>默认情况情况下 <code class="docutils literal notranslate"><span class="pre">journactl</span></code> 展示日志是分页的，所以需要不停滚动来查看。但是有时候我们想一次打印出所有日志，就需要使用 <code class="docutils literal notranslate"><span class="pre">--no-pager</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">service</span><span class="o">-</span><span class="n">name</span><span class="o">.</span><span class="n">service</span> <span class="o">-</span><span class="n">b</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">pager</span>
+</pre></div>
+</div>
+</li>
+<li><p>需要持续观察日志，则使用 <code class="docutils literal notranslate"><span class="pre">-f</span></code> 参数，类似 <code class="docutils literal notranslate"><span class="pre">tail</span> <span class="pre">-f</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">service</span><span class="o">-</span><span class="n">name</span><span class="o">.</span><span class="n">service</span> <span class="o">-</span><span class="n">f</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference external" href="https://unix.stackexchange.com/questions/225401/how-to-see-full-log-from-systemctl-status-service/225407">How to see full log from systemctl status service?</a></p></li>
 <li><p><a class="reference external" href="https://www.loggly.com/ultimate-guide/using-journalctl/">Using journalctl</a></p></li>
+<li><p><a class="reference external" href="https://www.loggly.com/ultimate-guide/using-systemctl/">Ultimate Guide to Logging</a></p></li>
 </ul>
 </section>
 </section>

@@ -15,3 +15,4 @@ Kubernetes排查
    apiserver_cert_expire.rst
    k8s_crashloopbackoff.rst
    apiserver_port_2379_refuse.rst
+   k8s_notready_node.rst

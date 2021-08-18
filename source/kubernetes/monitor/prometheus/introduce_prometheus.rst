@@ -136,6 +136,8 @@ pull模式可以通过HTTP方式接收metrics，对于需要监控的系统，�
 
 - Prometheus还可以使用推送网关(push gateway)来接收少量无法拉取数据的监控目标发出的数据（例如防火墙后面的监控目标），此外也适合那种非常短暂存在的jobs和cronjobs。
 
+- PromQL 是一个非常具有伸缩性的查询语言，可以用来查询metrics
+
 指标搜集
 ---------
 

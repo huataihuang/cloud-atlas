@@ -119,6 +119,22 @@ Prometheus使用Kubernetes API来获取节点、Pods、Deployments等的所有�
 
    kubectl create  -f prometheus-deployment.yaml
 
+- 完成后检查::
+
+   kubectl -n monitoring get pods -o wide
+
+显示::
+
+   NAME                                     READY   STATUS    RESTARTS   AGE   IP           NODE         NOMINATED NODE   READINESS GATES
+   prometheus-deployment-64d4b79f85-565jn   1/1     Running   0          24h   10.244.1.3   pi-worker1   <none>           <none>
+
+设置Kube State Metrics
+=========================
+
+默认配置下Kube state metrics service并没有提供很多metrics。所以需要确保部署Kube state metrics来监控所有的Kubernetes API对象，例如 ``deployments`` , ``pods`` , ``jobs`` , ``cronjobs`` 等等。请参考 :ref:`k8s_kube_state_metircs`
+
+
+
 参考
 ===========
 
