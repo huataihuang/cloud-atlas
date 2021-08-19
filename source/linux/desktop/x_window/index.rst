@@ -1,15 +1,14 @@
-.. _linux_memory_management:
+.. _x_window:
 
 =================================
-Linux内存管理
+X Window显示服务器协议
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   hugetlb_page.rst
-   numa/index
-   oomd.rst
+   remote_x_from_mac.rst
+   xpra.rst
 
 .. only::  subproject and html
 
