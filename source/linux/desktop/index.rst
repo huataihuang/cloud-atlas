@@ -7,6 +7,8 @@ Linux桌面
 .. toctree::
    :maxdepth: 1
 
+   x_window/index
+   rdp/index
    wayland/index
    sway/index
    i3.rst
@@ -15,8 +17,6 @@ Linux桌面
    tmux.rst
    vim/index
    remote_linux_desktop.rst
-   rdp/index
-   xpra.rst
    light_browser.rst
    netsurf.rst 
    vs_code.rst

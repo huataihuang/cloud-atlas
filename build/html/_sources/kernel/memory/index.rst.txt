@@ -8,7 +8,7 @@ Linux内存管理
    :maxdepth: 1
 
    hugetlb_page.rst
-   numa.rst
+   numa/index
    oomd.rst
 
 .. only::  subproject and html
