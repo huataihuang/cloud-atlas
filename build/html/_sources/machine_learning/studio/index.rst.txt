@@ -9,6 +9,7 @@
    :maxdepth: 1
 
    conda_anaconda.rst
+   gpu_deep_learning_on_arch_linux.rst
 
 .. only::  subproject and html
 

@@ -14,7 +14,7 @@ Real Atlas
 .. toctree::
    :maxdepth: 1
 
-   real_concept.rst
+   real_think/index
    prepare/index
    private_cloud/index
    network/index

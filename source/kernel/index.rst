@@ -13,7 +13,6 @@ Kernel Atlas
    cpu/index
    cgroup/index
    process/index
-   intel_rdt/index
    flame_graph.rst
    kms.rst
    bpf/index

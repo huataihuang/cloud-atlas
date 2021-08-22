@@ -7,6 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
+   pi_os.rst
    pi_3.rst
    pi_zero.rst
    pi_4.rst
