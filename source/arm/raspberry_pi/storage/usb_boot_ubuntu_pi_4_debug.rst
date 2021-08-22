@@ -1,7 +1,7 @@
 .. _usb_boot_ubuntu_pi_4_debug:
 
 ====================================================
-debug: 树莓派4 USB启动Ubuntu Server 20.04
+debug: 树莓派4 USB存储启动Ubuntu Server 20.04
 ====================================================
 
 我在折腾 :ref:`usb_boot_pi_3` 时发现Ubuntu Server 20.04 for Raspberry Pi版本在树莓派上启动特性和标准的树莓派不同，设置USB存储启动步骤比较复杂。

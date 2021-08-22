@@ -10,6 +10,7 @@ Alpine Linux
    introduce_alpine.rst
    think_alpine.rst
    alpine_startup.rst
+   alpine_install.rst
    alpine_wireless.rst
    alpine_extended.rst
    alpine_apk.rst
