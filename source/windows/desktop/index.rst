@@ -1,19 +1,13 @@
-.. _alpine_linux:
+.. _windows_desktop:
 
 =================================
-Alpine Linux
+Windows Desktop
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_alpine.rst
-   think_alpine.rst
-   alpine_startup.rst
-   alpine_wireless.rst
-   alpine_extended.rst
-   alpine_apk.rst
-   
+   bing_wallpaper.rst
 
 .. only::  subproject and html
 

@@ -10,7 +10,8 @@ Btrfs快照和镜像
 ==================
 
 我们知道现在云计算已经从最初的虚拟化演进到虚拟化结合容器化的云计算，通过容器化可以更为快速可伸缩地部署应用服务。但是类似Docker容器化的磁盘隔离，需要设置复杂的文件系统Quota以及卷隔离，不仅复杂而且创建缓慢，拖累 :ref:`kubernetes` 实现serverless的快速部署。
-  Facebook推出了容器化隔离解决方案是Tupperware：以前是每次启动一个任务来设置容器的文件系统，但是消耗了大量的磁盘IO和CPU。现在，通过Btrfs的快照功能，Tupperware可以从一个预先准备的Btrfs image生成snapshot。
+
+Facebook推出了容器化隔离解决方案是Tupperware：以前是每次启动一个任务来设置容器的文件系统，但是消耗了大量的磁盘IO和CPU。现在，通过Btrfs的快照功能，Tupperware可以从一个预先准备的Btrfs image生成snapshot。
 
 Tupperware Btrfs实现也存在3个主要的问题：
 

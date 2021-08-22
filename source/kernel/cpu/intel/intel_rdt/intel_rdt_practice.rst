@@ -263,7 +263,7 @@ c             1100
 
 上述修改以后，分配到 ``p0`` 资源组的进程，就只能分配到 cache ID 0的低位50% (3) 和 cache ID 1的高位50% (c) ；而分配到 ``p1`` 资源组的进程，就能够使用两个socket中缓存的低位50% (都是3) 。
 
-.. figure:: ../../_static/kernel/intel_rdt/l3_schemata_1.png
+.. figure:: ../../../../_static/kernel/cpu/intel/intel_rdt/l3_schemata_1.png
    :scale: 80
 
 案例2
@@ -306,7 +306,7 @@ c             1100
 
 最终结果图示如下:
 
-.. figure:: ../../_static/kernel/intel_rdt/l3_schemata_2.png
+.. figure:: ../../../../_static/kernel/cpu/intel/intel_rdt/l3_schemata_2.png
    :scale: 80
 
 案例3

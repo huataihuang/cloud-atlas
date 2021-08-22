@@ -17,6 +17,13 @@ Jetson Nano PCIe Buss Error
 .. literalinclude:: jetson_pcie_err/dmesg_pcie_bus_error.txt
    :lines: 475-482
 
+上述报错看起来和PCIe Bus相关::
+
+   [五 8月 20 08:40:47 2021] pcieport 0000:00:01.0: AER: Corrected error received: id=0010
+   [五 8月 20 08:40:47 2021] pcieport 0000:00:01.0: PCIe Bus Error: severity=Corrected, type=Physical Layer, id=0008(Receiver ID)
+   [五 8月 20 08:40:47 2021] pcieport 0000:00:01.0:   device [10de:0fae] error status/mask=00000001/00002000
+   [五 8月 20 08:40:47 2021] pcieport 0000:00:01.0:    [ 0] Receiver Error         (First)
+
 - 检查处理器温度::
 
    paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'
@@ -59,6 +66,11 @@ PCIe活跃状态电源管理(PCIe Active State Power Management)是将链路转�
 - 修改后，重启系统，再检查 ``cat /proc/cmdline`` 可以看到内核参数后添加了 ``pcie_aspm=off`` 参数:
 
 .. literalinclude:: jetson_pcie_err/cmdline
+
+实践经验
+============
+
+从之前验证来看，使用 ``pcie_aspm=off`` 确实可以消除内核报错，并且印象中好像很少再出现文件系统只读问题。对比之下，我最近一次重装jetson系统，没有添加这个内核参数，则非常容易出现文件系统只读以及上述内核报错。
 
 参考
 =======
