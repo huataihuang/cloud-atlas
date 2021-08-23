@@ -4,6 +4,11 @@
 NUMA实践
 ==================
 
+
+.. figure:: ../../../_static/kernel/memory/numa/cpu_numa.png
+   :scale: 50
+
+
 参考
 =======
 
