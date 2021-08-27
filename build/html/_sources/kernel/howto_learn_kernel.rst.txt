@@ -62,7 +62,17 @@ Linux内核包含了非常多的模块，例如内存管理，进程调度，虚
 
    很遗憾，国内没有引进 `Linux Kernel Development <https://www.amazon.com/Linux-Kernel-Development-Developers-Library-ebook-dp-B003V4ATI0/dp/B003V4ATI0/>`_ ，请参考 `Linux.Kernel.Development.3rd.Edition.pdf <https://github.com/jyfc/ebook/blob/master/03_operating_system/Linux.Kernel.Development.3rd.Edition.pdf>`_
 
+代码注释、调试和参与社区
+=========================
+
+学习内核代码是一个漫长的过程，系统越来越复杂和庞大。老内核开发和新加入的开发之间存在不同的知识边界，相互间存在 ``代沟`` 。解决的方法可能是:
+
+- 保持代码清晰：明确的接口，稳定的设计，以及 "只做一件事，将事情做好" (Linus Torvald的解决方案)
+- 代码注释是开发者和后来维护者的沟通途径，你需要理解设计和实现之间的差异(也就是debuging)，你通过修改内核代码来能够理解内核设计，并且远比仅仅阅读代码要理解得更为深刻
+- 加入内核开发邮件列表并和其他开发者互动，这会促使你和其他开发者共同进步
+
 参考
 =========
 
 - `How to Learn Linux? (from Zero to Hero) <https://coderscat.com/how-to-learn-linux/>`_ 这是一篇关于如何学习Linux的经验分享，涵盖了 ``维护、应用开发、系统编程、内核开发`` 的一些建议。本文摘自其中的系统编程和内核开发部分，觉得有所借鉴
+- Robot Love 撰写的 `Linux Kernel Development <https://www.amazon.com/Linux-Kernel-Development-Developers-Library-ebook-dp-B003V4ATI0/dp/B003V4ATI0/>`_

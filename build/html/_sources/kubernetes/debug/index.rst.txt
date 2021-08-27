@@ -16,3 +16,4 @@ Kubernetes排查
    k8s_crashloopbackoff.rst
    apiserver_port_2379_refuse.rst
    k8s_notready_node.rst
+   k8s_master_pod_create_error.rst

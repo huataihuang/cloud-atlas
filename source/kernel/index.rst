@@ -10,6 +10,7 @@ Kernel Atlas
    :maxdepth: 1
 
    howto_learn_kernel.rst
+   prepare_kernel_dev.rst
    kernel_overview.rst
    cpu/index
    cgroup/index
