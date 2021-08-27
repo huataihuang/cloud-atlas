@@ -29,4 +29,3 @@ NvMe硬盘升级MacBook Pro SSD
 =====
 
 - `教程：如何使用NVMe硬盘升级旧款Mac的SSD <https://www.sohu.com/a/414599050_99956743>`_
-- 

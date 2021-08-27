@@ -8,7 +8,8 @@ Linux安全
    :maxdepth: 1
 
    chroot.rst
-   vpn/index.rst
+   vpn/index
+   tpm/index
 
 .. only::  subproject and html
 

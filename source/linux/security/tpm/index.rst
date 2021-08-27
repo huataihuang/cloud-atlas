@@ -1,16 +1,14 @@
-.. _centos:
+.. _linux_tpm:
 
 ========================================
-CentOS
+Linux TPM(Trusted Platform Module)
 ========================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_centos.rst
-   upgrade_centos_7_to_8.rst
-   install_centos8.rst
-   fix_centos6_repo.rst
+   intro_tpm.rst
+   tpm_hardware.rst
 
 .. only::  subproject and html
 

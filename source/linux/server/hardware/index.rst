@@ -10,6 +10,7 @@
    edac.rst
    lm_sensor.rst
    check_server_temp.rst
+   lackpack.rst
    
 .. only::  subproject and html
 
