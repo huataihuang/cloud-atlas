@@ -198,6 +198,12 @@ YouCompleteMe插件对vim版本有要求，在树莓派当前Raspberry Pi OS中�
 
    apt install build-essential cmake python3-dev
 
+.. note::
+
+   在 Fedora / CentOS 平台，对应 ``build-essential`` 执行::
+
+      sudo yum groupinstall 'Development Tools'
+
 - 编译YCM::
 
    cd ~/.vim/bundle/youcompleteme

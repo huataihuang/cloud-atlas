@@ -1,16 +1,15 @@
-.. _linux_disk:
+.. _kernel_startup:
 
 =================================
-Linux磁盘
+Kernel起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   linux_partition.rst
-   4k_alignment.rst
-   parted.rst
-   mount_img.rst
+   howto_learn_kernel.rst
+   prepare_kernel_dev.rst
+   kernel_overview.rst
 
 .. only::  subproject and html
 

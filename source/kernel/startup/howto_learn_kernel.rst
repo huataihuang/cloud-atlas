@@ -36,7 +36,7 @@ Linux系统编程指开发底层软件，例如存储或网络应用程序。
 
 Linux内核包含了非常多的模块，例如内存管理，进程调度，虚拟内存，文件系统，设备驱动等等。
 
-.. figure:: ../_static/kernel/linux-kernel-map.png
+.. figure:: ../../_static/kernel/startup/linux-kernel-map.png
    :scale: 65
 
 这么多内容对于内核开发初学者来说可能会感觉无从下手，所以你需要一个关于内核的全景指引：

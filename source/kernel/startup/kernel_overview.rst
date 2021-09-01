@@ -121,7 +121,7 @@ Linux将虚拟地址空间划分为两部分：
 - 内核空间
 - 用户空间
 
-.. figure:: ../_static/kernel/kernel_memory_space.png
+.. figure:: ../../_static/kernel/startup/kernel_memory_space.png
    :scale: 30
 
 - 每个用户进程都有自身对虚拟地址范围：从0到 ``TASK_SIZE``
