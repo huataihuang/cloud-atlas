@@ -14,7 +14,7 @@ Studio测试环境IP分配
 物理机/虚拟化/容器
 ===================
 
-纵观我的 :ref:`introduce_my_studio` 依旧 :ref:`real_concept` ，始终都是结婚了物理主机、KVM虚拟化和容器即技术(Kubernetes)来实现的。为了区分不同的主机，我规划主机命名策略:
+纵观我的 :ref:`introduce_my_studio` 依旧 :ref:`real_think` ，始终都是结婚了物理主机、KVM虚拟化和容器即技术(Kubernetes)来实现的。为了区分不同的主机，我规划主机命名策略:
 
 - worker-X :ref:`real` 真实物理主机
 - machine-X 使用KVM的 :ref:`kvm_nested_virtual` 技术模拟物理主机
@@ -23,7 +23,7 @@ Studio测试环境IP分配
   - kubemaster-X 在VKM虚拟机运行的Kubernetes集群master节点
   - kubenode-X 在VKM虚拟机运行的Kubernetes集群worker节点
 
-- vc-X (较少使用)直接命名的运行容器，通常会做一些容器验证测试。不过，在 :ref:`kubernetes` 环境中通常容器会起一个和应用有关的命名，例如 ``mangdb-1`` 
+- vc-X (较少使用)直接命名的运行容器，通常会做一些容器验证测试。不过，在 :ref:`kubernetes` 环境中通常容器会起一个和应用有关的命名，例如 ``mangdb-1``
 
 MacBook模拟集群
 ==================
