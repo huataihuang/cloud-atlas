@@ -4,7 +4,7 @@
 "Bad RIP value"含义
 =======================
 
-在 :ref:`debug_high_sys` 时，采用 :ref:`sysrq` 指令 ``t`` dump出进程信息::
+在 :ref:`debug_high_sys_process` 时，采用 :ref:`sysrq` 指令 ``t`` dump出进程信息::
 
    echo t > /proc/sysrq-trigger
 
@@ -14,7 +14,7 @@
    :language: bash
    :linenos:
    :caption:
-   
+
 从上述当前任务的信息可以看出:
 
 - ``RIP: 0033:0x7f4f6a70b4f3`` 对应地址错误 ( ``Code: Bad RIP value.`` )

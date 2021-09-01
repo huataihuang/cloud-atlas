@@ -32,14 +32,14 @@
 重要信息
 ----------
 
-- 务必备份所有重要组件: ``kubeadm upgrade`` 不会影响工作负载，只会涉及kubernetes内部组件，为防止万一，请完成 :ref:`k8s_backup` (演练) 
+- 务必备份所有重要组件: ``kubeadm upgrade`` 不会影响工作负载，只会涉及kubernetes内部组件，为防止万一，请完成 :ref:`k8s_backup` (演练)
 - 对kubelet做版本升级需要 :ref:`drain_node` ，对于管控面节点，可能运行 CoreDNS Pods或者其他非常重要的负载
 - 升级后，因为容器spec的哈希值已经更改，所以 ``所有容器都会被重新启动``
 
 升级控制平面节点
 =====================
 
-``控制平面节点升级过程应该每次处理一个节点`` 
+``控制平面节点升级过程应该每次处理一个节点``
 
 选择要升级的控制面节点，该节点上必须拥有 ``/etc/kubernetes/admin.conf`` 文件
 
@@ -235,7 +235,7 @@ kubeadm upgrade
    apt update
    apt install kubeadm=1.19.13-00 kubectl=1.19.13-00 kubelet=1.19.13-00 --allow-downgrades
    apt-mark hold kubeadm kubectl kubelet
-   
+
 - 再次执行升级报错依旧
 
 - 参考 `kubeadm join is not fault tolerant to etcd endpoint failures #1432 <https://github.com/kubernetes/kubeadm/issues/1432>`_ 我推测etcd版本是否存在兼容性bug？
@@ -264,7 +264,7 @@ etcd配置了从内建的grpc gateway尝试按照客户端在和etcd交互时候
 这是由于服务器配置没有输出证书，导致客户端认证失败，参考 `cfssl.txt <https://github.com/cloudflare/cfssl/blob/master/doc/cmd/cfssl.txt>`_ ，解决的方法(参考 KIVagant 的解决方法)，即:
 
 - 重新生成etcd证书(包含server和client的profile)
-- 设置 ``client_cert_auth=ture`` 运行参数(使用etcd启动环境变量指定) 
+- 设置 ``client_cert_auth=ture`` 运行参数(使用etcd启动环境变量指定)
 - 运行 ``etcd`` 时参数 ``--peer-auto-tls=true``
 
 不过，这个方法由于较为复杂(主要时证书我还没有搞清楚)，所以我采用上述issue中 JinsYin 的解决方法，即传递给etcd运行参数 ``--client-cert-auth=false`` ，见下文排查和解决方法
@@ -307,7 +307,7 @@ etcd配置了从内建的grpc gateway尝试按照客户端在和etcd交互时候
 - 再次尝试小版本升级::
 
    kubeadm upgrade apply v1.19.5
-   
+
 .. warning::
 
    很不幸，尝试失败，基本可以确定是etcd证书问题，解决方法也要从证书入手。不过，证书还没失效，因为etcd能够启动，并且apiserver连接有效
@@ -397,11 +397,11 @@ etcd配置了从内建的grpc gateway尝试按照客户端在和etcd交互时候
 
    cp -r /etc/kubernetes/pki/etcd /etc/kubernetes/pki/etcd.bak
 
-- 编辑配置文件 ``ca-config.json`` 
+- 编辑配置文件 ``ca-config.json``
 
 .. literalinclude:: upgrade_kubeadm_cluster/ca-config.json
    :linenos:
- 
+
 - 执行::
 
    cfssl gencert -ca=/etc/kubernetes/pki/etcd/ca.crt -ca-key=/etc/kubernetes/pki/etcd/ca.key -config=ca-config.json -profile=server ca-config.json | cfssljson -bare server
@@ -448,7 +448,7 @@ etcd配置了从内建的grpc gateway尝试按照客户端在和etcd交互时候
 
 .. warning::
 
-   这次升级失败，目前推测是早期部署集群的证书问题在版本升级中可能有什么兼容性问题，目前无法恢复。所以，我改为 :ref:`delete_k8s_cluster` 然后重建
+   这次升级失败，目前推测是早期部署集群的证书问题在版本升级中可能有什么兼容性问题，目前无法恢复。所以，我改为 :ref:`delete_kubeadm_cluster` 然后重建
 
 参考
 =======

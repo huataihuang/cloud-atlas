@@ -6,7 +6,7 @@
 
 .. note::
 
-   本文介绍一种找出大量消耗CPU的sys的进程的思路，适合采用cgroup隔离进程的生产系统问题排查。在找出大量消耗sys的进程后，我们可以采用 :ref:`debug_high_sys` 来进一步分析进程，找出代码问题。
+   本文介绍一种找出大量消耗CPU的sys的进程的思路，适合采用cgroup隔离进程的生产系统问题排查。在找出大量消耗sys的进程后，我们可以采用 :ref:`debug_high_sys_process` 来进一步分析进程，找出代码问题。
 
    如果没有使用cgroup，则稍微有些麻烦(话说应该没有不使用cgroup的系统了吧)，就是通过 ``cpuset`` 命令手工将进程指定到某个CPU上，观察CPU负载变化来排查。
 
@@ -28,7 +28,7 @@
    ...
    Mem:  263819896k total, 137107080k used, 126712816k free,  2005040k buffers
    Swap:        0k total,        0k used,        0k free, 30639512k cached
-   
+
      PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
    27980 root      20   0 1189m 1.0g 5148 S 107.1  0.4   8049:15 qemu-kvm
    32303 root      20   0 1274m 1.0g 5136 S 106.5  0.4   2790:12 qemu-kvm
@@ -58,7 +58,7 @@
    ...
    Mem:  263819896k total, 137200564k used, 126619332k free,  2004656k buffers
    Swap:        0k total,        0k used,        0k free, 30641964k cached
-   
+
      PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
    27980 root      20   0 1189m 1.0g 5148 S  108  0.4   8095:26 qemu-kvm
    32303 root      20   0 1274m 1.0g 5136 S  107  0.4   2836:03 qemu-kvm

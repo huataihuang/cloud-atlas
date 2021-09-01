@@ -1,44 +1,40 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Kubernetes的Master负载均衡 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../../_static/theme_overrides.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
         <script src="../../../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -197,7 +192,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -232,13 +226,11 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../../../index.html">Kubernetes Atlas</a> &raquo;</li>
         
@@ -253,7 +245,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../../../_sources/kubernetes/deployment/bootstrap_kubernetes/ha_k8s_lb/k8s_lb.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -267,7 +259,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="kubernetesmaster">
+  <div class="section" id="kubernetesmaster">
 <span id="k8s-lb"></span><h1>Kubernetes的Master负载均衡<a class="headerlink" href="#kubernetesmaster" title="永久链接至标题">¶</a></h1>
 <p>正如 <a class="reference internal" href="../ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 所述，构建Kubernetes高可用集群，以etcd是否独立部署来划分两种不同对HA部署架构：</p>
 <ul class="simple">
@@ -275,7 +267,7 @@
 <li><p>独立部署etcd</p></li>
 </ul>
 <p>在部署扩展多Master节点高可用集群之前，我们先要为apiserver准备好负载均衡。即完成本章节准备工作之后，我们才能继续 <a class="reference internal" href="../create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 。</p>
-<section id="id1">
+<div class="section" id="id1">
 <h2>负载均衡<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <p>不管采用哪种HA部署方式，都需要使负载均衡来分发worker节点对请求和连接给后端的多个apiserver。在 <a class="reference internal" href="../create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 中，我们扩展了Kubenetes Master服务器，使得对外同时具备了多个Kube-apiserver服务，现在我们需要在apiserver之前构建负载均衡，使得worker节点可以通过负载均衡的VIP来访问后端实际服务器。</p>
 <p>kube-apiserver负载均衡：</p>
@@ -305,10 +297,10 @@
 <p>由于kubelet客户端采用长连接方式访问apiserver，所以一旦kubelet通过负载均衡分发到后端到apiserver之后，除非kubelet客户端重启，一般情况下kubelete客户端会始终访问同一台apiserver。这就带来了一个均衡性问题：当apiserver由于升级重启或者crash重启，kubelet客户端连接会集中到其他正常服务器上并且不会再平衡。极端情况下，可能虽然有多个apiserver，但负载会集中到少量服务器上。</p>
 <p>这个问题在KubeCon China 2019的阿里云演讲 <a class="reference external" href="https://www.youtube.com/watch?v=1ThhTbMO1NE">Understanding Scalability and Performance in the Kubenetes Masteer</a> 有详细介绍和解决方案思路介绍(中文观看请访问 <a class="reference external" href="https://v.qq.com/x/page/v0906j1czvd.html">了解 Kubernetes Master 的可扩展性和性能</a> )。</p>
 </div>
-</section>
-<section id="apihaproxykeeplived">
+</div>
+<div class="section" id="apihaproxykeeplived">
 <h2>API高可用HAProxy和Keeplived<a class="headerlink" href="#apihaproxykeeplived" title="永久链接至标题">¶</a></h2>
-<section id="id2">
+<div class="section" id="id2">
 <h3>准备工作<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 需要关闭SELinux，否则启动haproxy服务无法绑定端口(详细见下文 <code class="docutils literal notranslate"><span class="pre">问题排查</span></code> ):</p>
@@ -318,8 +310,8 @@
 </div>
 </li>
 </ul>
-</section>
-<section id="keepalived">
+</div>
+<div class="section" id="keepalived">
 <h3>Keepalived<a class="headerlink" href="#keepalived" title="永久链接至标题">¶</a></h3>
 <p>Keepalived提供Kubernetes集群Master VIP 192.168.122.10 ( <a class="reference internal" href="../../../../studio/studio_ip.html#studio-ip"><span class="std std-ref">Studio测试环境IP分配</span></a> )，即浮动在HAProxy的健康节点之一，提供对外服务的访问IP，并在节点故障时自动切换到其他健康节点。Kubernetes API将始终通过HAProxy提供对外访问。</p>
 <ul>
@@ -436,8 +428,8 @@
 <p>在HAProxy前端，则部署Nginx做反向代理，Nginx实现简单的四层负载均衡。Nginx对外采用DNS轮询方式实现GSLB。</p>
 <p>GSLB结合脚本侦测和DDNS动态更新DNS记录，自动摘除故障的Nginx节点。</p>
 </div>
-</section>
-<section id="haproxy">
+</div>
+<div class="section" id="haproxy">
 <h3>HAProxy<a class="headerlink" href="#haproxy" title="永久链接至标题">¶</a></h3>
 <p>HAProxy将检查后端 <code class="docutils literal notranslate"><span class="pre">kubemaster-X</span></code> 服务器上的 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> 端口健康状态，并且负载均衡请求到集群的健康实例上，并且也将对局域网提供Kubernetes web UI(Dashboard)服务，对外提供服务的虚拟VIP即Keepalived的浮动IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 。</p>
 <ul>
@@ -464,76 +456,76 @@
 <blockquote>
 <div><div class="literal-block-wrapper docutils container" id="id7">
 <div class="code-block-caption"><span class="caption-text">haproxy.cfg</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>global
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70</pre></div></td><td class="code"><div class="highlight"><pre><span></span>global
   log /dev/log  local0
   log /dev/log  local1 notice
   chroot /var/lib/haproxy
@@ -620,11 +612,11 @@ listen stats
 <p><code class="docutils literal notranslate"><span class="pre">stats</span> <span class="pre">socket</span> <span class="pre">/var/lib/haproxy/stats</span></code> 替换了 <code class="docutils literal notranslate"><span class="pre">stats</span> <span class="pre">socket</span> <span class="pre">/run/haproxy/admin.sock</span> <span class="pre">mode</span> <span class="pre">660</span> <span class="pre">level</span> <span class="pre">admin</span></code> ，原因是发行版操作系统启动默认没有 <code class="docutils literal notranslate"><span class="pre">/run/haproxy</span></code> 目录，会导致无法创建 sock 文件。见下文。</p>
 <p><code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">*:6443</span></code> 是为了使得haproxy启动时能绑定任何的接口，因为keeplived只在主服务器上启动了VIP地址，所以设置了通配符 <code class="docutils literal notranslate"><span class="pre">*</span></code> 来匹配，否则haproxy在没有浮动VIP的主机上无法启动。</p>
 </div>
-</section>
-</section>
-<section id="keepalived-haproxy">
+</div>
+</div>
+<div class="section" id="keepalived-haproxy">
 <h2>keepalived+haproxy验证<a class="headerlink" href="#keepalived-haproxy" title="永久链接至标题">¶</a></h2>
-<section id="apiserver-vip">
+<div class="section" id="apiserver-vip">
 <h3>测试apiserver VIP<a class="headerlink" href="#apiserver-vip" title="永久链接至标题">¶</a></h3>
 <p>现在 VIP <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 浮动在 <code class="docutils literal notranslate"><span class="pre">proxy-1</span></code> 虚拟机上，所以我们可以通过以下命令验证是否可以访问集群。</p>
 <ul>
@@ -649,11 +641,11 @@ listen stats
 </div>
 </li>
 </ul>
-</section>
-</section>
-<section id="id4">
+</div>
+</div>
+<div class="section" id="id4">
 <h2>问题排查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
-<section id="haproxysocket">
+<div class="section" id="haproxysocket">
 <h3>HAProxy无法绑定socket<a class="headerlink" href="#haproxysocket" title="永久链接至标题">¶</a></h3>
 <p>启动遇到报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">haproxy</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">wrapper</span><span class="p">[</span><span class="mi">20624</span><span class="p">]:</span> <span class="p">[</span><span class="n">ALERT</span><span class="p">]</span> <span class="mi">229</span><span class="o">/</span><span class="mi">120654</span> <span class="p">(</span><span class="mi">20625</span><span class="p">)</span> <span class="p">:</span> <span class="n">Starting</span> <span class="n">frontend</span> <span class="n">GLOBAL</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">bind</span> <span class="n">UNIX</span> <span class="n">socket</span> <span class="p">[</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">admin</span><span class="o">.</span><span class="n">sock</span><span class="p">]</span>
@@ -682,9 +674,9 @@ listen stats
 <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">selinux</span><span class="o">/</span><span class="n">config</span>
 </pre></div>
 </div>
-</section>
-</section>
-<section id="id5">
+</div>
+</div>
+<div class="section" id="id5">
 <h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a></p></li>
@@ -692,35 +684,34 @@ listen stats
 <li><p><a class="reference external" href="https://snapdev.net/2015/09/08/install-haproxy-and-keepalived-on-centos-7-for-mariadb-cluster/">INSTALL HAPROXY AND KEEPALIVED ON CENTOS 7 FOR MARIADB CLUSTER</a></p></li>
 <li><p><a class="reference external" href="https://medium.com/&#64;sliit.sk95/managing-failovers-with-keepalived-haproxy-c8de98d0c96e">Managing Failovers with Keepalived &amp; HAproxy</a></p></li>
 </ul>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../ha_k8s_dnsrr/index.html" class="btn btn-neutral float-right" title="基于DNSRR的高可用Kubernetes集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="基于负载均衡的高可用Kubernetes集群" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="../ha_k8s_dnsrr/index.html" class="btn btn-neutral float-right" title="基于DNSRR的高可用Kubernetes集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="基于负载均衡的高可用Kubernetes集群" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="../../../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
+        &copy; <a href="../../../../copyright.html">Copyright</a> 2021, Huatai Huang
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -728,6 +719,7 @@ listen stats
 
 
 </footer>
+
         </div>
       </div>
 
@@ -735,6 +727,7 @@ listen stats
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

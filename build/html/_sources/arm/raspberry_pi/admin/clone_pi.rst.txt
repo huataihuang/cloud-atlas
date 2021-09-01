@@ -21,7 +21,7 @@
 `PiShrink <https://github.com/Drewsif/PiShrink>`_ 是一个bash脚本可以自动收缩树莓派镜像，这样可以制作出较小的镜像文件，可以快速恢复到SD卡::
 
    Usage: $0 [-adhrspvzZ] imagefile.img [newimagefile.img]
-   
+
      -s         Don't expand filesystem when image is booted the first time
      -v         Be verbose
      -r         Use advanced filesystem repair option if the normal one fails
@@ -55,7 +55,7 @@
 恢复镜像
 =========
 
-我主要想通过将TF卡替换成USB 3.0接口上的外接存储，来加速存储访问性能。所以通过上述方法制作的镜像，可以通过以下命令 ``dd`` 复制到U盘，然后 :ref:`usb_boot_pi_400` ::
+我主要想通过将TF卡替换成USB 3.0接口上的外接存储，来加速存储访问性能。所以通过上述方法制作的镜像，可以通过以下命令 ``dd`` 复制到U盘，然后 :ref:`usb_boot_ubuntu_pi_4` ::
 
    dd if=raspi_studio.img of=/dev/sdc bs=100M conv=fsync
 
