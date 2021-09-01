@@ -9,3 +9,4 @@ Intel CPU架构
 
    intel_rdt/index
    intel_qat/index
+   intel_sgx/index

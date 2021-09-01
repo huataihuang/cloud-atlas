@@ -8,6 +8,7 @@ Linux磁盘
    :maxdepth: 1
 
    linux_partition.rst
+   4k_alignment.rst
    parted.rst
    mount_img.rst
 

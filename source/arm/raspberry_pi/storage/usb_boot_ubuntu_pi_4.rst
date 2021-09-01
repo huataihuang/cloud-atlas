@@ -11,7 +11,18 @@
 Raspbian和firmware
 =====================
 
-树莓派的USB启动需要更新和设置树莓派firmware，不过，我安装和使用的是 :ref:`ubuntu_linux` for Raspberry Pi，所以在Ubuntu 20.0.4  LTS操作系统中并没有包含树莓派firmware更新工具。解决的方法是，在SD卡中安装树莓派官方提供的Raspbian操作系统，利用raspbian中的firmware更新工具进行更新。
+树莓派的USB启动需要更新和设置树莓派firmware，不过，我安装和使用的是 :ref:`ubuntu_linux` for Raspberry Pi，所以在Ubuntu 20.0.4  LTS操作系统中并没有包含树莓派firmware更新工具。
+
+解决的方法是，在SD卡中安装树莓派官方提供的Raspbian操作系统，利用raspbian中的firmware更新工具进行更新:
+
+- 如本文下述，先用Raspbian OS启动树莓派，更新firmware
+- 再将Ubuntu for Raspberry Pi复制到移动硬盘中，最后通过修改启动配置从移动硬盘启动
+
+本文是我在Ubuntu for Raspberry Pi上实践，同样，我在 :ref:`usb_boot_kali_pi_4` 将结合 chroot 和 
+
+
+更新firmware
+--------------
 
 - 采用 :ref:`pi_quick_start` 中方法，我们先下载镜像并通过dd命令写入TF卡::
 

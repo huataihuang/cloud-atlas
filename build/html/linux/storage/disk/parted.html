@@ -43,7 +43,7 @@
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="挂载raw镜像(.img)" href="mount_img.html" />
-    <link rel="prev" title="Linux分区" href="linux_partition.html" /> 
+    <link rel="prev" title="磁盘块设备4K对齐" href="4k_alignment.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -131,6 +131,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Linux存储</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Linux磁盘</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="linux_partition.html">Linux分区</a></li>
+<li class="toctree-l4"><a class="reference internal" href="4k_alignment.html">磁盘块设备4K对齐</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">parted分区工具</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mount_img.html">挂载raw镜像(.img)</a></li>
 </ul>
@@ -145,6 +146,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../server/index.html">Linux服务器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Linux安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../desktop/index.html">Linux桌面</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../linux_tablet/index.html">Linux平板</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../kernel/index.html">Kernel Atlas</a></li>
@@ -245,9 +247,134 @@
   <section id="parted">
 <span id="id1"></span><h1>parted分区工具<a class="headerlink" href="#parted" title="永久链接至标题">¶</a></h1>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>块设备概览<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>我们日常使用的磁盘在Unix/Linux中称为 <code class="docutils literal notranslate"><span class="pre">块设备</span></code> ，之所以称为块设备是因为这些设备的读写数据总是以一个固定大小的块来完成。所以当硬盘插入主机显示的设备文件是有别于打印机、麦克风或者相机。要列出所有连接到Linux系统的跨设备，可以使用 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令(list block devices):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsbk</span>
+</pre></div>
+</div>
+<p>显示可能类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NAME         MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda            8:0    0 953.9G  0 disk
+├─sda1         8:1    0   256M  0 part /boot/firmware
+└─sda2         8:2    0    32G  0 part /
+mmcblk0      179:0    0  29.3G  0 disk
+├─mmcblk0p1  179:1    0  29.3G  0 part
+├─mmcblk0p2  179:2    0   128K  0 part
+...
+</pre></div>
+</div>
+<p>上述 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令仅仅用于侦测和显示设备，不会修改，所以可以在任何数据设备上使用。可以看到 <code class="docutils literal notranslate"><span class="pre">TYPE</span> <span class="pre">MOUNTPOINT</span></code> 有两种类型 <code class="docutils literal notranslate"><span class="pre">disk</span></code> 和 <code class="docutils literal notranslate"><span class="pre">part</span></code> 分别表示磁盘和分区</p>
+<section id="dmesg">
+<h3>dmesg显示块设备<a class="headerlink" href="#dmesg" title="永久链接至标题">¶</a></h3>
+<p>如果将USB移动硬盘设备插入系统，可以从系统日志中显示出相关信息，可以使用dmesg命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dmesg</span> <span class="o">|</span> <span class="n">tail</span>
+</pre></div>
+</div>
+<p>插入和拔出设备都会看到磁盘块设备信息变化</p>
+</section>
+</section>
+<section id="id3">
+<h2>文件系统概览<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>在真正开始使用磁盘块设备之前，我们需要在块设备上创建文件系统。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>本段操作是一个高危操作，会破坏磁盘上数据，所以请确保操作的是没有重要数据的磁盘，并且已经提前做好了数据备份。 <code class="docutils literal notranslate"><span class="pre">警告!!!</span></code></p>
+</div>
+<p>实际上块设备也能直接操作，例如以下案例:</p>
+<ul>
+<li><p>我们可以卸载一个磁盘文件系统挂载 <code class="docutils literal notranslate"><span class="pre">/dev/sdx</span></code> (假设有这个 <code class="docutils literal notranslate"><span class="pre">sdx</span></code> 磁盘设备文件)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">umount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdx</span><span class="p">{,</span><span class="mi">1</span><span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p>在磁盘设备没有挂载情况下，我们可以直接向裸设备写入数据:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s1">&#39;hello world&#39;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdx</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>虽然我们没有挂载磁盘文件系统，实际上写入到块设备文件的字符串依然可以读出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">head</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdx</span>
+</pre></div>
+</div>
+<p>可以看到输出的信息就是我们写入的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hello</span> <span class="n">world</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>parted工具<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>parted是一个创建和维护分区表的工具，提供了交互模式和直接的命令行模式（可以在shell中使用）.</p>
+<p>基本命令模式（注意，选项在设备名前面，命令在设备之后，这样选项就会传递给`parted`命令）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="p">[</span><span class="n">OPTION</span><span class="p">]</span><span class="o">...</span> <span class="p">[</span><span class="n">DEVICE</span> <span class="p">[</span><span class="n">COMMAND</span> <span class="p">[</span><span class="n">PARAMETERS</span><span class="p">]</span><span class="o">...</span><span class="p">]</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="mi">0</span><span class="o">%</span> <span class="mi">256</span><span class="n">MB</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在磁盘块设备使用中，有一个非常重要的选项是 <a class="reference internal" href="4k_alignment.html#k-alignment"><span class="std std-ref">磁盘块设备4K对齐</span></a> ，上述参数 <code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">optimal</span></code> 就是启用4K对齐设置，可以确保分区完全4K对齐，提高磁盘读写性能。</p>
+<p>检查分区 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 是否4k对齐:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">align</span><span class="o">-</span><span class="n">check</span> <span class="n">opt</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>输入显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="n">aligned</span>
+</pre></div>
+</div>
+<p>则表明分区已经对齐</p>
+</div>
+<ul>
+<li><p>列出磁盘分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="nb">print</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Model</span><span class="p">:</span> <span class="n">WD</span> <span class="n">My</span> <span class="n">Passport</span> <span class="mi">25</span><span class="n">F3</span> <span class="p">(</span><span class="n">scsi</span><span class="p">)</span>
+<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mi">1024</span><span class="n">GB</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span><span class="n">B</span><span class="o">/</span><span class="mi">4096</span><span class="n">B</span>
+<span class="n">Partition</span> <span class="n">Table</span><span class="p">:</span> <span class="n">msdos</span>
+<span class="n">Disk</span> <span class="n">Flags</span><span class="p">:</span>
+
+<span class="n">Number</span>  <span class="n">Start</span>   <span class="n">End</span>     <span class="n">Size</span>    <span class="n">Type</span>     <span class="n">File</span> <span class="n">system</span>  <span class="n">Flags</span>
+ <span class="mi">1</span>      <span class="mi">1049</span><span class="n">kB</span>  <span class="mi">269</span><span class="n">MB</span>   <span class="mi">268</span><span class="n">MB</span>   <span class="n">primary</span>  <span class="n">fat32</span>        <span class="n">boot</span><span class="p">,</span> <span class="n">lba</span>
+ <span class="mi">2</span>      <span class="mi">269</span><span class="n">MB</span>   <span class="mf">34.6</span><span class="n">GB</span>  <span class="mf">34.4</span><span class="n">GB</span>  <span class="n">primary</span>  <span class="n">ext4</span>
+</pre></div>
+</div>
+<ul>
+<li><p>如果已经进入 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 交互模式，可以通过 <code class="docutils literal notranslate"><span class="pre">select</span></code> 命令切换磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">parted</span><span class="p">)</span> <span class="n">select</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdX</span>
+</pre></div>
+</div>
+</li>
+<li><p>重建分区表</p></li>
+</ul>
+<p>分区表是通过命令 <code class="docutils literal notranslate"><span class="pre">mklabel</span></code> 完成的，类型有 <code class="docutils literal notranslate"><span class="pre">msdos</span></code> （即传统的DOS分区表），也可以使用现在主流的 <code class="docutils literal notranslate"><span class="pre">gpt</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mklabel</span> <span class="n">gpt</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p><code class="docutils literal notranslate"><span class="pre">警告</span></code> ：重建分区表将擦除磁盘上所有数据。</p>
+</div>
+<ul class="simple">
+<li><p>创建分区</p></li>
+</ul>
+<p>使用交互命令 <code class="docutils literal notranslate"><span class="pre">mkpart</span></code> 可以实现创建分区，但是非常繁琐。直接命令行实现较为快捷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="mi">0</span><span class="o">%</span> <span class="mi">256</span><span class="n">MB</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://opensource.com/article/18/11/partition-format-drive-linux">How to partition and format a drive on Linux</a></p></li>
+<li><p><a class="reference external" href="https://www.tecmint.com/parted-command-to-create-resize-rescue-linux-disk-partitions/">8 Linux ‘Parted’ Commands to Create, Resize and Rescue Disk Partitions</a></p></li>
+<li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/GNU_Parted">archlinux: GNU Parted - UEFI/GPT examples</a></p></li>
 </ul>
 </section>
 </section>
@@ -259,7 +386,7 @@
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="mount_img.html" class="btn btn-neutral float-right" title="挂载raw镜像(.img)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="linux_partition.html" class="btn btn-neutral float-left" title="Linux分区" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="4k_alignment.html" class="btn btn-neutral float-left" title="磁盘块设备4K对齐" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

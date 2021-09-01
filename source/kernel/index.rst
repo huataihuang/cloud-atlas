@@ -9,9 +9,7 @@ Kernel Atlas
 .. toctree::
    :maxdepth: 1
 
-   howto_learn_kernel.rst
-   prepare_kernel_dev.rst
-   kernel_overview.rst
+   startup/index
    cpu/index
    cgroup/index
    process/index
