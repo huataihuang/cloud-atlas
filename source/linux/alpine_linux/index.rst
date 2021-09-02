@@ -11,7 +11,9 @@ Alpine Linux
    think_alpine.rst
    alpine_startup.rst
    alpine_install.rst
+   alpine_local_backup.rst
    alpine_static_ip.rst
+   alpine_setup_disk.rst
    alpine_wireless.rst
    alpine_extended.rst
    alpine_apk.rst
