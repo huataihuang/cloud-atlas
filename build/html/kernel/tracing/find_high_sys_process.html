@@ -1,40 +1,44 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
+<html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>找出消耗CPU的sys的进程 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
         <script src="../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
@@ -76,6 +80,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -159,6 +164,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -193,11 +199,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Kernel Atlas</a> &raquo;</li>
         
@@ -208,7 +216,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../_sources/kernel/tracing/find_high_sys_process.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -222,14 +230,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="cpusys">
+  <section id="cpusys">
 <span id="find-high-sys-process"></span><h1>找出消耗CPU的sys的进程<a class="headerlink" href="#cpusys" title="永久链接至标题">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>本文介绍一种找出大量消耗CPU的sys的进程的思路，适合采用cgroup隔离进程的生产系统问题排查。在找出大量消耗sys的进程后，我们可以采用 <a class="reference internal" href="debug_high_sys_process.html#debug-high-sys-process"><span class="std std-ref">debug占用很高system的进程</span></a> 来进一步分析进程，找出代码问题。</p>
 <p>如果没有使用cgroup，则稍微有些麻烦(话说应该没有不使用cgroup的系统了吧)，就是通过 <code class="docutils literal notranslate"><span class="pre">cpuset</span></code> 命令手工将进程指定到某个CPU上，观察CPU负载变化来排查。</p>
 </div>
-<div class="section" id="sys">
+<section id="sys">
 <h2>大量消耗sys的场景<a class="headerlink" href="#sys" title="永久链接至标题">¶</a></h2>
 <p>在生产环境中，会采用 <a class="reference internal" href="../cgroup/index.html#cgroup"><span class="std std-ref">Kernel Cgroup</span></a> 进行资源隔离不同类型的进程，例如，会把监控服务(大量的数据采集脚本)都加入到 <code class="docutils literal notranslate"><span class="pre">agent</span></code> 的cgroup控制组，并绑定使用 <code class="docutils literal notranslate"><span class="pre">cpu</span> <span class="pre">24</span></code> 。这种方式可以闭麦呢辅助程序和应用系统争抢CPU资源。</p>
 <p>但是，发现数十个辅助程序绑定到 <code class="docutils literal notranslate"><span class="pre">cpu</span> <span class="pre">24</span></code> 之后，这个CPU出现了非常严重的 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 使用率，从 <a class="reference internal" href="../process/utils/top.html#top"><span class="std std-ref">性能观察工具top</span></a> 来看，系统 <code class="docutils literal notranslate"><span class="pre">load</span> <span class="pre">average</span></code> 负载非常高，但是实际上除了少数 <code class="docutils literal notranslate"><span class="pre">cpu</span></code> 确实计算较为繁忙，大多数cpu都是空闲的:</p>
@@ -286,34 +294,35 @@
 </div>
 <p>经过对比，可以看到 <code class="docutils literal notranslate"><span class="pre">load</span> <span class="pre">average</span></code> 非常高的原因是 <code class="docutils literal notranslate"><span class="pre">cpu</span> <span class="pre">24</span></code> 存在 <code class="docutils literal notranslate"><span class="pre">阻塞</span></code> ：这个CPU异常高的 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 完全消耗了CPU资源，导致任务在运行队列中很长。</p>
 <p>我的目标是找出导致如此高的 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 消耗的程序，解决辅助程序堆积在运行队列中导致 <code class="docutils literal notranslate"><span class="pre">load</span> <span class="pre">average</span></code> 过高问题。</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="debug_high_sys_process.html" class="btn btn-neutral float-right" title="debug占用很高system的进程" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="sysrq.html" class="btn btn-neutral float-left" title="Linux “魔力” 系统请求组合键 SysRq" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="debug_high_sys_process.html" class="btn btn-neutral float-right" title="debug占用很高system的进程" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sysrq.html" class="btn btn-neutral float-left" title="Linux “魔力” 系统请求组合键 SysRq" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; <a href="../../copyright.html">Copyright</a> 2021, Huatai Huang
+        &#169; <a href="../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -321,7 +330,6 @@
 
 
 </footer>
-
         </div>
       </div>
 
@@ -329,7 +337,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

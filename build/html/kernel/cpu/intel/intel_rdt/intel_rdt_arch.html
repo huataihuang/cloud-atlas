@@ -1,40 +1,44 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
+<html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Intel资源调配技术(Intel RDT)架构 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/theme_overrides.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/language_data.js"></script>
         <script src="../../../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
@@ -76,6 +80,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -157,6 +162,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -191,11 +197,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../../index.html">Kernel Atlas</a> &raquo;</li>
         
@@ -210,7 +218,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../../../_sources/kernel/cpu/intel/intel_rdt/intel_rdt_arch.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -224,9 +232,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="intel-intel-rdt">
+  <section id="intel-intel-rdt">
 <span id="intel-rdt-arch"></span><h1>Intel资源调配技术(Intel RDT)架构<a class="headerlink" href="#intel-intel-rdt" title="永久链接至标题">¶</a></h1>
-<div class="section" id="rdtl2-l3">
+<section id="rdtl2-l3">
 <h2>RDT管控L2/L3缓存和内存带宽<a class="headerlink" href="#rdtl2-l3" title="永久链接至标题">¶</a></h2>
 <p>RDT技术，全称为Resource Director Technology，提供了两种能力：监控和分配。该技术旨在通过一系列的CPU指令从而允许用户直接对每个CPU核心（附加了HT技术后为每个逻辑核心）的L2缓存、L3缓存（LLC）以及内存带宽进行监控和分配。</p>
 <p>Linux Kernel 4.10引入了Intel RDT实现架构，基于 <code class="docutils literal notranslate"><span class="pre">resctrl</span></code> 文件系统提供了 L3 CAT (Cache Allocation Technology)，L3 CDP(Code and Data Prioritization)，以及L2 CAT。并且Linux Kernel 4.12进一步实现支持了MBA(Memory Bandwidth Allocation)内存带宽分配技术。</p>
@@ -239,8 +247,8 @@
 <p>以往解决方法是通过控制虚拟机逻辑资源(cgroup)但是调整粒度太粗，并且无法控制处理器缓存这样敏感而且稀缺的资源。为此Intel推出了RDT技术。在Intel中文网站的 <a class="reference external" href="https://www.intel.cn/content/www/cn/zh/architecture-and-technology/optimize-resource-utilization-rdt-animation.html">通过英特尔® 资源调配技术优化资源利用</a> 视频形象介绍了RDT的作用。</p>
 <p>Intel的Fenghua Yu在Linux Foundation上的演讲 <a class="reference external" href="https://01.org/intel-rdt-linux/blogs/fyu1/2017/resource-allocation-intel%C2%AE-resource-director-technology">Resource Allocation in Intel® Resource Director Technology</a> 可以帮助我们快速了解这项技术。</p>
 </div>
-</div>
-<div class="section" id="rdt">
+</section>
+<section id="rdt">
 <h2>RDT技术架构<a class="headerlink" href="#rdt" title="永久链接至标题">¶</a></h2>
 <p>缓存分配技术CAT(Cache Allocation Technology)的核心目标是基于服务级别(Class of Service, COS 或 CLOS)来实现资源分配。应用程序或者独立线程可以按照处理器提供的一系列服务级别来标记。这样就会按照应用程序和线程的服务分类来限制和分配其使用的缓存。每个CLOS可以使用能力掩码(capacity bitmasks, CBMs)来标志并在服务分类中指定覆盖(overlap)或隔离(isolation)的程度。</p>
 <p>对于每个逻辑处理器，都有一个寄存器(被称为 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR或PQR)来允许操作系统(OS)或虚拟机管理器(VMM)在应用程序、线程、虚拟机(VM)调度(scheduled)的时候指定它的CLOS。</p>
@@ -266,7 +274,7 @@
 <p class="admonition-title">注解</p>
 <p>我的 <a class="reference internal" href="../../../../studio/index.html#studio"><span class="std std-ref">Studio Atlas</span></a> 模拟云计算集群的实验环境使用的是 <a class="reference internal" href="../../../../studio/hardware/intel_core_i7_4850hq.html#intel-core-i7-4850hq"><span class="std std-ref">Intel Core i7-4850HQ处理器</span></a> 处理器是 Haswll 系列，仅支持</p>
 </div>
-<div class="section" id="id2">
+<section id="id2">
 <h3>RDT术语<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>RMID</p></li>
@@ -288,14 +296,14 @@
 <li><p>CLOS</p></li>
 </ul>
 <p>CAT中引入了一个中间结构叫做 <code class="docutils literal notranslate"><span class="pre">CLOS</span></code> (Class of Service)，可以理解为资源控制标签。此外每个CLOS定义了CBM（capacity bitmasks），CLOS和CBM一起，确定有多少cache可以被这个CLOS使用。</p>
-</div>
-</div>
-<div class="section" id="cat">
+</section>
+</section>
+<section id="cat">
 <h2>高速缓存分配技术(CAT)<a class="headerlink" href="#cat" title="永久链接至标题">¶</a></h2>
 <p>在云计算环境，多租户虚拟机会运行多种不同类型的应用，所以确保一致的性能和优先级划分确保重要应用运行是巨大的挑战。在多核处理器系统中，共享资源，例如末级高速缓存(LLC，Last Level Cache)、共享IO设备、共享内存带宽的分配和使用是关系到应用性能的关键。</p>
-<img alt="../../../../_images/multi_core_cpu_share_resource.jpg" src="../../../../_images/multi_core_cpu_share_resource.jpg" />
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/multi_core_cpu_share_resource.jpg" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/multi_core_cpu_share_resource.jpg" />
 <p>一些应用（如后台视频流和转码应用）会过度使用高速缓存，导致降低更重要应用的性能。例如下图中 <code class="docutils literal notranslate"><span class="pre">Noisy</span> <span class="pre">neighbor</span></code> 的 <code class="docutils literal notranslate"><span class="pre">App[0]</span></code> （运行在CPU核心0上）消耗了过多的末级高速缓存，影响了CPU核心1上运行的 <code class="docutils literal notranslate"><span class="pre">App[1]</span></code> 。这是因为通常根据先到先得的分配原则：</p>
-<img alt="../../../../_images/noisy_neighbor.png" src="../../../../_images/noisy_neighbor.png" />
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/noisy_neighbor.png" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/noisy_neighbor.png" />
 <p>高速缓存分配技术（CAT）提供了软件可编程控制，以控制特定线程、应用、虚拟机或容器等消耗的高速缓存空间。可支持操作系统保护重要的进程，支持管理程序即使在 <code class="docutils literal notranslate"><span class="pre">noisy</span></code> 环境中也可以对重要虚拟机进行优先级划分。</p>
 <p>CAT基本机制：</p>
 <ul class="simple">
@@ -306,16 +314,20 @@
 <p class="admonition-title">注解</p>
 <p>Intel在Haswell志强处理器首次引入CAT L3功能，并且在后续的Broadwell和Skylake系列上得到增强改进。未来x86处理器还将引入CAT L2功能，对共享的L2缓存进行类似的分配管理技术。</p>
 </div>
-<div class="section" id="id3">
+<section id="id3">
 <h3>CAT硬件架构<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
-<div class="figure align-default" id="id12">
-<img alt="../../../../_images/cat_l3_hardware_architecture.png" src="../../../../_images/cat_l3_hardware_architecture.png" />
-<p class="caption"><span class="caption-text">Figure 1: CAT L3硬件架构</span><a class="headerlink" href="#id12" title="永久链接至图片">¶</a></p>
-</div>
-<div class="figure align-default" id="id13">
-<img alt="../../../../_images/l2_l3_cat.png" src="../../../../_images/l2_l3_cat.png" />
-<p class="caption"><span class="caption-text">Figure 2: 多资源分配 - L2和L3 CAT</span><a class="headerlink" href="#id13" title="永久链接至图片">¶</a></p>
-</div>
+<figure class="align-default" id="id12">
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/cat_l3_hardware_architecture.png" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/cat_l3_hardware_architecture.png" />
+<figcaption>
+<p><span class="caption-text">Figure 1: CAT L3硬件架构</span><a class="headerlink" href="#id12" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id13">
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/l2_l3_cat.png" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/l2_l3_cat.png" />
+<figcaption>
+<p><span class="caption-text">Figure 2: 多资源分配 - L2和L3 CAT</span><a class="headerlink" href="#id13" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>Intel L1缓存分为 <code class="docutils literal notranslate"><span class="pre">iCache</span></code> (指令缓存) 和 <code class="docutils literal notranslate"><span class="pre">dCache</span></code> (数据缓存) ，是每个CPU物理核心独享的缓存。L1缓存分为 <code class="docutils literal notranslate"><span class="pre">iCache</span></code> 和 <code class="docutils literal notranslate"><span class="pre">dCache</span></code> 结构具有多种优势:</p>
@@ -325,14 +337,14 @@
 </ul>
 <p>参考： <a class="reference external" href="https://softwareengineering.stackexchange.com/questions/44731/why-are-there-separate-l1-caches-for-data-and-instructions">Why are there separate L1 caches for data and instructions?</a></p>
 </div>
-</div>
-<div class="section" id="id4">
+</section>
+<section id="id4">
 <h3>CAT技术的关键概念<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>CLOS</p></li>
 </ul>
 <p>高速缓存分配技术引入一种名为服务类(CLOS)的中间接口，可以为资源控制标记，线程/应用/虚拟机/容器在该标记内进行分组。CLOS包含相关资源容量位掩码(CBM)，来说明特定的CLOS能够使用多少高速缓存。</p>
-<img alt="../../../../_images/clos.png" src="../../../../_images/clos.png" />
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/clos.png" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/clos.png" />
 <ul class="simple">
 <li><p>使用模式</p></li>
 </ul>
@@ -346,30 +358,36 @@
 </ul>
 <p>更高层次的软件，例如一个调度框架（Kubernetes）或者管理员层次的工具可以通过 <code class="docutils literal notranslate"><span class="pre">OS/VMM</span></code> 激活硬件能力，可以参考 <a class="reference external" href="https://software.intel.com/en-us/articles/software-enabling-for-cache-allocation-technology">Software Enabling for Cache Allocation Technology in the Intel® Xeon® Processor E5 v4 Family</a> 文档的设置方法。</p>
 <p>对于给定应用程序指定可用的缓存是通过MSR所包含 <code class="docutils literal notranslate"><span class="pre">能力掩码</span></code> ( capacity bitmasks, CBMs )来设置的：</p>
-<div class="figure align-default" id="id14">
-<img alt="../../../../_images/config_l3_cbms_per_clos.png" src="../../../../_images/config_l3_cbms_per_clos.png" />
-<p class="caption"><span class="caption-text">Figure 2: 为每个服务逻辑分类 (logical class of service, CLOS) 配置L3容量位掩码 (L3 capacity bitmasks)</span><a class="headerlink" href="#id14" title="永久链接至图片">¶</a></p>
+<figure class="align-default" id="id14">
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/config_l3_cbms_per_clos.png" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/config_l3_cbms_per_clos.png" />
+<figcaption>
+<p><span class="caption-text">Figure 2: 为每个服务逻辑分类 (logical class of service, CLOS) 配置L3容量位掩码 (L3 capacity bitmasks)</span><a class="headerlink" href="#id14" title="永久链接至图片">¶</a></p>
 <div class="legend">
 <p>通过 MSR的  <code class="docutils literal notranslate"><span class="pre">IA32_L3_MASK_n</span></code> 可以配置CLOS的L3容量位掩码，这里 <code class="docutils literal notranslate"><span class="pre">n</span></code> 表示 CLOS 编号</p>
 </div>
-</div>
+</figcaption>
+</figure>
 <p>在CBMs中的值表示了可用缓存量以及重叠或隔离程度。例如下图CLOS[1]的可用缓存小于CLOS[3]，即优先级较低：</p>
-<div class="figure align-default" id="id15">
-<img alt="../../../../_images/clos_cbm_example.png" src="../../../../_images/clos_cbm_example.png" />
-<p class="caption"><span class="caption-text">Figure 3: 容量位掩码覆盖和横跨多个CLOS的隔离</span><a class="headerlink" href="#id15" title="永久链接至图片">¶</a></p>
-</div>
+<figure class="align-default" id="id15">
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/clos_cbm_example.png" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/clos_cbm_example.png" />
+<figcaption>
+<p><span class="caption-text">Figure 3: 容量位掩码覆盖和横跨多个CLOS的隔离</span><a class="headerlink" href="#id15" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
 <p>在末端高速缓存（LLC）中，如果应用程序没有相互覆盖或者VM没有竞争缓存空间的情况下，系统不会使用独立的缓存分区，而是可以动态更新任何需要修改的资源。</p>
 <p>使用覆盖位掩码（overlapping bitmasks）（在上图Figure 2中的CLOS[2]和CLOS[3]）通常可能比隔离情况更能达到较高的带宽，并且依然具备了相关优先级：因为比使用完全隔离的分区，可以动态按需更新资源可以获得更大的LLC。这可能是适合很多线程/应用/VM并发运行的模型。</p>
 <p>关联软件线程和CLOS是通过 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR实现的，为每个硬件线程做了定义：</p>
-<div class="figure align-default" id="id16">
-<img alt="../../../../_images/hardware_thread_clos.png" src="../../../../_images/hardware_thread_clos.png" />
-<p class="caption"><span class="caption-text">Figure 3: 一个线程的当前服务分类（class of service, CLOS）可以使用 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR 为每个硬件线程定义</span><a class="headerlink" href="#id16" title="永久链接至图片">¶</a></p>
-</div>
+<figure class="align-default" id="id16">
+<img alt="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/hardware_thread_clos.png" src="kernel/cpu/intel/intel_rdt/../../../../_static/kernel/cpu/intel/intel_rdt/hardware_thread_clos.png" />
+<figcaption>
+<p><span class="caption-text">Figure 3: 一个线程的当前服务分类（class of service, CLOS）可以使用 <code class="docutils literal notranslate"><span class="pre">IA32_PQR_ASSOC</span></code> MSR 为每个硬件线程定义</span><a class="headerlink" href="#id16" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
 <p>另一种可选的方法是不激活操作系统和VMM的CLOS直接pin到硬件线程的方式，而是采用软件线程pin到硬件线程上；不过建议激活OS/VMM的方式避免需要pin应用线程。</p>
 <p>在开始评估截断，pin模式可以通过 <a class="reference external" href="https://github.com/01org/intel-cmt-cat">RDT工具</a> 来实现，这个工具提供了Linux系统的线程监控和通过关联 <a class="reference external" href="https://software.intel.com/en-us/blogs/2014/12/11/intel-s-cache-monitoring-technology-software-visible-interfaces">Resource Monitoring IDs (RMIDs)</a> 和 每个硬件线程的 <a class="reference external" href="https://software.intel.com/en-us/articles/introduction-to-cache-allocation-technology">CLOS</a> 控制资源使用。</p>
-</div>
-</div>
-<div class="section" id="id6">
+</section>
+</section>
+<section id="id6">
 <h2>CAT技术的应用场景<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>CAT缓存分配技术在很多领域有广泛适应性，具备动态更新的伸缩和重叠(overlapped)、隔离(isolated)配置，可以将一个设备在不同应用领域轮转共享使用：</p>
 <ul class="simple">
@@ -385,12 +403,12 @@
 <p class="admonition-title">注解</p>
 <p>在 <a class="reference external" href="https://software.intel.com/en-us/articles/cache-allocation-technology-proof-points">Proof Points for Cache Allocation Technology in the Intel® Xeon® Processor E5 v4 Family</a> 文档中，Intel提供了一些应用CAT的案例可以参考，例如借鉴作为性能测试方案。</p>
 </div>
-</div>
-<div class="section" id="cdp">
+</section>
+<section id="cdp">
 <h2>代码和数据优先级(CDP)<a class="headerlink" href="#cdp" title="永久链接至标题">¶</a></h2>
 <p>代码和数据优先级(Code and Data Prioritization, CDP)技术是CAT技术的扩展，提供了代码和数据的隔离以及区分优先级，也是通过CLOSID来实现代码和数据掩码的隔离。CDP技术最早从Broadwell系列志强处理器引入。</p>
-</div>
-<div class="section" id="id7">
+</section>
+<section id="id7">
 <h2>RDT实战<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <p>RDT使用分为两种方式:</p>
 <ul class="simple">
@@ -398,15 +416,15 @@
 <li><p>使能OS/VMM调度（需要内核支持），在进程切换时候会自动将RMID进行更新，能够支持线程迁移。</p></li>
 </ul>
 <p>使用Intel开源工具 <a class="reference external" href="https://github.com/intel/intel-cmt-cat">intel-cmt-cat</a> 可以不需要内核支持，直接使用 CAT,CMT,MBM,CDP功能。</p>
-<div class="section" id="intelrdtintel-cmt-cat">
+<section id="intelrdtintel-cmt-cat">
 <h3>Intel开源RDT工具intel-cmt-cat<a class="headerlink" href="#intelrdtintel-cmt-cat" title="永久链接至标题">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="o">&amp;&amp;</span> <span class="n">make</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>如果找不到动态链接库，则指定: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">LD_LIBRARY_PATH=/usr/local/lib</span></code></p>
 <p>RDT工具 <code class="docutils literal notranslate"><span class="pre">pqos</span></code> ，运行在用户层，通过标准Linux工具访问MSR寄存器，需要root用户权限。支持在每个core或线程上提供CMT和MBM，其中MBM包括本地和异地内存。目前在 RHEL 7操作系统，通过 <code class="docutils literal notranslate"><span class="pre">intel-cmt-cat</span></code> 软件包提供了 <code class="docutils literal notranslate"><span class="pre">pqos</span></code> 工具，用于控制Intel处理器CPU缓存和内存带宽。( <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-performance_monitoring_tools-pqos">Red Hat Enterprise Linux 7 Performance Tuning Guide 2.14. pqos</a> ) 。根据 <a class="reference external" href="https://manpages.debian.org/unstable/intel-cmt-cat/pqos.8.en.html">pqos manual(8)</a> 可以看到， <code class="docutils literal notranslate"><span class="pre">pqos</span></code> 工具同时支持 Intel RDT 和 AMD PQoS。</p>
-</div>
-<div class="section" id="id8">
+</section>
+<section id="id8">
 <h3>内核方式使用RDT<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
 <p>虽然传统上通过Intel开源RDT工具intel-cmt-cat来直接访问MSR设置RDT，但是也可以通过操作系统内核方式使用RDT，需要内核支持。</p>
 <ul>
@@ -416,14 +434,14 @@
 </div>
 </li>
 </ul>
-</div>
-</div>
-<div class="section" id="amd-pqos-arm-mpam">
+</section>
+</section>
+<section id="amd-pqos-arm-mpam">
 <h2>AMD PQoS 和ARM MPAM<a class="headerlink" href="#amd-pqos-arm-mpam" title="永久链接至标题">¶</a></h2>
 <p>AMD在Zen处理器二代架构支持和RDT对等技术PQoS，并且已经被内核支持 - <a class="reference external" href="https://www.phoronix.com/scan.php?page=news_item&amp;px=AMD-Platform-QoS-RFC-Patches">AMD Publishes Platform QoS Patches For Next-Gen Processors</a> 。如上文所述， <code class="docutils literal notranslate"><span class="pre">pqos</span></code> 工具是同时支持Intel RDT和AMD PQoS技术的，两者兼容。</p>
 <p>ARM架构处理器对应有MPAM技术(Memory Partitioning and Monitoring)，不过该技术起步较晚，目前尚未有完善的用户空间管控工具( <code class="docutils literal notranslate"><span class="pre">resctrl</span></code> 还不支持ARM架构 )。</p>
-</div>
-<div class="section" id="id9">
+</section>
+<section id="id9">
 <h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.youtube.com/watch?v=rKe5_xWpH8o">Resource Allocation: Intel Resource Director Technology (RDT) by Fenghua Yu, Intel</a> - Intel的FengHua Yu在Linux Foundation上演讲介绍RDT视频，可参考</p></li>
@@ -436,34 +454,35 @@
 <li><p><a class="reference external" href="https://developer.amd.com/wp-content/resources/56375.pdf">AMD64 Technology Platform Quality of Service Extensions</a></p></li>
 <li><p><a class="reference external" href="https://zhuanlan.zhihu.com/p/92125001">Kernel 4.14+ Intel RDT / AMD PQOS配置</a></p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="intel_rdt_practice.html" class="btn btn-neutral float-right" title="Intel RDT实践" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="Intel Resource Director Technology(RDT)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="intel_rdt_practice.html" class="btn btn-neutral float-right" title="Intel RDT实践" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Intel Resource Director Technology(RDT)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; <a href="../../../../copyright.html">Copyright</a> 2021, Huatai Huang
+        &#169; <a href="../../../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -471,7 +490,6 @@
 
 
 </footer>
-
         </div>
       </div>
 
@@ -479,7 +497,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
