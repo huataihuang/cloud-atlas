@@ -114,6 +114,21 @@ tmux的 ``前导键`` 是 ``ctrl-b`` ，也就是按下 ``ctrl-b`` 就进入发�
 
 结合 ``ctrl-b`` 和 ``?`` 可以查看帮助
 
+tmux-config
+================
+
+`samoshkin/tmux-config <https://github.com/samoshkin/tmux-config>`_ 提供了一个超级强大的tmux配置:
+
+.. figure:: ../../_static/linux/desktop/tmux.gif
+   :scale: 80
+
+- 安装简便::
+
+   git clone https://github.com/samoshkin/tmux-config.git
+   ./tmux-config/install.sh
+
+ 并且结合macOS上的iTerm2使用非常方便。
+
 参考
 =======
 
