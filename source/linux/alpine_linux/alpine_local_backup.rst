@@ -83,7 +83,9 @@ Alpine的 ``diskless mode`` ISO镜像会尝试从系统分区加载一个 ``.apk
    /dev/loop0               99.4M     99.4M         0 100% /.modloop
    /dev/sdb3                27.5G     24.0K     26.0G   0% /media/sdb3
 
-- 然后在 ``setup-alpine`` 中就可以使用这个 ``sdb3`` 作为存储配置以及apk缓存目录 ``/media/sdb3/cache``
+- 然后在 ``setup-alpine`` 中就可以使用这个 ``sdb3`` 作为存储配置以及apk缓存目录 ``/media/sdb3/cache`` :
+
+
 
 参考
 ======
