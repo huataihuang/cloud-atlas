@@ -19,6 +19,20 @@ Alpine Linux以diskless模式启动时，只会从启动设备中加载一些必
 保存和加载自定义ISO镜像
 ========================
 
+- 刚完成 ``dd`` 命令将ISO复制到U盘的分区::
+
+   Disk /dev/sda: 28.67 GiB, 30765219840 bytes, 60088320 sectors
+   Disk model:  SanDisk 3.2Gen1
+   Units: sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+   Disklabel type: dos
+   Disk identifier: 0x65428faa
+   
+   Device     Boot Start     End Sectors  Size Id Type
+   /dev/sda1  *        0 1224703 1224704  598M  0 Empty
+   /dev/sda2         460    3339    2880  1.4M ef EFI (FAT-12/16/32)
+
 Alpine的 ``diskless mode`` ISO镜像会尝试从系统分区加载一个 ``.apkovl`` 卷，这样就可以将定制的运行状态保存到一个可写入分区的 ``.apkovl`` 文件，然后在启动是自动加载。
 
 .. note::
@@ -57,6 +71,8 @@ Alpine的 ``diskless mode`` ISO镜像会尝试从系统分区加载一个 ``.apk
    /dev/sdb2    1023,254,63 1023,254,63        460       3339       2880 1440K ef EFI (FAT-12/16/32)
    /dev/sdb3    76,59,48    668,82,54      1224704   60088319   58863616 28.0G 83 Linux
 
+另外一种方法，是在第一次制作alipine linux U盘时，就通过fdisk命令创建好分区3，并且使用 ``mkfs.ext4`` 把文件系统建立好，这样就可以直接用于 ``setup-alpine``
+
 - 格式化分区::
 
    apk add e2fsprogs
@@ -85,9 +101,110 @@ Alpine的 ``diskless mode`` ISO镜像会尝试从系统分区加载一个 ``.apk
 
 - 然后在 ``setup-alpine`` 中就可以使用这个 ``sdb3`` 作为存储配置以及apk缓存目录 ``/media/sdb3/cache`` :
 
+- (可选,因为 ``setup-alpine`` 会自动添加)将挂载 ``sdb3`` 的配置写入 ``/etc/fstab`` ::
 
+   echo "/dev/sdb3 /media/sdb3 ext4 noatime,ro 0 0" >> /etc/fstab
+
+.. note::
+
+   你会注意到上述前述配置中将 ``/dev/sdb3`` 挂载为只读 ``ro`` 模式，不过这不影响 ``lbu`` 工具，因为 ``lbu`` 在执行数据写入时会临时将挂载目录 ``remount`` 成读写模式，所以这里配置只读也没有关系。
+
+   这步添加 ``/etc/fstab`` 配置可以不用执行，因为 ``setup-alpine`` 交互脚本在配置本地lbu配置磁盘时，会自动添加一行 ``/etc/fstab`` 配置如下::
+
+      /dev/sdb3 /media/sdb3 ext4 rw,relatime 0 0
+
+- (可选,因为 ``setup-alpine`` 会自动添加 )修改 ``/etc/lbu/lbu.conf`` 配置::
+
+   LBU_MEDIA=sdb3
+
+此外，如果分区足够大，甚至可以保留多个备份(例如3个备份)::
+
+   BACKUP_LIMIT=3
+
+- 最后执行以下命令持久化本地修改，这样下次系统启动会自动恢复所做修改::
+
+   lbu commit
+
+lbu常用修命令
+===============
+
+- lbu
+- lbu commit (Same as 'lbu ci')
+- lbu package (Same as 'lbu pkg')
+- lbu status (Same as 'lbu st')
+- lbu list (Same as 'lbu ls')
+- lbu diff
+- lbu include (Same as 'lbu inc' or 'lbu add')
+- lbu exclude (Same as 'lbu ex' or 'lbu delete')
+- lbu list-backup (Same as 'lbu lb')
+- lbu revert
+
+当执行 ``lbu commit`` 命令时，会将系统修改保存，此时 ``lbu`` 会生成一个类似 ``myboxname.apkovl.tar.gz`` (这里 ``myboxname`` 是主机名)。这个文件包含了被称为 ``apkovl`` 的修改内容，保存到指定的media中，例如上文案例中的 ``sdb3``
+
+lbu实践
+-----------
+
+- 添加 ``/home`` 目录备份::
+
+   lbu include /home
+
+- 创建一个系统用户::
+
+   adduser -h /home/huatai -s /bin/ash -S -u 502 huatai
+   passwd huatai
+
+- 安装 ``sudo`` 工具::
+
+   apk add sudo
+   vi /etc/sudoers
+
+添加 ``/etc/sudoers`` 配置::
+
+   huatai ALL=(ALL) NOPASSWD: ALL
+
+- 然后提交备份::
+
+   lbu ci
+
+- 重启系统观察
+
+Alpine Linux磁盘
+===================
+
+Alpine Linux磁盘划分采用 ``parted`` 和 ``fdisk`` 观察不同::
+
+   # parted /dev/sda print
+   Model:  USB  SanDisk 3.2Gen1 (scsi)
+   Disk /dev/sda: 30.8GB
+   Sector size (logical/physical): 512B/512B
+   Partition Table: msdos
+   Disk Flags:
+   
+   Number  Start  End     Size    Type     File system  Flags
+    2      236kB  1710kB  1475kB  primary               esp
+    3      627MB  30.8GB  30.1GB  primary  ext4
+   
+   # fdisk -l /dev/sda
+   Disk /dev/sda: 28.67 GiB, 30765219840 bytes, 60088320 sectors
+   Disk model:  SanDisk 3.2Gen1
+   Units: sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+   Disklabel type: dos
+   Disk identifier: 0x65428faa
+   
+   Device     Boot   Start      End  Sectors  Size Id Type
+   /dev/sda1  *          0  1224703  1224704  598M  0 Empty
+   /dev/sda2           460     3339     2880  1.4M ef EFI (FAT-12/16/32)
+   /dev/sda3       1224704 60088319 58863616 28.1G 83 Linux
+
+启动失败排查
+==============
+
+我遇到一个问题，重启进入 GRUB 界面显示内核没有正确加载
 
 参考
 ======
 
 - `Alpine local backup <https://wiki.alpinelinux.org/wiki/Alpine_local_backup>`_
+- `alpine-persistent-usb <https://github.com/IronOxidizer/alpine-persistent-usb>`_
