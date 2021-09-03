@@ -1,44 +1,40 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>etcd故障恢复 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
         <script src="../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -159,6 +154,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
@@ -178,7 +174,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -213,13 +208,11 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Kubernetes Atlas</a> &raquo;</li>
         
@@ -230,7 +223,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../_sources/kubernetes/production/recovery_etcd.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -244,51 +237,50 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="etcd">
+  <div class="section" id="etcd">
 <span id="recovery-etcd"></span><h1>etcd故障恢复<a class="headerlink" href="#etcd" title="永久链接至标题">¶</a></h1>
 <p>etcd被设计成在服务器故障时依然可用，etcd集群会自动从临时故障中恢复（例如主机重启）并且可以承受最多 <code class="docutils literal notranslate"><span class="pre">(N-1)/2</span></code> 节点的持续故障（N表示集群etcd节点数量）。当etcd成员服务器永久性故障，无论是硬件或磁盘故障，就会和集群失去联系。需要注意，当出现超过 <code class="docutils literal notranslate"><span class="pre">(N-1)/2</span></code> 节点故障，etcd集群将持续故障，因为集群缺少足够的法定投票。如果投票不足，集群就不能达成一致，这样也就不能更新数据。</p>
 <p>为了从灾难性故障中恢复，etcd v3提供了快照(snapshot)和恢复机制，以便能够在丢失v3关键数据时重建集群。</p>
-<section id="keyspace">
+<div class="section" id="keyspace">
 <h2>keyspace快照<a class="headerlink" href="#keyspace" title="永久链接至标题">¶</a></h2>
 <p>要恢复一个集群，首先需要从给一个etcd成员服务器上获取keyspace的快照。快照可以从活着的成员服务器上使用 <code class="docutils literal notranslate"><span class="pre">etcdctl</span> <span class="pre">snapshot</span> <span class="pre">save</span></code> 命令获取，也可以从一个 etcd 数据目录中复制 <code class="docutils literal notranslate"><span class="pre">member/snap/db</span></code> 文件来得到。举例，以下通过 <code class="docutils literal notranslate"><span class="pre">$ENDPOINT</span></code> 从keyspace获得快照，存储到文件 <code class="docutils literal notranslate"><span class="pre">snapshot.db</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ETCDCTL_API=3 etcdctl --endpoints $ENDPOINT snapshot save snapshot.db
 </pre></div>
 </div>
-<section id="id1">
+<div class="section" id="id1">
 <h3>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/recovery.md">Disaster recovery</a></p></li>
 </ul>
-</section>
-</section>
-</section>
+</div>
+</div>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="debug_node_notready.html" class="btn btn-neutral float-right" title="kubenetes节点”NotReady”状态排查" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="k8s_ha_master.html" class="btn btn-neutral float-left" title="高可用Kubernetes Master" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="debug_node_notready.html" class="btn btn-neutral float-right" title="kubenetes节点”NotReady”状态排查" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="k8s_ha_master.html" class="btn btn-neutral float-left" title="高可用Kubernetes Master" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
+        &copy; <a href="../../copyright.html">Copyright</a> 2021, Huatai Huang
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -296,6 +288,7 @@
 
 
 </footer>
+
         </div>
       </div>
 
@@ -303,6 +296,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

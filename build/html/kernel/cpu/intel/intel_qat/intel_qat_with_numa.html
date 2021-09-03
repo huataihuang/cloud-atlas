@@ -1,44 +1,40 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>结合NUMA使用Intel QAT &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../../_static/theme_overrides.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
         <script src="../../../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -143,6 +138,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rust/index.html">Rust Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../bsd/index.html">BSD Atlas</a></li>
@@ -162,7 +158,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -197,13 +192,11 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../../../index.html">Kernel Atlas</a> &raquo;</li>
         
@@ -218,7 +211,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../../../_sources/kernel/cpu/intel/intel_qat/intel_qat_with_numa.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -232,51 +225,50 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="numaintel-qat">
+  <div class="section" id="numaintel-qat">
 <span id="intel-qat-with-numa"></span><h1>结合NUMA使用Intel QAT<a class="headerlink" href="#numaintel-qat" title="永久链接至标题">¶</a></h1>
 <p>Intel QuickAssist Technology (Intel QAT)提供了通用 <code class="docutils literal notranslate"><span class="pre">加密/机密</span></code> 和 <code class="docutils literal notranslate"><span class="pre">压缩/解压</span></code> 高性能技术。随着Intel Xeon处理器Scale系列上市，一些服务器采用了Intel QAT onboard 作为系统平台控制Hub。所以使用好Intel QAT优化操作对于数据中心运行时非常有利的。</p>
 <p>对于多socket服务器的非一致性内存访问( <code class="docutils literal notranslate"><span class="pre">non-uniform</span> <span class="pre">memory</span> <span class="pre">access</span></code> NUMA )，精心部署优化Intel QAT可以获得良好的性能优化。当使用Intel QAT设备标识，通过感应CPU拓扑(NUMA Aware)，可以智能将工作负载导入和导出Intel QAT设备通道，实现性能加速。</p>
-<section id="numa-awareness">
+<div class="section" id="numa-awareness">
 <h2>为什么NUMA Awareness重要?<a class="headerlink" href="#numa-awareness" title="永久链接至标题">¶</a></h2>
-<figure class="align-default">
-<a class="reference internal image-reference" href="kernel/cpu/intel/intel_qat/../../../../_static/kernel/cpu/intel/intel_qat/simple_abstracted_2_socket_numa_layout.png"><img alt="kernel/cpu/intel/intel_qat/../../../../_static/kernel/cpu/intel/intel_qat/simple_abstracted_2_socket_numa_layout.png" src="kernel/cpu/intel/intel_qat/../../../../_static/kernel/cpu/intel/intel_qat/simple_abstracted_2_socket_numa_layout.png" style="width: 630.0px; height: 244.8px;" /></a>
-</figure>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="../../../../_images/simple_abstracted_2_socket_numa_layout.png"><img alt="../../../../_images/simple_abstracted_2_socket_numa_layout.png" src="../../../../_images/simple_abstracted_2_socket_numa_layout.png" style="width: 630.0px; height: 244.8px;" /></a>
+</div>
 <p>总的来说，当服务器使用2个或更多物理处理器sockets时候，使用 NUMA awareness 对性能非常重要。每个processor socket都有自己连接访问的系统主内存和设备总线。在基于NUMA的架构中，</p>
-</section>
-<section id="id1">
+</div>
+<div class="section" id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://software.intel.com/content/www/us/en/develop/articles/use-intel-quickassist-technology-efficiently-with-numa-awareness.html">Use Intel® QuickAssist Technology Efficiently with NUMA Awareness</a></p></li>
 </ul>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../intel_sgx/index.html" class="btn btn-neutral float-right" title="Intel Software Guard Extensions(SGX)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="intel_qat_quickstart.html" class="btn btn-neutral float-left" title="Intel QuickAssist技术 快速起步" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="../intel_sgx/index.html" class="btn btn-neutral float-right" title="Intel Software Guard Extensions(SGX)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="intel_qat_quickstart.html" class="btn btn-neutral float-left" title="Intel QuickAssist技术 快速起步" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="../../../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
+        &copy; <a href="../../../../copyright.html">Copyright</a> 2021, Huatai Huang
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -284,6 +276,7 @@
 
 
 </footer>
+
         </div>
       </div>
 
@@ -291,6 +284,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

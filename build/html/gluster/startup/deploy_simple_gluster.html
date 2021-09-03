@@ -1,44 +1,40 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>部署简单GlusterFS集群 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
         <script src="../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -141,6 +136,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
@@ -160,7 +156,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -195,13 +190,11 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Gluster Atlas</a> &raquo;</li>
         
@@ -212,7 +205,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../_sources/gluster/startup/deploy_simple_gluster.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -226,23 +219,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="glusterfs">
+  <div class="section" id="glusterfs">
 <span id="deploy-simple-gluster"></span><h1>部署简单GlusterFS集群<a class="headerlink" href="#glusterfs" title="永久链接至标题">¶</a></h1>
 <p>正如 <a class="reference internal" href="../gluster_vs_ceph.html#gluster-vs-ceph"><span class="std std-ref">Gluster和Ceph对比</span></a> 辨析，GlusterFS是在文件系统之上构建的分布式文件系统，所以 <a class="reference internal" href="../../linux/storage/filesystem/index.html#linux-filesystem"><span class="std std-ref">Linux文件系统</span></a> 的构建会给GlusterFS带来更多的特性和功能。例如，结合卷管理可以实现快照。本文实践是快速部署一个简化版本的GlusterFS集群，在文件系统存储层采用直接基于磁盘设备创建XFS文件系统。这种简洁的文件系统虽然灵活性受到限制，但是架构简洁也使得出现错误的可能性降低。</p>
-<section id="id1">
+<div class="section" id="id1">
 <h2>服务器准备<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>至少需要3台服务器组建稳定的GlusterFS集群(2台虽然也能构建，但是缺乏quotum容易导致脑裂)，在我的这个演示案例中，我采用6个KVM虚拟机(最初我以为奇数服务器可以构建更为稳定，但是参考 <a class="reference internal" href="../admin/gluster_split_brain_deal.html#gluster-split-brain-deal"><span class="std std-ref">GlusterFS脑裂和解决方案</span></a> 修正了方案)，目的是构建分布式多副本集群</p></li>
 <li><p>每个虚拟机使用一个附加的 <cite>/dev/vdb</cite> 设备(见下文磁盘分区和文件系统构建)</p></li>
 </ul>
-<section id="id2">
+<div class="section" id="id2">
 <h3>环境准备<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>所有服务器节点的时间必须同步，所以，请安装并运行ntp客户端，当前主流推荐采用 chrony - <a class="reference external" href="https://www.thegeekdiary.com/centos-rhel-7-chrony-vs-ntp-differences-between-ntpd-and-chronyd/">CentOS / RHEL 7 : Chrony V/s NTP (Differences Between ntpd and chronyd)</a></p></li>
 <li><p>所有服务器需要彼此能够DNS解析，所以建议采用统一的DNS服务器进行维护主机名解析，比较简化的方法是所有服务器采用一致的 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 提供静态主机名解析。</p></li>
 </ul>
-</section>
-<section id="id3">
+</div>
+<div class="section" id="id3">
 <h3>磁盘分区<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>使用 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 对磁盘进行分区，分区vdb1占用250G(没有使用这个vdb是因为我还准备用vdb构建复杂的 <a class="reference internal" href="../../linux/storage/stratis/index.html#stratis"><span class="std std-ref">Stratis - Linux存储系统</span></a> ):</p>
@@ -300,8 +293,8 @@ vdb    253:16   0   500G  0 disk
 `-vdb1 253:17   0 232.9G  0 part
 </pre></div>
 </div>
-</section>
-<section id="xfs">
+</div>
+<div class="section" id="xfs">
 <h3>XFS文件系统<a class="headerlink" href="#xfs" title="永久链接至标题">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -330,8 +323,8 @@ vdb    253:16   0   500G  0 disk
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb1</span> <span class="n">on</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">brick1</span> <span class="nb">type</span> <span class="n">xfs</span> <span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">attr2</span><span class="p">,</span><span class="n">inode64</span><span class="p">,</span><span class="n">noquota</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="id4">
+</div>
+<div class="section" id="id4">
 <h3>批量创建文件系统脚本<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <p>服务器有多块nvme磁盘，从 <code class="docutils literal notranslate"><span class="pre">/dev/nvme0n1</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/dev/nvme11n1</span></code> 共计12块磁盘，则采用如下脚本快速完成格式化挂载:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for i in {0..11};do
@@ -362,9 +355,9 @@ done
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme11n1p1</span>  <span class="mf">3.5</span><span class="n">T</span>   <span class="mi">33</span><span class="n">M</span>  <span class="mf">3.5</span><span class="n">T</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">brick11</span>
 </pre></div>
 </div>
-</section>
-</section>
-<section id="id5">
+</div>
+</div>
+<div class="section" id="id5">
 <h2>安装GlusterFS<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -411,7 +404,7 @@ done
 </div>
 </li>
 </ul>
-<section id="centos-7glusterfs">
+<div class="section" id="centos-7glusterfs">
 <h3>在CentOS 7上安装GlusterFS<a class="headerlink" href="#centos-7glusterfs" title="永久链接至标题">¶</a></h3>
 <p>如果在标准的CentOS 7上，当前也是可以直接使用 SIG Yum Repos进行安装的:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">centos</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">gluster</span>
@@ -456,13 +449,13 @@ done
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">server</span>
 </pre></div>
 </div>
-</section>
-<section id="centos-6glusterfs">
+</div>
+<div class="section" id="centos-6glusterfs">
 <h3>在CentOS 6上安装GlusterFS<a class="headerlink" href="#centos-6glusterfs" title="永久链接至标题">¶</a></h3>
 <p>生产环境也有非常古老的CentOS 6系统，安装GlusterFS旧版本客户端，测试和GlusterFS 7的兼容性。首先通过 <code class="docutils literal notranslate"><span class="pre">yum</span> <span class="pre">search</span> <span class="pre">centos-release-gluster</span></code> 检查可用版本，然后安装对应的GlusterFS。</p>
-</section>
-</section>
-<section id="id6">
+</div>
+</div>
+<div class="section" id="id6">
 <h2>配置GlusterFS<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>确保服务器打开正确通讯端口:</p>
@@ -510,7 +503,7 @@ done
 <span class="n">State</span><span class="p">:</span> <span class="n">Peer</span> <span class="ow">in</span> <span class="n">Cluster</span> <span class="p">(</span><span class="n">Connected</span><span class="p">)</span>
 </pre></div>
 </div>
-<section id="id7">
+<div class="section" id="id7">
 <h3>设置GlusterFS卷<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在 <strong>所有服务器</strong> 上执行以下命令创建一个GlusterFS卷:</p>
@@ -704,19 +697,19 @@ done
 <p>GlusterFS支持多种 <a class="reference internal" href="../admin/gluster_volume.html#gluster-volume"><span class="std std-ref">GlusterFS卷</span></a> ，通常对于生产环境，建议使用数据高可用的 <code class="docutils literal notranslate"><span class="pre">Replicated</span></code> 卷，或者 <code class="docutils literal notranslate"><span class="pre">Distributed</span> <span class="pre">Replicated</span></code> 卷。</p>
 <p>这里的案例指定 <code class="docutils literal notranslate"><span class="pre">replica</span> <span class="pre">3</span></code> 也就是多副本卷，但是由于同时提供了多个3x数量的brick，所以就自然形成了分布式多副本卷( <code class="docutils literal notranslate"><span class="pre">Distributed</span> <span class="pre">Replicated</span></code> )。这种场景非常适合大规模的海量存储。</p>
 </div>
-</section>
-</section>
-<section id="id8">
+</div>
+</div>
+<div class="section" id="id8">
 <h2>使用GlusterFS卷<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <p>通常为了结构清晰和便于维护，GlusterFS客户端和服务器是采用分离部署的。这里我们把刚才剔除掉的 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> 作为客户端来测试刚才构建的数据卷。当然，客户端和服务器端部署在相同服务器上也是可以的，但是需要确保GlusterFS服务端比客户端先启动并就绪，否则可能会导致客户端异常。</p>
-<section id="id9">
+<div class="section" id="id9">
 <h3>客户端GlusterFS软件安装<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h3>
 <p>在客户端不需要安装完整的glusterfs软件包，只需要安装 <code class="docutils literal notranslate"><span class="pre">gluster-fuse</span></code> 软件包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">fuse</span>
 </pre></div>
 </div>
-</section>
-<section id="id10">
+</div>
+<div class="section" id="id10">
 <h3>客户端挂载GlusterFS卷<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> 上创建挂载目录:</p>
@@ -764,8 +757,8 @@ done
 </li>
 </ul>
 <p>我估算了一下，12秒钟复制了 27MB*100 = 2.7GB 数据，大约写入速度是 245MB/s (连续大文件写入)</p>
-</section>
-<section id="id11">
+</div>
+<div class="section" id="id11">
 <h3>GlusterFS文件分布<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h3>
 <p>上述6个brick，按照顺序排列，可以在 <code class="docutils literal notranslate"><span class="pre">worker1</span></code> 节点 <code class="docutils literal notranslate"><span class="pre">/data/brick1/gv0</span></code> 目录下看到文件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">copy</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">001</span>
@@ -821,9 +814,9 @@ done
 <p class="admonition-title">注解</p>
 <p>参考 <a class="reference external" href="https://blog.csdn.net/xdgouzongmei/article/details/52748812">GlusterFS Dispersed Volume(纠错卷)总结</a></p>
 </div>
-</section>
-</section>
-<section id="id12">
+</div>
+</div>
+<div class="section" id="id12">
 <h2>参考<a class="headerlink" href="#id12" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.gluster.org/en/latest/Quick-Start-Guide/Quickstart/">Getting started with GlusterFS - Quick Start Guide</a></p></li>
@@ -831,35 +824,34 @@ done
 <li><p><a class="reference external" href="https://www.golinuxcloud.com/glusterfs-distributed-volume-centos-rhel-8/">Install &amp; configure glusterfs distributed volume RHEL/CentOS 8</a></p></li>
 <li><p><a class="reference external" href="https://wiki.centos.org/HowTos/GlusterFSonCentOS">GlusterFS Storage Cluster on CentOS 7</a></p></li>
 </ul>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../deploy/index.html" class="btn btn-neutral float-right" title="GlusterFS部署" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="gluster_architecture.html" class="btn btn-neutral float-left" title="GlusterFS架构" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="../deploy/index.html" class="btn btn-neutral float-right" title="GlusterFS部署" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gluster_architecture.html" class="btn btn-neutral float-left" title="GlusterFS架构" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
+        &copy; <a href="../../copyright.html">Copyright</a> 2021, Huatai Huang
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -867,6 +859,7 @@ done
 
 
 </footer>
+
         </div>
       </div>
 
@@ -874,6 +867,7 @@ done
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

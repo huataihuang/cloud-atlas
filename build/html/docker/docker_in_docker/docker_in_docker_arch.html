@@ -1,44 +1,40 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Docker in Docker架构 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
         <script src="../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -143,6 +138,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
@@ -162,7 +158,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -197,13 +192,11 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Docker Atlas</a> &raquo;</li>
         
@@ -214,7 +207,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../_sources/docker/docker_in_docker/docker_in_docker_arch.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -228,7 +221,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="docker-in-docker">
+  <div class="section" id="docker-in-docker">
 <span id="docker-in-docker-arch"></span><h1>Docker in Docker架构<a class="headerlink" href="#docker-in-docker" title="永久链接至标题">¶</a></h1>
 <p>在开发测试环境，为了能够建立一个完整的 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 集群，使用大量的物理服务器是不经济的。最初我采用 <a class="reference internal" href="../../studio/kvm_docker_in_studio.html#kvm-docker-in-studio"><span class="std std-ref">Studio环境KVM和Docker</span></a> 在一台物理主机上构建多个KVM虚拟机，然后再在虚拟机内部部署Docker来运行Kubernetes。</p>
 <p>这种基于虚拟机运行的Kubernetes集群，在云计算厂商中较为流行，不过云计算厂商采用虚拟机的优势主要是：</p>
@@ -237,7 +230,7 @@
 <li><p>继承了KVM虚拟机的成熟技术，例如热迁移，以及大量的成熟调度、资源分配技术</p></li>
 </ul>
 <p>不过，对于测试环境以及内部使用的有安全保障的运行环境，嵌套KVM虚拟化和Docker容器带来了性能损耗。特别是个人电脑上模拟Kubernetes技术，大量的虚拟机资源消耗影响过大。</p>
-<section id="id1">
+<div class="section" id="id1">
 <h2>Docker in Docker背景<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <p><a class="reference external" href="https://store.docker.com/images/docker">Docker in Docker</a> 可以在一个Docker系统中运行Docker镜像，实现一个本地化Kubernetes集群。在2017年时，可以通过GitHub项目 <a class="reference external" href="https://github.com/Mirantis/kubeadm-dind-cluster">Mirantis/kubeadm-dind-cluster</a> 来使用Docker in Docker设置一个Kubernetes集群。当然，你的底层Docker可以是运行在Linux上的Docker，也可以是macOS上的Docker Desktop。</p>
 <div class="admonition note">
@@ -249,41 +242,40 @@
 <p>和 <a class="reference internal" href="../../kubernetes/startup_prepare/install_run_minikube.html#id1"><span class="std std-ref">minikube</span></a> 不同的是：minikube是一个单节点kubernetes，没有扩展性，只能做基本的命令操作。Docker in Docker提供了完整的在单个节点上运行多个Docker节点来实现多节点Kubernetes集群。除了没有物理服务器的冗灾，Docker in Docker可以模拟完整的Kubernetes集群，并且 <a class="reference internal" href="docker_in_docker_kind.html#docker-in-docker-kind"><span class="std std-ref">Docker in Docker部署工具kind</span></a> 可以实现多集群模拟，以便能够测试不同的应用部署架构。</p>
 </div>
 <p>Docker in Docker 主要用于帮助Docker的开发，很多人用Docker in Docker来运行持续集成(CI，例如 Jenkins)。</p>
-</section>
-<section id="id4">
+</div>
+<div class="section" id="id4">
 <h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://callistaenterprise.se/blogg/teknik/2017/12/20/kubernetes-on-docker-in-docker/">Setting up a Kubernetes cluster using Docker in Docker</a></p></li>
 </ul>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="docker_in_docker_kind.html" class="btn btn-neutral float-right" title="Docker in Docker部署工具kind" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="Docker in Docker" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="docker_in_docker_kind.html" class="btn btn-neutral float-right" title="Docker in Docker部署工具kind" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Docker in Docker" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
+        &copy; <a href="../../copyright.html">Copyright</a> 2021, Huatai Huang
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -291,6 +283,7 @@
 
 
 </footer>
+
         </div>
       </div>
 
@@ -298,6 +291,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

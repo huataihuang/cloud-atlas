@@ -1,44 +1,40 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Alpine Linux本地备份 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
         <script src="../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -133,8 +128,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#iso">保存和加载自定义ISO镜像</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lbu">lbu常用修命令</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">Alpine Linux磁盘</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">启动失败排查</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_static_ip.html">配置Alpine Linux静态IP地址</a></li>
@@ -142,6 +136,7 @@
 <li class="toctree-l3"><a class="reference internal" href="alpine_wireless.html">设置Alpine Linux无线</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_extended.html">U盘运行Alpine Linux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_apk.html">Alpine Linux包管理apk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="alpine_kvm.html">Alpine Linux运行KVM虚拟化</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../subgraph_os/index.html">Subgraph OS</a></li>
@@ -183,7 +178,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -218,13 +212,11 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Linux Atlas</a> &raquo;</li>
         
@@ -235,7 +227,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../_sources/linux/alpine_linux/alpine_local_backup.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -249,7 +241,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="alpine-linux">
+  <div class="section" id="alpine-linux">
 <span id="alpine-local-backup"></span><h1>Alpine Linux本地备份<a class="headerlink" href="#alpine-linux" title="永久链接至标题">¶</a></h1>
 <p>Alpine Linux以diskless模式启动时，只会从启动设备中加载一些必要的软件包。然后，本地修改内存中的数据(操作系统加载到内存中运行)是可能的，例如，安装软件包或者修改 <code class="docutils literal notranslate"><span class="pre">/etc</span></code> 目录中配置文件。这些修改通过一个 overlay 文件保存 ( <code class="docutils literal notranslate"><span class="pre">.apkovl</span></code> )，就好像 <a class="reference internal" href="../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 使用了分层的overlay文件系统，这样就能够在启动时自动加载，恢复到保存的状态。</p>
 <p><code class="docutils literal notranslate"><span class="pre">.apkovl</span></code> 文件包含了自定义配置，可以使用 Alpine的本地备份工具 <code class="docutils literal notranslate"><span class="pre">lbu</span></code> 保存到可写入存储中。</p>
@@ -261,7 +253,7 @@
 <p class="admonition-title">警告</p>
 <p>默认情况下， <code class="docutils literal notranslate"><span class="pre">lbu</span> <span class="pre">commit</span></code> 只保存 <code class="docutils literal notranslate"><span class="pre">/etc</span></code> 目录下的修改，但不包括 <code class="docutils literal notranslate"><span class="pre">/etc/init.d/</span></code> 子目录。不过，可以使用 <code class="docutils literal notranslate"><span class="pre">lbu</span> <span class="pre">include</span></code> 来包含更多指定文件或者目录来进行备份。</p>
 </div>
-<section id="iso">
+<div class="section" id="iso">
 <h2>保存和加载自定义ISO镜像<a class="headerlink" href="#iso" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>刚完成 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令将ISO复制到U盘的分区:</p>
@@ -318,6 +310,10 @@
 </pre></div>
 </div>
 <p>另外一种方法，是在第一次制作alipine linux U盘时，就通过fdisk命令创建好分区3，并且使用 <code class="docutils literal notranslate"><span class="pre">mkfs.ext4</span></code> 把文件系统建立好，这样就可以直接用于 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我的实践发现，似乎还是在最初通过 <code class="docutils literal notranslate"><span class="pre">dd</span></code> 命令将ISO文件dump到U盘时候，同时使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 命令添加一个 <code class="docutils literal notranslate"><span class="pre">/dev/sdb3</span></code> 比较方便。alpine linux提供的系统 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 是busybox工具，功能比较简陋，并且默认使用 CHS 来计算分区，实在使用不便。</p>
+</div>
 <ul>
 <li><p>格式化分区:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">add</span> <span class="n">e2fsprogs</span>
@@ -349,6 +345,10 @@
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb3</span>                <span class="mf">27.5</span><span class="n">G</span>     <span class="mf">24.0</span><span class="n">K</span>     <span class="mf">26.0</span><span class="n">G</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我的实践发现，这个挂载分区步骤必须手工完成 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code> 交互命令并没有提供挂载 <code class="docutils literal notranslate"><span class="pre">sdb3</span></code> 功能，而是只是将 <code class="docutils literal notranslate"><span class="pre">/media/sdb3</span></code> 作为 <code class="docutils literal notranslate"><span class="pre">lbu</span></code> 备份位置。只有挂载了磁盘分区才能确保备份存储是持久化保存到磁盘的。</p>
+</div>
 <ul>
 <li><p>然后在 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code> 中就可以使用这个 <code class="docutils literal notranslate"><span class="pre">sdb3</span></code> 作为存储配置以及apk缓存目录 <code class="docutils literal notranslate"><span class="pre">/media/sdb3/cache</span></code> :</p></li>
 <li><p>(可选,因为 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code> 会自动添加)将挂载 <code class="docutils literal notranslate"><span class="pre">sdb3</span></code> 的配置写入 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
@@ -364,6 +364,11 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb3</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span> <span class="n">ext4</span> <span class="n">rw</span><span class="p">,</span><span class="n">relatime</span> <span class="mi">0</span> <span class="mi">0</span>
 </pre></div>
 </div>
+<p>但是，我的另一次实践发现，即使没有添加 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 的这行配置，只要在 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code> 中指定过 <code class="docutils literal notranslate"><span class="pre">sdb3</span></code> 作为lbu存储目标，并且已经挂载过，重启之后还是会挂载。这是因为在 <code class="docutils literal notranslate"><span class="pre">/etc/mtab</span></code> 中添加了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb3</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span> <span class="n">ext4</span> <span class="n">ro</span><span class="p">,</span><span class="n">relatime</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>导致的重启依然生效。</p>
 </div>
 <ul>
 <li><p>(可选,因为 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code> 会自动添加 )修改 <code class="docutils literal notranslate"><span class="pre">/etc/lbu/lbu.conf</span></code> 配置:</p>
@@ -383,8 +388,8 @@
 </div>
 </li>
 </ul>
-</section>
-<section id="lbu">
+</div>
+<div class="section" id="lbu">
 <h2>lbu常用修命令<a class="headerlink" href="#lbu" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>lbu</p></li>
@@ -399,7 +404,7 @@
 <li><p>lbu revert</p></li>
 </ul>
 <p>当执行 <code class="docutils literal notranslate"><span class="pre">lbu</span> <span class="pre">commit</span></code> 命令时，会将系统修改保存，此时 <code class="docutils literal notranslate"><span class="pre">lbu</span></code> 会生成一个类似 <code class="docutils literal notranslate"><span class="pre">myboxname.apkovl.tar.gz</span></code> (这里 <code class="docutils literal notranslate"><span class="pre">myboxname</span></code> 是主机名)。这个文件包含了被称为 <code class="docutils literal notranslate"><span class="pre">apkovl</span></code> 的修改内容，保存到指定的media中，例如上文案例中的 <code class="docutils literal notranslate"><span class="pre">sdb3</span></code></p>
-<section id="id1">
+<div class="section" id="id1">
 <h3>lbu实践<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>添加 <code class="docutils literal notranslate"><span class="pre">/home</span></code> 目录备份:</p>
@@ -432,9 +437,9 @@
 </li>
 <li><p>重启系统观察</p></li>
 </ul>
-</section>
-</section>
-<section id="id2">
+</div>
+</div>
+<div class="section" id="id2">
 <h2>Alpine Linux磁盘<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>Alpine Linux磁盘划分采用 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 和 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 观察不同:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># parted /dev/sda print</span>
@@ -463,46 +468,41 @@
 <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>       <span class="mi">1224704</span> <span class="mi">60088319</span> <span class="mi">58863616</span> <span class="mf">28.1</span><span class="n">G</span> <span class="mi">83</span> <span class="n">Linux</span>
 </pre></div>
 </div>
-</section>
-<section id="id3">
-<h2>启动失败排查<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
-<p>我遇到一个问题，重启进入 GRUB 界面显示内核没有正确加载</p>
-</section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.alpinelinux.org/wiki/Alpine_local_backup">Alpine local backup</a></p></li>
 <li><p><a class="reference external" href="https://github.com/IronOxidizer/alpine-persistent-usb">alpine-persistent-usb</a></p></li>
 </ul>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="alpine_static_ip.html" class="btn btn-neutral float-right" title="配置Alpine Linux静态IP地址" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="alpine_install.html" class="btn btn-neutral float-left" title="安装Alpine Linux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="alpine_static_ip.html" class="btn btn-neutral float-right" title="配置Alpine Linux静态IP地址" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="alpine_install.html" class="btn btn-neutral float-left" title="安装Alpine Linux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
+        &copy; <a href="../../copyright.html">Copyright</a> 2021, Huatai Huang
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -510,6 +510,7 @@
 
 
 </footer>
+
         </div>
       </div>
 
@@ -517,6 +518,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
