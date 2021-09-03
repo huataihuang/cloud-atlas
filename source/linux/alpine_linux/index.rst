@@ -17,7 +17,7 @@ Alpine Linux
    alpine_wireless.rst
    alpine_extended.rst
    alpine_apk.rst
-   
+   alpine_kvm.rst
 
 .. only::  subproject and html
 

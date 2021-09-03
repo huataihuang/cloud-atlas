@@ -24,6 +24,13 @@
 
    ip link
 
+安装firmware(可能)
+======================
+
+.. note::
+
+   以前的经验是对于私有软件(驱动)需要安装对应的firmware
+
 如果没有看到 ``wlan0`` 设备，则说明需要安装无线网卡的firmware::
 
    apk add linux-firmware

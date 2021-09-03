@@ -36,7 +36,13 @@ Alpine Linux的网络配置和Debian的配置相似，在 ``/etc/network/interfa
        inet 192.168.6.111/24 scope global eth0
           valid_lft forever preferred_lft forever
        inet6 fe80::7ec3:a1ff:fe87:2c5c/64 scope link
-          valid_lft forever preferred_lft forever 
+          valid_lft forever preferred_lft forever
+
+- 通过 ``setup-alpine`` 交互设置的代理服务器配置实际上是环境变量::
+
+   https_proxy=http://192.168.6.11:3128
+   http_proxy=http://192.168.6.11:3128
+   ftp_proxy=http://192.168.6.11:3128
 
 参考
 ==========
