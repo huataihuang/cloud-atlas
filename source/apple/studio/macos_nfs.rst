@@ -32,6 +32,23 @@ macOS系统NFS服务
     100003    2   tcp   2049  nfs
     100003    3   tcp   2049  nfs
 
+如果 ``rpcinfo -p`` 输出显示超时::
+
+   Can't contact rpcbind on localhost
+   rpcinfo: RPC: Timed out
+
+则可以尝试重启(实际是stop)一次 ``com.apple.rpcbind`` ::
+
+   sudo launchctl stop com.apple.rpcbind
+
+此时你会看到::
+
+   sudo launchctl list | grep rpcbind
+
+依然显示 ``rpcbind`` 进程存在，但是该进程的pid已经改变，实际上系统会自动重新拉起 ``com.apple.rpcbind`` ，相当于重启了一次该服务。
+
+然后再执行 ``sudo rpcinfo -p`` 就可以看到正常输出。
+
 - 和标准的Unix/Linux系统相似，macOS也是通过 ``/etc/exports`` 文件配置NFS输出::
 
    /Users/huatai/home_admin/dev -rw
