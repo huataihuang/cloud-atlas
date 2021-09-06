@@ -84,6 +84,8 @@ diskless模式更新内核
    apk add nfs-utils
    # 磁盘维护
    apk add lsblk cfdisk e2fsprogs
+   # lspci等维护工具
+   apk add pciutils
 
 参考
 ========
