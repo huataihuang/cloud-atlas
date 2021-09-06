@@ -43,7 +43,7 @@ macOS系统NFS服务
 
 此时你会看到::
 
-   sudo launchctl list | grep rpcbind
+ k  sudo launchctl list | grep rpcbind
 
 依然显示 ``rpcbind`` 进程存在，但是该进程的pid已经改变，实际上系统会自动重新拉起 ``com.apple.rpcbind`` ，相当于重启了一次该服务。
 
@@ -51,19 +51,49 @@ macOS系统NFS服务
 
 - 和标准的Unix/Linux系统相似，macOS也是通过 ``/etc/exports`` 文件配置NFS输出::
 
-   /Users/huatai/home_admin/dev -rw
+   /System/Volumes/Data/Users/dev -maproot=502:20 -network 192.168.6.0 -mask 255.255.255.0
+
+.. note::
+
+   对应macOS需要设置 ``-maproot`` 这样远程客户端的root账号才能被映射到本地到一个用户，才能读写某个目录
+
+如果是仅仅对外提供一个只读目录并且对整个网络开放，可以使用::
+
+   /System/Volumes/Data/Users/shareall -ro -mapall=nobody -network 192.168.6.0 -mask 255.255.255.0
+
+参数 ``mapall`` 可以将所有没有对应 gid/uid 的NFS客户端都映射到服务器上一个相同账号，例如 ``nobody`` 提供安全
+
+- 并且检查配置的NFS是否正确::
+
+   nfsd checkexports
 
 - 重启一次服务::
 
    nfsd restart
+
+- 最后检查输出的共享是否正确::
+
+   showmount -a
+
+显示::
+
+   Exports list on localhost:
+   /System/Volumes/Data/Users/dev      192.168.6.0
 
 NFS客户端访问
 ================
 
 .. note::
 
-   在macOS上我曾经想 :ref:`macos_docker_shell` 在Docker VM上使用NFS来挂载macOS上的共享NFS卷，但是实践没有找到方法(难点在于 :ref:`alpine_linux` 软件包管理以及访问macOS的IP地址 )，有待探索。所以，我这里客户端改为在局域网上一台Linux
+   在macOS上我曾经想 :ref:`macos_docker_shell` 在Docker VM上使用NFS来挂载macOS上的共享NFS卷，但是实践没有找到方法(难点在于 :ref:`alpine_linux` 软件包管理以及访问macOS的IP地址 )，有待探索。不过，我在使用 :ref:`alpine_kvm` 恰好需要访问macOS上共享的ISO镜像，所以采用局域网Linux来访问macOS NFS共享。
 
+- 配置 ``/etc/fstab`` 添加::
+
+   192.168.6.1:/System/Volumes/Data/Users/dev /mnt nfs,noauto,resvport rw 0 0
+
+- 挂载::
+
+   mount /mnt
 
 防火墙
 ==========
@@ -83,3 +113,5 @@ macOS提供了一个防火墙，需要检查确认一下默认是否启用了防
 - `How to configure an NFS share from Mac OSX to Linux <https://www.williamrobertson.net/documents/nfs-mac-linux-setup.html>`_
 - `macOS X Mount NFS Share / Set an NFS Client <https://www.cyberciti.biz/faq/apple-mac-osx-nfs-mount-command-tutorial>`_
 - `Exporting Directories with NFS <https://docstore.mik.ua/orelly/unix3/mac/ch03_10.htm>`_
+- `macOS Catalina: nfsd needs to change exported dir to /System/Volumes/Data/... <https://github.com/drud/ddev/issues/1869>`_
+- `Snow Leopard NFS Server and no_root_squash <https://serverfault.com/questions/118816/snow-leopard-nfs-server-and-no-root-squash>`_ 解决服务器端用户uid映射问题，否则写入失败
