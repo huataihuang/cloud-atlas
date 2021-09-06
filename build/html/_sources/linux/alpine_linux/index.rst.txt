@@ -18,6 +18,7 @@ Alpine Linux
    alpine_extended.rst
    alpine_apk.rst
    alpine_kvm.rst
+   alpine_nfs.rst
 
 .. only::  subproject and html
 

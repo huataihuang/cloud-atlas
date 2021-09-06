@@ -14,6 +14,7 @@ ARM架构在存储上似乎落后于x86体系，毕竟我们熟悉的各种存�
    choice_pi_storage.rst
    usb_3.rst
    wd_passport_ssd.rst
+   wd_digital_dashboard.rst
    usb_boot_pi_3.rst
    usb_boot_ubuntu_pi_4_debug.rst
    usb_boot_ubuntu_pi_4.rst

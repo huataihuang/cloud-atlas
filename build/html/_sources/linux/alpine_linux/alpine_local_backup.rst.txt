@@ -182,6 +182,16 @@ lbu实践
 
 - 重启系统观察
 
+lbu ci实践
+==============
+
+为了能够实现我的 :ref:`studio` ，我在 :ref:`alpine_kvm` ，所以包含的备份::
+
+   lbu include /home
+   lbu include /var/lib/libvirt
+
+   lbu ci
+
 Alpine Linux磁盘
 ===================
 
