@@ -25,12 +25,35 @@ macOS系统NFS服务
 
 输出显示::
 
-   program vers proto   port
-    ...
-    100003    2   udp   2049  nfs
-    100003    3   udp   2049  nfs
-    100003    2   tcp   2049  nfs
-    100003    3   tcp   2049  nfs
+      program vers proto   port
+       100000    2   udp    111  rpcbind
+       100000    3   udp    111  rpcbind
+       100000    4   udp    111  rpcbind
+       100000    2   tcp    111  rpcbind
+       100000    3   tcp    111  rpcbind
+       100000    4   tcp    111  rpcbind
+       100024    1   udp    877  status
+       100021    0   udp    788  nlockmgr
+       100024    1   tcp    901  status
+       100021    1   udp    788  nlockmgr
+       100021    3   udp    788  nlockmgr
+       100021    4   udp    788  nlockmgr
+       100021    0   tcp    897  nlockmgr
+       100021    1   tcp    897  nlockmgr
+       100021    3   tcp    897  nlockmgr
+       100021    4   tcp    897  nlockmgr
+       100003    2   udp   2049  nfs
+       100003    3   udp   2049  nfs
+       100003    2   tcp   2049  nfs
+       100003    3   tcp   2049  nfs
+       100011    1   udp    714  rquotad
+       100011    2   udp    714  rquotad
+       100011    1   tcp    852  rquotad
+       100005    1   udp    928  mountd
+       100011    2   tcp    852  rquotad
+       100005    3   udp    928  mountd
+       100005    1   tcp    858  mountd
+       100005    3   tcp    858  mountd
 
 如果 ``rpcinfo -p`` 输出显示超时::
 
@@ -55,7 +78,7 @@ macOS系统NFS服务
 
 .. note::
 
-   对应macOS需要设置 ``-maproot`` 这样远程客户端的root账号才能被映射到本地到一个用户，才能读写某个目录
+   对应macOS需要设置 ``-maproot`` 这样远程客户端的root账号才能被映射到本地到一个用户，才能读写某个目录(远程客户端的root用户被映射成NFS服务器上的某个账号进行读写)
 
 如果是仅仅对外提供一个只读目录并且对整个网络开放，可以使用::
 
@@ -89,11 +112,20 @@ NFS客户端访问
 
 - 配置 ``/etc/fstab`` 添加::
 
-   192.168.6.1:/System/Volumes/Data/Users/dev /mnt nfs,noauto,resvport rw 0 0
+   192.168.6.1:/System/Volumes/Data/Users/dev /mnt nfs,noauto rw 0 0
 
 - 挂载::
 
    mount /mnt
+
+Connection refused
+---------------------
+
+我在 :ref:`alpine_linux` 上挂载macOS NFS时候出现报错::
+
+   mount: mounting 192.168.6.1:/System/Volumes/Data/Users/dev on /mnt failed: Connection refused
+
+但是，同样的配置，在 :ref:`ubuntu64bit_pi` ，却能够作为NFS客户端正常挂载和使用。详见 :ref:`alpine_nfs`
 
 防火墙
 ==========
@@ -115,3 +147,4 @@ macOS提供了一个防火墙，需要检查确认一下默认是否启用了防
 - `Exporting Directories with NFS <https://docstore.mik.ua/orelly/unix3/mac/ch03_10.htm>`_
 - `macOS Catalina: nfsd needs to change exported dir to /System/Volumes/Data/... <https://github.com/drud/ddev/issues/1869>`_
 - `Snow Leopard NFS Server and no_root_squash <https://serverfault.com/questions/118816/snow-leopard-nfs-server-and-no-root-squash>`_ 解决服务器端用户uid映射问题，否则写入失败
+- `Fast NFS volume on macOS <https://gist.github.com/joaomlneto/74338ef17f3591f04ee20413b5b4a57e>`_ 介绍了OS X的NFS客户端，需要使用参数 ``nolocks,locallocks`` 

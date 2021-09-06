@@ -9,6 +9,7 @@ Linux磁盘
 
    linux_partition.rst
    4k_alignment.rst
+   wd_advanced_format.rst
    parted.rst
    mount_img.rst
 
