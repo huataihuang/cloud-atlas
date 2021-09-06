@@ -75,6 +75,16 @@ diskless模式更新内核
 
    update-kernel /media/sdXY/boot/
 
+基础软件安装
+==================
+
+- 默认最小化安装对于维护不是很方便，所以安装以下软件::
+
+   # NFS客户端和服务
+   apk add nfs-utils
+   # 磁盘维护
+   apk add lsblk cfdisk e2fsprogs
+
 参考
 ========
 

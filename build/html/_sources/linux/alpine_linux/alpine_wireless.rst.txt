@@ -52,6 +52,40 @@
 
 官方文档 `Connecting to a wireless access point <https://wiki.alpinelinux.org/wiki/Connecting_to_a_wireless_access_point>`_ 已经说明了Broadcom芯片需要手工编译安装驱动
 
+- 检查Broadcom无线芯片::
+
+   dmesg | grep Broadcom
+
+可以看到::
+
+   [    8.212259 ] b43-phy0: Broadcom 4360 WLAN found (core revision 42)
+   [    8.212536 ] Broadcom 43xx driver loaded [ Features: PNLS  ]
+
+- 安装SDK和git::
+
+   apk add alpine-sdk git
+
+- 切换到普通用户，然后将这个用户账号添加到 ``abuild`` 组::
+
+   su - huatai
+   sudo addgroup $(whoami) abuild
+
+- 首次build软件包，需要生成一个签名包到key::
+
+   abuild-keygen -a -i
+
+- 下载源代码::
+
+   git clone git://git.alpinelinux.org/aports
+
+- 进入 b43-firmware ::
+
+   cd aports/non-free/b43-firmware
+
+- 编译软件包::
+
+   abuild -r
+
 参考
 ========
 
