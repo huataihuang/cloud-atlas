@@ -1,48 +1,44 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="zh-CN" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Alpine Linux运行KVM虚拟化 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
         <script src="../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="Subgraph OS" href="../subgraph_os/index.html" />
+    <link rel="next" title="Alpine Linux配置NFS" href="alpine_nfs.html" />
     <link rel="prev" title="Alpine Linux包管理apk" href="alpine_apk.html" /> 
 </head>
 
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -137,9 +132,14 @@
 <li class="toctree-l3"><a class="reference internal" href="alpine_apk.html">Alpine Linux包管理apk</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Alpine Linux运行KVM虚拟化</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#kvm">安装KVM</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">网络(未实践)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#guest">Guest生命周期管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vfio">vfio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="alpine_nfs.html">Alpine Linux配置NFS</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../subgraph_os/index.html">Subgraph OS</a></li>
@@ -181,7 +181,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -216,13 +215,11 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Linux Atlas</a> &raquo;</li>
         
@@ -233,7 +230,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../_sources/linux/alpine_linux/alpine_kvm.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -247,7 +244,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="alpine-linuxkvm">
+  <div class="section" id="alpine-linuxkvm">
 <span id="alpine-kvm"></span><h1>Alpine Linux运行KVM虚拟化<a class="headerlink" href="#alpine-linuxkvm" title="永久链接至标题">¶</a></h1>
 <p><a class="reference internal" href="../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 是Linux上主流内核模块虚拟化解决方案，使用 QEMU 作为 hypervisor。QEMU可以虚拟化x86, PowerPC以及其他架构。而 <a class="reference internal" href="../../kvm/libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 则是和QEMU/KVM,LXC,Xen等相集成的管理框架。</p>
 <div class="admonition note">
@@ -258,7 +255,7 @@
 <p class="admonition-title">注解</p>
 <p>我的实践是为了在 <a class="reference internal" href="alpine_extended.html#alpine-extended"><span class="std std-ref">U盘运行Alpine Linux</span></a> 模式下通过 <a class="reference internal" href="alpine_extended.html#alpine-extended"><span class="std std-ref">U盘运行Alpine Linux</span></a> 方式安装一个KVM虚拟化环境，通过这种方式来运行一个Windows虚拟机，帮助我处理一些在Windows环境下运行的程序，例如 <a class="reference internal" href="../../arm/raspberry_pi/storage/wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 的磁盘检查和firmware升级，需要在Windows环境下运行管理工具。</p>
 </div>
-<section id="kvm">
+<div class="section" id="kvm">
 <h2>安装KVM<a class="headerlink" href="#kvm" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>安装KVM相关组件:</p>
@@ -281,11 +278,11 @@
 </div>
 <p>但是，我已经配置了 <a class="reference internal" href="alpine_apk.html#alpine-apk"><span class="std std-ref">Alpine Linux包管理apk</span></a> 的软件仓库，为何还找不到软件包呢？</p>
 <p>原来，需要添加多个软件仓库源，光添加 <code class="docutils literal notranslate"><span class="pre">main</span></code> 不够，还需要添加 <code class="docutils literal notranslate"><span class="pre">community</span></code> ，所以修订 <code class="docutils literal notranslate"><span class="pre">/etc/apk/repositories</span></code> :</p>
-<div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">alpine_apk/repositories</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>/media/sdb1/apks
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">alpine_apk/repositories</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span>/media/sdb1/apks
 http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/main
 http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/community
 </pre></div>
@@ -312,42 +309,92 @@ http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/community
 </pre></div>
 </div>
 </li>
+<li><p>现在可以使用 virsh</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
 </ul>
-</section>
-<section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<blockquote>
+<div><p>目前还是空的，我们可以开始安装虚拟机 - 我这里将安装一个Windows虚拟机，以便使用 <a class="reference internal" href="../../arm/raspberry_pi/storage/wd_digital_dashboard.html#wd-digital-dashboard"><span class="std std-ref">西部数据SSD存储管理工具: Western Digital Dashboard</span></a> 检查 <a class="reference internal" href="../../arm/raspberry_pi/storage/wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 。</p>
+</div></blockquote>
+</div>
+<div class="section" id="id1">
+<h2>网络(未实践)<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>默认情况下，libvirt使用 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_nat_network.html#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> ，可以在有线网络上启用 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 实现直接把guest网络对外输出提供服务。需要注意在使用IPv6时，当路由器发送路由器公告时，Alpine会给自身设置一个链接本地(link-local)地址作为SLAAC地址。这种情况对于KVM主机服务于guest时候会在每个网络具备KVM主机地址，是我们不期望的。不顾IPv6不能通过sysctl配置在bridge上关闭，所以需要在 <code class="docutils literal notranslate"><span class="pre">/etc/network/interfaces</span></code> 配置中加上一个 <code class="docutils literal notranslate"><span class="pre">post-up</span></code> hook</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">auto</span> <span class="n">brlan</span>
+<span class="n">iface</span> <span class="n">brlan</span> <span class="n">inet</span> <span class="n">manual</span>
+       <span class="n">bridge</span><span class="o">-</span><span class="n">ports</span> <span class="n">eth1</span><span class="o">.</span><span class="mi">5</span>
+       <span class="n">bridge</span><span class="o">-</span><span class="n">stp</span> <span class="mi">0</span>
+       <span class="n">post</span><span class="o">-</span><span class="n">up</span> <span class="n">ip</span> <span class="o">-</span><span class="mi">6</span> <span class="n">a</span> <span class="n">flush</span> <span class="n">dev</span> <span class="n">brlan</span><span class="p">;</span> <span class="n">sysctl</span> <span class="o">-</span><span class="n">w</span> <span class="n">net</span><span class="o">.</span><span class="n">ipv6</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">brlan</span><span class="o">.</span><span class="n">disable_ipv6</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>管理<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>如果要让非root用户管理libvirt，需要将用户加入到 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 组:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">addgroup</span> <span class="n">user</span> <span class="n">libvirt</span>
+</pre></div>
+</div>
+<p>libvirt也提供了一个图形管理工具 <code class="docutils literal notranslate"><span class="pre">virt-manager</span></code> ，可以通过SSH远程管理本地系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">add</span> <span class="n">dbus</span> <span class="n">polkit</span> <span class="n">virt</span><span class="o">-</span><span class="n">manager</span> <span class="n">terminus</span><span class="o">-</span><span class="n">font</span>
+<span class="n">rc</span><span class="o">-</span><span class="n">update</span> <span class="n">add</span> <span class="n">dbus</span>
+</pre></div>
+</div>
+<p>要允许通过 ssh PolicyKit来使用libvirt远程管理KVM，需要一个 <code class="docutils literal notranslate"><span class="pre">.pkla</span></code> 通知它允许，也就是配置 <code class="docutils literal notranslate"><span class="pre">/etc/polkit-1/localauthority/50-local.d/50-libvirt-ssh-remote-access-policy.pkla</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Remote</span> <span class="n">libvirt</span> <span class="n">SSH</span> <span class="n">access</span><span class="p">]</span>
+<span class="n">Identity</span><span class="o">=</span><span class="n">unix</span><span class="o">-</span><span class="n">group</span><span class="p">:</span><span class="n">libvirt</span>
+<span class="n">Action</span><span class="o">=</span><span class="n">org</span><span class="o">.</span><span class="n">libvirt</span><span class="o">.</span><span class="n">unix</span><span class="o">.</span><span class="n">manage</span>
+<span class="n">ResultAny</span><span class="o">=</span><span class="n">yes</span>
+<span class="n">ResultInactive</span><span class="o">=</span><span class="n">yes</span>
+<span class="n">ResultActive</span><span class="o">=</span><span class="n">yes</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="guest">
+<h2>Guest生命周期管理<a class="headerlink" href="#guest" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">libvirt-guests</span></code> 服务可以在系统启动时候自动启动guest，也可以物理主机shutdown或reboot时候自动suspend或者shutdown虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span><span class="o">-</span><span class="n">update</span> <span class="n">add</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">guests</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="vfio">
+<h2>vfio<a class="headerlink" href="#vfio" title="永久链接至标题">¶</a></h2>
+<p>VFIO是比PCI passthrough更灵活的虚拟化设备，可以将物理PCI设备划分成多个虚拟设备分配给不同的虚拟机使用，不仅保留了性能也具备了虚拟化的伸缩性。</p>
+</div>
+<div class="section" id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.alpinelinux.org/wiki/KVM">Alpine Linux Wiki: KVM</a></p></li>
 </ul>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../subgraph_os/index.html" class="btn btn-neutral float-right" title="Subgraph OS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="alpine_apk.html" class="btn btn-neutral float-left" title="Alpine Linux包管理apk" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="alpine_nfs.html" class="btn btn-neutral float-right" title="Alpine Linux配置NFS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="alpine_apk.html" class="btn btn-neutral float-left" title="Alpine Linux包管理apk" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
+        &copy; <a href="../../copyright.html">Copyright</a> 2021, Huatai Huang
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -355,6 +402,7 @@ http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/community
 
 
 </footer>
+
         </div>
       </div>
 
@@ -362,6 +410,7 @@ http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/community
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
