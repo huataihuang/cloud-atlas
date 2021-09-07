@@ -82,6 +82,8 @@
 
    cd aports/non-free/b43-firmware
 
+在目录下有一个 ``APKBUILD`` 文件，类似 :ref:`gentoo_linux` 
+
 - 编译软件包::
 
    abuild -r

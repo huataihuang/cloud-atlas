@@ -125,7 +125,35 @@ Connection refused
 
    mount: mounting 192.168.6.1:/System/Volumes/Data/Users/dev on /mnt failed: Connection refused
 
-但是，同样的配置，在 :ref:`ubuntu64bit_pi` ，却能够作为NFS客户端正常挂载和使用。详见 :ref:`alpine_nfs`
+但是，同样的配置，在 :ref:`ubuntu64bit_pi` ，却能够作为NFS客户端正常挂载和使用，这个报错是因为 :ref:`alpine_linux` 默认没有安装 ``nfs-utils`` 工具，并且没有启动NFS相关服务导致的。详见 :ref:`alpine_nfs`
+
+排查方法的经验是使用 ``rpcinfo -p`` 查看远程服务是否打开了对应服务端口::
+
+   rpcinfo -p 192.168.6.1
+
+要检查有哪些服务列表也可以使用以下命令::
+
+   rpcinfo -p 192.168.6.1 | cut -c30- | sort -u
+
+可以看到::
+
+   mountd
+   nfs
+   nlockmgr
+   rpcbind
+   rquotad
+   status
+
+此外可以检查服务器上输出的挂载点::
+
+   showmount -e 192.168.6.1
+
+输出显示::
+
+   Exports list on 192.168.6.1:
+   /System/Volumes/Data/Users/dev      192.168.6.0
+
+上述输出显示NFS服务器正常，并且对比不同NFS客户端现象不同，则需要排查NFS客户端
 
 防火墙
 ==========
@@ -148,3 +176,4 @@ macOS提供了一个防火墙，需要检查确认一下默认是否启用了防
 - `macOS Catalina: nfsd needs to change exported dir to /System/Volumes/Data/... <https://github.com/drud/ddev/issues/1869>`_
 - `Snow Leopard NFS Server and no_root_squash <https://serverfault.com/questions/118816/snow-leopard-nfs-server-and-no-root-squash>`_ 解决服务器端用户uid映射问题，否则写入失败
 - `Fast NFS volume on macOS <https://gist.github.com/joaomlneto/74338ef17f3591f04ee20413b5b4a57e>`_ 介绍了OS X的NFS客户端，需要使用参数 ``nolocks,locallocks`` 
+- `Mounting Directory - Connection Refused <https://unix.stackexchange.com/questions/61329/mounting-directory-connection-refused>`_ 排查Connection Refused问题

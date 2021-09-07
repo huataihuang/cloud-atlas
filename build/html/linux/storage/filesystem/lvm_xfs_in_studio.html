@@ -1,40 +1,44 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="zh-CN" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-CN" > <!--<![endif]-->
+<html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Studio环境的LVM+XFS存储 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
         <script src="../../../_static/translations.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
@@ -76,6 +80,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -176,6 +181,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -210,11 +216,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../index.html">Linux Atlas</a> &raquo;</li>
         
@@ -227,7 +235,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../../_sources/linux/storage/filesystem/lvm_xfs_in_studio.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -241,7 +249,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="studiolvm-xfs">
+  <section id="studiolvm-xfs">
 <span id="lvm-xfs-in-studio"></span><h1>Studio环境的LVM+XFS存储<a class="headerlink" href="#studiolvm-xfs" title="永久链接至标题">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -250,15 +258,15 @@
 <p>从Red Hat Enterprise Linux 8开始，Red Hat放弃了Btrfs支持，这对于企业运行RHEL/CentOS环境，实际上已经变相阻止了Btrfs。原因可能比较复杂，一方面是Btrfs的高级特性(如RAID)一直不稳定，另一方面可能和Oracle和Red Hat的存储竞争策略冲突相关。</p>
 <p>Red Hat Enterprise Linux推荐的默认文件系统是XFS，XFS文件系统是数据库本地磁盘首选的文件系统。</p>
 </div>
-<div class="section" id="id1">
+<section id="id1">
 <h2>方案选择<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>存储分区需要能够灵活调整，所以需要采用LVM卷管理来划分磁盘分区</p></li>
 <li><p>需要有高性能文件系统，对SSD存储优化，并适合大型应用运行</p></li>
 </ul>
 <p>LVM + XFS是适合数据库应用运行的Linux存储组合，并且也是Red Hat主推的用于取代ZFS和Btrfs的 <a class="reference external" href="https://stratis-storage.github.io/">Stratis项目</a> 底层技术堆栈。所以，我选择这个存储技术组合。</p>
-</div>
-<div class="section" id="lvm">
+</section>
+<section id="lvm">
 <h2>LVM卷管理<a class="headerlink" href="#lvm" title="永久链接至标题">¶</a></h2>
 <p>逻辑卷管理(Logical Volume Management)工具使用了内核 <a class="reference internal" href="../../../kernel/admin/device_mapper.html#device-mapper"><span class="std std-ref">Device Mapper</span></a> 功能来提供系统分区无关的底层磁盘布局。通过LVM抽象存储就能够获得”虚拟分区”，已及方便的扩展和收缩功能。</p>
 <p>虚拟分区允许添加或移除一个分区的底层磁盘，这样就无需担忧磁盘空间不足。</p>
@@ -269,7 +277,7 @@
 <li><p>逻辑卷(Logical volume, LV): 逻辑分区是在VG中表述并由PE组成的，LV是一个Unix块设备，类似物理分区，也就是可以直接用文件系统格式化。</p></li>
 <li><p>物理扩展(Physical extent): 物理扩展PE时在PV上的最小连续扩展(默认4MB)，可以分配给LV，你可以将PE视为PV的一部分，被分配给LV。</p></li>
 </ul>
-<div class="section" id="id2">
+<section id="id2">
 <h3>安装软件包<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>安装 <code class="docutils literal notranslate"><span class="pre">lvm2</span></code> 软件包:</p>
@@ -278,8 +286,8 @@
 </div>
 </li>
 </ul>
-</div>
-<div class="section" id="id3">
+</section>
+<section id="id3">
 <h3>创建分区<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>使用parted划分分区，参数采用 <code class="docutils literal notranslate"><span class="pre">--align</span></code></p>
@@ -318,8 +326,8 @@
 </pre></div>
 </div>
 <p>以上分区3将作为数据存储的LVM卷。对于修改系统磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 分区，则建议重启一次操作系统以便刷新。或者通过 <code class="docutils literal notranslate"><span class="pre">partprobe</span></code> 刷新分区。</p>
-</div>
-<div class="section" id="id4">
+</section>
+<section id="id4">
 <h3>创建物理卷<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>初始化物理卷:</p>
@@ -356,8 +364,8 @@
 <span class="n">PV</span> <span class="n">UUID</span>               <span class="n">HYPqoi</span><span class="o">-</span><span class="n">s2Ga</span><span class="o">-</span><span class="n">r2c9</span><span class="o">-</span><span class="n">upv6</span><span class="o">-</span><span class="n">Q3by</span><span class="o">-</span><span class="n">DFf3</span><span class="o">-</span><span class="n">NJe9BT</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="id5">
+</section>
+<section id="id5">
 <h3>卷组管理<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在物理卷上构建卷组:</p>
@@ -378,8 +386,8 @@
 </div>
 </li>
 </ul>
-</div>
-<div class="section" id="id6">
+</section>
+<section id="id6">
 <h3>逻辑卷<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">store</span></code> 卷组上创建 <code class="docutils literal notranslate"><span class="pre">home</span></code> 逻辑卷:</p>
@@ -421,9 +429,9 @@
 <p>Docker支持quota可以用来限制容器可用空间，如果要强制隔离，则可以利用LVM卷来实现。</p>
 <p>详细的 <code class="docutils literal notranslate"><span class="pre">store</span></code> 卷部署使用请参考 <a class="reference internal" href="../../../docker/storage/docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 和 <a class="reference internal" href="../../../docker/admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中配置Docker使用共享卷部分。</p>
 </div>
-</div>
-</div>
-<div class="section" id="xfs">
+</section>
+</section>
+<section id="xfs">
 <h2>XFS<a class="headerlink" href="#xfs" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -470,41 +478,42 @@
 <p class="admonition-title">注解</p>
 <p>实际我的操作是采用root用户登陆后，将上述两个XFS文件系统先挂载到临时目录下，将数据迁移到新建的XFS文件系统中，然后再切换目录挂载来完成的。请参考 <a class="reference internal" href="../../../appendix/using_btrfs_in_studio.html#using-btrfs-in-studio"><span class="std std-ref">在Studio中使用btrfs文件系统</span></a> 中切换 libvirt 目录到btrfs文件系统步骤。</p>
 </div>
-</div>
-<div class="section" id="id7">
+</section>
+<section id="id7">
 <h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/LVM">Arch Linux社区文档 - LVM</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/XFS">Arch Linux社区文档 - XFS</a></p></li>
 </ul>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="xfs_tunning.html" class="btn btn-neutral float-right" title="XFS性能优化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="xfs.html" class="btn btn-neutral float-left" title="XFS文件系统" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="xfs_tunning.html" class="btn btn-neutral float-right" title="XFS性能优化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="xfs.html" class="btn btn-neutral float-left" title="XFS文件系统" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; <a href="../../../copyright.html">Copyright</a> 2021, Huatai Huang
+        &#169; <a href="../../../copyright.html"> 版权所有</a> 2021, Huatai Huang.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
     <!-- your html code here -->
     <br>
     <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
@@ -512,7 +521,6 @@
 
 
 </footer>
-
         </div>
       </div>
 
@@ -520,7 +528,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
