@@ -31,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
@@ -88,7 +89,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
@@ -252,131 +253,70 @@
 </ul>
 <div class="literal-block-wrapper docutils container" id="id4">
 <div class="code-block-caption"><span class="caption-text">../admin/centos8-ssh</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
-<div class="highlight-dockerfile notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c"># Build centos 8 image with ssh:</span>
-<span class="c"># ------------------------------</span>
-<span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
-
-<span class="c"># create container:</span>
-<span class="c"># -----------------</span>
-<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
-
-<span class="c"># create container with volume:</span>
-<span class="c"># -----------------------------</span>
-<span class="c"># docker volume create data</span>
-<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
-
-<span class="c"># create container with volume and static ip:</span>
-<span class="c"># -------------------------------------------</span>
-<span class="c"># docker volume create data</span>
-<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
-
-<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
-<span class="c"># -----------------------------------------------------------------------------</span>
-<span class="c"># docker volume create data</span>
-<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
-<span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
-
-<span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
-<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
-
-<span class="k">RUN</span> dnf clean all
-<span class="k">RUN</span> dnf -y update
-
-<span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server initscripts
-
-<span class="c"># Prepare sshd host key</span>
-<span class="k">RUN</span> ssh-keygen -A
-
-<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
-<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
-<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
-<span class="k">RUN</span> usermod -aG wheel admin
-<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
-
-<span class="c"># Add ssh public key for login</span>
-<span class="k">RUN</span> mkdir -p /home/admin/.ssh
-<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
-<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
-<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
-<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
-<span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
-
-<span class="c"># run service when container started - sshd</span>
-<span class="k">EXPOSE</span><span class="s"> 22:1122</span>
-<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
-
-<span class="c"># ----------</span>
-<span class="c"># WANT run sshd and get a bash</span>
-<span class="c"># ENTRYPOINT will not be override by commandline</span>
-<span class="c"># ----------</span>
-<span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># Build centos 8 image with ssh:</span>
+<span class="linenos"> 2</span><span class="c"># ------------------------------</span>
+<span class="linenos"> 3</span><span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="c"># create container:</span>
+<span class="linenos"> 6</span><span class="c"># -----------------</span>
+<span class="linenos"> 7</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="c"># create container with volume:</span>
+<span class="linenos">10</span><span class="c"># -----------------------------</span>
+<span class="linenos">11</span><span class="c"># docker volume create data</span>
+<span class="linenos">12</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c"># create container with volume and static ip:</span>
+<span class="linenos">15</span><span class="c"># -------------------------------------------</span>
+<span class="linenos">16</span><span class="c"># docker volume create data</span>
+<span class="linenos">17</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="linenos">18</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="linenos">19</span><span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="linenos">22</span><span class="c"># -----------------------------------------------------------------------------</span>
+<span class="linenos">23</span><span class="c"># docker volume create data</span>
+<span class="linenos">24</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="linenos">25</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="linenos">26</span><span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="linenos">27</span><span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
+<span class="linenos">30</span><span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="k">RUN</span> dnf clean all
+<span class="linenos">33</span><span class="k">RUN</span> dnf -y update
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server initscripts
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="c"># Prepare sshd host key</span>
+<span class="linenos">38</span><span class="k">RUN</span> ssh-keygen -A
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="linenos">41</span><span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="linenos">42</span><span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="linenos">43</span><span class="k">RUN</span> usermod -aG wheel admin
+<span class="linenos">44</span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+<span class="linenos">45</span>
+<span class="linenos">46</span><span class="c"># Add ssh public key for login</span>
+<span class="linenos">47</span><span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="linenos">48</span><span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="linenos">49</span><span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="linenos">50</span><span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="linenos">51</span><span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+<span class="linenos">52</span><span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
+<span class="linenos">53</span>
+<span class="linenos">54</span><span class="c"># run service when container started - sshd</span>
+<span class="linenos">55</span><span class="k">EXPOSE</span><span class="s"> 22:1122</span>
+<span class="linenos">56</span><span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+<span class="linenos">57</span>
+<span class="linenos">58</span><span class="c"># ----------</span>
+<span class="linenos">59</span><span class="c"># WANT run sshd and get a bash</span>
+<span class="linenos">60</span><span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="linenos">61</span><span class="c"># ----------</span>
+<span class="linenos">62</span><span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -421,16 +361,16 @@
 </ul>
 <p>显示镜像列表如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MAGE</span>                                      <span class="n">TAG</span>                 <span class="n">IMAGE</span> <span class="n">ID</span>            <span class="n">SIZE</span>
-<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kindest</span><span class="o">/</span><span class="n">kindnetd</span>                 <span class="mf">0.5</span><span class="o">.</span><span class="mi">4</span>               <span class="mi">2186</span><span class="n">a1a396deb</span>       <span class="mi">113</span><span class="n">MB</span>
+<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kindest</span><span class="o">/</span><span class="n">kindnetd</span>                 <span class="mf">0.5.4</span>               <span class="mi">2186</span><span class="n">a1a396deb</span>       <span class="mi">113</span><span class="n">MB</span>
 <span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">library</span><span class="o">/</span><span class="n">local</span>                    <span class="n">centos8</span><span class="o">-</span><span class="n">ssh</span>         <span class="mi">80314</span><span class="n">bfa9eedd</span>       <span class="mi">294</span><span class="n">MB</span>
-<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">rancher</span><span class="o">/</span><span class="n">local</span><span class="o">-</span><span class="n">path</span><span class="o">-</span><span class="n">provisioner</span>   <span class="n">v0</span><span class="o">.</span><span class="mf">0.12</span>             <span class="n">db10073a6f829</span>       <span class="mi">42</span><span class="n">MB</span>
-<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">coredns</span>                         <span class="mf">1.6</span><span class="o">.</span><span class="mi">7</span>               <span class="mi">67</span><span class="n">da37a9a360e</span>       <span class="mf">43.9</span><span class="n">MB</span>
-<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">debian</span><span class="o">-</span><span class="n">base</span>                     <span class="n">v2</span><span class="o">.</span><span class="mf">0.0</span>              <span class="mi">9</span><span class="n">bd6154724425</span>       <span class="mf">53.9</span><span class="n">MB</span>
-<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">etcd</span>                            <span class="mf">3.4</span><span class="o">.</span><span class="mi">3</span><span class="o">-</span><span class="mi">0</span>             <span class="mi">303</span><span class="n">ce5db0e90d</span>       <span class="mi">290</span><span class="n">MB</span>
-<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span>                  <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">7</span><span class="n">df05884b1e25</span>       <span class="mi">147</span><span class="n">MB</span>
-<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span>         <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">31</span><span class="n">fd71c85722f</span>       <span class="mi">133</span><span class="n">MB</span>
-<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">proxy</span>                      <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">312</span><span class="n">d3d1cb6c72</span>       <span class="mi">133</span><span class="n">MB</span>
-<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span>                  <span class="n">v1</span><span class="o">.</span><span class="mf">18.2</span>             <span class="mi">121</span><span class="n">edc8356c58</span>       <span class="mi">113</span><span class="n">MB</span>
+<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">rancher</span><span class="o">/</span><span class="n">local</span><span class="o">-</span><span class="n">path</span><span class="o">-</span><span class="n">provisioner</span>   <span class="n">v0</span><span class="mf">.0.12</span>             <span class="n">db10073a6f829</span>       <span class="mi">42</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">coredns</span>                         <span class="mf">1.6.7</span>               <span class="mi">67</span><span class="n">da37a9a360e</span>       <span class="mf">43.9</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">debian</span><span class="o">-</span><span class="n">base</span>                     <span class="n">v2</span><span class="mf">.0.0</span>              <span class="mi">9</span><span class="n">bd6154724425</span>       <span class="mf">53.9</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">etcd</span>                            <span class="mf">3.4.3</span><span class="o">-</span><span class="mi">0</span>             <span class="mi">303</span><span class="n">ce5db0e90d</span>       <span class="mi">290</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span>                  <span class="n">v1</span><span class="mf">.18.2</span>             <span class="mi">7</span><span class="n">df05884b1e25</span>       <span class="mi">147</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span>         <span class="n">v1</span><span class="mf">.18.2</span>             <span class="mi">31</span><span class="n">fd71c85722f</span>       <span class="mi">133</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">proxy</span>                      <span class="n">v1</span><span class="mf">.18.2</span>             <span class="mi">312</span><span class="n">d3d1cb6c72</span>       <span class="mi">133</span><span class="n">MB</span>
+<span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span>                  <span class="n">v1</span><span class="mf">.18.2</span>             <span class="mi">121</span><span class="n">edc8356c58</span>       <span class="mi">113</span><span class="n">MB</span>
 <span class="n">k8s</span><span class="o">.</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">pause</span>                           <span class="mf">3.2</span>                 <span class="mi">80</span><span class="n">d28bedfe5de</span>       <span class="mi">686</span><span class="n">kB</span>
 </pre></div>
 </div>
@@ -493,14 +433,14 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span><span class="p">:</span>         <span class="n">dev</span><span class="o">-</span><span class="n">studio</span>
 <span class="n">Namespace</span><span class="p">:</span>    <span class="n">studio</span>
 <span class="n">Priority</span><span class="p">:</span>     <span class="mi">0</span>
-<span class="n">Node</span><span class="p">:</span>         <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span><span class="o">/</span><span class="mf">172.19</span><span class="o">.</span><span class="mf">0.4</span>
+<span class="n">Node</span><span class="p">:</span>         <span class="n">dev</span><span class="o">-</span><span class="n">worker3</span><span class="o">/</span><span class="mf">172.19.0.4</span>
 <span class="n">Start</span> <span class="n">Time</span><span class="p">:</span>   <span class="n">Sun</span><span class="p">,</span> <span class="mi">19</span> <span class="n">Jul</span> <span class="mi">2020</span> <span class="mi">22</span><span class="p">:</span><span class="mi">36</span><span class="p">:</span><span class="mi">23</span> <span class="o">+</span><span class="mi">0800</span>
 <span class="n">Labels</span><span class="p">:</span>       <span class="n">run</span><span class="o">=</span><span class="n">dev</span><span class="o">-</span><span class="n">studio</span>
 <span class="n">Annotations</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
 <span class="n">Status</span><span class="p">:</span>       <span class="n">Running</span>
-<span class="n">IP</span><span class="p">:</span>           <span class="mf">10.244</span><span class="o">.</span><span class="mf">5.2</span>
+<span class="n">IP</span><span class="p">:</span>           <span class="mf">10.244.5.2</span>
 <span class="n">IPs</span><span class="p">:</span>
-  <span class="n">IP</span><span class="p">:</span>  <span class="mf">10.244</span><span class="o">.</span><span class="mf">5.2</span>
+  <span class="n">IP</span><span class="p">:</span>  <span class="mf">10.244.5.2</span>
 <span class="n">Containers</span><span class="p">:</span>
   <span class="n">dev</span><span class="o">-</span><span class="n">studio</span><span class="p">:</span>
     <span class="n">Container</span> <span class="n">ID</span><span class="p">:</span>   <span class="n">containerd</span><span class="p">:</span><span class="o">//</span><span class="mf">50e1</span><span class="n">df5e4464ede9f6cdb0e3b59bb5bcf93c02907cf0038732a0ff8fcfe882c2</span>
@@ -629,7 +569,7 @@
 </ul>
 <p>显示:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>   <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>          <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
-<span class="n">test</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">43</span><span class="n">m</span>   <span class="mf">10.244</span><span class="o">.</span><span class="mf">4.2</span>   <span class="n">dev</span><span class="o">-</span><span class="n">worker5</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">test</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">43</span><span class="n">m</span>   <span class="mf">10.244.4.2</span>   <span class="n">dev</span><span class="o">-</span><span class="n">worker5</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 </section>
