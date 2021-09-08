@@ -88,6 +88,22 @@
 
    abuild -r
 
+编译完成后，在 ``~/packages/non-free/x86_64/`` 目录下有一个 ``b43-firmware-4.150.10.5-r1.apk`` 软件包
+
+- 需要传递一个 ``--allow-untrustedd`` ::
+
+   apk add --allow-untrusted ~/packages/non-free/x86_64/b43-firmware-4.150.10.5-r1.apk
+
+报错::
+
+   (1/1) Installing b43-firmware (4.150.10.5-r1)
+   ERROR: Failed to create lib/firmware/b43/a0g0bsinitvals5.fw: No such file or directory
+   ERROR: Failed to create lib/firmware/b43/a0g0bsinitvals9.fw: No such file or directory
+   ERROR: Failed to create lib/firmware/b43/a0g0initvals5.fw: No such file or directory
+   ...
+
+在 `Broadcom wireless package installation <https://dev.alpinelinux.org/~clandmeter/other/forum.alpinelinux.org/forum/networking/broadcom-wireless-package-installation.html>`_ 提出了是需要
+
 参考
 ========
 
