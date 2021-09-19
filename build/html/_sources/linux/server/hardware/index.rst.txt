@@ -11,6 +11,9 @@
    lm_sensor.rst
    check_server_temp.rst
    lackpack.rst
+   dell/index
+   hpe/index
+   chipset/index
    
 .. only::  subproject and html
 

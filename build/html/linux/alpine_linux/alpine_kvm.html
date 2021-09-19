@@ -142,7 +142,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#id2">管理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#guest">Guest生命周期管理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#vfio">vfio</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">快速实践</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#libvirt">迁移libvirt目录持久化</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tun">tun网络模块</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_nfs.html">Alpine Linux配置NFS</a></li>
@@ -287,8 +290,8 @@
 </div>
 <p>但是，我已经配置了 <a class="reference internal" href="alpine_apk.html#alpine-apk"><span class="std std-ref">Alpine Linux包管理apk</span></a> 的软件仓库，为何还找不到软件包呢？</p>
 <p>原来，需要添加多个软件仓库源，光添加 <code class="docutils literal notranslate"><span class="pre">main</span></code> 不够，还需要添加 <code class="docutils literal notranslate"><span class="pre">community</span></code> ，所以修订 <code class="docutils literal notranslate"><span class="pre">/etc/apk/repositories</span></code> :</p>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">alpine_apk/repositories</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">alpine_apk/repositories</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>/media/sdb1/apks
 <span class="linenos">2</span>http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/main
 <span class="linenos">3</span>http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/community
@@ -370,7 +373,101 @@
 <p>VFIO是比PCI passthrough更灵活的虚拟化设备，可以将物理PCI设备划分成多个虚拟设备分配给不同的虚拟机使用，不仅保留了性能也具备了虚拟化的伸缩性。</p>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>快速实践<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p><a class="reference internal" href="../../kvm/startup/deploy_win_vm.html#deploy-win-vm"><span class="std std-ref">部署Windows KVM虚拟机</span></a> :</p>
+<ul>
+<li><p>首先SSH到alpine linux服务器上，注意，这里启用了端口转发 <code class="docutils literal notranslate"><span class="pre">5900</span></code> ，是为了能够访问 VNC/SPICE 在本地 <code class="docutils literal notranslate"><span class="pre">127.0.0.1:5900</span></code> 监听端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">C</span> <span class="o">-</span><span class="n">L</span> <span class="mi">5900</span><span class="p">:</span><span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">5900</span> <span class="n">root</span><span class="o">@</span><span class="mf">192.168.6.111</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建Windows虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="o">=</span><span class="n">virbr0</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">virtio</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">win10</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">windows</span> <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">win10</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">win10</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">20</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">spice</span> \
+  <span class="o">--</span><span class="n">cdrom</span><span class="o">=/</span><span class="n">mnt</span><span class="o">/</span><span class="n">en_windows_10_business_editions_version_1803_updated_march_2018_x64_dvd_12063333</span><span class="o">.</span><span class="n">iso</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span>  <span class="n">The</span> <span class="n">requested</span> <span class="n">volume</span> <span class="n">capacity</span> <span class="n">will</span> <span class="n">exceed</span> <span class="n">the</span> <span class="n">available</span> <span class="n">pool</span> <span class="n">space</span> <span class="n">when</span> <span class="n">the</span> <span class="n">volume</span> <span class="ow">is</span> <span class="n">fully</span> <span class="n">allocated</span><span class="o">.</span> <span class="p">(</span><span class="mi">20480</span> <span class="n">M</span> <span class="n">requested</span> <span class="n">capacity</span> <span class="o">&gt;</span> <span class="mi">6896</span> <span class="n">M</span> <span class="n">available</span><span class="p">)</span>
+<span class="n">WARNING</span>  <span class="n">KVM</span> <span class="n">acceleration</span> <span class="ow">not</span> <span class="n">available</span><span class="p">,</span> <span class="n">using</span> <span class="s1">&#39;qemu&#39;</span>
+<span class="n">ERROR</span>    <span class="n">The</span> <span class="n">requested</span> <span class="n">volume</span> <span class="n">capacity</span> <span class="n">will</span> <span class="n">exceed</span> <span class="n">the</span> <span class="n">available</span> <span class="n">pool</span> <span class="n">space</span> <span class="n">when</span> <span class="n">the</span> <span class="n">volume</span> <span class="ow">is</span> <span class="n">fully</span> <span class="n">allocated</span><span class="o">.</span> <span class="p">(</span><span class="mi">20480</span> <span class="n">M</span> <span class="n">requested</span> <span class="n">capacity</span> <span class="o">&gt;</span> <span class="mi">6896</span> <span class="n">M</span> <span class="n">available</span><span class="p">)</span> <span class="p">(</span><span class="n">Use</span> <span class="o">--</span><span class="n">check</span> <span class="n">disk_size</span><span class="o">=</span><span class="n">off</span> <span class="ow">or</span> <span class="o">--</span><span class="n">check</span> <span class="nb">all</span><span class="o">=</span><span class="n">off</span> <span class="n">to</span> <span class="n">override</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>原因是完全在内存中运行Alpine Linux，磁盘空间受到内存限制，无法创建超过内存大小的文件，例如在我的 MacBook Pro 有16G物理内存，当运行 <a class="reference internal" href="alpine_extended.html#alpine-extended"><span class="std std-ref">U盘运行Alpine Linux</span></a> 的diskless模式，默认系统使用了 1/2 内存作为 tmpfs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Filesystem</span>                <span class="n">Size</span>      <span class="n">Used</span> <span class="n">Available</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="n">devtmpfs</span>                 <span class="mf">10.0</span><span class="n">M</span>         <span class="mi">0</span>     <span class="mf">10.0</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span>
+<span class="n">shm</span>                       <span class="mf">7.8</span><span class="n">G</span>         <span class="mi">0</span>      <span class="mf">7.8</span><span class="n">G</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">shm</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb1</span>               <span class="mf">598.0</span><span class="n">M</span>    <span class="mf">598.0</span><span class="n">M</span>         <span class="mi">0</span> <span class="mi">100</span><span class="o">%</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb1</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb3</span>                <span class="mf">27.5</span><span class="n">G</span>    <span class="mf">459.4</span><span class="n">M</span>     <span class="mf">25.6</span><span class="n">G</span>   <span class="mi">2</span><span class="o">%</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span>
+<span class="n">tmpfs</span>                     <span class="mf">7.8</span><span class="n">G</span>      <span class="mf">1.0</span><span class="n">G</span>      <span class="mf">6.7</span><span class="n">G</span>  <span class="mi">13</span><span class="o">%</span> <span class="o">/</span>
+<span class="n">tmpfs</span>                     <span class="mf">3.1</span><span class="n">G</span>    <span class="mf">216.0</span><span class="n">K</span>      <span class="mf">3.1</span><span class="n">G</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">loop0</span>               <span class="mf">99.4</span><span class="n">M</span>     <span class="mf">99.4</span><span class="n">M</span>         <span class="mi">0</span> <span class="mi">100</span><span class="o">%</span> <span class="o">/.</span><span class="n">modloop</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>               <span class="mf">457.5</span><span class="n">G</span>     <span class="mf">12.6</span><span class="n">G</span>    <span class="mf">421.6</span><span class="n">G</span>   <span class="mi">3</span><span class="o">%</span> <span class="o">/</span><span class="n">mnt</span>
+</pre></div>
+</div>
+<p>其中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tmpfs</span>                     <span class="mf">7.8</span><span class="n">G</span>      <span class="mf">1.0</span><span class="n">G</span>      <span class="mf">6.7</span><span class="n">G</span>  <span class="mi">13</span><span class="o">%</span> <span class="o">/</span>
+</pre></div>
+</div>
+</section>
+<section id="libvirt">
+<h2>迁移libvirt目录持久化<a class="headerlink" href="#libvirt" title="永久链接至标题">¶</a></h2>
+<p>由于内存限制，并非所有的操作系统内容都能够 <code class="docutils literal notranslate"><span class="pre">塞进</span></code> 内存 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> ，例如上文的 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 卷，如果完全按照默认 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt</span></code> 存储在 <code class="docutils literal notranslate"><span class="pre">/</span></code> ，就只有 <code class="docutils literal notranslate"><span class="pre">6.7G</span></code> 可用空间，通常不够完成虚拟机存储。</p>
+<p>所以，我们需要把内存中的 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt</span></code> 目录迁移到本地存储 <code class="docutils literal notranslate"><span class="pre">/dev/sdb3</span></code> ，也就是 <code class="docutils literal notranslate"><span class="pre">/mdeia/sdb3</span></code> 下目录:</p>
+<ul>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/media/sdb3</span></code> 挂载，从只读改为读写，即修订 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb3</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span> <span class="n">ext4</span> <span class="n">rw</span><span class="p">,</span><span class="n">relatime</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>执行重新挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">umount</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span>
+<span class="n">mount</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span>
+</pre></div>
+</div>
+<ul>
+<li><p>目录同步:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span>
+<span class="n">mv</span> <span class="n">libvirt</span> <span class="n">libvirt</span><span class="o">.</span><span class="n">bak</span>
+<span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">.</span><span class="n">bak</span><span class="o">/</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">cf</span> <span class="o">-</span> <span class="o">.</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cd</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdb3</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span> <span class="o">&amp;&amp;</span> <span class="n">tar</span> <span class="n">xf</span> <span class="o">-</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="tun">
+<h2>tun网络模块<a class="headerlink" href="#tun" title="永久链接至标题">¶</a></h2>
+<p>执行安装的另一个报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ERROR    Unable to open /dev/net/tun, is tun module loaded?: No such file or directory
+</pre></div>
+</div>
+<ul>
+<li><p>这是表示需要假爱tun模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modprobe</span> <span class="n">tun</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>将这个模块在启动时加载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="n">tun</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">modules</span><span class="o">-</span><span class="n">load</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">tun</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.alpinelinux.org/wiki/KVM">Alpine Linux Wiki: KVM</a></p></li>
 </ul>

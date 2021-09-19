@@ -102,7 +102,7 @@
    ERROR: Failed to create lib/firmware/b43/a0g0initvals5.fw: No such file or directory
    ...
 
-在 `Broadcom wireless package installation <https://dev.alpinelinux.org/~clandmeter/other/forum.alpinelinux.org/forum/networking/broadcom-wireless-package-installation.html>`_ 提出了是需要
+在 `Broadcom wireless package installation <https://dev.alpinelinux.org/~clandmeter/other/forum.alpinelinux.org/forum/networking/broadcom-wireless-package-installation.html>`_ 提出了是需要参考 `How do I write to/make changes to an existing squashfs filesystem? <https://stackoverflow.com/questions/10704353/how-do-i-write-to-make-changes-to-an-existing-squashfs-filesystem>`_ 修订squashfs文件系统。不过，我暂时没有时间实践，等以后有机会再补充。
 
 参考
 ========
