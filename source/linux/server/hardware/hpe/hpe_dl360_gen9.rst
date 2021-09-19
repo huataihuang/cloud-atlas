@@ -24,7 +24,35 @@ HPE ProLiant DL360 Gen9 服务器综合配置介于 :ref:`dell_r630` 和 :ref:`d
 
    不过从淘宝可以看到 LRDIMM 内存目前非常昂贵，不如 RDIMM内存 性价比高。不过，技术发展迅速，或许未来也可能进入二手市场的高性价比范围。
 
+存储
+========
+
+DL360服务器内置驱动器分为8盘位和10盘位两种，有以下集中配置规格:
+
+存储控制器
+-------------
+
+主板内置存储控制芯片: HPE Dynamic Smart Array B140i控制器 (对于E5-2600v3 CPU处理器，主板集成的B140i只能工作在UEFI模式)。默认B140i设置为AHCI模式，如果要使用SATA only模式则需要配置激活。
+
+支持2种阵列卡：
+
+- H240ar 阵列卡，适合少量硬盘，只支持RAID 0和1模式，硬盘也可以设置为无阵列模式
+- H440ar 阵列卡，配置2G缓存和电池，支持多硬盘RAID 5,6,10,50,60等模式，硬盘也可以设置为无阵列模式
+
+HP官方支持网站提供了部件安装视频指南，例如 `HP Smpart Array Controller <https://support.hpe.com/hpesc/public/docDisplay?docId=psg000107aen_us&page=GUID-F16DC03B-D44C-4C4C-B314-BD207D305DF1.html>`_ 介绍了如何替换阵列卡。其他组件的安装替换也有相应指导，非常方便
+
+内置硬盘配置组合:
+
+电源支持
+=========
+
+- 500W标配
+- 800W
+- 1400W
+- 750W +
+
 参考
 =======
 
-- `HPE ProLiant DL360 Gen9 Server - Overview <https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c04442953>`_
+- `HPE ProLiant DL360 Gen9 Server <https://support.hpe.com/connect/s/product?language=en_US&ismnp=0&l5oid=7252836&kmpmoid=7252838&cep=on#t=All>`_
+- `HPE ProLiant DL360 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&docId=c04346229>`_
