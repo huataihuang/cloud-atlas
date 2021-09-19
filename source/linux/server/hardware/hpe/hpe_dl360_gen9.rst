@@ -7,7 +7,13 @@ HPE ProLiant DL360 Gen9服务器
 HPE ProLiant DL360 Gen9 服务器综合配置介于 :ref:`dell_r630` 和 :ref:`dell_r640` 之间:
 
 - 主板芯片和 :ref:`dell_r630` 相同，采用 :ref:`intel_c610` 系列
-- CPU支持和 :ref:`dell_r630` 相同，支持 :ref:`xeon_e5-2600_v3` 和 :ref:`xeon_e5-2600_v4`
+- CPU支持和 :ref:`dell_r630` 相同，支持 :ref:`xeon_e5-2600_v3` 和 :ref:`xeon_e5-2600_v4` ，这款服务器支持的CPU型号较多(比DL160):
+
+.. csv-table:: HPE ProLiant DL360 Gen9 支持E5-2600 v3/v4处理器
+   :file: hpe_dl360_gen9/hpe_dl360_gen9_cpu.csv
+   :widths: 25, 15, 10, 10, 10, 15, 15
+   :header-rows: 1
+
 - 内存支持和 :ref:`dell_r640` 类似，同时支持不同类型(超越了Dell R630)
 
   - :ref:`lrdimm_ram` 3TB (24 x 128GB LRDIMM @ 2400 MHz)
