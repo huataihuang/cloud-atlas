@@ -1,19 +1,14 @@
-.. _server_hardware:
+.. _server_chipset:
 
 =================================
-服务器硬件
+服务器主板芯片
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
-   lackpack.rst
-   dell/index
-   hpe/index
-   chipset/index
+   intel_c610.rst
+   dimm_ram.rst
    
 .. only::  subproject and html
 

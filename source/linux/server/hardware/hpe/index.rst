@@ -1,19 +1,14 @@
-.. _server_hardware:
+.. _server_hpe:
 
 =================================
-服务器硬件
+HPE服务器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
-   lackpack.rst
-   dell/index
-   hpe/index
-   chipset/index
+   hpe_dl360_gen9.rst
+   hpe_dl160_gen9.rst
    
 .. only::  subproject and html
 

@@ -1,20 +1,15 @@
-.. _server_hardware:
+.. _vs_code:
 
 =================================
-服务器硬件
+VS Code
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
-   lackpack.rst
-   dell/index
-   hpe/index
-   chipset/index
-   
+   vs_code_linux.rst
+   vs_code_lsp.rst
+
 .. only::  subproject and html
 
    Indices

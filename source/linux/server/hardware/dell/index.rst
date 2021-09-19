@@ -1,19 +1,15 @@
-.. _server_hardware:
+.. _server_dell:
 
 =================================
-服务器硬件
+Dell服务器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
-   lackpack.rst
-   dell/index
-   hpe/index
-   chipset/index
+   dell_r630.rst
+   dell_r640.rst
+   dell_r640_vs_r630.rst
    
 .. only::  subproject and html
 

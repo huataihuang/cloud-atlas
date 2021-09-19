@@ -1,7 +1,7 @@
-.. _vs_code:
+.. _vs_code_linux:
 
 =====================================
-Visual Studio Code
+在Linux上运行Visual Studio Code
 =====================================
 
 随着Visual Studio Code功能越来越丰富，已经成为跨平台首选的轻量级开发编辑器。在Ubuntu Linux上安装VS Code也非常方便。
