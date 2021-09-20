@@ -1,20 +1,13 @@
-.. _server_hardware:
+.. _server_storage:
 
 =================================
-服务器硬件
+服务器存储
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   edac.rst
-   lm_sensor.rst
-   check_server_temp.rst
-   lackpack.rst
-   dell/index
-   hpe/index
-   chipset/index
-   storage/index
+   storage_spec.rst
    
 .. only::  subproject and html
 
