@@ -140,6 +140,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../dell/index.html">Dell服务器</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="index.html">HPE服务器</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../chipset/index.html">服务器主板芯片</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../storage/index.html">服务器存储</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../ipmi/index.html">IPMI</a></li>
@@ -252,13 +253,54 @@
             
   <section id="hpe-proliant-dl360-gen9">
 <span id="hpe-dl360-gen9"></span><h1>HPE ProLiant DL360 Gen9服务器<a class="headerlink" href="#hpe-proliant-dl360-gen9" title="永久链接至标题">¶</a></h1>
+<section id="dl360">
+<h2>DL360服务器外观<a class="headerlink" href="#dl360" title="永久链接至标题">¶</a></h2>
+<section id="id1">
+<h3>前面板<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
+<p>HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不错的计算能力和高密度存储(目前SSD存储技术已经向微型化发展，所以即使1U服务也能提供非常高的存储容量)。</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_front.png"><img alt="../../../../_images/hpe_dl360_gen9_front.png" src="../../../../_images/hpe_dl360_gen9_front.png" style="width: 525.6px; height: 266.4px;" /></a>
+</figure>
+<p>标准配置是采用 8 个SFF，也可以订购不同 <a class="reference internal" href="../storage/storage_spec.html#storage-spec"><span class="std std-ref">存储设备规格</span></a> 组合，其中比较有特色的是:</p>
+<ul class="simple">
+<li><p>4 SAS/SATA (Drive 1-4)+6 NVMe (Drive 5-10)</p></li>
+</ul>
+<p>我觉得可以配置成:</p>
+<ul class="simple">
+<li><p>Drive 1-2 采用常规SAS SSD组成RAID1，构建操作系统，确保本机服务器始终可用</p></li>
+<li><p>Drive 3-4 采用大容量 HDD ，构建基于 <a class="reference internal" href="../../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 的镜像近线存储，提供NAS文件存储功能</p></li>
+<li><p>Drive 5-10 采用 NVMe SSD，通过虚拟化构建 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储集群，提供整个虚拟化 <a class="reference internal" href="../../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 分布式存储，实现云计算底层存储</p></li>
+</ul>
+<p>不过服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5” NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。详细实践待后续…</p>
+</section>
+<section id="id2">
+<h3>后面版<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_front.png"><img alt="../../../../_images/hpe_dl360_gen9_front.png" src="../../../../_images/hpe_dl360_gen9_front.png" style="width: 525.6px; height: 266.4px;" /></a>
+</figure>
+<p>值得关注点:</p>
+<ul class="simple">
+<li><p>板载集成4端口千兆网卡，可以组建network bonding实现高速网络交换，或者可以尝试实践一个以Linux为基础的高速交换网络，学习SDN技术</p></li>
+<li><p>可选的FlexibleLOM bay可以安装附加的4口网卡，扩展性更强的交换网络</p></li>
+<li><p>电源可能需要购买高功率，因为如果使用高性能CPU没有大功率电源支持会导致不稳定 - 具体待查询资料和实践</p></li>
+</ul>
+</section>
+<section id="id3">
+<h3>内部<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_inside.png"><img alt="../../../../_images/hpe_dl360_gen9_inside.png" src="../../../../_images/hpe_dl360_gen9_inside.png" style="width: 550.1999999999999px; height: 501.0px;" /></a>
+</figure>
+</section>
+</section>
+<section id="id4">
+<h2>配置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>HPE ProLiant DL360 Gen9 服务器综合配置介于 <a class="reference internal" href="../dell/dell_r630.html#dell-r630"><span class="std std-ref">Dell R630服务器</span></a> 和 <a class="reference internal" href="../dell/dell_r640.html#dell-r640"><span class="std std-ref">Dell PowerEdge R640服务器</span></a> 之间:</p>
 <ul class="simple">
 <li><p>主板芯片和 <a class="reference internal" href="../dell/dell_r630.html#dell-r630"><span class="std std-ref">Dell R630服务器</span></a> 相同，采用 <a class="reference internal" href="../chipset/intel_c610.html#intel-c610"><span class="std std-ref">Intel C610系列主板芯片</span></a> 系列</p></li>
 <li><p>CPU支持和 <a class="reference internal" href="../dell/dell_r630.html#dell-r630"><span class="std std-ref">Dell R630服务器</span></a> 相同，支持 <a class="reference internal" href="../../../../kernel/cpu/intel/xeon_e5-2600_v3.html#xeon-e5-2600-v3"><span class="std std-ref">Intel Xeon E5-2600 v3处理器</span></a> 和 <a class="reference internal" href="../../../../kernel/cpu/intel/xeon_e5-2600_v4.html#xeon-e5-2600-v4"><span class="std std-ref">Intel Xeon E5-2600 v4处理器</span></a> ，这款服务器支持的CPU型号较多(比DL160):</p></li>
 </ul>
-<table class="colwidths-given docutils align-default" id="id5">
-<caption><span class="caption-text">HPE ProLiant DL360 Gen9 支持E5-2600 v3/v4处理器</span><a class="headerlink" href="#id5" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id9">
+<caption><span class="caption-text">HPE ProLiant DL360 Gen9 支持E5-2600 v3/v4处理器</span><a class="headerlink" href="#id9" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 25%" />
 <col style="width: 15%" />
@@ -654,11 +696,12 @@
 <p class="admonition-title">注解</p>
 <p>不过从淘宝可以看到 LRDIMM 内存目前非常昂贵，不如 RDIMM内存 性价比高。不过，技术发展迅速，或许未来也可能进入二手市场的高性价比范围。</p>
 </div>
-<section id="id1">
-<h2>存储<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+</section>
+<section id="id5">
+<h2>存储<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p>DL360服务器内置驱动器分为8盘位和10盘位两种，有以下集中配置规格:</p>
-<section id="id2">
-<h3>存储控制器<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<section id="id6">
+<h3>存储控制器<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
 <p>主板内置存储控制芯片: HPE Dynamic Smart Array B140i控制器 (对于E5-2600v3 CPU处理器，主板集成的B140i只能工作在UEFI模式)。默认B140i设置为AHCI模式，如果要使用SATA only模式则需要配置激活。</p>
 <p>支持2种阵列卡：</p>
 <ul class="simple">
@@ -669,8 +712,8 @@
 <p>内置硬盘配置组合:</p>
 </section>
 </section>
-<section id="id3">
-<h2>电源支持<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id7">
+<h2>电源支持<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>500W标配</p></li>
 <li><p>800W</p></li>
@@ -678,8 +721,8 @@
 <li><p>750W +</p></li>
 </ul>
 </section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://support.hpe.com/connect/s/product?language=en_US&amp;ismnp=0&amp;l5oid=7252836&amp;kmpmoid=7252838&amp;cep=on#t=All">HPE ProLiant DL360 Gen9 Server</a></p></li>
 <li><p><a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&amp;docId=c04346229">HPE ProLiant DL360 Gen9 Server QuickSpecs</a></p></li>
