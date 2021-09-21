@@ -4,6 +4,50 @@
 HPE ProLiant DL360 Gen9服务器
 ================================
 
+DL360服务器外观
+=================
+
+前面板
+----------
+
+HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不错的计算能力和高密度存储(目前SSD存储技术已经向微型化发展，所以即使1U服务也能提供非常高的存储容量)。
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_front.png
+   :scale: 60
+
+标准配置是采用 8 个SFF，也可以订购不同 :ref:`storage_spec` 组合，其中比较有特色的是:
+
+- 4 SAS/SATA (Drive 1-4)+6 NVMe (Drive 5-10)
+
+我觉得可以配置成:
+
+- Drive 1-2 采用常规SAS SSD组成RAID1，构建操作系统，确保本机服务器始终可用
+- Drive 3-4 采用大容量 HDD ，构建基于 :ref:`gluster` 的镜像近线存储，提供NAS文件存储功能
+- Drive 5-10 采用 NVMe SSD，通过虚拟化构建 :ref:`ceph` 存储集群，提供整个虚拟化 :ref:`openstack` 分布式存储，实现云计算底层存储
+
+不过服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5" NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。详细实践待后续...
+
+后面版
+---------
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_front.png
+   :scale: 60
+
+值得关注点:
+
+- 板载集成4端口千兆网卡，可以组建network bonding实现高速网络交换，或者可以尝试实践一个以Linux为基础的高速交换网络，学习SDN技术
+- 可选的FlexibleLOM bay可以安装附加的4口网卡，扩展性更强的交换网络
+- 电源可能需要购买高功率，因为如果使用高性能CPU没有大功率电源支持会导致不稳定 - 具体待查询资料和实践
+
+内部
+--------
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_inside.png
+   :scale: 60
+
+配置
+========
+
 HPE ProLiant DL360 Gen9 服务器综合配置介于 :ref:`dell_r630` 和 :ref:`dell_r640` 之间:
 
 - 主板芯片和 :ref:`dell_r630` 相同，采用 :ref:`intel_c610` 系列
@@ -42,6 +86,8 @@ DL360服务器内置驱动器分为8盘位和10盘位两种，有以下集中配
 HP官方支持网站提供了部件安装视频指南，例如 `HP Smpart Array Controller <https://support.hpe.com/hpesc/public/docDisplay?docId=psg000107aen_us&page=GUID-F16DC03B-D44C-4C4C-B314-BD207D305DF1.html>`_ 介绍了如何替换阵列卡。其他组件的安装替换也有相应指导，非常方便
 
 内置硬盘配置组合:
+
+
 
 电源支持
 =========
