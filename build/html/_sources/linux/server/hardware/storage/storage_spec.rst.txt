@@ -40,6 +40,10 @@ NVMe规范了一系列工业标准PCIe SSD标准，包括:
 
 这种转接卡的优点是可以使用廉价的家用型 M.2 NVMe SSD存储，并且可以采用多个NVMe组建 :ref:`ceph` 或 :ref:`gluster` 分布式存储(不建议使用RAID)，缺点是对于服务器占用了宝贵的PCIe插槽(通常用于GPU显卡或者高性能多口网卡)，也没有使用原先规划的热插拔磁盘位。
 
+.. note::
+
+   由于通过 PCIe转NVMe扩展卡 ( `京东: 麦沃 MAIWO M.2转接卡Nvme四盘位PCIEX16转固态硬盘阵列转接卡 <https://item.jd.com/10021208284029.html>`_ 售价约340元 ) 可以使用价格较为低廉的家用型 M.2 接口NVMe SSD，相同存储容量是服务器 U.2 存储的一半，所以对于个人使用较为合适，能够组件一个小规模的 :ref:`ceph` 存储虚拟化集群。 
+
 上述转接卡方式使用NVMe是非常实用的技术，已经有实践案例 `Add NVMe capability to an HPE Proliant DL360p Gen8 Server <https://www.stephenwagner.com/2020/05/26/add-nvme-capability-hpe-proliant-server/>`_ 为非常古老的DL360 Gen8服务器实现了NVMe存储。
 
 不过，需要注意的是，服务器厂商，例如HPE并没有在官方提供上述转接卡形式的NVMe存储方案，而是采用 标准2.5寸 ``U.2`` 存储硬件接口，这种标准方式和传统的机架服务器热插拔磁盘兼容，就像安装传统的SAS/SATA磁盘一样。在 `HPE ProLiant DL360 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&docId=c04346229>`_ 只说明了支持 Hot Plug SFF NVMe PCIe SSD ::
