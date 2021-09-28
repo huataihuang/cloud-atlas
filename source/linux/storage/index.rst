@@ -9,6 +9,7 @@ Linux存储
 
    disk/index
    filesystem/index
+   lvm/index
    zfs/index
    btrfs/index
    stratis/index

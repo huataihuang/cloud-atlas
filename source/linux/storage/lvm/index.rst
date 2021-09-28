@@ -1,14 +1,13 @@
-.. _server_storage:
+.. _linux_lvm:
 
 =================================
-服务器存储
+Linux LVM逻辑卷管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   storage_spec.rst
-   nvme.rst
+   striped_lvm.rst
    
 .. only::  subproject and html
 

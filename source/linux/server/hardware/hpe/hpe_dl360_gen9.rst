@@ -45,6 +45,13 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
 .. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_inside.png
    :scale: 60
 
+重点:
+
+- 主板内部提供了Micro-SD卡接口，功能待查
+- 支持2种存储卡: HPE Flexible Smart Array 和 Smart HBA，型号是 H240ar 和 P440ar
+- PCIe 规格是 3.0，需要注意插槽1和2和处理器1关联，插槽3和处理器2关联
+- 提供了2个主板SATA控制器插口
+
 配置
 ========
 
@@ -87,7 +94,7 @@ HP官方支持网站提供了部件安装视频指南，例如 `HP Smpart Array 
 
 内置硬盘配置组合:
 
-
+- Hot Plug SFF NVMe PCIe + SSD : 可以组合 6个NVMe + 4个SSD 不过由于存储是服务器最大的投资部分，可以采用渐进升级方法
 
 电源支持
 =========
@@ -96,6 +103,26 @@ HP官方支持网站提供了部件安装视频指南，例如 `HP Smpart Array 
 - 800W
 - 1400W
 - 750W +
+
+UEFI
+========
+
+Unified Extensible Firmware Interface (UEFI)是服务器启动管理，HP提供了 `HPE UEFI支持 <http://www.hpe.com/servers/uefi>`_ :
+
+- 结合UFEI安全启动(通过内建可信任密钥签名)，并且HPE ProLiant Gen10服务器还支持Trusted Platform Module(TPM)
+- 嵌入的UEFI Sheel 和 `iLo RESTful API <https://www.hpe.com/us/en/servers/restful-api.html>`_ ，可以管理UEFI以及BIOS
+- UEFI支持PXE从IPv6网络启动，这样可以通过网络快速部署大量服务器
+
+我的服务器组合
+=================
+
+- HPE ProLiant DL360 Gen9 Server
+- :ref:`xeon_e5-2670_v3`
+- 三星 32G DDR4 2R*4 2400MHz 内存 (实际上v3只支持2133MHz，考虑到后续可能升级v4处理器支持2400MHz)
+
+  - DL360支持每个DIMM插槽最高32GB RDIMM内存，满配24根最高768GB。为了不浪费插槽和内存，选择2根32G
+
+- 硬盘暂时采用原先的购买的笔记本2.5" SSD SATA硬盘，后续再做升级到 U.2 接口NVMe SSD
 
 参考
 =======
