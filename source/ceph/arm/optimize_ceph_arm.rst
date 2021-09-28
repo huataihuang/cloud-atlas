@@ -83,6 +83,15 @@ CPU优化
 .. figure:: ../../_static/ceph/arm/ceph_optimize_numa.png
    :scale: 60
 
+上述架构启示我在 :ref:`real_private_cloud_think` 可以采用NUMA来运行直接访问存储的第一层虚拟化，这样可以确保每次读写存储、网络、内存都是就近访问，加速性能。
+
+这点需要重点剖析我所使用 :ref:`hpe_dl360_gen9` 的 :ref:`xeon_e5-2670_v3` 实际的物理处理器核心该如何划分NUMA(不出现伪NUMA)， 是如何访问周边内存、网络和存储，所以要确保硬件上这些设备是均匀分布在不同的NUMA节点上，避免跨NUMA访问，特别是存储密集和网络密集，绝对不能忽视跨NUMA导致的性能损失。我觉得应该有一个完整的性能测试，用数据来验证理论。
+
+根据华为工程师性能测试介绍(待验证)，Ceph OSD 合理部署NUMA可以获得 4%~11% 的IOPS提升以及 3%~10%的延迟降低：
+
+.. figure:: ../../_static/ceph/arm/ceph_osd_numa.png
+   :scale: 60
+
 - 内核 4K/64K pagesize
 
 - DDR多通道部署 (这个应该和服务器硬件优化相关，注意 :ref:`hpe_dl360_gen9` 每个内存DDR通道是和CPU相关联的，所以部署进程访问不同的DDR通道结合NUMA应该有所优化)
@@ -91,6 +100,14 @@ CPU优化
 -------------
 
 - 中断CPU core绑定
+
+默认时，多个NIC网卡中断会集中到NUMA0上(通常是CPU0)，通过将中断打散到不同NUMA节点来分担。这里需要注意，NUMA节点绑定的OSD进程，访问的网卡应该是同一个NUMA节点的，避免跨NUMA引发性能下降。同时要确保NIC和OSD收发数据包都是在同一个NUMA上。
+
+后续我在部署嵌套虚拟化的第一层虚拟化，把每个虚拟机部署到NUMA节点上进行对比测试来验证
+
+.. figure:: ../../_static/ceph/arm/ceph_nic_interrupt_numa.png
+   :scale: 60
+
 - MTU调整
 - TCP参数调整
 - 多端口NIC部署
