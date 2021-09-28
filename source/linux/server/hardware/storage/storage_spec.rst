@@ -10,11 +10,19 @@ SAS和SATA
 ============
 
 - SAS：串行scsi接口，能够兼容sata接口，这是服务器上常见的高性价比硬盘接口，多见于企业级机械磁盘(HDD)。
-- SATA：串行ata接口，也就是我们生活中常见的台式机和笔记本硬盘接口
+- SATA：串行ata接口，也就是我们生活中常见的台式机和笔记本硬盘接口，SATA采用串行连接方式，SATA总线使用嵌入式时钟信号，具备更强纠错能力，结构简单，支持热插拔
+
+  - SATA实际上是SAS标准的子集，两者可以兼容
+  - SAS由于强大的SCSI指令集，并且支持双向全双工模式(可同时发生读写操作提供了两路活动通道)
+  - SATA只能提供单通道和半双工模式，所以性能较弱
+  - SATA接口速度6Gb/s (SAS也是6Gb/s但是速度更快)
+
 - LFF：3.5寸，就是我们一般见到的那种台式机硬盘的大小，这里 ``L`` 表示Large
 - SFF：2.5寸，类似笔记本硬盘尺寸
 
 在HP服务器文档中会经常看到 ``SFF`` 和 ``LFF`` 磁盘，实际上就是 2.5寸和3.5寸磁盘。所谓 ``SFF`` 意思是 small form factor ，即小形状因素，指的是小型化的电脑组件和接口。在服务器相关文档，一般SFF硬盘就是指2.5"硬盘。此外，在网络领域，有专业术语 ``SFP`` 表示 small form-factor pluggable(SFP)，是一种紧凑型，热插拔网络接口模块，通常是光线接口，或者电缆。( `Small form-factor pluggable transceiver <https://en.wikipedia.org/wiki/Small_form-factor_pluggable_transceiver>`_ )
+
+
 
 NVMe和SSD
 =============

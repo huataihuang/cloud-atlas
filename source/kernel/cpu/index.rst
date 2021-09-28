@@ -9,6 +9,7 @@ CPU架构
 .. toctree::
    :maxdepth: 1
 
+   cpu_prefetch.rst
    intel/index
    amd/index
    arm/index

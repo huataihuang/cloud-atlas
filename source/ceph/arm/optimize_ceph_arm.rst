@@ -66,8 +66,42 @@ ARM支持64K内核大页，内核大页可以提升Ceph的以下性能:
 - 随机读: 性能提高 6.24% ~ 9.99%
 - 随机写: 性能提高 5.93% ~ 15.4%
 
+Ceph在ARM架构的SSD环境优化
+============================
+
+CPU优化
+-----------
+
+- 开关 :ref:`cpu_prefetch` 进行对比
+
+- 优化相应的线程数量
+
+- :ref:`numa` 优化
+
+数据通过NUMA访问: 精心设置数据访问通道，确保所有数据访问，包括内存、网络、存储都是NUMA就近访问
+
+.. figure:: ../../_static/ceph/arm/ceph_optimize_numa.png
+   :scale: 60
+
+- 内核 4K/64K pagesize
+
+- DDR多通道部署 (这个应该和服务器硬件优化相关，注意 :ref:`hpe_dl360_gen9` 每个内存DDR通道是和CPU相关联的，所以部署进程访问不同的DDR通道结合NUMA应该有所优化)
+
+网络性能优化
+-------------
+
+- 中断CPU core绑定
+- MTU调整
+- TCP参数调整
+- 多端口NIC部署
+
+I/O性能优化
+--------------
+
+- CRC校验
 
 参考
 =====
 
 - `Ceph Month 2021: Optimizing Ceph on Arm64 <https://www.youtube.com/watch?v=IzYYOdm2nuE&list=WL&index=8>`_
+- `Ceph Month 2021: Performance Optimization for All Flash based on aarch64 <https://www.youtube.com/watch?v=SLOfsUC71J8&list=WL&index=12>`_
