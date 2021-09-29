@@ -70,3 +70,6 @@ CPU和GPU冷却
 =======
 
 - `A Full Hardware Guide to Deep Learning <http://timdettmers.com/2018/12/16/deep-learning-hardware-guide/>`_
+- `Which GPU(s) to Get for Deep Learning: My Experience and Advice for Using GPUs in Deep Learning <https://timdettmers.com/2020/09/07/which-gpu-for-deep-learning/>`_
+- `深度学习工作站攒机指南 <https://www.cnblogs.com/guoyaohua/p/deeplearning-workstation.html>`_
+- `Dive into deep learning GPU购买指南 <https://zh.d2l.ai/chapter_appendix/buy-gpu.html>`_

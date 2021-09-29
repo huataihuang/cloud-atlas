@@ -107,7 +107,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#ceph-isa-l">Ceph ISA-L卸载</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#k">64K内核页</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cepharmssd">Ceph在ARM架构的SSD环境优化</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -307,9 +307,47 @@
 <a class="reference internal image-reference" href="../../_images/ceph_osd_numa.png"><img alt="../../_images/ceph_osd_numa.png" src="../../_images/ceph_osd_numa.png" style="width: 614.4px; height: 303.59999999999997px;" /></a>
 </figure>
 <ul class="simple">
-<li><p>内核 4K/64K pagesize</p></li>
+<li><p>CPU partition affinity</p></li>
+</ul>
+<p>通过CPU partition affinity 来隔离 <code class="docutils literal notranslate"><span class="pre">msgr-worker</span></code> 、 <code class="docutils literal notranslate"><span class="pre">tp_osd_tp</span></code> 和 <code class="docutils literal notranslate"><span class="pre">bstore</span></code> 线程实现公平调度，可以提高IOPS以及降低延迟:</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/ceph_cpu_partition_affinity.png"><img alt="../../_images/ceph_cpu_partition_affinity.png" src="../../_images/ceph_cpu_partition_affinity.png" style="width: 612.6px; height: 319.2px;" /></a>
+</figure>
+<p>在实时Linux系统中，会采用一种 <a class="reference internal" href="../../linux/redhat_linux/performance/system_partition.html#system-partitioning"><span class="std std-ref">性能优化之系统分区(System Partitioning)</span></a> 优化实时程序性能。Linux发行版也提供了 <a class="reference internal" href="../../linux/redhat_linux/performance/tuned.html#tuned"><span class="std std-ref">TuneD系统优化服务</span></a> 工具提供系统CPU分区隔离和保留用于延迟敏感应用。</p>
+<ul class="simple">
+<li><p>内核 4K/64K pagesize</p>
+<ul>
+<li><p>和默认的4K内存页相比，64K内存页可以降低TLB miss并提高10%性能</p></li>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">bufferlist::reserve</span></code> 中使用小内存页对齐来降低内存浪费</p></li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">CEPH_PAGE_SHIFT</span></code> 来兼容不同的内存页大小</p></li>
+</ul>
+</li>
+</ul>
+<p>使用64K页带来的问题:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>写入放大 (Write amplification) 问题:</p></li>
+</ul>
+<p>当 <code class="docutils literal notranslate"><span class="pre">bluefs_buffered_io</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">true</span></code> 的时候，metadata是使用buffer I/O写入的，并且 <code class="docutils literal notranslate"><span class="pre">sync_file_range</span></code> 是通过内核页来调用来写入数据到磁盘。这时对于4K页写入放大系数是2.46，而对于64K页写入放大系数是5.46</p>
+<p>当 <code class="docutils literal notranslate"><span class="pre">bluefs_buffered_io</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">false</span></code> ，则 metadata 是采用direct I/O写入，不调用 <code class="docutils literal notranslate"><span class="pre">sync_file_range</span></code> ，此时写入放大系数是 2.29。</p>
+<p>由于写入放大会影响SSD使用寿命，所以建议 <code class="docutils literal notranslate"><span class="pre">bluefs_buffered_io</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+<ul class="simple">
+<li><p>tcmalloc和内核页大小问题(这个问题提出非常有意思，需要研究):</p></li>
+</ul>
+<p>当 <code class="docutils literal notranslate"><span class="pre">tcmalloc</span></code> 页大小 <code class="docutils literal notranslate"><span class="pre">小于</span></code> 内核页大小，则内存会持续增长直到达到 <code class="docutils literal notranslate"><span class="pre">osd_memory_target</span></code> ，然后性能会明显退化。所以要确保 <code class="docutils literal notranslate"><span class="pre">tcmalloc</span></code> 的页大小 <code class="docutils literal notranslate"><span class="pre">大于</span></code> 内核页大小。这个问题是在 <a class="reference internal" href="../../linux/redhat_linux/index.html#redhat-linux"><span class="std std-ref">RedHat Linux</span></a> 7.6 版本上发现的，原因是默认7.6版本默认tcmalloc是8K，比调整的64K内核页小(启动操作系统时候可以修改内核的内核页大小设置)，这会导致适配问题。所以一定要注意调整pagesize，以适配操作系统内置的 <code class="docutils literal notranslate"><span class="pre">tcmalloc</span></code> 页大小(这个值不可变)。不过CentOS 8.1 调整了默认tcmalloc为64K(目前就发现是CentOS 8调整了，其他发行版Ubuntu/SUSE都默认4K)，就解决了这个问题。</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>写入放大 是flash内存和SSD的一种特有不良现象，也就是对已经存在数据的介质进行重写需要先擦除然后才能写入，但是擦除操作的粒度比写入操作的粒度要低很多，就会导致多次移动(或改写)用户数据和元数据。</p>
+<p>闪存工作原理是以4K页(page)为单元写入，但擦除只能以块(block, 64个page)为单位。如果一个块上部分page是有效数据部分page是标记删除数据，则在这个块上重新写入数据，必须擦除整个数据块。这时需要首先把有效数据搬迁到一个有空位置的block块。这就是GC垃圾回收技术。这也就为何重写会导致写入放大。</p>
+<p>此外还有一个和SSD相关的TRIM技术，也就是trim指令可以告知GC垃圾回收时只搬迁有效数据而不必搬迁已经标记删除的数据，可以降低写入量。这个trim对于SSD磁盘非常重要，可以延长SSD使用寿命。trim技术需要文件系统支持。</p>
+<p>保持SSD存储的空闲空间(需要TRIM)以及开启数据要锁可以降低写入放大。</p>
+<p>详细实践请参考 <a class="reference internal" href="../../linux/storage/disk/linux_ssd.html#linux-ssd"><span class="std std-ref">Linux固态驱动器(SSD)</span></a></p>
+</div>
+<ul class="simple">
 <li><p>DDR多通道部署 (这个应该和服务器硬件优化相关，注意 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 每个内存DDR通道是和CPU相关联的，所以部署进程访问不同的DDR通道结合NUMA应该有所优化)</p></li>
 </ul>
+<p>根据华为工程师介绍，16通道DDR比12通道DDR在4KB读写和读读测试中，性能分别提高 7% 和 11%</p>
 </section>
 <section id="id1">
 <h3>网络性能优化<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
@@ -330,15 +368,23 @@
 <section id="i-o">
 <h3>I/O性能优化<a class="headerlink" href="#i-o" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
-<li><p>CRC校验</p></li>
+<li><p>rocksdb的 <code class="docutils literal notranslate"><span class="pre">crc32_arm64</span></code> 优化</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>ceph参数<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p><cite>osd_client_message_cap</cite></p></li>
 </ul>
 </section>
 </section>
-<section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.youtube.com/watch?v=IzYYOdm2nuE&amp;list=WL&amp;index=8">Ceph Month 2021: Optimizing Ceph on Arm64</a></p></li>
 <li><p><a class="reference external" href="https://www.youtube.com/watch?v=SLOfsUC71J8&amp;list=WL&amp;index=12">Ceph Month 2021: Performance Optimization for All Flash based on aarch64</a></p></li>
+<li><p><a class="reference external" href="https://zh.wikipedia.org/wiki/%E5%86%99%E5%85%A5%E6%94%BE%E5%A4%A7">写入放大</a></p></li>
+<li><p><a class="reference external" href="https://www.zhihu.com/question/31024021">如何理解SSD的写放大?</a></p></li>
 </ul>
 </section>
 </section>

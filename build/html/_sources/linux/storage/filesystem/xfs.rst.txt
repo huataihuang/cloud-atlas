@@ -113,6 +113,8 @@ XFS案例
 
   ``-n ftype=1`` 是XFS在overlay文件系统时候存储附加元数据时候必须使用的，这个参数在 RHEL 7.4 之后XFS模式激活 ``ftype=1`` ，详情参考RHEL 7文档，在 `Docker installation on RHEL 7.2 and file system requirement <https://serverfault.com/questions/1029785/docker-installation-on-rhel-7-2-and-file-system-requirement/1029872#1029872>`_ 可以看到，docker容器要求XFS格式化成 ``fytpe=1`` 才能正常用于 ``/var/lib/docker`` 正常工作。
 
+
+
 - 创建挂载配置::
 
    echo "/dev/vgdb/log    /dbdata/log   xfs defaults,noatime,nodiratime<Plug>PeepOpenquota 0 0" >> /etc/fstab

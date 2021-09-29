@@ -7,6 +7,7 @@ Linux磁盘
 .. toctree::
    :maxdepth: 1
 
+   linux_ssd.rst
    linux_partition.rst
    4k_alignment.rst
    wd_advanced_format.rst

@@ -23,7 +23,7 @@ OverlayFS是一个类似AUFS的现代化联合文件系统，但是速度更快�
 
 - ``overlay`` 和 ``overlay2`` 存储引擎支持 ``xfs`` 文件系统，但是 ``xfs`` 文件系统必须激活 ``d_type=true``
 
-请使用 ``xfs_info`` 来校验文件系统选项是否已经设置了 ``ftype`` 选项为 ``1`` 。如果没有激活 ``d_type=true`` ，则必须重新格式化xfs文件系统，格式化时候使用参数 ``-n ftype=1`` 。
+请使用 ``xfs_info`` 来校验文件系统选项是否已经设置了 ``ftype`` 选项为 ``1`` 。如果没有激活 ``d_type=true`` ，则必须重新格式化xfs文件系统，格式化时候使用参数 ``-n ftype=1`` 。实践案例参考 :ref:`xfs`
 
 使用 ``xfs_info /var/lib/docker`` 显示输出::
 
