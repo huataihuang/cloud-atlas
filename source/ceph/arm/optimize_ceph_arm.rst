@@ -92,9 +92,50 @@ CPU优化
 .. figure:: ../../_static/ceph/arm/ceph_osd_numa.png
    :scale: 60
 
+- CPU partition affinity
+
+通过CPU partition affinity 来隔离 ``msgr-worker`` 、 ``tp_osd_tp`` 和 ``bstore`` 线程实现公平调度，可以提高IOPS以及降低延迟:
+
+.. figure:: ../../_static/ceph/arm/ceph_cpu_partition_affinity.png
+   :scale: 60
+
+在实时Linux系统中，会采用一种 :ref:`system_partitioning` 优化实时程序性能。Linux发行版也提供了 :ref:`tuned` 工具提供系统CPU分区隔离和保留用于延迟敏感应用。
+
 - 内核 4K/64K pagesize
 
+  - 和默认的4K内存页相比，64K内存页可以降低TLB miss并提高10%性能
+  - 在 ``bufferlist::reserve`` 中使用小内存页对齐来降低内存浪费
+  - 使用 ``CEPH_PAGE_SHIFT`` 来兼容不同的内存页大小
+
+使用64K页带来的问题:
+
+  - 写入放大 (Write amplification) 问题: 
+
+  当 ``bluefs_buffered_io`` 设置为 ``true`` 的时候，metadata是使用buffer I/O写入的，并且 ``sync_file_range`` 是通过内核页来调用来写入数据到磁盘。这时对于4K页写入放大系数是2.46，而对于64K页写入放大系数是5.46
+
+  当 ``bluefs_buffered_io`` 设置为 ``false`` ，则 metadata 是采用direct I/O写入，不调用 ``sync_file_range`` ，此时写入放大系数是 2.29。
+
+  由于写入放大会影响SSD使用寿命，所以建议 ``bluefs_buffered_io`` 设置为 ``false``
+
+  - tcmalloc和内核页大小问题(这个问题提出非常有意思，需要研究):
+
+  当 ``tcmalloc`` 页大小 ``小于`` 内核页大小，则内存会持续增长直到达到 ``osd_memory_target`` ，然后性能会明显退化。所以要确保 ``tcmalloc`` 的页大小 ``大于`` 内核页大小。这个问题是在 :ref:`redhat_linux` 7.6 版本上发现的，原因是默认7.6版本默认tcmalloc是8K，比调整的64K内核页小(启动操作系统时候可以修改内核的内核页大小设置)，这会导致适配问题。所以一定要注意调整pagesize，以适配操作系统内置的 ``tcmalloc`` 页大小(这个值不可变)。不过CentOS 8.1 调整了默认tcmalloc为64K(目前就发现是CentOS 8调整了，其他发行版Ubuntu/SUSE都默认4K)，就解决了这个问题。
+
+.. note::
+
+   写入放大 是flash内存和SSD的一种特有不良现象，也就是对已经存在数据的介质进行重写需要先擦除然后才能写入，但是擦除操作的粒度比写入操作的粒度要低很多，就会导致多次移动(或改写)用户数据和元数据。
+
+   闪存工作原理是以4K页(page)为单元写入，但擦除只能以块(block, 64个page)为单位。如果一个块上部分page是有效数据部分page是标记删除数据，则在这个块上重新写入数据，必须擦除整个数据块。这时需要首先把有效数据搬迁到一个有空位置的block块。这就是GC垃圾回收技术。这也就为何重写会导致写入放大。
+
+   此外还有一个和SSD相关的TRIM技术，也就是trim指令可以告知GC垃圾回收时只搬迁有效数据而不必搬迁已经标记删除的数据，可以降低写入量。这个trim对于SSD磁盘非常重要，可以延长SSD使用寿命。trim技术需要文件系统支持。
+
+   保持SSD存储的空闲空间(需要TRIM)以及开启数据要锁可以降低写入放大。
+
+   详细实践请参考 :ref:`linux_ssd`
+
 - DDR多通道部署 (这个应该和服务器硬件优化相关，注意 :ref:`hpe_dl360_gen9` 每个内存DDR通道是和CPU相关联的，所以部署进程访问不同的DDR通道结合NUMA应该有所优化)
+
+根据华为工程师介绍，16通道DDR比12通道DDR在4KB读写和读读测试中，性能分别提高 7% 和 11%
 
 网络性能优化
 -------------
@@ -115,10 +156,17 @@ CPU优化
 I/O性能优化
 --------------
 
-- CRC校验
+- rocksdb的 ``crc32_arm64`` 优化
+
+ceph参数
+------------
+
+- `osd_client_message_cap`
 
 参考
 =====
 
 - `Ceph Month 2021: Optimizing Ceph on Arm64 <https://www.youtube.com/watch?v=IzYYOdm2nuE&list=WL&index=8>`_
 - `Ceph Month 2021: Performance Optimization for All Flash based on aarch64 <https://www.youtube.com/watch?v=SLOfsUC71J8&list=WL&index=12>`_
+- `写入放大 <https://zh.wikipedia.org/wiki/%E5%86%99%E5%85%A5%E6%94%BE%E5%A4%A7>`_
+- `如何理解SSD的写放大? <https://www.zhihu.com/question/31024021>`_
