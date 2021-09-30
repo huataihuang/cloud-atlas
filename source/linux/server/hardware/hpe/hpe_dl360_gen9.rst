@@ -13,7 +13,7 @@ DL360服务器外观
 HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不错的计算能力和高密度存储(目前SSD存储技术已经向微型化发展，所以即使1U服务也能提供非常高的存储容量)。
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_front.png
-   :scale: 60
+   :scale: 80
 
 标准配置是采用 8 个SFF，也可以订购不同 :ref:`storage_spec` 组合，其中比较有特色的是:
 
@@ -31,7 +31,7 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
 ---------
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_front.png
-   :scale: 60
+   :scale: 80
 
 值得关注点:
 
@@ -43,7 +43,7 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
 --------
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_inside.png
-   :scale: 60
+   :scale: 80
 
 重点:
 
