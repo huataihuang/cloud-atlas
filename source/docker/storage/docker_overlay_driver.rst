@@ -33,7 +33,7 @@ OverlayFS是一个类似AUFS的现代化联合文件系统，但是速度更快�
 
 .. warning::
 
-   没有启用 ``d_type`` 的XFS文件系统会导致Docker不能使用 ``overlay`` 或 ``overlay2`` 驱动。已经安装的Docker虽然可以运行但是会报错，这样至少能够允许用户歉意数据。但是未来版本，Docker将拒绝启动。
+   没有启用 ``d_type`` 的XFS文件系统会导致Docker不能使用 ``overlay`` 或 ``overlay2`` 驱动。已经安装的Docker虽然可以运行但是会报错，这样至少能够允许用户迁移数据。但是未来版本，Docker将拒绝启动。
 
 - 修改现有容器和镜像的存储引擎可能会导致不可访问。所以在修改 :ref:`docker_storage_driver` 之前，应该使用 ``docker save`` 命令将镜像存储或推送到镜像仓库中，以应对异常问题。
 
