@@ -8,21 +8,14 @@
 
 .. note::
 
-   对于个人或小型企业，推荐采用二手的机架服务器来构建私有云平台，虽然二手服务求肯定不如最新的原装服务器性能优异并且有维保，故障率也较高，但是通过开源系统的分布式部署，合理构建故障冗灾，还是能够保障系统稳定性的。
+   对于个人或小型企业，推荐采用二手的机架服务器来构建私有云平台，虽然二手服务器肯定不如最新的原装服务器性能优异并且有维保，故障率也较高，但是通过开源系统的分布式部署，合理构建故障冗灾，还是能够保障系统稳定性的。
 
-   如果你缺乏资金，可以采用 :ref:`kvm_docker_in_studio` 中使用的 :ref:`kvm_nested_virtual` 来实现私有云的物理服务器。
+   如果你缺乏资金，可以采用 :ref:`kvm_docker_in_studio` 中使用的 :ref:`kvm_nested_virtual` 来实现私有云的物理服务器。例如，我的实践就是采用嵌套虚拟化，在一台物理主机上实现大量服务器部署集群。
 
    私有云的构建目标是实现一个企业内部的测试演练环境，以及持续集成持续测试，并构建内部管理IT平台，ERP/CRM等。
-
-真实云计算的解析地址:
-
-.. literalinclude:: ../../studio/hosts
-   :language: bash
-   :emphasize-lines: 72-85
-   :linenos:
-   :caption:
 
 .. toctree::
    :maxdepth: 1
 
-   phy_server_setup.rst   
+   ubuntu_host_setup.rst
+   phy_server_setup_old.rst
