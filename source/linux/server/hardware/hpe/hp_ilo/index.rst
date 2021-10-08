@@ -1,15 +1,13 @@
-.. _server_hpe:
+.. _hp_ilo:
 
 =================================
-HPE服务器
+HP服务器iLO技术
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   hpe_dl360_gen9.rst
-   hpe_dl160_gen9.rst
-   hp_ilo/index
+   hp_ilo_startup.rst
    
 .. only::  subproject and html
 
