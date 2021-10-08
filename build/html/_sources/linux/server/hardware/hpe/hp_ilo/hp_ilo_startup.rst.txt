@@ -12,7 +12,7 @@ iLO的版本
 目前HP已经开发了5代iLO，并且每代有不同板本:
 
 .. figure:: ../../../../../_static/linux/server/hardware/hpe/hp_ilo/hp_ilo_gen_version.jpg
-   :scale: 80
+   :scale: 60
 
 参考
 =======
