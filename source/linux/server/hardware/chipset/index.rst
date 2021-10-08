@@ -7,6 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
+   pcie.rst
    intel_c610.rst
    dimm_ram.rst
    

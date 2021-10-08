@@ -1,7 +1,7 @@
-.. _macos_studio:
+.. _macos:
 
 =================================
-macOS Studio
+macOS
 =================================
 
 日常工作都使用MacBook Pro，我准备从0开始，记录构建一个适合开发和运维的工作环境。
@@ -23,6 +23,7 @@ macOS Studio
    missing_xcrun.rst
    vim_tmux_iterm_zsh.rst
    macos_nfs.rst
+   restore_launchpad.rst
 
 .. only::  subproject and html
 

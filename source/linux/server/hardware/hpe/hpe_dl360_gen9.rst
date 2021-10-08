@@ -21,16 +21,30 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
 
 我觉得可以配置成:
 
-- Drive 1-2 采用常规SAS SSD组成RAID1，构建操作系统，确保本机服务器始终可用
+- Drive 1-2 采用常规SATA SSD (企业级SAS SSD价格惊人，个人无法承受)
+
+  - 方法一: 双盘组成RAID1，构建操作系统，确保本机服务器始终可用
+  - 方法二: 两个SSD磁盘分别用于文件系统不同职责，例如数据和log分离，加速ZFS/Btrfs的性能
+
 - Drive 3-4 采用大容量 HDD ，构建基于 :ref:`gluster` 的镜像近线存储，提供NAS文件存储功能
-- Drive 5-10 采用 NVMe SSD，通过虚拟化构建 :ref:`ceph` 存储集群，提供整个虚拟化 :ref:`openstack` 分布式存储，实现云计算底层存储
+
+  - 采用大容量的机械磁盘可以降低存储成本，并且对于连续写入的大文件，机械磁盘性能在可接受范围
+  - 注意必须 :ref:`hdd_pmr_cmr_smr` ，应该购买CMR结构的HDD，并尽可能选择CMR大容量磁盘(小规格CMR HDD已经和SSD价格相近毫无优势)
+
+- Drive 5-10 采用 SATA SSD，通过虚拟化构建 :ref:`ceph` 存储集群，提供整个虚拟化 :ref:`openstack` 分布式存储，实现云计算底层存储
 
 不过服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5" NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。详细实践待后续...
+
+.. note::
+
+   实际上我最终没有采购CMR HDD机械磁盘，因为我发现目前由于磁记录技术停滞发展，已经没有超过2T规格的CMR HDD了。小规格HDD售价和SSD相差无几，性能又大为落后，所以如果要实现高性能分布式集群，还是采用 NVMe SSD实现更佳。
+
+   目前我先临时采用旧有的500GB HDD磁盘来模拟实验，后续将采购 PCIe 3.0 x16 转接4个NVMe SSD磁盘，来实现高性能 :ref:`ceph` 集群。
 
 后面版
 ---------
 
-.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_front.png
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_back.png
    :scale: 80
 
 值得关注点:
@@ -51,6 +65,41 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
 - 支持2种存储卡: HPE Flexible Smart Array 和 Smart HBA，型号是 H240ar 和 P440ar
 - PCIe 规格是 3.0，需要注意插槽1和2和处理器1关联，插槽3和处理器2关联
 - 提供了2个主板SATA控制器插口
+- 主板内建4个千兆网口，使用的是 Broadcom BCM5719 网卡芯片
+- 可选4口千兆 ``FlexibleLOM Bay`` 网卡(有多种规格，千兆、万兆和25Gb各种)，常见的是Intel 4口千兆网卡 ``HP Ethernet 1Gb 4-port 366FLR Adapter`` (部件编号 ``665240-B21``) (从淘宝购买二手服务器时，这块可选网卡被拆除了，需要单独购买 220 元)
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_mainboard.png
+   :scale: 55
+
+.. csv-table:: HPE ProLiant DL360 Gen9 主板组件
+   :file: hpe_dl360_gen9/hpe_dl360_gen9_mainboard.csv
+   :widths: 25, 75
+   :header-rows: 1
+
+PCIe
+--------
+
+:ref:`pcie` 通道是和CPU连接的，主机受限于处理器并不能添加过多的PCIe插槽(添加过多也只是分享cpu通道，反而无法获得最高速度)。不过，对于 :ref:`intel_c610` 也就是X99平台，支持2个志强处理器，所以可以通过将不同的PCIe分别连接到2个处理器获得全速运行性能。需要注意，在 `HPE ProLiant DL360 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&docId=c04346229>`_ 明确指出主机所支持到3个PCIe slot，其中 PCIe slot 1-2 连接CPU 1，而 PCIe slot 3 连接到CPU 2 :
+
+- 由于DL 360是一个1U的紧凑型机架服务器，所以需要使用 ``PCIe 3.0 riser for PCIe slot X`` 也就是PCIe扩展板，将插槽由垂直转为水平。需要注意的是，DL 360默认配置只提供了 ``Primary PCIe 3.0 riser for PCIe slot 1 & 2`` (对应CPU 1) ，而第二块PCIe扩展板 ``Secondary PCIe 3.0 riser for PCIe slot 3 (requires CPU 2)`` 需要另外购买
+- 只有购买了 ``Secondary PCIe 3.0 riser for PCIe slot 3 (requires CPU 2)`` 才能充分发挥DL 360的PCIe性能，也就是把PCIe数据访问分担到两个CPU上，性能最佳
+- 我推测如果购买并安装第二块PCIe扩展板，实际上DL360可以安装2块 PCIe 3.0 x16 的显卡，理论上可以组建一个性能更强 :ref:`dl_hardware` 平台 (待实践)
+- 根据 `HPE ProLiant DL360 Gen9 Server - Option Parts <https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c04444424>`_ 可以查询到上述第二块PCIe riser扩展板部件:
+
+  - HP DL360 Gen9 Low Profile PCIe Slot CPU2 Kit 部件编号是 ``764642-B21`` 在淘宝上能够找到价格为400元 (可能半高扩展板也够安装显卡了)
+  - HP DL360 Gen9 Full Height PCIe Slot CPU2 Kit 部件编号是 ``764644-B21`` (淘宝上没有可能需要ebay才能找到)
+
+FlexibleLOM Adapter
+-----------------------
+
+可选的 ``FlexibleLOM Bay`` 网卡有多种规格，千兆、万兆甚至25Gb。常见的是Intel 4口千兆网卡 ``HP Ethernet 1Gb 4-port 366FLR Adapter`` (部件编号 ``665240-B21``) 。
+
+不过我从淘宝购买二手DL360服务器，这块可选网卡被拆除了，需要单独购买 220 元。虽然有些小贵，但是考虑到不用占用服务器宝贵的PCIe插槽，并且是Intel网卡芯片，可以结合Intel开发的驱动以及DPDK技术加速网络虚拟化性能，我准备用来构建Linux交换设备，来连接我的多个 :ref:`pi_cluster` ，实现混合架构 :ref:`kubernetes` 。
+
+内部改造
+-----------
+
+考虑到DL360服务器内部有一些尚未利用到空间，我准备将 :ref:`pi_4` 和 :ref:`jetson_nano` 安装到DL 360内部，结合上述Intel 4口千兆网卡所构建的Linux交换机，组建成一台混合架构模拟集群的服务器。
 
 配置
 ========
@@ -78,7 +127,23 @@ HPE ProLiant DL360 Gen9 服务器综合配置介于 :ref:`dell_r630` 和 :ref:`d
 存储
 ========
 
-DL360服务器内置驱动器分为8盘位和10盘位两种，有以下集中配置规格:
+DL360服务器有两种大小规格的磁盘 - 4LFF(3.5") 和 8SFF(2.5")/10SFF(2.5")
+
+我购买的二手DL 360是常见的8FF配置版本，其数据盘位置如下:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_disks.png
+   :scale: 50
+
+可以扩展到10SFF配置(需要另外购置一个 ``HP DL360 Gen9 2SFF SAS/SATA Universal Media Bay Kit 764630-B21`` (约230-300元) 以安装第9-10磁盘)
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_10disks.png
+   :scale: 50
+
+10SFF配置有一种性能极致的配置: ``HP DL360 Gen9 6 NVMe + 4 SAS/SATA Express Bay Enablement Kit  817676-B21`` 背板替换后，可以支持 4个SAS/SATA 加上 6个NVMe (U.2接口)设备，但是这个配件的价格约在 800 刀到 1000 刀，并且万能淘宝也找不到，只有海外直购，所以并不现实。
+
+.. note::
+
+   由于 ``4SAS/SATA + 6NVMe`` 的扩展模块售价极高，对于二手设备已没有可能。所以如果要通过NVMe存储充分发挥DL 360服务器性能，可行的方法是采用PCIe转M.2 NVMe，实现高性能 :ref:`ceph` 存储，用于 :ref:`openstack` 构建云计算集群。
 
 存储控制器
 -------------
@@ -92,15 +157,15 @@ DL360服务器内置驱动器分为8盘位和10盘位两种，有以下集中配
 
 HP官方支持网站提供了部件安装视频指南，例如 `HP Smpart Array Controller <https://support.hpe.com/hpesc/public/docDisplay?docId=psg000107aen_us&page=GUID-F16DC03B-D44C-4C4C-B314-BD207D305DF1.html>`_ 介绍了如何替换阵列卡。其他组件的安装替换也有相应指导，非常方便
 
-内置硬盘配置组合:
+.. note::
 
-- Hot Plug SFF NVMe PCIe + SSD : 可以组合 6个NVMe + 4个SSD 不过由于存储是服务器最大的投资部分，可以采用渐进升级方法
+   现代云计算已经采用 :ref:`gluster` 和 :ref:`ceph` 这样的分布式存储来替代早期的RAID存储技术，所以我的不使用硬件RAID设备，没有购买相应的阵列卡。
 
 电源支持
 =========
 
 - 500W标配
-- 800W
+- 800W - 考虑到后续将升级添加显卡(耗能大户)以及满配多个存储设备，所以在购买二手DL360时，加价购买了800w电源
 - 1400W
 - 750W +
 
@@ -122,10 +187,12 @@ Unified Extensible Firmware Interface (UEFI)是服务器启动管理，HP提供�
 
   - DL360支持每个DIMM插槽最高32GB RDIMM内存，满配24根最高768GB。为了不浪费插槽和内存，选择2根32G
 
-- 硬盘暂时采用原先的购买的笔记本2.5" SSD SATA硬盘，后续再做升级到 U.2 接口NVMe SSD
+- 硬盘暂时采用原先的购买的笔记本2.5" SSD SATA硬盘，并购置2块2.5" HDD来构建 :ref:`gluster` 虚拟机
 
 参考
 =======
 
 - `HPE ProLiant DL360 Gen9 Server <https://support.hpe.com/connect/s/product?language=en_US&ismnp=0&l5oid=7252836&kmpmoid=7252838&cep=on#t=All>`_
 - `HPE ProLiant DL360 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&docId=c04346229>`_
+- `HPE ProLiant DL360 Gen9 Server - Option Parts <https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c04444424>`_
+- `HPE ProLiant DL360 Gen9 Server User Guide <https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&docId=c04441974>`_

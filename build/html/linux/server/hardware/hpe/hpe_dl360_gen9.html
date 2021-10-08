@@ -267,16 +267,31 @@
 </ul>
 <p>我觉得可以配置成:</p>
 <ul class="simple">
-<li><p>Drive 1-2 采用常规SAS SSD组成RAID1，构建操作系统，确保本机服务器始终可用</p></li>
-<li><p>Drive 3-4 采用大容量 HDD ，构建基于 <a class="reference internal" href="../../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 的镜像近线存储，提供NAS文件存储功能</p></li>
-<li><p>Drive 5-10 采用 NVMe SSD，通过虚拟化构建 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储集群，提供整个虚拟化 <a class="reference internal" href="../../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 分布式存储，实现云计算底层存储</p></li>
+<li><p>Drive 1-2 采用常规SATA SSD (企业级SAS SSD价格惊人，个人无法承受)</p>
+<ul>
+<li><p>方法一: 双盘组成RAID1，构建操作系统，确保本机服务器始终可用</p></li>
+<li><p>方法二: 两个SSD磁盘分别用于文件系统不同职责，例如数据和log分离，加速ZFS/Btrfs的性能</p></li>
+</ul>
+</li>
+<li><p>Drive 3-4 采用大容量 HDD ，构建基于 <a class="reference internal" href="../../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 的镜像近线存储，提供NAS文件存储功能</p>
+<ul>
+<li><p>采用大容量的机械磁盘可以降低存储成本，并且对于连续写入的大文件，机械磁盘性能在可接受范围</p></li>
+<li><p>注意必须 <a class="reference internal" href="../storage/hdd_pmr_cmr_smr.html#hdd-pmr-cmr-smr"><span class="std std-ref">机械硬盘(HDD)磁头PMR、CMR、SMR的区别和选择</span></a> ，应该购买CMR结构的HDD，并尽可能选择CMR大容量磁盘(小规格CMR HDD已经和SSD价格相近毫无优势)</p></li>
+</ul>
+</li>
+<li><p>Drive 5-10 采用 SATA SSD，通过虚拟化构建 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储集群，提供整个虚拟化 <a class="reference internal" href="../../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 分布式存储，实现云计算底层存储</p></li>
 </ul>
 <p>不过服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5” NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。详细实践待后续…</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上我最终没有采购CMR HDD机械磁盘，因为我发现目前由于磁记录技术停滞发展，已经没有超过2T规格的CMR HDD了。小规格HDD售价和SSD相差无几，性能又大为落后，所以如果要实现高性能分布式集群，还是采用 NVMe SSD实现更佳。</p>
+<p>目前我先临时采用旧有的500GB HDD磁盘来模拟实验，后续将采购 PCIe 3.0 x16 转接4个NVMe SSD磁盘，来实现高性能 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 集群。</p>
+</div>
 </section>
 <section id="id2">
 <h3>后面版<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_front.png"><img alt="../../../../_images/hpe_dl360_gen9_front.png" src="../../../../_images/hpe_dl360_gen9_front.png" style="width: 700.8000000000001px; height: 355.20000000000005px;" /></a>
+<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_back.png"><img alt="../../../../_images/hpe_dl360_gen9_back.png" src="../../../../_images/hpe_dl360_gen9_back.png" style="width: 689.6px; height: 371.20000000000005px;" /></a>
 </figure>
 <p>值得关注点:</p>
 <ul class="simple">
@@ -296,18 +311,124 @@
 <li><p>支持2种存储卡: HPE Flexible Smart Array 和 Smart HBA，型号是 H240ar 和 P440ar</p></li>
 <li><p>PCIe 规格是 3.0，需要注意插槽1和2和处理器1关联，插槽3和处理器2关联</p></li>
 <li><p>提供了2个主板SATA控制器插口</p></li>
+<li><p>主板内建4个千兆网口，使用的是 Broadcom BCM5719 网卡芯片</p></li>
+<li><p>可选4口千兆 <code class="docutils literal notranslate"><span class="pre">FlexibleLOM</span> <span class="pre">Bay</span></code> 网卡(有多种规格，千兆、万兆和25Gb各种)，常见的是Intel 4口千兆网卡 <code class="docutils literal notranslate"><span class="pre">HP</span> <span class="pre">Ethernet</span> <span class="pre">1Gb</span> <span class="pre">4-port</span> <span class="pre">366FLR</span> <span class="pre">Adapter</span></code> (部件编号 <code class="docutils literal notranslate"><span class="pre">665240-B21</span></code>) (从淘宝购买二手服务器时，这块可选网卡被拆除了，需要单独购买 220 元)</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_mainboard.png"><img alt="../../../../_images/hpe_dl360_gen9_mainboard.png" src="../../../../_images/hpe_dl360_gen9_mainboard.png" style="width: 633.6px; height: 643.5px;" /></a>
+</figure>
+<table class="colwidths-given docutils align-default" id="id13">
+<caption><span class="caption-text">HPE ProLiant DL360 Gen9 主板组件</span><a class="headerlink" href="#id13" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>编号</p></th>
+<th class="head"><p>描述</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>FlexibleLOM connector</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>Primary (processor 1) PCI riser connector</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>NMI jumper</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>System maintenance switch</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Front VGA/USB 2.0 connector</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>x4 SATA port 1</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>x4 SATA port 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>Backplane presence detect connector</p></td>
+</tr>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>Optical/SATA port 5</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>SATA port 4</p></td>
+</tr>
+<tr class="row-even"><td><p>11</p></td>
+<td><p>Front power/USB 3.0 connector</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>HPE Smart Storage Battery connector</p></td>
+</tr>
+<tr class="row-even"><td><p>13</p></td>
+<td><p>Optional Location Discovery Services connector</p></td>
+</tr>
+<tr class="row-odd"><td><p>14</p></td>
+<td><p>Drive backplane power connector</p></td>
+</tr>
+<tr class="row-even"><td><p>15</p></td>
+<td><p>microSD card slot</p></td>
+</tr>
+<tr class="row-odd"><td><p>16</p></td>
+<td><p>Dual internal USB 3.0 connector</p></td>
+</tr>
+<tr class="row-even"><td><p>17</p></td>
+<td><p>Smart Array/HBA connector</p></td>
+</tr>
+<tr class="row-odd"><td><p>18</p></td>
+<td><p>Secondary (processor 2) PCI riser connector</p></td>
+</tr>
+<tr class="row-even"><td><p>19</p></td>
+<td><p>System battery</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>TPM connector</p></td>
+</tr>
+<tr class="row-even"><td><p>21</p></td>
+<td><p>Optional serial port connector</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="pcie">
+<h3>PCIe<a class="headerlink" href="#pcie" title="永久链接至标题">¶</a></h3>
+<p><a class="reference internal" href="../chipset/pcie.html#pcie"><span class="std std-ref">PCIe</span></a> 通道是和CPU连接的，主机受限于处理器并不能添加过多的PCIe插槽(添加过多也只是分享cpu通道，反而无法获得最高速度)。不过，对于 <a class="reference internal" href="../chipset/intel_c610.html#intel-c610"><span class="std std-ref">Intel C610系列主板芯片</span></a> 也就是X99平台，支持2个志强处理器，所以可以通过将不同的PCIe分别连接到2个处理器获得全速运行性能。需要注意，在 <a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&amp;docId=c04346229">HPE ProLiant DL360 Gen9 Server QuickSpecs</a> 明确指出主机所支持到3个PCIe slot，其中 PCIe slot 1-2 连接CPU 1，而 PCIe slot 3 连接到CPU 2 :</p>
+<ul class="simple">
+<li><p>由于DL 360是一个1U的紧凑型机架服务器，所以需要使用 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">X</span></code> 也就是PCIe扩展板，将插槽由垂直转为水平。需要注意的是，DL 360默认配置只提供了 <code class="docutils literal notranslate"><span class="pre">Primary</span> <span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">1</span> <span class="pre">&amp;</span> <span class="pre">2</span></code> (对应CPU 1) ，而第二块PCIe扩展板 <code class="docutils literal notranslate"><span class="pre">Secondary</span> <span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">3</span> <span class="pre">(requires</span> <span class="pre">CPU</span> <span class="pre">2)</span></code> 需要另外购买</p></li>
+<li><p>只有购买了 <code class="docutils literal notranslate"><span class="pre">Secondary</span> <span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">3</span> <span class="pre">(requires</span> <span class="pre">CPU</span> <span class="pre">2)</span></code> 才能充分发挥DL 360的PCIe性能，也就是把PCIe数据访问分担到两个CPU上，性能最佳</p></li>
+<li><p>我推测如果购买并安装第二块PCIe扩展板，实际上DL360可以安装2块 PCIe 3.0 x16 的显卡，理论上可以组建一个性能更强 <a class="reference internal" href="../../../../machine_learning/hardware/dl_hardware.html#dl-hardware"><span class="std std-ref">深度学习硬件指南</span></a> 平台 (待实践)</p></li>
+<li><p>根据 <a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c04444424">HPE ProLiant DL360 Gen9 Server - Option Parts</a> 可以查询到上述第二块PCIe riser扩展板部件:</p>
+<ul>
+<li><p>HP DL360 Gen9 Low Profile PCIe Slot CPU2 Kit 部件编号是 <code class="docutils literal notranslate"><span class="pre">764642-B21</span></code> 在淘宝上能够找到价格为400元 (可能半高扩展板也够安装显卡了)</p></li>
+<li><p>HP DL360 Gen9 Full Height PCIe Slot CPU2 Kit 部件编号是 <code class="docutils literal notranslate"><span class="pre">764644-B21</span></code> (淘宝上没有可能需要ebay才能找到)</p></li>
+</ul>
+</li>
 </ul>
 </section>
+<section id="flexiblelom-adapter">
+<h3>FlexibleLOM Adapter<a class="headerlink" href="#flexiblelom-adapter" title="永久链接至标题">¶</a></h3>
+<p>可选的 <code class="docutils literal notranslate"><span class="pre">FlexibleLOM</span> <span class="pre">Bay</span></code> 网卡有多种规格，千兆、万兆甚至25Gb。常见的是Intel 4口千兆网卡 <code class="docutils literal notranslate"><span class="pre">HP</span> <span class="pre">Ethernet</span> <span class="pre">1Gb</span> <span class="pre">4-port</span> <span class="pre">366FLR</span> <span class="pre">Adapter</span></code> (部件编号 <code class="docutils literal notranslate"><span class="pre">665240-B21</span></code>) 。</p>
+<p>不过我从淘宝购买二手DL360服务器，这块可选网卡被拆除了，需要单独购买 220 元。虽然有些小贵，但是考虑到不用占用服务器宝贵的PCIe插槽，并且是Intel网卡芯片，可以结合Intel开发的驱动以及DPDK技术加速网络虚拟化性能，我准备用来构建Linux交换设备，来连接我的多个 <a class="reference internal" href="../../../../arm/raspberry_pi/pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> ，实现混合架构 <a class="reference internal" href="../../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 。</p>
 </section>
 <section id="id4">
-<h2>配置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h3>内部改造<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<p>考虑到DL360服务器内部有一些尚未利用到空间，我准备将 <a class="reference internal" href="../../../../arm/raspberry_pi/startup/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 和 <a class="reference internal" href="../../../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 安装到DL 360内部，结合上述Intel 4口千兆网卡所构建的Linux交换机，组建成一台混合架构模拟集群的服务器。</p>
+</section>
+</section>
+<section id="id5">
+<h2>配置<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p>HPE ProLiant DL360 Gen9 服务器综合配置介于 <a class="reference internal" href="../dell/dell_r630.html#dell-r630"><span class="std std-ref">Dell R630服务器</span></a> 和 <a class="reference internal" href="../dell/dell_r640.html#dell-r640"><span class="std std-ref">Dell PowerEdge R640服务器</span></a> 之间:</p>
 <ul class="simple">
 <li><p>主板芯片和 <a class="reference internal" href="../dell/dell_r630.html#dell-r630"><span class="std std-ref">Dell R630服务器</span></a> 相同，采用 <a class="reference internal" href="../chipset/intel_c610.html#intel-c610"><span class="std std-ref">Intel C610系列主板芯片</span></a> 系列</p></li>
 <li><p>CPU支持和 <a class="reference internal" href="../dell/dell_r630.html#dell-r630"><span class="std std-ref">Dell R630服务器</span></a> 相同，支持 <a class="reference internal" href="../../../../kernel/cpu/intel/xeon_e5-2600_v3.html#xeon-e5-2600-v3"><span class="std std-ref">Intel Xeon E5-2600 v3系列处理器</span></a> 和 <a class="reference internal" href="../../../../kernel/cpu/intel/xeon_e5-2600_v4.html#xeon-e5-2600-v4"><span class="std std-ref">Intel Xeon E5-2600 v4处理器</span></a> ，这款服务器支持的CPU型号较多(比DL160):</p></li>
 </ul>
-<table class="colwidths-given docutils align-default" id="id10">
-<caption><span class="caption-text">HPE ProLiant DL360 Gen9 支持E5-2600 v3/v4处理器</span><a class="headerlink" href="#id10" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id14">
+<caption><span class="caption-text">HPE ProLiant DL360 Gen9 支持E5-2600 v3/v4处理器</span><a class="headerlink" href="#id14" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 25%" />
 <col style="width: 15%" />
@@ -704,11 +825,24 @@
 <p>不过从淘宝可以看到 LRDIMM 内存目前非常昂贵，不如 RDIMM内存 性价比高。不过，技术发展迅速，或许未来也可能进入二手市场的高性价比范围。</p>
 </div>
 </section>
-<section id="id5">
-<h2>存储<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
-<p>DL360服务器内置驱动器分为8盘位和10盘位两种，有以下集中配置规格:</p>
 <section id="id6">
-<h3>存储控制器<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
+<h2>存储<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<p>DL360服务器有两种大小规格的磁盘 - 4LFF(3.5”) 和 8SFF(2.5”)/10SFF(2.5”)</p>
+<p>我购买的二手DL 360是常见的8FF配置版本，其数据盘位置如下:</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_disks.png"><img alt="../../../../_images/hpe_dl360_gen9_disks.png" src="../../../../_images/hpe_dl360_gen9_disks.png" style="width: 867.0px; height: 111.0px;" /></a>
+</figure>
+<p>可以扩展到10SFF配置(需要另外购置一个 <code class="docutils literal notranslate"><span class="pre">HP</span> <span class="pre">DL360</span> <span class="pre">Gen9</span> <span class="pre">2SFF</span> <span class="pre">SAS/SATA</span> <span class="pre">Universal</span> <span class="pre">Media</span> <span class="pre">Bay</span> <span class="pre">Kit</span> <span class="pre">764630-B21</span></code> (约230-300元) 以安装第9-10磁盘)</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hpe_dl360_gen9_10disks.png"><img alt="../../../../_images/hpe_dl360_gen9_10disks.png" src="../../../../_images/hpe_dl360_gen9_10disks.png" style="width: 861.0px; height: 110.0px;" /></a>
+</figure>
+<p>10SFF配置有一种性能极致的配置: <code class="docutils literal notranslate"><span class="pre">HP</span> <span class="pre">DL360</span> <span class="pre">Gen9</span> <span class="pre">6</span> <span class="pre">NVMe</span> <span class="pre">+</span> <span class="pre">4</span> <span class="pre">SAS/SATA</span> <span class="pre">Express</span> <span class="pre">Bay</span> <span class="pre">Enablement</span> <span class="pre">Kit</span>&#160; <span class="pre">817676-B21</span></code> 背板替换后，可以支持 4个SAS/SATA 加上 6个NVMe (U.2接口)设备，但是这个配件的价格约在 800 刀到 1000 刀，并且万能淘宝也找不到，只有海外直购，所以并不现实。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>由于 <code class="docutils literal notranslate"><span class="pre">4SAS/SATA</span> <span class="pre">+</span> <span class="pre">6NVMe</span></code> 的扩展模块售价极高，对于二手设备已没有可能。所以如果要通过NVMe存储充分发挥DL 360服务器性能，可行的方法是采用PCIe转M.2 NVMe，实现高性能 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储，用于 <a class="reference internal" href="../../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 构建云计算集群。</p>
+</div>
+<section id="id7">
+<h3>存储控制器<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
 <p>主板内置存储控制芯片: HPE Dynamic Smart Array B140i控制器 (对于E5-2600v3 CPU处理器，主板集成的B140i只能工作在UEFI模式)。默认B140i设置为AHCI模式，如果要使用SATA only模式则需要配置激活。</p>
 <p>支持2种阵列卡：</p>
 <ul class="simple">
@@ -716,17 +850,17 @@
 <li><p>H440ar 阵列卡，配置2G缓存和电池，支持多硬盘RAID 5,6,10,50,60等模式，硬盘也可以设置为无阵列模式</p></li>
 </ul>
 <p>HP官方支持网站提供了部件安装视频指南，例如 <a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docId=psg000107aen_us&amp;page=GUID-F16DC03B-D44C-4C4C-B314-BD207D305DF1.html">HP Smpart Array Controller</a> 介绍了如何替换阵列卡。其他组件的安装替换也有相应指导，非常方便</p>
-<p>内置硬盘配置组合:</p>
-<ul class="simple">
-<li><p>Hot Plug SFF NVMe PCIe + SSD : 可以组合 6个NVMe + 4个SSD 不过由于存储是服务器最大的投资部分，可以采用渐进升级方法</p></li>
-</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>现代云计算已经采用 <a class="reference internal" href="../../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 和 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 这样的分布式存储来替代早期的RAID存储技术，所以我的不使用硬件RAID设备，没有购买相应的阵列卡。</p>
+</div>
 </section>
 </section>
-<section id="id7">
-<h2>电源支持<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<section id="id8">
+<h2>电源支持<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>500W标配</p></li>
-<li><p>800W</p></li>
+<li><p>800W - 考虑到后续将升级添加显卡(耗能大户)以及满配多个存储设备，所以在购买二手DL360时，加价购买了800w电源</p></li>
 <li><p>1400W</p></li>
 <li><p>750W +</p></li>
 </ul>
@@ -740,8 +874,8 @@
 <li><p>UEFI支持PXE从IPv6网络启动，这样可以通过网络快速部署大量服务器</p></li>
 </ul>
 </section>
-<section id="id8">
-<h2>我的服务器组合<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<section id="id9">
+<h2>我的服务器组合<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>HPE ProLiant DL360 Gen9 Server</p></li>
 <li><p><a class="reference internal" href="../../../../kernel/cpu/intel/xeon_e5-2670_v3.html#xeon-e5-2670-v3"><span class="std std-ref">Intel Xeon E5-2670 v3处理器</span></a></p></li>
@@ -750,14 +884,16 @@
 <li><p>DL360支持每个DIMM插槽最高32GB RDIMM内存，满配24根最高768GB。为了不浪费插槽和内存，选择2根32G</p></li>
 </ul>
 </li>
-<li><p>硬盘暂时采用原先的购买的笔记本2.5” SSD SATA硬盘，后续再做升级到 U.2 接口NVMe SSD</p></li>
+<li><p>硬盘暂时采用原先的购买的笔记本2.5” SSD SATA硬盘，并购置2块2.5” HDD来构建 <a class="reference internal" href="../../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 虚拟机</p></li>
 </ul>
 </section>
-<section id="id9">
-<h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<section id="id10">
+<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://support.hpe.com/connect/s/product?language=en_US&amp;ismnp=0&amp;l5oid=7252836&amp;kmpmoid=7252838&amp;cep=on#t=All">HPE ProLiant DL360 Gen9 Server</a></p></li>
 <li><p><a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&amp;docId=c04346229">HPE ProLiant DL360 Gen9 Server QuickSpecs</a></p></li>
+<li><p><a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c04444424">HPE ProLiant DL360 Gen9 Server - Option Parts</a></p></li>
+<li><p><a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&amp;docId=c04441974">HPE ProLiant DL360 Gen9 Server User Guide</a></p></li>
 </ul>
 </section>
 </section>

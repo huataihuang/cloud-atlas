@@ -19,7 +19,7 @@ iOS 是苹果公司开发的移动操作系统，目前已经演化成 iOS(iphon
 .. toctree::
    :maxdepth: 1
 
-   studio/index
+   macos/index
    iphone/index
    music/index
    recovery/index
