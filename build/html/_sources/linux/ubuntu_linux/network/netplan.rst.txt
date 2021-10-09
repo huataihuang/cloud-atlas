@@ -92,6 +92,27 @@ Netplan会读取 ``/etc/netplan/*.yaml`` 配置文件来设置所有的网络接
 
 - 验证检查 ``ifconfig -a`` 可以看到IP地址已经修改成静态配置IP地址
 
+netplan配置有线802.1x认证
+============================
+
+企业网络常常会使用802.1x网络实现认证，不仅无线可以通过这种方式加强安全，有线网络也可以实现。netplan也支持在有线网络上加上认证功能，配置案例有些类似后文 ``WPA Enterprise无线网络`` ，案例 ``01-eno4-config.yaml`` 如下::
+
+   network:
+     version: 2
+     renderer: networkd
+     ethernets:
+       eno4:
+         dhcp4: yes
+         dhcp6: no
+         macaddress: xx:xx:xx:xx:xx:xx
+         auth:
+           key-management: 802.1x
+           method: peap
+           identity: "USERNAME"
+           password: "PASSWD"
+
+然后执行 ``netplan apply`` 即完成网络激活
+
 netplan配置无线
 ================
 

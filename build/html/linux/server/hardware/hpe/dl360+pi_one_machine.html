@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>HPE服务器 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>改造HP DL360集成树莓派实现集群一体机 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -43,8 +43,8 @@
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
-    <link rel="next" title="HPE ProLiant DL360 Gen9服务器" href="hpe_dl360_gen9.html" />
-    <link rel="prev" title="Dell PowerEdge R640 vs. R630" href="../dell/dell_r640_vs_r630.html" /> 
+    <link rel="next" title="HP服务器iLO技术" href="hp_ilo/index.html" />
+    <link rel="prev" title="HPE ProLiant DL160 Gen9服务器" href="hpe_dl160_gen9.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -138,7 +138,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../check_server_temp.html">服务器温度检测</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../lackpack.html">LackPack</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../dell/index.html">Dell服务器</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">HPE服务器</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">HPE服务器</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../chipset/index.html">服务器主板芯片</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storage/index.html">服务器存储</a></li>
 </ul>
@@ -230,13 +230,15 @@
         
           <li><a href="../index.html">服务器硬件</a> &raquo;</li>
         
-      <li>HPE服务器</li>
+          <li><a href="index.html">HPE服务器</a> &raquo;</li>
+        
+      <li>改造HP DL360集成树莓派实现集群一体机</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../../../../_sources/linux/server/hardware/hpe/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../../_sources/linux/server/hardware/hpe/dl360+pi_one_machine.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -249,15 +251,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="hpe">
-<span id="server-hpe"></span><h1>HPE服务器<a class="headerlink" href="#hpe" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="hpe_dl360_gen9.html">HPE ProLiant DL360 Gen9服务器</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hpe_dl160_gen9.html">HPE ProLiant DL160 Gen9服务器</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dl360%2Bpi_one_machine.html">改造HP DL360集成树莓派实现集群一体机</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hp_ilo/index.html">HP服务器iLO技术</a></li>
-</ul>
+  <section id="hp-dl360">
+<span id="dl360-pi-one-machine"></span><h1>改造HP DL360集成树莓派实现集群一体机<a class="headerlink" href="#hp-dl360" title="永久链接至标题">¶</a></h1>
+<p>我最初在构建 <a class="reference internal" href="../../../../arm/raspberry_pi/pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> 的时候，采用的是普通的千兆网络交换机连接多个树莓派，但是由于没有类似机架服务器这样的集成安装设备，所以树莓派多了以后非常散乱。所以我一直在想如何能够把树莓派装配成一体机，但是需要亚克力板或者金属加工能力，就一直没有实现。</p>
+<p>最近购买了一台二手的 <a class="reference internal" href="hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> ，机架服务器体积非常精简，但是同时由于不太可能将存储盘位全部用完，所以多余出一些服务器内部空间没有充分利用。我就考虑树莓派这样小巧的SOC设备，有没有可能插入到这种1U的机架服务器内部空间(磁盘位)，并且通过服务器的多网口网卡来构建Linux交换机，实现一种一体机。</p>
+<p>是的，我的想法就是实现类似Oracle Exadata数据库一体机这样的云计算一体机。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>类似 <a class="reference internal" href="hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 这样支持NVMe SSD的服务器，支持PCIe插槽直接添加NMMe M.2存储，并且现在技术支持split PCIe通道，可以实现在一个 PCIe 3.0 x16 上切分成4个 x4的通道，连接4个NVMe M.2 SSD存储，可以实现非常高密度节约空间的存储部署。除了不方便热插拔，其他都非常完美。</p>
+<p>这也使得昂贵的热插拔U.2存储没有用武之地，对于个人，不太可能购买大量的热插拔存储，所以节约出来的存储盘位空间，可以用于树莓派这样的小型设备。</p>
+<p>此外，Linux自身可以实现交换机功能，也是一项技术挑战，无需再购买外置交换机，也使得服务器整体非常紧凑。</p>
 </div>
 </section>
 
@@ -267,8 +270,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="hpe_dl360_gen9.html" class="btn btn-neutral float-right" title="HPE ProLiant DL360 Gen9服务器" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../dell/dell_r640_vs_r630.html" class="btn btn-neutral float-left" title="Dell PowerEdge R640 vs. R630" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hp_ilo/index.html" class="btn btn-neutral float-right" title="HP服务器iLO技术" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hpe_dl160_gen9.html" class="btn btn-neutral float-left" title="HPE ProLiant DL160 Gen9服务器" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
