@@ -14,6 +14,8 @@ Linux文件系统
    xfs_tunning.rst
    dropbox_ext4.rst
    resize_ext4_rootfs.rst
+   remount_without_reboot.rst
+   fstrim.rst
    quota/index
 
 .. only::  subproject and html
