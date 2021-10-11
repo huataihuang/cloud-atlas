@@ -13,7 +13,7 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
 ``btrfs`` 支持需要满足以下条件：
 
-- ``Docker CE`` : 对于docker ce， btrfs 仅在 Ubuntu 和 Debian 下才建议使用
+- ``Docker CE`` : 对于docker ce， ``btrfs 仅在 Ubuntu 和 Debian 下才建议使用``
 - ``Docker EE`` : 对于Docker EE 和 CS-Engine，仅在SLES下才支持 ``btrfs`` 。请参考 `Product compatibility matrix <https://success.docker.com/Policies/Compatibility_Matrix>`_ 获取所有商业支持Docker支持的配置
 - 注意：修改存储驱动会导致已经在本地文件系统上创建的容器不可访问。 请使用 ``docker save`` 先保存容器，并将镜像推送到Docker Hub或私有仓库，在修改存储驱动之后才能恢复回来。
 - ``btrfs`` 需要使用一个独立的块存储设备，例如物理磁盘。并且被格式化成btrfs，然后挂载到 ``/var/lib/docker/`` 目录。配置指令会指导你过程。默认情况下，SLES的根文件系统已经格式化成BTRFS，所以对于SLES，不需要使用独立的快设备文件，但是你选择独立块设备可以提高性能。

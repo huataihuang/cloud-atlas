@@ -43,8 +43,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="真实荒漠" href="../network/index.html" />
-    <link rel="prev" title="私有云Kubernetes和docker环境" href="priv_k8s_docker.html" /> 
+    <link rel="next" title="私有云KVM环境" href="priv_kvm.html" />
+    <link rel="prev" title="私有云计算构建" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -130,14 +130,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../real_think/index.html">真实世界的技术思考</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../prepare/index.html">真实云计算的构建准备</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
-<li class="toctree-l3"><a class="reference internal" href="priv_k8s_docker.html">私有云Kubernetes和docker环境</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">私有云架构</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">私有云拓扑架构图</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#kubernetes">Kubernetes私有云</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#openstack">OpenStack私有云</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">私有云拓扑架构图</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
+<li class="toctree-l3"><a class="reference internal" href="priv_k8s_docker.html">私有云Kubernetes和docker环境</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../network/index.html">真实荒漠</a></li>
@@ -224,6 +224,24 @@
             
   <section id="priv-cloud-infrastructure">
 <span id="id1"></span><h1>私有云架构<a class="headerlink" href="#priv-cloud-infrastructure" title="永久链接至标题">¶</a></h1>
+<section id="id2">
+<h2>私有云拓扑架构图<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>2021年10月，我购买了 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 来实现完整的云计算模拟，规划是采用一台二手服务器:</p>
+<ul class="simple">
+<li><p>通过 <a class="reference internal" href="../../kvm/kvm_nested_virtual.html#kvm-nested-virtual"><span class="std std-ref">KVM嵌套虚拟化</span></a> 运行大量的一级KVM虚拟机，一级KVM虚拟机作为运行 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 的物理机，部署一个完整的OpenStack集群</p></li>
+<li><p>在一级虚拟机中运行 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 模拟裸机的K8S集群</p></li>
+<li><p>在OpenStack中部署运行大量二级虚拟机，按需运行，模拟云计算的弹性以及计费和监控</p></li>
+<li><p>OpenStack中的二级虚拟机内部再部署一个 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 集群，模拟云计算之上的K8S集群，结合 HashiCorp 的 Terraform 来实现全链路的自动化部署</p></li>
+<li><p>附加：在DL360物理服务器上运行一个精简的Docker容器来做日常开发学习</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/real_cloud.png"><img alt="../../_images/real_cloud.png" src="../../_images/real_cloud.png" style="width: 724.8000000000001px; height: 426.40000000000003px;" /></a>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>采用OpenStack来实现云计算是当前主流的云计算平台，涉及到广泛的虚拟化、网络、存储技术，是一个非常好实现案例</p>
+</div>
+</section>
 <section id="kubernetes">
 <h2>Kubernetes私有云<a class="headerlink" href="#kubernetes" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
@@ -283,19 +301,6 @@
 <li><p><a class="reference internal" href="../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a></p></li>
 </ul>
 </section>
-<section id="id2">
-<h2>私有云拓扑架构图<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>我采用这种混合OpenStack和Kubernetes的架构主要是为了充分发挥硬件性能同时节约物理服务器资源。如果是在面向公共用户的共有云环境，会采用OpenStack嵌套Kubernetes的架构：</p>
-<ul class="simple">
-<li><p>通过OpenStack KVM虚拟化提供的强隔离，避免租户之间的影响和安全隐患</p></li>
-<li><p>通过Kubernetes提供给用户轻量级和灵活的应用部署能力</p></li>
-<li><p>缺点是虚拟化对资源的消耗较大，浪费了一部分物理服务器计算资源</p></li>
-<li><p>优点是获得了高安全性，并且具备了虚拟化热迁移的高可用能力</p></li>
-</ul>
-</div>
-</section>
 </section>
 
 
@@ -304,8 +309,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../network/index.html" class="btn btn-neutral float-right" title="真实荒漠" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="priv_k8s_docker.html" class="btn btn-neutral float-left" title="私有云Kubernetes和docker环境" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="priv_kvm.html" class="btn btn-neutral float-right" title="私有云KVM环境" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="私有云计算构建" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

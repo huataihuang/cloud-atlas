@@ -110,3 +110,4 @@ libvirt daemon允许系统管理员选择用于客户端每次网络socket链接
 =========
 
 - `Arch Linux文档 - libvirt <https://wiki.archlinux.org/index.php/Libvirt>`_
+- `rockstable libvirt文档 <https://wiki.rockstable.it/libvirt>`_ 这个文档有很多全面的知识点

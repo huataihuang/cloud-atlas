@@ -7,7 +7,7 @@ HP服务器iLO技术
 .. toctree::
    :maxdepth: 1
 
-   hp_ilo_startup.rst
+   introduce_ilo.rst
    
 .. only::  subproject and html
 

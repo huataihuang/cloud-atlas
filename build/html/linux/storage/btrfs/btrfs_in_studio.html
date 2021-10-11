@@ -132,6 +132,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Linux存储</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../disk/index.html">Linux磁盘</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../filesystem/index.html">Linux文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lvm/index.html">Linux LVM逻辑卷管理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../zfs/index.html">ZFS - Linux存储系统</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Btrfs - Linux存储系统</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="introduce_btrfs.html">Btrfs文件系统简介</a></li>
@@ -270,62 +271,25 @@
 </pre></div>
 </div>
 </div>
-<p>按照我的实践经验，btrfs的基本功能稳定，但是高级压缩功能可能存在风险。</p>
+<p>我在2019年10月1日的btrfs系统中发现了异常虚拟机hang以及btrfs读写错误，转眼已过去2年。2021年，我重新在 <a class="reference internal" href="../../server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上部署了 <a class="reference internal" href="../../ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 来运行虚拟化 <a class="reference internal" href="../../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> ，存储再次选择 Btrfs 。我期望能够验证和充分发挥系统性能</p>
 </section>
 <section id="id1">
-<h2>Btrfs在不同发行版和厂商应用对比<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<section id="red-hat-enterprise-linux">
-<h3>Red Hat Enterprise Linux<a class="headerlink" href="#red-hat-enterprise-linux" title="永久链接至标题">¶</a></h3>
-<p>参考 <a class="reference external" href="https://www.theregister.co.uk/2017/08/16/red_hat_banishes_btrfs_from_rhel">Red Hat banishes Btrfs from RHEL</a> 报道，Red Hat在RHEL 7.4还保持Btrfs上游补丁更新，但之后放弃了Btrfs功能更新。从 RHEL 8 <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/considerations_in_adopting_rhel_8/file-systems-and-storage_considerations-in-adopting-rhel-8">Considerations in adopting RHEL 8Chapter 12. File systems and storage</a> 可以看到Red Hat Enterprise Linux 8已经完全移除了Btrfs支持，已经不能在RHEL中创建、挂载和安装Btrfs文件系统。</p>
-</section>
-<section id="red-hatfedora">
-<h3>Red Hat社区Fedora<a class="headerlink" href="#red-hatfedora" title="永久链接至标题">¶</a></h3>
-<p>从 <a class="reference external" href="https://fedoramagazine.org/btrfs-coming-to-fedora-33/">Fedora 33重新引入Btrfs作为默认文件系统</a> ，可以观察到Red Hat社区开始尝试在桌面系统引入Btrfs，今后有可能进入Red Hat服务器领域的话，则可以作为生产引入验证使用。</p>
-</section>
-<section id="suselinux">
-<h3>SUSE企业版Linux<a class="headerlink" href="#suselinux" title="永久链接至标题">¶</a></h3>
-<p>SUSE发行版一直以来都是将 Btrfs 作为服务器版默认文件系统。这应该和各个Linux发行版公司在开发力量投入上有关。</p>
-</section>
-<section id="facebook">
-<h3>Facebook<a class="headerlink" href="#facebook" title="永久链接至标题">¶</a></h3>
-<p>根据网上信息了解，Facebook可能是最积极采用Btrfs的超级互联网公司，并且雇佣了Btrfs的核心开发者，也是能够在生产环境采用Btrfs高级特性并保证稳定性的底气。</p>
-<p>Facebook使用Btrfs的快照和镜像来隔离容器，在 <a class="reference external" href="https://facebookmicrosites.github.io/btrfs/docs/btrfs-facebook.html">Btrfs at Facebook(facebookmicrosites)</a> 透露了F厂应用Btrfs遇到的问题和解决方案。同时在LWN源代码新闻网站， <a class="reference external" href="https://lwn.net/Articles/824855/">Btrfs at Facebook(LWN)</a> 记录了Btrfs开发 Josef Bacik 在 <a class="reference external" href="https://events.linuxfoundation.org/open-source-summit-north-america/">2020 Open Source Summit North America</a>
-演讲，介绍了Facebook利用Btrfs进行快速测试的隔离解决方案。</p>
-</section>
-<section id="id2">
-<h3>我的观点<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
-<p>Btrfs和ZFS是目前Linux系统功能最丰富同时也是最具发展潜力的本地文件系统。两者各自有独特的发展历史和技术优势，当前都已经逐步进入稳定生产状态，比早期动辄crash已经不可同日而语。</p>
-<p>Btrfs和ZFS需要非常精心的部署和调优，以充分发挥最佳性能，我决定后续做实践对比，进行性能优化和测试，并撰写应用方案。</p>
-<p>建议保持持续跟进观察，并不断做性能和稳定性测试，在合适的时候正式采用Btrfs。</p>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>以下是我较早的一些实践笔记，不太完善，但是我今后会再次迭代改进。</p>
-</div>
-</section>
-</section>
-<section id="id3">
-<h2>初始安装操作系统的磁盘<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>初始安装操作系统的磁盘<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <p>在初始化安装的Ubuntu操作系统，磁盘分区如下:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">465.9</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">500277790720</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">977105060</span> <span class="n">sectors</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">476.96</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">512110190592</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">1000215216</span> <span class="n">sectors</span>
+<span class="n">Disk</span> <span class="n">model</span><span class="p">:</span> <span class="n">INTEL</span> <span class="n">SSDSC2KW51</span>
 <span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
-<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">4096</span> <span class="nb">bytes</span>
-<span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">4096</span> <span class="nb">bytes</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
 <span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">gpt</span>
-<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="n">F2FB6986</span><span class="o">-</span><span class="mi">2</span><span class="n">DCE</span><span class="o">-</span><span class="mi">46</span><span class="n">B4</span><span class="o">-</span><span class="mi">907</span><span class="n">F</span><span class="o">-</span><span class="mi">7</span><span class="n">F4D7D29E3B4</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mi">9</span><span class="n">AA02658</span><span class="o">-</span><span class="n">A444</span><span class="o">-</span><span class="mi">4</span><span class="n">DE6</span><span class="o">-</span><span class="mi">8</span><span class="n">DEE</span><span class="o">-</span><span class="mi">8978</span><span class="n">DA2F02B6</span>
 
-<span class="n">Device</span>      <span class="n">Start</span>       <span class="n">End</span>  <span class="n">Sectors</span>  <span class="n">Size</span> <span class="n">Type</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>    <span class="mi">2048</span>    <span class="mi">374783</span>   <span class="mi">372736</span>  <span class="mi">182</span><span class="n">M</span> <span class="n">EFI</span> <span class="n">System</span>
-<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>  <span class="mi">374784</span> <span class="mi">100374527</span> <span class="mi">99999744</span> <span class="mf">47.7</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">filesystem</span>
+<span class="n">Device</span>     <span class="n">Start</span>      <span class="n">End</span>  <span class="n">Sectors</span> <span class="n">Size</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>   <span class="mi">2048</span>     <span class="mi">4095</span>     <span class="mi">2048</span>   <span class="mi">1</span><span class="n">M</span> <span class="n">BIOS</span> <span class="n">boot</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>   <span class="mi">4096</span> <span class="mi">67112959</span> <span class="mi">67108864</span>  <span class="mi">32</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">filesystem</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 是EFI分区，挂载在 <code class="docutils literal notranslate"><span class="pre">/boot/efi</span></code> 目录下，包含分区启动信息</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> EXT4文件系统，挂载在 <code class="docutils literal notranslate"><span class="pre">/</span></code> 根目录下</p></li>
-</ul>
-<p>物理主机是500GB的SSD，目前安装操作系统占用了50GB。</p>
-</div>
+<p>物理主机是500GB的SSD，目前划分给操作系统占用32GB。</p>
 <p>由于物理主机将同时运行KVM和Docker，所以需要给 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 巨大的容量空间以存储虚拟机和容器镜像。</p>
 <p>在Linux平台，具有伸缩性的文件系统，我选择采用btrfs：</p>
 <ul class="simple">
@@ -337,28 +301,52 @@
 <p><a class="reference external" href="https://btrfs.wiki.kernel.org/index.php/Main_Page">Btrfs</a> 是现代的copy-on-write的文件系统，提供了很多针对失效容忍、修复和易于管理的高级特性。但是，btrfs的稳定性需要关注 <a class="reference external" href="https://btrfs.wiki.kernel.org/index.php/Status">btrfs status</a> ，确保采用符合自己需求和稳定性的功能。</p>
 </div>
 </section>
-<section id="id5">
-<h2>Btrfs工具<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h2>Btrfs工具<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>Ubuntu安装Btrfs工具 <code class="docutils literal notranslate"><span class="pre">btrfs-progs</span></code> （在RHEL/CentOS中名为 <code class="docutils literal notranslate"><span class="pre">btrfs-tools</span></code> 软件包):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">btrfs</span><span class="o">-</span><span class="n">progs</span>
 </pre></div>
 </div>
 </li>
-</ul>
-<p>Arch Linux的软件包同名，安装命令如下:</p>
+<li><p>Arch Linux的软件包同名，安装命令如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">btrfs</span><span class="o">-</span><span class="n">progs</span>
 </pre></div>
 </div>
+</li>
+</ul>
 <p>加载btrfs模块:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modprobe</span> <span class="n">btrfs</span>
 </pre></div>
 </div>
+<ul>
+<li><p>在 Ubuntu 20.04.3 LTS 服务器版本，默认已经安装了 <code class="docutils literal notranslate"><span class="pre">btrfs-progs</span></code> 并且加载了内核模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsmod</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">btrfs</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到内核加载了 <code class="docutils literal notranslate"><span class="pre">zstd_compress</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span>                <span class="mi">1257472</span>  <span class="mi">0</span>
+<span class="n">zstd_compress</span>         <span class="mi">167936</span>  <span class="mi">1</span> <span class="n">btrfs</span>
+<span class="n">xor</span>                    <span class="mi">24576</span>  <span class="mi">2</span> <span class="n">async_xor</span><span class="p">,</span><span class="n">btrfs</span>
+<span class="n">raid6_pq</span>              <span class="mi">114688</span>  <span class="mi">4</span> <span class="n">async_pq</span><span class="p">,</span><span class="n">btrfs</span><span class="p">,</span><span class="n">raid456</span><span class="p">,</span><span class="n">async_raid6_recov</span>
+<span class="n">libcrc32c</span>              <span class="mi">16384</span>  <span class="mi">4</span> <span class="n">nf_conntrack</span><span class="p">,</span><span class="n">nf_nat</span><span class="p">,</span><span class="n">btrfs</span><span class="p">,</span><span class="n">raid456</span>
+</pre></div>
+</div>
 </section>
-<section id="id6">
-<h2>磁盘分区<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>磁盘分区<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>当前 <a class="reference internal" href="../../server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 只安装了一块 SATA SSD磁盘，由于 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 要求独立的块设备，所以我分别为 <a class="reference internal" href="../../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 划分一个分区:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/dev/sda3</span></code> 挂载为docker使用的 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code></p></li>
+</ul>
+<p>需要注意，libvirt官方并不支持使用 Btrfs 作为存储池，虽然我在实践中也采用过 Btrfs 的子卷存储镜像，但是我参考了一些资料，发现这个方式存在缺陷，详见 <a class="reference internal" href="introduce_btrfs.html#introduce-btrfs"><span class="std std-ref">Btrfs文件系统简介</span></a></p>
+</div>
 <p>使用 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 创建 <code class="docutils literal notranslate"><span class="pre">/dev/sda3</span></code> 来构建btrfs:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -366,16 +354,19 @@
 <p><code class="docutils literal notranslate"><span class="pre">parted</span></code> 提供了4k对齐优化（参考 <a class="reference external" href="https://unix.stackexchange.com/questions/38164/create-partition-aligned-using-parted">Create partition aligned using parted</a> ），使用参数 <code class="docutils literal notranslate"><span class="pre">--align</span></code> 或 <code class="docutils literal notranslate"><span class="pre">-a</span></code> 指定优化，一般可以使用 <code class="docutils literal notranslate"><span class="pre">optimal</span></code> 由parted自动处理对齐功能。</p>
 </div>
 <p>显示磁盘分区:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">parted</span><span class="p">)</span> <span class="nb">print</span>
-<span class="n">Model</span><span class="p">:</span> <span class="n">ATA</span> <span class="n">INTEL</span> <span class="n">SSDSC2KW51</span> <span class="p">(</span><span class="n">scsi</span><span class="p">)</span>
-<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mi">512</span><span class="n">GB</span>
-<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span><span class="n">B</span><span class="o">/</span><span class="mi">512</span><span class="n">B</span>
-<span class="n">Partition</span> <span class="n">Table</span><span class="p">:</span> <span class="n">gpt</span>
-<span class="n">Disk</span> <span class="n">Flags</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GNU Parted 3.3
+Using /dev/sda
+Welcome to GNU Parted! Type &#39;help&#39; to view a list of commands.
+(parted) print
+Model: ATA INTEL SSDSC2KW51 (scsi)
+Disk /dev/sda: 512GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
 
-<span class="n">Number</span>  <span class="n">Start</span>   <span class="n">End</span>     <span class="n">Size</span>    <span class="n">File</span> <span class="n">system</span>  <span class="n">Name</span>  <span class="n">Flags</span>
- <span class="mi">1</span>      <span class="mi">1049</span><span class="n">kB</span>  <span class="mi">512</span><span class="n">MB</span>   <span class="mi">511</span><span class="n">MB</span>   <span class="n">fat16</span>                 <span class="n">boot</span><span class="p">,</span> <span class="n">esp</span>
- <span class="mi">2</span>      <span class="mi">512</span><span class="n">MB</span>   <span class="mf">51.7</span><span class="n">GB</span>  <span class="mf">51.2</span><span class="n">GB</span>  <span class="n">ext4</span>
+Number  Start   End     Size    File system  Name  Flags
+ 1      1049kB  2097kB  1049kB                     bios_grub
+ 2      2097kB  34.4GB  34.4GB  ext4
 </pre></div>
 </div>
 <p>增加分区3:</p>
@@ -435,8 +426,8 @@
 </div>
 <p>在初步完成了磁盘分区规划之后，我们现在有了可以用于btrfs的磁盘分区 <code class="docutils literal notranslate"><span class="pre">/dev/sda3</span></code> ，请参考 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#configure-docker-btrfs"><span class="std std-ref">配置Docker使用btrfs存储驱动</span></a> 完成Docker的btrfs存储引擎设置。如果你需要多种用途混合使用btrfs，也可以参考 <a class="reference internal" href="../../../appendix/using_btrfs_in_studio.html#using-btrfs-in-studio"><span class="std std-ref">在Studio中使用btrfs文件系统</span></a> 。</p>
 </section>
-<section id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/Parted">ArchLinux Parted</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/btrfs">ArchLinux Btrfs</a></p></li>

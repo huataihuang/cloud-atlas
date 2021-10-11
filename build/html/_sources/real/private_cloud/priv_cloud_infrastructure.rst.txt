@@ -4,6 +4,25 @@
 私有云架构
 ============
 
+私有云拓扑架构图
+==================
+
+2021年10月，我购买了 :ref:`hpe_dl360_gen9` 来实现完整的云计算模拟，规划是采用一台二手服务器:
+
+- 通过 :ref:`kvm_nested_virtual` 运行大量的一级KVM虚拟机，一级KVM虚拟机作为运行 :ref:`openstack` 的物理机，部署一个完整的OpenStack集群
+- 在一级虚拟机中运行 :ref:`kubernetes` 模拟裸机的K8S集群
+- 在OpenStack中部署运行大量二级虚拟机，按需运行，模拟云计算的弹性以及计费和监控
+- OpenStack中的二级虚拟机内部再部署一个 :ref:`kubernetes` 集群，模拟云计算之上的K8S集群，结合 HashiCorp 的 Terraform 来实现全链路的自动化部署
+- 附加：在DL360物理服务器上运行一个精简的Docker容器来做日常开发学习
+
+.. figure:: ../../_static/real/private_cloud/real_cloud.png
+   :scale: 80
+
+
+.. note::
+
+   采用OpenStack来实现云计算是当前主流的云计算平台，涉及到广泛的虚拟化、网络、存储技术，是一个非常好实现案例
+
 Kubernetes私有云
 ==================
 
@@ -58,14 +77,3 @@ OpenStack和Kubernetes共同部署在3台物理服务器上，底层的基础服
 - :ref:`ceph`
 - :ref:`gluster`
 
-私有云拓扑架构图
-==================
-
-.. note::
-
-   我采用这种混合OpenStack和Kubernetes的架构主要是为了充分发挥硬件性能同时节约物理服务器资源。如果是在面向公共用户的共有云环境，会采用OpenStack嵌套Kubernetes的架构：
-
-   - 通过OpenStack KVM虚拟化提供的强隔离，避免租户之间的影响和安全隐患
-   - 通过Kubernetes提供给用户轻量级和灵活的应用部署能力
-   - 缺点是虚拟化对资源的消耗较大，浪费了一部分物理服务器计算资源
-   - 优点是获得了高安全性，并且具备了虚拟化热迁移的高可用能力

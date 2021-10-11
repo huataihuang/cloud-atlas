@@ -132,6 +132,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Linux存储</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../disk/index.html">Linux磁盘</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../filesystem/index.html">Linux文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lvm/index.html">Linux LVM逻辑卷管理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../zfs/index.html">ZFS - Linux存储系统</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Btrfs - Linux存储系统</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Btrfs文件系统简介</a></li>
@@ -268,6 +269,8 @@
 </section>
 <section id="id2">
 <h2>企业级使用Btrfs<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>根据网上信息了解，Facebook可能是最积极采用Btrfs的超级互联网公司，并且雇佣了Btrfs的核心开发者，也是能够在生产环境采用Btrfs高级特性并保证稳定性的底气。</p>
+<p>Facebook使用Btrfs的快照和镜像来隔离容器，在 <a class="reference external" href="https://facebookmicrosites.github.io/btrfs/docs/btrfs-facebook.html">Btrfs at Facebook(facebookmicrosites)</a> 透露了F厂应用Btrfs遇到的问题和解决方案。同时在LWN源代码新闻网站， <a class="reference external" href="https://lwn.net/Articles/824855/">Btrfs at Facebook(LWN)</a> 记录了Btrfs开发 Josef Bacik 在 <a class="reference external" href="https://events.linuxfoundation.org/open-source-summit-north-america/">2020 Open Source Summit North America</a> 演讲，介绍了Facebook利用Btrfs进行快速测试的隔离解决方案。</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="btrfs_facebook.html#btrfs-facebook"><span class="std std-ref">Facebook的Btrfs</span></a></p></li>
 </ul>
@@ -280,8 +283,16 @@
 </section>
 <section id="fedora-rhel-centos">
 <h3>Fedora/RHEL/CentOS<a class="headerlink" href="#fedora-rhel-centos" title="永久链接至标题">¶</a></h3>
+<p>参考 <a class="reference external" href="https://www.theregister.co.uk/2017/08/16/red_hat_banishes_btrfs_from_rhel">Red Hat banishes Btrfs from RHEL</a> 报道，Red Hat在RHEL 7.4还保持Btrfs上游补丁更新，但之后放弃了Btrfs功能更新。从 RHEL 8 <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/considerations_in_adopting_rhel_8/file-systems-and-storage_considerations-in-adopting-rhel-8">Considerations in adopting RHEL 8Chapter 12. File systems and storage</a> 可以看到Red Hat Enterprise Linux 8已经完全移除了Btrfs支持，已经不能在RHEL中创建、挂载和安装Btrfs文件系统。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://access.redhat.com/discussions/3138231">why redhat abandon btrfs where SUSE makes it default.?</a> 最新的2021年8月 Red Hat Expert Andrew Puch 有一个详尽的答复，说明了Red Hat的文件系统路线:</p>
+<ul class="simple">
+<li><p>RedHat正在从btrfs转向 <a class="reference internal" href="../stratis/index.html#stratis"><span class="std std-ref">Stratis - Linux存储系统</span></a> 用户层文件系统(采用Rust重写)</p></li>
+</ul>
+</div>
 <p>2020年8月发布的最新的Fedora 33修改了桌面系列(Fedora Workstation, Fedora KDE等)的默认文件系统，采用了Btrfs替代了以前版本采用的默认Ext4文件系统。在此之前，2012年开始，Fedora就已经试验性引入了Btrfs，经过8年的社区验证，终于迈出了一大步。</p>
-<p>这意味着Btrfs的现代化特性：数据一致性、SSD优化、压缩、可写快照、多设备支持等等已经进入了稳定和成熟的状态。</p>
+<p>这意味着Btrfs的现代化特性：数据一致性、SSD优化、压缩、可写快照、多设备支持等等已经进入了稳定和成熟的状态。所以，我估计可能在后续的 Red Hat Enterprise Linux 发行版中会再度加入Btrfs支持。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>Fedora作为Red Hat Enterprise Linux的上游版本，是很多新技术进入企业级应用阶段的前奏。Fedora验证测试的技术从一定程度上证明了技术的可靠性和稳定性，在经过几轮发行版后，验证成熟的技术极有可能融入到最新的RHEL发行版。</p>
@@ -289,10 +300,26 @@
 </section>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>虚拟化和Btrfs<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>参考 <a class="reference external" href="https://wiki.rockstable.it/libvirt">rockstable libvirt文档</a> 以及 <a class="reference external" href="https://wiki.archlinux.org/title/QEMU">archlinux - QEMU</a> 如果将QEMU的虚拟磁盘镜像存储到Btrfs文件系统，需要事先关闭Btrfs目录的Copy-on-Write(CoW)功能，否则存储性能会受到影响。(这个关闭也会同时禁用了Btrfs的checksum功能，会导致Btrfs无法检测到腐败的 <code class="docutils literal notranslate"><span class="pre">nodatacow</span></code> 文件)</p>
+<p>实际上限制很多，所以我在 KVM 实践中，将转为采用 <a class="reference internal" href="../stratis/index.html#stratis"><span class="std std-ref">Stratis - Linux存储系统</span></a> 作为存储文件系统</p>
+</div>
+</section>
+<section id="id5">
+<h2>我的观点<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>Btrfs和ZFS是目前Linux系统功能最丰富同时也是最具发展潜力的本地文件系统。两者各自有独特的发展历史和技术优势，当前都已经逐步进入稳定生产状态，比早期动辄crash已经不可同日而语。</p>
+<p>Btrfs和ZFS需要非常精心的部署和调优，以充分发挥最佳性能。但是，这两个文件系统也是非常复杂，在使用中实际上有很多需要仔细理解原理和精心配置，否则会导致数据损坏和系统异常。</p>
+<p>建议保持持续跟进观察，并不断做性能和稳定性测试，在合适的时候正式采用Btrfs。</p>
+</section>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://btrfs.wiki.kernel.org/index.php/SysadminGuide">Btrfs SysadminGuide</a></p></li>
 <li><p><a class="reference external" href="https://fedoramagazine.org/btrfs-coming-to-fedora-33/">Btrfs Coming to Fedora 33</a></p></li>
+<li><p><a class="reference external" href="https://access.redhat.com/discussions/3138231">why redhat abandon btrfs where SUSE makes it default.?</a></p></li>
+<li><p><a class="reference external" href="https://wiki.archlinux.org/title/QEMU">archlinux - QEMU</a></p></li>
 </ul>
 </section>
 </section>

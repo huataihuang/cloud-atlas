@@ -28,69 +28,26 @@ Studio环境的Btrfs存储
 
       ERROR    Couldn't create storage volume 'win10.qcow2': 'internal error: Child process (/usr/bin/qemu-img convert -f qcow2 -O qcow2 -o compat=1.1,lazy_refcounts /data-libvirt/images/win10.qcow2 /var/lib/libvirt/images/win10.qcow2) unexpected exit status 1: qemu-img: error while reading sector 13647872: Input/output error
 
-按照我的实践经验，btrfs的基本功能稳定，但是高级压缩功能可能存在风险。
-
-Btrfs在不同发行版和厂商应用对比
-=================================
-
-Red Hat Enterprise Linux
----------------------------
-
-参考 `Red Hat banishes Btrfs from RHEL <https://www.theregister.co.uk/2017/08/16/red_hat_banishes_btrfs_from_rhel>`_ 报道，Red Hat在RHEL 7.4还保持Btrfs上游补丁更新，但之后放弃了Btrfs功能更新。从 RHEL 8 `Considerations in adopting RHEL 8Chapter 12. File systems and storage <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/considerations_in_adopting_rhel_8/file-systems-and-storage_considerations-in-adopting-rhel-8>`_ 可以看到Red Hat Enterprise Linux 8已经完全移除了Btrfs支持，已经不能在RHEL中创建、挂载和安装Btrfs文件系统。
-
-Red Hat社区Fedora
---------------------
-
-从 `Fedora 33重新引入Btrfs作为默认文件系统 <https://fedoramagazine.org/btrfs-coming-to-fedora-33/>`_ ，可以观察到Red Hat社区开始尝试在桌面系统引入Btrfs，今后有可能进入Red Hat服务器领域的话，则可以作为生产引入验证使用。
-
-SUSE企业版Linux
--------------------
-
-SUSE发行版一直以来都是将 Btrfs 作为服务器版默认文件系统。这应该和各个Linux发行版公司在开发力量投入上有关。
-
-Facebook
---------------
-
-根据网上信息了解，Facebook可能是最积极采用Btrfs的超级互联网公司，并且雇佣了Btrfs的核心开发者，也是能够在生产环境采用Btrfs高级特性并保证稳定性的底气。
-
-Facebook使用Btrfs的快照和镜像来隔离容器，在 `Btrfs at Facebook(facebookmicrosites) <https://facebookmicrosites.github.io/btrfs/docs/btrfs-facebook.html>`_ 透露了F厂应用Btrfs遇到的问题和解决方案。同时在LWN源代码新闻网站， `Btrfs at Facebook(LWN) <https://lwn.net/Articles/824855/>`_ 记录了Btrfs开发 Josef Bacik 在 `2020 Open Source Summit North America <https://events.linuxfoundation.org/open-source-summit-north-america/>`_
-演讲，介绍了Facebook利用Btrfs进行快速测试的隔离解决方案。
-
-我的观点
----------
-
-Btrfs和ZFS是目前Linux系统功能最丰富同时也是最具发展潜力的本地文件系统。两者各自有独特的发展历史和技术优势，当前都已经逐步进入稳定生产状态，比早期动辄crash已经不可同日而语。
-
-Btrfs和ZFS需要非常精心的部署和调优，以充分发挥最佳性能，我决定后续做实践对比，进行性能优化和测试，并撰写应用方案。
-
-建议保持持续跟进观察，并不断做性能和稳定性测试，在合适的时候正式采用Btrfs。
-
-.. note::
-
-   以下是我较早的一些实践笔记，不太完善，但是我今后会再次迭代改进。
+我在2019年10月1日的btrfs系统中发现了异常虚拟机hang以及btrfs读写错误，转眼已过去2年。2021年，我重新在 :ref:`hpe_dl360_gen9` 上部署了 :ref:`ubuntu_linux` 来运行虚拟化 :ref:`kvm` ，存储再次选择 Btrfs 。我期望能够验证和充分发挥系统性能
 
 初始安装操作系统的磁盘
 =========================
 
 在初始化安装的Ubuntu操作系统，磁盘分区如下::
 
-   Disk /dev/sda: 465.9 GiB, 500277790720 bytes, 977105060 sectors
+   Disk /dev/sda: 476.96 GiB, 512110190592 bytes, 1000215216 sectors
+   Disk model: INTEL SSDSC2KW51
    Units: sectors of 1 * 512 = 512 bytes
-   Sector size (logical/physical): 512 bytes / 4096 bytes
-   I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
    Disklabel type: gpt
-   Disk identifier: F2FB6986-2DCE-46B4-907F-7F4D7D29E3B4
+   Disk identifier: 9AA02658-A444-4DE6-8DEE-8978DA2F02B6
+   
+   Device     Start      End  Sectors Size Type
+   /dev/sda1   2048     4095     2048   1M BIOS boot
+   /dev/sda2   4096 67112959 67108864  32G Linux filesystem
 
-   Device      Start       End  Sectors  Size Type
-   /dev/sda1    2048    374783   372736  182M EFI System
-   /dev/sda2  374784 100374527 99999744 47.7G Linux filesystem
-
-.. note::
-
-   - ``/dev/sda1`` 是EFI分区，挂载在 ``/boot/efi`` 目录下，包含分区启动信息
-   - ``/dev/sda2`` EXT4文件系统，挂载在 ``/`` 根目录下
-
-   物理主机是500GB的SSD，目前安装操作系统占用了50GB。
+物理主机是500GB的SSD，目前划分给操作系统占用32GB。
 
 由于物理主机将同时运行KVM和Docker，所以需要给 ``/var/lib/libvirt`` 和 ``/var/lib/docker`` 巨大的容量空间以存储虚拟机和容器镜像。
 
@@ -110,7 +67,7 @@ Btrfs工具
 
    apt install btrfs-progs
 
-Arch Linux的软件包同名，安装命令如下::
+- Arch Linux的软件包同名，安装命令如下::
 
    pacman -S btrfs-progs
 
@@ -118,12 +75,32 @@ Arch Linux的软件包同名，安装命令如下::
 
    modprobe btrfs
 
+- 在 Ubuntu 20.04.3 LTS 服务器版本，默认已经安装了 ``btrfs-progs`` 并且加载了内核模块::
+
+   lsmod | grep btrfs
+
+可以看到内核加载了 ``zstd_compress`` ::
+
+   btrfs                1257472  0
+   zstd_compress         167936  1 btrfs
+   xor                    24576  2 async_xor,btrfs
+   raid6_pq              114688  4 async_pq,btrfs,raid456,async_raid6_recov
+   libcrc32c              16384  4 nf_conntrack,nf_nat,btrfs,raid456
+
 磁盘分区
 =============
 
+.. note::
+
+   当前 :ref:`hpe_dl360_gen9` 只安装了一块 SATA SSD磁盘，由于 :ref:`docker_btrfs_driver` 要求独立的块设备，所以我分别为 :ref:`docker` 划分一个分区:
+
+   - ``/dev/sda3`` 挂载为docker使用的 ``/var/lib/docker``
+
+   需要注意，libvirt官方并不支持使用 Btrfs 作为存储池，虽然我在实践中也采用过 Btrfs 的子卷存储镜像，但是我参考了一些资料，发现这个方式存在缺陷，详见 :ref:`introduce_btrfs`
+
 使用 ``parted`` 创建 ``/dev/sda3`` 来构建btrfs::
 
-   parted -a optimal
+   parted -a optimal /dev/sda
 
 .. note::
 
@@ -131,16 +108,19 @@ Arch Linux的软件包同名，安装命令如下::
 
 显示磁盘分区::
 
+   GNU Parted 3.3
+   Using /dev/sda
+   Welcome to GNU Parted! Type 'help' to view a list of commands.
    (parted) print
    Model: ATA INTEL SSDSC2KW51 (scsi)
    Disk /dev/sda: 512GB
    Sector size (logical/physical): 512B/512B
    Partition Table: gpt
    Disk Flags:
-
+   
    Number  Start   End     Size    File system  Name  Flags
-    1      1049kB  512MB   511MB   fat16                 boot, esp
-    2      512MB   51.7GB  51.2GB  ext4
+    1      1049kB  2097kB  1049kB                     bios_grub
+    2      2097kB  34.4GB  34.4GB  ext4
 
 增加分区3::
 
