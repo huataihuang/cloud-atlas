@@ -1,7 +1,7 @@
-.. _hp_ilo_startup:
+.. _introduce_ilo:
 
 ====================
-HP iLO快速起步
+HP iLO简介
 ====================
 
 Integrated Lights-Out，简称 iLo，是由HP(Hewlett-Packard)公司推出的专有嵌入式服务器管理技术，提供了带外管理功能。HP iLO结合了服务器主板的iLO ASIC(集成电路)以及增强ASIC的firmware。iLO是服务器强大操作的关键，也是启动时方便设置，系统健康监控以及电源和温度控制的平台。
@@ -12,7 +12,7 @@ iLO的版本
 目前HP已经开发了5代iLO，并且每代有不同板本:
 
 .. csv-table:: HPE iLO
-   :file: hp_ilo_startup/ilo_gen.csv
+   :file: introduce_ilo/ilo_gen.csv
    :widths: 25, 75
    :header-rows: 1
 
@@ -36,7 +36,41 @@ iLO访问方式
 ==============
 
 - web访问 - 提供了浏览器访问管理服务器方式
-- ROM-based配置工具 - 
+- ROM-based配置工具 - 根据不同的服务器型号，可以使用iLO RBSU 或 iLO 4 配置工具程序来配置网络参数，全局设置以及用户账号。在支持UEFI的服务器，例如DL580 Gen8或者Gen 9服务器，可以在UEFI系统工具中使用iLO 4配置工具。在不支持UEFI的服务器，就使用iLO RBSU
+- iLO RESTful API - iLO 4 2.00 以及后续版本提供了iLO RESTful API，可以参考 `iLO RESTful API ecosystem <https://www.hpe.com/us/en/servers/restful-api.html>`_
+- iLO 脚本和命令行
+- iLO Amplifier Pack - 提供清单以及firmware和驱动更新解决方案的服务器，可以快速发现、详情报告，以及firmware和驱动更新，是大型网络管理的平台软件
+
+iLO网络连接
+==============
+
+有两种iLO网络连接方式:
+
+独立的管理网络
+-----------------
+
+在独立部署的管理网络架构中，iLO端口是使用一个分离的物理网络，带来更好的性能和安全性:
+
+- 生产网络流量不会影响管理网络，这在大型数据中心非常重要，因为一旦出现网络故障，独立的管理网络提供了应急处理通道
+- 管理网络可以采用低端交换设备，降低维护成本
+- 独立的管理网路是推荐部署方式
+
+.. figure:: ../../../../../_static/linux/server/hardware/hpe/hp_ilo/dedicated_ilo_network.png
+   :scale: 70
+
+兼用生产网络
+--------------
+
+如果条件不允许，则可以将服务器NIC和iLO端口连接到相同的生产网络，这种方式称为Shared Network Port configuration。一些HP企业级嵌入NIC以及附加网卡提供了这种能力，也就是服务器网卡可以兼作iLO网络接口，但是带来不利点有:
+
+- 共享网络，流量可能会影响iLO性能
+- 当服务器启动时，操作系统加载或卸载系统NIC驱动会导致短时间(2-8秒)不能访问iLO
+- 网卡更新firmware或reset会导致iLO无法访问
+- iLO共享网络连接不能用于网速大于100Mbps网络
+
+.. figure:: ../../../../../_static/linux/server/hardware/hpe/hp_ilo/shared_ilo_network.png
+   :scale: 70
+
 
 参考
 =======
