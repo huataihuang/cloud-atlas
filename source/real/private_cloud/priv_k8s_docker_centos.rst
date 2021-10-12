@@ -1,35 +1,12 @@
-.. _priv_k8s_docker:
+.. _priv_k8s_docker_centos:
 
-===============================
-私有云Kubernetes和docker环境
-===============================
-
-Kubernetes选型
-==============
-
-部署Kubernetes，通常有3种模式：
-
-- 单节点Kubernetes: 通过单台服务器，运行minikube，不提供任何容灾能力
-
-- 单个master多个woker集群：管控平面只部署一台服务器，工作节点至少2台，提供了一定的工作节点容灾能力。最少3太服务器(1master2worker)
-
-
-- 3个master多个worker集群：管控平面部署3台服务器，工作节点至少2台，同时具备了master和worker节点的容灾能力。最少5台服务器(3master2worker)
-
-  - 随着规模扩大，可以水平扩展worker节点
-  - 要进一步提高master节点稳定性和性能，可以将 ``etcd`` 抽取出来独立部署，则管控平面增加到6台服务器，而woker节点可以水平扩展到5000+。
-
-.. figure:: ../../_static/kubernetes/kubeadm-ha-topology-stacked-etcd.svg
-
-.. figure:: ../../_static/kubernetes/kubeadm-ha-topology-external-etcd.svg
-    
-.. note::
-
-   详细高可用kubernetes集群部署参考 :ref:`ha_k8s`
+======================================
+私有云Kubernetes和docker环境(CentOS)
+======================================
 
 .. note::
 
-   整体架构请参考 :ref:priv_cloud_infrastructure`
+   本文是旧文，暂时存档待整理。新部署见 :ref:`priv_k8s_docker`
 
 安装Docker运行环境
 ====================
@@ -115,7 +92,6 @@ Kubernetes选型
 
    lsmod | grep br_netfilter
 
-
 安装软件包
 ==============
 
@@ -171,6 +147,33 @@ Kubernetes选型
 =======================
 
 在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 ``/var/lib/kubelet/kubeadm-flags.env`` ，所以在我们的部署环境中不需要设置 ``cgroup-driver`` 值。
+
+Kubernetes选型
+==============
+
+部署Kubernetes，通常有3种模式：
+
+- 单节点Kubernetes: 通过单台服务器，运行minikube，不提供任何容灾能力
+
+- 单个master多个woker集群：管控平面只部署一台服务器，工作节点至少2台，提供了一定的工作节点容灾能力。最少3太服务器(1master2worker)
+
+
+- 3个master多个worker集群：管控平面部署3台服务器，工作节点至少2台，同时具备了master和worker节点的容灾能力。最少5台服务器(3master2worker)
+
+  - 随着规模扩大，可以水平扩展worker节点
+  - 要进一步提高master节点稳定性和性能，可以将 ``etcd`` 抽取出来独立部署，则管控平面增加到6台服务器，而woker节点可以水平扩展到5000+。
+
+.. figure:: ../../_static/kubernetes/kubeadm-ha-topology-stacked-etcd.svg
+
+.. figure:: ../../_static/kubernetes/kubeadm-ha-topology-external-etcd.svg
+    
+.. note::
+
+   详细高可用kubernetes集群部署参考 :ref:`ha_k8s`
+
+.. note::
+
+   整体架构请参考 :ref:priv_cloud_infrastructure`
 
 参考
 =======

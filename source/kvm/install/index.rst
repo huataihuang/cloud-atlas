@@ -1,16 +1,13 @@
-.. _btrfs:
+.. _kvm_install:
 
 =================================
-Btrfs - Linux存储系统
+KVM 环境安装
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_btrfs.rst
-   btrfs_facebook.rst
-   btrfs_in_studio.rst
-   tune_btrfs.rst
+   ubuntu_deploy_kvm.rst
 
 .. only::  subproject and html
 

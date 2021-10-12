@@ -14,6 +14,7 @@ Infrastructure Atlas
    best_open_source.rst
    wikipedia_base.rst
    fedoraproject_base.rst
+   storage/index
    cloud_gaming/index
    akraino/index
 
