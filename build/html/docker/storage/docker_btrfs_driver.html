@@ -123,6 +123,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="docker_overlay_driver.html">Docker OverlayFS存储引擎</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_unionfs.html">Docker UnionFS 文件系统</a></li>
 <li class="toctree-l3"><a class="reference internal" href="docker_size_quota.html">Docker容器规格Quota</a></li>
 <li class="toctree-l3"><a class="reference internal" href="docker_run_add_host_device.html">添加host设备到容器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="docker_container_nfs.html">Docker容器使用NFS</a></li>
@@ -260,20 +261,48 @@
 </li>
 <li><p>为了能够在操作系统级别管理BTRFS文件系统，需要 <code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 命令，则需要安装 <code class="docutils literal notranslate"><span class="pre">btrfsprogs</span></code> 软件包(SLES)或 <code class="docutils literal notranslate"><span class="pre">btrfs-tools</span></code> 软件包(Ubuntu)。</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Btrfs的配置和优化比较复杂，请参考 <a class="reference internal" href="../../linux/storage/btrfs/tune_btrfs.html#tune-btrfs"><span class="std std-ref">Btrfs优化</span></a> 以及 <a class="reference internal" href="../../infrastructure/storage/rockstor/index.html#rockstor"><span class="std std-ref">Rockstor存储</span></a></p>
+</div>
 </section>
 <section id="id2">
 <h2>磁盘块设备(分区)准备<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>在 <a class="reference internal" href="../../linux/storage/btrfs/btrfs_in_studio.html#btrfs-in-studio"><span class="std std-ref">Studio环境的Btrfs存储</span></a> 准备工作中，我们已经通过 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 工具划分了 <code class="docutils literal notranslate"><span class="pre">/dev/sda3</span></code> 给btrfs使用:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span>
-<span class="n">mkpart</span> <span class="n">primary</span> <span class="mf">51.4</span><span class="n">GB</span> <span class="mi">251</span><span class="n">GB</span>   <span class="c1">#注意分区不可重叠，这里划分了200G</span>
-<span class="n">name</span> <span class="mi">3</span> <span class="n">docker</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+<ul>
+<li><p>打印当前状态 <code class="docutils literal notranslate"><span class="pre">print</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">parted</span><span class="p">)</span> <span class="nb">print</span>
+<span class="n">Model</span><span class="p">:</span> <span class="n">ATA</span> <span class="n">INTEL</span> <span class="n">SSDSC2KW51</span> <span class="p">(</span><span class="n">scsi</span><span class="p">)</span>
+<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mi">512</span><span class="n">GB</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span><span class="n">B</span><span class="o">/</span><span class="mi">512</span><span class="n">B</span>
+<span class="n">Partition</span> <span class="n">Table</span><span class="p">:</span> <span class="n">gpt</span>
+<span class="n">Disk</span> <span class="n">Flags</span><span class="p">:</span>
+
+<span class="n">Number</span>  <span class="n">Start</span>   <span class="n">End</span>     <span class="n">Size</span>    <span class="n">File</span> <span class="n">system</span>  <span class="n">Name</span>  <span class="n">Flags</span>
+ <span class="mi">1</span>      <span class="mi">1049</span><span class="n">kB</span>  <span class="mi">538</span><span class="n">MB</span>   <span class="mi">537</span><span class="n">MB</span>   <span class="n">fat32</span>              <span class="n">boot</span><span class="p">,</span> <span class="n">esp</span>
+ <span class="mi">2</span>      <span class="mi">538</span><span class="n">MB</span>   <span class="mf">34.9</span><span class="n">GB</span>  <span class="mf">34.4</span><span class="n">GB</span>  <span class="n">ext4</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建 200G 空间:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkpart</span> <span class="n">primary</span> <span class="mf">34.9</span><span class="n">GB</span> <span class="mi">235</span><span class="n">GB</span>   <span class="c1">#注意分区不可重叠，这里划分了200G</span>
+</pre></div>
+</div>
+</li>
+<li><p>重命名为 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 分区名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="mi">3</span> <span class="n">docker</span>
 <span class="nb">print</span>
 </pre></div>
 </div>
+</li>
+</ul>
 <p>上述指令完成后最后print输出分区空间如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Number</span>  <span class="n">Start</span>   <span class="n">End</span>     <span class="n">Size</span>    <span class="n">File</span> <span class="n">system</span>  <span class="n">Name</span>     <span class="n">Flags</span>
 <span class="o">...</span>
-<span class="mi">3</span>      <span class="mf">51.4</span><span class="n">GB</span>  <span class="mi">251</span><span class="n">GB</span>   <span class="mi">200</span><span class="n">GB</span>                <span class="n">docker</span>
+<span class="mi">3</span>      <span class="mf">34.9</span><span class="n">GB</span>  <span class="mi">235</span><span class="n">GB</span>   <span class="mi">200</span><span class="n">GB</span>                <span class="n">docker</span>
 </pre></div>
 </div>
 </section>
@@ -281,7 +310,8 @@
 <span id="configure-docker-btrfs"></span><h2>配置Docker使用btrfs存储驱动<a class="headerlink" href="#dockerbtrfs" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>停止Docker:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span><span class="o">.</span><span class="n">socket</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span>
 </pre></div>
 </div>
 </li>
@@ -292,19 +322,46 @@
 </div>
 </li>
 <li><p>格式化目标块设备成为 <code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 文件系统:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkfs</span><span class="o">.</span><span class="n">btrfs</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkfs</span><span class="o">.</span><span class="n">btrfs</span> <span class="o">-</span><span class="n">f</span> <span class="o">-</span><span class="n">L</span> <span class="n">docker</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
 </pre></div>
 </div>
 </li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">btrfs</span><span class="o">-</span><span class="n">progs</span> <span class="n">v5</span><span class="mf">.4.1</span>
+<span class="n">See</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">btrfs</span><span class="o">.</span><span class="n">wiki</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">org</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
+
+<span class="n">Detected</span> <span class="n">a</span> <span class="n">SSD</span><span class="p">,</span> <span class="n">turning</span> <span class="n">off</span> <span class="n">metadata</span> <span class="n">duplication</span><span class="o">.</span>  <span class="n">Mkfs</span> <span class="k">with</span> <span class="o">-</span><span class="n">m</span> <span class="n">dup</span> <span class="k">if</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">force</span> <span class="n">metadata</span> <span class="n">duplication</span><span class="o">.</span>
+<span class="n">Label</span><span class="p">:</span>              <span class="n">docker</span>
+<span class="n">UUID</span><span class="p">:</span>               <span class="n">d80f2f08</span><span class="o">-</span><span class="mi">3</span><span class="n">b50</span><span class="o">-</span><span class="mi">4</span><span class="n">b19</span><span class="o">-</span><span class="n">a0eb</span><span class="o">-</span><span class="mi">058</span><span class="n">fb47693b0</span>
+<span class="n">Node</span> <span class="n">size</span><span class="p">:</span>          <span class="mi">16384</span>
+<span class="n">Sector</span> <span class="n">size</span><span class="p">:</span>        <span class="mi">4096</span>
+<span class="n">Filesystem</span> <span class="n">size</span><span class="p">:</span>    <span class="mf">186.36</span><span class="n">GiB</span>
+<span class="n">Block</span> <span class="n">group</span> <span class="n">profiles</span><span class="p">:</span>
+  <span class="n">Data</span><span class="p">:</span>             <span class="n">single</span>            <span class="mf">8.00</span><span class="n">MiB</span>
+  <span class="n">Metadata</span><span class="p">:</span>         <span class="n">single</span>            <span class="mf">8.00</span><span class="n">MiB</span>
+  <span class="n">System</span><span class="p">:</span>           <span class="n">single</span>            <span class="mf">4.00</span><span class="n">MiB</span>
+<span class="n">SSD</span> <span class="n">detected</span><span class="p">:</span>       <span class="n">yes</span>
+<span class="n">Incompat</span> <span class="n">features</span><span class="p">:</span>  <span class="n">extref</span><span class="p">,</span> <span class="n">skinny</span><span class="o">-</span><span class="n">metadata</span>
+<span class="n">Checksum</span><span class="p">:</span>           <span class="n">crc32c</span>
+<span class="n">Number</span> <span class="n">of</span> <span class="n">devices</span><span class="p">:</span>  <span class="mi">1</span>
+<span class="n">Devices</span><span class="p">:</span>
+   <span class="n">ID</span>        <span class="n">SIZE</span>  <span class="n">PATH</span>
+    <span class="mi">1</span>   <span class="mf">186.36</span><span class="n">GiB</span>  <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>
+</pre></div>
+</div>
+<ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 中添加以下配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>    <span class="n">btrfs</span>    <span class="n">defaults</span><span class="p">,</span><span class="n">compress</span><span class="o">=</span><span class="n">zstd</span>   <span class="mi">0</span>    <span class="mi">1</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#/dev/sda3    /var/lib/docker    btrfs    defaults,compress=zstd   0    1</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">disk</span><span class="o">/</span><span class="n">by</span><span class="o">-</span><span class="n">uuid</span><span class="o">/</span><span class="n">d80f2f08</span><span class="o">-</span><span class="mi">3</span><span class="n">b50</span><span class="o">-</span><span class="mi">4</span><span class="n">b19</span><span class="o">-</span><span class="n">a0eb</span><span class="o">-</span><span class="mi">058</span><span class="n">fb47693b0</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>   <span class="n">btrfs</span>    <span class="n">defaults</span><span class="p">,</span><span class="n">compress</span><span class="o">=</span><span class="n">lzo</span>   <span class="mi">0</span>    <span class="mi">1</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
-<p>上述Btrfs挂载启用了 <code class="docutils literal notranslate"><span class="pre">zstd</span></code> 压缩，但是我实践发现这个参数可能导致了 <code class="docutils literal notranslate"><span class="pre">csum</span> <span class="pre">failed</span></code> 进而系统负载过高hang住。所以，上述参数请谨慎使用，并做严格测试验证。目前我的实践经验有限，尚无法完善测试。</p>
+<p>在2019年的实践中，我Btrfs挂载启用了 <code class="docutils literal notranslate"><span class="pre">zstd</span></code> 压缩，但是感觉这个参数可能导致了 <code class="docutils literal notranslate"><span class="pre">csum</span> <span class="pre">failed</span></code> 进而系统负载过高hang住。所以，上述参数请谨慎使用，并做严格测试验证。</p>
+<p>2021年10月，我再次部署时参考 <a class="reference internal" href="../../linux/storage/btrfs/tune_btrfs.html#tune-btrfs"><span class="std std-ref">Btrfs优化</span></a> 尝试采用 lzo 压缩算法，根据官方FAQ，这种压缩算法压缩率较高且快速。不过，还需要研究和实践</p>
 </div>
 <ul>
 <li><p>然后挂载btrfs文件系统:</p>
@@ -319,7 +376,7 @@
 </li>
 </ul>
 <p>输出显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span> <span class="n">on</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span> <span class="nb">type</span> <span class="n">btrfs</span> <span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">compress</span><span class="o">=</span><span class="n">zstd</span><span class="p">,</span><span class="n">ssd</span><span class="p">,</span><span class="n">space_cache</span><span class="p">,</span><span class="n">subvolid</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">subvol</span><span class="o">=/</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span> <span class="n">on</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span> <span class="nb">type</span> <span class="n">btrfs</span> <span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">compress</span><span class="o">=</span><span class="n">lzo</span><span class="p">,</span><span class="n">ssd</span><span class="p">,</span><span class="n">space_cache</span><span class="p">,</span><span class="n">subvolid</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">subvol</span><span class="o">=/</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul>
@@ -362,8 +419,8 @@
 <p>输出显示:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="n">Storage</span> <span class="n">Driver</span><span class="p">:</span> <span class="n">btrfs</span>
- <span class="n">Build</span> <span class="n">Version</span><span class="p">:</span> <span class="n">Btrfs</span> <span class="n">v4</span><span class="mf">.7.3</span>
- <span class="n">Library</span> <span class="n">Version</span><span class="p">:</span> <span class="mi">101</span>
+ <span class="n">Build</span> <span class="n">Version</span><span class="p">:</span> <span class="n">Btrfs</span> <span class="n">v5</span><span class="mf">.4.1</span>
+ <span class="n">Library</span> <span class="n">Version</span><span class="p">:</span> <span class="mi">102</span>
 <span class="o">...</span>
 </pre></div>
 </div>

@@ -24,13 +24,36 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
 - 为了能够在操作系统级别管理BTRFS文件系统，需要 ``btrfs`` 命令，则需要安装 ``btrfsprogs`` 软件包(SLES)或 ``btrfs-tools`` 软件包(Ubuntu)。
 
+.. note::
+
+   Btrfs的配置和优化比较复杂，请参考 :ref:`tune_btrfs` 以及 :ref:`rockstor` 
+
 磁盘块设备(分区)准备
 ==============================
 
 在 :ref:`btrfs_in_studio` 准备工作中，我们已经通过 ``parted`` 工具划分了 ``/dev/sda3`` 给btrfs使用::
 
-   parted -a optimal
-   mkpart primary 51.4GB 251GB   #注意分区不可重叠，这里划分了200G
+   parted -a optimal /dev/sda
+
+- 打印当前状态 ``print`` ::
+
+   (parted) print
+   Model: ATA INTEL SSDSC2KW51 (scsi)
+   Disk /dev/sda: 512GB
+   Sector size (logical/physical): 512B/512B
+   Partition Table: gpt
+   Disk Flags:
+
+   Number  Start   End     Size    File system  Name  Flags
+    1      1049kB  538MB   537MB   fat32              boot, esp
+    2      538MB   34.9GB  34.4GB  ext4
+
+- 创建 200G 空间::
+
+   mkpart primary 34.9GB 235GB   #注意分区不可重叠，这里划分了200G
+
+- 重命名为 ``docker`` 分区名::
+
    name 3 docker
    print
 
@@ -38,7 +61,7 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
    Number  Start   End     Size    File system  Name     Flags
    ...
-   3      51.4GB  251GB   200GB                docker
+   3      34.9GB  235GB   200GB                docker
 
 .. _configure_docker_btrfs:
 
@@ -47,6 +70,7 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
 - 停止Docker::
 
+   systemctl stop docker.socket
    systemctl stop docker
 
 - 备份 ``/var/lib/docker`` 目录内容，并清空该目录::
@@ -56,15 +80,41 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
 - 格式化目标块设备成为 ``btrfs`` 文件系统::
 
-   sudo mkfs.btrfs -f /dev/sda3
+   sudo mkfs.btrfs -f -L docker /dev/sda3
+
+提示信息::
+
+   btrfs-progs v5.4.1
+   See http://btrfs.wiki.kernel.org for more information.
+   
+   Detected a SSD, turning off metadata duplication.  Mkfs with -m dup if you want to force metadata duplication.
+   Label:              docker
+   UUID:               d80f2f08-3b50-4b19-a0eb-058fb47693b0
+   Node size:          16384
+   Sector size:        4096
+   Filesystem size:    186.36GiB
+   Block group profiles:
+     Data:             single            8.00MiB
+     Metadata:         single            8.00MiB
+     System:           single            4.00MiB
+   SSD detected:       yes
+   Incompat features:  extref, skinny-metadata
+   Checksum:           crc32c
+   Number of devices:  1
+   Devices:
+      ID        SIZE  PATH
+       1   186.36GiB  /dev/sda3
 
 - 在 ``/etc/fstab`` 中添加以下配置::
 
-   /dev/sda3    /var/lib/docker    btrfs    defaults,compress=zstd   0    1
+   #/dev/sda3    /var/lib/docker    btrfs    defaults,compress=zstd   0    1
+   /dev/disk/by-uuid/d80f2f08-3b50-4b19-a0eb-058fb47693b0    /var/lib/docker   btrfs    defaults,compress=lzo   0    1
 
 .. warning::
 
-   上述Btrfs挂载启用了 ``zstd`` 压缩，但是我实践发现这个参数可能导致了 ``csum failed`` 进而系统负载过高hang住。所以，上述参数请谨慎使用，并做严格测试验证。目前我的实践经验有限，尚无法完善测试。
+   在2019年的实践中，我Btrfs挂载启用了 ``zstd`` 压缩，但是感觉这个参数可能导致了 ``csum failed`` 进而系统负载过高hang住。所以，上述参数请谨慎使用，并做严格测试验证。
+
+   2021年10月，我再次部署时参考 :ref:`tune_btrfs` 尝试采用 lzo 压缩算法，根据官方FAQ，这种压缩算法压缩率较高且快速。不过，还需要研究和实践
 
 - 然后挂载btrfs文件系统::
 
@@ -76,7 +126,7 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
 输出显示::
 
-   /dev/sda3 on /var/lib/docker type btrfs (rw,relatime,compress=zstd,ssd,space_cache,subvolid=5,subvol=/)
+   /dev/sda3 on /var/lib/docker type btrfs (rw,relatime,compress=lzo,ssd,space_cache,subvolid=5,subvol=/)
 
 - 将 ``/var/lib/docker.bk`` 内容恢复回 ``/var/lib/docker/`` ::
 
@@ -111,8 +161,8 @@ Docker的 ``btrfs`` 存储驱动使用了很多btrfs的功能用于镜像和容�
 
    ...
    Storage Driver: btrfs
-    Build Version: Btrfs v4.7.3
-    Library Version: 101
+    Build Version: Btrfs v5.4.1
+    Library Version: 102
    ...
 
 - 确保没有问题之后，删除 ``/var/lib/docker.bk`` 目录

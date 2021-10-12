@@ -4,15 +4,23 @@
 私有云KVM环境
 =======================
 
-和 :ref:`kvm_docker_in_studio` 类似，在私有云的物理服务器上部署KVM运行环境::
+运行环境
+=========
 
-   yum install libvirt virt-install qemu-kvm
-   systemctl start libvirtd
-   systemctl enable libvirtd
+- 物理服务器: :ref:`hpe_dl360_gen9`
 
-.. note::
+- 按照 :ref:`ubuntu_deploy_kvm` 安装部署好基础KVM运行环境::
 
-   仅安装字符界面工具
+   sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst
+
+   sudo adduser `id -un` libvirt
+   sudo adduser `id -un` kvm
+
+- 然后确认运行环境正常::
+
+   $ virsh list --all
+    Id    Name                           State
+   ----------------------------------------------------
 
 创建模版虚拟机
 ===================
@@ -112,7 +120,7 @@
 
    详细克隆KVM虚拟机请参考 :ref:`clone_vm` 。
 
-   准备 :ref:`priv_k8s_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 
+   准备 :ref:`priv_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 
 
 - 暂停虚拟机::
 

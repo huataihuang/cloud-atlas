@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>私有云Kubernetes和docker环境 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>私有云docker环境 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -42,9 +42,7 @@
     
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
-    <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="私有云架构" href="priv_cloud_infrastructure.html" />
-    <link rel="prev" title="私有云KVM环境" href="priv_kvm.html" /> 
+    <link rel="copyright" title="版权所有" href="../../copyright.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,7 +88,7 @@
             
             
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
@@ -126,27 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Real Atlas</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../real_think/index.html">真实世界的技术思考</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../prepare/index.html">真实云计算的构建准备</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">私有云Kubernetes和docker环境</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#kubernetes">Kubernetes选型</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#docker">安装Docker运行环境</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">服务器环境</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">安装软件包</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">网络端口</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cgroup">配置管控节点cgroup驱动</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="priv_cloud_infrastructure.html">私有云架构</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../network/index.html">真实荒漠</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Real Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
@@ -203,11 +181,7 @@
     
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../index.html">Real Atlas</a> &raquo;</li>
-        
-          <li><a href="index.html">私有云计算构建</a> &raquo;</li>
-        
-      <li>私有云Kubernetes和docker环境</li>
+      <li>私有云docker环境</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -226,194 +200,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="kubernetesdocker">
-<span id="priv-k8s-docker"></span><h1>私有云Kubernetes和docker环境<a class="headerlink" href="#kubernetesdocker" title="永久链接至标题">¶</a></h1>
-<section id="kubernetes">
-<h2>Kubernetes选型<a class="headerlink" href="#kubernetes" title="永久链接至标题">¶</a></h2>
-<p>部署Kubernetes，通常有3种模式：</p>
-<ul class="simple">
-<li><p>单节点Kubernetes: 通过单台服务器，运行minikube，不提供任何容灾能力</p></li>
-<li><p>单个master多个woker集群：管控平面只部署一台服务器，工作节点至少2台，提供了一定的工作节点容灾能力。最少3太服务器(1master2worker)</p></li>
-<li><p>3个master多个worker集群：管控平面部署3台服务器，工作节点至少2台，同时具备了master和worker节点的容灾能力。最少5台服务器(3master2worker)</p>
-<ul>
-<li><p>随着规模扩大，可以水平扩展worker节点</p></li>
-<li><p>要进一步提高master节点稳定性和性能，可以将 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 抽取出来独立部署，则管控平面增加到6台服务器，而woker节点可以水平扩展到5000+。</p></li>
-</ul>
-</li>
-</ul>
-<figure class="align-default">
-<img alt="../../_images/kubeadm-ha-topology-stacked-etcd.svg" src="../../_images/kubeadm-ha-topology-stacked-etcd.svg" /></figure>
-<figure class="align-default">
-<img alt="../../_images/kubeadm-ha-topology-external-etcd.svg" src="../../_images/kubeadm-ha-topology-external-etcd.svg" /></figure>
+  <section id="docker">
+<span id="priv-docker"></span><h1>私有云docker环境<a class="headerlink" href="#docker" title="永久链接至标题">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>详细高可用kubernetes集群部署参考 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes/ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a></p>
+<p>我重新部署的基于 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 云计算环境，采用虚拟机运行Docker和Kubernetes。不过，我也在物理主机上部署了一个用于日常开发学习的Docker环境，主操作系统是 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，实践如下。</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>整体架构请参考 :ref:priv_cloud_infrastructure`</p>
-</div>
-</section>
-<section id="docker">
-<h2>安装Docker运行环境<a class="headerlink" href="#docker" title="永久链接至标题">¶</a></h2>
-<ul>
-<li><p>在 workerX 各服务器 (请参考 <a class="reference internal" href="../prepare/index.html#real-prepare"><span class="std std-ref">真实云计算的构建准备</span></a> 分配物理主机列表 <code class="docutils literal notranslate"><span class="pre">hosts</span></code> 文件) 上安装Docker环境:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 安装必要软件包</span>
-<span class="n">yum</span> <span class="n">install</span> <span class="n">yum</span><span class="o">-</span><span class="n">utils</span> <span class="n">device</span><span class="o">-</span><span class="n">mapper</span><span class="o">-</span><span class="n">persistent</span><span class="o">-</span><span class="n">data</span> <span class="n">lvm2</span>
-
-<span class="c1"># 添加Docker仓库，注意必须是Docker-CE</span>
-<span class="n">yum</span><span class="o">-</span><span class="n">config</span><span class="o">-</span><span class="n">manager</span> \
-  <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">repo</span> \
-  <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">docker</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">linux</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">ce</span><span class="o">.</span><span class="n">repo</span>
-
-<span class="c1"># 安装Docker CE</span>
-<span class="n">yum</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">docker</span><span class="o">-</span><span class="n">ce</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>在 <a class="reference internal" href="../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 中，我是在Studio环境部署Ubuntu 18操作系统，由于内核4.x已经支持了btrfs文件系统，目前Docker官方文档仅在Ubuntu/Debian中推荐使用btrfs。但是，我实际测试发现稳定性可能还存在问题。</p>
-<p>CentOS/RHEL 7.x开始已经放弃了btrfs，官方推荐采用XFS。</p>
-</div>
-<ul>
-<li><p>设置Docker的配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 默认安装 /etc/docker 目录不存在，需要创建</span>
-<span class="n">mkdir</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span>
-
-<span class="c1"># 设置Daemon</span>
-<span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">daemon</span><span class="o">.</span><span class="n">json</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
-<span class="p">{</span>
-  <span class="s2">&quot;exec-opts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;native.cgroupdriver=systemd&quot;</span><span class="p">],</span>
-  <span class="s2">&quot;log-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;log-opts&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;max-size&quot;</span><span class="p">:</span> <span class="s2">&quot;100m&quot;</span>
-  <span class="p">},</span>
-  <span class="s2">&quot;storage-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;overlay2&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;storage-opts&quot;</span><span class="p">:</span> <span class="p">[</span>
-    <span class="s2">&quot;overlay2.override_kernel_check=true&quot;</span>
-  <span class="p">]</span>
-<span class="p">}</span>
-<span class="n">EOF</span>
-
-<span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">d</span>
-</pre></div>
-</div>
-</li>
-<li><p>重启Docker服务:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Restart Docker</span>
-<span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
-<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>如果这里docker启动失败，请使用 <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">status</span> <span class="pre">docker</span></code> 和 <code class="docutils literal notranslate"><span class="pre">journalctl</span> <span class="pre">-xe</span></code> 检查启动日志。我遇到的问题是 <code class="docutils literal notranslate"><span class="pre">network</span> <span class="pre">controller</span></code> 初始化失败:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Jul</span> <span class="mi">23</span> <span class="mi">20</span><span class="p">:</span><span class="mi">16</span><span class="p">:</span><span class="mi">17</span> <span class="n">worker4</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="n">dockerd</span><span class="p">[</span><span class="mi">16518</span><span class="p">]:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">start</span> <span class="n">daemon</span><span class="p">:</span> <span class="n">Error</span> <span class="n">initializing</span> <span class="n">c</span><span class="p">:</span> <span class="nb">list</span> <span class="n">bridge</span> <span class="n">addresses</span> <span class="n">failed</span><span class="p">:</span> <span class="n">PredefinedLocalScopeDefaultNetworks</span> <span class="n">List</span><span class="p">:</span> <span class="p">[</span><span class="mf">172.17.0.0</span><span class="o">/</span><span class="mi">16</span> <span class="mf">172.18.0.0</span><span class="o">/</span><span class="mi">16</span> <span class="mf">172.19.0.0</span><span class="o">/</span><span class="mi">16</span> <span class="mf">172.20.0.0</span><span class="o">/</span><span class="mi">1</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>参考 <a class="reference external" href="https://github.com/docker/for-linux/issues/123#issuecomment-346546953">Error starting daemon: Error initializing network controller: list bridge addresses failed: no available network #123</a> 创建 <code class="docutils literal notranslate"><span class="pre">docker0</span></code> 网桥:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="n">add</span> <span class="n">name</span> <span class="n">docker0</span> <span class="nb">type</span> <span class="n">bridge</span>
-<span class="n">ip</span> <span class="n">addr</span> <span class="n">add</span> <span class="n">dev</span> <span class="n">docker0</span> <span class="mf">172.17.0.1</span><span class="o">/</span><span class="mi">16</span>
-</pre></div>
-</div>
-<p>就可以正常启动 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 服务。</p>
-</div>
-</section>
 <section id="id1">
-<h2>服务器环境<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>安装Docker运行环境<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul>
-<li><p>关闭SELinux:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setenforce</span> <span class="mi">0</span>
+<li><p>参考 <a class="reference internal" href="../../docker/startup/install_docker_linux.html#install-docker-linux"><span class="std std-ref">Linux环境安装Docker</span></a> 完成Docker软件初始安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span>
 </pre></div>
 </div>
 </li>
-</ul>
-<p>并且修改 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/selinux</span></code> 设置 <code class="docutils literal notranslate"><span class="pre">SELINUX=disabled</span></code> 确保操作系统重启后依然禁用SELinux。</p>
-<ul>
-<li><p>执行以下命令确保iptables不会被绕过:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span>  <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span>
-<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">EOF</span>
-<span class="n">sysctl</span> <span class="o">--</span><span class="n">system</span>
+<li><p>将个人用户账号 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> 添加到 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 用户组方便执行docker命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo usermod -aG docker $USER
 </pre></div>
 </div>
 </li>
-<li><p>确保 <code class="docutils literal notranslate"><span class="pre">br_netfilter</span></code> 模块已经加载:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsmod</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">br_netfilter</span>
+<li><p>然后验证docker运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span>
 </pre></div>
 </div>
 </li>
 </ul>
 </section>
-<section id="id2">
-<h2>安装软件包<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<ul>
-<li><p>按照服务器环境CentOS 7安装软件包:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">yum</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
-<span class="p">[</span><span class="n">kubernetes</span><span class="p">]</span>
-<span class="n">name</span><span class="o">=</span><span class="n">Kubernetes</span>
-<span class="n">baseurl</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">el7</span><span class="o">-</span><span class="n">x86_64</span>
-<span class="n">enabled</span><span class="o">=</span><span class="mi">1</span>
-<span class="n">gpgcheck</span><span class="o">=</span><span class="mi">1</span>
-<span class="n">repo_gpgcheck</span><span class="o">=</span><span class="mi">1</span>
-<span class="n">gpgkey</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">yum</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yum</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">rpm</span><span class="o">-</span><span class="n">package</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span>
-<span class="n">EOF</span>
-
-<span class="c1"># Set SELinux in permissive mode (effectively disabling it)</span>
-<span class="n">setenforce</span> <span class="mi">0</span>
-<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/^SELINUX=enforcing$/SELINUX=permissive/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">selinux</span><span class="o">/</span><span class="n">config</span>
-
-<span class="n">yum</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span> <span class="o">--</span><span class="n">disableexcludes</span><span class="o">=</span><span class="n">kubernetes</span>
-
-<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">kubelet</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>安装会遇到GFW阻碍，所以请参考 <a class="reference internal" href="../../linux/security/vpn/openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 搭好翻墙梯子之后再执行安装。</p>
-</div>
-</section>
-<section id="id3">
-<h2>网络端口<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>请参考 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes/index.html#bootstrap-kubernetes"><span class="std std-ref">Kubernetes集群引导</span></a>  的 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes/kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a> 部分调整好物理服务器的防火墙端口。</p>
-<p>默认安装docker时候已经配置了iptables，但是CentOS 7默认只安装了firewalld但没有激活firewalld:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">firewalld</span>
-<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">firewalld</span>
-<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">firewalld</span>
-</pre></div>
-</div>
-</div>
-<ul>
-<li><p>开启防火墙端口:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">6443</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
-<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">2379</span><span class="o">-</span><span class="mi">2380</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
-<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">10250</span><span class="o">-</span><span class="mi">10252</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
-
-<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">10250</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
-<span class="n">sudo</span> <span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">zone</span><span class="o">=</span><span class="n">public</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">30000</span><span class="o">-</span><span class="mi">32767</span><span class="o">/</span><span class="n">tcp</span> <span class="o">--</span><span class="n">permanent</span>
-</pre></div>
-</div>
-</li>
-</ul>
-</section>
-<section id="cgroup">
-<h2>配置管控节点cgroup驱动<a class="headerlink" href="#cgroup" title="永久链接至标题">¶</a></h2>
-<p>在使用Docker的环境中，kubeadm可以为kubelet自动检测到cgroup driver，并在运行时设到 <code class="docutils literal notranslate"><span class="pre">/var/lib/kubelet/kubeadm-flags.env</span></code> ，所以在我们的部署环境中不需要设置 <code class="docutils literal notranslate"><span class="pre">cgroup-driver</span></code> 值。</p>
-</section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">Container runtimes</a></p></li>
-</ul>
+<section id="dockerbtrfs">
+<h2>将Docker存储迁移到Btrfs<a class="headerlink" href="#dockerbtrfs" title="永久链接至标题">¶</a></h2>
+<p>为了能够充分发挥SSD性能，并且学习和实践 <a class="reference internal" href="../../linux/storage/btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> ，参考 <a class="reference internal" href="../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 将Docker存储迁移到Btrfs中。</p>
 </section>
 </section>
 
@@ -422,10 +237,6 @@
            
           </div>
           <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="priv_cloud_infrastructure.html" class="btn btn-neutral float-right" title="私有云架构" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="priv_kvm.html" class="btn btn-neutral float-left" title="私有云KVM环境" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
 
   <hr/>
 

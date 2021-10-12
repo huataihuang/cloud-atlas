@@ -68,6 +68,11 @@ Fedora/RHEL/CentOS
 
    实际上限制很多，所以我在 KVM 实践中，将转为采用 :ref:`stratis` 作为存储文件系统
 
+NAS方案
+========
+
+:ref:`rockstor` 提供了结合 :ref:`docker_btrfs_driver` 实现容器化运行NAS的方案，使用了很多开源架构，值得分析和研究。请参考 :ref:`introduce_rockstor` 以及我的后续实践。
+
 我的观点
 ===========
 

@@ -9,4 +9,5 @@
 
    priv_cloud_infrastructure.rst
    priv_kvm.rst
-   priv_k8s_docker.rst
+   priv_docker.rst
+   priv_k8s_docker_centos.rst
