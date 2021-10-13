@@ -37,11 +37,19 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
        inet6 fe80::d9ef:58a4:a664:6d7c/64 scope link noprefixroute 
           valid_lft forever preferred_lft forever   
 
-- 由于 `ntefilter的bridge性能和安全原因 <https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0>`_ ，禁止bridge设备的netfilter，所以创建 ``/etc/sysctl.d/bridge.conf`` 以下设置::
+- `ntefilter的bridge性能和安全原因 <https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0>`_ ，禁止bridge设备的netfilter，所以创建 ``/etc/sysctl.d/bridge.conf`` 以下设置::
 
    net.bridge.bridge-nf-call-ip6tables=0
    net.bridge.bridge-nf-call-iptables=0
    net.bridge.bridge-nf-call-arptables=0
+
+生效::
+
+   sysctl -p /etc/sysctl.d/bridge.conf
+
+.. note::
+
+   ``/etc/sysctl.d/`` 目录下配置文件以 ``.conf`` 结尾都会在系统启动时执行，但是直接运行 ``sysctl -p /etc/sysctl.conf`` 现在已经不会刷新 ``/etc/sysctl.d`` 目录下配置，所以需要指定配置文件刷新
 
 - 创建 ``/etc/udev/rules.d/99-bridge.rules`` ，这个udev规则将在sysctl设置上述bridge模块时加载。注意，对于Kernel 3.18之前的版本， ``KERNEL=="br_netfilter"`` 需要修改成 ``KERNEL=="bridge"`` ::
 
@@ -179,13 +187,69 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
    bridge name    bridge id        STP enabled    interfaces
    br0        8000.94ebcd8eeb3f    no        enp0s25
 
+使用netplan
+-------------
+
+参考:
+
+- `How to create a bridge network on Linux with Netplan <https://www.techrepublic.com/article/how-to-create-a-bridge-network-on-linux-with-netplan/>`_
+- `Netplan Examples: Configuring network bridges <https://netplan.io/examples/#configuring-network-bridges>`_
+
+在 :ref:`ubuntu_linux` 服务器上，使用netplan来完成网络设置，为了统一管理，Ubuntu Server我也采用Netplan完成设置
+
+- 备份原先的配置::
+
+   sudo cp /etc/netplan/00-cloud-init.yaml /etc/netplan/00-cloud-init.yaml.bak
+
+- 然后修订配置如下
+
+.. literalinclude:: libvirt_bridged_network/00-cloud-init.yaml
+   :language: yaml
+   :linenos:
+   :caption: /etc/netplan/00-cloud-init.yaml
+
+参数 ``forward-delay`` 会设置bridge启动后延迟4秒之后再开始转发
+
+- 执行生效::
+
+   sudo netplan generate
+   sudo netplan apply
+
+- 完成后检查IP::
+
+   ip addr
+
+可以看到::
+
+   2: eno1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq master br0 state UP group default qlen 1000
+       link/ether 94:57:a5:5a:d9:c0 brd ff:ff:ff:ff:ff:ff
+   
+   9: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+       link/ether 94:57:a5:5a:d9:c0 brd ff:ff:ff:ff:ff:ff
+       inet 192.168.6.200/24 brd 192.168.6.255 scope global br0
+          valid_lft forever preferred_lft forever
+       inet6 fe80::e4b8:87ff:fedc:5146/64 scope link
+          valid_lft forever preferred_lft forever
+
+- 检查网桥::
+
+   brctl show
+
+
+显示::
+
+   bridge name     bridge id               STP enabled     interfaces
+   br0             8000.9457a55ad9c0       no              eno1
+
+使用systemd-networkd
+---------------------------
+
+参考 `systemd-networkd#Bridge interface <https://wiki.archlinux.org/index.php/Systemd-networkd#Bridge_interface>`_
+
 其他方法
----------
+----------
 
-其他方法我没有实践，列举如下:
-
-- 使用netctl: `Bridge with netctl <https://wiki.archlinux.org/index.php/Bridge_with_netctl>`_
-- 使用systemd-networkd: `systemd-networkd#Bridge interface <https://wiki.archlinux.org/index.php/Systemd-networkd#Bridge_interface>`_
+- 使用netctl: `Bridge with netctl <https://wiki.archlinux.org/index.php/Bridge_with_netctl>`_ (未实践)
 
 配置虚拟机
 =============
