@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
@@ -133,7 +134,8 @@
 <li class="toctree-l3"><a class="reference internal" href="priv_cloud_infrastructure.html">私有云架构</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">私有云KVM环境</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">运行环境</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">创建模版虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">设置交换网络</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">创建模版虚拟机</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#kvm-kubernetes-master">复制KVM虚拟机(Kubernetes Master)</a></li>
 </ul>
 </li>
@@ -247,16 +249,116 @@ sudo adduser `id -un` kvm
 </ul>
 </section>
 <section id="id2">
-<h2>创建模版虚拟机<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>设置交换网络<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>虽然在测试环境中，我们常常使用 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_nat_network.html#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> ，但是我在部署 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 和 <a class="reference internal" href="../../arm/raspberry_pi/pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> 是通过物理交换机连接的，也就是说，所有数据通讯都是通过真实网络传输，所以我们需要采用 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> :</p>
 <ul>
-<li><p>创建CentOS 7.6模版:</p>
+<li><p>通讯通过DL360服务器的 <code class="docutils literal notranslate"><span class="pre">eno1</span></code> 网口，网段是 <code class="docutils literal notranslate"><span class="pre">192.168.6.0/24</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">address</span> <span class="n">show</span> <span class="n">eno1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="p">:</span> <span class="n">eno1</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">mq</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">94</span><span class="p">:</span><span class="mi">57</span><span class="p">:</span><span class="n">a5</span><span class="p">:</span><span class="mi">5</span><span class="n">a</span><span class="p">:</span><span class="n">d9</span><span class="p">:</span><span class="n">c0</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">192.168.6.200</span><span class="o">/</span><span class="mi">24</span> <span class="n">brd</span> <span class="mf">192.168.6.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">eno1</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="mi">9657</span><span class="p">:</span><span class="n">a5ff</span><span class="p">:</span><span class="n">fe5a</span><span class="p">:</span><span class="n">d9c0</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+</pre></div>
+</div>
+<ul>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/bridge.conf</span></code> 以下设置(性能和安全原因):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">arptables</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>配置生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sysctl</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">bridge</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+<ul>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/udev/rules.d/99-bridge.rules</span></code> ，这个udev规则将在加载bridge模块式执行上述sysctl规则:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ACTION</span><span class="o">==</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="n">SUBSYSTEM</span><span class="o">==</span><span class="s2">&quot;module&quot;</span><span class="p">,</span> <span class="n">KERNEL</span><span class="o">==</span><span class="s2">&quot;bridge&quot;</span><span class="p">,</span> <span class="n">RUN</span><span class="o">+=</span><span class="s2">&quot;/sbin/sysctl -p /etc/sysctl.d/bridge.conf&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实现bridge网络有多种方法，为了和Ubuntu Server默认的 <a class="reference internal" href="../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 管理方法一致，这里采用 netplan 来实现bridge</p>
+</div>
+<ul class="simple">
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/00-cloud-init.yaml</span></code></p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span>
+<span class="linenos"> 2</span>  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos"> 3</span>  <span class="nt">renderer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">networkd</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>  <span class="nt">ethernets</span><span class="p">:</span>
+<span class="linenos"> 6</span><span class="c1">#   eno1:</span>
+<span class="linenos"> 7</span><span class="c1">#     addresses:</span>
+<span class="linenos"> 8</span><span class="c1">#     - 192.168.6.200/24</span>
+<span class="linenos"> 9</span><span class="c1">#     gateway4: 192.168.6.11</span>
+<span class="linenos">10</span><span class="c1">#     nameservers:</span>
+<span class="linenos">11</span><span class="c1">#       addresses:</span>
+<span class="linenos">12</span><span class="c1">#       - 192.168.6.11</span>
+<span class="linenos">13</span><span class="c1">#       search: []</span>
+<span class="linenos">14</span>    <span class="nt">eno1</span><span class="p">:</span>
+<span class="linenos">15</span>      <span class="nt">dhcp4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="linenos">16</span>      <span class="nt">dhcp6</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>  <span class="nt">bridges</span><span class="p">:</span>
+<span class="linenos">19</span>    <span class="nt">br0</span><span class="p">:</span>
+<span class="linenos">20</span>      <span class="nt">dhcp4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="linenos">21</span>      <span class="nt">dhcp6</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="linenos">22</span>      <span class="nt">interfaces</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">eno1</span><span class="p p-Indicator">]</span>
+<span class="linenos">23</span>      <span class="nt">addresses</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">192.168.6.200/24</span><span class="p p-Indicator">]</span>
+<span class="linenos">24</span>      <span class="nt">parameters</span><span class="p">:</span>
+<span class="linenos">25</span>        <span class="nt">stp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="linenos">26</span>        <span class="nt">forward-delay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</div>
+<p>执行生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">netplan</span> <span class="n">generate</span>
+<span class="n">sudo</span> <span class="n">netplan</span> <span class="n">apply</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>创建模版虚拟机<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，如果是普通用户执行 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span>  <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">virt</span><span class="o">-</span><span class="n">manager</span><span class="o">/</span><span class="n">boot</span> <span class="n">may</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">accessible</span> <span class="n">by</span> <span class="n">the</span> <span class="n">hypervisor</span><span class="o">.</span> <span class="n">You</span> <span class="n">will</span> <span class="n">need</span> <span class="n">to</span> <span class="n">grant</span> <span class="n">the</span> <span class="s1">&#39;libvirt-qemu&#39;</span> <span class="n">user</span> <span class="n">search</span> <span class="n">permissions</span> <span class="k">for</span> <span class="n">the</span> <span class="n">following</span> <span class="n">directories</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;/home/huatai/.cache&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>需要修复这个权限才能正常安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="mi">770</span> <span class="o">~/.</span><span class="n">cache</span>
+<span class="n">sudo</span> <span class="n">adduser</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">qemu</span> <span class="n">staff</span>
+</pre></div>
+</div>
+<p>不过还是报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>  <span class="mf">219.477216</span> <span class="p">]</span> <span class="n">dracut</span><span class="o">-</span><span class="n">initqueue</span><span class="p">[</span><span class="mi">736</span><span class="p">]:</span> <span class="ne">Warning</span><span class="p">:</span> <span class="n">dracut</span><span class="o">-</span><span class="n">initqueue</span> <span class="n">timeout</span> <span class="o">-</span> <span class="n">starting</span> <span class="n">timeout</span> <span class="n">scripts</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">libosinfo-bin</span></code> 就可以使用 <code class="docutils literal notranslate"><span class="pre">osinfo-query</span> <span class="pre">--os-variant</span></code> 查询可以支持的操作系统类型</p></li>
+<li><p>创建CentOS 7模版:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
   <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
   <span class="o">--</span><span class="n">name</span> <span class="n">centos7</span> \
   <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
   <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
   <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">centos7</span><span class="mf">.0</span> \
-  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">centos7</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">centos7</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">6</span> \
   <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
   <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">7</span><span class="o">/</span><span class="n">os</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span> \
   <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
@@ -266,10 +368,31 @@ sudo adduser `id -un` kvm
 </ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
+<p>请注意，这里 <code class="docutils literal notranslate"><span class="pre">--network</span> <span class="pre">bridge:virbr0</span></code> 是使用了 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_nat_network.html#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> ，而没有直接使用前面创建的的 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> <code class="docutils literal notranslate"><span class="pre">br0</span></code> ，这是因为发现初次安装guest内部内核还是需要访问internet，否则会出现报错 <a class="reference internal" href="../../kvm/debug/dracut-initqueue_timeout.html#dracut-initqueue-timeout"><span class="std std-ref">CentOS 7虚拟机安装”dracut-initqueue timeout”报错</span></a> 。</p>
+<p>模版操作系统通过NAT方式完成安装，再clone出来的虚拟机连接Bridge网络，则可以通过设置 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 完成后续更新和部署。</p>
+</div>
+<ul>
+<li><p>创建CentOS 8模版:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">centos8</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">centos8</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">6</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
+  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">BaseOS</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> \
+  <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
 <p>构建 Ubuntu 模版guest系统，则参考 <a class="reference internal" href="../../kvm/startup/create_vm.html#create-vm"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a></p>
 </div>
-<section id="id3">
-<h3>虚拟机串口设置<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<section id="id4">
+<h3>虚拟机串口设置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>通过上述串口控制台安装的CentOS 7虚拟机，已经默认在Guest OS的内核启动参数中添加了 <code class="docutils literal notranslate"><span class="pre">console=ttyS0,115200</span></code> ，所以可以直接在Host主机上使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">&lt;虚拟机&gt;</span></code> 访问虚拟机控制台。</p>
@@ -283,11 +406,7 @@ sudo adduser `id -un` kvm
 </section>
 <section id="ip">
 <h3>静态IP<a class="headerlink" href="#ip" title="永久链接至标题">¶</a></h3>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>模板虚拟机依然采用NAT网络 <code class="docutils literal notranslate"><span class="pre">192.168.122.x</span></code> ，不占用物理网络有限的IP地址资源。</p>
-</div>
-<p>和 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_static_ip.html#libvirt-static-ip-in-studio"><span class="std std-ref">Studio环境libvirt静态分配IP</span></a> 相同，我们配置KVM固定分配一部分IP地址给模版主机。</p>
+<p>为了方便管理模版主机，设置各个模版主机IP地址为 <code class="docutils literal notranslate"><span class="pre">192.168.122.x</span></code> ，所以需要按照 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_static_ip.html#libvirt-static-ip-in-studio"><span class="std std-ref">Studio环境libvirt静态分配IP</span></a> 将 <code class="docutils literal notranslate"><span class="pre">default</span></code> 网络的DHCP分配IP段空出一部分给固定IP地址</p>
 <ul>
 <li><p>编辑默认网络:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="n">edit</span> <span class="n">default</span>
@@ -314,14 +433,14 @@ sudo adduser `id -un` kvm
 </pre></div>
 </div>
 </li>
-<li><p>并重新将虚拟机网络连接到default网络:</p>
+<li><p>重新将虚拟机网络连接到default网络:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">addif</span> <span class="n">virbr0</span> <span class="n">vnet0</span>
 <span class="n">brctl</span> <span class="n">addif</span> <span class="n">virbr0</span> <span class="n">vnet1</span>
 <span class="o">...</span>
 </pre></div>
 </div>
 </li>
-<li><p>根据 <code class="docutils literal notranslate"><span class="pre">/var/lib/libvirt/dnsmasq/virbr0.status</span></code> 内容获取当前DHCP分配给模版虚拟机的IP地址，这样可以 ssh 进入虚拟机，并配置静态IP地址: 修订 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/network-scripts/ifcfg-eth0</span></code></p>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">centos7</span></code> 连接到虚拟机控制台，然后登录系统，修订 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/network-scripts/ifcfg-eth0</span></code> 配置，设置静态IP地址:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by dracut initrd</span>
 <span class="n">NAME</span><span class="o">=</span><span class="s2">&quot;eth0&quot;</span>
 <span class="n">HWADDR</span><span class="o">=</span><span class="s2">&quot;52:54:00:d0:84:1f&quot;</span>
@@ -333,7 +452,7 @@ sudo adduser `id -un` kvm
 <span class="c1"># 以下新加</span>
 <span class="n">IPV6INIT</span><span class="o">=</span><span class="n">no</span>
 <span class="n">BOOTPROTO</span><span class="o">=</span><span class="n">static</span>
-<span class="n">IPADDR</span><span class="o">=</span><span class="mf">192.168.122.3</span>
+<span class="n">IPADDR</span><span class="o">=</span><span class="mf">192.168.122.42</span>
 <span class="n">NETMASK</span><span class="o">=</span><span class="mf">255.255.255.0</span>
 <span class="n">GATEWAY</span><span class="o">=</span><span class="mf">192.168.122.1</span>
 <span class="n">DNS1</span><span class="o">=</span><span class="mf">192.168.122.1</span>
@@ -387,11 +506,6 @@ sudo adduser `id -un` kvm
 </div>
 </div>
 <ul>
-<li><p>参考 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 配置网桥型网络:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">待补充</span>
-</pre></div>
-</div>
-</li>
 <li><p>启动虚拟机，进一步定制:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">kubemaster</span><span class="o">-</span><span class="mi">1</span>
 </pre></div>

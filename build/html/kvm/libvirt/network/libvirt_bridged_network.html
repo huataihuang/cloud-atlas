@@ -94,7 +94,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../infrastructure/index.html">Infrastructure Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ansible/index.html">Ansible Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../index.html">KVM Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../install/index.html">KVM 环境安装</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../startup/index.html">KVM 快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../hypervisor.html">hypervisor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../kvm_architecture.html">KVM虚拟化</a></li>
@@ -283,13 +285,23 @@
 </pre></div>
 </div>
 <ul>
-<li><p>由于 <a class="reference external" href="https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0">ntefilter的bridge性能和安全原因</a> ，禁止bridge设备的netfilter，所以创建 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/bridge.conf</span></code> 以下设置:</p>
+<li><p><a class="reference external" href="https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0">ntefilter的bridge性能和安全原因</a> ，禁止bridge设备的netfilter，所以创建 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/bridge.conf</span></code> 以下设置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span><span class="o">=</span><span class="mi">0</span>
 <span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span><span class="o">=</span><span class="mi">0</span>
 <span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">arptables</span><span class="o">=</span><span class="mi">0</span>
 </pre></div>
 </div>
 </li>
+</ul>
+<p>生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sysctl</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">bridge</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/</span></code> 目录下配置文件以 <code class="docutils literal notranslate"><span class="pre">.conf</span></code> 结尾都会在系统启动时执行，但是直接运行 <code class="docutils literal notranslate"><span class="pre">sysctl</span> <span class="pre">-p</span> <span class="pre">/etc/sysctl.conf</span></code> 现在已经不会刷新 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d</span></code> 目录下配置，所以需要指定配置文件刷新</p>
+</div>
+<ul>
 <li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/udev/rules.d/99-bridge.rules</span></code> ，这个udev规则将在sysctl设置上述bridge模块时加载。注意，对于Kernel 3.18之前的版本， <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;br_netfilter&quot;</span></code> 需要修改成 <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;bridge&quot;</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ACTION</span><span class="o">==</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="n">SUBSYSTEM</span><span class="o">==</span><span class="s2">&quot;module&quot;</span><span class="p">,</span> <span class="n">KERNEL</span><span class="o">==</span><span class="s2">&quot;bridge&quot;</span><span class="p">,</span> <span class="n">RUN</span><span class="o">+=</span><span class="s2">&quot;/sbin/sysctl -p /etc/sysctl.d/bridge.conf&quot;</span>
 </pre></div>
@@ -461,12 +473,100 @@
 </pre></div>
 </div>
 </section>
+<section id="netplan">
+<h3>使用netplan<a class="headerlink" href="#netplan" title="永久链接至标题">¶</a></h3>
+<p>参考:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.techrepublic.com/article/how-to-create-a-bridge-network-on-linux-with-netplan/">How to create a bridge network on Linux with Netplan</a></p></li>
+<li><p><a class="reference external" href="https://netplan.io/examples/#configuring-network-bridges">Netplan Examples: Configuring network bridges</a></p></li>
+</ul>
+<p>在 <a class="reference internal" href="../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 服务器上，使用netplan来完成网络设置，为了统一管理，Ubuntu Server我也采用Netplan完成设置</p>
+<ul>
+<li><p>备份原先的配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netplan</span><span class="o">/</span><span class="mi">00</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">init</span><span class="o">.</span><span class="n">yaml</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netplan</span><span class="o">/</span><span class="mi">00</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">init</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">bak</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后修订配置如下</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span>
+<span class="linenos"> 2</span>  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos"> 3</span>  <span class="nt">renderer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">networkd</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>  <span class="nt">ethernets</span><span class="p">:</span>
+<span class="linenos"> 6</span><span class="c1">#   eno1:</span>
+<span class="linenos"> 7</span><span class="c1">#     addresses:</span>
+<span class="linenos"> 8</span><span class="c1">#     - 192.168.6.200/24</span>
+<span class="linenos"> 9</span><span class="c1">#     gateway4: 192.168.6.11</span>
+<span class="linenos">10</span><span class="c1">#     nameservers:</span>
+<span class="linenos">11</span><span class="c1">#       addresses:</span>
+<span class="linenos">12</span><span class="c1">#       - 192.168.6.11</span>
+<span class="linenos">13</span><span class="c1">#       search: []</span>
+<span class="linenos">14</span>    <span class="nt">eno1</span><span class="p">:</span>
+<span class="linenos">15</span>      <span class="nt">dhcp4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="linenos">16</span>      <span class="nt">dhcp6</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>  <span class="nt">bridges</span><span class="p">:</span>
+<span class="linenos">19</span>    <span class="nt">br0</span><span class="p">:</span>
+<span class="linenos">20</span>      <span class="nt">dhcp4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="linenos">21</span>      <span class="nt">dhcp6</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="linenos">22</span>      <span class="nt">interfaces</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">eno1</span><span class="p p-Indicator">]</span>
+<span class="linenos">23</span>      <span class="nt">addresses</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">192.168.6.200/24</span><span class="p p-Indicator">]</span>
+<span class="linenos">24</span>      <span class="nt">parameters</span><span class="p">:</span>
+<span class="linenos">25</span>        <span class="nt">stp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="linenos">26</span>        <span class="nt">forward-delay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</div>
+<p>参数 <code class="docutils literal notranslate"><span class="pre">forward-delay</span></code> 会设置bridge启动后延迟4秒之后再开始转发</p>
+<ul>
+<li><p>执行生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">netplan</span> <span class="n">generate</span>
+<span class="n">sudo</span> <span class="n">netplan</span> <span class="n">apply</span>
+</pre></div>
+</div>
+</li>
+<li><p>完成后检查IP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">addr</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="p">:</span> <span class="n">eno1</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">mq</span> <span class="n">master</span> <span class="n">br0</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">94</span><span class="p">:</span><span class="mi">57</span><span class="p">:</span><span class="n">a5</span><span class="p">:</span><span class="mi">5</span><span class="n">a</span><span class="p">:</span><span class="n">d9</span><span class="p">:</span><span class="n">c0</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+
+<span class="mi">9</span><span class="p">:</span> <span class="n">br0</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">noqueue</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">94</span><span class="p">:</span><span class="mi">57</span><span class="p">:</span><span class="n">a5</span><span class="p">:</span><span class="mi">5</span><span class="n">a</span><span class="p">:</span><span class="n">d9</span><span class="p">:</span><span class="n">c0</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">192.168.6.200</span><span class="o">/</span><span class="mi">24</span> <span class="n">brd</span> <span class="mf">192.168.6.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">br0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="n">e4b8</span><span class="p">:</span><span class="mi">87</span><span class="n">ff</span><span class="p">:</span><span class="n">fedc</span><span class="p">:</span><span class="mi">5146</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查网桥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">show</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bridge</span> <span class="n">name</span>     <span class="n">bridge</span> <span class="nb">id</span>               <span class="n">STP</span> <span class="n">enabled</span>     <span class="n">interfaces</span>
+<span class="n">br0</span>             <span class="mf">8000.9457</span><span class="n">a55ad9c0</span>       <span class="n">no</span>              <span class="n">eno1</span>
+</pre></div>
+</div>
+</section>
+<section id="systemd-networkd">
+<h3>使用systemd-networkd<a class="headerlink" href="#systemd-networkd" title="永久链接至标题">¶</a></h3>
+<p>参考 <a class="reference external" href="https://wiki.archlinux.org/index.php/Systemd-networkd#Bridge_interface">systemd-networkd#Bridge interface</a></p>
+</section>
 <section id="id3">
 <h3>其他方法<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
-<p>其他方法我没有实践，列举如下:</p>
 <ul class="simple">
-<li><p>使用netctl: <a class="reference external" href="https://wiki.archlinux.org/index.php/Bridge_with_netctl">Bridge with netctl</a></p></li>
-<li><p>使用systemd-networkd: <a class="reference external" href="https://wiki.archlinux.org/index.php/Systemd-networkd#Bridge_interface">systemd-networkd#Bridge interface</a></p></li>
+<li><p>使用netctl: <a class="reference external" href="https://wiki.archlinux.org/index.php/Bridge_with_netctl">Bridge with netctl</a> (未实践)</p></li>
 </ul>
 </section>
 </section>
