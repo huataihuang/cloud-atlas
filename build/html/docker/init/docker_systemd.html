@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
@@ -110,10 +111,11 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Docker systemd进程管理器</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dockersystemd">Docker容器中的systemd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">Docker容器运行systemd实践</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">其他服务运行</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ssh">安装ssh服务和制作镜像</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dockerfilesystemd-sshd">Dockerfile构建systemd+sshd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#podman">podman</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="docker_s6.html">Docker s6进程管理器</a></li>
@@ -280,9 +282,242 @@
 <li><p>指定 <code class="docutils literal notranslate"><span class="pre">sysinit.target</span></code> 作为默认unit来启动，而不是启动 <code class="docutils literal notranslate"><span class="pre">multi-user.target</span></code> 或其他运行级别，因为你不会在容器内启动图形</p></li>
 <li><p>如果要在容器内运行基于 <code class="docutils literal notranslate"><span class="pre">fuse</span></code> 到软件，需要bind mount <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code></p></li>
 </ul>
+<section id="fedora-34-systemd-in-docker-container">
+<span id="fedora-systemd-in-docker"></span><h3>Fedora 34 systemd in Docker Container<a class="headerlink" href="#fedora-34-systemd-in-docker-container" title="永久链接至标题">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在2021年10月时候，我发现Fedora 34官方已经去除了镜像中的systemd软件包( 只安装了 <code class="docutils literal notranslate"><span class="pre">systemd-libs</span></code> )，如果Dockerfile中没有加上 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">-y</span> <span class="pre">install</span> <span class="pre">systemd</span></code> 则运行容器出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="p">:</span> <span class="n">Error</span> <span class="n">response</span> <span class="kn">from</span> <span class="nn">daemon</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">create</span> <span class="n">shim</span><span class="p">:</span> <span class="n">OCI</span> <span class="n">runtime</span> <span class="n">create</span> <span class="n">failed</span><span class="p">:</span> <span class="n">container_linux</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">380</span><span class="p">:</span> <span class="n">starting</span> <span class="n">container</span> <span class="n">process</span> <span class="n">caused</span><span class="p">:</span> <span class="n">exec</span><span class="p">:</span> <span class="s2">&quot;/usr/sbin/init&quot;</span><span class="p">:</span> <span class="n">stat</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span><span class="p">:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span><span class="p">:</span> <span class="n">unknown</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>对比KVM虚拟机中systemd，可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ls -lh /sbin/init
+lrwxrwxrwx 1 root root 20 Sep  7 18:37 /sbin/init -&gt; /lib/systemd/systemd
+
+$ ls -lh /usr/sbin/init
+lrwxrwxrwx 1 root root 20 Sep  7 18:37 /usr/sbin/init -&gt; /lib/systemd/systemd
+</pre></div>
+</div>
+<p>所以缺少 <code class="docutils literal notranslate"><span class="pre">/usr/sbin/init</span></code> 其实就是 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 软件包没有安装</p>
+<p>先使用常规 <code class="docutils literal notranslate"><span class="pre">/usr/bin/bash</span></code> 运行容器命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">ti</span> <span class="n">fedora</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>然后登陆到系统中检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">attach</span> <span class="n">fedora</span>
+</pre></div>
+</div>
+</div>
+<p>Fedora 34官方镜像没有包含 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> ，所以需要Dockerfile增加安装步骤</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">fedora-systemd.dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">FROM</span> <span class="s">fedora:34</span>
+<span class="linenos"> 2</span><span class="k">MAINTAINER</span><span class="s"> huatai</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="k">ENV</span> container docker
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="k">RUN</span> dnf -y update <span class="o">&amp;&amp;</span> dnf -y install systemd <span class="o">&amp;&amp;</span> dnf clean all
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">VOLUME</span> <span class="p">[</span> <span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;/run&quot;</span> <span class="p">]</span>
+<span class="linenos"> 9</span><span class="c">#CMD [&quot;/usr/bin/init&quot;]</span>
+<span class="linenos">10</span><span class="k">CMD</span> <span class="p">[</span><span class="s2">&quot;/sbin/init&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span> <span class="o">.</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">it</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span>
+</pre></div>
+</div>
+<p>这里Dockerfile的最后倒数第二行配置的volume非常重要，如果没有这行配置，虽然 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">build</span></code> 生成了image，但是使用这个image启动容器 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 会失败，用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">logs</span> <span class="pre">fedora34</span></code> 命令检查会看到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Failed to mount tmpfs at /run: Operation not permitted
+[!!!!!!] Failed to mount API filesystems.
+Exiting PID 1...
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ENV</span> <span class="pre">container</span> <span class="pre">docker</span></code> 提供了容器内环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> ，容器内运行的 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。</p>
+<p>但是，我在2020年使用上述方法能够完成运行(当时官方fedora34镜像还内置安装了systemd，所以不需要单独安装)，但是到2021年10月尝试上述方法则失败，用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">logs</span> <span class="pre">fedora34</span></code> 看到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Failed to mount cgroup at /sys/fs/cgroup/systemd: Operation not permitted
+[!!!!!!] Failed to mount API filesystems.
+Exiting PID 1...
+</pre></div>
+</div>
+<p>既然是权限不足，那么运行时添加 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 是否可以解决？</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">privileged</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">it</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span>
+</pre></div>
+</div>
+<p>这次的报错日志显示没有 cgroup</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>systemd v248.7-1.fc34 running in system mode. (+PAM +AUDIT +SELINUX -APPARMOR +IMA +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified)
+Detected virtualization docker.
+Detected architecture x86-64.
+
+Welcome to Fedora 34 (Container Image)!
+
+Cannot determine cgroup we are running in: No medium found
+Failed to allocate manager object: No medium found
+[!!!!!!] Failed to allocate manager object.
+Exiting PID 1...
+</pre></div>
+</div>
+<p>这表明 <code class="docutils literal notranslate"><span class="pre">cgoup</span></code> 没有正确映射进入容器。看来 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 中的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">VOLUME</span> <span class="p">[</span> <span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;/run&quot;</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>现在(2021年10月)已经不能解决cgroup <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> 到容器内部了。</p>
+<p>通过以下 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令参数明确 <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> 则成功成功运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1222</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">fedora34</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span> \
+     <span class="o">--</span><span class="n">entrypoint</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">systemd</span> \
+     <span class="o">--</span><span class="n">env</span> <span class="n">container</span><span class="o">=</span><span class="n">docker</span> \
+     <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span> \
+     <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span> \
+     <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">tmp</span> \
+     <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">run</span> \
+     <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">destination</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span> \
+     <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span> <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span><span class="o">=</span><span class="n">info</span> <span class="o">--</span><span class="n">unit</span><span class="o">=</span><span class="n">sysinit</span><span class="o">.</span><span class="n">target</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>也就是说，现在必须在 Dockerfile 中明确进行 <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> cgroup 才能正确运行systemd，否则就需要在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令中传递 <code class="docutils literal notranslate"><span class="pre">--mount</span> <span class="pre">type=bind</span></code> 参数(这样的命令太复杂)。</p>
+<p>为了能够更轻松运行systemd，我还是需要探索如何把 <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> 明确在Dockerfile中配置的方法。见下文 <code class="docutils literal notranslate"><span class="pre">buildkit的Dockerfile</span></code></p>
+</div>
+<section id="buildkitdockerfile">
+<h4>buildkit的Dockerfile<a class="headerlink" href="#buildkitdockerfile" title="永久链接至标题">¶</a></h4>
+<p>上述通过显式传递 <code class="docutils literal notranslate"><span class="pre">--mount</span> <span class="pre">type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup</span></code> 参数运行 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令虽然能够解决systemd运行问题，但是命令参数过于复杂，使用不便。所以，需要转换成 Dockerfile 配置才能方便运行。不过，对于挂载不同类型的卷，需要使用 <a class="reference internal" href="../moby/buildkit/index.html#buildkit"><span class="std std-ref">BuildKit</span></a> 来实现，参考 <a class="reference external" href="https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md">Dockerfile frontend syntaxes</a> 改造Dockerfile</p>
+<ul>
+<li><p>首先，对于Docker v18.09或更高版本，在环境变量设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DOCKER_BUILDKIT</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>来激活客户端的BuildKit。建议直接在 <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> 中添加这个配置项。</p>
+<ul class="simple">
+<li><p>然后修订Dockerfile:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">fedora-systemd_buildkit.dockerfile</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># syntax = docker/dockerfile:1.3</span>
+<span class="linenos"> 2</span><span class="k">FROM</span> <span class="s">fedora:34</span>
+<span class="linenos"> 3</span><span class="k">MAINTAINER</span><span class="s"> huatai</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="k">ENV</span> container docker
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c">#RUN dnf -y update &amp;&amp; dnf -y install systemd &amp;&amp; dnf clean all</span>
+<span class="linenos"> 8</span><span class="c">#VOLUME [ &quot;/sys/fs/cgroup&quot;, &quot;/tmp&quot;, &quot;/run&quot; ]</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c">#CMD [&quot;/sbin/init&quot;]</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/cgroup <span class="se">\</span>
+<span class="linenos">13</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/fuse <span class="se">\</span>
+<span class="linenos">14</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/tmp <span class="se">\</span>
+<span class="linenos">15</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run <span class="se">\</span>
+<span class="linenos">16</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run/lock <span class="se">\</span>
+<span class="linenos">17</span>    dnf -y update <span class="o">&amp;&amp;</span> dnf -y install systemd <span class="o">&amp;&amp;</span> dnf clean all
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="k">EXPOSE</span><span class="s"> 22 80 443</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="k">ENTRYPOINT</span> <span class="p">[</span> <span class="s2">&quot;/usr/lib/systemd/systemd&quot;</span> <span class="p">]</span>
+<span class="linenos">22</span><span class="k">CMD</span> <span class="p">[</span> <span class="s2">&quot;log-level=info&quot;</span><span class="p">,</span> <span class="s2">&quot;unit=sysinit.target&quot;</span> <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>执行构建:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>注意，我最初配置行类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RUN</span> <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span> \
+    <span class="o">--</span><span class="n">mount</span> <span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span> \
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>但是会报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="n">ERROR</span> <span class="p">[</span><span class="n">stage</span><span class="o">-</span><span class="mi">0</span> <span class="mi">2</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="n">RUN</span> <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">ro</span>     <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">ro</span>     <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span>  <span class="mf">0.0</span><span class="n">s</span>
+<span class="o">------</span>
+<span class="o">&gt;</span> <span class="p">[</span><span class="n">stage</span><span class="o">-</span><span class="mi">0</span> <span class="mi">2</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="n">RUN</span> <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">ro</span>     <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">ro</span>     <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">tmp</span>     <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">run</span>     <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">tmpfs</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>     <span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">systemd</span> <span class="o">&amp;&amp;</span> <span class="n">dnf</span> <span class="n">clean</span> <span class="nb">all</span><span class="p">:</span>
+<span class="o">------</span>
+<span class="n">failed</span> <span class="n">to</span> <span class="n">compute</span> <span class="n">cache</span> <span class="n">key</span><span class="p">:</span> <span class="s2">&quot;/sys/fs/cgroup&quot;</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span> <span class="ow">not</span> <span class="n">found</span>
+</pre></div>
+</div>
+<p>上述报错通常是 <code class="docutils literal notranslate"><span class="pre">COPY</span></code> 命令报错，一般是没有把需要复制的文件准备好。在网上很多类似的报错，都是因为没有在当前目录下准备好文件导致的。看来这个挂载，如果使用 <code class="docutils literal notranslate"><span class="pre">source</span></code> 是从当前目录下开始的bind。修订:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RUN</span> <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span> \
+ <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">source</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span> \
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RUN</span> <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span> \
+ <span class="o">--</span><span class="n">mount</span><span class="o">=</span><span class="nb">type</span><span class="o">=</span><span class="n">bind</span><span class="p">,</span><span class="n">target</span><span class="o">=/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">fuse</span> \
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>就不再报错</p>
+<ul>
+<li><p>再次执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span> <span class="o">-</span><span class="n">f</span> <span class="n">Dockerfile</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>成功</p>
+<ul>
+<li><p>运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">it</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是容器没有运行起来</p>
+<ul>
+<li><p>排查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">logs</span> <span class="mi">8</span><span class="n">a79a424e8e7</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Failed to mount tmpfs at /run: Operation not permitted
+[!!!!!!] Failed to mount API filesystems.
+Exiting PID 1...
+</pre></div>
+</div>
+<ul>
+<li><p>加上 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 参数可以运行 (参考 <a class="reference external" href="https://stackoverflow.com/questions/36617368/docker-centos-7-with-systemctl-failed-to-mount-tmpfs-cgroup">Docker (CentOS 7 with SYSTEMCTL) : Failed to mount tmpfs &amp; cgroup</a> )</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">privileged</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">it</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这说明 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 是关键，挂载 cgroup 和 tmp 卷需要这个权限。</p>
+<p>然后就可以看到容器运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span>
+</pre></div>
+</div>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                    <span class="n">COMMAND</span>                  <span class="n">CREATED</span>         <span class="n">STATUS</span>        <span class="n">PORTS</span>                     <span class="n">NAMES</span>
+<span class="mi">5</span><span class="n">ba415c8fcbe</span>   <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span>   <span class="s2">&quot;/usr/lib/systemd/sy…&quot;</span>   <span class="mi">2</span> <span class="n">seconds</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">1</span> <span class="n">second</span>   <span class="mi">22</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">80</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="mi">443</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 启动后，登陆需要密码账号，不再是 <code class="docutils literal notranslate"><span class="pre">/bin/bash</span></code> ，所以还需要增加账号添加步骤。详细配置见 <a class="reference internal" href="../../apple/macos/docker_studio.html#docker-studio"><span class="std std-ref">Docker运行Studio容器</span></a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> 挂载成 <code class="docutils literal notranslate"><span class="pre">ro</span></code> 只读就可以，只需要将 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup/systemd</span></code> 挂载成读写就能正确运行。详见 <a class="reference external" href="https://developers.redhat.com/blog/2016/09/13/running-systemd-in-a-non-privileged-container#">Running systemd in a non-privileged container</a></p>
+</div>
+</section>
+</section>
 </section>
 <section id="id2">
 <h2>Docker容器运行systemd实践<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>以下部分是去年(2020)的探索，当时的解决方法就是通过 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 时明确传递 <code class="docutils literal notranslate"><span class="pre">--mount</span> <span class="pre">type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup</span></code> 才正确运行起 systemd 。不过，当时并没有探索 Buildkit ，现在(2021)补全了上面的Dockerfile方法。</p>
+</div>
 <section id="cap-sys-admin-cgroupfs">
 <h3>CAP_SYS_ADMIN 和 cgroupfs<a class="headerlink" href="#cap-sys-admin-cgroupfs" title="永久链接至标题">¶</a></h3>
 <p>我们在 <a class="reference internal" href="../admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中介绍了如何 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">build</span></code> 一个CentOS或Ubuntu系统，当时我的实践是在容器中运行 <code class="docutils literal notranslate"><span class="pre">sshd</span></code> ，现在我们则构建一个运行systemd的容器。</p>
@@ -377,6 +612,18 @@
 </li>
 </ul>
 <p>以上方法就是在当前(2020年)在容器内运行 systemd 的实践方法。</p>
+</section>
+<section id="systemd">
+<h3>systemd运行总结<a class="headerlink" href="#systemd" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>Docker需要传递环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> 给容器内部才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 知道自己运行在容器中</p></li>
+<li><p>必须明确挂载 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> (bind) 和 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> (tmpfs) 才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 运行</p></li>
+<li><p>如果是 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 明确的挂载参数方式，则不需要 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 运行参数；但是如果是 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 配置 <code class="docutils literal notranslate"><span class="pre">bind</span></code> 和 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 挂载，则需要在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 时传递 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 运行参数</p></li>
+</ul>
+</section>
+</section>
+<section id="id3">
+<h2>其他服务运行<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>如果需要在容器内运行 <code class="docutils literal notranslate"><span class="pre">ntpd</span></code> 服务，则需要添加 <code class="docutils literal notranslate"><span class="pre">--cap-add=SYS_TIME</span></code> 。</p>
 <ul>
 <li><p>最终完成后，在容器内部，你可以通过 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">systemd</span></code> 看到如下进程:</p>
@@ -417,7 +664,6 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </div>
 </li>
 </ul>
-</section>
 </section>
 <section id="ssh">
 <h2>安装ssh服务和制作镜像<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h2>
@@ -546,57 +792,77 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </div>
 </section>
 <section id="buildkit">
-<h3>buildkit构建(尚未实践)<a class="headerlink" href="#buildkit" title="永久链接至标题">¶</a></h3>
+<h3>buildkit构建<a class="headerlink" href="#buildkit" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>如果你安装使用 <a class="reference internal" href="../moby/buildkit/index.html#buildkit"><span class="std std-ref">BuildKit</span></a> ，则可以使用以下 Dockerfile</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Build centos 8 image with ssh:</span>
-<span class="linenos"> 2</span><span class="c1"># ------------------------------</span>
-<span class="linenos"> 3</span><span class="c1"># docker build -f centos8-systemd-sshd -t local:centos8-systemd-sshd .</span>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># Build centos 8 image with ssh:</span>
+<span class="linenos"> 2</span><span class="c"># ------------------------------</span>
+<span class="linenos"> 3</span><span class="c"># docker build -f centos8-systemd-sshd -t local:centos8-systemd-sshd .</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="c1"># create container with systemd</span>
-<span class="linenos"> 6</span><span class="c1"># -------------------------------</span>
-<span class="linenos"> 7</span><span class="c1"># docker run -itd -p 1122:22 --hostname myserver --name myserver \</span>
-<span class="linenos"> 8</span><span class="c1">#   --entrypoint=/usr/lib/systemd/systemd \</span>
-<span class="linenos"> 9</span><span class="c1">#   --env container=docker \</span>
-<span class="linenos">10</span><span class="c1">#   --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \</span>
-<span class="linenos">11</span><span class="c1">#   --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \</span>
-<span class="linenos">12</span><span class="c1">#   --mount type=tmpfs,destination=/tmp \</span>
-<span class="linenos">13</span><span class="c1">#   --mount type=tmpfs,destination=/run \</span>
-<span class="linenos">14</span><span class="c1">#   --mount type=tmpfs,destination=/run/lock \</span>
-<span class="linenos">15</span><span class="c1">#     local:centos8-systemd-sshd --log-level=info --unit=sysinit.target</span>
-<span class="linenos">16</span>
-<span class="linenos">17</span>FROM docker.io/centos:8
-<span class="linenos">18</span>MAINTAINER vincent huatai &lt;vincent@huatai.me&gt;
-<span class="linenos">19</span>
-<span class="linenos">20</span>ENV <span class="nv">continer</span><span class="o">=</span>docker
-<span class="linenos">21</span>
-<span class="linenos">22</span>RUN dnf clean all
-<span class="linenos">23</span>RUN dnf -y update
-<span class="linenos">24</span>
-<span class="linenos">25</span>RUN dnf -y install which sudo openssh-clients openssh-server
-<span class="linenos">26</span>
-<span class="linenos">27</span>RUN systemctl <span class="nb">enable</span> sshd
+<span class="linenos"> 5</span><span class="c"># create container:</span>
+<span class="linenos"> 6</span><span class="c"># -----------------</span>
+<span class="linenos"> 7</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-systemd-sshd</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="c"># create container with volume:</span>
+<span class="linenos">10</span><span class="c"># -----------------------------</span>
+<span class="linenos">11</span><span class="c"># docker volume create data</span>
+<span class="linenos">12</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-systemd-sshd</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c"># create container with volume and static ip:</span>
+<span class="linenos">15</span><span class="c"># -------------------------------------------</span>
+<span class="linenos">16</span><span class="c"># docker volume create data</span>
+<span class="linenos">17</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="linenos">18</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="linenos">19</span><span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-systemd-sshd</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="linenos">22</span><span class="c"># -----------------------------------------------------------------------------</span>
+<span class="linenos">23</span><span class="c"># docker volume create data</span>
+<span class="linenos">24</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="linenos">25</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="linenos">26</span><span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="linenos">27</span><span class="c">#   -p 22 -p 8080:80 local:centos8-systemd-sshd</span>
 <span class="linenos">28</span>
-<span class="linenos">29</span><span class="c1"># add account &quot;admin&quot; and give sudo privilege</span>
-<span class="linenos">30</span>RUN groupadd -g <span class="m">505</span> admin
-<span class="linenos">31</span>RUN useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
-<span class="linenos">32</span>RUN usermod -aG wheel admin
-<span class="linenos">33</span>RUN <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
-<span class="linenos">34</span>
-<span class="linenos">35</span><span class="c1"># Add ssh public key for login</span>
-<span class="linenos">36</span>RUN mkdir -p /home/admin/.ssh
-<span class="linenos">37</span>COPY authorized_keys /home/admin/.ssh/authorized_keys
-<span class="linenos">38</span>RUN chown -R admin:admin /home/admin/.ssh
-<span class="linenos">39</span>RUN chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
-<span class="linenos">40</span>RUN chmod <span class="m">700</span> /home/admin/.ssh
-<span class="linenos">41</span><span class="c1"># default unprivileged users are not permitted to log in, so rm /var/run/nologin to let users log in</span>
-<span class="linenos">42</span>RUN mv /var/run/nologin /var/run/nologin.bak
-<span class="linenos">43</span>
-<span class="linenos">44</span><span class="c1"># run service when container started - sshd</span>
-<span class="linenos">45</span>EXPOSE <span class="m">22</span>:1122
+<span class="linenos">29</span><span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
+<span class="linenos">30</span><span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="k">ENV</span> <span class="nv">continer</span><span class="o">=</span>docker
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="c"># if use moby / buildkit, you can use &quot;RUN --mount=type=...&quot; </span>
+<span class="linenos">35</span><span class="c"># Dockerfile frontend syntaxes: https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md</span>
+<span class="linenos">36</span><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,source<span class="o">=</span>/sys/fs/cgroup,target<span class="o">=</span>/sys/fs/cgroup
+<span class="linenos">37</span><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,source<span class="o">=</span>/sys/fs/fuse,target<span class="o">=</span>/sys/fs/fuse
+<span class="linenos">38</span><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,destination<span class="o">=</span>/tmp
+<span class="linenos">39</span><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,destination<span class="o">=</span>/run
+<span class="linenos">40</span><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,destination<span class="o">=</span>/run/lock
+<span class="linenos">41</span>
+<span class="linenos">42</span><span class="k">RUN</span> dnf clean all
+<span class="linenos">43</span><span class="k">RUN</span> dnf -y update
+<span class="linenos">44</span>
+<span class="linenos">45</span><span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server
 <span class="linenos">46</span>
-<span class="linenos">47</span>ENTRYPOINT /usr/lib/systemd/systemd
+<span class="linenos">47</span><span class="k">RUN</span> systemctl <span class="nb">enable</span> sshd
+<span class="linenos">48</span>
+<span class="linenos">49</span><span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="linenos">50</span><span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="linenos">51</span><span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="linenos">52</span><span class="k">RUN</span> usermod -aG wheel admin
+<span class="linenos">53</span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+<span class="linenos">54</span>
+<span class="linenos">55</span><span class="c"># Add ssh public key for login</span>
+<span class="linenos">56</span><span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="linenos">57</span><span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="linenos">58</span><span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="linenos">59</span><span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="linenos">60</span><span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+<span class="linenos">61</span><span class="c"># default unprivileged users are not permitted to log in, so rm /var/run/nologin to let users log in</span>
+<span class="linenos">62</span><span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
+<span class="linenos">63</span>
+<span class="linenos">64</span><span class="c"># run service when container started - sshd</span>
+<span class="linenos">65</span><span class="k">EXPOSE</span><span class="s"> 22:1122</span>
+<span class="linenos">66</span>
+<span class="linenos">67</span><span class="k">ENTRYPOINT</span> /usr/lib/systemd/systemd
 </pre></div>
 </div>
 <p>执行以下命令构建镜像:</p>
@@ -606,20 +872,22 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
     <span class="o">--</span><span class="n">local</span> <span class="n">dockerfile</span><span class="o">=.</span>
 </pre></div>
 </div>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">bulidkit</span></code> 提供了不同的卷挂载命令，在前文Fedora镜像制作中，使用并简单做了介绍。</p>
 </section>
 </section>
 <section id="podman">
 <h2>podman<a class="headerlink" href="#podman" title="永久链接至标题">¶</a></h2>
 <p>Red Hat公司开发了另外一个符合OCI规范的容器和pods管理工具 podman ( <a class="reference external" href="https://github.com/containers/podman">GitHub podman</a> )。这个工具也直接支持在容器中运行systemd ( <a class="reference external" href="https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/">How to run systemd in a container</a> )</p>
 </section>
-<section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux">Running systemd inside a docker container (arch linux)</a> - 当前2020年，这篇解决方案最准确</p></li>
+<li><p><a class="reference external" href="https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux">Running systemd inside a docker container (arch linux)</a> - 当前2020年，这篇解决方案最准确，并且2021年更新还介绍 <a class="reference external" href="https://developers.redhat.com/blog/author/rhatdan/">David Walsh &#64; REDHAT blog</a> 提供了很多有用的信息，特别是挂载 cgroup 的方法</p></li>
 <li><p><a class="reference external" href="https://medium.com/swlh/docker-and-systemd-381dfd7e4628">Docker and systemd</a></p></li>
 <li><p><a class="reference external" href="https://systemd.io/CONTAINER_INTERFACE/">systemd - The Container Interface</a></p></li>
 <li><p><a class="reference external" href="https://stackoverflow.com/questions/46800594/start-service-using-systemctl-inside-docker-conatiner">Start service using systemctl inside docker conatiner</a></p></li>
 <li><p><a class="reference external" href="https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/">How to run systemd in a container</a></p></li>
+<li><p><a class="reference external" href="https://developers.redhat.com/blog/2014/05/05/running-systemd-within-docker-container">Running systemd within a Docker Container</a></p></li>
 </ul>
 </section>
 </section>

@@ -46,6 +46,14 @@ clone虚拟机
 
    暂时对 ``virt-sysprep`` 了解不透彻，后续在 :ref:`kvm` 补充详细用法。实际上这个工具可以帮助我们clone步骤自动化，可以省却这里对手工设置步骤。 - `How to reset a KVM clone virtual Machines with virt-sysprep on Linux <https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/>`_
 
+保留了账号 huatai/root 并且指定IP地址，避免重头开始::
+
+   virt-sysprep -d z-pi-worker3 --hostname z-pi-worker3 \
+       --run 'sed -i "s/192.168.122.42/192.168.122.251/" /etc/sysconfig/network-scripts/ifcfg-eth0' \
+       --enable user-account --keep-user-accounts huatai --keep-user-accounts root
+
+不过，实践发现网卡IP修改并不生效，还是需要手工订正 ``/etc/sysconfig/network-scripts/ifcfg-eth0`` ，需要订正MAC地址以及UUID。网卡的UUID我不确定，按照 `How to find out the uuid for eth0? <https://community.hpe.com/t5/Networking/How-to-find-out-the-uuid-for-eth0/td-p/5789983#.YWf9ttlBxqs>`_ 似乎是 ``uuidgen eth0`` 生成，每次都不相同。
+
 启动虚拟机副本
 =====================
 

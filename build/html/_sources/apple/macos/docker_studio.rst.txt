@@ -30,6 +30,10 @@ Fedora项目提供的Dockerfile可以方便我们快速部署不同的运行环�
 初始化镜像
 ==============
 
+.. note::
+
+   详细参考 :ref:`fedora_systemd_in_docker`
+
 - 先部署一个最基础的镜像fedora，验证运行，只包含最小化运行环境：
 
 .. literalinclude:: docker_studio/fedora/Dockerfile
@@ -38,31 +42,14 @@ Fedora项目提供的Dockerfile可以方便我们快速部署不同的运行环�
    :linenos:
    :caption:
 
-解析:
-
-  - ``ENV container docker`` 提供了容器内环境变量 ``container=docker`` ，容器内运行的 ``systemd`` 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。
-
 - 构建镜像::
 
-   docker build -t fedora .
-
-.. note::
-
-   上述Dockerfile采用了 ``systemd`` 作为进程管理器，为后续通过容器运行ssh服务提供基础。这个环境是用来作为统一开发环境，所以并没有采用精简的容器运行模式。
-
-   后续作为持续集成，将代码推送到运行容器中，将采用完全原生精简的Dockerfile
-
-.. warning::
-
-   这里Dockerfile的最后倒数第二行配置的volume非常重要，如果没有这行配置，虽然 ``docker build`` 生成了image，但是使用这个image启动容器 ``docker run`` 会失败，用 ``docker logs`` 命令检查会看到报错::
-
-      Failed to mount tmpfs at /run: Operation not permitted
-      [!!!!!!] Failed to mount API filesystems.
-      Exiting PID 1...
+   export DOCKER_BUILDKIT=1
+   docker build -t local:fedora34-systemd .
 
 - 运行容器::
 
-   docker run --name fedora --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro fedora /usr/sbin/init
+   docker run --privileged=true --name fedora34-systemd -d -it local:fedora34-systemd
 
 .. note::
 
@@ -77,7 +64,6 @@ ssh服务容器(ssh)
 
 .. literalinclude:: docker_studio/ssh/Dockerfile
    :language: dockerfile
-   :emphasize-lines: 4
    :linenos:
    :caption:
 
@@ -87,7 +73,7 @@ ssh服务容器(ssh)
 
 - 构建带有ssh服务的镜像::
 
-   docker build -t fedora-ssh .
+   docker build -t local:fedora34-systemd-ssh .
 
 访问虚拟机ssh
 -----------------
@@ -102,7 +88,12 @@ ssh服务容器(ssh)
 
 - 我们修订以下运行容器命令，增加 ``-p 222:22`` 把端口从回环地址映射到容器上::
 
-   docker run --name fedora-ssh -p 222:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro fedora-ssh /usr/sbin/init
+   docker run --privileged=true --hostname fedora34 --name fedora34 \
+       -p 122:22 -p 180:80 -p 1443:443 -dti local:fedora34-systemd-ssh
+
+.. note::
+
+   在 Dockerfile 中 EXPOSE 的端口只能是完全相同的输出，只有 ``docker run`` 命令参数才能映射成不同端口
 
 完成启动后检查::
 
@@ -110,14 +101,30 @@ ssh服务容器(ssh)
 
 可以看到::
 
-   CONTAINER ID   IMAGE        COMMAND            CREATED         STATUS         PORTS                                 NAMES
-   b8b84a8fd4d9   fedora-ssh   "/usr/sbin/init"   4 minutes ago   Up 4 minutes   0.0.0.0:222->22/tcp, :::222->22/tcp   fedora-ssh
+   CONTAINER ID   IMAGE                        COMMAND                  CREATED         STATUS        PORTS                                                                                                               NAMES
+   57c7cde18f5c   local:fedora34-systemd-ssh   "/usr/lib/systemd/sy…"   2 seconds ago   Up 1 second   0.0.0.0:122->22/tcp, :::122->22/tcp, 0.0.0.0:180->80/tcp, :::180->80/tcp, 0.0.0.0:1443->443/tcp, :::1443->443/tcp   fedora34
 
-- 新创建容器就是能通过 ``222`` 端口访问到容器::
+- 新创建容器就是能通过 ``122`` 端口访问到容器::
 
-   ssh admin@127.0.0.1 -p 222
+   ssh admin@127.0.0.1 -p 122
 
 则通过密钥认证可以登陆容器系统
+
+登陆以后，可以检查验证 ``systemd`` 运行情况::
+
+   $ ps aux | grep systemd
+   root           1  0.0  0.0  20396 12044 ?        Ss   17:19   0:00 /usr/lib/systemd/systemd log-level=info unit=sysinit.target
+   root          23  0.0  0.0  34224 14072 ?        Ss   17:19   0:00 /usr/lib/systemd/systemd-journald
+   systemd+      33  0.0  0.0  29468 17128 ?        Ss   17:19   0:00 /usr/lib/systemd/systemd-resolved
+   root          39  0.0  0.0  17956  8896 ?        Ss   17:19   0:00 /usr/lib/systemd/systemd-homed
+   root          40  0.0  0.0  17792  8944 ?        Ss   17:19   0:00 /usr/lib/systemd/systemd-logind
+   root          68  0.5  0.0  17540  7724 ?        Ss   17:24   0:00 /usr/lib/systemd/systemd-userdbd
+   root          69  0.0  0.0  18004  8552 ?        S    17:24   0:00 systemd-userwork
+   root          70  0.0  0.0  18004  8580 ?        S    17:24   0:00 systemd-userwork
+   root          71  0.0  0.0  18004  8528 ?        S    17:24   0:00 systemd-userwork
+   admin         73  0.5  0.0  19548 11012 ?        Ss   17:24   0:00 /usr/lib/systemd/systemd --user
+   root          86  0.6  0.0  17556  7588 ?        Ss   17:24   0:00 /usr/lib/systemd/systemd-hostnamed
+   admin        100  0.0  0.0  10424   852 pts/1    S+   17:24   0:00 grep --color=auto systemd
 
 编译开发的软件安装(dev)
 =========================

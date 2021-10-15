@@ -10,6 +10,8 @@ HPE服务器
    hpe_dl360_gen9.rst
    hpe_dl160_gen9.rst
    dl360+pi_one_machine.rst
+   dl360_bios.rst
+   dl360_bios_numa.rst
    hp_ilo/index
    
 .. only::  subproject and html

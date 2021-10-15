@@ -87,7 +87,7 @@ ARM环境Ubuntu虚拟机
 
 安装过程请选择安装SSH Server，其他软件包不需要安装，等服务器运行起来之后，可以按需安装。
 
-创建CentOS 8虚拟机
+创建CentOS虚拟机
 ======================
 
 - CentOS 8虚拟机安装::
@@ -106,6 +106,59 @@ ARM环境Ubuntu虚拟机
 
 .. figure:: ../../_static/kvm/startup/centos8_installation_source.png
 
+- CentOS 8虚拟机在线安装::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name centos8 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=centos8 \
+     --disk path=/var/lib/libvirt/images/centos8.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --graphics none \
+     --location=http://mirrors.163.com/centos/8/BaseOS/x86_64/os/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+- CentOS 7虚拟机在线安装::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name centos7 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=centos7.0 \
+     --disk path=/var/lib/libvirt/images/centos7.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --graphics none \
+     --location=http://mirrors.163.com/centos/7/os/x86_64/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+创建Fedora虚拟机
+===================
+
+- Fedora 34 Server虚拟机安装::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name fedora34 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=fedora31 \
+     --disk path=/var/lib/libvirt/images/centos34.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --graphics none \
+     --location=http://mirrors.163.com/fedora/releases/34/Server/x86_64/os/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+- Fedora 34 Workstation虚拟机安装(没有在线方式，只能iso安装)::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name fedora34w \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-variant=fedora31 \
+     --disk path=/var/lib/libvirt/images/fedora34w.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --graphics spice \
+     --cdrom=/var/lib/libvirt/images/Fedora-Workstation-Live-x86_64-34-1.2.iso
 
 创建SUSE虚拟机
 ===================

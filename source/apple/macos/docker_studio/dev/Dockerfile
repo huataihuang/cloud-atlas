@@ -3,7 +3,12 @@ MAINTAINER vincent huatai <vincent@huatai.me>
 
 ENV container docker
 
-RUN dnf -y update && dnf clean all
+RUN --mount=type=bind,target=/sys/fs/cgroup \
+    --mount=type=bind,target=/sys/fs/fuse \
+    --mount=type=tmpfs,target=/tmp \
+    --mount=type=tmpfs,target=/run \
+    --mount=type=tmpfs,target=/run/lock \
+    dnf -y update && dnf -y install systemd && dnf clean all
 
 RUN dnf -y install openssh-server which procps-ng nmap-ncat mlocate net-tools file \
            iputils tmux bzip2 sysstat unzip nfs-utils parted lsof bind-utils crontabs
@@ -36,5 +41,7 @@ USER admin
 RUN mkdir /home/admin/go
 RUN echo 'export GOPATH=$HOME/go' >> $HOME/.bashrc
 
-VOLUME [ "/sys/fs/cgroup", "/tmp", "/run" ]
-CMD ["/usr/bin/init"]
+EXPOSE 22 80 443
+
+ENTRYPOINT [ "/usr/lib/systemd/systemd" ]
+CMD [ "log-level=info", "unit=sysinit.target" ]

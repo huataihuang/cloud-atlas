@@ -94,7 +94,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">KVM Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../install/index.html">KVM 环境安装</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">KVM 快速起步</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="create_vm.html">Studio环境创建KVM虚拟机</a></li>
 <li class="toctree-l3"><a class="reference internal" href="deploy_win_vm.html">部署Windows KVM虚拟机</a></li>
@@ -113,6 +115,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../hypervisor.html">hypervisor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_architecture.html">KVM虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtio/index.html">KVM virtio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numa/index.html">KVM NUMA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
@@ -133,6 +136,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../amd_kvm/index.html">AMD硬件环境KVM虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm_kvm/index.html">ARM硬件环境KVM虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_macos/index.html">KVM虚拟化运行macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">KVM故障排查</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
@@ -292,6 +296,13 @@
 <p><code class="docutils literal notranslate"><span class="pre">virt-sysprep</span></code> 命令行工具用于reset或unconfigure虚拟机。这个过程包括移除SSH host keys，移除持久化的网络MAC地址配置，以及清除用户账号。需要安装 <code class="docutils literal notranslate"><span class="pre">libguestfs-tools</span></code> 来获得 <code class="docutils literal notranslate"><span class="pre">virt-sysprep</span></code> 工具。</p>
 <p>暂时对 <code class="docutils literal notranslate"><span class="pre">virt-sysprep</span></code> 了解不透彻，后续在 <a class="reference internal" href="../index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 补充详细用法。实际上这个工具可以帮助我们clone步骤自动化，可以省却这里对手工设置步骤。 - <a class="reference external" href="https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/">How to reset a KVM clone virtual Machines with virt-sysprep on Linux</a></p>
 </div>
+<p>保留了账号 huatai/root 并且指定IP地址，避免重头开始:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">sysprep</span> <span class="o">-</span><span class="n">d</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span> \
+    <span class="o">--</span><span class="n">run</span> <span class="s1">&#39;sed -i &quot;s/192.168.122.42/192.168.122.251/&quot; /etc/sysconfig/network-scripts/ifcfg-eth0&#39;</span> \
+    <span class="o">--</span><span class="n">enable</span> <span class="n">user</span><span class="o">-</span><span class="n">account</span> <span class="o">--</span><span class="n">keep</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">accounts</span> <span class="n">huatai</span> <span class="o">--</span><span class="n">keep</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">accounts</span> <span class="n">root</span>
+</pre></div>
+</div>
+<p>不过，实践发现网卡IP修改并不生效，还是需要手工订正 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/network-scripts/ifcfg-eth0</span></code> ，需要订正MAC地址以及UUID。网卡的UUID我不确定，按照 <a class="reference external" href="https://community.hpe.com/t5/Networking/How-to-find-out-the-uuid-for-eth0/td-p/5789983#.YWf9ttlBxqs">How to find out the uuid for eth0?</a> 似乎是 <code class="docutils literal notranslate"><span class="pre">uuidgen</span> <span class="pre">eth0</span></code> 生成，每次都不相同。</p>
 </section>
 <section id="id2">
 <h2>启动虚拟机副本<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>

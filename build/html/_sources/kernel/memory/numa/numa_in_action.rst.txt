@@ -8,6 +8,10 @@ NUMA实践
 .. figure:: ../../../_static/kernel/memory/numa/cpu_numa.png
    :scale: 50
 
+服务器
+========
+
+我的实践环境是 :ref:`hpe_dl360_gen9` ，首先完成 :ref:`dl360_bios_numa`
    
 
 参考

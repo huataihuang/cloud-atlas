@@ -18,6 +18,7 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    hypervisor.rst
    kvm_architecture.rst
    virtio/index
+   numa/index
    libvirt/index
    remote_desktop/index
    performance/index
