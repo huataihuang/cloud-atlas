@@ -3,7 +3,12 @@ MAINTAINER vincent huatai <vincent@huatai.me>
 
 ENV container docker
 
-RUN dnf -y update && dnf clean all
+RUN --mount=type=bind,target=/sys/fs/cgroup \
+    --mount=type=bind,target=/sys/fs/fuse \
+    --mount=type=tmpfs,target=/tmp \
+    --mount=type=tmpfs,target=/run \
+    --mount=type=tmpfs,target=/run/lock \
+    dnf -y update && dnf -y install systemd && dnf clean all
 
 RUN dnf -y install openssh-server \
     which net-tools iputils procps-ng
@@ -26,5 +31,7 @@ RUN chown -R admin:admin /home/admin/.ssh
 RUN chmod 600 /home/admin/.ssh/authorized_keys
 RUN chmod 700 /home/admin/.ssh
 
-VOLUME [ "/sys/fs/cgroup", "/tmp", "/run" ]
-CMD ["/usr/bin/init"]
+EXPOSE 22 80 443
+
+ENTRYPOINT [ "/usr/lib/systemd/systemd" ]
+CMD [ "log-level=info", "unit=sysinit.target" ]

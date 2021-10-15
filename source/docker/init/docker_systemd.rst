@@ -49,12 +49,209 @@ Docker默认在非特权容器( ``non privileged container`` )中关闭了这个
 
 - 如果要在容器内运行基于 ``fuse`` 到软件，需要bind mount ``/sys/fs/cgroup``
 
+.. _fedora_systemd_in_docker:
+
+Fedora 34 systemd in Docker Container
+--------------------------------------
+
+.. note::
+
+   在2021年10月时候，我发现Fedora 34官方已经去除了镜像中的systemd软件包( 只安装了 ``systemd-libs`` )，如果Dockerfile中没有加上 ``dnf -y install systemd`` 则运行容器出现报错::
+
+      docker: Error response from daemon: failed to create shim: OCI runtime create failed: container_linux.go:380: starting container process caused: exec: "/usr/sbin/init": stat /usr/sbin/init: no such file or directory: unknown.
+
+   对比KVM虚拟机中systemd，可以看到::
+
+      $ ls -lh /sbin/init
+      lrwxrwxrwx 1 root root 20 Sep  7 18:37 /sbin/init -> /lib/systemd/systemd
+
+      $ ls -lh /usr/sbin/init
+      lrwxrwxrwx 1 root root 20 Sep  7 18:37 /usr/sbin/init -> /lib/systemd/systemd
+
+   所以缺少 ``/usr/sbin/init`` 其实就是 ``systemd`` 软件包没有安装
+
+   先使用常规 ``/usr/bin/bash`` 运行容器命令::
+
+      docker run --name fedora -d -ti fedora /usr/bin/bash
+
+   然后登陆到系统中检查::
+
+      docker attach fedora
+
+Fedora 34官方镜像没有包含 :ref:`systemd` ，所以需要Dockerfile增加安装步骤
+
+.. literalinclude:: docker_systemd/fedora-systemd.dockerfile
+   :language: dockerfile
+   :linenos:
+   :caption: fedora-systemd.dockerfile
+
+::
+
+   docker build -t local:fedora34-systemd .
+   docker run --name fedora34 -d -it local:fedora34-systemd
+
+
+这里Dockerfile的最后倒数第二行配置的volume非常重要，如果没有这行配置，虽然 ``docker build`` 生成了image，但是使用这个image启动容器 ``docker run`` 会失败，用 ``docker logs fedora34`` 命令检查会看到报错::
+
+   Failed to mount tmpfs at /run: Operation not permitted
+   [!!!!!!] Failed to mount API filesystems.
+   Exiting PID 1...
+
+``ENV container docker`` 提供了容器内环境变量 ``container=docker`` ，容器内运行的 ``systemd`` 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。
+
+但是，我在2020年使用上述方法能够完成运行(当时官方fedora34镜像还内置安装了systemd，所以不需要单独安装)，但是到2021年10月尝试上述方法则失败，用 ``docker logs fedora34`` 看到报错::
+
+   Failed to mount cgroup at /sys/fs/cgroup/systemd: Operation not permitted
+   [!!!!!!] Failed to mount API filesystems.
+   Exiting PID 1...
+
+既然是权限不足，那么运行时添加 ``--privileged=true`` 是否可以解决？
+
+::
+
+   docker run --privileged=true --name fedora34 -d -it local:fedora34-systemd
+
+这次的报错日志显示没有 cgroup ::
+
+   systemd v248.7-1.fc34 running in system mode. (+PAM +AUDIT +SELINUX -APPARMOR +IMA +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified)
+   Detected virtualization docker.
+   Detected architecture x86-64.
+   
+   Welcome to Fedora 34 (Container Image)!
+   
+   Cannot determine cgroup we are running in: No medium found
+   Failed to allocate manager object: No medium found
+   [!!!!!!] Failed to allocate manager object.
+   Exiting PID 1...
+
+这表明 ``cgoup`` 没有正确映射进入容器。看来 ``Dockerfile`` 中的::
+
+   VOLUME [ "/sys/fs/cgroup", "/tmp", "/run" ]
+
+现在(2021年10月)已经不能解决cgroup ``bind mount`` 到容器内部了。
+
+通过以下 ``docker run`` 命令参数明确 ``bind mount`` 则成功成功运行::
+
+   docker run -tid -p 1222:22 --hostname fedora34 --name fedora34 \
+        --entrypoint=/usr/lib/systemd/systemd \
+        --env container=docker \
+        --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \
+        --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
+        --mount type=tmpfs,destination=/tmp \
+        --mount type=tmpfs,destination=/run \
+        --mount type=tmpfs,destination=/run/lock \
+        local:fedora34-systemd --log-level=info --unit=sysinit.target
+
+.. warning::
+
+   也就是说，现在必须在 Dockerfile 中明确进行 ``bind mount`` cgroup 才能正确运行systemd，否则就需要在 ``docker run`` 命令中传递 ``--mount type=bind`` 参数(这样的命令太复杂)。
+
+   为了能够更轻松运行systemd，我还是需要探索如何把 ``bind mount`` 明确在Dockerfile中配置的方法。见下文 ``buildkit的Dockerfile``
+
+buildkit的Dockerfile
+~~~~~~~~~~~~~~~~~~~~~~
+
+上述通过显式传递 ``--mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup`` 参数运行 ``docker run`` 命令虽然能够解决systemd运行问题，但是命令参数过于复杂，使用不便。所以，需要转换成 Dockerfile 配置才能方便运行。不过，对于挂载不同类型的卷，需要使用 :ref:`buildkit` 来实现，参考 `Dockerfile frontend syntaxes <https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md>`_ 改造Dockerfile
+
+- 首先，对于Docker v18.09或更高版本，在环境变量设置::
+
+   export DOCKER_BUILDKIT=1
+
+来激活客户端的BuildKit。建议直接在 ``~/.bashrc`` 中添加这个配置项。
+
+- 然后修订Dockerfile:
+
+.. literalinclude:: docker_systemd/fedora-systemd_buildkit.dockerfile
+   :language: dockerfile
+   :linenos:
+   :caption: fedora-systemd_buildkit.dockerfile
+
+- 执行构建::
+
+   docker build -t local:fedora34-systemd .
+
+注意，我最初配置行类似::
+
+   RUN --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \
+       --mount type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
+       ...
+
+但是会报错::
+
+   => ERROR [stage-0 2/2] RUN --mount=type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup,ro     --mount=type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse,ro     --mount=type  0.0s
+   ------
+   > [stage-0 2/2] RUN --mount=type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup,ro     --mount=type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse,ro     --mount=type=tmpfs,target=/tmp     --mount=type=tmpfs,target=/run     --mount=type=tmpfs,target=/run/lock     dnf -y update && dnf -y install systemd && dnf clean all:
+   ------
+   failed to compute cache key: "/sys/fs/cgroup" not found: not found
+
+上述报错通常是 ``COPY`` 命令报错，一般是没有把需要复制的文件准备好。在网上很多类似的报错，都是因为没有在当前目录下准备好文件导致的。看来这个挂载，如果使用 ``source`` 是从当前目录下开始的bind。修订::
+
+   RUN --mount=type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \
+    --mount=type=bind,source=/sys/fs/fuse,target=/sys/fs/fuse \
+   ...
+
+改成::
+
+   RUN --mount=type=bind,target=/sys/fs/cgroup \
+    --mount=type=bind,target=/sys/fs/fuse \
+   ...
+
+就不再报错
+
+- 再次执行::
+
+   docker build -t local:fedora34-systemd -f Dockerfile .
+
+成功
+
+- 运行::
+
+   docker run --name fedora34-systemd -d -it local:fedora34-systemd
+   
+但是容器没有运行起来
+
+- 排查::
+
+   docker logs 8a79a424e8e7
+
+可以看到::
+
+   Failed to mount tmpfs at /run: Operation not permitted
+   [!!!!!!] Failed to mount API filesystems.
+   Exiting PID 1...
+
+- 加上 ``--privileged=true`` 参数可以运行 (参考 `Docker (CentOS 7 with SYSTEMCTL) : Failed to mount tmpfs & cgroup <https://stackoverflow.com/questions/36617368/docker-centos-7-with-systemctl-failed-to-mount-tmpfs-cgroup>`_ ) ::
+
+   docker run --privileged=true --name fedora34-systemd -d -it local:fedora34-systemd
+
+这说明 ``--privileged=true`` 是关键，挂载 cgroup 和 tmp 卷需要这个权限。
+
+然后就可以看到容器运行::
+
+   docker ps
+
+显示输出::
+
+   CONTAINER ID   IMAGE                    COMMAND                  CREATED         STATUS        PORTS                     NAMES
+   5ba415c8fcbe   local:fedora34-systemd   "/usr/lib/systemd/sy…"   2 seconds ago   Up 1 second   22/tcp, 80/tcp, 443/tcp   fedora34-systemd
+
+.. note::
+
+   使用 ``systemd`` 启动后，登陆需要密码账号，不再是 ``/bin/bash`` ，所以还需要增加账号添加步骤。详细配置见 :ref:`docker_studio`
+
+.. note::
+
+   实际上 ``/sys/fs/cgroup`` 挂载成 ``ro`` 只读就可以，只需要将 ``/sys/fs/cgroup/systemd`` 挂载成读写就能正确运行。详见 `Running systemd in a non-privileged container <https://developers.redhat.com/blog/2016/09/13/running-systemd-in-a-non-privileged-container#>`_
+
 Docker容器运行systemd实践
 ==========================
 
+.. note::
+
+   以下部分是去年(2020)的探索，当时的解决方法就是通过 ``docker run`` 时明确传递 ``--mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup`` 才正确运行起 systemd 。不过，当时并没有探索 Buildkit ，现在(2021)补全了上面的Dockerfile方法。
+
 CAP_SYS_ADMIN 和 cgroupfs
 --------------------------
-
 
 我们在 :ref:`dockerfile` 中介绍了如何 ``docker build`` 一个CentOS或Ubuntu系统，当时我的实践是在容器中运行 ``sshd`` ，现在我们则构建一个运行systemd的容器。
 
@@ -133,6 +330,16 @@ tmpfs / fuse / sysinit.target
        local:centos8 --log-level=info --unit=sysinit.target
 
 以上方法就是在当前(2020年)在容器内运行 systemd 的实践方法。
+
+systemd运行总结
+-----------------
+
+- Docker需要传递环境变量 ``container=docker`` 给容器内部才能使得 ``systemd`` 知道自己运行在容器中
+- 必须明确挂载 ``/sys/fs/cgroup`` (bind) 和 ``/tmp`` (tmpfs) 才能使得 ``systemd`` 运行
+- 如果是 ``docker run`` 明确的挂载参数方式，则不需要 ``--privileged=true`` 运行参数；但是如果是 ``Dockerfile`` 配置 ``bind`` 和 ``tmpfs`` 挂载，则需要在 ``docker run`` 时传递 ``--privileged=true`` 运行参数
+
+其他服务运行
+==============
 
 如果需要在容器内运行 ``ntpd`` 服务，则需要添加 ``--cap-add=SYS_TIME`` 。
 
@@ -237,13 +444,13 @@ dockerfile构建
 
    完成后运行的容器已经启动了systemd，并且已经准备好了sshd运行环境，包括创建了 ``admin`` 账号。不过，目前我遇到问题还有可能需要手工启动一次sshd以及删除 ``/var/run/nologin`` 。
 
-buildkit构建(尚未实践)
+buildkit构建
 -------------------------
 
 - 如果你安装使用 :ref:`buildkit` ，则可以使用以下 Dockerfile
 
-.. literalinclude:: docker_systemd/centos8-systemd-sshd.dockerfile
-   :language: bash
+.. literalinclude:: docker_systemd/centos8-systemd-sshd.buildkit
+   :language: dockerfile
    :linenos:
 
 执行以下命令构建镜像::
@@ -253,6 +460,8 @@ buildkit构建(尚未实践)
        --local context=. \
        --local dockerfile=. 
 
+使用 ``bulidkit`` 提供了不同的卷挂载命令，在前文Fedora镜像制作中，使用并简单做了介绍。
+
 podman
 ========
 
@@ -261,8 +470,9 @@ Red Hat公司开发了另外一个符合OCI规范的容器和pods管理工具 po
 参考
 ======
 
-- `Running systemd inside a docker container (arch linux) <https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux>`_ - 当前2020年，这篇解决方案最准确
+- `Running systemd inside a docker container (arch linux) <https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux>`_ - 当前2020年，这篇解决方案最准确，并且2021年更新还介绍 `David Walsh @ REDHAT blog <https://developers.redhat.com/blog/author/rhatdan/>`_ 提供了很多有用的信息，特别是挂载 cgroup 的方法 
 - `Docker and systemd <https://medium.com/swlh/docker-and-systemd-381dfd7e4628>`_
 - `systemd - The Container Interface <https://systemd.io/CONTAINER_INTERFACE/>`_
 - `Start service using systemctl inside docker conatiner <https://stackoverflow.com/questions/46800594/start-service-using-systemctl-inside-docker-conatiner>`_
 - `How to run systemd in a container <https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/>`_
+- `Running systemd within a Docker Container <https://developers.redhat.com/blog/2014/05/05/running-systemd-within-docker-container>`_

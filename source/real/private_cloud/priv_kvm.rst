@@ -193,41 +193,42 @@
 
    /etc/init.d/network restart
 
-复制KVM虚拟机(Kubernetes Master)
+复制KVM虚拟机
 =====================================
 
 .. note::
 
    详细克隆KVM虚拟机请参考 :ref:`clone_vm` 。
 
-   准备 :ref:`priv_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 
+   准备 :ref:`priv_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 :ref:`priv_cloud_infrastructure`
+
+   这里的案例是创建 ``z-pi-worker3`` 准备 :ref:`k8s_numa` 实践
 
 - 暂停虚拟机::
 
-   virsh suspend centos7
+   virsh shutdown centos7
 
 - clone虚拟机::
 
-   virt-clone --connect qemu:///system --original centos7 --name kubemaster-1 --file /var/lib/libvirt/images/kubemaster-1.qcow2
-
-.. note::
-
-   分别在3台物理服务器上创建 ``kubemaster-1`` ``kubemaster-2`` 和 ``kubemaster-3`` 。
+   virt-clone --connect qemu:///system --original centos7 --name z-pi-worker3  --file /var/lib/libvirt/images/z-pi-worker3.qcow2
 
 - 使用 ``virt-sysprep`` 初始化虚拟机::
 
-   virt-sysprep -d kubemaster-1 --hostname kubemaster-1 --root-password password:CHANGE_ME
+   virt-sysprep -d z-pi-worker3 --hostname z-pi-worker3 --root-password password:CHANGE_ME
+
+不过，我实际操作保留了账号 huatai/root 并且指定IP地址，避免重头开始::
+
+   virt-sysprep -d z-pi-worker3 --hostname z-pi-worker3 \
+       --run 'sed -i "s/192.168.122.42/192.168.122.251/" /etc/sysconfig/network-scripts/ifcfg-eth0' \
+       --enable user-account --keep-user-accounts huatai --keep-user-accounts root
 
 .. note::
 
-   如果要保留一些设置，可以参考 `How to reset a KVM clone virtual Machines with virt-sysprep on Linux <https://www.cyberciti.biz/faq/reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/>`_ 做一些重置调整::
-
-      virt-sysprep -d nullstack --hostname nullstack \
-        --run 'sed -i "s/192.168.122.3/192.168.122.10/" /etc/sysconfig/network-scripts/ifcfg-eth0' \
-        --keep-user-accounts huatai --keep-user-accounts root
+   如果要保留一些设置，需要同时使用 ``--enable user-account`` 参数( `How to reset a KVM clone virtual Machines with virt-sysprep on Linux <https://www.nixcraft.com/t/how-to-reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/781>`_ )
 
 - 启动虚拟机，进一步定制::
 
-   virsh start kubemaster-1
+   virsh start z-pi-worker3
 
+注意，这里开始的时候，clone出来的虚拟机是NAT网络，确保运行正常以后，修订成 :ref:`libvirt_bridged_network` 
 
