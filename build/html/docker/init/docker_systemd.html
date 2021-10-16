@@ -111,11 +111,10 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Docker systemd进程管理器</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dockersystemd">Docker容器中的systemd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">Docker容器运行systemd实践</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">其他服务运行</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ssh">安装ssh服务和制作镜像</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dockerfilesystemd-sshd">Dockerfile构建systemd+sshd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#podman">podman</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="docker_s6.html">Docker s6进程管理器</a></li>
@@ -309,8 +308,8 @@ lrwxrwxrwx 1 root root 20 Sep  7 18:37 /usr/sbin/init -&gt; /lib/systemd/systemd
 </div>
 </div>
 <p>Fedora 34官方镜像没有包含 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> ，所以需要Dockerfile增加安装步骤</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">fedora-systemd.dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">fedora-systemd.dockerfile</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">FROM</span> <span class="s">fedora:34</span>
 <span class="linenos"> 2</span><span class="k">MAINTAINER</span><span class="s"> huatai</span>
 <span class="linenos"> 3</span>
@@ -328,14 +327,11 @@ lrwxrwxrwx 1 root root 20 Sep  7 18:37 /usr/sbin/init -&gt; /lib/systemd/systemd
 <span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">it</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span>
 </pre></div>
 </div>
-<p>这里Dockerfile的最后倒数第二行配置的volume非常重要，如果没有这行配置，虽然 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">build</span></code> 生成了image，但是使用这个image启动容器 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 会失败，用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">logs</span> <span class="pre">fedora34</span></code> 命令检查会看到报错:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Failed to mount tmpfs at /run: Operation not permitted
-[!!!!!!] Failed to mount API filesystems.
-Exiting PID 1...
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">ENV</span> <span class="pre">container</span> <span class="pre">docker</span></code> 提供了容器内环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> ，容器内运行的 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。</p>
-<p>但是，我在2020年使用上述方法能够完成运行(当时官方fedora34镜像还内置安装了systemd，所以不需要单独安装)，但是到2021年10月尝试上述方法则失败，用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">logs</span> <span class="pre">fedora34</span></code> 看到报错:</p>
+<ul class="simple">
+<li><p>这里Dockerfile的最后倒数第二行尝试配置的bind mount <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> 和 tmpfs mount <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 等卷</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ENV</span> <span class="pre">container</span> <span class="pre">docker</span></code> 提供了容器内环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> ，容器内运行的 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。</p></li>
+</ul>
+<p>但是，启动失败，用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">logs</span> <span class="pre">fedora34</span></code> 看到报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Failed to mount cgroup at /sys/fs/cgroup/systemd: Operation not permitted
 [!!!!!!] Failed to mount API filesystems.
 Exiting PID 1...
@@ -362,8 +358,8 @@ Exiting PID 1...
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">VOLUME</span> <span class="p">[</span> <span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;/run&quot;</span> <span class="p">]</span>
 </pre></div>
 </div>
-<p>现在(2021年10月)已经不能解决cgroup <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> 到容器内部了。</p>
-<p>通过以下 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令参数明确 <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> 则成功成功运行:</p>
+<ul>
+<li><p>通过以下 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令参数明确 <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> 则成功成功运行:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1222</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">fedora34</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span> \
      <span class="o">--</span><span class="n">entrypoint</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">systemd</span> \
      <span class="o">--</span><span class="n">env</span> <span class="n">container</span><span class="o">=</span><span class="n">docker</span> \
@@ -375,6 +371,8 @@ Exiting PID 1...
      <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span> <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span><span class="o">=</span><span class="n">info</span> <span class="o">--</span><span class="n">unit</span><span class="o">=</span><span class="n">sysinit</span><span class="o">.</span><span class="n">target</span>
 </pre></div>
 </div>
+</li>
+</ul>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>也就是说，现在必须在 Dockerfile 中明确进行 <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> cgroup 才能正确运行systemd，否则就需要在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令中传递 <code class="docutils literal notranslate"><span class="pre">--mount</span> <span class="pre">type=bind</span></code> 参数(这样的命令太复杂)。</p>
@@ -394,8 +392,8 @@ Exiting PID 1...
 <ul class="simple">
 <li><p>然后修订Dockerfile:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">fedora-systemd_buildkit.dockerfile</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">fedora-systemd_buildkit.dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># syntax = docker/dockerfile:1.3</span>
 <span class="linenos"> 2</span><span class="k">FROM</span> <span class="s">fedora:34</span>
 <span class="linenos"> 3</span><span class="k">MAINTAINER</span><span class="s"> huatai</span>
@@ -511,6 +509,21 @@ Exiting PID 1...
 </div>
 </section>
 </section>
+<section id="systemd">
+<h3>systemd运行总结<a class="headerlink" href="#systemd" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>Docker需要传递环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> 给容器内部才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 知道自己运行在容器中</p></li>
+<li><p>必须明确挂载 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> (从物理主机 bind mount <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> 文件系统) 才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 运行</p>
+<ul>
+<li><p>如果是 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 明确的挂载参数方式，则不需要 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 运行参数</p></li>
+<li><p>如果是 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 配置 <code class="docutils literal notranslate"><span class="pre">bind</span></code> 和 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 挂载 ( 使用 <a class="reference internal" href="../moby/buildkit/index.html#buildkit"><span class="std std-ref">BuildKit</span></a> ) ，则需要在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 时传递 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 运行参数</p></li>
+</ul>
+</li>
+<li><p>bind mount <code class="docutils literal notranslate"><span class="pre">/sys/fs/fuse</span></code> 不是必须的，但是可以避免很多依赖fuse运行的软件问题</p></li>
+<li><p>systemd 希望在随时随地都使用 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> ，但是如果运行在 <code class="docutils literal notranslate"><span class="pre">unprivileged</span></code> (非特权) 模式就不能随时随地挂载 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> ，所以需要预先挂载 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> , <code class="docutils literal notranslate"><span class="pre">/run</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/run/lock</span></code></p></li>
+<li><p>由于你实际上不希望在容器内部启动任何图形应用，所以需要在最后指定 <code class="docutils literal notranslate"><span class="pre">sysinit.target</span></code> 作为 default unit 来启动，而不是使用 <code class="docutils literal notranslate"><span class="pre">multi-user.target</span></code> 或其他模式</p></li>
+</ul>
+</section>
 </section>
 <section id="id2">
 <h2>Docker容器运行systemd实践<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
@@ -612,18 +625,7 @@ Exiting PID 1...
 </li>
 </ul>
 <p>以上方法就是在当前(2020年)在容器内运行 systemd 的实践方法。</p>
-</section>
-<section id="systemd">
-<h3>systemd运行总结<a class="headerlink" href="#systemd" title="永久链接至标题">¶</a></h3>
-<ul class="simple">
-<li><p>Docker需要传递环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> 给容器内部才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 知道自己运行在容器中</p></li>
-<li><p>必须明确挂载 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> (bind) 和 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> (tmpfs) 才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 运行</p></li>
-<li><p>如果是 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 明确的挂载参数方式，则不需要 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 运行参数；但是如果是 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 配置 <code class="docutils literal notranslate"><span class="pre">bind</span></code> 和 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 挂载，则需要在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 时传递 <code class="docutils literal notranslate"><span class="pre">--privileged=true</span></code> 运行参数</p></li>
-</ul>
-</section>
-</section>
-<section id="id3">
-<h2>其他服务运行<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<hr class="docutils" />
 <p>如果需要在容器内运行 <code class="docutils literal notranslate"><span class="pre">ntpd</span></code> 服务，则需要添加 <code class="docutils literal notranslate"><span class="pre">--cap-add=SYS_TIME</span></code> 。</p>
 <ul>
 <li><p>最终完成后，在容器内部，你可以通过 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">systemd</span></code> 看到如下进程:</p>
@@ -664,6 +666,7 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </div>
 </li>
 </ul>
+</section>
 </section>
 <section id="ssh">
 <h2>安装ssh服务和制作镜像<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h2>
@@ -879,8 +882,8 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 <h2>podman<a class="headerlink" href="#podman" title="永久链接至标题">¶</a></h2>
 <p>Red Hat公司开发了另外一个符合OCI规范的容器和pods管理工具 podman ( <a class="reference external" href="https://github.com/containers/podman">GitHub podman</a> )。这个工具也直接支持在容器中运行systemd ( <a class="reference external" href="https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/">How to run systemd in a container</a> )</p>
 </section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux">Running systemd inside a docker container (arch linux)</a> - 当前2020年，这篇解决方案最准确，并且2021年更新还介绍 <a class="reference external" href="https://developers.redhat.com/blog/author/rhatdan/">David Walsh &#64; REDHAT blog</a> 提供了很多有用的信息，特别是挂载 cgroup 的方法</p></li>
 <li><p><a class="reference external" href="https://medium.com/swlh/docker-and-systemd-381dfd7e4628">Docker and systemd</a></p></li>

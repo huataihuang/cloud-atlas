@@ -90,16 +90,10 @@ Fedora 34官方镜像没有包含 :ref:`systemd` ，所以需要Dockerfile增加
    docker build -t local:fedora34-systemd .
    docker run --name fedora34 -d -it local:fedora34-systemd
 
+- 这里Dockerfile的最后倒数第二行尝试配置的bind mount ``/sys/fs/cgroup`` 和 tmpfs mount ``/tmp`` 等卷
+- ``ENV container docker`` 提供了容器内环境变量 ``container=docker`` ，容器内运行的 ``systemd`` 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。
 
-这里Dockerfile的最后倒数第二行配置的volume非常重要，如果没有这行配置，虽然 ``docker build`` 生成了image，但是使用这个image启动容器 ``docker run`` 会失败，用 ``docker logs fedora34`` 命令检查会看到报错::
-
-   Failed to mount tmpfs at /run: Operation not permitted
-   [!!!!!!] Failed to mount API filesystems.
-   Exiting PID 1...
-
-``ENV container docker`` 提供了容器内环境变量 ``container=docker`` ，容器内运行的 ``systemd`` 需要根据这个环境变量来判断知道自身运行在容器中，才能使得systemd能够在容器中正常运行。
-
-但是，我在2020年使用上述方法能够完成运行(当时官方fedora34镜像还内置安装了systemd，所以不需要单独安装)，但是到2021年10月尝试上述方法则失败，用 ``docker logs fedora34`` 看到报错::
+但是，启动失败，用 ``docker logs fedora34`` 看到报错::
 
    Failed to mount cgroup at /sys/fs/cgroup/systemd: Operation not permitted
    [!!!!!!] Failed to mount API filesystems.
@@ -128,9 +122,7 @@ Fedora 34官方镜像没有包含 :ref:`systemd` ，所以需要Dockerfile增加
 
    VOLUME [ "/sys/fs/cgroup", "/tmp", "/run" ]
 
-现在(2021年10月)已经不能解决cgroup ``bind mount`` 到容器内部了。
-
-通过以下 ``docker run`` 命令参数明确 ``bind mount`` 则成功成功运行::
+- 通过以下 ``docker run`` 命令参数明确 ``bind mount`` 则成功成功运行::
 
    docker run -tid -p 1222:22 --hostname fedora34 --name fedora34 \
         --entrypoint=/usr/lib/systemd/systemd \
@@ -243,6 +235,19 @@ buildkit的Dockerfile
 
    实际上 ``/sys/fs/cgroup`` 挂载成 ``ro`` 只读就可以，只需要将 ``/sys/fs/cgroup/systemd`` 挂载成读写就能正确运行。详见 `Running systemd in a non-privileged container <https://developers.redhat.com/blog/2016/09/13/running-systemd-in-a-non-privileged-container#>`_
 
+systemd运行总结
+-----------------
+
+- Docker需要传递环境变量 ``container=docker`` 给容器内部才能使得 ``systemd`` 知道自己运行在容器中
+- 必须明确挂载 ``/sys/fs/cgroup`` (从物理主机 bind mount ``/sys/fs/cgroup`` 文件系统) 才能使得 ``systemd`` 运行
+
+  - 如果是 ``docker run`` 明确的挂载参数方式，则不需要 ``--privileged=true`` 运行参数
+  - 如果是 ``Dockerfile`` 配置 ``bind`` 和 ``tmpfs`` 挂载 ( 使用 :ref:`buildkit` ) ，则需要在 ``docker run`` 时传递 ``--privileged=true`` 运行参数
+
+- bind mount ``/sys/fs/fuse`` 不是必须的，但是可以避免很多依赖fuse运行的软件问题
+- systemd 希望在随时随地都使用 ``tmpfs`` ，但是如果运行在 ``unprivileged`` (非特权) 模式就不能随时随地挂载 ``tmpfs`` ，所以需要预先挂载 ``tmpfs`` 到 ``/tmp`` , ``/run`` 和 ``/run/lock``
+- 由于你实际上不希望在容器内部启动任何图形应用，所以需要在最后指定 ``sysinit.target`` 作为 default unit 来启动，而不是使用 ``multi-user.target`` 或其他模式
+
 Docker容器运行systemd实践
 ==========================
 
@@ -331,14 +336,6 @@ tmpfs / fuse / sysinit.target
 
 以上方法就是在当前(2020年)在容器内运行 systemd 的实践方法。
 
-systemd运行总结
------------------
-
-- Docker需要传递环境变量 ``container=docker`` 给容器内部才能使得 ``systemd`` 知道自己运行在容器中
-- 必须明确挂载 ``/sys/fs/cgroup`` (bind) 和 ``/tmp`` (tmpfs) 才能使得 ``systemd`` 运行
-- 如果是 ``docker run`` 明确的挂载参数方式，则不需要 ``--privileged=true`` 运行参数；但是如果是 ``Dockerfile`` 配置 ``bind`` 和 ``tmpfs`` 挂载，则需要在 ``docker run`` 时传递 ``--privileged=true`` 运行参数
-
-其他服务运行
 ==============
 
 如果需要在容器内运行 ``ntpd`` 服务，则需要添加 ``--cap-add=SYS_TIME`` 。
