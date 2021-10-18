@@ -18,6 +18,7 @@ systemd最早是Red Hat主推开发，目前已经成为各大发行版最主要
    systemd_env.rst
    systemd_dissuspend.rst
    systemd_timesyncd.rst
+   systemd_timer.rst
    systemctl.rst
    networkctl.rst
    journalctl.rst

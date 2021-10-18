@@ -144,7 +144,6 @@ ssh服务容器(ssh)
 
 .. literalinclude:: docker_studio/dev/Dockerfile
    :language: dockerfile
-   :linenos:
    :caption:
 
 .. note::
@@ -153,17 +152,52 @@ ssh服务容器(ssh)
 
 - 初始化镜像::
 
-   docker build -t fedora-dev .
+   docker build -t local:fedora34-dev .
 
 - 启动容器::
 
-   docker run --name fedora-dev --hostname fedora-dev -p 122:22 --detach -ti -v /sys/fs/cgroup:/sys/fs/cgroup:ro fedora-dev /usr/sbin/init
+   docker run --privileged=true --hostname fedora34-dev --name fedora34-dev \
+       -p 122:22 -p 180:80 -p 1443:443 -dti local:fedora34-dev
 
-这里我遇到的问题排查见 :ref:`docker_macos_file_share`
+这里遇到一个奇怪的问题，我确实使用了 ``--privileged=true`` ，这个参数可以让我在之前运行 ``fedora34`` (基于 ``local:fedora34-systemd-ssh`` 镜像) 没有问题，但是现在再次出现报错::
 
+   Failed to mount tmpfs at /run: Operation not permitted
+   [!!!!!!] Failed to mount API filesystems.
+   Exiting PID 1...
+
+这个问题待查...
+
+2020年的问题排查见 :ref:`docker_macos_file_share`
 
 容器持久化数据存储(dev-data)
 ===============================
+
+简单的bind mount
+-----------------
+
+对于单机运行工作平台，直接将物理主机的 home 目录映射进容器内部::
+
+   docker run --privileged=true --hostname fedora34-dev --name fedora34-dev \
+       -p 222:22 -p 280:80 -p 2443:443 -v /home/huatai/dev:/home/admin/dev \
+       -dti local:fedora34-systemd-ssh
+
+启动以后检查::
+
+   docker ps
+
+可以看到::
+
+   CONTAINER ID   IMAGE                        COMMAND                  CREATED         STATUS        PORTS                                                                                                               NAMES
+   abd0f1fc7ae6   local:fedora34-systemd-ssh   "/usr/lib/systemd/sy…"   2 seconds ago   Up 1 second   0.0.0.0:222->22/tcp, :::222->22/tcp, 0.0.0.0:280->80/tcp, :::280->80/tcp, 0.0.0.0:2443->443/tcp, :::2443->443/tcp   fedora34-dev
+
+.. note::
+
+   目前我采用这个开发环境进行学习
+
+   开发环境部署参考 :ref:`fedora_develop` 构建不同的语言开发环境
+
+多容器共享NFS
+----------------
 
 为了能够在容器销毁并重建等常见操作情况下，不丢失自己辛苦开发工作的数据，我构想了一个方案:
 
@@ -175,7 +209,9 @@ ssh服务容器(ssh)
 
 - 在物理主机上采用定时备份同步方法，能够实现数据不丢失
 
-不过，我在实践中尚未找到如何在物理主机和Docker VM之间共享NFS的方法，所以本方案修订成 :ref:`docker_macos_file_share`
+我在macOS上中尚未找到如何在物理主机和Docker VM之间共享NFS的方法，所以在macOS上修订成 :ref:`docker_macos_file_share`
+
+在Linux主机上，非常容易构建NFS共享，所以这个方案可以采用 :ref:`docker_container_nfs` 来实现
 
 开发环境框架搭建(studio)
 =========================

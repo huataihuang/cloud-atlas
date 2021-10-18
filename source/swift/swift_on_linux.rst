@@ -28,12 +28,10 @@
 
    swift --version
 
-输出类似::
+输出类似( :ref:`fedora_develop` )::
 
-   Swift version 5.4 (swift-5.4-RELEASE)
+   Swift version 5.5 (swift-5.5-RELEASE)
    Target: x86_64-unknown-linux-gnu
-
-
 
 参考
 ======

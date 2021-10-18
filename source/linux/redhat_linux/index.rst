@@ -11,6 +11,7 @@ RedHat Linux
    admin/index
    systemd/index
    cgroup/index
+   fedora_develop/index
    kernel/index
    performance/index
 

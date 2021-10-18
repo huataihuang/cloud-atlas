@@ -11,6 +11,8 @@ Life Atlas
 .. toctree::
    :maxdepth: 1
 
+   open_your_mind/index
+
 .. only::  subproject and html
 
    Indices
