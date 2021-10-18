@@ -1,19 +1,14 @@
-.. _redhat_linux:
+.. _apple_one:
 
 =================================
-RedHat Linux
+Apple One
 =================================
+
+Apple One 使用经验汇总
 
 .. toctree::
    :maxdepth: 1
 
-   centos/index
-   admin/index
-   systemd/index
-   cgroup/index
-   fedora_develop/index
-   kernel/index
-   performance/index
 
 .. only::  subproject and html
 
