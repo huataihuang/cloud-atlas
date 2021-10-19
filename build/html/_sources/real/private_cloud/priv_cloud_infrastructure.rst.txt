@@ -10,6 +10,12 @@
 2021年10月，我购买了 :ref:`hpe_dl360_gen9` 来实现完整的云计算模拟，规划是采用一台二手服务器:
 
 - 通过 :ref:`kvm_nested_virtual` 运行大量的一级KVM虚拟机，一级KVM虚拟机作为运行 :ref:`openstack` 的物理机，部署一个完整的OpenStack集群
+
+  - 物理服务器运行 :ref:`cockpit` 可以集成 :ref:`stratis` 存储，以及 :ref:`ovirt` ，所以在第一层虚拟化上，可以不用自己手工部署 :ref:`kvm` ，而是集成到 oVirt
+  - 通过oVirt来管理第一层虚拟机，虚拟机开启嵌套虚拟化，这样可以同时学习oVirt的管理，体验不同于OpenStack的轻量级虚拟化管理平台
+    
+    - oVirt支持 :ref:`gluster` 管理，可以方便在底层部署 GlusterFS
+
 - 在一级虚拟机中运行 :ref:`kubernetes` 模拟裸机的K8S集群
 - 在OpenStack中部署运行大量二级虚拟机，按需运行，模拟云计算的弹性以及计费和监控
 - OpenStack中的二级虚拟机内部再部署一个 :ref:`kubernetes` 集群，模拟云计算之上的K8S集群，结合 HashiCorp 的 Terraform 来实现全链路的自动化部署
@@ -18,17 +24,11 @@
 .. figure:: ../../_static/real/private_cloud/real_cloud.png
    :scale: 80
 
-
 .. note::
-
    采用OpenStack来实现云计算是当前主流的云计算平台，涉及到广泛的虚拟化、网络、存储技术，是一个非常好实现案例
 
 Kubernetes私有云
 ==================
-
-.. note::
-
-   kubernetes私有云选型的思考请参考 :ref:`priv_k8s_docker`
 
 从集群稳定性和扩展性来说，推荐采用 :ref:`ha_k8s_external` 部署模式：
 

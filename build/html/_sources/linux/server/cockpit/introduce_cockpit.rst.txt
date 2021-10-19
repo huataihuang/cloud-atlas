@@ -39,6 +39,15 @@ CentOS
    sudo firewall-cmd --permanent --zone=public --add-service=cockpit
    sudo firewall-cmd --reload
 
+Ubuntu
+---------
+
+在 :ref:`real` 的 :ref:`priv_cloud_infrastructure` ，我部署在 :ref:`hpe_dl360_gen9` 二手服务器上模拟云计算的底层操作系统，采用 :ref:`ubuntu_linux` 。 在这个底层物理服务器上，构建采用Cockpit来查看和管理系统。
+
+- 安装软件包::
+
+   sudo apt install cockpit
+
 cockpit集成的运维功能
 ======================
 

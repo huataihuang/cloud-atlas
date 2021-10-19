@@ -43,7 +43,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="XFS性能" href="xfs_performance.html" />
+    <link rel="next" title="Stratis存储技术快速起步" href="stratis_startup.html" />
     <link rel="prev" title="Stratis - Linux存储系统" href="index.html" /> 
 </head>
 
@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../infrastructure/index.html">Infrastructure Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ansible/index.html">Ansible Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../kvm/index.html">KVM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ceph/index.html">Ceph Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../gluster/index.html">Gluster Atlas</a></li>
@@ -137,6 +138,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../btrfs/index.html">Btrfs - Linux存储系统</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Stratis - Linux存储系统</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Stratis存储技术简介</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stratis_startup.html">Stratis存储技术快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="xfs_performance.html">XFS性能</a></li>
 </ul>
 </li>
@@ -247,6 +249,48 @@
             
   <section id="stratis">
 <span id="introduce-stratis"></span><h1>Stratis存储技术简介<a class="headerlink" href="#stratis" title="永久链接至标题">¶</a></h1>
+<p>在Linux本地存储技术领域存在多种成熟稳定的技术:</p>
+<ul class="simple">
+<li><p>device mapper(dm)</p></li>
+<li><p>逻辑卷管理(LVM)</p></li>
+<li><p>XFS文件系统</p></li>
+</ul>
+<p>这些技术组件提供的功能包括大规模的伸缩文件系统，快照(snapshots)，冗余(RAID)逻辑卷,多路径，thin provisioning(精简配置?)，缓存，重复数据删除(deduplication)，以及支持虚拟机和容器。每个存储堆栈曾(dm, LVM 和 XFS)都是需要使用特定的命令和工具来维护，这就要求系统管理员将这些存储层作为独立的存储组件来维护，所以相对复杂和运维成本高。</p>
+<p>Red Hat当前的存储战略(CentOS/RHEL 8)是新型的 Stratis 存储，结合了上述3种成熟的本地存储技术，但是通过统一的管理工具来维护。Stratis作为服务运行，管理了物理存储设备以及透明创建和管理卷、文件系统。由于Stratis使用现有的存储驱动和工具，所以所有LVM, XFS以及device-mapper的高级存储功能都得到了继承。</p>
+<p>在卷管理文件系统，文件系统是使用一种称为 <code class="docutils literal notranslate"><span class="pre">thin</span> <span class="pre">provisioning</span></code> 来构建磁盘设备的共享池。Stratis文件系统没有固定大小，也不会预分配没有使用的块空间。虽然这个文件系统依然建筑在一个隐藏的LVM卷上，Stratis管理这个底层卷，并且可以按需扩展。这种 <code class="docutils literal notranslate"><span class="pre">in-use</span></code> 大小的文件系统只显示实际包含文件的块，而文件系统可用空间实际上是整个存储池设备的剩余空间。多个文件系统可以共享相同的磁盘设备存储池，共享这个可用空间，但是文件系统可以预留存储池空间以确保当需要时可以存储数据。</p>
+<p>Stratis使用存储元数据(stored metadata)来标识被管理的存储池，卷和文件系统。这样，通过Stratis创建的文件系统就不需要重新格式化或者手工重新配置；它们只需要使用Stratis工具和命令进行管理。手工配置Stratis文件系统会导致元数据丢失并导致Stratis不能感知文件系统已经被创建。</p>
+<p>可以在不同的块设备集合上创建多个存储池。从每个存储池可以创建一个或多个文件系统。当前，支持在每个存储池创建最多224个文件系统:</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../_images/components-of-Stratis-RHEL-8.jpg"><img alt="../../../_images/components-of-Stratis-RHEL-8.jpg" src="../../../_images/components-of-Stratis-RHEL-8.jpg" style="width: 625.6px; height: 436.8px;" /></a>
+</figure>
+<p>存储池将块设备组织成数据层(data tier)以及可选的缓存层(cache tier)，数据层聚焦于灵活性(flexibility)和完整性(integrity)，而缓存层则聚焦于提升性能。由于缓存层趋向于提升性能，所以建议使用高IOPS(input/output per second)的固态存储设备，例如SSDs。</p>
+<section id="id1">
+<h2>简化存储堆栈<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>Stratis简化了很多本地存储供给(local storage provisioning)和一系列Red Hat产品的配置访问的交互。例如，在Anaconda安装的早期版本，系统管理员不得不处理每个磁盘管理的方方面面，而现在使用Stratis，只需要简单磁盘设置。其他使用Statis的产品包括 <a class="reference internal" href="../../server/cockpit/index.html#cockpit"><span class="std std-ref">Cockpit服务器统一管理平台</span></a> ， Red Hat Virtualization 以及 Red Hat Enterprise Linux Atomic Host。对于这些产品，Stratis都能够简化和更少犯错地管理存储空间和快照。Stratis还提供了易于集成到更高层管理工具的能力，这样就不必使用任何编程CLI。</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../_images/Stratis-in-the-Linux-storage-management-stack.jpg"><img alt="../../../_images/Stratis-in-the-Linux-storage-management-stack.jpg" src="../../../_images/Stratis-in-the-Linux-storage-management-stack.jpg" style="width: 445.6px; height: 297.6px;" /></a>
+</figure>
+</section>
+<section id="id2">
+<h2>Stratis层<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>Stratis内部使用 <code class="docutils literal notranslate"><span class="pre">Backstore</span></code> 子系统来管理块设备，用 <code class="docutils literal notranslate"><span class="pre">Thinpool</span></code> 子系统来管理存储池。其中 <code class="docutils literal notranslate"><span class="pre">Backstore</span></code> 子系统有一个数据层来维护在块设备上(on-disk)的元数据(metadata)并且检测和修复数据腐化。缓存层( <code class="docutils literal notranslate"><span class="pre">cache</span> <span class="pre">tier</span></code> )使用高性能的块设备作为数据层( <code class="docutils literal notranslate"><span class="pre">data</span> <span class="pre">tier</span></code> )上的缓存。这个子系统使用 <code class="docutils literal notranslate"><span class="pre">dm-thin</span></code> device-mapper驱动来代替位于虚拟卷之上的LVM，这样可以实现伸缩和管理。 <code class="docutils literal notranslate"><span class="pre">dm-thin</span></code>
+使用一个大型虚拟规格来创建卷，使用XFS格式化，但是维持了一个实际上非常小的使用量。当物理存储空间接近满的时候，Stratis会自动扩展卷。(也就是说， <code class="docutils literal notranslate"><span class="pre">dm-thin</span></code> 最大的好处是创建虚拟规格的逻辑卷，但实际上只占用很小的磁盘空间，只在空间接近满的时候自动扩展，这样大大节约了磁盘)</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../_images/Stratis-layers-CentOS-8.jpg"><img alt="../../../_images/Stratis-layers-CentOS-8.jpg" src="../../../_images/Stratis-layers-CentOS-8.jpg" style="width: 520.0px; height: 404.8px;" /></a>
+</figure>
+</section>
+<section id="thin-provisoned">
+<h2>管理thin-provisoned文件系统<a class="headerlink" href="#thin-provisoned" title="永久链接至标题">¶</a></h2>
+<p>要使用Stratis存储管理解决方案来管理thin-provisoned文件系统，需要安装 <code class="docutils literal notranslate"><span class="pre">stratis-cli</span></code> 和 <code class="docutils literal notranslate"><span class="pre">stratisd</span></code> 软件包。其中 <code class="docutils literal notranslate"><span class="pre">stratis-cli</span></code> 软件包包括了 <code class="docutils literal notranslate"><span class="pre">stratis</span></code> 命令，这个命令可以通过D-Bus API转换用户请求到statisd服务。 <code class="docutils literal notranslate"><span class="pre">statisd</span></code> 软件包提供了 <code class="docutils literal notranslate"><span class="pre">statisd</span></code> 服务，这服务实现了D-Bus接口，并且管理和监控了Stratis的元素，例如快设备，存储池，和文件系统。只要 <code class="docutils literal notranslate"><span class="pre">statisd</span></code> 服务在运行，这个D-Bus API就存在。</p>
+<p>详细的实践操作见 <a class="reference internal" href="stratis_startup.html#stratis-startup"><span class="std std-ref">Stratis存储技术快速起步</span></a></p>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.thegeeksearch.com/beginners-guide-to-stratis-local-storage-management-in-centos-rhel-8/">Beginners Guide to Stratis local storage management in CentOS/RHEL 8</a></p></li>
+<li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/managing_file_systems/managing-layered-local-storage-with-stratis_managing-file-systems">CHAPTER 23. MANAGING LAYERED LOCAL STORAGE WITH STRATIS</a></p></li>
+</ul>
+</section>
 </section>
 
 
@@ -255,7 +299,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="xfs_performance.html" class="btn btn-neutral float-right" title="XFS性能" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="stratis_startup.html" class="btn btn-neutral float-right" title="Stratis存储技术快速起步" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="index.html" class="btn btn-neutral float-left" title="Stratis - Linux存储系统" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
