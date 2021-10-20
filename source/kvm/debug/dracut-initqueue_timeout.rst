@@ -28,7 +28,7 @@ CentOS 7虚拟机安装"dracut-initqueue timeout"报错
 
 这个报错通常是因为虚拟机启动或者安装过程中无法识别存储设备导致的，例如无法识别 RAID 设备。在 `RHEL 7 prints "dracut-initqueue timeout - starting timeout scripts" messages in loop while booting <https://access.redhat.com/solutions/2515741>`_ 提供了解决思路(不过这个是指已经运行的服务器无法识别LVM，需要通过内核参数 ``rd.lvm.lv`` 指定启动设备 )
 
-不过，我的情况不同，我在 :ref:`priv_cloud_infrastructure` 采用了交换虚拟网络 ``br0`` ，但是这个 ``br0`` 连接的网络是内部网络 ``192.168.6.0/24`` ，这个网段的主机不能直接访问internet。我忘记通过网络安装虚拟机，虚拟机内部需要直接访问internet，上述报错具有迷惑性。在 `CentOS 7 dracut-initqueue timeout and could not boot – warning /dev/disk/by-id/md-uuid- does not exist <https://ahelpme.com/linux/centos7/centos-7-dracut-initqueue-timeout-and-could-not-boot-warning-dev-disk-by-id-md-uuid-does-not-exist/>`_ 的一个commit提醒了我。
+不过，我的情况不同，我在 :ref:`priv_cloud_infra` 采用了交换虚拟网络 ``br0`` ，但是这个 ``br0`` 连接的网络是内部网络 ``192.168.6.0/24`` ，这个网段的主机不能直接访问internet。我忘记通过网络安装虚拟机，虚拟机内部需要直接访问internet，上述报错具有迷惑性。在 `CentOS 7 dracut-initqueue timeout and could not boot – warning /dev/disk/by-id/md-uuid- does not exist <https://ahelpme.com/linux/centos7/centos-7-dracut-initqueue-timeout-and-could-not-boot-warning-dev-disk-by-id-md-uuid-does-not-exist/>`_ 的一个commit提醒了我。
 
 解决的方法我考虑如下:
 

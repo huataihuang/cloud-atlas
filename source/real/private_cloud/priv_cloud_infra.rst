@@ -1,4 +1,4 @@
-.. _priv_cloud_infrastructure:
+.. _priv_cloud_infra:
 
 ============
 私有云架构

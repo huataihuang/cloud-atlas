@@ -11,7 +11,7 @@ RUN --mount=type=bind,target=/sys/fs/cgroup \
     dnf -y update && dnf -y install systemd && dnf clean all
 
 RUN dnf -y install openssh-server which procps-ng nmap-ncat mlocate net-tools file \
-           iputils tmux bzip2 sysstat unzip nfs-utils parted lsof bind-utils crontabs
+           iputils tmux bzip2 sysstat unzip nfs-utils parted lsof bind-utils
 
 RUN dnf -y install gcc gcc-c++ make flex autoconf automake ncurses-devel zlib-devel git
 

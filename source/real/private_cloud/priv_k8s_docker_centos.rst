@@ -6,7 +6,7 @@
 
 .. note::
 
-   本文是旧文，暂时存档待整理。新部署见 :ref:`priv_k8s_docker`
+   本文是旧文，暂时存档待整理。新部署见 :ref:`priv_docker`
 
 安装Docker运行环境
 ====================
@@ -173,7 +173,7 @@ Kubernetes选型
 
 .. note::
 
-   整体架构请参考 :ref:priv_cloud_infrastructure`
+   整体架构请参考 :ref:priv_cloud_infra`
 
 参考
 =======
