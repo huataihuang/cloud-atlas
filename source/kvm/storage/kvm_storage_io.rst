@@ -61,7 +61,7 @@ I/O虚拟化有不同的技术，各自具有利弊:
    :widths: 30, 30, 40
    :header-rows: 1
 
-在 :ref:`priv_cloud_infra` 就采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`vt-d_in_kvm`
+在 :ref:`priv_cloud_infra` 就采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`intel_vt-d`
 
 参考
 =======

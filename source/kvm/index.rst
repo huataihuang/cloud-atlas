@@ -22,6 +22,8 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    libvirt/index
    remote_desktop/index
    performance/index
+   intel_vt-d/index
+   sr-iov/index
    hardware_virtual.rst
    intel_vmcs.rst
    kvm_nested_virtual.rst
@@ -32,7 +34,6 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    memballoon.rst
    pci_passthrough.rst
    gpu_passthrough_with_kvm.rst
-   vt-d_in_kvm.rst
    nvidia_cuda_gpu_in_kvm.rst
    amd_rocm_gpu_in_kvm.rst
    macos_xhyve/index
