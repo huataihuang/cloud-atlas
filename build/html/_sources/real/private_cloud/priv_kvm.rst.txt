@@ -200,7 +200,7 @@
 
    详细克隆KVM虚拟机请参考 :ref:`clone_vm` 。
 
-   准备 :ref:`priv_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 :ref:`priv_cloud_infrastructure`
+   准备 :ref:`priv_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 :ref:`priv_cloud_infra`
 
    这里的案例是创建 ``z-pi-worker3`` 准备 :ref:`k8s_numa` 实践
 

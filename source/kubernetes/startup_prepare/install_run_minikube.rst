@@ -500,7 +500,7 @@ Docker in Docker
 
 .. note::
 
-   除了minikube，Docker公司也推出了一个集成standalone Kubernetes，包含了服务器和客户端，也是一个不能配置，并且单节点的Kubernetes集群。如果你和我一样使用 :ref:`macos_studio` ，并且只做开发不关心部署，并且不想由于VirtualBox虚拟化白白消耗系统资源，则可以尝试Docker Desktop集成的Kubernetes。（这个系统采用了macOS集成的 :ref:`xhyve` 所以性能损耗较少)
+   除了minikube，Docker公司也推出了一个集成standalone Kubernetes，包含了服务器和客户端，也是一个不能配置，并且单节点的Kubernetes集群。如果你和我一样使用 :ref:`docker_studio` ，并且只做开发不关心部署，并且不想由于VirtualBox虚拟化白白消耗系统资源，则可以尝试Docker Desktop集成的Kubernetes。（这个系统采用了macOS集成的 :ref:`xhyve` 所以性能损耗较少)
 
 参考
 =====

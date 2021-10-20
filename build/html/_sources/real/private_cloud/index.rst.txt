@@ -7,7 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
-   priv_cloud_infrastructure.rst
+   priv_cloud_infra.rst
    priv_kvm.rst
    priv_docker.rst
    priv_k8s_docker_centos.rst
