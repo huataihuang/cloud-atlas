@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>KVM存储I/O &mdash; Cloud Atlas 0.1 文档</title>
+  <title>VFIO - Virtual Function I/O &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -43,8 +43,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="KVM virtio" href="virtio/index.html" />
-    <link rel="prev" title="KVM 存储" href="index.html" /> 
+    <link rel="next" title="SR-IOV" href="../sr-iov/index.html" />
+    <link rel="prev" title="Intel VT-d快速起步" href="intel_vt-d_startup.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -100,22 +100,20 @@
 <li class="toctree-l2"><a class="reference internal" href="../startup/index.html">KVM 快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hypervisor.html">hypervisor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_architecture.html">KVM虚拟化</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">KVM 存储</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">KVM存储I/O</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#i-o-scheduler">I/O Scheduler</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#i-o">异步I/O</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">I/O虚拟化</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="virtio/index.html">KVM virtio</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">KVM 存储</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../numa/index.html">KVM NUMA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../intel_vt-d/index.html">Intel VT-d</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">IOMMU</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="iommu_infrastructure.html">IOMMU架构</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intel_vt-d_startup.html">Intel VT-d快速起步</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">VFIO - Virtual Function I/O</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
@@ -226,15 +224,15 @@
         
           <li><a href="../index.html">KVM Atlas</a> &raquo;</li>
         
-          <li><a href="index.html">KVM 存储</a> &raquo;</li>
+          <li><a href="index.html">IOMMU</a> &raquo;</li>
         
-      <li>KVM存储I/O</li>
+      <li>VFIO - Virtual Function I/O</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../../_sources/kvm/storage/kvm_storage_io.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/kvm/iommu/vfio.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -247,136 +245,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="kvmi-o">
-<span id="kvm-storage-io"></span><h1>KVM存储I/O<a class="headerlink" href="#kvmi-o" title="永久链接至标题">¶</a></h1>
-<section id="i-o-scheduler">
-<h2>I/O Scheduler<a class="headerlink" href="#i-o-scheduler" title="永久链接至标题">¶</a></h2>
-<p>默认HDD的磁盘I/O调度是完全公平队列(CFQ)，这种调度提供了对所有进程完全公平对磁盘I/O带宽。不过，在虚拟化环境中，需要针对不同设备使用不同I/O调度。</p>
-<p>为了能够获得host主机和VM虚拟机的最佳性能，在虚拟化的物理主机上建议使用 <code class="docutils literal notranslate"><span class="pre">deadline</span></code> scheduler(针对SSD优化)，而在VM Guest虚拟机中则使用 <code class="docutils literal notranslate"><span class="pre">noop</span></code> scheduler(禁用I/O调度)。</p>
-<ul>
-<li><p>检查当前自磁盘I/O调度:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/</span><span class="n">sda</span><span class="o">/</span><span class="n">queue</span><span class="o">/</span><span class="n">scheduler</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>例如，在我的 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器，使用SSD磁盘，安装了 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，系统安装后使用的磁盘I/O调度就是 <code class="docutils literal notranslate"><span class="pre">deadline</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mq</span><span class="o">-</span><span class="n">deadline</span><span class="p">]</span> <span class="n">none</span>
-</pre></div>
-</div>
-<ul>
-<li><p>要修改系统的默认(所有磁盘)的I/O调度器，使用内核参数 <code class="docutils literal notranslate"><span class="pre">elevator</span></code> ，即对虚拟化的物理主机:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">elevator</span><span class="o">=</span><span class="n">deadline</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>对VM虚拟机，则使用:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">elevator</span><span class="o">=</span><span class="n">noop</span>
-</pre></div>
-</div>
-<p>如果需要针对每个磁盘使用不同的I/O schedulers，则创建 <code class="docutils literal notranslate"><span class="pre">/usr/lib/tmpfiles.d/IO_ioscheduler.conf</span></code> ，按照以下案例配置，例如 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 设置 <code class="docutils literal notranslate"><span class="pre">deadline</span></code> scheduler , <code class="docutils literal notranslate"><span class="pre">/dev/sdb</span></code> 设置 <code class="docutils literal notranslate"><span class="pre">noop</span></code> scheduler</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">w</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/</span><span class="n">sda</span><span class="o">/</span><span class="n">queue</span><span class="o">/</span><span class="n">scheduler</span> <span class="o">-</span> <span class="o">-</span> <span class="o">-</span> <span class="o">-</span> <span class="n">deadline</span>
-<span class="n">w</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/</span><span class="n">sdb</span><span class="o">/</span><span class="n">queue</span><span class="o">/</span><span class="n">scheduler</span> <span class="o">-</span> <span class="o">-</span> <span class="o">-</span> <span class="o">-</span> <span class="n">noop</span>
-</pre></div>
-</div>
-</section>
-<section id="i-o">
-<h2>异步I/O<a class="headerlink" href="#i-o" title="永久链接至标题">¶</a></h2>
-<p>很多虚拟磁盘后端的实现采用了Linux异步I/O (Asynchronous I/O, aio)。默认情况下，aio上下文的最大数量是 <code class="docutils literal notranslate"><span class="pre">65536</span></code> ，但主机上运行了上百使用Linux异步I/O的VM虚拟机时候，有可能会超出这个限制。所以，当在VM Host主机上运行大量VM Guests时，需要增加 <code class="docutils literal notranslate"><span class="pre">/proc/sys/fs/aio-max-nr</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">aio</span><span class="o">-</span><span class="nb">max</span><span class="o">-</span><span class="n">nr</span>
-</pre></div>
-</div>
-<p>默认显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">65536</span>
-</pre></div>
-</div>
-<ul>
-<li><p>可以通过以下命令修订 <code class="docutils literal notranslate"><span class="pre">aio-max-nr</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">echo</span> <span class="mi">131072</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">aio</span><span class="o">-</span><span class="nb">max</span><span class="o">-</span><span class="n">nr</span>
-</pre></div>
-</div>
-</li>
-<li><p>如果要持久化 <code class="docutils literal notranslate"><span class="pre">aio-max-nr</span></code> ，则配置一个本地 <code class="docutils literal notranslate"><span class="pre">sysctl</span></code> 文件，例如 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/99-sysctl.conf</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span><span class="o">.</span><span class="n">aio</span><span class="o">-</span><span class="nb">max</span><span class="o">-</span><span class="n">nr</span> <span class="o">=</span> <span class="mi">1048576</span>
-</pre></div>
-</div>
-</li>
-</ul>
-</section>
+  <section id="vfio-virtual-function-i-o">
+<span id="vfio"></span><h1>VFIO - Virtual Function I/O<a class="headerlink" href="#vfio-virtual-function-i-o" title="永久链接至标题">¶</a></h1>
 <section id="id1">
-<h2>I/O虚拟化<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<p>I/O虚拟化有不同的技术，各自具有利弊:</p>
-<table class="colwidths-given docutils align-default" id="id5">
-<caption><span class="caption-text">I/O虚拟化解决方案</span><a class="headerlink" href="#id5" title="永久链接至表格">¶</a></caption>
-<colgroup>
-<col style="width: 30%" />
-<col style="width: 30%" />
-<col style="width: 40%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>___I/<a href="#id6"><span class="problematic" id="id7">O__</span></a></p></th>
-<th class="head"></th>
-<th class="head" id="id2"></th>
-</tr>
-</thead>
-<tbody id="id3">
-<tr class="row-even"><td><p>____(pass-through)</p></td>
-<td><p>guest_________</p></td>
-<td><p>__guests_______</p></td>
-</tr>
-<tr class="row-odd"><td></td>
-<td><p>___</p></td>
-<td><p>Live migration____</p></td>
-</tr>
-<tr class="row-even"><td></td>
-<td></td>
-<td><p>__guest_____8_PCI__</p></td>
-</tr>
-<tr class="row-odd"><td></td>
-<td></td>
-<td><p>______slot____</p></td>
-</tr>
-<tr class="row-even"><td><p>_____(IDE,SATA,SCSI,e1000)</p></td>
-<td><p>VM Guest____</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>Para-virtualization(virtio-blk,virtio-net,virtio-scsi)</p></td>
-<td></td>
-<td><p>____guest(PV drivers)</p></td>
-</tr>
-<tr class="row-odd"><td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-even"><td></td>
-<td><p>VM guest_______</p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<p><a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 采用上述 <code class="docutils literal notranslate"><span class="pre">Device</span> <span class="pre">Assignment(pass-through)</span></code> 方式，也就是 <a class="reference internal" href="../intel_vt-d/index.html#intel-vt-d"><span class="std std-ref">Intel VT-d</span></a> ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM
-Guest。要实现VFIO，需要满足条件有:</p>
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
-<li><p>Host物理主机服务器CPU和主板芯片以及BIOS/UEFI支持</p></li>
-<li><p>BIOS/EFI激活了IOMMU</p></li>
-<li><p>内核参数设置激活IOMMU: 对于Intel处理器，内核参数使用 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code></p></li>
-<li><p>系统提供了VFIO架构，也即是内核加载了模块 <code class="docutils literal notranslate"><span class="pre">vfio_pci</span></code></p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>我最初想通过 <a class="reference internal" href="../intel_vt-d/intel_vt-d_startup.html#intel-vt-d-startup"><span class="std std-ref">Intel VT-d快速起步</span></a> 设置VT-d来实现pass-through方式分配磁盘给虚拟机，虽然这个方法依然可以采用，但是显然目前虚拟化技术已经发展 VFIO 设备(底层还是IOMMU)，所以，实际实践采用 <a class="reference internal" href="../intel_vt-d/vfio.html#vfio"><span class="std std-ref">VFIO - Virtual Function I/O</span></a> 完成。</p>
-</div>
-</section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://documentation.suse.com/sles/15-SP1/pdf/article-vt-best-practices_color_en.pdf">SUSE Linux Enterprise Server 15 SP1 Virtualization Best Practices</a></p></li>
 <li><p><a class="reference external" href="https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html">SUSE Linux Enterprise Server 15 SP1 Virtualization Guide</a></p></li>
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=fFz44XivxWI">Beginner VFIO Tutorial - Part 0: Demo and Hardware</a> YouTube 上一个完整的VFIO教程(在Linux虚拟机中玩Windows游戏，对性能有极高要求)，视频解释做得很清晰，并且提供相关资料；链接资料中提供了benchmark，也是我后续准备做的方案</p></li>
+<li><p><a class="reference external" href="https://forum.level1techs.com/t/how-to-use-seperate-hdd-as-vfio-kvm-qemu-vm-disk/149623">How to use seperate hdd as vfio+kvm+qemu vm disk</a> vfio讨论</p></li>
+<li><p><a class="reference external" href="https://passthroughpo.st/disk-passthrough-explained/">Disk Passthrough Explained</a> 这篇文档解释了QEMU不同类型虚拟化磁盘技术的差异，简单明了；并且这个 passthroughpo.st 网站汇集了大量vfio资料信息，主要聚焦于虚拟化和linux游戏，最初是从 discord.gg 和 reddit 的VFIO讨论汇总而来</p></li>
+<li><p><a class="reference external" href="https://www.kernel.org/doc/Documentation/vfio.txt">Kernel Documentation: VFIO - “Virtual Function I/O”</a></p></li>
+<li><p><a class="reference external" href="https://www.reddit.com/r/VFIO/">reddit: VFIO Discussion and Support</a></p></li>
+<li><p><a class="reference external" href="https://insujang.github.io/2017-04-27/introduction-to-vfio/">Introduction to VFIO</a></p></li>
+<li><p><a class="reference external" href="https://forum.level1techs.com/t/the-vfio-and-gpu-passthrough-beginners-resource/129897">The VFIO and GPU Passthrough Beginner’s Resource</a></p></li>
+<li><p><a class="reference external" href="https://blog.sakuragawa.moe/vt-d-vfio-and-gpu-passthrough-virtualization-in-a-nutshell-rhel8/">VT-d, vfio and GPU passthrough, Virtualization in a nutshell (RHEL8)</a> 这篇是最新在RHEL8上部署GPU passthrough</p></li>
 </ul>
 </section>
 </section>
@@ -387,8 +269,8 @@ Guest。要实现VFIO，需要满足条件有:</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="virtio/index.html" class="btn btn-neutral float-right" title="KVM virtio" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="KVM 存储" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../sr-iov/index.html" class="btn btn-neutral float-right" title="SR-IOV" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="intel_vt-d_startup.html" class="btn btn-neutral float-left" title="Intel VT-d快速起步" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

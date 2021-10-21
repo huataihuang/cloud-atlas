@@ -22,7 +22,7 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    libvirt/index
    remote_desktop/index
    performance/index
-   intel_vt-d/index
+   iommu/index
    sr-iov/index
    hardware_virtual.rst
    intel_vmcs.rst

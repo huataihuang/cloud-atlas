@@ -131,11 +131,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../real_think/index.html">真实世界的技术思考</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../prepare/index.html">真实云计算的构建准备</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="priv_cloud_infrastructure.html">私有云架构</a></li>
+<li class="toctree-l3"><a class="reference internal" href="priv_cloud_infra.html">私有云架构</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">私有云docker环境</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">安装Docker运行环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dockerbtrfs">将Docker存储迁移到Btrfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">创建运行容器</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="priv_k8s_docker_centos.html">私有云Kubernetes和docker环境(CentOS)</a></li>
@@ -251,7 +252,71 @@
 </section>
 <section id="dockerbtrfs">
 <h2>将Docker存储迁移到Btrfs<a class="headerlink" href="#dockerbtrfs" title="永久链接至标题">¶</a></h2>
-<p>为了能够充分发挥SSD性能，并且学习和实践 <a class="reference internal" href="../../linux/storage/btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> ，参考 <a class="reference internal" href="../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 将Docker存储迁移到Btrfs中。</p>
+<p>为了能够充分发挥SSD性能，并且学习和实践 <a class="reference internal" href="../../linux/storage/btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> ，采用 <a class="reference internal" href="../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 将Docker存储迁移到Btrfs中。</p>
+</section>
+<section id="id2">
+<h2>创建运行容器<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>部署 <a class="reference internal" href="../../docker/admin/docker_studio.html#docker-studio"><span class="std std-ref">Docker运行Studio容器</span></a> 使用 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 的docker容器 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">../../docker/admin/docker_studio/ssh/Dockerfile</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">FROM</span> <span class="s">fedora:34</span>
+<span class="linenos"> 2</span><span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="k">ENV</span> container docker
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/cgroup <span class="se">\</span>
+<span class="linenos"> 7</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/fuse <span class="se">\</span>
+<span class="linenos"> 8</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/tmp <span class="se">\</span>
+<span class="linenos"> 9</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run <span class="se">\</span>
+<span class="linenos">10</span>    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run/lock <span class="se">\</span>
+<span class="linenos">11</span>    dnf -y update <span class="o">&amp;&amp;</span> dnf -y install systemd <span class="o">&amp;&amp;</span> dnf clean all
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="k">RUN</span> dnf -y install openssh-server <span class="se">\</span>
+<span class="linenos">14</span>    which net-tools iputils procps-ng
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c"># iputils: ping arping tracepath ...</span>
+<span class="linenos">17</span><span class="c"># net-tools: arp ifconfig route ...</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c">#RUN systemctl enable sshd</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="linenos">22</span><span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="linenos">23</span><span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="linenos">24</span><span class="k">RUN</span> usermod -aG wheel admin
+<span class="linenos">25</span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c"># Add ssh public key for login</span>
+<span class="linenos">28</span><span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="linenos">29</span><span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="linenos">30</span><span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="linenos">31</span><span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="linenos">32</span><span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="k">EXPOSE</span><span class="s"> 22 80 443</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span><span class="k">ENTRYPOINT</span> <span class="p">[</span> <span class="s2">&quot;/usr/lib/systemd/systemd&quot;</span> <span class="p">]</span>
+<span class="linenos">37</span><span class="k">CMD</span> <span class="p">[</span> <span class="s2">&quot;log-level=info&quot;</span><span class="p">,</span> <span class="s2">&quot;unit=sysinit.target&quot;</span> <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>构建docker镜像并运行(采用 <a class="reference internal" href="../../docker/admin/auto_start_containers.html#auto-start-containers"><span class="std std-ref">自动启动Docker容器</span></a> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DOCKER_BUILDKIT</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">ssh</span> <span class="o">.</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">privileged</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">fedora34</span><span class="o">-</span><span class="n">dev</span> <span class="o">--</span><span class="n">name</span> <span class="n">fedora34</span><span class="o">-</span><span class="n">dev</span> \
+    <span class="o">-</span><span class="n">p</span> <span class="mi">222</span><span class="p">:</span><span class="mi">22</span> <span class="o">-</span><span class="n">p</span> <span class="mi">280</span><span class="p">:</span><span class="mi">80</span> <span class="o">-</span><span class="n">p</span> <span class="mi">2443</span><span class="p">:</span><span class="mi">443</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">dev</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">admin</span><span class="o">/</span><span class="n">dev</span> <span class="o">--</span><span class="n">restart</span> <span class="n">unless</span><span class="o">-</span><span class="n">stopped</span> \
+    <span class="o">-</span><span class="n">dti</span> <span class="n">local</span><span class="p">:</span><span class="n">fedora34</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">ssh</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">fedora34-dev</span></code> 作为开发环境</p>
+</div>
 </section>
 </section>
 

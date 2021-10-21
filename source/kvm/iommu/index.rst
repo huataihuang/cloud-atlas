@@ -1,14 +1,15 @@
-.. _intel_vt-d:
+.. _iommu:
 
 =================================
-Intel VT-d
+IOMMU
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_intel_vt-d.rst
+   iommu_infrastructure.rst
    intel_vt-d_startup.rst
+   vfio.rst
 
 .. only::  subproject and html
 

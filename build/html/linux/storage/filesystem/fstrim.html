@@ -256,8 +256,187 @@
             
   <section id="fstrimtrim">
 <span id="fstrim"></span><h1>fstrim服务及周期TRIM<a class="headerlink" href="#fstrimtrim" title="永久链接至标题">¶</a></h1>
+<p>在 <a class="reference internal" href="../disk/linux_ssd.html#linux-ssd"><span class="std std-ref">Linux固态驱动器(SSD)</span></a> 上，需要激活文件系统 <code class="docutils literal notranslate"><span class="pre">TRIM</span></code> 来实现降低写入放大、延长SSD设备使用寿命。所谓TRIM，就是一种声明设备上没有使用的块，对于没有需要数据的块可以返回给存储池重新使用。我们有两种方式激活文件系统的TRIM功能:</p>
+<ul class="simple">
+<li><p>持久化TRIM: 挂载文件系统的时候，使用 <code class="docutils literal notranslate"><span class="pre">discard</span></code> 参数，例如</p></li>
+</ul>
+<p>对于 EXT4文件系统 增加挂载参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">ext4</span> <span class="o">-</span><span class="n">o</span> <span class="n">discard</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
+</pre></div>
+</div>
+<p>对于XFS文件系统，在 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 中也可以配置该参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UUID</span><span class="o">=</span><span class="mi">3453</span><span class="n">g54</span><span class="o">-</span><span class="mi">6628</span><span class="o">-</span><span class="mi">2346</span><span class="o">-</span><span class="mi">8123435</span><span class="n">f</span>  <span class="o">/</span><span class="n">home</span>  <span class="n">xfs</span>  <span class="n">defaults</span><span class="p">,</span><span class="n">discard</span>   <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>上述 <code class="docutils literal notranslate"><span class="pre">discard</span></code> 参数都会激活文件系统的持续TRIM，也就是每次新数据写入磁盘都会激活TRIM。这个方式也引发了是否存在潜在性能影响的争论。</p>
+<ul class="simple">
+<li><p>周期性TRIM: 通过定时任务定时触发TRIM</p></li>
+</ul>
+<p>传统上定时任务采用 <code class="docutils literal notranslate"><span class="pre">cron</span></code> 实现，不过在现代化的 <a class="reference internal" href="../../redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 系统，可以采用和系统更为紧密结合的 <a class="reference internal" href="../../redhat_linux/systemd/systemd_timer.html#systemd-timer"><span class="std std-ref">Systemd timer服务(替代cron)</span></a> 来实现，下文就是采用一条简单的 <code class="docutils literal notranslate"><span class="pre">fstrim.timer</span></code> 服务激活实现周期性TRIM</p>
+<section id="trim-fstrim">
+<h2>TRIM服务 <code class="docutils literal notranslate"><span class="pre">fstrim</span></code><a class="headerlink" href="#trim-fstrim" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>在终端执行以下命令来确定 <code class="docutils literal notranslate"><span class="pre">fstrim</span></code> 命令是否可以正常根据 <code class="docutils literal notranslate"><span class="pre">fstab</span></code> 配置调用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">fstrim</span> <span class="o">--</span><span class="n">fstab</span> <span class="o">--</span><span class="n">verbose</span> <span class="o">--</span><span class="n">quiet</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时会看到类似以下输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="p">:</span> <span class="mf">183.4</span> <span class="n">GiB</span> <span class="p">(</span><span class="mi">196879622144</span> <span class="nb">bytes</span><span class="p">)</span> <span class="n">trimmed</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">disk</span><span class="o">/</span><span class="n">by</span><span class="o">-</span><span class="n">uuid</span><span class="o">/</span><span class="n">d80f2f08</span><span class="o">-</span><span class="mi">3</span><span class="n">b50</span><span class="o">-</span><span class="mi">4</span><span class="n">b19</span><span class="o">-</span><span class="n">a0eb</span><span class="o">-</span><span class="mi">058</span><span class="n">fb47693b0</span>
+<span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">efi</span><span class="p">:</span> <span class="mf">505.8</span> <span class="n">MiB</span> <span class="p">(</span><span class="mi">530321408</span> <span class="nb">bytes</span><span class="p">)</span> <span class="n">trimmed</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">disk</span><span class="o">/</span><span class="n">by</span><span class="o">-</span><span class="n">uuid</span><span class="o">/</span><span class="mf">7E7</span><span class="n">B</span><span class="o">-</span><span class="mf">5E3</span><span class="n">A</span>
+<span class="o">/</span><span class="p">:</span> <span class="mf">6.6</span> <span class="n">GiB</span> <span class="p">(</span><span class="mi">7021338624</span> <span class="nb">bytes</span><span class="p">)</span> <span class="n">trimmed</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">disk</span><span class="o">/</span><span class="n">by</span><span class="o">-</span><span class="n">uuid</span><span class="o">/</span><span class="n">caa4193b</span><span class="o">-</span><span class="mi">9222</span><span class="o">-</span><span class="mi">49</span><span class="n">fe</span><span class="o">-</span><span class="n">a4b3</span><span class="o">-</span><span class="mi">89</span><span class="n">f1cb417e6a</span>
+</pre></div>
+</div>
+<p>这表明当前挂载的文件系统可以正确实现TRIM</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fstrim</span></code> 的 <code class="docutils literal notranslate"><span class="pre">--help</span></code> 提供了简洁说明:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">fstrim</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span>
+ <span class="n">fstrim</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="o">&lt;</span><span class="n">mount</span> <span class="n">point</span><span class="o">&gt;</span>
+
+<span class="n">Discard</span> <span class="n">unused</span> <span class="n">blocks</span> <span class="n">on</span> <span class="n">a</span> <span class="n">mounted</span> <span class="n">filesystem</span><span class="o">.</span>
+
+<span class="n">Options</span><span class="p">:</span>
+ <span class="o">-</span><span class="n">a</span><span class="p">,</span> <span class="o">--</span><span class="nb">all</span>           <span class="n">trim</span> <span class="nb">all</span> <span class="n">supported</span> <span class="n">mounted</span> <span class="n">filesystems</span>
+ <span class="o">-</span><span class="n">A</span><span class="p">,</span> <span class="o">--</span><span class="n">fstab</span>         <span class="n">trim</span> <span class="nb">all</span> <span class="n">supported</span> <span class="n">mounted</span> <span class="n">filesystems</span> <span class="kn">from</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+ <span class="o">-</span><span class="n">o</span><span class="p">,</span> <span class="o">--</span><span class="n">offset</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">&gt;</span>  <span class="n">the</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">bytes</span> <span class="n">to</span> <span class="n">start</span> <span class="n">discarding</span> <span class="kn">from</span>
+ <span class="o">-</span><span class="n">l</span><span class="p">,</span> <span class="o">--</span><span class="n">length</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">&gt;</span>  <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="nb">bytes</span> <span class="n">to</span> <span class="n">discard</span>
+ <span class="o">-</span><span class="n">m</span><span class="p">,</span> <span class="o">--</span><span class="n">minimum</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">&gt;</span> <span class="n">the</span> <span class="n">minimum</span> <span class="n">extent</span> <span class="n">length</span> <span class="n">to</span> <span class="n">discard</span>
+ <span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="o">--</span><span class="n">verbose</span>       <span class="nb">print</span> <span class="n">number</span> <span class="n">of</span> <span class="n">discarded</span> <span class="nb">bytes</span>
+     <span class="o">--</span><span class="n">quiet</span>         <span class="n">suppress</span> <span class="n">error</span> <span class="n">messages</span>
+ <span class="o">-</span><span class="n">n</span><span class="p">,</span> <span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span>       <span class="n">does</span> <span class="n">everything</span><span class="p">,</span> <span class="n">but</span> <span class="n">trim</span>
+
+ <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>          <span class="n">display</span> <span class="n">this</span> <span class="n">help</span>
+ <span class="o">-</span><span class="n">V</span><span class="p">,</span> <span class="o">--</span><span class="n">version</span>       <span class="n">display</span> <span class="n">version</span>
+</pre></div>
+</div>
+<ul>
+<li><p>如果只想查看一下设置是否正确，模拟TRIM(不实际执行TRIM)可以执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">fstrim</span> <span class="o">--</span><span class="n">fstab</span> <span class="o">--</span><span class="n">verbose</span> <span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span>
+</pre></div>
+</div>
+</li>
+<li><p>可以执行TRIM显示每个文件系统的TRIM操作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">fstrim</span> <span class="o">--</span><span class="n">fstab</span> <span class="o">--</span><span class="n">verbose</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="trim">
+<h2>激活定时TRIM<a class="headerlink" href="#trim" title="永久链接至标题">¶</a></h2>
+<p>对于 Fedora 30 / RHEL 8 / CentOS 8 提供了 <a class="reference internal" href="../../redhat_linux/systemd/systemd_timer.html#systemd-timer"><span class="std std-ref">Systemd timer服务(替代cron)</span></a> 服务，周期性执行 <code class="docutils literal notranslate"><span class="pre">fstrim.timer</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">status</span> <span class="n">fstrim</span><span class="o">.</span><span class="n">timer</span>
+</pre></div>
+</div>
+<p>在 Ubuntu 20.04.3 LTS 上， <code class="docutils literal notranslate"><span class="pre">fstrim.timer</span></code> 默认激活，所以显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● fstrim.timer - Discard unused blocks once a week
+     Loaded: loaded (/lib/systemd/system/fstrim.timer; enabled; vendor preset: enabled)
+     Active: active (waiting) since Wed 2021-10-20 17:52:32 CST; 21h ago
+    Trigger: Mon 2021-10-25 00:00:00 CST; 3 days left
+   Triggers: ● fstrim.service
+       Docs: man:fstrim
+
+Oct 20 17:52:32 zcloud systemd[1]: Started Discard unused blocks once a week.
+</pre></div>
+</div>
+<p>如果没有激活，可以通过以下命令执行激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">fstrim</span><span class="o">.</span><span class="n">timer</span>
+</pre></div>
+</div>
+<p>可以通过以下命令检查 <a class="reference internal" href="../../redhat_linux/systemd/systemd_timer.html#systemd-timer"><span class="std std-ref">Systemd timer服务(替代cron)</span></a> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="nb">list</span><span class="o">-</span><span class="n">timers</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+<p>显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NEXT</span>                        <span class="n">LEFT</span>          <span class="n">LAST</span>                        <span class="n">PASSED</span>      <span class="n">UNIT</span>                         <span class="n">ACTIVATES</span>
+<span class="o">...</span>
+<span class="n">Mon</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">25</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span> <span class="n">CST</span> <span class="mi">3</span> <span class="n">days</span> <span class="n">left</span>   <span class="n">Mon</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">18</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">24</span> <span class="n">CST</span> <span class="mi">3</span> <span class="n">days</span> <span class="n">ago</span>  <span class="n">fstrim</span><span class="o">.</span><span class="n">timer</span>                 <span class="n">fstrim</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+<p>现在你可以放心使用 <a class="reference internal" href="../disk/linux_ssd.html#linux-ssd"><span class="std std-ref">Linux固态驱动器(SSD)</span></a> 设备了。</p>
+</section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>禁用fstrim的情况<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>以下情况下需要禁用周期性TRIM:</p>
+<ul class="simple">
+<li><p>底层设备是 <code class="docutils literal notranslate"><span class="pre">thin-provisioned</span></code> (精简分配)</p></li>
+</ul>
+<p><strong>并且</strong></p>
+<ul class="simple">
+<li><p>文件系统内部不使用 <code class="docutils literal notranslate"><span class="pre">UNMAP</span></code> (trim是ata指令，对应scsi指令是unmap)</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">thin-provisioned</span></code> (精简分配) 策略是虚拟化根据虚拟环境中的实际使用情况实现存储资源的“过度分配（over-commit）”功能。“存储过度分配”是指分配给虚拟机的存储总量比存储池中所具有的物理存储总量要大。通常情况下，虚拟机不会使用分配给它们的全部存储资源。从用户的角度来看，使用精简分配功能的虚拟机完全具有了所有定义的存储空间；而实际上，只有一部分存储空间被实际分配给虚拟机。 – <a class="reference external" href="https://access.redhat.com/documentation/zh-cn/red_hat_virtualization/4.1/html/technical_reference/over-commitment">Red Hat Virtualization 2.11. 精简分配（THIN
+PROVISIONING）和存储过度分配（OVER-COMMITMENT）</a></p>
+</div>
+<p>fstrim (或者通常是 TRIM/DISCARD) 在 <code class="docutils literal notranslate"><span class="pre">over-provisioned</span></code> 过度分配的系统上操作和 <code class="docutils literal notranslate"><span class="pre">thin-provisioned</span></code> 精简分配系统处理方式是不同的。如果系统在每个LUN(不论是不是精简分配)都分配了足够的空间，则不需要TRIM指令。然而，在SAP HANA是不建议使用 <code class="docutils literal notranslate"><span class="pre">over-provisioned</span></code> 过度分配系统，而且也强烈建议 <code class="docutils literal notranslate"><span class="pre">不</span></code> 使用精简分配设备。</p>
+<ul>
+<li><p>检查文件系统是否支持 <code class="docutils literal notranslate"><span class="pre">UNMAP</span></code> 的方法是使用 <code class="docutils literal notranslate"><span class="pre">lsblk</span> <span class="pre">-D</span></code> 命令，如果 <code class="docutils literal notranslate"><span class="pre">DISC-MAX</span></code> 值是 <code class="docutils literal notranslate"><span class="pre">0</span></code> 就标识设备不支持 <code class="docutils literal notranslate"><span class="pre">discard</span></code> 功能:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsblk</span> <span class="o">-</span><span class="n">D</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NAME   DISC-ALN DISC-GRAN DISC-MAX DISC-ZERO
+sda           0      512B       2G         0
+├─sda1        0      512B       2G         0
+├─sda2        0      512B       2G         0
+└─sda3        0      512B       2G         0
+sdb           0        0B       0B         0
+└─sdb1        0        0B       0B         0
+sdc           0        0B       0B         0
+├─sdc1        0        0B       0B         0
+└─sdc2        0        0B       0B         0
+sdd           0        0B       0B         0
+├─sdd1        0        0B       0B         0
+└─sdd2        0        0B       0B         0
+</pre></div>
+</div>
+<p>可以看到 <code class="docutils literal notranslate"><span class="pre">sdb</span></code> , <code class="docutils literal notranslate"><span class="pre">sdc</span></code> , <code class="docutils literal notranslate"><span class="pre">sdd</span></code> 存储设备不支持 <code class="docutils literal notranslate"><span class="pre">UNMAP</span></code> / <code class="docutils literal notranslate"><span class="pre">TRIM</span></code> ，实际上是传统的机械硬盘。</p>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">fstrim</span></code> 命令也可以验证:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb1</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">sudo</span> <span class="n">fstrim</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">mnt</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fstrim</span><span class="p">:</span> <span class="o">/</span><span class="n">mnt</span><span class="p">:</span> <span class="n">the</span> <span class="n">discard</span> <span class="n">operation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">supported</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>虚拟机<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>在虚拟机内部， <code class="docutils literal notranslate"><span class="pre">fstrim.service</span></code> 是没有效果的，除非虚拟块设备宣告它支持 <code class="docutils literal notranslate"><span class="pre">discard</span></code> 。在 <code class="docutils literal notranslate"><span class="pre">virt-manager</span></code> 虚拟化管理器中，需要对块设备设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Advanced</span> <span class="n">options</span><span class="o">&gt;</span><span class="n">Performance</span> <span class="n">options</span><span class="o">&gt;</span><span class="n">Discard</span> <span class="n">mode</span><span class="p">:</span> <span class="n">unmap</span>
+</pre></div>
+</div>
+<p>默认情况下 <code class="docutils literal notranslate"><span class="pre">virt-manager</span></code> 的 <code class="docutils literal notranslate"><span class="pre">qemu-kvm</span></code> 虚拟机会忽略 <code class="docutils literal notranslate"><span class="pre">discard</span></code> 执行，所以虽然 <code class="docutils literal notranslate"><span class="pre">ftrim.service</span></code> 显示执行成功，但是内核日志会显示这个执行失败:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[ 122.895923 ] localhost.localdomain kernel: blk_update_request: operation not supported error, dev vda, sector 206856170 op 0x3:(DISCARD) flags 0x0 phys_seg 2 prio class 0
+</pre></div>
+</div>
+<p>如果对支持的存储设置VM使用 <code class="docutils literal notranslate"><span class="pre">unmap</span></code> ，此时 <code class="docutils literal notranslate"><span class="pre">fstrim</span></code> 指令会 pass through 透传给底层块存储；如果底层块存储是 <code class="docutils literal notranslate"><span class="pre">raw</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">qcow2</span></code> 则该文件会编程一个稀疏(sparse)文件。</p>
+</section>
+<section id="id3">
+<h2>容器<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>从 <code class="docutils literal notranslate"><span class="pre">util-linux</span> <span class="pre">2.35</span></code> 开始，也就是 Fedora 32开始， <code class="docutils literal notranslate"><span class="pre">fstrim.service</span></code> 包含了以下配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ConditionVirtualization=!container
+</pre></div>
+</div>
+<p><a class="reference internal" href="../../../docker/init/docker_systemd.html#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 通过Docker环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> 可以知道自己运行在容器内部，也就会停止运行 <code class="docutils literal notranslate"><span class="pre">fstrim.service</span></code> 。</p>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://fedoraproject.org/wiki/Changes/EnableFSTrimTimer">Changes/EnableFSTrimTimer</a></p></li>
 <li><p><a class="reference external" href="https://opensource.com/article/20/2/trim-solid-state-storage-linux">Extend the life of your SSD drive with fstrim - A new systemd service to make your life easier</a></p></li>
