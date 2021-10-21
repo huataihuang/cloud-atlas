@@ -33,9 +33,21 @@ Intel VT-d快速起步
 
    GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on"
 
+.. note::
+
+   如果使用AMD处理器，则内核参数可以使用以下配置::
+
+      iommu=pt iommu=1    # AMD only
+
+   ``iommu=pt`` 可以避免Linux使用不能pass-through的设备
+
 然后更新grub::
 
    sudo update-grub
+
+.. note::
+
+   如果是CentOS/RHEL 则使用 ``grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg`` 命令
 
 并重启系统，然后检查 ``cat /proc/cmdline`` 可以看到::
 
@@ -49,8 +61,31 @@ Intel VT-d快速起步
    :linenos:
    :caption:
 
+确认IOMMU groups
+------------------
+
+以下脚本 ``check_iommu.sh`` 脚本可以查看系统中不同的PCI设备被映射到IOMMU组，如果没有返回任何信息，则表明系统没有激活IOMMU支持或者硬件不支持IOMMU
+
+.. literalinclude:: intel_vt-d_startup/check_iommu.sh
+   :language: bash
+   :linenos:
+   :caption:
+
+Host主机unbind设备
+====================
+
+要将PCI设备直通给虚拟机，需要首先在Host物理主机上 ``unbind`` 这个PCI设备，也就是在物理主机上这个设备将 ``消失`` ，然后 ``asign`` 设备给迅即，这样这个设备就是虚拟机 ``独占`` 使用
+
+
+
+
+
+
 参考
 ======
 
 - `How to assign devices with VT-d in KVM <http://www.linux-kvm.org/page/How_to_assign_devices_with_VT-d_in_KVM>`_ 
 - `KVM : GPU Passthrough <https://www.server-world.info/en/note?os=Ubuntu_18.04&p=kvm&f=11>`_
+- `arch linux: PCI passthrough via OVMF <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>`_ arch linux文档不愧是Linux发行版中最详尽的，提供了不同Host设备passthrough给虚拟机的方法和案例
+- `gentoo linux: GPU passthrough with libvirt qemu kvm <https://wiki.gentoo.org/wiki/GPU_passthrough_with_libvirt_qemu_kvm>`_ 和arch linux相似，Gentoo Linux文档也非常深刻
+- `QEMU Features/VT-d <https://wiki.qemu.org/Features/VT-d>`_ 

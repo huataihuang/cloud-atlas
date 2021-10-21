@@ -61,9 +61,21 @@ I/O虚拟化有不同的技术，各自具有利弊:
    :widths: 30, 30, 40
    :header-rows: 1
 
-在 :ref:`priv_cloud_infra` 就采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`intel_vt-d`
+:ref:`priv_cloud_infra` 采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`intel_vt-d` ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM
+Guest。要实现VFIO，需要满足条件有:
+
+- Host物理主机服务器CPU和主板芯片以及BIOS/UEFI支持
+- BIOS/EFI激活了IOMMU
+- 内核参数设置激活IOMMU: 对于Intel处理器，内核参数使用 ``intel_iommu=on``
+- 系统提供了VFIO架构，也即是内核加载了模块 ``vfio_pci``
+
+.. note::
+
+   我最初想通过 :ref:`intel_vt-d_startup` 设置VT-d来实现pass-through方式分配磁盘给虚拟机，虽然这个方法依然可以采用，但是显然目前虚拟化技术已经发展 VFIO 设备(底层还是IOMMU)，所以，实际实践采用 :ref:`vfio` 完成。
+
 
 参考
 =======
 
 - `SUSE Linux Enterprise Server 15 SP1 Virtualization Best Practices <https://documentation.suse.com/sles/15-SP1/pdf/article-vt-best-practices_color_en.pdf>`_
+- `SUSE Linux Enterprise Server 15 SP1 Virtualization Guide <https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html>`_

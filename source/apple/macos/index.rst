@@ -10,7 +10,6 @@ macOS
    :maxdepth: 1
 
    introduce_macos_studio.rst
-   docker_studio.rst
    mbp15_late_2013.rst
    macbook_nvme.rst
    macos_install_drive.rst

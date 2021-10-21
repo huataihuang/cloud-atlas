@@ -196,6 +196,12 @@ ssh服务容器(ssh)
 
    开发环境部署参考 :ref:`fedora_develop` 构建不同的语言开发环境
 
+- 为了能够在物理服务器重启时自动重启容器，设置 :ref:`auto_start_containers` (修订运行命令)::
+
+   docker run --privileged=true --hostname fedora34-dev --name fedora34-dev \
+       -p 222:22 -p 280:80 -p 2443:443 -v /home/huatai/dev:/home/admin/dev --restart unless-stopped \
+       -dti local:fedora34-systemd-ssh
+
 多容器共享NFS
 ----------------
 

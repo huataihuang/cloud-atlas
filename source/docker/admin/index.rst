@@ -15,6 +15,7 @@ Docker 管理
    docker_ssh.rst
    debug_docker_ssh_crash.rst
    dockerfile.rst
+   docker_studio.rst
    auto_start_containers.rst
    docker_timezone.rst
    find_container_process.rst
