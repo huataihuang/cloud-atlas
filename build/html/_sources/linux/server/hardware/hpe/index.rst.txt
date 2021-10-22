@@ -13,6 +13,7 @@ HPE服务器
    dl360_bios.rst
    dl360_bios_upgrade.rst
    dl360_bios_numa.rst
+   hp_utilities_ubuntu.rst
    hp_ilo/index
    
 .. only::  subproject and html

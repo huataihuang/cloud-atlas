@@ -31,6 +31,11 @@ Linux驱动和工具
 在Linux中使用iLO，使用以下驱动和工具:
 
 - ``System Health Application and Command-Line Utilities`` 包含了一系列监控风扇、电源、温度传感器以及管理事件的应用程序，包括 ``hpasmd`` ``hpasmlited`` ``hpasmpld`` 和 ``hpasmxld`` 服务
+
+.. note::
+
+   :ref:`hp_utilities_ubuntu` 安装以后可以获得上述工具
+
 - ``hpilo`` 驱动是Linux内核模块，在Ubuntu系统中会自动加载::
 
    lsmod | grep hpilo

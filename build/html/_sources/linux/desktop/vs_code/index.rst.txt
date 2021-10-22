@@ -9,6 +9,7 @@ VS Code
 
    vs_code_linux.rst
    vs_code_lsp.rst
+   vs_code_extensions.rst
 
 .. only::  subproject and html
 
