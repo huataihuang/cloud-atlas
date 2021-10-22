@@ -8,6 +8,7 @@ VFIO - Virtual Function I/O
 ======
 
 - `SUSE Linux Enterprise Server 15 SP1 Virtualization Guide <https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html>`_
+- `Ubuntu 20.04, straightforward guide for gaming on a virtual machine <https://mathiashueber.com/pci-passthrough-ubuntu-2004-virtual-machine/>`_ 设置Ubuntu的PCI pass-through，非常详细
 - `Beginner VFIO Tutorial - Part 0: Demo and Hardware <https://www.youtube.com/watch?v=fFz44XivxWI>`_ YouTube 上一个完整的VFIO教程(在Linux虚拟机中玩Windows游戏，对性能有极高要求)，视频解释做得很清晰，并且提供相关资料；链接资料中提供了benchmark，也是我后续准备做的方案
 - `How to use seperate hdd as vfio+kvm+qemu vm disk <https://forum.level1techs.com/t/how-to-use-seperate-hdd-as-vfio-kvm-qemu-vm-disk/149623>`_ vfio讨论
 - `Disk Passthrough Explained <https://passthroughpo.st/disk-passthrough-explained/>`_ 这篇文档解释了QEMU不同类型虚拟化磁盘技术的差异，简单明了；并且这个 passthroughpo.st 网站汇集了大量vfio资料信息，主要聚焦于虚拟化和linux游戏，最初是从 discord.gg 和 reddit 的VFIO讨论汇总而来

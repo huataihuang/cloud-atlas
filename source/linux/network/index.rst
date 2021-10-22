@@ -9,6 +9,7 @@ Linux网络
 
    ring_buffer_dma_mmio.rst
    ip_command.rst
+   axel.rst
    ethtool/index
    create_ap.rst
    linux_router.rst

@@ -8,6 +8,7 @@ HP服务器iLO技术
    :maxdepth: 1
 
    introduce_ilo.rst
+   hp_ilo_startup.rst
    
 .. only::  subproject and html
 

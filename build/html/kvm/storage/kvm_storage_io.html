@@ -105,7 +105,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#i-o-scheduler">I/O Scheduler</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#i-o">异步I/O</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">I/O虚拟化</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">基于磁盘的虚拟化存储</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="virtio/index.html">KVM virtio</a></li>
@@ -115,7 +116,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../intel_vt-d/index.html">Intel VT-d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iommu/index.html">IOMMU</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
@@ -307,15 +308,15 @@
 <section id="id1">
 <h2>I/O虚拟化<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <p>I/O虚拟化有不同的技术，各自具有利弊:</p>
-<table class="colwidths-given docutils align-default" id="id5">
-<caption><span class="caption-text">I/O虚拟化解决方案</span><a class="headerlink" href="#id5" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id8">
+<caption><span class="caption-text">I/O虚拟化解决方案</span><a class="headerlink" href="#id8" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 30%" />
 <col style="width: 30%" />
 <col style="width: 40%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p>___I/<a href="#id6"><span class="problematic" id="id7">O__</span></a></p></th>
+<tr class="row-odd"><th class="head"><p>___I/<a href="#id9"><span class="problematic" id="id10">O__</span></a></p></th>
 <th class="head"></th>
 <th class="head" id="id2"></th>
 </tr>
@@ -359,7 +360,7 @@
 </tr>
 </tbody>
 </table>
-<p><a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 采用上述 <code class="docutils literal notranslate"><span class="pre">Device</span> <span class="pre">Assignment(pass-through)</span></code> 方式，也就是 <a class="reference internal" href="../intel_vt-d/index.html#intel-vt-d"><span class="std std-ref">Intel VT-d</span></a> ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM
+<p><a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 采用上述 <code class="docutils literal notranslate"><span class="pre">Device</span> <span class="pre">Assignment(pass-through)</span></code> 方式，也就是 <a class="reference internal" href="../iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM
 Guest。要实现VFIO，需要满足条件有:</p>
 <ul class="simple">
 <li><p>Host物理主机服务器CPU和主板芯片以及BIOS/UEFI支持</p></li>
@@ -369,14 +370,37 @@ Guest。要实现VFIO，需要满足条件有:</p>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>我最初想通过 <a class="reference internal" href="../intel_vt-d/intel_vt-d_startup.html#intel-vt-d-startup"><span class="std std-ref">Intel VT-d快速起步</span></a> 设置VT-d来实现pass-through方式分配磁盘给虚拟机，虽然这个方法依然可以采用，但是显然目前虚拟化技术已经发展 VFIO 设备(底层还是IOMMU)，所以，实际实践采用 <a class="reference internal" href="../intel_vt-d/vfio.html#vfio"><span class="std std-ref">VFIO - Virtual Function I/O</span></a> 完成。</p>
+<p>我最初想通过 <a class="reference internal" href="../iommu/intel_vt-d_startup.html#intel-vt-d-startup"><span class="std std-ref">Intel VT-d快速起步</span></a> 设置VT-d来实现pass-through方式分配磁盘给虚拟机，虽然这个方法依然可以采用，但是显然目前虚拟化技术已经发展 VFIO 设备(底层还是IOMMU)，所以，实际实践采用 <a class="reference internal" href="../iommu/vfio.html#vfio"><span class="std std-ref">VFIO - Virtual Function I/O</span></a> 完成。</p>
 </div>
+<section id="pass-through">
+<h3>pass-through 分区(似乎不行)<a class="headerlink" href="#pass-through" title="永久链接至标题">¶</a></h3>
+<p>参考 <a class="reference external" href="https://www.reddit.com/r/VFIO/comments/j443ad/pass_through_a_partition/">Pass through a partition?</a></p>
+<ul class="simple">
+<li><p>可以将一个磁盘分区pass through给虚拟机，但是需要注意分区在虚拟机内部会视为一个完整磁盘，所以虚拟机在这个分区中创建完整的GPT分区表，从外部看来这是一个嵌套的(nested)分区</p></li>
+<li><p>需要非常小心，在物理服务器上不能直接访问pass-through给虚拟机的分区中的数据，需要特殊处理(我记得是要使用loop方式)</p></li>
+</ul>
+<p>但是，参考 <a class="reference external" href="https://passthroughpo.st/disk-passthrough-explained/">Disk Passthrough Explained</a> 的 <code class="docutils literal notranslate"><span class="pre">Direct</span> <span class="pre">SATA</span> <span class="pre">Controller</span> <span class="pre">Passthrough</span> <span class="pre">via</span> <span class="pre">vfio-pci</span></code> :</p>
+<p>SATA控制器是位于PCI总线，所以可以将SATA控制器直接pass
+through给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。</p>
+<p><a class="reference external" href="https://github.com/lennard0711/vfio">lennard0711/vfio</a> 提供了一个配置案例，并且 <a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Physical_disk/partition">arch linux: PCI passthrough via OVMF - Physical disk/partition</a> 介绍了可以pass through磁盘或分区</p>
+</section>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>基于磁盘的虚拟化存储<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p><a class="reference external" href="https://www.heiko-sieger.info/tuning-vm-disk-performance/">Tuning VM Disk Performance</a> 的 <code class="docutils literal notranslate"><span class="pre">Disk-based</span> <span class="pre">storage</span></code> 方案和我设想相近:</p>
+<ul class="simple">
+<li><p>使用LVM逻辑卷来构建 <code class="docutils literal notranslate"><span class="pre">raw</span></code> 磁盘，直接分配给虚拟机使用(虽然也能直接用分区，但是分区只能固定数量，很难调节，而LVM卷可以在底层伸缩)</p></li>
+<li><p>虚拟机磁盘配置 <code class="docutils literal notranslate"><span class="pre">cache=none</span></code> 提高性能</p></li>
+</ul>
+<p>这种方式去掉了Host主机上的文件系统层，理论上可以提高性能，不过性能肯定不如pass-through</p>
+<p>实际上Red Hat虚拟化文档就提供了这个解决方法 <a class="reference external" href="https://access.redhat.com/documentation/zh-cn/red_hat_enterprise_linux/8/html/configuring_and_managing_logical_volumes/assembly_thinly-provisioned-logical-volumes_configuring-and-managing-logical-volumes">第 12 章 创建和管理精简配置的逻辑卷（精简卷）</a></p>
+</section>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://documentation.suse.com/sles/15-SP1/pdf/article-vt-best-practices_color_en.pdf">SUSE Linux Enterprise Server 15 SP1 Virtualization Best Practices</a></p></li>
 <li><p><a class="reference external" href="https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html">SUSE Linux Enterprise Server 15 SP1 Virtualization Guide</a></p></li>
+<li><p><a class="reference external" href="https://www.heiko-sieger.info/tuning-vm-disk-performance/">Tuning VM Disk Performance</a></p></li>
 </ul>
 </section>
 </section>
