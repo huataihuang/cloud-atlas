@@ -12,6 +12,7 @@ HPE服务器
    dl360+pi_one_machine.rst
    dl360_bios.rst
    dl360_bios_upgrade.rst
+   pcie_bifurcation.rst
    dl360_bios_numa.rst
    hp_utilities_ubuntu.rst
    hp_ilo/index
