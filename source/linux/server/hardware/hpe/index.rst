@@ -11,6 +11,7 @@ HPE服务器
    hpe_dl160_gen9.rst
    dl360+pi_one_machine.rst
    dl360_bios.rst
+   dl360_bios_upgrade.rst
    dl360_bios_numa.rst
    hp_ilo/index
    
