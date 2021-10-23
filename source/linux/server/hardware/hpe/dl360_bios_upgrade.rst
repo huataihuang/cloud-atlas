@@ -25,6 +25,11 @@ Reddit的帖子 `HPE DL380 Gen 9 Firmware/Bios update <https://www.reddit.com/r/
 
    下载建议使用 :ref:`axel` 加速
 
+升级前后性能对比
+==================
+
+使用 :ref:`sysbench` 进行BIOS升级前后性能对比
+
 参考
 =======
 
