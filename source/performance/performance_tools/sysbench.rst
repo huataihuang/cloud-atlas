@@ -115,6 +115,17 @@ Sysbench性能测试
    :emphasize-lines: 18,20
    :caption: sysbench memory
 
+MySQL数据库测试(待实践)
+-------------------------
+
+- 创建一个test表包含 1,000,000 行数据::
+
+   sysbench --test=oltp --oltp-table-size=1000000 --db-driver=mysql --mysql-db=test --mysql-user=root --mysql-password=yourrootsqlpassword prepare
+
+- 性能测试::
+
+   sysbench --test=oltp --oltp-table-size=1000000 --db-driver=mysql --mysql-db=test --mysql-user=root --mysql-password=yourrootsqlpassword --max-time=60 --oltp-read-only=on --max-requests=0 --num-threads=8 run
+
 
 参考
 ======
