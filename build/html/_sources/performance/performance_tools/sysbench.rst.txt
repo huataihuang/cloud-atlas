@@ -47,6 +47,75 @@ Sysbench性能测试
    :emphasize-lines: 22-24,27-28
    :caption: sysbench fileio
 
+测试 ``cpu``
+--------------
+
+在 CPU 工作负载下运行时，sysbench 将通过将数字标准除以 2 和数字平方根之间的所有数字来验证素数。 如果任何数字的余数为 0，则计算下一个数字。 可以想象，这会给 CPU 带来一些压力，但仅限于一组非常有限的 CPU 功能。
+
+测试命令::
+
+   sysbench cpu --cpu-max-prime=20000 --threads=48 run
+
+输出结果:
+
+.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_cpu
+   :language: bash
+   :emphasize-lines: 18-19
+   :caption: sysbench cpu 
+
+测试线程工作负载
+-----------------
+
+对于线程工作负载，每个工作线程都将被分配一个互斥锁（一种锁），并且对于每次执行，将循环多次（记录为产量），其中获取锁，产量（意味着它 要求调度程序停止运行并将其放回运行队列的末尾），然后，当它再次被调度执行时，解锁。
+
+通过调整各种参数，可以模拟具有相同锁的高并发线程，或具有多个不同锁的高并发线程等情况。
+
+::
+
+   sysbench threads --thread-locks=1 --time=20 run
+
+输出结果:
+
+.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_threads
+   :language: bash
+   :emphasize-lines: 14-15
+   :caption: sysbench threads
+
+测试mutex工作负载
+-------------------
+
+使用互斥量工作负载时，sysbench 应用程序将为每个线程运行一个请求。 这个请求首先会给 CPU 带来一些压力（使用一个简单的增量循环，通过 ``--mutex-loops`` 参数），然后它需要一个随机互斥锁（锁），增加一个全局变量并再次释放锁。 这个过程会重复几次，由锁的数量（ ``--mutex-locks`` ）标识。 随机互斥锁取自 ``--mutex-num`` 参数确定大小的池。
+
+::
+
+   sysbench mutex --threads=1024 run
+
+输出结果:
+
+.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_mutex
+   :language: bash
+   :emphasize-lines: 14
+   :caption: sysbench mutex
+
+这里输出结果中，运行时间长度最为关键，尽管必须考虑到线程将从可用池中随机获取一个互斥锁。 这个随机因素可能会影响结果。
+
+测试内存工作负载
+------------------
+
+在 sysbench 中使用内存测试时，基准应用程序会分配一个内存缓冲区，然后从中读取或写入，每次为一个指针的大小（即 32 位或 64 位），每次执行直到读取了总缓冲区大小 从或写到。 然后重复此操作，直到达到提供的容量 ( ``--memory-total-size`` )。 用户可以提供多线程（ ``--threads`` ）、不同大小的缓冲区（ ``--memory-block-size`` ）和请求类型（读或写，顺序或随机）。
+
+::
+
+   sysbench memory --threads=1024 run
+
+输出结果:
+
+.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_memory
+   :language: bash
+   :emphasize-lines: 18,20
+   :caption: sysbench memory
+
+
 参考
 ======
 
