@@ -6,6 +6,10 @@ Trusted Platform Module(TPM)硬件
 
 实际上PC主板上很早就已经集成了TPM芯片，但是很长时间并没有实际得到主流欢迎，原因是很少有软件使用TPM。不过，现在TPM越来越受到关注，原因是Windows和Linux都开始支持和使用TPM(应该也是因为苹果公司T1/T2安全芯片带来的市场竞争)。
 
+.. note::
+
+   我在构建 :ref:`private_cloud` 采用二手 :ref:`hpe_dl360_gen9` ，服务器需要安装一个 ``HP Trusted Platform Module 2.0 Kit 745823-B21`` 模块才能提供TPM支持。这个模块需要到ebay上从美国卖家这里购买，价格大约是300元。从部件手册看还有一个 ``HP Trusted Platform Module Option 488069-B21`` 不知道差异。
+
 TPM功能和原理
 ==============
 
