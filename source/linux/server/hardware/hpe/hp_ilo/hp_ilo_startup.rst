@@ -82,6 +82,24 @@ Linux驱动和工具
 
    BIOS 升级参考 :ref:`dl360_bios_upgrade`
 
+- 通过iLO WEB方式升级:
+
+.. figure:: ../../../../../_static/linux/server/hardware/hpe/hp_ilo/upgrade_hp_ilo.png
+   :scale: 80
+
+.. figure:: ../../../../../_static/linux/server/hardware/hpe/hp_ilo/upgrade_hp_ilo-1.png
+   :scale: 40
+
+.. figure:: ../../../../../_static/linux/server/hardware/hpe/hp_ilo/upgrade_hp_ilo-2.png
+   :scale: 40
+
+.. figure:: ../../../../../_static/linux/server/hardware/hpe/hp_ilo/upgrade_hp_ilo-3.png
+   :scale: 40
+
+- 更新以后版本是 ``2.78 Apr 28 2021`` ，这个版本带来了全新的交互界面，并且提供了 ``HTML5`` 的 ``remote console`` ，这样就不再需要安装java才能运行控制台程序。不过，java支持升级到了jre 8，之前下载安装Oracle JRE 8无法运行控制台的问题终于解决，现在终于可以通过Java Web访问控制台了。
+
+既然提供了HTML5的远程控制台，可以支持更多的浏览器，所以推荐采用 HTML 5 方式。
+
 IPMI tool
 =============
 
