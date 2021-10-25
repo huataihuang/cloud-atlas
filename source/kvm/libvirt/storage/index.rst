@@ -9,6 +9,7 @@ Libvirt存储
    :maxdepth: 1
 
    libvirt_storage_arch.rst
+   libvirt_lvm_pool.rst
 
 .. only::  subproject and html
 
