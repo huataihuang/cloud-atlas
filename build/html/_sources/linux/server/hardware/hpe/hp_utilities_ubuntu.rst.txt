@@ -56,7 +56,7 @@ Management Component Pack
 
    sudo apt update
    #sudo apt install hp-health hponcfg amsd ams ssacli ssaducli ssa
-   sudo apt install hp-health hponcfg 
+   sudo apt install hp-health hponcfg hp-ams
 
 软件包列表位于 `HPE Software Delivery Repository: Management Component Pack <https://downloads.linux.hpe.com/SDR/project/mcp/>`_ 不过，部分软件包已经改名或不存在:
 
@@ -79,6 +79,10 @@ Management Component Pack
 .. note::
 
    我的 :ref:`hpe_dl360_gen9` 服务器没有安装HPE Flexible Smart Array或者Smart HBA卡，所以我不安装 ``ssa*`` 程序，也没有使用 ``storecli`` (MegaRAID卡)
+
+.. note::
+
+   iLO WEB管理平台在 ``System Information`` 中可以观察系统的状态，其中 ``Storage Information`` 依赖 ``Agentless Management Service`` ，所以需要安装 ``hp-ams`` ，这样才能显示监控页面
 
 使用
 =======

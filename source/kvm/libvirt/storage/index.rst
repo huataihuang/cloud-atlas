@@ -1,15 +1,14 @@
-.. _libvirt:
+.. _libvirt_storage:
 
 =================================
-Libvirt虚拟机管理器
+Libvirt存储
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   libvirt_architecture.rst
-   network/index
-   storage/index
+   libvirt_storage_arch.rst
 
 .. only::  subproject and html
 

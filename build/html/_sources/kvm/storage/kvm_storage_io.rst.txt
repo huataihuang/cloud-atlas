@@ -195,6 +195,10 @@ qemu/kvm 虚拟机可以直接使用磁盘或分区，只需要将 ``-drive``
 
 - 购买NVMe扩展卡并使用 :ref:`pcie_bifurcation` 将 PCIe 3.0 X16 切分成 X4X4X4X4 ，分别安装4个NVMe m.2存储设备，其中1个提供物理主机的libvirt作为虚拟机存储池，另外3个通过 VFIO 直接 pass-through 给3个虚拟机，构建 :ref:`ceph`
 
+.. note::
+
+   为了方便管理KVM虚拟机存储，实践采用 :ref:`libvirt_storage`
+
 参考
 =======
 

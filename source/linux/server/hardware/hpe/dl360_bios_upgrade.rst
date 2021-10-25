@@ -110,14 +110,28 @@ rpm包升级(未完成)
 
    firmware-system-p89-2.80_2020_10_16-1.1.i386.rpm
 
-好吧，版本稍微旧一些
+版本稍微旧一些
 
-此外::
+此外该ISO镜像提供的firmware版本也稍微低一点::
 
    firmware-ilo4-2.78-1.1.i386.rpm (13 MB)
 
+.. note::
+
+   由于我实际上最终找到了最新的BIOS和iLO升级firemware，所以我实际升级方法见下文 ``.flash文件升级``
+
 .flash文件升级
 ------------------
+
+通过google找到的VMware的升级包解压缩，找寻到 ``P89_2.90_04_29_2021.signed.flash`` ，然后通过和 :ref:`hp_ilo_startup` 升级iLO firmware版本相同方法进行升级。
+
+升级完成后，需要关机(reset)重启才能使新版本 System ROM 生效(单纯在Host OS中使用 ``reboot`` 命令不会切换到新刷入的system rom)，然后观察iLO WEB页面的 ``Information >> Overview`` 可以看到::
+
+   System ROM P89 v2.90 (04/29/2021)
+   System ROM Date 04/29/2021
+   Backup System ROM 08/08/2015
+
+即证明升级成功，并且提供了备份System ROM，在出现问题时可以回滚。
 
 通过BIOS工具升级
 ==================
@@ -134,7 +148,27 @@ rpm包升级(未完成)
 升级前后性能对比
 ==================
 
-使用 :ref:`sysbench` 进行BIOS升级前后性能对比
+使用 :ref:`sysbench` 进行BIOS升级前后性能对比，目前初步观察似乎cpu性能测试相当::
+
+   before - events per second: 12371.95
+   after - events per second: 12419.41
+
+具体等后续我研究内核性能以及 Intel 处理器 Meltdown和Spectre安全漏洞 对性能的影响再做对比测试
+
+.. note::
+
+   - `针对Intel处理器芯片存在的Meltdown和Spectre安全漏洞，应该如何规避？ <https://support.huaweicloud.com/ecs_faq/ecs_faq_0714.html>`_
+   - `Information leak via speculative execution side channel attacks <https://wiki.ubuntu.com/SecurityTeam/KnowledgeBase/SpectreAndMeltdown>`_
+
+其他系统firmware升级
+======================
+
+:ref:`hp_ilo` 提供了非常好的系统观察页面，其中 ``System Information >> Firmware`` 可以显示系统中所有firmware版本，也就是如果必要，这些firmware都应该更新到最新，以提供最大优化:
+
+.. csv-table:: HPE DL360 gen9 Firmware Version
+   :file: dl360_bios_upgrade/dl360_firmware.csv
+   :widths: 45, 25, 18, 12
+   :header-rows: 1
 
 参考
 =======

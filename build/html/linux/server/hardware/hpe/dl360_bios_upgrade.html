@@ -356,14 +356,26 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firmware</span><span class="o">-</span><span class="n">system</span><span class="o">-</span><span class="n">p89</span><span class="o">-</span><span class="mf">2.80_2020_10_16</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="n">i386</span><span class="o">.</span><span class="n">rpm</span>
 </pre></div>
 </div>
-<p>好吧，版本稍微旧一些</p>
-<p>此外:</p>
+<p>版本稍微旧一些</p>
+<p>此外该ISO镜像提供的firmware版本也稍微低一点:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firmware</span><span class="o">-</span><span class="n">ilo4</span><span class="o">-</span><span class="mf">2.78</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="n">i386</span><span class="o">.</span><span class="n">rpm</span> <span class="p">(</span><span class="mi">13</span> <span class="n">MB</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>由于我实际上最终找到了最新的BIOS和iLO升级firemware，所以我实际升级方法见下文 <code class="docutils literal notranslate"><span class="pre">.flash文件升级</span></code></p>
 </div>
 </section>
 <section id="flash">
 <h3>.flash文件升级<a class="headerlink" href="#flash" title="永久链接至标题">¶</a></h3>
+<p>通过google找到的VMware的升级包解压缩，找寻到 <code class="docutils literal notranslate"><span class="pre">P89_2.90_04_29_2021.signed.flash</span></code> ，然后通过和 <a class="reference internal" href="hp_ilo/hp_ilo_startup.html#hp-ilo-startup"><span class="std std-ref">HP iLO起步</span></a> 升级iLO firmware版本相同方法进行升级。</p>
+<p>升级完成后，需要关机(reset)重启才能使新版本 System ROM 生效(单纯在Host OS中使用 <code class="docutils literal notranslate"><span class="pre">reboot</span></code> 命令不会切换到新刷入的system rom)，然后观察iLO WEB页面的 <code class="docutils literal notranslate"><span class="pre">Information</span> <span class="pre">&gt;&gt;</span> <span class="pre">Overview</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">System</span> <span class="n">ROM</span> <span class="n">P89</span> <span class="n">v2</span><span class="mf">.90</span> <span class="p">(</span><span class="mi">04</span><span class="o">/</span><span class="mi">29</span><span class="o">/</span><span class="mi">2021</span><span class="p">)</span>
+<span class="n">System</span> <span class="n">ROM</span> <span class="n">Date</span> <span class="mi">04</span><span class="o">/</span><span class="mi">29</span><span class="o">/</span><span class="mi">2021</span>
+<span class="n">Backup</span> <span class="n">System</span> <span class="n">ROM</span> <span class="mi">08</span><span class="o">/</span><span class="mi">08</span><span class="o">/</span><span class="mi">2015</span>
+</pre></div>
+</div>
+<p>即证明升级成功，并且提供了备份System ROM，在出现问题时可以回滚。</p>
 </section>
 </section>
 <section id="bios">
@@ -380,7 +392,91 @@
 </section>
 <section id="id4">
 <h2>升级前后性能对比<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
-<p>使用 <a class="reference internal" href="../../../../performance/performance_tools/sysbench.html#sysbench"><span class="std std-ref">Sysbench性能测试</span></a> 进行BIOS升级前后性能对比</p>
+<p>使用 <a class="reference internal" href="../../../../performance/performance_tools/sysbench.html#sysbench"><span class="std std-ref">Sysbench性能测试</span></a> 进行BIOS升级前后性能对比，目前初步观察似乎cpu性能测试相当:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">before</span> <span class="o">-</span> <span class="n">events</span> <span class="n">per</span> <span class="n">second</span><span class="p">:</span> <span class="mf">12371.95</span>
+<span class="n">after</span> <span class="o">-</span> <span class="n">events</span> <span class="n">per</span> <span class="n">second</span><span class="p">:</span> <span class="mf">12419.41</span>
+</pre></div>
+</div>
+<p>具体等后续我研究内核性能以及 Intel 处理器 Meltdown和Spectre安全漏洞 对性能的影响再做对比测试</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://support.huaweicloud.com/ecs_faq/ecs_faq_0714.html">针对Intel处理器芯片存在的Meltdown和Spectre安全漏洞，应该如何规避？</a></p></li>
+<li><p><a class="reference external" href="https://wiki.ubuntu.com/SecurityTeam/KnowledgeBase/SpectreAndMeltdown">Information leak via speculative execution side channel attacks</a></p></li>
+</ul>
+</div>
+</section>
+<section id="firmware">
+<h2>其他系统firmware升级<a class="headerlink" href="#firmware" title="永久链接至标题">¶</a></h2>
+<p><a class="reference internal" href="hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a> 提供了非常好的系统观察页面，其中 <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">Information</span> <span class="pre">&gt;&gt;</span> <span class="pre">Firmware</span></code> 可以显示系统中所有firmware版本，也就是如果必要，这些firmware都应该更新到最新，以提供最大优化:</p>
+<table class="colwidths-given docutils align-default" id="id7">
+<caption><span class="caption-text">HPE DL360 gen9 Firmware Version</span><a class="headerlink" href="#id7" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 25%" />
+<col style="width: 18%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Firmware Name</p></th>
+<th class="head"><p>Firmware Version</p></th>
+<th class="head"><p>Location</p></th>
+<th class="head"><p>说明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>HP Ethernet 1Gb 4-port 331i Adapter - NIC</p></td>
+<td><p>17.0.2</p></td>
+<td><p>Embedded</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>iLO</p></td>
+<td><p>2.78 Apr 28 2021</p></td>
+<td><p>System Board</p></td>
+<td><p>已升级</p></td>
+</tr>
+<tr class="row-even"><td><p>Intelligent Platform Abstraction Data</p></td>
+<td><p>27.01</p></td>
+<td><p>System Board</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Intelligent Provisioning</p></td>
+<td><p>2.30.75</p></td>
+<td><p>System Board</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Power Management Controller Firmware</p></td>
+<td><p>1.0.9</p></td>
+<td><p>System Board</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Power Management Controller FW Bootloader</p></td>
+<td><p>1</p></td>
+<td><p>System Board</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Redundant System ROM</p></td>
+<td><p>P89 v1.51 (08/08/2015)</p></td>
+<td><p>System Board</p></td>
+<td><p>备份</p></td>
+</tr>
+<tr class="row-odd"><td><p>Server Platform Services (SPS) Firmware</p></td>
+<td><p>3.0.6.267.1</p></td>
+<td><p>System Board</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>System Programmable Logic Device</p></td>
+<td><p>Version 0x30</p></td>
+<td><p>System Board</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>System ROM</p></td>
+<td><p>P89 v2.90 (04/29/2021)</p></td>
+<td><p>System Board</p></td>
+<td><p>已升级</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="id5">
 <h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>

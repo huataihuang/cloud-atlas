@@ -24,9 +24,11 @@ PCIe bifurcation
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_bifurcation-1.png
    :scale: 50
 
-对于 :ref:`hpe_dl360_gen9` 需要完成 :ref:`dl360_bios_upgrade` ，然后才可以在 BIOS 配置中设置:
+参考HP官方文档，DL360 gen10 是支持 PCIe Bifurcation 的:
 
 ``System Configuration > BIOS/Platform Configuration (RBSU) > PCIe Device Configuration > PCIe Bifurcation Options``
+
+对于 :ref:`hpe_dl360_gen9` 我尝试完成 :ref:`dl360_bios_upgrade` 再做BIOS配置验证
 
 .. note::
 
