@@ -115,6 +115,9 @@ libvirt LVM卷管理存储池
 创建虚拟机
 ==============
 
+CentOS 6
+-------------
+
 - 创建CentOS 6.10模版虚拟机::
 
    virt-install \
@@ -123,18 +126,66 @@ libvirt LVM卷管理存储池
      --ram=2048 \
      --vcpus=1 \
      --os-type=centos6.0 \
-     --disk path=/dev/vg-libvirt/centos6,sparse=false,format=raw,bus=virtio,cache=none \
+     --disk path=/dev/vg-libvirt/centos6,sparse=false,format=raw,bus=virtio,cache=none,io=native \
      --graphics none \
      --location=http://mirrors.163.com/centos-vault/6.10/os/x86_64/ \
      --extra-args="console=tty0 console=ttyS0,115200"
 
-虚拟机文件系统配置:
+- 虚拟机文件系统配置:
 
-- 使用XFS
+  - 使用XFS
+  
+    - 文件系统scheduler设置为 deadline
+  
+  - 虚拟机内部直接使用文件系统，不使用复杂的LVM卷，以便能够避免LVM堆砌，尽可能提高性能
 
-  - 文件系统scheduler设置为 deadline
+.. note::
 
-- 虚拟机内部直接使用文件系统，不使用复杂的LVM卷，以便能够避免LVM堆砌，尽可能提高性能
+   RHEL/CentOS 6还没有对XFS完善支持，所以采用EXT4文件系统，不过在CentOS7开始可以采用XFS
+
+- 安装完成后检查 ``virsh edit centos6`` 可以看到磁盘配置::
+
+   <disk type='block' device='disk'>
+     <driver name='qemu' type='raw' cache='none' io='native'/>
+     <source dev='/dev/vg-libvirt/centos6'/>
+     <target dev='vda' bus='virtio'/>
+     <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
+   </disk>
+
+CentOS 7
+----------
+
+- LVM磁盘::
+
+   virsh vol-create-as images_lvm centos7 6G
+
+- 创建CentOS 7 模版虚拟机::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name centos7-lvm \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=centos7.0 \
+     --disk path=/dev/vg-libvirt/centos7,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+     --graphics none \
+     --location=http://mirrors.163.com/centos/7/os/x86_64/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+- 由于终端控制台安装无法对磁盘进行定制，所以安装过程中选择启动vnc，此时提示::
+
+   03:52:24 Please manually connect your vnc client to 192.168.122.212:1 to begin the install.
+   03:52:24 Attempting to start vncconfig
+
+- 通过ssh端口转发方式访问来，即在本地ssh登陆到zcloud上同时转发本地端口::
+
+   ssh -L 127.0.0.1:5901:192.168.122.212:5901 192.168.6.200
+
+然后本地使用VNC客户端访问 ``127.0.0.1:5901`` 就可以看到安装图形界
+
+.. note::
+
+   注意，这里虚拟安装使用的是传统的BIOS模式，所以无法实现 :ref:`iommu` pass-through PCIe 设备(以及 ``--cpu host-passthrough`` )到虚拟机内部。要实现 :ref:`intel_vt-d_startup` 这样的 :ref:`vfio` 以及进一步的 :ref:`sr-iov` ，需要使用 :ref:`ovmf` 技术
 
 clone虚拟机
 ============

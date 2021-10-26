@@ -142,7 +142,7 @@ Libvirt支持以下存储池类型:
      </target>
    </pool>
 
-:ref:`libvirt_lvm_pool` 实践 是我在 :ref:`hpe_dl360_gen6` 服务器上部署 :ref:`priv_kvm` 采用的主存储池技术。
+:ref:`libvirt_lvm_pool` 实践 是我在 :ref:`hpe_dl360_gen9` 服务器上部署 :ref:`priv_kvm` 采用的主存储池技术。
 
 磁盘存储池
 ------------
