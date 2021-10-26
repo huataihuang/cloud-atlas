@@ -132,6 +132,23 @@ ARM环境Ubuntu虚拟机
      --location=http://mirrors.163.com/centos/7/os/x86_64/ \
      --extra-args="console=tty0 console=ttyS0,115200"
 
+- CentOS 6.10 虚拟机在线安装::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name centos6 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=centos6.0 \
+     --disk path=/var/lib/libvirt/images/centos6.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --graphics none \
+     --location=http://mirrors.163.com/centos-vault/6.10/os/x86_64/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+.. note::
+
+   使用 :ref:`libvirt_lvm_pool` 创建虚拟机需要先构建LVM卷，详见 :ref:`libvirt_lvm_pool` 实践记录
+
 创建Fedora虚拟机
 ===================
 
@@ -320,7 +337,7 @@ ARM环境Ubuntu虚拟机
           "expiry-time": 1551337558
         }
       ]
-   
+
 .. note::
 
    详细的KVM虚拟机串口设置请参考 `虚拟机串口控制台 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/virtual/libvirt/devices/vm_serial_console.md>`_
@@ -347,7 +364,7 @@ ARM环境Ubuntu虚拟机
 
    sudo apt update
    sudo apt upgrade
-   sudo apt install screen net-tools nmon 
+   sudo apt install screen net-tools nmon
 
 准备虚拟机的动态调整
 ======================

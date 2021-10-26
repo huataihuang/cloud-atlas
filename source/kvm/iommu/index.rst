@@ -9,6 +9,7 @@ IOMMU
 
    iommu_infrastructure.rst
    intel_vt-d_startup.rst
+   ovmf.rst
    vfio.rst
 
 .. only::  subproject and html

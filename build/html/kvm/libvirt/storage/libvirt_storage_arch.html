@@ -43,7 +43,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="远程桌面" href="../../remote_desktop/index.html" />
+    <link rel="next" title="libvirt LVM卷管理存储池" href="libvirt_lvm_pool.html" />
     <link rel="prev" title="Libvirt存储" href="index.html" /> 
 </head>
 
@@ -107,6 +107,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../network/index.html">Libvirt网络</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Libvirt存储</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">libvirt存储管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="libvirt_lvm_pool.html">libvirt LVM卷管理存储池</a></li>
 </ul>
 </li>
 </ul>
@@ -377,10 +378,155 @@
 <span class="o">&lt;/</span><span class="n">pool</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-</section>
+<p><a class="reference internal" href="libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 实践 是我在 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器上部署 <a class="reference internal" href="../../../real/private_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 采用的主存储池技术。</p>
 </section>
 <section id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<h3>磁盘存储池<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<p>磁盘存储池是基于物理磁盘的存储池。libvirt在磁盘上创建分区来构建存储卷。磁盘存储池大小是首先的并且被卷所替代。其中的 <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">extens</span></code> 信息是有关这个region剩余可创建新卷的信息。一个卷不能跨越两个不同的 <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">extents</span></code> 。默认在磁盘存储池的源格式使用 <code class="docutils literal notranslate"><span class="pre">dos</span></code> 分区表:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pool</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;disk&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">sda</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">device</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;/dev/sda&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;/</span><span class="n">dev</span><span class="o">&lt;/</span><span class="n">path</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">target</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">pool</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>在磁盘卷存储池支持的分区表类型有:</p>
+<ul class="simple">
+<li><p>dos</p></li>
+<li><p>dvh</p></li>
+<li><p>gpt</p></li>
+<li><p>mac</p></li>
+<li><p>bsd</p></li>
+<li><p>pc98</p></li>
+<li><p>sun</p></li>
+<li><p>lvm2</p></li>
+</ul>
+<p>建议在传统的BIOS系统中使用 <code class="docutils literal notranslate"><span class="pre">msdos</span></code> 作为分区表，而UEFI系统使用 <code class="docutils literal notranslate"><span class="pre">gpt</span></code> 作为分区表(支持大于2TB磁盘)。另外需要注意，这里 <code class="docutils literal notranslate"><span class="pre">lvm2</span></code> 格式指的是物理卷格式(也就是整个磁盘作为一个物理卷，不是通常我们在LVM卷管理中作为物理卷的分区)。</p>
+</section>
+<section id="scsi">
+<h3>SCSI存储池<a class="headerlink" href="#scsi" title="永久链接至标题">¶</a></h3>
+<p>我没有这样的实践环境</p>
+</section>
+<section id="multipath">
+<h3>Multipath存储池<a class="headerlink" href="#multipath" title="永久链接至标题">¶</a></h3>
+<p>我理解Multipath是只多路设备的RAID 1环境，暂时没有找到案例，后续看需求</p>
+</section>
+<section id="rbd">
+<h3>RBD存储池<a class="headerlink" href="#rbd" title="永久链接至标题">¶</a></h3>
+<p>RDB存储池是在一个 RADOS 存储池中包含了所有RBD镜像的村池池。RBD(RADOS Block Device)是 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 分布式存储的组件。这种RBD存储池后端只支持QEMU with RBD。输出到 <code class="docutils literal notranslate"><span class="pre">/dev</span></code> 中作为块设备的内核RBD是 <code class="docutils literal notranslate"><span class="pre">不支持</span></code> 的。使用RBD存储池后端创建的RBD镜像可以通过手工配置的内核RBD访问，但是这种后端不能提供镜像的映射。使用这种后端创建的镜像可以添加到已经编译支持RBD的QEMU(也就是从 QEMU 0.14.0 开始)。这种存储后端支持 cephx 认证用于和ceph集群通讯。存储cephx认证密钥是由libvirt secret极致负责。下面的案例中存储池UUID是引用存储密钥的UUID:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pool</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;rbd&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">myrbdpool</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">rbdpool</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">host</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;1.2.3.4&#39;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="n">host</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;my.ceph.monitor&#39;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="n">host</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;third.ceph.monitor&#39;</span> <span class="n">port</span><span class="o">=</span><span class="s1">&#39;6789&#39;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="n">auth</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;admin&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ceph&#39;</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">secret</span> <span class="n">uuid</span><span class="o">=</span><span class="s1">&#39;2ec115d7-3a88-3ceb-bc12-0ac909a6fd87&#39;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;/</span><span class="n">auth</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">pool</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>输出的卷案例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">volume</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">myvol</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">key</span><span class="o">&gt;</span><span class="n">rbd</span><span class="o">/</span><span class="n">myvol</span><span class="o">&lt;/</span><span class="n">key</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">capacity</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;bytes&#39;</span><span class="o">&gt;</span><span class="mi">53687091200</span><span class="o">&lt;/</span><span class="n">capacity</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">allocation</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;bytes&#39;</span><span class="o">&gt;</span><span class="mi">53687091200</span><span class="o">&lt;/</span><span class="n">allocation</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span><span class="n">rbd</span><span class="p">:</span><span class="n">rbd</span><span class="o">/</span><span class="n">myvol</span><span class="o">&lt;/</span><span class="n">path</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nb">format</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="n">permissions</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;</span><span class="mi">00</span><span class="o">&lt;/</span><span class="n">mode</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">owner</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">&lt;/</span><span class="n">owner</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">group</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">&lt;/</span><span class="n">group</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">permissions</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">target</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">volume</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>后续我将使用 <a class="reference internal" href="../../iommu/vfio.html#vfio"><span class="std std-ref">VFIO - Virtual Function I/O</span></a> 将 <a class="reference internal" href="../../../linux/server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation选项</span></a> 切分的 3 个 PCIe NVMe 存储连接到 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 虚拟机中构建ceph分布式存储，然后实现一个RBD存储池作为大规模的 <a class="reference internal" href="../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 存储后端。</p>
+</div>
+</section>
+<section id="sheepdog">
+<h3>Sheepdog存储池<a class="headerlink" href="#sheepdog" title="永久链接至标题">¶</a></h3>
+<p>无实践环境</p>
+</section>
+<section id="gluster">
+<h3>Gluster存储池<a class="headerlink" href="#gluster" title="永久链接至标题">¶</a></h3>
+<p>Gluster存储池提供了原生的Gluster访问。 <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 是一个分布式文件系统，可以通过FUSE, NFS 或 SMB 输出给用户；不过为了最小化开销，建议通过原生访问(只能用于已经支持 <code class="docutils literal notranslate"><span class="pre">libgfapi</span></code> 支持的 QEMU/KVM)。这个集群和存储卷必须是已经运行的，并且建议gluster卷是使用 <code class="docutils literal notranslate"><span class="pre">gluster</span> <span class="pre">volume</span> <span class="pre">set</span> <span class="pre">$volname</span> <span class="pre">storage.owner-uid=$uid</span></code> 和 <code class="docutils literal notranslate"><span class="pre">gluster</span> <span class="pre">volume</span> <span class="pre">set</span> <span class="pre">$volname</span> <span class="pre">storage.owner-gid=$gid</span></code> 配置为qemu运行的uid和gid。也有可能需要在glusterd服务上设置 <code class="docutils literal notranslate"><span class="pre">rpc-auth-allow-insecure</span></code> ，类似 <code class="docutils literal notranslate"><span class="pre">gluster</span> <span class="pre">set</span> <span class="pre">$volname</span> <span class="pre">server.allow-insecure</span> <span class="pre">on</span></code> 来允许访问gluster卷。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我计划在 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上使用2块HDD构建disk pool，提供给两个虚拟机使用，并使用虚拟机构建一个 <a class="reference internal" href="../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 集群，输出给 <a class="reference internal" href="../../../ovirt/index.html#ovirt"><span class="std std-ref">oVirt Atlas</span></a> 虚拟化集群。这个集群将作为和 <a class="reference internal" href="../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 对比的虚拟化解决方案。</p>
+</div>
+<ul class="simple">
+<li><p>输入卷案例</p></li>
+</ul>
+<p>一个gluster卷对应了一个libvirt存储池。如果一个gluster卷被挂载成类似 <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">-t</span> <span class="pre">glusterfs</span> <span class="pre">localhost:/volname</span> <span class="pre">/some/path</span></code> ，这样下面的案例就不需要创建一个本地挂载点。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pool</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;gluster&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">myglusterpool</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">volname</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">host</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="nb">dir</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">pool</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>输出卷案例</p></li>
+</ul>
+<p>libvirt存储卷和一个gluster村池池对应文件就是挂载的gluster卷。这个 <code class="docutils literal notranslate"><span class="pre">name</span></code> 是和挂载点相关路径，这里的 <code class="docutils literal notranslate"><span class="pre">key</span></code> 是为了唯一标识一个卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">volume</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">myfile</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">key</span><span class="o">&gt;</span><span class="n">gluster</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="o">/</span><span class="n">volname</span><span class="o">/</span><span class="n">myfile</span><span class="o">&lt;/</span><span class="n">key</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">capacity</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;bytes&#39;</span><span class="o">&gt;</span><span class="mi">53687091200</span><span class="o">&lt;/</span><span class="n">capacity</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">allocation</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;bytes&#39;</span><span class="o">&gt;</span><span class="mi">53687091200</span><span class="o">&lt;/</span><span class="n">allocation</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">volume</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="zfs">
+<h3>ZFS存储卷<a class="headerlink" href="#zfs" title="永久链接至标题">¶</a></h3>
+<p>ZFS存储卷基于一个ZFS文件系统。最初是为FreeBSD开发的，从libvirt 1.3.2 开始实验性支持ZFS on Linux version 0.6.4或更新版本。</p>
+<p>ZFS存储池可以手工通过 <code class="docutils literal notranslate"><span class="pre">zpool</span> <span class="pre">create</span></code> 命令创建，并且它的名字是作为 <code class="docutils literal notranslate"><span class="pre">source</span></code> 指定的；不过，从libvirt 1.2.9 开始，可以使用libvirt创建ZFS存储池</p>
+<ul>
+<li><p>输入卷案例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">pool</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;zfs&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">myzfspool</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">zpoolname</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">device</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/dev/ada1&quot;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="n">device</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/dev/ada2&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">pool</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>后续我在虚拟机中研究ZFS时候，再尝试使用ZFS作为libvirt存储卷</p>
+</div>
+</section>
+<section id="vstorage">
+<h3>Vstorage存储池<a class="headerlink" href="#vstorage" title="永久链接至标题">¶</a></h3>
+<p>基于Virtuozzo存储的存储池，这个Virtuozzo存储也是一个高可用分布式存储，不过我不了解，暂时无实践。</p>
+</section>
+</section>
+<section id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://libvirt.org/storage.html">libvirt Storage Management</a></p></li>
 </ul>
@@ -393,7 +539,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../../remote_desktop/index.html" class="btn btn-neutral float-right" title="远程桌面" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="libvirt_lvm_pool.html" class="btn btn-neutral float-right" title="libvirt LVM卷管理存储池" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="index.html" class="btn btn-neutral float-left" title="Libvirt存储" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

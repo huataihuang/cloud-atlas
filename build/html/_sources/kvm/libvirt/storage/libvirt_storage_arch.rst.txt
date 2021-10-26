@@ -142,6 +142,159 @@ Libvirt支持以下存储池类型:
      </target>
    </pool>
 
+:ref:`libvirt_lvm_pool` 实践 是我在 :ref:`hpe_dl360_gen9` 服务器上部署 :ref:`priv_kvm` 采用的主存储池技术。
+
+磁盘存储池
+------------
+
+磁盘存储池是基于物理磁盘的存储池。libvirt在磁盘上创建分区来构建存储卷。磁盘存储池大小是首先的并且被卷所替代。其中的 ``free extens`` 信息是有关这个region剩余可创建新卷的信息。一个卷不能跨越两个不同的 ``free extents`` 。默认在磁盘存储池的源格式使用 ``dos`` 分区表::
+
+   <pool type="disk">
+     <name>sda</name>
+     <source>
+       <device path='/dev/sda'/>
+     </source>
+     <target>
+       <path>/dev</path>
+     </target>
+   </pool>
+
+在磁盘卷存储池支持的分区表类型有:
+
+- dos
+- dvh
+- gpt
+- mac
+- bsd
+- pc98
+- sun
+- lvm2
+
+建议在传统的BIOS系统中使用 ``msdos`` 作为分区表，而UEFI系统使用 ``gpt`` 作为分区表(支持大于2TB磁盘)。另外需要注意，这里 ``lvm2`` 格式指的是物理卷格式(也就是整个磁盘作为一个物理卷，不是通常我们在LVM卷管理中作为物理卷的分区)。
+
+SCSI存储池
+-------------
+
+我没有这样的实践环境
+
+Multipath存储池
+----------------
+
+我理解Multipath是只多路设备的RAID 1环境，暂时没有找到案例，后续看需求
+
+
+RBD存储池
+------------
+
+RDB存储池是在一个 RADOS 存储池中包含了所有RBD镜像的村池池。RBD(RADOS Block Device)是 :ref:`ceph` 分布式存储的组件。这种RBD存储池后端只支持QEMU with RBD。输出到 ``/dev`` 中作为块设备的内核RBD是 ``不支持`` 的。使用RBD存储池后端创建的RBD镜像可以通过手工配置的内核RBD访问，但是这种后端不能提供镜像的映射。使用这种后端创建的镜像可以添加到已经编译支持RBD的QEMU(也就是从 QEMU 0.14.0 开始)。这种存储后端支持 cephx 认证用于和ceph集群通讯。存储cephx认证密钥是由libvirt secret极致负责。下面的案例中存储池UUID是引用存储密钥的UUID::
+
+   <pool type="rbd">
+     <name>myrbdpool</name>
+     <source>
+       <name>rbdpool</name>
+       <host name='1.2.3.4'/>
+       <host name='my.ceph.monitor'/>
+       <host name='third.ceph.monitor' port='6789'/>
+       <auth username='admin' type='ceph'>
+         <secret uuid='2ec115d7-3a88-3ceb-bc12-0ac909a6fd87'/>
+       </auth>
+     </source>
+   </pool>
+
+输出的卷案例::
+
+   <volume>
+     <name>myvol</name>
+     <key>rbd/myvol</key>
+     <source>
+     </source>
+     <capacity unit='bytes'>53687091200</capacity>
+     <allocation unit='bytes'>53687091200</allocation>
+     <target>
+       <path>rbd:rbd/myvol</path>
+       <format type='unknown'/>
+       <permissions>
+         <mode>00</mode>
+         <owner>0</owner>
+         <group>0</group>
+       </permissions>
+     </target>
+   </volume>
+
+.. note::
+
+   后续我将使用 :ref:`vfio` 将 :ref:`pcie_bifurcation` 切分的 3 个 PCIe NVMe 存储连接到 :ref:`ceph` 虚拟机中构建ceph分布式存储，然后实现一个RBD存储池作为大规模的 :ref:`openstack` 存储后端。
+
+Sheepdog存储池
+-----------------
+
+无实践环境
+
+Gluster存储池
+-------------------
+
+Gluster存储池提供了原生的Gluster访问。 :ref:`gluster` 是一个分布式文件系统，可以通过FUSE, NFS 或 SMB 输出给用户；不过为了最小化开销，建议通过原生访问(只能用于已经支持 ``libgfapi`` 支持的 QEMU/KVM)。这个集群和存储卷必须是已经运行的，并且建议gluster卷是使用 ``gluster volume set $volname storage.owner-uid=$uid`` 和 ``gluster volume set $volname storage.owner-gid=$gid`` 配置为qemu运行的uid和gid。也有可能需要在glusterd服务上设置 ``rpc-auth-allow-insecure`` ，类似 ``gluster set $volname server.allow-insecure on`` 来允许访问gluster卷。
+
+.. note::
+
+   我计划在 :ref:`hpe_dl360_gen9` 上使用2块HDD构建disk pool，提供给两个虚拟机使用，并使用虚拟机构建一个 :ref:`gluster` 集群，输出给 :ref:`ovirt` 虚拟化集群。这个集群将作为和 :ref:`openstack` 对比的虚拟化解决方案。
+
+- 输入卷案例
+
+一个gluster卷对应了一个libvirt存储池。如果一个gluster卷被挂载成类似 ``mount -t glusterfs localhost:/volname /some/path`` ，这样下面的案例就不需要创建一个本地挂载点。
+
+::
+
+   <pool type="gluster">
+     <name>myglusterpool</name>
+     <source>
+       <name>volname</name>
+       <host name='localhost'/>
+       <dir path='/'/>
+     </source>
+   </pool>
+
+- 输出卷案例
+
+libvirt存储卷和一个gluster村池池对应文件就是挂载的gluster卷。这个 ``name`` 是和挂载点相关路径，这里的 ``key`` 是为了唯一标识一个卷::
+
+   <volume>
+     <name>myfile</name>
+     <key>gluster://localhost/volname/myfile</key>
+     <source>
+     </source>
+     <capacity unit='bytes'>53687091200</capacity>
+     <allocation unit='bytes'>53687091200</allocation>
+   </volume>
+
+ZFS存储卷
+-------------
+
+ZFS存储卷基于一个ZFS文件系统。最初是为FreeBSD开发的，从libvirt 1.3.2 开始实验性支持ZFS on Linux version 0.6.4或更新版本。
+
+ZFS存储池可以手工通过 ``zpool create`` 命令创建，并且它的名字是作为 ``source`` 指定的；不过，从libvirt 1.2.9 开始，可以使用libvirt创建ZFS存储池
+
+- 输入卷案例::
+
+   <pool type="zfs">
+     <name>myzfspool</name>
+     <source>
+       <name>zpoolname</name>
+       <device path="/dev/ada1"/>
+       <device path="/dev/ada2"/>
+     </source>
+   </pool>
+
+.. note::
+
+   后续我在虚拟机中研究ZFS时候，再尝试使用ZFS作为libvirt存储卷
+
+Vstorage存储池
+-------------------
+
+基于Virtuozzo存储的存储池，这个Virtuozzo存储也是一个高可用分布式存储，不过我不了解，暂时无实践。
+
+
 参考
 ======
 
