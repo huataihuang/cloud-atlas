@@ -9,6 +9,7 @@
 
    dl_hardware.rst
    nvidia_gpu.rst
+   gtx_1050_ti.rst
 
 .. only::  subproject and html
 
