@@ -1,11 +1,10 @@
-.. _istio:
+.. _envoy:
 
 ===============================
-Istio服务网格
+Envoy负载均衡/反向代理
 ===============================
 
 .. toctree::
    :maxdepth: 1
 
-   istio_architecture.rst
-   envoy/index
+   envoy_arch.rst

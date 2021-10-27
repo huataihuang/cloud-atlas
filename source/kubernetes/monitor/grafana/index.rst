@@ -9,6 +9,7 @@ Grafana通用可视分析平台
 .. toctree::
    :maxdepth: 1
 
+   install_grafana.rst
    run_grafana_in_k8s.rst
 
 推荐阅读:
