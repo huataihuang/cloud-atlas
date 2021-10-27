@@ -50,6 +50,31 @@ X86环境Ubuntu虚拟机
 
    在KVM中部署和运行Windows虚拟机相对复杂，请参考 :ref:`deploy_win_vm`
 
+- :ref:`libvirt_lvm_pool` 安装Ubuntu 20.04.3::
+
+   virsh vol-create-as images_lvm ubuntu20.04 6G
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name ubuntu20.04 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=ubuntu20.04 \
+     --disk path=/dev/vg-libvirt/ubuntu20.04,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+     --graphics none \
+     --location=http://mirrors.163.com/ubuntu/dists/focal/main/installer-amd64/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+.. note::
+
+   安装命令参考 `Can't Install Ubuntu 20.04 KVM Guest <https://askubuntu.com/questions/1237165/cant-install-ubuntu-20-04-kvm-guest>`_
+
+安装中磁盘划分::
+
+   Virtual disk 1 (vda) - 6.4 GB Virtio Block Device
+   >     #1  primary  254.8 MB     f  ext4     /boot
+   >     #2  primary    6.2 GB  B  f  btrfs    /    
+
 ARM环境Ubuntu虚拟机
 ----------------------
 

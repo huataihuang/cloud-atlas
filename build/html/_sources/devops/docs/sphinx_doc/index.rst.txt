@@ -13,6 +13,7 @@ Sphinx文档
 
    sphinx_show_code.rst
    sphinx_table.rst
+   sphinx_strike.rst
 
 .. only::  subproject and html
 

@@ -194,8 +194,11 @@ clone虚拟机
 
    virsh vol-clone centos6 kernel-dev --pool images_lvm
 
+
 参考
 =====
 
 - `CREATING AN LVM-BASED STORAGE POOL WITH VIRSH <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/virtualization_administration_guide/create-lvm-storage-pool-virsh>`_
 - `Create an LVM Storage Pool with Libvirt <https://acloudguru.com/hands-on-labs/create-an-lvm-storage-pool-with-libvirt>`_
+- `Virsh vol-clone <https://kb.novaordis.com/index.php/Virsh_vol-clone>`_
+- `How to clone existing KVM virtual machine images on Linux <https://www.cyberciti.biz/faq/how-to-clone-existing-kvm-virtual-machine-images-on-linux/>`_
