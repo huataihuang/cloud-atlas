@@ -122,7 +122,7 @@ HPE ProLiant DL360 Gen9 服务器综合配置介于 :ref:`dell_r630` 和 :ref:`d
   - :ref:`lrdimm_ram` 3TB (24 x 128GB LRDIMM @ 2400 MHz)
   - :ref:`rdimm_ram` 768GB (24 x 32GB RDIMM @ 2133 MHz)
   - :ref:`nvdimm_ram` 128GB (16 x 8GB NVDIMM)
-  
+
 .. note::
 
    不过从淘宝可以看到 LRDIMM 内存目前非常昂贵，不如 RDIMM内存 性价比高。不过，技术发展迅速，或许未来也可能进入二手市场的高性价比范围。
@@ -191,6 +191,10 @@ Unified Extensible Firmware Interface (UEFI)是服务器启动管理，HP提供�
   - DL360支持每个DIMM插槽最高32GB RDIMM内存，满配24根最高768GB。为了不浪费插槽和内存，选择2根32G
 
 - 硬盘暂时采用原先的购买的笔记本2.5" SSD SATA硬盘，并购置2块2.5" HDD来构建 :ref:`gluster` 虚拟机
+
+- 存储: 采用 :ref:`pcie_bifurcation` 安装3块 :ref:`nvme` :ref:`samsung_pm9a1` 构建 :ref:`ceph` ( :ref:`iommu` )
+
+- GPU: 采购 Nvidia GPU卡 实现 :ref:`sr-iov` 组建GPU虚拟化集群
 
 参考
 =======

@@ -10,6 +10,7 @@
    dl_hardware.rst
    nvidia_gpu.rst
    gtx_1050_ti.rst
+   tesla_p10.rst
 
 .. only::  subproject and html
 
