@@ -61,8 +61,7 @@ I/O虚拟化有不同的技术，各自具有利弊:
    :widths: 30, 30, 40
    :header-rows: 1
 
-:ref:`priv_cloud_infra` 采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`iommu` ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM
-Guest。要实现VFIO，需要满足条件有:
+:ref:`priv_cloud_infra` 采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`iommu` ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM Guest。要实现VFIO，需要满足条件有:
 
 - Host物理主机服务器CPU和主板芯片以及BIOS/UEFI支持
 - BIOS/EFI激活了IOMMU
