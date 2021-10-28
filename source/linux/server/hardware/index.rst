@@ -15,7 +15,6 @@
    hpe/index
    chipset/index
    storage/index
-   gpu/index
 
 .. only::  subproject and html
 
