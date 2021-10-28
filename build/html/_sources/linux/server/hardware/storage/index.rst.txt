@@ -10,6 +10,7 @@
    storage_spec.rst
    hdd_pmr_cmr_smr.rst
    nvme.rst
+   samsung_pm9a1.rst
    
 .. only::  subproject and html
 
