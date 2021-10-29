@@ -105,10 +105,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#i-o-scheduler">I/O Scheduler</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#i-o">异步I/O</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">I/O虚拟化</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">基于磁盘的虚拟化存储</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">基于磁盘的虚拟化存储</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#qemuio">QEMU磁盘IO的比较</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">小结</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id9">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">小结</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="virtio/index.html">KVM virtio</a></li>
@@ -309,70 +309,66 @@
 </section>
 <section id="id1">
 <h2>I/O虚拟化<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<p>I/O虚拟化有不同的技术，各自具有利弊:</p>
-<table class="colwidths-given docutils align-default" id="id12">
-<caption><span class="caption-text">I/O虚拟化解决方案</span><a class="headerlink" href="#id12" title="永久链接至表格">¶</a></caption>
+<p>I/O虚拟化有不同的技术，各自具有利弊</p>
+<table class="colwidths-given docutils align-default" id="id7">
+<caption><span class="caption-text">I/O虚拟化解决方案</span><a class="headerlink" href="#id7" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 30%" />
 <col style="width: 30%" />
 <col style="width: 40%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p>___I/<a href="#id13"><span class="problematic" id="id14">O__</span></a></p></th>
-<th class="head"></th>
-<th class="head" id="id2"></th>
+<tr class="row-odd"><th class="head"><p>技术</p></th>
+<th class="head"><p>优点</p></th>
+<th class="head"><p>缺点</p></th>
 </tr>
 </thead>
-<tbody id="id3">
-<tr class="row-even"><td><p>____(pass-through)</p></td>
-<td><p>guest_________</p></td>
-<td><p>__guests_______</p></td>
+<tbody>
+<tr class="row-even"><td><p>直通设备(pass-through)</p></td>
+<td><p>高性能</p></td>
+<td><p>不能在多个虚拟机间共享设备</p></td>
 </tr>
 <tr class="row-odd"><td></td>
-<td><p>___</p></td>
-<td><p>Live migration____</p></td>
+<td></td>
+<td><p>热迁移非常复杂</p></td>
 </tr>
 <tr class="row-even"><td></td>
 <td></td>
-<td><p>__guest_____8_PCI__</p></td>
+<td><p>每个VM限制最多8个PCI设备</p></td>
 </tr>
 <tr class="row-odd"><td></td>
 <td></td>
-<td><p>______slot____</p></td>
+<td><p>物理服务器上的slot数量有限</p></td>
 </tr>
-<tr class="row-even"><td><p>_____(IDE,SATA,SCSI,e1000)</p></td>
-<td><p>VM Guest____</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>Para-virtualization(virtio-blk,virtio-net,virtio-scsi)</p></td>
-<td></td>
-<td><p>____guest(PV drivers)</p></td>
+<tr class="row-even"><td><p>完全虚拟化(Full virtualization)</p></td>
+<td><p>VM虚拟机兼容性好</p></td>
+<td><p>性能不佳</p></td>
 </tr>
 <tr class="row-odd"><td></td>
-<td></td>
+<td><p>容易实现热迁移</p></td>
+<td><p>模拟操作</p></td>
+</tr>
+<tr class="row-even"><td><p>半虚拟化(Para-virtualization) - virtio-blk, virtio-net, virtio-scsi</p></td>
+<td><p>性能较好</p></td>
+<td><p>需要修改虚拟机操作系统(PV驱动)</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>容易热迁移</p></td>
 <td></td>
 </tr>
 <tr class="row-even"><td></td>
-<td><p>VM guest_______</p></td>
+<td><p>VM虚拟机之间高效的主机通讯</p></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-<p><a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 采用上述 <code class="docutils literal notranslate"><span class="pre">Device</span> <span class="pre">Assignment(pass-through)</span></code> 方式，也就是 <a class="reference internal" href="../iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM Guest。要实现VFIO，需要满足条件有:</p>
+<p>在 <a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 采用上述 <code class="docutils literal notranslate"><span class="pre">Device</span> <span class="pre">Assignment(pass-through)</span></code> 方式，也就是 <a class="reference internal" href="../iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> VFIO 标准(Virtual Function I/O)。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM Guest。要实现VFIO，需要满足条件有:</p>
 <ul class="simple">
 <li><p>Host物理主机服务器CPU和主板芯片以及BIOS/UEFI支持</p></li>
 <li><p>BIOS/EFI激活了IOMMU</p></li>
 <li><p>内核参数设置激活IOMMU: 对于Intel处理器，内核参数使用 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code></p></li>
 <li><p>系统提供了VFIO架构，也即是内核加载了模块 <code class="docutils literal notranslate"><span class="pre">vfio_pci</span></code></p></li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>我最初想通过 <a class="reference internal" href="../iommu/intel_vt-d_startup.html#intel-vt-d-startup"><span class="std std-ref">Intel VT-d快速起步</span></a> 设置VT-d来实现pass-through方式分配磁盘给虚拟机，虽然这个方法依然可以采用，但是显然目前虚拟化技术已经发展 VFIO 设备(底层还是IOMMU)，所以，实际实践采用 <a class="reference internal" href="../iommu/vfio.html#vfio"><span class="std std-ref">VFIO - Virtual Function I/O</span></a> 完成。</p>
-</div>
 <section id="pass-through">
 <h3>pass-through 分区(似乎不行)<a class="headerlink" href="#pass-through" title="永久链接至标题">¶</a></h3>
 <p>参考 <a class="reference external" href="https://www.reddit.com/r/VFIO/comments/j443ad/pass_through_a_partition/">Pass through a partition?</a></p>
@@ -381,13 +377,12 @@
 <li><p>需要非常小心，在物理服务器上不能直接访问pass-through给虚拟机的分区中的数据，需要特殊处理(我记得是要使用loop方式)</p></li>
 </ul>
 <p>但是，参考 <a class="reference external" href="https://passthroughpo.st/disk-passthrough-explained/">Disk Passthrough Explained</a> 的 <code class="docutils literal notranslate"><span class="pre">Direct</span> <span class="pre">SATA</span> <span class="pre">Controller</span> <span class="pre">Passthrough</span> <span class="pre">via</span> <span class="pre">vfio-pci</span></code> :</p>
-<p>SATA控制器是位于PCI总线，所以可以将SATA控制器直接pass
-through给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。</p>
+<p>SATA控制器是位于PCI总线，所以可以将SATA控制器直接passthrough给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。</p>
 <p><a class="reference external" href="https://github.com/lennard0711/vfio">lennard0711/vfio</a> 提供了一个配置案例，并且 <a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Physical_disk/partition">arch linux: PCI passthrough via OVMF - Physical disk/partition</a> 介绍了可以pass through磁盘或分区</p>
 </section>
 </section>
-<section id="id4">
-<h2>基于磁盘的虚拟化存储<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="id2">
+<h2>基于磁盘的虚拟化存储<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p><a class="reference external" href="https://www.heiko-sieger.info/tuning-vm-disk-performance/">Tuning VM Disk Performance</a> 的 <code class="docutils literal notranslate"><span class="pre">Disk-based</span> <span class="pre">storage</span></code> 方案和我设想相近:</p>
 <ul class="simple">
 <li><p>使用LVM逻辑卷来构建 <code class="docutils literal notranslate"><span class="pre">raw</span></code> 磁盘，直接分配给虚拟机使用(虽然也能直接用分区，但是分区只能固定数量，很难调节，而LVM卷可以在底层伸缩)</p></li>
@@ -398,7 +393,6 @@ through给虚拟机，这样就几乎没有延迟或超载，提供了最高的�
 </section>
 <section id="qemuio">
 <h2>QEMU磁盘IO的比较<a class="headerlink" href="#qemuio" title="永久链接至标题">¶</a></h2>
-<p><a class="reference external" href="https://www.slideshare.net/pradeepkumarsuvce/qemu-disk-io-which-performs-better-native-or-threads">QEMU Disk IO Which performs Better: Native or threads?</a></p>
 <p>Libvirt对于磁盘设备的AIO有异步(Asynchronous IO, AIO=Native)和同步(Synchronous, AIO=Threads)两种模式，在 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 默认使用 <code class="docutils literal notranslate"><span class="pre">aio=theads</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">disk</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;file&#39;</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;disk&#39;</span><span class="o">&gt;</span>
   <span class="o">&lt;</span><span class="n">driver</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;qemu&#39;</span> <span class="n">typ</span><span class="s1">&#39;qcow2&#39;</span> <span class="n">cache</span><span class="o">=</span><span class="s1">&#39;none&#39;</span> <span class="n">io</span><span class="o">=</span><span class="s1">&#39;native&#39;</span><span class="o">/&gt;</span>
@@ -419,9 +413,6 @@ through给虚拟机，这样就几乎没有延迟或超载，提供了最高的�
 <li><p><code class="docutils literal notranslate"><span class="pre">AIO=Native</span></code> 限制更少，建议使用</p></li>
 <li><p>由于在文件不是完全分配的情况下，Native AIO会阻塞VM，所以Native AIO不建议用于稀疏文件</p></li>
 <li><p>在完全预分配的文件，本地磁盘或者逻辑卷的情况下，建议只使用 <code class="docutils literal notranslate"><span class="pre">aio=native</span></code> ，但是不要用于稀疏文件(阻塞)</p></li>
-</ul>
-<p><a class="reference external" href="https://www.heiko-sieger.info/tuning-vm-disk-performance/">Tuning VM Disk Performance</a> 也提供了进一步信息:</p>
-<ul class="simple">
 <li><p>基于文件的存储</p>
 <ul>
 <li><p>容易实现，qemu提供了 <code class="docutils literal notranslate"><span class="pre">raw</span></code> 和 <code class="docutils literal notranslate"><span class="pre">qcow2</span></code></p>
@@ -460,7 +451,7 @@ through给虚拟机，这样就几乎没有延迟或超载，提供了最高的�
 <p>qemu/kvm 虚拟机可以直接使用磁盘或分区，只需要将 <code class="docutils literal notranslate"><span class="pre">-drive</span></code>
 设置为指定分区而不是镜像文件名即可。直接使用磁盘作为虚拟存储会失去伸缩性，以及不能使用快照(用于备份)。这种情况下，解决的方法是使用LVM逻辑卷管理。也就是说，并不是直接把裸磁盘分配给虚拟机，而是使用LVM逻辑卷(也是块设备)来代替简单的磁盘或磁盘分区，这样就能获得直接的磁盘性能，同时提供逻辑卷管理的伸缩性(例如可以在底层添加磁盘，扩展逻辑卷等)。</p>
 <p>注意，需要先使用LVM逻辑卷管理配置好，然后才能使用它(逻辑卷)作为虚拟机磁盘，所以操作会有些繁琐。</p>
-<p>此外，在使用LVM逻辑卷作为虚拟机存储时，应该将虚拟机存储参数设置为 <code class="docutils literal notranslate"><span class="pre">cache=none</span></code> 来获得最佳性能。至于使用 <code class="docutils literal notranslate"><span class="pre">aio=native</span></code> 还是 <code class="docutils literal notranslate"><span class="pre">aio=threads</span></code> 设置则视系统中同时运行的虚拟机数量而定。在使用SSD存储的系统中，如果只运行一个VM，则使用 <code class="docutils literal notranslate"><span class="pre">aio=theads</span></code> 可以增加带宽；而同时运行很多VM，则使用 <code class="docutils literal notranslate"><span class="pre">aio=native</span></code> 可以获得较好的性能。详细测试案例及说明见上文引用的 <a class="reference external" href="https://www.slideshare.net/pradeepkumarsuvce/qemu-disk-io-which-performs-better-native-or-threads">QEMU Disk IO Which performs Better: Native or threads?</a></p>
+<p>此外，在使用LVM逻辑卷作为虚拟机存储时，应该将虚拟机存储参数设置为 <code class="docutils literal notranslate"><span class="pre">cache=none</span></code> 来获得最佳性能。至于使用 <code class="docutils literal notranslate"><span class="pre">aio=native</span></code> 还是 <code class="docutils literal notranslate"><span class="pre">aio=threads</span></code> 设置则视系统中同时运行的虚拟机数量而定。在使用SSD存储的系统中，如果只运行一个VM，则使用 <code class="docutils literal notranslate"><span class="pre">aio=theads</span></code> 可以增加带宽；而同时运行很多VM，则使用 <code class="docutils literal notranslate"><span class="pre">aio=native</span></code> 可以获得较好的性能。</p>
 <p>以下案例是使用 <code class="docutils literal notranslate"><span class="pre">virtio-blk-pci</span></code> 驱动访问存储分区 <code class="docutils literal notranslate"><span class="pre">/dev/sdb1</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="nb">object</span> <span class="n">iothread</span><span class="p">,</span><span class="nb">id</span><span class="o">=</span><span class="n">io1</span> \
 <span class="o">-</span><span class="n">device</span> <span class="n">virtio</span><span class="o">-</span><span class="n">blk</span><span class="o">-</span><span class="n">pci</span><span class="p">,</span><span class="n">drive</span><span class="o">=</span><span class="n">disk0</span><span class="p">,</span><span class="n">iothread</span><span class="o">=</span><span class="n">io1</span> \
@@ -476,8 +467,8 @@ through给虚拟机，这样就几乎没有延迟或超载，提供了最高的�
 </pre></div>
 </div>
 </section>
-<section id="id8">
-<h2>小结<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>小结<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>通过pass-through（VFIO)方式获得最高性能(接近于物理主机): 对于存储、网络、GPU，使用VFIO都是性能最优方法</p></li>
 <li><p>如果设备(GPU或网卡)支持 <a class="reference internal" href="../sr-iov/index.html#sr-iov"><span class="std std-ref">SR-IOV</span></a> 则可以结合 VFIO 实现将 VF 设备pass-through给虚拟机，不仅实现高性能I/O，同时也实现一个物理设备按需切分分配给不同虚拟机，最大化使用率</p></li>
@@ -500,8 +491,8 @@ through给虚拟机，这样就几乎没有延迟或超载，提供了最高的�
 <p>为了方便管理KVM虚拟机存储，实践采用 <a class="reference internal" href="../libvirt/storage/index.html#libvirt-storage"><span class="std std-ref">Libvirt存储</span></a></p>
 </div>
 </section>
-<section id="id9">
-<h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://documentation.suse.com/sles/15-SP1/pdf/article-vt-best-practices_color_en.pdf">SUSE Linux Enterprise Server 15 SP1 Virtualization Best Practices</a></p></li>
 <li><p><a class="reference external" href="https://documentation.suse.com/sles/15-SP1/html/SLES-all/book-virt.html">SUSE Linux Enterprise Server 15 SP1 Virtualization Guide</a></p></li>

@@ -52,25 +52,21 @@ I/O Scheduler
    fs.aio-max-nr = 1048576
 
 I/O虚拟化
-===========
+===============
 
-I/O虚拟化有不同的技术，各自具有利弊:
+I/O虚拟化有不同的技术，各自具有利弊
 
 .. csv-table:: I/O虚拟化解决方案
    :file: kvm_storage_io/io_virt_solutions.csv
    :widths: 30, 30, 40
    :header-rows: 1
 
-:ref:`priv_cloud_infra` 采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`iommu` ，现在这个传统的 KVM PCI Pass-Through 设备分配已经被VFIO 标准(Virtual Function I/O)取代。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM Guest。要实现VFIO，需要满足条件有:
+在 :ref:`priv_cloud_infra` 采用上述 ``Device Assignment(pass-through)`` 方式，也就是 :ref:`iommu` VFIO 标准(Virtual Function I/O)。VFIO驱动直接输出设备访问到一个安全内存(IOMMU)保护环境的用户空间。使用VFIO，VM Guest虚拟机可以直接访问VM Host物理主机硬件设备(pass-through)，避免了模拟带来的性能损失。注意，这种模式不允许共享设备(和SR-IOV不同)，每个设备只能指派给一个唯一VM Guest。要实现VFIO，需要满足条件有:
 
 - Host物理主机服务器CPU和主板芯片以及BIOS/UEFI支持
 - BIOS/EFI激活了IOMMU
 - 内核参数设置激活IOMMU: 对于Intel处理器，内核参数使用 ``intel_iommu=on``
 - 系统提供了VFIO架构，也即是内核加载了模块 ``vfio_pci``
-
-.. note::
-
-   我最初想通过 :ref:`intel_vt-d_startup` 设置VT-d来实现pass-through方式分配磁盘给虚拟机，虽然这个方法依然可以采用，但是显然目前虚拟化技术已经发展 VFIO 设备(底层还是IOMMU)，所以，实际实践采用 :ref:`vfio` 完成。
 
 pass-through 分区(似乎不行)
 -------------------------------
@@ -82,8 +78,7 @@ pass-through 分区(似乎不行)
 
 但是，参考 `Disk Passthrough Explained <https://passthroughpo.st/disk-passthrough-explained/>`_ 的 ``Direct SATA Controller Passthrough via vfio-pci`` :
 
-SATA控制器是位于PCI总线，所以可以将SATA控制器直接pass
-through给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。
+SATA控制器是位于PCI总线，所以可以将SATA控制器直接passthrough给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。
 
 `lennard0711/vfio <https://github.com/lennard0711/vfio>`_ 提供了一个配置案例，并且 `arch linux: PCI passthrough via OVMF - Physical disk/partition <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Physical_disk/partition>`_ 介绍了可以pass through磁盘或分区
 
@@ -101,8 +96,6 @@ through给虚拟机，这样就几乎没有延迟或超载，提供了最高的�
 
 QEMU磁盘IO的比较
 ===================
-
-`QEMU Disk IO Which performs Better: Native or threads? <https://www.slideshare.net/pradeepkumarsuvce/qemu-disk-io-which-performs-better-native-or-threads>`_
 
 Libvirt对于磁盘设备的AIO有异步(Asynchronous IO, AIO=Native)和同步(Synchronous, AIO=Threads)两种模式，在 :ref:`openstack` 默认使用 ``aio=theads`` ::
 
@@ -124,11 +117,9 @@ Libvirt对于磁盘设备的AIO有异步(Asynchronous IO, AIO=Native)和同步(S
 - 由于在文件不是完全分配的情况下，Native AIO会阻塞VM，所以Native AIO不建议用于稀疏文件
 - 在完全预分配的文件，本地磁盘或者逻辑卷的情况下，建议只使用 ``aio=native`` ，但是不要用于稀疏文件(阻塞)
 
-`Tuning VM Disk Performance <https://www.heiko-sieger.info/tuning-vm-disk-performance/>`_ 也提供了进一步信息:
-
 - 基于文件的存储
 
-  - 容易实现，qemu提供了 ``raw`` 和 ``qcow2`` 
+  - 容易实现，qemu提供了 ``raw`` 和 ``qcow2``
 
     - raw (Raw disk image format) 格式简单并且易于迁移到其他虚拟化平台
     - qcow2 提供了更小的镜像(稀疏文件)以及加密、压缩和虚拟机快照功能
@@ -158,8 +149,7 @@ qemu/kvm 虚拟机可以直接使用磁盘或分区，只需要将 ``-drive``
 
 注意，需要先使用LVM逻辑卷管理配置好，然后才能使用它(逻辑卷)作为虚拟机磁盘，所以操作会有些繁琐。
 
-此外，在使用LVM逻辑卷作为虚拟机存储时，应该将虚拟机存储参数设置为 ``cache=none`` 来获得最佳性能。至于使用 ``aio=native`` 还是 ``aio=threads`` 设置则视系统中同时运行的虚拟机数量而定。在使用SSD存储的系统中，如果只运行一个VM，则使用 ``aio=theads`` 可以增加带宽；而同时运行很多VM，则使用 ``aio=native`` 可以获得较好的性能。详细测试案例及说明见上文引用的 `QEMU Disk IO Which performs Better: Native or threads?
-<https://www.slideshare.net/pradeepkumarsuvce/qemu-disk-io-which-performs-better-native-or-threads>`_
+此外，在使用LVM逻辑卷作为虚拟机存储时，应该将虚拟机存储参数设置为 ``cache=none`` 来获得最佳性能。至于使用 ``aio=native`` 还是 ``aio=threads`` 设置则视系统中同时运行的虚拟机数量而定。在使用SSD存储的系统中，如果只运行一个VM，则使用 ``aio=theads`` 可以增加带宽；而同时运行很多VM，则使用 ``aio=native`` 可以获得较好的性能。
 
 以下案例是使用 ``virtio-blk-pci`` 驱动访问存储分区 ``/dev/sdb1`` ::
 

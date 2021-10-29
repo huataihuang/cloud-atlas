@@ -4,7 +4,7 @@
 Intel VT-d快速起步
 =====================
 
-:ref:`kvm_storage_io` 中性能最好的磁盘IO是 ``pass-through`` ，即 ``IOMMU`` 技术。这项技术在Intel中称为 ``VT-d`` ，本文就是在 :ref:`hpe_dl360_gen9` 服务器上实现 :ref:`priv_cloud_infra` ，在最底层的第一层虚拟化中，即采用虚拟机直接访问存储，以实现最好的I/O性能。
+KVM中性能最好的磁盘IO是 ``pass-through`` ，即 ``IOMMU`` 技术。这项技术在Intel中称为 ``VT-d`` ，本文就是在 :ref:`hpe_dl360_gen9` 服务器上实现 :ref:`priv_cloud_infra` ，在最底层的第一层虚拟化中，即采用虚拟机直接访问存储，以实现最好的I/O性能。
 
 具体实现:
 
