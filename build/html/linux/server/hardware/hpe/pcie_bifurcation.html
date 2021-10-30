@@ -289,6 +289,9 @@
 </pre></div>
 </div>
 </li>
+</ul>
+<p>也就是说对于 DL360 Gen9 是支持Slot 1的 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">bifurcation</span></code> ，对于 DL380 Gen9 则支持 Slot 2的 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">bitfurcaton</span></code></p>
+<ul class="simple">
 <li><p>HP的人说DL360和DL380 Gen9是支持，但是需要PCIe扩展卡厂商的部件适配bifurcate，部件需要和firmware和驱动适配正确的速率才能实现 x8 / x4 。所以，这可能是没有插入PCIe扩展卡就看不到 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Device</span> <span class="pre">Configuratio</span></code> 选项的原因？</p></li>
 </ul>
 <p>参考 <a class="reference external" href="https://linustechtips.com/topic/1279595-hpe-gen9-with-asus-hyper-m2-x16-card-v2/">HPE Gen9 with asus hyper m.2 x16 card v2</a> 提到有人购买了 Asus hyper m.2 x16 card v2 以及 4块 Samsung 970 plus:</p>
@@ -308,9 +311,24 @@
 <h3>综合<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">bifurcation</span></code> 需要PCIe设备和主板firmware/driver配合进行协商，所以如果系统没有安装PCIe设备(GPU或NVMe卡)则看不到 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Device</span> <span class="pre">Configuration</span></code> 配置选项</p></li>
-<li><p>HPE gen9服务器更新到最新的BIOS是支持 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">bifurcation</span></code> 的，但是有可能需要扩展卡能够适配才能正确设置</p></li>
+<li><p>HPE gen9服务器更新到最新的BIOS是支持 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">bifurcation</span></code> 的，但是有可能需要扩展卡能够适配才能正确设置，但是没有看到 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Device</span> <span class="pre">Configuration</span></code> 配置入口:</p></li>
 </ul>
 </section>
+</section>
+<section id="id4">
+<h2>我的实践<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>我购买了 3个 <a class="reference internal" href="../storage/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 以及 佳翼M2X16四盘NVMe扩展卡( 宣传称 <code class="docutils literal notranslate"><span class="pre">支持PCIE</span> <span class="pre">4.0</span> <span class="pre">GEN4，</span> <span class="pre">向下兼容PCIE3.0</span> <span class="pre">GEN3</span></code> )。我比较担心能否配合DL 360 Gen9实现 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">bifurcation</span></code></p>
+<ul class="simple">
+<li><p>我最初尝试将 NVMe扩展卡 安装在 Slot 3上(因为我想能在 Slot 1上安装显卡，然后可以还留出空间在Slot 2上安装第二个NVMe扩展卡)，但是确实启动以后没有找到PCIe配置选项</p></li>
+<li><p>将 NVMe 扩展卡 改到安装到 Slot 1，重新启动系统，检查 <code class="docutils literal notranslate"><span class="pre">BIOS/Platform</span> <span class="pre">Configuration(RBSU)</span></code> 配置选项，依然没有看到 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Device</span> <span class="pre">Configuration</span></code> 配置入口(只看到 <code class="docutils literal notranslate"><span class="pre">PCI</span> <span class="pre">Device</span> <span class="pre">Enable/Disable</span></code> 激活关闭设置):</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/rbsu_no_pcie_config.png"><img alt="../../../../_images/rbsu_no_pcie_config.png" src="../../../../_images/rbsu_no_pcie_config.png" style="width: 1260.8000000000002px; height: 640.0px;" /></a>
+</figure>
+<p><a class="reference external" href="https://community.hpe.com/t5/Servers-General/HPE-Proliant-dl160-gen9-bifurcation/td-p/7133232#.YXdM-y8RppQ">HPE Proliant dl160 gen9 bifurcation</a> 中答复中也提到了，这个功能需要扩展卡厂商支持firmware，有人换了6个扩展卡都没有看到BIOS能够显示出 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Device</span> <span class="pre">Configuration</span></code> 配置项。看起来我购买的 <code class="docutils literal notranslate"><span class="pre">佳翼M2X16四盘NVMe扩展卡</span></code> 也同样没有适配成功。</p>
+<p>目前能够找到的确定支持HP DL360 Gen9的NVMe扩展卡是使用PLX主控芯片( PLX 是PCIe交换和桥接芯片供应商 )，在淘宝上能够找到不需要主板自带PCIe bifurcation就可以使用多块NVMe存储的扩展卡都是使用PLX主控芯片。</p>
+<p>真是让人非常沮丧，折腾这么久，查询很多资料都没有明确的 HPE Gen9 解决 PCIe bifurction 的解释和适配方法，虽然2016年 <a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&amp;docId=c05060771">HPE UEFI System Utilities and Shell Release Notes for HPE ProLiant Gen9 Servers</a> 提到了支持，但是该文档最新2021年版本已经找不到这项说明了。</p>
+<p>最终，我还是重新购买了 <code class="docutils literal notranslate"><span class="pre">M.2</span> <span class="pre">NVMe</span> <span class="pre">SSD扩展卡</span> <span class="pre">PCIe3.0</span> <span class="pre">X8X16扩2口4口M2</span> <span class="pre">PLX8747</span></code> ，需要注意，接口应该是 PCIe3.0 X16 ，这样拆分4个以后才是 x4x4x4x4 ，可以满足较高速的 NVMe 读写。</p>
 </section>
 </section>
 
