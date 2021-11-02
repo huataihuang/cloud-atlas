@@ -7,7 +7,7 @@ IOMMU
 .. toctree::
    :maxdepth: 1
 
-   iommu_infrastructure.rst
+   iommu_infra.rst
    intel_vt-d_startup.rst
    ovmf.rst
    vfio.rst

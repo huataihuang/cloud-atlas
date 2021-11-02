@@ -1,4 +1,4 @@
-.. _iommu_infrastructure:
+.. _iommu_infra:
 
 ======================
 IOMMU架构
