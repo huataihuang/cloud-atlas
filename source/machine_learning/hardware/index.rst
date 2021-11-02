@@ -11,6 +11,7 @@
    nvidia_gpu.rst
    gtx_1050_ti.rst
    tesla_p10.rst
+   nvidia_vgpu.rst
 
 .. only::  subproject and html
 

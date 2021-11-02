@@ -31,6 +31,13 @@ GP102图形处理器是die面积高达471 mm²，包含了11,800 million (1亿1�
 
 Tesla P10是一个单插槽运算卡，长度 267 mm / 宽度 97 mm，使用 PCIe 3.0 x16 接口，这恰好是我购买的二手 :ref:`hpe_dl360_gen9` 能够安装的规格(1U服务器)，这也是我能够找到经济上可以承受同时能够安装到1U服务器的GPU卡。
 
+.. figure:: ../../_static/machine_learning/hardware/tesla_p10.jpg
+   :scale: 50
+
+.. figure:: ../../_static/machine_learning/hardware/tesla_p10_back.jpg
+   :scale: 50
+
+
 技术规格
 ------------
 
@@ -67,7 +74,10 @@ Tesla P10 和 GeForce GTX 1080 Ti 采用了相同的GPU核心 GP102 ，也就是
 
 Tesla P10买家是通过顺丰空运，第二天晚上就拿到了，安装到 DL360 Gen9的狭窄1U机箱，果然如我所推测，尺寸正好。
 
-不过，遇到一个问题，Nvidia的GPU卡需要外接电源，而DL 360内部没有这个电源线。问了卖家，这个电源线就是PC机的标准8-pin电源线。只是我的DL 360服务器内部确实没有。
+不过，遇到一个问题，Nvidia的GPU卡需要外接电源，而DL 360内部没有这个电源线。问了卖家，这个电源线就是PC机的标准8-pin电源线。在HP DL360 gen9的 ``Primary PCIe 3.0 riser for PCIe slot 1 & 2`` (对应CPU 1) 的电路板背面(靠近 slot2)有一个象牙色的电源出输出(8-pin)，可以输出电流给显卡使用。下图是PCIe Slot 1 & 2板上电源接口(部件翻转过来看):
+
+.. figure:: ../../_static/machine_learning/hardware/dl360_gen9_pcie1.png
+   :scale: 70
 
 参考
 ======
