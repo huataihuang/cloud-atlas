@@ -69,7 +69,7 @@ PCIe设备和bifuration
 我的选择
 ============
 
-直通扩展卡(失败)
+直通扩展卡(探索中)
 -------------------
 
 我购买了 3个 :ref:`samsung_pm9a1` 以及 佳翼M2X16四盘NVMe扩展卡( 宣传称 ``支持PCIE 4.0 GEN4， 向下兼容PCIE3.0 GEN3`` )。我比较担心能否配合DL 360 Gen9实现 ``PCIe bifurcation`` 
@@ -81,9 +81,25 @@ PCIe设备和bifuration
 .. figure:: ../../../../_static/linux/server/hardware/hpe/rbsu_no_pcie_config.png
    :scale: 80
 
-`HPE Proliant dl160 gen9 bifurcation <https://community.hpe.com/t5/Servers-General/HPE-Proliant-dl160-gen9-bifurcation/td-p/7133232#.YXdM-y8RppQ>`_ 中答复中也提到了，这个功能需要扩展卡厂商支持firmware，有人换了6个扩展卡都没有看到BIOS能够显示出 ``PCIe Device Configuration`` 配置项。看起来我购买的 ``佳翼M2X16四盘NVMe扩展卡`` 也同样没有适配成功。
+`HPE Proliant dl160 gen9 bifurcation <https://community.hpe.com/t5/Servers-General/HPE-Proliant-dl160-gen9-bifurcation/td-p/7133232#.YXdM-y8RppQ>`_ 中答复中也提到了，这个功能需要扩展卡厂商支持firmware，有人换了6个扩展卡都没有看到BIOS能够显示出 ``PCIe Device Configuration`` 配置项。
+
+看起来我购买的 ``佳翼M2X16四盘NVMe扩展卡`` 也同样没有适配成功???
 
 真是让人非常沮丧，折腾这么久，查询很多资料都没有明确的 HPE Gen9 解决 PCIe bifurction 的解释和适配方法，虽然2016年 `HPE UEFI System Utilities and Shell Release Notes for HPE ProLiant Gen9 Servers <https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&docId=c05060771>`_ 提到了支持，但是该文档最新2021年版本已经找不到这项说明了。
+
+柳暗花明又一村...
+
+我在DL360 Gen9服务器上安装 :ref:`tesla_p10` 启动时遇到需要 :ref:`enable_gpu_iommu` 问题，HPE DL360 Gen9的 ``PCI Express 64-Bit BAR Support`` BIOS配置选项隐藏在没有任何提示的 ``Service Options`` 菜单中(需要在 ``ROM-Based Setup Utility (RBSU)`` 界面通过 ``Ctrl-A`` 激活)，但是没有任何菜单引导。我是通过Google文档才找到方法...
+
+原来在这个隐藏的 ``Service Options`` 中提供了很多高级功能，其中就包括了 ``Primary Riser PCIe x16 Bifurcation`` 
+
+HPE DL360 Gen9 BIOS设置Bifurcatio
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- 启动服务器，在BIOS提示时，按下 ``F9`` 进入 ``ROM-Based Setup Utility (RBSU)``
+- 在RBSU中，按下 ``Ctrl + A`` ，进入 ``Service Options``
+- 通过上下键移动菜单高亮，选择 ``Primary Riser PCIe x16 Bifurcation`` ，然后按下回车
+- 此时可选的配置选项和在 ``Primary PCIe 3.0 riser for PCIe slot 1`` 上插入的PCIe卡有关，例如对于 :ref:`tesla_p10` 就只显示 ``x16`` 和 ``x8x8`` 选项，对于我使用的 ``佳翼M2X16四盘NVMe扩展卡`` (无PLX主控芯片)，则显示:
 
 PLX主控扩展卡
 ----------------
@@ -92,6 +108,8 @@ PLX主控扩展卡
 
 - ASM2824
 - PLX2847 ( `Broadcom PEX8747 <https://www.broadcom.com/products/pcie-switches-bridges/pcie-switches/pex8747>`_ 就是收购PLX的产品线的PLX8747)
+
+`Multi-NVMe (m.2, u.2) adapters that do not require bifurcation <https://forums.servethehome.com/index.php?threads/multi-nvme-m-2-u-2-adapters-that-do-not-require-bifurcation.31172/>`_ 汇总了国外网友搜集的无需主板bifurcation功能就可以支持多个NVMe存储的PCIe扩展卡(aliexpress上由2家中国销售公司售卖的)，主控芯片绝大多数是PLX 8724/8747/8748，少量是ASM芯片。
 
 最终，我还是重新购买了 ``M.2 NVMe SSD扩展卡 PCIe3.0 X8X16扩2口4口M2 PLX8747`` ：
 

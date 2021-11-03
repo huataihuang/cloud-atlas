@@ -16,6 +16,7 @@ Machine Learning Atlas
    studio/index
    hardware/index
    jetson/index
+   cuda/index
    tensorflow/index
 
 .. only::  subproject and html
