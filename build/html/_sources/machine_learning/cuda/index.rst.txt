@@ -1,17 +1,13 @@
-.. _iommu:
+.. _cuda:
 
 =================================
-IOMMU
+NVIDIA CUDA
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   iommu_infra.rst
-   enable_gpu_iommu.rst
-   intel_vt-d_startup.rst
-   ovmf.rst
-   vfio.rst
+   install_cuda_ubuntu.rst
 
 .. only::  subproject and html
 

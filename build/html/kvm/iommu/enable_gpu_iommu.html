@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>激活GPU Passthrough模式(Tesla P10) &mdash; Cloud Atlas 0.1 文档</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Intel VT-d快速起步" href="intel_vt-d_startup.html" />
+    <link rel="prev" title="IOMMU架构" href="iommu_infra.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">KVM Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../install/index.html">KVM 环境安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">KVM 快速起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hypervisor.html">hypervisor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_architecture.html">KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">KVM 存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numa/index.html">KVM NUMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">IOMMU</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="iommu_infra.html">IOMMU架构</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">激活GPU Passthrough模式(Tesla P10)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpui-o">GPU卡请求内存映射I/O超过限制</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">原因</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vmware-esx">VMware ESX配置建议</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hp-dl360-gen9-bios">HP DL360 Gen9 BIOS设置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="intel_vt-d_startup.html">Intel VT-d快速起步</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ovmf.html">Open Virtual Machine Firmware(OMVF)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual.html">KVM嵌套虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_vdisk_live.html">KVM虚拟机动态添加、调整磁盘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_live_migration.html">KVM热迁移</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">使用QEMU管理KVM虚拟机</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_libguestfs.html">使用libguestfs访问KVM镜像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../memballoon.html">虚拟机内存balloon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu_passthrough_with_kvm.html">KVM的GPU直通虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nvidia_cuda_gpu_in_kvm.html">在KVM中使用NVIDIA CUDA GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amd_rocm_gpu_in_kvm.html">在KVM中使用AMD ROCm GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../macos_xhyve/index.html">macOS平台xhyve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amd_kvm/index.html">AMD硬件环境KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm_kvm/index.html">ARM硬件环境KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_macos/index.html">KVM虚拟化运行macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">KVM故障排查</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../postgresql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">KVM Atlas</a> &raquo;</li>
+        
+          <li><a href="index.html">IOMMU</a> &raquo;</li>
+        
+      <li>激活GPU Passthrough模式(Tesla P10)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/kvm/iommu/enable_gpu_iommu.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="gpu-passthrough-tesla-p10">
+<span id="enable-gpu-iommu"></span><h1>激活GPU Passthrough模式(Tesla P10)<a class="headerlink" href="#gpu-passthrough-tesla-p10" title="永久链接至标题">¶</a></h1>
+<section id="gpui-o">
+<h2>GPU卡请求内存映射I/O超过限制<a class="headerlink" href="#gpui-o" title="永久链接至标题">¶</a></h2>
+<p>当我第一次在 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上安装 <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> ，启动时候BIOS自检会提示错误:</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/gpu_mem_map_err.png"><img alt="../../_images/gpu_mem_map_err.png" src="../../_images/gpu_mem_map_err.png" style="width: 676.6px; height: 506.59999999999997px;" /></a>
+</figure>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">276</span> <span class="n">Option</span> <span class="n">Card</span> <span class="n">Configuration</span> <span class="n">Error</span><span class="o">.</span> <span class="n">An</span> <span class="n">option</span> <span class="n">card</span> <span class="ow">is</span> <span class="n">requesting</span> <span class="n">more</span> <span class="n">memory</span>
+<span class="n">mapped</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">than</span> <span class="ow">is</span> <span class="n">available</span><span class="o">.</span>
+<span class="n">Action</span><span class="p">:</span> <span class="n">Remove</span> <span class="n">the</span> <span class="n">option</span> <span class="n">card</span> <span class="n">to</span> <span class="n">allow</span> <span class="n">the</span> <span class="n">system</span> <span class="n">to</span> <span class="n">boot</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>原因<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>NVIDIA的计算加速卡</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://www.ibm.com/support/pages/nvidia-gpgpu-adapters-system-memory-addressing-limitations-ibm-systems">NVIDIA GPGPU Adapters system memory addressing limitations - IBM Systems</a> 还指出了 NVIDIA Grid, NVIDIA Tesla, or NVIDIA Quadro 受到产品设计影响，内存地址限制导致不能用于内存大于 1TB 的系统。</p>
+<p><a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docId=a00104867en_us&amp;docLocale=en_US">Advisory: HPE ProLiant Servers - On Systems Configured with an NVIDIA GPU With More Than 1 TB of Server Host Memory, GPU Options Will Not Function Properly</a> 也是同样建议</p>
+</div>
+</section>
+<section id="vmware-esx">
+<h2>VMware ESX配置建议<a class="headerlink" href="#vmware-esx" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>虚拟机系统为64-bit操作系统</p></li>
+<li><p>物理机和虚拟机都使用EFI引导模式</p></li>
+<li><p>若GPU 需要 16 GB 或更多的内存映射（BAR1 Memory），需要在物理机bios中启用GPU直通，设置项名称通常为:</p>
+<ul class="simple">
+<li><p>Above 4G decoding</p></li>
+<li><p>Memory mapped I/O above 4GB</p></li>
+<li><p>PCI 64-bit resource handing above 4G</p></li>
+</ul>
+</li>
+<li><p>在虚拟机的 <code class="docutils literal notranslate"><span class="pre">vmx</span></code> 文件配置中激活 64 位 Memory Mapped I/O (MMIO)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pciPassthru</span><span class="o">.</span><span class="n">use64bitMMIO</span><span class="o">=</span><span class="s2">&quot;TRUE&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Memory Mapped I/O (MMIO)大小调整：建议调整为（n*GPU显存）向上舍入到下一个2次幂:</p>
+<ul>
+<li><p>两个16G显存GPU，2 x 16 GB = 32，将 32 GB 向上舍入到下一个 2 次幂，所需的内存量为 64 GB</p></li>
+<li><p>三个16G显存GPU，3 x 16 GB = 48，将 48 GB 向上舍入到下一个 2 次幂，所需的内存量为 64 GB</p></li>
+<li><p>或者直接设置为虚拟机分配的所有GPU显存大小的两倍，2*n*GPU显存（单位为GB）</p></li>
+<li><p>设置举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pciPassthru</span><span class="mf">.64</span><span class="n">bitMMIOSizeGB</span> <span class="o">=</span><span class="s2">&quot;64&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>虚拟机内存最小值建议为分配的所有GPU显存总大小的1.5倍</p></li>
+</ul>
+</section>
+<section id="hp-dl360-gen9-bios">
+<h2>HP DL360 Gen9 BIOS设置<a class="headerlink" href="#hp-dl360-gen9-bios" title="永久链接至标题">¶</a></h2>
+<p>虽然VMware文档提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Your host BIOS must be configured to support the large memory regions needed by these high-end PCI devices.
+To enable this, find the host BIOS setting for “above 4G decoding” or “memory mapped I/O above 4GB” or “PCI 64 bit resource handing above 4G” and enable it.
+The exact wording of this option varies by system vendor, though the option is often found in the PCI section of the BIOS menu.
+Consult your system provider if necessary to enable this option.
+</pre></div>
+</div>
+<p>但是我反复查看BIOS配置，都没有找到 PCI 配置部分</p>
+<p>不过， <a class="reference external" href="https://community.hpe.com/t5/ProLiant-Servers-ML-DL-SL/enable-large-BAR-support/td-p/7142448#.YYIDSL1Bxqs">enable large BAR support</a> 有人也问了相似的查找 BIOS 配置支持 ‘64-bit IO’ ，提到了术语 <code class="docutils literal notranslate"><span class="pre">Large</span> <span class="pre">BAR</span></code> 。果然，在 HPE 文档中，使用了术语 <code class="docutils literal notranslate"><span class="pre">Support</span> <span class="pre">64-Bit</span> <span class="pre">Addressing</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Large</span> <span class="pre">BAR</span></code> 。根据 <code class="docutils literal notranslate"><span class="pre">hpe</span> <span class="pre">dl360</span> <span class="pre">gen9</span> <span class="pre">enable</span> <span class="pre">large</span> <span class="pre">BAR</span> <span class="pre">support</span></code> 搜索能够找到支持文档 <a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c03745865-5">Advisory: (Revision) HP ProLiant SL250s Gen8 and ProLiant SL270s Gen8 Servers - Servers Configured with a Large Number Of NVIDIA Tesla or Intel Xeon GPU Computing Modules Require the System ROM to Support 64-Bit Addressing (Large BAR) Support</a> :</p>
+<ul class="simple">
+<li><p>启动服务器，在BIOS提示时，按下 <code class="docutils literal notranslate"><span class="pre">F9</span></code> 进入 <code class="docutils literal notranslate"><span class="pre">ROM-Based</span> <span class="pre">Setup</span> <span class="pre">Utility</span> <span class="pre">(RBSU)</span></code></p></li>
+<li><p>在RBSU中，按下 <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">A</span></code> ，此时会进入一个 <code class="docutils literal notranslate"><span class="pre">Service</span> <span class="pre">Options</span></code> – WOW，打开了一个新世界，原来很多选项都在这里</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/rbsu_service_options.png"><img alt="../../_images/rbsu_service_options.png" src="../../_images/rbsu_service_options.png" style="width: 535.5px; height: 503.2px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">Service</span> <span class="pre">Options</span></code> 中，通过上下键移动菜单高亮，选择 <code class="docutils literal notranslate"><span class="pre">PCI</span> <span class="pre">Express</span> <span class="pre">64-Bit</span> <span class="pre">BAR</span> <span class="pre">Support</span></code> ，默认这个选项是 <code class="docutils literal notranslate"><span class="pre">Disabled</span></code> ，按下回车键进入修改选项，将这个参数修改成 <code class="docutils literal notranslate"><span class="pre">Enabled</span></code></p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/rbsu_service_options.png"><img alt="../../_images/rbsu_service_options.png" src="../../_images/rbsu_service_options.png" style="width: 535.5px; height: 503.2px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>退出保存，然后重启服务器，此时 <code class="docutils literal notranslate"><span class="pre">Large</span> <span class="pre">BAR</span></code> 就已经激活</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>根据HPE文档，当 <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">Maintenance</span> <span class="pre">Switch</span> <span class="pre">9</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">ON</span></code> 的时候将始终激活 <code class="docutils literal notranslate"><span class="pre">Large</span> <span class="pre">BAR</span></code> 功能，所以如果要在 RBSU 中关闭 <code class="docutils literal notranslate"><span class="pre">Large</span> <span class="pre">BAR</span></code> 需要将 <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">Maintenance</span> <span class="pre">Switch</span> <span class="pre">9</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">OFF</span></code> 位置。</p>
+</div>
+<ul>
+<li><p>进入 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 操作系统(我在 <a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 采用Ubuntu作为物理主机操作系统 )，执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">vvv</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到新增加的NVIDIA设备:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">enable_gpu_iommu/lspci_tesla_p10.txt</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="m">08</span>:00.0 3D controller: NVIDIA Corporation Device 1b39 <span class="o">(</span>rev a1<span class="o">)</span>
+<span class="linenos"> 2</span>        Subsystem: NVIDIA Corporation Device <span class="m">1217</span>
+<span class="linenos"> 3</span>        Physical Slot: <span class="m">1</span>
+<span class="linenos"> 4</span>        Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr+ Stepping- SERR+ FastB2B- DisINTx+
+<span class="linenos"> 5</span>        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- <span class="nv">DEVSEL</span><span class="o">=</span>fast &gt;TAbort- &lt;TAbort- &lt;MAbort- &gt;SERR- &lt;PERR- INTx-
+<span class="linenos"> 6</span>        Latency: <span class="m">0</span>, Cache Line Size: <span class="m">64</span> bytes
+<span class="linenos"> 7</span>        Interrupt: pin A routed to IRQ <span class="m">75</span>
+<span class="linenos"> 8</span>        NUMA node: <span class="m">0</span>
+<span class="linenos"> 9</span>        Region <span class="m">0</span>: Memory at <span class="m">93000000</span> <span class="o">(</span><span class="m">32</span>-bit, non-prefetchable<span class="o">)</span> <span class="o">[</span><span class="nv">size</span><span class="o">=</span>16M<span class="o">]</span>
+<span class="linenos">10</span>        Region <span class="m">1</span>: Memory at <span class="m">39000000000</span> <span class="o">(</span><span class="m">64</span>-bit, prefetchable<span class="o">)</span> <span class="o">[</span><span class="nv">size</span><span class="o">=</span>32G<span class="o">]</span>
+<span class="linenos">11</span>        Region <span class="m">3</span>: Memory at <span class="m">39800000000</span> <span class="o">(</span><span class="m">64</span>-bit, prefetchable<span class="o">)</span> <span class="o">[</span><span class="nv">size</span><span class="o">=</span>32M<span class="o">]</span>
+<span class="linenos">12</span>        Capabilities: <span class="o">[</span><span class="m">60</span><span class="o">]</span> Power Management version <span class="m">3</span>
+<span class="linenos">13</span>                Flags: PMEClk- DSI- D1- D2- <span class="nv">AuxCurrent</span><span class="o">=</span>0mA PME<span class="o">(</span>D0-,D1-,D2-,D3hot-,D3cold-<span class="o">)</span>
+<span class="linenos">14</span>                Status: D0 NoSoftRst+ PME-Enable- <span class="nv">DSel</span><span class="o">=</span><span class="m">0</span> <span class="nv">DScale</span><span class="o">=</span><span class="m">0</span> PME-
+<span class="linenos">15</span>        Capabilities: <span class="o">[</span><span class="m">68</span><span class="o">]</span> MSI: Enable+ <span class="nv">Count</span><span class="o">=</span><span class="m">1</span>/1 Maskable- 64bit+
+<span class="linenos">16</span>                Address: 00000000fee00718  Data: <span class="m">0000</span>
+<span class="linenos">17</span>        Capabilities: <span class="o">[</span><span class="m">78</span><span class="o">]</span> Express <span class="o">(</span>v2<span class="o">)</span> Endpoint, MSI <span class="m">00</span>
+<span class="linenos">18</span>                DevCap: MaxPayload <span class="m">256</span> bytes, PhantFunc <span class="m">0</span>, Latency L0s unlimited, L1 &lt;64us
+<span class="linenos">19</span>                        ExtTag+ AttnBtn- AttnInd- PwrInd- RBE+ FLReset- SlotPowerLimit <span class="m">0</span>.000W
+<span class="linenos">20</span>                DevCtl: CorrErr- NonFatalErr+ FatalErr+ UnsupReq-
+<span class="linenos">21</span>                        RlxdOrd+ ExtTag+ PhantFunc- AuxPwr- NoSnoop+
+<span class="linenos">22</span>                        MaxPayload <span class="m">256</span> bytes, MaxReadReq <span class="m">4096</span> bytes
+<span class="linenos">23</span>                DevSta: CorrErr+ NonFatalErr- FatalErr- UnsupReq+ AuxPwr- TransPend-
+<span class="linenos">24</span>                LnkCap: Port <span class="c1">#0, Speed 8GT/s, Width x16, ASPM not supported</span>
+<span class="linenos">25</span>                        ClockPM+ Surprise- LLActRep- BwNot- ASPMOptComp+
+<span class="linenos">26</span>                LnkCtl: ASPM Disabled<span class="p">;</span> RCB <span class="m">64</span> bytes Disabled- CommClk+
+<span class="linenos">27</span>                        ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
+<span class="linenos">28</span>                LnkSta: Speed <span class="m">2</span>.5GT/s <span class="o">(</span>downgraded<span class="o">)</span>, Width x16 <span class="o">(</span>ok<span class="o">)</span>
+<span class="linenos">29</span>                        TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+<span class="linenos">30</span>                DevCap2: Completion Timeout: Range AB, TimeoutDis+, NROPrPrP-, LTR+
+<span class="linenos">31</span>                         10BitTagComp-, 10BitTagReq-, OBFF Via message, ExtFmt-, EETLPPrefix-
+<span class="linenos">32</span>                         EmergencyPowerReduction Not Supported, EmergencyPowerReductionInit-
+<span class="linenos">33</span>                         FRS-, TPHComp-, ExtTPHComp-
+<span class="linenos">34</span>                         AtomicOpsCap: 32bit- 64bit- 128bitCAS-
+<span class="linenos">35</span>                DevCtl2: Completion Timeout: 50us to 50ms, TimeoutDis-, LTR-, OBFF Disabled
+<span class="linenos">36</span>                         AtomicOpsCtl: ReqEn-
+<span class="linenos">37</span>                LnkCtl2: Target Link Speed: 8GT/s, EnterCompliance- SpeedDis-
+<span class="linenos">38</span>                         Transmit Margin: Normal Operating Range, EnterModifiedCompliance- ComplianceSOS-
+<span class="linenos">39</span>                         Compliance De-emphasis: -6dB
+<span class="linenos">40</span>                LnkSta2: Current De-emphasis Level: -6dB, EqualizationComplete+, EqualizationPhase1+
+<span class="linenos">41</span>                         EqualizationPhase2+, EqualizationPhase3+, LinkEqualizationRequest-
+<span class="linenos">42</span>        Capabilities: <span class="o">[</span><span class="m">100</span> v1<span class="o">]</span> Virtual Channel
+<span class="linenos">43</span>                Caps:   <span class="nv">LPEVC</span><span class="o">=</span><span class="m">0</span> <span class="nv">RefClk</span><span class="o">=</span>100ns <span class="nv">PATEntryBits</span><span class="o">=</span><span class="m">1</span>
+<span class="linenos">44</span>                Arb:    Fixed- WRR32- WRR64- WRR128-
+<span class="linenos">45</span>                Ctrl:   <span class="nv">ArbSelect</span><span class="o">=</span>Fixed
+<span class="linenos">46</span>                Status: InProgress-
+<span class="linenos">47</span>                VC0:    Caps:   <span class="nv">PATOffset</span><span class="o">=</span><span class="m">00</span> <span class="nv">MaxTimeSlots</span><span class="o">=</span><span class="m">1</span> RejSnoopTrans-
+<span class="linenos">48</span>                        Arb:    Fixed- WRR32- WRR64- WRR128- TWRR128- WRR256-
+<span class="linenos">49</span>                        Ctrl:   Enable+ <span class="nv">ID</span><span class="o">=</span><span class="m">0</span> <span class="nv">ArbSelect</span><span class="o">=</span>Fixed TC/VC<span class="o">=</span>ff
+<span class="linenos">50</span>                        Status: NegoPending- InProgress-
+<span class="linenos">51</span>        Capabilities: <span class="o">[</span><span class="m">250</span> v1<span class="o">]</span> Latency Tolerance Reporting
+<span class="linenos">52</span>                Max snoop latency: 0ns
+<span class="linenos">53</span>                Max no snoop latency: 0ns
+<span class="linenos">54</span>        Capabilities: <span class="o">[</span><span class="m">128</span> v1<span class="o">]</span> Power Budgeting &lt;?&gt;
+<span class="linenos">55</span>        Capabilities: <span class="o">[</span><span class="m">420</span> v2<span class="o">]</span> Advanced Error Reporting
+<span class="linenos">56</span>                UESta:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt- RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
+<span class="linenos">57</span>                UEMsk:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt- RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
+<span class="linenos">58</span>                UESvrt: DLP+ SDES+ TLP- FCP+ CmpltTO- CmpltAbrt- UnxCmplt- RxOF+ MalfTLP+ ECRC- UnsupReq- ACSViol-
+<span class="linenos">59</span>                CESta:  RxErr- BadTLP- BadDLLP- Rollover- Timeout- AdvNonFatalErr-
+<span class="linenos">60</span>                CEMsk:  RxErr- BadTLP- BadDLLP- Rollover- Timeout- AdvNonFatalErr+
+<span class="linenos">61</span>                AERCap: First Error Pointer: <span class="m">00</span>, ECRCGenCap- ECRCGenEn- ECRCChkCap- ECRCChkEn-
+<span class="linenos">62</span>                        MultHdrRecCap- MultHdrRecEn- TLPPfxPres- HdrLogCap-
+<span class="linenos">63</span>                HeaderLog: <span class="m">00000000</span> <span class="m">00000000</span> <span class="m">00000000</span> <span class="m">00000000</span>
+<span class="linenos">64</span>        Capabilities: <span class="o">[</span><span class="m">600</span> v1<span class="o">]</span> Vendor Specific Information: <span class="nv">ID</span><span class="o">=</span><span class="m">0001</span> <span class="nv">Rev</span><span class="o">=</span><span class="m">1</span> <span class="nv">Len</span><span class="o">=</span><span class="m">024</span> &lt;?&gt;
+<span class="linenos">65</span>        Capabilities: <span class="o">[</span><span class="m">900</span> v1<span class="o">]</span> Secondary PCI Express
+<span class="linenos">66</span>                LnkCtl3: LnkEquIntrruptEn-, PerformEqu-
+<span class="linenos">67</span>                LaneErrStat: <span class="m">0</span>
+<span class="linenos">68</span>        Kernel driver <span class="k">in</span> use: nouveau
+<span class="linenos">69</span>        Kernel modules: nvidiafb, nouveau
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>NVIDIA设备需要安装官方提供的私有驱动，默认Ubuntu软件仓库没有提供。 <a class="reference external" href="https://forums.developer.nvidia.com/t/linux-view-gpu-information-display-what-kind-of-video-card-is-this/79311">Linux view GPU information display? What kind of video card is this?</a> 提供了常规安装显卡驱动的方法:</p>
+<ul>
+<li><p>添加 Ubuntu 图形驱动 ppa: <a class="reference external" href="https://launchpad.net/~graphics-drivers/+archive/ubuntu/ppa">Proprietary GPU Drivers</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">add</span><span class="o">-</span><span class="n">apt</span><span class="o">-</span><span class="n">repository</span> <span class="n">ppa</span><span class="p">:</span><span class="n">graphics</span><span class="o">-</span><span class="n">drivers</span><span class="o">/</span><span class="n">ppa</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装驱动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">XXX</span>
+</pre></div>
+</div>
+</li>
+<li><p>下载安装CUDA</p></li>
+</ul>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://blogs.vmware.com/apps/2018/10/how-to-enable-nvidia-v100-gpu-in-passthrough-mode-on-vsphere-for-machine-learning-and-other-hpc-workloads.html">How to Enable Nvidia V100 GPU in Passthrough mode on vSphere for Machine Learning and Other HPC Workloads</a></p></li>
+<li><p><a class="reference external" href="https://blog.51cto.com/zaa47/2596875">ESXi GPU 直通</a></p></li>
+<li><p><a class="reference external" href="https://blog.workinghardinit.work/2016/04/11/discrete-device-assignment-in-windows-server-2016-hyper-v/">Setting up Discrete Device Assignment with a GPU</a></p></li>
+<li><p><a class="reference external" href="https://dash.harvard.edu/bitstream/handle/1/37367717/BROESTL-DOCUMENT-2021.pdf?sequence=1&amp;isAllowed=y">Minimizing NUMA Effects on Machine Learning Workloads in Virtualized Environments</a></p></li>
+<li><p><a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&amp;docId=c04441974">HPE ProLiant DL360 Gen9 Server User Guide</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="intel_vt-d_startup.html" class="btn btn-neutral float-right" title="Intel VT-d快速起步" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="iommu_infra.html" class="btn btn-neutral float-left" title="IOMMU架构" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
