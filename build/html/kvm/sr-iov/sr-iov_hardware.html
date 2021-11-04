@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Open Virtual Machine Firmware(OMVF) &mdash; Cloud Atlas 0.1 文档</title>
+  <title>SR-IOV实现硬件规划 &mdash; Cloud Atlas 0.1 文档</title>
   
 
   
@@ -43,8 +43,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="VFIO - Virtual Function I/O" href="vfio.html" />
-    <link rel="prev" title="Intel VT-d快速起步" href="intel_vt-d_startup.html" /> 
+    <link rel="next" title="硬件虚拟化" href="../hardware_virtual.html" />
+    <link rel="prev" title="SR-IOV技术简介" href="introduce_sr-iov.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -105,19 +105,16 @@
 <li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">IOMMU</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="iommu_infra.html">IOMMU架构</a></li>
-<li class="toctree-l3"><a class="reference internal" href="enable_gpu_iommu.html">激活GPU Passthrough模式(Tesla P10)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="intel_vt-d_startup.html">Intel VT-d快速起步</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Open Virtual Machine Firmware(OMVF)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">准备工作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iommu/index.html">IOMMU</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">SR-IOV</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="introduce_sr-iov.html">SR-IOV技术简介</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SR-IOV实现硬件规划</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">SR-IOV需要考虑的硬件因素</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual.html">KVM嵌套虚拟化</a></li>
@@ -227,15 +224,15 @@
         
           <li><a href="../index.html">KVM Atlas</a> &raquo;</li>
         
-          <li><a href="index.html">IOMMU</a> &raquo;</li>
+          <li><a href="index.html">SR-IOV</a> &raquo;</li>
         
-      <li>Open Virtual Machine Firmware(OMVF)</li>
+      <li>SR-IOV实现硬件规划</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../../_sources/kvm/iommu/ovmf.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/kvm/sr-iov/sr-iov_hardware.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -248,32 +245,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="open-virtual-machine-firmware-omvf">
-<span id="ovmf"></span><h1>Open Virtual Machine Firmware(OMVF)<a class="headerlink" href="#open-virtual-machine-firmware-omvf" title="永久链接至标题">¶</a></h1>
-<p>Open Virtual Machine Firmware(OMVF)是在虚拟机内部激活UEFI支持的开源项目，从Linux 3.9和最新QEMU开始，可以将图形卡直通给虚拟机，提供VM原生图形性能，对图形性能敏感对任务非常有用。</p>
+  <section id="sr-iov">
+<span id="sr-iov-hardware"></span><h1>SR-IOV实现硬件规划<a class="headerlink" href="#sr-iov" title="永久链接至标题">¶</a></h1>
+<ul class="simple">
+<li><p>提供SR-IOV能力的传统PCIe功能称为物理功能(Physical function, PF)，处理PCIe设备的完全配置和控制，包括数据移动。每个PCIe设备可以具备 1 ~ 8 个独立的 PFs</p></li>
+<li><p>虚拟功能(Virtual function, VF)是轻量级PCIe功能，包括必要的数据移动和最小化配置资源。在每个PF上可以创建多个VF，并且每个PF可以支持不同数量的VFs。这里的VFs总数取决于PCIe设备供应商，不同设备的VF数量差距很大</p></li>
+</ul>
+<p>通过实现 <code class="docutils literal notranslate"><span class="pre">可替换路由ID说明</span></code> (Alternative Routing ID Interpretation, ARI) ，PCIe规范支持大量的VF。这个转换依赖PCIe设备和上游设备等端口实现，不管是root端口或者交换都需要支持ARI。 (这段未理解，待后续学习)</p>
 <section id="id1">
-<h2>准备工作<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<p>显示直通(VGA passthrough)依赖很多比较少见的技术，并且有可能需要你的硬件支持才能实现。要完成直通，</p>
-<section id="virt-install">
-<h3>virt-install<a class="headerlink" href="#virt-install" title="永久链接至标题">¶</a></h3>
-<p>在 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 命令添加 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span></code> 参数:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virt</span><span class="o">-</span><span class="n">install</span> <span class="o">--</span><span class="n">name</span> <span class="n">f20</span><span class="o">-</span><span class="n">uefi</span> \
-<span class="o">--</span><span class="n">ram</span> <span class="mi">2048</span> <span class="o">--</span><span class="n">disk</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span> \
-<span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> \
-<span class="o">--</span><span class="n">location</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">dl</span><span class="o">.</span><span class="n">fedoraproject</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pub</span><span class="o">/</span><span class="n">fedora</span><span class="o">/</span><span class="n">linux</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="mi">22</span><span class="o">/</span><span class="n">Workstation</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span>
-</pre></div>
-</div>
-</section>
+<h2>SR-IOV需要考虑的硬件因素<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>Firmware(BIOS或UEFI)必须支持SR-IOV</p></li>
+<li><p>PCIe设备上游(例如PCIe switch)实现的端口，也就是root ports，必须支持ARI</p></li>
+<li><p>PCIe设备必须支持SR-IOV</p></li>
+</ul>
+<p>passthrough方式是直接把一个PCIe设备指派给guest虚拟机，这样guest虚拟机可以完全控制设备并提供接近于原生性能。但是，在PCIe passthrough实现是和SR-IOV冲突的，因为在SR-IOV实现中，虚拟机是直接分配一个 VF 。这样多个虚拟机可以通过分配的VF来使用同一个PCIe设备。</p>
+<p>设备指定分配需要 CPU 和 firmware 都支持 <a class="reference internal" href="../iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> (I/O Memory Management Unit) 。IOMMU负责 <code class="docutils literal notranslate"><span class="pre">I/O虚拟地址</span></code> (I/O Virtual Address, IOVA) 和 <code class="docutils literal notranslate"><span class="pre">物理内存地址</span></code> 转换。这样虚拟机就能够使用guest物理地址来对设备编程，通过IOMMU转换成物理主机内存地址。</p>
+<p>IOMMU groups 是一组和系统中其他设备隔离的设备集合。也就是说，IOMMU groups 代表了具有IOMMU粒度和于系统中所有</p>
 </section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="http://www.linux-kvm.org/downloads/lersek/ovmf-whitepaper-c770f8c.txt">Open Virtual Machine Firmware (OVMF) Status Report</a></p></li>
-<li><p><a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF">arch linux: PCI passthrough via OVMF</a></p></li>
-<li><p><a class="reference external" href="https://wiki.archlinux.org/title/libvirt">arch linux: libvirt</a></p></li>
-<li><p><a class="reference external" href="https://fedoraproject.org/wiki/Using_UEFI_with_QEMU">Using UEFI with QEMU</a></p></li>
-<li><p><a class="reference external" href="https://wiki.ubuntu.com/UEFI/OVMF">ubuntu wiki: OVMF</a> 如果要自制OVMF镜像，可以参考 <a class="reference external" href="https://wiki.ubuntu.com/UEFI/EDK2">ubuntu wiki: EDK2</a></p></li>
-<li><p><a class="reference external" href="https://frdmtoplay.com/virtualizing-windows-7-or-linux-on-a-nvme-drive-with-vfio/">Virtualizing Windows 7 (or Linux) on a NVMe drive with VFIO</a></p></li>
+<li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.4/html/hardware_considerations_for_implementing_sr-iov/index">Hardware considerations for implementing SR-IOV with Red Hat Virtualization</a></p></li>
 </ul>
 </section>
 </section>
@@ -284,8 +277,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="vfio.html" class="btn btn-neutral float-right" title="VFIO - Virtual Function I/O" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="intel_vt-d_startup.html" class="btn btn-neutral float-left" title="Intel VT-d快速起步" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../hardware_virtual.html" class="btn btn-neutral float-right" title="硬件虚拟化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="introduce_sr-iov.html" class="btn btn-neutral float-left" title="SR-IOV技术简介" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
