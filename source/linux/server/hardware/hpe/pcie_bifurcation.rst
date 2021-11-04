@@ -6,15 +6,19 @@ PCIe bifurcation选项
 
 :ref:`hpe_dl360_gen9` 支持PCIe直接使用NVMe存储，这样可以在服务器上实现高性能存储集群。(原厂的 U.2 接口NVMe SSD存储升级套件实在成本太高)
 
+最初构想方案(验证存在限制)
+===========================
+
 在淘宝上可以购买到 PCIe X16 四盘NVMe扩展卡:
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_nvme_extendcard.png
+   :scale: 40
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_nvme_extendcard-1.png
-   :scale: 60
+   :scale: 40
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_nvme_extendcard-2.png
-   :scale: 50
+   :scale: 40
 
 PCIe bifurcation
 ====================
@@ -22,17 +26,17 @@ PCIe bifurcation
 需要注意，扩展卡是 PCIe x16 规格的，为了能够支持4个NVMe m.2 存储，需要将这个 X16 分成4个 X4 才能支持4个NVMe盘。需要主板支持一种称为 ``PCIe bifurcation`` 技术，这样在主板BIOS中可以将 PCIe X16 改成 ``x4x4x4x4`` 
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_bifurcation-1.png
-   :scale: 50
+   :scale: 40
 
 参考HP官方文档，DL360 gen10 是支持 PCIe Bifurcation 的:
 
 ``System Configuration > BIOS/Platform Configuration (RBSU) > PCIe Device Configuration > PCIe Bifurcation Options``
 
-对于 :ref:`hpe_dl360_gen9` 我尝试完成 :ref:`dl360_bios_upgrade` 再做BIOS配置验证
+对于 :ref:`hpe_dl360_gen9` 我执行完成 :ref:`dl360_bios_upgrade` 然后经过多方验证，发现 :ref:`hpe_dl360_gen9` 对 ``PCIe bifurcation`` 支持有限，见下文。
 
 .. note::
 
-   目前尚未实践，等完成 :ref:`dl360_bios_upgrade` 之后看能否实现分成4个X4，如果只支持对半分，则购买2块双盘NVMe扩展卡，安装到 PCIe 3.0 Slot 1 和 Slot 2上，也能实现相同效果 - 因为HP DL360的Slot 1和Slot 2都连接在CPU 1上，和在一个Slot 1上切分4个X4一样。
+   :ref:`hpe_dl360_gen9` 的第一个 ``主PCIe3.0 x16`` 只支持对半分，如果不想投入太高成本，则可以选择购买 双盘位NVMe直通扩展卡，配合 ``Slot 2`` 的第3个NVMe SSD，也能够实现成本最低性能最好的存储扩展方案。
 
 PCIe设备和bifuration
 =======================
@@ -60,17 +64,11 @@ PCIe设备和bifuration
    4:1—Maps 4 PCIe slots to each installed processor
    8:1—Maps all slots to a single processor
 
-综合
---------
-
-- ``PCIe bifurcation`` 需要PCIe设备和主板firmware/driver配合进行协商，所以如果系统没有安装PCIe设备(GPU或NVMe卡)则看不到 ``PCIe Device Configuration`` 配置选项
-- HPE gen9服务器更新到最新的BIOS是支持 ``PCIe bifurcation`` 的，但是有可能需要扩展卡能够适配才能正确设置，但是没有看到 ``PCIe Device Configuration`` 配置入口:
-
 我的选择
 ============
 
-直通扩展卡(探索中)
--------------------
+直通扩展卡(部分实现bifurcation)
+----------------------------------
 
 我购买了 3个 :ref:`samsung_pm9a1` 以及 佳翼M2X16四盘NVMe扩展卡( 宣传称 ``支持PCIE 4.0 GEN4， 向下兼容PCIE3.0 GEN3`` )。我比较担心能否配合DL 360 Gen9实现 ``PCIe bifurcation`` 
 
@@ -99,7 +97,31 @@ HPE DL360 Gen9 BIOS设置Bifurcatio
 - 启动服务器，在BIOS提示时，按下 ``F9`` 进入 ``ROM-Based Setup Utility (RBSU)``
 - 在RBSU中，按下 ``Ctrl + A`` ，进入 ``Service Options``
 - 通过上下键移动菜单高亮，选择 ``Primary Riser PCIe x16 Bifurcation`` ，然后按下回车
-- 此时可选的配置选项和在 ``Primary PCIe 3.0 riser for PCIe slot 1`` 上插入的PCIe卡有关，例如对于 :ref:`tesla_p10` 就只显示 ``x16`` 和 ``x8x8`` 选项，对于我使用的 ``佳翼M2X16四盘NVMe扩展卡`` (无PLX主控芯片)，则显示:
+- 此时可以看到提供了2个选项:
+
+  - ``PCIe x16 slot`` 保持默认的 ``PCIe 3.0 x16`` 直接输出
+  - ``Dual PCIe x8 Slot`` 将 ``第一个主 PCIe 3.0 x16`` 分成2个 ``x8`` 通道
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/rbsu_pcie_bifurcation.png
+   :scale: 80
+
+.. warning::
+
+   很不幸，HPE DL360 Gen9的 ``PCIe Bifurcation`` 有很大的限制，不能将 ``x16`` 切分成 ``x4x4x4x4`` ，只能对半分成 ``x8x8`` ；并且 ``Bifurcation`` 仅限于第一个主 PCIe 插槽。
+
+   也就是说，实际上即使使用了第一个插槽的 ``PCIe Bifurcation`` 也就只能增多一个 NVMe SSD存储，实现价值大打了折扣，并没有我最初设想的能够在一个 ``PCIe 3.0 x16`` 上连接4个NVMe SSD存储实现阵列。
+
+很遗憾，HP DL360只能实现在第一个PCIe 3.0x16分成2个 ``x8`` ，所以我最初想通过 ``佳翼M2X16四盘NVMe扩展卡`` 并行使用 ``4个 NVMe SSD`` 的方案并不能实现。通过直通方式只能连接 ``2个 NVMe SSD`` 使得这个方案非常鸡肋(不过也许性能可以较好)。
+
+出于成本和性能，我还是决定采用此方案:
+
+- 主 ``PCIe 3.0 x16`` Slot 1 通过DL 360 Gen9内置 PCIe bifurcation 分成 ``x8 x8`` ，安装 ``佳翼M2X16四盘NVMe扩展卡`` (沉没成本，虽然不能充分利用4盘位) ，使用 2 块 :ref:`samsung_pm9a1` 
+- ``PCIe 3.0 x8`` Slot 2不支持PCIe bifurcation，所以购买单盘NVMe扩展卡
+- 主机总共安装3个NVMe SSD:
+
+  - 由于 Slot 1 和 Slot 2 都是直连在 CPU 1上，所以可以获得极佳的互访性能
+  - 采用 :ref:`iommu` 由第一层 :ref:`kvm` 虚拟机读写，力求能够实现 native 性能
+  - 运行3个 :ref:`ceph` 虚拟机分别处理 pass-through 的NVMe存储，虚拟机采用cpuset方式绑定到CPU 1上，结合 :ref:`numa` 实现性能最大化
 
 PLX主控扩展卡
 ----------------
@@ -107,11 +129,11 @@ PLX主控扩展卡
 根据网上搜索到到信息了解到，HP gent9 的服务器可以使用PLX主控芯片扩展卡( PLX 是PCIe交换和桥接芯片供应商 )，从淘宝上搜索无需主板支持 ``bifurcation`` 的扩展卡有两种芯片:
 
 - ASM2824
-- PLX2847 ( `Broadcom PEX8747 <https://www.broadcom.com/products/pcie-switches-bridges/pcie-switches/pex8747>`_ 就是收购PLX的产品线的PLX8747)
+- PLX8747 ( `Broadcom PEX8747 <https://www.broadcom.com/products/pcie-switches-bridges/pcie-switches/pex8747>`_ 就是收购PLX的产品线的PLX8747)
 
 `Multi-NVMe (m.2, u.2) adapters that do not require bifurcation <https://forums.servethehome.com/index.php?threads/multi-nvme-m-2-u-2-adapters-that-do-not-require-bifurcation.31172/>`_ 汇总了国外网友搜集的无需主板bifurcation功能就可以支持多个NVMe存储的PCIe扩展卡(aliexpress上由2家中国销售公司售卖的)，主控芯片绝大多数是PLX 8724/8747/8748，少量是ASM芯片。
 
-最终，我还是重新购买了 ``M.2 NVMe SSD扩展卡 PCIe3.0 X8X16扩2口4口M2 PLX8747`` ：
+我购买了 ``M.2 NVMe SSD扩展卡 PCIe3.0 X8X16扩2口4口M2 PLX8747`` ：
 
 - 目前google到的英文资料基本都是采用PLX芯片成功的
 - PLX是专注于PCIe连接的厂商，被很多NVMe Extend Card采用
@@ -123,7 +145,23 @@ PLX主控扩展卡
 
    PLX是半导体行业巨头新博通(Broadcom)旗下企业，原先是安华高公司于2014年收购PLX，2016年安华高公司收购Broadcom后改名Broadcom Limited(新博通)。( `博通又准备收购芯片公司？|半导体行业观察 <https://zhuanlan.zhihu.com/p/70074321>`_ )
 
-- 需要注意，接口应该是 PCIe3.0 X16 ，这样拆分4个以后才是 x4x4x4x4 ，可以满足较高速的 NVMe 读写。
+- 需要注意，接口应该是 PCIe3.0 X16 ，这样拆分4个以后才是 x4x4x4x4 ，可以满足较高速的 NVMe 读写
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/plx8747_pcie_switch_card.jpg
+   :scale: 80
+
+既然通过PLX主控芯片实现 ``bifurcation`` ，所以也就无所谓安装在 ``Slot 1`` 还是 ``Slot 3`` ；考虑到 ``Slot 2`` 和 ``Slot 3`` 之间空间较大，可以安装2个 PLX主控扩展卡 :
+
+- ``Slot 2`` 是 ``x8`` 接口，可以安装 双盘位 扩展卡
+- ``Slot 3`` 是 ``x16`` 接口，可以安装 四盘位 扩展卡
+- 总共可以扩展安装 ``6个`` NVMe SSD存储: 需要注意 ``Slot 2`` 和 ``Slot 3`` 分别属于 CPU1 和 CPU2，所以应该分配给不同的虚拟化存储集群:
+
+  - ``Slot 2`` 上2个 NVMe SSD 可以组合成 ``RAID 0`` (性能最强) 或者 ``RAID 1`` (数据安全性高)；或者分配给2个 :ref:`gluster` 虚拟机组件镜像模式的GlusterFS集群提供大容量近线数据归档
+  - ``Slot 3`` 上4个 NVMe SSD 可以选择3个分配给3个 :ref:`ceph` 虚拟机组建成 Ceph 高可用高性能虚拟化存储集群；另外1个则分配给物理主机，作为 :ref:`docker` 和 :ref:`kvm` 的镜像存储，以及容器和虚拟机本地挂载存储，以获得性能最大化
+
+.. note::
+
+   为了降低成本，并且能够使用原生的PCIe NVMe存储访问，所以我最终退掉了新购买的 ``M.2 NVMe SSD扩展卡 PCIe3.0 X8X16扩2口4口M2 PLX8747`` 扩展卡，还是采用HP DL360 Gen9直接访问存储。也就是采用前一个方案。
 
 PCIe switches性能
 ==================
@@ -139,7 +177,7 @@ PCIE Switch (pcie扩充器/转换器/桥) 提供了通道数扩充以及拆分�
 注意配置的拓扑 `Exploring the PCIe Bus Routes <https://link.zhihu.com/?target=http%3A//www.cirrascale.com/blog/index.php/exploring-the-pcie-bus-routes/>`_ :
 
 - 如果主板使用PLX芯片，则应该将需要通讯的两个GPU位于同一个PLX芯片下面
-- 如果两个gpu位于不同的PLX芯片下, 但位于同一个cpu下, 性能次之: 有7%的带宽损失(9.8 vs 10.6 gb/s) 和 7.9 vs 7.7微妙的延迟
+- 如果两个gpu位于不同的PLX芯片下, 但位于同一个cpu下, 性能次之: 有7%的带宽损失(9.8 vs 10.6 gb/s) 和 7.9 vs 7.7微秒的延迟
 - 两个gpu位于不同cpu下(自然也不同plx下)性能最次: 有62%的带宽损失和316%的延迟增加 (4 vs 10.6 gb/s, 32.1 vs 7.7)
 
 我的连接构思:
