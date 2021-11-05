@@ -18,6 +18,7 @@ Sphinx文档
 .. toctree::
    :maxdepth: 1
 
+   sphinx_typeerror.rst
    sphinx_show_code.rst
    sphinx_table.rst
    sphinx_strike.rst
