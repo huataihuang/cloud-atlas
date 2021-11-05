@@ -9,6 +9,12 @@ PCIe bifurcation选项
 最初构想方案(验证存在限制)
 ===========================
 
+.. warning::
+
+   请注意， :ref:`hpe_dl360_gen9` 只支持第一个PCIe 3.0 x16的bifurcation功能，并且只支持 ``Dual PCIe x8 slot`` ，也就是只能切分成2个 ``x8`` 。所以最多只能在Slot 1上支持2块NVMe SSD。
+
+   请购买 ``双盘NVMe扩展卡`` ，我购买4盘位NVMe扩展卡实际上上浪费了资源，并不是很好的选择。
+
 在淘宝上可以购买到 PCIe X16 四盘NVMe扩展卡:
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_nvme_extendcard.png
@@ -77,7 +83,7 @@ PCIe设备和bifuration
 - 将 NVMe 扩展卡 改到安装到 Slot 1，重新启动系统，检查 ``BIOS/Platform Configuration(RBSU)`` 配置选项，依然没有看到 ``PCIe Device Configuration`` 配置入口(只看到 ``PCI Device Enable/Disable`` 激活关闭设置):
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/rbsu_no_pcie_config.png
-   :scale: 80
+   :scale: 40
 
 `HPE Proliant dl160 gen9 bifurcation <https://community.hpe.com/t5/Servers-General/HPE-Proliant-dl160-gen9-bifurcation/td-p/7133232#.YXdM-y8RppQ>`_ 中答复中也提到了，这个功能需要扩展卡厂商支持firmware，有人换了6个扩展卡都没有看到BIOS能够显示出 ``PCIe Device Configuration`` 配置项。
 
@@ -103,7 +109,7 @@ HPE DL360 Gen9 BIOS设置Bifurcatio
   - ``Dual PCIe x8 Slot`` 将 ``第一个主 PCIe 3.0 x16`` 分成2个 ``x8`` 通道
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/rbsu_pcie_bifurcation.png
-   :scale: 80
+   :scale: 40
 
 .. warning::
 
@@ -122,6 +128,14 @@ HPE DL360 Gen9 BIOS设置Bifurcatio
   - 由于 Slot 1 和 Slot 2 都是直连在 CPU 1上，所以可以获得极佳的互访性能
   - 采用 :ref:`iommu` 由第一层 :ref:`kvm` 虚拟机读写，力求能够实现 native 性能
   - 运行3个 :ref:`ceph` 虚拟机分别处理 pass-through 的NVMe存储，虚拟机采用cpuset方式绑定到CPU 1上，结合 :ref:`numa` 实现性能最大化
+
+我有一个疑问，对于4盘位的 ``佳翼M2X16四盘NVMe扩展卡`` ，BIOS只支持 ``x8 x8`` ，那么究竟是安装在哪个盘位的磁盘被识别出来呢，实践记录如下:
+
+- 按照上文配置好 ``Primary Riser PCIe x16 Bifurcation >> Dual PCIe x8 slot`` ，重新启动服务器，登陆系统
+- 检查磁盘 ``fdisk -l | grep nvme`` 可以看到现在识别了2块NVMe SSD::
+
+   Disk /dev/nvme0n1: 953.89 GiB, 1024209543168 bytes, 2000409264 sectors
+   Disk /dev/nvme1n1: 953.89 GiB, 1024209543168 bytes, 2000409264 sectors
 
 PLX主控扩展卡
 ----------------
@@ -142,7 +156,6 @@ PLX主控扩展卡
   - `华擎X99 WS-E/10G <http://www.asrock.com/news/index.cn.asp?id=2565>`_ (华擎是从华硕分出的主板制造厂商，售价较低但做工还比较扎实，比不上华硕但是同价位质量较优 `感觉华擎的东西做工用料都很扎实呀，为什么都说是二线？ <https://www.zhihu.com/question/354822608>`_ ) ，在HP论坛中有信息显示华擎ASrocck的NVMe PLX芯片扩展卡可以在HP gen9服务器上正确工作
 
 .. note::
-
    PLX是半导体行业巨头新博通(Broadcom)旗下企业，原先是安华高公司于2014年收购PLX，2016年安华高公司收购Broadcom后改名Broadcom Limited(新博通)。( `博通又准备收购芯片公司？|半导体行业观察 <https://zhuanlan.zhihu.com/p/70074321>`_ )
 
 - 需要注意，接口应该是 PCIe3.0 X16 ，这样拆分4个以后才是 x4x4x4x4 ，可以满足较高速的 NVMe 读写
@@ -183,7 +196,7 @@ PCIE Switch (pcie扩充器/转换器/桥) 提供了通道数扩充以及拆分�
 我的连接构思:
 
 - 由于 Slot1 和 Slot2 是连接在CPU 1上的PCIe，所以如果考虑多个GPU，可以在Slot1和Slot2上安装2块PGU卡，在Slot 3上安装NVMe存储卡，这样确保GPU之间通讯快速。
-- 如果使用1个GPU卡 :ref:`tesla_p10` ，则安装在 Slot 1上， Slot2 空出来安装一个双盘位NVMe存储扩展卡(x4x4)
+- 如果使用1个GPU卡 :ref:`tesla_p10` ，则安装在 Slot 3上，在Slot 1 和 Slot 2上安装NVMe存储扩展开(我就采用这个模式)
 
 神奇PCIe拆分NVMe存储
 =======================

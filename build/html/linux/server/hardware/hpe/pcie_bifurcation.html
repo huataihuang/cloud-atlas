@@ -258,6 +258,11 @@
 <p><a class="reference internal" href="hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 支持PCIe直接使用NVMe存储，这样可以在服务器上实现高性能存储集群。(原厂的 U.2 接口NVMe SSD存储升级套件实在成本太高)</p>
 <section id="id2">
 <h2>最初构想方案(验证存在限制)<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>请注意， <a class="reference internal" href="hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 只支持第一个PCIe 3.0 x16的bifurcation功能，并且只支持 <code class="docutils literal notranslate"><span class="pre">Dual</span> <span class="pre">PCIe</span> <span class="pre">x8</span> <span class="pre">slot</span></code> ，也就是只能切分成2个 <code class="docutils literal notranslate"><span class="pre">x8</span></code> 。所以最多只能在Slot 1上支持2块NVMe SSD。</p>
+<p>请购买 <code class="docutils literal notranslate"><span class="pre">双盘NVMe扩展卡</span></code> ，我购买4盘位NVMe扩展卡实际上上浪费了资源，并不是很好的选择。</p>
+</div>
 <p>在淘宝上可以购买到 PCIe X16 四盘NVMe扩展卡:</p>
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../../_images/pcie_nvme_extendcard.png"><img alt="../../../../_images/pcie_nvme_extendcard.png" src="../../../../_images/pcie_nvme_extendcard.png" style="width: 333.6px; height: 333.6px;" /></a>
@@ -321,7 +326,7 @@
 <li><p>将 NVMe 扩展卡 改到安装到 Slot 1，重新启动系统，检查 <code class="docutils literal notranslate"><span class="pre">BIOS/Platform</span> <span class="pre">Configuration(RBSU)</span></code> 配置选项，依然没有看到 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Device</span> <span class="pre">Configuration</span></code> 配置入口(只看到 <code class="docutils literal notranslate"><span class="pre">PCI</span> <span class="pre">Device</span> <span class="pre">Enable/Disable</span></code> 激活关闭设置):</p></li>
 </ul>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../../../../_images/rbsu_no_pcie_config.png"><img alt="../../../../_images/rbsu_no_pcie_config.png" src="../../../../_images/rbsu_no_pcie_config.png" style="width: 1260.8000000000002px; height: 640.0px;" /></a>
+<a class="reference internal image-reference" href="../../../../_images/rbsu_no_pcie_config.png"><img alt="../../../../_images/rbsu_no_pcie_config.png" src="../../../../_images/rbsu_no_pcie_config.png" style="width: 630.4000000000001px; height: 320.0px;" /></a>
 </figure>
 <p><a class="reference external" href="https://community.hpe.com/t5/Servers-General/HPE-Proliant-dl160-gen9-bifurcation/td-p/7133232#.YXdM-y8RppQ">HPE Proliant dl160 gen9 bifurcation</a> 中答复中也提到了，这个功能需要扩展卡厂商支持firmware，有人换了6个扩展卡都没有看到BIOS能够显示出 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Device</span> <span class="pre">Configuration</span></code> 配置项。</p>
 <p>看起来我购买的 <code class="docutils literal notranslate"><span class="pre">佳翼M2X16四盘NVMe扩展卡</span></code> 也同样没有适配成功???</p>
@@ -343,7 +348,7 @@
 </li>
 </ul>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../../../../_images/rbsu_pcie_bifurcation.png"><img alt="../../../../_images/rbsu_pcie_bifurcation.png" src="../../../../_images/rbsu_pcie_bifurcation.png" style="width: 1267.2px; height: 939.2px;" /></a>
+<a class="reference internal image-reference" href="../../../../_images/rbsu_pcie_bifurcation.png"><img alt="../../../../_images/rbsu_pcie_bifurcation.png" src="../../../../_images/rbsu_pcie_bifurcation.png" style="width: 633.6px; height: 469.6px;" /></a>
 </figure>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
@@ -361,6 +366,16 @@
 <li><p>采用 <a class="reference internal" href="../../../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 由第一层 <a class="reference internal" href="../../../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 虚拟机读写，力求能够实现 native 性能</p></li>
 <li><p>运行3个 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 虚拟机分别处理 pass-through 的NVMe存储，虚拟机采用cpuset方式绑定到CPU 1上，结合 <a class="reference internal" href="../../../../kernel/memory/numa/index.html#numa"><span class="std std-ref">NUMA架构</span></a> 实现性能最大化</p></li>
 </ul>
+</li>
+</ul>
+<p>我有一个疑问，对于4盘位的 <code class="docutils literal notranslate"><span class="pre">佳翼M2X16四盘NVMe扩展卡</span></code> ，BIOS只支持 <code class="docutils literal notranslate"><span class="pre">x8</span> <span class="pre">x8</span></code> ，那么究竟是安装在哪个盘位的磁盘被识别出来呢，实践记录如下:</p>
+<ul>
+<li><p>按照上文配置好 <code class="docutils literal notranslate"><span class="pre">Primary</span> <span class="pre">Riser</span> <span class="pre">PCIe</span> <span class="pre">x16</span> <span class="pre">Bifurcation</span> <span class="pre">&gt;&gt;</span> <span class="pre">Dual</span> <span class="pre">PCIe</span> <span class="pre">x8</span> <span class="pre">slot</span></code> ，重新启动服务器，登陆系统</p></li>
+<li><p>检查磁盘 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">nvme</span></code> 可以看到现在识别了2块NVMe SSD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span><span class="p">:</span> <span class="mf">953.89</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024209543168</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000409264</span> <span class="n">sectors</span>
+<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme1n1</span><span class="p">:</span> <span class="mf">953.89</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1024209543168</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">2000409264</span> <span class="n">sectors</span>
+</pre></div>
+</div>
 </li>
 </ul>
 </section>
@@ -427,7 +442,7 @@
 <p>我的连接构思:</p>
 <ul class="simple">
 <li><p>由于 Slot1 和 Slot2 是连接在CPU 1上的PCIe，所以如果考虑多个GPU，可以在Slot1和Slot2上安装2块PGU卡，在Slot 3上安装NVMe存储卡，这样确保GPU之间通讯快速。</p></li>
-<li><p>如果使用1个GPU卡 <a class="reference internal" href="../../../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> ，则安装在 Slot 1上， Slot2 空出来安装一个双盘位NVMe存储扩展卡(x4x4)</p></li>
+<li><p>如果使用1个GPU卡 <a class="reference internal" href="../../../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> ，则安装在 Slot 3上，在Slot 1 和 Slot 2上安装NVMe存储扩展开(我就采用这个模式)</p></li>
 </ul>
 </section>
 <section id="pcienvme">
