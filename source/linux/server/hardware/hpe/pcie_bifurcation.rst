@@ -29,7 +29,7 @@ PCIe bifurcation选项
 PCIe bifurcation
 ====================
 
-需要注意，扩展卡是 PCIe x16 规格的，为了能够支持4个NVMe m.2 存储，需要将这个 X16 分成4个 X4 才能支持4个NVMe盘。需要主板支持一种称为 ``PCIe bifurcation`` 技术，这样在主板BIOS中可以将 PCIe X16 改成 ``x4x4x4x4`` 
+需要注意，扩展卡是 PCIe x16 规格的，为了能够支持4个NVMe m.2 存储，需要将这个 X16 分成4个 X4 才能支持4个NVMe盘。需要主板支持一种称为 ``PCIe bifurcation`` 技术，这样在主板BIOS中可以将 PCIe X16 改成 ``x4x4x4x4``
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_bifurcation-1.png
    :scale: 40
@@ -76,7 +76,7 @@ PCIe设备和bifuration
 直通扩展卡(部分实现bifurcation)
 ----------------------------------
 
-我购买了 3个 :ref:`samsung_pm9a1` 以及 佳翼M2X16四盘NVMe扩展卡( 宣传称 ``支持PCIE 4.0 GEN4， 向下兼容PCIE3.0 GEN3`` )。我比较担心能否配合DL 360 Gen9实现 ``PCIe bifurcation`` 
+我购买了 3个 :ref:`samsung_pm9a1` 以及 佳翼M2X16四盘NVMe扩展卡( 宣传称 ``支持PCIE 4.0 GEN4， 向下兼容PCIE3.0 GEN3`` )。我比较担心能否配合DL 360 Gen9实现 ``PCIe bifurcation``
 
 - 我最初尝试将 NVMe扩展卡 安装在 Slot 3上(因为我想能在 Slot 1上安装显卡，然后可以还留出空间在Slot 2上安装第二个NVMe扩展卡)，但是确实启动以后没有找到PCIe配置选项
 
@@ -95,7 +95,7 @@ PCIe设备和bifuration
 
 我在DL360 Gen9服务器上安装 :ref:`tesla_p10` 启动时遇到需要 :ref:`enable_gpu_iommu` 问题，HPE DL360 Gen9的 ``PCI Express 64-Bit BAR Support`` BIOS配置选项隐藏在没有任何提示的 ``Service Options`` 菜单中(需要在 ``ROM-Based Setup Utility (RBSU)`` 界面通过 ``Ctrl-A`` 激活)，但是没有任何菜单引导。我是通过Google文档才找到方法...
 
-原来在这个隐藏的 ``Service Options`` 中提供了很多高级功能，其中就包括了 ``Primary Riser PCIe x16 Bifurcation`` 
+原来在这个隐藏的 ``Service Options`` 中提供了很多高级功能，其中就包括了 ``Primary Riser PCIe x16 Bifurcation``
 
 HPE DL360 Gen9 BIOS设置Bifurcatio
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,7 +121,7 @@ HPE DL360 Gen9 BIOS设置Bifurcatio
 
 出于成本和性能，我还是决定采用此方案:
 
-- 主 ``PCIe 3.0 x16`` Slot 1 通过DL 360 Gen9内置 PCIe bifurcation 分成 ``x8 x8`` ，安装 ``佳翼M2X16四盘NVMe扩展卡`` (沉没成本，虽然不能充分利用4盘位) ，使用 2 块 :ref:`samsung_pm9a1` 
+- 主 ``PCIe 3.0 x16`` Slot 1 通过DL 360 Gen9内置 PCIe bifurcation 分成 ``x8 x8`` ，安装 ``佳翼M2X16四盘NVMe扩展卡`` (沉没成本，虽然不能充分利用4盘位) ，使用 2 块 :ref:`samsung_pm9a1`
 - ``PCIe 3.0 x8`` Slot 2不支持PCIe bifurcation，所以购买单盘NVMe扩展卡
 - 主机总共安装3个NVMe SSD:
 
@@ -207,7 +207,7 @@ PCIE Switch (pcie扩充器/转换器/桥) 提供了通道数扩充以及拆分�
 :ref:`pcie` :
 
 - 3.0 的单通道性能是传输速率 984.6MB/s ，使用 ×4 规格已经达到 3.938GB/s ，可以满足 PCIe 3.0 NVMe 的带宽需求
-- 4.0 的单通道性能是传输速率 1.969GB/s ，使用 ×4 规格达到 7.877GB/s ，可以满足最快的PCIe 4.0 NVMe:ref:`samsung_pm9a1` 以及对应企业级 980 Pro的带宽
+- 4.0 的单通道性能是传输速率 1.969GB/s ，使用 ×4 规格达到 7.877GB/s ，可以满足最快的PCIe 4.0 NVMe :ref:`samsung_pm9a1` 以及对应企业级 980 Pro的带宽
 
 传统的RAID技术，在不断推陈出新的NVMe存储技术发展下，也出现了NVMe RAID卡，通过NVMe switch可以实现更多的NVMe设备直连。如果HBA卡没有提供内置的RAID功能，可以采用 :ref:`intel_vroc` 技术，实现全速率的NVMe组件RAID。在使用PEX88048主控芯片的NVMe Switch Adapter (Broadcom P411W-32P)，默认将PCIe 4.0 x16拆分成 4个x8 SFF-8654接口:
 
