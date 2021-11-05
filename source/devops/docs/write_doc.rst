@@ -62,9 +62,25 @@ macOS安装
 
    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
+- 如果使用一段时间可能需要升级Homebrew::
+
+   brew upgrade
+
 - 通过Homebrew安装Python3 ::
 
    brew install python3
+
+如果系统中已经安装过python3，则可能会提示::
+
+   Warning: python@3.9 3.9.6 is already installed, it's just not linked.
+
+则执行创建链接::
+
+   brew link python@3.9
+
+如果之前已经有软链接存在，可以使用强制覆盖::
+
+   brew link --overwrite python@3.9
 
 .. note::
 
@@ -89,18 +105,16 @@ Arch Linux默认安装了Python3，所以仅需要安装pip::
 
    sudo pacman -S python-virtualenv
 
- Ubuntu Linux安装
- ---------------------
+Ubuntu Linux安装
+---------------------
 
- Ubuntu Linux现在默认安装了Python3，所以也仅安装pip::
+Ubuntu Linux现在默认安装了Python3，所以也仅安装pip::
 
-    sudo apt install python3-pip
+   sudo apt install python3-pip
 
- 安装virtualenv::
+安装virtualenv::
 
-    sudo apt install python3-venv
-
-
+   sudo apt install python3-venv
 
 设置virtualenv
 ----------------
