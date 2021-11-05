@@ -41,7 +41,8 @@ release = '0.1'
 # ones.
 extensions = [
         'sphinx.ext.graphviz',
-        'sphinxnotes.strike',
+#        'sphinxnotes.strike',
+        'sphinxnotes.strike'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
