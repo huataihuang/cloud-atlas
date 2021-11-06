@@ -27,7 +27,7 @@ role实现
 
 `<U>` 下划线 `</U>` 、 `<S>` 删除线 `</S>`
 
-sphinxnotes-strike
+sphinxnotes-strike (推荐)
 ================================
 
 .. note::
