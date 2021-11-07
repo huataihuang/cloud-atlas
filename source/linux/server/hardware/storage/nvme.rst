@@ -1,7 +1,7 @@
 .. _nvme:
 
 ===============
-NVMe存储技术
+NVMe存储
 ===============
 
 在 SSD 技术领域，根据Memory Cells不同，分为 SLC, MLC, TLC, QLC 。目前(2021)，最主流的SSD存储技术是TLC，不过未来QLC将会取而代之成为主流。此外，根据接口协议不同，SSD又分为SATA和NVMe。

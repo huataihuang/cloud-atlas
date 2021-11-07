@@ -1,7 +1,7 @@
 .. _pcie_bifurcation:
 
 =========================
-PCIe bifurcation选项
+PCIe bifurcation
 =========================
 
 :ref:`hpe_dl360_gen9` 支持PCIe直接使用NVMe存储，这样可以在服务器上实现高性能存储集群。(原厂的 U.2 接口NVMe SSD存储升级套件实在成本太高)
