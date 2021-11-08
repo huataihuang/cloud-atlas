@@ -39,7 +39,134 @@ Linux系统硬件信息检测工具hwinfo
 
    sudo hwinfo --all
 
+输出信息类似如下::
 
+   ...
+     Processor Info: #3
+       Socket: "Proc 1"
+       Socket Type: 0x2b (Other)
+       Socket Status: Populated
+       Type: 0x03 (CPU)
+       Family: 0xb3 (Xeon)
+       Manufacturer: "Intel(R) Corporation"
+       Version: "Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz"
+       Asset Tag: "UNKNOWN"
+       Processor ID: 0xbfebfbff000306f2
+       Status: 0x01 (Enabled)
+       Voltage: 1.6 V
+       External Clock: 100 MHz
+       Max. Speed: 4000 MHz
+       Current Speed: 2300 MHz
+       L2 Cache: #1
+       L3 Cache: #2
+   ...
+
+上述硬件信息输出非常繁多，有可能过于庞杂，所以也有一个简单输出方式，使用参数 ``--short`` ::
+
+   sudo hwinfo --short
+
+输出类似::
+
+   cpu:                                                            
+                          Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz, 1200 MHz
+                          Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz, 1200 MHz
+   ...
+
+使用hwinfo显示特定设备信息
+---------------------------
+
+- 检查CPU的相信信息::
+
+   sudo hwinfo --cpu
+
+显示输出非常详细的CPU规格:
+
+.. literalinclude:: hwinfo/hwinfo_cpu.txt
+   :language: bash
+
+- 同样也有简略输出CPU信息参数 ``--short`` ::
+
+   sudo hwinfo --short --cpu
+
+输出类似::
+
+   cpu:
+                          Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz, 1200 MHz
+                          ...
+
+使用hwinfo显示系统架构
+------------------------
+
+- 系统架构::
+
+   sudo hwinfo --arch
+
+显示输出::
+
+   Arch: X86_64/grub
+
+使用hwinfo显示内存详情
+--------------------------
+
+- 内存信息详情::
+
+   sudo hwinfo --memory
+
+输出:
+
+.. literalinclude:: hwinfo/hwinfo_disk.txt
+   :language: bash
+
+使用hwinfo显示分区详情
+----------------------------
+
+- 可以显示硬盘的分区详情::
+
+   sudo hwinfo --partition
+
+输出信息:
+
+.. literalinclude:: hwinfo/hwinfo_partition.txt
+   :language: bash
+
+使用hwinfo显示网卡详情
+------------------------
+
+- 显示网卡的详情::
+
+   sudo hwinfo --network
+
+输出信息:
+
+.. literalinclude:: hwinfo/hwinfo_network.txt
+   :language: bash
+
+使用hwinfo显示BIOS详情
+--------------------------
+
+- 显示BIOS详情::
+
+   sudo hwinfo --bios
+
+输出信息:
+
+.. literalinclude:: hwinfo/hwinfo_bios.txt
+   :language: bash
+
+.. note::
+
+   ``hwinfo`` 可以侦测所有其他硬件内容
+
+输出硬件信息到文件
+====================
+
+``hwinfo`` 可以用来输出完整的系统硬件报告，也可以记录到文件中用于进一步排查和分析::
+
+   sudo hwinfo --all --log hardwareinfo.txt
+
+或者::
+
+   sudo hwinfo --all > hardwareinfo.txt
 
 参考
 =========

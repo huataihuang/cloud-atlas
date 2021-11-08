@@ -23,7 +23,7 @@
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="Linux分区" href="linux_partition.html" />
-    <link rel="prev" title="Linux固态驱动器(SSD)" href="linux_ssd.html" /> 
+    <link rel="prev" title="存储设备S.M.A.R.T监控" href="smart_monitor.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -85,6 +85,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Linux存储</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Linux磁盘</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="linux_ssd.html">Linux固态驱动器(SSD)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="smart_monitor.html">存储设备S.M.A.R.T监控</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">检查硬盘SN</a></li>
 <li class="toctree-l4"><a class="reference internal" href="linux_partition.html">Linux分区</a></li>
 <li class="toctree-l4"><a class="reference internal" href="4k_alignment.html">磁盘块设备4K对齐</a></li>
@@ -163,7 +164,264 @@
   <section id="sn">
 <span id="check-hd-sn"></span><h1>检查硬盘SN<a class="headerlink" href="#sn" title="永久链接至标题">¶</a></h1>
 <p>我在实践 <a class="reference internal" href="../../server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 时候，需要在NVMe扩展卡上安装多个NVMe SSD磁盘。启动服务器之后，识别出2个NVMe SSD，需要确认是识别了哪2个NVMe SSD。</p>
-<p>有不少Linux工具而已获得硬盘信息，例如 <a class="reference internal" href="../../server/hardware/hwinfo.html#hwinfo"><span class="std std-ref">Linux系统硬件信息检测工具hwinfo</span></a></p>
+<p>有不少Linux工具可以获得硬盘信息，例如 <a class="reference internal" href="../../server/hardware/hwinfo.html#hwinfo"><span class="std std-ref">Linux系统硬件信息检测工具hwinfo</span></a> ，但是并不是所有工具能够获得硬盘SN，而且随着存储技术发展，传统的机械磁盘逐渐被SSD或者 <a class="reference internal" href="../../server/hardware/storage/nvme.html#nvme"><span class="std std-ref">NVMe存储</span></a> SSD 替代，一些原本维护HDD的工具并不能兼容新的固态硬盘检查维护。</p>
+<section id="smartctl">
+<h2>smartctl(推荐)<a class="headerlink" href="#smartctl" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 是 <code class="docutils literal notranslate"><span class="pre">smatmontools</span></code> 工具包的组件，提供了 <a class="reference internal" href="smart_monitor.html#smart-monitor"><span class="std std-ref">存储设备S.M.A.R.T监控</span></a> 功能。这是一个非常适合检查服务器存储的工具，而且对SSD和NVMe SSD的兼容也非常好。这个工具是我实践下来可以检查NVMe SSD的最佳程序。</p>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">smartmontools</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">smartmontools</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查NVMe:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>同理检查不同的NVMe磁盘，分别输出如下:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ sudo smartctl -i /dev/nvme0n1
+
+smartctl <span class="m">7</span>.1 <span class="m">2019</span>-12-30 r5022 <span class="o">[</span>x86_64-linux-5.4.0-89-generic<span class="o">]</span> <span class="o">(</span><span class="nb">local</span> build<span class="o">)</span>
+Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2002</span>-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+<span class="o">===</span> START OF INFORMATION <span class="nv">SECTION</span> <span class="o">===</span>
+Model Number:                       SAMSUNG MZVL21T0HCLR-00B00
+Serial Number:                      S676NF0R908202
+Firmware Version:                   GXA7401Q
+PCI Vendor/Subsystem ID:            0x144d
+IEEE OUI Identifier:                0x002538
+Total NVM Capacity:                 <span class="m">1</span>,024,209,543,168 <span class="o">[</span><span class="m">1</span>.02 TB<span class="o">]</span>
+Unallocated NVM Capacity:           <span class="m">0</span>
+Controller ID:                      <span class="m">6</span>
+Number of Namespaces:               <span class="m">1</span>
+Namespace <span class="m">1</span> Size/Capacity:          <span class="m">1</span>,024,209,543,168 <span class="o">[</span><span class="m">1</span>.02 TB<span class="o">]</span>
+Namespace <span class="m">1</span> Utilization:            <span class="m">0</span>
+Namespace <span class="m">1</span> Formatted LBA Size:     <span class="m">512</span>
+Namespace <span class="m">1</span> IEEE EUI-64:            <span class="m">002538</span> b911b37f97
+Local Time is:                      Mon Nov  <span class="m">8</span> <span class="m">09</span>:11:17 <span class="m">2021</span> CST
+
+$ sudo smartctl -i /dev/nvme1n1
+
+smartctl <span class="m">7</span>.1 <span class="m">2019</span>-12-30 r5022 <span class="o">[</span>x86_64-linux-5.4.0-89-generic<span class="o">]</span> <span class="o">(</span><span class="nb">local</span> build<span class="o">)</span>
+Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2002</span>-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+<span class="o">===</span> START OF INFORMATION <span class="nv">SECTION</span> <span class="o">===</span>
+Model Number:                       SAMSUNG MZVL21T0HCLR-00B00
+Serial Number:                      S676NF0R908144
+Firmware Version:                   GXA7401Q
+PCI Vendor/Subsystem ID:            0x144d
+IEEE OUI Identifier:                0x002538
+Total NVM Capacity:                 <span class="m">1</span>,024,209,543,168 <span class="o">[</span><span class="m">1</span>.02 TB<span class="o">]</span>
+Unallocated NVM Capacity:           <span class="m">0</span>
+Controller ID:                      <span class="m">6</span>
+Number of Namespaces:               <span class="m">1</span>
+Namespace <span class="m">1</span> Size/Capacity:          <span class="m">1</span>,024,209,543,168 <span class="o">[</span><span class="m">1</span>.02 TB<span class="o">]</span>
+Namespace <span class="m">1</span> Utilization:            <span class="m">0</span>
+Namespace <span class="m">1</span> Formatted LBA Size:     <span class="m">512</span>
+Namespace <span class="m">1</span> IEEE EUI-64:            <span class="m">002538</span> b911b37f5d
+Local Time is:                      Mon Nov  <span class="m">8</span> <span class="m">09</span>:12:01 <span class="m">2021</span> CST
+</pre></div>
+</div>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 还支持对SSD硬盘检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>smartctl <span class="m">7</span>.1 <span class="m">2019</span>-12-30 r5022 <span class="o">[</span>x86_64-linux-5.4.0-89-generic<span class="o">]</span> <span class="o">(</span><span class="nb">local</span> build<span class="o">)</span>
+Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2002</span>-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+<span class="o">===</span> START OF INFORMATION <span class="nv">SECTION</span> <span class="o">===</span>
+Model Family:     Intel 545s Series SSDs
+Device Model:     INTEL SSDSC2KW512G8
+Serial Number:    BTLA7513037S512DGN
+LU WWN Device Id: <span class="m">5</span> 5cd2e4 14eea7536
+Firmware Version: LHF002C
+User Capacity:    <span class="m">512</span>,110,190,592 bytes <span class="o">[</span><span class="m">512</span> GB<span class="o">]</span>
+Sector Size:      <span class="m">512</span> bytes logical/physical
+Rotation Rate:    Solid State Device
+Form Factor:      <span class="m">2</span>.5 inches
+Device is:        In smartctl database <span class="o">[</span><span class="k">for</span> details use: -P show<span class="o">]</span>
+ATA Version is:   ACS-3 <span class="o">(</span>minor revision not indicated<span class="o">)</span>
+SATA Version is:  SATA <span class="m">3</span>.2, <span class="m">6</span>.0 Gb/s <span class="o">(</span>current: <span class="m">6</span>.0 Gb/s<span class="o">)</span>
+Local Time is:    Mon Nov  <span class="m">8</span> <span class="m">09</span>:45:16 <span class="m">2021</span> CST
+SMART support is: Available - device has SMART capability.
+SMART support is: Enabled
+</pre></div>
+</div>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 检查机械硬盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>目前服务器上有3个机械硬盘，输入如下:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ sudo smartctl -i /dev/sdb
+
+smartctl <span class="m">7</span>.1 <span class="m">2019</span>-12-30 r5022 <span class="o">[</span>x86_64-linux-5.4.0-89-generic<span class="o">]</span> <span class="o">(</span><span class="nb">local</span> build<span class="o">)</span>
+Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2002</span>-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+<span class="o">===</span> START OF INFORMATION <span class="nv">SECTION</span> <span class="o">===</span>
+Model Family:     Seagate Momentus <span class="m">7200</span>.4
+Device Model:     ST9500420AS
+Serial Number:    5VJ9R32K
+LU WWN Device Id: <span class="m">5</span> 000c50 02efa5b15
+Firmware Version: 0001BSM2
+User Capacity:    <span class="m">500</span>,107,862,016 bytes <span class="o">[</span><span class="m">500</span> GB<span class="o">]</span>
+Sector Size:      <span class="m">512</span> bytes logical/physical
+Rotation Rate:    <span class="m">7200</span> rpm
+Device is:        In smartctl database <span class="o">[</span><span class="k">for</span> details use: -P show<span class="o">]</span>
+ATA Version is:   ATA8-ACS T13/1699-D revision <span class="m">4</span>
+SATA Version is:  SATA <span class="m">2</span>.6, <span class="m">1</span>.5 Gb/s
+Local Time is:    Mon Nov  <span class="m">8</span> <span class="m">09</span>:48:45 <span class="m">2021</span> CST
+SMART support is: Available - device has SMART capability.
+SMART support is: Enabled
+
+$ sudo smartctl -i /dev/sdc
+
+smartctl <span class="m">7</span>.1 <span class="m">2019</span>-12-30 r5022 <span class="o">[</span>x86_64-linux-5.4.0-89-generic<span class="o">]</span> <span class="o">(</span><span class="nb">local</span> build<span class="o">)</span>
+Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2002</span>-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+<span class="o">===</span> START OF INFORMATION <span class="nv">SECTION</span> <span class="o">===</span>
+Model Family:     Hitachi/HGST Travelstar Z7K500
+Device Model:     HGST HTS725050A7E630
+Serial Number:    TF652AWE04A6JV
+LU WWN Device Id: <span class="m">5</span> 000cca 81bc1f7d0
+Firmware Version: GH2OA420
+User Capacity:    <span class="m">500</span>,107,862,016 bytes <span class="o">[</span><span class="m">500</span> GB<span class="o">]</span>
+Sector Sizes:     <span class="m">512</span> bytes logical, <span class="m">4096</span> bytes physical
+Rotation Rate:    <span class="m">7200</span> rpm
+Form Factor:      <span class="m">2</span>.5 inches
+Device is:        In smartctl database <span class="o">[</span><span class="k">for</span> details use: -P show<span class="o">]</span>
+ATA Version is:   ATA8-ACS T13/1699-D revision <span class="m">6</span>
+SATA Version is:  SATA <span class="m">2</span>.6, <span class="m">6</span>.0 Gb/s <span class="o">(</span>current: <span class="m">6</span>.0 Gb/s<span class="o">)</span>
+Local Time is:    Mon Nov  <span class="m">8</span> <span class="m">09</span>:49:19 <span class="m">2021</span> CST
+SMART support is: Available - device has SMART capability.
+SMART support is: Enabled
+
+$ sudo smartctl -i /dev/sdd
+
+smartctl <span class="m">7</span>.1 <span class="m">2019</span>-12-30 r5022 <span class="o">[</span>x86_64-linux-5.4.0-89-generic<span class="o">]</span> <span class="o">(</span><span class="nb">local</span> build<span class="o">)</span>
+Copyright <span class="o">(</span>C<span class="o">)</span> <span class="m">2002</span>-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+<span class="o">===</span> START OF INFORMATION <span class="nv">SECTION</span> <span class="o">===</span>
+Model Family:     Seagate Momentus <span class="m">5400</span>.6
+Device Model:     ST9500325AS
+Serial Number:    5VE7X2Q7
+LU WWN Device Id: <span class="m">5</span> 000c50 01eae2511
+Firmware Version: 0002BSM1
+User Capacity:    <span class="m">500</span>,107,862,016 bytes <span class="o">[</span><span class="m">500</span> GB<span class="o">]</span>
+Sector Size:      <span class="m">512</span> bytes logical/physical
+Rotation Rate:    <span class="m">5400</span> rpm
+Device is:        In smartctl database <span class="o">[</span><span class="k">for</span> details use: -P show<span class="o">]</span>
+ATA Version is:   ATA8-ACS T13/1699-D revision <span class="m">4</span>
+SATA Version is:  SATA <span class="m">2</span>.6, <span class="m">1</span>.5 Gb/s
+Local Time is:    Mon Nov  <span class="m">8</span> <span class="m">09</span>:49:30 <span class="m">2021</span> CST
+SMART support is: Available - device has SMART capability.
+SMART support is: Enabled
+</pre></div>
+</div>
+</section>
+<section id="lshw">
+<h2>lshw<a class="headerlink" href="#lshw" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">lshw</span></code> 类似 <a class="reference internal" href="../../server/hardware/hwinfo.html#hwinfo"><span class="std std-ref">Linux系统硬件信息检测工具hwinfo</span></a> 工具，支持DMI(只用于x86和IA-64)，OpenFirmware设备树(PowerPC), PCI/AGP, CPUID(x86),IDE/ATA/ATAPI, PCMCIA,SCSI和USB。</p>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">lshw</span></code> 检查磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">lshw</span> <span class="o">-</span><span class="k">class</span> <span class="nc">disk</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>实际上 <code class="docutils literal notranslate"><span class="pre">lshw</span></code> 对传统HDD支持较好，但是不能完整展示NVMe SSD信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="o">*-</span><span class="n">namespace</span>
+       <span class="n">description</span><span class="p">:</span> <span class="n">NVMe</span> <span class="n">namespace</span>
+       <span class="n">physical</span> <span class="nb">id</span><span class="p">:</span> <span class="mi">1</span>
+       <span class="n">logical</span> <span class="n">name</span><span class="p">:</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+       <span class="n">size</span><span class="p">:</span> <span class="mi">953</span><span class="n">GiB</span> <span class="p">(</span><span class="mi">1024</span><span class="n">GB</span><span class="p">)</span>
+       <span class="n">configuration</span><span class="p">:</span> <span class="n">logicalsectorsize</span><span class="o">=</span><span class="mi">512</span> <span class="n">sectorsize</span><span class="o">=</span><span class="mi">512</span>
+<span class="o">...</span>
+  <span class="o">*-</span><span class="n">disk</span>
+       <span class="n">description</span><span class="p">:</span> <span class="n">ATA</span> <span class="n">Disk</span>
+       <span class="n">product</span><span class="p">:</span> <span class="n">INTEL</span> <span class="n">SSDSC2KW51</span>
+       <span class="n">physical</span> <span class="nb">id</span><span class="p">:</span> <span class="mf">0.0.0</span>
+       <span class="n">bus</span> <span class="n">info</span><span class="p">:</span> <span class="n">scsi</span><span class="o">@</span><span class="mi">0</span><span class="p">:</span><span class="mf">0.0.0</span>
+       <span class="n">logical</span> <span class="n">name</span><span class="p">:</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+       <span class="n">version</span><span class="p">:</span> <span class="mi">002</span><span class="n">C</span>
+       <span class="n">serial</span><span class="p">:</span> <span class="n">BTLA7513037S512DGN</span>
+       <span class="n">size</span><span class="p">:</span> <span class="mi">476</span><span class="n">GiB</span> <span class="p">(</span><span class="mi">512</span><span class="n">GB</span><span class="p">)</span>
+       <span class="n">capabilities</span><span class="p">:</span> <span class="n">gpt</span><span class="o">-</span><span class="mf">1.00</span> <span class="n">partitioned</span> <span class="n">partitioned</span><span class="p">:</span><span class="n">gpt</span>
+       <span class="n">configuration</span><span class="p">:</span> <span class="n">ansiversion</span><span class="o">=</span><span class="mi">5</span> <span class="n">guid</span><span class="o">=</span><span class="mi">3</span><span class="n">cdb3a71</span><span class="o">-</span><span class="mi">60</span><span class="n">d4</span><span class="o">-</span><span class="mi">41</span><span class="n">f2</span><span class="o">-</span><span class="mi">884</span><span class="n">f</span><span class="o">-</span><span class="n">c347b9dcae21</span> <span class="n">logicalsectorsize</span><span class="o">=</span><span class="mi">512</span> <span class="n">sectorsize</span><span class="o">=</span><span class="mi">512</span>
+</pre></div>
+</div>
+</section>
+<section id="hdparm">
+<h2>hdparm<a class="headerlink" href="#hdparm" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">hdparm</span></code> 也是传统的HDD检测工具，适合机械硬盘和SSD，但是不支持NVMe SSD设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">hdparm</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+</pre></div>
+</div>
+<p>提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span><span class="p">:</span>
+ <span class="n">HDIO_DRIVE_CMD</span><span class="p">(</span><span class="n">identify</span><span class="p">)</span> <span class="n">failed</span><span class="p">:</span> <span class="n">Inappropriate</span> <span class="n">ioctl</span> <span class="k">for</span> <span class="n">device</span>
+ <span class="n">HDIO_GET_IDENTITY</span> <span class="n">failed</span><span class="p">:</span> <span class="n">Inappropriate</span> <span class="n">ioctl</span> <span class="k">for</span> <span class="n">device</span>
+</pre></div>
+</div>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hdparm</span></code> 支持SATA接口的SSD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">hdparm</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span>
+
+ <span class="n">Model</span><span class="o">=</span><span class="n">INTEL</span> <span class="n">SSDSC2KW512G8</span><span class="p">,</span> <span class="n">FwRev</span><span class="o">=</span><span class="n">LHF002C</span><span class="p">,</span> <span class="n">SerialNo</span><span class="o">=</span><span class="n">BTLA7513037S512DGN</span>
+ <span class="n">Config</span><span class="o">=</span><span class="p">{</span> <span class="n">Fixed</span> <span class="p">}</span>
+ <span class="n">RawCHS</span><span class="o">=</span><span class="mi">16383</span><span class="o">/</span><span class="mi">16</span><span class="o">/</span><span class="mi">63</span><span class="p">,</span> <span class="n">TrkSize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">SectSize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ECCbytes</span><span class="o">=</span><span class="mi">0</span>
+ <span class="n">BuffType</span><span class="o">=</span><span class="n">unknown</span><span class="p">,</span> <span class="n">BuffSize</span><span class="o">=</span><span class="n">unknown</span><span class="p">,</span> <span class="n">MaxMultSect</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">MultSect</span><span class="o">=</span><span class="n">off</span>
+ <span class="n">CurCHS</span><span class="o">=</span><span class="mi">16383</span><span class="o">/</span><span class="mi">16</span><span class="o">/</span><span class="mi">63</span><span class="p">,</span> <span class="n">CurSects</span><span class="o">=</span><span class="mi">16514064</span><span class="p">,</span> <span class="n">LBA</span><span class="o">=</span><span class="n">yes</span><span class="p">,</span> <span class="n">LBAsects</span><span class="o">=</span><span class="mi">1000215216</span>
+ <span class="n">IORDY</span><span class="o">=</span><span class="n">on</span><span class="o">/</span><span class="n">off</span><span class="p">,</span> <span class="n">tPIO</span><span class="o">=</span><span class="p">{</span><span class="nb">min</span><span class="p">:</span><span class="mi">120</span><span class="p">,</span><span class="n">w</span><span class="o">/</span><span class="n">IORDY</span><span class="p">:</span><span class="mi">120</span><span class="p">},</span> <span class="n">tDMA</span><span class="o">=</span><span class="p">{</span><span class="nb">min</span><span class="p">:</span><span class="mi">120</span><span class="p">,</span><span class="n">rec</span><span class="p">:</span><span class="mi">120</span><span class="p">}</span>
+ <span class="n">PIO</span> <span class="n">modes</span><span class="p">:</span>  <span class="n">pio0</span> <span class="n">pio3</span> <span class="n">pio4</span>
+ <span class="n">DMA</span> <span class="n">modes</span><span class="p">:</span>  <span class="n">mdma0</span> <span class="n">mdma1</span> <span class="n">mdma2</span>
+ <span class="n">UDMA</span> <span class="n">modes</span><span class="p">:</span> <span class="n">udma0</span> <span class="n">udma1</span> <span class="n">udma2</span> <span class="n">udma3</span> <span class="n">udma4</span> <span class="n">udma5</span> <span class="o">*</span><span class="n">udma6</span>
+ <span class="n">AdvancedPM</span><span class="o">=</span><span class="n">yes</span><span class="p">:</span> <span class="n">unknown</span> <span class="n">setting</span> <span class="n">WriteCache</span><span class="o">=</span><span class="n">disabled</span>
+ <span class="n">Drive</span> <span class="n">conforms</span> <span class="n">to</span><span class="p">:</span> <span class="n">unknown</span><span class="p">:</span>  <span class="n">ATA</span><span class="o">/</span><span class="n">ATAPI</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span>
+
+ <span class="o">*</span> <span class="n">signifies</span> <span class="n">the</span> <span class="n">current</span> <span class="n">active</span> <span class="n">mode</span>
+</pre></div>
+</div>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hdparm</span></code> 也支持SATA的HDD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">hdparm</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span><span class="p">:</span>
+
+ <span class="n">Model</span><span class="o">=</span><span class="n">ST9500420AS</span><span class="p">,</span> <span class="n">FwRev</span><span class="o">=</span><span class="mi">0001</span><span class="n">BSM2</span><span class="p">,</span> <span class="n">SerialNo</span><span class="o">=</span><span class="mi">5</span><span class="n">VJ9R32K</span>
+ <span class="n">Config</span><span class="o">=</span><span class="p">{</span> <span class="n">HardSect</span> <span class="n">NotMFM</span> <span class="n">HdSw</span><span class="o">&gt;</span><span class="mi">15</span><span class="n">uSec</span> <span class="n">Fixed</span> <span class="n">DTR</span><span class="o">&gt;</span><span class="mi">10</span><span class="n">Mbs</span> <span class="n">RotSpdTol</span><span class="o">&gt;</span><span class="mf">.5</span><span class="o">%</span> <span class="p">}</span>
+ <span class="n">RawCHS</span><span class="o">=</span><span class="mi">16383</span><span class="o">/</span><span class="mi">16</span><span class="o">/</span><span class="mi">63</span><span class="p">,</span> <span class="n">TrkSize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">SectSize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ECCbytes</span><span class="o">=</span><span class="mi">4</span>
+ <span class="n">BuffType</span><span class="o">=</span><span class="n">unknown</span><span class="p">,</span> <span class="n">BuffSize</span><span class="o">=</span><span class="mi">16384</span><span class="n">kB</span><span class="p">,</span> <span class="n">MaxMultSect</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">MultSect</span><span class="o">=</span><span class="mi">16</span>
+ <span class="n">CurCHS</span><span class="o">=</span><span class="mi">16383</span><span class="o">/</span><span class="mi">16</span><span class="o">/</span><span class="mi">63</span><span class="p">,</span> <span class="n">CurSects</span><span class="o">=</span><span class="mi">16514064</span><span class="p">,</span> <span class="n">LBA</span><span class="o">=</span><span class="n">yes</span><span class="p">,</span> <span class="n">LBAsects</span><span class="o">=</span><span class="mi">976773168</span>
+ <span class="n">IORDY</span><span class="o">=</span><span class="n">on</span><span class="o">/</span><span class="n">off</span><span class="p">,</span> <span class="n">tPIO</span><span class="o">=</span><span class="p">{</span><span class="nb">min</span><span class="p">:</span><span class="mi">120</span><span class="p">,</span><span class="n">w</span><span class="o">/</span><span class="n">IORDY</span><span class="p">:</span><span class="mi">120</span><span class="p">},</span> <span class="n">tDMA</span><span class="o">=</span><span class="p">{</span><span class="nb">min</span><span class="p">:</span><span class="mi">120</span><span class="p">,</span><span class="n">rec</span><span class="p">:</span><span class="mi">120</span><span class="p">}</span>
+ <span class="n">PIO</span> <span class="n">modes</span><span class="p">:</span>  <span class="n">pio0</span> <span class="n">pio1</span> <span class="n">pio2</span> <span class="n">pio3</span> <span class="n">pio4</span>
+ <span class="n">DMA</span> <span class="n">modes</span><span class="p">:</span>  <span class="n">mdma0</span> <span class="n">mdma1</span> <span class="n">mdma2</span>
+ <span class="n">UDMA</span> <span class="n">modes</span><span class="p">:</span> <span class="n">udma0</span> <span class="n">udma1</span> <span class="n">udma2</span> <span class="n">udma3</span> <span class="n">udma4</span> <span class="n">udma5</span> <span class="o">*</span><span class="n">udma6</span>
+ <span class="n">AdvancedPM</span><span class="o">=</span><span class="n">yes</span><span class="p">:</span> <span class="n">unknown</span> <span class="n">setting</span> <span class="n">WriteCache</span><span class="o">=</span><span class="n">disabled</span>
+ <span class="n">Drive</span> <span class="n">conforms</span> <span class="n">to</span><span class="p">:</span> <span class="n">unknown</span><span class="p">:</span>  <span class="n">ATA</span><span class="o">/</span><span class="n">ATAPI</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span>
+
+ <span class="o">*</span> <span class="n">signifies</span> <span class="n">the</span> <span class="n">current</span> <span class="n">active</span> <span class="n">mode</span>
+</pre></div>
+</div>
+</section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
@@ -176,7 +434,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="linux_ssd.html" class="btn btn-neutral float-left" title="Linux固态驱动器(SSD)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="smart_monitor.html" class="btn btn-neutral float-left" title="存储设备S.M.A.R.T监控" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="linux_partition.html" class="btn btn-neutral float-right" title="Linux分区" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

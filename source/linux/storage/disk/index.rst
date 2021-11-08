@@ -8,6 +8,7 @@ Linux磁盘
    :maxdepth: 1
 
    linux_ssd.rst
+   smart_monitor.rst
    check_hd_sn.rst
    linux_partition.rst
    4k_alignment.rst
