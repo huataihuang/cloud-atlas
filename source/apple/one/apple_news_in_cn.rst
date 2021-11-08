@@ -43,8 +43,8 @@ macOS版本News
 
 - 「系统偏好设置 > 语言与地区」中将「地区」修改至「美国」
 
-.. figure:: ../../_static/life/open_your_mind/macos_unlock_news.png
-   :scale: 80
+.. figure:: ../../_static/apple/one/macos_unlock_news.png
+   :scale: 35 
 
 - 开启VPN翻墙
 
