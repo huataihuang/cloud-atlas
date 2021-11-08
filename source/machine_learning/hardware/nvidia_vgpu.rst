@@ -16,4 +16,3 @@ NVIDIA vGPU软件有以下几种使用方法:
 ========
 
 - `NVIDIA Virtual GPU Software User Guide <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html>`_ ( `Virtual GPU Software User Guide (pdf ) <https://docs.nvidia.com/grid/latest/pdf/grid-vgpu-user-guide.pdf>`_ )
-- NVIDIA Accelerators for HPE ProLiant Servers HPE服务器所使用的NVIDIA加速卡
