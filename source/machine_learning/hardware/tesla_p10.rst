@@ -42,12 +42,16 @@ Tesla P10是一个单插槽运算卡，长度 267 mm / 宽度 97 mm，使用 PCI
 
 Tesla P10是一块 ``隐形运算卡`` ，你在网上几乎找不到资料，虽然同属 NVIDIA Tesla 系列，但是我们常见的有 ``Tesla P40 24GB`` 和 ``Tesla P199 12GB`` ，同属Pascal 微架构
 
+.. note::
+
+   ``Tesla P10`` 相当于同规格 ``Tesla P40`` 的降频版本，内核完全一致
+
 技术规格
 ------------
 
 .. csv-table:: Tesla P10 vs. GeForce GTX 1080 Ti
    :file: tesla_p10/tesla_spec.csv
-   :widths: 33, 33, 33
+   :widths: 10, 30, 30, 30
    :header-rows: 1
 
 Tesla P10 和 GeForce GTX 1080 Ti 采用了相同的GPU核心 GP102 ，也就是 Pascal 架构，工艺和技术参数几乎相同，主要差异:
@@ -59,6 +63,11 @@ Tesla P10 和 GeForce GTX 1080 Ti 采用了相同的GPU核心 GP102 ，也就是
    :scale: 80
 
 - 其他差异是 P10 没有显示输出，是纯粹的数据中心运算卡，无法用于3D游戏加速，也不能用于挖矿(算力是个位数)，所以这也是同样性能的 Tesla P10 在当前 ``疯狂时期`` 二手售价仅为 GeForce GTX 1080 Ti 的 1/5 的原因之一(GTX 1080 Ti二手价格被炒高了)
+
+- Tesla P10 和 Tesla P40 的GPU核心以及参数基本相同，差异仅在于主频，P40通过提高主频性能得到少量提升，以 ``Radeon RX 6600 XT`` 为参照，P40的性能比P10提高了3%。不过，P40是双插槽GPU运算卡，散热要好于P10，但是也要求更大的机箱空间
+
+.. figure:: ../../_static/machine_learning/hardware/p10_1080_ti.png
+   :scale: 80
 
 .. note::
 
