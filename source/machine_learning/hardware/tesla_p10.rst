@@ -66,7 +66,7 @@ Tesla P10 和 GeForce GTX 1080 Ti 采用了相同的GPU核心 GP102 ，也就是
 
 - Tesla P10 和 Tesla P40 的GPU核心以及参数基本相同，差异仅在于主频，P40通过提高主频性能得到少量提升，以 ``Radeon RX 6600 XT`` 为参照，P40的性能比P10提高了3%。不过，P40是双插槽GPU运算卡，散热要好于P10，但是也要求更大的机箱空间
 
-.. figure:: ../../_static/machine_learning/hardware/p10_1080_ti.png
+.. figure:: ../../_static/machine_learning/hardware/p40.png
    :scale: 80
 
 .. note::
