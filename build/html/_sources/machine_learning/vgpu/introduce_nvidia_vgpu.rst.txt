@@ -42,10 +42,7 @@ Tesla 系列 GPU 可同时支持通用计算和图形图像处理，例如：
 vgpu_unlock
 ==============
 
-NVIDIA不允许在消费级GPU上使用vGPU功能，但是实际上硬件是完全支持的。所以开源软件 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 通过软件方式解锁了消费级NVidia vGPU功能。详细信息可以参考 `vGPU_Unlock Wiki <https://docs.google.com/document/d/1pzrWJ9h-zANCtyqRgS7Vzla0Y8Ea2-5z2HEi4X75d2Q>`_
-
-vgpu_unlock支持显卡
---------------------
+NVIDIA不允许在消费级GPU上使用vGPU功能，但是实际上硬件是完全支持的。所以开源软件 :ref:`vgpu_unlock` 通过软件方式解锁了消费级NVidia vGPU功能。
 
 
 
