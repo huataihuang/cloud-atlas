@@ -7,7 +7,7 @@ Docker tini进程管理器
 Tini
 =====
 
-`tini 容器init <https://github.com/krallin/tini>`_ 是一个最小化到 ``init`` 系统，运行在容器内部，用于启动一个子进程，并等待进程退出时清理僵尸和执行信号转发。 这是一个替代庞大复杂的systemd体系的解决方案，已经集成到Docker 1.13中，并包含在Docker CE的所有版本。
+`tini 容器init <https://github.com/krallin/tini>`_ 是一个最小化的 ``init`` 系统，运行在容器内部，用于启动一个子进程，并等待进程退出时清理僵尸和执行信号转发。 这是一个替代庞大复杂的systemd体系的解决方案，已经集成到Docker 1.13中，并包含在Docker CE的所有版本。
 
 Tini的优点:
 
