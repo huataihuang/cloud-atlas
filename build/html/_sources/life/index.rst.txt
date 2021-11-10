@@ -12,6 +12,7 @@ Life Atlas
    :maxdepth: 1
 
    open_your_mind/index
+   sport/index
 
 .. only::  subproject and html
 
