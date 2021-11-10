@@ -68,19 +68,35 @@ I/O虚拟化有不同的技术，各自具有利弊
 - 内核参数设置激活IOMMU: 对于Intel处理器，内核参数使用 ``intel_iommu=on``
 - 系统提供了VFIO架构，也即是内核加载了模块 ``vfio_pci``
 
-pass-through 分区(似乎不行)
+pass-through NVMe存储
+------------------------
+
+NVMe可以通过PCIe直接分配给虚拟机使用，可以实现最大化的存储性能。这种方式绕过了物理主机上的操作系统控制，并且直接通过PCIe总线访问存储，是虚拟化存储中性能最高的技术。
+
+通过 :ref:`ovmf` 可以实现PCI设备直通给虚拟机，获得最好的I/O性能
+
+pass-through SATA控制器
+-------------------------
+
+SATA控制器是位于PCI总线，所以可以将SATA控制器直接passthrough给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。
+
+.. note::
+
+   需要仔细检查 :ref:`hpe_dl360_gen9` 服务器手册中有关内部SATA控制器如何和SFF存储连接，如果能够区分出不同的SATA控制器，可以实践将没有用于物理主机的启动盘上的SATA控制器pass-through给虚拟机，验证这个技术
+
+pass-through 分区或磁盘
 -------------------------------
 
 参考 `Pass through a partition? <https://www.reddit.com/r/VFIO/comments/j443ad/pass_through_a_partition/>`_
 
 - 可以将一个磁盘分区pass through给虚拟机，但是需要注意分区在虚拟机内部会视为一个完整磁盘，所以虚拟机在这个分区中创建完整的GPT分区表，从外部看来这是一个嵌套的(nested)分区
-- 需要非常小心，在物理服务器上不能直接访问pass-through给虚拟机的分区中的数据，需要特殊处理(我记得是要使用loop方式)
+- 需要非常小心，在物理服务器上不能直接访问pass-through给虚拟机的分区中的数据
 
-但是，参考 `Disk Passthrough Explained <https://passthroughpo.st/disk-passthrough-explained/>`_ 的 ``Direct SATA Controller Passthrough via vfio-pci`` :
-
-SATA控制器是位于PCI总线，所以可以将SATA控制器直接passthrough给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。
+参考 `Disk Passthrough Explained <https://passthroughpo.st/disk-passthrough-explained/>`_ 的 ``Direct SATA Controller Passthrough via vfio-pci`` :
 
 `lennard0711/vfio <https://github.com/lennard0711/vfio>`_ 提供了一个配置案例，并且 `arch linux: PCI passthrough via OVMF - Physical disk/partition <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Physical_disk/partition>`_ 介绍了可以pass through磁盘或分区
+
+这种方式比直接pass-through SATA控制器多了一层物理服务器操作系统控制，所以理论上性能会差一些
 
 基于磁盘的虚拟化存储
 ======================

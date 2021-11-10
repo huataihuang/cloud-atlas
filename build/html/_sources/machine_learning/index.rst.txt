@@ -15,7 +15,6 @@ Machine Learning Atlas
 
    studio/index
    hardware/index
-   vgpu/index
    jetson/index
    cuda/index
    tensorflow/index

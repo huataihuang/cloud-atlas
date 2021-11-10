@@ -8,6 +8,7 @@ Linux存储
    :maxdepth: 1
 
    disk/index
+   nvme/index
    filesystem/index
    lvm/index
    zfs/index

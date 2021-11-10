@@ -72,6 +72,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../iommu/index.html">IOMMU</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual.html">KVM嵌套虚拟化</a></li>
@@ -278,16 +280,29 @@
 <li><p>内核参数设置激活IOMMU: 对于Intel处理器，内核参数使用 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code></p></li>
 <li><p>系统提供了VFIO架构，也即是内核加载了模块 <code class="docutils literal notranslate"><span class="pre">vfio_pci</span></code></p></li>
 </ul>
+<section id="pass-through-nvme">
+<h3>pass-through NVMe存储<a class="headerlink" href="#pass-through-nvme" title="永久链接至标题">¶</a></h3>
+<p>NVMe可以通过PCIe直接分配给虚拟机使用，可以实现最大化的存储性能。这种方式绕过了物理主机上的操作系统控制，并且直接通过PCIe总线访问存储，是虚拟化存储中性能最高的技术。</p>
+<p>通过 <a class="reference internal" href="../iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 可以实现PCI设备直通给虚拟机，获得最好的I/O性能</p>
+</section>
+<section id="pass-through-sata">
+<h3>pass-through SATA控制器<a class="headerlink" href="#pass-through-sata" title="永久链接至标题">¶</a></h3>
+<p>SATA控制器是位于PCI总线，所以可以将SATA控制器直接passthrough给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>需要仔细检查 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器手册中有关内部SATA控制器如何和SFF存储连接，如果能够区分出不同的SATA控制器，可以实践将没有用于物理主机的启动盘上的SATA控制器pass-through给虚拟机，验证这个技术</p>
+</div>
+</section>
 <section id="pass-through">
-<h3>pass-through 分区(似乎不行)<a class="headerlink" href="#pass-through" title="永久链接至标题">¶</a></h3>
+<h3>pass-through 分区或磁盘<a class="headerlink" href="#pass-through" title="永久链接至标题">¶</a></h3>
 <p>参考 <a class="reference external" href="https://www.reddit.com/r/VFIO/comments/j443ad/pass_through_a_partition/">Pass through a partition?</a></p>
 <ul class="simple">
 <li><p>可以将一个磁盘分区pass through给虚拟机，但是需要注意分区在虚拟机内部会视为一个完整磁盘，所以虚拟机在这个分区中创建完整的GPT分区表，从外部看来这是一个嵌套的(nested)分区</p></li>
-<li><p>需要非常小心，在物理服务器上不能直接访问pass-through给虚拟机的分区中的数据，需要特殊处理(我记得是要使用loop方式)</p></li>
+<li><p>需要非常小心，在物理服务器上不能直接访问pass-through给虚拟机的分区中的数据</p></li>
 </ul>
-<p>但是，参考 <a class="reference external" href="https://passthroughpo.st/disk-passthrough-explained/">Disk Passthrough Explained</a> 的 <code class="docutils literal notranslate"><span class="pre">Direct</span> <span class="pre">SATA</span> <span class="pre">Controller</span> <span class="pre">Passthrough</span> <span class="pre">via</span> <span class="pre">vfio-pci</span></code> :</p>
-<p>SATA控制器是位于PCI总线，所以可以将SATA控制器直接passthrough给虚拟机，这样就几乎没有延迟或超载，提供了最高的带宽。这个方案的缺点是整个SATA控制器都被VM控制，所以这个SATA控制器无法在Host主机使用，也就是说你必须有2个SATA控制器，一个给Host主机使用，一个给VM虚拟机使用。由于主机上的SATA控制器数量有限(通常就2个)，扩展管理非常麻烦(Guest虚拟机使用这个SATA控制器时候，物理主机不能使用这个SATA控制器上的所有磁盘)。</p>
+<p>参考 <a class="reference external" href="https://passthroughpo.st/disk-passthrough-explained/">Disk Passthrough Explained</a> 的 <code class="docutils literal notranslate"><span class="pre">Direct</span> <span class="pre">SATA</span> <span class="pre">Controller</span> <span class="pre">Passthrough</span> <span class="pre">via</span> <span class="pre">vfio-pci</span></code> :</p>
 <p><a class="reference external" href="https://github.com/lennard0711/vfio">lennard0711/vfio</a> 提供了一个配置案例，并且 <a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Physical_disk/partition">arch linux: PCI passthrough via OVMF - Physical disk/partition</a> 介绍了可以pass through磁盘或分区</p>
+<p>这种方式比直接pass-through SATA控制器多了一层物理服务器操作系统控制，所以理论上性能会差一些</p>
 </section>
 </section>
 <section id="id2">
