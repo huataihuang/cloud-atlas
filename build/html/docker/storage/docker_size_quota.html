@@ -151,7 +151,23 @@
              
   <section id="dockerquota">
 <span id="docker-size-quota"></span><h1>Docker容器规格Quota<a class="headerlink" href="#dockerquota" title="永久链接至标题">¶</a></h1>
-<p>通常 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 文件系统采用一个独立的分区比较合适，可以通过文件系统的Quota来限制Docker容器规格。Docker size Quota建议使用XFS的quota属性实现，不过，现在ext4文件系统也扩展成能够支持quota，所以两者都可以使用 <code class="docutils literal notranslate"><span class="pre">overlay</span></code> 作为存储引擎来限制容器规格。推荐使用XFS结合 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 来实现 project quotas。</p>
+<p>通常 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 文件系统采用一个独立的分区比较合适，可以通过文件系统的Quota来限制Docker容器规格。Docker size Quota建议使用XFS的quota属性实现。</p>
+<p>根据Docker官方文档 <a class="reference external" href="https://docs.docker.com/engine/reference/commandline/run/#set-storage-driver-options-per-container">Set storage driver options per container</a> :</p>
+<p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 参数 <code class="docutils literal notranslate"><span class="pre">--storage-opt</span> <span class="pre">size=120G</span></code> 可以在容器创建时设置容器rootfs大小。这个选项 <code class="docutils literal notranslate"><span class="pre">--storage-opt</span></code> 只在以下 <a class="reference internal" href="docker_storage_driver.html#docker-storage-driver"><span class="std std-ref">Docker存储驱动</span></a> 有效:</p>
+<ul class="simple">
+<li><p>devicemapper</p></li>
+<li><p>btrfs</p></li>
+<li><p>overlay2</p></li>
+<li><p>windowsfilter</p></li>
+<li><p>zfs</p></li>
+</ul>
+<p>对于上述存储驱动 devicemapper, btrfs, windowsfilter, zfs ，用户不能设置比默认BaseFS更小的容器大小。对于 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 存储驱动，这个 <code class="docutils literal notranslate"><span class="pre">size</span></code> 选项只对 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 后端文件系统有效，并且 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 必须使用 <code class="docutils literal notranslate"><span class="pre">pquota</span></code> 挂载选项。只有这些条件满足，用户才能传递比后端文件系统小的容器rootfs大小。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>上述Docker官方文档指出只有底层文件系统是 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 情况(使用了 <code class="docutils literal notranslate"><span class="pre">pquota</span></code> 选项挂载)，才能在上层 <code class="docutils literal notranslate"><span class="pre">overlay2</span></code> 存储驱动中使用 <code class="docutils literal notranslate"><span class="pre">--storage-opt</span> <span class="pre">size=XXX</span></code> 来限制容器rootfs大小。(感谢 michaelyu0906 指正 <a class="reference external" href="https://github.com/huataihuang/cloud-atlas/issues/5">Docker目前不支持ext4的quota #5</a> )</p>
+<p>目前根据资料和相关信息，官方Docker不支持EXT4文件系统作为OverlayFS后端文件系统来实现容器rootfs quota，不过国内互联网大厂出于稳定性和持续性，通过修改Docker实现了EXT4文件系统作为底层文件系统的OverlayFS quota。</p>
+<p>本文后续会根据实践做修订补充…</p>
+</div>
 <section id="xfsprjquota">
 <h2>XFS实现prjquota<a class="headerlink" href="#xfsprjquota" title="永久链接至标题">¶</a></h2>
 <ul>
@@ -181,7 +197,8 @@
 </section>
 <section id="ext4prjquota">
 <h2>EXT4实现prjquota<a class="headerlink" href="#ext4prjquota" title="永久链接至标题">¶</a></h2>
-<p>在 EXT4文件系统之上使用 <a class="reference internal" href="docker_overlay_driver.html#docker-overlay-driver"><span class="std std-ref">Docker OverlayFS存储引擎</span></a> 也可以实现容器的文件系统quota。这个功能是通过EXT4文件系统的 <code class="docutils literal notranslate"><span class="pre">project</span> <span class="pre">quota</span></code> 功能实现的。如果内核支持这个功能，需要使用 <code class="docutils literal notranslate"><span class="pre">SYS_IOCTL</span></code> syscall 来设置目录的project ID，然后使用 <code class="docutils literal notranslate"><span class="pre">SYS_QUOTACTL</span></code> 对对应的 <code class="docutils literal notranslate"><span class="pre">project</span> <span class="pre">ID</span></code> 设置hard limit和soft limit。</p>
+<p>现在ext4文件系统也扩展成能够支持quota，国内互联网大厂通常传统上使用EXT4文件系统(稳定性)，由于现代的EXT4文件系统通过扩展属性也能支持quota，所以通过定制Docker也可以使用EXT4文件系统作为后端FS， <code class="docutils literal notranslate"><span class="pre">overlayfs</span></code> 作为存储引擎来限制容器规格。</p>
+<p>在 EXT4文件系统之上使用 <a class="reference internal" href="docker_overlay_driver.html#docker-overlay-driver"><span class="std std-ref">Docker OverlayFS存储引擎</span></a> 实现容器的文件系统quota：这个功能是通过EXT4文件系统的 <code class="docutils literal notranslate"><span class="pre">project</span> <span class="pre">quota</span></code> 功能实现的。如果内核支持这个功能，需要使用 <code class="docutils literal notranslate"><span class="pre">SYS_IOCTL</span></code> syscall 来设置目录的project ID，然后使用 <code class="docutils literal notranslate"><span class="pre">SYS_QUOTACTL</span></code> 对对应的 <code class="docutils literal notranslate"><span class="pre">project</span> <span class="pre">ID</span></code> 设置hard limit和soft limit。</p>
 <ul>
 <li><p>确保文件系统支持 <code class="docutils literal notranslate"><span class="pre">Project</span> <span class="pre">ID</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Project</span> <span class="pre">Quota</span></code> 属性的环境要求:</p>
 <ul class="simple">
@@ -220,8 +237,10 @@
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference external" href="https://fabianlee.org/2020/01/15/docker-use-overlay2-with-an-xfs-backing-filesystem-to-limit-rootfs-size/">Docker: Use overlay2 with an xfs backing filesystem to limit rootfs size</a></p></li>
 <li><p><a class="reference external" href="https://reece.tech/posts/docker-container-size-quota/">Docker Container Size Quota</a></p></li>
-<li><p><a class="reference external" href="https://docs.openeuler.org/en/docs/20.03_LTS/docs/Container/container-resource-management.html#restricting-the-rootfs-storage-space-of-a-container">Restricting the Rootfs Storage Space of a Container</a></p></li>
+<li><p><a class="reference external" href="https://docs.openeuler.org/en/docs/20.03_LTS/docs/Container/container-resource-management.html#restricting-the-rootfs-storage-space-of-a-container">Restricting the Rootfs Storage Space of a Container</a> 华为的OpenEuler系统提供了EXT4文件系统作为后端文件系统，实现 overlay2 上quota功能</p></li>
+<li><p><a class="reference external" href="https://docs.docker.com/engine/reference/commandline/run/#set-storage-driver-options-per-container">Set storage driver options per container</a></p></li>
 </ul>
 </section>
 </section>

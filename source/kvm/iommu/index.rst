@@ -8,7 +8,6 @@ IOMMU
    :maxdepth: 1
 
    iommu_infra.rst
-   enable_gpu_iommu.rst
    intel_vt-d_startup.rst
    ovmf.rst
    vfio.rst

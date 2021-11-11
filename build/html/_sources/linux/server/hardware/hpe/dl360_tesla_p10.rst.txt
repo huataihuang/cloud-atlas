@@ -78,7 +78,7 @@ OK，一切正常，GPU运算卡在操作系统启动后能够正常识别...
 .. figure:: ../../../../_static/linux/server/hardware/hpe/dl360_cover_1.png
    :scale: 70
 
-最终
-=======
+GPU需要服务器large bar内存
+============================
 
-终于，硬件安装完成，可以开始我的 :ref:`iommu` 和 :ref:`sr-iov` 虚拟化GPU部署了...
+硬件安装完成后，首次启动会发现BIOS报错，显示GPU请求太多内存超出限制。这里需要 :ref:`dl360_gen9_large_bar_memory` 配置完成才能正常识别GPU运算卡。之后，我们才能开始进一步 :ref:`vgpu` 以及 :ref:`iommu` 等虚拟化配置。
