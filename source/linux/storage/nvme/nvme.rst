@@ -39,7 +39,7 @@ QLC可以在一个cell中存储4倍于SLC的数据，所以容量可以做到更
 在购买之前，请关注耐久性，也就是TBW，或者Maximum Terabytes Written(即可写多少太字节)
 
 .. figure:: ../../../_static/linux/storage/nvme/nand_compare.png
-   :scale: 70
+   :scale: 30
 
 `TLC vs. QLC SSDs: What are the differences? <https://blog.synology.com/tlc-vs-qlc-ssds-what-are-the-differences>`_ 提供了性能评测，可以看到规律：
 
@@ -50,6 +50,7 @@ QLC可以在一个cell中存储4倍于SLC的数据，所以容量可以做到更
 总之，如果要购买TLC的NVMe，建议购买企业级TLC，可以获得较为平衡的性能；实在经费紧张，也要购买消费级TLC 而不要购买消费级 QLC
 
 .. figure:: ../../../_static/linux/storage/nvme/taobao_emlc.jpg
+   :scale: 80
 
 SATA vs NVMe (m.2接口)
 =========================
