@@ -181,9 +181,31 @@
 </section>
 <section id="ext4prjquota">
 <h2>EXT4实现prjquota<a class="headerlink" href="#ext4prjquota" title="永久链接至标题">¶</a></h2>
+<p>在 EXT4文件系统之上使用 <a class="reference internal" href="docker_overlay_driver.html#docker-overlay-driver"><span class="std std-ref">Docker OverlayFS存储引擎</span></a> 也可以实现容器的文件系统quota。这个功能是通过EXT4文件系统的 <code class="docutils literal notranslate"><span class="pre">project</span> <span class="pre">quota</span></code> 功能实现的。如果内核支持这个功能，需要使用 <code class="docutils literal notranslate"><span class="pre">SYS_IOCTL</span></code> syscall 来设置目录的project ID，然后使用 <code class="docutils literal notranslate"><span class="pre">SYS_QUOTACTL</span></code> 对对应的 <code class="docutils literal notranslate"><span class="pre">project</span> <span class="pre">ID</span></code> 设置hard limit和soft limit。</p>
+<ul>
+<li><p>确保文件系统支持 <code class="docutils literal notranslate"><span class="pre">Project</span> <span class="pre">ID</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Project</span> <span class="pre">Quota</span></code> 属性的环境要求:</p>
+<ul class="simple">
+<li><p>内核需要 <code class="docutils literal notranslate"><span class="pre">4.19</span></code> 或更高版本</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">e2fsprogs</span></code> 需要 <code class="docutils literal notranslate"><span class="pre">1.43.4-2</span></code> 或更高版本</p></li>
+</ul>
+</li>
+<li><p>在挂载overlayfs到容器前，首先需要不同容器的上一级目录和自身工作目录使用不同的 <code class="docutils literal notranslate"><span class="pre">Project</span> <span class="pre">ID</span></code> 并设置 <code class="docutils literal notranslate"><span class="pre">inheritance</span></code> 选项。一旦overlayfs被挂载到容器，这个 <code class="docutils literal notranslate"><span class="pre">Project</span> <span class="pre">ID</span></code> 和继承属性不能修改</p></li>
+<li><p>在容器外使用特权用户账号身份设置quota</p></li>
+<li><p>在启动docker服务时使用以下配置参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">s</span> <span class="n">overlay2</span> <span class="o">--</span><span class="n">storage</span><span class="o">-</span><span class="n">opt</span> <span class="n">overlay2</span><span class="o">.</span><span class="n">override_kernel_check</span><span class="o">=</span><span class="n">true</span>
+</pre></div>
+</div>
+</li>
+<li><p>Docker服务支持以下选项来设置容器的默认quota:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>–storage-opt overlay2.basesize=128M
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果 <code class="docutils literal notranslate"><span class="pre">-storage-opt</span> <span class="pre">size</span></code> 也传递了参数，则该参数优先级更高(生效)。如果Docker服务没有设置默认quota，并且运行容器时也没有传递 <code class="docutils literal notranslate"><span class="pre">-storage-opt</span> <span class="pre">size</span></code> 参数，则容器quota没有限制。</p>
 <ul>
 <li><p>格式化EXT4文件系统则需要传递参数来激活prjquota:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">ext4</span> <span class="o">-</span><span class="n">O</span> <span class="n">quota</span><span class="o">&lt;</span><span class="n">Plug</span><span class="o">&gt;</span><span class="n">PeepOpenroject</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">ext4</span> <span class="o">-</span><span class="n">O</span> <span class="n">quota</span><span class="p">,</span><span class="n">project</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
 <span class="n">mount</span> <span class="o">-</span><span class="n">o</span> <span class="n">prjquota</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
 </pre></div>
 </div>
@@ -199,7 +221,7 @@
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://reece.tech/posts/docker-container-size-quota/">Docker Container Size Quota</a></p></li>
-<li><p><a class="reference external" href="https://openeuler.org/en/docs/20.03_LTS/docs/Container/container-resource-management.html#restricting-the-rootfs-storage-space-of-a-container">Restricting the Rootfs Storage Space of a Container</a></p></li>
+<li><p><a class="reference external" href="https://docs.openeuler.org/en/docs/20.03_LTS/docs/Container/container-resource-management.html#restricting-the-rootfs-storage-space-of-a-container">Restricting the Rootfs Storage Space of a Container</a></p></li>
 </ul>
 </section>
 </section>

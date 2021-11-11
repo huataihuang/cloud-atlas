@@ -12,6 +12,15 @@ Jabra Sport Pulse蓝牙运动耳机
 .. figure:: ../../_static/life/sport/jabra_sport_pulse.png
    :scale: 30
 
+.. figure:: ../../_static/life/sport/jabra_sport_pulse_1.jpg
+   :scale: 50
+
+.. figure:: ../../_static/life/sport/jabra_sport_pulse_2.jpg
+   :scale: 50
+
+.. figure:: ../../_static/life/sport/jabra_sport_pulse_3.jpg
+   :scale: 50
+
 这款蓝牙运动耳机在国内没有销售，亚马逊美国网站上售价是60美金，淘宝上可以找到最低价位是 399 元。
 
 ``什么值得买`` 有简单评测文章，但是评论中有人提到这款耳机质量不佳(线控失灵无法开机)，并且音质不佳。不过考虑到发售时高达1600元售价，现在回归到正常水位，在这个400元性价比上，可以一试。

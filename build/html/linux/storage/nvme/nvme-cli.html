@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Linux文件系统" href="../filesystem/index.html" />
-    <link rel="prev" title="Linux NVMe" href="index.html" /> 
+    <link rel="next" title="SSD故障分析-NVMe SSD管理" href="nvme_ssd_management.html" />
+    <link rel="prev" title="三星PM9A1 NVMe存储" href="samsung_pm9a1.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -85,7 +85,11 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Linux存储</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../disk/index.html">Linux磁盘</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Linux NVMe</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="nvme.html">NVMe存储</a></li>
+<li class="toctree-l4"><a class="reference internal" href="samsung_pm9a1.html">三星PM9A1 NVMe存储</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">nvme-cli用户工具</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nvme_ssd_management.html">SSD故障分析-NVMe SSD管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nvme_passthru.html">NVMe passthru技术概述</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../filesystem/index.html">Linux文件系统</a></li>
@@ -157,14 +161,422 @@
              
   <section id="nvme-cli">
 <span id="id1"></span><h1>nvme-cli用户工具<a class="headerlink" href="#nvme-cli" title="永久链接至标题">¶</a></h1>
-<p>NVMe组织 &lt;<a class="reference external" href="https://nvmexpress.org/">https://nvmexpress.org/</a>&gt;`_ 开发了Linux用户空间命令行工具 <code class="docutils literal notranslate"><span class="pre">nvme-cli</span></code> ，可以在Linux系统中管理NVM-Express设备。</p>
+<p>由于数据中心需要很多监控SSD健康度和耐用度，以及更新firmware，安全擦除数据，读取设备日志等管理功能， NVMe组织 &lt;<a class="reference external" href="https://nvmexpress.org/">https://nvmexpress.org/</a>&gt;`_ 开发了Linux用户空间命令行工具 <code class="docutils literal notranslate"><span class="pre">nvme-cli</span></code> ，可以在Linux系统中管理NVM-Express设备。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>有关NVMe监控、管理和故障报告，请参考 <a class="reference internal" href="nvme_ssd_management.html#nvme-ssd-management"><span class="std std-ref">SSD故障分析-NVMe SSD管理</span></a></p>
+</div>
 <section id="id2">
 <h2>安装<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-</section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h3>源代码编译安装<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>clone源代码是需要 <code class="docutils literal notranslate"><span class="pre">libnvme</span></code> 子模块，所以使用以下命令clone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recurse</span><span class="o">-</span><span class="n">submodules</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">linux</span><span class="o">-</span><span class="n">nvme</span><span class="o">/</span><span class="n">nvme</span><span class="o">-</span><span class="n">cli</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果没有使用上述包含子模块方式clone但已经clone过源代码，则可以使用以下命令重新初始化并更新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">submodule</span> <span class="n">update</span> <span class="o">--</span><span class="n">init</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>当然，上述命令也可以分为2个命令执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">submodule</span> <span class="n">init</span>
+<span class="n">git</span> <span class="n">submodule</span> <span class="n">update</span>
+</pre></div>
+</div>
+<ul>
+<li><p>编译安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span>
+<span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h3>发行版安装<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<p>主要的Linux发行版都包含了 <code class="docutils literal notranslate"><span class="pre">nvme-cli</span></code> ，可以使用对应包管理器安装：</p>
+<ul>
+<li><p>Debian/Ubuntu安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">insall</span> <span class="n">nvme</span><span class="o">-</span><span class="n">cli</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="id5">
+<h2>使用<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<table class="colwidths-given docutils align-default" id="id7">
+<caption><span class="caption-text">nvme-cli 命令案例和说明</span><a class="headerlink" href="#id7" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>命令</p></th>
+<th class="head"><p>说明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>nvme list</p></td>
+<td><p>列出系统所有NVMe SSD:设备名,序列号,型号,namespace,使用量,LBA格式,firmware版本</p></td>
+</tr>
+<tr class="row-odd"><td><p>nvme id-ctrl</p></td>
+<td><p>NVMe控制器信息以及控制器支持功能</p></td>
+</tr>
+<tr class="row-even"><td><p>nvme id-ns</p></td>
+<td><p>查看 NVMe namespaces, 优化, 功能, 和支持</p></td>
+</tr>
+<tr class="row-odd"><td><p>nvme format</p></td>
+<td><p>安全删除SSD上数据，格式化一个LBA大小或者为端到端数据保护信息</p></td>
+</tr>
+<tr class="row-even"><td><p>nvme sanitize</p></td>
+<td><p>安全擦除SSD所有用户数据</p></td>
+</tr>
+<tr class="row-odd"><td><p>nvme smart-log</p></td>
+<td><p>输出NVMe SMART health status, temp, endurance, 以及更多的日志页面</p></td>
+</tr>
+<tr class="row-even"><td><p>nvme fw-log</p></td>
+<td><p>输出firmware 日志页面</p></td>
+</tr>
+<tr class="row-odd"><td><p>nvme error-log</p></td>
+<td><p>输出 NVMe 错误日志页面</p></td>
+</tr>
+<tr class="row-even"><td><p>nvme reset</p></td>
+<td><p>重置NVMe controller / NVMe SSD</p></td>
+</tr>
+<tr class="row-odd"><td><p>nvme help</p></td>
+<td><p>帮助信息输出，另外，还支持特定厂商的插件扩展信息帮助，例如 nvme help intel 会输出intel厂商的特定扩展(需要安装对应设备?)</p></td>
+</tr>
+<tr class="row-even"><td><p>nvme delete-ns</p></td>
+<td><p>删除一个namespace</p></td>
+</tr>
+<tr class="row-odd"><td><p>nvme create-ns</p></td>
+<td><p>创建一个新的namespace, 例如创建一个较小的namespace 来过度配置 SSD 以提高耐用性、性能和延迟</p></td>
+</tr>
+<tr class="row-even"><td><p>nvme fw-download</p></td>
+<td><p>将新固件下载到 NVMe 设备</p></td>
+</tr>
+<tr class="row-odd"><td><p>nvme fw-commit</p></td>
+<td><p>提交 (激活) firmware 立即运行或者在reset之后运行</p></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>列出系统所有安装的NVMe SSD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在我的 <a class="reference internal" href="../../server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上通过 <a class="reference internal" href="../../server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 安装了3根 <a class="reference internal" href="samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> :</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">nvme list 输出</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>Node          SN              Model                       Namespace Usage                  Format          FW Rev  
+<span class="linenos">2</span>------------- --------------- --------------------------- --------- ---------------------- --------------- --------
+<span class="linenos">3</span>/dev/nvme0n1  S676NF0R908202  SAMSUNG MZVL21T0HCLR-00B00  <span class="m">1</span>         <span class="m">0</span>.00   B /   <span class="m">1</span>.02  TB  <span class="m">512</span>   B +  <span class="m">0</span> B  GXA7401Q
+<span class="linenos">4</span>/dev/nvme1n1  S676NF0R908214  SAMSUNG MZVL21T0HCLR-00B00  <span class="m">1</span>         <span class="m">0</span>.00   B /   <span class="m">1</span>.02  TB  <span class="m">512</span>   B +  <span class="m">0</span> B  GXA7401Q
+<span class="linenos">5</span>/dev/nvme2n1  S676NF0R908144  SAMSUNG MZVL21T0HCLR-00B00  <span class="m">1</span>         <span class="m">0</span>.00   B /   <span class="m">1</span>.02  TB  <span class="m">512</span>   B +  <span class="m">0</span> B  GXA7401Q
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>检查NVMe控制器以及支持的功能:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="nb">id</span><span class="o">-</span><span class="n">ctrl</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出类似:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">nvme id-ctrl 输出</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>NVME Identify Controller:
+<span class="linenos"> 2</span>vid       : 0x144d
+<span class="linenos"> 3</span>ssvid     : 0x144d
+<span class="linenos"> 4</span>sn        : S676NF0R908202      
+<span class="linenos"> 5</span>mn        : SAMSUNG MZVL21T0HCLR-00B00              
+<span class="linenos"> 6</span>fr        : GXA7401Q
+<span class="linenos"> 7</span>rab       : <span class="m">2</span>
+<span class="linenos"> 8</span>ieee      : <span class="m">002538</span>
+<span class="linenos"> 9</span>cmic      : <span class="m">0</span>
+<span class="linenos">10</span>mdts      : <span class="m">7</span>
+<span class="linenos">11</span>cntlid    : 0x6
+<span class="linenos">12</span>ver       : 0x10300
+<span class="linenos">13</span>rtd3r     : 0x30d40
+<span class="linenos">14</span>rtd3e     : 0x989680
+<span class="linenos">15</span>oaes      : 0x200
+<span class="linenos">16</span>ctratt    : 0x10
+<span class="linenos">17</span>rrls      : <span class="m">0</span>
+<span class="linenos">18</span>crdt1     : <span class="m">0</span>
+<span class="linenos">19</span>crdt2     : <span class="m">0</span>
+<span class="linenos">20</span>crdt3     : <span class="m">0</span>
+<span class="linenos">21</span>oacs      : 0x17
+<span class="linenos">22</span>acl       : <span class="m">7</span>
+<span class="linenos">23</span>aerl      : <span class="m">3</span>
+<span class="linenos">24</span>frmw      : 0x16
+<span class="linenos">25</span>lpa       : 0xe
+<span class="linenos">26</span>elpe      : <span class="m">63</span>
+<span class="linenos">27</span>npss      : <span class="m">4</span>
+<span class="linenos">28</span>avscc     : 0x1
+<span class="linenos">29</span>apsta     : 0x1
+<span class="linenos">30</span>wctemp    : <span class="m">354</span>
+<span class="linenos">31</span>cctemp    : <span class="m">358</span>
+<span class="linenos">32</span>mtfa      : <span class="m">0</span>
+<span class="linenos">33</span>hmpre     : <span class="m">0</span>
+<span class="linenos">34</span>hmmin     : <span class="m">0</span>
+<span class="linenos">35</span>tnvmcap   : <span class="m">1024209543168</span>
+<span class="linenos">36</span>unvmcap   : <span class="m">0</span>
+<span class="linenos">37</span>rpmbs     : <span class="m">0</span>
+<span class="linenos">38</span>edstt     : <span class="m">35</span>
+<span class="linenos">39</span>dsto      : <span class="m">0</span>
+<span class="linenos">40</span>fwug      : <span class="m">0</span>
+<span class="linenos">41</span>kas       : <span class="m">0</span>
+<span class="linenos">42</span>hctma     : 0x1
+<span class="linenos">43</span>mntmt     : <span class="m">318</span>
+<span class="linenos">44</span>mxtmt     : <span class="m">356</span>
+<span class="linenos">45</span>sanicap   : 0x2
+<span class="linenos">46</span>hmminds   : <span class="m">0</span>
+<span class="linenos">47</span>hmmaxd    : <span class="m">0</span>
+<span class="linenos">48</span>nsetidmax : <span class="m">0</span>
+<span class="linenos">49</span>anatt     : <span class="m">0</span>
+<span class="linenos">50</span>anacap    : <span class="m">0</span>
+<span class="linenos">51</span>anagrpmax : <span class="m">0</span>
+<span class="linenos">52</span>nanagrpid : <span class="m">0</span>
+<span class="linenos">53</span>sqes      : 0x66
+<span class="linenos">54</span>cqes      : 0x44
+<span class="linenos">55</span>maxcmd    : <span class="m">256</span>
+<span class="linenos">56</span>nn        : <span class="m">1</span>
+<span class="linenos">57</span>oncs      : 0x57
+<span class="linenos">58</span>fuses     : <span class="m">0</span>
+<span class="linenos">59</span>fna       : <span class="m">0</span>
+<span class="linenos">60</span>vwc       : 0x7
+<span class="linenos">61</span>awun      : <span class="m">1023</span>
+<span class="linenos">62</span>awupf     : <span class="m">0</span>
+<span class="linenos">63</span>nvscc     : <span class="m">1</span>
+<span class="linenos">64</span>nwpc      : <span class="m">0</span>
+<span class="linenos">65</span>acwu      : <span class="m">0</span>
+<span class="linenos">66</span>sgls      : <span class="m">0</span>
+<span class="linenos">67</span>mnan      : <span class="m">0</span>
+<span class="linenos">68</span>subnqn    : nqn.1994-11.com.samsung:nvme:PM9A1:M.2:S676NF0R908202      
+<span class="linenos">69</span>ioccsz    : <span class="m">0</span>
+<span class="linenos">70</span>iorcsz    : <span class="m">0</span>
+<span class="linenos">71</span>icdoff    : <span class="m">0</span>
+<span class="linenos">72</span>ctrattr   : <span class="m">0</span>
+<span class="linenos">73</span>msdbd     : <span class="m">0</span>
+<span class="linenos">74</span>ps    <span class="m">0</span> : mp:8.37W operational enlat:0 exlat:0 rrt:0 rrl:0
+<span class="linenos">75</span>          rwt:0 rwl:0 idle_power:- active_power:-
+<span class="linenos">76</span>ps    <span class="m">1</span> : mp:8.37W operational enlat:0 exlat:200 rrt:1 rrl:1
+<span class="linenos">77</span>          rwt:1 rwl:1 idle_power:- active_power:-
+<span class="linenos">78</span>ps    <span class="m">2</span> : mp:8.37W operational enlat:0 exlat:200 rrt:2 rrl:2
+<span class="linenos">79</span>          rwt:2 rwl:2 idle_power:- active_power:-
+<span class="linenos">80</span>ps    <span class="m">3</span> : mp:0.0500W non-operational enlat:2000 exlat:1200 rrt:3 rrl:3
+<span class="linenos">81</span>          rwt:3 rwl:3 idle_power:- active_power:-
+<span class="linenos">82</span>ps    <span class="m">4</span> : mp:0.0050W non-operational enlat:500 exlat:9500 rrt:4 rrl:4
+<span class="linenos">83</span>          rwt:4 rwl:4 idle_power:- active_power:-
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>重要: 检查NVMe SMART健康状态，温度等:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="n">smart</span><span class="o">-</span><span class="n">log</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">nvme smart-log 输出</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>Smart Log <span class="k">for</span> NVME device:nvme0n1 namespace-id:ffffffff
+<span class="linenos"> 2</span>critical_warning                    : <span class="m">0</span>
+<span class="linenos"> 3</span>temperature                         : <span class="m">36</span> C
+<span class="linenos"> 4</span>available_spare                     : <span class="m">100</span>%
+<span class="linenos"> 5</span>available_spare_threshold           : <span class="m">10</span>%
+<span class="linenos"> 6</span>percentage_used                     : <span class="m">0</span>%
+<span class="linenos"> 7</span>data_units_read                     : <span class="m">58</span>
+<span class="linenos"> 8</span>data_units_written                  : <span class="m">0</span>
+<span class="linenos"> 9</span>host_read_commands                  : <span class="m">1</span>,299
+<span class="linenos">10</span>host_write_commands                 : <span class="m">0</span>
+<span class="linenos">11</span>controller_busy_time                : <span class="m">0</span>
+<span class="linenos">12</span>power_cycles                        : <span class="m">13</span>
+<span class="linenos">13</span>power_on_hours                      : <span class="m">149</span>
+<span class="linenos">14</span>unsafe_shutdowns                    : <span class="m">10</span>
+<span class="linenos">15</span>media_errors                        : <span class="m">0</span>
+<span class="linenos">16</span>num_err_log_entries                 : <span class="m">0</span>
+<span class="linenos">17</span>Warning Temperature Time            : <span class="m">0</span>
+<span class="linenos">18</span>Critical Composite Temperature Time : <span class="m">0</span>
+<span class="linenos">19</span>Temperature Sensor <span class="m">1</span>                : <span class="m">36</span> C
+<span class="linenos">20</span>Temperature Sensor <span class="m">2</span>                : <span class="m">39</span> C
+<span class="linenos">21</span>Thermal Management T1 Trans Count   : <span class="m">0</span>
+<span class="linenos">22</span>Thermal Management T2 Trans Count   : <span class="m">0</span>
+<span class="linenos">23</span>Thermal Management T1 Total Time    : <span class="m">0</span>
+<span class="linenos">24</span>Thermal Management T2 Total Time    : <span class="m">0</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>检查firmware 日志页面:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="n">fw</span><span class="o">-</span><span class="n">log</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">nvme fw-log 输出</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>Firmware Log <span class="k">for</span> device:nvme0n1
+<span class="linenos">2</span>afi  : 0x1
+<span class="linenos">3</span>frs1 : 0x5131303437415847 <span class="o">(</span>GXA7401Q<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>输出NVMe错误日志页面:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="n">error</span><span class="o">-</span><span class="n">log</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出部分案例:</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">nvme error-log 输出</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>Error Log Entries <span class="k">for</span> device:nvme0n1 entries:64
+<span class="linenos"> 2</span>.................
+<span class="linenos"> 3</span> Entry<span class="o">[</span> <span class="m">0</span><span class="o">]</span>   
+<span class="linenos"> 4</span>.................
+<span class="linenos"> 5</span>error_count  : <span class="m">0</span>
+<span class="linenos"> 6</span>sqid         : <span class="m">0</span>
+<span class="linenos"> 7</span>cmdid        : <span class="m">0</span>
+<span class="linenos"> 8</span>status_field : <span class="m">0</span><span class="o">(</span>SUCCESS: The <span class="nb">command</span> completed successfully<span class="o">)</span>
+<span class="linenos"> 9</span>parm_err_loc : <span class="m">0</span>
+<span class="linenos">10</span>lba          : <span class="m">0</span>
+<span class="linenos">11</span>nsid         : <span class="m">0</span>
+<span class="linenos">12</span>vs           : <span class="m">0</span>
+<span class="linenos">13</span>cs           : <span class="m">0</span>
+<span class="linenos">14</span>.................
+<span class="linenos">15</span> Entry<span class="o">[</span> <span class="m">1</span><span class="o">]</span>   
+<span class="linenos">16</span>.................
+<span class="linenos">17</span>error_count  : <span class="m">0</span>
+<span class="linenos">18</span>sqid         : <span class="m">0</span>
+<span class="linenos">19</span>cmdid        : <span class="m">0</span>
+<span class="linenos">20</span>status_field : <span class="m">0</span><span class="o">(</span>SUCCESS: The <span class="nb">command</span> completed successfully<span class="o">)</span>
+<span class="linenos">21</span>parm_err_loc : <span class="m">0</span>
+<span class="linenos">22</span>lba          : <span class="m">0</span>
+<span class="linenos">23</span>nsid         : <span class="m">0</span>
+<span class="linenos">24</span>vs           : <span class="m">0</span>
+<span class="linenos">25</span>cs           : <span class="m">0</span>
+<span class="linenos">26</span>...
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>(警告：我没有使用过)重置NVMe controller / NVMe SSD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="n">reset</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="nvme-namespace">
+<h2>NVMe Namespace解析<a class="headerlink" href="#nvme-namespace" title="永久链接至标题">¶</a></h2>
+<p>NVMe的namespace就是NVMe技术中用于存储用户数据的结构。一个NVMe可以具有多个namespace。不过大多数情况下，现在NVMe只使用一个namespace。但是，如果是多租户(multi-tenant)应用程序，虚拟化以及安全要求等业务场景，需要使用多名字空间(multiple namespaces)。</p>
+<p>所谓namespace就是一组逻辑块，这些逻辑块地址范围从0到这个namespace的size; 名字空间ID (namespace ID, NSID)是控制器用来访问该名字空间的标识。</p>
+<p>你会发现namespace的size和namespace的utilization(使用)对于生成LBA使用的比例非常有用。在标识namespace的命令输出的有用数据中能够用来优化主机软件的性能、数据一致性，TRIM(回收),LBA大小(例如512B,4kB)等等</p>
+<ul>
+<li><p>检查NVMe的namesapce:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="nb">id</span><span class="o">-</span><span class="n">ns</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">nvme id-ns 输出</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>NVME Identify Namespace <span class="m">1</span>:
+<span class="linenos"> 2</span>nsze    : 0x773bd2b0
+<span class="linenos"> 3</span>ncap    : 0x773bd2b0
+<span class="linenos"> 4</span>nuse    : <span class="m">0</span>
+<span class="linenos"> 5</span>nsfeat  : <span class="m">0</span>
+<span class="linenos"> 6</span>nlbaf   : <span class="m">0</span>
+<span class="linenos"> 7</span>flbas   : <span class="m">0</span>
+<span class="linenos"> 8</span>mc      : <span class="m">0</span>
+<span class="linenos"> 9</span>dpc     : <span class="m">0</span>
+<span class="linenos">10</span>dps     : <span class="m">0</span>
+<span class="linenos">11</span>nmic    : <span class="m">0</span>
+<span class="linenos">12</span>rescap  : <span class="m">0</span>
+<span class="linenos">13</span>fpi     : 0x80
+<span class="linenos">14</span>dlfeat  : <span class="m">1</span>
+<span class="linenos">15</span>nawun   : <span class="m">0</span>
+<span class="linenos">16</span>nawupf  : <span class="m">0</span>
+<span class="linenos">17</span>nacwu   : <span class="m">0</span>
+<span class="linenos">18</span>nabsn   : <span class="m">0</span>
+<span class="linenos">19</span>nabo    : <span class="m">0</span>
+<span class="linenos">20</span>nabspf  : <span class="m">0</span>
+<span class="linenos">21</span>noiob   : <span class="m">0</span>
+<span class="linenos">22</span>nvmcap  : <span class="m">1024209543168</span>
+<span class="linenos">23</span>nsattr  : <span class="m">0</span>
+<span class="linenos">24</span>nvmsetid: <span class="m">0</span>
+<span class="linenos">25</span>anagrpid: <span class="m">0</span>
+<span class="linenos">26</span>endgid  : <span class="m">1</span>
+<span class="linenos">27</span>nguid   : <span class="m">00000000000000000000000000000000</span>
+<span class="linenos">28</span>eui64   : 002538b911b37f97
+<span class="linenos">29</span>lbaf  <span class="m">0</span> : ms:0   lbads:9  rp:0 <span class="o">(</span><span class="k">in</span> use<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="firmware">
+<h2>更新firmware<a class="headerlink" href="#firmware" title="永久链接至标题">¶</a></h2>
+<p>SSD厂商通常会在SSD的生产周期内多次发布firmware更新，不过一个SSD的5年生命期发布4~5次更新则很少见。firmware更新可以提供安全补丁，bug修复以及可靠性提高。OEM通常使用自己的管理工具来更新，比且会加密签名firmware以确保匹配其OEM产品，不过NVMe SSD可以从渠道分销获得通用firmware进行更新。请联系SSD供应商获取最新firmware。</p>
+<p>请参考 NVMe 1.4 规范的 <code class="docutils literal notranslate"><span class="pre">Firmware</span> <span class="pre">Update</span> <span class="pre">Process</span></code> 部分，可以详细了解在哪里需要reset，firmware slot的概念(一些NVMe SSD有多个firmware副本存储在设备上，可以通过激活指定副本来运行，这样出现问题可以回退)</p>
+<ul>
+<li><p>查看当前firmware版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="nb">id</span><span class="o">-</span><span class="n">ctrl</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0</span> <span class="o">|</span> <span class="n">grep</span> <span class="s2">&quot;fr &quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到firmware版本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fr</span>        <span class="p">:</span> <span class="n">GXA7401Q</span>
+</pre></div>
+</div>
+<ul>
+<li><p>下载firmware到目标设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nvme</span> <span class="n">fw</span><span class="o">-</span><span class="n">download</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0</span> <span class="o">-</span>
+<span class="n">nvme</span> <span class="n">fw</span><span class="o">-</span><span class="n">commit</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0</span> <span class="o">-</span><span class="n">a</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">-a</span></code> 参数:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> 表示将镜像替换掉 <code class="docutils literal notranslate"><span class="pre">Firmware</span> <span class="pre">slot</span></code> 字段指定的镜像，这个镜像没有激活</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> 将镜像替换掉 <code class="docutils literal notranslate"><span class="pre">Firmware</span> <span class="pre">slot</span></code> 字段指定的镜像，这个镜像在下次reset时激活</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> 通过 <code class="docutils literal notranslate"><span class="pre">Firmware</span> <span class="pre">slot</span></code> 字段制定的镜像在下次reset时激活</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code> 立即激活 <code class="docutils literal notranslate"><span class="pre">Firmware</span> <span class="pre">slot</span></code> 字段指定的镜像，无需reset</p></li>
+</ul>
+</div></blockquote>
+<ul>
+<li><p>完成firmware下载之后，需要reset设备(如果这个设备不支持无需reset设备就激活镜像):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nvme</span> <span class="n">reset</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>实际上firmware升级需要非常谨慎，我还没有机会实践，以上仅是一些资料整理，后续有机会再实践</p>
+</div>
+</section>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/linux-nvme/nvme-cli">NVMe management command line interface</a></p></li>
+<li><p><a class="reference external" href="https://nvmexpress.org/open-source-nvme-management-utility-nvme-command-line-interface-nvme-cli/">Open Source NVMe™ Management Utility – NVMe Command Line Interface (NVMe-CLI)</a></p></li>
 </ul>
 </section>
 </section>
@@ -173,8 +585,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Linux NVMe" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../filesystem/index.html" class="btn btn-neutral float-right" title="Linux文件系统" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="samsung_pm9a1.html" class="btn btn-neutral float-left" title="三星PM9A1 NVMe存储" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="nvme_ssd_management.html" class="btn btn-neutral float-right" title="SSD故障分析-NVMe SSD管理" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
