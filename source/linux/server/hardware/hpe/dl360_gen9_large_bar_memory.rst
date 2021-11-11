@@ -9,7 +9,7 @@ GPU卡请求内存映射I/O超过限制
 
 当我第一次在 :ref:`hpe_dl360_gen9` 上安装 :ref:`tesla_p10` ，启动时候BIOS自检会提示错误:
 
-.. figure:: ../../_static/kvm/iommu/gpu_mem_map_err.png
+.. figure:: ../../../../_static/linux/server/hardware/hpe/gpu_mem_map_err.png
    :scale: 85
 
 ::
@@ -72,12 +72,12 @@ HP DL360 Gen9 BIOS设置
 - 启动服务器，在BIOS提示时，按下 ``F9`` 进入 ``ROM-Based Setup Utility (RBSU)``
 - 在RBSU中，按下 ``Ctrl + A`` ，此时会进入一个 ``Service Options`` -- WOW，打开了一个新世界，原来很多选项都在这里
 
-.. figure:: ../../_static/kvm/iommu/rbsu_service_options.png
+.. figure:: ../../../../_static/linux/server/hardware/hpe/rbsu_service_options.png
    :scale: 85
 
 - 在 ``Service Options`` 中，通过上下键移动菜单高亮，选择 ``PCI Express 64-Bit BAR Support`` ，默认这个选项是 ``Disabled`` ，按下回车键进入修改选项，将这个参数修改成 ``Enabled``
 
-.. figure:: ../../_static/kvm/iommu/rbsu_enable_large_bar.png
+.. figure:: ../../../../_static/linux/server/hardware/hpe/rbsu_enable_large_bar.png
    :scale: 85
 
 - 退出保存，然后重启服务器，此时 ``Large BAR`` 就已经激活
