@@ -16,7 +16,7 @@ NAND flash cell按照每个cell的bit数量划分为:
 - Triple-Level Cell (TLC) : 每个cell存储3个bit
 - Quad-Level Cell (QLC) : 每个cell存储4个bit
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/nand_cell_bits.jpg
+.. figure:: ../../../_static/linux/storage/nvme/nand_cell_bits.jpg
    :scale: 70
 
 
@@ -38,7 +38,7 @@ QLC可以在一个cell中存储4倍于SLC的数据，所以容量可以做到更
 
 在购买之前，请关注耐久性，也就是TBW，或者Maximum Terabytes Written(即可写多少太字节)
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/nand_compare.png
+.. figure:: ../../../_static/linux/storage/nvme/nand_compare.png
    :scale: 70
 
 `TLC vs. QLC SSDs: What are the differences? <https://blog.synology.com/tlc-vs-qlc-ssds-what-are-the-differences>`_ 提供了性能评测，可以看到规律：
@@ -49,7 +49,7 @@ QLC可以在一个cell中存储4倍于SLC的数据，所以容量可以做到更
 
 总之，如果要购买TLC的NVMe，建议购买企业级TLC，可以获得较为平衡的性能；实在经费紧张，也要购买消费级TLC 而不要购买消费级 QLC
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/taobao_emlc.jpg
+.. figure:: ../../../_static/linux/storage/nvme/taobao_emlc.jpg
 
 SATA vs NVMe (m.2接口)
 =========================
@@ -61,7 +61,7 @@ SATA依赖Advanced Host Controller Interface(AHCI)，在单个队列中只能处
 
 M.2 接口是一种较新的接口类型。注意M.2 接口也有SATA SSD 和 NVMe SSD区分。
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/m.2_sata_nvme.jpg
+.. figure:: ../../../_static/linux/storage/nvme/m.2_sata_nvme.jpg
 
 3D NAND和VNAND
 =================
@@ -75,14 +75,10 @@ M.2 接口是一种较新的接口类型。注意M.2 接口也有SATA SSD 和 NV
 - 对于性能要求不高且需要节约费用的大容量存储，则可以采用TLC（例如游戏盘，需要存储大量的游戏数据但是不会反复重写)
 - 普通应用程序运行，可以采用平衡各方面较完善的 3D TLC
 
-.. note::
-
-   以下选购分类摘自
-
 高端NVMe
 ---------------
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/compare_nvme.jpg
+.. figure:: ../../../_static/linux/storage/nvme/compare_nvme.jpg
 
 推荐 ``三星970 EVO Plus`` 读取和写入纷纷超过3000MB/s，1TB版本拥有42G SLC缓存，缓外速度也是维持在1500MB/s，性能无可挑剔。
 
@@ -93,7 +89,7 @@ M.2 接口是一种较新的接口类型。注意M.2 接口也有SATA SSD 和 NV
 中端NVMe
 ----------------
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/compare_nvme-1.jpg
+.. figure:: ../../../_static/linux/storage/nvme/compare_nvme-1.jpg
 
 推荐 ``西部数据的SN550（500G容量以上版本）`` 价格适中，虽然采用了无DRAM的方案，但是由于出色的缓外速度和SLC缓存，并未对SSD的性能造成比较大的影响。
 
@@ -114,7 +110,7 @@ PCIe 3.0 写入速度 2900MB/s，读取速度3500MB/s，当前售价 479 元
 
 PCIe 3.0 写入速度 3000MB/s, 读取速度3500MB/s，当前售价 775/819 元
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/samsung_pm981a.jpg
+.. figure:: ../../../_static/linux/storage/nvme/samsung_pm981a.jpg
 
 .. note::
 
@@ -133,7 +129,7 @@ PCIe 3.0 写入速度 3000MB/s, 读取速度3500MB/s，当前售价 775/819 元
 
 - 三星 PM9A1 (PCIe 4.0x4) - 性能极佳，价格和 PM981a 相差不大，可惜我的DL360没有这么高速的PCIe 4.0x4
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/samsung_pm9a1.png
+.. figure:: ../../../_static/linux/storage/nvme/samsung_pm9a1.png
 
 .. note::
 
@@ -158,7 +154,7 @@ PCIe 3.0 写入速度 3000MB/s, 读取速度3500MB/s，当前售价 775/819 元
 
 plus版本是最新款，两者在性能上有些差距，价格相差不到100元，三星渠道货，可以享受官方售后质保
 
-.. figure:: ../../../../_static/linux/server/hardware/storage/samsung_970_evo.png
+.. figure:: ../../../_static/linux/storage/nvme/samsung_970_evo.png
 
 - 三星970 PRO 512G(太贵了)
 

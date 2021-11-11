@@ -7,7 +7,10 @@ Linux NVMe
 .. toctree::
    :maxdepth: 1
 
+   nvme.rst
+   samsung_pm9a1.rst
    nvme-cli.rst
+   nvme_ssd_management.rst
    nvme_passthru.rst
 
 .. only::  subproject and html
