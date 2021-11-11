@@ -15,10 +15,11 @@ HPE服务器
    dl360_config_mem.rst
    pcie_bifurcation.rst
    dl360_tesla_p10.rst
+   dl360_gen9_large_bar_memory.rst
    dl360_bios_numa.rst
    hp_utilities_ubuntu.rst
    hp_ilo/index
-   
+
 .. only::  subproject and html
 
    Indices

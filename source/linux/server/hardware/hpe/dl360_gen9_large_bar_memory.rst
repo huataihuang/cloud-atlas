@@ -1,8 +1,8 @@
-.. _enable_gpu_iommu:
+.. _dl360_gen9_large_bar_memory:
 
-======================================
-激活GPU Passthrough模式(Tesla P10)
-======================================
+=============================================
+HP DL360 Gen9 Large Bar Memory(Tesla P10)
+=============================================
 
 GPU卡请求内存映射I/O超过限制
 ===============================
@@ -60,9 +60,9 @@ HP DL360 Gen9 BIOS设置
 
 虽然VMware文档提示::
 
-   Your host BIOS must be configured to support the large memory regions needed by these high-end PCI devices. 
-   To enable this, find the host BIOS setting for “above 4G decoding” or “memory mapped I/O above 4GB” or “PCI 64 bit resource handing above 4G” and enable it. 
-   The exact wording of this option varies by system vendor, though the option is often found in the PCI section of the BIOS menu. 
+   Your host BIOS must be configured to support the large memory regions needed by these high-end PCI devices.
+   To enable this, find the host BIOS setting for “above 4G decoding” or “memory mapped I/O above 4GB” or “PCI 64 bit resource handing above 4G” and enable it.
+   The exact wording of this option varies by system vendor, though the option is often found in the PCI section of the BIOS menu.
    Consult your system provider if necessary to enable this option.
 
 但是我反复查看BIOS配置，都没有找到 PCI 配置部分
@@ -77,7 +77,7 @@ HP DL360 Gen9 BIOS设置
 
 - 在 ``Service Options`` 中，通过上下键移动菜单高亮，选择 ``PCI Express 64-Bit BAR Support`` ，默认这个选项是 ``Disabled`` ，按下回车键进入修改选项，将这个参数修改成 ``Enabled``
 
-.. figure:: ../../_static/kvm/iommu/rbsu_service_options.png
+.. figure:: ../../_static/kvm/iommu/rbsu_enable_large_bar.png
    :scale: 85
 
 - 退出保存，然后重启服务器，此时 ``Large BAR`` 就已经激活
@@ -92,7 +92,7 @@ HP DL360 Gen9 BIOS设置
 
 可以看到新增加的NVIDIA设备:
 
-.. literalinclude:: enable_gpu_iommu/lspci_tesla_p10.txt
+.. literalinclude:: dl360_gen9_large_bar_memory/lspci_tesla_p10.txt
    :language: bash
    :linenos:
    :caption:
