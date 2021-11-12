@@ -16,6 +16,7 @@ DevOps 文档
    sphinx_doc/index
    hugo/index
    kindle/index
+   pandoc.rst
 
 .. only::  subproject and html
 

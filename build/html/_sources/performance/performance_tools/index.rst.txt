@@ -8,6 +8,9 @@
    :maxdepth: 1
 
    sysbench.rst
+   unixbench.rst
+   hdparm.rst
+   fio/index
 
 .. only::  subproject and html
 

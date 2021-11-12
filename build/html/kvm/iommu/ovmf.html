@@ -59,17 +59,20 @@
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">IOMMU</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="iommu_infra.html">IOMMU架构</a></li>
-<li class="toctree-l3"><a class="reference internal" href="enable_gpu_iommu.html">激活GPU Passthrough模式(Tesla P10)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="intel_vt-d_startup.html">Intel VT-d快速起步</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Open Virtual Machine Firmware(OMVF)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">准备工作</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iommu">设置IOMMU</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpu">隔离GPU</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual.html">KVM嵌套虚拟化</a></li>
@@ -162,7 +165,266 @@
 <p>Open Virtual Machine Firmware(OMVF)是在虚拟机内部激活UEFI支持的开源项目，从Linux 3.9和最新QEMU开始，可以将图形卡直通给虚拟机，提供VM原生图形性能，对图形性能敏感对任务非常有用。</p>
 <section id="id1">
 <h2>准备工作<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<p>显示直通(VGA passthrough)依赖很多比较少见的技术，并且有可能需要你的硬件支持才能实现。要完成直通，</p>
+<p>显示直通(VGA passthrough)依赖很多比较少见的技术，并且有可能需要你的硬件支持才能实现。要完成直通，需要以下条件：</p>
+<ul class="simple">
+<li><p>CPU支持硬件虚拟化(kvm)和IOMMU(用于passthrough自身，即把cpu完整透传给虚拟机)</p>
+<ul>
+<li><p>兼容 <a class="reference external" href="https://ark.intel.com/content/www/us/en/ark/search/featurefilter.html?productType=873&amp;0_VTD=True">Intel VT-d技术的CPU列表</a></p></li>
+<li><p>所有从Bulldozer代开始的AMD处理器(包括zen)都兼容</p></li>
+</ul>
+</li>
+<li><p>主板支持IOMMU</p>
+<ul>
+<li><p>需要主板芯片和BIOS都支持IOMMU: 可以参考 <a class="reference external" href="https://en.wikipedia.org/wiki/List_of_IOMMU-supporting_hardware">Wikipedia:List of IOMMU-supporting hardware</a></p></li>
+</ul>
+</li>
+<li><p>Guest虚拟机GPU ROM必须支持 <code class="docutils literal notranslate"><span class="pre">UEFI</span></code></p>
+<ul>
+<li><p>可以从 <a class="reference external" href="https://www.techpowerup.com/vgabios/">techpowerup Video BIOS Collection</a> 查询特定GPU是否支持UEFI。不过，从2012年开始所有GPU应该都支持UEFI，因为微软将UEFI作为兼容Windows 8的必要条件。</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>你需要有其他通道来观察系统，例如其他显卡或者带外管理，因为passthrough GPU会导致该GPU在物理主机上不可使用。</p>
+</div>
+</section>
+<section id="iommu">
+<h2>设置IOMMU<a class="headerlink" href="#iommu" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<ul class="simple">
+<li><p>IOMMU是Intel VT-d 和 AMD-Vi 的通用名称</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VT-d</span></code> 是Intel Virtualization Technology for Directed I/O ，所以不要和 <code class="docutils literal notranslate"><span class="pre">VT-x</span></code> Intel Virtualization Technology混淆。 <code class="docutils literal notranslate"><span class="pre">VT-x</span></code> 允许一个硬件平台功能表现为多个虚拟化平台，而 <code class="docutils literal notranslate"><span class="pre">VT-d</span></code> 则是为了提高安全和系统可靠性并且提升虚拟化环境的I/O设备性能。</p></li>
+</ul>
+</div>
+<p>使用 IOMMU 可以开启新功能，例如 PCI passthrough 和 内存保护。请参考 <a class="reference external" href="https://en.wikipedia.org/wiki/Input-output_memory_management_unit#Advantages">Wikipedia:Input-output memory management unit#Advantages</a> 和 <a class="reference external" href="https://www.quora.com/Memory-Management-computer-programming/Could-you-explain-IOMMU-in-plain-English">Memory Management (computer programming): Could you explain IOMMU in plain English?</a></p>
+<section id="id2">
+<h3>激活IOMMU<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<p>AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常在BIOS中配置CPU功能部分可找到对应 <code class="docutils literal notranslate"><span class="pre">Virtualization</span> <span class="pre">technology</span></code> 之类配置。</p>
+<p>在BIOS激活了 “VT-d” or “AMD-Vi” 之后，需要在内核参数中，根据CPU厂商不同配置内核参数:</p>
+<ul class="simple">
+<li><p>Intel CPU( <code class="docutils literal notranslate"><span class="pre">VT-d</span></code> )配置 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code></p></li>
+<li><p>AMD CPU( <code class="docutils literal notranslate"><span class="pre">AMD-Vi</span></code> )通常内核检测到BIOS支持  <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">HW</span></code> 就会激活，为确定激活可配置 <code class="docutils literal notranslate"><span class="pre">iommu=pt</span> <span class="pre">iommu=1</span></code></p></li>
+</ul>
+<p>重启主机，然后检查 <code class="docutils literal notranslate"><span class="pre">dmesg</span></code> 确保IOMMU正确设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dmesg</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">e</span> <span class="n">DMAR</span> <span class="o">-</span><span class="n">e</span> <span class="n">IOMMU</span>
+</pre></div>
+</div>
+<p>输出类似:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">ovmf/dmesg_dmar_iommu.txt</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="o">[</span>    <span class="m">0</span>.000000<span class="o">]</span> Command line: <span class="nv">BOOT_IMAGE</span><span class="o">=</span>/boot/vmlinuz-5.4.0-90-generic <span class="nv">root</span><span class="o">=</span><span class="nv">UUID</span><span class="o">=</span>caa4193b-9222-49fe-a4b3-89f1cb417e6a ro <span class="nv">intel_iommu</span><span class="o">=</span>on
+<span class="linenos"> 2</span><span class="o">[</span>    <span class="m">0</span>.009994<span class="o">]</span> ACPI: DMAR 0x000000007B7E7000 <span class="m">000294</span> <span class="o">(</span>v01 HP     ProLiant <span class="m">00000001</span> HP   <span class="m">00000001</span><span class="o">)</span>
+<span class="linenos"> 3</span><span class="o">[</span>    <span class="m">0</span>.010030<span class="o">]</span> ACPI: Reserving DMAR table memory at <span class="o">[</span>mem 0x7b7e7000-0x7b7e7293<span class="o">]</span>
+<span class="linenos"> 4</span><span class="o">[</span>    <span class="m">0</span>.252650<span class="o">]</span> Kernel <span class="nb">command</span> line: <span class="nv">BOOT_IMAGE</span><span class="o">=</span>/boot/vmlinuz-5.4.0-90-generic <span class="nv">root</span><span class="o">=</span><span class="nv">UUID</span><span class="o">=</span>caa4193b-9222-49fe-a4b3-89f1cb417e6a ro <span class="nv">intel_iommu</span><span class="o">=</span>on
+<span class="linenos"> 5</span><span class="o">[</span>    <span class="m">0</span>.252714<span class="o">]</span> DMAR: IOMMU enabled
+<span class="linenos"> 6</span><span class="o">[</span>    <span class="m">0</span>.508460<span class="o">]</span> DMAR: Host address width <span class="m">46</span>
+<span class="linenos"> 7</span><span class="o">[</span>    <span class="m">0</span>.508462<span class="o">]</span> DMAR: DRHD base: 0x000000fbffc000 flags: 0x0
+<span class="linenos"> 8</span><span class="o">[</span>    <span class="m">0</span>.508469<span class="o">]</span> DMAR: dmar0: reg_base_addr fbffc000 ver <span class="m">1</span>:0 cap d2078c106f0466 ecap f020df
+<span class="linenos"> 9</span><span class="o">[</span>    <span class="m">0</span>.508471<span class="o">]</span> DMAR: DRHD base: 0x000000c7ffc000 flags: 0x1
+<span class="linenos">10</span><span class="o">[</span>    <span class="m">0</span>.508476<span class="o">]</span> DMAR: dmar1: reg_base_addr c7ffc000 ver <span class="m">1</span>:0 cap d2078c106f0466 ecap f020df
+<span class="linenos">11</span><span class="o">[</span>    <span class="m">0</span>.508478<span class="o">]</span> DMAR: RMRR base: 0x00000079174000 end: 0x00000079176fff
+<span class="linenos">12</span><span class="o">[</span>    <span class="m">0</span>.508481<span class="o">]</span> DMAR: RMRR base: 0x000000791f4000 end: 0x000000791f7fff
+<span class="linenos">13</span><span class="o">[</span>    <span class="m">0</span>.508483<span class="o">]</span> DMAR: RMRR base: 0x000000791de000 end: 0x000000791f3fff
+<span class="linenos">14</span><span class="o">[</span>    <span class="m">0</span>.508485<span class="o">]</span> DMAR: RMRR base: 0x000000791cb000 end: 0x000000791dbfff
+<span class="linenos">15</span><span class="o">[</span>    <span class="m">0</span>.508486<span class="o">]</span> DMAR: RMRR base: 0x000000791dc000 end: 0x000000791ddfff
+<span class="linenos">16</span><span class="o">[</span>    <span class="m">0</span>.508490<span class="o">]</span> DMAR-IR: IOAPIC id <span class="m">10</span> under DRHD base  0xfbffc000 IOMMU <span class="m">0</span>
+<span class="linenos">17</span><span class="o">[</span>    <span class="m">0</span>.508492<span class="o">]</span> DMAR-IR: IOAPIC id <span class="m">8</span> under DRHD base  0xc7ffc000 IOMMU <span class="m">1</span>
+<span class="linenos">18</span><span class="o">[</span>    <span class="m">0</span>.508494<span class="o">]</span> DMAR-IR: IOAPIC id <span class="m">9</span> under DRHD base  0xc7ffc000 IOMMU <span class="m">1</span>
+<span class="linenos">19</span><span class="o">[</span>    <span class="m">0</span>.508496<span class="o">]</span> DMAR-IR: HPET id <span class="m">0</span> under DRHD base 0xc7ffc000
+<span class="linenos">20</span><span class="o">[</span>    <span class="m">0</span>.508498<span class="o">]</span> DMAR-IR: Queued invalidation will be enabled to support x2apic and Intr-remapping.
+<span class="linenos">21</span><span class="o">[</span>    <span class="m">0</span>.509028<span class="o">]</span> DMAR-IR: Enabled IRQ remapping <span class="k">in</span> x2apic mode
+<span class="linenos">22</span><span class="o">[</span>    <span class="m">0</span>.815054<span class="o">]</span> iommu: Default domain type: Translated
+<span class="linenos">23</span><span class="o">[</span>    <span class="m">1</span>.068333<span class="o">]</span> DMAR: No ATSR found
+<span class="linenos">24</span><span class="o">[</span>    <span class="m">1</span>.068769<span class="o">]</span> DMAR: dmar0: Using Queued invalidation
+<span class="linenos">25</span><span class="o">[</span>    <span class="m">1</span>.068775<span class="o">]</span> DMAR: dmar1: Using Queued invalidation
+<span class="linenos">26</span><span class="o">[</span>    <span class="m">1</span>.069672<span class="o">]</span> pci <span class="m">0000</span>:00:00.0: Adding to iommu group <span class="m">0</span>
+<span class="linenos">27</span><span class="o">[</span>    <span class="m">1</span>.070272<span class="o">]</span> pci <span class="m">0000</span>:00:01.0: Adding to iommu group <span class="m">1</span>
+<span class="linenos">28</span><span class="o">[</span>    <span class="m">1</span>.070667<span class="o">]</span> pci <span class="m">0000</span>:00:01.1: Adding to iommu group <span class="m">2</span>
+<span class="linenos">29</span>...
+<span class="linenos">30</span><span class="o">[</span>    <span class="m">1</span>.125619<span class="o">]</span> pci <span class="m">0000</span>:ff:1e.3: Adding to iommu group <span class="m">92</span>
+<span class="linenos">31</span><span class="o">[</span>    <span class="m">1</span>.125691<span class="o">]</span> pci <span class="m">0000</span>:ff:1e.4: Adding to iommu group <span class="m">92</span>
+<span class="linenos">32</span><span class="o">[</span>    <span class="m">1</span>.126288<span class="o">]</span> pci <span class="m">0000</span>:ff:1f.0: Adding to iommu group <span class="m">93</span>
+<span class="linenos">33</span><span class="o">[</span>    <span class="m">1</span>.126363<span class="o">]</span> pci <span class="m">0000</span>:ff:1f.2: Adding to iommu group <span class="m">93</span>
+<span class="linenos">34</span><span class="o">[</span>    <span class="m">1</span>.126369<span class="o">]</span> DMAR: Intel<span class="o">(</span>R<span class="o">)</span> Virtualization Technology <span class="k">for</span> Directed I/O
+</pre></div>
+</div>
+</div>
+</section>
+<section id="groups">
+<h3>检查groups是否正确<a class="headerlink" href="#groups" title="永久链接至标题">¶</a></h3>
+<p>以下脚本 <code class="docutils literal notranslate"><span class="pre">check_iommu.sh</span></code> 脚本可以查看系统中不同的PCI设备被映射到IOMMU组，如果没有返回任何信息，则表明系统没有激活IOMMU支持或者硬件不支持IOMMU</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">intel_vt-d_startup/check_iommu.sh</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="ch">#!/bin/bash</span>
+<span class="linenos">2</span><span class="nb">shopt</span> -s nullglob
+<span class="linenos">3</span><span class="k">for</span> g <span class="k">in</span> <span class="sb">`</span>find /sys/kernel/iommu_groups/* -maxdepth <span class="m">0</span> -type d <span class="p">|</span> sort -V<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
+<span class="linenos">4</span>    <span class="nb">echo</span> <span class="s2">&quot;IOMMU Group </span><span class="si">${</span><span class="nv">g</span><span class="p">##*/</span><span class="si">}</span><span class="s2">:&quot;</span>
+<span class="linenos">5</span>    <span class="k">for</span> d <span class="k">in</span> <span class="nv">$g</span>/devices/*<span class="p">;</span> <span class="k">do</span>
+<span class="linenos">6</span>        <span class="nb">echo</span> -e <span class="s2">&quot;\t</span><span class="k">$(</span>lspci -nns <span class="si">${</span><span class="nv">d</span><span class="p">##*/</span><span class="si">}</span><span class="k">)</span><span class="s2">&quot;</span>
+<span class="linenos">7</span>    <span class="k">done</span><span class="p">;</span>
+<span class="linenos">8</span><span class="k">done</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<p>执行输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="mi">00</span><span class="p">:</span><span class="mi">1</span><span class="n">f</span><span class="mf">.0</span> <span class="n">ISA</span> <span class="n">bridge</span> <span class="p">[</span><span class="mi">0601</span><span class="p">]:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">C610</span><span class="o">/</span><span class="n">X99</span> <span class="n">series</span> <span class="n">chipset</span> <span class="n">LPC</span> <span class="n">Controller</span> <span class="p">[</span><span class="mi">8086</span><span class="p">:</span><span class="mi">8</span><span class="n">d44</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">05</span><span class="p">)</span>
+        <span class="mi">00</span><span class="p">:</span><span class="mi">1</span><span class="n">f</span><span class="mf">.2</span> <span class="n">SATA</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0106</span><span class="p">]:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">C610</span><span class="o">/</span><span class="n">X99</span> <span class="n">series</span> <span class="n">chipset</span> <span class="mi">6</span><span class="o">-</span><span class="n">Port</span> <span class="n">SATA</span> <span class="n">Controller</span> <span class="p">[</span><span class="n">AHCI</span> <span class="n">mode</span><span class="p">]</span> <span class="p">[</span><span class="mi">8086</span><span class="p">:</span><span class="mi">8</span><span class="n">d02</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">05</span><span class="p">)</span>
+        <span class="mi">00</span><span class="p">:</span><span class="mi">1</span><span class="n">f</span><span class="mf">.3</span> <span class="n">SMBus</span> <span class="p">[</span><span class="mi">0</span><span class="n">c05</span><span class="p">]:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">C610</span><span class="o">/</span><span class="n">X99</span> <span class="n">series</span> <span class="n">chipset</span> <span class="n">SMBus</span> <span class="n">Controller</span> <span class="p">[</span><span class="mi">8086</span><span class="p">:</span><span class="mi">8</span><span class="n">d22</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">05</span><span class="p">)</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">33</span><span class="p">:</span>
+        <span class="mi">01</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">System</span> <span class="n">peripheral</span> <span class="p">[</span><span class="mi">0880</span><span class="p">]:</span> <span class="n">Hewlett</span><span class="o">-</span><span class="n">Packard</span> <span class="n">Company</span> <span class="n">Integrated</span> <span class="n">Lights</span><span class="o">-</span><span class="n">Out</span> <span class="n">Standard</span> <span class="n">Slave</span> <span class="n">Instrumentation</span> <span class="o">&amp;</span> <span class="n">System</span> <span class="n">Support</span> <span class="p">[</span><span class="mi">103</span><span class="n">c</span><span class="p">:</span><span class="mi">3306</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">06</span><span class="p">)</span>
+        <span class="mi">01</span><span class="p">:</span><span class="mf">00.1</span> <span class="n">VGA</span> <span class="n">compatible</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0300</span><span class="p">]:</span> <span class="n">Matrox</span> <span class="n">Electronics</span> <span class="n">Systems</span> <span class="n">Ltd</span><span class="o">.</span> <span class="n">MGA</span> <span class="n">G200EH</span> <span class="p">[</span><span class="mi">102</span><span class="n">b</span><span class="p">:</span><span class="mi">0533</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+        <span class="mi">01</span><span class="p">:</span><span class="mf">00.2</span> <span class="n">System</span> <span class="n">peripheral</span> <span class="p">[</span><span class="mi">0880</span><span class="p">]:</span> <span class="n">Hewlett</span><span class="o">-</span><span class="n">Packard</span> <span class="n">Company</span> <span class="n">Integrated</span> <span class="n">Lights</span><span class="o">-</span><span class="n">Out</span> <span class="n">Standard</span> <span class="n">Management</span> <span class="n">Processor</span> <span class="n">Support</span> <span class="ow">and</span> <span class="n">Messaging</span> <span class="p">[</span><span class="mi">103</span><span class="n">c</span><span class="p">:</span><span class="mi">3307</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">06</span><span class="p">)</span>
+        <span class="mi">01</span><span class="p">:</span><span class="mf">00.4</span> <span class="n">USB</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0</span><span class="n">c03</span><span class="p">]:</span> <span class="n">Hewlett</span><span class="o">-</span><span class="n">Packard</span> <span class="n">Company</span> <span class="n">Integrated</span> <span class="n">Lights</span><span class="o">-</span><span class="n">Out</span> <span class="n">Standard</span> <span class="n">Virtual</span> <span class="n">USB</span> <span class="n">Controller</span> <span class="p">[</span><span class="mi">103</span><span class="n">c</span><span class="p">:</span><span class="mi">3300</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">03</span><span class="p">)</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">34</span><span class="p">:</span>
+        <span class="mi">02</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Broadcom</span> <span class="n">Inc</span><span class="o">.</span> <span class="ow">and</span> <span class="n">subsidiaries</span> <span class="n">NetXtreme</span> <span class="n">BCM5719</span> <span class="n">Gigabit</span> <span class="n">Ethernet</span> <span class="n">PCIe</span> <span class="p">[</span><span class="mf">14e4</span><span class="p">:</span><span class="mi">1657</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+        <span class="mi">02</span><span class="p">:</span><span class="mf">00.1</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Broadcom</span> <span class="n">Inc</span><span class="o">.</span> <span class="ow">and</span> <span class="n">subsidiaries</span> <span class="n">NetXtreme</span> <span class="n">BCM5719</span> <span class="n">Gigabit</span> <span class="n">Ethernet</span> <span class="n">PCIe</span> <span class="p">[</span><span class="mf">14e4</span><span class="p">:</span><span class="mi">1657</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+        <span class="mi">02</span><span class="p">:</span><span class="mf">00.2</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Broadcom</span> <span class="n">Inc</span><span class="o">.</span> <span class="ow">and</span> <span class="n">subsidiaries</span> <span class="n">NetXtreme</span> <span class="n">BCM5719</span> <span class="n">Gigabit</span> <span class="n">Ethernet</span> <span class="n">PCIe</span> <span class="p">[</span><span class="mf">14e4</span><span class="p">:</span><span class="mi">1657</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+        <span class="mi">02</span><span class="p">:</span><span class="mf">00.3</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Broadcom</span> <span class="n">Inc</span><span class="o">.</span> <span class="ow">and</span> <span class="n">subsidiaries</span> <span class="n">NetXtreme</span> <span class="n">BCM5719</span> <span class="n">Gigabit</span> <span class="n">Ethernet</span> <span class="n">PCIe</span> <span class="p">[</span><span class="mf">14e4</span><span class="p">:</span><span class="mi">1657</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">35</span><span class="p">:</span>
+        <span class="mi">04</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">[</span><span class="mi">8086</span><span class="p">:</span><span class="mi">1521</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">36</span><span class="p">:</span>
+        <span class="mi">04</span><span class="p">:</span><span class="mf">00.1</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">[</span><span class="mi">8086</span><span class="p">:</span><span class="mi">1521</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">37</span><span class="p">:</span>
+        <span class="mi">04</span><span class="p">:</span><span class="mf">00.2</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">[</span><span class="mi">8086</span><span class="p">:</span><span class="mi">1521</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">38</span><span class="p">:</span>
+        <span class="mi">04</span><span class="p">:</span><span class="mf">00.3</span> <span class="n">Ethernet</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0200</span><span class="p">]:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">[</span><span class="mi">8086</span><span class="p">:</span><span class="mi">1521</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">39</span><span class="p">:</span>
+        <span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">40</span><span class="p">:</span>
+        <span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">41</span><span class="p">:</span>
+        <span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="o">...</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">79</span><span class="p">:</span>
+        <span class="mi">82</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0302</span><span class="p">]:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>上述输出中有不同的 <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span></code> ，这个意义是:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span></code> 是直通给虚拟机的最小物理设备集合。举例，上述 <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span> <span class="pre">32</span></code> 这组设备只能完整分配给一个虚拟机，这个虚拟机将同时获得 <code class="docutils literal notranslate"><span class="pre">ISA</span> <span class="pre">bridge</span> <span class="pre">[0601]</span></code> <code class="docutils literal notranslate"><span class="pre">SATA</span> <span class="pre">controller</span> <span class="pre">[0106]</span></code> 和 <code class="docutils literal notranslate"><span class="pre">SMBus</span> <span class="pre">[0c05]</span></code> ；同理， <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span> <span class="pre">34</span></code> 包含了4个Broadcom 以太网接口(实际上就是主板集成4网口)也只能同时分配给一个虚拟机；而独立添加的Intel 4网口千兆网卡则是完全独立的4个 <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span></code> ，意味着可以独立分配个4个虚拟机</p></li>
+<li><p>我在 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上通过 <a class="reference internal" href="../../linux/server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 将PCIe 3.0 Slot 1(x16)划分成2个独立的x8通道，安装了2块 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> ，加上在 Slot 2(x8) 上安装的第3块 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> ，所以服务器上一共有3块 NVMe 存储。在这里可以看到有3个 <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span></code> 分别是 <code class="docutils literal notranslate"><span class="pre">39-40</span></code> 对应了3个NVMe控制器，可以分别分配给3个虚拟机</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span> <span class="pre">79</span></code> 是安装在PCIe 3.0 Slot 3(x16)上的 <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> GPU运算卡，可以直接透传给一个虚拟机。我仅做技术实践，最终我希望采用 <a class="reference internal" href="../vgpu/index.html#vgpu"><span class="std std-ref">NVIDIA vGPU</span></a> 划分为更多GPU设备分配给虚拟化集群，来模拟大规模云计算</p></li>
+</ul>
+</section>
+</section>
+<section id="gpu">
+<h2>隔离GPU<a class="headerlink" href="#gpu" title="永久链接至标题">¶</a></h2>
+<p>要实现将一个设备指定给虚拟机，这个设备以及所有在相同IOMMU组的设备必须将它们的驱动替换成 <code class="docutils literal notranslate"><span class="pre">stub</span></code> 驱动 或者 <code class="docutils literal notranslate"><span class="pre">VFIO</span></code> 驱动，这样才能避免物理主机访问设备。并且需要注意，大多数设备需要在VM启动前完成这个替换。</p>
+<p>但是，GPU驱动往往不倾向于支持动态绑定，所以可能难以实现一些用于物理主机的GPU被透明直通给虚拟机，因为这样的两种驱动相互冲突。通常建议手工绑定这些驱动，然后再启动虚拟机。</p>
+<p>从Linux内核4.1开始，内核包含了 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> ，这个VFIO驱动可以完全替代 <code class="docutils literal notranslate"><span class="pre">pci-stub</span></code> 而且提供了控制设备的扩展，例如在不使用设备时将设备切换到 <code class="docutils literal notranslate"><span class="pre">D3</span></code> 状态。</p>
+<section id="id-vfio-pci">
+<h3>通过设备ID来绑定 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code><a class="headerlink" href="#id-vfio-pci" title="永久链接至标题">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 通常使用ID来找寻PCI设备，也就是只需要指定passthrough的设备ID。举例，前面显示的我的服务器上设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">39</span><span class="p">:</span>
+        <span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">79</span><span class="p">:</span>
+        <span class="mi">82</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0302</span><span class="p">]:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>只需要使用 <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> 和 <code class="docutils literal notranslate"><span class="pre">10de:1b39</span></code> 这两个设备ID来绑定 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code></p>
+<p>有两种方式将设备 remove 或者 break :</p>
+<ul>
+<li><p>使用启动内核参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vfio</span><span class="o">-</span><span class="n">pci</span><span class="o">.</span><span class="n">ids</span><span class="o">=</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">,</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span>
+</pre></div>
+</div>
+</li>
+<li><p>另一种方式是使用 modprobe 配置，添加一个 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/vfio.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span> <span class="n">ids</span><span class="o">=</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">,</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="vfio-pci">
+<h3>提前加载 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code><a class="headerlink" href="#vfio-pci" title="永久链接至标题">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我采用方法三 <code class="docutils literal notranslate"><span class="pre">dracut</span></code> ，另外两种方法未实践</p>
+<p><code class="docutils literal notranslate"><span class="pre">dracut</span></code> 是一个制作 提前加载需要访问根文件系统的块设备模块(例如IDE，SCSI，RAID等) 初始化镜像 <code class="docutils literal notranslate"><span class="pre">initramfs</span></code> 工具。 <code class="docutils literal notranslate"><span class="pre">mkinitcpio</span></code> 是相同功能的工具。目前，大多数发行版，如Fedora, RHEL, Gentoo, Debian都使用 <code class="docutils literal notranslate"><span class="pre">dracut</span></code> ，不过 <a class="reference internal" href="../../linux/arch_linux/index.html#arch-linux"><span class="std std-ref">Arch Linux</span></a> 默认使用 <code class="docutils literal notranslate"><span class="pre">mkinitcpio</span></code> 。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>参考 Red Hat Virtualization 文档，通过内核传递参数 <code class="docutils literal notranslate"><span class="pre">pci-stub.ids=144d:a80a,10de:1b39</span> <span class="pre">rdblacklist=nouveau</span></code> 就可以阻止host主机使用GPU设备(并拒绝加载显卡驱动) ，然后只需要重新生成引导装载程序:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grub2</span><span class="o">-</span><span class="n">mkconfig</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">grub2</span><span class="o">.</span><span class="n">cfg</span>
+</pre></div>
+</div>
+<p>然后重启系统就可以从 <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/cmdline</span></code> 确认主机设备被添加到 pci-stub.ids 列表中，Nouveau 已列入黑名单</p>
+</div>
+<section id="mkinitcpio">
+<h4>mkinitcpio(方法一)<a class="headerlink" href="#mkinitcpio" title="永久链接至标题">¶</a></h4>
+<p>由于操作系统使用 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 内核模块，需要确保 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 模块提前加载，这样才能避免图形驱动绑定到这个GPU卡上。要实现这点，需要使用 <code class="docutils literal notranslate"><span class="pre">mkinitcpio</span></code> 帮助把 <code class="docutils literal notranslate"><span class="pre">vfio_cpi</span></code> 等相关内核模块加入到 <code class="docutils literal notranslate"><span class="pre">initramfs</span></code> 中</p>
+<ul>
+<li><p>编辑 <code class="docutils literal notranslate"><span class="pre">/etc/mkinitcpio.conf</span></code> 配置文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MODULES</span><span class="o">=</span><span class="p">(</span><span class="o">...</span> <span class="n">vfio_pci</span> <span class="n">vfio</span> <span class="n">vfio_iommu_type1</span> <span class="n">vfio_virqfd</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>并且确认 <code class="docutils literal notranslate"><span class="pre">mkinitcpio.conf</span></code> 已经包含了 <code class="docutils literal notranslate"><span class="pre">modconf</span></code> hook:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HOOKS</span><span class="o">=</span><span class="p">(</span><span class="o">...</span> <span class="n">modconf</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkinitcpio</span> <span class="o">-</span><span class="n">P</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="booster">
+<h4>booster(方法二)<a class="headerlink" href="#booster" title="永久链接至标题">¶</a></h4>
+<ul>
+<li><p>编辑 <code class="docutils literal notranslate"><span class="pre">/etc/booster.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules_force_load</span><span class="p">:</span> <span class="n">vfio_pci</span><span class="p">,</span><span class="n">vfio</span><span class="p">,</span><span class="n">vfio_iommu_type1</span><span class="p">,</span><span class="n">vfio_virqfd</span>
+</pre></div>
+</div>
+</li>
+<li><p>重新生成initramfs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">booster</span><span class="o">/</span><span class="n">regenerate_images</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="dracut">
+<h4>dracut(方法三)<a class="headerlink" href="#dracut" title="永久链接至标题">¶</a></h4>
+<p>dracut的早期加载机制是通过内核参数。</p>
+<ul>
+<li><p>要提前加载 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> ，在内核参数上添加设备ID以及 <code class="docutils literal notranslate"><span class="pre">rd.driver.pre</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vfio</span><span class="o">-</span><span class="n">pci</span><span class="o">.</span><span class="n">ids</span><span class="o">=</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">,</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span> <span class="n">rd</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">pre</span><span class="o">=</span><span class="n">vfio_pci</span>
+</pre></div>
+</div>
+</li>
+<li><p>同样也需要将所有vfio驱动加入到initramfs，所以在 <code class="docutils literal notranslate"><span class="pre">/etc/dracut.conf.d</span></code> 目录下添加配置文件 <code class="docutils literal notranslate"><span class="pre">10-vfio.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">add_drivers</span><span class="o">+=</span><span class="s2">&quot; vfio_pci vfio vfio_iommu_type1 vfio_virqfd &quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>为当前运行内核生成initramfs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dracut</span> <span class="o">--</span><span class="n">hostonly</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">hostonly</span><span class="o">-</span><span class="n">cmdline</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initramfs</span><span class="o">-</span><span class="n">linux</span><span class="o">.</span><span class="n">img</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="id3">
+<h3>验证是否实现提前加载 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code><a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>重启系统</p></li>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 是否正确加载，并且绑定到正确设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dmesg</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">vfio</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="virt-install">
 <h3>virt-install<a class="headerlink" href="#virt-install" title="永久链接至标题">¶</a></h3>
 <p>在 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 命令添加 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span></code> 参数:</p>
@@ -174,8 +436,8 @@
 </div>
 </section>
 </section>
-<section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://www.linux-kvm.org/downloads/lersek/ovmf-whitepaper-c770f8c.txt">Open Virtual Machine Firmware (OVMF) Status Report</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF">arch linux: PCI passthrough via OVMF</a></p></li>
@@ -183,6 +445,7 @@
 <li><p><a class="reference external" href="https://fedoraproject.org/wiki/Using_UEFI_with_QEMU">Using UEFI with QEMU</a></p></li>
 <li><p><a class="reference external" href="https://wiki.ubuntu.com/UEFI/OVMF">ubuntu wiki: OVMF</a> 如果要自制OVMF镜像，可以参考 <a class="reference external" href="https://wiki.ubuntu.com/UEFI/EDK2">ubuntu wiki: EDK2</a></p></li>
 <li><p><a class="reference external" href="https://frdmtoplay.com/virtualizing-windows-7-or-linux-on-a-nvme-drive-with-vfio/">Virtualizing Windows 7 (or Linux) on a NVMe drive with VFIO</a></p></li>
+<li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.4/html/setting_up_an_nvidia_gpu_for_a_virtual_machine_in_red_hat_virtualization/index">SETTING UP AN NVIDIA GPU FOR A VIRTUAL MACHINE IN RED HAT VIRTUALIZATION</a> 设置GPU的直通和vgpu，本文参考前半部分</p></li>
 </ul>
 </section>
 </section>
