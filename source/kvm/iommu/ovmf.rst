@@ -144,11 +144,22 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 提前加载 ``vfio-pci``
 ------------------------
 
-.. note::
+需要分辨 ``vfio-pci`` 是作为内核直接编译的还是作为内核模块加载的:
 
-   我采用方法三 ``dracut`` ，另外两种方法未实践
+- 如果是直接静态编译到内核，则只需要内核启动参数中传递参数阻止host主机使用PCI设备: 如 Red Hat Enterprise Linux 和 Ubuntu 都是直接内核静态编译 ``vfio``
+- 如果是内核模块加载 ``vfio-pci`` 则还需要重建 ``initramfs`` 确保提前加载模块: 如 arch linux就是模块方式加载 ``vfio-pci`` 等模块
 
-   ``dracut`` 是一个制作 提前加载需要访问根文件系统的块设备模块(例如IDE，SCSI，RAID等) 初始化镜像 ``initramfs`` 工具。 ``mkinitcpio`` 是相同功能的工具。目前，大多数发行版，如Fedora, RHEL, Gentoo, Debian都使用 ``dracut`` ，不过 :ref:`arch_linux` 默认使用 ``mkinitcpio`` 。
+检查方法是查看 ``/boot`` 目录下对应内核版本 ``config-xxx-xxx`` 配置，例如 Ubuntu 20.04.3 LTS 当前使用内核 使用 ``uname -r`` 查看是 ``5.4.0-90-generic`` ，则检查 ``/boot/config-5.4.0-90-generic`` 文件，可以看到各个 ``vfio`` 相关模块都是静态编译(对应值都是 ``Y`` )::
+
+   CONFIG_VFIO_IOMMU_TYPE1=y
+   CONFIG_VFIO_VIRQFD=y
+   CONFIG_VFIO=y
+   CONFIG_VFIO_NOIOMMU=y
+   CONFIG_VFIO_PCI=y
+   CONFIG_VFIO_PCI_VGA=y
+   CONFIG_VFIO_PCI_MMAP=y
+   CONFIG_VFIO_PCI_INTX=y
+   CONFIG_VFIO_PCI_IGD=y
 
 .. note::
 
@@ -157,6 +168,14 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
       grub2-mkconfig -o /etc/grub2.cfg
 
    然后重启系统就可以从 ``cat /proc/cmdline`` 确认主机设备被添加到 pci-stub.ids 列表中，Nouveau 已列入黑名单
+
+对于内核模块方式加载 ``VFIO`` 相关模块(arch linux就是如此)，则采用以下3个方法之一来定制 ``intiramfs`` 确保内核首先加载 VFIO 模块，这样才能屏蔽掉host主机使用需要分配给虚拟机的PCI设备:
+
+.. note::
+
+   ``dracut`` 是一个制作 提前加载需要访问根文件系统的块设备模块(例如IDE，SCSI，RAID等) 初始化镜像 ``initramfs`` 工具。 ``mkinitcpio`` 是相同功能的工具。目前，大多数发行版，如Fedora, RHEL, Gentoo, Debian都使用 ``dracut`` ，不过 :ref:`arch_linux` 默认使用 ``mkinitcpio`` 。
+
+   由于我的实践是在Ubuntu上完成， ``VFIO`` 相关支持都是直接静态编译进内核，所以并不需要执行以下内核模块加入 ``initiramfs`` 的需求，我并没有执行以下3个方法的任意一个。不过，对于arch linux需要执行。
 
 mkinitcpio(方法一)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -202,6 +221,23 @@ dracut的早期加载机制是通过内核参数。
 - 为当前运行内核生成initramfs::
 
    dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
+
+我的屏蔽host pcie实践
+------------------------
+
+这段是我实际操作实践:
+
+- 实践是在 :ref:`ubuntu_linux` 20.04.3 LTS上完成，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` ::
+
+   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on pci-stub.ids=144d:a80a,10de:1b39 rdblacklist=nouveau" 
+
+- 然后执行::
+
+   sudo update-grub
+
+- 重启操作系统，然后执行以下命令检查::
+
+   cat /proc/cmdline
    
 验证是否实现提前加载 ``vfio-pci``
 -----------------------------------
@@ -212,17 +248,139 @@ dracut的早期加载机制是通过内核参数。
 
    dmesg | grep -i vfio
 
+我的实践看到输出内容是::
 
+   [    1.434041 ] VFIO - User Level meta-driver version: 0.3
+
+并没有看到设备
+
+- 在host主机上检查设备::
+
+   lspci -nnk -d 144d:a80a
+
+很不幸，物理主机依然能够访问::
+
+   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: nvme
+   	Kernel modules: nvme
+   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: nvme
+   	Kernel modules: nvme
+   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: nvme
+   	Kernel modules: nvme
+
+检查GPU设备也是如此::
+
+   lspci -nnk -d 10de:1b39
+
+输出::
+
+   82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
+   	Subsystem: NVIDIA Corporation Device [10de:1217]
+   	Kernel driver in use: nouveau
+   	Kernel modules: nvidiafb, nouveau
+
+- 我发现错误了，内核配置应该是 ``vfio-pci.ids=144d:a80a,10de:1b39`` ，而不是以前旧格式配置 ``pci-stub.ids=144d:a80a,10de:1b39`` ，所以重新修订 ``/etc/default/grub`` ::
+
+   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39"
+
+然后重新生成grub::
+
+   sudo update-grub
+
+
+- 我发现错误了，内核配置应该是 ``vfio-pci.ids=144d:a80a,10de:1b39`` ，而不是以前旧格式配置 ``pci-stub.ids=144d:a80a,10de:1b39`` ，所以重新修订 ``/etc/default/grub`` ::
+
+   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39"
+
+然后重新生成grub::
+
+   sudo update-grub
+
+然后再次重启系统，并检查 ``dmesg | grep -i vfio`` 输出，这次正常了，可以看到 ``vfio_pci`` 正确绑定了指定PCIe设备::
+
+   [    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
+   [    0.252622] Kernel command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
+   [    1.457708] VFIO - User Level meta-driver version: 0.3
+   [    1.516284] vfio_pci: add [144d:a80a[ffffffff:ffffffff]] class 0x000000/00000000
+   [    1.536263] vfio_pci: add [10de:1b39[ffffffff:ffffffff]] class 0x000000/00000000
+
+- 此时根据设备ID检查PCIe设备，可以看到已经被 ``vfio-pci`` 驱动::
+
+   lspci -nnk -d 144d:a80a
+
+显示::
+
+   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme
+   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme
+   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme
+
+检查GPU::
+
+   lspci -nnk -d 10de:1b39
+
+显示::
+
+   82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
+   	Subsystem: NVIDIA Corporation Device [10de:1217]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvidiafb, nouveau
+
+设置OVMF guest VM
+====================
+
+OVMF是开源UEFI firmware，用于QEMU虚拟机。
+
+配置libvirt
+-------------
+
+:ref:`libvirt` 是一系列虚拟化工具包装，可以大幅简化配置和部署过程。在KVM和QEMU案例中，使用libvirt可以避免我们处理QEMU权限并容易添加和移除虚拟机设备。不过，由于libvirt是包装器，所以也有部分qemu功能不能支持，需要使用定制脚本来提供QEMU的扩展参数。
+
+.. note::
+
+   arch linux 文档 `arch linux: PCI passthrough via OVMF <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>`_ 只介绍了使用图形化工具 ``virt-manager`` 设置 UEFI 虚拟机。不过，可以从 Red Hat Enterprise Linux 虚拟化文档以及SUSE虚拟化文档提供了命令行方式操作。我的实践以命令行为主。
 
 virt-install
 --------------
 
-在 ``virt-install`` 命令添加 ``--boot uefi`` 参数::
+- 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷::
 
-   sudo virt-install --name f20-uefi \
-   --ram 2048 --disk size=20 \
-   --boot uefi \
-   --location https://dl.fedoraproject.org/pub/fedora/linux/releases/22/Workstation/x86_64/os/
+   virsh vol-create-as images_lvm fedora35 6G
+
+- 创建虚拟机::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name fedora35 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=Linux --os-variant=fedora31 \
+     --boot uefi --cpu host-passthrough \
+     --disk path=/dev/vg-libvirt/fedora35,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+     --graphics none \
+     --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+Fedora Workstation版本只能从iso安装
+
+安装注意点:
+
+- 安装过程启用VNC使用图形界面安装，这样可以选择文件系统分区等高级配置，方便安装
+- ``vda`` 需要分配一个独立UEFI分区挂载为 ``/boot/efi`` ，这个分区不需指定文件系统类型，系统会自动选择 ``vfat`` 类型，我分配了 256MB；其余磁盘全部分配给 ``/`` ，设置为 ``xfs`` 文件系统
+- 安装完成后，重启系统，继续可以通过控制台维护，首次启动后就可以通过 ``dnf upgrade`` 更新系统
 
 参考
 ======
