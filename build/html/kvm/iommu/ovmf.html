@@ -64,6 +64,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id1">准备工作</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#iommu">设置IOMMU</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#gpu">隔离GPU</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ovmf-guest-vm">设置OVMF guest VM</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
@@ -212,8 +213,8 @@
 </pre></div>
 </div>
 <p>输出类似:</p>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">ovmf/dmesg_dmar_iommu.txt</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">ovmf/dmesg_dmar_iommu.txt</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="o">[</span>    <span class="m">0</span>.000000<span class="o">]</span> Command line: <span class="nv">BOOT_IMAGE</span><span class="o">=</span>/boot/vmlinuz-5.4.0-90-generic <span class="nv">root</span><span class="o">=</span><span class="nv">UUID</span><span class="o">=</span>caa4193b-9222-49fe-a4b3-89f1cb417e6a ro <span class="nv">intel_iommu</span><span class="o">=</span>on
 <span class="linenos"> 2</span><span class="o">[</span>    <span class="m">0</span>.009994<span class="o">]</span> ACPI: DMAR 0x000000007B7E7000 <span class="m">000294</span> <span class="o">(</span>v01 HP     ProLiant <span class="m">00000001</span> HP   <span class="m">00000001</span><span class="o">)</span>
 <span class="linenos"> 3</span><span class="o">[</span>    <span class="m">0</span>.010030<span class="o">]</span> ACPI: Reserving DMAR table memory at <span class="o">[</span>mem 0x7b7e7000-0x7b7e7293<span class="o">]</span>
@@ -255,8 +256,8 @@
 <section id="groups">
 <h3>检查groups是否正确<a class="headerlink" href="#groups" title="永久链接至标题">¶</a></h3>
 <p>以下脚本 <code class="docutils literal notranslate"><span class="pre">check_iommu.sh</span></code> 脚本可以查看系统中不同的PCI设备被映射到IOMMU组，如果没有返回任何信息，则表明系统没有激活IOMMU支持或者硬件不支持IOMMU</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">intel_vt-d_startup/check_iommu.sh</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">intel_vt-d_startup/check_iommu.sh</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="ch">#!/bin/bash</span>
 <span class="linenos">2</span><span class="nb">shopt</span> -s nullglob
 <span class="linenos">3</span><span class="k">for</span> g <span class="k">in</span> <span class="sb">`</span>find /sys/kernel/iommu_groups/* -maxdepth <span class="m">0</span> -type d <span class="p">|</span> sort -V<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
@@ -342,10 +343,22 @@
 </section>
 <section id="vfio-pci">
 <h3>提前加载 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code><a class="headerlink" href="#vfio-pci" title="永久链接至标题">¶</a></h3>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>我采用方法三 <code class="docutils literal notranslate"><span class="pre">dracut</span></code> ，另外两种方法未实践</p>
-<p><code class="docutils literal notranslate"><span class="pre">dracut</span></code> 是一个制作 提前加载需要访问根文件系统的块设备模块(例如IDE，SCSI，RAID等) 初始化镜像 <code class="docutils literal notranslate"><span class="pre">initramfs</span></code> 工具。 <code class="docutils literal notranslate"><span class="pre">mkinitcpio</span></code> 是相同功能的工具。目前，大多数发行版，如Fedora, RHEL, Gentoo, Debian都使用 <code class="docutils literal notranslate"><span class="pre">dracut</span></code> ，不过 <a class="reference internal" href="../../linux/arch_linux/index.html#arch-linux"><span class="std std-ref">Arch Linux</span></a> 默认使用 <code class="docutils literal notranslate"><span class="pre">mkinitcpio</span></code> 。</p>
+<p>需要分辨 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 是作为内核直接编译的还是作为内核模块加载的:</p>
+<ul class="simple">
+<li><p>如果是直接静态编译到内核，则只需要内核启动参数中传递参数阻止host主机使用PCI设备: 如 Red Hat Enterprise Linux 和 Ubuntu 都是直接内核静态编译 <code class="docutils literal notranslate"><span class="pre">vfio</span></code></p></li>
+<li><p>如果是内核模块加载 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 则还需要重建 <code class="docutils literal notranslate"><span class="pre">initramfs</span></code> 确保提前加载模块: 如 arch linux就是模块方式加载 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 等模块</p></li>
+</ul>
+<p>检查方法是查看 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 目录下对应内核版本 <code class="docutils literal notranslate"><span class="pre">config-xxx-xxx</span></code> 配置，例如 Ubuntu 20.04.3 LTS 当前使用内核 使用 <code class="docutils literal notranslate"><span class="pre">uname</span> <span class="pre">-r</span></code> 查看是 <code class="docutils literal notranslate"><span class="pre">5.4.0-90-generic</span></code> ，则检查 <code class="docutils literal notranslate"><span class="pre">/boot/config-5.4.0-90-generic</span></code> 文件，可以看到各个 <code class="docutils literal notranslate"><span class="pre">vfio</span></code> 相关模块都是静态编译(对应值都是 <code class="docutils literal notranslate"><span class="pre">Y</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONFIG_VFIO_IOMMU_TYPE1</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO_VIRQFD</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO_NOIOMMU</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO_PCI</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO_PCI_VGA</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO_PCI_MMAP</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO_PCI_INTX</span><span class="o">=</span><span class="n">y</span>
+<span class="n">CONFIG_VFIO_PCI_IGD</span><span class="o">=</span><span class="n">y</span>
+</pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -354,6 +367,12 @@
 </pre></div>
 </div>
 <p>然后重启系统就可以从 <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/cmdline</span></code> 确认主机设备被添加到 pci-stub.ids 列表中，Nouveau 已列入黑名单</p>
+</div>
+<p>对于内核模块方式加载 <code class="docutils literal notranslate"><span class="pre">VFIO</span></code> 相关模块(arch linux就是如此)，则采用以下3个方法之一来定制 <code class="docutils literal notranslate"><span class="pre">intiramfs</span></code> 确保内核首先加载 VFIO 模块，这样才能屏蔽掉host主机使用需要分配给虚拟机的PCI设备:</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">dracut</span></code> 是一个制作 提前加载需要访问根文件系统的块设备模块(例如IDE，SCSI，RAID等) 初始化镜像 <code class="docutils literal notranslate"><span class="pre">initramfs</span></code> 工具。 <code class="docutils literal notranslate"><span class="pre">mkinitcpio</span></code> 是相同功能的工具。目前，大多数发行版，如Fedora, RHEL, Gentoo, Debian都使用 <code class="docutils literal notranslate"><span class="pre">dracut</span></code> ，不过 <a class="reference internal" href="../../linux/arch_linux/index.html#arch-linux"><span class="std std-ref">Arch Linux</span></a> 默认使用 <code class="docutils literal notranslate"><span class="pre">mkinitcpio</span></code> 。</p>
+<p>由于我的实践是在Ubuntu上完成， <code class="docutils literal notranslate"><span class="pre">VFIO</span></code> 相关支持都是直接静态编译进内核，所以并不需要执行以下内核模块加入 <code class="docutils literal notranslate"><span class="pre">initiramfs</span></code> 的需求，我并没有执行以下3个方法的任意一个。不过，对于arch linux需要执行。</p>
 </div>
 <section id="mkinitcpio">
 <h4>mkinitcpio(方法一)<a class="headerlink" href="#mkinitcpio" title="永久链接至标题">¶</a></h4>
@@ -414,6 +433,27 @@
 </ul>
 </section>
 </section>
+<section id="host-pcie">
+<h3>我的屏蔽host pcie实践<a class="headerlink" href="#host-pcie" title="永久链接至标题">¶</a></h3>
+<p>这段是我实际操作实践:</p>
+<ul>
+<li><p>实践是在 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04.3 LTS上完成，配置 <a class="reference internal" href="../../linux/ubuntu_linux/admin/ubuntu_grub.html#ubuntu-grub"><span class="std std-ref">Ubuntu修订Grub内核启动参数</span></a> - 修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on pci-stub.ids=144d:a80a,10de:1b39 rdblacklist=nouveau&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+</li>
+<li><p>重启操作系统，然后执行以下命令检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cmdline</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="id3">
 <h3>验证是否实现提前加载 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code><a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul>
@@ -424,16 +464,151 @@
 </div>
 </li>
 </ul>
+<p>我的实践看到输出内容是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>    <span class="mf">1.434041</span> <span class="p">]</span> <span class="n">VFIO</span> <span class="o">-</span> <span class="n">User</span> <span class="n">Level</span> <span class="n">meta</span><span class="o">-</span><span class="n">driver</span> <span class="n">version</span><span class="p">:</span> <span class="mf">0.3</span>
+</pre></div>
+</div>
+<p>并没有看到设备</p>
+<ul>
+<li><p>在host主机上检查设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>很不幸，物理主机依然能够访问:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">nvme</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">nvme</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">nvme</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+</pre></div>
+</div>
+<p>检查GPU设备也是如此:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span>
+</pre></div>
+</div>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">82</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0302</span><span class="p">]:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1217</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">nouveau</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvidiafb</span><span class="p">,</span> <span class="n">nouveau</span>
+</pre></div>
+</div>
+<ul>
+<li><p>我发现错误了，内核配置应该是 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a,10de:1b39</span></code> ，而不是以前旧格式配置 <code class="docutils literal notranslate"><span class="pre">pci-stub.ids=144d:a80a,10de:1b39</span></code> ，所以重新修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后重新生成grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+<ul>
+<li><p>我发现错误了，内核配置应该是 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a,10de:1b39</span></code> ，而不是以前旧格式配置 <code class="docutils literal notranslate"><span class="pre">pci-stub.ids=144d:a80a,10de:1b39</span></code> ，所以重新修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后重新生成grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+<p>然后再次重启系统，并检查 <code class="docutils literal notranslate"><span class="pre">dmesg</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">-i</span> <span class="pre">vfio</span></code> 输出，这次正常了，可以看到 <code class="docutils literal notranslate"><span class="pre">vfio_pci</span></code> 正确绑定了指定PCIe设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
+[    0.252622] Kernel command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
+[    1.457708] VFIO - User Level meta-driver version: 0.3
+[    1.516284] vfio_pci: add [144d:a80a[ffffffff:ffffffff]] class 0x000000/00000000
+[    1.536263] vfio_pci: add [10de:1b39[ffffffff:ffffffff]] class 0x000000/00000000
+</pre></div>
+</div>
+<ul>
+<li><p>此时根据设备ID检查PCIe设备，可以看到已经被 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 驱动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+</pre></div>
+</div>
+<p>检查GPU:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">82</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0302</span><span class="p">]:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1217</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvidiafb</span><span class="p">,</span> <span class="n">nouveau</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ovmf-guest-vm">
+<h2>设置OVMF guest VM<a class="headerlink" href="#ovmf-guest-vm" title="永久链接至标题">¶</a></h2>
+<p>OVMF是开源UEFI firmware，用于QEMU虚拟机。</p>
+<section id="libvirt">
+<h3>配置libvirt<a class="headerlink" href="#libvirt" title="永久链接至标题">¶</a></h3>
+<p><a class="reference internal" href="../libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 是一系列虚拟化工具包装，可以大幅简化配置和部署过程。在KVM和QEMU案例中，使用libvirt可以避免我们处理QEMU权限并容易添加和移除虚拟机设备。不过，由于libvirt是包装器，所以也有部分qemu功能不能支持，需要使用定制脚本来提供QEMU的扩展参数。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>arch linux 文档 <a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF">arch linux: PCI passthrough via OVMF</a> 只介绍了使用图形化工具 <code class="docutils literal notranslate"><span class="pre">virt-manager</span></code> 设置 UEFI 虚拟机。不过，可以从 Red Hat Enterprise Linux 虚拟化文档以及SUSE虚拟化文档提供了命令行方式操作。我的实践以命令行为主。</p>
+</div>
 </section>
 <section id="virt-install">
 <h3>virt-install<a class="headerlink" href="#virt-install" title="永久链接至标题">¶</a></h3>
-<p>在 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 命令添加 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span></code> 参数:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virt</span><span class="o">-</span><span class="n">install</span> <span class="o">--</span><span class="n">name</span> <span class="n">f20</span><span class="o">-</span><span class="n">uefi</span> \
-<span class="o">--</span><span class="n">ram</span> <span class="mi">2048</span> <span class="o">--</span><span class="n">disk</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span> \
-<span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> \
-<span class="o">--</span><span class="n">location</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">dl</span><span class="o">.</span><span class="n">fedoraproject</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pub</span><span class="o">/</span><span class="n">fedora</span><span class="o">/</span><span class="n">linux</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="mi">22</span><span class="o">/</span><span class="n">Workstation</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 命令添加 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span></code> 和 <code class="docutils literal notranslate"><span class="pre">--cpu</span> <span class="pre">host-passthrough</span></code> 参数安装操作系统。注意，虚拟机系统磁盘采用 <a class="reference internal" href="../libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> ，所以首先创建LVM卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">fedora35</span> <span class="mi">6</span><span class="n">G</span>
 </pre></div>
 </div>
+</li>
+<li><p>创建虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">fedora35</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">Linux</span> <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">fedora31</span> \
+  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">fedora35</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
+  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">fedora</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="mi">35</span><span class="o">/</span><span class="n">Server</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> \
+  <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Fedora Workstation版本只能从iso安装</p>
+<p>安装注意点:</p>
+<ul class="simple">
+<li><p>安装过程启用VNC使用图形界面安装，这样可以选择文件系统分区等高级配置，方便安装</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vda</span></code> 需要分配一个独立UEFI分区挂载为 <code class="docutils literal notranslate"><span class="pre">/boot/efi</span></code> ，这个分区不需指定文件系统类型，系统会自动选择 <code class="docutils literal notranslate"><span class="pre">vfat</span></code> 类型，我分配了 256MB；其余磁盘全部分配给 <code class="docutils literal notranslate"><span class="pre">/</span></code> ，设置为 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 文件系统</p></li>
+<li><p>安装完成后，重启系统，继续可以通过控制台维护，首次启动后就可以通过 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">upgrade</span></code> 更新系统</p></li>
+</ul>
 </section>
 </section>
 <section id="id4">

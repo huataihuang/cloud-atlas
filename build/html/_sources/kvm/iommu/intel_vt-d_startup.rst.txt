@@ -84,6 +84,7 @@ Host主机unbind设备
 参考
 ======
 
+- `Red Hat Enterprise Linux8 > Configuring and managing virtualization: 12.1. Assigning a GPU to a virtual machine <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_virtualization/assembly_managing-gpu-devices-in-virtual-machines_configuring-and-managing-virtualization>`_
 - `How to assign devices with VT-d in KVM <http://www.linux-kvm.org/page/How_to_assign_devices_with_VT-d_in_KVM>`_ 
 - `KVM : GPU Passthrough <https://www.server-world.info/en/note?os=Ubuntu_18.04&p=kvm&f=11>`_
 - `arch linux: PCI passthrough via OVMF <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>`_ arch linux文档不愧是Linux发行版中最详尽的，提供了不同Host设备passthrough给虚拟机的方法和案例
