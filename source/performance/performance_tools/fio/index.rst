@@ -1,16 +1,13 @@
-.. _vgpu:
+.. _fio:
 
 =================================
-NVIDIA vGPU
+fio 存储性能测试
 =================================
-
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_nvidia_vgpu.rst
-   vgpu_unlock.rst
-   vgpu_startup.rst
+   fio_startup.rst
 
 .. only::  subproject and html
 
