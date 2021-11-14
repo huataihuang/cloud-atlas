@@ -1,4 +1,4 @@
-.. _postgresql:
+.. _pgsql:
 
 =================================
 PostgreSQL Atlas

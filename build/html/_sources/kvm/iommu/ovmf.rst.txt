@@ -379,8 +379,21 @@ Fedora Workstation版本只能从iso安装
 安装注意点:
 
 - 安装过程启用VNC使用图形界面安装，这样可以选择文件系统分区等高级配置，方便安装
-- ``vda`` 需要分配一个独立UEFI分区挂载为 ``/boot/efi`` ，这个分区不需指定文件系统类型，系统会自动选择 ``vfat`` 类型，我分配了 256MB；其余磁盘全部分配给 ``/`` ，设置为 ``xfs`` 文件系统
+- ``vda`` 需要分配一个独立UEFI分区挂载为 ``/boot/efi`` ，这个分区不需指定文件系统类型，系统会自动选择 ``vfat`` 类型，我分配了 256MB；其余磁盘全部分配给 ``/`` ，设置为 ``xfs`` 文件系统::
+
+   Filesystem      Size  Used Avail Use% Mounted on
+   devtmpfs        964M     0  964M   0% /dev
+   tmpfs           983M     0  983M   0% /dev/shm
+   tmpfs           393M  952K  392M   1% /run
+   /dev/vda2       5.8G  1.8G  4.0G  31% /
+   tmpfs           983M  4.0K  983M   1% /tmp
+   /dev/vda1       256M  6.1M  250M   3% /boot/efi
+   tmpfs           197M     0  197M   0% /run/user/0
+
 - 安装完成后，重启系统，继续可以通过控制台维护，首次启动后就可以通过 ``dnf upgrade`` 更新系统
+- 按照 :ref:`priv_cloud_infra` 规划配置主机IP，然后clone出测试服务器 ( :ref:`libvirt_lvm_pool` )::
+
+   virt-clone --original fedora35 --name z-iommu --auto-clone
 
 参考
 ======

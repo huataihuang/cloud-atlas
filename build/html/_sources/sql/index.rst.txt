@@ -8,7 +8,7 @@ SQL Atlas
 
 倘若你只能学习一门IT语言，我觉得SQL至少是前三之一。作为我个人，在工作这么多年，依然在某些时候感叹SQL能够帮助自己完成很多用脚本难以完善实现的工作，依然觉得需要静下心来系统地学习SQL。
 
-推荐系统学习 `SQL必知必会 <https://book.douban.com/subject/35167240/>`_ ，我将在 :ref:`postgresql` 平台上构建一个学习环境，完成这个实践之旅。
+推荐系统学习 `SQL必知必会 <https://book.douban.com/subject/35167240/>`_ ，我将在 :ref:`pgsql` 平台上构建一个学习环境，完成这个实践之旅。
 
 .. toctree::
    :maxdepth: 1

@@ -224,7 +224,7 @@ ssh服务容器(ssh)
 
 在开发环境中，还有非常重要的部署框架:
 
-- 数据库运行环境 - :ref:`mysql` :ref:`postgresql` ，也通过上述持久化数据存储到物理主机
+- 数据库运行环境 - :ref:`mysql` :ref:`pgsql` ，也通过上述持久化数据存储到物理主机
 - web服务 - 构建 :ref:`nginx`
 - 开发框架
   - :ref:`django`

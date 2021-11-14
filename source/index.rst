@@ -64,7 +64,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    openshift/index
    sql/index
    mysql/index
-   postgresql/index
+   pgsql/index
    redis/index
    network/index
    infra_service/index
