@@ -177,30 +177,46 @@ ARM环境Ubuntu虚拟机
 创建Fedora虚拟机
 ===================
 
-- Fedora 34 Server虚拟机安装::
+- Fedora 35 Server虚拟机安装::
 
    virt-install \
      --network bridge:virbr0 \
-     --name fedora34 \
+     --name fedora35 \
      --ram=2048 \
      --vcpus=1 \
      --os-type=fedora31 \
-     --disk path=/var/lib/libvirt/images/centos34.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --disk path=/var/lib/libvirt/images/centos35.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
      --graphics none \
-     --location=http://mirrors.163.com/fedora/releases/34/Server/x86_64/os/ \
+     --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
      --extra-args="console=tty0 console=ttyS0,115200"
 
-- Fedora 34 Workstation虚拟机安装(没有在线方式，只能iso安装)::
+- Fedora 35 Workstation虚拟机安装(没有在线方式，只能iso安装)::
 
    virt-install \
      --network bridge:virbr0 \
-     --name fedora34w \
+     --name fedora35w \
      --ram=2048 \
      --vcpus=1 \
      --os-variant=fedora31 \
-     --disk path=/var/lib/libvirt/images/fedora34w.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --disk path=/var/lib/libvirt/images/fedora35w.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
      --graphics spice \
      --cdrom=/var/lib/libvirt/images/Fedora-Workstation-Live-x86_64-34-1.2.iso
+
+- 使用 :ref:`libvirt_lvm_pool` 则先创建LVM卷再创建虚拟机::
+
+   virsh vol-create-as images_lvm fedora35 6G
+
+   virt-install \
+        --network bridge:virbr0 \
+        --name fedora35 \
+        --ram=2048 \
+        --vcpus=1 \
+        --os-type=Linux --os-variant=fedora31 \
+        --boot uefi --cpu host-passthrough \
+        --disk path=/dev/vg-libvirt/fedora35,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+        --graphics none \
+        --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
+        --extra-args="console=tty0 console=ttyS0,115200"
 
 创建SUSE虚拟机
 ===================

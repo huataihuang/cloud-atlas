@@ -190,10 +190,43 @@ CentOS 7
 clone虚拟机
 ============
 
-- 使用 ``virsh vol-clone`` 进行clone::
+- :strike:`clone存储卷` ::
 
    virsh vol-clone centos6 kernel-dev --pool images_lvm
 
+.. note::
+
+   我最初以为使用LVM卷的虚拟机需要手工 clone 出卷，然后重新定义虚拟机。但是实践发现，原来 ``virt-clone`` 工具提供了非常好用的 ``--auto-clone`` 参数，能够自动判断LVM卷并自动clone存储卷，生成新的虚拟机定义。
+
+   不过，对于数据盘来说，使用 ``virsh vol-clone`` 还是比较方便的
+
+- 使用 ``virt-clone`` 克隆新的虚拟机::
+
+   virt-clone --original centos6 --name kernel-dev --auto-clone
+
+.. note::
+
+   如果创建同名虚拟机(旧虚拟机删除情况下)，则 ``virt-clone`` 会自动将存储卷名字加上 ``_1`` ，例如 ``centos6_1`` ... ``centos6_2`` ，依次类推。
+
+删除虚拟机
+============
+
+- 通常我们删除虚拟机的方式是使用 ``virsh undefine`` 命令，但是对于 :ref:`ovmf` 这种使用UEFI的虚拟机，如果执行命令::
+
+   sudo virsh undefine kernel-dev
+
+会提示错误::
+
+   error: Failed to undefine domain kernel-dev
+   error: Requested operation is not valid: cannot undefine domain with nvram
+
+- 解决方法是添加 ``--nvram`` 参数::
+
+   sudo virsh undefine --nvram kernel-dev
+
+- 卷需要手工删除::
+
+   sudo lvremove /dev/vg-libvirt/kernel-dev
 
 参考
 =====
