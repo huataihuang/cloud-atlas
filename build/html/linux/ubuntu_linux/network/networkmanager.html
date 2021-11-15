@@ -170,7 +170,7 @@
 <li><p><a class="reference internal" href="netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a></p></li>
 <li><p>NetworkManager</p></li>
 </ul>
-<p>在桌面系统中，通常会使用 NetworkManager 配置，不仅有字符命令配置，也有GUI方便完成设置。</p>
+<p>在桌面系统中，例如 Fedora (server/workstation) 以及 Ubuntu Workstation ，通常会使用 NetworkManager 配置，不仅有字符命令配置，也有GUI方便完成设置。</p>
 <p><a class="reference internal" href="../../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 上NVIDIA官方提供的是基于 <a class="reference internal" href="../index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 桌面版 18.04 LTS改造的L4T系统，默认使用的就是 NetworkManager管理网络，熟悉使用对桌面发行版Linux会有很大帮助。</p>
 </div>
 <section id="nmcli">
@@ -191,6 +191,11 @@
 <p>显示输出:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">STATE</span>                  <span class="n">CONNECTIVITY</span>  <span class="n">WIFI</span><span class="o">-</span><span class="n">HW</span>  <span class="n">WIFI</span>     <span class="n">WWAN</span><span class="o">-</span><span class="n">HW</span>  <span class="n">WWAN</span>
 <span class="n">connected</span> <span class="p">(</span><span class="n">site</span> <span class="n">only</span><span class="p">)</span>  <span class="n">limited</span>       <span class="n">enabled</span>  <span class="n">enabled</span>  <span class="n">enabled</span>  <span class="n">enabled</span>
+</pre></div>
+</div>
+<p>如果主机配置了DHCP但是没有获得IP地址，则会显示(例如我在 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 使用Fedora虚拟机，切换到 <a class="reference internal" href="../../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 后没有DHCP提供IP地址):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">STATE</span>       <span class="n">CONNECTIVITY</span>  <span class="n">WIFI</span><span class="o">-</span><span class="n">HW</span>  <span class="n">WIFI</span>     <span class="n">WWAN</span><span class="o">-</span><span class="n">HW</span>  <span class="n">WWAN</span>
+<span class="n">connecting</span>  <span class="n">none</span>          <span class="n">enabled</span>  <span class="n">enabled</span>  <span class="n">enabled</span>  <span class="n">enabled</span>
 </pre></div>
 </div>
 <ul>
@@ -233,6 +238,19 @@
 </pre></div>
 </div>
 </li>
+<li><p>检查连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">con</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>例如，在 Fedora 虚拟机中看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>    <span class="n">UUID</span>                                  <span class="n">TYPE</span>      <span class="n">DEVICE</span>
+<span class="n">enp1s0</span>  <span class="mi">239</span><span class="n">c09f4</span><span class="o">-</span><span class="n">a28c</span><span class="o">-</span><span class="mf">46e3</span><span class="o">-</span><span class="n">b5c7</span><span class="o">-</span><span class="mi">2</span><span class="n">beb90c594f2</span>  <span class="n">ethernet</span>  <span class="n">enp1s0</span>
+</pre></div>
+</div>
+<p>就可以通过后续 <code class="docutils literal notranslate"><span class="pre">nmcli</span> <span class="pre">con</span> <span class="pre">modify</span> <span class="pre">&quot;enp1s0&quot;</span></code> 来修订(默认安装以后系统生成的是DHCP配置 <code class="docutils literal notranslate"><span class="pre">/etc/NetworkManager/system-connections/enp1s0.nmconnection</span></code> )</p>
+<ul>
 <li><p>注意 <code class="docutils literal notranslate"><span class="pre">nmcli</span> <span class="pre">conneciton</span> <span class="pre">edit</span></code> 命令会需要你使用子命令 <code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">connection.id</span> <span class="pre">XXX;</span> <span class="pre">set</span> <span class="pre">connection.interface-name</span> <span class="pre">xxx;</span></code> 都会使用 <code class="docutils literal notranslate"><span class="pre">set</span></code> 子命令，在单条命令时不需要使用 <code class="docutils literal notranslate"><span class="pre">set</span></code> ，所以我们直接使用:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="s2">&quot;Wired connection 1&quot;</span> <span class="n">connection</span><span class="o">.</span><span class="n">id</span> <span class="n">manage</span>
 </pre></div>
@@ -256,6 +274,11 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="s2">&quot;manage&quot;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">method</span> <span class="n">manual</span>
 <span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="s2">&quot;manage&quot;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">address</span> <span class="mf">192.168.6.9</span><span class="o">/</span><span class="mi">24</span>
 <span class="n">nmcli</span> <span class="n">con</span> <span class="n">modify</span> <span class="n">manage</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">gateway</span> <span class="mf">192.168.6.1</span>
+</pre></div>
+</div>
+</li>
+<li><p>很多时候初始安装的虚拟机采用DHCP方式，需要切换到静态IP地址，执行以下命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="s2">&quot;enp1s0&quot;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">method</span> <span class="n">manual</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">address</span> <span class="mf">192.168.6.242</span><span class="o">/</span><span class="mi">24</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">gateway</span> <span class="mf">192.168.6.200</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dns</span> <span class="s2">&quot;192.168.6.200,192.168.6.11&quot;</span>
 </pre></div>
 </div>
 </li>

@@ -108,7 +108,7 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 - ``IOMMU Group`` 是直通给虚拟机的最小物理设备集合。举例，上述 ``IOMMU Group 32`` 这组设备只能完整分配给一个虚拟机，这个虚拟机将同时获得 ``ISA bridge [0601]`` ``SATA controller [0106]`` 和 ``SMBus [0c05]`` ；同理， ``IOMMU Group 34`` 包含了4个Broadcom 以太网接口(实际上就是主板集成4网口)也只能同时分配给一个虚拟机；而独立添加的Intel 4网口千兆网卡则是完全独立的4个 ``IOMMU Group`` ，意味着可以独立分配个4个虚拟机
 - 我在 :ref:`hpe_dl360_gen9` 上通过 :ref:`pcie_bifurcation` 将PCIe 3.0 Slot 1(x16)划分成2个独立的x8通道，安装了2块 :ref:`samsung_pm9a1` ，加上在 Slot 2(x8) 上安装的第3块 :ref:`samsung_pm9a1` ，所以服务器上一共有3块 NVMe 存储。在这里可以看到有3个 ``IOMMU Group`` 分别是 ``39-40`` 对应了3个NVMe控制器，可以分别分配给3个虚拟机
-- ``IOMMU Group 79`` 是安装在PCIe 3.0 Slot 3(x16)上的 :ref:`tesla_p10` GPU运算卡，可以直接透传给一个虚拟机。我仅做技术实践，最终我希望采用 :ref:`vgpu` 划分为更多GPU设备分配给虚拟化集群，来模拟大规模云计算
+- ``IOMMU Group 79`` 是安装在PCIe 3.0 Slot 3(x16)上的 :ref:`tesla_p10` ，可以直接透传给一个虚拟机。我仅做技术实践，最终我希望采用 :ref:`vgpu` 划分为更多GPU设备分配给虚拟化集群，来模拟大规模云计算
 
 隔离GPU
 =============
@@ -395,6 +395,176 @@ Fedora Workstation版本只能从iso安装
 
    virt-clone --original fedora35 --name z-iommu --auto-clone
 
+- clone之后，对容器内部进行配置修订: Fedora Server使用 :ref:`networkmanager` 管理网络，所以通过以下命令修订静态IP地址和主机名::
+
+   nmcli general hostname z-iommu
+   nmcli connection modify "enp1s0" ipv4.method manual ipv4.address 192.168.6.242/24 ipv4.gateway 192.168.6.200 ipv4.dns "192.168.6.200,192.168.6.11"
+
+虚拟机添加设备
+---------------------
+
+设备xml配置文件
+~~~~~~~~~~~~~~~~~
+
+我们前面已经通过 ``check_iommu.sh`` 脚本找出了需要指派给虚拟机的PCIe设备::
+
+   IOMMU Group 39:
+           05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   IOMMU Group 79:
+           82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
+
+并通过内核启动参数 ``vfio-pci.ids=144d:a80a,10de:1b39`` 屏蔽了HOST物理主机使用这两个设备，现在我们可以将这两个设备attach到虚拟机。
+
+- 使用 ``lspci`` 命令检查::
+
+   # lspci | grep -i Samsung
+   05:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
+   # lspci | grep -i nvidia
+   82:00.0 3D controller: NVIDIA Corporation Device 1b39 (rev a1)
+
+- 使用 ``virsh nodedev-list`` 命令检查 ``pci`` 类型设备::
+
+   virsh nodedev-list --cap pci
+
+此时设备显示会将 ``lspci`` 输出的分隔符号 ``:`` 和 ``.`` 替换成 ``_`` ，所以列出设备是::
+
+   pci_0000_05_00_0
+   pci_0000_82_00_0
+
+- 再次检查设备信息
+
+NVMe设备::
+
+   virsh nodedev-dumpxml pci_0000_05_00_0
+
+输出显示:
+
+.. literalinclude:: ovmf/pci_0000_05_00_0.xml
+   :language: xml
+   :linenos:
+   :emphasize-lines: 11-13
+   :caption: Samsung PM9A1
+
+GPU设备::
+
+   virsh nodedev-dumpxml pci_0000_82_00_0
+
+输出显示:
+
+.. literalinclude:: ovmf/pci_0000_82_00_0.xml
+   :language: xml
+   :linenos:
+   :emphasize-lines: 11-13
+   :caption: NVIDIA Tesla P10
+
+- 转换设备配置参数:
+
+在上述 ``nodedev-dumpxml`` 中高亮的3行参数配置是10进制，需要转换成16进制配置到设备添加xml配置中
+
+NVMe设备::
+
+    <bus>5</bus>
+    <slot>0</slot>
+    <function>0</function>
+
+执行以下命令得到对应16进制值::
+
+   $ printf %x 5
+   5
+   $ printf %x 0
+   0
+   $ printf %x 0
+   0
+
+则对应配置 ``samsung_pm9a1_1.xml`` :
+
+.. literalinclude:: ovmf/samsung_pm9a1_1.xml
+   :language: xml
+   :linenos:
+   :caption: Samsung PM9A1 #1
+
+GPU设备::
+
+    <bus>130</bus>
+    <slot>0</slot>
+    <function>0</function>
+
+执行以下命令得到对应16进制值::
+
+   $ printf %x 130
+   82
+   $ printf %x 0
+   0
+   $ printf %x 0
+   0
+
+则对应配置 ``tesla_p10.xml`` :
+
+.. literalinclude:: ovmf/tesla_p10.xml
+   :language: xml
+   :linenos:
+   :caption: NVIDIA Tesla P10
+
+添加NVMe设备
+~~~~~~~~~~~~~
+
+- 执行以下命令将第一个NVMe Samsung PM9A1 添加到虚拟机 ``z-iommu`` 上::
+
+   virsh attach-device z-iommu samsung_pm9a1_1.xml
+   
+此时在物理主机上提示信息::
+
+   Device attached successfully
+
+在虚拟机 ``z-iommu`` 终端控制台可以看到信息:
+
+.. literalinclude:: ovmf/samsung_pm9a1_1.txt
+   :language: xml
+   :linenos:
+   :caption: Samsung PM9A1 #1
+
+此时在虚拟机 ``z-iommmu`` 中检查磁盘::
+
+   fdisk -l
+
+可以看到::
+
+   Disk /dev/nvme0n1: 953.87 GiB, 1024209543168 bytes, 2000409264 sectors
+   Disk model: SAMSUNG MZVL21T0HCLR-00B00              
+   Units: sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+添加GPU设备
+~~~~~~~~~~~~~
+
+- 执行以下命令将NVIDIA Tesla P10 GPU运算卡 添加到虚拟机 ``z-iommu`` 上::
+
+   virsh attach-device z-iommu tesla_p10.xml
+
+这里出现一个报错::
+
+   error: Failed to attach device from tesla_p10.xml
+   error: internal error: No more available PCI slots
+
+这个问题在 `libvirtd: No more available PCI slots <https://unix.stackexchange.com/questions/570166/libvirtd-no-more-available-pci-slots>`_ 提到了解决方法: 添加一个 ``--config`` 参数，让libvirt来自动添加需要的 ``pcie-root-port`` 配置。然后就需要shutdown虚拟机，并再次启动虚拟机。这个设备就会正确添加。
+
+所以改为执行::
+
+   virsh attach-device z-iommu tesla_p10.xml --config
+
+   virsh destory z-iommu
+   virsh start z-iommu
+
+- 重启完虚拟机，登录虚拟机中执行::
+
+   lspci
+
+可以看到完整的2个PCI设备::
+
+   
+   07:00.0 3D controller: NVIDIA Corporation GP102GL [Tesla P10] (rev a1)
+
 参考
 ======
 
@@ -405,3 +575,5 @@ Fedora Workstation版本只能从iso安装
 - `ubuntu wiki: OVMF <https://wiki.ubuntu.com/UEFI/OVMF>`_ 如果要自制OVMF镜像，可以参考 `ubuntu wiki: EDK2 <https://wiki.ubuntu.com/UEFI/EDK2>`_
 - `Virtualizing Windows 7 (or Linux) on a NVMe drive with VFIO <https://frdmtoplay.com/virtualizing-windows-7-or-linux-on-a-nvme-drive-with-vfio/>`_
 - `SETTING UP AN NVIDIA GPU FOR A VIRTUAL MACHINE IN RED HAT VIRTUALIZATION <https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.4/html/setting_up_an_nvidia_gpu_for_a_virtual_machine_in_red_hat_virtualization/index>`_ 设置GPU的直通和vgpu，本文参考前半部分
+- `Enabling PCI pass-through in guest <https://developer.ibm.com/tutorials/enabling-pci-pass-through-using-libvirt/>`_ 这篇blog提供了添加pci设备的xml案例，可以直接使用virsh命令动态添加设备
+- `Attaching and updating a device with virsh <https://docs.fedoraproject.org/en-US/Fedora/18/html/Virtualization_Administration_Guide/sect-Attaching_and_updating_a_device_with_virsh.html>`_ Fedora文档，提供xml案例添加CDROM设备

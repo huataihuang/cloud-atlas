@@ -11,9 +11,10 @@ NetworkManager
    - :ref:`netplan`
    - NetworkManager
 
-   在桌面系统中，通常会使用 NetworkManager 配置，不仅有字符命令配置，也有GUI方便完成设置。
+   在桌面系统中，例如 Fedora (server/workstation) 以及 Ubuntu Workstation ，通常会使用 NetworkManager 配置，不仅有字符命令配置，也有GUI方便完成设置。
 
    :ref:`jetson_nano` 上NVIDIA官方提供的是基于 :ref:`ubuntu_linux` 桌面版 18.04 LTS改造的L4T系统，默认使用的就是 NetworkManager管理网络，熟悉使用对桌面发行版Linux会有很大帮助。
+
 
 nmcli简介
 ============
@@ -35,6 +36,11 @@ General命令
 
    STATE                  CONNECTIVITY  WIFI-HW  WIFI     WWAN-HW  WWAN    
    connected (site only)  limited       enabled  enabled  enabled  enabled
+
+如果主机配置了DHCP但是没有获得IP地址，则会显示(例如我在 :ref:`priv_cloud_infra` 使用Fedora虚拟机，切换到 :ref:`libvirt_bridged_network` 后没有DHCP提供IP地址)::
+
+   STATE       CONNECTIVITY  WIFI-HW  WIFI     WWAN-HW  WWAN
+   connecting  none          enabled  enabled  enabled  enabled
 
 - 检查主机名::
 
@@ -70,6 +76,17 @@ nmcli命令的规律是尽可能使用 ``help`` ，每一级命令都有help可�
    nmcli con mod bond0 +bond.options mii=500
    nmcli con mod bond0 -bond.options downdelay
 
+- 检查连接::
+
+   nmcli con
+
+例如，在 Fedora 虚拟机中看到::
+
+   NAME    UUID                                  TYPE      DEVICE
+   enp1s0  239c09f4-a28c-46e3-b5c7-2beb90c594f2  ethernet  enp1s0
+
+就可以通过后续 ``nmcli con modify "enp1s0"`` 来修订(默认安装以后系统生成的是DHCP配置 ``/etc/NetworkManager/system-connections/enp1s0.nmconnection`` )
+
 - 注意 ``nmcli conneciton edit`` 命令会需要你使用子命令 ``set connection.id XXX; set connection.interface-name xxx;`` 都会使用 ``set`` 子命令，在单条命令时不需要使用 ``set`` ，所以我们直接使用::
 
    nmcli connection modify "Wired connection 1" connection.id manage
@@ -90,6 +107,10 @@ nmcli命令的规律是尽可能使用 ``help`` ，每一级命令都有help可�
    nmcli connection modify "manage" ipv4.method manual
    nmcli connection modify "manage" ipv4.address 192.168.6.9/24
    nmcli con modify manage ipv4.gateway 192.168.6.1
+
+- 很多时候初始安装的虚拟机采用DHCP方式，需要切换到静态IP地址，执行以下命令::
+
+   nmcli connection modify "enp1s0" ipv4.method manual ipv4.address 192.168.6.242/24 ipv4.gateway 192.168.6.200 ipv4.dns "192.168.6.200,192.168.6.11"
 
 .. note::
 
