@@ -64,8 +64,8 @@
 <li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">比较IOMMU NVMe和原生NVMe存储性能</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">磁盘性能测试</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">测试结果</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">测试结果</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="iommu_tuning.html">IOMMU调优</a></li>
@@ -171,18 +171,18 @@
 </div>
 <section id="id1">
 <h2>磁盘性能测试<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<section id="iommu">
-<h3>iommu虚拟机<a class="headerlink" href="#iommu" title="永久链接至标题">¶</a></h3>
+<section id="iops">
+<h3>随机写IOPS<a class="headerlink" href="#iops" title="永久链接至标题">¶</a></h3>
 <ul>
-<li><p>随机写IOPS:</p>
+<li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randwrite</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
 </pre></div>
 </div>
 </li>
+<li><p>虚拟机测试结果:</p></li>
 </ul>
-<p>测试结果:</p>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机写IOPS</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机写IOPS</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
 <span class="linenos"> 2</span>Starting <span class="m">4</span> processes
 <span class="linenos"> 3</span><span class="o">[</span><span class="m">43573</span>.735774<span class="o">]</span>  nvme0n1: p1
@@ -221,16 +221,58 @@
 </pre></div>
 </div>
 </div>
+<ul class="simple">
+<li><p>物理主机测试结果:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">物理主机 随机写IOPS</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
+<span class="linenos"> 2</span>Starting <span class="m">4</span> processes
+<span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>w<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>1605MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span>411k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 4</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">3079</span>: Wed Nov <span class="m">17</span> <span class="m">00</span>:38:52 <span class="m">2021</span>
+<span class="linenos"> 5</span>  write: <span class="nv">IOPS</span><span class="o">=</span>669k, <span class="nv">BW</span><span class="o">=</span>2614MiB/s <span class="o">(</span>2741MB/s<span class="o">)(</span>153GiB/60002msec<span class="o">)</span><span class="p">;</span> <span class="m">0</span> zone resets
+<span class="linenos"> 6</span>    slat <span class="o">(</span>nsec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1735</span>, <span class="nv">max</span><span class="o">=</span>13104k, <span class="nv">avg</span><span class="o">=</span><span class="m">2479</span>.76, <span class="nv">stdev</span><span class="o">=</span><span class="m">3624</span>.75
+<span class="linenos"> 7</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">17</span>, <span class="nv">max</span><span class="o">=</span><span class="m">31428</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">188</span>.19, <span class="nv">stdev</span><span class="o">=</span><span class="m">229</span>.37
+<span class="linenos"> 8</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">100</span>, <span class="nv">max</span><span class="o">=</span><span class="m">31430</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">190</span>.78, <span class="nv">stdev</span><span class="o">=</span><span class="m">229</span>.47
+<span class="linenos"> 9</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">10</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span>  <span class="m">135</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span>  <span class="m">143</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span>  <span class="m">149</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span>  <span class="m">151</span><span class="o">]</span>,
+<span class="linenos">11</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span>  <span class="m">151</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span>  <span class="m">151</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span>  <span class="m">151</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span>  <span class="m">153</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span>  <span class="m">157</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span>  <span class="m">169</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span>  <span class="m">253</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span>  <span class="m">375</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span>  <span class="m">725</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span>  <span class="m">906</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span> <span class="m">1369</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span> <span class="m">3294</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span> <span class="m">4293</span><span class="o">]</span>
+<span class="linenos">15</span>   bw <span class="o">(</span>  MiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">1427</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">3243</span>, <span class="nv">per</span><span class="o">=</span><span class="m">99</span>.98%, <span class="nv">avg</span><span class="o">=</span><span class="m">2613</span>.49, <span class="nv">stdev</span><span class="o">=</span><span class="m">188</span>.57, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">16</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">365372</span>, <span class="nv">max</span><span class="o">=</span><span class="m">830288</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">669052</span>.77, <span class="nv">stdev</span><span class="o">=</span><span class="m">48273</span>.91, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">17</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">100</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">250</span><span class="o">=</span><span class="m">89</span>.78%, <span class="nv">500</span><span class="o">=</span><span class="m">7</span>.60%, <span class="nv">750</span><span class="o">=</span><span class="m">1</span>.70%
+<span class="linenos">18</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">1000</span><span class="o">=</span><span class="m">0</span>.58%
+<span class="linenos">19</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.28%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.04%, <span class="nv">10</span><span class="o">=</span><span class="m">0</span>.03%, <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">50</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">20</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">34</span>.03%, <span class="nv">sys</span><span class="o">=</span><span class="m">43</span>.44%, <span class="nv">ctx</span><span class="o">=</span><span class="m">6636228</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">23552</span>
+<span class="linenos">21</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">100</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">22</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">23</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">24</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">0</span>,40151535,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">25</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">32</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">28</span>  WRITE: <span class="nv">bw</span><span class="o">=</span>2614MiB/s <span class="o">(</span>2741MB/s<span class="o">)</span>, 2614MiB/s-2614MiB/s <span class="o">(</span>2741MB/s-2741MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>153GiB <span class="o">(</span>164GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60002</span>-60002msec
+<span class="linenos">29</span>
+<span class="linenos">30</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">31</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">49</span>/40095228, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">3</span>/7015916, <span class="nv">in_queue</span><span class="o">=</span><span class="m">86932</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.93%
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h3>随机读IOPS<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <ul>
-<li><p>随机读IOPS:</p>
+<li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randread</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
 </pre></div>
 </div>
 </li>
+<li><p>虚拟机测试结果:</p></li>
 </ul>
-<p>测试结果:</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机读IOPS</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机读IOPS</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
 <span class="linenos"> 2</span>Starting <span class="m">4</span> processes
 <span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>r<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>703MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span>180k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -265,16 +307,58 @@
 </pre></div>
 </div>
 </div>
+<ul class="simple">
+<li><p>物理主机测试结果:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">物理主机 随机读IOPS</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
+<span class="linenos"> 2</span>Starting <span class="m">4</span> processes
+<span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>r<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>3358MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span>860k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 4</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">3165</span>: Wed Nov <span class="m">17</span> <span class="m">00</span>:41:21 <span class="m">2021</span>
+<span class="linenos"> 5</span>  read: <span class="nv">IOPS</span><span class="o">=</span>765k, <span class="nv">BW</span><span class="o">=</span>2988MiB/s <span class="o">(</span>3134MB/s<span class="o">)(</span>175GiB/60001msec<span class="o">)</span>
+<span class="linenos"> 6</span>    slat <span class="o">(</span>nsec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1731</span>, <span class="nv">max</span><span class="o">=</span><span class="m">517537</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">2676</span>.86, <span class="nv">stdev</span><span class="o">=</span><span class="m">2086</span>.72
+<span class="linenos"> 7</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">11</span>, <span class="nv">max</span><span class="o">=</span><span class="m">2254</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">163</span>.93, <span class="nv">stdev</span><span class="o">=</span><span class="m">91</span>.78
+<span class="linenos"> 8</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">13</span>, <span class="nv">max</span><span class="o">=</span><span class="m">2257</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">166</span>.72, <span class="nv">stdev</span><span class="o">=</span><span class="m">91</span>.78
+<span class="linenos"> 9</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">10</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span>   <span class="m">65</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span>   <span class="m">79</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span>   <span class="m">88</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span>  <span class="m">102</span><span class="o">]</span>,
+<span class="linenos">11</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span>  <span class="m">117</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span>  <span class="m">128</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span>  <span class="m">141</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span>  <span class="m">155</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span>  <span class="m">174</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span>  <span class="m">204</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span>  <span class="m">265</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span>  <span class="m">334</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span>  <span class="m">519</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span>  <span class="m">611</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span>  <span class="m">873</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span>  <span class="m">996</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span> <span class="m">1270</span><span class="o">]</span>
+<span class="linenos">15</span>   bw <span class="o">(</span>  MiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">2590</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">3393</span>, <span class="nv">per</span><span class="o">=</span><span class="m">99</span>.88%, <span class="nv">avg</span><span class="o">=</span><span class="m">2984</span>.89, <span class="nv">stdev</span><span class="o">=</span><span class="m">56</span>.96, <span class="nv">samples</span><span class="o">=</span><span class="m">476</span>
+<span class="linenos">16</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">663154</span>, <span class="nv">max</span><span class="o">=</span><span class="m">868642</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">764132</span>.39, <span class="nv">stdev</span><span class="o">=</span><span class="m">14582</span>.55, <span class="nv">samples</span><span class="o">=</span><span class="m">476</span>
+<span class="linenos">17</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">50</span><span class="o">=</span><span class="m">0</span>.14%, <span class="nv">100</span><span class="o">=</span><span class="m">18</span>.40%, <span class="nv">250</span><span class="o">=</span><span class="m">69</span>.60%, <span class="nv">500</span><span class="o">=</span><span class="m">10</span>.68%
+<span class="linenos">18</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">750</span><span class="o">=</span><span class="m">0</span>.97%, <span class="nv">1000</span><span class="o">=</span><span class="m">0</span>.15%
+<span class="linenos">19</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.05%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">20</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">40</span>.12%, <span class="nv">sys</span><span class="o">=</span><span class="m">46</span>.57%, <span class="nv">ctx</span><span class="o">=</span><span class="m">4938168</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">23686</span>
+<span class="linenos">21</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">100</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">22</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">23</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">24</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">45902275</span>,0,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">25</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">32</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">28</span>   READ: <span class="nv">bw</span><span class="o">=</span>2988MiB/s <span class="o">(</span>3134MB/s<span class="o">)</span>, 2988MiB/s-2988MiB/s <span class="o">(</span>3134MB/s-3134MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>175GiB <span class="o">(</span>188GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60001</span>-60001msec
+<span class="linenos">29</span>
+<span class="linenos">30</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">31</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">45797167</span>/0, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">6875887</span>/0, <span class="nv">in_queue</span><span class="o">=</span><span class="m">0</span>, <span class="nv">util</span><span class="o">=</span><span class="m">100</span>.00%
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h3>顺序写吞吐量<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <ul>
-<li><p>顺序写吞吐量:</p>
+<li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">128</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">write</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">128</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
 </pre></div>
 </div>
 </li>
+<li><p>虚拟机测试结果:</p></li>
 </ul>
-<p>测试结果:</p>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序写吞吐量</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序写吞吐量</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
 <span class="linenos"> 2</span>Starting <span class="m">1</span> process
 <span class="linenos"> 3</span><span class="o">[</span><span class="m">44748</span>.680320<span class="o">]</span>  nvme0n1: p1
@@ -309,16 +393,56 @@
 </pre></div>
 </div>
 </div>
+<ul class="simple">
+<li><p>物理主机测试结果:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">物理主机 顺序写吞吐量</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
+<span class="linenos"> 2</span>Starting <span class="m">1</span> process
+<span class="linenos"> 3</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>W<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>1703MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">13</span>.6k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 4</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">3236</span>: Wed Nov <span class="m">17</span> <span class="m">00</span>:43:35 <span class="m">2021</span>
+<span class="linenos"> 5</span>  write: <span class="nv">IOPS</span><span class="o">=</span><span class="m">20</span>.0k, <span class="nv">BW</span><span class="o">=</span>2624MiB/s <span class="o">(</span>2752MB/s<span class="o">)(</span>154GiB/60011msec<span class="o">)</span><span class="p">;</span> <span class="m">0</span> zone resets
+<span class="linenos"> 6</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">5</span>, <span class="nv">max</span><span class="o">=</span><span class="m">567</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">11</span>.20, <span class="nv">stdev</span><span class="o">=</span> <span class="m">5</span>.09
+<span class="linenos"> 7</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1237</span>, <span class="nv">max</span><span class="o">=</span><span class="m">45813</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">6084</span>.24, <span class="nv">stdev</span><span class="o">=</span><span class="m">2514</span>.30
+<span class="linenos"> 8</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1247</span>, <span class="nv">max</span><span class="o">=</span><span class="m">45827</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">6095</span>.64, <span class="nv">stdev</span><span class="o">=</span><span class="m">2515</span>.80
+<span class="linenos"> 9</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">10</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>,
+<span class="linenos">11</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span> <span class="m">4817</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span> <span class="m">8979</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span> <span class="m">9634</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span><span class="m">10028</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span><span class="m">11600</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span><span class="m">13435</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span><span class="m">39584</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span><span class="m">40633</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span><span class="m">43779</span><span class="o">]</span>
+<span class="linenos">15</span>   bw <span class="o">(</span>  MiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">1350</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">3318</span>, <span class="nv">per</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">avg</span><span class="o">=</span><span class="m">2624</span>.36, <span class="nv">stdev</span><span class="o">=</span><span class="m">810</span>.62, <span class="nv">samples</span><span class="o">=</span><span class="m">120</span>
+<span class="linenos">16</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">10806</span>, <span class="nv">max</span><span class="o">=</span><span class="m">26544</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">20994</span>.88, <span class="nv">stdev</span><span class="o">=</span><span class="m">6484</span>.91, <span class="nv">samples</span><span class="o">=</span><span class="m">120</span>
+<span class="linenos">17</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">10</span><span class="o">=</span><span class="m">94</span>.74%, <span class="nv">20</span><span class="o">=</span><span class="m">5</span>.10%, <span class="nv">50</span><span class="o">=</span><span class="m">0</span>.16%
+<span class="linenos">18</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">17</span>.24%, <span class="nv">sys</span><span class="o">=</span><span class="m">21</span>.52%, <span class="nv">ctx</span><span class="o">=</span><span class="m">1245901</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">18</span>
+<span class="linenos">19</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">100</span>.0%
+<span class="linenos">20</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">21</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.1%
+<span class="linenos">22</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">0</span>,1259822,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">23</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">128</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">26</span>  WRITE: <span class="nv">bw</span><span class="o">=</span>2624MiB/s <span class="o">(</span>2752MB/s<span class="o">)</span>, 2624MiB/s-2624MiB/s <span class="o">(</span>2752MB/s-2752MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>154GiB <span class="o">(</span>165GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60011</span>-60011msec
+<span class="linenos">27</span>
+<span class="linenos">28</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">29</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">49</span>/1258174, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">3</span>/7648325, <span class="nv">in_queue</span><span class="o">=</span><span class="m">6389084</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.89%
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id4">
+<h3>顺序读吞吐量<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <ul>
-<li><p>顺序读吞吐量:</p>
+<li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">128</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">read</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">128</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
 </pre></div>
 </div>
 </li>
+<li><p>虚拟机测试结果:</p></li>
 </ul>
-<p>测试结果:</p>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序读吞吐量</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序读吞吐量</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
 <span class="linenos"> 2</span>Starting <span class="m">1</span> process
 <span class="linenos"> 3</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>R<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>3452MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span><span class="m">27</span>.6k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -352,12 +476,54 @@
 </pre></div>
 </div>
 </div>
+<ul class="simple">
+<li><p>物理主机测试结果:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">物理主机 顺序读吞吐量</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
+<span class="linenos"> 2</span>Starting <span class="m">1</span> process
+<span class="linenos"> 3</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>R<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>3444MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span><span class="m">27</span>.5k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 4</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">3314</span>: Wed Nov <span class="m">17</span> <span class="m">00</span>:45:32 <span class="m">2021</span>
+<span class="linenos"> 5</span>  read: <span class="nv">IOPS</span><span class="o">=</span><span class="m">27</span>.5k, <span class="nv">BW</span><span class="o">=</span>3437MiB/s <span class="o">(</span>3604MB/s<span class="o">)(</span>201GiB/60004msec<span class="o">)</span>
+<span class="linenos"> 6</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">4</span>, <span class="nv">max</span><span class="o">=</span><span class="m">556</span>, <span class="nv">avg</span><span class="o">=</span> <span class="m">8</span>.88, <span class="nv">stdev</span><span class="o">=</span> <span class="m">4</span>.45
+<span class="linenos"> 7</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1348</span>, <span class="nv">max</span><span class="o">=</span><span class="m">12643</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">4644</span>.51, <span class="nv">stdev</span><span class="o">=</span><span class="m">1082</span>.97
+<span class="linenos"> 8</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1371</span>, <span class="nv">max</span><span class="o">=</span><span class="m">12656</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">4653</span>.56, <span class="nv">stdev</span><span class="o">=</span><span class="m">1082</span>.95
+<span class="linenos"> 9</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">10</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span> <span class="m">3785</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span> <span class="m">3949</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span> <span class="m">3982</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span> <span class="m">4047</span><span class="o">]</span>,
+<span class="linenos">11</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span> <span class="m">4113</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span> <span class="m">4146</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span> <span class="m">4228</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span> <span class="m">4293</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span> <span class="m">4555</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span> <span class="m">4883</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span> <span class="m">5997</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span> <span class="m">7570</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span> <span class="m">8717</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span> <span class="m">8979</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span> <span class="m">9241</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span> <span class="m">9372</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span> <span class="m">9503</span><span class="o">]</span>
+<span class="linenos">15</span>   bw <span class="o">(</span>  MiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">3313</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">3451</span>, <span class="nv">per</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">avg</span><span class="o">=</span><span class="m">3437</span>.09, <span class="nv">stdev</span><span class="o">=</span><span class="m">13</span>.50, <span class="nv">samples</span><span class="o">=</span><span class="m">120</span>
+<span class="linenos">16</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">26504</span>, <span class="nv">max</span><span class="o">=</span><span class="m">27614</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">27496</span>.70, <span class="nv">stdev</span><span class="o">=</span><span class="m">107</span>.98, <span class="nv">samples</span><span class="o">=</span><span class="m">120</span>
+<span class="linenos">17</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">4</span><span class="o">=</span><span class="m">11</span>.45%, <span class="nv">10</span><span class="o">=</span><span class="m">88</span>.54%, <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">18</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">12</span>.83%, <span class="nv">sys</span><span class="o">=</span><span class="m">28</span>.07%, <span class="nv">ctx</span><span class="o">=</span><span class="m">1178237</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">4112</span>
+<span class="linenos">19</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">100</span>.0%
+<span class="linenos">20</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">21</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.1%
+<span class="linenos">22</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">1649929</span>,0,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">23</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">128</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">26</span>   READ: <span class="nv">bw</span><span class="o">=</span>3437MiB/s <span class="o">(</span>3604MB/s<span class="o">)</span>, 3437MiB/s-3437MiB/s <span class="o">(</span>3604MB/s-3604MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>201GiB <span class="o">(</span>216GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60004</span>-60004msec
+<span class="linenos">27</span>
+<span class="linenos">28</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">29</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">1647401</span>/0, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">7644604</span>/0, <span class="nv">in_queue</span><span class="o">=</span><span class="m">6008424</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.87%
+</pre></div>
+</div>
+</div>
 </section>
 </section>
-<section id="id2">
-<h2>测试结果<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<table class="colwidths-given docutils align-default" id="id9">
-<caption><span class="caption-text">IOMMU虚拟机和物理机 NVMe性能对比</span><a class="headerlink" href="#id9" title="永久链接至表格">¶</a></caption>
+<section id="id5">
+<h2>测试结果<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>这里我有一个测试错误，我分配 <a class="reference internal" href="ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机时候，设置了 <code class="docutils literal notranslate"><span class="pre">1c2g</span></code> 规格。实际上上述随机读写测试采用了4个job，我观察了实际上会把4个CPU核心打满。对于 <code class="docutils literal notranslate"><span class="pre">1c2g</span></code> 虚拟机由于只有1个cpu，会导致性能无法满足并发4个读写进程对要求。</p>
+<p>我将会重新部署虚拟机进行测试，以下测试结果稍后更新。</p>
+</div>
+<table class="colwidths-given docutils align-default" id="id16">
+<caption><span class="caption-text">IOMMU虚拟机和物理机 NVMe性能对比</span><a class="headerlink" href="#id16" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 30%" />
@@ -372,25 +538,25 @@
 <tbody>
 <tr class="row-even"><td><p>4K随机写IOPS</p></td>
 <td><p>179k</p></td>
-<td></td>
+<td><p>669k</p></td>
 </tr>
 <tr class="row-odd"><td><p>4K随机读IOPS</p></td>
 <td><p>184k</p></td>
-<td></td>
+<td><p>765k</p></td>
 </tr>
 <tr class="row-even"><td><p>顺序写吞吐量</p></td>
 <td><p>2440MB/s</p></td>
-<td></td>
+<td><p>2752MB/s</p></td>
 </tr>
 <tr class="row-odd"><td><p>顺序读吞吐量</p></td>
 <td><p>3621MB/s</p></td>
-<td></td>
+<td><p>3604MB/s</p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://help.aliyun.com/document_detail/147897.html">阿里云帮助文档: 测试块存储性能</a></p></li>
 </ul>

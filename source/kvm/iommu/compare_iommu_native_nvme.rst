@@ -15,55 +15,98 @@
 磁盘性能测试
 ==============
 
-iommu虚拟机
----------------
+随机写IOPS
+------------
 
-- 随机写IOPS::
+- 测试命令::
 
    fio -direct=1 -iodepth=32 -rw=randwrite -ioengine=libaio -bs=4k -numjobs=4 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
 
-测试结果:
+- 虚拟机测试结果:
 
 .. literalinclude:: compare_iommu_native_nvme/iommu_randwrite_iops.txt
    :language: bash
    :linenos:
    :caption: IOMMU虚拟机 随机写IOPS
 
-- 随机读IOPS::
+- 物理主机测试结果:
+
+.. literalinclude:: compare_iommu_native_nvme/host_randwrite_iops.txt
+   :language: bash
+   :linenos:
+   :caption: 物理主机 随机写IOPS
+
+随机读IOPS
+-------------
+
+- 测试命令::
 
    fio -direct=1 -iodepth=32 -rw=randread -ioengine=libaio -bs=4k -numjobs=4 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
 
-测试结果:
+- 虚拟机测试结果:
 
 .. literalinclude:: compare_iommu_native_nvme/iommu_randread_iops.txt
    :language: bash
    :linenos:
    :caption: IOMMU虚拟机 随机读IOPS
 
-- 顺序写吞吐量::
+- 物理主机测试结果:
+
+.. literalinclude:: compare_iommu_native_nvme/host_randread_iops.txt
+   :language: bash
+   :linenos:
+   :caption: 物理主机 随机读IOPS
+
+顺序写吞吐量
+-------------
+
+- 测试命令::
 
    fio -direct=1 -iodepth=128 -rw=write -ioengine=libaio -bs=128k -numjobs=1 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
 
-测试结果:
+- 虚拟机测试结果:
 
 .. literalinclude:: compare_iommu_native_nvme/iommu_write.txt
    :language: bash
    :linenos:
    :caption: IOMMU虚拟机 顺序写吞吐量
 
-- 顺序读吞吐量::
+- 物理主机测试结果:
+
+.. literalinclude:: compare_iommu_native_nvme/host_write.txt
+   :language: bash
+   :linenos:
+   :caption: 物理主机 顺序写吞吐量
+
+顺序读吞吐量
+----------------
+
+- 测试命令::
 
    fio -direct=1 -iodepth=128 -rw=read -ioengine=libaio -bs=128k -numjobs=1 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
 
-测试结果:
+- 虚拟机测试结果:
 
 .. literalinclude:: compare_iommu_native_nvme/iommu_read.txt
    :language: bash
    :linenos:
    :caption: IOMMU虚拟机 顺序读吞吐量
 
+- 物理主机测试结果:
+
+.. literalinclude:: compare_iommu_native_nvme/host_read.txt
+   :language: bash
+   :linenos:
+   :caption: 物理主机 顺序读吞吐量
+
 测试结果
 ============
+
+.. warning::
+
+   这里我有一个测试错误，我分配 :ref:`ovmf` 虚拟机时候，设置了 ``1c2g`` 规格。实际上上述随机读写测试采用了4个job，我观察了实际上会把4个CPU核心打满。对于 ``1c2g`` 虚拟机由于只有1个cpu，会导致性能无法满足并发4个读写进程对要求。
+
+   我将会重新部署虚拟机进行测试，以下测试结果稍后更新。
 
 .. csv-table:: IOMMU虚拟机和物理机 NVMe性能对比
    :file: compare_iommu_native_nvme/compare_iommu_native_nvme.csv
