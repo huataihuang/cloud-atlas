@@ -10,7 +10,7 @@ Android 虚拟化
    android_on_linux.rst
    linux_on_android.rst
    archon.rst
-   anbox.rst
+   anbox/index
 
 
 .. only::  subproject and html

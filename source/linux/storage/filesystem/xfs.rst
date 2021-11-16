@@ -37,7 +37,7 @@ xfsprogs 3.2.0引入了一个磁盘格式v5包含了元数据校验和机制，�
 XFS性能
 ============
 
-在RAID社别上使用XFS时候，有可能通过使用 ``largeio`` , ``swalloc`` 参数值增加来提高性能。参考:
+在RAID设备上使用XFS时候，有可能通过使用 ``largeio`` , ``swalloc`` 参数值增加来提高性能。参考:
 
 - `Recommended XFS settings for MarkLogic Server <https://help.marklogic.com/Knowledgebase/Article/View/505/0/recommended-xfs-settings-for-marklogic-server>`_
 
@@ -58,7 +58,7 @@ XFS案例
 - 创建GPT分区::
 
    parted -s /dev/nvme0n1 mklabel gpt
-   parted -s -a optimal /dev/nvmd0n1 mkpart primary 0% 100%
+   parted -s -a optimal /dev/nvme0n1 mkpart primary 0% 100%
 
 如果有多个NVMe磁盘，依次执行::
 
@@ -113,12 +113,10 @@ XFS案例
 
   ``-n ftype=1`` 是XFS在overlay文件系统时候存储附加元数据时候必须使用的，这个参数在 RHEL 7.4 之后XFS模式激活 ``ftype=1`` ，详情参考RHEL 7文档，在 `Docker installation on RHEL 7.2 and file system requirement <https://serverfault.com/questions/1029785/docker-installation-on-rhel-7-2-and-file-system-requirement/1029872#1029872>`_ 可以看到，docker容器要求XFS格式化成 ``fytpe=1`` 才能正常用于 ``/var/lib/docker`` 正常工作。
 
-
-
 - 创建挂载配置::
 
-   echo "/dev/vgdb/log    /dbdata/log   xfs defaults,noatime,nodiratime<Plug>PeepOpenquota 0 0" >> /etc/fstab
-   echo "/dev/vgdb/data   /dbdata/data  xfs defaults,noatime,nodiratime<Plug>PeepOpenquota 0 0" >> /etc/fstab
+   echo "/dev/vgdb/log    /dbdata/log   xfs defaults,noatime,nodiratime,PeepOpenquota 0 0" >> /etc/fstab
+   echo "/dev/vgdb/data   /dbdata/data  xfs defaults,noatime,nodiratime,PeepOpenquota 0 0" >> /etc/fstab
 
 - 挂载目录::
 

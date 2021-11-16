@@ -1,7 +1,7 @@
-.. _anbox:
+.. _anbox_startup:
 
 ==========================
-Anbox运行Andorid程序
+Anbox快速起步
 ==========================
 
 Anbox部署要点
