@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>比较IOMMU NVMe和原生NVMe存储性能 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="IOMMU调优" href="iommu_tuning.html" />
+    <link rel="prev" title="VFIO - Virtual Function I/O" href="vfio.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">KVM Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../install/index.html">KVM 环境安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">KVM 快速起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hypervisor.html">hypervisor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_architecture.html">KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">KVM 存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numa/index.html">KVM NUMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">IOMMU</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="iommu_infra.html">IOMMU架构</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intel_vt-d_startup.html">Intel VT-d快速起步</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ovmf.html">Open Virtual Machine Firmware(OMVF)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">比较IOMMU NVMe和原生NVMe存储性能</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">磁盘性能测试</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">测试结果</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="iommu_tuning.html">IOMMU调优</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual.html">KVM嵌套虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_vdisk_live.html">KVM虚拟机动态添加、调整磁盘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_live_migration.html">KVM热迁移</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">使用QEMU管理KVM虚拟机</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_libguestfs.html">使用libguestfs访问KVM镜像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../memballoon.html">虚拟机内存balloon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu_passthrough_with_kvm.html">KVM的GPU直通虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nvidia_cuda_gpu_in_kvm.html">在KVM中使用NVIDIA CUDA GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amd_rocm_gpu_in_kvm.html">在KVM中使用AMD ROCm GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../macos_xhyve/index.html">macOS平台xhyve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amd_kvm/index.html">AMD硬件环境KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm_kvm/index.html">ARM硬件环境KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_macos/index.html">KVM虚拟化运行macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">KVM故障排查</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">KVM Atlas</a> &raquo;</li>
+          <li><a href="index.html">IOMMU</a> &raquo;</li>
+      <li>比较IOMMU NVMe和原生NVMe存储性能</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/kvm/iommu/compare_iommu_native_nvme.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="iommu-nvmenvme">
+<span id="compare-iommu-native-nvme"></span><h1>比较IOMMU NVMe和原生NVMe存储性能<a class="headerlink" href="#iommu-nvmenvme" title="永久链接至标题">¶</a></h1>
+<p>我通过 <a class="reference internal" href="ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 将 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> assign到kvm虚拟机，这种 pass-through 技术可以极大提升虚拟机的存储性能。本文将采用 <a class="reference internal" href="../../performance/performance_tools/fio/index.html#fio"><span class="std std-ref">fio 存储性能测试</span></a> 对比存储性能，观察能否满足性能要求，后续还会进行 <a class="reference internal" href="iommu_tuning.html#iommu-tuning"><span class="std std-ref">IOMMU调优</span></a></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在 <a class="reference internal" href="ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机指定NVMe设备前，需要先在物理主机上内核屏蔽了 NVMe 设备。所以要测试物理服务器，必须在内核没有屏蔽之前进行。</p>
+<p>由于我已经完成NVMe assign 给虚拟机 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code> ，所以我先在虚拟机内部完成fio测试，然后关闭虚拟机，去除内核屏蔽nvme设备。然后重启服务器，让物理主机能够访问NVMe设备，再进行对比测试。</p>
+</div>
+<section id="id1">
+<h2>磁盘性能测试<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<section id="iommu">
+<h3>iommu虚拟机<a class="headerlink" href="#iommu" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>随机写IOPS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randwrite</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>测试结果:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机写IOPS</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
+<span class="linenos"> 2</span>Starting <span class="m">4</span> processes
+<span class="linenos"> 3</span><span class="o">[</span><span class="m">43573</span>.735774<span class="o">]</span>  nvme0n1: p1
+<span class="linenos"> 4</span><span class="o">[</span><span class="m">43573</span>.742767<span class="o">]</span>  nvme0n1: p1
+<span class="linenos"> 5</span><span class="o">[</span><span class="m">43633</span>.956828<span class="o">]</span>  nvme0n1: p1%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>698MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span>179k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 6</span><span class="o">[</span><span class="m">43633</span>.969867<span class="o">]</span>  nvme0n1: p1
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">18949</span>: Tue Nov <span class="m">16</span> <span class="m">23</span>:12:38 <span class="m">2021</span>
+<span class="linenos"> 9</span>  write: <span class="nv">IOPS</span><span class="o">=</span>179k, <span class="nv">BW</span><span class="o">=</span>698MiB/s <span class="o">(</span>731MB/s<span class="o">)(</span><span class="m">40</span>.9GiB/60008msec<span class="o">)</span><span class="p">;</span> <span class="m">0</span> zone resets
+<span class="linenos">10</span>    slat <span class="o">(</span>nsec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1966</span>, <span class="nv">max</span><span class="o">=</span>15478k, <span class="nv">avg</span><span class="o">=</span><span class="m">13565</span>.38, <span class="nv">stdev</span><span class="o">=</span><span class="m">229019</span>.39
+<span class="linenos">11</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">3</span>, <span class="nv">max</span><span class="o">=</span><span class="m">15894</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">699</span>.18, <span class="nv">stdev</span><span class="o">=</span><span class="m">1563</span>.95
+<span class="linenos">12</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">112</span>, <span class="nv">max</span><span class="o">=</span><span class="m">15896</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">713</span>.50, <span class="nv">stdev</span><span class="o">=</span><span class="m">1578</span>.09
+<span class="linenos">13</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">14</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span>  <span class="m">159</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span>  <span class="m">161</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span>  <span class="m">163</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span>  <span class="m">167</span><span class="o">]</span>,
+<span class="linenos">15</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span>  <span class="m">169</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span>  <span class="m">169</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span>  <span class="m">172</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span>  <span class="m">172</span><span class="o">]</span>,
+<span class="linenos">16</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span>  <span class="m">176</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span>  <span class="m">182</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span> <span class="m">3195</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span> <span class="m">5211</span><span class="o">]</span>,
+<span class="linenos">17</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span> <span class="m">6194</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span> <span class="m">6587</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span> <span class="m">8094</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span> <span class="m">8225</span><span class="o">]</span>,
+<span class="linenos">18</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span> <span class="m">9241</span><span class="o">]</span>
+<span class="linenos">19</span>   bw <span class="o">(</span>  KiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">664748</span>, <span class="nv">max</span><span class="o">=</span><span class="m">729380</span>, <span class="nv">per</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">avg</span><span class="o">=</span><span class="m">715042</span>.92, <span class="nv">stdev</span><span class="o">=</span><span class="m">2059</span>.70, <span class="nv">samples</span><span class="o">=</span><span class="m">476</span>
+<span class="linenos">20</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">166187</span>, <span class="nv">max</span><span class="o">=</span><span class="m">182343</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">178759</span>.74, <span class="nv">stdev</span><span class="o">=</span><span class="m">514</span>.92, <span class="nv">samples</span><span class="o">=</span><span class="m">476</span>
+<span class="linenos">21</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">10</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">250</span><span class="o">=</span><span class="m">88</span>.39%, <span class="nv">500</span><span class="o">=</span><span class="m">0</span>.03%, <span class="nv">750</span><span class="o">=</span><span class="m">0</span>.14%
+<span class="linenos">22</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">1000</span><span class="o">=</span><span class="m">0</span>.20%
+<span class="linenos">23</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.79%, <span class="nv">4</span><span class="o">=</span><span class="m">1</span>.73%, <span class="nv">10</span><span class="o">=</span><span class="m">8</span>.73%, <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">24</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">7</span>.45%, <span class="nv">sys</span><span class="o">=</span><span class="m">13</span>.06%, <span class="nv">ctx</span><span class="o">=</span><span class="m">42183</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">53</span>
+<span class="linenos">25</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">100</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">26</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">27</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">28</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">0</span>,10716248,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">29</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">32</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">32</span>  WRITE: <span class="nv">bw</span><span class="o">=</span>698MiB/s <span class="o">(</span>731MB/s<span class="o">)</span>, 698MiB/s-698MiB/s <span class="o">(</span>731MB/s-731MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span><span class="m">40</span>.9GiB <span class="o">(</span><span class="m">43</span>.9GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60008</span>-60008msec
+<span class="linenos">33</span>
+<span class="linenos">34</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">35</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">150</span>/10679159, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">6</span>/144970, <span class="nv">in_queue</span><span class="o">=</span><span class="m">144976</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.70%
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>随机读IOPS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randread</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>测试结果:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机读IOPS</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
+<span class="linenos"> 2</span>Starting <span class="m">4</span> processes
+<span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>r<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>703MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span>180k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 4</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">19036</span>: Tue Nov <span class="m">16</span> <span class="m">23</span>:19:47 <span class="m">2021</span>
+<span class="linenos"> 5</span>  read: <span class="nv">IOPS</span><span class="o">=</span>184k, <span class="nv">BW</span><span class="o">=</span>718MiB/s <span class="o">(</span>753MB/s<span class="o">)(</span><span class="m">42</span>.1GiB/60005msec<span class="o">)</span>
+<span class="linenos"> 6</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">2</span>, <span class="nv">max</span><span class="o">=</span><span class="m">16035</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">13</span>.26, <span class="nv">stdev</span><span class="o">=</span><span class="m">226</span>.44
+<span class="linenos"> 7</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">3</span>, <span class="nv">max</span><span class="o">=</span><span class="m">16646</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">678</span>.77, <span class="nv">stdev</span><span class="o">=</span><span class="m">1542</span>.05
+<span class="linenos"> 8</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">91</span>, <span class="nv">max</span><span class="o">=</span><span class="m">16648</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">692</span>.82, <span class="nv">stdev</span><span class="o">=</span><span class="m">1556</span>.10
+<span class="linenos"> 9</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">10</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span>  <span class="m">123</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span>  <span class="m">129</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span>  <span class="m">133</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span>  <span class="m">141</span><span class="o">]</span>,
+<span class="linenos">11</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span>  <span class="m">153</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span>  <span class="m">161</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span>  <span class="m">172</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span>  <span class="m">180</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span>  <span class="m">190</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span>  <span class="m">202</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span> <span class="m">2933</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span> <span class="m">5211</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span> <span class="m">6194</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span> <span class="m">6259</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span> <span class="m">7308</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span> <span class="m">8160</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span> <span class="m">9241</span><span class="o">]</span>
+<span class="linenos">15</span>   bw <span class="o">(</span>  KiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">686847</span>, <span class="nv">max</span><span class="o">=</span><span class="m">752704</span>, <span class="nv">per</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">avg</span><span class="o">=</span><span class="m">735929</span>.24, <span class="nv">stdev</span><span class="o">=</span><span class="m">2074</span>.97, <span class="nv">samples</span><span class="o">=</span><span class="m">476</span>
+<span class="linenos">16</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">171711</span>, <span class="nv">max</span><span class="o">=</span><span class="m">188176</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">183981</span>.78, <span class="nv">stdev</span><span class="o">=</span><span class="m">518</span>.78, <span class="nv">samples</span><span class="o">=</span><span class="m">476</span>
+<span class="linenos">17</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">100</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">250</span><span class="o">=</span><span class="m">88</span>.62%, <span class="nv">500</span><span class="o">=</span><span class="m">0</span>.12%, <span class="nv">750</span><span class="o">=</span><span class="m">0</span>.14%
+<span class="linenos">18</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">1000</span><span class="o">=</span><span class="m">0</span>.23%
+<span class="linenos">19</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.71%, <span class="nv">4</span><span class="o">=</span><span class="m">1</span>.65%, <span class="nv">10</span><span class="o">=</span><span class="m">8</span>.52%, <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">20</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">7</span>.46%, <span class="nv">sys</span><span class="o">=</span><span class="m">12</span>.99%, <span class="nv">ctx</span><span class="o">=</span><span class="m">42065</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">172</span>
+<span class="linenos">21</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">100</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">22</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">23</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">24</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">11026195</span>,0,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">25</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">32</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">28</span>   READ: <span class="nv">bw</span><span class="o">=</span>718MiB/s <span class="o">(</span>753MB/s<span class="o">)</span>, 718MiB/s-718MiB/s <span class="o">(</span>753MB/s-753MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span><span class="m">42</span>.1GiB <span class="o">(</span><span class="m">45</span>.2GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60005</span>-60005msec
+<span class="linenos">29</span>
+<span class="linenos">30</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">31</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">10995918</span>/0, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">779571</span>/0, <span class="nv">in_queue</span><span class="o">=</span><span class="m">779570</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.72%
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>顺序写吞吐量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">128</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">write</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">128</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>测试结果:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序写吞吐量</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
+<span class="linenos"> 2</span>Starting <span class="m">1</span> process
+<span class="linenos"> 3</span><span class="o">[</span><span class="m">44748</span>.680320<span class="o">]</span>  nvme0n1: p1
+<span class="linenos"> 4</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>W<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>1740MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">13</span>.9k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 5</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">19177</span>: Tue Nov <span class="m">16</span> <span class="m">23</span>:32:13 <span class="m">2021</span>
+<span class="linenos"> 6</span>  write: <span class="nv">IOPS</span><span class="o">=</span><span class="m">18</span>.6k, <span class="nv">BW</span><span class="o">=</span>2327MiB/s <span class="o">(</span>2440MB/s<span class="o">)(</span>136GiB/60009msec<span class="o">)</span><span class="p">;</span> <span class="m">0</span> zone resets
+<span class="linenos"> 7</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">4</span>, <span class="nv">max</span><span class="o">=</span><span class="m">4098</span>, <span class="nv">avg</span><span class="o">=</span> <span class="m">8</span>.52, <span class="nv">stdev</span><span class="o">=</span> <span class="m">8</span>.11
+<span class="linenos"> 8</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1659</span>, <span class="nv">max</span><span class="o">=</span><span class="m">70016</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">6865</span>.76, <span class="nv">stdev</span><span class="o">=</span><span class="m">2906</span>.56
+<span class="linenos"> 9</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1666</span>, <span class="nv">max</span><span class="o">=</span><span class="m">70025</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">6874</span>.46, <span class="nv">stdev</span><span class="o">=</span><span class="m">2907</span>.11
+<span class="linenos">10</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">11</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span> <span class="m">4752</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span> <span class="m">4817</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span> <span class="m">4817</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span> <span class="m">4817</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span> <span class="m">8455</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span> <span class="m">8979</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span> <span class="m">9241</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span> <span class="m">9503</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span> <span class="m">9896</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span><span class="m">11207</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span><span class="m">13435</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span><span class="m">40633</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span><span class="m">42206</span><span class="o">]</span>,
+<span class="linenos">15</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span><span class="m">68682</span><span class="o">]</span>
+<span class="linenos">16</span>   bw <span class="o">(</span>  MiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">1487</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">3313</span>, <span class="nv">per</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">avg</span><span class="o">=</span><span class="m">2332</span>.57, <span class="nv">stdev</span><span class="o">=</span><span class="m">780</span>.16, <span class="nv">samples</span><span class="o">=</span><span class="m">119</span>
+<span class="linenos">17</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">11898</span>, <span class="nv">max</span><span class="o">=</span><span class="m">26508</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">18660</span>.45, <span class="nv">stdev</span><span class="o">=</span><span class="m">6241</span>.27, <span class="nv">samples</span><span class="o">=</span><span class="m">119</span>
+<span class="linenos">18</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.04%, <span class="nv">10</span><span class="o">=</span><span class="m">96</span>.03%, <span class="nv">20</span><span class="o">=</span><span class="m">3</span>.65%, <span class="nv">50</span><span class="o">=</span><span class="m">0</span>.24%
+<span class="linenos">19</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">100</span><span class="o">=</span><span class="m">0</span>.02%
+<span class="linenos">20</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">8</span>.93%, <span class="nv">sys</span><span class="o">=</span><span class="m">13</span>.70%, <span class="nv">ctx</span><span class="o">=</span><span class="m">1098973</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">10</span>
+<span class="linenos">21</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">100</span>.0%
+<span class="linenos">22</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">23</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.1%
+<span class="linenos">24</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">0</span>,1117179,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">25</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">128</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">28</span>  WRITE: <span class="nv">bw</span><span class="o">=</span>2327MiB/s <span class="o">(</span>2440MB/s<span class="o">)</span>, 2327MiB/s-2327MiB/s <span class="o">(</span>2440MB/s-2440MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>136GiB <span class="o">(</span>146GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60009</span>-60009msec
+<span class="linenos">29</span>
+<span class="linenos">30</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">31</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">70</span>/1115212, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">3</span>/7649227, <span class="nv">in_queue</span><span class="o">=</span><span class="m">7649230</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.91%
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>顺序读吞吐量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">128</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">read</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">128</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>测试结果:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序读吞吐量</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.26
+<span class="linenos"> 2</span>Starting <span class="m">1</span> process
+<span class="linenos"> 3</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>R<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>3452MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span><span class="m">27</span>.6k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 4</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">19234</span>: Tue Nov <span class="m">16</span> <span class="m">23</span>:37:10 <span class="m">2021</span>
+<span class="linenos"> 5</span>  read: <span class="nv">IOPS</span><span class="o">=</span><span class="m">27</span>.6k, <span class="nv">BW</span><span class="o">=</span>3454MiB/s <span class="o">(</span>3621MB/s<span class="o">)(</span>202GiB/60004msec<span class="o">)</span>
+<span class="linenos"> 6</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">3</span>, <span class="nv">max</span><span class="o">=</span><span class="m">1005</span>, <span class="nv">avg</span><span class="o">=</span> <span class="m">6</span>.18, <span class="nv">stdev</span><span class="o">=</span> <span class="m">4</span>.63
+<span class="linenos"> 7</span>    clat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">737</span>, <span class="nv">max</span><span class="o">=</span><span class="m">15904</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">4625</span>.20, <span class="nv">stdev</span><span class="o">=</span><span class="m">1178</span>.03
+<span class="linenos"> 8</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">742</span>, <span class="nv">max</span><span class="o">=</span><span class="m">15913</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">4631</span>.53, <span class="nv">stdev</span><span class="o">=</span><span class="m">1178</span>.04
+<span class="linenos"> 9</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">10</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span> <span class="m">3458</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span> <span class="m">3556</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span> <span class="m">3621</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span> <span class="m">3687</span><span class="o">]</span>,
+<span class="linenos">11</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span> <span class="m">4080</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span> <span class="m">4146</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span> <span class="m">4228</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span> <span class="m">4490</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span> <span class="m">4686</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span> <span class="m">4948</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span> <span class="m">7046</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span> <span class="m">7635</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span> <span class="m">7963</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span> <span class="m">8029</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span> <span class="m">8291</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span> <span class="m">8356</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span><span class="m">10159</span><span class="o">]</span>
+<span class="linenos">15</span>   bw <span class="o">(</span>  MiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">3384</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">3467</span>, <span class="nv">per</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">avg</span><span class="o">=</span><span class="m">3456</span>.70, <span class="nv">stdev</span><span class="o">=</span> <span class="m">8</span>.85, <span class="nv">samples</span><span class="o">=</span><span class="m">119</span>
+<span class="linenos">16</span>   iops        : <span class="nv">min</span><span class="o">=</span><span class="m">27074</span>, <span class="nv">max</span><span class="o">=</span><span class="m">27742</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">27653</span>.51, <span class="nv">stdev</span><span class="o">=</span><span class="m">70</span>.83, <span class="nv">samples</span><span class="o">=</span><span class="m">119</span>
+<span class="linenos">17</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">750</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">1000</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">18</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.13%, <span class="nv">4</span><span class="o">=</span><span class="m">27</span>.97%, <span class="nv">10</span><span class="o">=</span><span class="m">71</span>.88%, <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">19</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">5</span>.68%, <span class="nv">sys</span><span class="o">=</span><span class="m">18</span>.43%, <span class="nv">ctx</span><span class="o">=</span><span class="m">1249956</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">4108</span>
+<span class="linenos">20</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">100</span>.0%
+<span class="linenos">21</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">22</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.1%
+<span class="linenos">23</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">1657851</span>,0,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">24</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">128</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">27</span>   READ: <span class="nv">bw</span><span class="o">=</span>3454MiB/s <span class="o">(</span>3621MB/s<span class="o">)</span>, 3454MiB/s-3454MiB/s <span class="o">(</span>3621MB/s-3621MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>202GiB <span class="o">(</span>217GB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60004</span>-60004msec
+<span class="linenos">28</span>
+<span class="linenos">29</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">30</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">1654854</span>/0, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/0, <span class="nv">ticks</span><span class="o">=</span><span class="m">7648191</span>/0, <span class="nv">in_queue</span><span class="o">=</span><span class="m">7648190</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.94%
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="id2">
+<h2>测试结果<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<table class="colwidths-given docutils align-default" id="id9">
+<caption><span class="caption-text">IOMMU虚拟机和物理机 NVMe性能对比</span><a class="headerlink" href="#id9" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 30%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>IOMMU虚拟机</p></th>
+<th class="head"><p>物理主机</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4K随机写IOPS</p></td>
+<td><p>179k</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>4K随机读IOPS</p></td>
+<td><p>184k</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>顺序写吞吐量</p></td>
+<td><p>2440MB/s</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>顺序读吞吐量</p></td>
+<td><p>3621MB/s</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://help.aliyun.com/document_detail/147897.html">阿里云帮助文档: 测试块存储性能</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="vfio.html" class="btn btn-neutral float-left" title="VFIO - Virtual Function I/O" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="iommu_tuning.html" class="btn btn-neutral float-right" title="IOMMU调优" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

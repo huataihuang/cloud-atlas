@@ -65,10 +65,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#iommu">设置IOMMU</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#gpu">隔离GPU</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ovmf-guest-vm">设置OVMF guest VM</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">下一步</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
+<li class="toctree-l3"><a class="reference internal" href="compare_iommu_native_nvme.html">比较IOMMU NVMe和原生NVMe存储性能</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
@@ -213,8 +215,8 @@
 </pre></div>
 </div>
 <p>输出类似:</p>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">ovmf/dmesg_dmar_iommu.txt</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">ovmf/dmesg_dmar_iommu.txt</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="o">[</span>    <span class="m">0</span>.000000<span class="o">]</span> Command line: <span class="nv">BOOT_IMAGE</span><span class="o">=</span>/boot/vmlinuz-5.4.0-90-generic <span class="nv">root</span><span class="o">=</span><span class="nv">UUID</span><span class="o">=</span>caa4193b-9222-49fe-a4b3-89f1cb417e6a ro <span class="nv">intel_iommu</span><span class="o">=</span>on
 <span class="linenos"> 2</span><span class="o">[</span>    <span class="m">0</span>.009994<span class="o">]</span> ACPI: DMAR 0x000000007B7E7000 <span class="m">000294</span> <span class="o">(</span>v01 HP     ProLiant <span class="m">00000001</span> HP   <span class="m">00000001</span><span class="o">)</span>
 <span class="linenos"> 3</span><span class="o">[</span>    <span class="m">0</span>.010030<span class="o">]</span> ACPI: Reserving DMAR table memory at <span class="o">[</span>mem 0x7b7e7000-0x7b7e7293<span class="o">]</span>
@@ -256,8 +258,8 @@
 <section id="groups">
 <h3>检查groups是否正确<a class="headerlink" href="#groups" title="永久链接至标题">¶</a></h3>
 <p>以下脚本 <code class="docutils literal notranslate"><span class="pre">check_iommu.sh</span></code> 脚本可以查看系统中不同的PCI设备被映射到IOMMU组，如果没有返回任何信息，则表明系统没有激活IOMMU支持或者硬件不支持IOMMU</p>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">intel_vt-d_startup/check_iommu.sh</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">intel_vt-d_startup/check_iommu.sh</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="ch">#!/bin/bash</span>
 <span class="linenos">2</span><span class="nb">shopt</span> -s nullglob
 <span class="linenos">3</span><span class="k">for</span> g <span class="k">in</span> <span class="sb">`</span>find /sys/kernel/iommu_groups/* -maxdepth <span class="m">0</span> -type d <span class="p">|</span> sort -V<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
@@ -554,6 +556,10 @@
      <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>请注意， <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a</span></code> 是对同一种类设备进行屏蔽，所有在这个服务器上安装的 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 都是相同的设备ID，也就是会同时被屏蔽掉。目前看，不能单独只屏蔽一块NVMe存储，因为都是相同的三星NVMe，会一起被 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 接管。可以看到上面 <code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">-nnk</span> <span class="pre">-d</span> <span class="pre">144d:a80a</span></code> 显示3块三星NVMe。</p>
+</div>
 <p>检查GPU:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">10</span><span class="n">de</span><span class="p">:</span><span class="mi">1</span><span class="n">b39</span>
 </pre></div>
@@ -672,8 +678,8 @@
 </pre></div>
 </div>
 <p>输出显示:</p>
-<div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">Samsung PM9A1</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">&lt;device&gt;</span>
 <span class="linenos"> 2</span>  <span class="nt">&lt;name&gt;</span>pci_0000_05_00_0<span class="nt">&lt;/name&gt;</span>
 <span class="linenos"> 3</span>  <span class="nt">&lt;path&gt;</span>/sys/devices/pci0000:00/0000:00:02.0/0000:05:00.0<span class="nt">&lt;/path&gt;</span>
@@ -707,8 +713,8 @@
 </pre></div>
 </div>
 <p>输出显示:</p>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">NVIDIA Tesla P10</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">NVIDIA Tesla P10</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">&lt;device&gt;</span>
 <span class="linenos"> 2</span>  <span class="nt">&lt;name&gt;</span>pci_0000_82_00_0<span class="nt">&lt;/name&gt;</span>
 <span class="linenos"> 3</span>  <span class="nt">&lt;path&gt;</span>/sys/devices/pci0000:80/0000:80:02.0/0000:82:00.0<span class="nt">&lt;/path&gt;</span>
@@ -757,8 +763,8 @@ $ printf %x 0
 </pre></div>
 </div>
 <p>则对应配置 <code class="docutils literal notranslate"><span class="pre">samsung_pm9a1_1.xml</span></code> :</p>
-<div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #1</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #1</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
 <span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
 <span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x5&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
@@ -783,8 +789,8 @@ $ printf %x 0
 </pre></div>
 </div>
 <p>则对应配置 <code class="docutils literal notranslate"><span class="pre">tesla_p10.xml</span></code> :</p>
-<div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">NVIDIA Tesla P10</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">NVIDIA Tesla P10</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
 <span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
 <span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x82&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
@@ -808,8 +814,8 @@ $ printf %x 0
 </pre></div>
 </div>
 <p>在虚拟机 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code> 终端控制台可以看到信息:</p>
-<div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #1</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #1</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>[ 6621.990244] pcieport 0000:00:01.6: pciehp: Slot(0-6) Powering on due to button press
 <span class="linenos"> 2</span>[ 6621.993421] pcieport 0000:00:01.6: pciehp: Slot(0-6): Card present
 <span class="linenos"> 3</span>[ 6621.995719] pcieport 0000:00:01.6: pciehp: Slot(0-6): Link Up
@@ -841,6 +847,10 @@ $ printf %x 0
 <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这种live方式添加nvme磁盘所在的pci设备可以立即使用存储，无需重启虚拟机。但是虚拟机重启后，该磁盘未自动添加。所以我后来还是采用 <code class="docutils literal notranslate"><span class="pre">--config</span></code> 参数运行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">attach-device</span></code> ，然后重启虚拟机。重启以后可以保持使用NVMe设备。</p>
+</div>
 </section>
 <section id="id5">
 <h4>添加GPU设备<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h4>
@@ -871,15 +881,32 @@ $ printf %x 0
 </div>
 </li>
 </ul>
-<p>可以看到完整的2个PCI设备:</p>
+<p>可以看到GPU设备:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">07</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">GP102GL</span> <span class="p">[</span><span class="n">Tesla</span> <span class="n">P10</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>但是没有找到前面live方式添加的NVMe设备，所以使用 <code class="docutils literal notranslate"><span class="pre">--config</span></code> 参数再重新添加一次NVMe设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">iommu</span> <span class="n">samsung_pm9a1_1</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
+</pre></div>
+</div>
+<p>重启以后再次检查可以看到添加的2个pci设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">07</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">GP102GL</span> <span class="p">[</span><span class="n">Tesla</span> <span class="n">P10</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">NVMe</span> <span class="n">SSD</span> <span class="n">Controller</span> <span class="n">PM9A1</span><span class="o">/</span><span class="n">PM9A3</span><span class="o">/</span><span class="mi">980</span><span class="n">PRO</span>
 </pre></div>
 </div>
 </section>
 </section>
 </section>
 <section id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<h2>下一步<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<p>现在上述两个PCIe设备已经属于虚拟机独占使用，和常规的设备使用一致，接下来就是:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../machine_learning/cuda/install_cuda_ubuntu.html#install-cuda-ubuntu"><span class="std std-ref">在Ubuntu安装NVIDIA CUDA</span></a> - 对于pass-through的gpu设备，在虚拟机内部如同物理主机一样，需要安装GPU驱动以及CUDA环境</p></li>
+<li><p><a class="reference internal" href="compare_iommu_native_nvme.html#compare-iommu-native-nvme"><span class="std std-ref">比较IOMMU NVMe和原生NVMe存储性能</span></a> - 在虚拟机内部和物理主机上，分别对NVMe测试存储性能</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://www.linux-kvm.org/downloads/lersek/ovmf-whitepaper-c770f8c.txt">Open Virtual Machine Firmware (OVMF) Status Report</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF">arch linux: PCI passthrough via OVMF</a></p></li>

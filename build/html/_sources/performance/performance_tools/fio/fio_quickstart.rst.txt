@@ -1,0 +1,106 @@
+.. _fio_quickstart:
+
+===================
+fio简明操作
+===================
+
+.. note::
+
+   本文简单整理快速对比测试 :ref:`samsung_pm9a1` 在 :ref:`iommu` 环境和直接物理主机读写性能，目标是使用 ``fio`` 快速完成简单性能测试对比。不作详细解析，留待后续进一步学习整理。
+
+完成 :ref:`iommu` 的 :ref:`ovmf` 虚拟机部署之后，需要验证和测试虚拟化pass-through对存储性能的影响
+
+.. note::
+
+   在 :ref:`ovmf` 虚拟机指定NVMe设备前，需要先在物理主机上内核屏蔽了 NVMe 设备。所以要测试物理服务器，必须在内核没有屏蔽之前进行。
+
+   由于我已经完成NVMe assign 给虚拟机 ``z-iommu`` ，所以我先在虚拟机内部完成fio测试，然后关闭虚拟机，去除内核屏蔽nvme设备。然后重启服务器，让物理主机能够访问NVMe设备，再进行对比测试。
+
+磁盘性能测试
+==============
+
+iommu虚拟机
+---------------
+
+- 随机写IOPS::
+
+   fio -direct=1 -iodepth=32 -rw=randwrite -ioengine=libaio -bs=4k -numjobs=4 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
+
+测试结果:
+
+.. literalinclude:: fio_quickstart/iommu_randwrite_iops.txt
+   :language: bash
+   :linenos:
+   :caption: IOMMU虚拟机 随机写IOPS
+
+- 随机读IOPS::
+
+   fio -direct=1 -iodepth=32 -rw=randread -ioengine=libaio -bs=4k -numjobs=4 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
+
+测试结果:
+
+.. literalinclude:: fio_quickstart/iommu_randread_iops.txt
+   :language: bash
+   :linenos:
+   :caption: IOMMU虚拟机 随机读IOPS
+
+- 顺序写吞吐量::
+
+   fio -direct=1 -iodepth=128 -rw=write -ioengine=libaio -bs=128k -numjobs=1 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
+
+测试结果:
+
+.. literalinclude:: fio_quickstart/iommu_write.txt
+   :language: bash
+   :linenos:
+   :caption: IOMMU虚拟机 顺序写吞吐量
+
+- 顺序读吞吐量::
+
+   fio -direct=1 -iodepth=128 -rw=read -ioengine=libaio -bs=128k -numjobs=1 -time_based=1 -runtime=60 -group_reporting -filename=/dev/nvme0n1 -name=test
+
+测试结果:
+
+.. literalinclude:: fio_quickstart/iommu_read.txt
+   :language: bash
+   :linenos:
+   :caption: IOMMU虚拟机 顺序读吞吐量
+
+文件系统测试
+================
+
+.. note::
+
+   文件系统对fio磁盘性能测试有较大影响，所以对于硬件性能对比，我最终没有采用文件系统，而是采用阿里云文档中直接对磁盘设备进行读写
+
+虚拟机和物理主机使用相同规格的 :ref:`samsung_pm9a1` ，采用 :ref:`xfs` 文件系统
+
+- 在虚拟机 ``z-iommu`` 中格式化磁盘::
+
+   parted -s /dev/nvme0n1 mklabel gpt
+   parted -s -a optimal /dev/nvme0n1 mkpart primary 0% 100%
+   mkfs.xfs /dev/nvme0n1p1
+
+- 编辑 ``/etc/fstab`` 添加::
+
+   /dev/nvme0n1p1  /data  xfs  defaults,noatime,nodiratime 0 0
+
+- 挂载::
+
+   mkdir /data
+   mount /data
+
+- 使用 ``df -h`` 检查可以看到::
+
+   /dev/nvme0n1p1  954G  6.7G  947G   1% /data
+
+- 执行 ``mount | grep nmve`` 可以看到实际挂载参数::
+
+   /dev/nvme0n1p1 on /data type xfs (rw,noatime,nodiratime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota)
+
+
+
+参考
+=========
+
+- `阿里云帮助文档: 测试块存储性能 <https://help.aliyun.com/document_detail/147897.html>`_

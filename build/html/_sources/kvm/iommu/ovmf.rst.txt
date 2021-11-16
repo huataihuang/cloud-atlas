@@ -328,6 +328,10 @@ dracut的早期加载机制是通过内核参数。
    	Kernel driver in use: vfio-pci
    	Kernel modules: nvme
 
+.. note::
+
+   请注意， ``vfio-pci.ids=144d:a80a`` 是对同一种类设备进行屏蔽，所有在这个服务器上安装的 :ref:`samsung_pm9a1` 都是相同的设备ID，也就是会同时被屏蔽掉。目前看，不能单独只屏蔽一块NVMe存储，因为都是相同的三星NVMe，会一起被 ``vfio-pci`` 接管。可以看到上面 ``lspci -nnk -d 144d:a80a`` 显示3块三星NVMe。
+
 检查GPU::
 
    lspci -nnk -d 10de:1b39
@@ -535,6 +539,10 @@ GPU设备::
    Sector size (logical/physical): 512 bytes / 512 bytes
    I/O size (minimum/optimal): 512 bytes / 512 bytes
 
+.. note::
+
+   这种live方式添加nvme磁盘所在的pci设备可以立即使用存储，无需重启虚拟机。但是虚拟机重启后，该磁盘未自动添加。所以我后来还是采用 ``--config`` 参数运行 ``virsh attach-device`` ，然后重启虚拟机。重启以后可以保持使用NVMe设备。
+
 添加GPU设备
 ~~~~~~~~~~~~~
 
@@ -560,10 +568,26 @@ GPU设备::
 
    lspci
 
-可以看到完整的2个PCI设备::
-
+可以看到GPU设备::
    
    07:00.0 3D controller: NVIDIA Corporation GP102GL [Tesla P10] (rev a1)
+
+但是没有找到前面live方式添加的NVMe设备，所以使用 ``--config`` 参数再重新添加一次NVMe设备::
+
+   virsh attach-device z-iommu samsung_pm9a1_1.xml --config
+
+重启以后再次检查可以看到添加的2个pci设备::
+
+   07:00.0 3D controller: NVIDIA Corporation GP102GL [Tesla P10] (rev a1)
+   08:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller PM9A1/PM9A3/980PRO
+
+下一步
+=========
+
+现在上述两个PCIe设备已经属于虚拟机独占使用，和常规的设备使用一致，接下来就是:
+
+- :ref:`install_cuda_ubuntu` - 对于pass-through的gpu设备，在虚拟机内部如同物理主机一样，需要安装GPU驱动以及CUDA环境
+- :ref:`compare_iommu_native_nvme` - 在虚拟机内部和物理主机上，分别对NVMe测试存储性能
 
 参考
 ======
