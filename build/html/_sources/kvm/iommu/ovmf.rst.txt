@@ -131,6 +131,20 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 只需要使用 ``144d:a80a`` 和 ``10de:1b39`` 这两个设备ID来绑定 ``vfio-pci``
 
+.. note::
+
+   要同时输出设备ID和 ``vfio-pci`` 绑定ID，可以使用 ``lspci -nn`` 命令，可以显示详细信息::
+
+      lspci -nn | grep -i samsung
+
+   就可以看到详细信息::
+
+      05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+      08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+      0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+
+   可以直接知道内核需要传递的 ``vfio-pci.ids`` 就是 ``144d:a80a`` ，同时也能够知道如何配置设备 ``.xml`` 文件用于 ``virsh attach-device``
+
 有两种方式将设备 remove 或者 break :
 
 - 使用启动内核参数::
@@ -292,15 +306,6 @@ dracut的早期加载机制是通过内核参数。
 
    sudo update-grub
 
-
-- 我发现错误了，内核配置应该是 ``vfio-pci.ids=144d:a80a,10de:1b39`` ，而不是以前旧格式配置 ``pci-stub.ids=144d:a80a,10de:1b39`` ，所以重新修订 ``/etc/default/grub`` ::
-
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39"
-
-然后重新生成grub::
-
-   sudo update-grub
-
 然后再次重启系统，并检查 ``dmesg | grep -i vfio`` 输出，这次正常了，可以看到 ``vfio_pci`` 正确绑定了指定PCIe设备::
 
    [    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
@@ -362,13 +367,13 @@ virt-install
 
 - 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷::
 
-   virsh vol-create-as images_lvm fedora35 6G
+   virsh vol-create-as images_lvm z-fedora35 6G
 
 - 创建虚拟机::
 
    virt-install \
      --network bridge:virbr0 \
-     --name fedora35 \
+     --name z-fedora35 \
      --ram=2048 \
      --vcpus=1 \
      --os-type=Linux --os-variant=fedora31 \
@@ -397,7 +402,7 @@ Fedora Workstation版本只能从iso安装
 - 安装完成后，重启系统，继续可以通过控制台维护，首次启动后就可以通过 ``dnf upgrade`` 更新系统
 - 按照 :ref:`priv_cloud_infra` 规划配置主机IP，然后clone出测试服务器 ( :ref:`libvirt_lvm_pool` )::
 
-   virt-clone --original fedora35 --name z-iommu --auto-clone
+   virt-clone --original z-fedora35 --name z-iommu --auto-clone
 
 - clone之后，对容器内部进行配置修订: Fedora Server使用 :ref:`networkmanager` 管理网络，所以通过以下命令修订静态IP地址和主机名::
 
@@ -418,6 +423,28 @@ Fedora Workstation版本只能从iso安装
            82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
 
 并通过内核启动参数 ``vfio-pci.ids=144d:a80a,10de:1b39`` 屏蔽了HOST物理主机使用这两个设备，现在我们可以将这两个设备attach到虚拟机。
+
+.. note::
+
+   我被Red Hat的文档绕糊涂了，实际上只需要执行 ``virsh nodedev-list --cap pci`` 没有必要执行 ``virsh nodedev-dumpxml`` :
+
+   - ``lspci | grep -i Samsung`` 和 ``lspci | grep -i nvidia`` 实际上已经获得了16进制设备的完整id了::
+
+      05:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
+      08:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
+      0b:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
+
+      82:00.0 3D controller: NVIDIA Corporation Device 1b39 (rev a1)
+
+   第一列就是设备十六进制的ID，可以直接用来配置设备的 ``.xml`` 文件，3个数字字段分别对应了 ``bus= slot= function=`` 举例第三个NVMe设备 ``0b:00.0`` ::
+
+      <hostdev mode='subsystem' type='pci' managed='yes'>
+        <source>
+           <address domain='0x0' bus='0xb' slot='0x0' function='0x0'/>
+        </source>
+      </hostdev>
+
+   后面我写的这段实践可以省略
 
 - 使用 ``lspci`` 命令检查::
 
@@ -541,7 +568,13 @@ GPU设备::
 
 .. note::
 
-   这种live方式添加nvme磁盘所在的pci设备可以立即使用存储，无需重启虚拟机。但是虚拟机重启后，该磁盘未自动添加。所以我后来还是采用 ``--config`` 参数运行 ``virsh attach-device`` ，然后重启虚拟机。重启以后可以保持使用NVMe设备。
+   这种live方式添加nvme磁盘所在的pci设备可以立即使用存储，无需重启虚拟机。但是虚拟机重启后，该磁盘未自动添加。所以我后来还是采用 ``--config`` 参数运行 ``virsh attach-device`` ，然后重启虚拟机。重启以后可以保持使用NVMe设备::
+
+      virsh attach-device z-iommu samsung_pm9a1_1.xml --config 
+
+- 删除设备是反向操作::
+
+   virsh detach-device z-iommu samsung_pm9a1_1.xml --config 
 
 添加GPU设备
 ~~~~~~~~~~~~~

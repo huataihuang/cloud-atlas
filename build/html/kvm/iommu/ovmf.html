@@ -71,6 +71,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
 <li class="toctree-l3"><a class="reference internal" href="compare_iommu_native_nvme.html">比较IOMMU NVMe和原生NVMe存储性能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tunning/index.html">IOMMU性能优化</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
@@ -114,6 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
@@ -329,6 +331,20 @@
 </pre></div>
 </div>
 <p>只需要使用 <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> 和 <code class="docutils literal notranslate"><span class="pre">10de:1b39</span></code> 这两个设备ID来绑定 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>要同时输出设备ID和 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 绑定ID，可以使用 <code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">-nn</span></code> 命令，可以显示详细信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nn</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">samsung</span>
+</pre></div>
+</div>
+<p>就可以看到详细信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>可以直接知道内核需要传递的 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids</span></code> 就是 <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> ，同时也能够知道如何配置设备 <code class="docutils literal notranslate"><span class="pre">.xml</span></code> 文件用于 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">attach-device</span></code></p>
+</div>
 <p>有两种方式将设备 remove 或者 break :</p>
 <ul>
 <li><p>使用启动内核参数:</p>
@@ -515,17 +531,6 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
 </pre></div>
 </div>
-<ul>
-<li><p>我发现错误了，内核配置应该是 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a,10de:1b39</span></code> ，而不是以前旧格式配置 <code class="docutils literal notranslate"><span class="pre">pci-stub.ids=144d:a80a,10de:1b39</span></code> ，所以重新修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39&quot;</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>然后重新生成grub:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
-</pre></div>
-</div>
 <p>然后再次重启系统，并检查 <code class="docutils literal notranslate"><span class="pre">dmesg</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">-i</span> <span class="pre">vfio</span></code> 输出，这次正常了，可以看到 <code class="docutils literal notranslate"><span class="pre">vfio_pci</span></code> 正确绑定了指定PCIe设备:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
 [    0.252622] Kernel command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
@@ -588,14 +593,14 @@
 <h3>virt-install<a class="headerlink" href="#virt-install" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 命令添加 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span></code> 和 <code class="docutils literal notranslate"><span class="pre">--cpu</span> <span class="pre">host-passthrough</span></code> 参数安装操作系统。注意，虚拟机系统磁盘采用 <a class="reference internal" href="../libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> ，所以首先创建LVM卷:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">fedora35</span> <span class="mi">6</span><span class="n">G</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> <span class="mi">6</span><span class="n">G</span>
 </pre></div>
 </div>
 </li>
 <li><p>创建虚拟机:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
   <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
-  <span class="o">--</span><span class="n">name</span> <span class="n">fedora35</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> \
   <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
   <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
   <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">Linux</span> <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">fedora31</span> \
@@ -626,7 +631,7 @@
 </li>
 <li><p>安装完成后，重启系统，继续可以通过控制台维护，首次启动后就可以通过 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">upgrade</span></code> 更新系统</p></li>
 <li><p>按照 <a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划配置主机IP，然后clone出测试服务器 ( <a class="reference internal" href="../libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> ):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">fedora35</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">iommu</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">iommu</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
 </pre></div>
 </div>
 </li>
@@ -650,6 +655,30 @@
 </pre></div>
 </div>
 <p>并通过内核启动参数 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a,10de:1b39</span></code> 屏蔽了HOST物理主机使用这两个设备，现在我们可以将这两个设备attach到虚拟机。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我被Red Hat的文档绕糊涂了，实际上只需要执行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">nodedev-list</span> <span class="pre">--cap</span> <span class="pre">pci</span></code> 没有必要执行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">nodedev-dumpxml</span></code> :</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">-i</span> <span class="pre">Samsung</span></code> 和 <code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">-i</span> <span class="pre">nvidia</span></code> 实际上已经获得了16进制设备的完整id了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="n">a80a</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="n">a80a</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="n">a80a</span>
+
+<span class="mi">82</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">Device</span> <span class="mi">1</span><span class="n">b39</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>第一列就是设备十六进制的ID，可以直接用来配置设备的 <code class="docutils literal notranslate"><span class="pre">.xml</span></code> 文件，3个数字字段分别对应了 <code class="docutils literal notranslate"><span class="pre">bus=</span> <span class="pre">slot=</span> <span class="pre">function=</span></code> 举例第三个NVMe设备 <code class="docutils literal notranslate"><span class="pre">0b:00.0</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">hostdev</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;subsystem&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;pci&#39;</span> <span class="n">managed</span><span class="o">=</span><span class="s1">&#39;yes&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+     <span class="o">&lt;</span><span class="n">address</span> <span class="n">domain</span><span class="o">=</span><span class="s1">&#39;0x0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0xb&#39;</span> <span class="n">slot</span><span class="o">=</span><span class="s1">&#39;0x0&#39;</span> <span class="n">function</span><span class="o">=</span><span class="s1">&#39;0x0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">hostdev</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>后面我写的这段实践可以省略</p>
+</div>
 <ul>
 <li><p>使用 <code class="docutils literal notranslate"><span class="pre">lspci</span></code> 命令检查:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># lspci | grep -i Samsung</span>
@@ -849,8 +878,18 @@ $ printf %x 0
 </div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>这种live方式添加nvme磁盘所在的pci设备可以立即使用存储，无需重启虚拟机。但是虚拟机重启后，该磁盘未自动添加。所以我后来还是采用 <code class="docutils literal notranslate"><span class="pre">--config</span></code> 参数运行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">attach-device</span></code> ，然后重启虚拟机。重启以后可以保持使用NVMe设备。</p>
+<p>这种live方式添加nvme磁盘所在的pci设备可以立即使用存储，无需重启虚拟机。但是虚拟机重启后，该磁盘未自动添加。所以我后来还是采用 <code class="docutils literal notranslate"><span class="pre">--config</span></code> 参数运行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">attach-device</span></code> ，然后重启虚拟机。重启以后可以保持使用NVMe设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">iommu</span> <span class="n">samsung_pm9a1_1</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
+</pre></div>
 </div>
+</div>
+<ul>
+<li><p>删除设备是反向操作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">detach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">iommu</span> <span class="n">samsung_pm9a1_1</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </section>
 <section id="id5">
 <h4>添加GPU设备<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h4>

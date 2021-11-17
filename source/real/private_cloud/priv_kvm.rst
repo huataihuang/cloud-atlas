@@ -90,18 +90,45 @@
 
 - 安装 ``libosinfo-bin`` 就可以使用 ``osinfo-query --os-variant`` 查询可以支持的操作系统类型
 
-- 创建CentOS 7模版::
+.. note::
+
+   为了能够优化虚拟机存储性能，我采用 :ref:`libvirt_lvm_pool` 作为虚拟存储(物理主机没有文件系统层)
+
+   我主要使用3种操作系统:
+
+   - Ubuntu 20.04.3 - 主要虚拟机操作系统，用于部署 :ref:`openstack` 以及 :ref:`kubernetes` 运行环境
+   - Fedora 35 - 开发用途的操作系统
+   - CentOS 8 - 用于Red Hat系列应用部署，例如 :ref:`ovirt` 和 :ref:`gluster` 运行环境
+
+Fedora35虚拟机模板
+--------------------
+
+- 创建模板虚拟机 Fedora 35 (详见 :ref:`ovmf` )::
+
+   virsh vol-create-as images_lvm z-fedora35 6G
 
    virt-install \
      --network bridge:virbr0 \
-     --name centos7 \
+     --name z-fedora35 \
      --ram=2048 \
      --vcpus=1 \
-     --os-type=centos7.0 \
-     --disk path=/var/lib/libvirt/images/centos7.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --os-type=Linux --os-variant=fedora31 \
+     --boot uefi --cpu host-passthrough \
+     --disk path=/dev/vg-libvirt/z-fedora35,sparse=false,format=raw,bus=virtio,cache=none,io=native \
      --graphics none \
-     --location=http://mirrors.163.com/centos/7/os/x86_64/ \
-     --extra-args="console=tty0 console=ttyS0,115200" 
+     --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+- Fedora使用 :ref:`networkmanager` 管理网络，所以登录虚拟机配置静态IP地址和主机名::
+
+   nmcli general hostname z-fedora35
+   nmcli connection modify "enp1s0" ipv4.method manual ipv4.address 192.168.6.244/24 ipv4.gateway 192.168.6.200 ipv4.dns "192.168.6.200,192.168.6.11"   
+
+- 配置用户帐号 :ref:`ssh` 密钥认证登录
+
+- 结合 :ref:`apt_proxy_arch` 配置虚拟机使用代理服务器更新系统，设置 :ref:`dnf` 代理配置 ``/etc/dnf/dnf.conf`` 添加::
+
+   proxy=http://192.168.6.200:3128
 
 .. note::
 
@@ -109,126 +136,151 @@
 
    模版操作系统通过NAT方式完成安装，再clone出来的虚拟机连接Bridge网络，则可以通过设置 :ref:`apt_proxy_arch` 完成后续更新和部署。
 
-- 创建CentOS 8模版::
+- clone基于Fedora 35的虚拟机( ``z-dev`` )::
+
+   virt-clone --original z-fedora35 --name z-dev --auto-clone 
+
+- 修订 ``z-dev`` 配置( ``2c4g`` )然后启动::
+
+   virsh edit z-dev
+   virsh start z-dev
+
+- 登录 ``z-dev`` 控制台， 修订主机名和IP::
+
+   nmcli general hostname z-dev
+   nmcli connection modify "enp1s0" ipv4.method manual ipv4.address 192.168.6.253/24 ipv4.gateway 192.168.6.200 ipv4.dns "192.168.6.200,192.168.6.11"   
+
+Ubuntu20虚拟机模板
+------------------------
+
+- 创建模板虚拟机 Ubuntu 20.04.3 (详见 :ref:`ovmf` )::
+
+   virsh vol-create-as images_lvm z-ubuntu20 6G
 
    virt-install \
      --network bridge:virbr0 \
-     --name centos8 \
+     --name z-ubuntu20 \
      --ram=2048 \
      --vcpus=1 \
-     --os-type=centos8 \
-     --disk path=/var/lib/libvirt/images/centos8.qcow2,format=qcow2,bus=virtio,cache=none,size=6 \
+     --os-type=ubuntu20.04 \
+     --boot uefi --cpu host-passthrough \
+     --disk path=/dev/vg-libvirt/z-ubuntu20,sparse=false,format=raw,bus=virtio,cache=none,io=native \
      --graphics none \
-     --location=http://mirrors.163.com/centos/8/BaseOS/x86_64/os/ \
-     --extra-args="console=tty0 console=ttyS0,115200" 
+     --location=http://mirrors.163.com/ubuntu/dists/focal/main/installer-amd64/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
 
 .. note::
 
-   构建 Ubuntu 模版guest系统，则参考 :ref:`create_vm` 
+   一定要使用 ``--boot uefi --cpu host-passthrough`` 参数激活 :ref:`ovmf` ，否则虽然能够 ``pass-through`` PCIe设备给虚拟机，但是虚拟机无法使用完整的物理主机CPU特性，而是使用虚拟出来的CPU，性能会损失。
 
-虚拟机串口设置
-----------------
+- :ref:`ubuntu_vm_console` 默认不输出，所以安装完成(配置了ssh服务)，通过ssh登录到虚拟机修订 ``/etc/default/grub`` 配置::
 
-.. note::
+   GRUB_CMDLINE_LINUX="console=ttyS0,115200"
+   GRUB_TERMINAL="serial console"
+   GRUB_SERIAL_COMMAND="serial --speed=115200"
 
-   通过上述串口控制台安装的CentOS 7虚拟机，已经默认在Guest OS的内核启动参数中添加了 ``console=ttyS0,115200`` ，所以可以直接在Host主机上使用 ``virsh console <虚拟机>`` 访问虚拟机控制台。
+重启以后 ``virsh console z-ubuntu20`` 就能正常工作，方便运维。
 
-   如果是早期CentOS 版本，可能默认没有配置串口输出，则在guest系统的 ``/etc/default/grub`` 中设置::
+- 修订虚拟机 ``/etc/sudoers`` 将自己的管理帐号所在 ``sudo`` 组设置为无密码执行命令(个人使用降低安全性，不推荐生产环境)::
 
-      GRUB_TERMINAL="serial console"
-      GRUB_SERIAL_COMMAND="serial --speed=115200"
-      GRUB_CMDLINE_LINUX="crashkernel=auto console=ttyS0,115200"
+   # Allow members of group sudo to execute any command
+   #%sudo  ALL=(ALL:ALL) ALL
+   %sudo   ALL=(ALL:ALL) NOPASSWD:ALL
+   
+- ``virsh edit z-ubuntu20`` 修订网络，更改为 :ref:`libvirt_bridged_network`  ``br0`` ，再次重启虚拟机
 
-静态IP
----------
+- Ubuntu Server使用 :ref:`netplan` 管理网络，所以修订 ``/etc/netplan/01-netcfg.yaml`` ::
 
-为了方便管理模版主机，设置各个模版主机IP地址为 ``192.168.122.x`` ，所以需要按照 :ref:`libvirt_static_ip_in_studio` 将 ``default`` 网络的DHCP分配IP段空出一部分给固定IP地址
+   network:
+     version: 2
+     renderer: networkd
+     ethernets:
+       enp1s0:
+         dhcp4: no
+         dhcp6: no
+         addresses: [192.168.6.246/24, ]
+         gateway4: 192.168.6.200
+         nameservers:
+            addresses: [192.168.6.200, ]
 
-- 编辑默认网络::
+然后执行以下命令生效::
 
-   virsh net-edit default
+   sudo netplan generate
+   sudo netplan apply
 
-将::
+- 配置用户帐号 :ref:`ssh` 密钥认证登录
 
-   <dhcp>
-     <range start='192.168.122.2' end='192.168.122.254'/>
-   </dhcp>
+- 结合 :ref:`apt_proxy_arch` 配置虚拟机使用代理服务器更新系统，设置 :ref:`apt` 代理配置 ``/etc/apt/apt.conf.d/proxy.conf`` 添加::
 
-修改成::
+   Acquire::http::Proxy "http://192.168.6.200:3128/";                                                 
+   Acquire::https::Proxy "http://192.168.6.200:3128/";
 
-   <dhcp>
-     <range start='192.168.122.51' end='192.168.122.254'/>
-   </dhcp>
+然后更新系统::
 
-- 然后重新生成libvirt网络::
+   sudo apt update
+   sudo apt upgrade
 
-   virsh  net-destroy default
-   virsh  net-start default
+- clone基于Ubuntu 20的虚拟机( ``z-b-data-1`` 构建数据存储系统 ``ceph`` / ``etcd`` / ``mysql`` / ``pgsq`` ... )::
 
-- 重新将虚拟机网络连接到default网络::
+   virt-clone --original z-ubuntu20 --name z-b-data-1 --auto-clone 
 
-   brctl addif virbr0 vnet0
-   brctl addif virbr0 vnet1
-   ...
+- 修订 ``z-b-data-1`` 配置( ``4c8g`` )设置::
 
-- 通过 ``virsh console centos7`` 连接到虚拟机控制台，然后登录系统，修订 ``/etc/sysconfig/network-scripts/ifcfg-eth0`` 配置，设置静态IP地址::
+   virsh edit z-b-data-1
 
-   # Generated by dracut initrd
-   NAME="eth0"
-   HWADDR="52:54:00:d0:84:1f"
-   ONBOOT=yes
-   NETBOOT=yes
-   UUID="d5a03523-af20-4aff-af1c-4a4393219707"
-   TYPE=Ethernet
+::
 
-   # 以下新加
-   IPV6INIT=no
-   BOOTPROTO=static
-   IPADDR=192.168.122.42
-   NETMASK=255.255.255.0
-   GATEWAY=192.168.122.1
-   DNS1=192.168.122.1
+     <memory unit='KiB'>8388608</memory>
+     <currentMemory unit='KiB'>8388608</currentMemory>
+     <vcpu placement='static'>4</vcpu>
 
-然后在控制台重启生效::
+NVMe存储pass-through
+=======================
 
-   /etc/init.d/network restart
+在模拟大规模云计算平台的分布式存储 :ref:`ceph` 需要高性能NVMe存储通过 :ref:`iommu` pass-through 给虚拟机，以构建高速存储架构。要实现PCIe pass-through，需要采用 :ref:`ovmf` 模式的KVM虚拟机
 
-复制KVM虚拟机
-=====================================
+- 检查需要 ``pass-through`` 的NVMe设备( ``samsung`` 存储 )::
 
-.. note::
+   lspci -nn | grep -i Samsung
 
-   详细克隆KVM虚拟机请参考 :ref:`clone_vm` 。
+输出显示通过 :ref:`pcie_bifurcation` 安装到 :ref:`hpe_dl360_gen9` 一共有3块 :ref:`samsung_pm9a1` ::
 
-   准备 :ref:`priv_docker` 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 :ref:`priv_cloud_infra`
+   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
 
-   这里的案例是创建 ``z-pi-worker3`` 准备 :ref:`k8s_numa` 实践
+- ``144d:a80a`` 代表 :ref:`samsung_pm9a1` 需要传递给内核绑定到 ``vfio-pci`` 模块上，同时需要增加 ``intel_iommu=on`` 内核参数激活 :ref:`iommu` (也就是 Intel vt-d 技术)，所以修订 ``/etc/default/grub`` 添加配置::
 
-- 暂停虚拟机::
+   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a"
 
-   virsh shutdown centos7
+并更新grub::
 
-- clone虚拟机::
+   sudo update-grub
 
-   virt-clone --connect qemu:///system --original centos7 --name z-pi-worker3  --file /var/lib/libvirt/images/z-pi-worker3.qcow2
+重启操作系统使内核新参数生效，重启后检查内核参数::
 
-- 使用 ``virt-sysprep`` 初始化虚拟机::
+   cat /proc/cmdline
 
-   virt-sysprep -d z-pi-worker3 --hostname z-pi-worker3 --root-password password:CHANGE_ME
+可以看到::
 
-不过，我实际操作保留了账号 huatai/root 并且指定IP地址，避免重头开始::
+   BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a
 
-   virt-sysprep -d z-pi-worker3 --hostname z-pi-worker3 \
-       --run 'sed -i "s/192.168.122.42/192.168.122.251/" /etc/sysconfig/network-scripts/ifcfg-eth0' \
-       --enable user-account --keep-user-accounts huatai --keep-user-accounts root
+- 检查内核模块 ``vfio-pci`` 是否已经绑定了 NVMe 设备::
 
-.. note::
+   lspci -nnk -d 144d:a80a
 
-   如果要保留一些设置，需要同时使用 ``--enable user-account`` 参数( `How to reset a KVM clone virtual Machines with virt-sysprep on Linux <https://www.nixcraft.com/t/how-to-reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/781>`_ )
+应该看到如下表明3个NVMe设备都已经绑定内核驱动 ``vfio-pci`` ::
 
-- 启动虚拟机，进一步定制::
-
-   virsh start z-pi-worker3
-
-注意，这里开始的时候，clone出来的虚拟机是NAT网络，确保运行正常以后，修订成 :ref:`libvirt_bridged_network` 
+   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme
+   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme
+   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme   
 

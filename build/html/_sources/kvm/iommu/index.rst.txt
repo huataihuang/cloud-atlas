@@ -12,7 +12,7 @@ IOMMU
    ovmf.rst
    vfio.rst
    compare_iommu_native_nvme.rst
-   iommu_tuning.rst
+   tunning/index
 
 .. only::  subproject and html
 

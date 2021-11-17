@@ -68,6 +68,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
@@ -89,7 +90,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id1">运行环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">设置交换网络</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">创建模版虚拟机</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">复制KVM虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nvmepass-through">NVMe存储pass-through</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="priv_docker.html">私有云docker环境</a></li>
@@ -204,8 +205,8 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/00-cloud-init.yaml</span></code></p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span>
 <span class="linenos"> 2</span>  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="linenos"> 3</span>  <span class="nt">renderer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">networkd</span>
@@ -259,19 +260,48 @@ sudo adduser `id -un` kvm
 </pre></div>
 </div>
 </div>
-<ul>
+<ul class="simple">
 <li><p>安装 <code class="docutils literal notranslate"><span class="pre">libosinfo-bin</span></code> 就可以使用 <code class="docutils literal notranslate"><span class="pre">osinfo-query</span> <span class="pre">--os-variant</span></code> 查询可以支持的操作系统类型</p></li>
-<li><p>创建CentOS 7模版:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>为了能够优化虚拟机存储性能，我采用 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 作为虚拟存储(物理主机没有文件系统层)</p>
+<p>我主要使用3种操作系统:</p>
+<ul class="simple">
+<li><p>Ubuntu 20.04.3 - 主要虚拟机操作系统，用于部署 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 以及 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 运行环境</p></li>
+<li><p>Fedora 35 - 开发用途的操作系统</p></li>
+<li><p>CentOS 8 - 用于Red Hat系列应用部署，例如 <a class="reference internal" href="../../ovirt/index.html#ovirt"><span class="std std-ref">oVirt Atlas</span></a> 和 <a class="reference internal" href="../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 运行环境</p></li>
+</ul>
+</div>
+<section id="fedora35">
+<h3>Fedora35虚拟机模板<a class="headerlink" href="#fedora35" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>创建模板虚拟机 Fedora 35 (详见 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> <span class="mi">6</span><span class="n">G</span>
+
+<span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
   <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
-  <span class="o">--</span><span class="n">name</span> <span class="n">centos7</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> \
   <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
   <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
-  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">centos7</span><span class="mf">.0</span> \
-  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">centos7</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">6</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">Linux</span> <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">fedora31</span> \
+  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">fedora35</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
   <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
-  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">7</span><span class="o">/</span><span class="n">os</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span> \
+  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">fedora</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="mi">35</span><span class="o">/</span><span class="n">Server</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> \
   <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Fedora使用 <a class="reference internal" href="../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 管理网络，所以登录虚拟机配置静态IP地址和主机名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">general</span> <span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span>
+<span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="s2">&quot;enp1s0&quot;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">method</span> <span class="n">manual</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">address</span> <span class="mf">192.168.6.244</span><span class="o">/</span><span class="mi">24</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">gateway</span> <span class="mf">192.168.6.200</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dns</span> <span class="s2">&quot;192.168.6.200,192.168.6.11&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>配置用户帐号 <a class="reference internal" href="../../infra_service/ssh/index.html#ssh"><span class="std std-ref">ssh服务</span></a> 密钥认证登录</p></li>
+<li><p>结合 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 配置虚拟机使用代理服务器更新系统，设置 <a class="reference internal" href="../../linux/redhat_linux/admin/dnf.html#dnf"><span class="std std-ref">DNF包管理器</span></a> 代理配置 <code class="docutils literal notranslate"><span class="pre">/etc/dnf/dnf.conf</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">proxy</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span>
 </pre></div>
 </div>
 </li>
@@ -282,16 +312,41 @@ sudo adduser `id -un` kvm
 <p>模版操作系统通过NAT方式完成安装，再clone出来的虚拟机连接Bridge网络，则可以通过设置 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 完成后续更新和部署。</p>
 </div>
 <ul>
-<li><p>创建CentOS 8模版:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+<li><p>clone基于Fedora 35的虚拟机( <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 配置( <code class="docutils literal notranslate"><span class="pre">2c4g</span></code> )然后启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">edit</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+<span class="n">virsh</span> <span class="n">start</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+<li><p>登录 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 控制台， 修订主机名和IP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">general</span> <span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+<span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="s2">&quot;enp1s0&quot;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">method</span> <span class="n">manual</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">address</span> <span class="mf">192.168.6.253</span><span class="o">/</span><span class="mi">24</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">gateway</span> <span class="mf">192.168.6.200</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dns</span> <span class="s2">&quot;192.168.6.200,192.168.6.11&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="ubuntu20">
+<h3>Ubuntu20虚拟机模板<a class="headerlink" href="#ubuntu20" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>创建模板虚拟机 Ubuntu 20.04.3 (详见 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="mi">6</span><span class="n">G</span>
+
+<span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
   <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
-  <span class="o">--</span><span class="n">name</span> <span class="n">centos8</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> \
   <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
   <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
-  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">centos8</span> \
-  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">centos8</span><span class="o">.</span><span class="n">qcow2</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">qcow2</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">6</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">ubuntu20</span><span class="mf">.04</span> \
+  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
   <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
-  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">centos</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="n">BaseOS</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> \
+  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="n">dists</span><span class="o">/</span><span class="n">focal</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">installer</span><span class="o">-</span><span class="n">amd64</span><span class="o">/</span> \
   <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
 </pre></div>
 </div>
@@ -299,126 +354,138 @@ sudo adduser `id -un` kvm
 </ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>构建 Ubuntu 模版guest系统，则参考 <a class="reference internal" href="../../kvm/startup/create_vm.html#create-vm"><span class="std std-ref">Studio环境创建KVM虚拟机</span></a></p>
+<p>一定要使用 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span> <span class="pre">--cpu</span> <span class="pre">host-passthrough</span></code> 参数激活 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ，否则虽然能够 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> PCIe设备给虚拟机，但是虚拟机无法使用完整的物理主机CPU特性，而是使用虚拟出来的CPU，性能会损失。</p>
 </div>
-<section id="id4">
-<h3>虚拟机串口设置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>通过上述串口控制台安装的CentOS 7虚拟机，已经默认在Guest OS的内核启动参数中添加了 <code class="docutils literal notranslate"><span class="pre">console=ttyS0,115200</span></code> ，所以可以直接在Host主机上使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">&lt;虚拟机&gt;</span></code> 访问虚拟机控制台。</p>
-<p>如果是早期CentOS 版本，可能默认没有配置串口输出，则在guest系统的 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 中设置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_TERMINAL</span><span class="o">=</span><span class="s2">&quot;serial console&quot;</span>
+<ul>
+<li><p><a class="reference internal" href="../../kvm/startup/ubuntu_vm_console.html#ubuntu-vm-console"><span class="std std-ref">Ubuntu虚拟机控制台</span></a> 默认不输出，所以安装完成(配置了ssh服务)，通过ssh登录到虚拟机修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;console=ttyS0,115200&quot;</span>
+<span class="n">GRUB_TERMINAL</span><span class="o">=</span><span class="s2">&quot;serial console&quot;</span>
 <span class="n">GRUB_SERIAL_COMMAND</span><span class="o">=</span><span class="s2">&quot;serial --speed=115200&quot;</span>
-<span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;crashkernel=auto console=ttyS0,115200&quot;</span>
 </pre></div>
 </div>
+</li>
+</ul>
+<p>重启以后 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">z-ubuntu20</span></code> 就能正常工作，方便运维。</p>
+<ul>
+<li><p>修订虚拟机 <code class="docutils literal notranslate"><span class="pre">/etc/sudoers</span></code> 将自己的管理帐号所在 <code class="docutils literal notranslate"><span class="pre">sudo</span></code> 组设置为无密码执行命令(个人使用降低安全性，不推荐生产环境):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Allow members of group sudo to execute any command</span>
+<span class="c1">#%sudo  ALL=(ALL:ALL) ALL</span>
+<span class="o">%</span><span class="n">sudo</span>   <span class="n">ALL</span><span class="o">=</span><span class="p">(</span><span class="n">ALL</span><span class="p">:</span><span class="n">ALL</span><span class="p">)</span> <span class="n">NOPASSWD</span><span class="p">:</span><span class="n">ALL</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">z-ubuntu20</span></code> 修订网络，更改为 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a>  <code class="docutils literal notranslate"><span class="pre">br0</span></code> ，再次重启虚拟机</p></li>
+<li><p>Ubuntu Server使用 <a class="reference internal" href="../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 管理网络，所以修订 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/01-netcfg.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
+  <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">renderer</span><span class="p">:</span> <span class="n">networkd</span>
+  <span class="n">ethernets</span><span class="p">:</span>
+    <span class="n">enp1s0</span><span class="p">:</span>
+      <span class="n">dhcp4</span><span class="p">:</span> <span class="n">no</span>
+      <span class="n">dhcp6</span><span class="p">:</span> <span class="n">no</span>
+      <span class="n">addresses</span><span class="p">:</span> <span class="p">[</span><span class="mf">192.168.6.246</span><span class="o">/</span><span class="mi">24</span><span class="p">,</span> <span class="p">]</span>
+      <span class="n">gateway4</span><span class="p">:</span> <span class="mf">192.168.6.200</span>
+      <span class="n">nameservers</span><span class="p">:</span>
+         <span class="n">addresses</span><span class="p">:</span> <span class="p">[</span><span class="mf">192.168.6.200</span><span class="p">,</span> <span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后执行以下命令生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">netplan</span> <span class="n">generate</span>
+<span class="n">sudo</span> <span class="n">netplan</span> <span class="n">apply</span>
+</pre></div>
+</div>
+<ul>
+<li><p>配置用户帐号 <a class="reference internal" href="../../infra_service/ssh/index.html#ssh"><span class="std std-ref">ssh服务</span></a> 密钥认证登录</p></li>
+<li><p>结合 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 配置虚拟机使用代理服务器更新系统，设置 <a class="reference internal" href="../../linux/ubuntu_linux/admin/apt.html#apt"><span class="std std-ref">APT包管理</span></a> 代理配置 <code class="docutils literal notranslate"><span class="pre">/etc/apt/apt.conf.d/proxy.conf</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Acquire</span><span class="p">::</span><span class="n">http</span><span class="p">::</span><span class="n">Proxy</span> <span class="s2">&quot;http://192.168.6.200:3128/&quot;</span><span class="p">;</span>
+<span class="n">Acquire</span><span class="p">::</span><span class="n">https</span><span class="p">::</span><span class="n">Proxy</span> <span class="s2">&quot;http://192.168.6.200:3128/&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后更新系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">upgrade</span>
+</pre></div>
+</div>
+<ul>
+<li><p>clone基于Ubuntu 20的虚拟机( <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 构建数据存储系统 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> / <code class="docutils literal notranslate"><span class="pre">etcd</span></code> / <code class="docutils literal notranslate"><span class="pre">mysql</span></code> / <code class="docutils literal notranslate"><span class="pre">pgsq</span></code> … ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 配置( <code class="docutils literal notranslate"><span class="pre">4c8g</span></code> )设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">edit</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">memory</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;KiB&#39;</span><span class="o">&gt;</span><span class="mi">8388608</span><span class="o">&lt;/</span><span class="n">memory</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">currentMemory</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;KiB&#39;</span><span class="o">&gt;</span><span class="mi">8388608</span><span class="o">&lt;/</span><span class="n">currentMemory</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">vcpu</span> <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;static&#39;</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="n">vcpu</span><span class="o">&gt;</span>
+</pre></div>
 </div>
 </section>
-<section id="ip">
-<h3>静态IP<a class="headerlink" href="#ip" title="永久链接至标题">¶</a></h3>
-<p>为了方便管理模版主机，设置各个模版主机IP地址为 <code class="docutils literal notranslate"><span class="pre">192.168.122.x</span></code> ，所以需要按照 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_static_ip.html#libvirt-static-ip-in-studio"><span class="std std-ref">Studio环境libvirt静态分配IP</span></a> 将 <code class="docutils literal notranslate"><span class="pre">default</span></code> 网络的DHCP分配IP段空出一部分给固定IP地址</p>
-<ul>
-<li><p>编辑默认网络:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">net</span><span class="o">-</span><span class="n">edit</span> <span class="n">default</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>将:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">dhcp</span><span class="o">&gt;</span>
-  <span class="o">&lt;</span><span class="nb">range</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;192.168.122.2&#39;</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;192.168.122.254&#39;</span><span class="o">/&gt;</span>
-<span class="o">&lt;/</span><span class="n">dhcp</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>修改成:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">dhcp</span><span class="o">&gt;</span>
-  <span class="o">&lt;</span><span class="nb">range</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;192.168.122.51&#39;</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;192.168.122.254&#39;</span><span class="o">/&gt;</span>
-<span class="o">&lt;/</span><span class="n">dhcp</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<ul>
-<li><p>然后重新生成libvirt网络:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span>  <span class="n">net</span><span class="o">-</span><span class="n">destroy</span> <span class="n">default</span>
-<span class="n">virsh</span>  <span class="n">net</span><span class="o">-</span><span class="n">start</span> <span class="n">default</span>
-</pre></div>
-</div>
-</li>
-<li><p>重新将虚拟机网络连接到default网络:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">addif</span> <span class="n">virbr0</span> <span class="n">vnet0</span>
-<span class="n">brctl</span> <span class="n">addif</span> <span class="n">virbr0</span> <span class="n">vnet1</span>
-<span class="o">...</span>
-</pre></div>
-</div>
-</li>
-<li><p>通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">centos7</span></code> 连接到虚拟机控制台，然后登录系统，修订 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/network-scripts/ifcfg-eth0</span></code> 配置，设置静态IP地址:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by dracut initrd</span>
-<span class="n">NAME</span><span class="o">=</span><span class="s2">&quot;eth0&quot;</span>
-<span class="n">HWADDR</span><span class="o">=</span><span class="s2">&quot;52:54:00:d0:84:1f&quot;</span>
-<span class="n">ONBOOT</span><span class="o">=</span><span class="n">yes</span>
-<span class="n">NETBOOT</span><span class="o">=</span><span class="n">yes</span>
-<span class="n">UUID</span><span class="o">=</span><span class="s2">&quot;d5a03523-af20-4aff-af1c-4a4393219707&quot;</span>
-<span class="n">TYPE</span><span class="o">=</span><span class="n">Ethernet</span>
-
-<span class="c1"># 以下新加</span>
-<span class="n">IPV6INIT</span><span class="o">=</span><span class="n">no</span>
-<span class="n">BOOTPROTO</span><span class="o">=</span><span class="n">static</span>
-<span class="n">IPADDR</span><span class="o">=</span><span class="mf">192.168.122.42</span>
-<span class="n">NETMASK</span><span class="o">=</span><span class="mf">255.255.255.0</span>
-<span class="n">GATEWAY</span><span class="o">=</span><span class="mf">192.168.122.1</span>
-<span class="n">DNS1</span><span class="o">=</span><span class="mf">192.168.122.1</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>然后在控制台重启生效:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">network</span> <span class="n">restart</span>
-</pre></div>
-</div>
 </section>
-</section>
-<section id="id5">
-<h2>复制KVM虚拟机<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>详细克隆KVM虚拟机请参考 <a class="reference internal" href="../../kvm/startup/clone_vm.html#clone-vm"><span class="std std-ref">复制KVM虚拟机</span></a> 。</p>
-<p>准备 <a class="reference internal" href="priv_docker.html#priv-docker"><span class="std std-ref">私有云docker环境</span></a> 中作为 kubemaster 服务器的虚拟机，详细架构解析请参考 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a></p>
-<p>这里的案例是创建 <code class="docutils literal notranslate"><span class="pre">z-pi-worker3</span></code> 准备 <a class="reference internal" href="../../kubernetes/numa/index.html#k8s-numa"><span class="std std-ref">Kubernetes NUMA</span></a> 实践</p>
-</div>
+<section id="nvmepass-through">
+<h2>NVMe存储pass-through<a class="headerlink" href="#nvmepass-through" title="永久链接至标题">¶</a></h2>
+<p>在模拟大规模云计算平台的分布式存储 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 需要高性能NVMe存储通过 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> pass-through 给虚拟机，以构建高速存储架构。要实现PCIe pass-through，需要采用 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 模式的KVM虚拟机</p>
 <ul>
-<li><p>暂停虚拟机:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">shutdown</span> <span class="n">centos7</span>
-</pre></div>
-</div>
-</li>
-<li><p>clone虚拟机:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">connect</span> <span class="n">qemu</span><span class="p">:</span><span class="o">///</span><span class="n">system</span> <span class="o">--</span><span class="n">original</span> <span class="n">centos7</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span>  <span class="o">--</span><span class="n">file</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span><span class="o">.</span><span class="n">qcow2</span>
-</pre></div>
-</div>
-</li>
-<li><p>使用 <code class="docutils literal notranslate"><span class="pre">virt-sysprep</span></code> 初始化虚拟机:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">sysprep</span> <span class="o">-</span><span class="n">d</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span> <span class="o">--</span><span class="n">root</span><span class="o">-</span><span class="n">password</span> <span class="n">password</span><span class="p">:</span><span class="n">CHANGE_ME</span>
+<li><p>检查需要 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 的NVMe设备( <code class="docutils literal notranslate"><span class="pre">samsung</span></code> 存储 ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nn</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">Samsung</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>不过，我实际操作保留了账号 huatai/root 并且指定IP地址，避免重头开始:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">sysprep</span> <span class="o">-</span><span class="n">d</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span> \
-    <span class="o">--</span><span class="n">run</span> <span class="s1">&#39;sed -i &quot;s/192.168.122.42/192.168.122.251/&quot; /etc/sysconfig/network-scripts/ifcfg-eth0&#39;</span> \
-    <span class="o">--</span><span class="n">enable</span> <span class="n">user</span><span class="o">-</span><span class="n">account</span> <span class="o">--</span><span class="n">keep</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">accounts</span> <span class="n">huatai</span> <span class="o">--</span><span class="n">keep</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">accounts</span> <span class="n">root</span>
+<p>输出显示通过 <a class="reference internal" href="../../linux/server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 安装到 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 一共有3块 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>如果要保留一些设置，需要同时使用 <code class="docutils literal notranslate"><span class="pre">--enable</span> <span class="pre">user-account</span></code> 参数( <a class="reference external" href="https://www.nixcraft.com/t/how-to-reset-a-kvm-clone-virtual-machines-with-virt-sysprep-on-linux/781">How to reset a KVM clone virtual Machines with virt-sysprep on Linux</a> )</p>
-</div>
 <ul>
-<li><p>启动虚拟机，进一步定制:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">z</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">worker3</span>
+<li><p><code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> 代表 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 需要传递给内核绑定到 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 模块上，同时需要增加 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code> 内核参数激活 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> (也就是 Intel vt-d 技术)，所以修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 添加配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a&quot;</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>注意，这里开始的时候，clone出来的虚拟机是NAT网络，确保运行正常以后，修订成 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a></p>
+<p>并更新grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+<p>重启操作系统使内核新参数生效，重启后检查内核参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cmdline</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BOOT_IMAGE</span><span class="o">=/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.4.0</span><span class="o">-</span><span class="mi">90</span><span class="o">-</span><span class="n">generic</span> <span class="n">root</span><span class="o">=</span><span class="n">UUID</span><span class="o">=</span><span class="n">caa4193b</span><span class="o">-</span><span class="mi">9222</span><span class="o">-</span><span class="mi">49</span><span class="n">fe</span><span class="o">-</span><span class="n">a4b3</span><span class="o">-</span><span class="mi">89</span><span class="n">f1cb417e6a</span> <span class="n">ro</span> <span class="n">intel_iommu</span><span class="o">=</span><span class="n">on</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span><span class="o">.</span><span class="n">ids</span><span class="o">=</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查内核模块 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 是否已经绑定了 NVMe 设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>应该看到如下表明3个NVMe设备都已经绑定内核驱动 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+</pre></div>
+</div>
 </section>
 </section>
 
