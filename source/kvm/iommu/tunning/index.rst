@@ -1,18 +1,13 @@
-.. _iommu:
+.. _iommu_tunning:
 
 =================================
-IOMMU
+IOMMU性能优化
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   iommu_infra.rst
-   intel_vt-d_startup.rst
-   ovmf.rst
-   vfio.rst
-   compare_iommu_native_nvme.rst
-   tunning/index
+   iommu_cpu_pinning.rst
 
 .. only::  subproject and html
 

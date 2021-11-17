@@ -12,6 +12,7 @@ KVM 快速起步
    backup_vm.rst
    clone_vm.rst
    vm_attach_dev.rst
+   ubuntu_vm_console.rst
 
 .. only::  subproject and html
 
