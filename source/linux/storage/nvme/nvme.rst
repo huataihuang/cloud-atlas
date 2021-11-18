@@ -173,3 +173,10 @@ plus版本是最新款，两者在性能上有些差距，价格相差不到100�
 - `Difference Between SLC, MLC, TLC & QLC NAND SSDs: Which One is Better? <https://www.hardwaretimes.com/difference-between-slc-mlc-tlc-qlc-nand-ssds-which-one-is-better/>`_
 - `Understanding SSD NAND Chips – SLC Vs MLC Vs TLC Vs QLC <https://nascompares.com/2021/04/06/understanding-ssd-nand-chips-slc-vs-mlc-vs-tlc-vs-qlc/>`_
 - `2020 SSD 固态硬盘超全选购指南之二——主流NVME硬盘数据解析 <https://post.smzdm.com/p/andlqo62/>`_
+
+以下文档没有详细阅读，供后续完善文档参考:
+
+- `Multi-Layer SSDs: What Are SLC, MLC, TLC, QLC, and PLC? <https://www.howtogeek.com/444787/multi-layer-ssds-what-are-slc-mlc-tlc-qlc-and-mlc/>`_
+- `NAND and cells: SLC, QLC, TLC and MLC explained <https://www.techradar.com/news/nand-and-cells-slc-qlc-tlc-and-mlc-explained>`_
+- `TLC vs. QLC NAND: Pick the best memory technology for your storage application <https://venturebeat.com/2019/12/06/tlc-vs-qlc-nand-pick-the-best-memory-technology-for-your-application/>`_
+- `QLC vs. TLC NAND: Which is best for your storage needs? <https://searchstorage.techtarget.com/tip/QLC-vs-TLC-NAND-Which-is-best-for-your-storage-needs>`_

@@ -4,10 +4,35 @@
 私有云KVM环境
 =======================
 
-运行环境
+环境准备
 =========
 
+内核和KVM虚拟化
+-----------------
+
 - 物理服务器: :ref:`hpe_dl360_gen9`
+
+- 物理主机内核启用 :ref:`iommu` 并采用 :ref:`ovmf` 方式将NVMe设备( :ref:`samsung_pm9a1` 对应ID是 ``144d:a80a`` )绑定到 ``vfio-pci`` 内核模块: 修改 ``/etc/default/grub`` ::
+
+   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a"
+
+.. note::
+
+   这里 :ref:`samsung_pm9a1` 的ID通过命令::
+
+      lspci -nn | grep -i samsung
+
+   可以获得::
+
+      05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+      ...
+
+   所有相同型号NVMe都共用一个设备ID ``144d:a80a``
+
+然后修正grub并重启::
+
+   sudo update-grub
+   shutdown -r now
 
 - 按照 :ref:`ubuntu_deploy_kvm` 安装部署好基础KVM运行环境::
 
@@ -22,8 +47,100 @@
     Id    Name                           State
    ----------------------------------------------------
 
+NVMe存储pass-through
+----------------------
+
+在模拟大规模云计算平台的分布式存储 :ref:`ceph` 需要高性能NVMe存储通过 :ref:`iommu` pass-through 给虚拟机，以构建高速存储架构。要实现PCIe pass-through，需要采用 :ref:`ovmf` 模式的KVM虚拟机
+
+- 检查需要 ``pass-through`` 的NVMe设备( ``samsung`` 存储 )::
+
+   lspci -nn | grep -i Samsung
+
+输出显示通过 :ref:`pcie_bifurcation` 安装到 :ref:`hpe_dl360_gen9` 一共有3块 :ref:`samsung_pm9a1` ::
+
+   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+
+- ``144d:a80a`` 代表 :ref:`samsung_pm9a1` 需要传递给内核绑定到 ``vfio-pci`` 模块上，同时需要增加 ``intel_iommu=on`` 内核参数激活 :ref:`iommu` (也就是 Intel vt-d 技术)，所以修订 ``/etc/default/grub`` 添加配置::
+
+   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a"
+
+并更新grub::
+
+   sudo update-grub
+
+重启操作系统使内核新参数生效，重启后检查内核参数::
+
+   cat /proc/cmdline
+
+可以看到::
+
+   BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a
+
+- 检查内核模块 ``vfio-pci`` 是否已经绑定了 NVMe 设备::
+
+   lspci -nnk -d 144d:a80a
+
+应该看到如下表明3个NVMe设备都已经绑定内核驱动 ``vfio-pci`` ::
+
+   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme
+   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme
+   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+   	Kernel driver in use: vfio-pci
+   	Kernel modules: nvme   
+
+LVM卷作为libvirt存储
+------------------------
+
+- 物理主机 ``/dev/sda`` 是Intel SSD 512G，分区4作为LVM卷::
+
+   /dev/sda4  458983424 1000214527 541231104 258.1G Linux LVM
+
+- 执行 :ref:`libvirt_lvm_pool` 中卷管理并加入libvirt作为存储::
+
+   pvcreate /dev/sda4
+   vgcreate vg-libvirt /dev/sda4
+
+   virsh pool-define-as images_lvm logical --source-name vg-libvirt --target /dev/sda4
+   virsh pool-start images_lvm
+   virsh pool-autostart images_lvm
+
+- 在每次创建VM之前，首先创建对应卷::
+
+   virsh vol-create-as images_lvm VM 6G
+
+然后创建虚拟机(详见下文)::
+
+   virt-install ... \
+   ...
+     --boot uefi --cpu host-passthrough \
+     --disk path=/dev/vg-libvirt/VMNAME,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+   ...
+
+- 如果已经创建了模板虚拟机，则使用 ``virt-clone`` 命令clone出(无需手工准备LVM卷)::
+
+   virt-clone --original TEMPLATE-VM --name NEW-VM --auto-clone
+
+- 删除VM::
+
+   virsh undefine --nvram VM --remove-all-storage
+
+如果没有使用 ``--remove-all-storage`` 则虚拟机删除并不删除卷，可以独立使用命令::
+
+   virsh vol-delete VMNAME-VOL images_lvm
+
+这里 ``VMNAME-VOL`` 是虚拟机卷， ``images_lvm`` 是创建的LVM卷存储池名字
+
 设置交换网络
-=============
+----------------
 
 虽然在测试环境中，我们常常使用 :ref:`libvirt_nat_network` ，但是我在部署 :ref:`hpe_dl360_gen9` 和 :ref:`pi_cluster` 是通过物理交换机连接的，也就是说，所有数据通讯都是通过真实网络传输，所以我们需要采用 :ref:`libvirt_bridged_network` :
 
@@ -158,7 +275,7 @@ Ubuntu20虚拟机模板
    virsh vol-create-as images_lvm z-ubuntu20 6G
 
    virt-install \
-     --network bridge:virbr0 \
+     --network bridge:br0 \
      --name z-ubuntu20 \
      --ram=2048 \
      --vcpus=1 \
@@ -171,13 +288,34 @@ Ubuntu20虚拟机模板
 
 .. note::
 
+   这里直接使用了 :ref:`libvirt_bridged_network` 中配置的 ``br0`` ，是因为Ubuntu在安装过程中可以设置代理服务器，而我已经采用 :ref:`apt_proxy_arch` 部署了 :ref:`squid` 作为代理
+
+.. note::
+
    一定要使用 ``--boot uefi --cpu host-passthrough`` 参数激活 :ref:`ovmf` ，否则虽然能够 ``pass-through`` PCIe设备给虚拟机，但是虚拟机无法使用完整的物理主机CPU特性，而是使用虚拟出来的CPU，性能会损失。
+
+正确实现 ``--boot uefi --cpu host-passthrough`` 后，在虚拟机内部有以下2个特征:
+
+  - CPU显示和物理服务器一致::
+
+     cat /proc/cpuinfo
+
+可以看到::
+
+   ...
+   model name: Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz    
+   
+  - ``/boot/efi`` 目录独立分区，且存储了 ``EFI`` 相关配置和数据
 
 - :ref:`ubuntu_vm_console` 默认不输出，所以安装完成(配置了ssh服务)，通过ssh登录到虚拟机修订 ``/etc/default/grub`` 配置::
 
    GRUB_CMDLINE_LINUX="console=ttyS0,115200"
    GRUB_TERMINAL="serial console"
    GRUB_SERIAL_COMMAND="serial --speed=115200"
+
+更新grub::
+
+   sudo update-grub
 
 重启以后 ``virsh console z-ubuntu20`` 就能正常工作，方便运维。
 
@@ -220,9 +358,16 @@ Ubuntu20虚拟机模板
    sudo apt update
    sudo apt upgrade
 
+clone虚拟机
+=============
+
 - clone基于Ubuntu 20的虚拟机( ``z-b-data-1`` 构建数据存储系统 ``ceph`` / ``etcd`` / ``mysql`` / ``pgsq`` ... )::
 
    virt-clone --original z-ubuntu20 --name z-b-data-1 --auto-clone 
+
+.. note::
+
+   ``virt-clone`` 命令clone出来的虚拟机会自动修订 ``uuid`` 以及虚拟网卡的 ``mac address`` ，所以不用担心虚拟机冲突
 
 - 修订 ``z-b-data-1`` 配置( ``4c8g`` )设置::
 
@@ -234,53 +379,82 @@ Ubuntu20虚拟机模板
      <currentMemory unit='KiB'>8388608</currentMemory>
      <vcpu placement='static'>4</vcpu>
 
-NVMe存储pass-through
-=======================
+- 由于存储访问需要稳定性和高性能， 设置 ``z-b-data-1`` :ref:`iommu_cpu_pinning` ( 请参考我在 :ref:`priv_cloud_infra` 规划)，确保所有 ``data`` 虚拟服务器(通过高速PCIe 3.0接口访问 :ref:`samsung_pm9a1` NVMe存储)::
 
-在模拟大规模云计算平台的分布式存储 :ref:`ceph` 需要高性能NVMe存储通过 :ref:`iommu` pass-through 给虚拟机，以构建高速存储架构。要实现PCIe pass-through，需要采用 :ref:`ovmf` 模式的KVM虚拟机
+     <vcpu placement='static'>4</vcpu>
+     <cputune>
+       <vcpupin vcpu='0' cpuset='24'/>
+       <vcpupin vcpu='1' cpuset='25'/>
+       <vcpupin vcpu='2' cpuset='26'/>
+       <vcpupin vcpu='3' cpuset='27'/>
+     </cputune>
 
-- 检查需要 ``pass-through`` 的NVMe设备( ``samsung`` 存储 )::
+.. note::
 
-   lspci -nn | grep -i Samsung
+   采用上述方式按照 :ref:`priv_cloud_infra` 规划的VM列表，clone出部署所需的虚拟机 ``z-b-data-2`` 和 ``z-b-data-3``
 
-输出显示通过 :ref:`pcie_bifurcation` 安装到 :ref:`hpe_dl360_gen9` 一共有3块 :ref:`samsung_pm9a1` ::
+添加pass-through NVMe存储
+=============================
 
-   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+上述 ``z-b-data-X`` 共有3台虚拟机，通过 :ref:`iommu_cpu_pinning` 关联到物理主机 ``socket 0 CPU`` 。根据 :ref:`hpe_dl360_gen9` 硬件规格， ``socket 0 CPU`` 和 ``slot 0/1`` 两个PCIe 3.0直接联通，可以获得直接访问这两个插槽上NVMe高性能。所以上述 ``cpu pinning`` 可以提高存储访问性能。
 
-- ``144d:a80a`` 代表 :ref:`samsung_pm9a1` 需要传递给内核绑定到 ``vfio-pci`` 模块上，同时需要增加 ``intel_iommu=on`` 内核参数激活 :ref:`iommu` (也就是 Intel vt-d 技术)，所以修订 ``/etc/default/grub`` 添加配置::
+现在我们把3个 :ref:`samsung_pm9a1` 分配到上述3个虚拟机，以便构建 :ref:`ceph` 分布式存储以及各种需要直接访问存储的基础服务。
 
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a"
+- 参考 :ref:`ovmf` 执行以下命令检查 :ref:`samsung_pm9a1` 存储的ID::
 
-并更新grub::
-
-   sudo update-grub
-
-重启操作系统使内核新参数生效，重启后检查内核参数::
-
-   cat /proc/cmdline
+   lspci -nn | grep -i samsung
 
 可以看到::
 
-   BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a
-
-- 检查内核模块 ``vfio-pci`` 是否已经绑定了 NVMe 设备::
-
-   lspci -nnk -d 144d:a80a
-
-应该看到如下表明3个NVMe设备都已经绑定内核驱动 ``vfio-pci`` ::
-
    05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: vfio-pci
-   	Kernel modules: nvme
    08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: vfio-pci
-   	Kernel modules: nvme
    0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: vfio-pci
-   	Kernel modules: nvme   
+
+这里第一列的id对应了每个PCIe，也就是我们要指定给虚拟机的标识配置。
+
+- 创建3个PCIe设备配置XML文件分别对应上述设备:
+
+.. literalinclude:: ../../kvm/iommu/ovmf/samsung_pm9a1_1.xml
+   :language: xml
+   :linenos:
+   :caption: Samsung PM9A1 #1
+
+.. literalinclude:: ../../kvm/iommu/ovmf/samsung_pm9a1_2.xml
+   :language: xml
+   :linenos:
+   :caption: Samsung PM9A1 #2
+
+.. literalinclude:: ../../kvm/iommu/ovmf/samsung_pm9a1_3.xml
+   :language: xml
+   :linenos:
+   :caption: Samsung PM9A1 #3
+
+- 执行以下设备添加命令，分别将3个NVMe设备pass-through给3个 ``z-b-data-X`` 虚拟机::
+
+   virsh attach-device z-b-data-1 samsung_pm9a1_1.xml --config
+   virsh attach-device z-b-data-2 samsung_pm9a1_2.xml --config
+   virsh attach-device z-b-data-3 samsung_pm9a1_3.xml --config
+
+- 启动虚拟机 ``z-b-data-1`` 然后通过控制台访问::
+
+   virsh start z-b-data-1
+   virsh console z-b-data-1
+
+- (这里只举例 ``z-b-data-1`` 修订方法)启动基础服务器虚拟机(需要一台台顺序处理，因为需要修订主机名和IP地址)
+
+修改主机名::
+
+   hostnamectl set-hostname z-b-data-1
+
+修订IP地址 - :ref:`netplan` 方式修订 ``/etc/netplan/01-netcfg.yaml`` ::
+
+   IP=192.168.6.204
+   sed -i "s/192.168.6.246/$IP/g" /etc/netplan/01-netcfg.yaml
+
+   netplan generate
+   netplan apply
+
+   ip addr
+
+- 同样完成 ``z-b-data-2`` 和 ``z-b-data-3`` 的启动和修订
 

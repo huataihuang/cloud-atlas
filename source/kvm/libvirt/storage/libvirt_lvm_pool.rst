@@ -222,11 +222,13 @@ clone虚拟机
 
 - 解决方法是添加 ``--nvram`` 参数::
 
-   sudo virsh undefine --nvram kernel-dev
+   sudo virsh undefine --nvram kernel-dev --remove-all-storage
 
-- 卷需要手工删除::
+- 如果在 ``virsh undefine`` 命令没有使用 ``--remove-all-storage`` 参数删除虚拟机使用的卷，则单独执行以下命令删除LVM卷::
 
-   sudo lvremove /dev/vg-libvirt/kernel-dev
+   sudo virsh vol-delete kernel-dev images_lvm
+
+上述命令格式是 ``virsh vol-delete <vm_vol> <libvirt_lvm_storage>``
 
 参考
 =====
