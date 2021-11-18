@@ -4,7 +4,7 @@
 比较IOMMU NVMe和原生NVMe存储性能
 ===================================
 
-我通过 :ref:`ovmf` 将 :ref:`samsung_pm9a1` assign到kvm虚拟机，这种 pass-through 技术可以极大提升虚拟机的存储性能。本文将采用 :ref:`fio` 对比存储性能，观察能否满足性能要求，后续还会进行 :ref:`iommu_tuning`
+我通过 :ref:`ovmf` 将 :ref:`samsung_pm9a1` assign到kvm虚拟机，这种 pass-through 技术可以极大提升虚拟机的存储性能。本文将采用 :ref:`fio` 对比存储性能，观察能否满足性能要求，后续还会进行 :ref:`iommu_tunning`
 
 .. note::
 
@@ -110,7 +110,7 @@
 
 .. csv-table:: IOMMU虚拟机和物理机 NVMe性能对比
    :file: compare_iommu_native_nvme/compare_iommu_native_nvme.csv
-   :widths: 40, 30, 30
+   :widths: 25, 25, 25, 25
    :header-rows: 1
 
 参考

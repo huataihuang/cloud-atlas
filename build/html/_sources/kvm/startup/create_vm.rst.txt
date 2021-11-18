@@ -4,13 +4,13 @@
 创建KVM虚拟机
 =============================
 
-.. note::
 
-   在Studio环境中，KVM虚拟化是实现模拟数据中心的核心。因为单纯的Docker+Kubernetes无法模拟多台物理服务器，虽然容器技术更为轻量级。
+KVM虚拟化是实现模拟数据中心的核心。因为单纯的Docker+Kubernetes无法模拟多台物理服务器，虽然容器技术更为轻量级。
 
-   为Studio选择的默认Guest操作系统是Ubuntu 18.04，这样可以获得Kernel 4.15，并且得到LTS长期支持。这个基础Guest系统将用于构建OpenStack。
+常规的虚拟机采用 ``qcow2`` 镜像文件作为虚拟磁盘，性能有限。为了能够提高虚拟机性能，我们需要采用 :ref:`ovmf` 来实现PCIe pass-through，可以加速网络、存储、图形性能，接近物理主机的性能：
 
-   Studio环境采用Ubuntu作为host和guest的OS，在 :ref:`real` 中， :ref:`priv_kvm` 则采用CentOS作为OS。
+- 虚拟机的操作系统盘采用LVM卷，减少Host物理主机文件系统的性能消耗: 下文中采用 :ref:`libvirt_lvm_pool` 先创建LVM卷，然后在 ``virt-install`` 安装命令中指定LVM卷作为虚拟磁盘
+- :ref:`priv_kvm` 使用 :ref:`hpe_dl360_gen9` ，内核配置 ``GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a"`` 详见 :ref:`priv_kvm`
 
 创建Ubuntu虚拟机
 =======================
@@ -59,6 +59,7 @@ X86环境Ubuntu虚拟机
      --name ubuntu20.04 \
      --ram=2048 \
      --vcpus=1 \
+     --boot uefi --cpu host-passthrough \
      --os-type=ubuntu20.04 \
      --disk path=/dev/vg-libvirt/ubuntu20.04,sparse=false,format=raw,bus=virtio,cache=none,io=native \
      --graphics none \

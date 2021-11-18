@@ -87,10 +87,10 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="priv_cloud_infra.html">私有云架构</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">私有云KVM环境</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">运行环境</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">设置交换网络</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">创建模版虚拟机</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#nvmepass-through">NVMe存储pass-through</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">环境准备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">创建模版虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clone">clone虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pass-through-nvme">添加pass-through NVMe存储</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="priv_docker.html">私有云docker环境</a></li>
@@ -139,9 +139,36 @@
   <section id="kvm">
 <span id="priv-kvm"></span><h1>私有云KVM环境<a class="headerlink" href="#kvm" title="永久链接至标题">¶</a></h1>
 <section id="id1">
-<h2>运行环境<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>环境准备<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<section id="id2">
+<h3>内核和KVM虚拟化<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>物理服务器: <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a></p></li>
+<li><p>物理主机内核启用 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 并采用 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 方式将NVMe设备( <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 对应ID是 <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> )绑定到 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 内核模块: 修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 的ID通过命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nn</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">samsung</span>
+</pre></div>
+</div>
+<p>可以获得:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>所有相同型号NVMe都共用一个设备ID <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code></p>
+</div>
+<p>然后修正grub并重启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+<span class="n">shutdown</span> <span class="o">-</span><span class="n">r</span> <span class="n">now</span>
+</pre></div>
+</div>
+<ul>
 <li><p>按照 <a class="reference internal" href="../../kvm/install/ubuntu_deploy_kvm.html#ubuntu-deploy-kvm"><span class="std std-ref">Ubuntu部署KVM</span></a> 安装部署好基础KVM运行环境:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst
 
@@ -159,8 +186,116 @@ sudo adduser `id -un` kvm
 </li>
 </ul>
 </section>
-<section id="id2">
-<h2>设置交换网络<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="nvmepass-through">
+<h3>NVMe存储pass-through<a class="headerlink" href="#nvmepass-through" title="永久链接至标题">¶</a></h3>
+<p>在模拟大规模云计算平台的分布式存储 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 需要高性能NVMe存储通过 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> pass-through 给虚拟机，以构建高速存储架构。要实现PCIe pass-through，需要采用 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 模式的KVM虚拟机</p>
+<ul>
+<li><p>检查需要 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 的NVMe设备( <code class="docutils literal notranslate"><span class="pre">samsung</span></code> 存储 ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nn</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">Samsung</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示通过 <a class="reference internal" href="../../linux/server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 安装到 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 一共有3块 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+</pre></div>
+</div>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> 代表 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 需要传递给内核绑定到 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 模块上，同时需要增加 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code> 内核参数激活 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> (也就是 Intel vt-d 技术)，所以修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 添加配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>并更新grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+<p>重启操作系统使内核新参数生效，重启后检查内核参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cmdline</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BOOT_IMAGE</span><span class="o">=/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.4.0</span><span class="o">-</span><span class="mi">90</span><span class="o">-</span><span class="n">generic</span> <span class="n">root</span><span class="o">=</span><span class="n">UUID</span><span class="o">=</span><span class="n">caa4193b</span><span class="o">-</span><span class="mi">9222</span><span class="o">-</span><span class="mi">49</span><span class="n">fe</span><span class="o">-</span><span class="n">a4b3</span><span class="o">-</span><span class="mi">89</span><span class="n">f1cb417e6a</span> <span class="n">ro</span> <span class="n">intel_iommu</span><span class="o">=</span><span class="n">on</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span><span class="o">.</span><span class="n">ids</span><span class="o">=</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查内核模块 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 是否已经绑定了 NVMe 设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>应该看到如下表明3个NVMe设备都已经绑定内核驱动 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+</pre></div>
+</div>
+</section>
+<section id="lvmlibvirt">
+<h3>LVM卷作为libvirt存储<a class="headerlink" href="#lvmlibvirt" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>物理主机 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 是Intel SSD 512G，分区4作为LVM卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span>  <span class="mi">458983424</span> <span class="mi">1000214527</span> <span class="mi">541231104</span> <span class="mf">258.1</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">LVM</span>
+</pre></div>
+</div>
+</li>
+<li><p>执行 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 中卷管理并加入libvirt作为存储:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span>
+<span class="n">vgcreate</span> <span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span>
+
+<span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">define</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">logical</span> <span class="o">--</span><span class="n">source</span><span class="o">-</span><span class="n">name</span> <span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span> <span class="o">--</span><span class="n">target</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda4</span>
+<span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">start</span> <span class="n">images_lvm</span>
+<span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">autostart</span> <span class="n">images_lvm</span>
+</pre></div>
+</div>
+</li>
+<li><p>在每次创建VM之前，首先创建对应卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">VM</span> <span class="mi">6</span><span class="n">G</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后创建虚拟机(详见下文):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> <span class="o">...</span> \
+<span class="o">...</span>
+  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">VMNAME</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>如果已经创建了模板虚拟机，则使用 <code class="docutils literal notranslate"><span class="pre">virt-clone</span></code> 命令clone出(无需手工准备LVM卷):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">TEMPLATE</span><span class="o">-</span><span class="n">VM</span> <span class="o">--</span><span class="n">name</span> <span class="n">NEW</span><span class="o">-</span><span class="n">VM</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+<li><p>删除VM:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">undefine</span> <span class="o">--</span><span class="n">nvram</span> <span class="n">VM</span> <span class="o">--</span><span class="n">remove</span><span class="o">-</span><span class="nb">all</span><span class="o">-</span><span class="n">storage</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果没有使用 <code class="docutils literal notranslate"><span class="pre">--remove-all-storage</span></code> 则虚拟机删除并不删除卷，可以独立使用命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">delete</span> <span class="n">VMNAME</span><span class="o">-</span><span class="n">VOL</span> <span class="n">images_lvm</span>
+</pre></div>
+</div>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">VMNAME-VOL</span></code> 是虚拟机卷， <code class="docutils literal notranslate"><span class="pre">images_lvm</span></code> 是创建的LVM卷存储池名字</p>
+</section>
+<section id="id3">
+<h3>设置交换网络<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
 <p>虽然在测试环境中，我们常常使用 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_nat_network.html#libvirt-nat-network"><span class="std std-ref">libvirt NAT型网络</span></a> ，但是我在部署 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 和 <a class="reference internal" href="../../arm/raspberry_pi/pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> 是通过物理交换机连接的，也就是说，所有数据通讯都是通过真实网络传输，所以我们需要采用 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> :</p>
 <ul>
 <li><p>通讯通过DL360服务器的 <code class="docutils literal notranslate"><span class="pre">eno1</span></code> 网口，网段是 <code class="docutils literal notranslate"><span class="pre">192.168.6.0/24</span></code></p>
@@ -205,8 +340,8 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/00-cloud-init.yaml</span></code></p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span>
 <span class="linenos"> 2</span>  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="linenos"> 3</span>  <span class="nt">renderer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">networkd</span>
@@ -242,8 +377,9 @@ sudo adduser `id -un` kvm
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h2>创建模版虚拟机<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+</section>
+<section id="id4">
+<h2>创建模版虚拟机<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>注意，如果是普通用户执行 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 会提示错误:</p>
@@ -338,7 +474,7 @@ sudo adduser `id -un` kvm
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="mi">6</span><span class="n">G</span>
 
 <span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
-  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">br0</span> \
   <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> \
   <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
   <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
@@ -354,7 +490,28 @@ sudo adduser `id -un` kvm
 </ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
+<p>这里直接使用了 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 中配置的 <code class="docutils literal notranslate"><span class="pre">br0</span></code> ，是因为Ubuntu在安装过程中可以设置代理服务器，而我已经采用 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 部署了 <a class="reference internal" href="../../web/proxy/squid/index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 作为代理</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
 <p>一定要使用 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span> <span class="pre">--cpu</span> <span class="pre">host-passthrough</span></code> 参数激活 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ，否则虽然能够 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> PCIe设备给虚拟机，但是虚拟机无法使用完整的物理主机CPU特性，而是使用虚拟出来的CPU，性能会损失。</p>
+</div>
+<p>正确实现 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span> <span class="pre">--cpu</span> <span class="pre">host-passthrough</span></code> 后，在虚拟机内部有以下2个特征:</p>
+<blockquote>
+<div><ul>
+<li><p>CPU显示和物理服务器一致:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cpuinfo</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> ...
+ model name: Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz
+
+- ``/boot/efi`` 目录独立分区，且存储了 ``EFI`` 相关配置和数据
+</pre></div>
 </div>
 <ul>
 <li><p><a class="reference internal" href="../../kvm/startup/ubuntu_vm_console.html#ubuntu-vm-console"><span class="std std-ref">Ubuntu虚拟机控制台</span></a> 默认不输出，所以安装完成(配置了ssh服务)，通过ssh登录到虚拟机修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置:</p>
@@ -365,6 +522,10 @@ sudo adduser `id -un` kvm
 </div>
 </li>
 </ul>
+<p>更新grub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
 <p>重启以后 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">z-ubuntu20</span></code> 就能正常工作，方便运维。</p>
 <ul>
 <li><p>修订虚拟机 <code class="docutils literal notranslate"><span class="pre">/etc/sudoers</span></code> 将自己的管理帐号所在 <code class="docutils literal notranslate"><span class="pre">sudo</span></code> 组设置为无密码执行命令(个人使用降低安全性，不推荐生产环境):</p>
@@ -410,12 +571,22 @@ sudo adduser `id -un` kvm
 <span class="n">sudo</span> <span class="n">apt</span> <span class="n">upgrade</span>
 </pre></div>
 </div>
+</section>
+</section>
+<section id="clone">
+<h2>clone虚拟机<a class="headerlink" href="#clone" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>clone基于Ubuntu 20的虚拟机( <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 构建数据存储系统 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> / <code class="docutils literal notranslate"><span class="pre">etcd</span></code> / <code class="docutils literal notranslate"><span class="pre">mysql</span></code> / <code class="docutils literal notranslate"><span class="pre">pgsq</span></code> … ):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
 </pre></div>
 </div>
 </li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">virt-clone</span></code> 命令clone出来的虚拟机会自动修订 <code class="docutils literal notranslate"><span class="pre">uuid</span></code> 以及虚拟网卡的 <code class="docutils literal notranslate"><span class="pre">mac</span> <span class="pre">address</span></code> ，所以不用担心虚拟机冲突</p>
+</div>
+<ul>
 <li><p>修订 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 配置( <code class="docutils literal notranslate"><span class="pre">4c8g</span></code> )设置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">edit</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
 </pre></div>
@@ -427,65 +598,108 @@ sudo adduser `id -un` kvm
 <span class="o">&lt;</span><span class="n">vcpu</span> <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;static&#39;</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="n">vcpu</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-</section>
-</section>
-<section id="nvmepass-through">
-<h2>NVMe存储pass-through<a class="headerlink" href="#nvmepass-through" title="永久链接至标题">¶</a></h2>
-<p>在模拟大规模云计算平台的分布式存储 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 需要高性能NVMe存储通过 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> pass-through 给虚拟机，以构建高速存储架构。要实现PCIe pass-through，需要采用 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 模式的KVM虚拟机</p>
 <ul>
-<li><p>检查需要 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 的NVMe设备( <code class="docutils literal notranslate"><span class="pre">samsung</span></code> 存储 ):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nn</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">Samsung</span>
+<li><p>由于存储访问需要稳定性和高性能， 设置 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> <a class="reference internal" href="../../kvm/iommu/tunning/iommu_cpu_pinning.html#iommu-cpu-pinning"><span class="std std-ref">IOMMU调优: CPU pinning</span></a> ( 请参考我在 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划)，确保所有 <code class="docutils literal notranslate"><span class="pre">data</span></code> 虚拟服务器(通过高速PCIe 3.0接口访问 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> NVMe存储):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">vcpu</span> <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;static&#39;</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="n">vcpu</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">cputune</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">vcpupin</span> <span class="n">vcpu</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">cpuset</span><span class="o">=</span><span class="s1">&#39;24&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">vcpupin</span> <span class="n">vcpu</span><span class="o">=</span><span class="s1">&#39;1&#39;</span> <span class="n">cpuset</span><span class="o">=</span><span class="s1">&#39;25&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">vcpupin</span> <span class="n">vcpu</span><span class="o">=</span><span class="s1">&#39;2&#39;</span> <span class="n">cpuset</span><span class="o">=</span><span class="s1">&#39;26&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">vcpupin</span> <span class="n">vcpu</span><span class="o">=</span><span class="s1">&#39;3&#39;</span> <span class="n">cpuset</span><span class="o">=</span><span class="s1">&#39;27&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">cputune</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>输出显示通过 <a class="reference internal" href="../../linux/server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 安装到 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 一共有3块 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
-<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
-<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
-</pre></div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>采用上述方式按照 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划的VM列表，clone出部署所需的虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code></p>
 </div>
+</section>
+<section id="pass-through-nvme">
+<h2>添加pass-through NVMe存储<a class="headerlink" href="#pass-through-nvme" title="永久链接至标题">¶</a></h2>
+<p>上述 <code class="docutils literal notranslate"><span class="pre">z-b-data-X</span></code> 共有3台虚拟机，通过 <a class="reference internal" href="../../kvm/iommu/tunning/iommu_cpu_pinning.html#iommu-cpu-pinning"><span class="std std-ref">IOMMU调优: CPU pinning</span></a> 关联到物理主机 <code class="docutils literal notranslate"><span class="pre">socket</span> <span class="pre">0</span> <span class="pre">CPU</span></code> 。根据 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 硬件规格， <code class="docutils literal notranslate"><span class="pre">socket</span> <span class="pre">0</span> <span class="pre">CPU</span></code> 和 <code class="docutils literal notranslate"><span class="pre">slot</span> <span class="pre">0/1</span></code> 两个PCIe 3.0直接联通，可以获得直接访问这两个插槽上NVMe高性能。所以上述 <code class="docutils literal notranslate"><span class="pre">cpu</span> <span class="pre">pinning</span></code> 可以提高存储访问性能。</p>
+<p>现在我们把3个 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 分配到上述3个虚拟机，以便构建 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 分布式存储以及各种需要直接访问存储的基础服务。</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> 代表 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 需要传递给内核绑定到 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 模块上，同时需要增加 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code> 内核参数激活 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> (也就是 Intel vt-d 技术)，所以修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 添加配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a&quot;</span>
+<li><p>参考 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 执行以下命令检查 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 存储的ID:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nn</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">samsung</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>并更新grub:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
-</pre></div>
-</div>
-<p>重启操作系统使内核新参数生效，重启后检查内核参数:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cmdline</span>
-</pre></div>
-</div>
 <p>可以看到:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BOOT_IMAGE</span><span class="o">=/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.4.0</span><span class="o">-</span><span class="mi">90</span><span class="o">-</span><span class="n">generic</span> <span class="n">root</span><span class="o">=</span><span class="n">UUID</span><span class="o">=</span><span class="n">caa4193b</span><span class="o">-</span><span class="mi">9222</span><span class="o">-</span><span class="mi">49</span><span class="n">fe</span><span class="o">-</span><span class="n">a4b3</span><span class="o">-</span><span class="mi">89</span><span class="n">f1cb417e6a</span> <span class="n">ro</span> <span class="n">intel_iommu</span><span class="o">=</span><span class="n">on</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span><span class="o">.</span><span class="n">ids</span><span class="o">=</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
+<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
 </pre></div>
 </div>
+<p>这里第一列的id对应了每个PCIe，也就是我们要指定给虚拟机的标识配置。</p>
+<ul class="simple">
+<li><p>创建3个PCIe设备配置XML文件分别对应上述设备:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #1</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
+<span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x5&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">4</span>  <span class="nt">&lt;/source&gt;</span>
+<span class="linenos">5</span><span class="nt">&lt;/hostdev&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #2</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
+<span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x8&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">4</span>  <span class="nt">&lt;/source&gt;</span>
+<span class="linenos">5</span><span class="nt">&lt;/hostdev&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #3</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
+<span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0xb&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">4</span>  <span class="nt">&lt;/source&gt;</span>
+<span class="linenos">5</span><span class="nt">&lt;/hostdev&gt;</span>
+</pre></div>
+</div>
+</div>
 <ul>
-<li><p>检查内核模块 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 是否已经绑定了 NVMe 设备:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nnk</span> <span class="o">-</span><span class="n">d</span> <span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span>
+<li><p>执行以下设备添加命令，分别将3个NVMe设备pass-through给3个 <code class="docutils literal notranslate"><span class="pre">z-b-data-X</span></code> 虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">samsung_pm9a1_1</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
+<span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span> <span class="n">samsung_pm9a1_2</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
+<span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">3</span> <span class="n">samsung_pm9a1_3</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
 </pre></div>
 </div>
 </li>
-</ul>
-<p>应该看到如下表明3个NVMe设备都已经绑定内核驱动 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
-     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
-     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
-     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
-<span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
-     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
-     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
-     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
-<span class="mi">0</span><span class="n">b</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
-     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a801</span><span class="p">]</span>
-     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
-     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvme</span>
+<li><p>启动虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 然后通过控制台访问:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">virsh</span> <span class="n">console</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
 </pre></div>
 </div>
+</li>
+<li><p>(这里只举例 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 修订方法)启动基础服务器虚拟机(需要一台台顺序处理，因为需要修订主机名和IP地址)</p></li>
+</ul>
+<p>修改主机名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hostnamectl</span> <span class="nb">set</span><span class="o">-</span><span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>修订IP地址 - <a class="reference internal" href="../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 方式修订 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/01-netcfg.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IP</span><span class="o">=</span><span class="mf">192.168.6.204</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s2">&quot;s/192.168.6.246/$IP/g&quot;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netplan</span><span class="o">/</span><span class="mi">01</span><span class="o">-</span><span class="n">netcfg</span><span class="o">.</span><span class="n">yaml</span>
+
+<span class="n">netplan</span> <span class="n">generate</span>
+<span class="n">netplan</span> <span class="n">apply</span>
+
+<span class="n">ip</span> <span class="n">addr</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>同样完成 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 的启动和修订</p></li>
+</ul>
 </section>
 </section>
 

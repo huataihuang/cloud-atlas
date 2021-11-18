@@ -118,6 +118,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
@@ -169,12 +170,12 @@
              
   <section id="kvm">
 <span id="create-vm"></span><h1>创建KVM虚拟机<a class="headerlink" href="#kvm" title="永久链接至标题">¶</a></h1>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>在Studio环境中，KVM虚拟化是实现模拟数据中心的核心。因为单纯的Docker+Kubernetes无法模拟多台物理服务器，虽然容器技术更为轻量级。</p>
-<p>为Studio选择的默认Guest操作系统是Ubuntu 18.04，这样可以获得Kernel 4.15，并且得到LTS长期支持。这个基础Guest系统将用于构建OpenStack。</p>
-<p>Studio环境采用Ubuntu作为host和guest的OS，在 <a class="reference internal" href="../../real/index.html#real"><span class="std std-ref">Real Atlas</span></a> 中， <a class="reference internal" href="../../real/private_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 则采用CentOS作为OS。</p>
-</div>
+<p>KVM虚拟化是实现模拟数据中心的核心。因为单纯的Docker+Kubernetes无法模拟多台物理服务器，虽然容器技术更为轻量级。</p>
+<p>常规的虚拟机采用 <code class="docutils literal notranslate"><span class="pre">qcow2</span></code> 镜像文件作为虚拟磁盘，性能有限。为了能够提高虚拟机性能，我们需要采用 <a class="reference internal" href="../iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 来实现PCIe pass-through，可以加速网络、存储、图形性能，接近物理主机的性能：</p>
+<ul class="simple">
+<li><p>虚拟机的操作系统盘采用LVM卷，减少Host物理主机文件系统的性能消耗: 下文中采用 <a class="reference internal" href="../libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 先创建LVM卷，然后在 <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 安装命令中指定LVM卷作为虚拟磁盘</p></li>
+<li><p><a class="reference internal" href="../../real/private_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 使用 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> ，内核配置 <code class="docutils literal notranslate"><span class="pre">GRUB_CMDLINE_LINUX_DEFAULT=&quot;intel_iommu=on</span> <span class="pre">vfio-pci.ids=144d:a80a&quot;</span></code> 详见 <a class="reference internal" href="../../real/private_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a></p></li>
+</ul>
 <section id="ubuntu">
 <h2>创建Ubuntu虚拟机<a class="headerlink" href="#ubuntu" title="永久链接至标题">¶</a></h2>
 <section id="x86ubuntu">
@@ -225,6 +226,7 @@
   <span class="o">--</span><span class="n">name</span> <span class="n">ubuntu20</span><span class="mf">.04</span> \
   <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
   <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
   <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">ubuntu20</span><span class="mf">.04</span> \
   <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">ubuntu20</span><span class="mf">.04</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
   <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
