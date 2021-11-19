@@ -106,12 +106,22 @@
 
    我第一次测试 :ref:`ovmf` 虚拟机，设置了 ``1c2g`` 规格。实际上上述随机读写测试采用了4个job，我观察了实际上会把4个CPU核心打满。对于 ``1c2g`` 虚拟机由于只有1个cpu，会导致性能无法满足并发4个读写进程对要求: 测试结果读写性能只有物理主机的 1/4 不到
 
-   第二次测试我分配了4cpu的虚拟机，并发果然跑满4个vcpu之后，虚拟机存储性能基本上接近物理主机存储性能: 随机4k读写性能 92% ~ 94% ，顺序读写性能 99%
+   第二次测试我分配了4cpu的虚拟机，并发果然跑满4个vcpu之后，虚拟机存储性能基本上接近物理主机存储性能
 
 .. csv-table:: IOMMU虚拟机和物理机 NVMe性能对比
    :file: compare_iommu_native_nvme/compare_iommu_native_nvme.csv
-   :widths: 25, 25, 25, 25
+   :widths: 14, 15, 15, 15, 15, 15, 11
    :header-rows: 1
+
+- 采用 iommu 方式pass-through NVMe存储给虚拟机，结合了 :ref:`ovmf` (uefi)虚拟机 + :ref:`iommu_cpu_pinning` ，可以接近直接物理主机读写NVMe性能: 随机4k读写性能 92% ~ 94% ，顺序读写性能 99%
+
+  - 后续准备实践 :ref:`huge_memory_pages` 以及 :ref:`cpu_frequency_governor` 、 :ref:`isolating_pinned_cpus` 技术来进一步提高虚拟化性能
+
+- 由于我使用的二手 :ref:`hpe_dl360_gen9` 硬件是PCIe 3.0，所以对于 PCIe 3.0 x4 接口，最高只支持大约 3500 MB/s 接口速率，从我的 :ref:`fio` 测试来看
+
+  - 物理读写NVMe存储受限于PCIe3.0接口，只能获得顺序读写能力50%(已接近理想值)和随机读写能力77%
+  - 虚拟化消耗的存储性能不多，所以也能获得硬件顺序读写能力50%和随机读写能力72%
+  - 对于我的模拟测试环境，采用iommu虚拟化存储应该能过满足部署大规模云计算需求
 
 参考
 =========

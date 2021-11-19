@@ -8,6 +8,7 @@ IOMMU性能优化
    :maxdepth: 1
 
    iommu_cpu_pinning.rst
+   isolating_pinned_cpus.rst
 
 .. only::  subproject and html
 
