@@ -22,7 +22,7 @@ CPU拓扑
 
 在 :ref:`hpe_dl360_gen9` 上 ``E5-2670 v3`` 处理器拓扑如下
 
-.. literalinclude:: ../../../kernel/cpu/intel/xeon_e5-2670_v3/lscpu_e5-2670_v3.txt
+.. literalinclude:: ../../../kernel/cpu/intel/xeon_e5/xeon_e5-2670_v3/lscpu_e5-2670_v3.txt
    :language: bash
    :linenos:
    :caption: XEON E5-2670 v3处理器拓扑
@@ -33,7 +33,7 @@ CPU拓扑
 
 在 :ref:`hpe_dl360_gen9` 上 ``E5-2670 v3`` 处理器NUMA结构如下
 
-.. literalinclude:: ../../../kernel/cpu/intel/xeon_e5-2670_v3/numa_e5-2670_v3.txt
+.. literalinclude:: ../../../kernel/cpu/intel/xeon_e5/xeon_e5-2670_v3/numa_e5-2670_v3.txt
    :language: bash
    :linenos:
    :caption: XEON E5-2670 v3处理器NUMA

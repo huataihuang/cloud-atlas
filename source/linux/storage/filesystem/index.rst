@@ -7,6 +7,8 @@ Linux文件系统
 .. toctree::
    :maxdepth: 1
 
+   gpt.rst
+   parted.rst
    choice_linux_filesystem.rst
    mount_ext4_on_macos.rst
    xfs.rst

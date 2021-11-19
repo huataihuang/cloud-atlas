@@ -1,14 +1,14 @@
-.. _iommu_tunning:
+.. _huge_memory_pages:
 
 =================================
-IOMMU性能优化
+Linux内存大页
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   iommu_cpu_pinning.rst
-   isolating_pinned_cpus.rst
+   intro_huge_memory_pages.rst
+   hugetlb_page.rst
 
 .. only::  subproject and html
 
