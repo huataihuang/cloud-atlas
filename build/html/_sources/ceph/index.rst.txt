@@ -12,11 +12,13 @@ Ceph Atlas
    :maxdepth: 1
 
    introduce_ceph.rst
+   ceph_recommend.rst
    bluestore.rst
    rdma.rst
    ceph_docker_in_studio.rst
    deploy/index
    arm/index
+   arch/index
 
 .. only::  subproject and html
 

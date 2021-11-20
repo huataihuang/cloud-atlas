@@ -4,7 +4,7 @@
 Kali Linux ARM环境运行Anbox
 =============================
 
-我在 :ref:`pi_400` 上将 :ref:`kali_fulltime` 。考虑到很多商业软件都有Andorid版本，并且ARM架构硬件可以直接运行原生Android程序，所以考虑采用Anbox来弥补Linux应用程序不足的缺憾。
+考虑到很多商业软件都有Andorid版本，并且ARM架构硬件可以直接运行原生Android程序，所以考虑采用Anbox来弥补Linux应用程序不足的缺憾。
 
 .. warning::
 
