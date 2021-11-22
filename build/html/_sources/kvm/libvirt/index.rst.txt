@@ -10,6 +10,8 @@ Libvirt虚拟机管理器
    libvirt_architecture.rst
    network/index
    storage/index
+   agent/index
+   virsh_dompmsuspend.rst
 
 .. only::  subproject and html
 

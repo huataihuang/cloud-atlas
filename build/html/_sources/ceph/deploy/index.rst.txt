@@ -7,8 +7,9 @@ Ceph 部署
 .. toctree::
    :maxdepth: 1
 
+   install_ceph.rst
    centos_sig_ceph.rst
-   install_ceph_manual.rst
+   install_ceph_manual/index
 
 .. only::  subproject and html
 

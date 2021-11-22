@@ -75,6 +75,11 @@ sudoers文件配置
 
    echo 'foobar ALL=(ALL:ALL) ALL' | sudo EDITOR='tee -a' visudo
 
+sudo缓慢问题
+===============
+
+我在 :ref:`priv_kvm` 采用 ``virsh clone`` 方式从模版服务器复制出虚拟机，在修订了主机IP地址之后，我发现 ``sudo su -`` 命令响应非常缓慢。这个问题和 ``/etc/hosts`` 配置有关，因为需要解析IP地址和主机名，如果没有及时更新(修改了IP地址)，则会需要通过DNS解析。而如果此时没有配置DNS，则 ``sudo`` 命令要等待IP解析超时才能返回，这样就会非常慢。
+
 参考
 ====
 

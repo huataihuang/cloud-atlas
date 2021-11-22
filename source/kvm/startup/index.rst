@@ -8,6 +8,7 @@ KVM 快速起步
    :maxdepth: 1
 
    create_vm.rst
+   virsh_manage_vm.rst
    deploy_win_vm.rst
    backup_vm.rst
    clone_vm.rst

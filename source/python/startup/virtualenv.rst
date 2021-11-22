@@ -41,6 +41,52 @@ CentOS 7通过Yum安装（EPEL源）
    pip2 install virtualenv
    virtualenv venv2
 
+古老CentOS 7安装使用virtualenv
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+在非常古老的CentOS 7版本上安装virtualenv会遇到更多麻烦:
+
+- CentOS 7.2上执行 ``virtualenv venv2`` 会出现一下报错::
+
+   Traceback (most recent call last):
+     File "/bin/virtualenv", line 7, in <module>
+       from virtualenv.__main__ import run_with_catch
+     File "/usr/lib/python2.7/site-packages/virtualenv/__init__.py", line 3, in <module>
+       from .run import cli_run, session_via_cli
+     File "/usr/lib/python2.7/site-packages/virtualenv/run/__init__.py", line 7, in <module>
+       from ..app_data import make_app_data
+     File "/usr/lib/python2.7/site-packages/virtualenv/app_data/__init__.py", line 9, in <module>
+       from platformdirs import user_data_dir
+   ImportError: No module named platformdirs   
+
+这是因为操作系统自带的 ``pip2`` 版本过于陈旧，甚至直接执行 ``pip2.7 install --upgrade pip`` 都会报错::
+
+   You are using pip version 7.1.0, however version 21.3.1 is available.
+   You should consider upgrading via the 'pip install --upgrade pip' command.
+   Collecting pip
+     Using cached https://files.pythonhosted.org/packages/da/f6/c83229dcc3635cdeb51874184241a9508ada15d8baa3
+   37a41093fab58011/pip-21.3.1.tar.gz
+       Complete output from command python setup.py egg_info:
+       Traceback (most recent call last):
+         File "<string>", line 20, in <module>
+         File "/tmp/pip-build-wfciDf/pip/setup.py", line 7
+           def read(rel_path: str) -> str:
+                            ^
+       SyntaxError: invalid syntax
+       
+       ----------------------------------------
+   Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-wfciDf/pip 
+
+- 解决的方法是手工下载安装pip的脚本::
+
+   curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+   python get-pip.py
+
+- 通过手工升级 ``pip`` 之后，再次安装virtuualenv环境就可以成功::
+
+   pip2.7 install virtualenv
+   virtualenv venv2
+
 CentOS 8通过dnf安装python 2virtualenv
 ----------------------------------------
 

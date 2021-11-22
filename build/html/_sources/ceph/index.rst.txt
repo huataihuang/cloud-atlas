@@ -17,6 +17,7 @@ Ceph Atlas
    rdma.rst
    ceph_docker_in_studio.rst
    deploy/index
+   mgr/index
    arm/index
    arch/index
 

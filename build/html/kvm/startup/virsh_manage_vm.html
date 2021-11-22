@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>virsh管理虚拟机 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="部署Windows KVM虚拟机" href="deploy_win_vm.html" />
+    <link rel="prev" title="创建KVM虚拟机" href="create_vm.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">KVM Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../install/index.html">KVM 环境安装</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">KVM 快速起步</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="create_vm.html">创建KVM虚拟机</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">virsh管理虚拟机</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">启动虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">配置虚拟机自动启动</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">重启虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">保存虚拟机运行状态</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#suspend-resume">suspend 和 resume 虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_win_vm.html">部署Windows KVM虚拟机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backup_vm.html">备份KVM虚拟机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clone_vm.html">复制KVM虚拟机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vm_attach_dev.html">KVM虚拟机添加设备</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ubuntu_vm_console.html">Ubuntu虚拟机控制台</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../hypervisor.html">hypervisor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_architecture.html">KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">KVM 存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numa/index.html">KVM NUMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iommu/index.html">IOMMU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_vmcs.html">Intel VMCS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual.html">KVM嵌套虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_vdisk_live.html">KVM虚拟机动态添加、调整磁盘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_live_migration.html">KVM热迁移</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">使用QEMU管理KVM虚拟机</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_libguestfs.html">使用libguestfs访问KVM镜像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../memballoon.html">虚拟机内存balloon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu_passthrough_with_kvm.html">KVM的GPU直通虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nvidia_cuda_gpu_in_kvm.html">在KVM中使用NVIDIA CUDA GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amd_rocm_gpu_in_kvm.html">在KVM中使用AMD ROCm GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../macos_xhyve/index.html">macOS平台xhyve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../amd_kvm/index.html">AMD硬件环境KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm_kvm/index.html">ARM硬件环境KVM虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kvm_macos/index.html">KVM虚拟化运行macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">KVM故障排查</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">KVM Atlas</a> &raquo;</li>
+          <li><a href="index.html">KVM 快速起步</a> &raquo;</li>
+      <li>virsh管理虚拟机</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/kvm/startup/virsh_manage_vm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="virsh">
+<span id="virsh-manage-vm"></span><h1>virsh管理虚拟机<a class="headerlink" href="#virsh" title="永久链接至标题">¶</a></h1>
+<p>在 <a class="reference internal" href="create_vm.html#create-vm"><span class="std std-ref">创建KVM虚拟机</span></a> 之后，我们可以通过 <code class="docutils literal notranslate"><span class="pre">virsh</span></code> 管理虚拟机的生命周期:</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>本文案例以虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 为案例</p>
+</div>
+<section id="id1">
+<h2>启动虚拟机<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>最简单的启动虚拟机命令只需要虚拟机名字，例如启动 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在上述 <code class="docutils literal notranslate"><span class="pre">start</span></code> 命令之后，可以添加一些有用参数:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--console</span></code> 启动虚拟机之后，连接到虚拟机的控制台</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--paused</span></code> 启动虚拟机进入暂停状态</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-autodestroy</span></code> 当virsh断开连接后自动销毁虚拟机</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--bypass-cache</span></code> 这个参数结合 <code class="docutils literal notranslate"><span class="pre">managedsave</span></code> 使用</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--force-boot</span></code> 放弃任何 <code class="docutils literal notranslate"><span class="pre">managedsave</span></code> 选项并导致全新启动</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id2">
+<h2>配置虚拟机自动启动<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">virsh</span></code> 提供了 <code class="docutils literal notranslate"><span class="pre">autostart</span></code> 命令设置虚拟机自动启动属性，也就是在操作系统启动时自动虚拟机。例如 <a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 中 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 是部署所有虚拟机镜像存储的 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 分布式存储，需要首先在物理服务器启动时自动启动，以便提供其他虚拟机启动时加载镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">autostart</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果要关闭自动启动，则添加一个 <code class="docutils literal notranslate"><span class="pre">--disable</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">autostart</span> <span class="o">--</span><span class="n">disable</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>重启虚拟机<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">virsh</span></code> 重启虚拟机命令 <code class="docutils literal notranslate"><span class="pre">reboot</span></code> ，并且提供了 <code class="docutils literal notranslate"><span class="pre">--mode</span> <span class="pre">modename</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">reboot</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>保存虚拟机运行状态<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">save</span></code> 命令可以将一个运行的虚拟机的虚拟内存当前状态保存到一个指定文件，之后就可以通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">restore</span></code> 恢复运行。这个命令有些类似 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">suspend</span></code> 命令，区别在于 <code class="docutils literal notranslate"><span class="pre">suspend</span></code> 是暂停在物理主机的内存中，所以如果服务器重启就不能恢复虚拟机的当前状态；而 <code class="docutils literal notranslate"><span class="pre">save</span></code> 是把虚拟机内存状态保存到磁盘文件，所以即使物理主机重启，也可以通过对应的 <code class="docutils literal notranslate"><span class="pre">restore</span></code> 命令从磁盘文件恢复。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">save</span></code> 是保存虚拟机的快照( <code class="docutils literal notranslate"><span class="pre">snapshot</span></code> )</p>
+</div>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">save</span></code> 保存虚拟机状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">save</span> <span class="p">[</span><span class="o">--</span><span class="n">bypass</span><span class="o">-</span><span class="n">cache</span><span class="p">]</span> <span class="n">domain</span> <span class="n">file</span> <span class="p">[</span><span class="o">--</span><span class="n">xml</span> <span class="n">string</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">running</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">paused</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">verbose</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">save</span> <span class="o">--</span><span class="n">bypass</span><span class="o">-</span><span class="n">cache</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">save</span>
+</pre></div>
+</div>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Domain</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span> <span class="n">saved</span> <span class="n">to</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">save</span>
+</pre></div>
+</div>
+<p>一旦保存了虚拟机内存状态到磁盘文件，则虚拟机立即关闭</p>
+<ul>
+<li><p>对应我们可以恢复保存的虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">restore</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">save</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Domain</span> <span class="n">restored</span> <span class="kn">from</span> <span class="nn">z</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">save</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>保存 <a class="reference internal" href="../iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 方式pass-through PCI设备的 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 虚拟机是报错的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">save</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mf">1.</span><span class="n">save</span>
+</pre></div>
+</div>
+<p>提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">save</span> <span class="n">domain</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">to</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mf">1.</span><span class="n">save</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">Requested</span> <span class="n">operation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span> <span class="n">domain</span> <span class="n">has</span> <span class="n">assigned</span> <span class="n">non</span><span class="o">-</span><span class="n">USB</span> <span class="n">host</span> <span class="n">devices</span>
+</pre></div>
+</div>
+<p>原因是 libvirt 冻结虚拟机时，虚拟机内部是不知道这个冻结操作，也就无法处理GPU设备的内存内容。解决的方法是采用 <a class="reference internal" href="../libvirt/virsh_dompmsuspend.html#virsh-dompmsuspend"><span class="std std-ref">virsh dompmsuspend 挂起运行虚拟机</span></a> 结合 <a class="reference internal" href="../libvirt/agent/qemu_guest_agent.html#qemu-guest-agent"><span class="std std-ref">QEMU虚拟机Agent</span></a> 实现vram内存处理才能保存PCIe设备直通的虚拟机状态保存。</p>
+</div>
+</section>
+<section id="suspend-resume">
+<h2>suspend 和 resume 虚拟机<a class="headerlink" href="#suspend-resume" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">suspend</span></code> 和 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">resume</span></code> 命令可用来挂起和解冻指定的虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">suspend</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+<span class="n">virsh</span> <span class="n">resume</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/virtualization_deployment_and_administration_guide/sect-starting_suspending_resuming_saving_and_restoring_a_guest_virtual_machine-starting_a_defined_domain">STARTING, RESUMING, AND RESTORING A VIRTUAL MACHINE</a></p></li>
+<li><p><a class="reference external" href="https://www.cyberciti.biz/faq/rhel-centos-linux-kvm-virtualization-start-virtual-machine-guest/">KVM: Autostart a Domain / VM Command</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="create_vm.html" class="btn btn-neutral float-left" title="创建KVM虚拟机" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deploy_win_vm.html" class="btn btn-neutral float-right" title="部署Windows KVM虚拟机" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
