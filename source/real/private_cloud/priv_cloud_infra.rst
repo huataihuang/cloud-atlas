@@ -125,6 +125,7 @@
 
   - 采用 :ref:`ubuntu_linux` 20.04 部署
   - 采用 :ref:`vgpu` 将 :ref:`tesla_p10` 输出到多个工作节点虚拟机，实现分布式 :ref:`machine_learning`
+  - 采用 :ref:`rook` 来部署一个集成到Kubernetes的 :ref:`ceph` 集群
 
 第一层虚拟化的虚拟机也采用手工方式部署，部署用于构建集群的虚拟机都采用 ``数据存储层`` 的 :ref:`ceph` ``RBD`` ，不使用任何本地磁盘: 虚拟机计算节点可以任意迁移。
 

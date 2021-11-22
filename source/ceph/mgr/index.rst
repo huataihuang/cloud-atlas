@@ -1,15 +1,13 @@
-.. _ceph_deploy:
+.. _ceph_mgr:
 
 =================================
-Ceph 部署
+Ceph Manager Daemon
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install_ceph.rst
-   centos_sig_ceph.rst
-   install_ceph_manual/index
+   ceph_dashboard.rst
 
 .. only::  subproject and html
 

@@ -456,5 +456,15 @@ clone虚拟机
 
    ip addr
 
+修订 ``/etc/hosts`` 添加自身主机IP解析(这步非常重要，如果不能对自身IP解析会导致 :ref:`sudo` 非常缓慢)::
+
+   192.168.6.204  z-b-data-1
+
 - 同样完成 ``z-b-data-2`` 和 ``z-b-data-3`` 的启动和修订
 
+- :ref:`virsh_manage_vm` 设置 ``z-b-data-1`` / ``z-b-data-2`` / ``z-b-data-3`` 在操作系统启动时自动启动(这3个虚拟机是 :ref:`priv_cloud_infra` 中关键的数据存储层服务器，所有虚拟机集群的数据存储，所以必须自动启动运行才能提供其他虚拟机运行基础) ::
+
+   for vm in z-b-data-1 z-b-data-2 z-b-data-3;do
+     virsh autostart $vm
+   done
+   

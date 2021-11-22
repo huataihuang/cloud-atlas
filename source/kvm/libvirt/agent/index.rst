@@ -1,15 +1,15 @@
-.. _ceph_deploy:
+.. _vm_agent:
 
 =================================
-Ceph 部署
+虚拟机Agent增强
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   install_ceph.rst
-   centos_sig_ceph.rst
-   install_ceph_manual/index
+   qemu_guest_agent.rst
+   spice_agent.rst
 
 .. only::  subproject and html
 

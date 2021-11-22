@@ -1,15 +1,15 @@
-.. _ceph_deploy:
+.. _install_ceph_manual:
 
 =================================
-Ceph 部署
+Ceph 手工部署
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install_ceph.rst
-   centos_sig_ceph.rst
-   install_ceph_manual/index
+   prepare.rst
+   install_ceph_mon.rst
+   install_ceph_mgr.rst
 
 .. only::  subproject and html
 
