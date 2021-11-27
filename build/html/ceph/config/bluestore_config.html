@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ceph BlueStore配置 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="ARM架构Ceph" href="../arm/index.html" />
+    <link rel="prev" title="Ceph 配置" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Ceph Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduce_ceph.html">Ceph存储介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_recommend.html">Ceph部署软硬件推荐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rdma.html">Remote Direct Memory Access(RDMA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_docker_in_studio.html">Stuido环境Docker容器运行Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/index.html">Ceph 部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mgr/index.html">Ceph Manager Daemon</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Ceph 配置</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Ceph BlueStore配置</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ceph-bluestoe">Ceph BlueStoe设备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#block-data">只使用一个设备作为block(data)设备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#block-data-block-db">分离block(data)设备和block.db(元数据)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">大小规格</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">自动缓存大小</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">有用的一些功能</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arch/index.html">Ceph 架构</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Ceph Atlas</a> &raquo;</li>
+          <li><a href="index.html">Ceph 配置</a> &raquo;</li>
+      <li>Ceph BlueStore配置</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/ceph/config/bluestore_config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ceph-bluestore">
+<span id="bluestore-config"></span><h1>Ceph BlueStore配置<a class="headerlink" href="#ceph-bluestore" title="永久链接至标题">¶</a></h1>
+<section id="ceph-bluestoe">
+<h2>Ceph BlueStoe设备<a class="headerlink" href="#ceph-bluestoe" title="永久链接至标题">¶</a></h2>
+<p>对于存储系统来说，性能优化往往会将数据存储、元数据存储、日志存储分离开，Ceph BlueStore也是这样: BlueStore存储管理可以使用3个存储设备来分别存放不同用途的数据:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">primary</span> <span class="pre">device</span></code> 主设备</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">write-ahead</span> <span class="pre">log</span></code> 设备(WAL设备)，在该设备数据目录下有一个 <code class="docutils literal notranslate"><span class="pre">block.wal</span></code> ，是BlueStore内置日志或者提前写入日志。WAL设备通常要求更高性能，并且通常要求比主设备更快。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DB</span> <span class="pre">device</span></code> 数据库设备，也就是用来存储BlueStore内置元数据。BlueStore采用嵌入的RocksDB来存储元数据，存放到DB设备来提高性能。如果DB设备存满了，元数据就会存放到主设备或其他位置(性能会降低)。同样， DB设备也应该比主设备更快</p></li>
+</ul>
+<p>由于WAL设备通常存储容量较小，DB设备也如此，所以我们会采用高速但是容量小一些的存储设备。应该将日志(journal)存储到最快存储中，其次DB设备也应存储到较快设备中。</p>
+<p>对于测试环境或者要求不高环境，可以将上述3个设备合成一个设备使用。</p>
+<ul>
+<li><p>采用单一存储设备构建BlueStore OSD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">prepare</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="o">&lt;</span><span class="n">device</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>指定WAL设备 和/或 DB设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">prepare</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="o">&lt;</span><span class="n">device</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">block</span><span class="o">.</span><span class="n">wal</span> <span class="o">&lt;</span><span class="n">wal</span><span class="o">-</span><span class="n">device</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">block</span><span class="o">.</span><span class="n">db</span> <span class="o">&lt;</span><span class="n">db</span><span class="o">-</span><span class="n">device</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里的 <code class="docutils literal notranslate"><span class="pre">&lt;device&gt;</span></code> 可以是使用 <code class="docutils literal notranslate"><span class="pre">vg/lv</span></code> 标记的逻辑卷，或者是现有的 <code class="docutils literal notranslate"><span class="pre">逻辑卷</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">GPT</span> <span class="pre">分区</span></code></p>
+</div>
+</section>
+<section id="block-data">
+<h2>只使用一个设备作为block(data)设备<a class="headerlink" href="#block-data" title="永久链接至标题">¶</a></h2>
+<p>如果服务器中所有磁盘都是一样的类型，例如都是传统的机械磁盘，也就是没有快速的设备(例如SSD)来用于元数据，则可以采用单一磁盘来完成BlueStore存储。</p>
+<ul>
+<li><p>单块磁盘构建bluestore:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">create</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</li>
+<li><p>或者先在所有磁盘上构建好一个LVM逻辑卷，然后再把BlueStore存储到这个LVM卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">create</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="n">ceph</span><span class="o">-</span><span class="n">vg</span><span class="o">/</span><span class="n">block</span><span class="o">-</span><span class="n">lv</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="block-data-block-db">
+<h2>分离block(data)设备和block.db(元数据)<a class="headerlink" href="#block-data-block-db" title="永久链接至标题">¶</a></h2>
+<p>如果系统中有多块传统的机械硬盘(案例中有4块机械硬盘)，同时又有一块高速SSD磁盘，则可以将每块机械硬盘构建一个LVM逻辑卷作为OSD主设备存储数据，然后将高速SSD另外构建一个LVM卷来存储 <code class="docutils literal notranslate"><span class="pre">block.db</span></code> (元数据)</p>
+<ul>
+<li><p>构建LVM卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+<span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+<span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc</span>
+<span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdd</span>
+
+<span class="n">vgcreate</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">0</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+<span class="n">vgcreate</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+<span class="n">vgcreate</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">2</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc</span>
+<span class="n">vgcreate</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">3</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdd</span>
+
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">l</span> <span class="mi">100</span><span class="o">%</span><span class="n">FREE</span> <span class="o">-</span><span class="n">n</span> <span class="n">block</span><span class="o">-</span><span class="mi">0</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">0</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">l</span> <span class="mi">100</span><span class="o">%</span><span class="n">FREE</span> <span class="o">-</span><span class="n">n</span> <span class="n">block</span><span class="o">-</span><span class="mi">1</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">l</span> <span class="mi">100</span><span class="o">%</span><span class="n">FREE</span> <span class="o">-</span><span class="n">n</span> <span class="n">block</span><span class="o">-</span><span class="mi">2</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">2</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">l</span> <span class="mi">100</span><span class="o">%</span><span class="n">FREE</span> <span class="o">-</span><span class="n">n</span> <span class="n">block</span><span class="o">-</span><span class="mi">3</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">3</span>
+</pre></div>
+</div>
+</li>
+<li><p>由于我们有4个OSD，所以我们需要在 <code class="docutils literal notranslate"><span class="pre">/dev/sdx</span></code> (SSD存储) 上划分出4个逻辑卷来作为 <code class="docutils literal notranslate"><span class="pre">block.db</span></code> 存储:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdx</span>
+<span class="n">vgcreate</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdx</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">L</span> <span class="mi">50</span><span class="n">GB</span> <span class="o">-</span><span class="n">n</span> <span class="n">db</span><span class="o">-</span><span class="mi">0</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">L</span> <span class="mi">50</span><span class="n">GB</span> <span class="o">-</span><span class="n">n</span> <span class="n">db</span><span class="o">-</span><span class="mi">1</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">L</span> <span class="mi">50</span><span class="n">GB</span> <span class="o">-</span><span class="n">n</span> <span class="n">db</span><span class="o">-</span><span class="mi">2</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">L</span> <span class="mi">50</span><span class="n">GB</span> <span class="o">-</span><span class="n">n</span> <span class="n">db</span><span class="o">-</span><span class="mi">3</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>最后创建4个OSD，并且分别对应分布到机械硬盘的LVM卷(block)和SSD的LVM卷(block.db):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">create</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">0</span><span class="o">/</span><span class="n">block</span><span class="o">-</span><span class="mi">0</span> <span class="o">--</span><span class="n">block</span><span class="o">.</span><span class="n">db</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span><span class="o">/</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span>
+<span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">create</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">block</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">block</span><span class="o">.</span><span class="n">db</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span><span class="o">/</span><span class="n">db</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">create</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">2</span><span class="o">/</span><span class="n">block</span><span class="o">-</span><span class="mi">2</span> <span class="o">--</span><span class="n">block</span><span class="o">.</span><span class="n">db</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span><span class="o">/</span><span class="n">db</span><span class="o">-</span><span class="mi">2</span>
+<span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">create</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">--</span><span class="n">data</span> <span class="n">ceph</span><span class="o">-</span><span class="n">block</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="n">block</span><span class="o">-</span><span class="mi">3</span> <span class="o">--</span><span class="n">block</span><span class="o">.</span><span class="n">db</span> <span class="n">ceph</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">0</span><span class="o">/</span><span class="n">db</span><span class="o">-</span><span class="mi">3</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id1">
+<h2>大小规格<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>建议使用LVM卷管理作为Ceph底层的存储块设备，因为LVM卷可以随时扩展，方便在后续维护中按需调整。</p>
+<p>我的测试环境采用 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 安装了3块NVMe存储，分别通过3个 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> pass-through虚拟机来访问存储，所以因为没有多个设备，也就不区分OSD的独立分离存储了，只指定一个 <code class="docutils literal notranslate"><span class="pre">--data</span></code> 设备，也不需要使用LVM卷(因为没有可扩容的可能)。</p>
+</div>
+<ul class="simple">
+<li><p>通常情况下 <code class="docutils literal notranslate"><span class="pre">block.db</span></code> 大小应该是 <code class="docutils literal notranslate"><span class="pre">block</span></code> 大小的 4% (或更多)</p></li>
+<li><p>当使用相同速度的设备，就不需要独立的逻辑卷用于 <code class="docutils literal notranslate"><span class="pre">block.db</span></code> 或 <code class="docutils literal notranslate"><span class="pre">block.wal</span></code> ，BlueStore会自动计算它们在 <code class="docutils literal notranslate"><span class="pre">block</span></code> 中的空间</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>自动缓存大小<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>当 <code class="docutils literal notranslate"><span class="pre">TCMalloc</span></code> 被配置成内存分配器并且 <code class="docutils literal notranslate"><span class="pre">bluestore_cache_autotune</span></code> 设置成激活，则BlueStore会自动配置缓存大小。这个选项默认激活。</p>
+<p>BlueStore会尝试保持OSD堆栈内存使用低于通过 <code class="docutils literal notranslate"><span class="pre">osd_memory_target</span></code> 配置项指定的目标大小。最佳算法和缓存是不收缩小雨 <code class="docutils literal notranslate"><span class="pre">osd_memory_cache_min</span></code> 的指定大小。缓存率会基于优先级层级来选择。如果优先级信息没有提供，则 <code class="docutils literal notranslate"><span class="pre">bluestore_cache_meta_ratio</span></code> 和 <code class="docutils literal notranslate"><span class="pre">bluestore_cache_kv_ratio</span></code> 选项作为fallback。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bluestore_cache_autotune</span></code> 默认 <code class="docutils literal notranslate"><span class="pre">true</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">osd_memory_target</span></code> 默认 <code class="docutils literal notranslate"><span class="pre">4G</span></code> 最小 <code class="docutils literal notranslate"><span class="pre">896M</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bluestore_cache_autotune_interval</span></code> 默认 <code class="docutils literal notranslate"><span class="pre">5.0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">osd_memory_base</span></code> 默认 <code class="docutils literal notranslate"><span class="pre">768M</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">osd_memory_expected_fragmentation</span></code> 默认 <code class="docutils literal notranslate"><span class="pre">0.15</span></code> 消除内存碎片</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">osd_memory_cache_min</span></code> 默认 <code class="docutils literal notranslate"><span class="pre">128M</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">osd_memory_cache_resize_interval</span></code> 默认 <code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>BlueStore有很多调优参数，我现在缺乏实践和生产环境验证，所以无法一一分析。请参考原文档结合自己的使用场景调优，我后续会逐步根据自己的使用经验总结和补充完善。</p>
+</div>
+</section>
+<section id="id3">
+<h2>有用的一些功能<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>BlueStore提供了一些对生产非常有用的功能，这里做一些举例，后续根据实践再补充:</p>
+<ul class="simple">
+<li><p>checksums 校验元数据和数据，通过RocksDB和crc32c实现</p></li>
+<li><p>在线压缩 使用snappy, zlib 或 lz4实现在线压缩。注意lz4压缩插件不是官方版本提供</p></li>
+<li><p>RocksDB sharding (分片) 通过将数据存储到多个 RocksDB 列族(column families)可以提高缓存和压缩性能</p></li>
+<li><p>使用SPDK driver for NVMe 可以加速 <a class="reference internal" href="../../linux/storage/nvme/nvme.html#nvme"><span class="std std-ref">NVMe存储</span></a> 读写性能(待实践)</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.ceph.com/en/latest/rados/configuration/bluestore-config-ref/">BlueStore Config Reference</a></p></li>
+<li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/4/html/administration_guide/osd-bluestore">Red Hat Ceph Storage 4 Administration Guide: BlueStore</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Ceph 配置" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../arm/index.html" class="btn btn-neutral float-right" title="ARM架构Ceph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

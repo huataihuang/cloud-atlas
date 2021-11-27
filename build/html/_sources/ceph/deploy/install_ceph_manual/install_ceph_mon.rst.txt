@@ -6,7 +6,7 @@
 
 .. note::
 
-   2021年10月我购买了 :ref:`hpe_dl360_gen9` 构建 :ref:`priv_cloud_infra` ，底层数据存储层采用Ceph实现。为了完整控制部署并了解Ceph组件安装，采用本文手工部署Ceph方式安装。本文在原先 :ref:`install_ceph_manual_old` 基础上重新开始。
+   2021年10月我购买了 :ref:`hpe_dl360_gen9` 构建 :ref:`priv_cloud_infra` ，底层数据存储层采用Ceph实现。为了完整控制部署并了解Ceph组件安装，采用本文手工部署Ceph方式安装。本文在原先 :ref:`install_ceph_manual_zdata` 基础上重新开始。
 
    部署采用3个 :ref:`ovmf` 虚拟机，通过 :ref:`iommu` 方式 pass-through :ref:`samsung_pm9a1` :ref:`nvme` 存储。也就是一共有3个 :ref:`kvm` 虚拟机来完成Ceph集群部署:
 

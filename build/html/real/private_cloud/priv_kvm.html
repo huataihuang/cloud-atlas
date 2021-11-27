@@ -91,6 +91,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id4">创建模版虚拟机</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#clone">clone虚拟机</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pass-through-nvme">添加pass-through NVMe存储</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#z-b-data-1">重建虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="priv_docker.html">私有云docker环境</a></li>
@@ -711,6 +712,35 @@ done
 </div>
 </li>
 </ul>
+</section>
+<section id="z-b-data-1">
+<h2>重建虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code><a class="headerlink" href="#z-b-data-1" title="永久链接至标题">¶</a></h2>
+<p>我在部署 <a class="reference internal" href="../../ceph/deploy/install_ceph_manual_zdata/index.html#install-ceph-manual-zdata"><span class="std std-ref">Ceph 手工部署zdata集群(暂未成功)</span></a> 遇到了自定义Ceph集群名部署问题，由于需要尽快完成大量测试实践，所以准备回退到初始环境重新开始 <a class="reference internal" href="../../ceph/deploy/install_ceph_manual/index.html#install-ceph-manual"><span class="std std-ref">Ceph 手工部署</span></a> 。对于虚拟机环境 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 进行重建：</p>
+<ul>
+<li><p>按照 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 实践经验，采用如下命令undefine掉 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> (使用UEFI)虚拟机，同时删除掉LVM卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virsh</span> <span class="n">shutdown</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">sudo</span> <span class="n">virsh</span> <span class="n">undefine</span> <span class="o">--</span><span class="n">nvram</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">remove</span><span class="o">-</span><span class="nb">all</span><span class="o">-</span><span class="n">storage</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Domain</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">has</span> <span class="n">been</span> <span class="n">undefined</span>
+<span class="n">Volume</span> <span class="s1">&#39;vda&#39;</span><span class="p">(</span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">removed</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>上述过程会完整清理掉虚拟机以及LVM卷，现在我们可以完整再重新开始新的部署，重复上一段到部署过程:</p>
+<ul>
+<li><p>再次clone虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我在实践中发现 Ubuntu 支持安装过程使用代理服务器，所以不需要采用NAT网络，可以直接配置 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 结合 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 就可以完成模版主机安装。完成 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 安装后，主要就是再按照上文调整 vcpu和memory，以及 <code class="docutils literal notranslate"><span class="pre">cpupin</span></code> ，然后添加 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 的NVMe存储就完全恢复。</p>
+</div>
 </section>
 </section>
 

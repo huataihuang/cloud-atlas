@@ -89,6 +89,8 @@
 <li class="toctree-l4"><a class="reference internal" href="pi_4.html">树莓派Raspberry Pi 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_400.html">树莓派Raspberry Pi 400</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_400_4k_display.html">Raspberry Pi 400的4K显示</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pi_400_dual_monitor.html">Raspberry Pi 400双显示器</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pi_x11_slow.html">树莓派X11运行缓慢</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_400_desktop.html">Raspberry Pi 400桌面定制</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pi_4b_4k_display.html">Raspberry Pi 4B的4K显示</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">树莓派显示加速</a></li>
@@ -185,6 +187,10 @@
 </li>
 </ul>
 <p>上述配置中启用了开源 <code class="docutils literal notranslate"><span class="pre">vc4-fkms-v3d</span></code> 3D显示驱动(Fake KMS)，并且配置 129MB 内存给GPU内存管理。 ( 有关GPU需要预分配内存可以参考 <a class="reference external" href="https://www.raspberrypi.org/documentation/configuration/config-txt/memory.md">Raspberry Pi OS Memory options in config.txt</a> )</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>启用 <code class="docutils literal notranslate"><span class="pre">vc4-fkms-v3d</span></code> 显示驱动非常重要，没有这个驱动，我在 <a class="reference internal" href="pi_400.html#pi-400"><span class="std std-ref">树莓派Raspberry Pi 400</span></a> 上运行 <a class="reference internal" href="../../../linux/kali_linux/index.html#kali-linux"><span class="std std-ref">Kali Linux</span></a> 无法识别HDMI连接的显示器型号 <code class="docutils literal notranslate"><span class="pre">HPN</span> <span class="pre">27&quot;</span></code> 并且也无法选择 <code class="docutils literal notranslate"><span class="pre">2560x1440</span></code> 高分辨率(该显示器支持2k)，只能使用模糊的 <code class="docutils literal notranslate"><span class="pre">1920x1080</span></code> 分辨率</p>
+</div>
 </section>
 <section id="cma">
 <h2>内存分离和CMA分配<a class="headerlink" href="#cma" title="永久链接至标题">¶</a></h2>
@@ -228,10 +234,41 @@
 <section id="chromium">
 <h2>启用Chromium硬件加速<a class="headerlink" href="#chromium" title="永久链接至标题">¶</a></h2>
 <p>Chromium硬件加速配置检查位于 <code class="docutils literal notranslate"><span class="pre">chrome://gpu</span></code> ，配置修改则在 <code class="docutils literal notranslate"><span class="pre">chrome://flags</span></code> 。</p>
+<p>我查看了一下当前配置 <code class="docutils literal notranslate"><span class="pre">Graphics</span> <span class="pre">Feature</span> <span class="pre">Status</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Canvas</span><span class="p">:</span> <span class="n">Hardware</span> <span class="n">accelerated</span>
+<span class="n">Compositing</span><span class="p">:</span> <span class="n">Hardware</span> <span class="n">accelerated</span>
+<span class="n">Multiple</span> <span class="n">Raster</span> <span class="n">Threads</span><span class="p">:</span> <span class="n">Enabled</span>
+<span class="n">Out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">process</span> <span class="n">Rasterization</span><span class="p">:</span> <span class="n">Hardware</span> <span class="n">accelerated</span>
+<span class="n">OpenGL</span><span class="p">:</span> <span class="n">Enabled</span>
+<span class="n">Rasterization</span><span class="p">:</span> <span class="n">Hardware</span> <span class="n">accelerated</span> <span class="n">on</span> <span class="nb">all</span> <span class="n">pages</span>
+<span class="n">Skia</span> <span class="n">Renderer</span><span class="p">:</span> <span class="n">Enabled</span>
+<span class="n">Video</span> <span class="n">Decode</span><span class="p">:</span> <span class="n">Software</span> <span class="n">only</span><span class="o">.</span> <span class="n">Hardware</span> <span class="n">acceleration</span> <span class="n">disabled</span>
+<span class="n">Vulkan</span><span class="p">:</span> <span class="n">Disabled</span>
+<span class="n">WebGL</span><span class="p">:</span> <span class="n">Hardware</span> <span class="n">accelerated</span>
+<span class="n">WebGL2</span><span class="p">:</span> <span class="n">Hardware</span> <span class="n">accelerated</span>
+</pre></div>
+</div>
 <ul class="simple">
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">chrome://flags</span></code> 中找到 <code class="docutils literal notranslate"><span class="pre">Override</span> <span class="pre">software</span> <span class="pre">rendering</span> <span class="pre">list</span></code> 将参数值从 <code class="docutils literal notranslate"><span class="pre">Default</span></code> 修改为 <code class="docutils literal notranslate"><span class="pre">Enabled</span></code> ，这样就覆盖了内建的软件渲染列表，并且在unsupported system configurations上激活了GPU加速。</p></li>
-<li><p>在 <code class="docutils literal notranslate"><span class="pre">chrome://gup</span></code> 页面再次检查，就会看到 <code class="docutils literal notranslate"><span class="pre">Hardware</span> <span class="pre">Protected</span> <span class="pre">Video</span> <span class="pre">Decode:</span> <span class="pre">Hardware</span> <span class="pre">accelerated</span></code></p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我在 <a class="reference internal" href="../../../linux/kali_linux/index.html#kali-linux"><span class="std std-ref">Kali Linux</span></a> for arm 上实践，发现已经激活了GPU加速，不需要上述 <code class="docutils literal notranslate"><span class="pre">Override</span> <span class="pre">software</span> <span class="pre">rendering</span> <span class="pre">list</span></code> 激活(激活也没有变化)</p>
+</div>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">chrome://gup</span></code> 页面再次检查，就会看到 <code class="docutils literal notranslate"><span class="pre">Hardware</span> <span class="pre">Protected</span> <span class="pre">Video</span> <span class="pre">Decode:</span> <span class="pre">Hardware</span> <span class="pre">accelerated</span></code></p></li>
+<li><p>可以看到有2项没有激活硬件加速:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Video</span> <span class="n">Decode</span><span class="p">:</span> <span class="n">Software</span> <span class="n">only</span><span class="o">.</span> <span class="n">Hardware</span> <span class="n">acceleration</span> <span class="n">disabled</span>
+<span class="n">Vulkan</span><span class="p">:</span> <span class="n">Disabled</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述2个硬件加速可以通过  <code class="docutils literal notranslate"><span class="pre">chrome://flags</span></code> 强制设置打开</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://linuxreviews.org/Chromium_81_Is_Released_With_Many_Security_Fixes_And_Mostly_Working_Vulkan_Rendering_Support">Chromium 81 Is Released With Many Security Fixes And Mostly Working Vulkan Rendering Support</a></p>
+</div>
 </section>
 <section id="vlc">
 <h2>VLC激活硬件加速<a class="headerlink" href="#vlc" title="永久链接至标题">¶</a></h2>

@@ -10,6 +10,7 @@ Ceph 部署
    install_ceph.rst
    centos_sig_ceph.rst
    install_ceph_manual/index
+   install_ceph_manual_zdata/index
 
 .. only::  subproject and html
 

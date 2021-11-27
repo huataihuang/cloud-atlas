@@ -12,6 +12,7 @@ Linux网络
    axel.rst
    ethtool/index
    create_ap.rst
+   create_ap_kali.rst
    linux_router.rst
    linux_wifi_hotspot.rst
    setup_hostapd.rst

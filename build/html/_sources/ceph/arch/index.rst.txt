@@ -9,6 +9,7 @@ Ceph 架构
 .. toctree::
    :maxdepth: 1
 
+   bluestore.rst
 
 .. only::  subproject and html
 
