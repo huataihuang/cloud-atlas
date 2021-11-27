@@ -1,7 +1,7 @@
-.. _install_ceph_mon:
+.. _install_ceph_mon_zdata:
 
 =========================
-安装 ceph-mon
+安装 ceph-mon (zdata)
 =========================
 
 .. note::

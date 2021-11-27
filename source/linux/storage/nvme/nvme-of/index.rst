@@ -1,16 +1,13 @@
-.. _ceph_deploy:
+.. _nvme-of:
 
 =================================
-Ceph 部署
+NVMe over Fabrics (NVMe-oF)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install_ceph.rst
-   centos_sig_ceph.rst
-   install_ceph_manual/index
-   install_ceph_manual_zdata/index
+   intro_nvme-of.rst
 
 .. only::  subproject and html
 

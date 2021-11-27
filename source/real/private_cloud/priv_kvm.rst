@@ -467,4 +467,28 @@ clone虚拟机
    for vm in z-b-data-1 z-b-data-2 z-b-data-3;do
      virsh autostart $vm
    done
-   
+
+重建虚拟机 ``z-b-data-1``
+===========================
+
+我在部署 :ref:`install_ceph_manual_zdata` 遇到了自定义Ceph集群名部署问题，由于需要尽快完成大量测试实践，所以准备回退到初始环境重新开始 :ref:`install_ceph_manual` 。对于虚拟机环境 ``z-b-data-1`` 进行重建：
+
+- 按照 :ref:`libvirt_lvm_pool` 实践经验，采用如下命令undefine掉 :ref:`ovmf` (使用UEFI)虚拟机，同时删除掉LVM卷::
+
+   sudo virsh shutdown z-b-data-1
+   sudo virsh undefine --nvram z-b-data-1 --remove-all-storage
+
+显示信息::
+
+   Domain z-b-data-1 has been undefined
+   Volume 'vda'(/dev/vg-libvirt/z-b-data-1) removed.
+
+上述过程会完整清理掉虚拟机以及LVM卷，现在我们可以完整再重新开始新的部署，重复上一段到部署过程:
+
+- 再次clone虚拟机::
+
+   virt-clone --original z-ubuntu20 --name z-b-data-1 --auto-clone
+
+.. note::
+
+   我在实践中发现 Ubuntu 支持安装过程使用代理服务器，所以不需要采用NAT网络，可以直接配置 :ref:`libvirt_bridged_network` 结合 :ref:`apt_proxy_arch` 就可以完成模版主机安装。完成 :ref:`ubuntu_linux` 安装后，主要就是再按照上文调整 vcpu和memory，以及 ``cpupin`` ，然后添加 ``pass-through`` 的NVMe存储就完全恢复。

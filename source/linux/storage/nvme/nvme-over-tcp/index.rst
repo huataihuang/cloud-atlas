@@ -1,16 +1,13 @@
-.. _ceph_deploy:
+.. _nvme-over-tcp:
 
 =================================
-Ceph 部署
+NVMe over TCP
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install_ceph.rst
-   centos_sig_ceph.rst
-   install_ceph_manual/index
-   install_ceph_manual_zdata/index
+   intro_nvme-over-tcp.rst
 
 .. only::  subproject and html
 

@@ -1,7 +1,7 @@
-.. _install_ceph_mgr:
+.. _install_ceph_mgr_zdata:
 
 =======================
-安装 ceph-mgr
+安装 ceph-mgr (zdata)
 =======================
 
 手工安装Ceph的第一阶段工作 :ref:`install_ceph_mon` 完成后，需要在 ``每个`` ``ceph-mon`` 服务的运行节点，在安装一个 ``ceph-mgr`` daemon

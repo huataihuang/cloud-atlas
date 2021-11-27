@@ -1,16 +1,13 @@
-.. _ceph_deploy:
+.. _ceph_config:
 
 =================================
-Ceph 部署
+Ceph 配置
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install_ceph.rst
-   centos_sig_ceph.rst
-   install_ceph_manual/index
-   install_ceph_manual_zdata/index
+   bluestore_config.rst
 
 .. only::  subproject and html
 

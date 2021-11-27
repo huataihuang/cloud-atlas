@@ -33,7 +33,7 @@ Ceph OSD执行两个功能：在网络中和其他OSD之间复制数据（多副
 
 传统的Ceph OSD是将数据存储到现有的文件存储模块，例如XFS文件系统。但是这样的性能开销较大，因为需要实现Ceph数据到POSIX的转换。
 
-.. image:: ../_static/ceph/filestore-vs-bluestore-2.png.webp
+.. image:: ../../_static/ceph/arch/filestore-vs-bluestore-2.png.webp
 
 BlueStore是在底层裸块设备上建立的存储系统，内建了RocksDB key/value 数据库用于管理内部元数据。一个小型的内部接口组件称为 ``BludFS`` 实现了类似文件系统的接口，以便提供足够功能让RocksDB来存储它的"文件"并向BlueStroe共享相同的裸设备。
 

@@ -13,11 +13,11 @@ Ceph Atlas
 
    introduce_ceph.rst
    ceph_recommend.rst
-   bluestore.rst
    rdma.rst
    ceph_docker_in_studio.rst
    deploy/index
    mgr/index
+   config/index
    arm/index
    arch/index
 

@@ -30,6 +30,10 @@
 
 上述配置中启用了开源 ``vc4-fkms-v3d`` 3D显示驱动(Fake KMS)，并且配置 129MB 内存给GPU内存管理。 ( 有关GPU需要预分配内存可以参考 `Raspberry Pi OS Memory options in config.txt <https://www.raspberrypi.org/documentation/configuration/config-txt/memory.md>`_ )
 
+.. note::
+
+   启用 ``vc4-fkms-v3d`` 显示驱动非常重要，没有这个驱动，我在 :ref:`pi_400` 上运行 :ref:`kali_linux` 无法识别HDMI连接的显示器型号 ``HPN 27"`` 并且也无法选择 ``2560x1440`` 高分辨率(该显示器支持2k)，只能使用模糊的 ``1920x1080`` 分辨率
+
 内存分离和CMA分配
 ===================
 
@@ -75,9 +79,38 @@
 
 Chromium硬件加速配置检查位于 ``chrome://gpu`` ，配置修改则在 ``chrome://flags`` 。
 
+我查看了一下当前配置 ``Graphics Feature Status`` ::
+
+   Canvas: Hardware accelerated
+   Compositing: Hardware accelerated
+   Multiple Raster Threads: Enabled
+   Out-of-process Rasterization: Hardware accelerated
+   OpenGL: Enabled
+   Rasterization: Hardware accelerated on all pages
+   Skia Renderer: Enabled
+   Video Decode: Software only. Hardware acceleration disabled
+   Vulkan: Disabled
+   WebGL: Hardware accelerated
+   WebGL2: Hardware accelerated
+
 - 在 ``chrome://flags`` 中找到 ``Override software rendering list`` 将参数值从 ``Default`` 修改为 ``Enabled`` ，这样就覆盖了内建的软件渲染列表，并且在unsupported system configurations上激活了GPU加速。
 
+.. note::
+
+   我在 :ref:`kali_linux` for arm 上实践，发现已经激活了GPU加速，不需要上述 ``Override software rendering list`` 激活(激活也没有变化)
+
 - 在 ``chrome://gup`` 页面再次检查，就会看到 ``Hardware Protected Video Decode: Hardware accelerated``
+
+- 可以看到有2项没有激活硬件加速::
+
+   Video Decode: Software only. Hardware acceleration disabled
+   Vulkan: Disabled
+
+上述2个硬件加速可以通过  ``chrome://flags`` 强制设置打开
+
+.. note::
+
+   `Chromium 81 Is Released With Many Security Fixes And Mostly Working Vulkan Rendering Support <https://linuxreviews.org/Chromium_81_Is_Released_With_Many_Security_Fixes_And_Mostly_Working_Vulkan_Rendering_Support>`_
 
 VLC激活硬件加速
 ==================

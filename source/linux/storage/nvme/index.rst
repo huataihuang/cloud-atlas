@@ -12,6 +12,9 @@ Linux NVMe
    nvme-cli.rst
    nvme_ssd_management.rst
    nvme_passthru.rst
+   nvme-over-tcp/index
+   nvme-of/index
+   spdk_nvme/index
 
 .. only::  subproject and html
 
