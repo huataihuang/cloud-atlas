@@ -62,7 +62,7 @@ Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量�
 
 依次完成以下安装过程:
 
-- :ref:`install_ceph_mon`
-- :ref:`install_ceph_mgr`
-- :ref:`add_ceph_osds`
+- :ref:`install_ceph_mon_zdata`
+- :ref:`install_ceph_mgr_zdata`
+- :ref:`add_ceph_osds_zdata`
 

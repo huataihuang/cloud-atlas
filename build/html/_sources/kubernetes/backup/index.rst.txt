@@ -8,5 +8,4 @@ Kubernetes备份与恢复
    :maxdepth: 1
 
    think_backup_restore_k8s.rst
-   velero.rst
-   velero_startup.rst
+   velero/index

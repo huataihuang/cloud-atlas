@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="私有云docker环境" href="priv_docker.html" />
+    <link rel="next" title="私有云数据层 ZData Ceph" href="zdata_ceph.html" />
     <link rel="prev" title="私有云架构" href="priv_cloud_infra.html" /> 
 </head>
 
@@ -94,6 +94,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#z-b-data-1">重建虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="zdata_ceph.html">私有云数据层 ZData Ceph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_docker.html">私有云docker环境</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_k8s_docker_centos.html">私有云Kubernetes和docker环境(CentOS)</a></li>
 </ul>
@@ -588,20 +589,27 @@ sudo adduser `id -un` kvm
 <p><code class="docutils literal notranslate"><span class="pre">virt-clone</span></code> 命令clone出来的虚拟机会自动修订 <code class="docutils literal notranslate"><span class="pre">uuid</span></code> 以及虚拟网卡的 <code class="docutils literal notranslate"><span class="pre">mac</span> <span class="pre">address</span></code> ，所以不用担心虚拟机冲突</p>
 </div>
 <ul>
-<li><p>修订 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 配置( <code class="docutils literal notranslate"><span class="pre">4c8g</span></code> )设置:</p>
+<li><p>对于 <a class="reference internal" href="../../ceph/deploy/install_ceph_manual_zdata/add_ceph_osds_zdata.html#add-ceph-osds-zdata"><span class="std std-ref">添加Ceph OSDs (zdata)</span></a> 失败的虚拟机，采用如下方法销毁:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virsh</span> <span class="n">destroy</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">sudo</span> <span class="n">virsh</span> <span class="n">undefine</span> <span class="o">--</span><span class="n">nvram</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">remove</span><span class="o">-</span><span class="nb">all</span><span class="o">-</span><span class="n">storage</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后从模版重新构建虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订虚拟机 <a class="reference internal" href="#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">edit</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">memory</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;KiB&#39;</span><span class="o">&gt;</span><span class="mi">8388608</span><span class="o">&lt;/</span><span class="n">memory</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="n">currentMemory</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;KiB&#39;</span><span class="o">&gt;</span><span class="mi">8388608</span><span class="o">&lt;/</span><span class="n">currentMemory</span><span class="o">&gt;</span>
+<p>按照 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 修订 <a class="reference internal" href="../../kvm/iommu/tunning/iommu_cpu_pinning.html#iommu-cpu-pinning"><span class="std std-ref">IOMMU调优: CPU pinning</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">memory</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;KiB&#39;</span><span class="o">&gt;</span><span class="mi">16777216</span><span class="o">&lt;/</span><span class="n">memory</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">currentMemory</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;KiB&#39;</span><span class="o">&gt;</span><span class="mi">16777216</span><span class="o">&lt;/</span><span class="n">currentMemory</span><span class="o">&gt;</span>
 <span class="o">&lt;</span><span class="n">vcpu</span> <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;static&#39;</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="n">vcpu</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<ul>
-<li><p>由于存储访问需要稳定性和高性能， 设置 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> <a class="reference internal" href="../../kvm/iommu/tunning/iommu_cpu_pinning.html#iommu-cpu-pinning"><span class="std std-ref">IOMMU调优: CPU pinning</span></a> ( 请参考我在 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划)，确保所有 <code class="docutils literal notranslate"><span class="pre">data</span></code> 虚拟服务器(通过高速PCIe 3.0接口访问 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> NVMe存储):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">vcpu</span> <span class="n">placement</span><span class="o">=</span><span class="s1">&#39;static&#39;</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="n">vcpu</span><span class="o">&gt;</span>
 <span class="o">&lt;</span><span class="n">cputune</span><span class="o">&gt;</span>
   <span class="o">&lt;</span><span class="n">vcpupin</span> <span class="n">vcpu</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">cpuset</span><span class="o">=</span><span class="s1">&#39;24&#39;</span><span class="o">/&gt;</span>
   <span class="o">&lt;</span><span class="n">vcpupin</span> <span class="n">vcpu</span><span class="o">=</span><span class="s1">&#39;1&#39;</span> <span class="n">cpuset</span><span class="o">=</span><span class="s1">&#39;25&#39;</span><span class="o">/&gt;</span>
@@ -610,12 +618,18 @@ sudo adduser `id -un` kvm
 <span class="o">&lt;/</span><span class="n">cputune</span><span class="o">&gt;</span>
 </pre></div>
 </div>
+<ul>
+<li><p>启动虚拟机，在虚拟机内部( <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">z-b-data-1</span></code> )执行主机名订正(z-b-data-1)和IP订正(IP从模版的192.168.6.246改成192.168.6.204):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hostnamectl</span> <span class="nb">set</span><span class="o">-</span><span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/192.168.6.246/192.168.6.204/g&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netplan</span><span class="o">/</span><span class="mi">01</span><span class="o">-</span><span class="n">netcfg</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">netplan</span> <span class="n">generate</span>
+<span class="n">netplan</span> <span class="n">apply</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;/192.168.6.246/d&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+<span class="n">echo</span> <span class="s2">&quot;192.168.6.204    z-b-data-1&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+</pre></div>
+</div>
 </li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>采用上述方式按照 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划的VM列表，clone出部署所需的虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code></p>
-</div>
 </section>
 <section id="pass-through-nvme">
 <h2>添加pass-through NVMe存储<a class="headerlink" href="#pass-through-nvme" title="永久链接至标题">¶</a></h2>
@@ -739,7 +753,7 @@ done
 </ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>我在实践中发现 Ubuntu 支持安装过程使用代理服务器，所以不需要采用NAT网络，可以直接配置 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 结合 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 就可以完成模版主机安装。完成 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 安装后，主要就是再按照上文调整 vcpu和memory，以及 <code class="docutils literal notranslate"><span class="pre">cpupin</span></code> ，然后添加 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 的NVMe存储就完全恢复。</p>
+<p>我在实践中发现 Ubuntu 支持安装过程使用代理服务器，所以不需要采用NAT网络，可以直接配置 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 结合 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 就可以完成模版主机安装。完成 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 安装后，主要就是再按照上文调整 vcpu和memory，以及 <code class="docutils literal notranslate"><span class="pre">cpupin</span></code> ，然后添加 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 的NVMe存储就完全恢复初始状态，然后重新开始 <a class="reference internal" href="../../ceph/deploy/install_ceph_manual/index.html#install-ceph-manual"><span class="std std-ref">Ceph 手工部署</span></a></p>
 </div>
 </section>
 </section>
@@ -749,7 +763,7 @@ done
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="priv_cloud_infra.html" class="btn btn-neutral float-left" title="私有云架构" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="priv_docker.html" class="btn btn-neutral float-right" title="私有云docker环境" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="zdata_ceph.html" class="btn btn-neutral float-right" title="私有云数据层 ZData Ceph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

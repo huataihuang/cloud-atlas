@@ -4,13 +4,21 @@
 Ceph 手工部署
 =================================
 
+.. note::
+
+   本章节采用 ``ceph`` 默认集群名来部署用于 :ref:`priv_cloud_infra` 数据层存储 - 目前尚未解决自定义Ceph集群名，所以 :ref:`install_ceph_manual_zdata` 是 ``尚未成功`` 的实践记录，待后续再构建环境继续研究。
+
 .. toctree::
    :maxdepth: 1
 
    prepare.rst
    install_ceph_mon.rst
    install_ceph_mgr.rst
-   add_ceph_osds.rst
+   add_ceph_osds_raw.rst
+   add_ceph_osds_lvm.rst
+   add_ceph_mons.rst
+   add_ceph_osds_more.rst
+
 
 .. only::  subproject and html
 

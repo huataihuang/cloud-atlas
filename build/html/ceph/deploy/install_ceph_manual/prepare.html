@@ -60,7 +60,10 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">手工安装Ceph - 准备工作</a></li>
 <li class="toctree-l4"><a class="reference internal" href="install_ceph_mon.html">安装 ceph-mon</a></li>
 <li class="toctree-l4"><a class="reference internal" href="install_ceph_mgr.html">安装 ceph-mgr</a></li>
-<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds.html">添加Ceph OSDs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_raw.html">添加Ceph OSDs (RAW磁盘)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_lvm.html">添加Ceph OSDs (LVM卷)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_mons.html">Ceph集群添加ceph-mon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_more.html">Ceph集群添加更多ceph-osd</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../install_ceph_manual_zdata/index.html">Ceph 手工部署zdata集群(暂未成功)</a></li>
@@ -70,6 +73,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../config/index.html">Ceph 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Ceph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arch/index.html">Ceph 架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tunning/index.html">Ceph 优化</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../gluster/index.html">Gluster Atlas</a></li>
@@ -156,15 +160,21 @@
 <p>操作系统采用 <a class="reference internal" href="../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04.3 LTS</p>
 </div>
 <section id="id1">
-<h2>获取Ceph软件<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>虚拟机环境准备<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>采用 <a class="reference internal" href="../../../real/private_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 中 <code class="docutils literal notranslate"><span class="pre">clone虚拟机</span></code> 和 <code class="docutils literal notranslate"><span class="pre">添加pass-through</span> <span class="pre">NVMe存储</span></code> 的方法完成3台虚拟机的准备工作</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>获取Ceph软件<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>最简易获取软件的方法还是采用发行版的软件仓库，例如 <code class="docutils literal notranslate"><span class="pre">apt</span></code> (Debian/Ubuntu) 或 <code class="docutils literal notranslate"><span class="pre">yum</span></code> (RHEL/CentOS) ，如果使用非 <code class="docutils literal notranslate"><span class="pre">deb</span></code> 或 <code class="docutils literal notranslate"><span class="pre">rpm</span></code> 的软件包管理，则可以使用官方提供的tar包安装二进制可执行程序。</p>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>在多台服务器上同时操作，可以使用 <a class="reference internal" href="../../../devops/utils/pssh.html#pssh"><span class="std std-ref">pssh - 并行SSH</span></a></p>
 </div>
 </section>
-<section id="id2">
-<h2>安装Ceph软件<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h2>安装Ceph软件<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>为了能够完整了解Ceph集群部署过程，本文档没有使用 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ceph-adm</span></code> 工具，而是采用手工通过APT包管理工具进行部署。</p>
@@ -182,14 +192,14 @@
 <p>对于通过对象存储模式使用Ceph，需要安装 <code class="docutils literal notranslate"><span class="pre">Ceph</span> <span class="pre">Object</span> <span class="pre">Gateway</span></code> ，我将另外撰写文章；对于虚拟化平台使用Ceph块设备则需要通过 <code class="docutils literal notranslate"><span class="pre">librdb</span></code> 驱动，我也会另外撰写实践文章。</p>
 </div>
 </section>
-<section id="id3">
-<h2>Ceph集群的初始<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>Ceph集群的初始<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量相同（或更多）的OSD运行在集群中。 monitor部署是整个集群设置的重要步骤，例如存储池的副本数量，每个OSD的placement groups数量，心跳间隔，是否需要认证等等。这些配置都有默认值，但是在部署生产集群需要仔细调整这些配置。</p>
 <p>本案例采用3个节点：</p>
-<figure class="align-default" id="id5">
+<figure class="align-default" id="id6">
 <img alt="../../../_images/simple_3nodes_cluster.png" src="../../../_images/simple_3nodes_cluster.png" />
 <figcaption>
-<p><span class="caption-text">Figure 1: 三节点Ceph集群</span><a class="headerlink" href="#id5" title="永久链接至图片">¶</a></p>
+<p><span class="caption-text">Figure 1: 三节点Ceph集群</span><a class="headerlink" href="#id6" title="永久链接至图片">¶</a></p>
 </figcaption>
 </figure>
 <div class="admonition note">
@@ -197,13 +207,13 @@
 <p>我在部署初始采用1个monitor，准备后续再通过monitor方式扩容(缩容及替换)来演练生产环境的维护。</p>
 </div>
 </section>
-<section id="id4">
-<h2>正式开始<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="id5">
+<h2>正式开始<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p>依次完成以下安装过程:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a></p></li>
 <li><p><a class="reference internal" href="install_ceph_mgr.html#install-ceph-mgr"><span class="std std-ref">安装 ceph-mgr</span></a></p></li>
-<li><p><a class="reference internal" href="add_ceph_osds.html#add-ceph-osds"><span class="std std-ref">添加Ceph OSDs</span></a></p></li>
+<li><p><a class="reference internal" href="add_ceph_osds_lvm.html#add-ceph-osds-lvm"><span class="std std-ref">添加Ceph OSDs (LVM卷)</span></a> (目前还存在问题的 <a class="reference internal" href="add_ceph_osds_raw.html#add-ceph-osds-raw"><span class="std std-ref">添加Ceph OSDs (RAW磁盘)</span></a> )</p></li>
 </ul>
 </section>
 </section>

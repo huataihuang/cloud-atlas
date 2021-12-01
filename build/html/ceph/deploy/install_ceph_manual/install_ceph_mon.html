@@ -60,7 +60,10 @@
 <li class="toctree-l4"><a class="reference internal" href="prepare.html">手工安装Ceph - 准备工作</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">安装 ceph-mon</a></li>
 <li class="toctree-l4"><a class="reference internal" href="install_ceph_mgr.html">安装 ceph-mgr</a></li>
-<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds.html">添加Ceph OSDs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_raw.html">添加Ceph OSDs (RAW磁盘)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_lvm.html">添加Ceph OSDs (LVM卷)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_mons.html">Ceph集群添加ceph-mon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_more.html">Ceph集群添加更多ceph-osd</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../install_ceph_manual_zdata/index.html">Ceph 手工部署zdata集群(暂未成功)</a></li>
@@ -70,6 +73,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../config/index.html">Ceph 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Ceph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arch/index.html">Ceph 架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tunning/index.html">Ceph 优化</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../gluster/index.html">Gluster Atlas</a></li>
@@ -209,6 +213,14 @@
 <li><p>管理员密钥环(Administrator Keyring)：为了使用ceph命令行工具，需要具备一个 <code class="docutils literal notranslate"><span class="pre">client.admin</span></code> 用户，所以必须生成一个管理员用户和密钥环，并且必须将 <code class="docutils literal notranslate"><span class="pre">client.admin</span></code> 用户添加到监控密钥环。</p></li>
 </ul>
 <p>建议创建Ceph配置文件包含 <code class="docutils literal notranslate"><span class="pre">fsid</span></code> 以及 mon 的 <code class="docutils literal notranslate"><span class="pre">initial</span></code> 成员和 mom 的 <code class="docutils literal notranslate"><span class="pre">host</span></code> 设置。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>我在 <a class="reference internal" href="../install_ceph_manual_zdata/index.html#install-ceph-manual-zdata"><span class="std std-ref">Ceph 手工部署zdata集群(暂未成功)</span></a> 步骤 <a class="reference internal" href="../install_ceph_manual_zdata/add_ceph_osds_zdata.html#add-ceph-osds-zdata"><span class="std std-ref">添加Ceph OSDs (zdata)</span></a> 没有解决自定义Ceph集群名的添加OSDs问题，所以目前只采用标准默认 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 作为集群名字，后续我将构建虚拟机环境来学习和实践部署多集群。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Ceph默认部署集群名字就是 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> ，需要注意，很多工具和配置文件都是以集群名字作为配置文件名，例如 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/zdata.conf</span></code> 表示 <code class="docutils literal notranslate"><span class="pre">zdata</span></code> 集群，对应的集群访问证书是 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/zdata.client.admin.keyring</span></code> 。在官方文档中，很多使用 <code class="docutils literal notranslate"><span class="pre">name</span></code> 来指代集群名字。</p>
+</div>
 </section>
 <section id="monitor">
 <h2>部署monitor<a class="headerlink" href="#monitor" title="永久链接至标题">¶</a></h2>
@@ -227,22 +239,26 @@
 </div>
 </li>
 </ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0e6</span><span class="n">c8b6f</span><span class="o">-</span><span class="mi">0</span><span class="n">d32</span><span class="o">-</span><span class="mi">4</span><span class="n">cdb</span><span class="o">-</span><span class="n">a45d</span><span class="o">-</span><span class="mi">85</span><span class="n">f8c7997c17</span>
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>也可以使用 <code class="docutils literal notranslate"><span class="pre">uuidgen</span></code> 工具来生成uuid，这个工具包含在 <code class="docutils literal notranslate"><span class="pre">util-linux</span></code> 软件包中（ 参考 <a class="reference external" href="http://manpages.ubuntu.com/manpages/xenial/man1/uuidgen.1.html">uuidgen - create a new UUID value</a> ）</p>
 </div>
 <ul>
-<li><p>创建Ceph配置文件 - 默认 Ceph 使用 <code class="docutils literal notranslate"><span class="pre">ceph.conf</span></code> 配置，这个配置文件的命名规则是 <code class="docutils literal notranslate"><span class="pre">{cluster_name}.conf</span></code> ，由于我准备设置集群名字 <code class="docutils literal notranslate"><span class="pre">zdata</span></code> (表示 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 服务器上数据层) ，所以这个配置文件命名为 <code class="docutils literal notranslate"><span class="pre">zdata.conf</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">vim</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<li><p>创建Ceph配置文件 - 默认 Ceph 使用 <code class="docutils literal notranslate"><span class="pre">ceph.conf</span></code> 配置，这个配置文件的命名规则是 <code class="docutils literal notranslate"><span class="pre">{cluster_name}.conf</span></code> 这里我依然使用默认集群名字，所以配置文件是 <code class="docutils literal notranslate"><span class="pre">ceph.conf</span></code> ，对于指定集群名，将在 <a class="reference internal" href="../install_ceph_manual_zdata/index.html#install-ceph-manual-zdata"><span class="std std-ref">Ceph 手工部署zdata集群(暂未成功)</span></a> 中探索:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">vim</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">conf</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p>配置案例:</p>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">/etc/ceph/zdata.conf</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">/etc/ceph/ceph.conf</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="o">[</span>global<span class="o">]</span>
-<span class="linenos"> 2</span><span class="nv">fsid</span> <span class="o">=</span> 53c3f770-d869-4b59-902e-d645eca7e34a
+<span class="linenos"> 2</span><span class="nv">fsid</span> <span class="o">=</span> 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17
 <span class="linenos"> 3</span>mon initial <span class="nv">members</span> <span class="o">=</span> z-b-data-1
 <span class="linenos"> 4</span>mon <span class="nv">host</span> <span class="o">=</span> <span class="m">192</span>.168.6.204
 <span class="linenos"> 5</span>public <span class="nv">network</span> <span class="o">=</span> <span class="m">192</span>.168.6.0/24
@@ -300,21 +316,21 @@
 </div>
 <ul>
 <li><p>生成管理员keyring，生成 <code class="docutils literal notranslate"><span class="pre">client.admin</span></code> 用户并添加用户到keyring:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">--</span><span class="n">create</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">gen</span><span class="o">-</span><span class="n">key</span> <span class="o">-</span><span class="n">n</span> <span class="n">client</span><span class="o">.</span><span class="n">admin</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mon</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mgr</span> <span class="s1">&#39;allow *&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">--</span><span class="n">create</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">gen</span><span class="o">-</span><span class="n">key</span> <span class="o">-</span><span class="n">n</span> <span class="n">client</span><span class="o">.</span><span class="n">admin</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mon</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mgr</span> <span class="s1">&#39;allow *&#39;</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p>提示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">creating</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">creating</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span>
 </pre></div>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
-<p>这里 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/zdata.client.admin.keyring</span></code> 必须要注意配置文件名必须以集群名字 <code class="docutils literal notranslate"><span class="pre">zdata</span></code> 开始，否则后续步骤都会错误</p>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/ceph.client.admin.keyring</span></code> 是和集群名 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 对应的，所以如果创建其他集群管理，例如对 <code class="docutils literal notranslate"><span class="pre">zdata</span></code> 集群管理，则这个keyring名字必须是 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/zdata.client.admin.keyring</span></code></p>
 </div>
 <ul>
-<li><p>生成 <code class="docutils literal notranslate"><span class="pre">bootstrap-osd</span></code> keyring，生成 <code class="docutils literal notranslate"><span class="pre">client.bootstrap-osd</span></code> 用户并添加用户到keyring:</p>
+<li><p>生成 <code class="docutils literal notranslate"><span class="pre">bootstrap-osd</span></code> keyring(命名应该也是和集群名相关，没有验证，感觉应该是 <code class="docutils literal notranslate"><span class="pre">&lt;cluseter&gt;.keyring</span></code> )，生成 <code class="docutils literal notranslate"><span class="pre">client.bootstrap-osd</span></code> 用户并添加用户到keyring:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">--</span><span class="n">create</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">osd</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">gen</span><span class="o">-</span><span class="n">key</span> <span class="o">-</span><span class="n">n</span> <span class="n">client</span><span class="o">.</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">osd</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mon</span> <span class="s1">&#39;profile bootstrap-osd&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mgr</span> <span class="s1">&#39;allow r&#39;</span>
 </pre></div>
 </div>
@@ -326,7 +342,7 @@
 </div>
 <ul>
 <li><p>将生成的key添加到 <code class="docutils literal notranslate"><span class="pre">ceph.mon.keyring</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">import</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">import</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span>
 <span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">import</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">bootstrap</span><span class="o">-</span><span class="n">osd</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">keyring</span>
 </pre></div>
 </div>
@@ -350,12 +366,12 @@
 </li>
 </ul>
 <p>实际操作为:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">monmaptool</span> <span class="o">--</span><span class="n">create</span> <span class="o">--</span><span class="n">add</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="mf">192.168.6.204</span> <span class="o">--</span><span class="n">fsid</span> <span class="mi">53</span><span class="n">c3f770</span><span class="o">-</span><span class="n">d869</span><span class="o">-</span><span class="mi">4</span><span class="n">b59</span><span class="o">-</span><span class="mi">902</span><span class="n">e</span><span class="o">-</span><span class="n">d645eca7e34a</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">monmaptool</span> <span class="o">--</span><span class="n">create</span> <span class="o">--</span><span class="n">add</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="mf">192.168.6.204</span> <span class="o">--</span><span class="n">fsid</span> <span class="mf">0e6</span><span class="n">c8b6f</span><span class="o">-</span><span class="mi">0</span><span class="n">d32</span><span class="o">-</span><span class="mi">4</span><span class="n">cdb</span><span class="o">-</span><span class="n">a45d</span><span class="o">-</span><span class="mi">85</span><span class="n">f8c7997c17</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
 </pre></div>
 </div>
 <p>提示信息:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">monmaptool</span><span class="p">:</span> <span class="n">monmap</span> <span class="n">file</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
-<span class="n">monmaptool</span><span class="p">:</span> <span class="nb">set</span> <span class="n">fsid</span> <span class="n">to</span> <span class="mi">53</span><span class="n">c3f770</span><span class="o">-</span><span class="n">d869</span><span class="o">-</span><span class="mi">4</span><span class="n">b59</span><span class="o">-</span><span class="mi">902</span><span class="n">e</span><span class="o">-</span><span class="n">d645eca7e34a</span>
+<span class="n">monmaptool</span><span class="p">:</span> <span class="nb">set</span> <span class="n">fsid</span> <span class="n">to</span> <span class="mf">0e6</span><span class="n">c8b6f</span><span class="o">-</span><span class="mi">0</span><span class="n">d32</span><span class="o">-</span><span class="mi">4</span><span class="n">cdb</span><span class="o">-</span><span class="n">a45d</span><span class="o">-</span><span class="mi">85</span><span class="n">f8c7997c17</span>
 <span class="n">monmaptool</span><span class="p">:</span> <span class="n">writing</span> <span class="n">epoch</span> <span class="mi">0</span> <span class="n">to</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span> <span class="p">(</span><span class="mi">1</span> <span class="n">monitors</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -370,7 +386,7 @@
 </div>
 </li>
 </ul>
-<p>实际操作为-我的实验环境存储集群名设置为 <code class="docutils literal notranslate"><span class="pre">zdata</span></code></p>
+<p>实际操作为-我的实验环境存储集群名设置为 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 主机名是 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">ceph</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
 </pre></div>
 </div>
@@ -382,19 +398,21 @@
 </li>
 </ul>
 <p>实际操作:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">ceph</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span> <span class="o">--</span><span class="n">cluster</span> <span class="n">zdata</span> <span class="o">--</span><span class="n">mkfs</span> <span class="o">-</span><span class="n">i</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">monmap</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span> <span class="o">--</span><span class="n">keyring</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">ceph</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span> <span class="o">--</span><span class="n">cluster</span> <span class="n">ceph</span> <span class="o">--</span><span class="n">mkfs</span> <span class="o">-</span><span class="n">i</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">monmap</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span> <span class="o">--</span><span class="n">keyring</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span>
 </pre></div>
 </div>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">重要</span></code> : 配置 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 启动集群的环境变量，修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/ceph</span></code> 添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CLUSTER</span><span class="o">=</span><span class="n">zdata</span>
+<li><p><code class="docutils literal notranslate"><span class="pre">如果使用自定义集群名，则非常重要</span></code> : 配置 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 启动集群的环境变量，修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/ceph</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CLUSTER</span><span class="o">=</span><span class="n">ceph</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
-<p>这个步骤非常重要，因为 <code class="docutils literal notranslate"><span class="pre">ceph-mon&#64;&lt;hostname&gt;</span></code> 启动 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 服务会读取 <code class="docutils literal notranslate"><span class="pre">/etc/default/ceph</span></code> 中环境变量，如果没有配置 <code class="docutils literal notranslate"><span class="pre">CLUSTER</span></code> 环境变量，就会尝试启动名字为 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 的集群。所以如果要配置一个非默认名字的集群，一定要配置 <code class="docutils literal notranslate"><span class="pre">CLUSTER</span></code> 环境变量，否则启动会失败。详见下文我的排查过程。</p>
+<p>这个步骤非常重要，因为 <code class="docutils literal notranslate"><span class="pre">ceph-mon&#64;&lt;hostname&gt;</span></code> 启动 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 服务会读取 <code class="docutils literal notranslate"><span class="pre">/etc/default/ceph</span></code> 中环境变量，如果没有配置 <code class="docutils literal notranslate"><span class="pre">CLUSTER</span></code> 环境变量，就会尝试启动名字为 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 的集群。所以如果要配置一个非默认名字的集群，一定要配置 <code class="docutils literal notranslate"><span class="pre">CLUSTER</span></code> 环境变量，否则启动会失败。</p>
+<p>这里我的环境还是使用默认名 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 则此步骤可以跳过</p>
+<p>对于采用非默认Ceph集群名字命名，则会遇到很多困难，我在 <a class="reference internal" href="../install_ceph_manual_zdata/install_ceph_mon_zdata.html#install-ceph-mon-zdata"><span class="std std-ref">安装 ceph-mon (zdata)</span></a> 中有相关实践记录</p>
 </div>
 <ul class="simple">
 <li><p>启动monitor(s)</p></li>
@@ -405,21 +423,14 @@
 </div>
 <ul>
 <li><p>验证monitor运行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>这里 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">-s</span></code> 检查命令要提供 <code class="docutils literal notranslate"><span class="pre">-c</span></code> 参数来指定配置文件，否则会出现报错无法读取配置文件:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span> <span class="n">initializing</span> <span class="n">cluster</span> <span class="n">client</span><span class="p">:</span> <span class="n">ObjectNotFound</span><span class="p">(</span><span class="s1">&#39;RADOS object not found (error calling conf_read_file)&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
 <p>如果正常，会看到如下输出:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cluster</span><span class="p">:</span>
-  <span class="nb">id</span><span class="p">:</span>     <span class="mi">53</span><span class="n">c3f770</span><span class="o">-</span><span class="n">d869</span><span class="o">-</span><span class="mi">4</span><span class="n">b59</span><span class="o">-</span><span class="mi">902</span><span class="n">e</span><span class="o">-</span><span class="n">d645eca7e34a</span>
+  <span class="nb">id</span><span class="p">:</span>     <span class="mi">39392603</span><span class="o">-</span><span class="n">fe09</span><span class="o">-</span><span class="mi">4441</span><span class="o">-</span><span class="n">acce</span><span class="o">-</span><span class="mi">1</span><span class="n">eb22b1391e1</span>
   <span class="n">health</span><span class="p">:</span> <span class="n">HEALTH_WARN</span>
           <span class="n">mon</span> <span class="ow">is</span> <span class="n">allowing</span> <span class="n">insecure</span> <span class="n">global_id</span> <span class="n">reclaim</span>
           <span class="mi">1</span> <span class="n">monitors</span> <span class="n">have</span> <span class="ow">not</span> <span class="n">enabled</span> <span class="n">msgr2</span>
@@ -437,12 +448,12 @@
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>参考 <a class="reference external" href="https://access.redhat.com/articles/6136242">Ceph HEALTH_WARN with ‘mons are allowing insecure global_id reclaim’ after install/upgrade to RHCS 4.2z2 (or newer)</a> (原因是新版本要求严格安全) 或者 <a class="reference external" href="https://github.com/rook/rook/issues/7746">ceph: Mons are allowing insecure global_id reclaim #7746</a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mon</span> <span class="n">auth_allow_insecure_global_id_reclaim</span> <span class="n">false</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mon</span> <span class="n">auth_allow_insecure_global_id_reclaim</span> <span class="n">false</span>
 </pre></div>
 </div>
 <p>上述安全设置加严会禁止没有补丁过的不安全客户端连接并且超时以后需要重新生成认证ticket(默认72小时)</p>
 <p>也可以关闭这个报错输出(我采用这种方法):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mon</span> <span class="n">mon_warn_on_insecure_global_id_reclaim_allowed</span> <span class="n">false</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mon</span> <span class="n">mon_warn_on_insecure_global_id_reclaim_allowed</span> <span class="n">false</span>
 </pre></div>
 </div>
 </div>
@@ -454,166 +465,35 @@
 </pre></div>
 </div>
 <p>我执行以下命令修正:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mon</span> <span class="n">enable</span><span class="o">-</span><span class="n">msgr2</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mon</span> <span class="n">enable</span><span class="o">-</span><span class="n">msgr2</span>
 </pre></div>
 </div>
+</div>
+<p>最终完成后，执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="o">-</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>输出以下信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cluster</span><span class="p">:</span>
+  <span class="nb">id</span><span class="p">:</span>     <span class="mi">39392603</span><span class="o">-</span><span class="n">fe09</span><span class="o">-</span><span class="mi">4441</span><span class="o">-</span><span class="n">acce</span><span class="o">-</span><span class="mi">1</span><span class="n">eb22b1391e1</span>
+  <span class="n">health</span><span class="p">:</span> <span class="n">HEALTH_OK</span>
+<span class="n">services</span><span class="p">:</span>
+  <span class="n">mon</span><span class="p">:</span> <span class="mi">1</span> <span class="n">daemons</span><span class="p">,</span> <span class="n">quorum</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="p">(</span><span class="n">age</span> <span class="mi">5</span><span class="n">s</span><span class="p">)</span>
+  <span class="n">mgr</span><span class="p">:</span> <span class="n">no</span> <span class="n">daemons</span> <span class="n">active</span>
+  <span class="n">osd</span><span class="p">:</span> <span class="mi">0</span> <span class="n">osds</span><span class="p">:</span> <span class="mi">0</span> <span class="n">up</span><span class="p">,</span> <span class="mi">0</span> <span class="ow">in</span>
+<span class="n">data</span><span class="p">:</span>
+  <span class="n">pools</span><span class="p">:</span>   <span class="mi">0</span> <span class="n">pools</span><span class="p">,</span> <span class="mi">0</span> <span class="n">pgs</span>
+  <span class="n">objects</span><span class="p">:</span> <span class="mi">0</span> <span class="n">objects</span><span class="p">,</span> <span class="mi">0</span> <span class="n">B</span>
+  <span class="n">usage</span><span class="p">:</span>   <span class="mi">0</span> <span class="n">B</span> <span class="n">used</span><span class="p">,</span> <span class="mi">0</span> <span class="n">B</span> <span class="o">/</span> <span class="mi">0</span> <span class="n">B</span> <span class="n">avail</span>
+  <span class="n">pgs</span><span class="p">:</span>
+</pre></div>
 </div>
 </section>
 <section id="id3">
-<h2>部署monitor排查记录(参考)<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
-<section id="keyring">
-<h3>排查 keyring 名字错误问题<a class="headerlink" href="#keyring" title="永久链接至标题">¶</a></h3>
-<p>此时提示报错:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mf">03.944</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f0de6190700</span> <span class="o">-</span><span class="mi">1</span> <span class="n">auth</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">find</span> <span class="n">a</span> <span class="n">keyring</span> <span class="n">on</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="o">.</span><span class="n">bin</span><span class="p">,:</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mf">03.944</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f0de6190700</span> <span class="o">-</span><span class="mi">1</span> <span class="n">AuthRegistry</span><span class="p">(</span><span class="mh">0x7f0de00590e0</span><span class="p">)</span> <span class="n">no</span> <span class="n">keyring</span> <span class="n">found</span> <span class="n">at</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="o">.</span><span class="n">bin</span><span class="p">,,</span> <span class="n">disabling</span> <span class="n">cephx</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mf">03.944</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f0de6190700</span> <span class="o">-</span><span class="mi">1</span> <span class="n">auth</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">find</span> <span class="n">a</span> <span class="n">keyring</span> <span class="n">on</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="o">.</span><span class="n">bin</span><span class="p">,:</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mf">03.944</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f0de6190700</span> <span class="o">-</span><span class="mi">1</span> <span class="n">AuthRegistry</span><span class="p">(</span><span class="mh">0x7f0de005b248</span><span class="p">)</span> <span class="n">no</span> <span class="n">keyring</span> <span class="n">found</span> <span class="n">at</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="o">.</span><span class="n">bin</span><span class="p">,,</span> <span class="n">disabling</span> <span class="n">cephx</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mf">03.948</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f0de6190700</span> <span class="o">-</span><span class="mi">1</span> <span class="n">auth</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">find</span> <span class="n">a</span> <span class="n">keyring</span> <span class="n">on</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="o">.</span><span class="n">bin</span><span class="p">,:</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mf">03.948</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f0de6190700</span> <span class="o">-</span><span class="mi">1</span> <span class="n">AuthRegistry</span><span class="p">(</span><span class="mh">0x7f0de618f130</span><span class="p">)</span> <span class="n">no</span> <span class="n">keyring</span> <span class="n">found</span> <span class="n">at</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="p">,</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">keyring</span><span class="o">.</span><span class="n">bin</span><span class="p">,,</span> <span class="n">disabling</span> <span class="n">cephx</span>
-<span class="p">[</span><span class="n">errno</span> <span class="mi">2</span><span class="p">]</span> <span class="n">RADOS</span> <span class="nb">object</span> <span class="ow">not</span> <span class="n">found</span> <span class="p">(</span><span class="n">error</span> <span class="n">connecting</span> <span class="n">to</span> <span class="n">the</span> <span class="n">cluster</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>仔细看了一下，原来前面执行 <code class="docutils literal notranslate"><span class="pre">生成管理员keyring</span></code> 步骤时没有注意到每个配置文件的开头必须是集群名字，例如我的集群名字是 <code class="docutils literal notranslate"><span class="pre">zdata</span></code> 就必须生成 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/zdata.client.admin.keyring</span></code> 。我最初按照官方文档(手册是创建 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 名字的集群)，所以原文是:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">--</span><span class="n">create</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">gen</span><span class="o">-</span><span class="n">key</span> <span class="o">-</span><span class="n">n</span> <span class="n">client</span><span class="o">.</span><span class="n">admin</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mon</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mgr</span> <span class="s1">&#39;allow *&#39;</span>
-</pre></div>
-</div>
-<p>应该按照集群名字修订成:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">authtool</span> <span class="o">--</span><span class="n">create</span><span class="o">-</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="n">gen</span><span class="o">-</span><span class="n">key</span> <span class="o">-</span><span class="n">n</span> <span class="n">client</span><span class="o">.</span><span class="n">admin</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mon</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">--</span><span class="n">cap</span> <span class="n">mgr</span> <span class="s1">&#39;allow *&#39;</span>
-</pre></div>
-</div>
-<p>所以还需要重新走一遍流程</p>
-</section>
-<section id="ceph-mon-ceph">
-<h3>排查 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 失败(不同的ceph集群名)<a class="headerlink" href="#ceph-mon-ceph" title="永久链接至标题">¶</a></h3>
-<p>执行启动服务报错:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-</pre></div>
-</div>
-<p>提示错误:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Job</span> <span class="k">for</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mf">1.</span><span class="n">service</span> <span class="n">failed</span> <span class="n">because</span> <span class="n">the</span> <span class="n">control</span> <span class="n">process</span> <span class="n">exited</span> <span class="k">with</span> <span class="n">error</span> <span class="n">code</span><span class="o">.</span>
-<span class="n">See</span> <span class="s2">&quot;systemctl status ceph-mon@z-b-data-1.service&quot;</span> <span class="ow">and</span> <span class="s2">&quot;journalctl -xe&quot;</span> <span class="k">for</span> <span class="n">details</span><span class="o">.</span>
-</pre></div>
-</div>
-<ul>
-<li><p>检查:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mf">1.</span><span class="n">service</span>
-</pre></div>
-</div>
-</li>
+<h2>下一步<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="install_ceph_mgr.html#install-ceph-mgr"><span class="std std-ref">安装 ceph-mgr</span></a></p></li>
 </ul>
-<p>显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● ceph-mon@z-b-data-1.service - Ceph cluster monitor daemon
-     Loaded: loaded (/lib/systemd/system/ceph-mon@.service; disabled; vendor preset: enabled)
-     Active: failed (Result: exit-code) since Sun 2021-11-21 23:03:02 CST; 30min ago
-    Process: 10167 ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id z-b-data-1 --setuser ceph --setgroup ceph (code=exited, status=1/FAILURE)
-   Main PID: 10167 (code=exited, status=1/FAILURE)
-
-Nov 21 23:03:02 z-b-data-1 systemd[1]: Failed to start Ceph cluster monitor daemon.
-Nov 21 23:24:30 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Start request repeated too quickly.
-Nov 21 23:24:30 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Failed with result &#39;exit-code&#39;.
-Nov 21 23:24:30 z-b-data-1 systemd[1]: Failed to start Ceph cluster monitor daemon.
-</pre></div>
-</div>
-<p>检查 <code class="docutils literal notranslate"><span class="pre">/var/log/ceph/zdata-mon.z-b-data-1.log</span></code> 日志显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">27.116</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">ff4e9ec2540</span>  <span class="mi">4</span> <span class="n">rocksdb</span><span class="p">:</span> <span class="p">[</span><span class="n">db</span><span class="o">/</span><span class="n">db_impl</span><span class="o">.</span><span class="n">cc</span><span class="p">:</span><span class="mi">389</span><span class="p">]</span> <span class="n">Shutdown</span><span class="p">:</span> <span class="n">canceling</span> <span class="nb">all</span> <span class="n">background</span> <span class="n">work</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">27.120</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">ff4e9ec2540</span>  <span class="mi">4</span> <span class="n">rocksdb</span><span class="p">:</span> <span class="p">[</span><span class="n">db</span><span class="o">/</span><span class="n">db_impl</span><span class="o">.</span><span class="n">cc</span><span class="p">:</span><span class="mi">563</span><span class="p">]</span> <span class="n">Shutdown</span> <span class="n">complete</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">27.120</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">ff4e9ec2540</span>  <span class="mi">0</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="p">:</span> <span class="n">created</span> <span class="n">monfs</span> <span class="n">at</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">mon</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-<span class="mi">2021</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">21</span><span class="n">T23</span><span class="p">:</span><span class="mi">25</span><span class="p">:</span><span class="mf">36.620</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f5fe6f7b540</span> <span class="o">-</span><span class="mi">1</span> <span class="s1">&#39;/var/lib/ceph/mon/zdata-z-b-data-1&#39;</span> <span class="n">already</span> <span class="n">exists</span> <span class="ow">and</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">empty</span><span class="p">:</span> <span class="n">monitor</span> <span class="n">may</span> <span class="n">already</span> <span class="n">exist</span>
-</pre></div>
-</div>
-<p>原因看来是之前启动 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 失败失败残留数据影响，所以删除目录重新走:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-<span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">ceph</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-
-<span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">ceph</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span> <span class="o">--</span><span class="n">cluster</span> <span class="n">zdata</span> <span class="o">--</span><span class="n">mkfs</span> <span class="o">-</span><span class="n">i</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">monmap</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span> <span class="o">--</span><span class="n">keyring</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span>
-<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-</pre></div>
-</div>
-<p>但是依然失败:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● ceph-mon@z-b-data-1.service - Ceph cluster monitor daemon
-     Loaded: loaded (/lib/systemd/system/ceph-mon@.service; disabled; vendor preset: enabled)
-     Active: failed (Result: exit-code) since Mon 2021-11-22 10:02:32 CST; 4s ago
-    Process: 11062 ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id z-b-data-1 --setuser ceph --setgroup ce&gt;
-   Main PID: 11062 (code=exited, status=1/FAILURE)
-
-Nov 22 10:02:32 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Scheduled restart job, restart counter is at 5.
-Nov 22 10:02:32 z-b-data-1 systemd[1]: Stopped Ceph cluster monitor daemon.
-Nov 22 10:02:32 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Start request repeated too quickly.
-Nov 22 10:02:32 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Failed with result &#39;exit-code&#39;.
-Nov 22 10:02:32 z-b-data-1 systemd[1]: Failed to start Ceph cluster monitor daemon.
-</pre></div>
-</div>
-<p>仔细看了进程命令:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Process: 10467 ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id z-b-data-1 --setuser ceph --setgroup ceph
-</pre></div>
-</div>
-<p>奇怪，怎么集群参数 <code class="docutils literal notranslate"><span class="pre">--cluster</span> <span class="pre">${CLUSTER}</span></code> 没有传递进去？</p>
-<p>检查 <code class="docutils literal notranslate"><span class="pre">/var/log/ceph/ceph-mon.z-b-data-1.log</span></code> 发现这个启动监控也需要传递集群名字，否则就出现如下报错:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>2021-11-22T10:50:47.796+0800 7f3215b55540  0 set uid:gid to 64045:64045 (ceph:ceph)
-2021-11-22T10:50:47.796+0800 7f3215b55540 -1 Errors while parsing config file!
-2021-11-22T10:50:47.796+0800 7f3215b55540 -1 parse_file: filesystem error: cannot get file size: No such file or directory [ceph.conf]
-2021-11-22T10:50:47.796+0800 7f3215b55540  0 ceph version 15.2.14 (cd3bb7e87a2f62c1b862ff3fd8b1eec13391a5be) octopus (stable), process ceph-mon, pid 11162
-2021-11-22T10:50:47.796+0800 7f3215b55540 -1 monitor data directory at &#39;/var/lib/ceph/mon/ceph-z-b-data-1&#39; does not exist: have you run &#39;mkfs&#39;?
-2021-11-22T10:50:58.056+0800 7ffa5983d540  0 set uid:gid to 64045:64045 (ceph:ceph)
-2021-11-22T10:50:58.056+0800 7ffa5983d540 -1 Errors while parsing config file!
-2021-11-22T10:50:58.056+0800 7ffa5983d540 -1 parse_file: filesystem error: cannot get file size: No such file or directory [ceph.conf]
-2021-11-22T10:50:58.056+0800 7ffa5983d540  0 ceph version 15.2.14 (cd3bb7e87a2f62c1b862ff3fd8b1eec13391a5be) octopus (stable), process ceph-mon, pid 11180
-2021-11-22T10:50:58.056+0800 7ffa5983d540 -1 monitor data directory at &#39;/var/lib/ceph/mon/ceph-z-b-data-1&#39; does not exist: have you run &#39;mkfs&#39;?
-</pre></div>
-</div>
-<p>参考 <a class="reference external" href="https://www.reddit.com/r/ceph/comments/a0k4p8/how_to_start_a_daemon_w_custom_cluster_name/">How to start a daemon w/ custom cluster name?</a> 提供了线索和原因，也就是 <code class="docutils literal notranslate"><span class="pre">/lib/systemd/system/ceph-mon&#64;.service</span></code> 服务配置可以看到:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[Service]
-...
-EnvironmentFile=-/etc/default/ceph
-Environment=CLUSTER=ceph
-ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id %i --setuser ceph --setgroup ceph
-...
-</pre></div>
-</div>
-<p>也就是说，如果没有配置 <code class="docutils literal notranslate"><span class="pre">/etc/default/ceph</span></code> 则默认会启动集群 <code class="docutils literal notranslate"><span class="pre">Environment=CLUSTER=ceph</span></code> ，这就导致无法正确启动我配置的集群 <code class="docutils literal notranslate"><span class="pre">zdata</span></code></p>
-<ul>
-<li><p>创建配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/default/ceph</span></code> ，这个配置文件是用来传递环境变量的，可以看到默认已经具备了以下内容:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># /etc/default/ceph</span>
-<span class="c1">#</span>
-<span class="c1"># Environment file for ceph daemon systemd unit files.</span>
-<span class="c1">#</span>
-
-<span class="c1"># Increase tcmalloc cache size</span>
-<span class="n">TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES</span><span class="o">=</span><span class="mi">134217728</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>在该配置文件中添加一行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CLUSTER</span><span class="o">=</span><span class="n">zdata</span>
-</pre></div>
-</div>
-<ul>
-<li><p>然后再次启动:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-</pre></div>
-</div>
-</li>
-<li><p>现在检查 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 服务就可以看到正常启动了:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">status</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>输出显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>● ceph-mon@z-b-data-1.service - Ceph cluster monitor daemon
-     Loaded: loaded (/lib/systemd/system/ceph-mon@.service; disabled; vendor preset: enabled)
-     Active: active (running) since Mon 2021-11-22 11:23:32 CST; 12s ago
-   Main PID: 11510 (ceph-mon)
-      Tasks: 26
-     Memory: 12.8M
-     CGroup: /system.slice/system-ceph\x2dmon.slice/ceph-mon@z-b-data-1.service
-             └─11510 /usr/bin/ceph-mon -f --cluster zdata --id z-b-data-1 --setuser ceph --setgroup ceph
-
-Nov 22 11:23:32 z-b-data-1 systemd[1]: Started Ceph cluster monitor daemon.
-</pre></div>
-</div>
-</section>
 </section>
 <section id="id4">
 <h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>

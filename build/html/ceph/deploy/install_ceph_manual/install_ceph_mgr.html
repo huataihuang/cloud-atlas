@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="添加Ceph OSDs" href="add_ceph_osds.html" />
+    <link rel="next" title="添加Ceph OSDs (RAW磁盘)" href="add_ceph_osds_raw.html" />
     <link rel="prev" title="安装 ceph-mon" href="install_ceph_mon.html" /> 
 </head>
 
@@ -60,7 +60,10 @@
 <li class="toctree-l4"><a class="reference internal" href="prepare.html">手工安装Ceph - 准备工作</a></li>
 <li class="toctree-l4"><a class="reference internal" href="install_ceph_mon.html">安装 ceph-mon</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">安装 ceph-mgr</a></li>
-<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds.html">添加Ceph OSDs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_raw.html">添加Ceph OSDs (RAW磁盘)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_lvm.html">添加Ceph OSDs (LVM卷)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_mons.html">Ceph集群添加ceph-mon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_more.html">Ceph集群添加更多ceph-osd</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../install_ceph_manual_zdata/index.html">Ceph 手工部署zdata集群(暂未成功)</a></li>
@@ -70,6 +73,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../config/index.html">Ceph 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Ceph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arch/index.html">Ceph 架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tunning/index.html">Ceph 优化</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../gluster/index.html">Gluster Atlas</a></li>
@@ -148,7 +152,7 @@
 <p>可以设置 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 来使用诸如 <code class="docutils literal notranslate"><span class="pre">ceph-ansible</span></code> 工具。</p>
 <ul>
 <li><p>创建服务的认证key:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph auth get-or-create mgr.$name mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39;
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo ceph auth get-or-create mgr.$name mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39;
 </pre></div>
 </div>
 </li>
@@ -158,7 +162,7 @@
 <p>官方文档这里写得很含糊，我参考 <a class="reference external" href="http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html">iris ceph</a> 大致理解 <code class="docutils literal notranslate"><span class="pre">$name</span></code> 指的是管理服务器名字，所以实践操作我采用了第一台服务器 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 名字</p>
 </div>
 <p>实际操作:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">mgr</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">mon</span> <span class="s1">&#39;allow profile mgr&#39;</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">mgr</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">mon</span> <span class="s1">&#39;allow profile mgr&#39;</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span>
 </pre></div>
 </div>
 <p>此时会提示:</p>
@@ -166,26 +170,26 @@
      <span class="n">key</span> <span class="o">=</span> <span class="n">XXXXXXXXXXXXXXXX</span>
 </pre></div>
 </div>
-<p>将上述输出内容存放到集群对应名字( <code class="docutils literal notranslate"><span class="pre">zdata</span></code> )的 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 路径中，对于我的 <code class="docutils literal notranslate"><span class="pre">zdata</span></code> 集群，目录就是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/zdata-adm/</span></code> 。参考 <a class="reference internal" href="install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a> 有同样的配置 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 存放的密钥是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mon/zdata-z-b-data-1/keyring</span></code> 内容类似如下:</p>
+<p>将上述输出内容存放到集群对应名字( <code class="docutils literal notranslate"><span class="pre">ceph</span></code> )的 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 路径中，对于我的 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 集群，目录就是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/ceph-z-b-data-1/</span></code> 。参考 <a class="reference internal" href="install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a> 有同样的配置 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 存放的密钥是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mon/ceph-z-b-data-1/keyring</span></code> 内容类似如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mon</span><span class="o">.</span><span class="p">]</span>
     <span class="n">key</span> <span class="o">=</span> <span class="n">XXXXXXXXXXX</span>
     <span class="n">caps</span> <span class="n">mon</span> <span class="o">=</span> <span class="s2">&quot;allow *&quot;</span>
 </pre></div>
 </div>
-<p>所以类似 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 的key存放就是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/zdata-z-b-data-1/keyring</span></code></p>
+<p>所以类似 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 的key存放就是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/ceph-z-b-data-1/keyring</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mgr</span><span class="o">.</span><span class="n">adm</span><span class="p">]</span>
      <span class="n">key</span> <span class="o">=</span> <span class="n">XXXXXXXXXXXXXXXX</span>
 </pre></div>
 </div>
-<p>上述命令可以合并起来(不用再手工编辑 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/zdata-z-b-data-1/keyring</span></code> ):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
-<span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">mgr</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">mon</span> <span class="s1">&#39;allow profile mgr&#39;</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
+<p>上述命令可以合并起来(不用再手工编辑 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/ceph-z-b-data-1/keyring</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">mgr</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">mon</span> <span class="s1">&#39;allow profile mgr&#39;</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
 </pre></div>
 </div>
 <ul>
 <li><p>然后还需要修订文件属性:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">chown</span> <span class="n">ceph</span><span class="p">:</span><span class="n">ceph</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
-<span class="n">sudo</span> <span class="n">chmod</span> <span class="mi">600</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">zdata</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">chown</span> <span class="n">ceph</span><span class="p">:</span><span class="n">ceph</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
+<span class="n">sudo</span> <span class="n">chmod</span> <span class="mi">600</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
 </pre></div>
 </div>
 </li>
@@ -195,22 +199,19 @@
 </div>
 </li>
 <li><p>然后检查:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p>可以看到 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 已经注册成功:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cluster</span><span class="p">:</span>
-  <span class="nb">id</span><span class="p">:</span>     <span class="mi">53</span><span class="n">c3f770</span><span class="o">-</span><span class="n">d869</span><span class="o">-</span><span class="mi">4</span><span class="n">b59</span><span class="o">-</span><span class="mi">902</span><span class="n">e</span><span class="o">-</span><span class="n">d645eca7e34a</span>
-  <span class="n">health</span><span class="p">:</span> <span class="n">HEALTH_WARN</span>
-          <span class="n">OSD</span> <span class="n">count</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">osd_pool_default_size</span> <span class="mi">3</span>
-
+  <span class="nb">id</span><span class="p">:</span>     <span class="mi">39392603</span><span class="o">-</span><span class="n">fe09</span><span class="o">-</span><span class="mi">4441</span><span class="o">-</span><span class="n">acce</span><span class="o">-</span><span class="mi">1</span><span class="n">eb22b1391e1</span>
+  <span class="n">health</span><span class="p">:</span> <span class="n">HEALTH_OK</span>
 <span class="n">services</span><span class="p">:</span>
-  <span class="n">mon</span><span class="p">:</span> <span class="mi">1</span> <span class="n">daemons</span><span class="p">,</span> <span class="n">quorum</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="p">(</span><span class="n">age</span> <span class="mi">4</span><span class="n">h</span><span class="p">)</span>
-  <span class="n">mgr</span><span class="p">:</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="n">since</span> <span class="mi">50</span><span class="n">s</span><span class="p">)</span>
+  <span class="n">mon</span><span class="p">:</span> <span class="mi">1</span> <span class="n">daemons</span><span class="p">,</span> <span class="n">quorum</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="p">(</span><span class="n">age</span> <span class="mi">18</span><span class="n">m</span><span class="p">)</span>
+  <span class="n">mgr</span><span class="p">:</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="n">since</span> <span class="mi">11</span><span class="n">s</span><span class="p">)</span>
   <span class="n">osd</span><span class="p">:</span> <span class="mi">0</span> <span class="n">osds</span><span class="p">:</span> <span class="mi">0</span> <span class="n">up</span><span class="p">,</span> <span class="mi">0</span> <span class="ow">in</span>
-
 <span class="n">data</span><span class="p">:</span>
   <span class="n">pools</span><span class="p">:</span>   <span class="mi">0</span> <span class="n">pools</span><span class="p">,</span> <span class="mi">0</span> <span class="n">pgs</span>
   <span class="n">objects</span><span class="p">:</span> <span class="mi">0</span> <span class="n">objects</span><span class="p">,</span> <span class="mi">0</span> <span class="n">B</span>
@@ -222,7 +223,7 @@
 <h2>使用模块<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>查看 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 提供了哪些模块:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">ls</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">ls</span>
 </pre></div>
 </div>
 </li>
@@ -232,23 +233,31 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mgr</span><span class="o">-</span><span class="n">dashboard</span>
 </pre></div>
 </div>
-<p>然后通过 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">ls</span> <span class="pre">-c</span> <span class="pre">/etc/ceph/zdata.conf</span></code> 就会看到这个模块</p>
+<p>然后通过 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">ls</span></code> 就会看到这个模块</p>
 <ul>
 <li><p>通过 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">enable</span> <span class="pre">&lt;module&gt;</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">disable</span> <span class="pre">&lt;module&gt;</span></code> 可以激活和关闭模块:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">enable</span> <span class="n">dashboard</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
-</pre></div>
-</div>
-</li>
-<li><p>激活 <code class="docutils literal notranslate"><span class="pre">dashboard</span></code> 模块后，可以通过 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 的服务看到它:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">services</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">zdata</span><span class="o">.</span><span class="n">conf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">enable</span> <span class="n">dashboard</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p>详细配置见 <a class="reference internal" href="../../mgr/ceph_dashboard.html#ceph-dashboard"><span class="std std-ref">Ceph Dashboard 管控面板</span></a> 提供了非常丰富的管理功能，并且能够结合 <a class="reference internal" href="../../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 和 <a class="reference internal" href="../../../kubernetes/monitor/grafana/index.html#grafana"><span class="std std-ref">Grafana通用可视分析平台</span></a> 。</p>
+<ul>
+<li><p>激活 <code class="docutils literal notranslate"><span class="pre">dashboard</span></code> 并配置好模块后 ( 详见 <a class="reference internal" href="../../mgr/ceph_dashboard.html#ceph-dashboard"><span class="std std-ref">Ceph Dashboard 管控面板</span></a> )，可以通过 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 的服务看到它:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">services</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>下一步<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="add_ceph_osds_lvm.html#add-ceph-osds-lvm"><span class="std std-ref">添加Ceph OSDs (LVM卷)</span></a></p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.ceph.com/en/pacific/mgr/administrator/#mgr-administrator-guide">ceph-mgr administrator’s guide: MANUAL SETUP</a></p></li>
 <li><p><a class="reference external" href="http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html">iris ceph</a> 这篇笔记非常实用，补充了ceph官方文档的缺失</p></li>
@@ -261,7 +270,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="install_ceph_mon.html" class="btn btn-neutral float-left" title="安装 ceph-mon" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="add_ceph_osds.html" class="btn btn-neutral float-right" title="添加Ceph OSDs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="add_ceph_osds_raw.html" class="btn btn-neutral float-right" title="添加Ceph OSDs (RAW磁盘)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

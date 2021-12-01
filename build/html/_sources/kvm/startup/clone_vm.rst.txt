@@ -31,8 +31,18 @@ clone虚拟机
 
    virt-clone --connect qemu:///system --original ubuntu18.04 --name devstack --file /var/lib/libvirt/images/devstack.qcow2
 
+更为常用的命令是::
+
+   virt-clone --original ubuntu18.04 --name devstack --auto-clone
+
+这里使用 ``--auto-clone`` 参数可以自动处理 :ref:`libvirt_lvm_pool` ，非常方面实用
+
 初始化虚拟机副本
 ==================
+
+.. note::
+
+   我在构建 :ref:`priv_cloud_infra` 环境中，由于只是个人使用的测试环境，所以没有执行 ``virt-sysprep`` ，此时需要手工修订的是主机名和IP地址，所有账号和内部设置都完全一致。 ``virt-clone`` 可以自动确保虚拟机的uuid和mac地址唯一，所以不会冲突。
 
 - 使用 ``virt-sysprep`` 初始化虚拟机
 

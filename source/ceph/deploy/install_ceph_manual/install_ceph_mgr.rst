@@ -10,7 +10,7 @@
 
 - 创建服务的认证key::
 
-   ceph auth get-or-create mgr.$name mon 'allow profile mgr' osd 'allow *' mds 'allow *'
+   sudo ceph auth get-or-create mgr.$name mon 'allow profile mgr' osd 'allow *' mds 'allow *'
 
 .. note::
 
@@ -18,34 +18,34 @@
 
 实际操作::
 
-   sudo ceph auth get-or-create mgr.z-b-data-1 mon 'allow profile mgr' osd 'allow *' mds 'allow *' -c /etc/ceph/zdata.conf
+   sudo ceph auth get-or-create mgr.z-b-data-1 mon 'allow profile mgr' osd 'allow *' mds 'allow *'
 
 此时会提示::
 
    [mgr.adm]
         key = XXXXXXXXXXXXXXXX
 
-将上述输出内容存放到集群对应名字( ``zdata`` )的 ``z-b-data-1`` 路径中，对于我的 ``zdata`` 集群，目录就是 ``/var/lib/ceph/mgr/zdata-adm/`` 。参考 :ref:`install_ceph_mon` 有同样的配置 ``ceph-mon`` 存放的密钥是 ``/var/lib/ceph/mon/zdata-z-b-data-1/keyring`` 内容类似如下::
+将上述输出内容存放到集群对应名字( ``ceph`` )的 ``z-b-data-1`` 路径中，对于我的 ``ceph`` 集群，目录就是 ``/var/lib/ceph/mgr/ceph-z-b-data-1/`` 。参考 :ref:`install_ceph_mon` 有同样的配置 ``ceph-mon`` 存放的密钥是 ``/var/lib/ceph/mon/ceph-z-b-data-1/keyring`` 内容类似如下::
 
    [mon.]
        key = XXXXXXXXXXX
        caps mon = "allow *"
 
 
-所以类似 ``ceph-mgr`` 的key存放就是 ``/var/lib/ceph/mgr/zdata-z-b-data-1/keyring`` ::
+所以类似 ``ceph-mgr`` 的key存放就是 ``/var/lib/ceph/mgr/ceph-z-b-data-1/keyring`` ::
 
    [mgr.adm]
         key = XXXXXXXXXXXXXXXX
 
-上述命令可以合并起来(不用再手工编辑 ``/var/lib/ceph/mgr/zdata-z-b-data-1/keyring`` )::
+上述命令可以合并起来(不用再手工编辑 ``/var/lib/ceph/mgr/ceph-z-b-data-1/keyring`` )::
 
-   sudo mkdir /var/lib/ceph/mgr/zdata-z-b-data-1
-   sudo ceph auth get-or-create mgr.z-b-data-1 mon 'allow profile mgr' osd 'allow *' mds 'allow *' -c /etc/ceph/zdata.conf | sudo tee /var/lib/ceph/mgr/zdata-z-b-data-1/keyring
+   sudo mkdir /var/lib/ceph/mgr/ceph-z-b-data-1
+   sudo ceph auth get-or-create mgr.z-b-data-1 mon 'allow profile mgr' osd 'allow *' mds 'allow *' | sudo tee /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
 
 - 然后还需要修订文件属性::
 
-   sudo chown ceph:ceph /var/lib/ceph/mgr/zdata-z-b-data-1/keyring
-   sudo chmod 600 /var/lib/ceph/mgr/zdata-z-b-data-1/keyring
+   sudo chown ceph:ceph /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+   sudo chmod 600 /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
 
 - 然后通过systemd启动::
 
@@ -53,20 +53,17 @@
 
 - 然后检查::
 
-   sudo ceph -s -c /etc/ceph/zdata.conf
+   sudo ceph -s
 
 可以看到 ``ceph-mgr`` 已经注册成功::
 
    cluster:
-     id:     53c3f770-d869-4b59-902e-d645eca7e34a
-     health: HEALTH_WARN
-             OSD count 0 < osd_pool_default_size 3
-   
+     id:     39392603-fe09-4441-acce-1eb22b1391e1
+     health: HEALTH_OK
    services:
-     mon: 1 daemons, quorum z-b-data-1 (age 4h)
-     mgr: z-b-data-1(active, since 50s)
+     mon: 1 daemons, quorum z-b-data-1 (age 18m)
+     mgr: z-b-data-1(active, since 11s)
      osd: 0 osds: 0 up, 0 in
-   
    data:
      pools:   0 pools, 0 pgs
      objects: 0 objects, 0 B
@@ -78,7 +75,7 @@
 
 - 查看 ``ceph-mgr`` 提供了哪些模块::
 
-   sudo ceph mgr module ls -c /etc/ceph/zdata.conf
+   sudo ceph mgr module ls
 
 可以看到大量提供的模块以及哪些模块已经激活。
 
@@ -86,17 +83,22 @@ Ceph提供了一个非常有用的模块 ``dashboard`` 方便管理存储集群�
 
    sudo apt install ceph-mgr-dashboard
 
-然后通过 ``sudo ceph mgr module ls -c /etc/ceph/zdata.conf`` 就会看到这个模块
+然后通过 ``sudo ceph mgr module ls`` 就会看到这个模块
 
 - 通过 ``ceph mgr module enable <module>`` 和 ``ceph mgr module disable <module>`` 可以激活和关闭模块::
 
-   sudo ceph mgr module enable dashboard -c /etc/ceph/zdata.conf
-
-- 激活 ``dashboard`` 模块后，可以通过 ``ceph-mgr`` 的服务看到它::
-
-   sudo ceph mgr services -c /etc/ceph/zdata.conf
+   sudo ceph mgr module enable dashboard
 
 详细配置见 :ref:`ceph_dashboard` 提供了非常丰富的管理功能，并且能够结合 :ref:`prometheus` 和 :ref:`grafana` 。
+
+- 激活 ``dashboard`` 并配置好模块后 ( 详见 :ref:`ceph_dashboard` )，可以通过 ``ceph-mgr`` 的服务看到它::
+
+   sudo ceph mgr services
+
+下一步
+=======
+
+- :ref:`add_ceph_osds_lvm`
 
 参考
 =====

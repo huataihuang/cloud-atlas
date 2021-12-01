@@ -20,6 +20,7 @@ Ceph Atlas
    config/index
    arm/index
    arch/index
+   tunning/index
 
 .. only::  subproject and html
 
