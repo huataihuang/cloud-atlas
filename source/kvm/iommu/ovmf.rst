@@ -614,6 +614,46 @@ GPU设备::
    07:00.0 3D controller: NVIDIA Corporation GP102GL [Tesla P10] (rev a1)
    08:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller PM9A1/PM9A3/980PRO
 
+Windows OVMF虚拟机安装
+=========================
+
+.. note::
+
+   本段我尚未实践，目前暂未有 :ref:`windows` 实践机会，不过考虑到Windows的广泛使用，我在后续实践中会采用混合部署Linux+Windows，学习Windows体系。目前这段仅记录供后续参考 `Virtualizing Windows 7 (or Linux) on a NVMe drive with VFIO <https://frdmtoplay.com/virtualizing-windows-7-or-linux-on-a-nvme-drive-with-vfio/>`_
+
+在YouTube上，有很多技术爱好者展示了通过Windows虚拟机玩游戏的，主要的思路就是通过VFIO实现显卡和存储pass-through，既是炫技也是玩乐。我的思路是后续在 :ref:`priv_cloud_infra` 融入部署完整的Windows Active Directory Domain，构建一个企业级网络。
+
+- Intel的UEFI实现称为 ``tianocore`` ，在qeumu支持 ``tianocore`` 的发行包就是 ``ovmf`` ，所以同样我们需要在物理主机上安装 ``ovmf`` ::
+
+   apt install ovmf
+
+- 构建驱动ISO
+
+Windows安装国晨够可以选择磁盘驱动，由于我们是在虚拟机中安装Windows，所以只需要安装过程中在VM添加包含驱动的ISO文件挂载就可以。Fedora提供了 `virto 驱动镜像 <https://fedoraproject.org/wiki/Windows_Virtio_Drivers>`_ ，下载后将内容复制出来::
+
+   # mkdir /mnt/loop
+   # mount /path/to/virtio.iso -o loop /mnt/loop
+   $ cp -r /mnt/loop/* /home/user/virtio
+
+- 三星NVMe驱动:
+
+三星官方提供了NVMe驱动(可执行文件，待后续实践，应该是压缩包可以用来提取实际驱动文件)，后续实践可以尝试将驱动文件提取出来::
+
+   secnvme.cat
+   secnvme.inf
+   secnvme.sys
+   secnvmeF.sys
+
+复制到 ``/home/user/virtio/samsung``
+
+- 在复制了需要的驱动文件到 ``virtio/`` 目录之后，可以将这个目录重建成iso文件::
+
+   geniso -o virtio.iso virtio/
+
+- 然后参考 :ref:`create_vm` 创建虚拟机，注意需要启用 ``uefi`` 
+
+其他内容待后续实践
+
 下一步
 =========
 
@@ -634,3 +674,4 @@ GPU设备::
 - `SETTING UP AN NVIDIA GPU FOR A VIRTUAL MACHINE IN RED HAT VIRTUALIZATION <https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.4/html/setting_up_an_nvidia_gpu_for_a_virtual_machine_in_red_hat_virtualization/index>`_ 设置GPU的直通和vgpu，本文参考前半部分
 - `Enabling PCI pass-through in guest <https://developer.ibm.com/tutorials/enabling-pci-pass-through-using-libvirt/>`_ 这篇blog提供了添加pci设备的xml案例，可以直接使用virsh命令动态添加设备
 - `Attaching and updating a device with virsh <https://docs.fedoraproject.org/en-US/Fedora/18/html/Virtualization_Administration_Guide/sect-Attaching_and_updating_a_device_with_virsh.html>`_ Fedora文档，提供xml案例添加CDROM设备
+- `Virtualizing Windows 7 (or Linux) on a NVMe drive with VFIO <https://frdmtoplay.com/virtualizing-windows-7-or-linux-on-a-nvme-drive-with-vfio/>`_ 安装Windows VFIO可以实现接近原生的性能

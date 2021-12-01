@@ -369,29 +369,39 @@ clone虚拟机
 
    ``virt-clone`` 命令clone出来的虚拟机会自动修订 ``uuid`` 以及虚拟网卡的 ``mac address`` ，所以不用担心虚拟机冲突
 
-- 修订 ``z-b-data-1`` 配置( ``4c8g`` )设置::
+- 对于 :ref:`add_ceph_osds_zdata` 失败的虚拟机，采用如下方法销毁::
+
+   sudo virsh destroy z-b-data-1
+   sudo virsh undefine --nvram z-b-data-1 --remove-all-storage
+
+- 然后从模版重新构建虚拟机::
+
+   virt-clone --original z-ubuntu20 --name z-b-data-1 --auto-clone
+
+- 修订虚拟机 :ref:`priv_kvm` ::
 
    virsh edit z-b-data-1
 
-::
+按照 :ref:`priv_cloud_infra` 修订 :ref:`iommu_cpu_pinning` ::
 
-     <memory unit='KiB'>8388608</memory>
-     <currentMemory unit='KiB'>8388608</currentMemory>
-     <vcpu placement='static'>4</vcpu>
+   <memory unit='KiB'>16777216</memory>
+   <currentMemory unit='KiB'>16777216</currentMemory>
+   <vcpu placement='static'>4</vcpu>
+   <cputune>
+     <vcpupin vcpu='0' cpuset='24'/>
+     <vcpupin vcpu='1' cpuset='25'/>
+     <vcpupin vcpu='2' cpuset='26'/>
+     <vcpupin vcpu='3' cpuset='27'/>
+   </cputune>
 
-- 由于存储访问需要稳定性和高性能， 设置 ``z-b-data-1`` :ref:`iommu_cpu_pinning` ( 请参考我在 :ref:`priv_cloud_infra` 规划)，确保所有 ``data`` 虚拟服务器(通过高速PCIe 3.0接口访问 :ref:`samsung_pm9a1` NVMe存储)::
+- 启动虚拟机，在虚拟机内部( ``virsh console z-b-data-1`` )执行主机名订正(z-b-data-1)和IP订正(IP从模版的192.168.6.246改成192.168.6.204)::
 
-     <vcpu placement='static'>4</vcpu>
-     <cputune>
-       <vcpupin vcpu='0' cpuset='24'/>
-       <vcpupin vcpu='1' cpuset='25'/>
-       <vcpupin vcpu='2' cpuset='26'/>
-       <vcpupin vcpu='3' cpuset='27'/>
-     </cputune>
-
-.. note::
-
-   采用上述方式按照 :ref:`priv_cloud_infra` 规划的VM列表，clone出部署所需的虚拟机 ``z-b-data-2`` 和 ``z-b-data-3``
+   hostnamectl set-hostname z-b-data-1
+   sed -i 's/192.168.6.246/192.168.6.204/g' /etc/netplan/01-netcfg.yaml
+   netplan generate
+   netplan apply
+   sed -i '/192.168.6.246/d' /etc/hosts
+   echo "192.168.6.204    z-b-data-1" >> /etc/hosts
 
 添加pass-through NVMe存储
 =============================
@@ -491,4 +501,4 @@ clone虚拟机
 
 .. note::
 
-   我在实践中发现 Ubuntu 支持安装过程使用代理服务器，所以不需要采用NAT网络，可以直接配置 :ref:`libvirt_bridged_network` 结合 :ref:`apt_proxy_arch` 就可以完成模版主机安装。完成 :ref:`ubuntu_linux` 安装后，主要就是再按照上文调整 vcpu和memory，以及 ``cpupin`` ，然后添加 ``pass-through`` 的NVMe存储就完全恢复。
+   我在实践中发现 Ubuntu 支持安装过程使用代理服务器，所以不需要采用NAT网络，可以直接配置 :ref:`libvirt_bridged_network` 结合 :ref:`apt_proxy_arch` 就可以完成模版主机安装。完成 :ref:`ubuntu_linux` 安装后，主要就是再按照上文调整 vcpu和memory，以及 ``cpupin`` ，然后添加 ``pass-through`` 的NVMe存储就完全恢复初始状态，然后重新开始 :ref:`install_ceph_manual`

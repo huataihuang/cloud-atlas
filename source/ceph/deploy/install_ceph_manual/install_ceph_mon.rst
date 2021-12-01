@@ -71,6 +71,14 @@ Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量�
 
 建议创建Ceph配置文件包含 ``fsid`` 以及 mon 的 ``initial`` 成员和 mom 的 ``host`` 设置。
 
+.. warning::
+
+   我在 :ref:`install_ceph_manual_zdata` 步骤 :ref:`add_ceph_osds_zdata` 没有解决自定义Ceph集群名的添加OSDs问题，所以目前只采用标准默认 ``ceph`` 作为集群名字，后续我将构建虚拟机环境来学习和实践部署多集群。 
+
+.. note::
+
+   Ceph默认部署集群名字就是 ``ceph`` ，需要注意，很多工具和配置文件都是以集群名字作为配置文件名，例如 ``/etc/ceph/zdata.conf`` 表示 ``zdata`` 集群，对应的集群访问证书是 ``/etc/ceph/zdata.client.admin.keyring`` 。在官方文档中，很多使用 ``name`` 来指代集群名字。
+
 部署monitor
 ================
 
@@ -86,20 +94,24 @@ Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量�
 
    cat /proc/sys/kernel/random/uuid
 
+输出::
+
+   0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17
+
 .. note::
 
    也可以使用 ``uuidgen`` 工具来生成uuid，这个工具包含在 ``util-linux`` 软件包中（ 参考 `uuidgen - create a new UUID value <http://manpages.ubuntu.com/manpages/xenial/man1/uuidgen.1.html>`_ ）
 
-- 创建Ceph配置文件 - 默认 Ceph 使用 ``ceph.conf`` 配置，这个配置文件的命名规则是 ``{cluster_name}.conf`` ，由于我准备设置集群名字 ``zdata`` (表示 ``zcloud`` 服务器上数据层) ，所以这个配置文件命名为 ``zdata.conf`` ::
+- 创建Ceph配置文件 - 默认 Ceph 使用 ``ceph.conf`` 配置，这个配置文件的命名规则是 ``{cluster_name}.conf`` 这里我依然使用默认集群名字，所以配置文件是 ``ceph.conf`` ，对于指定集群名，将在 :ref:`install_ceph_manual_zdata` 中探索::
 
-   sudo vim /etc/ceph/zdata.conf
+   sudo vim /etc/ceph/ceph.conf
 
 配置案例:
 
-.. literalinclude:: install_ceph_mon/zdata.conf
+.. literalinclude:: install_ceph_mon/ceph.conf
    :language: bash
    :linenos:
-   :caption: /etc/ceph/zdata.conf
+   :caption: /etc/ceph/ceph.conf
 
 解析:
 
@@ -123,17 +135,17 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 - 生成管理员keyring，生成 ``client.admin`` 用户并添加用户到keyring::
 
-   sudo ceph-authtool --create-keyring /etc/ceph/zdata.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
+   sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
 
 提示::
 
-   creating /etc/ceph/zdata.client.admin.keyring
+   creating /etc/ceph/ceph.client.admin.keyring
 
 .. warning::
 
-   这里 ``/etc/ceph/zdata.client.admin.keyring`` 必须要注意配置文件名必须以集群名字 ``zdata`` 开始，否则后续步骤都会错误
+   这里 ``/etc/ceph/ceph.client.admin.keyring`` 是和集群名 ``ceph`` 对应的，所以如果创建其他集群管理，例如对 ``zdata`` 集群管理，则这个keyring名字必须是 ``/etc/ceph/zdata.client.admin.keyring``
 
-- 生成 ``bootstrap-osd`` keyring，生成 ``client.bootstrap-osd`` 用户并添加用户到keyring::
+- 生成 ``bootstrap-osd`` keyring(命名应该也是和集群名相关，没有验证，感觉应该是 ``<cluseter>.keyring`` )，生成 ``client.bootstrap-osd`` 用户并添加用户到keyring::
 
    sudo ceph-authtool --create-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring --gen-key -n client.bootstrap-osd --cap mon 'profile bootstrap-osd' --cap mgr 'allow r'
 
@@ -143,7 +155,7 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 - 将生成的key添加到 ``ceph.mon.keyring`` ::
 
-   sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/zdata.client.admin.keyring
+   sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/ceph.client.admin.keyring
    sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring
 
 提示::
@@ -161,12 +173,12 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 实际操作为::
 
-   monmaptool --create --add z-b-data-1 192.168.6.204 --fsid 53c3f770-d869-4b59-902e-d645eca7e34a /tmp/monmap
+   monmaptool --create --add z-b-data-1 192.168.6.204 --fsid 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17 /tmp/monmap
 
 提示信息::
 
    monmaptool: monmap file /tmp/monmap
-   monmaptool: set fsid to 53c3f770-d869-4b59-902e-d645eca7e34a
+   monmaptool: set fsid to 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17
    monmaptool: writing epoch 0 to /tmp/monmap (1 monitors)
 
 .. note::
@@ -177,7 +189,7 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
    sudo mkdir /var/lib/ceph/mon/{cluster-name}-{hostname}
 
-实际操作为-我的实验环境存储集群名设置为 ``zdata`` ::
+实际操作为-我的实验环境存储集群名设置为 ``ceph`` 主机名是 ``z-b-data-1`` ::
 
    sudo -u ceph mkdir /var/lib/ceph/mon/zdata-z-b-data-1
 
@@ -187,15 +199,19 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 实际操作::
 
-   sudo -u ceph ceph-mon --cluster zdata --mkfs -i z-b-data-1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+   sudo -u ceph ceph-mon --cluster ceph --mkfs -i z-b-data-1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
 
-- ``重要`` : 配置 ``systemd`` 启动集群的环境变量，修订 ``/etc/default/ceph`` 添加::
+- ``如果使用自定义集群名，则非常重要`` : 配置 ``systemd`` 启动集群的环境变量，修订 ``/etc/default/ceph`` 添加::
 
-   CLUSTER=zdata
+   CLUSTER=ceph
 
 .. warning::
 
-   这个步骤非常重要，因为 ``ceph-mon@<hostname>`` 启动 ``ceph-mon`` 服务会读取 ``/etc/default/ceph`` 中环境变量，如果没有配置 ``CLUSTER`` 环境变量，就会尝试启动名字为 ``ceph`` 的集群。所以如果要配置一个非默认名字的集群，一定要配置 ``CLUSTER`` 环境变量，否则启动会失败。详见下文我的排查过程。 
+   这个步骤非常重要，因为 ``ceph-mon@<hostname>`` 启动 ``ceph-mon`` 服务会读取 ``/etc/default/ceph`` 中环境变量，如果没有配置 ``CLUSTER`` 环境变量，就会尝试启动名字为 ``ceph`` 的集群。所以如果要配置一个非默认名字的集群，一定要配置 ``CLUSTER`` 环境变量，否则启动会失败。
+
+   这里我的环境还是使用默认名 ``ceph`` 则此步骤可以跳过
+
+   对于采用非默认Ceph集群名字命名，则会遇到很多困难，我在 :ref:`install_ceph_mon_zdata` 中有相关实践记录
 
 - 启动monitor(s)
 
@@ -205,18 +221,12 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 - 验证monitor运行::
 
-   sudo ceph -s -c /etc/ceph/zdata.conf
-
-.. note::
-
-   这里 ``ceph -s`` 检查命令要提供 ``-c`` 参数来指定配置文件，否则会出现报错无法读取配置文件::
-
-      Error initializing cluster client: ObjectNotFound('RADOS object not found (error calling conf_read_file)')
+   sudo ceph -s
 
 如果正常，会看到如下输出::
 
    cluster:
-     id:     53c3f770-d869-4b59-902e-d645eca7e34a
+     id:     39392603-fe09-4441-acce-1eb22b1391e1
      health: HEALTH_WARN
              mon is allowing insecure global_id reclaim
              1 monitors have not enabled msgr2
@@ -234,13 +244,13 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
    参考 `Ceph HEALTH_WARN with 'mons are allowing insecure global_id reclaim' after install/upgrade to RHCS 4.2z2 (or newer) <https://access.redhat.com/articles/6136242>`_ (原因是新版本要求严格安全) 或者 `ceph: Mons are allowing insecure global_id reclaim #7746 <https://github.com/rook/rook/issues/7746>`_ ::
 
-      sudo ceph config set mon auth_allow_insecure_global_id_reclaim false -c /etc/ceph/zdata.conf
+      sudo ceph config set mon auth_allow_insecure_global_id_reclaim false
 
    上述安全设置加严会禁止没有补丁过的不安全客户端连接并且超时以后需要重新生成认证ticket(默认72小时)
 
    也可以关闭这个报错输出(我采用这种方法)::
 
-      sudo ceph config set mon mon_warn_on_insecure_global_id_reclaim_allowed false -c /etc/ceph/zdata.conf
+      sudo ceph config set mon mon_warn_on_insecure_global_id_reclaim_allowed false
 
 .. note::
 
@@ -252,158 +262,31 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
    我执行以下命令修正::
 
-      sudo ceph mon enable-msgr2 -c /etc/ceph/zdata.conf
+      sudo ceph mon enable-msgr2
 
-部署monitor排查记录(参考)
-============================
+最终完成后，执行::
 
-排查 keyring 名字错误问题
--------------------------------------------
+   sudo ceph -s
 
-此时提示报错::
+输出以下信息::
 
-   2021-11-21T23:09:03.944+0800 7f0de6190700 -1 auth: unable to find a keyring on /etc/ceph/zdata.client.admin.keyring,/etc/ceph/zdata.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,: (2) No such file or directory
-   2021-11-21T23:09:03.944+0800 7f0de6190700 -1 AuthRegistry(0x7f0de00590e0) no keyring found at /etc/ceph/zdata.client.admin.keyring,/etc/ceph/zdata.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,, disabling cephx
-   2021-11-21T23:09:03.944+0800 7f0de6190700 -1 auth: unable to find a keyring on /etc/ceph/zdata.client.admin.keyring,/etc/ceph/zdata.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,: (2) No such file or directory
-   2021-11-21T23:09:03.944+0800 7f0de6190700 -1 AuthRegistry(0x7f0de005b248) no keyring found at /etc/ceph/zdata.client.admin.keyring,/etc/ceph/zdata.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,, disabling cephx
-   2021-11-21T23:09:03.948+0800 7f0de6190700 -1 auth: unable to find a keyring on /etc/ceph/zdata.client.admin.keyring,/etc/ceph/zdata.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,: (2) No such file or directory
-   2021-11-21T23:09:03.948+0800 7f0de6190700 -1 AuthRegistry(0x7f0de618f130) no keyring found at /etc/ceph/zdata.client.admin.keyring,/etc/ceph/zdata.keyring,/etc/ceph/keyring,/etc/ceph/keyring.bin,, disabling cephx
-   [errno 2] RADOS object not found (error connecting to the cluster)
+   cluster:
+     id:     39392603-fe09-4441-acce-1eb22b1391e1
+     health: HEALTH_OK
+   services:
+     mon: 1 daemons, quorum z-b-data-1 (age 5s)
+     mgr: no daemons active
+     osd: 0 osds: 0 up, 0 in
+   data:
+     pools:   0 pools, 0 pgs
+     objects: 0 objects, 0 B
+     usage:   0 B used, 0 B / 0 B avail
+     pgs:
 
-仔细看了一下，原来前面执行 ``生成管理员keyring`` 步骤时没有注意到每个配置文件的开头必须是集群名字，例如我的集群名字是 ``zdata`` 就必须生成 ``/etc/ceph/zdata.client.admin.keyring`` 。我最初按照官方文档(手册是创建 ``ceph`` 名字的集群)，所以原文是::
+下一步
+========
 
-   sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
-
-应该按照集群名字修订成::
-
-   sudo ceph-authtool --create-keyring /etc/ceph/zdata.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
-
-所以还需要重新走一遍流程
-
-排查 ``ceph-mon`` 失败(不同的ceph集群名)
--------------------------------------------
-
-执行启动服务报错::
-
-   sudo systemctl start ceph-mon@z-b-data-1
-
-提示错误::
-
-   Job for ceph-mon@z-b-data-1.service failed because the control process exited with error code.
-   See "systemctl status ceph-mon@z-b-data-1.service" and "journalctl -xe" for details.
-
-- 检查::
-
-   systemctl status ceph-mon@z-b-data-1.service
-
-显示::
-
-   ● ceph-mon@z-b-data-1.service - Ceph cluster monitor daemon
-        Loaded: loaded (/lib/systemd/system/ceph-mon@.service; disabled; vendor preset: enabled)
-        Active: failed (Result: exit-code) since Sun 2021-11-21 23:03:02 CST; 30min ago
-       Process: 10167 ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id z-b-data-1 --setuser ceph --setgroup ceph (code=exited, status=1/FAILURE)
-      Main PID: 10167 (code=exited, status=1/FAILURE)
-   
-   Nov 21 23:03:02 z-b-data-1 systemd[1]: Failed to start Ceph cluster monitor daemon.
-   Nov 21 23:24:30 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Start request repeated too quickly.
-   Nov 21 23:24:30 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Failed with result 'exit-code'.
-   Nov 21 23:24:30 z-b-data-1 systemd[1]: Failed to start Ceph cluster monitor daemon.
-
-检查 ``/var/log/ceph/zdata-mon.z-b-data-1.log`` 日志显示::
-
-   2021-11-21T23:01:27.116+0800 7ff4e9ec2540  4 rocksdb: [db/db_impl.cc:389] Shutdown: canceling all background work
-   2021-11-21T23:01:27.120+0800 7ff4e9ec2540  4 rocksdb: [db/db_impl.cc:563] Shutdown complete
-   2021-11-21T23:01:27.120+0800 7ff4e9ec2540  0 ceph-mon: created monfs at /var/lib/ceph/mon/zdata-z-b-data-1 for mon.z-b-data-1
-   2021-11-21T23:25:36.620+0800 7f5fe6f7b540 -1 '/var/lib/ceph/mon/zdata-z-b-data-1' already exists and is not empty: monitor may already exist
-
-原因看来是之前启动 ``ceph-mon`` 失败失败残留数据影响，所以删除目录重新走::
-
-   rm -rf /var/lib/ceph/mon/zdata-z-b-data-1
-   sudo -u ceph mkdir /var/lib/ceph/mon/zdata-z-b-data-1
-
-   sudo -u ceph ceph-mon --cluster zdata --mkfs -i z-b-data-1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
-   sudo systemctl start ceph-mon@z-b-data-1
-
-但是依然失败::
-
-   ● ceph-mon@z-b-data-1.service - Ceph cluster monitor daemon
-        Loaded: loaded (/lib/systemd/system/ceph-mon@.service; disabled; vendor preset: enabled)
-        Active: failed (Result: exit-code) since Mon 2021-11-22 10:02:32 CST; 4s ago
-       Process: 11062 ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id z-b-data-1 --setuser ceph --setgroup ce>
-      Main PID: 11062 (code=exited, status=1/FAILURE)
-   
-   Nov 22 10:02:32 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Scheduled restart job, restart counter is at 5.
-   Nov 22 10:02:32 z-b-data-1 systemd[1]: Stopped Ceph cluster monitor daemon.
-   Nov 22 10:02:32 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Start request repeated too quickly.
-   Nov 22 10:02:32 z-b-data-1 systemd[1]: ceph-mon@z-b-data-1.service: Failed with result 'exit-code'.
-   Nov 22 10:02:32 z-b-data-1 systemd[1]: Failed to start Ceph cluster monitor daemon.
-
-仔细看了进程命令::
-
-   Process: 10467 ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id z-b-data-1 --setuser ceph --setgroup ceph
-
-奇怪，怎么集群参数 ``--cluster ${CLUSTER}`` 没有传递进去？
-
-检查 ``/var/log/ceph/ceph-mon.z-b-data-1.log`` 发现这个启动监控也需要传递集群名字，否则就出现如下报错::
-
-   2021-11-22T10:50:47.796+0800 7f3215b55540  0 set uid:gid to 64045:64045 (ceph:ceph)
-   2021-11-22T10:50:47.796+0800 7f3215b55540 -1 Errors while parsing config file!
-   2021-11-22T10:50:47.796+0800 7f3215b55540 -1 parse_file: filesystem error: cannot get file size: No such file or directory [ceph.conf]
-   2021-11-22T10:50:47.796+0800 7f3215b55540  0 ceph version 15.2.14 (cd3bb7e87a2f62c1b862ff3fd8b1eec13391a5be) octopus (stable), process ceph-mon, pid 11162
-   2021-11-22T10:50:47.796+0800 7f3215b55540 -1 monitor data directory at '/var/lib/ceph/mon/ceph-z-b-data-1' does not exist: have you run 'mkfs'?
-   2021-11-22T10:50:58.056+0800 7ffa5983d540  0 set uid:gid to 64045:64045 (ceph:ceph)
-   2021-11-22T10:50:58.056+0800 7ffa5983d540 -1 Errors while parsing config file!
-   2021-11-22T10:50:58.056+0800 7ffa5983d540 -1 parse_file: filesystem error: cannot get file size: No such file or directory [ceph.conf]
-   2021-11-22T10:50:58.056+0800 7ffa5983d540  0 ceph version 15.2.14 (cd3bb7e87a2f62c1b862ff3fd8b1eec13391a5be) octopus (stable), process ceph-mon, pid 11180
-   2021-11-22T10:50:58.056+0800 7ffa5983d540 -1 monitor data directory at '/var/lib/ceph/mon/ceph-z-b-data-1' does not exist: have you run 'mkfs'?
-
-参考 `How to start a daemon w/ custom cluster name? <https://www.reddit.com/r/ceph/comments/a0k4p8/how_to_start_a_daemon_w_custom_cluster_name/>`_ 提供了线索和原因，也就是 ``/lib/systemd/system/ceph-mon@.service`` 服务配置可以看到::
-
-   [Service]
-   ...
-   EnvironmentFile=-/etc/default/ceph
-   Environment=CLUSTER=ceph
-   ExecStart=/usr/bin/ceph-mon -f --cluster ${CLUSTER} --id %i --setuser ceph --setgroup ceph
-   ...
-
-也就是说，如果没有配置 ``/etc/default/ceph`` 则默认会启动集群 ``Environment=CLUSTER=ceph`` ，这就导致无法正确启动我配置的集群 ``zdata`` 
-
-- 创建配置文件 ``/etc/default/ceph`` ，这个配置文件是用来传递环境变量的，可以看到默认已经具备了以下内容::
-
-   # /etc/default/ceph
-   #
-   # Environment file for ceph daemon systemd unit files.
-   #
-   
-   # Increase tcmalloc cache size
-   TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=134217728
-
-在该配置文件中添加一行::
-
-   CLUSTER=zdata
-
-- 然后再次启动::
-
-   sudo systemctl start ceph-mon@z-b-data-1
-
-- 现在检查 ``ceph-mon`` 服务就可以看到正常启动了::
-
-   sudo systemctl status ceph-mon@z-b-data-1
-
-输出显示::
-
-   ● ceph-mon@z-b-data-1.service - Ceph cluster monitor daemon
-        Loaded: loaded (/lib/systemd/system/ceph-mon@.service; disabled; vendor preset: enabled)
-        Active: active (running) since Mon 2021-11-22 11:23:32 CST; 12s ago
-      Main PID: 11510 (ceph-mon)
-         Tasks: 26
-        Memory: 12.8M
-        CGroup: /system.slice/system-ceph\x2dmon.slice/ceph-mon@z-b-data-1.service
-                └─11510 /usr/bin/ceph-mon -f --cluster zdata --id z-b-data-1 --setuser ceph --setgroup ceph
-   
-   Nov 22 11:23:32 z-b-data-1 systemd[1]: Started Ceph cluster monitor daemon.
-
-
+- :ref:`install_ceph_mgr`
 
 参考
 ======

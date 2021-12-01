@@ -14,4 +14,5 @@ Kubernetes实践
    :maxdepth: 1
 
    kubectl_get.rst
+   kubectl_delete.rst
    storage/index
