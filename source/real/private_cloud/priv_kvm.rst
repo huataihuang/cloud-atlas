@@ -171,6 +171,13 @@ LVM卷作为libvirt存储
 
    ACTION=="add", SUBSYSTEM=="module", KERNEL=="bridge", RUN+="/sbin/sysctl -p /etc/sysctl.d/bridge.conf"
 
+.. warning::
+
+   上述设置 ``net.bridge.bridge-nf-call-iptables=0`` 等3条内核规则非常重要，如果没有关闭，则会出现非常奇怪的现象:
+
+   - 物理主机能够访问bridged的虚拟机，虚拟机也能通过br0访问外网
+   - ``但是`` 连接在 ``br0`` 上的各个虚拟机相互之间网络不通
+
 .. note::
 
    实现bridge网络有多种方法，为了和Ubuntu Server默认的 :ref:`netplan` 管理方法一致，这里采用 netplan 来实现bridge

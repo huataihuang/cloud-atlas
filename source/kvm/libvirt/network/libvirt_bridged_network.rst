@@ -55,6 +55,10 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
 
    ACTION=="add", SUBSYSTEM=="module", KERNEL=="bridge", RUN+="/sbin/sysctl -p /etc/sysctl.d/bridge.conf"
 
+.. warning::
+
+   配置并执行 ``/etc/sysctl.d/bridge.conf`` 非常重要，如果没有设置内核 ``net.bridge.bridge-nf-call-iptables=0`` 这3个参数，则连接在 ``br0`` 上的虚拟机之间网络不通，虽然这些虚拟机依然能够通过物理网卡连接外部世界。
+
 .. note::
 
    实践发现在RHEL的系统中，存在 ``/proc/sys/net/bridge/bridge-nf-call-*tables`` 内核配置入口，上述配置在CentOS 7上可以完成。但是在Arch Linux平台没有上述内核配置，所以没有执行。

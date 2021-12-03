@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Ceph集群添加更多ceph-osd" href="add_ceph_osds_more.html" />
+    <link rel="next" title="Ceph Monitor时钟同步" href="mon_clock_sync.html" />
     <link rel="prev" title="添加Ceph OSDs (LVM卷)" href="add_ceph_osds_lvm.html" /> 
 </head>
 
@@ -63,6 +63,7 @@
 <li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_raw.html">添加Ceph OSDs (RAW磁盘)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_lvm.html">添加Ceph OSDs (LVM卷)</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Ceph集群添加ceph-mon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mon_clock_sync.html">Ceph Monitor时钟同步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="add_ceph_osds_more.html">Ceph集群添加更多ceph-osd</a></li>
 </ul>
 </li>
@@ -157,15 +158,109 @@
 <h2>部署monitor<a class="headerlink" href="#monitor" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>登陆需要部署monitor的服务器，例如，我这里部署到 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 服务器上，执行以下命令创建mon默认目录:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="p">{</span><span class="n">mon</span><span class="o">-</span><span class="nb">id</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mon-id=&quot;z-b-data-2&quot;
+sudo mkdir /var/lib/ceph/mon/ceph-${mon-id}
+</pre></div>
+</div>
+</li>
+<li><p>将 192.168.6.204 ( <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> ) 管理密钥复制到需要部署 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 的配置目录下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="mf">192.168.6.204</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span>
+<span class="n">scp</span> <span class="mf">192.168.6.204</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+<li><p>在需要部署新 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 的主机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 上执行以下命令获取monitors的keyring(需要读取本机的 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/ceph.client.admin.keyring</span></code> 认证来获取 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 的keyring):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span> <span class="n">mon</span><span class="o">.</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>实际命令:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span>
+<p>显示输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exported</span> <span class="n">keyring</span> <span class="k">for</span> <span class="n">mon</span><span class="o">.</span>
 </pre></div>
 </div>
+<p>此时获取到的monitor key存储在 <code class="docutils literal notranslate"><span class="pre">/tmp/ceph.mon.keyring</span></code> ，这个key文件实际上就是初始服务器 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 在 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mon/ceph-z-b-data-1/keyring</span></code> 内容。</p>
+<ul>
+<li><p>获取monitor map:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mon</span> <span class="n">getmap</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>但是需要注意，这里从集群中获得的 <code class="docutils literal notranslate"><span class="pre">monmap</span></code> 只包含了第一台服务器 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> ，我们还需要添加增加的 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">monmaptool</span> <span class="o">--</span><span class="n">add</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span> <span class="mf">192.168.6.205</span> <span class="o">--</span><span class="n">fsid</span> <span class="mf">0e6</span><span class="n">c8b6f</span><span class="o">-</span><span class="mi">0</span><span class="n">d32</span><span class="o">-</span><span class="mi">4</span><span class="n">cdb</span><span class="o">-</span><span class="n">a45d</span><span class="o">-</span><span class="mi">85</span><span class="n">f8c7997c17</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
+<span class="n">monmaptool</span> <span class="o">--</span><span class="n">add</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">3</span> <span class="mf">192.168.6.206</span> <span class="o">--</span><span class="n">fsid</span> <span class="mf">0e6</span><span class="n">c8b6f</span><span class="o">-</span><span class="mi">0</span><span class="n">d32</span><span class="o">-</span><span class="mi">4</span><span class="n">cdb</span><span class="o">-</span><span class="n">a45d</span><span class="o">-</span><span class="mi">85</span><span class="n">f8c7997c17</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
+</pre></div>
+</div>
+<p>现在我们的 <code class="docutils literal notranslate"><span class="pre">/tmp/monmap</span></code> 是最新的最全的monmap，但是我们在 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 上没有添加过节点2和节点3的 monmap ，我们需要把这个 <code class="docutils literal notranslate"><span class="pre">/tmp/monmap</span></code> 插入到 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 的监控目录中。所以把这个最新 <code class="docutils literal notranslate"><span class="pre">/tmp/monmap</span></code> 复制到 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 上，再执行以下命令更新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span> <span class="o">-</span><span class="n">i</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">inject</span><span class="o">-</span><span class="n">monmap</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，在更新 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 的 <code class="docutils literal notranslate"><span class="pre">monmap</span></code> 之前，需要先停止 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>否则会报错无法拿到db的锁:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">02</span><span class="n">T22</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mf">23.236</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f8227f17540</span> <span class="o">-</span><span class="mi">1</span> <span class="n">rocksdb</span><span class="p">:</span> <span class="n">IO</span> <span class="n">error</span><span class="p">:</span> <span class="n">While</span> <span class="n">lock</span> <span class="n">file</span><span class="p">:</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">store</span><span class="o">.</span><span class="n">db</span><span class="o">/</span><span class="n">LOCK</span><span class="p">:</span> <span class="n">Resource</span> <span class="n">temporarily</span> <span class="n">unavailable</span>
+<span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">02</span><span class="n">T22</span><span class="p">:</span><span class="mi">37</span><span class="p">:</span><span class="mf">23.236</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f8227f17540</span> <span class="o">-</span><span class="mi">1</span> <span class="n">error</span> <span class="n">opening</span> <span class="n">mon</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">at</span> <span class="s1">&#39;/var/lib/ceph/mon/ceph-z-b-data-1&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">22</span><span class="p">)</span> <span class="n">Invalid</span> <span class="n">argument</span>
+</pre></div>
+</div>
+<p>停止 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 之后再执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span> <span class="o">-</span><span class="n">i</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">inject</span><span class="o">-</span><span class="n">monmap</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
+</pre></div>
+</div>
+<p>我发现导入命令似乎应该使用 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 用户身份执行，否则会把文件属主设置成root，需要执行 <code class="docutils literal notranslate"><span class="pre">chown</span> <span class="pre">-R</span> <span class="pre">ceph:ceph</span> <span class="pre">/var/lib/ceph/mon/ceph-z-b-data-1</span></code> 来修复。</p>
+<p>就不再报错。等导入更新了 <code class="docutils literal notranslate"><span class="pre">monmap</span></code> 之后，再次启动服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>当配置了3个 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 的 <code class="docutils literal notranslate"><span class="pre">monmap</span></code> ，如果只启动 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 而没有启动其他节点的 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> ，则会发现虽然 <code class="docutils literal notranslate"><span class="pre">z-b-data-</span></code> 的 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 启动 ( <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">status</span> <span class="pre">ceph-mon&#64;z-b-data-1</span></code> 正常 )，但是 <code class="docutils literal notranslate"><span class="pre">/var/log/ceph/ceph-mon.z-b-data-1.log</span></code> 日志报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">02</span><span class="n">T23</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mf">15.980</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f16d5c02700</span>  <span class="mi">1</span> <span class="n">mon</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">@</span><span class="mi">0</span><span class="p">(</span><span class="n">probing</span><span class="p">)</span> <span class="n">e3</span> <span class="n">handle_auth_request</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">assign</span> <span class="n">global_id</span>
+<span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">02</span><span class="n">T23</span><span class="p">:</span><span class="mi">02</span><span class="p">:</span><span class="mf">16.184</span><span class="o">+</span><span class="mi">0800</span> <span class="mi">7</span><span class="n">f16d5c02700</span>  <span class="mi">1</span> <span class="n">mon</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">@</span><span class="mi">0</span><span class="p">(</span><span class="n">probing</span><span class="p">)</span> <span class="n">e3</span> <span class="n">handle_auth_request</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">assign</span> <span class="n">global_id</span>
+</pre></div>
+</div>
+<p>此时:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="o">-</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>无响应</p>
+<p>不过，只要再启动 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 上的 <code class="docutils literal notranslate"><span class="pre">ceph-mon&#64;z-b-data-2</span></code> ，则立即恢复正常响应。</p>
+</div>
+<ul>
+<li><p>准备monitor的数据目录，这里必须指定monitor map路径，这样才能够获取监控的quorum信息以及 <code class="docutils literal notranslate"><span class="pre">fsid</span></code> ，而且还需要提供 monitor keyring的路径:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span> <span class="o">--</span><span class="n">mkfs</span> <span class="o">-</span><span class="n">i</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span> <span class="o">--</span><span class="n">monmap</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span> <span class="o">--</span><span class="n">keyring</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>仔细对比一下，就可以看出第二个以及今后节点的 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 部署方法和 <a class="reference internal" href="install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a> 差不多，只是证书是从第一台服务器导入过来不需要重新生成。</p>
+</div>
+<ul>
+<li><p>启动服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>如果启动失败，可以尝试通过终端执行命令 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span> <span class="pre">-f</span> <span class="pre">--cluster</span> <span class="pre">ceph</span> <span class="pre">--id</span> <span class="pre">z-b-data-2</span> <span class="pre">--setuser</span> <span class="pre">ceph</span> <span class="pre">--setgroup</span> <span class="pre">ceph</span></code> 查看终端输出信息。我遇到失败的原因是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mon/z-b-data-2</span></code> 目录权限错误，可以根据提示信息检查</p>
+</div>
+</section>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.ceph.com/en/latest/rados/operations/add-or-rm-mons/">ADDING/REMOVING MONITORS</a></p></li>
+<li><p><a class="reference external" href="http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html">iris ceph 文档</a></p></li>
+</ul>
 </section>
 </section>
 
@@ -174,7 +269,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="add_ceph_osds_lvm.html" class="btn btn-neutral float-left" title="添加Ceph OSDs (LVM卷)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="add_ceph_osds_more.html" class="btn btn-neutral float-right" title="Ceph集群添加更多ceph-osd" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mon_clock_sync.html" class="btn btn-neutral float-right" title="Ceph Monitor时钟同步" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

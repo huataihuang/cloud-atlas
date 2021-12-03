@@ -17,6 +17,7 @@ Ceph 手工部署
    add_ceph_osds_raw.rst
    add_ceph_osds_lvm.rst
    add_ceph_mons.rst
+   mon_clock_sync.rst
    add_ceph_osds_more.rst
 
 
