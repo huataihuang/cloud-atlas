@@ -255,8 +255,62 @@ sudo mkdir /var/lib/ceph/mon/ceph-${mon-id}
 <p>如果启动失败，可以尝试通过终端执行命令 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span> <span class="pre">-f</span> <span class="pre">--cluster</span> <span class="pre">ceph</span> <span class="pre">--id</span> <span class="pre">z-b-data-2</span> <span class="pre">--setuser</span> <span class="pre">ceph</span> <span class="pre">--setgroup</span> <span class="pre">ceph</span></code> 查看终端输出信息。我遇到失败的原因是 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mon/z-b-data-2</span></code> 目录权限错误，可以根据提示信息检查</p>
 </div>
 </section>
+<section id="ceph-mon">
+<h2>部署第三个 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 节点<a class="headerlink" href="#ceph-mon" title="永久链接至标题">¶</a></h2>
+<p>有了上述部署 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 的 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 的经验，我们现在来快速完成第三个 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 的 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 部署</p>
+<ul>
+<li><p>将 192.168.6.204 ( <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code>  ) 管理密钥复制到 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 部署 ceph-mon 的配置目录下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="mf">192.168.6.204</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span>
+<span class="n">scp</span> <span class="mf">192.168.6.204</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 上执行以下命令获取 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 的keyring:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span> <span class="n">mon</span><span class="o">.</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span>
+</pre></div>
+</div>
+</li>
+<li><p>获取 monitor map:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mon</span> <span class="n">getmap</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，这里获得的 <code class="docutils literal notranslate"><span class="pre">monmap</span></code> 已经包含了3台主机的 monitor map ，所以不需要再修订</p>
+</div>
+<ul>
+<li><p>准备monitor数据目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span> <span class="o">--</span><span class="n">mkfs</span> <span class="o">-</span><span class="n">i</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">3</span> <span class="o">--</span><span class="n">monmap</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">monmap</span> <span class="o">--</span><span class="n">keyring</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ceph</span><span class="o">.</span><span class="n">mon</span><span class="o">.</span><span class="n">keyring</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订 ceph monitor数据目录权限:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="n">ceph</span><span class="p">:</span><span class="n">ceph</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mon</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">3</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">3</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">3</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>检查<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>完成部署 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 到 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 之后，集群就具备了3个监控</p></li>
+<li><p>观察 <a class="reference internal" href="../../mgr/ceph_dashboard.html#ceph-dashboard"><span class="std std-ref">Ceph Dashboard 管控面板</span></a> 可以看到启动了3个 mon :</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../_images/ceph-mon_3.png"><img alt="../../../_images/ceph-mon_3.png" src="../../../_images/ceph-mon_3.png" style="width: 512.0px; height: 247.5px;" /></a>
+</figure>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.ceph.com/en/latest/rados/operations/add-or-rm-mons/">ADDING/REMOVING MONITORS</a></p></li>
 <li><p><a class="reference external" href="http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html">iris ceph 文档</a></p></li>

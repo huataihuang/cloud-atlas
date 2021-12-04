@@ -149,6 +149,149 @@
              
   <section id="ceph-monitor">
 <span id="mon-clock-sync"></span><h1>Ceph Monitor时钟同步<a class="headerlink" href="#ceph-monitor" title="永久链接至标题">¶</a></h1>
+<p>在完成 <a class="reference internal" href="add_ceph_mons.html#add-ceph-mons"><span class="std std-ref">Ceph集群添加ceph-mon</span></a> 添加第二个 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> monitor节点之后，我注意到 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">-s</span></code> 提示第二个节点时间异常:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clock</span> <span class="n">skew</span> <span class="n">detected</span> <span class="n">on</span> <span class="n">mon</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>其实这两个虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 是位于同一个物理服务器 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 上，KVM提供了虚拟化时钟，理论上应该两者一致。但是为何还会有警告呢？</p>
+<p>通过ssh到服务器上检查，发现KVM虚拟机确实存在微小的时间差异:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>huatai@zcloud:~$ date;for i in 192.168.6.204 192.168.6.205 192.168.6.206;do ssh $i &#39;hostname;date&#39;;done
+Sat 04 Dec 2021 01:42:52 PM CST
+z-b-data-1
+Sat 04 Dec 2021 01:42:53 PM CST
+z-b-data-2
+Sat 04 Dec 2021 01:42:55 PM CST
+z-b-data-3
+Sat 04 Dec 2021 01:43:03 PM CST
+huatai@zcloud:~$ date;for i in 192.168.6.204 192.168.6.205 192.168.6.206;do ssh $i &#39;hostname;date&#39;;done
+Sat 04 Dec 2021 01:42:54 PM CST
+z-b-data-1
+Sat 04 Dec 2021 01:42:54 PM CST
+z-b-data-2
+Sat 04 Dec 2021 01:42:56 PM CST
+z-b-data-3
+Sat 04 Dec 2021 01:43:05 PM CST
+</pre></div>
+</div>
+<p>最小时间差异2秒，最大11秒。而且物理主机时间和最接近的虚拟机时间似乎也相差半秒到1秒。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际上Ubuntu默认已经安装了 <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> 服务并默认启动，不过，我的KVM虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-X</span></code> 都是内网虚拟机，不能直接连接Internet，所以导致长时间运行后时间偏移。这里我需要解决在本地物理服务器上提供NTP服务(物理服务器直连Internet可以实时同步时间)，来校准虚拟机的时钟。</p>
+</div>
+<p>这让我有点诧异，我原本以为KVM时钟至少本机能提供比较精确的时间，看来还是需要在我的 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> :</p>
+<ul class="simple">
+<li><p>在物理主机 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 上面向整个 <a class="reference internal" href="../../../real/private_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 集群 <a class="reference internal" href="../../../infra_service/ntp/deploy_ntp.html#deploy-ntp"><span class="std std-ref">部署NTP服务(集群)</span></a></p></li>
+<li><p>所有虚拟机都启用 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_timesyncd.html#systemd-timesyncd"><span class="std std-ref">Systemd Timesyncd服务</span></a> 同步时钟</p></li>
+</ul>
+<section id="chrony">
+<h2>部署 chrony 服务器<a class="headerlink" href="#chrony" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>登陆 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 物理服务器，执行以下命令安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">chrony</span>
+</pre></div>
+</div>
+</li>
+<li><p>编辑 <code class="docutils literal notranslate"><span class="pre">/etc/chrony/chrony.conf</span></code> 添加服务配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">allow</span> <span class="mf">192.168.6.0</span><span class="o">/</span><span class="mi">24</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>其他配置保持默认</p>
+</div>
+<ul>
+<li><p>启动服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">chrony</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">chrony</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查服务状态正常:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">status</span> <span class="n">chrony</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="systemd-timesyncd">
+<h2>配置客户机Systemd Timesyncd服务<a class="headerlink" href="#systemd-timesyncd" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>详情参考 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_timesyncd.html#systemd-timesyncd"><span class="std std-ref">Systemd Timesyncd服务</span></a></p>
+</div>
+<ul>
+<li><p>登陆所有KVM虚拟机，执行安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>操作系统默认已经安装和启动 <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> ，但是需要配置采用前述部署的局域网内部NTP服务器</p>
+</div>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/etc/systemd/timesyncd.conf</span></code> 修改:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Time</span><span class="p">]</span>
+<span class="n">NTP</span><span class="o">=</span><span class="mf">192.168.6.200</span>
+</pre></div>
+</div>
+</li>
+<li><p>重启 <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后检查同步配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timedatectl</span> <span class="n">show</span><span class="o">-</span><span class="n">timesync</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LinkNTPServers</span><span class="o">=</span>
+<span class="n">SystemNTPServers</span><span class="o">=</span><span class="mf">192.168.6.200</span>
+<span class="n">FallbackNTPServers</span><span class="o">=</span><span class="n">ntp</span><span class="o">.</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">com</span>
+<span class="n">ServerName</span><span class="o">=</span><span class="mf">192.168.6.200</span>
+<span class="n">ServerAddress</span><span class="o">=</span><span class="mf">192.168.6.200</span>
+<span class="n">RootDistanceMaxUSec</span><span class="o">=</span><span class="mi">5</span><span class="n">s</span>
+<span class="n">PollIntervalMinUSec</span><span class="o">=</span><span class="mi">32</span><span class="n">s</span>
+<span class="n">PollIntervalMaxUSec</span><span class="o">=</span><span class="mi">34</span><span class="nb">min</span> <span class="mi">8</span><span class="n">s</span>
+<span class="n">PollIntervalUSec</span><span class="o">=</span><span class="mi">32</span><span class="n">s</span>
+<span class="n">NTPMessage</span><span class="o">=</span><span class="p">{</span> <span class="n">Leap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">Version</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">Mode</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">Stratum</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">Precision</span><span class="o">=-</span><span class="mi">24</span><span class="p">,</span> <span class="n">RootDelay</span><span class="o">=</span><span class="mf">37.094</span><span class="n">ms</span><span class="p">,</span> <span class="n">RootDispersion</span><span class="o">=</span><span class="mi">350</span><span class="n">us</span><span class="p">,</span> <span class="n">Reference</span><span class="o">=</span><span class="n">CA701FC5</span><span class="p">,</span> <span class="n">OriginateTimestamp</span><span class="o">=</span><span class="n">Sat</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">04</span> <span class="mi">22</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">01</span> <span class="n">CST</span><span class="p">,</span> <span class="n">ReceiveTimestamp</span><span class="o">=</span><span class="n">Sat</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">04</span> <span class="mi">22</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">00</span> <span class="n">CST</span><span class="p">,</span> <span class="n">TransmitTimestamp</span><span class="o">=</span><span class="n">Sat</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">04</span> <span class="mi">22</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">00</span> <span class="n">CST</span><span class="p">,</span> <span class="n">DestinationTimestamp</span><span class="o">=</span><span class="n">Sat</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">04</span> <span class="mi">22</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">01</span> <span class="n">CST</span><span class="p">,</span> <span class="n">Ignored</span><span class="o">=</span><span class="n">no</span> <span class="n">PacketCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Jitter</span><span class="o">=</span><span class="mi">0</span>  <span class="p">}</span>
+<span class="n">Frequency</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>时钟服务器已经指向 <code class="docutils literal notranslate"><span class="pre">192.168.6.200</span></code> 也就是 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 服务器上自建的NTP服务器</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意需要修订 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20</span></code> 模版服务器的配置，方便后续创建虚拟机直接生效</p>
+</div>
+</section>
+<section id="id1">
+<h2>检查<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>完成时钟同步之后，再次检查可以看到虚拟机时间已经完全一致:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>date;for i in 192.168.6.204 192.168.6.205 192.168.6.206;do ssh $i &#39;hostname;date&#39;;done
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sat</span> <span class="mi">04</span> <span class="n">Dec</span> <span class="mi">2021</span> <span class="mi">10</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="mi">04</span> <span class="n">PM</span> <span class="n">CST</span>
+<span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">Sat</span> <span class="mi">04</span> <span class="n">Dec</span> <span class="mi">2021</span> <span class="mi">10</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="mi">04</span> <span class="n">PM</span> <span class="n">CST</span>
+<span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">2</span>
+<span class="n">Sat</span> <span class="mi">04</span> <span class="n">Dec</span> <span class="mi">2021</span> <span class="mi">10</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="mi">04</span> <span class="n">PM</span> <span class="n">CST</span>
+<span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">3</span>
+<span class="n">Sat</span> <span class="mi">04</span> <span class="n">Dec</span> <span class="mi">2021</span> <span class="mi">10</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="mi">04</span> <span class="n">PM</span> <span class="n">CST</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>此时检查 Ceph集群健康状态，可以看到时钟差异告警已经消失</p></li>
+</ul>
+</section>
 </section>
 
 

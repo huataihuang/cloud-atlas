@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    priv_cloud_infra.rst
+   priv_ntp.rst
    priv_kvm.rst
    zdata_ceph.rst
    priv_docker.rst
