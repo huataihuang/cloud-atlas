@@ -99,6 +99,51 @@ Ceph集群添加ceph-mon
 
    如果启动失败，可以尝试通过终端执行命令 ``ceph-mon -f --cluster ceph --id z-b-data-2 --setuser ceph --setgroup ceph`` 查看终端输出信息。我遇到失败的原因是 ``/var/lib/ceph/mon/z-b-data-2`` 目录权限错误，可以根据提示信息检查
 
+部署第三个 ``ceph-mon`` 节点
+=============================
+
+有了上述部署 ``z-b-data-2`` 的 ``ceph-mon`` 的经验，我们现在来快速完成第三个 ``z-b-data-3`` 的 ``ceph-mon`` 部署
+
+- 将 192.168.6.204 ( ``z-b-data-1``  ) 管理密钥复制到 ``z-b-data-3`` 部署 ceph-mon 的配置目录下::
+
+   scp 192.168.6.204:/etc/ceph/ceph.client.admin.keyring /etc/ceph/
+   scp 192.168.6.204:/etc/ceph/ceph.conf /etc/ceph/
+
+- 在 ``z-b-data-3`` 上执行以下命令获取 ``ceph-mon`` 的keyring::
+
+   sudo ceph auth get mon. -o /tmp/ceph.mon.keyring
+
+- 获取 monitor map::
+
+   sudo ceph mon getmap -o /tmp/monmap
+
+.. note::
+
+   注意，这里获得的 ``monmap`` 已经包含了3台主机的 monitor map ，所以不需要再修订
+
+- 准备monitor数据目录::
+
+   sudo ceph-mon --mkfs -i z-b-data-3 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+
+- 修订 ceph monitor数据目录权限::
+
+   sudo chown -R ceph:ceph /var/lib/ceph/mon/ceph-z-b-data-3
+
+- 启动服务::
+
+   sudo systemctl start ceph-mon@z-b-data-3
+   sudo systemctl enable ceph-mon@z-b-data-3
+
+检查
+=======
+
+- 完成部署 ``ceph-mon`` 到 ``z-b-data-1`` / ``z-b-data-2`` / ``z-b-data-3`` 之后，集群就具备了3个监控
+
+- 观察 :ref:`ceph_dashboard` 可以看到启动了3个 mon :
+
+.. figure:: ../../../_static/ceph/deploy/install_ceph_manual/ceph-mon_3.png
+   :scale: 50
+
 参考
 ========
 
