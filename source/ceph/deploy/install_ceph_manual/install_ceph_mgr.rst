@@ -14,7 +14,7 @@
 
 .. note::
 
-   官方文档这里写得很含糊，我参考 `iris ceph <http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html>`_ 大致理解 ``$name`` 指的是管理服务器名字，所以实践操作我采用了第一台服务器 ``z-b-data-1`` 名字
+   官方文档这里写得很含糊，我参考 `CEPH by hand <http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html>`_ 大致理解 ``$name`` 指的是管理服务器名字，所以实践操作我采用了第一台服务器 ``z-b-data-1`` 名字
 
 实际操作::
 
@@ -104,4 +104,4 @@ Ceph提供了一个非常有用的模块 ``dashboard`` 方便管理存储集群�
 =====
 
 - `ceph-mgr administrator’s guide: MANUAL SETUP <https://docs.ceph.com/en/pacific/mgr/administrator/#mgr-administrator-guide>`_
-- `iris ceph <http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html>`_ 这篇笔记非常实用，补充了ceph官方文档的缺失
+- `CEPH by hand <http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html>`_ 这篇笔记非常实用，补充了ceph官方文档的缺失
