@@ -148,4 +148,4 @@ Ceph集群添加ceph-mon
 ========
 
 - `ADDING/REMOVING MONITORS <https://docs.ceph.com/en/latest/rados/operations/add-or-rm-mons/>`_
-- `iris ceph 文档 <http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html>`_
+- `CEPH by hand <http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html>`_
