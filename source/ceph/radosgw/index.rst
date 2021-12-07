@@ -1,20 +1,12 @@
-.. _linux_storage:
+.. _ceph_radosgw:
 
 =================================
-Linux存储
+Ceph RADOS Gateway
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   disk/index
-   nvme/index
-   spdk/index
-   filesystem/index
-   lvm/index
-   zfs/index
-   btrfs/index
-   stratis/index
 
 .. only::  subproject and html
 

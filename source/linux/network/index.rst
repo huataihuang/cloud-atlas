@@ -10,6 +10,7 @@ Linux网络
    ring_buffer_dma_mmio.rst
    ip_command.rst
    axel.rst
+   dpdk/index
    ethtool/index
    create_ap.rst
    create_ap_kali.rst

@@ -1,20 +1,13 @@
-.. _linux_storage:
+.. _ceph_spdk:
 
 =================================
-Linux存储
+Ceph SPDK
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   disk/index
-   nvme/index
-   spdk/index
-   filesystem/index
-   lvm/index
-   zfs/index
-   btrfs/index
-   stratis/index
+   spdk_vhost_ceph_rbd.rst
 
 .. only::  subproject and html
 

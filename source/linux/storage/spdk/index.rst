@@ -1,20 +1,11 @@
-.. _linux_storage:
+.. _linux_spdk:
 
 =================================
-Linux存储
+Linux SPDK
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   disk/index
-   nvme/index
-   spdk/index
-   filesystem/index
-   lvm/index
-   zfs/index
-   btrfs/index
-   stratis/index
 
 .. only::  subproject and html
 

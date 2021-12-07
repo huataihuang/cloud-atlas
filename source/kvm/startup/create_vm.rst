@@ -219,6 +219,80 @@ ARM环境Ubuntu虚拟机
         --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
         --extra-args="console=tty0 console=ttyS0,115200"
 
+创建CentOS 9 Stream虚拟机
+=============================
+
+.. note::
+
+   存储采用 :ref:`ceph_rbd_libvirt`
+
+- 在 :ref:`ceph_rbd_libvirt` 上构建 RBD磁盘::
+
+   virsh vol-create-as images_rbd z-centos9 --capacity 6GB --format raw
+
+- 安装虚拟机::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name z-centos9 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=Linux --os-variant=rhl9 \
+     --boot uefi --cpu host-passthrough \
+     --disk vol=images_rbd/z-centos9,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+     --graphics none \
+     --location=http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+.. note::
+
+   注意，Ceph远程RBD的存储池是 ``libvirt-pool`` ，对应本地libvirt的存储池是 ``images_rbd``
+
+   参数 ``io=native`` 必须同时指定缓存类型，否则会提示::
+
+      ERROR    unsupported configuration: native I/O needs either no disk cache or directsync cache mode, QEMU will fallback to aio=threads
+
+   缓存类型选择参考 `KVM Disk Cache Modes <https://documentation.suse.com/sles/11-SP4/html/SLES-kvm4zseries/cha-qemu-cachemodes.html>`_
+
+网络安装过程显示下载了初始镜像，但是出现报错::
+
+   [  138.710304] dracut-initqueue[931]: Warning: dracut-initqueue: timeout, still waiting for following initqueue hooks:
+   [  138.721893] dracut-initqueue[931]: Warning: /lib/dracut/hooks/initqueue/finished/devexists-\x2fdev\x2froot.sh: "[ -e "/dev/root" ]"
+   [  138.725314] dracut-initqueue[931]: Warning: /lib/dracut/hooks/initqueue/finished/wait_for_settle.sh: "[ -f /tmp/settle.done ]"
+   [  138.729151] dracut-initqueue[931]: Warning: dracut-initqueue: starting timeout scripts
+   [  138.730615] dracut-initqueue[931]: Warning: ############# Anaconda installer errors begin #############
+   [  138.732271] dracut-initqueue[931]: Warning: #                                                         #
+   [  138.733904] dracut-initqueue[931]: Warning: It seems that the boot has failed. Possible causes include
+   [  138.735488] dracut-initqueue[931]: Warning: missing inst.stage2 or inst.repo boot parameters on the
+   [  138.737029] dracut-initqueue[931]: Warning: kernel cmdline. Please verify that you have specified
+   [  138.738613] dracut-initqueue[931]: Warning: inst.stage2 or inst.repo.
+   [  138.739813] dracut-initqueue[931]: Warning: Please also note that the 'inst.' prefix is now mandatory.
+   [  138.741374] dracut-initqueue[931]: Warning: #                                                         #
+   [  138.743049] dracut-initqueue[931]: Warning: ####     Installer errors encountered during boot:     ####
+   [  138.744683] dracut-initqueue[931]: Warning: #                                                         #
+   [  138.746345] dracut-initqueue[931]: /lib/dracut/hooks/initqueue/timeout/50-anaconda-error-reporting.sh: line 19: /run/anaconda/initrd_errors.txt: No such file or directory
+   [  138.748737] dracut-initqueue[931]: Warning: #                                                         #
+   [  138.750316] dracut-initqueue[931]: Warning: ############# Anaconda installer errors end ###############
+
+- 调整安装模式，改为ISO安装::
+
+   cd /var/lib/libvirt/images
+   axel -n 20 http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-dvd1.iso
+
+   virt-install \
+     --network bridge:br0 \
+     --name z-centos9 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=Linux --os-variant=rhl9 \
+     --boot uefi --cpu host-passthrough \
+     --disk vol=images_rbd/z-centos9,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+     --cdrom=/var/lib/libvirt/images/CentOS-Stream-9-latest-x86_64-boot.iso
+
+.. note::
+
+   我目前遇到VNC无法打开问题，待手续补充实践记录
+
 创建SUSE虚拟机
 ===================
 

@@ -1,20 +1,14 @@
-.. _linux_storage:
+.. _ceph_rbd:
 
 =================================
-Linux存储
+Ceph Block Device(RBD)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   disk/index
-   nvme/index
-   spdk/index
-   filesystem/index
-   lvm/index
-   zfs/index
-   btrfs/index
-   stratis/index
+   ceph_block_device.rst
+   ceph_rbd_libvirt.rst
 
 .. only::  subproject and html
 
