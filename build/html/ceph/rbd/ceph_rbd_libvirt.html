@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Libvirt集成Ceph RBD &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Ceph SPDK" href="../spdk/index.html" />
+    <link rel="prev" title="Ceph Block Device(块设备)" href="ceph_block_device.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Ceph Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduce_ceph.html">Ceph存储介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_recommend.html">Ceph部署软硬件推荐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rdma.html">Remote Direct Memory Access(RDMA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_docker_in_studio.html">Stuido环境Docker容器运行Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/index.html">Ceph 部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mgr/index.html">Ceph Manager Daemon</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Ceph Block Device(RBD)</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ceph_block_device.html">Ceph Block Device(块设备)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Libvirt集成Ceph RBD</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ceph">配置Ceph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">客户端(使用Ceph)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">性能优化</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../spdk/index.html">Ceph SPDK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radosgw/index.html">Ceph RADOS Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs/index.html">CephFS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/index.html">Ceph 配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arch/index.html">Ceph 架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tunning/index.html">Ceph 优化</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Ceph Atlas</a> &raquo;</li>
+          <li><a href="index.html">Ceph Block Device(RBD)</a> &raquo;</li>
+      <li>Libvirt集成Ceph RBD</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/ceph/rbd/ceph_rbd_libvirt.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="libvirtceph-rbd">
+<span id="ceph-rbd-libvirt"></span><h1>Libvirt集成Ceph RBD<a class="headerlink" href="#libvirtceph-rbd" title="永久链接至标题">¶</a></h1>
+<p><a class="reference internal" href="../../kvm/libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 在hypervisor接口和应用程序之间提供虚拟机抽象层方便我们管理和使用虚拟化技术。通过 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 开发者和系统管理员可以专注于一个通用管理框架，通用API以及通用shell接口( <code class="docutils literal notranslate"><span class="pre">virsh</span></code> )来完成很多hypervisor工作:</p>
+<ul class="simple">
+<li><p>QEMU/KVM</p></li>
+<li><p>XEN</p></li>
+<li><p>LXC</p></li>
+<li><p>VirtualBox</p></li>
+<li><p>等等</p></li>
+</ul>
+<p>Ceph块设备支持QEMU/KVM，通过 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 可以使用Ceph块设备:</p>
+<figure class="align-default">
+<img alt="../../_images/ceph_rbd_libvirt.png" src="../../_images/ceph_rbd_libvirt.png" />
+</figure>
+<p><code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 通用架构也提供了云计算解决方案的Ceph块设备，例如 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 或 CloudStack都通过libvirt使用Ceph块设备。这个云计算解决方案使用 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 和 QEMU/KVM 交互，然后 QEMU/KVM 再通过 <code class="docutils literal notranslate"><span class="pre">librbd</span></code> 和Ceph块设备交互。</p>
+<p>也可以使用 <a class="reference internal" href="../../kvm/libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> , <a class="reference internal" href="../../kvm/startup/virsh_manage_vm.html#virsh-manage-vm"><span class="std std-ref">virsh管理虚拟机</span></a> 以及 <code class="docutils literal notranslate"><span class="pre">libvirt</span> <span class="pre">API</span></code> 来使用Ceph块设备。</p>
+<section id="ceph">
+<h2>配置Ceph<a class="headerlink" href="#ceph" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>创建存储池:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="n">create</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里创建存储池命名为 <code class="docutils literal notranslate"><span class="pre">libvirt-pool</span></code> ，实际可根据需要命令</p>
+</div>
+<p>这里我的 <a class="reference internal" href="../deploy/install_ceph_manual/install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a> 最初配置 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/ceph.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="nb">min</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="n">pg</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">333</span>
+<span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="n">pgp</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">333</span>
+</pre></div>
+</div>
+<p>则会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span> <span class="n">ERANGE</span><span class="p">:</span>  <span class="n">pg_num</span> <span class="mi">333</span> <span class="n">size</span> <span class="mi">3</span> <span class="n">would</span> <span class="n">mean</span> <span class="mi">1002</span> <span class="n">total</span> <span class="n">pgs</span><span class="p">,</span> <span class="n">which</span> <span class="n">exceeds</span> <span class="nb">max</span> <span class="mi">750</span> <span class="p">(</span><span class="n">mon_max_pg_per_osd</span> <span class="mi">250</span> <span class="o">*</span> <span class="n">num_in_osds</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>也就是说，默认参数 <code class="docutils literal notranslate"><span class="pre">mon_max_pg_per_osd</span> <span class="pre">=</span> <span class="pre">250</span></code> ，对于3副本，则每个 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 只能监控 <code class="docutils literal notranslate"><span class="pre">250x3=750</span></code> 个 <code class="docutils literal notranslate"><span class="pre">pg</span></code> ，所以需要缩减 <code class="docutils literal notranslate"><span class="pre">osd</span> <span class="pre">pool</span> <span class="pre">default</span> <span class="pre">pg</span> <span class="pre">num</span></code> ，改为 <code class="docutils literal notranslate"><span class="pre">128</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="nb">min</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="n">pg</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">osd</span> <span class="n">pool</span> <span class="n">default</span> <span class="n">pgp</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">128</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里参考 <a class="reference external" href="https://www.cnblogs.com/kuku0223/p/8214412.html">ceph PG数量调整/PG的状态说明</a> 计算PG数量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Total</span> <span class="n">PGs</span> <span class="o">=</span> <span class="p">(</span><span class="n">Total_number_of_OSD</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="n">max_replication_count</span>
+</pre></div>
+</div>
+<p>结算的结果往上取靠近2的N次方的值。我这里有3个osd，所以计算结果是 100 ，接近的 2的7 次方取 128</p>
+</div>
+<p>创建成功则提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="s1">&#39;libvirt-pool&#39;</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>验证资源池:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">osd</span> <span class="n">lspools</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="n">device_health_metrics</span>
+<span class="mi">2</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查这个创建资源池的pg数量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="n">get</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span> <span class="n">pg_num</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pg_num</span><span class="p">:</span> <span class="mi">81</span>
+</pre></div>
+</div>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 工具初始化资源池用于RBD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="n">pool</span> <span class="n">init</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建一个Ceph用户:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">client</span><span class="o">.</span><span class="n">libvirt</span> <span class="n">mon</span> <span class="s1">&#39;profile rbd&#39;</span> <span class="n">osd</span> <span class="s1">&#39;profile rbd pool=libvirt-pool&#39;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时终端会显示keyring内容，可以存储为客户端用户的 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 访问使用的key <code class="docutils literal notranslate"><span class="pre">/etc/ceph/ceph.client.&lt;username&gt;.keyring</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span> <span class="n">client</span><span class="o">.</span><span class="n">libvirt</span> <span class="o">-</span><span class="n">o</span> <span class="n">client</span><span class="o">.</span><span class="n">libvirt</span><span class="o">.</span><span class="n">keyring</span>
+</pre></div>
+</div>
+<p>上述命令会创建一个 <code class="docutils literal notranslate"><span class="pre">client.libvirt.keyring</span></code> ，内容类似如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">client</span><span class="o">.</span><span class="n">libvirt</span><span class="p">]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">XXXXXXXXXX</span>
+        <span class="n">caps</span> <span class="n">mon</span> <span class="o">=</span> <span class="s2">&quot;profile rbd&quot;</span>
+        <span class="n">caps</span> <span class="n">osd</span> <span class="o">=</span> <span class="s2">&quot;profile rbd pool=libvirt-pool&quot;</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后验证用户存在:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">ls</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 访问Ceph是使用ID <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 而不是 Ceph名字 <code class="docutils literal notranslate"><span class="pre">client.libvirt</span></code></p>
+</div>
+</section>
+<section id="id1">
+<h2>客户端(使用Ceph)<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>在运行 <a class="reference internal" href="../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 和 <a class="reference internal" href="../../kvm/libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 的虚拟化服务器上，需要安装 <code class="docutils literal notranslate"><span class="pre">ceph-common</span></code> 软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">ceph</span><span class="o">-</span><span class="n">common</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>目前我对ceph认证和权限管理的了解有限，所以我暂时采用了所有服务器共享 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/ceph.client.admin.keyring</span></code> 的方式，这在测试环境部署比较方便，但不适合生产环境。后续需要学习和实践权限管理。</p>
+<p>对于使用Ceph的客户端(运行 <a class="reference internal" href="../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 和 <a class="reference internal" href="../../kvm/libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 的虚拟化服务器) ，我采用复制 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/ceph.client.admin.keyring</span></code> ，所以后续步骤具备了全面的权限可以直接操作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="o">-</span><span class="n">p</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span> <span class="n">ls</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>将Ceph服务器(前文创建)的 <code class="docutils literal notranslate"><span class="pre">/etc/ceph/client.libvirt.keyring</span></code> 复制到本地( <a class="reference internal" href="../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 和 <a class="reference internal" href="../../kvm/libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 的虚拟化服务器) ，然后指定 <code class="docutils literal notranslate"><span class="pre">keyring</span></code> 和 <code class="docutils literal notranslate"><span class="pre">id</span></code> 就可以检查和处理rbd:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="o">--</span><span class="n">keyring</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">libvirt</span><span class="o">.</span><span class="n">keyring</span> <span class="o">--</span><span class="nb">id</span> <span class="n">libvirt</span> <span class="o">-</span><span class="n">p</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span> <span class="n">ls</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到，这里只使用了限定使用 <code class="docutils literal notranslate"><span class="pre">RBD</span></code> 的 keyring，没有使用超级 <code class="docutils literal notranslate"><span class="pre">keyring</span></code> ，也可以同样完成维护操作</p>
+<div class="admonition note" id="ceph-args">
+<p class="admonition-title">注解</p>
+<p>Ceph提供了一个避免每次输入参数的方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">CEPH_ARGS</span><span class="o">=</span><span class="s2">&quot;--keyring /etc/ceph/client.libvirt.keyring --id libvirt -p libvirt-pool&quot;</span>
+</pre></div>
+</div>
+<p>设置了上述环境变量之后，就可以直接使用简化的操作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">ls</span>
+</pre></div>
+</div>
+<p>WOW!!! 我突然发现，这个方法可能是解决 <a class="reference internal" href="../deploy/install_ceph_manual_zdata/index.html#install-ceph-manual-zdata"><span class="std std-ref">Ceph 手工部署zdata集群(暂未成功)</span></a> 解决自定义Ceph集群名的方法，传递 <code class="docutils literal notranslate"><span class="pre">--ceph</span> <span class="pre">zdata</span></code> 参数</p>
+</div>
+<ul>
+<li><p>创建RBD镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">qemu</span><span class="o">-</span><span class="n">img</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">rbd</span> <span class="n">rbd</span><span class="p">:</span><span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span> <span class="mi">2</span><span class="n">G</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Formatting</span> <span class="s1">&#39;rbd:libvirt-pool/new-libvirt-image&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">rbd</span> <span class="n">size</span><span class="o">=</span><span class="mi">2147483648</span>
+</pre></div>
+</div>
+<p>然后就可以验证:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">CEPH_ARGS</span><span class="o">=</span><span class="s2">&quot;--keyring /etc/ceph/client.libvirt.keyring --id libvirt -p libvirt-pool&quot;</span>
+<span class="n">rbd</span> <span class="n">ls</span>
+</pre></div>
+</div>
+<p>可以看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>
+</pre></div>
+</div>
+<p>也可以查看详细信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">ls</span> <span class="o">-</span><span class="n">l</span>
+</pre></div>
+</div>
+<p>输出会显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>               <span class="n">SIZE</span>   <span class="n">PARENT</span>  <span class="n">FMT</span>  <span class="n">PROT</span>  <span class="n">LOCK</span>
+<span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>  <span class="mi">2</span> <span class="n">GiB</span>            <span class="mi">2</span>
+</pre></div>
+</div>
+<section id="libvirt-rbd">
+<h3>配置libvirt RBD存储池<a class="headerlink" href="#libvirt-rbd" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 需要定义RBD存储池，需要首先配置访问Ceph存储的secret:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>SECRET_UUID=$(uuidgen)
+cat &gt;secret.xml &lt;&lt;__XML__
+&lt;secret ephemeral=&#39;no&#39; private=&#39;no&#39;&gt;
+  &lt;uuid&gt;$SECRET_UUID&lt;/uuid&gt;
+  &lt;usage type=&#39;ceph&#39;&gt;
+    &lt;name&gt;client.libvirt secret&lt;/name&gt;
+  &lt;/usage&gt;
+&lt;/secret&gt;
+__XML__
+
+virsh secret-define --file secret.xml
+virsh secret-set-value --secret &quot;$SECRET_UUID&quot; --base64 &quot;$(sudo ceph auth get-key client.libvirt)&quot;
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我这里执行 <code class="docutils literal notranslate"><span class="pre">virsh</span></code> 命令的账号是已经配置过 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 用户组的账号 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> ，所以能够直接执行 <code class="docutils literal notranslate"><span class="pre">virsh</span></code></p>
+</div>
+<ul>
+<li><p>设置 <code class="docutils literal notranslate"><span class="pre">libvirt-pool</span></code> 存储池:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&gt;</span><span class="n">pool</span><span class="o">.</span><span class="n">xml</span> <span class="o">&lt;&lt;</span><span class="n">__XML__</span>
+<span class="o">&lt;</span><span class="n">pool</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;rbd&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">images_rbd</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">host</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;192.168.6.204&#39;</span><span class="o">/&gt;</span> <span class="c1"># ceph monitor 1</span>
+    <span class="o">&lt;</span><span class="n">host</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;192.168.6.205&#39;</span><span class="o">/&gt;</span> <span class="c1"># ceph monitor 2</span>
+    <span class="o">&lt;</span><span class="n">host</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;192.168.6.206&#39;</span><span class="o">/&gt;</span> <span class="c1"># ceph monitor 3</span>
+    <span class="o">&lt;</span><span class="n">auth</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;libvirt&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ceph&#39;</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">secret</span> <span class="n">uuid</span><span class="o">=</span><span class="s1">&#39;$SECRET_UUID&#39;</span><span class="o">/&gt;</span>
+    <span class="o">&lt;/</span><span class="n">auth</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">pool</span><span class="o">&gt;</span>
+<span class="n">__XML__</span>
+
+<span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">define</span> <span class="n">pool</span><span class="o">.</span><span class="n">xml</span>
+<span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">start</span> <span class="n">images_rbd</span>
+<span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">autostart</span> <span class="n">images_rbd</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后验证检查是否能够看到之前创建的RBD磁盘文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="nb">list</span> <span class="n">images_rbd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果一切正常，可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span>                <span class="n">Path</span>
+<span class="o">-----------------------------------------------------</span>
+<span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>   <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>创建虚拟机<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>创建RBD磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># virsh vol-create-as &quot;${LIBVIRT_POOL}&quot; &quot;${VM_VOLUME}&quot; --capacity &quot;${VM_SZ}&quot; --format raw</span>
+<span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_rbd</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span> <span class="o">--</span><span class="n">capacity</span> <span class="mi">6</span><span class="n">GB</span> <span class="o">--</span><span class="nb">format</span> <span class="n">raw</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vol</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="nb">list</span> <span class="n">images_rbd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>信息如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span>                <span class="n">Path</span>
+<span class="o">-----------------------------------------------------</span>
+<span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>   <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>
+<span class="n">z</span><span class="o">-</span><span class="n">centos9</span>           <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">centos9</span>
+</pre></div>
+</div>
+<ul>
+<li><p>安装虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">Linux</span> <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">rhl9</span> \
+  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">vol</span><span class="o">=</span><span class="n">images_rbd</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">centos9</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
+  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirror</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">centos</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="mi">9</span><span class="o">-</span><span class="n">stream</span><span class="o">/</span><span class="n">BaseOS</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> \
+  <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>不过我安装CentOS 9 Stream尚未成功，具体实践见 <a class="reference internal" href="../../kvm/startup/create_vm.html#create-vm"><span class="std std-ref">创建KVM虚拟机</span></a></p>
+</div>
+</section>
+<section id="id3">
+<h3>磁盘转换<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>qemu-img 转换:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qemu</span><span class="o">-</span><span class="n">img</span> <span class="n">convert</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="o">-</span><span class="n">O</span> <span class="n">raw</span> <span class="n">rbd</span><span class="p">:</span><span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="o">-</span><span class="n">p</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>耗时:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">real</span>    <span class="mi">1</span><span class="n">m24</span><span class="mf">.250</span><span class="n">s</span>
+<span class="n">user</span>    <span class="mi">0</span><span class="n">m4</span><span class="mf">.098</span><span class="n">s</span>
+<span class="n">sys</span>     <span class="mi">0</span><span class="n">m10</span><span class="mf">.363</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>很奇怪，通过 <code class="docutils literal notranslate"><span class="pre">qemu-img</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 命令创建的RBD磁盘，在 <code class="docutils literal notranslate"><span class="pre">images_rbd</span></code> 存储池查看不到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="nb">list</span> <span class="n">images_rbd</span>
+</pre></div>
+</div>
+<p>查看不到刚才转换的磁盘</p>
+<p>而:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="n">ls</span> <span class="o">--</span><span class="n">pool</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span>
+</pre></div>
+</div>
+<p>则可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>
+<span class="n">z</span><span class="o">-</span><span class="n">centos9</span>
+<span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span>
+</pre></div>
+</div>
+</section>
+<section id="rbd">
+<h3>修订磁盘使用RBD<a class="headerlink" href="#rbd" title="永久链接至标题">¶</a></h3>
+</section>
+</section>
+<section id="id4">
+<h2>性能优化<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>要进一步提高Ceph RBD性能，可以采用 <a class="reference internal" href="../spdk/index.html#ceph-spdk"><span class="std std-ref">Ceph SPDK</span></a> 实现。我将在后续完成这个性能优化实践。</p>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.ceph.com/en/latest/rbd/libvirt/">Using libvirt with Ceph RBD</a></p></li>
+<li><p><a class="reference external" href="https://pmhahn.github.io/ceph-jewel-libvirt/">Ceph-Jewel RBD libvirt storage pool</a></p></li>
+<li><p><a class="reference external" href="https://opengers.github.io/ceph/virt-install-create-vm-use-rbd-pool/">virt-install工具安装基于rbd磁盘的虚拟机</a></p></li>
+<li><p><a class="reference external" href="https://blog.modest-destiny.com/posts/kvm-libvirt-add-ceph-rbd-pool/">Add Ceph RBD Storage Pool to KVM/QEMU/Libvirt</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ceph_block_device.html" class="btn btn-neutral float-left" title="Ceph Block Device(块设备)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../spdk/index.html" class="btn btn-neutral float-right" title="Ceph SPDK" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

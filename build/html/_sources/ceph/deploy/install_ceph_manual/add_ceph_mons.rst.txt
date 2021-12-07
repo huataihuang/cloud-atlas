@@ -134,6 +134,18 @@ Ceph集群添加ceph-mon
    sudo systemctl start ceph-mon@z-b-data-3
    sudo systemctl enable ceph-mon@z-b-data-3
 
+最小化配置 ``ceph-mon``
+==========================
+
+参考 `Ceph Monitor Config Reference#Minimum Configuration <https://docs.ceph.com/en/pacific/rados/configuration/mon-config-ref/#minimum-configuration>`_ 修订 ``/etc/ceph/ceph.conf`` :
+
+.. literalinclude:: install_ceph_mon/ceph.conf
+   :language: bash
+   :linenos:
+   :caption: /etc/ceph/ceph.conf
+
+添加的 ``[mon.<id>]`` 段落可选，我实践下来似乎不配置也没有影响运行，待后续运维观察。
+
 检查
 =======
 

@@ -1,0 +1,308 @@
+.. _ceph_rbd_libvirt:
+
+=======================
+Libvirt集成Ceph RBD
+=======================
+
+:ref:`libvirt` 在hypervisor接口和应用程序之间提供虚拟机抽象层方便我们管理和使用虚拟化技术。通过 ``libvirt`` 开发者和系统管理员可以专注于一个通用管理框架，通用API以及通用shell接口( ``virsh`` )来完成很多hypervisor工作:
+
+- QEMU/KVM
+- XEN
+- LXC
+- VirtualBox
+- 等等
+
+Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
+
+.. figure:: ../../_static/ceph/rbd/ceph_rbd_libvirt.png
+
+``libvirt`` 通用架构也提供了云计算解决方案的Ceph块设备，例如 :ref:`openstack` 或 CloudStack都通过libvirt使用Ceph块设备。这个云计算解决方案使用 ``libvirt`` 和 QEMU/KVM 交互，然后 QEMU/KVM 再通过 ``librbd`` 和Ceph块设备交互。
+
+也可以使用 :ref:`libvirt` , :ref:`virsh_manage_vm` 以及 ``libvirt API`` 来使用Ceph块设备。
+
+配置Ceph
+==========
+
+- 创建存储池::
+
+   sudo ceph osd pool create libvirt-pool
+
+.. note::
+
+   这里创建存储池命名为 ``libvirt-pool`` ，实际可根据需要命令
+
+这里我的 :ref:`install_ceph_mon` 最初配置 ``/etc/ceph/ceph.conf`` ::
+
+   osd pool default size = 3
+   osd pool default min size = 2
+   osd pool default pg num = 333
+   osd pool default pgp num = 333
+
+则会提示错误::
+
+   Error ERANGE:  pg_num 333 size 3 would mean 1002 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
+
+也就是说，默认参数 ``mon_max_pg_per_osd = 250`` ，对于3副本，则每个 ``ceph-mon`` 只能监控 ``250x3=750`` 个 ``pg`` ，所以需要缩减 ``osd pool default pg num`` ，改为 ``128`` ::
+
+   osd pool default size = 3
+   osd pool default min size = 2
+   osd pool default pg num = 128
+   osd pool default pgp num = 128
+
+.. note::
+
+   这里参考 `ceph PG数量调整/PG的状态说明 <https://www.cnblogs.com/kuku0223/p/8214412.html>`_ 计算PG数量::
+
+      Total PGs = (Total_number_of_OSD * 100) / max_replication_count
+
+   结算的结果往上取靠近2的N次方的值。我这里有3个osd，所以计算结果是 100 ，接近的 2的7 次方取 128
+
+创建成功则提示::
+
+   pool 'libvirt-pool' created
+
+- 验证资源池::
+
+   sudo ceph osd lspools
+
+输出显示::
+
+   1 device_health_metrics
+   2 libvirt-pool
+
+- 检查这个创建资源池的pg数量::
+
+   sudo ceph osd pool get libvirt-pool pg_num
+
+显示::
+
+   pg_num: 81
+
+- 使用 ``rbd`` 工具初始化资源池用于RBD::
+
+   sudo rbd pool init libvirt-pool
+
+- 创建一个Ceph用户::
+
+   sudo ceph auth get-or-create client.libvirt mon 'profile rbd' osd 'profile rbd pool=libvirt-pool'
+
+此时终端会显示keyring内容，可以存储为客户端用户的 ``rbd`` 访问使用的key ``/etc/ceph/ceph.client.<username>.keyring`` ::
+
+   sudo ceph auth get client.libvirt -o client.libvirt.keyring
+
+上述命令会创建一个 ``client.libvirt.keyring`` ，内容类似如下::
+
+   [client.libvirt]
+           key = XXXXXXXXXX
+           caps mon = "profile rbd"
+           caps osd = "profile rbd pool=libvirt-pool"   
+
+- 然后验证用户存在::
+
+   sudo ceph auth ls
+
+.. note::
+
+   ``libvirt`` 访问Ceph是使用ID ``libvirt`` 而不是 Ceph名字 ``client.libvirt``
+
+客户端(使用Ceph)
+===================
+
+- 在运行 :ref:`kvm` 和 :ref:`libvirt` 的虚拟化服务器上，需要安装 ``ceph-common`` 软件包::
+
+   sudo apt install ceph-common
+
+.. note::
+
+   目前我对ceph认证和权限管理的了解有限，所以我暂时采用了所有服务器共享 ``/etc/ceph/ceph.client.admin.keyring`` 的方式，这在测试环境部署比较方便，但不适合生产环境。后续需要学习和实践权限管理。
+
+   对于使用Ceph的客户端(运行 :ref:`kvm` 和 :ref:`libvirt` 的虚拟化服务器) ，我采用复制 ``/etc/ceph/ceph.client.admin.keyring`` ，所以后续步骤具备了全面的权限可以直接操作::
+
+      sudo rbd -p libvirt-pool ls
+
+- 将Ceph服务器(前文创建)的 ``/etc/ceph/client.libvirt.keyring`` 复制到本地( :ref:`kvm` 和 :ref:`libvirt` 的虚拟化服务器) ，然后指定 ``keyring`` 和 ``id`` 就可以检查和处理rbd::
+
+   rbd --keyring /etc/ceph/client.libvirt.keyring --id libvirt -p libvirt-pool ls
+
+可以看到，这里只使用了限定使用 ``RBD`` 的 keyring，没有使用超级 ``keyring`` ，也可以同样完成维护操作
+
+.. _ceph_args:
+
+.. note::
+
+   Ceph提供了一个避免每次输入参数的方法::
+
+      export CEPH_ARGS="--keyring /etc/ceph/client.libvirt.keyring --id libvirt -p libvirt-pool"
+
+   设置了上述环境变量之后，就可以直接使用简化的操作::
+
+      rbd ls
+
+   WOW!!! 我突然发现，这个方法可能是解决 :ref:`install_ceph_manual_zdata` 解决自定义Ceph集群名的方法，传递 ``--ceph zdata`` 参数
+
+- 创建RBD镜像::
+
+   sudo qemu-img create -f rbd rbd:libvirt-pool/new-libvirt-image 2G
+
+提示信息::
+
+   Formatting 'rbd:libvirt-pool/new-libvirt-image', fmt=rbd size=2147483648
+
+然后就可以验证::
+
+   export CEPH_ARGS="--keyring /etc/ceph/client.libvirt.keyring --id libvirt -p libvirt-pool"
+   rbd ls
+
+可以看到输出::
+
+   new-libvirt-image
+
+也可以查看详细信息::
+
+   rbd ls -l
+
+输出会显示::
+
+   NAME               SIZE   PARENT  FMT  PROT  LOCK
+   new-libvirt-image  2 GiB            2
+
+配置libvirt RBD存储池
+------------------------
+
+- ``libvirt`` 需要定义RBD存储池，需要首先配置访问Ceph存储的secret::
+
+   SECRET_UUID=$(uuidgen)
+   cat >secret.xml <<__XML__
+   <secret ephemeral='no' private='no'>
+     <uuid>$SECRET_UUID</uuid>
+     <usage type='ceph'>
+       <name>client.libvirt secret</name>
+     </usage>
+   </secret>
+   __XML__
+
+   virsh secret-define --file secret.xml
+   virsh secret-set-value --secret "$SECRET_UUID" --base64 "$(sudo ceph auth get-key client.libvirt)"
+
+.. note::
+
+   我这里执行 ``virsh`` 命令的账号是已经配置过 ``libvirt`` 用户组的账号 ``huatai`` ，所以能够直接执行 ``virsh``
+
+- 设置 ``libvirt-pool`` 存储池::
+
+   cat >pool.xml <<__XML__
+   <pool type="rbd">
+     <name>images_rbd</name>
+     <source>
+       <name>libvirt-pool</name>
+       <host name='192.168.6.204'/> # ceph monitor 1
+       <host name='192.168.6.205'/> # ceph monitor 2
+       <host name='192.168.6.206'/> # ceph monitor 3
+       <auth username='libvirt' type='ceph'>
+         <secret uuid='$SECRET_UUID'/>
+       </auth>
+     </source>
+   </pool>
+   __XML__
+
+   virsh pool-define pool.xml
+   virsh pool-start images_rbd
+   virsh pool-autostart images_rbd
+
+- 然后验证检查是否能够看到之前创建的RBD磁盘文件::
+
+   virsh vol-list images_rbd
+
+如果一切正常，可以看到::
+
+   Name                Path
+   -----------------------------------------------------
+   new-libvirt-image   libvirt-pool/new-libvirt-image
+
+创建虚拟机
+------------
+
+- 创建RBD磁盘::
+
+   # virsh vol-create-as "${LIBVIRT_POOL}" "${VM_VOLUME}" --capacity "${VM_SZ}" --format raw
+   virsh vol-create-as images_rbd z-centos9 --capacity 6GB --format raw
+
+提示信息::
+
+   Vol z-centos9 created
+
+- 检查磁盘::
+
+   virsh vol-list images_rbd
+
+信息如下::
+
+   Name                Path
+   -----------------------------------------------------
+   new-libvirt-image   libvirt-pool/new-libvirt-image
+   z-centos9           libvirt-pool/z-centos9
+
+- 安装虚拟机::
+
+   virt-install \
+     --network bridge:virbr0 \
+     --name z-centos9 \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=Linux --os-variant=rhl9 \
+     --boot uefi --cpu host-passthrough \
+     --disk vol=images_rbd/z-centos9,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+     --graphics none \
+     --location=http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+.. note::
+
+   不过我安装CentOS 9 Stream尚未成功，具体实践见 :ref:`create_vm`
+
+磁盘转换
+--------------------
+
+- qemu-img 转换::
+
+   qemu-img convert /dev/vg-libvirt/z-ubuntu20 -O raw rbd:libvirt-pool/z-ubuntu20 -p
+
+耗时::
+
+   real    1m24.250s
+   user    0m4.098s
+   sys     0m10.363s
+
+很奇怪，通过 ``qemu-img`` 或者 ``rbd`` 命令创建的RBD磁盘，在 ``images_rbd`` 存储池查看不到::
+
+   virsh vol-list images_rbd
+
+查看不到刚才转换的磁盘
+
+而::
+
+   sudo rbd ls --pool libvirt-pool
+
+则可以看到::
+
+   new-libvirt-image
+   z-centos9
+   z-ubuntu20
+
+修订磁盘使用RBD
+------------------
+
+
+
+性能优化
+============
+
+要进一步提高Ceph RBD性能，可以采用 :ref:`ceph_spdk` 实现。我将在后续完成这个性能优化实践。
+
+参考
+=======
+
+- `Using libvirt with Ceph RBD <https://docs.ceph.com/en/latest/rbd/libvirt/>`_
+- `Ceph-Jewel RBD libvirt storage pool <https://pmhahn.github.io/ceph-jewel-libvirt/>`_
+- `virt-install工具安装基于rbd磁盘的虚拟机 <https://opengers.github.io/ceph/virt-install-create-vm-use-rbd-pool/>`_
+- `Add Ceph RBD Storage Pool to KVM/QEMU/Libvirt <https://blog.modest-destiny.com/posts/kvm-libvirt-add-ceph-rbd-pool/>`_

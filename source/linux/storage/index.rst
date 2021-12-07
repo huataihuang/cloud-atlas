@@ -9,6 +9,7 @@ Linux存储
 
    disk/index
    nvme/index
+   spdk/index
    filesystem/index
    lvm/index
    zfs/index

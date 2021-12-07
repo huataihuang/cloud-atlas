@@ -17,6 +17,10 @@ Ceph Atlas
    ceph_docker_in_studio.rst
    deploy/index
    mgr/index
+   rbd/index
+   spdk/index
+   radosgw/index
+   cephfs/index
    config/index
    arm/index
    arch/index

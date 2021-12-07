@@ -59,6 +59,16 @@ Ceph集群添加更多ceph-osd
 
 和 :ref:`add_ceph_osds_lvm` 一样，使用 ``LVM`` 卷方式管理是最方便的，自动添加了 ``systemd`` 服务 ``ceph-osd@.service`` 并且自动启动，也创建了该服务在操作系统启动时自动启动的 ``systemd`` 链接配置
 
+.. note::
+
+   注意， ``ceph-volume`` 会自动把后续添加的OSD的ID设置为 ``1`` 和 ``2`` ，你可以看到 在 ``z-b-data-2`` 的systemd配置是 ``ceph-osd@1.service`` ，启动服务是::
+
+      systemctl start ceph-osd@1.service
+
+   而在 ``z-b-data-3`` 是::
+
+      systemctl start ceph-osd@2.service
+
 此时检查osd卷设备::
 
    sudo ceph-volume lvm list
