@@ -265,15 +265,16 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
 
 - qemu-img 转换::
 
-   qemu-img convert /dev/vg-libvirt/z-ubuntu20 -O raw rbd:libvirt-pool/z-ubuntu20 -p
+   virsh shutdown z-ubuntu20  #关闭虚拟机之后再做转换
+   time sudo qemu-img convert /dev/vg-libvirt/z-ubuntu20 -O raw rbd:libvirt-pool/z-ubuntu20 -p #计算一下转换时间
 
-耗时::
+耗时约1分半钟转换了6G数据::
 
-   real    1m24.250s
-   user    0m4.098s
-   sys     0m10.363s
+   real1m25.619s
+   user0m4.428s
+   sys0m11.003s
 
-很奇怪，通过 ``qemu-img`` 或者 ``rbd`` 命令创建的RBD磁盘，在 ``images_rbd`` 存储池查看不到::
+注意，此时通过 ``qemu-img`` 或者 ``rbd`` 命令创建的RBD磁盘，在 ``images_rbd`` 存储池查看不到::
 
    virsh vol-list images_rbd
 
@@ -289,10 +290,111 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
    z-centos9
    z-ubuntu20
 
+解决的方法是刷新libvirt存储池::
+
+   virsh pool-refresh images_rbd
+
+提示::
+
+   Pool images_rbd refreshed
+
+完成刷新后就可以看到新生成的镜像文件::
+
+   virsh vol-list images_rbd
+
+此时可以看到::
+
+   Name                Path
+   -----------------------------------------------------
+   new-libvirt-image   libvirt-pool/new-libvirt-image
+   z-centos9           libvirt-pool/z-centos9
+   z-ubuntu20          libvirt-pool/z-ubuntu20
+
+接下来我们就可以参考现有的 ``z-ubuntu20`` 虚拟机的 XML 配置来构建基于RBD的虚拟机
+
 修订磁盘使用RBD
 ------------------
 
+- 可以直接 ``virsh edit z-ubuntu20`` 将原先使用 :ref:`libvirt_lvm_pool` 的虚拟机 ``z-ubuntu20`` 的虚拟磁盘修订成刚才创建的 RBD 磁盘。不过，我这里为了对比两种环境 (运行在SSD本地磁盘上 :ref:`libvirt_lvm_pool` 和运行在 基于NVMe硬件的Ceph分布式存储上 性能差异)，所以将 ``z-ubuntu20`` 配置dump出来修订创建 ``z-ubuntu20-rbd`` 虚拟机::
 
+   virsh dumpxml z-ubuntu20 > z-ubuntu20-rbd.xml
+
+- 修改 ``z-ubuntu20-rbd.xml`` 
+
+修订 ``name`` 和 ``uuid`` ，并调整 ``vcpu`` 和 ``memory`` ::
+
+   ...
+   <name>z-ubuntu20-rbd</name>
+   <uuid>89df14f3-a51c-4c62-a91d-584e4058961c</uuid>
+   ...
+   <memory unit='KiB'>8388608</memory>
+   <currentMemory unit='KiB'>8388608</currentMemory>
+   <vcpu placement='static'>4</vcpu>
+   ...
+
+修订磁盘部分，将::
+
+   <devices>
+     <emulator>/usr/bin/qemu-system-x86_64</emulator>
+     <disk type='block' device='disk'>
+       <driver name='qemu' type='raw' cache='none' io='native'/>
+       <source dev='/dev/vg-libvirt/z-ubuntu20'/>
+       <target dev='vda' bus='virtio'/>
+       <address type='pci' domain='0x0000' bus='0x03' slot='0x00' function='0x0'/>
+     </disk>
+
+修订成::
+
+   <devices>
+     <emulator>/usr/bin/qemu-system-x86_64</emulator>
+     <disk type='network' device='disk'>
+       <driver name='qemu' type='raw' cache='none' io='native'/>
+       <auth username='libvirt'>
+         <secret type='ceph' uuid='3f203352-fcfc-4329-b870-34783e13493a'/>
+       </auth>
+       <source protocol='rbd' name='libvirt-pool/z-ubuntu20'>
+         <host name='192.168.6.204'/>
+       </source>
+       <target dev='vda' bus='virtio'/>
+       <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
+     </disk>
+
+修订虚拟网卡MAC地址::
+
+     <interface type='bridge'>
+       <mac address='52:54:00:85:7c:09'/>
+
+.. note::
+
+   这里RBD配置参考前述 ``virt-install`` 安装 ``z-centos9`` 生成配置，注意其中提供了了 ``<secret type='ceph' uuid='3f203352-fcfc-4329-b870-34783e13493a'/>`` 是引用libvirt认证，否则无法读取Ceph存储
+
+- 创建 ``z-ubuntu20-rbd`` ::
+
+   virsh define z-ubuntu20-rbd.xml
+
+- 修改 ``z-ubuntu20`` 调整 vcpu 和 memory ，虚拟机硬件和 ``z-ubuntu20-rbd`` 一致::
+
+   <memory unit='KiB'>8388608</memory>
+   <currentMemory unit='KiB'>8388608</currentMemory>
+   <vcpu placement='static'>4</vcpu>
+
+- 启动 ``z-ubuntu20-rbd`` ::
+
+   virsh start z-ubuntu20-rbd
+
+然后执行 ``virsh console z-ubuntu20-rbd`` 登陆系统，然后订正主机名和IP地址( :ref:`priv_kvm` )::
+
+   hostnamectl set-hostname z-ubuntu-rbd
+   sed -i 's/192.168.6.246/192.168.6.247/g' /etc/netplan/01-netcfg.yaml
+   netplan generate
+   netplan apply
+   sed -i '/192.168.6.246/d' /etc/hosts
+   echo "192.168.6.247    z-ubuntu-rbd" >> /etc/hosts
+
+性能测试
+==============
+
+我非常好奇我部署的分布式Ceph存储性能能够达到本地SSD磁盘的多少比例，所以进行 :ref:`compare_local_ssd_ceph_rbd`
 
 性能优化
 ============

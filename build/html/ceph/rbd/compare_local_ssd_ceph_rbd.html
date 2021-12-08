@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>比较KVM虚拟机本地SSD和Ceph RBD存储性能 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Ceph SPDK" href="../spdk/index.html" />
+    <link rel="prev" title="Libvirt集成Ceph RBD" href="ceph_rbd_libvirt.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Ceph Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduce_ceph.html">Ceph存储介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_recommend.html">Ceph部署软硬件推荐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rdma.html">Remote Direct Memory Access(RDMA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_docker_in_studio.html">Stuido环境Docker容器运行Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/index.html">Ceph 部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mgr/index.html">Ceph Manager Daemon</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Ceph Block Device(RBD)</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ceph_block_device.html">Ceph Block Device(块设备)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ceph_rbd_libvirt.html">Libvirt集成Ceph RBD</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">比较KVM虚拟机本地SSD和Ceph RBD存储性能</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">测试环境</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">磁盘性能测试</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iops">随机写IOPS(文件)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">云盘性能分析</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../spdk/index.html">Ceph SPDK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radosgw/index.html">Ceph RADOS Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs/index.html">CephFS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/index.html">Ceph 配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arch/index.html">Ceph 架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tunning/index.html">Ceph 优化</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Ceph Atlas</a> &raquo;</li>
+          <li><a href="index.html">Ceph Block Device(RBD)</a> &raquo;</li>
+      <li>比较KVM虚拟机本地SSD和Ceph RBD存储性能</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/ceph/rbd/compare_local_ssd_ceph_rbd.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="kvmssdceph-rbd">
+<span id="compare-local-ssd-ceph-rbd"></span><h1>比较KVM虚拟机本地SSD和Ceph RBD存储性能<a class="headerlink" href="#kvmssdceph-rbd" title="永久链接至标题">¶</a></h1>
+<p>我在 <a class="reference internal" href="../../kvm/iommu/compare_iommu_native_nvme.html#compare-iommu-native-nvme"><span class="std std-ref">比较IOMMU NVMe和原生NVMe存储性能</span></a> 中，对比了在 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机内部采用IOMMU技术读写NVMe存储和裸物理机读写NVMe的性能差异。现在，按照 <a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 部署了 <a class="reference internal" href="../index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储来提供虚拟机存储，也需要考虑分布式存储Ceph对性能的损耗。所以本文将采用相同的 <a class="reference internal" href="../../performance/performance_tools/fio/index.html#fio"><span class="std std-ref">fio 存储性能测试</span></a> 测试方法，对比性能差异。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我希望测试能够获得在分布式Ceph上运行的KVM虚拟机磁盘性能达到使用本地SSD的性能，毕竟底层硬件是性能更佳的NVMe，即使分布式消耗，也希望能够达到本地SSD磁盘性能。</p>
+</div>
+<section id="id1">
+<h2>测试环境<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>虚拟机采用 <a class="reference internal" href="ceph_rbd_libvirt.html#ceph-rbd-libvirt"><span class="std std-ref">Libvirt集成Ceph RBD</span></a> 部署完全相同的 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04 ，虚拟机配置采用 <code class="docutils literal notranslate"><span class="pre">4c8g</span></code> 配置( <code class="docutils literal notranslate"><span class="pre">vcpu=4</span></code> 匹配 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 测试命令 <code class="docutils literal notranslate"><span class="pre">-numjobs=4</span></code> 并发数量 )</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>磁盘性能测试<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h3>测试说明<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/dev/vda</span></code> 磁盘已经安装了虚拟机操作系统，所以 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 采用文件进行测试，和直接读写块设备文件有差异(存在操作系统缓存影响)，不过对于测试两个一致操作系统还是可以有一定对比性。</p></li>
+<li><p>提供Ceph服务的3个虚拟机已经做了 cpu pinning ，分配到socket 0上的CPU核心; 但是由于我的 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 配置的XEON处理器是 <a class="reference internal" href="../../kernel/cpu/intel/xeon_e5/xeon_e5-2670_v3.html#xeon-e5-2670-v3"><span class="std std-ref">Intel Xeon E5-2670 v3处理器</span></a> ，物理核心数量有限，不考虑超线程已经全部一一分配给这3个Ceph虚拟机；所以我不确定Ceph客户端虚拟机绑定在同一个Socket的处理器上超线程cpu core上性能更好还是绑定到Socket 1的CPU核心更好(需要实测，并且我估计和负载、软件版本有关)</p></li>
+<li><p>本次测试简化，没有绑定虚拟机的vcpu pinning</p></li>
+</ul>
+<p>测试结果不精确，仅供参考</p>
+</section>
+</section>
+<section id="iops">
+<h2>随机写IOPS(文件)<a class="headerlink" href="#iops" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>测试命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>fio -direct=1 -iodepth=32 -rw=randwrite -ioengine=libaio -bs=4k -numjobs=4 -time_based=1 -runtime=60 -group_reporting -filename=${HOME}/fio -size=2g -name=test
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">z-ubuntu20</span></code> 本地SSD测试结果:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">本地SSD虚拟机 随机写IOPS</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
+<span class="linenos"> 2</span>Starting <span class="m">4</span> processes
+<span class="linenos"> 3</span>test: Laying out IO file <span class="o">(</span><span class="m">1</span> file / 2048MiB<span class="o">)</span>
+<span class="linenos"> 4</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>w<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>4932KiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">1233</span> IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 5</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">505</span>: Wed Dec  <span class="m">8</span> <span class="m">16</span>:43:57 <span class="m">2021</span>
+<span class="linenos"> 6</span>  write: <span class="nv">IOPS</span><span class="o">=</span><span class="m">1197</span>, <span class="nv">BW</span><span class="o">=</span>4790KiB/s <span class="o">(</span>4905kB/s<span class="o">)(</span>281MiB/60071msec<span class="o">)</span><span class="p">;</span> <span class="m">0</span> zone resets
+<span class="linenos"> 7</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">7</span>, <span class="nv">max</span><span class="o">=</span><span class="m">64376</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">77</span>.35, <span class="nv">stdev</span><span class="o">=</span><span class="m">952</span>.51
+<span class="linenos"> 8</span>    clat <span class="o">(</span>msec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">13</span>, <span class="nv">max</span><span class="o">=</span><span class="m">258</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">106</span>.80, <span class="nv">stdev</span><span class="o">=</span><span class="m">25</span>.94
+<span class="linenos"> 9</span>     lat <span class="o">(</span>msec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">13</span>, <span class="nv">max</span><span class="o">=</span><span class="m">258</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">106</span>.88, <span class="nv">stdev</span><span class="o">=</span><span class="m">25</span>.91
+<span class="linenos">10</span>    clat percentiles <span class="o">(</span>msec<span class="o">)</span>:
+<span class="linenos">11</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span>   <span class="m">54</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span>   <span class="m">59</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span>   <span class="m">64</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span>   <span class="m">80</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span>  <span class="m">106</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span>  <span class="m">111</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span>  <span class="m">114</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span>  <span class="m">116</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span>  <span class="m">118</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span>  <span class="m">122</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span>  <span class="m">128</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span>  <span class="m">136</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span>  <span class="m">180</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span>  <span class="m">190</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span>  <span class="m">203</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span>  <span class="m">205</span><span class="o">]</span>,
+<span class="linenos">15</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span>  <span class="m">247</span><span class="o">]</span>
+<span class="linenos">16</span>   bw <span class="o">(</span>  KiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">3800</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">5752</span>, <span class="nv">per</span><span class="o">=</span><span class="m">99</span>.92%, <span class="nv">avg</span><span class="o">=</span><span class="m">4786</span>.30, <span class="nv">stdev</span><span class="o">=</span><span class="m">92</span>.26, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">17</span>   iops        : <span class="nv">min</span><span class="o">=</span>  <span class="m">950</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">1438</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">1196</span>.50, <span class="nv">stdev</span><span class="o">=</span><span class="m">23</span>.07, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">18</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">50</span><span class="o">=</span><span class="m">0</span>.63%, <span class="nv">100</span><span class="o">=</span><span class="m">25</span>.21%, <span class="nv">250</span><span class="o">=</span><span class="m">74</span>.14%, <span class="nv">500</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">19</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">0</span>.23%, <span class="nv">sys</span><span class="o">=</span><span class="m">0</span>.69%, <span class="nv">ctx</span><span class="o">=</span><span class="m">25625</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">47</span>
+<span class="linenos">20</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">99</span>.8%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">21</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">22</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">23</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">0</span>,71936,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">24</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">32</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">27</span>  WRITE: <span class="nv">bw</span><span class="o">=</span>4790KiB/s <span class="o">(</span>4905kB/s<span class="o">)</span>, 4790KiB/s-4790KiB/s <span class="o">(</span>4905kB/s-4905kB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>281MiB <span class="o">(</span>295MB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60071</span>-60071msec
+<span class="linenos">28</span>
+<span class="linenos">29</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">30</span>  vda: <span class="nv">ios</span><span class="o">=</span><span class="m">0</span>/73364, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/4, <span class="nv">ticks</span><span class="o">=</span><span class="m">0</span>/7947375, <span class="nv">in_queue</span><span class="o">=</span><span class="m">7800168</span>, <span class="nv">util</span><span class="o">=</span><span class="m">98</span>.87%
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> Ceph RBD测试结果:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Ceph RBD虚拟机 随机写IOPS</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
+<span class="linenos"> 2</span>Starting <span class="m">4</span> processes
+<span class="linenos"> 3</span>test: Laying out IO file <span class="o">(</span><span class="m">1</span> file / 2048MiB<span class="o">)</span>
+<span class="linenos"> 4</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>w<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">13</span>.8MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">3520</span> IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 5</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">487</span>: Wed Dec  <span class="m">8</span> <span class="m">16</span>:46:50 <span class="m">2021</span>
+<span class="linenos"> 6</span>  write: <span class="nv">IOPS</span><span class="o">=</span><span class="m">4801</span>, <span class="nv">BW</span><span class="o">=</span><span class="m">18</span>.8MiB/s <span class="o">(</span><span class="m">19</span>.7MB/s<span class="o">)(</span>1126MiB/60015msec<span class="o">)</span><span class="p">;</span> <span class="m">0</span> zone resets
+<span class="linenos"> 7</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">3</span>, <span class="nv">max</span><span class="o">=</span><span class="m">578742</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">230</span>.97, <span class="nv">stdev</span><span class="o">=</span><span class="m">7263</span>.63
+<span class="linenos"> 8</span>    clat <span class="o">(</span>msec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">6</span>, <span class="nv">max</span><span class="o">=</span><span class="m">810</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">26</span>.42, <span class="nv">stdev</span><span class="o">=</span><span class="m">46</span>.37
+<span class="linenos"> 9</span>     lat <span class="o">(</span>msec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">7</span>, <span class="nv">max</span><span class="o">=</span><span class="m">810</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">26</span>.65, <span class="nv">stdev</span><span class="o">=</span><span class="m">47</span>.00
+<span class="linenos">10</span>    clat percentiles <span class="o">(</span>msec<span class="o">)</span>:
+<span class="linenos">11</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span>   <span class="m">12</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span>   <span class="m">14</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span>   <span class="m">15</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span>   <span class="m">16</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span>   <span class="m">17</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span>   <span class="m">18</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span>   <span class="m">19</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span>   <span class="m">21</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span>   <span class="m">22</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span>   <span class="m">26</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span>   <span class="m">32</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span>   <span class="m">41</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span>  <span class="m">317</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span>  <span class="m">443</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span>  <span class="m">567</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span>  <span class="m">600</span><span class="o">]</span>,
+<span class="linenos">15</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span>  <span class="m">701</span><span class="o">]</span>
+<span class="linenos">16</span>   bw <span class="o">(</span>  KiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">1496</span>, <span class="nv">max</span><span class="o">=</span><span class="m">30440</span>, <span class="nv">per</span><span class="o">=</span><span class="m">99</span>.97%, <span class="nv">avg</span><span class="o">=</span><span class="m">19199</span>.78, <span class="nv">stdev</span><span class="o">=</span><span class="m">1933</span>.14, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">17</span>   iops        : <span class="nv">min</span><span class="o">=</span>  <span class="m">374</span>, <span class="nv">max</span><span class="o">=</span> <span class="m">7610</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">4799</span>.87, <span class="nv">stdev</span><span class="o">=</span><span class="m">483</span>.29, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">18</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">10</span><span class="o">=</span><span class="m">0</span>.11%, <span class="nv">20</span><span class="o">=</span><span class="m">59</span>.21%, <span class="nv">50</span><span class="o">=</span><span class="m">37</span>.40%, <span class="nv">100</span><span class="o">=</span><span class="m">1</span>.66%, <span class="nv">250</span><span class="o">=</span><span class="m">0</span>.45%
+<span class="linenos">19</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">500</span><span class="o">=</span><span class="m">0</span>.95%, <span class="nv">750</span><span class="o">=</span><span class="m">0</span>.22%, <span class="nv">1000</span><span class="o">=</span><span class="m">0</span>.01%
+<span class="linenos">20</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">1</span>.18%, <span class="nv">sys</span><span class="o">=</span><span class="m">4</span>.26%, <span class="nv">ctx</span><span class="o">=</span><span class="m">194166</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">44</span>
+<span class="linenos">21</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">100</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">22</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">23</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">24</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">0</span>,288149,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">25</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">32</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">28</span>  WRITE: <span class="nv">bw</span><span class="o">=</span><span class="m">18</span>.8MiB/s <span class="o">(</span><span class="m">19</span>.7MB/s<span class="o">)</span>, <span class="m">18</span>.8MiB/s-18.8MiB/s <span class="o">(</span><span class="m">19</span>.7MB/s-19.7MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>1126MiB <span class="o">(</span>1180MB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60015</span>-60015msec
+<span class="linenos">29</span>
+<span class="linenos">30</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">31</span>  vda: <span class="nv">ios</span><span class="o">=</span><span class="m">0</span>/299107, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/4072, <span class="nv">ticks</span><span class="o">=</span><span class="m">0</span>/6565335, <span class="nv">in_queue</span><span class="o">=</span><span class="m">5964988</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.65%
+</pre></div>
+</div>
+</div>
+<p>让我有点吃惊， <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> Ceph RBD 测试文件的随机写iops只有 <code class="docutils literal notranslate"><span class="pre">4801</span></code> ，虽然比 本地SSD测试iops <code class="docutils literal notranslate"><span class="pre">1197</span></code> 好很多，大约是4倍性能；但是，比直接 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 读写单NVMe性能 ( <code class="docutils literal notranslate"><span class="pre">629k</span></code> ) 差距太大了，只有原始性能 0.7% ？ <code class="docutils literal notranslate"><span class="pre">是不是测试方法的问题?</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 、 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 上重新按照上述命令测试(读写文件而不是块设备)，减少测试差异进行对比(注意， <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 位于物理主机的不同PCIe插槽，并且 <code class="docutils literal notranslate"><span class="pre">1和2</span></code> 是同一个PCIe采用 <a class="reference internal" href="../../linux/server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 切分，而 <code class="docutils literal notranslate"><span class="pre">3</span></code> 是独立使用 PCIe 8x插槽 )</p>
+</div>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 、 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 上划分一个测试分区，建立文件系统进行以便进行fio测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="nb">print</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Model</span><span class="p">:</span> <span class="n">SAMSUNG</span> <span class="n">MZVL21T0HCLR</span><span class="o">-</span><span class="mi">00</span><span class="n">B00</span> <span class="p">(</span><span class="n">nvme</span><span class="p">)</span>
+<span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span><span class="p">:</span> <span class="mi">1024</span><span class="n">GB</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span><span class="n">B</span><span class="o">/</span><span class="mi">512</span><span class="n">B</span>
+<span class="n">Partition</span> <span class="n">Table</span><span class="p">:</span> <span class="n">gpt</span>
+<span class="n">Disk</span> <span class="n">Flags</span><span class="p">:</span>
+
+<span class="n">Number</span>  <span class="n">Start</span>   <span class="n">End</span>    <span class="n">Size</span>   <span class="n">File</span> <span class="n">system</span>  <span class="n">Name</span>     <span class="n">Flags</span>
+ <span class="mi">1</span>      <span class="mi">1049</span><span class="n">kB</span>  <span class="mi">500</span><span class="n">GB</span>  <span class="mi">500</span><span class="n">GB</span>               <span class="n">primary</span>
+</pre></div>
+</div>
+<p>划分一个6G临时分区(从500GB开始到506GB结束，所以空间是6GB)，用于测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="mi">500</span><span class="n">GB</span> <span class="mi">506</span><span class="n">GB</span>
+<span class="n">mkfs</span><span class="o">.</span><span class="n">xfs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p2</span>
+
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p2</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">mkdir</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">test</span>
+<span class="n">chown</span> <span class="n">huatai</span><span class="p">:</span><span class="n">huatai</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">test</span>
+</pre></div>
+</div>
+<ul>
+<li><p>执行fio测试(以 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> 用户身份执行):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randwrite</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">mnt</span><span class="o">/</span><span class="n">test</span><span class="o">/</span><span class="n">fio</span> <span class="o">-</span><span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="n">g</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机文件系统2GB文件 随机写IOPS</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
+<span class="linenos"> 2</span>Starting <span class="m">4</span> processes
+<span class="linenos"> 3</span>test: Laying out IO file <span class="o">(</span><span class="m">1</span> file / 2048MiB<span class="o">)</span>
+<span class="linenos"> 4</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>w<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">40</span>.0MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">10</span>.5k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
+<span class="linenos"> 5</span>test: <span class="o">(</span><span class="nv">groupid</span><span class="o">=</span><span class="m">0</span>, <span class="nv">jobs</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="nv">err</span><span class="o">=</span> <span class="m">0</span>: <span class="nv">pid</span><span class="o">=</span><span class="m">14017</span>: Wed Dec  <span class="m">8</span> <span class="m">21</span>:46:48 <span class="m">2021</span>
+<span class="linenos"> 6</span>  write: <span class="nv">IOPS</span><span class="o">=</span><span class="m">8180</span>, <span class="nv">BW</span><span class="o">=</span><span class="m">31</span>.0MiB/s <span class="o">(</span><span class="m">33</span>.5MB/s<span class="o">)(</span>1923MiB/60187msec<span class="o">)</span><span class="p">;</span> <span class="m">0</span> zone resets
+<span class="linenos"> 7</span>    slat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">2</span>, <span class="nv">max</span><span class="o">=</span><span class="m">444127</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">267</span>.96, <span class="nv">stdev</span><span class="o">=</span><span class="m">7794</span>.04
+<span class="linenos"> 8</span>    clat <span class="o">(</span>nsec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">1754</span>, <span class="nv">max</span><span class="o">=</span>446785k, <span class="nv">avg</span><span class="o">=</span><span class="m">15375574</span>.09, <span class="nv">stdev</span><span class="o">=</span><span class="m">44988666</span>.36
+<span class="linenos"> 9</span>     lat <span class="o">(</span>usec<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span><span class="m">23</span>, <span class="nv">max</span><span class="o">=</span><span class="m">449272</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">15644</span>.05, <span class="nv">stdev</span><span class="o">=</span><span class="m">45610</span>.46
+<span class="linenos">10</span>    clat percentiles <span class="o">(</span>usec<span class="o">)</span>:
+<span class="linenos">11</span>     <span class="p">|</span>  <span class="m">1</span>.00th<span class="o">=[</span>   <span class="m">445</span><span class="o">]</span>,  <span class="m">5</span>.00th<span class="o">=[</span>   <span class="m">971</span><span class="o">]</span>, <span class="m">10</span>.00th<span class="o">=[</span>  <span class="m">1483</span><span class="o">]</span>, <span class="m">20</span>.00th<span class="o">=[</span>  <span class="m">2040</span><span class="o">]</span>,
+<span class="linenos">12</span>     <span class="p">|</span> <span class="m">30</span>.00th<span class="o">=[</span>  <span class="m">2933</span><span class="o">]</span>, <span class="m">40</span>.00th<span class="o">=[</span>  <span class="m">3982</span><span class="o">]</span>, <span class="m">50</span>.00th<span class="o">=[</span>  <span class="m">4752</span><span class="o">]</span>, <span class="m">60</span>.00th<span class="o">=[</span>  <span class="m">5997</span><span class="o">]</span>,
+<span class="linenos">13</span>     <span class="p">|</span> <span class="m">70</span>.00th<span class="o">=[</span> <span class="m">10814</span><span class="o">]</span>, <span class="m">80</span>.00th<span class="o">=[</span> <span class="m">20579</span><span class="o">]</span>, <span class="m">90</span>.00th<span class="o">=[</span> <span class="m">23987</span><span class="o">]</span>, <span class="m">95</span>.00th<span class="o">=[</span> <span class="m">25822</span><span class="o">]</span>,
+<span class="linenos">14</span>     <span class="p">|</span> <span class="m">99</span>.00th<span class="o">=[</span><span class="m">308282</span><span class="o">]</span>, <span class="m">99</span>.50th<span class="o">=[</span><span class="m">354419</span><span class="o">]</span>, <span class="m">99</span>.90th<span class="o">=[</span><span class="m">417334</span><span class="o">]</span>, <span class="m">99</span>.95th<span class="o">=[</span><span class="m">425722</span><span class="o">]</span>,
+<span class="linenos">15</span>     <span class="p">|</span> <span class="m">99</span>.99th<span class="o">=[</span><span class="m">434111</span><span class="o">]</span>
+<span class="linenos">16</span>   bw <span class="o">(</span>  KiB/s<span class="o">)</span>: <span class="nv">min</span><span class="o">=</span> <span class="m">7752</span>, <span class="nv">max</span><span class="o">=</span><span class="m">240696</span>, <span class="nv">per</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">avg</span><span class="o">=</span><span class="m">32807</span>.11, <span class="nv">stdev</span><span class="o">=</span><span class="m">5786</span>.37, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">17</span>   iops        : <span class="nv">min</span><span class="o">=</span> <span class="m">1938</span>, <span class="nv">max</span><span class="o">=</span><span class="m">60174</span>, <span class="nv">avg</span><span class="o">=</span><span class="m">8201</span>.66, <span class="nv">stdev</span><span class="o">=</span><span class="m">1446</span>.59, <span class="nv">samples</span><span class="o">=</span><span class="m">480</span>
+<span class="linenos">18</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">20</span><span class="o">=</span><span class="m">0</span>.01%, <span class="nv">50</span><span class="o">=</span><span class="m">0</span>.04%, <span class="nv">100</span><span class="o">=</span><span class="m">0</span>.07%
+<span class="linenos">19</span>  lat <span class="o">(</span>usec<span class="o">)</span>   : <span class="nv">250</span><span class="o">=</span><span class="m">0</span>.26%, <span class="nv">500</span><span class="o">=</span><span class="m">0</span>.90%, <span class="nv">750</span><span class="o">=</span><span class="m">1</span>.79%, <span class="nv">1000</span><span class="o">=</span><span class="m">2</span>.27%
+<span class="linenos">20</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">2</span><span class="o">=</span><span class="m">13</span>.93%, <span class="nv">4</span><span class="o">=</span><span class="m">21</span>.07%, <span class="nv">10</span><span class="o">=</span><span class="m">28</span>.83%, <span class="nv">20</span><span class="o">=</span><span class="m">10</span>.07%, <span class="nv">50</span><span class="o">=</span><span class="m">18</span>.12%
+<span class="linenos">21</span>  lat <span class="o">(</span>msec<span class="o">)</span>   : <span class="nv">100</span><span class="o">=</span><span class="m">0</span>.37%, <span class="nv">250</span><span class="o">=</span><span class="m">0</span>.52%, <span class="nv">500</span><span class="o">=</span><span class="m">1</span>.75%
+<span class="linenos">22</span>  cpu          : <span class="nv">usr</span><span class="o">=</span><span class="m">0</span>.99%, <span class="nv">sys</span><span class="o">=</span><span class="m">2</span>.42%, <span class="nv">ctx</span><span class="o">=</span><span class="m">172912</span>, <span class="nv">majf</span><span class="o">=</span><span class="m">0</span>, <span class="nv">minf</span><span class="o">=</span><span class="m">50</span>
+<span class="linenos">23</span>  IO depths    : <span class="nv">1</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">2</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">4</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">32</span><span class="o">=</span><span class="m">100</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">24</span>     submit    : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">25</span>     <span class="nb">complete</span>  : <span class="nv">0</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">4</span><span class="o">=</span><span class="m">100</span>.0%, <span class="nv">8</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">16</span><span class="o">=</span><span class="m">0</span>.0%, <span class="nv">32</span><span class="o">=</span><span class="m">0</span>.1%, <span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%, &gt;<span class="o">=</span><span class="nv">64</span><span class="o">=</span><span class="m">0</span>.0%
+<span class="linenos">26</span>     issued rwts: <span class="nv">total</span><span class="o">=</span><span class="m">0</span>,492339,0,0 <span class="nv">short</span><span class="o">=</span><span class="m">0</span>,0,0,0 <span class="nv">dropped</span><span class="o">=</span><span class="m">0</span>,0,0,0
+<span class="linenos">27</span>     latency   : <span class="nv">target</span><span class="o">=</span><span class="m">0</span>, <span class="nv">window</span><span class="o">=</span><span class="m">0</span>, <span class="nv">percentile</span><span class="o">=</span><span class="m">100</span>.00%, <span class="nv">depth</span><span class="o">=</span><span class="m">32</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>Run status group <span class="m">0</span> <span class="o">(</span>all <span class="nb">jobs</span><span class="o">)</span>:
+<span class="linenos">30</span>  WRITE: <span class="nv">bw</span><span class="o">=</span><span class="m">31</span>.0MiB/s <span class="o">(</span><span class="m">33</span>.5MB/s<span class="o">)</span>, <span class="m">31</span>.0MiB/s-31.0MiB/s <span class="o">(</span><span class="m">33</span>.5MB/s-33.5MB/s<span class="o">)</span>, <span class="nv">io</span><span class="o">=</span>1923MiB <span class="o">(</span>2017MB<span class="o">)</span>, <span class="nv">run</span><span class="o">=</span><span class="m">60187</span>-60187msec
+<span class="linenos">31</span>
+<span class="linenos">32</span>Disk stats <span class="o">(</span>read/write<span class="o">)</span>:
+<span class="linenos">33</span>  nvme0n1: <span class="nv">ios</span><span class="o">=</span><span class="m">3</span>/533038, <span class="nv">merge</span><span class="o">=</span><span class="m">0</span>/7770, <span class="nv">ticks</span><span class="o">=</span><span class="m">0</span>/3590622, <span class="nv">in_queue</span><span class="o">=</span><span class="m">2874700</span>, <span class="nv">util</span><span class="o">=</span><span class="m">99</span>.78%
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id4">
+<h2>云盘性能分析<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>对 <code class="docutils literal notranslate"><span class="pre">1TB</span></code> NVMe 磁盘设备文件进行 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 随机读写压测，IO是随机分散到整个固态硬盘，所以整体性能卓越；而对单个文件(特别是只有 <code class="docutils literal notranslate"><span class="pre">2GB</span></code> 的小文件)测试随机读写压测，则IO只能局限于2GB的NVMe局部进行读写测试，所以性能 “下降” 到 <code class="docutils literal notranslate"><span class="pre">2G/1024G</span> <span class="pre">=</span> <span class="pre">1/512</span></code> ，也就是只有整体设备读写性能的 <code class="docutils literal notranslate"><span class="pre">1/512</span></code></p></li>
+<li><p>固态设备规格越小，同样型号的SSD性能越差；要 <code class="docutils literal notranslate"><span class="pre">公平</span></code> 测试性能，只能对比相同规格固态磁盘</p></li>
+<li><p>对于云盘，也有类似的分散读写效应，也即是云盘越大，云盘分散读写到更多的底层固态设备块上，就能获得更高性能；此外，类似 <a class="reference internal" href="../index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 的分布式存储，底层越多的 <code class="docutils literal notranslate"><span class="pre">OSD</span></code> 支撑，就能够获得更好的读写性能；这个性能是由 Ceph 的 <code class="docutils literal notranslate"><span class="pre">PG</span></code> 来决定的(分散度)，但同时分布式复制、网络性能、CPU繁忙、缓存冲突等等都会影响分布式存储性能，无法像直接访问NVMe设备那样获得稳定的一致性的性能</p></li>
+</ul>
+<p>对磁盘文件系统上的文件进行 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 测试得到的随机写IOPS非常低，之前在 <a class="reference internal" href="../../kvm/iommu/compare_iommu_native_nvme.html#compare-iommu-native-nvme"><span class="std std-ref">比较IOMMU NVMe和原生NVMe存储性能</span></a> 随机写IOPS高达 <code class="docutils literal notranslate"><span class="pre">629k</span></code> ，但同样的iommu虚拟机环境，对该设备上6GB分区中的2GB大小文件进行随机写测试，也只能获得 <code class="docutils literal notranslate"><span class="pre">8180</span></code> IOPS。仅比我构建的 Ceph RBD 随机写性能 <code class="docutils literal notranslate"><span class="pre">4801</span></code> 高70%，并不是数量级的差异。这也说明，对小规格文件进行测试只能做横向相同环境比较，没有绝对的测试意义。粗略估计，采用分布式Ceph存储，性能下降约40%。不过，这个性能完全可以通过扩大Ceph规模，构建更大规格云盘来调整到接近甚至超越的性能。</p>
+<p>所以，我感觉测试绝对数值没有太大意义，通过配置完全可以改变测试结果数值。只有相对同样规格横向对比才能有一定参考意义，然而也是受到底层参数调整影响，所以我就不再做进一步的性能压测了(太磨损固态硬盘寿命了)。后续只有对 <a class="reference internal" href="../tunning/index.html#ceph-tunning"><span class="std std-ref">Ceph 优化</span></a> 时，做参数对比才有测试意义。</p>
+<p>目前初步可以确认:</p>
+<ul class="simple">
+<li><p>ceph构建的虚拟化分布式存储，存储性能大约是直接pass-through本地NVMe性能的 <code class="docutils literal notranslate"><span class="pre">60%</span></code> ，但是是虚拟化本地SSD磁盘(非pass-through)性能的 <code class="docutils literal notranslate"><span class="pre">4倍</span></code> ，所以应该能够满足我构建大规模 <a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的需求</p></li>
+</ul>
+<p>目前我将集中精力构建云计算，在完成部署的基础上，再做性能调优</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ceph_rbd_libvirt.html" class="btn btn-neutral float-left" title="Libvirt集成Ceph RBD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../spdk/index.html" class="btn btn-neutral float-right" title="Ceph SPDK" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
