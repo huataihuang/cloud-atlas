@@ -33,7 +33,7 @@ Ceph集群添加更多ceph-osd
 
    OSD count 1 < osd_pool_default_size 3
 
-现在我们就在 ``z-b-data-2`` 和 ``z-b-data-3`` 上部署起OSD，使用 :ref:`omvf` pass-through PCIe NVMe存储
+现在我们就在 ``z-b-data-2`` 和 ``z-b-data-3`` 上部署起OSD，使用 :ref:`ovmf` pass-through PCIe NVMe存储
 
 部署新增OSD
 ==============

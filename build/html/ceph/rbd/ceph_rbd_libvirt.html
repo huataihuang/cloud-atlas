@@ -60,12 +60,15 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Libvirt集成Ceph RBD</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ceph">配置Ceph</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">客户端(使用Ceph)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">性能测试</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">性能优化</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">磁盘转换</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">性能测试</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">性能优化</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="compare_local_ssd_ceph_rbd.html">比较KVM虚拟机本地SSD和Ceph RBD存储性能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="down_1_of_3_ceph_vm_rbd.html">1/3 Ceph节点宕机演练: VM RBD测试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clone_vm_rbd.html">Clone使用Ceph RBD的虚拟机</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../spdk/index.html">Ceph SPDK</a></li>
@@ -288,7 +291,9 @@
 </li>
 </ul>
 <p>可以看到，这里只使用了限定使用 <code class="docutils literal notranslate"><span class="pre">RBD</span></code> 的 keyring，没有使用超级 <code class="docutils literal notranslate"><span class="pre">keyring</span></code> ，也可以同样完成维护操作</p>
-<div class="admonition note" id="ceph-args">
+<section id="ceph-args">
+<span id="id2"></span><h3><code class="docutils literal notranslate"><span class="pre">CEPH_ARGS</span></code> 环境变量<a class="headerlink" href="#ceph-args" title="永久链接至标题">¶</a></h3>
+<div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>Ceph提供了一个避免每次输入参数的方法:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">CEPH_ARGS</span><span class="o">=</span><span class="s2">&quot;--keyring /etc/ceph/client.libvirt.keyring --id libvirt -p libvirt-pool&quot;</span>
@@ -300,6 +305,9 @@
 </div>
 <p>WOW!!! 我突然发现，这个方法可能是解决 <a class="reference internal" href="../deploy/install_ceph_manual_zdata/index.html#install-ceph-manual-zdata"><span class="std std-ref">Ceph 手工部署zdata集群(暂未成功)</span></a> 解决自定义Ceph集群名的方法，传递 <code class="docutils literal notranslate"><span class="pre">--ceph</span> <span class="pre">zdata</span></code> 参数</p>
 </div>
+</section>
+<section id="rbd">
+<h3>RBD镜像<a class="headerlink" href="#rbd" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>创建RBD镜像:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">qemu</span><span class="o">-</span><span class="n">img</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">rbd</span> <span class="n">rbd</span><span class="p">:</span><span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span> <span class="mi">2</span><span class="n">G</span>
@@ -329,6 +337,7 @@
 <span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>  <span class="mi">2</span> <span class="n">GiB</span>            <span class="mi">2</span>
 </pre></div>
 </div>
+</section>
 <section id="libvirt-rbd">
 <h3>配置libvirt RBD存储池<a class="headerlink" href="#libvirt-rbd" title="永久链接至标题">¶</a></h3>
 <ul>
@@ -389,8 +398,10 @@ virsh secret-set-value --secret &quot;$SECRET_UUID&quot; --base64 &quot;$(sudo c
 </pre></div>
 </div>
 </section>
-<section id="id2">
-<h3>创建虚拟机<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<section id="id3">
+<h3>创建虚拟机<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<section id="centos-9-stream">
+<h4>CentOS 9 Stream<a class="headerlink" href="#centos-9-stream" title="永久链接至标题">¶</a></h4>
 <ul>
 <li><p>创建RBD磁盘:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># virsh vol-create-as &quot;${LIBVIRT_POOL}&quot; &quot;${VM_VOLUME}&quot; --capacity &quot;${VM_SZ}&quot; --format raw</span>
@@ -418,9 +429,76 @@ virsh secret-set-value --secret &quot;$SECRET_UUID&quot; --base64 &quot;$(sudo c
 </pre></div>
 </div>
 <ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">vol-create-as</span></code> 创建的 <code class="docutils literal notranslate"><span class="pre">RBD</span></code> 镜像不能直接用 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 命令删除(即使已经 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">undefine</span> <span class="pre">z-centos9</span> <span class="pre">--nvram</span></code> 删除了虚拟机定义)，会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo rbd -p libvirt-pool rm z-centos9
+2021-12-09T17:15:40.727+0800 7fe7c1ffb700 -1 librbd::image::PreRemoveRequest: 0x55caaa6e6ea0 check_image_watchers: image has watchers - not removing
+Removing image: 0% complete...failed.
+rbd: error: image still has watchers
+This means the image is still open or the client using it crashed. Try again after closing/unmapping it or waiting 30s for the crashed client to timeout.
+</pre></div>
+</div>
+</li>
+</ul>
+<p>尝试执行删除:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">delete</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span> <span class="o">--</span><span class="n">pool</span> <span class="n">images_rbd</span>
+</pre></div>
+</div>
+<p>不过还是报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">delete</span> <span class="n">vol</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">remove</span> <span class="n">volume</span> <span class="s1">&#39;libvirt-pool/z-centos9&#39;</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://forum.proxmox.com/threads/ceph-can-not-remove-image-watchers.49168/">ceph can not remove image - watchers</a> ，检查watcher:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="n">status</span> <span class="o">-</span><span class="n">p</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Watchers</span><span class="p">:</span>
+    <span class="n">watcher</span><span class="o">=</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">0</span><span class="o">/</span><span class="mi">1289276469</span> <span class="n">client</span><span class="mf">.164826</span> <span class="n">cookie</span><span class="o">=</span><span class="mi">140044924882800</span>
+</pre></div>
+</div>
+<p>检查磁盘信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="n">info</span> <span class="o">-</span><span class="n">p</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span>
+</pre></div>
+</div>
+<p>输出信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">image</span> <span class="s1">&#39;z-centos9&#39;</span><span class="p">:</span>
+     <span class="n">size</span> <span class="mf">5.6</span> <span class="n">GiB</span> <span class="ow">in</span> <span class="mi">1431</span> <span class="n">objects</span>
+     <span class="n">order</span> <span class="mi">22</span> <span class="p">(</span><span class="mi">4</span> <span class="n">MiB</span> <span class="n">objects</span><span class="p">)</span>
+     <span class="n">snapshot_count</span><span class="p">:</span> <span class="mi">0</span>
+     <span class="nb">id</span><span class="p">:</span> <span class="mi">281</span><span class="n">f7561e072c</span>
+     <span class="n">block_name_prefix</span><span class="p">:</span> <span class="n">rbd_data</span><span class="mf">.281</span><span class="n">f7561e072c</span>
+     <span class="nb">format</span><span class="p">:</span> <span class="mi">2</span>
+     <span class="n">features</span><span class="p">:</span> <span class="n">layering</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">-</span><span class="n">lock</span><span class="p">,</span> <span class="nb">object</span><span class="o">-</span><span class="nb">map</span><span class="p">,</span> <span class="n">fast</span><span class="o">-</span><span class="n">diff</span><span class="p">,</span> <span class="n">deep</span><span class="o">-</span><span class="n">flatten</span>
+     <span class="n">op_features</span><span class="p">:</span>
+     <span class="n">flags</span><span class="p">:</span>
+     <span class="n">create_timestamp</span><span class="p">:</span> <span class="n">Tue</span> <span class="n">Dec</span>  <span class="mi">7</span> <span class="mi">21</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span> <span class="mi">2021</span>
+     <span class="n">access_timestamp</span><span class="p">:</span> <span class="n">Tue</span> <span class="n">Dec</span>  <span class="mi">7</span> <span class="mi">23</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span> <span class="mi">2021</span>
+     <span class="n">modify_timestamp</span><span class="p">:</span> <span class="n">Tue</span> <span class="n">Dec</span>  <span class="mi">7</span> <span class="mi">21</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">56</span> <span class="mi">2021</span>
+</pre></div>
+</div>
+<p>检查watcher:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rados</span> <span class="o">-</span><span class="n">p</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span> <span class="n">listwatchers</span> <span class="n">rbd_header</span><span class="mf">.281</span><span class="n">f7561e072c</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">watcher</span><span class="o">=</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">0</span><span class="o">/</span><span class="mi">1289276469</span> <span class="n">client</span><span class="mf">.164826</span> <span class="n">cookie</span><span class="o">=</span><span class="mi">140044924882800</span>
+</pre></div>
+</div>
+<p>但是 <code class="docutils literal notranslate"><span class="pre">没有</span> <span class="pre">mapped</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="n">showmapped</span>
+</pre></div>
+</div>
+<p>输出是空的。</p>
+<p>我错了，我突然发现我忘记停止 <code class="docutils literal notranslate"><span class="pre">z-centos9</span></code> 虚拟机，所以导致上述清理失败，通过以下方式清理完成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virsh</span> <span class="n">destroy</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span>
+<span class="n">sudo</span> <span class="n">rbd</span> <span class="o">-</span><span class="n">p</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span> <span class="n">rm</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span>
+</pre></div>
+</div>
+<ul>
 <li><p>安装虚拟机:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
-  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">br0</span> \
   <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">centos9</span> \
   <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
   <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
@@ -439,8 +517,74 @@ virsh secret-set-value --secret &quot;$SECRET_UUID&quot; --base64 &quot;$(sudo c
 <p>不过我安装CentOS 9 Stream尚未成功，具体实践见 <a class="reference internal" href="../../kvm/startup/create_vm.html#create-vm"><span class="std std-ref">创建KVM虚拟机</span></a></p>
 </div>
 </section>
-<section id="id3">
-<h3>磁盘转换<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<section id="ubuntu-20">
+<h4>Ubuntu 20<a class="headerlink" href="#ubuntu-20" title="永久链接至标题">¶</a></h4>
+<ul>
+<li><p>创建RBD磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># virsh vol-create-as &quot;${LIBVIRT_POOL}&quot; &quot;${VM_VOLUME}&quot; --capacity &quot;${VM_SZ}&quot; --format raw</span>
+<span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="o">--</span><span class="n">pool</span> <span class="n">images_rbd</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">--</span><span class="n">capacity</span> <span class="mi">7</span><span class="n">GB</span> <span class="o">--</span><span class="n">allocation</span> <span class="mi">7</span><span class="n">GB</span> <span class="o">--</span><span class="nb">format</span> <span class="n">raw</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">vol-create-as</span></code> 使用方法参考 <a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/virtualization_deployment_and_administration_guide/sect-managing_guest_virtual_machines_with_virsh-storage_volume_commands">Red Hat Enterprise Linux7 &gt; Virtualization Deployment and Administration Guide &gt; 20.30. Storage Volume Commands</a></p>
+<p>不过，似乎对于RBD <code class="docutils literal notranslate"><span class="pre">--capacity</span> <span class="pre">7GB</span> <span class="pre">--allocation</span> <span class="pre">7GB</span></code> 也不是立即完全分配存储空间？</p>
+</div>
+<ul>
+<li><p>安装虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
+  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">br0</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> \
+  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
+  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
+  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">Linux</span> <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">ubuntu20</span><span class="mf">.04</span> \
+  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
+  <span class="o">--</span><span class="n">disk</span> <span class="n">vol</span><span class="o">=</span><span class="n">images_rbd</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
+  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
+  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="n">dists</span><span class="o">/</span><span class="n">focal</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">installer</span><span class="o">-</span><span class="n">amd64</span><span class="o">/</span> \
+  <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>安装完成后按照 <a class="reference internal" href="../../real/private_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 中订正</p>
+<ul>
+<li><p>修订NTP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;NTP=192.168.6.200&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">timesyncd</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订控制台输出</p></li>
+</ul>
+<p>默认安装 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 内容:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_TERMINAL</span><span class="o">=</span><span class="n">serial</span>
+<span class="n">GRUB_SERIAL_COMMAND</span><span class="o">=</span><span class="s2">&quot;serial --unit=0 --speed=115200 --stop=1&quot;</span>
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX</span><span class="o">=</span><span class="s2">&quot;console=ttyS0,115200&quot;</span>
+<span class="n">GRUB_TERMINAL</span><span class="o">=</span><span class="s2">&quot;serial console&quot;</span>
+<span class="n">GRUB_SERIAL_COMMAND</span><span class="o">=</span><span class="s2">&quot;serial --speed=115200&quot;</span>
+</pre></div>
+</div>
+<p>然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>修订虚拟机 <code class="docutils literal notranslate"><span class="pre">/etc/sudoers</span></code> 并添加主机登陆ssh key</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="id4">
+<h2>磁盘转换<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>以下实践是将 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 上VM转换成基于 Ceph RBD的VM，无需重新安装虚拟机</p>
+</div>
 <ul>
 <li><p>qemu-img 转换:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">shutdown</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span>  <span class="c1">#关闭虚拟机之后再做转换</span>
@@ -491,9 +635,8 @@ virsh secret-set-value --secret &quot;$SECRET_UUID&quot; --base64 &quot;$(sudo c
 </pre></div>
 </div>
 <p>接下来我们就可以参考现有的 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20</span></code> 虚拟机的 XML 配置来构建基于RBD的虚拟机</p>
-</section>
-<section id="rbd">
-<h3>修订磁盘使用RBD<a class="headerlink" href="#rbd" title="永久链接至标题">¶</a></h3>
+<section id="id5">
+<h3>修订磁盘使用RBD<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <ul>
 <li><p>可以直接 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">edit</span> <span class="pre">z-ubuntu20</span></code> 将原先使用 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 的虚拟机 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20</span></code> 的虚拟磁盘修订成刚才创建的 RBD 磁盘。不过，我这里为了对比两种环境 (运行在SSD本地磁盘上 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 和运行在 基于NVMe硬件的Ceph分布式存储上 性能差异)，所以将 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20</span></code> 配置dump出来修订创建 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 虚拟机:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">dumpxml</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="o">&gt;</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span><span class="o">.</span><span class="n">xml</span>
@@ -579,16 +722,16 @@ virsh secret-set-value --secret &quot;$SECRET_UUID&quot; --base64 &quot;$(sudo c
 </div>
 </section>
 </section>
-<section id="id4">
-<h2>性能测试<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="id6">
+<h2>性能测试<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <p>我非常好奇我部署的分布式Ceph存储性能能够达到本地SSD磁盘的多少比例，所以进行 <a class="reference internal" href="compare_local_ssd_ceph_rbd.html#compare-local-ssd-ceph-rbd"><span class="std std-ref">比较KVM虚拟机本地SSD和Ceph RBD存储性能</span></a></p>
 </section>
-<section id="id5">
-<h2>性能优化<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<section id="id7">
+<h2>性能优化<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <p>要进一步提高Ceph RBD性能，可以采用 <a class="reference internal" href="../spdk/index.html#ceph-spdk"><span class="std std-ref">Ceph SPDK</span></a> 实现。我将在后续完成这个性能优化实践。</p>
 </section>
-<section id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<section id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.ceph.com/en/latest/rbd/libvirt/">Using libvirt with Ceph RBD</a></p></li>
 <li><p><a class="reference external" href="https://pmhahn.github.io/ceph-jewel-libvirt/">Ceph-Jewel RBD libvirt storage pool</a></p></li>

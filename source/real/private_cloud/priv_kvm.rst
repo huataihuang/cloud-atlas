@@ -401,7 +401,7 @@ clone虚拟机
      <vcpupin vcpu='3' cpuset='27'/>
    </cputune>
 
-- 启动虚拟机，在虚拟机内部( ``virsh console z-b-data-1`` )执行主机名订正(z-b-data-1)和IP订正(IP从模版的192.168.6.246改成192.168.6.204)::
+- 启动虚拟机，在虚拟机内部( ``virsh console z-b-data-1`` )执行主机名订正(z-b-data-1)和IP订正(IP从模版的192.168.6.246改成192.168.6.204)，并且调整 :ref:`systemd_timesyncd` 配置::
 
    hostnamectl set-hostname z-b-data-1
    sed -i 's/192.168.6.246/192.168.6.204/g' /etc/netplan/01-netcfg.yaml
@@ -409,6 +409,7 @@ clone虚拟机
    netplan apply
    sed -i '/192.168.6.246/d' /etc/hosts
    echo "192.168.6.204    z-b-data-1" >> /etc/hosts
+   echo "NTP=192.168.6.200" >> /etc/systemd/timesyncd.conf
 
 添加pass-through NVMe存储
 =============================

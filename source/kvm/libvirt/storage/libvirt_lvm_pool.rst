@@ -230,6 +230,20 @@ clone虚拟机
 
 上述命令格式是 ``virsh vol-delete <vm_vol> <libvirt_lvm_storage>``
 
+结合libguestfs
+================
+
+为了方便快速复制使用LVM卷的虚拟机，我模仿 :ref:`clone_vm_rbd` 中的快速复制VM脚本，改写 ``clone_vm_lvm.sh`` 脚本::
+
+   ./clone_vm_lvm.sh z-b-mon-1
+
+可以快速复制出 ``z-b-mon-1`` 虚拟机
+
+.. literalinclude:: libvirt_lvm_pool/clone_vm_lvm.sh
+   :language: bash
+   :linenos:
+   :caption: clone使用LVM虚拟机的简单脚本
+
 参考
 =====
 

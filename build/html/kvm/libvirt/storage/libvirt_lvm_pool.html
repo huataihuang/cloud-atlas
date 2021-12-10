@@ -78,7 +78,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../kvm_vdisk_live.html">KVM虚拟机动态添加、调整磁盘</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../kvm_live_migration.html">KVM热迁移</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../qemu/index.html">使用QEMU管理KVM虚拟机</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../kvm_libguestfs.html">使用libguestfs访问KVM镜像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../kvm_libguestfs.html">使用libguestfs修订KVM镜像</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../memballoon.html">虚拟机内存balloon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../gpu_passthrough_with_kvm.html">KVM的GPU直通虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../nvidia_cuda_gpu_in_kvm.html">在KVM中使用NVIDIA CUDA GPU</a></li>
@@ -424,6 +424,63 @@
 </li>
 </ul>
 <p>上述命令格式是 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">vol-delete</span> <span class="pre">&lt;vm_vol&gt;</span> <span class="pre">&lt;libvirt_lvm_storage&gt;</span></code></p>
+</section>
+<section id="libguestfs">
+<h2>结合libguestfs<a class="headerlink" href="#libguestfs" title="永久链接至标题">¶</a></h2>
+<p>为了方便快速复制使用LVM卷的虚拟机，我模仿 <a class="reference internal" href="../../../ceph/rbd/clone_vm_rbd.html#clone-vm-rbd"><span class="std std-ref">Clone使用Ceph RBD的虚拟机</span></a> 中的快速复制VM脚本，改写 <code class="docutils literal notranslate"><span class="pre">clone_vm_lvm.sh</span></code> 脚本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">clone_vm_lvm</span><span class="o">.</span><span class="n">sh</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">mon</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>可以快速复制出 <code class="docutils literal notranslate"><span class="pre">z-b-mon-1</span></code> 虚拟机</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">clone使用LVM虚拟机的简单脚本</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/bin/env bash</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span>. /etc/profile
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="nv">origin_vm</span><span class="o">=</span><span class="s2">&quot;z-ubuntu20&quot;</span>
+<span class="linenos"> 6</span><span class="nv">vm</span><span class="o">=</span><span class="nv">$1</span>
+<span class="linenos"> 7</span><span class="nv">hosts_csv</span><span class="o">=</span>/home/huatai/github.com/cloud-atlas/source/real/private_cloud/priv_cloud_infra/hosts.csv
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="k">function</span> init <span class="o">{</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>     <span class="nv">ip</span><span class="o">=</span><span class="sb">`</span>grep <span class="s2">&quot;,</span><span class="si">${</span><span class="nv">vm</span><span class="si">}</span><span class="s2">,&quot;</span> <span class="nv">$hosts_csv</span> <span class="p">|</span> awk -F, <span class="s1">&#39;{print $2}&#39;</span><span class="sb">`</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>     <span class="k">if</span> <span class="o">[</span> -z <span class="nv">$ip</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+<span class="linenos">15</span>         <span class="nb">echo</span> <span class="s2">&quot;You input vm name is invalid, can&#39;t find vm IP&quot;</span>
+<span class="linenos">16</span>         <span class="nb">echo</span> <span class="s2">&quot;Please check </span><span class="nv">$hosts_csv</span><span class="s2">&quot;</span>
+<span class="linenos">17</span>         <span class="nb">exit</span> <span class="m">1</span>
+<span class="linenos">18</span>     <span class="k">fi</span>
+<span class="linenos">19</span><span class="o">}</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="k">function</span> clone_vm <span class="o">{</span>
+<span class="linenos">22</span>    virt-clone --original <span class="nv">$origin_vm</span> --name <span class="nv">$vm</span> --auto-clone
+<span class="linenos">23</span><span class="o">}</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="k">function</span> customize_vm <span class="o">{</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>sudo guestfish -d <span class="s2">&quot;</span><span class="nv">$vm</span><span class="s2">&quot;</span> -i <span class="s">&lt;&lt;EOF</span>
+<span class="linenos">28</span><span class="s">  write /etc/hostname &quot;${vm}&quot;</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="s">  download /etc/netplan/01-netcfg.yaml /tmp/01-netcfg.yaml</span>
+<span class="linenos">31</span><span class="s">  ! sed -i &quot;s/192.168.6.246/${ip}/g&quot; /tmp/01-netcfg.yaml</span>
+<span class="linenos">32</span><span class="s">  upload /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="s">  download /etc/hosts /tmp/hosts</span>
+<span class="linenos">35</span><span class="s">  ! sed -i &#39;/z-ubuntu20/d&#39; /tmp/hosts</span>
+<span class="linenos">36</span><span class="s">  ! echo &quot;${ip}  ${vm}.huatai.me  ${vm}&quot; &gt;&gt; /tmp/hosts</span>
+<span class="linenos">37</span><span class="s">  upload /tmp/hosts /etc/hosts</span>
+<span class="linenos">38</span><span class="s">EOF</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="o">}</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span>init
+<span class="linenos">43</span>clone_vm
+<span class="linenos">44</span>customize_vm
+</pre></div>
+</div>
+</div>
 </section>
 <section id="id3">
 <h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>

@@ -23,7 +23,7 @@ Ceph集群添加ceph-mon
    scp 192.168.6.204:/etc/ceph/ceph.client.admin.keyring /etc/ceph/
    scp 192.168.6.204:/etc/ceph/ceph.conf /etc/ceph/
 
-- 在需要部署新 ``ceph-mon`` 的主机 ``z-b-data-1`` 上执行以下命令获取monitors的keyring(需要读取本机的 ``/etc/ceph/ceph.client.admin.keyring`` 认证来获取 ``ceph-mon`` 的keyring)::
+- 在 ``ceph-mon`` 的主机 ``z-b-data-1`` 上执行以下命令获取monitors的keyring(需要读取本机的 ``/etc/ceph/ceph.client.admin.keyring`` 认证来获取 ``ceph-mon`` 的keyring)::
 
    sudo ceph auth get mon. -o /tmp/ceph.mon.keyring
 

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clone使用Ceph RBD的虚拟机 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Ceph SPDK" href="../spdk/index.html" />
+    <link rel="prev" title="1/3 Ceph节点宕机演练: VM RBD测试" href="down_1_of_3_ceph_vm_rbd.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Ceph Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduce_ceph.html">Ceph存储介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_recommend.html">Ceph部署软硬件推荐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rdma.html">Remote Direct Memory Access(RDMA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph_docker_in_studio.html">Stuido环境Docker容器运行Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/index.html">Ceph 部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mgr/index.html">Ceph Manager Daemon</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Ceph Block Device(RBD)</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ceph_block_device.html">Ceph Block Device(块设备)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ceph_rbd_libvirt.html">Libvirt集成Ceph RBD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="compare_local_ssd_ceph_rbd.html">比较KVM虚拟机本地SSD和Ceph RBD存储性能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="down_1_of_3_ceph_vm_rbd.html">1/3 Ceph节点宕机演练: VM RBD测试</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Clone使用Ceph RBD的虚拟机</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">解决思路</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clone-ceph-rbd">实践Clone Ceph RBD虚拟机</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clone-vm">排查clone VM启动问题</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#libguestfs">libguestfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clone">完整的clone脚本</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../spdk/index.html">Ceph SPDK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radosgw/index.html">Ceph RADOS Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs/index.html">CephFS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/index.html">Ceph 配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arch/index.html">Ceph 架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tunning/index.html">Ceph 优化</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Ceph Atlas</a> &raquo;</li>
+          <li><a href="index.html">Ceph Block Device(RBD)</a> &raquo;</li>
+      <li>Clone使用Ceph RBD的虚拟机</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/ceph/rbd/clone_vm_rbd.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cloneceph-rbd">
+<span id="clone-vm-rbd"></span><h1>Clone使用Ceph RBD的虚拟机<a class="headerlink" href="#cloneceph-rbd" title="永久链接至标题">¶</a></h1>
+<p>在 <a class="reference internal" href="ceph_rbd_libvirt.html#ceph-rbd-libvirt"><span class="std std-ref">Libvirt集成Ceph RBD</span></a> 环境中部署KVM虚拟机并调试运行正常之后，自然就想要类似 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 一样，通过 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">vol-clone</span></code> 批量复制VM，来构建大规模集群。</p>
+<p>不过，尝试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+<p>提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span>    <span class="p">[</span><span class="n">Errno</span> <span class="mi">2</span><span class="p">]</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span><span class="p">:</span> <span class="s1">&#39;rbd://192.168.6.204/libvirt-pool&#39;</span>
+</pre></div>
+</div>
+<p>这个问题在 <a class="reference external" href="https://github.com/virt-manager/virt-manager/issues/177">virt-clone can’t handle domains with rbd volumes #177</a> 有说明， <code class="docutils literal notranslate"><span class="pre">virt-install</span></code> 查看 <code class="docutils literal notranslate"><span class="pre">pool</span> <span class="pre">+</span> <span class="pre">vol</span></code> 的VM XML，没有认为存储是被管理的，所以不能clone。</p>
+<section id="id1">
+<h2>解决思路<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>如果只是因为无法处理Ceph RBD存储中的VM镜像文件，我考虑把clone步骤拆分来完成:</p>
+<ul class="simple">
+<li><p>将模版虚拟机 <code class="docutils literal notranslate"><span class="pre">XML</span></code> 配置中有关 Ceph RBD 磁盘部分摘除，然后剩余部分作为模版</p></li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">rbd</span> <span class="pre">cp</span> <span class="pre">libvirt-pool/z-ubuntu20</span> <span class="pre">libvirt-pool/${VM}</span></code> 来独立clone出RBD磁盘文件</p></li>
+<li><p>摘除的Ceph RBD磁盘配置XML单独保存成独立文件，等VM clone完成后再attach上去 ( 参考 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 添加PCIe设备方法 )</p></li>
+</ul>
+</section>
+<section id="clone-ceph-rbd">
+<h2>实践Clone Ceph RBD虚拟机<a class="headerlink" href="#clone-ceph-rbd" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>备份 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">dumpxml</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">&gt;</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span><span class="o">.</span><span class="n">xml</span>
+</pre></div>
+</div>
+</li>
+<li><p>分离出 <code class="docutils literal notranslate"><span class="pre">rbd.xml</span></code> 配置:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">rbd磁盘设备XML</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>  <span class="nt">&lt;disk</span> <span class="na">type=</span><span class="s">&#39;network&#39;</span> <span class="na">device=</span><span class="s">&#39;disk&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 2</span>    <span class="nt">&lt;driver</span> <span class="na">name=</span><span class="s">&#39;qemu&#39;</span> <span class="na">type=</span><span class="s">&#39;raw&#39;</span> <span class="na">cache=</span><span class="s">&#39;none&#39;</span> <span class="na">io=</span><span class="s">&#39;native&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 3</span>    <span class="nt">&lt;auth</span> <span class="na">username=</span><span class="s">&#39;libvirt&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 4</span>      <span class="nt">&lt;secret</span> <span class="na">type=</span><span class="s">&#39;ceph&#39;</span> <span class="na">uuid=</span><span class="s">&#39;3f203352-fcfc-4329-b870-34783e13493a&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 5</span>    <span class="nt">&lt;/auth&gt;</span>
+<span class="linenos"> 6</span>    <span class="nt">&lt;source</span> <span class="na">protocol=</span><span class="s">&#39;rbd&#39;</span> <span class="na">name=</span><span class="s">&#39;libvirt-pool/RBD_DISK&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 7</span>      <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.204&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 8</span>      <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.205&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 9</span>      <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.206&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">10</span>    <span class="nt">&lt;/source&gt;</span>
+<span class="linenos">11</span>    <span class="nt">&lt;target</span> <span class="na">dev=</span><span class="s">&#39;vda&#39;</span> <span class="na">bus=</span><span class="s">&#39;virtio&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">12</span>    <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x07&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">13</span>  <span class="nt">&lt;/disk&gt;</span>
+</pre></div>
+</div>
+</div>
+<p>请注意，这里 <code class="docutils literal notranslate"><span class="pre">rbd.xml</span></code> 配置中，我设置了 <code class="docutils literal notranslate"><span class="pre">占位符</span></code> <code class="docutils literal notranslate"><span class="pre">RBD_DISK</span></code> ，后面每次可以通过修订这个变量来添加不同设备</p>
+<ul>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 虚拟机配置，摘除 <code class="docutils literal notranslate"><span class="pre">RBD</span></code> 磁盘部分:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">edit</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span>
+</pre></div>
+</div>
+</li>
+<li><p>独立clone出新虚拟机磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">cp</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>完成复制后检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="n">ls</span> <span class="o">-</span><span class="n">p</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span>
+</pre></div>
+</div>
+<ul>
+<li><p>刷新libvirt存储池 <code class="docutils literal notranslate"><span class="pre">images_rbd</span></code> (否则libvirt看不到新创建的RBD磁盘文件)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">refresh</span> <span class="n">images_rbd</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">virt-clone</span></code> 完成没有磁盘的虚拟机clone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Allocating</span> <span class="s1">&#39;z-k8s-m-1_VARS.fd&#39;</span>                          <span class="o">|</span> <span class="mi">128</span> <span class="n">kB</span>  <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+<span class="n">Clone</span> <span class="s1">&#39;z-k8s-m-1&#39;</span> <span class="n">created</span> <span class="n">successfully</span><span class="o">.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后生成需要添加磁盘的XML:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>VM=z-k8s-m-1
+cat rbd.xml | sed &quot;s/RBD_DISK/$VM/g&quot; &gt; ${VM}-disk.xml
+</pre></div>
+</div>
+</li>
+<li><p>将磁盘配置添加到新虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>virsh attach-device $VM ${VM}-disk.xml --config
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Device</span> <span class="n">attached</span> <span class="n">successfully</span>
+</pre></div>
+</div>
+<ul>
+<li><p>现在我们就可以启动新虚拟机 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>在虚拟机内部订正主机名 (后续改为采用 <a class="reference internal" href="../../kvm/kvm_libguestfs.html#kvm-libguestfs"><span class="std std-ref">使用libguestfs修订KVM镜像</span></a> 来完成定制)</p></li>
+</ul>
+</section>
+<section id="clone-vm">
+<h2>排查clone VM启动问题<a class="headerlink" href="#clone-vm" title="永久链接至标题">¶</a></h2>
+<p>这里出现一个问题 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">console</span> <span class="pre">z-k8s-m-1</span></code> 没有任何输出，观察日志 <code class="docutils literal notranslate"><span class="pre">/var/log/libvirt/qemu/z-k8s-m-1.log</span></code> 发现有 <a class="reference internal" href="../../kvm/iommu/tainted_host-cpu.html#tainted-host-cpu"><span class="std std-ref">libvirt日志”Domain id=X is tainted: host-cpu”</span></a></p>
+<p>我对比了一下 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 和clone出来的 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> ，发现新虚拟机主要增加了 <code class="docutils literal notranslate"><span class="pre">guest_agent</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">channel</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;unix&#39;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">source</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;bind&#39;</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;/var/lib/libvirt/qemu/channel/target/domain-36-z-k8s-m-1/org.qemu.guest_agent.0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">target</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;virtio&#39;</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;org.qemu.guest_agent.0&#39;</span> <span class="n">state</span><span class="o">=</span><span class="s1">&#39;disconnected&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">alias</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;channel0&#39;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;virtio-serial&#39;</span> <span class="n">controller</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0&#39;</span> <span class="n">port</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="o">/&gt;</span>
+<span class="o">&lt;/</span><span class="n">channel</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>其他看不出特别</p>
+<ul>
+<li><p>改为 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">start</span> <span class="pre">z-k8s-m-1</span> <span class="pre">--console</span></code> 直接连接控制台，原来启动时出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>!!!! X64 Exception Type - 0D(#GP - General Protection)  CPU Apic ID - 00000000 !!!!
+ExceptionData - 0000000000000000
+RIP  - 000000007EAB8BCA, CS  - 0000000000000038, RFLAGS - 0000000000010002
+RAX  - 49C7C83113FA7698, RCX - 0000000000000000, RDX - 000000007FBD3898
+RBX  - 0000000000000020, RSP - 000000007FF9C9B0, RBP - 00000000746E7684
+RSI  - 00000000746E7668, RDI - 000000007FBD3898
+R8   - 8000000000000001, R9  - 000000007FF9CAC0, R10 - 0000000000000000
+R11  - 0000000000001000, R12 - 00000000746E7665, R13 - 0000000000000000
+R14  - 0000000000000000, R15 - 000000007F2B5E18
+DS   - 0000000000000030, ES  - 0000000000000030, FS  - 0000000000000030
+GS   - 0000000000000030, SS  - 0000000000000030
+CR0  - 0000000080010033, CR2 - 0000000000000000, CR3 - 000000007FC01000
+CR4  - 0000000000000668, CR8 - 0000000000000000
+DR0  - 0000000000000000, DR1 - 0000000000000000, DR2 - 0000000000000000
+DR3  - 0000000000000000, DR6 - 00000000FFFF0FF0, DR7 - 0000000000000400
+GDTR - 000000007FBEE698 0000000000000047, LDTR - 0000000000000000
+IDTR - 000000007F2D0018 0000000000000FFF,   TR - 0000000000000000
+FXSAVE_STATE - 000000007FF9C610
+!!!! Find image based on IP(0x7EAB8BCA) /build/edk2-xUnmxG/edk2-0~20191122.bd85bf54/Build/OvmfX64/RELEASE_GCC5/X64/MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe/DEBUG/VariableRuntimeDxe.dll (ImageBase=000000007EAB1000, EntryPoint=000000007EABD0EC) !!!!
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这个报错看起来是 EFI 错误</p>
+<p>解决思路:</p>
+<ul class="simple">
+<li><p>将新clone出来磁盘添加到原先能够正常运行的 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 上(运行在Ceph RBD的 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机)</p></li>
+<li><p>手工按照 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 编辑出 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> XML，定义虚拟机</p></li>
+<li><p>升级整个Host主机操作系统，再次尝试</p></li>
+<li><p>完全全新使用 Ceph RBD 从头开始安装 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04.3 LTS操作系统 (这个方法是最干净的)</p></li>
+</ul>
+<section id="z-ubuntu20-rbd-rbd">
+<h3><code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 添加RBD磁盘启动<a class="headerlink" href="#z-ubuntu20-rbd-rbd" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>将RBD磁盘 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1-disk.xml</span></code> 内容插入到 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 进行测试:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">z-ubuntu20-rbd 使用 z-k8s-m-1-disk.xml</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>  <span class="nt">&lt;disk</span> <span class="na">type=</span><span class="s">&#39;network&#39;</span> <span class="na">device=</span><span class="s">&#39;disk&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 2</span>    <span class="nt">&lt;driver</span> <span class="na">name=</span><span class="s">&#39;qemu&#39;</span> <span class="na">type=</span><span class="s">&#39;raw&#39;</span> <span class="na">cache=</span><span class="s">&#39;none&#39;</span> <span class="na">io=</span><span class="s">&#39;native&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 3</span>    <span class="nt">&lt;auth</span> <span class="na">username=</span><span class="s">&#39;libvirt&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 4</span>      <span class="nt">&lt;secret</span> <span class="na">type=</span><span class="s">&#39;ceph&#39;</span> <span class="na">uuid=</span><span class="s">&#39;3f203352-fcfc-4329-b870-34783e13493a&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 5</span>    <span class="nt">&lt;/auth&gt;</span>
+<span class="linenos"> 6</span>    <span class="nt">&lt;source</span> <span class="na">protocol=</span><span class="s">&#39;rbd&#39;</span> <span class="na">name=</span><span class="s">&#39;libvirt-pool/z-k8s-m-1&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 7</span>      <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.204&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 8</span>      <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.205&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 9</span>      <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.206&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">10</span>    <span class="nt">&lt;/source&gt;</span>
+<span class="linenos">11</span>    <span class="nt">&lt;target</span> <span class="na">dev=</span><span class="s">&#39;vda&#39;</span> <span class="na">bus=</span><span class="s">&#39;virtio&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">12</span>    <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x07&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">13</span>  <span class="nt">&lt;/disk&gt;</span>
+</pre></div>
+</div>
+</div>
+<p>添加磁盘后启动 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">start</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">--</span><span class="n">console</span>
+</pre></div>
+</div>
+<p>输出信息</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">z-ubuntu20-rbd 启动控制台信息</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>/usr/sbin/fsck.xfs: XFS file system.
+<span class="linenos"> 2</span><span class="o">[</span>    <span class="m">2</span>.247332<span class="o">]</span> pcieport <span class="m">0000</span>:00:01.5: pciehp: Failed to check link status
+<span class="linenos"> 3</span><span class="o">[</span>    <span class="m">2</span>.287301<span class="o">]</span> pcieport <span class="m">0000</span>:00:01.2: pciehp: Failed to check link status
+<span class="linenos"> 4</span><span class="o">[</span>  OK  <span class="o">]</span> Started Show Plymouth Boot Screen.
+<span class="linenos"> 5</span>plymouth-start.service
+<span class="linenos"> 6</span><span class="o">[</span>  OK  <span class="o">]</span> Started Forward Password R…s to Plymouth Directory Watch.
+<span class="linenos"> 7</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Local Encrypted Volumes.
+<span class="linenos"> 8</span><span class="o">[</span>  OK  <span class="o">]</span> Started Network Service.
+<span class="linenos"> 9</span>systemd-networkd.service
+<span class="linenos">10</span><span class="o">[</span>  OK  <span class="o">]</span> Found device /dev/ttyS0.
+<span class="linenos">11</span><span class="o">[</span>  OK  <span class="o">]</span> Found device /dev/disk/by-uuid/CC06-E7F6.
+<span class="linenos">12</span>         Starting File System Check…/dev/disk/by-uuid/CC06-E7F6...
+<span class="linenos">13</span><span class="o">[</span>  OK  <span class="o">]</span> Started File System Check Daemon to report status.
+<span class="linenos">14</span>systemd-fsckd.service
+<span class="linenos">15</span><span class="o">[</span>  OK  <span class="o">]</span> Listening on Load/Save RF …itch Status /dev/rfkill Watch.
+<span class="linenos">16</span><span class="o">[</span>  OK  <span class="o">]</span> Finished File System Check…n /dev/disk/by-uuid/CC06-E7F6.
+<span class="linenos">17</span>         Mounting /boot/efi...
+<span class="linenos">18</span>systemd-fsck@dev-disk-by<span class="se">\x</span>2duuid-CC06<span class="se">\x</span>2dE7F6.service
+<span class="linenos">19</span><span class="o">[</span>  OK  <span class="o">]</span> Mounted /boot/efi.
+<span class="linenos">20</span>boot-efi.mount
+<span class="linenos">21</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Local File Systems.
+<span class="linenos">22</span>         Starting Load AppArmor profiles...
+<span class="linenos">23</span>         Starting Set console font and keymap...
+<span class="linenos">24</span>         Starting Tell Plymouth To Write Out Runtime Data...
+<span class="linenos">25</span>         Starting Create Volatile Files and Directories...
+<span class="linenos">26</span><span class="o">[</span>  OK  <span class="o">]</span> Finished Tell Plymouth To Write Out Runtime Data.
+<span class="linenos">27</span><span class="o">[</span>  OK  <span class="o">]</span> Finished Set console font and keymap.
+<span class="linenos">28</span>console-setup.service
+<span class="linenos">29</span><span class="o">[</span>  OK  <span class="o">]</span> Finished Create Volatile Files and Directories.
+<span class="linenos">30</span>systemd-tmpfiles-setup.service
+<span class="linenos">31</span>         Starting Network Name Resolution...
+<span class="linenos">32</span>         Starting Network Time Synchronization...
+<span class="linenos">33</span>         Starting Update UTMP about System Boot/Shutdown...
+<span class="linenos">34</span>systemd-update-utmp.service
+<span class="linenos">35</span><span class="o">[</span>  OK  <span class="o">]</span> Finished Update UTMP about System Boot/Shutdown.
+<span class="linenos">36</span><span class="o">[</span>  OK  <span class="o">]</span> Started Network Time Synchronization.
+<span class="linenos">37</span>systemd-timesyncd.service
+<span class="linenos">38</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target System Time Set.
+<span class="linenos">39</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target System Time Synchronized.
+<span class="linenos">40</span><span class="o">[</span>  OK  <span class="o">]</span> Finished Load AppArmor profiles.
+<span class="linenos">41</span>apparmor.service
+<span class="linenos">42</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target System Initialization.
+<span class="linenos">43</span><span class="o">[</span>  OK  <span class="o">]</span> Started Trigger to poll fo…y enabled on GCP LTS non-pro<span class="o">)</span>.
+<span class="linenos">44</span><span class="o">[</span>  OK  <span class="o">]</span> Started Daily apt download activities.
+<span class="linenos">45</span><span class="o">[</span>  OK  <span class="o">]</span> Started Daily apt upgrade and clean activities.
+<span class="linenos">46</span><span class="o">[</span>  OK  <span class="o">]</span> Started Periodic ext4 Onli…ata Check <span class="k">for</span> All Filesystems.
+<span class="linenos">47</span><span class="o">[</span>  OK  <span class="o">]</span> Started Discard unused blocks once a week.
+<span class="linenos">48</span><span class="o">[</span>  OK  <span class="o">]</span> Started Daily rotation of log files.
+<span class="linenos">49</span><span class="o">[</span>  OK  <span class="o">]</span> Started Daily man-db regeneration.
+<span class="linenos">50</span><span class="o">[</span>  OK  <span class="o">]</span> Started Message of the Day.
+<span class="linenos">51</span><span class="o">[</span>  OK  <span class="o">]</span> Started Daily Cleanup of Temporary Directories.
+<span class="linenos">52</span><span class="o">[</span>  OK  <span class="o">]</span> Started Ubuntu Advantage Timer <span class="k">for</span> running repeated jobs.
+<span class="linenos">53</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Paths.
+<span class="linenos">54</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Timers.
+<span class="linenos">55</span><span class="o">[</span>  OK  <span class="o">]</span> Listening on D-Bus System Message Bus Socket.
+<span class="linenos">56</span><span class="o">[</span>  OK  <span class="o">]</span> Listening on UUID daemon activation socket.
+<span class="linenos">57</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Sockets.
+<span class="linenos">58</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Basic System.
+<span class="linenos">59</span>         Starting Accounts Service...
+<span class="linenos">60</span><span class="o">[</span>  OK  <span class="o">]</span> Started Regular background program processing daemon.
+<span class="linenos">61</span>cron.service
+<span class="linenos">62</span><span class="o">[</span>  OK  <span class="o">]</span> Started D-Bus System Message Bus.
+<span class="linenos">63</span>dbus.service
+<span class="linenos">64</span><span class="o">[</span>  OK  <span class="o">]</span> Started Save initial kernel messages after boot.
+<span class="linenos">65</span>dmesg.service
+<span class="linenos">66</span>         Starting Remove Stale Onli…t4 Metadata Check Snapshots...
+<span class="linenos">67</span>         Starting Record successful boot <span class="k">for</span> GRUB...
+<span class="linenos">68</span><span class="o">[</span>  OK  <span class="o">]</span> Started irqbalance daemon.
+<span class="linenos">69</span>irqbalance.service
+<span class="linenos">70</span>         Starting Dispatcher daemon <span class="k">for</span> systemd-networkd...
+<span class="linenos">71</span>         Starting System Logging Service...
+<span class="linenos">72</span>         Starting Login Service...
+<span class="linenos">73</span><span class="o">[</span>  OK  <span class="o">]</span> Started Network Name Resolution.
+<span class="linenos">74</span>systemd-resolved.service
+<span class="linenos">75</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Network.
+<span class="linenos">76</span><span class="o">[</span>  OK  <span class="o">]</span> Reached target Host and Network Name Lookups.
+<span class="linenos">77</span>         Starting OpenBSD Secure Shell server...
+<span class="linenos">78</span>         Starting Permit User Sessions...
+<span class="linenos">79</span>         Starting Rotate log files...
+<span class="linenos">80</span>         Starting Daily man-db regeneration...
+<span class="linenos">81</span><span class="o">[</span>  OK  <span class="o">]</span> Finished Permit User Sessions.
+<span class="linenos">82</span>systemd-user-sessions.service
+<span class="linenos">83</span>         Starting Hold <span class="k">until</span> boot process finishes up...
+<span class="linenos">84</span>         Starting Terminate Plymouth Boot Screen...
+<span class="linenos">85</span><span class="o">[</span>  OK  <span class="o">]</span> Started System Logging Service.
+<span class="linenos">86</span>rsyslog.service
+<span class="linenos">87</span>
+<span class="linenos">88</span>Ubuntu <span class="m">20</span>.04.3 LTS z-ubuntu-rbd ttyS0
+<span class="linenos">89</span>
+<span class="linenos">90</span>z-ubuntu-rbd login:
+</pre></div>
+</div>
+</div>
+<p>可以看到采用原始 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 配置启动是完全正常的，这说明前述 <code class="docutils literal notranslate"><span class="pre">virt-clone</span></code> 出来配置存在不兼容问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</section>
+<section id="ceph-rbd">
+<h3>全新安装基于Ceph RBD虚拟机模版<a class="headerlink" href="#ceph-rbd" title="永久链接至标题">¶</a></h3>
+<p>我在 <a class="reference internal" href="ceph_rbd_libvirt.html#ceph-rbd-libvirt"><span class="std std-ref">Libvirt集成Ceph RBD</span></a> 实践中全新安装 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> ，安装完成后检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">dumpxml</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">&gt;</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span><span class="o">.</span><span class="n">xml</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">z-ubuntu20-rbd 全新安装dumpxml</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="nt">&lt;domain</span> <span class="na">type=</span><span class="s">&#39;kvm&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">  2</span>  <span class="nt">&lt;name&gt;</span>z-ubuntu20-rbd<span class="nt">&lt;/name&gt;</span>
+<span class="linenos">  3</span>  <span class="nt">&lt;uuid&gt;</span>e14d43a0-2887-43ca-b568-cd3ee51ca31d<span class="nt">&lt;/uuid&gt;</span>
+<span class="linenos">  4</span>  <span class="nt">&lt;metadata&gt;</span>
+<span class="linenos">  5</span>    <span class="nt">&lt;libosinfo:libosinfo</span> <span class="na">xmlns:libosinfo=</span><span class="s">&quot;http://libosinfo.org/xmlns/libvirt/domain/1.0&quot;</span><span class="nt">&gt;</span>
+<span class="linenos">  6</span>      <span class="nt">&lt;libosinfo:os</span> <span class="na">id=</span><span class="s">&quot;http://ubuntu.com/ubuntu/20.04&quot;</span><span class="nt">/&gt;</span>
+<span class="linenos">  7</span>    <span class="nt">&lt;/libosinfo:libosinfo&gt;</span>
+<span class="linenos">  8</span>  <span class="nt">&lt;/metadata&gt;</span>
+<span class="linenos">  9</span>  <span class="nt">&lt;memory</span> <span class="na">unit=</span><span class="s">&#39;KiB&#39;</span><span class="nt">&gt;</span>2097152<span class="nt">&lt;/memory&gt;</span>
+<span class="linenos"> 10</span>  <span class="nt">&lt;currentMemory</span> <span class="na">unit=</span><span class="s">&#39;KiB&#39;</span><span class="nt">&gt;</span>2097152<span class="nt">&lt;/currentMemory&gt;</span>
+<span class="linenos"> 11</span>  <span class="nt">&lt;vcpu</span> <span class="na">placement=</span><span class="s">&#39;static&#39;</span><span class="nt">&gt;</span>1<span class="nt">&lt;/vcpu&gt;</span>
+<span class="linenos"> 12</span>  <span class="nt">&lt;os&gt;</span>
+<span class="linenos"> 13</span>    <span class="nt">&lt;type</span> <span class="na">arch=</span><span class="s">&#39;x86_64&#39;</span> <span class="na">machine=</span><span class="s">&#39;pc-q35-4.2&#39;</span><span class="nt">&gt;</span>hvm<span class="nt">&lt;/type&gt;</span>
+<span class="linenos"> 14</span>    <span class="nt">&lt;loader</span> <span class="na">readonly=</span><span class="s">&#39;yes&#39;</span> <span class="na">type=</span><span class="s">&#39;pflash&#39;</span><span class="nt">&gt;</span>/usr/share/OVMF/OVMF_CODE.fd<span class="nt">&lt;/loader&gt;</span>
+<span class="linenos"> 15</span>    <span class="nt">&lt;nvram&gt;</span>/var/lib/libvirt/qemu/nvram/z-ubuntu20-rbd_VARS.fd<span class="nt">&lt;/nvram&gt;</span>
+<span class="linenos"> 16</span>    <span class="nt">&lt;boot</span> <span class="na">dev=</span><span class="s">&#39;hd&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 17</span>  <span class="nt">&lt;/os&gt;</span>
+<span class="linenos"> 18</span>  <span class="nt">&lt;features&gt;</span>
+<span class="linenos"> 19</span>    <span class="nt">&lt;acpi/&gt;</span>
+<span class="linenos"> 20</span>    <span class="nt">&lt;apic/&gt;</span>
+<span class="linenos"> 21</span>  <span class="nt">&lt;/features&gt;</span>
+<span class="linenos"> 22</span>  <span class="nt">&lt;cpu</span> <span class="na">mode=</span><span class="s">&#39;host-passthrough&#39;</span> <span class="na">check=</span><span class="s">&#39;none&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 23</span>  <span class="nt">&lt;clock</span> <span class="na">offset=</span><span class="s">&#39;utc&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 24</span>    <span class="nt">&lt;timer</span> <span class="na">name=</span><span class="s">&#39;rtc&#39;</span> <span class="na">tickpolicy=</span><span class="s">&#39;catchup&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 25</span>    <span class="nt">&lt;timer</span> <span class="na">name=</span><span class="s">&#39;pit&#39;</span> <span class="na">tickpolicy=</span><span class="s">&#39;delay&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 26</span>    <span class="nt">&lt;timer</span> <span class="na">name=</span><span class="s">&#39;hpet&#39;</span> <span class="na">present=</span><span class="s">&#39;no&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 27</span>  <span class="nt">&lt;/clock&gt;</span>
+<span class="linenos"> 28</span>  <span class="nt">&lt;on_poweroff&gt;</span>destroy<span class="nt">&lt;/on_poweroff&gt;</span>
+<span class="linenos"> 29</span>  <span class="nt">&lt;on_reboot&gt;</span>restart<span class="nt">&lt;/on_reboot&gt;</span>
+<span class="linenos"> 30</span>  <span class="nt">&lt;on_crash&gt;</span>destroy<span class="nt">&lt;/on_crash&gt;</span>
+<span class="linenos"> 31</span>  <span class="nt">&lt;pm&gt;</span>
+<span class="linenos"> 32</span>    <span class="nt">&lt;suspend-to-mem</span> <span class="na">enabled=</span><span class="s">&#39;no&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 33</span>    <span class="nt">&lt;suspend-to-disk</span> <span class="na">enabled=</span><span class="s">&#39;no&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 34</span>  <span class="nt">&lt;/pm&gt;</span>
+<span class="linenos"> 35</span>  <span class="nt">&lt;devices&gt;</span>
+<span class="linenos"> 36</span>    <span class="nt">&lt;emulator&gt;</span>/usr/bin/qemu-system-x86_64<span class="nt">&lt;/emulator&gt;</span>
+<span class="linenos"> 37</span>    <span class="nt">&lt;disk</span> <span class="na">type=</span><span class="s">&#39;network&#39;</span> <span class="na">device=</span><span class="s">&#39;disk&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 38</span>      <span class="nt">&lt;driver</span> <span class="na">name=</span><span class="s">&#39;qemu&#39;</span> <span class="na">type=</span><span class="s">&#39;raw&#39;</span> <span class="na">cache=</span><span class="s">&#39;none&#39;</span> <span class="na">io=</span><span class="s">&#39;native&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 39</span>      <span class="nt">&lt;auth</span> <span class="na">username=</span><span class="s">&#39;libvirt&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 40</span>        <span class="nt">&lt;secret</span> <span class="na">type=</span><span class="s">&#39;ceph&#39;</span> <span class="na">uuid=</span><span class="s">&#39;3f203352-fcfc-4329-b870-34783e13493a&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 41</span>      <span class="nt">&lt;/auth&gt;</span>
+<span class="linenos"> 42</span>      <span class="nt">&lt;source</span> <span class="na">protocol=</span><span class="s">&#39;rbd&#39;</span> <span class="na">name=</span><span class="s">&#39;libvirt-pool/z-ubuntu20-rbd&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 43</span>        <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.204&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 44</span>        <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.205&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 45</span>        <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.206&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 46</span>      <span class="nt">&lt;/source&gt;</span>
+<span class="linenos"> 47</span>      <span class="nt">&lt;target</span> <span class="na">dev=</span><span class="s">&#39;vda&#39;</span> <span class="na">bus=</span><span class="s">&#39;virtio&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 48</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x03&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x00&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 49</span>    <span class="nt">&lt;/disk&gt;</span>
+<span class="linenos"> 50</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;usb&#39;</span> <span class="na">index=</span><span class="s">&#39;0&#39;</span> <span class="na">model=</span><span class="s">&#39;ich9-ehci1&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 51</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x1d&#39;</span> <span class="na">function=</span><span class="s">&#39;0x7&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 52</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 53</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;usb&#39;</span> <span class="na">index=</span><span class="s">&#39;0&#39;</span> <span class="na">model=</span><span class="s">&#39;ich9-uhci1&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 54</span>      <span class="nt">&lt;master</span> <span class="na">startport=</span><span class="s">&#39;0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 55</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x1d&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span> <span class="na">multifunction=</span><span class="s">&#39;on&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 56</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 57</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;usb&#39;</span> <span class="na">index=</span><span class="s">&#39;0&#39;</span> <span class="na">model=</span><span class="s">&#39;ich9-uhci2&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 58</span>      <span class="nt">&lt;master</span> <span class="na">startport=</span><span class="s">&#39;2&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 59</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x1d&#39;</span> <span class="na">function=</span><span class="s">&#39;0x1&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 60</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 61</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;usb&#39;</span> <span class="na">index=</span><span class="s">&#39;0&#39;</span> <span class="na">model=</span><span class="s">&#39;ich9-uhci3&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 62</span>      <span class="nt">&lt;master</span> <span class="na">startport=</span><span class="s">&#39;4&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 63</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x1d&#39;</span> <span class="na">function=</span><span class="s">&#39;0x2&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 64</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 65</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;sata&#39;</span> <span class="na">index=</span><span class="s">&#39;0&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 66</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x1f&#39;</span> <span class="na">function=</span><span class="s">&#39;0x2&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 67</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 68</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">index=</span><span class="s">&#39;0&#39;</span> <span class="na">model=</span><span class="s">&#39;pcie-root&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 69</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">index=</span><span class="s">&#39;1&#39;</span> <span class="na">model=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 70</span>      <span class="nt">&lt;model</span> <span class="na">name=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 71</span>      <span class="nt">&lt;target</span> <span class="na">chassis=</span><span class="s">&#39;1&#39;</span> <span class="na">port=</span><span class="s">&#39;0x8&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 72</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x01&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span> <span class="na">multifunction=</span><span class="s">&#39;on&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 73</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 74</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">index=</span><span class="s">&#39;2&#39;</span> <span class="na">model=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 75</span>      <span class="nt">&lt;model</span> <span class="na">name=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 76</span>      <span class="nt">&lt;target</span> <span class="na">chassis=</span><span class="s">&#39;2&#39;</span> <span class="na">port=</span><span class="s">&#39;0x9&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 77</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x01&#39;</span> <span class="na">function=</span><span class="s">&#39;0x1&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 78</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 79</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">index=</span><span class="s">&#39;3&#39;</span> <span class="na">model=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 80</span>      <span class="nt">&lt;model</span> <span class="na">name=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 81</span>      <span class="nt">&lt;target</span> <span class="na">chassis=</span><span class="s">&#39;3&#39;</span> <span class="na">port=</span><span class="s">&#39;0xa&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 82</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x01&#39;</span> <span class="na">function=</span><span class="s">&#39;0x2&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 83</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 84</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">index=</span><span class="s">&#39;4&#39;</span> <span class="na">model=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 85</span>      <span class="nt">&lt;model</span> <span class="na">name=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 86</span>      <span class="nt">&lt;target</span> <span class="na">chassis=</span><span class="s">&#39;4&#39;</span> <span class="na">port=</span><span class="s">&#39;0xb&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 87</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x01&#39;</span> <span class="na">function=</span><span class="s">&#39;0x3&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 88</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 89</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">index=</span><span class="s">&#39;5&#39;</span> <span class="na">model=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 90</span>      <span class="nt">&lt;model</span> <span class="na">name=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 91</span>      <span class="nt">&lt;target</span> <span class="na">chassis=</span><span class="s">&#39;5&#39;</span> <span class="na">port=</span><span class="s">&#39;0xc&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 92</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x01&#39;</span> <span class="na">function=</span><span class="s">&#39;0x4&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 93</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 94</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">index=</span><span class="s">&#39;6&#39;</span> <span class="na">model=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 95</span>      <span class="nt">&lt;model</span> <span class="na">name=</span><span class="s">&#39;pcie-root-port&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 96</span>      <span class="nt">&lt;target</span> <span class="na">chassis=</span><span class="s">&#39;6&#39;</span> <span class="na">port=</span><span class="s">&#39;0xd&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 97</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x00&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x01&#39;</span> <span class="na">function=</span><span class="s">&#39;0x5&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 98</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos"> 99</span>    <span class="nt">&lt;controller</span> <span class="na">type=</span><span class="s">&#39;virtio-serial&#39;</span> <span class="na">index=</span><span class="s">&#39;0&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">100</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x02&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x00&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">101</span>    <span class="nt">&lt;/controller&gt;</span>
+<span class="linenos">102</span>    <span class="nt">&lt;interface</span> <span class="na">type=</span><span class="s">&#39;bridge&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">103</span>      <span class="nt">&lt;mac</span> <span class="na">address=</span><span class="s">&#39;52:54:00:d9:18:dd&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">104</span>      <span class="nt">&lt;source</span> <span class="na">bridge=</span><span class="s">&#39;br0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">105</span>      <span class="nt">&lt;model</span> <span class="na">type=</span><span class="s">&#39;virtio&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">106</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x01&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x00&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">107</span>    <span class="nt">&lt;/interface&gt;</span>
+<span class="linenos">108</span>    <span class="nt">&lt;serial</span> <span class="na">type=</span><span class="s">&#39;pty&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">109</span>      <span class="nt">&lt;target</span> <span class="na">type=</span><span class="s">&#39;isa-serial&#39;</span> <span class="na">port=</span><span class="s">&#39;0&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">110</span>        <span class="nt">&lt;model</span> <span class="na">name=</span><span class="s">&#39;isa-serial&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">111</span>      <span class="nt">&lt;/target&gt;</span>
+<span class="linenos">112</span>    <span class="nt">&lt;/serial&gt;</span>
+<span class="linenos">113</span>    <span class="nt">&lt;console</span> <span class="na">type=</span><span class="s">&#39;pty&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">114</span>      <span class="nt">&lt;target</span> <span class="na">type=</span><span class="s">&#39;serial&#39;</span> <span class="na">port=</span><span class="s">&#39;0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">115</span>    <span class="nt">&lt;/console&gt;</span>
+<span class="linenos">116</span>    <span class="nt">&lt;channel</span> <span class="na">type=</span><span class="s">&#39;unix&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">117</span>      <span class="nt">&lt;target</span> <span class="na">type=</span><span class="s">&#39;virtio&#39;</span> <span class="na">name=</span><span class="s">&#39;org.qemu.guest_agent.0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">118</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;virtio-serial&#39;</span> <span class="na">controller=</span><span class="s">&#39;0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0&#39;</span> <span class="na">port=</span><span class="s">&#39;1&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">119</span>    <span class="nt">&lt;/channel&gt;</span>
+<span class="linenos">120</span>    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&#39;mouse&#39;</span> <span class="na">bus=</span><span class="s">&#39;ps2&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">121</span>    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&#39;keyboard&#39;</span> <span class="na">bus=</span><span class="s">&#39;ps2&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">122</span>    <span class="nt">&lt;memballoon</span> <span class="na">model=</span><span class="s">&#39;virtio&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">123</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x04&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x00&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">124</span>    <span class="nt">&lt;/memballoon&gt;</span>
+<span class="linenos">125</span>    <span class="nt">&lt;rng</span> <span class="na">model=</span><span class="s">&#39;virtio&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">126</span>      <span class="nt">&lt;backend</span> <span class="na">model=</span><span class="s">&#39;random&#39;</span><span class="nt">&gt;</span>/dev/urandom<span class="nt">&lt;/backend&gt;</span>
+<span class="linenos">127</span>      <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x05&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x00&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">128</span>    <span class="nt">&lt;/rng&gt;</span>
+<span class="linenos">129</span>  <span class="nt">&lt;/devices&gt;</span>
+<span class="linenos">130</span><span class="nt">&lt;/domain&gt;</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>对全新安装的基于Ceph RBD的虚拟机进行clone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>依然失败:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span>    <span class="p">[</span><span class="n">Errno</span> <span class="mi">2</span><span class="p">]</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span><span class="p">:</span> <span class="s1">&#39;rbd://192.168.6.204:6789/libvirt-pool&#39;</span>
+</pre></div>
+</div>
+<p>所以，重新尝试先去除RBD磁盘，再尝试clone</p>
+<ul class="simple">
+<li><p>从新创建的 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd.xml</span></code> 复制出新版本 <code class="docutils literal notranslate"><span class="pre">new-rbd.xml</span></code></p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">全新创建VM的rbd磁盘设备XML</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">&lt;disk</span> <span class="na">type=</span><span class="s">&#39;network&#39;</span> <span class="na">device=</span><span class="s">&#39;disk&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 2</span>  <span class="nt">&lt;driver</span> <span class="na">name=</span><span class="s">&#39;qemu&#39;</span> <span class="na">type=</span><span class="s">&#39;raw&#39;</span> <span class="na">cache=</span><span class="s">&#39;none&#39;</span> <span class="na">io=</span><span class="s">&#39;native&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 3</span>  <span class="nt">&lt;auth</span> <span class="na">username=</span><span class="s">&#39;libvirt&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 4</span>    <span class="nt">&lt;secret</span> <span class="na">type=</span><span class="s">&#39;ceph&#39;</span> <span class="na">uuid=</span><span class="s">&#39;3f203352-fcfc-4329-b870-34783e13493a&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 5</span>  <span class="nt">&lt;/auth&gt;</span>
+<span class="linenos"> 6</span>  <span class="nt">&lt;source</span> <span class="na">protocol=</span><span class="s">&#39;rbd&#39;</span> <span class="na">name=</span><span class="s">&#39;libvirt-pool/RBD_DISK&#39;</span><span class="nt">&gt;</span>
+<span class="linenos"> 7</span>    <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.204&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 8</span>    <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.205&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos"> 9</span>    <span class="nt">&lt;host</span> <span class="na">name=</span><span class="s">&#39;192.168.6.206&#39;</span> <span class="na">port=</span><span class="s">&#39;6789&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">10</span>  <span class="nt">&lt;/source&gt;</span>
+<span class="linenos">11</span>  <span class="nt">&lt;target</span> <span class="na">dev=</span><span class="s">&#39;vda&#39;</span> <span class="na">bus=</span><span class="s">&#39;virtio&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">12</span>  <span class="nt">&lt;address</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">domain=</span><span class="s">&#39;0x0000&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x03&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x00&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">13</span><span class="nt">&lt;/disk&gt;</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>将 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 的磁盘设备detach掉:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">detach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="n">new</span><span class="o">-</span><span class="n">rbd</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
+</pre></div>
+</div>
+</li>
+<li><p>现在 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 没有磁盘，我们开始clone:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virt</span><span class="o">-</span><span class="n">clone</span> <span class="o">--</span><span class="n">original</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">clone</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>成功提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Allocating</span> <span class="s1">&#39;z-k8s-m-1_VARS.fd&#39;</span>    <span class="o">|</span> <span class="mi">128</span> <span class="n">kB</span>  <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+<span class="n">Clone</span> <span class="s1">&#39;z-k8s-m-1&#39;</span> <span class="n">created</span> <span class="n">successfully</span><span class="o">.</span>
+</pre></div>
+</div>
+<ul>
+<li><p>clone出来的 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> 没有磁盘，先复制出磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rbd</span> <span class="n">cp</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="o">-</span><span class="n">rbd</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后将磁盘添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>VM=z-k8s-m-1
+cat new-rbd.xml | sed &quot;s/RBD_DISK/$VM/g&quot; &gt; ${VM}-disk.xml
+virsh attach-device $VM ${VM}-disk.xml --config
+</pre></div>
+</div>
+</li>
+<li><p>启动虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>virsh start $VM
+</pre></div>
+</div>
+</li>
+</ul>
+<p>通过全新安装 <a class="reference internal" href="ceph_rbd_libvirt.html#ceph-rbd-libvirt"><span class="std std-ref">Libvirt集成Ceph RBD</span></a> 虚拟机进行clone，是可以成功完成虚拟机复制的。之前在 <a class="reference internal" href="../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 虚拟机的虚拟磁盘导入 <a class="reference internal" href="index.html#ceph-rbd"><span class="std std-ref">Ceph Block Device(RBD)</span></a> ，我手工修改的原始VM xml配置，虽然首个导入VM可以正常运行，但是再通过 <code class="docutils literal notranslate"><span class="pre">virt-clone</span></code> 复制存在不兼容问题。</p>
+<p>目前 workaround 方式是每个模版虚拟机在 <a class="reference internal" href="ceph_rbd_libvirt.html#ceph-rbd-libvirt"><span class="std std-ref">Libvirt集成Ceph RBD</span></a> 重新安装一次，然后作为模版进行clone复制。</p>
+<ul>
+<li><p>虚拟机内部需要修订内容有:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 主机名</span>
+<span class="n">sudo</span> <span class="n">hostnamectl</span> <span class="nb">set</span><span class="o">-</span><span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span>
+<span class="c1"># IP</span>
+<span class="n">sudo</span> <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/192.168.6.247/192.168.6.101/g&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netplan</span><span class="o">/</span><span class="mi">01</span><span class="o">-</span><span class="n">netcfg</span><span class="o">.</span><span class="n">yaml</span>
+<span class="c1"># hosts</span>
+<span class="n">sudo</span> <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;/z-ubuntu-rbd/d&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+<span class="n">echo</span> <span class="s2">&quot;192.168.6.101  z-k8s-m-1.huatai.me  z-k8s-m-1&quot;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="libguestfs">
+<h2>libguestfs<a class="headerlink" href="#libguestfs" title="永久链接至标题">¶</a></h2>
+<p>为了便于脚本化完成大批虚拟机的创建，我们可以采用 <a class="reference internal" href="../../kvm/kvm_libguestfs.html#kvm-libguestfs"><span class="std std-ref">使用libguestfs修订KVM镜像</span></a> 完成虚拟机镜像修改，这样就无需手工操作。</p>
+<ul>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">guestfish</span></code> 访问 <a class="reference internal" href="index.html#ceph-rbd"><span class="std std-ref">Ceph Block Device(RBD)</span></a> 磁盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">guestfish</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">d</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">z-k8s-m-2</span></code> 就是访问 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 中domain <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> ，会直接启动一个内核环境挂载虚拟机的磁盘(对于Ceph RBD磁盘也可以处理，说明是通过 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 实现的)</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在 <code class="docutils literal notranslate"><span class="pre">guestfish</span></code> 交互命令中 <code class="docutils literal notranslate"><span class="pre">&gt;&lt;fs&gt;</span></code> 是提示符，所以后续案例中，不要输入 <code class="docutils literal notranslate"><span class="pre">&gt;&lt;fs&gt;</span></code></p>
+</div>
+<ul>
+<li><p>修改虚拟机主机名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&lt;</span><span class="n">fs</span><span class="o">&gt;</span> <span class="n">write</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hostname</span> <span class="s2">&quot;z-k8s-m-2&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在 <code class="docutils literal notranslate"><span class="pre">guestfish</span></code> 中，提供了非常微小的 <code class="docutils literal notranslate"><span class="pre">busybox</span></code> 系统，但是没有完整的运维工具，所以想使用 <code class="docutils literal notranslate"><span class="pre">sed</span></code> 编辑需要一些曲折:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;&lt;fs&gt; download /etc/netplan/01-netcfg.yaml /tmp/01-netcfg.yaml
+&gt;&lt;fs&gt; ! sed -i &#39;s/192.168.6.247/192.168.6.102/g&#39; /tmp/01-netcfg.yaml
+&gt;&lt;fs&gt; upload /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在 <code class="docutils literal notranslate"><span class="pre">guestfish</span></code> 内部没有提供运维工具，如 <code class="docutils literal notranslate"><span class="pre">sed</span></code> ，但是可以把文件 <code class="docutils literal notranslate"><span class="pre">download</span></code> 到本地物理主机上( 注意，就是运行虚拟机的host物理主机 )，然后通过 <code class="docutils literal notranslate"><span class="pre">!</span></code> 就可以运行本地物理主机上工具来处理。</p>
+<p>这里你可以看到我是先把 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/01-netcfg.yaml</span></code> 文件下载到物理主机 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 的 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 目录下( 也就是物理主机 <code class="docutils literal notranslate"><span class="pre">/tmp/01-netcfg.yaml</span></code> )，修改好以后再 <code class="docutils literal notranslate"><span class="pre">upload</span></code> 回去</p>
+</div>
+<p>上述交互命令命令可以改写成一段脚本:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">修改虚拟机IP的简单脚本</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="ch">#!/bin/bash -</span>
+<span class="linenos">2</span><span class="nb">set</span> -e
+<span class="linenos">3</span><span class="nv">vm</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span>guestfish -d <span class="s2">&quot;</span><span class="nv">$vm</span><span class="s2">&quot;</span> -i <span class="s">&lt;&lt;&#39;EOF&#39;</span>
+<span class="linenos">6</span><span class="s">  download /etc/netplan/01-netcfg.yaml /tmp/01-netcfg.yaml</span>
+<span class="linenos">7</span><span class="s">  ! sed -i &#39;s/192.168.6.247/192.168.6.102/g&#39; /tmp/01-netcfg.yaml</span>
+<span class="linenos">8</span><span class="s">  upload /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml</span>
+<span class="linenos">9</span><span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="clone">
+<h2>完整的clone脚本<a class="headerlink" href="#clone" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>将上述复制虚拟机以及通过 libguestfs 工具修订虚拟机配置的步骤串联起来，形成一个简单的 <code class="docutils literal notranslate"><span class="pre">clone_vm.sh</span></code> 脚本，使用方法如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">clone_vm</span><span class="o">.</span><span class="n">sh</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">3</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">clone虚拟机的简单脚本</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/bin/env bash</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span>. /etc/profile
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="nv">origin_vm</span><span class="o">=</span><span class="s2">&quot;z-ubuntu20-rbd&quot;</span>
+<span class="linenos"> 6</span><span class="nv">vm</span><span class="o">=</span><span class="nv">$1</span>
+<span class="linenos"> 7</span><span class="nv">rbd_pool</span><span class="o">=</span><span class="s2">&quot;libvirt-pool&quot;</span>
+<span class="linenos"> 8</span><span class="nv">hosts_csv</span><span class="o">=</span>/home/huatai/github.com/cloud-atlas/source/real/private_cloud/priv_cloud_infra/hosts.csv
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="k">function</span> init <span class="o">{</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="k">if</span> <span class="o">[</span> ! -f new-rbd.xml <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>cat &gt; new-rbd.xml <span class="s">&lt;&lt;__XML__</span>
+<span class="linenos">16</span><span class="s">&lt;disk type=&#39;network&#39; device=&#39;disk&#39;&gt;</span>
+<span class="linenos">17</span><span class="s">  &lt;driver name=&#39;qemu&#39; type=&#39;raw&#39; cache=&#39;none&#39; io=&#39;native&#39;/&gt;</span>
+<span class="linenos">18</span><span class="s">  &lt;auth username=&#39;libvirt&#39;&gt;</span>
+<span class="linenos">19</span><span class="s">    &lt;secret type=&#39;ceph&#39; uuid=&#39;3f203352-fcfc-4329-b870-34783e13493a&#39;/&gt;</span>
+<span class="linenos">20</span><span class="s">  &lt;/auth&gt;</span>
+<span class="linenos">21</span><span class="s">  &lt;source protocol=&#39;rbd&#39; name=&#39;libvirt-pool/RBD_DISK&#39;&gt;</span>
+<span class="linenos">22</span><span class="s">    &lt;host name=&#39;192.168.6.204&#39; port=&#39;6789&#39;/&gt;</span>
+<span class="linenos">23</span><span class="s">    &lt;host name=&#39;192.168.6.205&#39; port=&#39;6789&#39;/&gt;</span>
+<span class="linenos">24</span><span class="s">    &lt;host name=&#39;192.168.6.206&#39; port=&#39;6789&#39;/&gt;</span>
+<span class="linenos">25</span><span class="s">  &lt;/source&gt;</span>
+<span class="linenos">26</span><span class="s">  &lt;target dev=&#39;vda&#39; bus=&#39;virtio&#39;/&gt;</span>
+<span class="linenos">27</span><span class="s">  &lt;address type=&#39;pci&#39; domain=&#39;0x0000&#39; bus=&#39;0x03&#39; slot=&#39;0x00&#39; function=&#39;0x0&#39;/&gt;</span>
+<span class="linenos">28</span><span class="s">&lt;/disk&gt;</span>
+<span class="linenos">29</span><span class="s">__XML__</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span>     <span class="k">fi</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span>     <span class="nv">ip</span><span class="o">=</span><span class="sb">`</span>grep <span class="s2">&quot;,</span><span class="si">${</span><span class="nv">vm</span><span class="si">}</span><span class="s2">,&quot;</span> <span class="nv">$hosts_csv</span> <span class="p">|</span> awk -F, <span class="s1">&#39;{print $2}&#39;</span><span class="sb">`</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span>     <span class="k">if</span> <span class="o">[</span> -z <span class="nv">$ip</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+<span class="linenos">36</span>         <span class="nb">echo</span> <span class="s2">&quot;You input vm name is invalid, can&#39;t find vm IP&quot;</span>
+<span class="linenos">37</span>         <span class="nb">echo</span> <span class="s2">&quot;Please check </span><span class="nv">$hosts_csv</span><span class="s2">&quot;</span>
+<span class="linenos">38</span>         <span class="nb">exit</span> <span class="m">1</span>
+<span class="linenos">39</span>     <span class="k">fi</span>
+<span class="linenos">40</span><span class="o">}</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span><span class="k">function</span> clone_vm <span class="o">{</span>
+<span class="linenos">43</span>    virt-clone --original <span class="nv">$origin_vm</span> --name <span class="nv">$vm</span> --auto-clone
+<span class="linenos">44</span>    sudo rbd cp <span class="si">${</span><span class="nv">rbd_pool</span><span class="si">}</span>/<span class="si">${</span><span class="nv">origin_vm</span><span class="si">}</span> <span class="si">${</span><span class="nv">rbd_pool</span><span class="si">}</span>/<span class="si">${</span><span class="nv">vm</span><span class="si">}</span>
+<span class="linenos">45</span>    cat new-rbd.xml <span class="p">|</span> sed <span class="s2">&quot;s/RBD_DISK/</span><span class="si">${</span><span class="nv">vm</span><span class="si">}</span><span class="s2">/g&quot;</span> &gt; <span class="si">${</span><span class="nv">vm</span><span class="si">}</span>-disk.xml
+<span class="linenos">46</span>    virsh attach-device <span class="nv">$vm</span> <span class="si">${</span><span class="nv">vm</span><span class="si">}</span>-disk.xml --config
+<span class="linenos">47</span><span class="o">}</span>
+<span class="linenos">48</span>
+<span class="linenos">49</span><span class="k">function</span> customize_vm <span class="o">{</span>
+<span class="linenos">50</span>
+<span class="linenos">51</span>sudo guestfish -d <span class="s2">&quot;</span><span class="nv">$vm</span><span class="s2">&quot;</span> -i <span class="s">&lt;&lt;EOF</span>
+<span class="linenos">52</span><span class="s">  write /etc/hostname &quot;${vm}&quot;</span>
+<span class="linenos">53</span>
+<span class="linenos">54</span><span class="s">  download /etc/netplan/01-netcfg.yaml /tmp/01-netcfg.yaml</span>
+<span class="linenos">55</span><span class="s">  ! sed -i &quot;s/192.168.6.247/${ip}/g&quot; /tmp/01-netcfg.yaml</span>
+<span class="linenos">56</span><span class="s">  upload /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml</span>
+<span class="linenos">57</span>
+<span class="linenos">58</span><span class="s">  download /etc/hosts /tmp/hosts</span>
+<span class="linenos">59</span><span class="s">  ! sed -i &#39;/z-ubuntu-rbd/d&#39; /tmp/hosts</span>
+<span class="linenos">60</span><span class="s">  ! echo &quot;${ip}  ${vm}.huatai.me  ${vm}&quot; &gt;&gt; /tmp/hosts</span>
+<span class="linenos">61</span><span class="s">  upload /tmp/hosts /etc/hosts</span>
+<span class="linenos">62</span><span class="s">EOF</span>
+<span class="linenos">63</span>
+<span class="linenos">64</span><span class="o">}</span>
+<span class="linenos">65</span>
+<span class="linenos">66</span>init
+<span class="linenos">67</span>clone_vm
+<span class="linenos">68</span>customize_vm
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际使用时请根据环境做一些修订:</p>
+<ul class="simple">
+<li><p>我这里模版虚拟机 <code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> 安装时设置该虚拟机IP地址是 <code class="docutils literal notranslate"><span class="pre">192.168.6.247</span></code></p></li>
+</ul>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://bugzilla.redhat.com/show_bug.cgi?id=1392798">Bug 1392798 - secrets from libvirt domains are not read</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="down_1_of_3_ceph_vm_rbd.html" class="btn btn-neutral float-left" title="1/3 Ceph节点宕机演练: VM RBD测试" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../spdk/index.html" class="btn btn-neutral float-right" title="Ceph SPDK" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

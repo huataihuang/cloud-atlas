@@ -10,9 +10,6 @@
 
    部署Ceph采用 :ref:`install_ceph_manual` ，本文汇总精要
 
-Ceph部署
-=============
-
 - 虚拟机采用 :ref:`priv_kvm` clone方法创建::
 
    z-b-data-1
@@ -24,7 +21,11 @@ Ceph部署
    sudo apt update && sudo apt install ceph ceph-mds
 
 ``z-b-data-1`` 部署Ceph集群初始化
-------------------------------------
+===================================
+
+.. note::
+
+   首先 :ref:`install_ceph_mon` ，提供Ceph bootstrap
 
 - 生成一个unique ID，用于fsid::
 
@@ -84,7 +85,7 @@ Ceph部署
    sudo ceph mon enable-msgr2
 
 ``z-b-data-1`` 部署mgr
-------------------------------------
+==========================
 
 - 创建服务的认证key::
 
@@ -145,10 +146,10 @@ Ceph部署
 
 现在可以用创建的账号登陆Ceph管理平台了
 
-添加OSD
----------------
+添加第一个OSD
+==============
 
-- 分别登陆3台 ``z-b-data-X`` 虚拟机，执行以下命令准备好磁盘分区 500G ::
+- 登陆 ``z-b-data-1`` 虚拟机，执行以下命令准备好磁盘分区 500G ::
 
    sudo parted /dev/nvme0n1 mklabel gpt
    sudo parted -a optimal /dev/nvme0n1 mkpart primary 0% 500GB
@@ -157,6 +158,161 @@ Ceph部署
 
    sudo ceph-volume lvm create --bluestore --data /dev/nvme0n1p1
 
+.. note::
+
+   ``ceph-volume lvm create`` 会自动完成OSD磁盘初始化，OSD服务启动和systemd配置，所有操作都自动完成，非常简便，无需进一步设置。
+
 - 完成后检查OSD::
 
    sudo ceph-volume lvm list
+
+- 检查集群状态::
+
+   sudo ceph -s
+
+添加MON(配置3个)
+===================
+
+为满足冗余，在 ``z-b-data-2`` 和 ``z-b-data-3`` 上也部署 ``ceph-mon``
+
+- 在主机 ``z-b-data-1`` 上执行以下命令获取monitor map::
+
+   sudo ceph mon getmap -o /tmp/monmap
+
+注意，此时从集群中获得的 ``monmap`` 只包含了第一台服务器 ``z-b-data-1`` ，我们还需要添加增加的 ``z-b-data-2`` 和 ``z-b-data-3`` ::
+
+   monmaptool --add z-b-data-2 192.168.6.205 --fsid 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17 /tmp/monmap
+   monmaptool --add z-b-data-3 192.168.6.206 --fsid 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17 /tmp/monmap
+
+- 停止 ``z-b-data-1`` 上 ``ceph-mon`` 并更新 monitor map::
+
+   sudo systemctl stop ceph-mon@z-b-data-1
+   sudo ceph-mon -i z-b-data-1 --inject-monmap /tmp/monmap
+
+- 登陆需要部署monitor的服务器，执行以下命令创建mon默认目录::
+
+   mon-id="z-b-data-2"
+   sudo mkdir /var/lib/ceph/mon/ceph-${mon-id}
+
+- 将 192.168.6.204 ( ``z-b-data-1``  ) 管理密钥复制到需要部署 ``ceph-mon`` 的配置目录下::
+
+   scp 192.168.6.204:/etc/ceph/ceph.client.admin.keyring /etc/ceph/
+   scp 192.168.6.204:/etc/ceph/ceph.conf /etc/ceph/
+
+- 在主机 ``z-b-data-2`` 上执行以下命令获取monitors的keyring::
+
+   sudo ceph auth get mon. -o /tmp/ceph.mon.keyring
+
+- 在主机 ``z-b-data-2`` 上执行以下命令获取monitor map::
+
+   sudo ceph mon getmap -o /tmp/monmap
+
+- 在主机 ``z-b-data-2`` 准备monitor的数据目录，这里必须指定monitor map路径，这样才能够获取监控的quorum信息以及 ``fsid`` ，而且还需要提供 monitor keyring的路径::
+
+   sudo ceph-mon --mkfs -i z-b-data-2 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+
+ - 启动服务::
+
+    sudo systemctl start ceph-mon@z-b-data-2
+    sudo systemctl enable ceph-mon@z-b-data-2
+
+- 在 ``z-b-data-3`` 上完成和 ``z-b-data-2`` 相同的操作完成 ``ceph-mon`` 部署
+
+- 检查集群状态::
+
+   sudo ceph -s
+
+增加OSD(每个节点一个,共3个)
+===============================
+
+现在Ceph集群只有 ``z-b-data-1`` 上有一个OSD运行，不能满足3副本稳定要求。所以，在 ``z-b-data-2`` 和 ``z-b-data-3`` 上各部署一个 OSD，实现3副本
+
+- 在两台 ``z-b-data-2`` 和 ``z-b-data-3`` 复制配置和keyring (前面扩容 ``ceph-mon`` 已经做过)::
+
+   scp 192.168.6.204:/etc/ceph/ceph.client.admin.keyring /etc/ceph/
+   scp 192.168.6.204:/etc/ceph/ceph.conf /etc/ceph/
+
+- 在 ``z-b-data-2`` 和 ``z-b-data-3`` 准备磁盘::
+
+   sudo parted /dev/nvme0n1 mklabel gpt
+   sudo parted -a optimal /dev/nvme0n1 mkpart primary 0% 500GB
+
+- 将 ``z-b-data-1`` (192.68.6.204) ``/var/lib/ceph/bootstrap-osd/ceph.keyring`` 复制到部署OSD的服务器对应目录::
+
+   scp 192.168.6.204:/var/lib/ceph/bootstrap-osd/ceph.keyring /var/lib/ceph/bootstrap-osd/
+
+- 在  ``z-b-data-2`` 和 ``z-b-data-3`` 上创建OSD磁盘卷::
+
+   sudo ceph-volume lvm create --bluestore --data /dev/nvme0n1p1
+
+- 此时检查ceph集群状态，可以看到由于满足了3副本要求，整个集群进入稳定健康状态::
+
+   sudo ceph -s
+
+部署MDS(用于虚拟化RBD)
+=========================
+
+部署 ``ceph-mds`` 服务，对外提供POSIX兼容元数据
+
+- 在 ``z-b-data-1`` 上执行::
+
+   cluster=ceph
+   id=z-b-data-1
+   sudo mkdir -p /var/lib/ceph/mds/${cluster}-${id}
+
+- 创建keyring::
+
+   sudo ceph-authtool --create-keyring /var/lib/ceph/mds/${cluster}-${id}/keyring --gen-key -n mds.${id}
+   sudo chown -R ceph:ceph /var/lib/ceph/mds/${cluster}-${id}
+
+- 导入keyring和设置caps::
+
+   sudo ceph auth add mds.${id} osd "allow rwx" mds "allow *" mon "allow profile mds" -i /var/lib/ceph/mds/${cluster}-${id}/keyring
+
+- 启动服务::
+
+   sudo systemctl start ceph-mds@${id}
+   sudo systemctl enable ceph-mds@${id}
+   sudo systemctl status ceph-mds@${id}
+
+- 修改每个服务器上 ``/etc/ceph/ceph.conf`` 配置，添加::
+
+   [mds.z-b-data-1]
+   host = 192.168.6.204
+   
+   [mds.z-b-data-2]
+   host = 192.168.6.205
+   
+   [mds.z-b-data-3]
+   host = 192.168.6.206 
+
+然后重启每个服务器上 ``ceph-mon`` ::
+
+   sudo systemctl restart ceph-mon@`hostname`
+
+- 在 ``z-b-data-2`` 和 ``z-b-data-3`` 上执行以下命令将 ``z-b-data-1`` 主机上 keyring 复制过来(这里举例是 ``z-b-data-2`` )::
+
+   cluster=ceph
+   id=z-b-data-2
+
+   sudo mkdir /var/lib/ceph/mds/${cluster}-${id}
+   sudo ceph-authtool --create-keyring /var/lib/ceph/mds/${cluster}-${id}/keyring --gen-key -n mds.${id}
+   sudo chown -R ceph:ceph /var/lib/ceph/mds/${cluster}-${id}
+
+- 导入keyring和设置caps::
+
+   sudo ceph auth add mds.${id} osd "allow rwx" mds "allow *" mon "allow profile mds" -i /var/lib/ceph/mds/${cluster}-${id}/keyring
+
+- 启动服务器::
+
+   sudo systemctl start ceph-mds@${id}
+   sudo systemctl enable ceph-mds@${id}
+
+同样在 ``z-b-data-3`` 上完成上述操作
+
+- 检查状态::
+
+   sudo ceph -s
+
+   sudo ceph fs dump
+
