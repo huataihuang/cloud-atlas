@@ -8,6 +8,7 @@ fio 存储性能测试
    :maxdepth: 1
 
    fio_startup.rst
+   parallel_fio.rst
 
 .. only::  subproject and html
 

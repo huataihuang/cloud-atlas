@@ -7,13 +7,17 @@ Linux udev管理设备
 udev配置块设备属主
 ====================
 
-我在 :ref:`add_ceph_osds` 遇到一个经常在存储集群中会遇到的问题，当服务器重启以后，原先在 ``ceph-volume raw prepare`` 命令中执行的子命令::
+我在探索 :ref:`add_ceph_osds_raw` 遇到一个经常在存储集群中会遇到的问题，当服务器重启以后，原先在 ``ceph-volume raw prepare`` 命令中执行的子命令::
 
    /usr/bin/chown -R ceph:ceph /dev/nvme0n1p1
 
 当操作系统重启以后，磁盘设备会恢复到默认的 ``root`` 用户属主::
 
    brw-rw---- 1 root disk 259, 1 Nov 30 16:31 /dev/nvme0n1p1
+
+.. note::
+
+   实际最后这个设备文件属性还是通过Ceph OSD自身的内置功能去设置的，并没有使用本文的 ``udev`` 设置方法，不过，本文设置 ``udev`` 方法具有普适性，可作为参考。
 
 这个问题实际上在 Oracle ASM 存储中(作为Oracle RAC集群的存储基础)也有类似要求(重启后要求设备属主属于 ``oinstall`` )，也就是说对于分布式系统，应用进程必须能直接访问存储块设备(raw disk)，具备对应权限。
 

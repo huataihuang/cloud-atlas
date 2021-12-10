@@ -128,6 +128,9 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
 
 .. _ceph_args:
 
+``CEPH_ARGS`` 环境变量
+-----------------------
+
 .. note::
 
    Ceph提供了一个避免每次输入参数的方法::
@@ -139,6 +142,9 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
       rbd ls
 
    WOW!!! 我突然发现，这个方法可能是解决 :ref:`install_ceph_manual_zdata` 解决自定义Ceph集群名的方法，传递 ``--ceph zdata`` 参数
+
+RBD镜像
+------------
 
 - 创建RBD镜像::
 
@@ -222,6 +228,9 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
 创建虚拟机
 ------------
 
+CentOS 9 Stream
+~~~~~~~~~~~~~~~~~
+
 - 创建RBD磁盘::
 
    # virsh vol-create-as "${LIBVIRT_POOL}" "${VM_VOLUME}" --capacity "${VM_SZ}" --format raw
@@ -242,10 +251,75 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
    new-libvirt-image   libvirt-pool/new-libvirt-image
    z-centos9           libvirt-pool/z-centos9
 
+- 使用 ``virsh vol-create-as`` 创建的 ``RBD`` 镜像不能直接用 ``rbd`` 命令删除(即使已经 ``virsh undefine z-centos9 --nvram`` 删除了虚拟机定义)，会提示错误::
+
+   $ sudo rbd -p libvirt-pool rm z-centos9
+   2021-12-09T17:15:40.727+0800 7fe7c1ffb700 -1 librbd::image::PreRemoveRequest: 0x55caaa6e6ea0 check_image_watchers: image has watchers - not removing
+   Removing image: 0% complete...failed.
+   rbd: error: image still has watchers
+   This means the image is still open or the client using it crashed. Try again after closing/unmapping it or waiting 30s for the crashed client to timeout.
+
+尝试执行删除::
+
+   virsh vol-delete z-centos9 --pool images_rbd
+
+不过还是报错::
+
+   error: Failed to delete vol z-centos9
+   error: failed to remove volume 'libvirt-pool/z-centos9': No such file or directory
+
+参考 `ceph can not remove image - watchers <https://forum.proxmox.com/threads/ceph-can-not-remove-image-watchers.49168/>`_ ，检查watcher::
+
+   sudo rbd status -p libvirt-pool z-centos9
+
+可以看到::
+
+   Watchers:
+       watcher=192.168.6.200:0/1289276469 client.164826 cookie=140044924882800
+
+检查磁盘信息::
+
+   sudo rbd info -p libvirt-pool z-centos9
+
+输出信息::
+
+   rbd image 'z-centos9':
+   	size 5.6 GiB in 1431 objects
+   	order 22 (4 MiB objects)
+   	snapshot_count: 0
+   	id: 281f7561e072c
+   	block_name_prefix: rbd_data.281f7561e072c
+   	format: 2
+   	features: layering, exclusive-lock, object-map, fast-diff, deep-flatten
+   	op_features:
+   	flags:
+   	create_timestamp: Tue Dec  7 21:10:56 2021
+   	access_timestamp: Tue Dec  7 23:20:30 2021
+   	modify_timestamp: Tue Dec  7 21:10:56 2021 
+
+检查watcher::
+
+   sudo rados -p libvirt-pool listwatchers rbd_header.281f7561e072c
+
+可以看到::
+
+   watcher=192.168.6.200:0/1289276469 client.164826 cookie=140044924882800
+
+但是 ``没有 mapped`` ::
+
+   sudo rbd showmapped
+
+输出是空的。
+
+我错了，我突然发现我忘记停止 ``z-centos9`` 虚拟机，所以导致上述清理失败，通过以下方式清理完成::
+
+   sudo virsh destroy z-centos9
+   sudo rbd -p libvirt-pool rm z-centos9
+
 - 安装虚拟机::
 
    virt-install \
-     --network bridge:virbr0 \
+     --network bridge:br0 \
      --name z-centos9 \
      --ram=2048 \
      --vcpus=1 \
@@ -260,8 +334,65 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
 
    不过我安装CentOS 9 Stream尚未成功，具体实践见 :ref:`create_vm`
 
+Ubuntu 20
+~~~~~~~~~~~~~~~~~
+
+- 创建RBD磁盘::
+
+   # virsh vol-create-as "${LIBVIRT_POOL}" "${VM_VOLUME}" --capacity "${VM_SZ}" --format raw
+   virsh vol-create-as --pool images_rbd --name z-ubuntu20-rbd --capacity 7GB --allocation 7GB --format raw
+
+.. note::
+
+   ``virsh vol-create-as`` 使用方法参考 `Red Hat Enterprise Linux7 > Virtualization Deployment and Administration Guide > 20.30. Storage Volume Commands <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/virtualization_deployment_and_administration_guide/sect-managing_guest_virtual_machines_with_virsh-storage_volume_commands>`_
+
+   不过，似乎对于RBD ``--capacity 7GB --allocation 7GB`` 也不是立即完全分配存储空间？
+
+- 安装虚拟机::
+
+   virt-install \
+     --network bridge:br0 \
+     --name z-ubuntu20-rbd \
+     --ram=2048 \
+     --vcpus=1 \
+     --os-type=Linux --os-variant=ubuntu20.04 \
+     --boot uefi --cpu host-passthrough \
+     --disk vol=images_rbd/z-ubuntu20-rbd,sparse=false,format=raw,bus=virtio,cache=none,io=native \
+     --graphics none \
+     --location=http://mirrors.163.com/ubuntu/dists/focal/main/installer-amd64/ \
+     --extra-args="console=tty0 console=ttyS0,115200"
+
+安装完成后按照 :ref:`priv_kvm` 中订正
+
+- 修订NTP::
+
+   echo "NTP=192.168.6.200" >> /etc/systemd/timesyncd.conf
+
+- 修订控制台输出
+   
+默认安装 ``/etc/default/grub`` 内容::
+
+   GRUB_TERMINAL=serial
+   GRUB_SERIAL_COMMAND="serial --unit=0 --speed=115200 --stop=1"
+
+修改成::
+
+   GRUB_CMDLINE_LINUX="console=ttyS0,115200"
+   GRUB_TERMINAL="serial console"
+   GRUB_SERIAL_COMMAND="serial --speed=115200"
+
+然后执行::
+
+   sudo update-grub
+
+- 修订虚拟机 ``/etc/sudoers`` 并添加主机登陆ssh key
+
 磁盘转换
---------------------
+===================
+
+.. note::
+
+   以下实践是将 :ref:`libvirt_lvm_pool` 上VM转换成基于 Ceph RBD的VM，无需重新安装虚拟机
 
 - qemu-img 转换::
 
