@@ -9,6 +9,7 @@
 
    priv_cloud_infra.rst
    priv_ntp.rst
+   priv_dnsmasq.rst
    priv_kvm.rst
    zdata_ceph.rst
    zdata_ceph_rbd_libvirt.rst
