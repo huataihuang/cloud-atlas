@@ -277,7 +277,7 @@ libguestfs
 
    ./clone_vm.sh z-k8s-m-3
 
-.. literalinclude:: clone_vm_rbd/change_vm.sh
+.. literalinclude:: clone_vm_rbd/clone_vm.sh
    :language: bash
    :linenos:
    :caption: clone虚拟机的简单脚本
