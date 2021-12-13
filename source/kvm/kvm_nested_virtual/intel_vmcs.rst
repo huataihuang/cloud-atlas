@@ -12,7 +12,7 @@ Intel Virtual Machine Control Structure (Intel VMCS) shadowing ，即 Intel虚�
 
 响应灵敏和安全的桌面虚拟化需要使用虚拟机监控(virtualization machine monitor, VMM)软件来部署和管理虚拟机，以及底层硬件平台。第4代Intel Core vPro处理器提供了新型代基于硬件的Virtual Machine Control Structure (VMCS) Shadowing技术，可以实现多重VMM使用模式的高性能加速。
 
-.. image:: ../_static/kvm/nested_virtualization.png
+.. image:: ../../_static/kvm/kvm_nested_virtual/nested_virtualization.png
    :scale: 50
 
 VMCS改进
@@ -20,7 +20,7 @@ VMCS改进
 
 - VMCS通过硬件层加速减少了L0层VM退出
 
-.. image:: ../_static/kvm/software_and_hardware_vmcs.png
+.. image:: ../../_static/kvm/kvm_nested_virtual/software_and_hardware_vmcs.png
    :scale: 50
 
 

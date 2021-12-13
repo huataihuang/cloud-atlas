@@ -1,12 +1,12 @@
-.. _kvm_nested_virtual:
+.. _kvm_nested_virtual_startup:
 
 =======================
-KVM嵌套虚拟化
+KVM嵌套虚拟化起步
 =======================
 
 为了能够在一台物理主机（MacBook Pro）上能够模拟出OpenStack集群，即同时运行多个hypervisor，需要使用嵌套虚拟化(Nested Virtualization)。
 
-.. image:: ../_static/kvm/inception.jpg
+.. image:: ../../_static/kvm/kvm_nested_virtual/inception.jpg
    :scale: 50
 
 .. note::
