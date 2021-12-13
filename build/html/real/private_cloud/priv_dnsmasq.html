@@ -87,7 +87,12 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="priv_cloud_infra.html">私有云架构</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_ntp.html">私有云NTP服务</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">私有云DNS服务(dnsmasq)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">私有云DNS服务(dnsmasq)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">安装</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dnsmasq">配置dnsmasq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dns">配置DNS客户端</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
 <li class="toctree-l3"><a class="reference internal" href="zdata_ceph.html">私有云数据层 ZData Ceph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="zdata_ceph_rbd_libvirt.html">私有云基于 ZData Ceph 运行虚拟机</a></li>
@@ -136,7 +141,134 @@
              
   <section id="dns-dnsmasq">
 <span id="priv-dnsmasq"></span><h1>私有云DNS服务(dnsmasq)<a class="headerlink" href="#dns-dnsmasq" title="永久链接至标题">¶</a></h1>
-<p>在少量部署的虚拟机环境中，通过简单维护各个主机 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 一致，就能够实现主机解析。</p>
+<p>在少量部署的虚拟机环境中，通过简单维护各个主机 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 一致，就能够实现主机解析。但是，一旦开始大规模通过 <a class="reference internal" href="../../ceph/rbd/clone_vm_rbd.html#clone-vm-rbd"><span class="std std-ref">Clone使用Ceph RBD的虚拟机</span></a> <a class="reference internal" href="zdata_ceph_rbd_libvirt.html#zdata-ceph-rbd-libvirt"><span class="std std-ref">私有云基于 ZData Ceph 运行虚拟机</span></a> ，就很难实时更新每个虚拟机的 <code class="docutils literal notranslate"><span class="pre">hosts</span></code> 配置文件。更何况后续还会 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 构建 <a class="reference internal" href="../../kvm/kvm_nested_virtual/index.html#kvm-nested-virtual"><span class="std std-ref">KVM嵌套虚拟化</span></a> ，构建数以百计的虚拟机。所以，我们需要构建一个因特网非常基础的 <a class="reference internal" href="../../infra_service/dns/index.html#dns"><span class="std std-ref">DNS服务</span></a> ，来提供整个基础架构的域名解析。</p>
+<p>当然，大规模基础架构，我们会选择久经考验坚如磐石的 <a class="reference internal" href="../../infra_service/dns/bind/index.html#bind"><span class="std std-ref">BIND</span></a> (然而非常复杂)，但是为了快速搭建 <code class="docutils literal notranslate"><span class="pre">staging</span></code> 环境，我首先选择 <a class="reference internal" href="../../infra_service/dns/dnsmasq/index.html#dnsmasq"><span class="std std-ref">DNSmasq</span></a> 来完成原型，待后续不断优化后再升级到 Bind 构建真正的因特网基础设施。</p>
+<p>dnsmasq是小型网络的轻量级DNS/TFTP和DHCP服务器，特别适合小型网络的快速构建，以及宽带共享路由器的局域网基础服务。</p>
+<section id="id1">
+<h2>安装<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>ubuntu安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">dnsmasq</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="dnsmasq">
+<h2>配置dnsmasq<a class="headerlink" href="#dnsmasq" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.conf</span></code> 配置:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">dnsmasq简易配置</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 本地默认域名</span>
+<span class="linenos"> 2</span><span class="na">local</span><span class="o">=</span><span class="s">/staging.huatai.me/</span>
+<span class="linenos"> 3</span><span class="c1"># 转发上游域名解析服务器，请求DNS解析</span>
+<span class="linenos"> 4</span><span class="na">server</span><span class="o">=</span><span class="s">8.8.8.8</span>
+<span class="linenos"> 5</span><span class="c1"># 监听DNS请求的网卡接口</span>
+<span class="linenos"> 6</span><span class="na">listen-address</span><span class="o">=</span><span class="s">192.168.6.200,127.0.0.1</span>
+<span class="linenos"> 7</span><span class="c1"># 扩展主机域名，也就是请求 zcloud 默认扩展成 zcloud.staging.huatai.me</span>
+<span class="linenos"> 8</span><span class="na">expand-hosts</span>
+<span class="linenos"> 9</span><span class="c1"># 服务器提供解析的域名</span>
+<span class="linenos">10</span><span class="na">domain</span><span class="o">=</span><span class="s">staging.huatai.me</span>
+<span class="linenos">11</span><span class="c1"># DNS解析缓存</span>
+<span class="linenos">12</span><span class="na">cache-size</span><span class="o">=</span><span class="s">1000</span>
+</pre></div>
+</div>
+</div>
+<p>上述配置:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>指定默认域名 <code class="docutils literal notranslate"><span class="pre">staging.huatai.me</span></code> 并提供DNS解析服务</p></li>
+<li><p>绑定DNS请求服务网络接口IP <code class="docutils literal notranslate"><span class="pre">listen-address</span></code></p></li>
+<li><p>指定上游域名解析服务器 <code class="docutils literal notranslate"><span class="pre">server</span></code></p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>执行一个简单的脚本，生成 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> ，这个配置将被 <code class="docutils literal notranslate"><span class="pre">dnsmasq</span></code> 加载作为域名解析配置:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">hosts配置提供dnsmasq域名解析配置</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 本地默认域名</span>
+<span class="linenos"> 2</span><span class="nv">local</span><span class="o">=</span>/staging.huatai.me/
+<span class="linenos"> 3</span><span class="c1"># 转发上游域名解析服务器，请求DNS解析</span>
+<span class="linenos"> 4</span><span class="nv">server</span><span class="o">=</span><span class="m">8</span>.8.8.8
+<span class="linenos"> 5</span><span class="c1"># 监听DNS请求的网卡接口</span>
+<span class="linenos"> 6</span>listen-address<span class="o">=</span><span class="m">192</span>.168.6.200,127.0.0.1
+<span class="linenos"> 7</span><span class="c1"># 扩展主机域名，也就是请求 zcloud 默认扩展成 zcloud.staging.huatai.me</span>
+<span class="linenos"> 8</span>expand-hosts
+<span class="linenos"> 9</span><span class="c1"># 服务器提供解析的域名</span>
+<span class="linenos">10</span><span class="nv">domain</span><span class="o">=</span>staging.huatai.me
+<span class="linenos">11</span><span class="c1"># DNS解析缓存</span>
+<span class="linenos">12</span>cache-size<span class="o">=</span><span class="m">1000</span>
+</pre></div>
+</div>
+</div>
+<p>执行该脚本，根据 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划的主机列表生成 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">deploy_dnsmasq</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>注意，系统使用了 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_resolved.html#systemd-resolved"><span class="std std-ref">systemd-resolved</span></a> 和 <a class="reference internal" href="../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> ，在系统安装时候通过 <code class="docutils literal notranslate"><span class="pre">netplan</span></code> 已经配置了 802.1x 网络动态获取IP地址:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">netplan 802.1x配置</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span>
+<span class="linenos"> 2</span>  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos"> 3</span>  <span class="nt">renderer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">networkd</span>
+<span class="linenos"> 4</span>  <span class="nt">ethernets</span><span class="p">:</span>
+<span class="linenos"> 5</span>    <span class="nt">eno4</span><span class="p">:</span>
+<span class="linenos"> 6</span>      <span class="nt">dhcp4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yes</span>
+<span class="linenos"> 7</span>      <span class="nt">dhcp6</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="linenos"> 8</span>      <span class="nt">macaddress</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">xx:xx:xx:xx:xx:xx</span>
+<span class="linenos"> 9</span>      <span class="nt">auth</span><span class="p">:</span>
+<span class="linenos">10</span>        <span class="nt">key-management</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">802.1x</span>
+<span class="linenos">11</span>        <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">peap</span>
+<span class="linenos">12</span>        <span class="nt">identity</span><span class="p">:</span> <span class="s">&quot;USERNAME&quot;</span>
+<span class="linenos">13</span>        <span class="nt">password</span><span class="p">:</span> <span class="s">&quot;PASSWD&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>所以 <code class="docutils literal notranslate"><span class="pre">netplan</span></code> 会配置 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 服务使用DHCP获得的DNS服务器，我们需要覆盖这个配置，采用本地运行的 <code class="docutils literal notranslate"><span class="pre">dnsmasq</span></code> 来提供解析: 修订 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/resolved.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Resolve</span><span class="p">]</span>
+<span class="n">DNS</span><span class="o">=</span><span class="mf">127.0.0.1</span>
+<span class="n">Domains</span><span class="o">=</span><span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+<p>然后重启 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolved</span>
+</pre></div>
+</div>
+<p>(可选)命令行修订 <code class="docutils literal notranslate"><span class="pre">systemd-resolv</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemd</span><span class="o">-</span><span class="n">resolve</span> <span class="o">--</span><span class="n">interface</span> <span class="n">eno4</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">dns</span> <span class="mf">127.0.0.1</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">domain</span> <span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+<p>不过，我发现重启 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 服务后，上述配置是叠加在DHCP配置上的，检查 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/resolv.conf</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nameserver</span> <span class="mf">127.0.0.1</span>
+<span class="n">nameserver</span> <span class="mf">8.8.8.8</span>
+<span class="n">search</span> <span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="n">office</span><span class="o">.</span><span class="n">com</span>
+</pre></div>
+</div>
+<p>但是， <code class="docutils literal notranslate"><span class="pre">dig</span></code> 命令查询是正常的， <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> 配置的 <code class="docutils literal notranslate"><span class="pre">nameserver</span></code> 是始终访问第一个 <code class="docutils literal notranslate"><span class="pre">nameserver</span> <span class="pre">127.0.0.1</span></code> ，所以没有报错。(这和我很久以前学习 《DNS和Bind》 的记忆有差别，我记得是轮询所有 <code class="docutils literal notranslate"><span class="pre">nameserver</span></code> 的)</p>
+</section>
+<section id="dns">
+<h2>配置DNS客户端<a class="headerlink" href="#dns" title="永久链接至标题">¶</a></h2>
+<p>所有VM都需要配置 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_resolved.html#systemd-resolved"><span class="std std-ref">systemd-resolved</span></a> 采用 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 上部署的DNS服务器(dnsmasq)，所以修订VM以及模版VM <code class="docutils literal notranslate"><span class="pre">/etc/netplan/01-netcfg.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+   <span class="n">nameservers</span><span class="p">:</span>
+       <span class="n">search</span><span class="p">:</span> <span class="p">[</span> <span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="p">]</span>
+       <span class="n">addresses</span><span class="p">:</span>
+           <span class="o">-</span> <span class="s2">&quot;192.168.6.200&quot;</span>
+</pre></div>
+</div>
+<p>然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">netplan</span> <span class="n">apply</span>
+</pre></div>
+</div>
+<p>完成DNS解析器配置，采用 <code class="docutils literal notranslate"><span class="pre">192.168.6.200</span></code> （zcloud) 的DNS进行域名解析。</p>
+</section>
 </section>
 
 

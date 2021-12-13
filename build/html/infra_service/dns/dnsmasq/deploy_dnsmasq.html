@@ -164,17 +164,34 @@
 </pre></div>
 </div>
 </li>
-<li><p>在我的zcloud服务器上，有2个网络接口分别代表外网和内网。其中内网采用有线网络，网段是 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> ，所以需要设置dnsmasq监听特定地址，只监听内部网络网段和回环地址:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">listen</span><span class="o">-</span><span class="n">address</span><span class="o">=</span><span class="mf">192.168.6.9</span><span class="p">,</span><span class="mf">127.0.0.1</span>
+<li><p>现代发行版，在 <code class="docutils literal notranslate"><span class="pre">/etc/default/dnsmasq</span></code> 提供了对dnsmasq服务对基本控制，例如:</p>
+<ul class="simple">
+<li><p>启用或关闭dnsmasq: <code class="docutils literal notranslate"><span class="pre">ENABLED=1</span></code> （关闭是设置 <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></li>
+<li><p>设置DNS后缀(默认域名): <code class="docutils literal notranslate"><span class="pre">DOMAIN_SUFFIX=`dnsdomainname</span></code></p></li>
+<li><p>选择一个替代配置文件: <code class="docutils literal notranslate"><span class="pre">DNSMASQ_OPTS=&quot;--conf-file=/etc/dnsmasq.alt&quot;</span></code></p></li>
+<li><p>告知dnsmasq读取配置文件目录: <code class="docutils literal notranslate"><span class="pre">CONFIG_DIR=/etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new</span></code> (默认启用，配置集中在 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.d</span></code> )</p></li>
+<li><p>如果系统安装了 <code class="docutils literal notranslate"><span class="pre">resolvconf</span></code> 软件包，dnsmasq就会使用 <code class="docutils literal notranslate"><span class="pre">resolvconf</span></code> 的输出而不是 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 配置来 <code class="docutils literal notranslate"><span class="pre">查找</span> <span class="pre">upstream</span> <span class="pre">nameservers</span></code> 。如果要关闭这个特性，就激活 <code class="docutils literal notranslate"><span class="pre">IGNORE_RESOLVCONF=yes</span></code></p></li>
+</ul>
+</li>
+<li><p>在我的 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 服务器上，安装了多个网卡，其中内网采用有线网络，网段是 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> ，所以需要设置dnsmasq监听特定地址，只监听内部网络网段和回环地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">listen</span><span class="o">-</span><span class="n">address</span><span class="o">=</span><span class="mf">192.168.6.200</span><span class="p">,</span><span class="mf">127.0.0.1</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference internal" href="../../../kvm/libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 已经启动了 <code class="docutils literal notranslate"><span class="pre">/usr/sbin/dnsmasq</span> <span class="pre">--conf-file=/var/lib/libvirt/dnsmasq/default.conf</span> <span class="pre">...</span></code> 专用于 <code class="docutils literal notranslate"><span class="pre">virbr0</span></code> (NAT网络)的服务，提供KVM虚拟机的DHCP IP分配。这个dnsmasq是专门监听 <code class="docutils literal notranslate"><span class="pre">interface=virbr0</span></code> ，和本文配置不冲突</p>
+</div>
 <p>也可以通过设置监听接口来确保限制在指定网口上:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span><span class="o">=</span><span class="n">enp0s25</span><span class="p">,</span><span class="n">anbox0</span>
 </pre></div>
 </div>
 <p>或者仅指定不包括哪些接口 <code class="docutils literal notranslate"><span class="pre">except-interface=</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我这里采用 <code class="docutils literal notranslate"><span class="pre">listen-address=192.168.6.200,127.0.0.1</span></code> 是因为我这个服务将针对整个 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> ，并且我会在多个接口上使用这个网段的IP</p>
+</div>
 <ul>
 <li><p>设置缓存大小：通常dnsmasq是作为本地局域网的DNS缓存服务器运行，并且默认只缓存150条DNS记录，可以将这个缓存扩大:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cache</span><span class="o">-</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span>
@@ -186,6 +203,10 @@
 <h3>DNS地址文件和转发<a class="headerlink" href="#dns" title="永久链接至标题">¶</a></h3>
 <p>在配置了dnsmasq之后，你需要添加一个localhost地址到 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> ，这样本机的DNS请求才会发送被本机运行的dnsmasq。</p>
 <p>由于dnsmasq是一个stub解析器(resolver)但不是一个recusive解析器，所以你必须设置一个转发解析到外部DNS服务器。这个设置可以使用 <code class="docutils literal notranslate"><span class="pre">openresolv</span></code> 自动实现(也可以在dnsmasq的配置文件中手工设置，但我们通常都使用openresolv)。</p>
+<ul class="simple">
+<li><p>resolvconf</p></li>
+<li><p><a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_resolved.html#systemd-resolved"><span class="std std-ref">systemd-resolved</span></a> 是目前主流操作系统默认配置，例如我在 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 上部署的 <a class="reference internal" href="../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 服务器版本就采用 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code></p></li>
+</ul>
 <section id="openresolv">
 <h4>openresolv<a class="headerlink" href="#openresolv" title="永久链接至标题">¶</a></h4>
 <p>如果你的network manager支持 <code class="docutils literal notranslate"><span class="pre">resolvconf</span></code> ，就不需要直接修改 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> ，可以使用 <code class="docutils literal notranslate"><span class="pre">openresolv</span></code> 来为dnsmasq生成配置文件。</p>
@@ -210,7 +231,7 @@
 </ul>
 <p>请注意，此时原先 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 配置文件会修订成使用本机dns:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by resolvconf</span>
-<span class="n">domain</span> <span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+<span class="n">domain</span> <span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
 <span class="n">nameserver</span> <span class="mf">127.0.0.1</span>
 </pre></div>
 </div>
@@ -221,7 +242,7 @@
 </div>
 <p>而 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq-conf.conf</span></code> 配置是dnsmasq的配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by resolvconf</span>
-<span class="n">server</span><span class="o">=/</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span><span class="mf">202.96.209.133</span>
+<span class="n">server</span><span class="o">=/</span><span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span><span class="mf">202.96.209.133</span>
 </pre></div>
 </div>
 </section>
@@ -230,7 +251,7 @@
 <ul>
 <li><p>首先需要确保 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 配置中只设置 localhost 作为唯一的nameserver:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by resolvconf</span>
-<span class="n">domain</span> <span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+<span class="n">domain</span> <span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
 <span class="n">nameserver</span> <span class="mf">127.0.0.1</span>
 <span class="c1"># 如果是IPv6还需要如下行</span>
 <span class="c1"># nameserver ::1</span>
@@ -258,10 +279,28 @@
 <section id="id3">
 <h2>添加定制域名<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>可以为本地局域网添加一个domain，也就是我们内部域名:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">local</span><span class="o">=/</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span>
-<span class="n">domain</span><span class="o">=</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">local</span><span class="o">=/</span><span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span>
+<span class="n">domain</span><span class="o">=</span><span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
 <span class="n">expand</span><span class="o">-</span><span class="n">hosts</span>
 </pre></div>
+</div>
+<p>完整 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.conf</span></code> 配置:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">dnsmasq简易配置</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 本地默认域名</span>
+<span class="linenos"> 2</span><span class="na">local</span><span class="o">=</span><span class="s">/staging.huatai.me/</span>
+<span class="linenos"> 3</span><span class="c1"># 转发上游域名解析服务器，请求DNS解析</span>
+<span class="linenos"> 4</span><span class="na">server</span><span class="o">=</span><span class="s">8.8.8.8</span>
+<span class="linenos"> 5</span><span class="c1"># 监听DNS请求的网卡接口</span>
+<span class="linenos"> 6</span><span class="na">listen-address</span><span class="o">=</span><span class="s">192.168.6.200,127.0.0.1</span>
+<span class="linenos"> 7</span><span class="c1"># 扩展主机域名，也就是请求 zcloud 默认扩展成 zcloud.staging.huatai.me</span>
+<span class="linenos"> 8</span><span class="na">expand-hosts</span>
+<span class="linenos"> 9</span><span class="c1"># 服务器提供解析的域名</span>
+<span class="linenos">10</span><span class="na">domain</span><span class="o">=</span><span class="s">staging.huatai.me</span>
+<span class="linenos">11</span><span class="c1"># DNS解析缓存</span>
+<span class="linenos">12</span><span class="na">cache-size</span><span class="o">=</span><span class="s">1000</span>
+</pre></div>
+</div>
 </div>
 <p>上述域名就是我们用于DHCP和内部域名，这样我们在 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 中配置主机名解析时候就只需要配置短域名主机名就可以了，会自动扩展成FQDN完整域名。例如， <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.9</span>  <span class="n">zcloud</span>
@@ -274,7 +313,7 @@
 <span class="mf">192.168.6.17</span> <span class="n">pi</span><span class="o">-</span><span class="n">worker3</span>
 </pre></div>
 </div>
-<p>则自动会被加上 <code class="docutils literal notranslate"><span class="pre">.test.huatai.me</span></code> 后缀域名，形成完成的域名 <code class="docutils literal notranslate"><span class="pre">192.168.6.9</span> <span class="pre">zcloud.test.huatai.me</span></code></p>
+<p>则自动会被加上 <code class="docutils literal notranslate"><span class="pre">.staging.huatai.me</span></code> 后缀域名，形成完成的域名 <code class="docutils literal notranslate"><span class="pre">192.168.6.9</span> <span class="pre">zcloud.staging.huatai.me</span></code></p>
 </section>
 <section id="id4">
 <h2>启动DNSmasq<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
@@ -291,7 +330,7 @@
 </li>
 </ul>
 <p>可以看到输出的域名解析被自动展开:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zcloud</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="n">has</span> <span class="n">address</span> <span class="mf">192.168.6.9</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zcloud</span><span class="o">.</span><span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span> <span class="n">has</span> <span class="n">address</span> <span class="mf">192.168.6.9</span>
 </pre></div>
 </div>
 </section>
@@ -364,7 +403,7 @@
      Loaded: loaded (/usr/lib/systemd/system/dnsmasq.service; enabled; vendor preset: disabled)
      Active: active (running) since Thu 2020-10-08 22:23:52 CST; 14min ago
        Docs: man:dnsmasq(8)
-    Process: 36760 ExecStartPre=/usr/bin/dnsmasq --test (code=exited, status=0/SUCCESS)
+    Process: 36760 ExecStartPre=/usr/bin/dnsmasq --staging.(code=exited, status=0/SUCCESS)
    Main PID: 36761 (dnsmasq)
       Tasks: 1 (limit: 19050)
      Memory: 1.3M
@@ -378,7 +417,7 @@ Oct 08 22:23:52 zcloud dnsmasq[36761]: compile time options: IPv6 GNU-getopt DBu
 Oct 08 22:23:52 zcloud dnsmasq[36761]: DBus support enabled: connected to system bus
 Oct 08 22:23:52 zcloud dnsmasq-dhcp[36761]: DHCP, IP range 192.168.6.201 -- 192.168.6.254, lease time 12h
 Oct 08 22:23:52 zcloud dnsmasq-dhcp[36761]: DHCP, sockets bound exclusively to interface enp0s25
-Oct 08 22:23:52 zcloud dnsmasq[36761]: using only locally-known addresses for domain test.huatai.me
+Oct 08 22:23:52 zcloud dnsmasq[36761]: using only locally-known addresses for domain staging.huatai.me
 Oct 08 22:23:52 zcloud dnsmasq[36761]: using nameserver 202.96.209.133#53
 Oct 08 22:23:52 zcloud dnsmasq[36761]: read /etc/hosts - 12 addresses
 </pre></div>

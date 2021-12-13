@@ -172,6 +172,10 @@
   <section id="systemd-resolved">
 <span id="id1"></span><h1>systemd-resolved<a class="headerlink" href="#systemd-resolved" title="永久链接至标题">¶</a></h1>
 <p>systemd-resolved 是通过D-Bus接口向本地应用程序提供网络名字解析的systemd服务，包括解析(resolve) NSS服务(nss-resolve)和一个在127.0.0.53上监听的本地DNS stub监听器。不需要单独安装systemd-resolved，因为当前Linux主流发行版默认使用的systemd已经包含了这个组件，并且默认启用。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在我部署 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 中，采用 <a class="reference internal" href="../../ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04 LTS Server 发行版，默认采用 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 提供本地域名解析。我在 <a class="reference internal" href="../../../real/private_cloud/priv_dnsmasq.html#priv-dnsmasq"><span class="std std-ref">私有云DNS服务(dnsmasq)</span></a> 部署即结合 <a class="reference internal" href="../../../infra_service/dns/dnsmasq/index.html#dnsmasq"><span class="std std-ref">DNSmasq</span></a> 和 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 提供局域网DNS解析。</p>
+</div>
 <section id="id2">
 <h2>配置<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>systemd-resolved为域名系统(Domain Name System, DNS)(包括DNSSEC和DNS over TLS)，多播DNS(Multicast DNS, mDNS) 以及链接本地多播域名解析(Link-Local Multicast Name Resolution, LLMNR)提供解析服务。</p>
@@ -187,22 +191,64 @@
 </pre></div>
 </div>
 <p>而且，在 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/</span></code> 目录下还有一个 <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> 配置，则是 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 使用的上级DNS服务器，也就是转发(forward)DNS解析请求给上级DNS。</p>
+<p>检查 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/resolv.conf</span></code> 可以看到包含了上级DNS服务器配置(也就是你安装操作系统时候填写的网络配置中DNS记录)，以及默认搜索域名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nameserver</span> <span class="mf">192.168.6.200</span>
+<span class="n">search</span> <span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+<p>检查 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/stub-resolv.conf</span></code> 可以看到内容包含了指示客户端连接本地回环地址请求DNS(也就是 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> 服务)，以及默认搜索域名:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nameserver</span> <span class="mf">127.0.0.53</span>
+<span class="n">options</span> <span class="n">edns0</span> <span class="n">trust</span><span class="o">-</span><span class="n">ad</span>
+<span class="n">search</span> <span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>上述配置是我部署 <a class="reference internal" href="../../../real/private_cloud/zdata_ceph_rbd_libvirt.html#zdata-ceph-rbd-libvirt"><span class="std std-ref">私有云基于 ZData Ceph 运行虚拟机</span></a> ，安装过程配置的结果。由于我需要部署 <a class="reference internal" href="../../../real/private_cloud/priv_dnsmasq.html#priv-dnsmasq"><span class="std std-ref">私有云DNS服务(dnsmasq)</span></a> 来提供局域网DNS解析，并且默认域名调整为 <code class="docutils literal notranslate"><span class="pre">staging.huatai.me</span></code> ，所以还需要做进一步调整配置。</p>
+</div>
 <ul class="simple">
 <li><p>保护resolv.conf模式</p></li>
 </ul>
 <p>在保护模式下 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> 则依然存在，而且可以由其他软件包管理，此时systemd-resolved仅仅是这个文件的客户端。</p>
-<p>要检查DNS当前由systemd-resolved管理状态，执行以下命令:</p>
+<ul>
+<li><p>要检查DNS当前由systemd-resolved管理状态，执行以下命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resolvectl</span> <span class="n">status</span>
 </pre></div>
 </div>
+</li>
+</ul>
 <p>也可以执行:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemd</span><span class="o">-</span><span class="n">resolve</span> <span class="o">--</span><span class="n">status</span>
+</pre></div>
+</div>
+<p>输出信息类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Global</span>
+       <span class="n">LLMNR</span> <span class="n">setting</span><span class="p">:</span> <span class="n">no</span>
+<span class="n">MulticastDNS</span> <span class="n">setting</span><span class="p">:</span> <span class="n">no</span>
+  <span class="n">DNSOverTLS</span> <span class="n">setting</span><span class="p">:</span> <span class="n">no</span>
+      <span class="n">DNSSEC</span> <span class="n">setting</span><span class="p">:</span> <span class="n">no</span>
+    <span class="n">DNSSEC</span> <span class="n">supported</span><span class="p">:</span> <span class="n">no</span>
+          <span class="n">DNSSEC</span> <span class="n">NTA</span><span class="p">:</span> <span class="mf">10.</span><span class="ow">in</span><span class="o">-</span><span class="n">addr</span><span class="o">.</span><span class="n">arpa</span>
+                      <span class="mf">16.172</span><span class="o">.</span><span class="ow">in</span><span class="o">-</span><span class="n">addr</span><span class="o">.</span><span class="n">arpa</span>
+                      <span class="mf">168.192</span><span class="o">.</span><span class="ow">in</span><span class="o">-</span><span class="n">addr</span><span class="o">.</span><span class="n">arpa</span>
+                      <span class="mf">17.172</span><span class="o">.</span><span class="ow">in</span><span class="o">-</span><span class="n">addr</span><span class="o">.</span><span class="n">arpa</span>
+<span class="o">...</span>
+<span class="n">Link</span> <span class="mi">2</span> <span class="p">(</span><span class="n">enp1s0</span><span class="p">)</span>
+      <span class="n">Current</span> <span class="n">Scopes</span><span class="p">:</span> <span class="n">DNS</span>
+<span class="n">DefaultRoute</span> <span class="n">setting</span><span class="p">:</span> <span class="n">yes</span>
+       <span class="n">LLMNR</span> <span class="n">setting</span><span class="p">:</span> <span class="n">yes</span>
+<span class="n">MulticastDNS</span> <span class="n">setting</span><span class="p">:</span> <span class="n">no</span>
+  <span class="n">DNSOverTLS</span> <span class="n">setting</span><span class="p">:</span> <span class="n">no</span>
+      <span class="n">DNSSEC</span> <span class="n">setting</span><span class="p">:</span> <span class="n">no</span>
+    <span class="n">DNSSEC</span> <span class="n">supported</span><span class="p">:</span> <span class="n">no</span>
+         <span class="n">DNS</span> <span class="n">Servers</span><span class="p">:</span> <span class="mf">192.168.6.200</span>
+          <span class="n">DNS</span> <span class="n">Domain</span><span class="p">:</span> <span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
 </pre></div>
 </div>
 </section>
 <section id="id3">
 <h3>自动管理DNS<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
-<p>systemd-resolved默认就可以和 <a class="reference internal" href="../../ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 协作管理 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> ，不需要单独配置。不过，如果使用DHCP和VPN客户端，则会使用 <code class="docutils literal notranslate"><span class="pre">resolvconf</span></code> 程序设置DNS和search domains，则需要安装一个 <code class="docutils literal notranslate"><span class="pre">systemd-resolvconf</span></code> 软件包来提供 <code class="docutils literal notranslate"><span class="pre">/usr/bin/resolvconf</span></code> 软链接，以便和VPN客户端和DHCP一起协作。</p>
+<p>systemd-resolved默认就可以和 <a class="reference internal" href="../../ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 协作管理 <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> ，不需要单独配置。不过，如果使用DHCP和VPN客户端，则会使用 <code class="docutils literal notranslate"><span class="pre">resolvconf</span></code> 程序设置DNS和search domains，则需要安装一个 <code class="docutils literal notranslate"><span class="pre">systemd-resolvconf</span></code> 软件包来提供 <code class="docutils literal notranslate"><span class="pre">/usr/bin/resolvconf</span></code> 软链接，以便和VPN客户端和DHCP一起协作。(默认未安装)</p>
 </section>
 <section id="id4">
 <h3>手工配置DNS<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
@@ -231,6 +277,10 @@
 <p>systemd-resolved还有支持 DNSSEC, DNS over TLS, mDNS 等功能，有待后续在研究DNS服务 <a class="reference internal" href="../../../infra_service/dns/bind/index.html#bind"><span class="std std-ref">BIND</span></a> 时候学习实践。</p>
 </div>
 </section>
+</section>
+<section id="netplan">
+<h2>结合网络配置工具netplan<a class="headerlink" href="#netplan" title="永久链接至标题">¶</a></h2>
+<p>实际上在发行版中， <code class="docutils literal notranslate"><span class="pre">systemd-resolvd</span></code> 通常不需要手工配置，因为默认系统会同时安装 <code class="docutils literal notranslate"><span class="pre">network</span> <span class="pre">configuration</span> <span class="pre">abstraction</span> <span class="pre">renderer</span></code> (网络配置抽象渲染器)，例如 <a class="reference internal" href="../../ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> 。通过网络配置工具的简单设置就可以完成指定DNS。</p>
 </section>
 <section id="id5">
 <h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>

@@ -53,16 +53,12 @@ Netplan会读取 ``/etc/netplan/*.yaml`` 配置文件来设置所有的网络接
            TX packets 165  bytes 22890 (22.8 KB)
            TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
-- 默认在 ``/etc/netplan`` 目录下有一个 ``01-netcfg.yaml`` 内容如下::
+- 默认在 ``/etc/netplan`` 目录下有一个 ``01-netcfg.yaml`` 内容如下:
 
-   # This file describes the network interfaces available on your system
-   # For more information, see netplan(5).
-   network:
-     version: 2
-     renderer: networkd
-     ethernets:
-       ens2:
-         dhcp4: yes
+.. literalinclude:: netplan/01-netcfg-dhcp.yaml
+   :language: yaml
+   :linenos:
+   :caption: netplan初始DHCP配置
 
 .. note::
 
@@ -72,19 +68,12 @@ Netplan会读取 ``/etc/netplan/*.yaml`` 配置文件来设置所有的网络接
 
    不过，对于Ubuntu的desktop, server, cloud版本，自动生成的配置文件会采用不同的名字，例如 ``01-network-manager-all.yaml`` 或 ``01-netcfg.yaml`` 。
 
-- 编辑 ``/etc/netplan/01-netcfg.yaml`` ::
+- 编辑 ``/etc/netplan/01-netcfg.yaml`` :
 
-   network:
-     version: 2
-     renderer: networkd
-     ethernets:
-       ens2:
-         dhcp4: no
-         dhcp6: no
-         addresses: [192.168.122.11/24, ]
-         gateway4: 192.168.122.1
-         nameservers:
-            addresses: [192.168.122.1, ]
+.. literalinclude:: netplan/01-netcfg-static.yaml
+   :language: yaml
+   :linenos:
+   :caption: netplan 静态IPP配置
 
 - 执行以下命令生效（注意在控制台执行，否则网络会断开）::
 
@@ -95,21 +84,12 @@ Netplan会读取 ``/etc/netplan/*.yaml`` 配置文件来设置所有的网络接
 netplan配置有线802.1x认证
 ============================
 
-企业网络常常会使用802.1x网络实现认证，不仅无线可以通过这种方式加强安全，有线网络也可以实现。netplan也支持在有线网络上加上认证功能，配置案例有些类似后文 ``WPA Enterprise无线网络`` ，案例 ``01-eno4-config.yaml`` 如下::
+企业网络常常会使用802.1x网络实现认证，不仅无线可以通过这种方式加强安全，有线网络也可以实现。netplan也支持在有线网络上加上认证功能，配置案例有些类似后文 ``WPA Enterprise无线网络`` ，案例 ``01-eno4-config.yaml`` 如下:
 
-   network:
-     version: 2
-     renderer: networkd
-     ethernets:
-       eno4:
-         dhcp4: yes
-         dhcp6: no
-         macaddress: xx:xx:xx:xx:xx:xx
-         auth:
-           key-management: 802.1x
-           method: peap
-           identity: "USERNAME"
-           password: "PASSWD"
+.. literalinclude:: netplan/01-eno4-config.yaml
+   :language: yaml
+   :linenos:
+   :caption: netplan 802.1x配置
 
 然后执行 ``netplan apply`` 即完成网络激活
 

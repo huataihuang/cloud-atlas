@@ -27,8 +27,7 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    vgpu/index
    intel_gvt-g/index
    hardware_virtual.rst
-   intel_vmcs.rst
-   kvm_nested_virtual.rst
+   kvm_nested_virtual/index
    kvm_vdisk_live.rst
    kvm_live_migration.rst
    qemu/index
