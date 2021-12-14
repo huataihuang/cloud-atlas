@@ -37,21 +37,43 @@ ARM环境安装
 
       brew install prometheus
 
-配置
-========
+zcloud安装
+===============
 
-在解压缩的Prometheus软件包目录下有一个默认配置文件 ``prometheus.yml`` ，这个初始配置复制到 ``/etc/prometheus`` 目录下然后简单配置就可以启动::
+我在 :ref:`priv_cloud_infra` 重新在一台二手服务器 :ref:`hpe_dl360_gen9` 部署大规模虚拟化集群。为了结合 :ref:`zdata_ceph` 的 :ref:`ceph_dashboard` 以及对整个基础架构进行监控，我重新部署 ``prometheus + grafana`` 到两台KVM虚拟机 ``z-b-mon-1`` 和 ``z-b-mon-2`` 。
 
-   sudo mkdir -p /etc/prometheus
-   sudo cp prometheus.yml /etc/prometheus/
+- 操作系统: :ref:`ubuntu_linux` 20.04 LTS
 
-配置
-========
+- 准备用户账号::
 
-在解压缩的Prometheus软件包目录下有一个默认配置文件 ``prometheus.yml`` ，这个初始配置复制到 ``/etc/prometheus`` 目录下然后简单配置就可以启动::
+   sudo groupadd --system prometheus
+   sudo useradd -s /sbin/nologin --system -g prometheus prometheus
 
-   sudo mkdir -p /etc/prometheus
-   sudo cp prometheus.yml /etc/prometheus/
+用户ID < 1000则为系统用户ID，这个ID是从 999 开始递减的，对于刚安装好的Ubuntu系统， ``systemd-coredump`` 组的ID是 999，则上述两个命令创建的 ``prometheus`` 的GID和UID都是 998
+
+- 创建配置目录和数据目录::
+
+   sudo mkdir /var/lib/prometheus
+   for i in rules rules.d files_sd; do sudo mkdir -p /etc/prometheus/${i}; done
+
+- 下载工具::
+
+   sudo apt update
+   sudo apt -y install wget curl vim
+
+- 下载最新prometheus二进制程序::
+
+   mkdir -p /tmp/prometheus && cd /tmp/prometheus
+   curl -s https://api.github.com/repos/prometheus/prometheus/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi -
+
+- 解压缩::
+
+   tar xvf prometheus*.tar.gz
+   cd prometheus*/
+
+- 将执行文件移动到 ``/usr/local/bin`` 目录 ::
+
+   sudo mv prometheus promtool /usr/local/bin/
 
 配置
 ========
@@ -68,9 +90,13 @@ ARM环境安装
        static_configs:
        - targets: ['localhost:9090']
 
+对于较为安全的内部局域网，可以将配置修改成监听网络IP地址::
+
+       - targets: ['192.168.6.221:9090']
+
 启动::
 
-   prometheus --config.file "/etc/prometheus/prometheus.yml"
+   sudo prometheus --config.file "/etc/prometheus/prometheus.yml"
 
 如果发生异常，则可以使用 ``prometool`` 工具检查配置文件::
 
@@ -92,20 +118,20 @@ Docker运行Prometheus
 
 请注意，上述简单的实践是将Prometheus启动监听在本地回环地址 ``localhost:9090`` ，所以一般外部就不能访问。这样带来一定的安全保护。
 
-我们可以通过ssh端口转发方式实现远程访问，就是在客户端执行以下命令访问服务器 ``192.168.6.11`` 开启端口转发到服务器的回环地址 ``9090`` 端口::
+我们可以通过ssh端口转发方式实现远程访问，就是在客户端执行以下命令访问服务器 ``192.168.6.221`` 开启端口转发到服务器的回环地址 ``9090`` 端口::
 
-   ssh -L 9090:127.0.0.1:9090 192.168.6.11
+   ssh -L 9090:192.168.6.221:9090 192.168.6.200
 
 或者配置 ``.ssh/config`` 配置::
 
-   Host prometheus
-       HostName 192.168.6.11
+   Host zcloud
+       HostName 192.168.6.200
        User admin
-       LocalForward 9090 127.0.0.1:9090
+       LocalForward 9090 192.168.6.221:9090
 
 然后直接执行::
 
-   ssh prometheus
+   ssh zcloud
 
 通过ssh认证登陆后，在本地通过浏览器访问 http:://127.0.0.1:9090/graph 就可以看到管理配置界面(访问 http://127.0.0.1:9090 也会重定向到 ``/graph`` 路径)
 
@@ -141,3 +167,4 @@ Prometheus的PromQL提供了非常灵活的表达式语言，允许查询和聚�
 ========
 
 - `How To Install and Configure Prometheus On a Linux Server <https://devopscube.com/install-configure-prometheus-linux/>`_
+- `Install Prometheus Server on Ubuntu 22.04|20.04|18.04 <https://computingforgeeks.com/install-prometheus-server-on-debian-ubuntu-linux/>`_

@@ -207,24 +207,53 @@
 </div>
 </div>
 </section>
+<section id="zcloud">
+<h2>zcloud安装<a class="headerlink" href="#zcloud" title="永久链接至标题">¶</a></h2>
+<p>我在 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 重新在一台二手服务器 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 部署大规模虚拟化集群。为了结合 <a class="reference internal" href="../../../real/private_cloud/zdata_ceph.html#zdata-ceph"><span class="std std-ref">私有云数据层 ZData Ceph</span></a> 的 <a class="reference internal" href="../../../ceph/mgr/ceph_dashboard.html#ceph-dashboard"><span class="std std-ref">Ceph Dashboard 管控面板</span></a> 以及对整个基础架构进行监控，我重新部署 <code class="docutils literal notranslate"><span class="pre">prometheus</span> <span class="pre">+</span> <span class="pre">grafana</span></code> 到两台KVM虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-mon-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-mon-2</span></code> 。</p>
+<ul>
+<li><p>操作系统: <a class="reference internal" href="../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04 LTS</p></li>
+<li><p>准备用户账号:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">groupadd</span> <span class="o">--</span><span class="n">system</span> <span class="n">prometheus</span>
+<span class="n">sudo</span> <span class="n">useradd</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span> <span class="o">--</span><span class="n">system</span> <span class="o">-</span><span class="n">g</span> <span class="n">prometheus</span> <span class="n">prometheus</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>用户ID &lt; 1000则为系统用户ID，这个ID是从 999 开始递减的，对于刚安装好的Ubuntu系统， <code class="docutils literal notranslate"><span class="pre">systemd-coredump</span></code> 组的ID是 999，则上述两个命令创建的 <code class="docutils literal notranslate"><span class="pre">prometheus</span></code> 的GID和UID都是 998</p>
+<ul>
+<li><p>创建配置目录和数据目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo mkdir /var/lib/prometheus
+for i in rules rules.d files_sd; do sudo mkdir -p /etc/prometheus/${i}; done
+</pre></div>
+</div>
+</li>
+<li><p>下载工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">wget</span> <span class="n">curl</span> <span class="n">vim</span>
+</pre></div>
+</div>
+</li>
+<li><p>下载最新prometheus二进制程序:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">prometheus</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">prometheus</span>
+<span class="n">curl</span> <span class="o">-</span><span class="n">s</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">api</span><span class="o">.</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">latest</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">browser_download_url</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">linux</span><span class="o">-</span><span class="n">amd64</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span> <span class="s1">&#39;&quot;&#39;</span> <span class="o">-</span><span class="n">f</span> <span class="mi">4</span> <span class="o">|</span> <span class="n">wget</span> <span class="o">-</span><span class="n">qi</span> <span class="o">-</span>
+</pre></div>
+</div>
+</li>
+<li><p>解压缩:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="n">xvf</span> <span class="n">prometheus</span><span class="o">*.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">cd</span> <span class="n">prometheus</span><span class="o">*/</span>
+</pre></div>
+</div>
+</li>
+<li><p>将执行文件移动到 <code class="docutils literal notranslate"><span class="pre">/usr/local/bin</span></code> 目录</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mv</span> <span class="n">prometheus</span> <span class="n">promtool</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="id3">
 <h2>配置<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
-<p>在解压缩的Prometheus软件包目录下有一个默认配置文件 <code class="docutils literal notranslate"><span class="pre">prometheus.yml</span></code> ，这个初始配置复制到 <code class="docutils literal notranslate"><span class="pre">/etc/prometheus</span></code> 目录下然后简单配置就可以启动:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">prometheus</span>
-<span class="n">sudo</span> <span class="n">cp</span> <span class="n">prometheus</span><span class="o">.</span><span class="n">yml</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span>
-</pre></div>
-</div>
-</section>
-<section id="id4">
-<h2>配置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
-<p>在解压缩的Prometheus软件包目录下有一个默认配置文件 <code class="docutils literal notranslate"><span class="pre">prometheus.yml</span></code> ，这个初始配置复制到 <code class="docutils literal notranslate"><span class="pre">/etc/prometheus</span></code> 目录下然后简单配置就可以启动:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">prometheus</span>
-<span class="n">sudo</span> <span class="n">cp</span> <span class="n">prometheus</span><span class="o">.</span><span class="n">yml</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span>
-</pre></div>
-</div>
-</section>
-<section id="id5">
-<h2>配置<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p>在解压缩的Prometheus软件包目录下有一个默认配置文件 <code class="docutils literal notranslate"><span class="pre">prometheus.yml</span></code> ，这个初始配置复制到 <code class="docutils literal notranslate"><span class="pre">/etc/prometheus</span></code> 目录下然后简单配置就可以启动:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">prometheus</span>
 <span class="n">sudo</span> <span class="n">cp</span> <span class="n">prometheus</span><span class="o">.</span><span class="n">yml</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span>
@@ -237,8 +266,12 @@
     <span class="o">-</span> <span class="n">targets</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;localhost:9090&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
+<p>对于较为安全的内部局域网，可以将配置修改成监听网络IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">targets</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;192.168.6.221:9090&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
 <p>启动:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prometheus</span> <span class="o">--</span><span class="n">config</span><span class="o">.</span><span class="n">file</span> <span class="s2">&quot;/etc/prometheus/prometheus.yml&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">prometheus</span> <span class="o">--</span><span class="n">config</span><span class="o">.</span><span class="n">file</span> <span class="s2">&quot;/etc/prometheus/prometheus.yml&quot;</span>
 </pre></div>
 </div>
 <p>如果发生异常，则可以使用 <code class="docutils literal notranslate"><span class="pre">prometool</span></code> 工具检查配置文件:</p>
@@ -257,29 +290,29 @@
 </pre></div>
 </div>
 </section>
-<section id="id6">
-<h2>访问Prometheus<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>访问Prometheus<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>请注意，上述简单的实践是将Prometheus启动监听在本地回环地址 <code class="docutils literal notranslate"><span class="pre">localhost:9090</span></code> ，所以一般外部就不能访问。这样带来一定的安全保护。</p>
-<p>我们可以通过ssh端口转发方式实现远程访问，就是在客户端执行以下命令访问服务器 <code class="docutils literal notranslate"><span class="pre">192.168.6.11</span></code> 开启端口转发到服务器的回环地址 <code class="docutils literal notranslate"><span class="pre">9090</span></code> 端口:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="mi">9090</span><span class="p">:</span><span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">9090</span> <span class="mf">192.168.6.11</span>
+<p>我们可以通过ssh端口转发方式实现远程访问，就是在客户端执行以下命令访问服务器 <code class="docutils literal notranslate"><span class="pre">192.168.6.221</span></code> 开启端口转发到服务器的回环地址 <code class="docutils literal notranslate"><span class="pre">9090</span></code> 端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="mi">9090</span><span class="p">:</span><span class="mf">192.168.6.221</span><span class="p">:</span><span class="mi">9090</span> <span class="mf">192.168.6.200</span>
 </pre></div>
 </div>
 <p>或者配置 <code class="docutils literal notranslate"><span class="pre">.ssh/config</span></code> 配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">prometheus</span>
-    <span class="n">HostName</span> <span class="mf">192.168.6.11</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">zcloud</span>
+    <span class="n">HostName</span> <span class="mf">192.168.6.200</span>
     <span class="n">User</span> <span class="n">admin</span>
-    <span class="n">LocalForward</span> <span class="mi">9090</span> <span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">9090</span>
+    <span class="n">LocalForward</span> <span class="mi">9090</span> <span class="mf">192.168.6.221</span><span class="p">:</span><span class="mi">9090</span>
 </pre></div>
 </div>
 <p>然后直接执行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">prometheus</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">zcloud</span>
 </pre></div>
 </div>
 <p>通过ssh认证登陆后，在本地通过浏览器访问 <a class="reference external" href="http:://127.0.0.1:9090/graph">http:://127.0.0.1:9090/graph</a> 就可以看到管理配置界面(访问 <a class="reference external" href="http://127.0.0.1:9090">http://127.0.0.1:9090</a> 也会重定向到 <code class="docutils literal notranslate"><span class="pre">/graph</span></code> 路径)</p>
 <p>如果要访问Prometheus服务器自己的metrics，则访问 <a class="reference external" href="http://127.0.0.1:9090/metrics">http://127.0.0.1:9090/metrics</a></p>
 </section>
-<section id="id7">
-<h2>表达式浏览<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<section id="id5">
+<h2>表达式浏览<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <p>在表达式(也就是graph的查询栏输入需要查询的指标)，系统会自动匹配最接近的参数</p>
 <p>例如，我们查询 <code class="docutils literal notranslate"><span class="pre">go_gc_duration_seconds</span></code> 指标，输入后点击 <code class="docutils literal notranslate"><span class="pre">Execute</span></code> 按钮执行，就看到:</p>
 <figure class="align-default">
@@ -299,10 +332,11 @@
 <a class="reference internal image-reference" href="../../../_images/prometheus_graph_3.png"><img alt="../../../_images/prometheus_graph_3.png" src="../../../_images/prometheus_graph_3.png" style="width: 400.0px; height: 258.0px;" /></a>
 </figure>
 </section>
-<section id="id8">
-<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://devopscube.com/install-configure-prometheus-linux/">How To Install and Configure Prometheus On a Linux Server</a></p></li>
+<li><p><a class="reference external" href="https://computingforgeeks.com/install-prometheus-server-on-debian-ubuntu-linux/">Install Prometheus Server on Ubuntu 22.04|20.04|18.04</a></p></li>
 </ul>
 </section>
 </section>

@@ -78,7 +78,14 @@ dnsmasq是小型网络的轻量级DNS/TFTP和DHCP服务器，特别适合小型�
 配置DNS客户端
 ================
 
-所有VM都需要配置 :ref:`systemd_resolved` 采用 ``zcloud`` 上部署的DNS服务器(dnsmasq)，所以修订VM以及模版VM ``/etc/netplan/01-netcfg.yaml`` ::
+所有VM都需要配置 :ref:`systemd_resolved` 采用 ``zcloud`` 上部署的DNS服务器(dnsmasq)
+
+Ubuntu
+----------
+
+修订VM以及模版VM ``/etc/netplan/01-netcfg.yaml`` ::
+
+
 
    ...
       nameservers:
@@ -91,3 +98,15 @@ dnsmasq是小型网络的轻量级DNS/TFTP和DHCP服务器，特别适合小型�
    sudo netplan apply
 
 完成DNS解析器配置，采用 ``192.168.6.200`` （zcloud) 的DNS进行域名解析。
+
+Fedora
+------------
+
+Fedora使用 :ref:`networkmanager` 管理网络，使用以下命令修订DNS::
+
+   # nmcli可以直接修订配置
+   nmcli connection modify enp1s0 ipv4.dns "192.168.6.200" ipv4.dns-search "staging.huatai.me"
+   # 需要up刷新才能生效
+   nmcli connection up id "enp1s0"
+
+上述命令会修订 ``/etc/NetworkManager/system-connections/enp1s0.nmconnection`` 对应配置

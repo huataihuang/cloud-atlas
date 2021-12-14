@@ -14,6 +14,7 @@ IOMMU
    vfio.rst
    compare_iommu_native_nvme.rst
    tunning/index
+   smmu/index
 
 .. only::  subproject and html
 
