@@ -8,6 +8,7 @@ Ceph Manager Daemon
    :maxdepth: 1
 
    ceph_dashboard.rst
+   ceph_dashboard_prometheus.rst
 
 .. only::  subproject and html
 
