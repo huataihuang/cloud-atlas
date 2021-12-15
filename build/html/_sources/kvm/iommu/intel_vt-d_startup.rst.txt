@@ -39,7 +39,7 @@ KVM中性能最好的磁盘IO是 ``pass-through`` ，即 ``IOMMU`` 技术。这�
 
       iommu=pt iommu=1    # AMD only
 
-   ``iommu=pt`` 可以避免Linux使用不能pass-through的设备
+   ``iommu=pt`` 可以避免Linux使用不能pass-through的设备，详见 :ref:`iommu_grub_config`
 
 然后更新grub::
 

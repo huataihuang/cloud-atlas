@@ -9,6 +9,7 @@ SR-IOV
 
    introduce_sr-iov.rst
    sr-iov_hardware.rst
+   config_sr-iov_network.rst
 
 .. only::  subproject and html
 

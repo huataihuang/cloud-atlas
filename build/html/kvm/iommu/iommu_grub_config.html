@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IOMMU &mdash; Cloud Atlas 0.1 文档</title>
+  <title>IOMMU内核启动grub配置 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="IOMMU架构" href="iommu_infra.html" />
-    <link rel="prev" title="KVM虚拟机磁盘性能优化" href="../performance/kvm_disk_performance.html" /> 
+    <link rel="next" title="Open Virtual Machine Firmware(OMVF)" href="ovmf.html" />
+    <link rel="prev" title="Intel VT-d快速起步" href="intel_vt-d_startup.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,10 +57,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">IOMMU</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">IOMMU</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="iommu_infra.html">IOMMU架构</a></li>
 <li class="toctree-l3"><a class="reference internal" href="intel_vt-d_startup.html">Intel VT-d快速起步</a></li>
-<li class="toctree-l3"><a class="reference internal" href="iommu_grub_config.html">IOMMU内核启动grub配置</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">IOMMU内核启动grub配置</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#intel">Intel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="ovmf.html">Open Virtual Machine Firmware(OMVF)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tainted_host-cpu.html">libvirt日志”Domain id=X is tainted: host-cpu”</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
@@ -148,9 +152,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">KVM Atlas</a> &raquo;</li>
-      <li>IOMMU</li>
+          <li><a href="index.html">IOMMU</a> &raquo;</li>
+      <li>IOMMU内核启动grub配置</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/kvm/iommu/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/kvm/iommu/iommu_grub_config.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -158,29 +163,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="iommu">
-<span id="id1"></span><h1>IOMMU<a class="headerlink" href="#iommu" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="iommu_infra.html">IOMMU架构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="intel_vt-d_startup.html">Intel VT-d快速起步</a></li>
-<li class="toctree-l1"><a class="reference internal" href="iommu_grub_config.html">IOMMU内核启动grub配置</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ovmf.html">Open Virtual Machine Firmware(OMVF)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tainted_host-cpu.html">libvirt日志”Domain id=X is tainted: host-cpu”</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vfio.html">VFIO - Virtual Function I/O</a></li>
-<li class="toctree-l1"><a class="reference internal" href="compare_iommu_native_nvme.html">比较IOMMU NVMe和原生NVMe存储性能</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tunning/index.html">IOMMU性能优化</a></li>
-<li class="toctree-l1"><a class="reference internal" href="smmu/index.html">SMMU - ARM IOMMU实现</a></li>
-</ul>
+  <section id="iommugrub">
+<span id="iommu-grub-config"></span><h1>IOMMU内核启动grub配置<a class="headerlink" href="#iommugrub" title="永久链接至标题">¶</a></h1>
+<p>在 <a class="reference internal" href="intel_vt-d_startup.html#intel-vt-d-startup"><span class="std std-ref">Intel VT-d快速起步</span></a> 和 <a class="reference internal" href="ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 介绍了如何配置IOMMU虚拟化，其中有一个重要步骤是启用内核IOMMU。这个步骤需要配置内核参数，也就是通过配置 <code class="docutils literal notranslate"><span class="pre">grub</span></code> 实现参数修改。由于Intel和AMD的配置参数略有不同，本文做一个简单梳理。</p>
+<section id="intel">
+<h2>Intel<a class="headerlink" href="#intel" title="永久链接至标题">¶</a></h2>
+<p>Intel处理器使用 <code class="docutils literal notranslate"><span class="pre">IOMMU</span></code> 只需要激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">intel_iommu</span><span class="o">=</span><span class="n">on</span>
+</pre></div>
 </div>
+<p>如果要使用 <a class="reference internal" href="../sr-iov/index.html#sr-iov"><span class="std std-ref">SR-IOV</span></a> ，为了最佳性能，应该再添加一个 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iommu</span><span class="o">=</span><span class="n">pt</span>
+</pre></div>
+</div>
+<p>当激活了 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> 模式，网卡就不需要使用DMA转换到内存，这就提高了处理性能。所以，对于hypervisor性能，这个 <code class="docutils literal notranslate"><span class="pre">iommu=pt</span></code> 参数是非常必要的</p>
+</section>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://community.mellanox.com/s/article/understanding-the-iommu-linux-grub-file-configuration">Understanding the iommu Linux grub File Configuration</a></p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../performance/kvm_disk_performance.html" class="btn btn-neutral float-left" title="KVM虚拟机磁盘性能优化" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="iommu_infra.html" class="btn btn-neutral float-right" title="IOMMU架构" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="intel_vt-d_startup.html" class="btn btn-neutral float-left" title="Intel VT-d快速起步" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ovmf.html" class="btn btn-neutral float-right" title="Open Virtual Machine Firmware(OMVF)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

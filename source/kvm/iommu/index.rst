@@ -9,6 +9,7 @@ IOMMU
 
    iommu_infra.rst
    intel_vt-d_startup.rst
+   iommu_grub_config.rst
    ovmf.rst
    tainted_host-cpu.rst
    vfio.rst
