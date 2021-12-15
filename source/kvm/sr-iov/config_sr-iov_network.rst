@@ -38,6 +38,10 @@ SR-IOV提供了将单一物理PCI资源( ``PF`` )切分成虚拟PCI功能( ``VF`
 
    GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on iommu=pt vfio-pci.ids=144d:a80a,10de:1b39"
 
+.. note::
+
+   ``iommu=pt`` 参数 非常关键，虽然文档中仅说明这个参数影响性能，但是我实践发现，如果不激活这个参数，则虽然调整 ``/sys/class/net/eno49/device/sriov_numvfs`` 参数能够看到 ``eno49v0`` 到 ``eno49v6`` 多个eth设备，但是使用 ``lspci`` 却无法看到对应的 ``Ethernet Controller Virtual Function`` ，所以这个内核参数一定要激活。
+
 然后执行重建grub::
 
    sudo update-grub
@@ -181,6 +185,94 @@ VF配置
    Linux Kernel version 3.8.x 及以上版本可以通过上述调整 ``sriov_numvfs`` 方法动态调整VF数量。但是，对于 3.7.x 或更低版本，则不能动态调整，而是要在加载内核模块时传递参数::
 
       modprobe idb max_vfs=4,4
+
+- 此时检查 ``lspci`` 会看到增加了对应的 ``Ethernet Controller Virtual Function`` 设备::
+
+   sudo lspci | grep -i eth | grep -i i350
+
+显示::
+
+   04:00.0 Ethernet controller: Intel Corporation I350 Gigabit Network Connection (rev 01)
+   04:00.1 Ethernet controller: Intel Corporation I350 Gigabit Network Connection (rev 01)
+   04:00.2 Ethernet controller: Intel Corporation I350 Gigabit Network Connection (rev 01)
+   04:00.3 Ethernet controller: Intel Corporation I350 Gigabit Network Connection (rev 01)
+   04:10.0 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+   04:10.4 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+   04:11.0 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+   04:11.4 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+   04:12.0 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+   04:12.4 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+   04:13.0 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+
+VM注入VF设备
+==============
+
+和 :ref:`ovmf` 中向VM注入 PCIe 设备(NVMe 或 GPU) 一样，根据 ``lspci`` 输出的 VF 设备的ID 的 3个数字字段分别对应了 ``bus=  slot= function=`` ，配置一个 ``eno49vf0.xml`` 来对应::
+
+   04:10.0 Ethernet controller: Intel Corporation I350 Ethernet Controller Virtual Function (rev 01)
+
+.. literalinclude:: config_sr-iov_network/eno49vf0.xml
+   :language: xml
+   :linenos:
+   :caption: 注入 04:10.0 PCI设备到VM内部
+
+- 执行设备注入命令::
+
+   virsh attach-device z-iommu eno49vf0.xml --config
+
+- 检查虚拟机 ``z-iommu`` ::
+
+   virsh dumpxml z-iommu
+
+可以看到::
+
+   ...
+    <hostdev mode='subsystem' type='pci' managed='yes'>
+      <source>
+        <address domain='0x0000' bus='0x04' slot='0x10' function='0x0'/>
+      </source>
+      <address type='pci' domain='0x0000' bus='0x08' slot='0x00' function='0x0'/>
+    </hostdev>
+   ...
+
+- 登陆 ``z-iommu`` 虚拟机，执行 ``ifconfig`` 可以看新增加了一个网卡设备::
+
+   enp8s0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+           ether 1a:47:5d:9d:13:8d  txqueuelen 1000  (Ethernet)
+           RX packets 0  bytes 0 (0.0 B)
+           RX errors 0  dropped 0  overruns 0  frame 0
+           TX packets 0  bytes 0 (0.0 B)
+           TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+- 通过 ``ethtool`` 可以看到这个设备是一个 VF ::
+
+   ethtool -i enp8s0
+
+输出::
+
+   driver: igbvf
+   version: 5.15.6-200.fc35.x86_64
+   firmware-version:
+   expansion-rom-version:
+   bus-info: 0000:08:00.0
+   supports-statistics: yes
+   supports-test: yes
+   supports-eeprom-access: no
+   supports-register-dump: yes
+   supports-priv-flags: no
+
+- 接下来就可以在虚拟机中使用这个 SR-IOV 的 VF 设备，性能测试后续补充
+
+下一步
+============
+
+可以看到，如果通过这种查询 VF 的 pci id，然后编写设备XML文件，逐个添加到虚拟机中，存在以下不足:
+
+- 从PF通过SR-IOV虚拟化出来的VF设备众多，手工编写XML即使有脚本协助也非常繁琐
+- 每个注入虚拟机的VF设备都需要查询PCI id，非常容易出错
+- 难以确保不出现冲突
+
+实际上， :ref:`libvirt` 提供了一个非常巧妙管理VF的方法 :ref:`libvirt_network_pool_sr-iov`
 
 参考
 =====

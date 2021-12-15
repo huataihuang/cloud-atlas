@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="NVIDIA vGPU" href="../vgpu/index.html" />
+    <link rel="next" title="Libvirt管理SR-IOV虚拟网络池" href="libvirt_network_pool_sr-iov.html" />
     <link rel="prev" title="SR-IOV实现硬件规划" href="sr-iov_hardware.html" /> 
 </head>
 
@@ -65,9 +65,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#id1">实践环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">SR-IOV概述</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">准备</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vmvf">VM注入VF设备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">下一步</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="libvirt_network_pool_sr-iov.html">Libvirt管理SR-IOV虚拟网络池</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
@@ -194,6 +197,10 @@
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">iommu=pt</span></code> 参数 非常关键，虽然文档中仅说明这个参数影响性能，但是我实践发现，如果不激活这个参数，则虽然调整 <code class="docutils literal notranslate"><span class="pre">/sys/class/net/eno49/device/sriov_numvfs</span></code> 参数能够看到 <code class="docutils literal notranslate"><span class="pre">eno49v0</span></code> 到 <code class="docutils literal notranslate"><span class="pre">eno49v6</span></code> 多个eth设备，但是使用 <code class="docutils literal notranslate"><span class="pre">lspci</span></code> 却无法看到对应的 <code class="docutils literal notranslate"><span class="pre">Ethernet</span> <span class="pre">Controller</span> <span class="pre">Virtual</span> <span class="pre">Function</span></code> ，所以这个内核参数一定要激活。</p>
+</div>
 <p>然后执行重建grub:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
 </pre></div>
@@ -361,10 +368,114 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 </pre></div>
 </div>
 </div>
+<ul>
+<li><p>此时检查 <code class="docutils literal notranslate"><span class="pre">lspci</span></code> 会看到增加了对应的 <code class="docutils literal notranslate"><span class="pre">Ethernet</span> <span class="pre">Controller</span> <span class="pre">Virtual</span> <span class="pre">Function</span></code> 设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">lspci</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">eth</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">i350</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">04</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">00.1</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">00.2</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">00.3</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Gigabit</span> <span class="n">Network</span> <span class="n">Connection</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">10.0</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">10.4</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">11.0</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">11.4</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">12.0</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">12.4</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+<span class="mi">04</span><span class="p">:</span><span class="mf">13.0</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
+</section>
+<section id="vmvf">
+<h2>VM注入VF设备<a class="headerlink" href="#vmvf" title="永久链接至标题">¶</a></h2>
+<p>和 <a class="reference internal" href="../iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 中向VM注入 PCIe 设备(NVMe 或 GPU) 一样，根据 <code class="docutils literal notranslate"><span class="pre">lspci</span></code> 输出的 VF 设备的ID 的 3个数字字段分别对应了 <code class="docutils literal notranslate"><span class="pre">bus=</span>&#160; <span class="pre">slot=</span> <span class="pre">function=</span></code> ，配置一个 <code class="docutils literal notranslate"><span class="pre">eno49vf0.xml</span></code> 来对应:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">04</span><span class="p">:</span><span class="mf">10.0</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">注入 04:10.0 PCI设备到VM内部</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
+<span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
+<span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x4&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x10&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
+<span class="linenos">4</span>  <span class="nt">&lt;/source&gt;</span>
+<span class="linenos">5</span><span class="nt">&lt;/hostdev&gt;</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>执行设备注入命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">attach</span><span class="o">-</span><span class="n">device</span> <span class="n">z</span><span class="o">-</span><span class="n">iommu</span> <span class="n">eno49vf0</span><span class="o">.</span><span class="n">xml</span> <span class="o">--</span><span class="n">config</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查虚拟机 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">dumpxml</span> <span class="n">z</span><span class="o">-</span><span class="n">iommu</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+ <span class="o">&lt;</span><span class="n">hostdev</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;subsystem&#39;</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;pci&#39;</span> <span class="n">managed</span><span class="o">=</span><span class="s1">&#39;yes&#39;</span><span class="o">&gt;</span>
+   <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span>
+     <span class="o">&lt;</span><span class="n">address</span> <span class="n">domain</span><span class="o">=</span><span class="s1">&#39;0x0000&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0x04&#39;</span> <span class="n">slot</span><span class="o">=</span><span class="s1">&#39;0x10&#39;</span> <span class="n">function</span><span class="o">=</span><span class="s1">&#39;0x0&#39;</span><span class="o">/&gt;</span>
+   <span class="o">&lt;/</span><span class="n">source</span><span class="o">&gt;</span>
+   <span class="o">&lt;</span><span class="n">address</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;pci&#39;</span> <span class="n">domain</span><span class="o">=</span><span class="s1">&#39;0x0000&#39;</span> <span class="n">bus</span><span class="o">=</span><span class="s1">&#39;0x08&#39;</span> <span class="n">slot</span><span class="o">=</span><span class="s1">&#39;0x00&#39;</span> <span class="n">function</span><span class="o">=</span><span class="s1">&#39;0x0&#39;</span><span class="o">/&gt;</span>
+ <span class="o">&lt;/</span><span class="n">hostdev</span><span class="o">&gt;</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>登陆 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code> 虚拟机，执行 <code class="docutils literal notranslate"><span class="pre">ifconfig</span></code> 可以看新增加了一个网卡设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enp8s0</span><span class="p">:</span> <span class="n">flags</span><span class="o">=</span><span class="mi">4099</span><span class="o">&lt;</span><span class="n">UP</span><span class="p">,</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="o">&gt;</span>  <span class="n">mtu</span> <span class="mi">1500</span>
+        <span class="n">ether</span> <span class="mi">1</span><span class="n">a</span><span class="p">:</span><span class="mi">47</span><span class="p">:</span><span class="mi">5</span><span class="n">d</span><span class="p">:</span><span class="mi">9</span><span class="n">d</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">8</span><span class="n">d</span>  <span class="n">txqueuelen</span> <span class="mi">1000</span>  <span class="p">(</span><span class="n">Ethernet</span><span class="p">)</span>
+        <span class="n">RX</span> <span class="n">packets</span> <span class="mi">0</span>  <span class="nb">bytes</span> <span class="mi">0</span> <span class="p">(</span><span class="mf">0.0</span> <span class="n">B</span><span class="p">)</span>
+        <span class="n">RX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span>  <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">frame</span> <span class="mi">0</span>
+        <span class="n">TX</span> <span class="n">packets</span> <span class="mi">0</span>  <span class="nb">bytes</span> <span class="mi">0</span> <span class="p">(</span><span class="mf">0.0</span> <span class="n">B</span><span class="p">)</span>
+        <span class="n">TX</span> <span class="n">errors</span> <span class="mi">0</span>  <span class="n">dropped</span> <span class="mi">0</span> <span class="n">overruns</span> <span class="mi">0</span>  <span class="n">carrier</span> <span class="mi">0</span>  <span class="n">collisions</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">ethtool</span></code> 可以看到这个设备是一个 VF</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ethtool</span> <span class="o">-</span><span class="n">i</span> <span class="n">enp8s0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="p">:</span> <span class="n">igbvf</span>
+<span class="n">version</span><span class="p">:</span> <span class="mf">5.15.6</span><span class="o">-</span><span class="mf">200.</span><span class="n">fc35</span><span class="o">.</span><span class="n">x86_64</span>
+<span class="n">firmware</span><span class="o">-</span><span class="n">version</span><span class="p">:</span>
+<span class="n">expansion</span><span class="o">-</span><span class="n">rom</span><span class="o">-</span><span class="n">version</span><span class="p">:</span>
+<span class="n">bus</span><span class="o">-</span><span class="n">info</span><span class="p">:</span> <span class="mi">0000</span><span class="p">:</span><span class="mi">08</span><span class="p">:</span><span class="mf">00.0</span>
+<span class="n">supports</span><span class="o">-</span><span class="n">statistics</span><span class="p">:</span> <span class="n">yes</span>
+<span class="n">supports</span><span class="o">-</span><span class="n">test</span><span class="p">:</span> <span class="n">yes</span>
+<span class="n">supports</span><span class="o">-</span><span class="n">eeprom</span><span class="o">-</span><span class="n">access</span><span class="p">:</span> <span class="n">no</span>
+<span class="n">supports</span><span class="o">-</span><span class="n">register</span><span class="o">-</span><span class="n">dump</span><span class="p">:</span> <span class="n">yes</span>
+<span class="n">supports</span><span class="o">-</span><span class="n">priv</span><span class="o">-</span><span class="n">flags</span><span class="p">:</span> <span class="n">no</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>接下来就可以在虚拟机中使用这个 SR-IOV 的 VF 设备，性能测试后续补充</p></li>
+</ul>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>下一步<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>可以看到，如果通过这种查询 VF 的 pci id，然后编写设备XML文件，逐个添加到虚拟机中，存在以下不足:</p>
+<ul class="simple">
+<li><p>从PF通过SR-IOV虚拟化出来的VF设备众多，手工编写XML即使有脚本协助也非常繁琐</p></li>
+<li><p>每个注入虚拟机的VF设备都需要查询PCI id，非常容易出错</p></li>
+<li><p>难以确保不出现冲突</p></li>
+</ul>
+<p>实际上， <a class="reference internal" href="../libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 提供了一个非常巧妙管理VF的方法 <a class="reference internal" href="libvirt_network_pool_sr-iov.html#libvirt-network-pool-sr-iov"><span class="std std-ref">Libvirt管理SR-IOV虚拟网络池</span></a></p>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.intel.com/content/www/us/en/developer/articles/technical/configure-sr-iov-network-virtual-functions-in-linux-kvm.html">Configure SR-IOV Network Virtual Functions in Linux KVM</a></p></li>
 <li><p><a class="reference external" href="file:///Users/huatai/Downloads/xl710-sr-iov-config-guide-gbe-linux-brief.pdf">SR-IOV Configuration Guide Intel Ethernet CNA X710 &amp; XL710 on Red Hat Enterprise Linux 7</a></p></li>
@@ -377,7 +488,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="sr-iov_hardware.html" class="btn btn-neutral float-left" title="SR-IOV实现硬件规划" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../vgpu/index.html" class="btn btn-neutral float-right" title="NVIDIA vGPU" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="libvirt_network_pool_sr-iov.html" class="btn btn-neutral float-right" title="Libvirt管理SR-IOV虚拟网络池" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
