@@ -302,6 +302,10 @@ dracut的早期加载机制是通过内核参数。
 
    GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39"
 
+.. note::
+
+   后续我实践 :ref:`config_sr-iov_network` ，还增加一个 ``iommu=pt`` 参数，以提高 SR-IOV pass-through 性能。
+
 然后重新生成grub::
 
    sudo update-grub
