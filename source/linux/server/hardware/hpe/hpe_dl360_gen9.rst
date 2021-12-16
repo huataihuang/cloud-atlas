@@ -26,22 +26,25 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
   - 方法一: 双盘组成RAID1，构建操作系统，确保本机服务器始终可用
   - 方法二: 两个SSD磁盘分别用于文件系统不同职责，例如数据和log分离，加速ZFS/Btrfs的性能
 
-- Drive 3-4 采用大容量 HDD ，构建基于 :ref:`gluster` 的镜像近线存储，提供NAS文件存储功能
+- Drive 3-5 采用大容量 HDD ，构建基于 :ref:`gluster` 的镜像近线存储，提供NAS文件存储功能
 
   - 采用大容量的机械磁盘可以降低存储成本，并且对于连续写入的大文件，机械磁盘性能在可接受范围
-  - 注意必须 :ref:`hdd_pmr_cmr_smr` ，应该购买CMR结构的HDD，并尽可能选择CMR大容量磁盘(小规格CMR HDD已经和SSD价格相近毫无优势)
+  - 注意 :ref:`hdd_pmr_cmr_smr` ，应该购买CMR结构的HDD，并尽可能选择CMR大容量磁盘(小规格CMR HDD已经和SSD价格相近毫无优势)
 
-- Drive 5-10 采用 SATA SSD，通过虚拟化构建 :ref:`ceph` 存储集群，提供整个虚拟化 :ref:`openstack` 分布式存储，实现云计算底层存储
+- (取消这条建议，原因见后)Drive 6-8 采用 SATA SSD，通过虚拟化构建 :ref:`ceph` 存储集群，提供整个虚拟化 :ref:`openstack` 分布式存储，实现云计算底层存储
 
-不过服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5" NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。详细实践待后续...
+企业级服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5" NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。此外，根据资料，要在 Drive 5-10 使用 U.2 接口的NVMe SSD需要满足:
+
+  - 使用专用背板(价格非常昂贵)
+  - 内部改造连线，从PCIe接口引出联线
 
 .. note::
 
    实际上我最终没有采购CMR HDD机械磁盘，因为我发现目前由于磁记录技术停滞发展，已经没有超过2T规格的CMR HDD了。小规格HDD售价和SSD相差无几，性能又大为落后，所以如果要实现高性能分布式集群，还是采用 NVMe SSD实现更佳。
 
-   目前我先临时采用旧有的500GB HDD磁盘来模拟实验，后续将采购 PCIe 3.0 x16 转接4个NVMe SSD磁盘，来实现高性能 :ref:`ceph` 集群:
+   目前我先临时采用旧有的500GB HDD磁盘来模拟实验，并且采购 PCIe 3.0 slot 转接 :strike:`4个` 3个NVMe SSD磁盘(原因是 DL360 Gen9 :ref:`pcie_bifurcation` 只能在slot1上设置，并且只支持分成2个 x8，导致加上 slot 2，我只能安装3个NVMe - :ref:`samsung_pm9a1` )，来实现高性能 :ref:`ceph` 集群:
 
-   - PCIe 3.0 x16 转接4个NVMe SSD磁盘需要主板支持 :ref:`pcie_bifurcation` ，这样可以把 PCIe x16 切分成 4个 PCIe x4
+   - PCIe 3.0 x16 (slot1) 转接 :strike:`4个` 2个 NVMe SSD磁盘(需要主板支持 :ref:`pcie_bifurcation` )
    - 需要升级 :ref:`hpe_dl360_gen9` BIOS 才能支持 ``PCIe Bifurcation Options``
 
 后面版
@@ -53,8 +56,8 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
 值得关注点:
 
 - 板载集成4端口千兆网卡，可以组建network bonding实现高速网络交换，或者可以尝试实践一个以Linux为基础的高速交换网络，学习SDN技术
-- 可选的FlexibleLOM bay可以安装附加的4口网卡，扩展性更强的交换网络
-- 电源可能需要购买高功率，因为如果使用高性能CPU没有大功率电源支持会导致不稳定 - 具体待查询资料和实践
+- 可选的FlexibleLOM bay可以安装附加的4口网卡，扩展性更强的交换网络 (建议采购，因为主板自带的Broadcom NetXtreme BCM5719不支持 :ref:`sr-iov` ，而配套的 FlexibleLOM 4口网卡是 Intel I350千兆网卡，可以完美支持Intel主推的 :ref:`sr-iov` 技术，用于部署更多采用IOMMU/SR-IOV的虚拟机)
+- 电源可能需要购买高功率，因为如果使用高性能CPU没有大功率电源支持会导致不稳定 - 我最后订购了800w规格，目前使用下来比较稳定，后续观察GPU运行情况再补充
 
 内部
 --------
@@ -86,11 +89,11 @@ PCIe
 
 - 由于DL 360是一个1U的紧凑型机架服务器，所以需要使用 ``PCIe 3.0 riser for PCIe slot X`` 也就是PCIe扩展板，将插槽由垂直转为水平。需要注意的是，DL 360默认配置只提供了 ``Primary PCIe 3.0 riser for PCIe slot 1 & 2`` (对应CPU 1) ，而第二块PCIe扩展板 ``Secondary PCIe 3.0 riser for PCIe slot 3 (requires CPU 2)`` 需要另外购买
 - 只有购买了 ``Secondary PCIe 3.0 riser for PCIe slot 3 (requires CPU 2)`` 才能充分发挥DL 360的PCIe性能，也就是把PCIe数据访问分担到两个CPU上，性能最佳
-- 我推测如果购买并安装第二块PCIe扩展板，实际上DL360可以安装2块 PCIe 3.0 x16 的显卡，理论上可以组建一个性能更强 :ref:`dl_hardware` 平台 (待实践)
+- 我推测如果购买并安装第二块PCIe扩展板，实际上DL360可以安装2块 PCIe 3.0 x16 的显卡，理论上可以组建一个性能更强 :ref:`dl_hardware` 平台 (不过，因为PCIe插槽有限，我最终用slot1+slot2安装 :ref:`nvme` ，slot3安装 :ref:`tesla_p10` 。很可惜，扩展性不足，后续有机会要采购扩展性更好的服务器，组件GPU集群 )
 - 根据 `HPE ProLiant DL360 Gen9 Server - Option Parts <https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c04444424>`_ 可以查询到上述第二块PCIe riser扩展板部件:
 
-  - HP DL360 Gen9 Low Profile PCIe Slot CPU2 Kit 部件编号是 ``764642-B21`` 在淘宝上能够找到价格为400元 (可能半高扩展板也够安装显卡了)
-  - HP DL360 Gen9 Full Height PCIe Slot CPU2 Kit 部件编号是 ``764644-B21`` (淘宝上没有可能需要ebay才能找到)
+  - HP DL360 Gen9 Low Profile PCIe Slot CPU2 Kit 部件编号是 ``764642-B21`` 在淘宝上能够找到价格为400元 (已买，已成功转接安装 :ref:`tesla_p10` )
+  - HP DL360 Gen9 Full Height PCIe Slot CPU2 Kit 部件编号是 ``764644-B21`` (淘宝上没有，ebay上售价极高，放弃)
 
 FlexibleLOM Adapter
 -----------------------
@@ -101,6 +104,10 @@ FlexibleLOM Adapter
 
 内部改造
 -----------
+
+.. note::
+
+   这个内部改造暂时放弃，我计划购买二手Cisco交换机来实践企业网络组网
 
 考虑到DL360服务器内部有一些尚未利用到空间，我准备将 :ref:`pi_4` 和 :ref:`jetson_nano` 安装到DL 360内部，结合上述Intel 4口千兆网卡所构建的Linux交换机，组建成一台混合架构模拟集群的服务器。
 
@@ -121,7 +128,7 @@ HPE ProLiant DL360 Gen9 服务器综合配置介于 :ref:`dell_r630` 和 :ref:`d
 
   - :ref:`lrdimm_ram` 3TB (24 x 128GB LRDIMM @ 2400 MHz)
   - :ref:`rdimm_ram` 768GB (24 x 32GB RDIMM @ 2133 MHz)
-  - :ref:`nvdimm_ram` 128GB (16 x 8GB NVDIMM)
+  - :ref:`nvdimm_ram` 128GB (16 x 8GB NVDIMM) - 我对比 Intel Optane :ref:`linux_pmem` 资料，发现这种非易失RAM在特定应用加速上有极大优势， :strike:`所以可能还是想实践一下` 
 
 .. note::
 

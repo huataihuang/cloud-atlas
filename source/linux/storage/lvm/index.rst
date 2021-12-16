@@ -8,6 +8,7 @@ Linux LVM逻辑卷管理
    :maxdepth: 1
 
    striped_lvm.rst
+   lvmcache.rst
    
 .. only::  subproject and html
 

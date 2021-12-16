@@ -184,21 +184,27 @@
 <li><p>方法二: 两个SSD磁盘分别用于文件系统不同职责，例如数据和log分离，加速ZFS/Btrfs的性能</p></li>
 </ul>
 </li>
-<li><p>Drive 3-4 采用大容量 HDD ，构建基于 <a class="reference internal" href="../../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 的镜像近线存储，提供NAS文件存储功能</p>
+<li><p>Drive 3-5 采用大容量 HDD ，构建基于 <a class="reference internal" href="../../../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 的镜像近线存储，提供NAS文件存储功能</p>
 <ul>
 <li><p>采用大容量的机械磁盘可以降低存储成本，并且对于连续写入的大文件，机械磁盘性能在可接受范围</p></li>
-<li><p>注意必须 <a class="reference internal" href="../storage/hdd_pmr_cmr_smr.html#hdd-pmr-cmr-smr"><span class="std std-ref">机械硬盘(HDD)磁头PMR、CMR、SMR的区别和选择</span></a> ，应该购买CMR结构的HDD，并尽可能选择CMR大容量磁盘(小规格CMR HDD已经和SSD价格相近毫无优势)</p></li>
+<li><p>注意 <a class="reference internal" href="../storage/hdd_pmr_cmr_smr.html#hdd-pmr-cmr-smr"><span class="std std-ref">机械硬盘(HDD)磁头PMR、CMR、SMR的区别和选择</span></a> ，应该购买CMR结构的HDD，并尽可能选择CMR大容量磁盘(小规格CMR HDD已经和SSD价格相近毫无优势)</p></li>
 </ul>
 </li>
-<li><p>Drive 5-10 采用 SATA SSD，通过虚拟化构建 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储集群，提供整个虚拟化 <a class="reference internal" href="../../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 分布式存储，实现云计算底层存储</p></li>
+<li><p>(取消这条建议，原因见后)Drive 6-8 采用 SATA SSD，通过虚拟化构建 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储集群，提供整个虚拟化 <a class="reference internal" href="../../../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 分布式存储，实现云计算底层存储</p></li>
 </ul>
-<p>不过服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5” NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。详细实践待后续…</p>
+<p>企业级服务器的部件价格是家用计算机部件的2倍价格，例如同样1T容量的NVMe家用型只需要600元，但是U.2接口的NVMe SFF存储(2.5” NVMe SSD)则售价在1200~1800元，对于组件模拟分布式存储，还是推荐采用家用NVMe设备(转接卡+M.2 NVMe)。此外，根据资料，要在 Drive 5-10 使用 U.2 接口的NVMe SSD需要满足:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>使用专用背板(价格非常昂贵)</p></li>
+<li><p>内部改造连线，从PCIe接口引出联线</p></li>
+</ul>
+</div></blockquote>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>实际上我最终没有采购CMR HDD机械磁盘，因为我发现目前由于磁记录技术停滞发展，已经没有超过2T规格的CMR HDD了。小规格HDD售价和SSD相差无几，性能又大为落后，所以如果要实现高性能分布式集群，还是采用 NVMe SSD实现更佳。</p>
-<p>目前我先临时采用旧有的500GB HDD磁盘来模拟实验，后续将采购 PCIe 3.0 x16 转接4个NVMe SSD磁盘，来实现高性能 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 集群:</p>
+<p>目前我先临时采用旧有的500GB HDD磁盘来模拟实验，并且采购 PCIe 3.0 slot 转接 <span class="sphinxnotes-strike">4个</span> 3个NVMe SSD磁盘(原因是 DL360 Gen9 <a class="reference internal" href="pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 只能在slot1上设置，并且只支持分成2个 x8，导致加上 slot 2，我只能安装3个NVMe - <a class="reference internal" href="../../../storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> )，来实现高性能 <a class="reference internal" href="../../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 集群:</p>
 <ul class="simple">
-<li><p>PCIe 3.0 x16 转接4个NVMe SSD磁盘需要主板支持 <a class="reference internal" href="pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> ，这样可以把 PCIe x16 切分成 4个 PCIe x4</p></li>
+<li><p>PCIe 3.0 x16 (slot1) 转接 <span class="sphinxnotes-strike">4个</span> 2个 NVMe SSD磁盘(需要主板支持 <a class="reference internal" href="pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> )</p></li>
 <li><p>需要升级 <a class="reference internal" href="#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> BIOS 才能支持 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">Bifurcation</span> <span class="pre">Options</span></code></p></li>
 </ul>
 </div>
@@ -211,8 +217,8 @@
 <p>值得关注点:</p>
 <ul class="simple">
 <li><p>板载集成4端口千兆网卡，可以组建network bonding实现高速网络交换，或者可以尝试实践一个以Linux为基础的高速交换网络，学习SDN技术</p></li>
-<li><p>可选的FlexibleLOM bay可以安装附加的4口网卡，扩展性更强的交换网络</p></li>
-<li><p>电源可能需要购买高功率，因为如果使用高性能CPU没有大功率电源支持会导致不稳定 - 具体待查询资料和实践</p></li>
+<li><p>可选的FlexibleLOM bay可以安装附加的4口网卡，扩展性更强的交换网络 (建议采购，因为主板自带的Broadcom NetXtreme BCM5719不支持 <a class="reference internal" href="../../../../kvm/sr-iov/index.html#sr-iov"><span class="std std-ref">SR-IOV</span></a> ，而配套的 FlexibleLOM 4口网卡是 Intel I350千兆网卡，可以完美支持Intel主推的 <a class="reference internal" href="../../../../kvm/sr-iov/index.html#sr-iov"><span class="std std-ref">SR-IOV</span></a> 技术，用于部署更多采用IOMMU/SR-IOV的虚拟机)</p></li>
+<li><p>电源可能需要购买高功率，因为如果使用高性能CPU没有大功率电源支持会导致不稳定 - 我最后订购了800w规格，目前使用下来比较稳定，后续观察GPU运行情况再补充</p></li>
 </ul>
 </section>
 <section id="id3">
@@ -316,11 +322,11 @@
 <ul class="simple">
 <li><p>由于DL 360是一个1U的紧凑型机架服务器，所以需要使用 <code class="docutils literal notranslate"><span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">X</span></code> 也就是PCIe扩展板，将插槽由垂直转为水平。需要注意的是，DL 360默认配置只提供了 <code class="docutils literal notranslate"><span class="pre">Primary</span> <span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">1</span> <span class="pre">&amp;</span> <span class="pre">2</span></code> (对应CPU 1) ，而第二块PCIe扩展板 <code class="docutils literal notranslate"><span class="pre">Secondary</span> <span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">3</span> <span class="pre">(requires</span> <span class="pre">CPU</span> <span class="pre">2)</span></code> 需要另外购买</p></li>
 <li><p>只有购买了 <code class="docutils literal notranslate"><span class="pre">Secondary</span> <span class="pre">PCIe</span> <span class="pre">3.0</span> <span class="pre">riser</span> <span class="pre">for</span> <span class="pre">PCIe</span> <span class="pre">slot</span> <span class="pre">3</span> <span class="pre">(requires</span> <span class="pre">CPU</span> <span class="pre">2)</span></code> 才能充分发挥DL 360的PCIe性能，也就是把PCIe数据访问分担到两个CPU上，性能最佳</p></li>
-<li><p>我推测如果购买并安装第二块PCIe扩展板，实际上DL360可以安装2块 PCIe 3.0 x16 的显卡，理论上可以组建一个性能更强 <a class="reference internal" href="../../../../machine_learning/hardware/dl_hardware.html#dl-hardware"><span class="std std-ref">深度学习硬件指南</span></a> 平台 (待实践)</p></li>
+<li><p>我推测如果购买并安装第二块PCIe扩展板，实际上DL360可以安装2块 PCIe 3.0 x16 的显卡，理论上可以组建一个性能更强 <a class="reference internal" href="../../../../machine_learning/hardware/dl_hardware.html#dl-hardware"><span class="std std-ref">深度学习硬件指南</span></a> 平台 (不过，因为PCIe插槽有限，我最终用slot1+slot2安装 <a class="reference internal" href="../../../storage/nvme/nvme.html#nvme"><span class="std std-ref">NVMe存储</span></a> ，slot3安装 <a class="reference internal" href="../../../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> 。很可惜，扩展性不足，后续有机会要采购扩展性更好的服务器，组件GPU集群 )</p></li>
 <li><p>根据 <a class="reference external" href="https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c04444424">HPE ProLiant DL360 Gen9 Server - Option Parts</a> 可以查询到上述第二块PCIe riser扩展板部件:</p>
 <ul>
-<li><p>HP DL360 Gen9 Low Profile PCIe Slot CPU2 Kit 部件编号是 <code class="docutils literal notranslate"><span class="pre">764642-B21</span></code> 在淘宝上能够找到价格为400元 (可能半高扩展板也够安装显卡了)</p></li>
-<li><p>HP DL360 Gen9 Full Height PCIe Slot CPU2 Kit 部件编号是 <code class="docutils literal notranslate"><span class="pre">764644-B21</span></code> (淘宝上没有可能需要ebay才能找到)</p></li>
+<li><p>HP DL360 Gen9 Low Profile PCIe Slot CPU2 Kit 部件编号是 <code class="docutils literal notranslate"><span class="pre">764642-B21</span></code> 在淘宝上能够找到价格为400元 (已买，已成功转接安装 <a class="reference internal" href="../../../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> )</p></li>
+<li><p>HP DL360 Gen9 Full Height PCIe Slot CPU2 Kit 部件编号是 <code class="docutils literal notranslate"><span class="pre">764644-B21</span></code> (淘宝上没有，ebay上售价极高，放弃)</p></li>
 </ul>
 </li>
 </ul>
@@ -332,6 +338,10 @@
 </section>
 <section id="id4">
 <h3>内部改造<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这个内部改造暂时放弃，我计划购买二手Cisco交换机来实践企业网络组网</p>
+</div>
 <p>考虑到DL360服务器内部有一些尚未利用到空间，我准备将 <a class="reference internal" href="../../../../arm/raspberry_pi/startup/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 和 <a class="reference internal" href="../../../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano开发套件概览</span></a> 安装到DL 360内部，结合上述Intel 4口千兆网卡所构建的Linux交换机，组建成一台混合架构模拟集群的服务器。</p>
 </section>
 </section>
@@ -731,7 +741,7 @@
 <ul>
 <li><p><a class="reference internal" href="../chipset/dimm_ram.html#lrdimm-ram"><span class="std std-ref">LRDIMM 内存</span></a> 3TB (24 x 128GB LRDIMM &#64; 2400 MHz)</p></li>
 <li><p><a class="reference internal" href="../chipset/dimm_ram.html#rdimm-ram"><span class="std std-ref">RDIMM 内存</span></a> 768GB (24 x 32GB RDIMM &#64; 2133 MHz)</p></li>
-<li><p><a class="reference internal" href="../chipset/dimm_ram.html#nvdimm-ram"><span class="std std-ref">NVDIMM 内存</span></a> 128GB (16 x 8GB NVDIMM)</p></li>
+<li><p><a class="reference internal" href="../chipset/dimm_ram.html#nvdimm-ram"><span class="std std-ref">NVDIMM 内存</span></a> 128GB (16 x 8GB NVDIMM) - 我对比 Intel Optane <a class="reference internal" href="../../../storage/pmem/index.html#linux-pmem"><span class="std std-ref">Linux 持久内存</span></a> 资料，发现这种非易失RAM在特定应用加速上有极大优势， <span class="sphinxnotes-strike">所以可能还是想实践一下</span></p></li>
 </ul>
 </li>
 </ul>

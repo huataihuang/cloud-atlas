@@ -95,12 +95,14 @@
 <li class="toctree-l4"><a class="reference internal" href="spdk_nvme/index.html">NVMe设备的SPDK驱动</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../pmem/index.html">Linux 持久内存</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spdk/index.html">Linux SPDK</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../filesystem/index.html">Linux文件系统</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../lvm/index.html">Linux LVM逻辑卷管理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../zfs/index.html">ZFS - Linux存储系统</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../btrfs/index.html">Btrfs - Linux存储系统</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stratis/index.html">Stratis - Linux存储系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bcache/index.html">Linux Bcache(块缓存)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Linux网络</a></li>
@@ -166,7 +168,41 @@
              
   <section id="nvme">
 <span id="id1"></span><h1>NVMe存储<a class="headerlink" href="#nvme" title="永久链接至标题">¶</a></h1>
+<p>NVMe或称NVMHCIS（Non-Volatile Memory Host Controller Interface Specification，非易失性存储主机控制器接口标准）最早是由英特尔公司于2007年提出的。NVMe使能够使固态硬盘与主机通讯速度更快的主机控制器接口规范。</p>
+<p>NVMe的特点:</p>
+<ul class="simple">
+<li><p>PCIe: NVMe 使用PCIe总线来提供更大的带宽和更低的延迟链接</p></li>
+<li><p>并行性: NVMe SSD在很大程度上实现了并行性，极大提高了吞吐量</p>
+<ul>
+<li><p>数据从存储设备传输到主机时，会进入一个队列</p></li>
+<li><p>传统SATA设备只支持一个队列，一次只能接受32条数据</p></li>
+<li><p>NVMe存储支持最多64000个队列，每个队列有64000个条目 (你没有看错，理论上并发支持数据条目: 64000x64000) : 这就是固态硬盘能够充分利用NVMe提供的并行性来发挥性能的原因</p></li>
+<li><p>接口限速: SATA传输最大传输速度6.0Gbps; PCIe Gen3 总线带宽8Gbps(用于存储是x4 = 32Gbps)，PCIe Gen4 总线带宽 16Gbps(用于存储是x4 = 64Gbps) ，可以看到目前2021年，主流的PCIe Gen4已经达到了惊人的总线带宽，不过依然有着广阔的前景(PCIe Gen5 NVMe存储产品已经出现在市场上)</p></li>
+</ul>
+</li>
+</ul>
+<section id="nvme-of">
+<h2>NVMe-oF<a class="headerlink" href="#nvme-of" title="永久链接至标题">¶</a></h2>
+<p>早期传统机械硬盘HDD时代，硬盘性能太低(和CPU/RAM相比)，所以数据中心服务器采用RAID技术，将大量硬盘组合成磁盘阵列来提高性能和容量。随着固态硬盘发展，出现了SSD+HDD的缓存存储以及全SSD存储。但是，NVMe SSD技术突飞猛进，性能、容量、成本不断突破，现代服务器已经能够支持很多固态硬盘，导致现在主机的计算能力已经不能充分发挥固态硬盘的全部性能，计算或软件成了性能瓶颈。解决的方法主要有2个途径:</p>
+<ul class="simple">
+<li><p>减少软件开销，出现了 <code class="docutils literal notranslate"><span class="pre">SPDK</span></code> 技术 ( <a class="reference internal" href="../../../ceph/spdk/index.html#ceph-spdk"><span class="std std-ref">Ceph SPDK</span></a> / <a class="reference internal" href="../spdk/index.html#linux-spdk"><span class="std std-ref">Linux SPDK</span></a> )</p></li>
+<li><p>计算与存储分离，将固态硬盘安装到独立设备中，把存储独立出来可以提供多个主机共享</p>
+<ul>
+<li><p>当前主流云计算厂商都采用了分布式存储，并且为了提升性能，都采用了计算与存储分离，在计算节点，只有一个非常薄的存储客户端，大量的密集存储读写IO都由后端的独立存储承担</p></li>
+<li><p>计算和存储分离带来了带宽和延迟的挑战，触发了 <code class="docutils literal notranslate"><span class="pre">NVMe-oF</span></code> 技术的发展</p>
+<ul>
+<li><p>RDMA的NVMe-oF: InfiniBand、 RoCE(RDMA over Converged Ethernet) 和 iWARP(internet Wide Area RDMA Protocol)。RDMA支持在不涉及处理器的情况下将数据传输到两台计算机的内存，并提供低延迟和快速的数据传输。从逻辑架构上看，与NVMe over PCIe相比，NVMe over RDMA在软件开销上的增加很小，可以近似地认为跨网络访问和本地访问的延迟几乎是一样的。</p></li>
+<li><p>FC-NVMe 的 NVMe-oF</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>NVMe工艺<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>在 SSD 技术领域，根据Memory Cells不同，分为 SLC, MLC, TLC, QLC 。目前(2021)，最主流的SSD存储技术是TLC，不过未来QLC将会取而代之成为主流。此外，根据接口协议不同，SSD又分为SATA和NVMe。</p>
+</section>
 <section id="multi-layer-ssds">
 <h2>Multi-Layer SSDs<a class="headerlink" href="#multi-layer-ssds" title="永久链接至标题">¶</a></h2>
 <p>NAND flash cell按照每个cell的bit数量划分为:</p>
@@ -223,15 +259,15 @@
 <h2>3D NAND和VNAND<a class="headerlink" href="#d-nandvnand" title="永久链接至标题">¶</a></h2>
 <p>传统的NAND cell是2D排列的，现代的3D NAND结合了TLC和QLC技术，达到了价格和容量以及性能和耐用性的平衡</p>
 </section>
-<section id="id2">
-<h2>选购思路<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h2>选购思路<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p>对于重负载的存储，例如需要运行多个虚拟机的主机，需要采用较为稳定的MLC存储</p></li>
 <li><p>对于性能要求不高且需要节约费用的大容量存储，则可以采用TLC（例如游戏盘，需要存储大量的游戏数据但是不会反复重写)</p></li>
 <li><p>普通应用程序运行，可以采用平衡各方面较完善的 3D TLC</p></li>
 </ul>
-<section id="id3">
-<h3>高端NVMe<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<section id="id4">
+<h3>高端NVMe<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
 <figure class="align-default">
 <img alt="../../../_images/compare_nvme.jpg" src="../../../_images/compare_nvme.jpg" />
 </figure>
@@ -239,16 +275,16 @@
 <p>其次推荐西部数据的黑盘，不过SLC缓存少校，性能基本接近 三星970 EVO Plus</p>
 <p>东芝RD500 1TB版本拥有40G 的SLC缓存，即使缓存用完也能保持1000MB/s以上的速度</p>
 </section>
-<section id="id4">
-<h3>中端NVMe<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<section id="id5">
+<h3>中端NVMe<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
 <figure class="align-default">
 <img alt="../../../_images/compare_nvme-1.jpg" src="../../../_images/compare_nvme-1.jpg" />
 </figure>
 <p>推荐 <code class="docutils literal notranslate"><span class="pre">西部数据的SN550（500G容量以上版本）</span></code> 价格适中，虽然采用了无DRAM的方案，但是由于出色的缓外速度和SLC缓存，并未对SSD的性能造成比较大的影响。</p>
 <p>此外，INTEL的660P，采用的QLC颗粒，提供了120G 的SLC缓存，如果价格非常低廉的话，作为游戏盘比较适合（没有频繁的写入，所以对寿命影响不大)</p>
 </section>
-<section id="id5">
-<h3>性价比NVMe<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<section id="id6">
+<h3>性价比NVMe<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>三星 PM981a 256G</p></li>
 </ul>
@@ -320,8 +356,8 @@
 <p>在pcie-4.0通道上，读取速度达到7000MB/s</p>
 </section>
 </section>
-<section id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.howtogeek.com/444787/multi-layer-ssds-what-are-slc-mlc-tlc-qlc-and-mlc/">Multi-Layer SSDs: What Are SLC, MLC, TLC, QLC, and PLC?</a></p></li>
 <li><p><a class="reference external" href="https://blog.synology.com/tlc-vs-qlc-ssds-what-are-the-differences">TLC vs. QLC SSDs: What are the differences?</a> 提供了性能评测</p></li>
