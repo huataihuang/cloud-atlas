@@ -1,15 +1,14 @@
-.. _linux_lvm:
+.. _linux_pmem:
 
 =================================
-Linux LVM逻辑卷管理
+Linux 持久内存
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   striped_lvm.rst
-   lvmcache.rst
-   
+   intro_pmem.rst
+
 .. only::  subproject and html
 
    Indices

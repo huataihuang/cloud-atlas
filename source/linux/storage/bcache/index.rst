@@ -1,14 +1,13 @@
-.. _linux_lvm:
+.. _linux_bcache:
 
 =================================
-Linux LVM逻辑卷管理
+Linux Bcache(块缓存)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   striped_lvm.rst
-   lvmcache.rst
+   disk_cache.rst
    
 .. only::  subproject and html
 

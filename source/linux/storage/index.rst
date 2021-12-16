@@ -9,12 +9,14 @@ Linux存储
 
    disk/index
    nvme/index
+   pmem/index
    spdk/index
    filesystem/index
    lvm/index
    zfs/index
    btrfs/index
    stratis/index
+   bcache/index
 
 .. only::  subproject and html
 
