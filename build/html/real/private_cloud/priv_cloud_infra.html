@@ -87,7 +87,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">私有云架构</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id2">私有云拓扑架构图</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">虚拟化的层级部署</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">虚拟化的层级部署</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#kubernetes">Kubernetes私有云</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#openstack">OpenStack私有云</a></li>
 </ul>
@@ -167,8 +167,8 @@
 </figure>
 <section id="id3">
 <h3>多层次虚拟化服务器分布<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
-<table class="colwidths-given docutils align-default" id="id9">
-<caption><span class="caption-text">zcloud服务器部署多层虚拟化虚拟机分配</span><a class="headerlink" href="#id9" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id10">
+<caption><span class="caption-text">zcloud服务器部署多层虚拟化虚拟机分配</span><a class="headerlink" href="#id10" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 10%" />
@@ -816,7 +816,29 @@
 </ul>
 </section>
 <section id="id5">
-<h4>私有云域名规划<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h4>
+<h4>网络规划<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h4>
+<p>我所使用的 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 有2个4口网卡:</p>
+<ul class="simple">
+<li><p>服务器主板板载 <code class="docutils literal notranslate"><span class="pre">4口</span></code> Broadcom BCM5719千兆网卡</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FlexibleLOM</span> <span class="pre">Bay</span></code> <code class="docutils literal notranslate"><span class="pre">4口</span></code> Intel I350千兆网卡 - 支持 <a class="reference internal" href="../../kvm/sr-iov/index.html#sr-iov"><span class="std std-ref">SR-IOV</span></a></p></li>
+</ul>
+<p>由于独立的 <code class="docutils literal notranslate"><span class="pre">4口</span></code> Intel I350千兆网卡 支持 SR-IOV ，所以我规划:</p>
+<ul class="simple">
+<li><p>每个Intel I350 ( <code class="docutils literal notranslate"><span class="pre">igb</span></code> ) 支持 <code class="docutils literal notranslate"><span class="pre">7个</span></code> SR-IOV 的 VF，共计可以实现 <code class="docutils literal notranslate"><span class="pre">32</span> <span class="pre">个</span></code> 网卡 ( <code class="docutils literal notranslate"><span class="pre">4x8</span></code> ) ，分配到 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 和 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> :</p>
+<ul>
+<li><p>2块 Intel I350 ( <code class="docutils literal notranslate"><span class="pre">igb</span></code>  ) 用于 <code class="docutils literal notranslate"><span class="pre">z-k8s</span></code> 集群(Kubernetes): k8s运行节点(VM) <code class="docutils literal notranslate"><span class="pre">z-k8s-n-1</span></code> 到 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-4</span></code> ，每个node分配4个 sr-iov cni ，其余节点 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-5</span></code> 到 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-10</span></code> 则使用常规 <code class="docutils literal notranslate"><span class="pre">virtio-net</span></code> ； 通过标签区别节点能力 (此外 <a class="reference internal" href="../../kvm/vgpu/index.html#vgpu"><span class="std std-ref">NVIDIA vGPU</span></a> 也只分配2个node，以验证k8s调度)</p></li>
+<li><p>2块 Intel I350 ( <code class="docutils literal notranslate"><span class="pre">igb</span></code>   ) 用于 <code class="docutils literal notranslate"><span class="pre">z-o7k</span></code> 集群(OpenStack): 同样也分配4个node</p></li>
+</ul>
+</li>
+</ul>
+<p>绝大多数虚拟机的网络都连接在 <code class="docutils literal notranslate"><span class="pre">br0</span></code> 上，通过内部交换机实现互联 ( 后续学习 Open vSwitch (OVS) )，以内核虚拟交换机实现高速互联:</p>
+<ul class="simple">
+<li><p>所有虚拟机都通过 <code class="docutils literal notranslate"><span class="pre">br0</span></code> 访问 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 基础数据层，数据通路走内核，不经过外部交换机</p></li>
+<li><p>少量外部物理硬件(如 <a class="reference internal" href="../../arm/raspberry_pi/pi_cluster/index.html#pi-cluster"><span class="std std-ref">Raspberry Pi Cluster</span></a> 以及我用笔记本模拟都KVM节点)，通过 <a class="reference internal" href="../../network/cisco/index.html#cisco"><span class="std std-ref">Cisco 网络</span></a> 交换机访问 <code class="docutils literal notranslate"><span class="pre">br0</span></code> 连接的虚拟机，如 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 虚拟化集群</p></li>
+</ul>
+</section>
+<section id="id6">
+<h4>私有云域名规划<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h4>
 <p>私有云是我在一台 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 物理服务器( <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> ) 上部署的云计算环境，我将这个环境作为 <code class="docutils literal notranslate"><span class="pre">staging</span></code> 环境来运行，所以域名设置为 <code class="docutils literal notranslate"><span class="pre">staging.huatai.me</span></code> ：</p>
 <ul class="simple">
 <li><p>在最初部署环境中，为了快速完成整体架构，我采用 <a class="reference internal" href="../../infra_service/dns/dnsmasq/index.html#dnsmasq"><span class="std std-ref">DNSmasq</span></a> 来实现 <a class="reference internal" href="priv_dnsmasq.html#priv-dnsmasq"><span class="std std-ref">私有云DNS服务(dnsmasq)</span></a></p></li>
@@ -825,8 +847,8 @@
 </section>
 </section>
 </section>
-<section id="id6">
-<h2>虚拟化的层级部署<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<section id="id7">
+<h2>虚拟化的层级部署<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <section id="data">
 <h3>数据存储层(data)<a class="headerlink" href="#data" title="永久链接至标题">¶</a></h3>
 <p>在 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 底层虚拟化上，我采用完全手工方式构建最基础的存储数据的虚拟机:</p>
@@ -851,8 +873,8 @@
 </li>
 </ul>
 </section>
-<section id="id7">
-<h3>第一层虚拟化<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<section id="id8">
+<h3>第一层虚拟化<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">z-o7k</span></code> 系列构建 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 集群</p>
 <ul>
@@ -877,8 +899,8 @@
 </ul>
 <p>第一层虚拟化的虚拟机也采用手工方式部署，部署用于构建集群的虚拟机都采用 <code class="docutils literal notranslate"><span class="pre">数据存储层</span></code> 的 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> <code class="docutils literal notranslate"><span class="pre">RBD</span></code> ，不使用任何本地磁盘: 虚拟机计算节点可以任意迁移。</p>
 </section>
-<section id="id8">
-<h3>第二层虚拟化<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
+<section id="id9">
+<h3>第二层虚拟化<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h3>
 <ul class="simple">
 <li><p>基于第一层虚拟化部署的 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 和 <a class="reference internal" href="../../ovirt/index.html#ovirt"><span class="std std-ref">oVirt Atlas</span></a> 实现自动化部署</p></li>
 </ul>

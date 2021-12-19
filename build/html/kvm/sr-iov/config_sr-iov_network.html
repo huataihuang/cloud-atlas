@@ -66,6 +66,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id2">SR-IOV概述</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">准备</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#vmvf">VM注入VF设备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vfmac">启动时激活VF以及固定MAC地址</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">下一步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
 </ul>
@@ -464,6 +465,31 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 <li><p>接下来就可以在虚拟机中使用这个 SR-IOV 的 VF 设备，性能测试后续补充</p></li>
 </ul>
 </section>
+<section id="vfmac">
+<h2>启动时激活VF以及固定MAC地址<a class="headerlink" href="#vfmac" title="永久链接至标题">¶</a></h2>
+<p>上述实践步骤完整展示了如何构建VF并注入虚拟机的方法，不过也有一些细节可以改进:</p>
+<ul class="simple">
+<li><p>在启动时如何自动激活VF</p></li>
+</ul>
+<p>有多中方法可以实现，比较简单的方法是采用传统的 <code class="docutils literal notranslate"><span class="pre">/etc/rc.d/rc.local</span></code> 脚本</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">启动执行脚本激活VF及配置固定MAC</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">for</span> i <span class="k">in</span> <span class="o">{</span><span class="m">0</span>..3<span class="o">}</span><span class="p">;</span><span class="k">do</span>
+<span class="linenos"> 2</span>    <span class="nv">n</span><span class="o">=</span>$<span class="o">[</span><span class="m">49</span>+<span class="nv">$i</span><span class="o">]</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span>    <span class="c1"># 激活VF eno49 ~ eno52</span>
+<span class="linenos"> 5</span>    <span class="nb">echo</span> <span class="m">7</span> <span class="p">|</span> tee /sys/class/net/eno<span class="si">${</span><span class="nv">n</span><span class="si">}</span>/device/sriov_numvfs
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span>    <span class="c1"># 为每个VF配置固定MAC</span>
+<span class="linenos"> 8</span>    <span class="k">for</span> j <span class="k">in</span> <span class="o">{</span><span class="m">0</span>..6<span class="o">}</span><span class="p">;</span><span class="k">do</span>
+<span class="linenos"> 9</span>        <span class="nb">echo</span> <span class="s2">&quot;ip link set eno</span><span class="si">${</span><span class="nv">n</span><span class="si">}</span><span class="s2"> vf </span><span class="nv">$j</span><span class="s2"> mac 2a:9d:79:68:6</span><span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="s2">:0</span><span class="si">${</span><span class="nv">j</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos">10</span>    <span class="k">done</span>
+<span class="linenos">11</span><span class="k">done</span>
+</pre></div>
+</div>
+</div>
+<p>不过，现代操作系统已经采用更为巧妙的 <a class="reference internal" href="../../linux/redhat_linux/systemd/udev.html#udev"><span class="std std-ref">Linux udev管理设备</span></a> 来实现设配配置，结合到 <a class="reference internal" href="libvirt_network_pool_sr-iov.html#libvirt-network-pool-sr-iov"><span class="std std-ref">Libvirt管理SR-IOV虚拟网络池</span></a> 可以灵活配置。</p>
+</section>
 <section id="id4">
 <h2>下一步<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>可以看到，如果通过这种查询 VF 的 pci id，然后编写设备XML文件，逐个添加到虚拟机中，存在以下不足:</p>
@@ -478,7 +504,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 <h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.intel.com/content/www/us/en/developer/articles/technical/configure-sr-iov-network-virtual-functions-in-linux-kvm.html">Configure SR-IOV Network Virtual Functions in Linux KVM</a></p></li>
-<li><p><a class="reference external" href="file:///Users/huatai/Downloads/xl710-sr-iov-config-guide-gbe-linux-brief.pdf">SR-IOV Configuration Guide Intel Ethernet CNA X710 &amp; XL710 on Red Hat Enterprise Linux 7</a></p></li>
+<li><p><a class="reference external" href="https://usermanual.wiki/Pdf/xl710sriovconfigguidegbelinuxbrief.51018661/view">SR-IOV Configuration Guide Intel Ethernet CNA X710 &amp; XL710 on Red Hat Enterprise Linux 7</a></p></li>
 </ul>
 </section>
 </section>

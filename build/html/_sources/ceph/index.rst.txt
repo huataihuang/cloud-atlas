@@ -22,6 +22,7 @@ Ceph Atlas
    radosgw/index
    cephfs/index
    config/index
+   geo-replication/index
    arm/index
    arch/index
    tunning/index

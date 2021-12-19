@@ -85,6 +85,26 @@
 
   - 第四字段 表示节点序号数字
 
+网络规划
+~~~~~~~~~
+
+我所使用的 :ref:`hpe_dl360_gen9` 有2个4口网卡:
+
+- 服务器主板板载 ``4口`` Broadcom BCM5719千兆网卡
+- ``FlexibleLOM Bay`` ``4口`` Intel I350千兆网卡 - 支持 :ref:`sr-iov`
+
+由于独立的 ``4口`` Intel I350千兆网卡 支持 SR-IOV ，所以我规划:
+
+- 每个Intel I350 ( ``igb`` ) 支持 ``7个`` SR-IOV 的 VF，共计可以实现 ``32 个`` 网卡 ( ``4x8`` ) ，分配到 :ref:`kubernetes` 和 :ref:`openstack` :
+
+  - 2块 Intel I350 ( ``igb``  ) 用于 ``z-k8s`` 集群(Kubernetes): k8s运行节点(VM) ``z-k8s-n-1`` 到 ``z-k8s-n-4`` ，每个node分配4个 sr-iov cni ，其余节点 ``z-k8s-n-5`` 到 ``z-k8s-n-10`` 则使用常规 ``virtio-net`` ； 通过标签区别节点能力 (此外 :ref:`vgpu` 也只分配2个node，以验证k8s调度)
+  - 2块 Intel I350 ( ``igb``   ) 用于 ``z-o7k`` 集群(OpenStack): 同样也分配4个node
+
+绝大多数虚拟机的网络都连接在 ``br0`` 上，通过内部交换机实现互联 ( 后续学习 Open vSwitch (OVS) )，以内核虚拟交换机实现高速互联:
+
+- 所有虚拟机都通过 ``br0`` 访问 :ref:`ceph` 基础数据层，数据通路走内核，不经过外部交换机
+- 少量外部物理硬件(如 :ref:`pi_cluster` 以及我用笔记本模拟都KVM节点)，通过 :ref:`cisco` 交换机访问 ``br0`` 连接的虚拟机，如 :ref:`ceph` 虚拟化集群
+
 私有云域名规划
 ~~~~~~~~~~~~~~~~
 

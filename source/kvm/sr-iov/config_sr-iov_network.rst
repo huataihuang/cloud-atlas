@@ -263,6 +263,22 @@ VM注入VF设备
 
 - 接下来就可以在虚拟机中使用这个 SR-IOV 的 VF 设备，性能测试后续补充
 
+启动时激活VF以及固定MAC地址
+============================
+
+上述实践步骤完整展示了如何构建VF并注入虚拟机的方法，不过也有一些细节可以改进:
+
+- 在启动时如何自动激活VF
+
+有多中方法可以实现，比较简单的方法是采用传统的 ``/etc/rc.d/rc.local`` 脚本
+
+.. literalinclude:: config_sr-iov_network/set_vf.sh
+   :language: bash
+   :linenos:
+   :caption: 启动执行脚本激活VF及配置固定MAC
+
+不过，现代操作系统已经采用更为巧妙的 :ref:`udev` 来实现设配配置，结合到 :ref:`libvirt_network_pool_sr-iov` 可以灵活配置。
+
 下一步
 ============
 
@@ -278,4 +294,4 @@ VM注入VF设备
 =====
 
 - `Configure SR-IOV Network Virtual Functions in Linux KVM <https://www.intel.com/content/www/us/en/developer/articles/technical/configure-sr-iov-network-virtual-functions-in-linux-kvm.html>`_
-- `SR-IOV Configuration Guide Intel Ethernet CNA X710 & XL710 on Red Hat Enterprise Linux 7 <file:///Users/huatai/Downloads/xl710-sr-iov-config-guide-gbe-linux-brief.pdf>`_
+- `SR-IOV Configuration Guide Intel Ethernet CNA X710 & XL710 on Red Hat Enterprise Linux 7 <https://usermanual.wiki/Pdf/xl710sriovconfigguidegbelinuxbrief.51018661/view>`_

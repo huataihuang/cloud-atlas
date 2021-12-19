@@ -14,6 +14,7 @@ Gluster Atlas
    build/index
    admin/index
    performance/index
+   geo-replication/index
    debug/index
    tendrl/index
 
