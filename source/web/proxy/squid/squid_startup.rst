@@ -54,8 +54,30 @@ Squid快速起步
    firewall-cmd --zone=public --add-port=3128/tcp --permanent
    firewall-cmd --reload
 
+无需重启即重新加载配置
+=========================
+
+很多时候修订配置重启squid是非常缓慢麻烦的事情，因为重启服务会清理缓存，效率非常低下。所以，通常我们修改配置后，应该仅仅重新加载配置而不要重启服务。有多种方法可以实现:
+
+- 方法一:  :ref:`systemd` 系统中使用::
+
+   sudo systemctl reload squid
+
+- 方法二: 向进程id发送 ``HUP`` 信号::
+
+   sudo kill -HUP `cat /var/run/squid.pid`
+
+或者::
+
+   sudo kill -HUP $(cat /var/run/squid.pid)
+
+- 方法三: 命令参数(也适用于FreeBSD)::
+
+   sudo /usr/sbin/squid -k reconfigure
+
 参考
 ======
 
 - `How to install and configure Squid proxy server on Linux <https://www.techrepublic.com/article/how-to-install-and-configure-squid-proxy-server-on-linux/>`_
 - `arch linux官方文档 - Squid <https://wiki.archlinux.org/index.php/Squid>`_
+- `Reload Squid Proxy Server Without Restarting Squid Daemon <https://www.cyberciti.biz/faq/howto-linux-unix-bsd-appleosx-reload-squid-conf-file/>`_

@@ -15,6 +15,7 @@ Linux磁盘
    wd_advanced_format.rst
    parted.rst
    mount_img.rst
+   intel_ssd_dc_series.rst
 
 .. only::  subproject and html
 
