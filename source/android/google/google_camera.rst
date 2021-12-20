@@ -16,12 +16,12 @@ Google Camera Port
 
 .. note::
 
-   那时开发人员引起了人们的注意，并进行了逆向工程以使其在其他 Android 手机上运行。
-这个 GCam 修改后的 APK 被称为 GCam Mod APK 或 GCam 端口
+   那时开发人员引起了人们的注意，并进行了逆向工程以使其在其他 Android 手机上运行。这个 GCam 修改后的 APK 被称为 GCam Mod APK 或 GCam 端口
 
-You can `download a compatible Google Camera APK <https://www.cyanogenmods.org/google-camera/>`_ for your phone from this huge list.
+你可以按照手机列表 `下载一个兼容 Google Camera APK <https://www.cyanogenmods.org/google-camera/>`_ 。
 
 以下是 GCam APK 的一些显着功能:
+
 - HDR+
 - Night Sight
 - Astrophotography
@@ -32,4 +32,3 @@ You can `download a compatible Google Camera APK <https://www.cyanogenmods.org/g
 .. note::
 
    此 Google 相机端口基于芯片组，因此您可能必须从正确的列表中下载兼容的 apk。
-
