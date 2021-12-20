@@ -80,11 +80,11 @@ CentOS 7通过Yum安装（EPEL源）
 - 解决的方法是手工下载安装pip的脚本::
 
    curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-   python get-pip.py
+   sudo python get-pip.py
 
 - 通过手工升级 ``pip`` 之后，再次安装virtuualenv环境就可以成功::
 
-   pip2.7 install virtualenv
+   sudo pip2.7 install virtualenv
    virtualenv venv2
 
 CentOS 8通过dnf安装python 2virtualenv
@@ -96,7 +96,7 @@ CentOS 8通过dnf安装python 2virtualenv
 
 - 安装python 2 (默认CentOS 8只安装python 3)::
 
-   dnf install python2
+   sudo dnf install python2
 
 - 安装python2的virtualenv::
 

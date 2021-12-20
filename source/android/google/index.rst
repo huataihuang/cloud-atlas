@@ -9,6 +9,7 @@ Android的Google应用
 
    google_play_music.rst
    google_play_book.rst
+   google_camera.rst
 
 .. only::  subproject and html
 

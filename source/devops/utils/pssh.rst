@@ -78,7 +78,11 @@ pssh实际上是一个python程序，所以可以通过 Python pip方式安装�
           import version
       ModuleNotFoundError: No module named 'version'
 
-参考 `pssh的安装和问题 <https://blog.csdn.net/wjzholmes/article/details/102239639>`_ 改为使用 Python 2的virtualenv环境就可以解决。
+   参考 `pssh的安装和问题 <https://blog.csdn.net/wjzholmes/article/details/102239639>`_ 改为使用 Python 2的virtualenv环境就可以解决。
+
+.. note::
+
+   过于陈旧的发行版python2自带的pip由于版本过低，无法升级，请参考 :ref:`virtualenv` 升级
 
 在virtualenv中安装pssh(强烈推荐)
 ---------------------------------
