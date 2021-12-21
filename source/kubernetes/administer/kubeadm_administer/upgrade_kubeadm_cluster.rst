@@ -70,7 +70,7 @@
 版本差异困境
 ==============
 
-锁定kubernetes软件版本 :ref:`bootstrap_kubernetes` 和 :ref:`arm_k8s_deploy` 有一步不起眼的步骤，锁定kubernetes软件版本 ::
+锁定kubernetes软件版本 :ref:`bootstrap_kubernetes_single` 和 :ref:`arm_k8s_deploy` 有一步不起眼的步骤，锁定kubernetes软件版本 ::
 
    sudo apt-mark unhold kubelet kubeadm kubectl
 

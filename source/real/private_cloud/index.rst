@@ -15,5 +15,6 @@
    zdata_ceph_rbd_libvirt.rst
    priv_kvm_sr-iov.rst
    priv_cloud_infra_prometheus.rst
+   z-k8s_env.rst
    priv_docker.rst
    priv_k8s_docker_centos.rst
