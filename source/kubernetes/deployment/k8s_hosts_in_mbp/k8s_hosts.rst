@@ -57,12 +57,6 @@ clone k8s虚拟机
 
 在运行KVM的物理主机上 ``/etc/hosts`` 配置模拟集群的hosts域名解析
 
-.. literalinclude:: ../../studio/hosts
-   :language: bash
-   :emphasize-lines: 8,19-34
-   :linenos:
-   :caption:
-
 libvirt dnsmasq
 -----------------
 
@@ -94,13 +88,11 @@ libvirt dnsmasq
 
 参考 `KVM: Using dnsmasq for libvirt DNS resolution <https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/>`_ ，执行 ``virsh net-edit default`` 编辑 libvirt 网络，添加 ``<dns></dns>`` 段落:
 
-.. literalinclude:: ../../studio/libvirt_net_default.xml
+.. literalinclude:: ../../../studio/libvirt_net_default.xml
    :language: xml
    :emphasize-lines: 7-53
    :linenos:
    :caption: virsh net-edit default
-
-   
 
 然后重启libvirt default网络::
 
