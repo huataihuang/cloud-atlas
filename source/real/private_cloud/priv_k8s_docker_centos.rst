@@ -125,7 +125,7 @@
 
 .. note::
 
-   请参考 :ref:`bootstrap_kubernetes`  的 :ref:`kubeadm` 部分调整好物理服务器的防火墙端口。
+   请参考 :ref:`bootstrap_kubernetes_single`  的 :ref:`kubeadm` 部分调整好物理服务器的防火墙端口。
 
    默认安装docker时候已经配置了iptables，但是CentOS 7默认只安装了firewalld但没有激活firewalld::
 
