@@ -11,6 +11,7 @@ Raspberry Pi
 .. toctree::
    :maxdepth: 1
 
+   hardware/index
    startup/index
    admin/index
    network/index

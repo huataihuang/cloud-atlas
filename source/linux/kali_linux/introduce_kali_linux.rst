@@ -74,3 +74,7 @@ USB armory是一个开源硬件设计的USB计算棒，目前 `Mk II第二代产
 - `Kali Linux for Android Mobile Devices <https://www.offensive-security.com/kali-linux-nethunter-download/>`_
 
 基于Android设备中运行Kali Linux，可以工作在不同的Android手机或者平板。例如，你可以在Nexus 5手机内部安装一个Kali Linux系统来实现安全扫描。
+
+- :ref:`pi-tail`
+
+在手机上连接 :ref:`pi_zero` ，通过手机屏幕运行VNC访问Pi Zero上运行煮面，就好像一个随身电脑

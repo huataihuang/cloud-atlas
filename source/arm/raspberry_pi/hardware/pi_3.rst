@@ -6,7 +6,7 @@
 
 `Raspberry Pi 3 Model B <https://www.raspberrypi.org/products/raspberry-pi-3-model-b/>`_ 是树莓派2016年2月发布的版本。从这代树莓派开始采用了ARM Cortex-A53的64位处理器，为真正进入桌面和服务器领域踏出了第一步。
 
-.. figure:: ../../../_static/arm/raspberry_pi/startup/pi3.jpg
+.. figure:: ../../../_static/arm/raspberry_pi/hardware/pi3.jpg
    :scale: 75
 
 .. note::

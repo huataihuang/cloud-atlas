@@ -1,7 +1,7 @@
 .. _jetson_nano:
 
 ========================
-Jetson Nano开发套件概览
+Jetson Nano
 ========================
 
 .. note::

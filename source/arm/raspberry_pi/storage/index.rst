@@ -21,6 +21,7 @@ ARM架构在存储上似乎落后于x86体系，毕竟我们熟悉的各种存�
    usb_boot_kali_pi_4.rst
    chroot_raspbian.rst
    disable_auto_resize.rst
+   radxa_taco.rst
 
 .. only::  subproject and html
 
