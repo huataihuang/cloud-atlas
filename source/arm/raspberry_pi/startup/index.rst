@@ -8,10 +8,6 @@
    :maxdepth: 1
 
    pi_os.rst
-   pi_3.rst
-   pi_zero.rst
-   pi_4.rst
-   pi_400.rst
    pi_400_4k_display.rst
    pi_400_dual_monitor.rst
    pi_x11_slow.rst

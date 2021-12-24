@@ -11,6 +11,7 @@ Kali Linux
    kali_fulltime.rst
    startup/index
    admin/index
+   arm/index
 
 .. only::  subproject and html
 

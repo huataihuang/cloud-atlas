@@ -4,12 +4,12 @@
 树莓派Raspberry Pi 4
 ======================
 
-.. figure:: ../../../_static/arm/raspberry_pi/startup/pi4.png
+.. figure:: ../../../_static/arm/raspberry_pi/hardware/pi4.png
    :scale: 75
 
 Raspberry Pi 4是一个非常小巧的多显示输出桌面级计算机，刚拿到手，我就觉得制作工艺已经比前几代有很大提高，特别是元器件小型化，使得加上金属保护壳之后的颜值非常高。
 
-.. figure:: ../../../_static/arm/raspberry_pi/startup/pi4_case.png
+.. figure:: ../../../_static/arm/raspberry_pi/hardware/pi4_case.png
    :scale: 75
 
 .. note::
@@ -19,7 +19,7 @@ Raspberry Pi 4是一个非常小巧的多显示输出桌面级计算机，刚拿
 技术规格
 ==========
 
-.. figure:: ../../../_static/arm/raspberry_pi/startup/pi_4_blueprint-labelled.png
+.. figure:: ../../../_static/arm/raspberry_pi/hardware/pi_4_blueprint-labelled.png
    :scale: 75
 
 - Broadcom BCM2711处理器：4核心Cortex-A72(ARM v8) 64位处理器，主频1.5GHz - 树莓派4b的处理器属于A72架构，比 :ref:`jetson` 的A57架构要先进一代，据评测性能提升了1.8倍。(不过，NVIDIA是买GPU送CPU，所以也不能要求太高)
