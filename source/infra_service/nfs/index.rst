@@ -1,13 +1,11 @@
-.. _redis:
+.. _nfs:
 
 =================================
-Redis Atlas
+nfs服务
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   intro_redis.rst
 
 .. only::  subproject and html
 

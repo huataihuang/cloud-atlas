@@ -1,13 +1,14 @@
-.. _redis:
+.. _nosql:
 
 =================================
-Redis Atlas
+NoSQL Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_redis.rst
+   intro_nosql.rst
+   cassandra/index
 
 .. only::  subproject and html
 

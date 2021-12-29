@@ -121,35 +121,7 @@ Ubuntu 20.04
 
 .. note::
 
-   实际部署我调整为采用 :ref:`docker_btrfs_driver` 
-
-
-Debian/Ubuntu (Kubernetes官方方法)
------------------------------------
-
-- 更新并安装 Kubernetes apt 仓库所需软件包::
-
-   sudo apt update
-   sudo apt upgrade -y
-   sudo apt install -y apt-transport-https ca-certificates curl
-
-- 下载 Google Cloud 公开签名秘钥::
-
-   sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg -x "http://192.168.6.200:3128/"
-
-.. note::
-
-   这里使用 ``-x "http://192.168.6.200:3128/"`` 是为了使用 :ref:`squid_socks_peer` 翻墙
-
-- 添加 Kubernetes ``apt`` 仓库::
-
-   echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
-- 安装::
-
-   sudo apt update
-   sudo apt install -y kubelet kubeadm kubectl
-   sudo apt-mark hold kubelet kubeadm kubectl
+   实际部署我调整为采用 :ref:`docker_btrfs_driver` ，见 :ref:`prepare_z-k8s`
 
 CentOS/RHEL 7.4+
 -------------------

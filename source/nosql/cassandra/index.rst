@@ -1,13 +1,11 @@
-.. _redis:
+.. _cassandra:
 
 =================================
-Redis Atlas
+Cassandra
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   intro_redis.rst
 
 .. only::  subproject and html
 

@@ -19,4 +19,5 @@ Kubernetes管理
    set_k8s_worker_internal_ip.rst
    kubeadm_administer/index
    etcd/index
+   coredns/index
    federation/index
