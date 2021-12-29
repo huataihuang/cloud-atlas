@@ -14,4 +14,4 @@ Kubernetes结合虚拟化技术的实现：
    :maxdepth: 1
 
    gvisor/index
-   kubevirt.rst
+   kubevirt/index

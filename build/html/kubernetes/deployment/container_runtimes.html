@@ -184,13 +184,36 @@
 </ul>
 <section id="cgroup">
 <h2>Cgroup驱动<a class="headerlink" href="#cgroup" title="永久链接至标题">¶</a></h2>
-<p>在使用systemd作为init的Linux发行版中，init进程生成和控制了一个根控制组(root control group)并且systemd作为一个cgroup manager。systemd已经紧密结合了cgroups并且为每个进程分配cgroup。systemd可以配置container runtime 和 kubelet 来使用 <code class="docutils literal notranslate"><span class="pre">ccgroupfs</span></code> 。注意，如果独立于systemd来使用 <code class="docutils literal notranslate"><span class="pre">cgroupfs</span></code> 意味着系统有两套不同的cgruop manager。</p>
-<p>控制组(control groups)用于进程使用的资源。一个单一的cgroup manager可以简化资源分配的视图并且天然就具备可用及使用资源的一致性视图。所以如果我们使用两个cgroup manager就不得不面对这些资源的两种视图：需要检查通过 <code class="docutils literal notranslate"><span class="pre">cgroupfs</span></code> 配置的kubeleet和Docker的配置客店的字段，同时又要检查节点上剩下的由 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 配置的进程。这种情况会导致系统不稳定。</p>
+<p>在使用systemd作为init的Linux发行版中，init进程生成和控制了一个根控制组(root control group)并且systemd作为一个cgroup manager。systemd已经紧密结合了cgroups并且为每个进程分配cgroup。systemd可以配置container runtime 和 kubelet 来使用 <code class="docutils literal notranslate"><span class="pre">cgroupfs</span></code> 。注意，如果独立于systemd来使用 <code class="docutils literal notranslate"><span class="pre">cgroupfs</span></code> 意味着系统有两套不同的cgruop manager。</p>
+<p>控制组(control groups)用于进程使用的资源。一个单一的cgroup manager可以简化资源分配的视图并且天然就具备可用及使用资源的一致性视图。所以如果我们使用两个cgroup manager就不得不面对这些资源的两种视图：需要检查通过 <code class="docutils literal notranslate"><span class="pre">cgroupfs</span></code> 配置的kubelet和Docker的配置的字段，同时又要检查节点上剩下的由 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 配置的进程。这种情况会导致系统不稳定。</p>
 <p>要修改容器运行时环境和kubelet使用 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 作为cgroup驱动以便系统更佳稳定。请注意下文中设置Docker的配置 <code class="docutils literal notranslate"><span class="pre">native.cgroupdriver=systemd</span></code> 选项。</p>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>请不要修改已经加入集群节点的cgroup驱动：如果kubelet已经使用了一种cgroup driver创建了Pod，修改容器运行时环境使用另一种cgroup driver会导致对已经存在Pods重新创建PodSandbox时出错，甚至重新启动kubelet也不能解决这个错误。如果要修改节点cgroup driver，建议先从集群移除节点，然后修改cgroup driver再重新加入集群。</p>
 </div>
+<section id="cgroup-v2">
+<h3>Cgroup v2<a class="headerlink" href="#cgroup-v2" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>与 <a class="reference internal" href="../../kernel/cgroup/cgroup_v1.html#cgroup-v1"><span class="std std-ref">Control Group v1</span></a> 不同的是， <a class="reference internal" href="../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> 只有一个层次结构，而不是每个控制器有一个不同的层次结构。</p></li>
+<li><p>尽管内核支持混合配置，即其中一些控制器由 cgroup v1 管理，另一些由 cgroup v2 管理， Kubernetes 仅支持使用同一 cgroup 版本来管理所有控制器。</p></li>
+<li><p>如果 systemd 默认不使用 cgroup v2，你可以通过在内核命令行中添加 <code class="docutils literal notranslate"><span class="pre">systemd.unified_cgroup_hierarchy=1</span></code> 来配置系统去使用它。</p></li>
+<li><p>切换到 cgroup v2 时，用户体验不应有任何明显差异， 除非用户直接在节点上或在容器内访问 cgroup 文件系统。 为了使用它，CRI 运行时也必须支持 cgroup v2。</p></li>
+</ul>
+<p>Ubuntu 20.10 才开始默认使用cgroup v2，原因是snap系统尚未支持。不过，对于我不使用snap，且想要实践最新的 <a class="reference internal" href="../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> 来更精细化管控资源，所以 <a class="reference internal" href="../../linux/ubuntu_linux/cgroup/enable_cgrop_v2_ubuntu_20.04.html#enable-cgrop-v2-ubuntu-20-04"><span class="std std-ref">在Ubuntu 20.04 LTS激活Cgroup v2</span></a> 。以下修订在每个节点上完成:</p>
+<ul>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置在 <code class="docutils literal notranslate"><span class="pre">GRUB_CMDLINE_LINUX</span></code> 添加参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemd</span><span class="o">.</span><span class="n">unified_cgroup_hierarchy</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订grub并重启:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+<span class="n">sudo</span> <span class="n">reboot</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 </section>
 <section id="docker">
 <h2>Docker<a class="headerlink" href="#docker" title="永久链接至标题">¶</a></h2>
@@ -235,6 +258,38 @@
 <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
 <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
 </pre></div>
+</div>
+</section>
+<section id="ubuntu-20-04">
+<h3>Ubuntu 20.04<a class="headerlink" href="#ubuntu-20-04" title="永久链接至标题">¶</a></h3>
+<p>在 <a class="reference internal" href="../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 部署中采用 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04 LTS版本，采用了发行版提供的 <code class="docutils literal notranslate"><span class="pre">docker.io</span></code> 软件包部署:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">upgrade</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+<p>同样需要调整daemon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup daemon.</span>
+<span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">daemon</span><span class="o">.</span><span class="n">json</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
+<span class="p">{</span>
+  <span class="s2">&quot;exec-opts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;native.cgroupdriver=systemd&quot;</span><span class="p">],</span>
+  <span class="s2">&quot;log-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;log-opts&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;max-size&quot;</span><span class="p">:</span> <span class="s2">&quot;100m&quot;</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;storage-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;overlay2&quot;</span>
+<span class="p">}</span>
+<span class="n">EOF</span>
+
+<span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">d</span>
+
+<span class="c1"># Restart docker.</span>
+<span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>实际部署我调整为采用 <a class="reference internal" href="../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a></p>
 </div>
 </section>
 <section id="debian-ubuntu-kubernetes">

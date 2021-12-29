@@ -79,3 +79,4 @@ Kubernetes hostPath持久化卷实践
 
 - `Configure a Pod to Use a PersistentVolume for Storage <https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/>`_
 - `Kubernetes (4): Persistent Volumes – Hello World <https://vocon-it.com/2018/12/10/kubernetes-4-persistent-volumes-hello-world/>`_
+- `hostPath as volume in kubernetes <https://stackoverflow.com/questions/50001403/hostpath-as-volume-in-kubernetes>`_

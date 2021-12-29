@@ -14,15 +14,35 @@
 Cgroup驱动
 ===========
 
-在使用systemd作为init的Linux发行版中，init进程生成和控制了一个根控制组(root control group)并且systemd作为一个cgroup manager。systemd已经紧密结合了cgroups并且为每个进程分配cgroup。systemd可以配置container runtime 和 kubelet 来使用 ``ccgroupfs`` 。注意，如果独立于systemd来使用 ``cgroupfs`` 意味着系统有两套不同的cgruop manager。 
+在使用systemd作为init的Linux发行版中，init进程生成和控制了一个根控制组(root control group)并且systemd作为一个cgroup manager。systemd已经紧密结合了cgroups并且为每个进程分配cgroup。systemd可以配置container runtime 和 kubelet 来使用 ``cgroupfs`` 。注意，如果独立于systemd来使用 ``cgroupfs`` 意味着系统有两套不同的cgruop manager。 
 
-控制组(control groups)用于进程使用的资源。一个单一的cgroup manager可以简化资源分配的视图并且天然就具备可用及使用资源的一致性视图。所以如果我们使用两个cgroup manager就不得不面对这些资源的两种视图：需要检查通过 ``cgroupfs`` 配置的kubeleet和Docker的配置客店的字段，同时又要检查节点上剩下的由 ``systemd`` 配置的进程。这种情况会导致系统不稳定。
+控制组(control groups)用于进程使用的资源。一个单一的cgroup manager可以简化资源分配的视图并且天然就具备可用及使用资源的一致性视图。所以如果我们使用两个cgroup manager就不得不面对这些资源的两种视图：需要检查通过 ``cgroupfs`` 配置的kubelet和Docker的配置的字段，同时又要检查节点上剩下的由 ``systemd`` 配置的进程。这种情况会导致系统不稳定。
 
 要修改容器运行时环境和kubelet使用 ``systemd`` 作为cgroup驱动以便系统更佳稳定。请注意下文中设置Docker的配置 ``native.cgroupdriver=systemd`` 选项。
 
 .. warning::
 
    请不要修改已经加入集群节点的cgroup驱动：如果kubelet已经使用了一种cgroup driver创建了Pod，修改容器运行时环境使用另一种cgroup driver会导致对已经存在Pods重新创建PodSandbox时出错，甚至重新启动kubelet也不能解决这个错误。如果要修改节点cgroup driver，建议先从集群移除节点，然后修改cgroup driver再重新加入集群。
+
+Cgroup v2
+------------
+
+- 与 :ref:`cgroup_v1` 不同的是， :ref:`cgroup_v2` 只有一个层次结构，而不是每个控制器有一个不同的层次结构。
+- 尽管内核支持混合配置，即其中一些控制器由 cgroup v1 管理，另一些由 cgroup v2 管理， Kubernetes 仅支持使用同一 cgroup 版本来管理所有控制器。
+- 如果 systemd 默认不使用 cgroup v2，你可以通过在内核命令行中添加 ``systemd.unified_cgroup_hierarchy=1`` 来配置系统去使用它。
+- 切换到 cgroup v2 时，用户体验不应有任何明显差异， 除非用户直接在节点上或在容器内访问 cgroup 文件系统。 为了使用它，CRI 运行时也必须支持 cgroup v2。
+
+
+Ubuntu 20.10 才开始默认使用cgroup v2，原因是snap系统尚未支持。不过，对于我不使用snap，且想要实践最新的 :ref:`cgroup_v2` 来更精细化管控资源，所以 :ref:`enable_cgrop_v2_ubuntu_20.04` 。以下修订在每个节点上完成:
+
+- 修改 ``/etc/default/grub`` 配置在 ``GRUB_CMDLINE_LINUX`` 添加参数::
+
+   systemd.unified_cgroup_hierarchy=1
+
+- 修订grub并重启::
+
+   sudo update-grub
+   sudo reboot
 
 Docker
 =========
@@ -70,6 +90,39 @@ Ubuntu 16.04
    # Restart docker.
    systemctl daemon-reload
    systemctl restart docker   
+
+Ubuntu 20.04
+-----------------
+
+在 :ref:`priv_cloud_infra` 部署中采用 :ref:`ubuntu_linux` 20.04 LTS版本，采用了发行版提供的 ``docker.io`` 软件包部署::
+
+   sudo apt update && sudo apt upgrade
+   sudo apt install docker.io -y
+
+同样需要调整daemon::
+
+   # Setup daemon.
+   cat > /etc/docker/daemon.json <<EOF
+   {
+     "exec-opts": ["native.cgroupdriver=systemd"],
+     "log-driver": "json-file",
+     "log-opts": {
+       "max-size": "100m"
+     },
+     "storage-driver": "overlay2"
+   }
+   EOF
+   
+   mkdir -p /etc/systemd/system/docker.service.d
+   
+   # Restart docker.
+   systemctl daemon-reload
+   systemctl restart docker   
+
+.. note::
+
+   实际部署我调整为采用 :ref:`docker_btrfs_driver` 
+
 
 Debian/Ubuntu (Kubernetes官方方法)
 -----------------------------------

@@ -8,6 +8,7 @@ Kubernetes持续集成和持续部署
    :maxdepth: 2
 
    kubernetes_ci_cd_overview.rst
+   tekton/index
 
 参考
 =======

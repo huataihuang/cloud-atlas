@@ -174,8 +174,29 @@ Manual forwarding
 
    zcloud.staging.huatai.me has address 192.168.6.9
 
-DHCP服务器
-============
+DHCP服务器(推荐配置)
+===========================
+
+我在 :ref:`priv_cloud_infra` 采用的DNSmasq实现DNS解析，以及对局域网内部提供DHCP，提供 :ref:`airport_express_with_dnsmasq` ，配置添加::
+
+   dhcp-range=192.168.6.21,192.168.6.50,255.255.255.0,12h
+   dhcp-option=option:router,192.168.6.200
+   dhcp-option=option:ntp-server,192.168.6.200
+   dhcp-option=option:dns-server,192.168.6.200
+   dhcp-authoritative
+
+解析配置:
+
+- ``dhcp-range`` 设置了分配IP地址范围，注意，配置中结合了上文DNS配置，上文中已经配置 ``listen-address=192.168.6.200,127.0.0.1`` ，也就是只监听局域网内部IP以及回环地址，所以不会和无线网络(另一个DHCP)冲突
+- ``dhcp-option`` 提供了DHCP的选项:
+
+  - ``dhcp-option=option:router,192.168.6.200`` 指定DHCP客户端的默认路由
+  - ``dhcp-option=option:ntp-server,192.168.6.200`` 指定DHCP客户端的NTP服务器
+  - ``dhcp-option=option:dns-server,192.168.6.200`` 指定DHCP客户端的DNS服务器
+  - ``dhcp-authoritative`` 
+
+DHCP服务器(anbox案例)
+======================
 
 默认情况下，dnsmasq是关闭DHCP功能的，需要在配置中开启才可以使用dhcp。
 
@@ -274,3 +295,4 @@ dnsmasq内建了TFTP服务器。也准备在 :ref:`pi_cluster` 的diskless集群
 ======
 
 - `archlinux doc - dnsmasq <https://wiki.archlinux.org/index.php/Dnsmasq>`_
+- `Linux for Network Engineers: How to set up a DHCP server with Dnsmasq Part 4 <https://netbeez.net/blog/how-to-set-up-dns-server-dnsmasq-part-4/>`_

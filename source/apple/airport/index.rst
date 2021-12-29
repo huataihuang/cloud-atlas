@@ -9,6 +9,7 @@ Apple AirPort
    :maxdepth: 1
 
    airport_express.rst
+   airport_express_with_dnsmasq.rst
 
 .. only::  subproject and html
 
