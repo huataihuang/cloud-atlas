@@ -8,6 +8,7 @@ Apple Music
    :maxdepth: 1
 
    homepod_mini.rst
+   reset_homepod_mini.rst
    airpods_pro.rst
 
 .. only::  subproject and html

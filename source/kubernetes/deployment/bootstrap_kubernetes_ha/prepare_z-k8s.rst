@@ -11,9 +11,6 @@ KVM虚拟机运行环境已经按照 :ref:`z-k8s_env` 准备就绪，现在具�
    :widths: 20, 20, 60
    :header-rows: 1
 
-安装Docker运行时
-====================
-
 在 ``z-k8s`` 集群的管控节点和工作节点，全面安装 Docker 运行时
 
 - 基础数据存储服务器 ``z-b-data-X`` :
@@ -29,9 +26,77 @@ KVM虚拟机运行环境已经按照 :ref:`z-k8s_env` 准备就绪，现在具�
 
   - 安装Docker/Kubelet/Kubeadm
 
-安装 :ref:`container_runtimes` Docker 以及 ``kubectl / kubeadm / kubelet`` ::
+安装Docker运行时
+====================
+
+- 安装 :ref:`container_runtimes` Docker ::
 
    sudo apt update
    sudo apt upgrade -y
 
-   
+   sudo apt install docker.io -y
+
+- 将个人用户账号 ``huatai`` 添加到 ``docker`` 用户组方便执行docker命令::
+
+   sudo usermod -aG docker $USER
+
+docker存储驱动btrfs
+----------------------
+
+为了提升性能和存储效率，采用 :ref:`docker_btrfs_driver` ，所以执行:
+
+- 在虚拟机中添加独立的10GB :ref:`ceph_block_device` ，此步骤 :ref:`ceph_rbd_libvirt` 所以执行以下命令::
+
+   virsh vol-create-as --pool images_rbd --name z-k8s-m-1.docker --capacity 10GB --allocation 10GB --format raw
+
+.. note::
+
+   数据磁盘用于docker，所以命名是 ``<vm-name>.<disk-name>`` ，这里案例是用于 ``z-k8s-m-1`` 虚拟机的 ``docker`` 磁盘，所以命名为 ``z-k8s-m-1.docker``
+
+- 创建磁盘完成后检查::
+
+   virsh vol-list images_rbd
+
+可以看到::
+
+   Name               Path
+   ---------------------------------------------------
+   z-k8s-m-1          libvirt-pool/z-k8s-m-1
+   z-k8s-m-1.docker   libvirt-pool/z-k8s-m-1.docker
+   ...
+
+- 准备设备XML文件
+
+.. literalinclude:: prepare_z-k8s/z-k8s-m-1.docker-disk.xml
+   :language: xml
+   :linenos:
+   :caption: rbd磁盘设备XML
+
+- 添加磁盘文件::
+
+   virsh attach-device z-k8s-m-1 z-k8s-m-1.docker-disk.xml --live --config
+
+- 此时在虚拟机 ``z-k8s-m-1`` 内部可以看到新磁盘设备 ``fdisk -l`` ::
+
+   Disk /dev/vdb: 9.32 GiB, 10000000000 bytes, 19531250 sectors
+   Units: sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+这个磁盘设备将用于docker
+
+- 脚本 ``vm_docker-disk.sh`` 帮助完成上述自动化过程 
+
+.. literalinclude:: prepare_z-k8s/vm_docker-disk.sh
+   :language: xml
+   :linenos:
+   :caption: rbd磁盘(用于docker)注入脚本
+
+- 执行方法::
+
+   ./vm_docker-disk.sh z-k8s-m-2
+
+安装 ``kubectl / kubeadm / kubelet``
+======================================
+
+- 安装 ``kubectl / kubeadm / kubelet`` 

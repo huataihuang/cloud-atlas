@@ -55,6 +55,10 @@ AirPort Express
 - 802.11n (802.11a compatible)
 - 802.11n only (5GHz)
 
+.. note::
+
+   ``802.11n only (5GHz)`` 无线规格，如果使用全套Apple产品，可以看到Apple的设备都支持这个无线规格，性能优越
+
 无线标准
 ----------
 
@@ -68,12 +72,24 @@ AirPort Express
 - 802.11aj: 也称为中国毫米波，是中国的802.11ad波段标准，目标是实现向后兼容802.11ad
 - 802.11ax: Wi-Fi 6，2019年通过的替代802.11ac的新无线标准，Wi-Fi 6最高可达10Gbps，消耗较少电能并且在拥塞环境中较为可靠，且有更好安全性
 
+
 选择
 ---------
 
 为了能够实现较好的覆盖，我尝试采用 ``802.11n only (2.4GHz)`` ，可以比 ``802.11n only(5GHz)`` 更好穿墙，不过实际使用下来，还不理想，网络经常连接不畅。也测试了 ``802.11n(802.11b/g compatible)`` ，似乎穿透覆盖能力和 ``802.11n only (2.4GHz)`` 相差不大。总之，即使采用了上述两种相对覆盖较好的无线标准，依然不能实现稳定的穿墙通讯。
 
-我考虑购买 :ref:`mikrotik` 设备...
+我考虑 :strike:`购买` :ref:`mikrotik` 设备(非常灵活且功能强大，但售价昂贵，暂时没有资金，所以后续考虑参考 mikrotik 的技术解决方案，自己hack linux来实现)
+
+使用方案
+============
+
+要正确使用 AirPort Express 的关键条件:
+
+- 局域网有一个DHCP服务器，能够提供 ``动态IP`` 给 AirPort Express
+- DHCP提供的配置中包含: ``DNS`` 和 ``GATEWAY`` ，这个配置会被 AirPort Express 转发给连接的无线客户端
+- DHCP提供 ``动态IP`` 会被 AirPort Express 转发给连接的无线客户端使用
+
+总之，AirPort Express的无线客户端是通过 ``局域网DHCP服务器`` 获得配置，AirPort Express提供的是一个 ``透明转发`` 。 我发现这个架构非常适合我在 :ref:`priv_cloud_infra` 中提供的 :ref:`priv_dnsmasq` 实现无线扩展，所以我实现了一个 :ref:`airport_express_with_dnsmasq` 部署。
 
 参考
 ========

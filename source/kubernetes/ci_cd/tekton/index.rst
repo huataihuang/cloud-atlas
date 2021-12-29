@@ -1,14 +1,13 @@
-.. _kubernetes_ci_cd:
+.. _tekton:
 
 ===============================
-Kubernetes持续集成和持续部署
+云原生CI/CD系统Tekton
 ===============================
 
 .. toctree::
    :maxdepth: 2
 
-   kubernetes_ci_cd_overview.rst
-   tekton/index
+   intro_tekton.rst
 
 参考
 =======

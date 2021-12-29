@@ -1,16 +1,13 @@
-.. _k8s_storage:
+.. _p2p:
 
 =================================
-Kubernetes存储
+P2P 网络
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   k8s_storage_platform.rst
-   rook/index
-   gluster_k8s.rst
-   heketi/index
+   intro_libp2p.rst
 
 .. only::  subproject and html
 

@@ -1,16 +1,13 @@
-.. _k8s_storage:
+.. _ubuntu_cgroup:
 
 =================================
-Kubernetes存储
+Ubuntu Cgroup
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   k8s_storage_platform.rst
-   rook/index
-   gluster_k8s.rst
-   heketi/index
+   enable_cgrop_v2_ubuntu_20.04.rst
 
 .. only::  subproject and html
 
