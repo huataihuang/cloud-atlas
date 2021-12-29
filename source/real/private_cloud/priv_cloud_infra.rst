@@ -134,10 +134,27 @@
     - 你可以将这个数据存储层 Ceph 看成类似于阿里云的 ``盘古`` 分布式存储，开天劈地: 这样所有其他虚拟机都不需要占用本地磁盘(事实上作为 ``zcloud`` 主机的系统盘 ``ssd`` 空间非常狭小)
     - 分布式存储提供了网络共享访问，同时提供了数据镜像容灾，这样运行的虚拟机可以在网络上不同的计算节点迁移: 例如，我可以在网络中加入我的笔记本或者台式机来模拟一个物理节点，共享访问Ceph存储，实现把虚拟机热迁移过去，从而减轻服务器的压力
 
-- ``z-b-store-1`` / ``z-b-store-2`` / ``z-b-store-3`` 是直接访问服务器上3块 2.5" 机械硬盘，提供 :ref:`gluster` 存储服务
+
+  - 在磁盘上构建 :ref:`linux_lvm` LVM 卷用于存储数据 - ``vg-data`` (300G)
+
+    - :ref:`etcd` 存储在 ``vg-data/lv-etcd``
+      
+      - :ref:`coredns` 采用 :ref:`etcd` 存储数据
+      - :ref:`rook` 采用 :ref:`etcd` 存储配置，在 ``z-k8s`` 中实现微型 :ref:`ceph` / :ref:`cassandra` / :ref:`nfs`
+      - :ref:`m3` 采用 :ref:`etcd` 存储数据，构建分布式 :ref:`prometheus` metrics 存储
+      - :ref:`kubernetes` 采用 :ref:`etcd` 存储数据
+
+- ``z-b-store-1`` / ``z-b-store-2`` / ``z-b-store-3`` 是直接访问服务器上3块 2.5" SSD，基于 :ref:`gluster` 的 :ref:`stratis` 存储，运行 :ref:`ovirt` 同时提供 :ref:`ceph` 的 geo-replication
 
   - 数据备份和恢复
-  - 离线数据和近线数据存储，后续考虑实现一个容灾系统模拟
+  - 近线数据存储，后续考虑实现一个容灾系统模拟
+  - 使用 :strike:`企业级SSD` 较好的消费级大容量SSD(2T)
+
+- ``z-b-arch-1`` / ``z-b-arch-2`` / ``z-b-arch-3`` 是直接访问服务器上3块 2.5" 机械硬盘，提供 :ref:`gluster` 存储服务以及自动化归档备份 - 方案待定
+
+  - 采用大容量机械硬盘(叠瓦盘)(8T)，存储为主，较少修改，作为归档数据
+  - 双副本，实现基于磁盘的数据归档方案(磁带机维护成本高)
+  - 采用 :ref:`linux_bcache` 来加速(利用SSD的部分容量)
   
 第一层虚拟化
 -----------------

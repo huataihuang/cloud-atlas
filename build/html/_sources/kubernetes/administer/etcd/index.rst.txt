@@ -1,7 +1,7 @@
 .. _etcd:
 
 ======================
-Kubernetes Etcd管理
+etcd - 分布式kv存储
 ======================
 
 etcd是Kubernetes后端存储所有集群数据的高可用key value存储。由于etcd是Kubernetes集群的核心数据存储，所以数据备份是非常关键的运维工作。
@@ -16,5 +16,6 @@ etcd是Kubernetes后端存储所有集群数据的高可用key value存储。由
 .. toctree::
    :maxdepth: 1
 
+   intro_etcd.rst 
    startup/index
    recovery/index

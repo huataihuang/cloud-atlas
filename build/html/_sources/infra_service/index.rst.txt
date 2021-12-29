@@ -22,6 +22,7 @@ Infra-Service Atlas
    dns/index
    ssh/index
    samba/index
+   nfs/index
    asciinema/index
    guacamole/index
 

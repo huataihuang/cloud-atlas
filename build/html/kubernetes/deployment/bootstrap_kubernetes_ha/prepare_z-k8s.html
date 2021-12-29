@@ -299,6 +299,8 @@
 </ul>
 <section id="dockerbtrfs">
 <h3>docker存储驱动btrfs<a class="headerlink" href="#dockerbtrfs" title="永久链接至标题">¶</a></h3>
+<section id="vm-var-lib-docker">
+<h4>VM数据盘( <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> )准备<a class="headerlink" href="#vm-var-lib-docker" title="永久链接至标题">¶</a></h4>
 <p>为了提升性能和存储效率，采用 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> ，所以执行:</p>
 <ul>
 <li><p>在虚拟机中添加独立的10GB <a class="reference internal" href="../../../ceph/rbd/ceph_block_device.html#ceph-block-device"><span class="std std-ref">Ceph Block Device(块设备)</span></a> ，此步骤 <a class="reference internal" href="../../../ceph/rbd/ceph_rbd_libvirt.html#ceph-rbd-libvirt"><span class="std std-ref">Libvirt集成Ceph RBD</span></a> 所以执行以下命令:</p>
@@ -367,51 +369,51 @@
 </ul>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">rbd磁盘(用于docker)注入脚本</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
-<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>#!/bin/env bash
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/bin/env bash</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span>. /etc/profile
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span>vm=$1
-<span class="linenos"> 6</span>suffix=docker #表示磁盘用途
-<span class="linenos"> 7</span>rbd_pool=&quot;libvirt-pool&quot;
-<span class="linenos"> 8</span>hosts_csv=/home/huatai/github.com/cloud-atlas/source/real/private_cloud/priv_cloud_infra/hosts.csv
+<span class="linenos"> 5</span><span class="nv">vm</span><span class="o">=</span><span class="nv">$1</span>
+<span class="linenos"> 6</span><span class="nv">suffix</span><span class="o">=</span>docker <span class="c1">#表示磁盘用途</span>
+<span class="linenos"> 7</span><span class="nv">rbd_pool</span><span class="o">=</span><span class="s2">&quot;libvirt-pool&quot;</span>
+<span class="linenos"> 8</span><span class="nv">hosts_csv</span><span class="o">=</span>/home/huatai/github.com/cloud-atlas/source/real/private_cloud/priv_cloud_infra/hosts.csv
 <span class="linenos"> 9</span>
 <span class="linenos">10</span>
-<span class="linenos">11</span>function init {
+<span class="linenos">11</span><span class="k">function</span> init <span class="o">{</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span>    if [ ! -f docker-disk.xml ]; then
+<span class="linenos">13</span>    <span class="k">if</span> <span class="o">[</span> ! -f docker-disk.xml <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
 <span class="linenos">14</span>
-<span class="linenos">15</span>cat &gt; ${suffix}-disk.xml &lt;&lt;__XML__
-<span class="linenos">16</span>&lt;disk type=&#39;network&#39; device=&#39;disk&#39;&gt;
-<span class="linenos">17</span>  &lt;driver name=&#39;qemu&#39; type=&#39;raw&#39; cache=&#39;none&#39; io=&#39;native&#39;/&gt;
-<span class="linenos">18</span>  &lt;auth username=&#39;libvirt&#39;&gt;
-<span class="linenos">19</span>    &lt;secret type=&#39;ceph&#39; uuid=&#39;3f203352-fcfc-4329-b870-34783e13493a&#39;/&gt;
-<span class="linenos">20</span>  &lt;/auth&gt;
-<span class="linenos">21</span>  &lt;source protocol=&#39;rbd&#39; name=&#39;libvirt-pool/RBD_DISK&#39;&gt;
-<span class="linenos">22</span>    &lt;host name=&#39;192.168.6.204&#39; port=&#39;6789&#39;/&gt;
-<span class="linenos">23</span>    &lt;host name=&#39;192.168.6.205&#39; port=&#39;6789&#39;/&gt;
-<span class="linenos">24</span>    &lt;host name=&#39;192.168.6.206&#39; port=&#39;6789&#39;/&gt;
-<span class="linenos">25</span>  &lt;/source&gt;
-<span class="linenos">26</span>  &lt;target dev=&#39;vdb&#39; bus=&#39;virtio&#39;/&gt;
-<span class="linenos">27</span>&lt;/disk&gt;
-<span class="linenos">28</span>__XML__
+<span class="linenos">15</span>cat &gt; <span class="si">${</span><span class="nv">suffix</span><span class="si">}</span>-disk.xml <span class="s">&lt;&lt;__XML__</span>
+<span class="linenos">16</span><span class="s">&lt;disk type=&#39;network&#39; device=&#39;disk&#39;&gt;</span>
+<span class="linenos">17</span><span class="s">  &lt;driver name=&#39;qemu&#39; type=&#39;raw&#39; cache=&#39;none&#39; io=&#39;native&#39;/&gt;</span>
+<span class="linenos">18</span><span class="s">  &lt;auth username=&#39;libvirt&#39;&gt;</span>
+<span class="linenos">19</span><span class="s">    &lt;secret type=&#39;ceph&#39; uuid=&#39;3f203352-fcfc-4329-b870-34783e13493a&#39;/&gt;</span>
+<span class="linenos">20</span><span class="s">  &lt;/auth&gt;</span>
+<span class="linenos">21</span><span class="s">  &lt;source protocol=&#39;rbd&#39; name=&#39;libvirt-pool/RBD_DISK&#39;&gt;</span>
+<span class="linenos">22</span><span class="s">    &lt;host name=&#39;192.168.6.204&#39; port=&#39;6789&#39;/&gt;</span>
+<span class="linenos">23</span><span class="s">    &lt;host name=&#39;192.168.6.205&#39; port=&#39;6789&#39;/&gt;</span>
+<span class="linenos">24</span><span class="s">    &lt;host name=&#39;192.168.6.206&#39; port=&#39;6789&#39;/&gt;</span>
+<span class="linenos">25</span><span class="s">  &lt;/source&gt;</span>
+<span class="linenos">26</span><span class="s">  &lt;target dev=&#39;vdb&#39; bus=&#39;virtio&#39;/&gt;</span>
+<span class="linenos">27</span><span class="s">&lt;/disk&gt;</span>
+<span class="linenos">28</span><span class="s">__XML__</span>
 <span class="linenos">29</span>
-<span class="linenos">30</span>     fi
+<span class="linenos">30</span>     <span class="k">fi</span>
 <span class="linenos">31</span>
-<span class="linenos">32</span>     ip=`grep &quot;,${vm},&quot; $hosts_csv | awk -F, &#39;{print $2}&#39;`
+<span class="linenos">32</span>     <span class="nv">ip</span><span class="o">=</span><span class="sb">`</span>grep <span class="s2">&quot;,</span><span class="si">${</span><span class="nv">vm</span><span class="si">}</span><span class="s2">,&quot;</span> <span class="nv">$hosts_csv</span> <span class="p">|</span> awk -F, <span class="s1">&#39;{print $2}&#39;</span><span class="sb">`</span>
 <span class="linenos">33</span>
-<span class="linenos">34</span>     if [ -z $ip ]; then
-<span class="linenos">35</span>         echo &quot;You input vm name is invalid, can&#39;t find vm IP&quot;
-<span class="linenos">36</span>         echo &quot;Please check $hosts_csv&quot;
-<span class="linenos">37</span>         exit 1
-<span class="linenos">38</span>     fi
-<span class="linenos">39</span>}
+<span class="linenos">34</span>     <span class="k">if</span> <span class="o">[</span> -z <span class="nv">$ip</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+<span class="linenos">35</span>         <span class="nb">echo</span> <span class="s2">&quot;You input vm name is invalid, can&#39;t find vm IP&quot;</span>
+<span class="linenos">36</span>         <span class="nb">echo</span> <span class="s2">&quot;Please check </span><span class="nv">$hosts_csv</span><span class="s2">&quot;</span>
+<span class="linenos">37</span>         <span class="nb">exit</span> <span class="m">1</span>
+<span class="linenos">38</span>     <span class="k">fi</span>
+<span class="linenos">39</span><span class="o">}</span>
 <span class="linenos">40</span>
-<span class="linenos">41</span>function inject_vm_disk {
-<span class="linenos">42</span>    virsh vol-create-as --pool images_rbd --name ${vm}.${suffix} --capacity 10GB --allocation 10GB --format raw
-<span class="linenos">43</span>    cat ${suffix}-disk.xml | sed &quot;s/RBD_DISK/${vm}.${suffix}/g&quot; &gt; ${vm}.${suffix}-disk.xml
-<span class="linenos">44</span>    virsh attach-device $vm ${vm}.${suffix}-disk.xml --live --config
-<span class="linenos">45</span>}
+<span class="linenos">41</span><span class="k">function</span> inject_vm_disk <span class="o">{</span>
+<span class="linenos">42</span>    virsh vol-create-as --pool images_rbd --name <span class="si">${</span><span class="nv">vm</span><span class="si">}</span>.<span class="si">${</span><span class="nv">suffix</span><span class="si">}</span> --capacity 10GB --allocation 10GB --format raw
+<span class="linenos">43</span>    cat <span class="si">${</span><span class="nv">suffix</span><span class="si">}</span>-disk.xml <span class="p">|</span> sed <span class="s2">&quot;s/RBD_DISK/</span><span class="si">${</span><span class="nv">vm</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">suffix</span><span class="si">}</span><span class="s2">/g&quot;</span> &gt; <span class="si">${</span><span class="nv">vm</span><span class="si">}</span>.<span class="si">${</span><span class="nv">suffix</span><span class="si">}</span>-disk.xml
+<span class="linenos">44</span>    virsh attach-device <span class="nv">$vm</span> <span class="si">${</span><span class="nv">vm</span><span class="si">}</span>.<span class="si">${</span><span class="nv">suffix</span><span class="si">}</span>-disk.xml --live --config
+<span class="linenos">45</span><span class="o">}</span>
 <span class="linenos">46</span>
 <span class="linenos">47</span>init
 <span class="linenos">48</span>inject_vm_disk
@@ -426,11 +428,128 @@
 </li>
 </ul>
 </section>
+<section id="btrfs">
+<h4>btrfs存储驱动<a class="headerlink" href="#btrfs" title="永久链接至标题">¶</a></h4>
+<p>在虚拟机内部配置 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> :</p>
+<ul>
+<li><p>在虚拟机内部安装 <code class="docutils literal notranslate"><span class="pre">btrfs</span></code> 管理软件包 <code class="docutils literal notranslate"><span class="pre">btrfs-progs</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">btrfs</span><span class="o">-</span><span class="n">progs</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+</li>
+<li><p>磁盘分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span> <span class="n">mklabel</span> <span class="n">gpt</span>
+<span class="n">sudo</span> <span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="mi">0</span><span class="o">%</span> <span class="mi">100</span><span class="o">%</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">btrfs</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkfs</span><span class="o">.</span><span class="n">btrfs</span> <span class="o">-</span><span class="n">f</span> <span class="o">-</span><span class="n">L</span> <span class="n">docker</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb1</span>
+</pre></div>
+</div>
+</li>
+<li><p>添加 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;/dev/vdb1    /var/lib/docker    btrfs   defaults,compress=lzo    0 1&quot;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+</pre></div>
+</div>
+</li>
+<li><p>停止Docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span><span class="o">.</span><span class="n">socket</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>备份 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker</span></code> 目录内容，并清空该目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">-</span><span class="n">au</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">bk</span>
+<span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/*</span>
+</pre></div>
+</div>
+</li>
+<li><p>挂载btrfs文件系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mount</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">vdb1</span>
+</pre></div>
+</div>
+</li>
+<li><p>将 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker.bk</span></code> 内容恢复回 <code class="docutils literal notranslate"><span class="pre">/var/lib/docker/</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">su</span> <span class="o">-</span>
+<span class="n">cp</span> <span class="o">-</span><span class="n">au</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">bk</span><span class="o">/*</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/docker/daemon.json</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">创建Docker btrfs配置脚本</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>cat &gt; /etc/docker/daemon.json <span class="s">&lt;&lt; EOF</span>
+<span class="linenos"> 2</span><span class="s">{</span>
+<span class="linenos"> 3</span><span class="s">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span>
+<span class="linenos"> 4</span><span class="s">  &quot;log-driver&quot;: &quot;json-file&quot;,</span>
+<span class="linenos"> 5</span><span class="s">  &quot;log-opts&quot;: {</span>
+<span class="linenos"> 6</span><span class="s">    &quot;max-size&quot;: &quot;100m&quot;</span>
+<span class="linenos"> 7</span><span class="s">  },</span>
+<span class="linenos"> 8</span><span class="s">  &quot;storage-driver&quot;: &quot;btrfs&quot;</span>
+<span class="linenos"> 9</span><span class="s">}</span>
+<span class="linenos">10</span><span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>启动docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">docker</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查docker 是否使用btrfs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">info</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
 </section>
 <section id="kubectl-kubeadm-kubelet">
 <h2>安装 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">/</span> <span class="pre">kubeadm</span> <span class="pre">/</span> <span class="pre">kubelet</span></code><a class="headerlink" href="#kubectl-kubeadm-kubelet" title="永久链接至标题">¶</a></h2>
-<ul class="simple">
-<li><p>安装 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">/</span> <span class="pre">kubeadm</span> <span class="pre">/</span> <span class="pre">kubelet</span></code></p></li>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>Debian/Ubuntu (Kubernetes官方方法) 完成 <a class="reference internal" href="../bootstrap_kubernetes_single/kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a> 等基础软件安装</p>
+</div>
+<ul>
+<li><p>更新并安装 Kubernetes apt 仓库所需软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">upgrade</span> <span class="o">-</span><span class="n">y</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">apt</span><span class="o">-</span><span class="n">transport</span><span class="o">-</span><span class="n">https</span> <span class="n">ca</span><span class="o">-</span><span class="n">certificates</span> <span class="n">curl</span>
+</pre></div>
+</div>
+</li>
+<li><p>下载 Google Cloud 公开签名秘钥:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">curl</span> <span class="o">-</span><span class="n">fsSLo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">keyrings</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">archive</span><span class="o">-</span><span class="n">keyring</span><span class="o">.</span><span class="n">gpg</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">packages</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">apt</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">gpg</span> <span class="o">-</span><span class="n">x</span> <span class="s2">&quot;http://192.168.6.200:3128/&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里使用 <code class="docutils literal notranslate"><span class="pre">-x</span> <span class="pre">&quot;http://192.168.6.200:3128/&quot;</span></code> 是为了使用 <a class="reference internal" href="../../../web/proxy/squid/squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 翻墙</p>
+</div>
+<ul>
+<li><p>添加 Kubernetes <code class="docutils literal notranslate"><span class="pre">apt</span></code> 仓库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main&quot;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">list</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">mark</span> <span class="n">hold</span> <span class="n">kubelet</span> <span class="n">kubeadm</span> <span class="n">kubectl</span>
+</pre></div>
+</div>
+</li>
 </ul>
 </section>
 </section>

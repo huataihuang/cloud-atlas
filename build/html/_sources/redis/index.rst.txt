@@ -7,7 +7,7 @@ Redis Atlas
 .. toctree::
    :maxdepth: 1
 
-   intrudoce_redis.rst
+   intro_redis.rst
 
 .. only::  subproject and html
 

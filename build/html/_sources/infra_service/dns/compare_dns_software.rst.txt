@@ -26,7 +26,12 @@ BIND提供的关键功能:
 Dnsmasq
 ==========
 
-Dnsmasq是一个轻量级DNS, TFTP, PXE 以及路由器公告和DHCP服务器。
+:ref:`dnsmasq` 是一个轻量级DNS, TFTP, PXE 以及路由器公告和DHCP服务器。
+
+CoreDNS
+=============
+
+:ref:`kubernetes` 的基础组件 :ref:`coredns` 提供了容器化的DNS服务
 
 参考
 ======

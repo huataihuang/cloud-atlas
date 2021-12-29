@@ -1,4 +1,4 @@
-.. _intrudoce_redis:
+.. _intro_redis:
 
 ==============
 Redis简介
