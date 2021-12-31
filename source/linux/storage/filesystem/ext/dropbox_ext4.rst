@@ -13,12 +13,12 @@ Ext4文件系统上Dropbox疑问
 
 在 :ref:`archlinux_on_mbp` 遇到一个奇怪的问题，磁盘性能似乎极差，特别是当启动 Dropbox 同步网盘数据之后，虽然dropbox网络流量极低，但是 ``top`` 检查 iowait 非常高导致系统相应缓慢：
 
-.. figure:: ../../../_static/linux/storage/filesystem/dropbox_high_iowait.png
+.. figure:: ../../../../_static/linux/storage/filesystem/ext/dropbox_high_iowait.png
    :scale: 50
 
 但是，通过 ``iostat`` 检查却发现磁盘读写非常小，完全达不到SSD的性能:
 
-.. figure:: ../../../_static/linux/storage/filesystem/dropbox_iostat.png
+.. figure:: ../../../../_static/linux/storage/filesystem/ext/dropbox_iostat.png
    :scale: 50
 
 之前在 :ref:`archlinux_on_thinkpad_x220` 同样的Arch Linux，但是运行 Dropbox 没有丝毫问题，数据很快就同步完。那么，两者的差异是什么？
@@ -169,7 +169,7 @@ iotop和perf top
 
 从 ``iotop`` 就可以看到 ``jdb2/sda3-8`` 内核线程始终极高cpu占用率。
 
-.. figure:: ../../../_static/linux/storage/filesystem/dropbox_iotop_perf_top.png
+.. figure:: ../../../../_static/linux/storage/filesystem/ext/dropbox_iotop_perf_top.png
    :scale: 35
 
 

@@ -24,8 +24,18 @@ Pixel和Pixel XL是Google推出的第一代Pixel手机设备，最早发布于 2
 
 Pixel XL最大音量时输出电平为-6.9dB，和iPhone系列、Moto Z接近，比起Nexus 6P的-15.5dB要高出不少。由于电平的增加，Pixel XL的音质相比华为代工的Nexus 6P要好，但是受限与高通处理器和常规音频架构方案，相对于iPhone来说，Pixel XL的声音动态、瞬态表现更弱一些。另外声音有些含糊和毛糙，声底不够干净，这可能是SRC所致，而且其耳机驱动能力仍不如iPhone的级别。对于中高频表现力较好的耳机或耳塞来说，使用Pixel XL在音质表现上要打不少折扣。
 
+杀手锏
+=========
+
+Pixel一代作为Google初代Pixel设备，其实做工和使用体验有很多不足。加上同时代Android的软件水准低于iOS，且无法在墙内流畅访问Google服务，都使得这款产品成为鸡肋。不过，Google为了第一代Pixel加持了 ``无限容量相册`` 功能，是目前市场上所有Android设备都无法企及的特性。只要你能无阻碍访问Internet，那么这款手机是你最好的照片存储器。
+
+并且，只要你有Google账号，其他设备拍摄的照片同步到这款手机中，被Android系统识别为照片，都能够无限容量存储到Google云盘。这对大量照片的用户是很大的吸引力。
+
+当然，作为日常手机，这款Pixel一代已经无法承担，使用卡顿操作不便。
+
 参考
 ======
 
 - `从 Bootloader 解锁到必备应用推荐：我的 Google Pixel 折腾手记 <https://sspai.com/post/38319#!>`_ - 这篇"少数派"评测的使用经验对Pixel软件使用很有帮助
 - `Google 谷歌 Pixel XL智能手机音质测评报告 <http://www.soomal.com/doc/10100007206.htm>`_
+- `2021 年 6 月 1 日之后 iPhone 如何无限容量备份 Google 相册 <https://sspai.com/post/66620#!>`_

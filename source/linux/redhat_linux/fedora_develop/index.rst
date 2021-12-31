@@ -9,6 +9,8 @@ Fedora是面向Red Hat Enterprise Linux 和 CentOS 开发的理想平台，提�
 .. toctree::
    :maxdepth: 1
 
+   fedora_os_images.rst
+   fedora_dev_init.rst
 
 .. only::  subproject and html
 
