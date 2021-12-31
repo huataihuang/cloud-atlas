@@ -1,16 +1,15 @@
-.. _libvirt_storage:
+.. _ext:
 
 =================================
-Libvirt存储
+EXT文件系统
 =================================
-
 
 .. toctree::
    :maxdepth: 1
 
-   libvirt_storage_arch.rst
-   libvirt_lvm_pool.rst
-   libvirt_lvm_pool_resize_vm_disk.rst
+   dropbox_ext4.rst
+   mount_ext4_on_macos.rst
+   resize_ext4_rootfs.rst
 
 .. only::  subproject and html
 

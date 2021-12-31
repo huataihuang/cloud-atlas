@@ -9,6 +9,7 @@ Docker Atlas
 
    startup/index
    docker_in_docker/index
+   images/index
    moby/index
    linuxserver/index
    init/index

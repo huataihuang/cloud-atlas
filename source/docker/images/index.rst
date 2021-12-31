@@ -1,16 +1,14 @@
-.. _libvirt_storage:
+.. _docker_imagess:
 
 =================================
-Libvirt存储
+Docker 镜像
 =================================
-
 
 .. toctree::
    :maxdepth: 1
 
-   libvirt_storage_arch.rst
-   libvirt_lvm_pool.rst
-   libvirt_lvm_pool_resize_vm_disk.rst
+   smaller_docker_images.rst
+   dockerfile_best-practices.rst
 
 .. only::  subproject and html
 

@@ -1,16 +1,16 @@
-.. _libvirt_storage:
+.. _xfs:
 
 =================================
-Libvirt存储
+XFS文件系统
 =================================
-
 
 .. toctree::
    :maxdepth: 1
 
-   libvirt_storage_arch.rst
-   libvirt_lvm_pool.rst
-   libvirt_lvm_pool_resize_vm_disk.rst
+   xfs_startup.rst
+   xfs_growfs.rst
+   lvm_xfs_in_studio.rst
+   xfs_tunning.rst
 
 .. only::  subproject and html
 

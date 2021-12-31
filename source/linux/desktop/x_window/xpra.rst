@@ -27,7 +27,18 @@ CentOS安装
 
 - 安装xpra::
 
-   dnf install xpra
+   sudo dnf install xpra
+
+Fedora 安装
+----------------
+
+- Fedora发行版已经包含Xpra，可以直接安装::
+
+   sudo dnf install xpra
+
+.. note::
+
+   在 :ref:`priv_cloud_infra` 的 ``z-dev`` 使用Fedora 35，安装 xpra 实现远程服务器开发。
 
 Ubuntu安装
 -------------
