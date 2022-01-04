@@ -73,8 +73,6 @@ LSP协议类似简单版本的HTTP:
 - 头部有一个请求 ``Content-Length`` 字段用于表示内容的字节数大小，类似于可选项 ``Content-Type`` 字段
 - 内容使用 `JSON-RPC <https://www.jsonrpc.org/specification>`_ 来描述请求的结构，响应以及通知
 
-`
-
 
 参考
 ======

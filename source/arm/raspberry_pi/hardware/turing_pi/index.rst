@@ -14,4 +14,4 @@ Turing Pi 树莓派mini集群
    Indices
    =======
 
-   * :ref:`genindex
+   * :ref:`genindex`
