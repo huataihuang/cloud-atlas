@@ -16,6 +16,14 @@ Xpra可以通过SSH访问，也可以使用或不使用SSL加密而仅使用密�
 ========
 
 - Linux不同发行版都有二进制软件包可以使用，从 `Xpra Linux Download <https://xpra.org/trac/wiki/Download#Linux>`_ 可以获得下载信息
+- `xpra platforms <https://github.com/Xpra-org/xpra/wiki/Platforms>`_ 提供了各发行版支持情况:
+
+  - Fedora 34+
+  - CentOS / RHEL 8.x
+  - Ubuntu: Bionic, Focal, Hirsute, Impish
+  - Debian: Stretch, Buster, Bullseye, Bookworm, Sid
+  - 支持 x86_64 和 arm64
+  - macOS 10.9 (v3.x) 和 10.12.x (v4.x)
 
 CentOS安装
 -------------
@@ -63,14 +71,17 @@ Ubuntu安装
 macOS安装
 ------------
 
-没什么好说的，下载 `Xpra.dmg <https://xpra.org/dists/MacOS/x86_64/Xpra.dmg>`_ ，双击解开dmg包之后，将应用程序拖放到 Applications 目录下完成安装。
+没什么好说的，下载 `Xpra-x86_64.pkg <https://xpra.org/dists/osx/x86_64/Xpra-x86_64.pkg>`_ ，双击解开dmg包之后，将应用程序拖放到 Applications 目录下完成安装。
 
 不过，由于MacOS软件包没有证书授权，所以需要在 `macOS的安全设置中允许运行Xpra <https://lapcatsoftware.com/articles/unsigned.html>`_
 
-使用
-========
+服务器端
+=============
 
-我的服务器端是CentOS 8，按照上述方式安装以后，直接通过systemd启动::
+CentOS 8
+-------------
+
+在CentOS 8上按照上述方式安装以后，直接通过systemd启动::
 
    systemctl start xpra
 
@@ -83,6 +94,11 @@ macOS安装
    CGroup: /system.slice/xpra.service
               ├─361123 /usr/libexec/platform-python /usr/bin/xpra proxy :14500 --daemon=no --tcp-auth=sys --ssl-cert=/etc/xpra/ssl-cert.pem --ssl=on --bind=none>
               └─361148 /usr/bin/dbus-daemon --syslog-only --fork --print-pid 4 --print-address 6 --session
+
+Fedora 35 Server
+--------------------
+
+Fedora 35 Server上安装 ``xpra`` 会安装大量相关X软件包，需要占用 1.7GB磁盘空间(300+ rpm)。但是安装后并没有 ``xpra`` 的 systemd配置
 
 使用
 ======
@@ -117,7 +133,14 @@ Linux使用xpra
 
      xpra attach
 
-其他分步骤建立xpra的方法：
+.. note::
+
+   我感觉方法2比较清晰，可以在服务器端启动一些常用的桌面程序，分别位于不同会话实例，然后在客户端通过命令分别连接到服务器对应会话来工作。
+
+聚合桌面应用(最佳方案)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+通过将 ``心仪`` 的应用程序集中在某个桌面显示屏，例如 ``:7`` ，这样只需要一次 ``xpra`` 连接，就可以同时访问多个X程序，并且和本地桌面(例如macOS)完全融合。
 
 - 启动xpra服务器使用显示屏 ``:7`` ::
 
@@ -125,8 +148,16 @@ Linux使用xpra
 
 - 将firefox运行在xpra server中::
 
-   DISPALY=:7 firefox
+   DISPLAY=:7 firefox
 
+- 将rxvt运行在xpra server中::
+
+   DISPLAY=:7 rxvt
+
+.. note::
+
+   最好使用 ``screen`` 来运行上述程序，避免退出
+   
 - 显示当前主机运行的xpra服务器::
 
    xpra list
@@ -139,16 +170,23 @@ Linux使用xpra
 
    xpra attach ssh:frodo:7
 
+聚合桌面应用(最佳方案-screen)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+结合服务器端的screen程序，可以实现更为方便的启动程序。也就是只要在 ``DISPLAY=:7`` 中启动了 ``screen`` 程序，后续在 ``screen`` 中启动的应用都会自动连入 ``xpra`` 桌面，也就简化了启动命令
+
 - 启动xpra服务器和screen会话，所有在screen中的应用程序都是使用X，将定向到xpra服务器::
 
-   xpra start :7 && DISPLAY=:7 screen
+   xpra start :7 && DISPLAY=:7 screen -S xpra
+
+此时在 ``screen`` 中，可以启动 ``firefox`` 和 ``rxvt`` 程序，都会位于 ``xpra`` 会话中展示程序
 
 - 停止 xpra 显示屏 ``:7`` ::
 
    xpra stop :7
 
-直接TCP访问
-~~~~~~~~~~~~
+直接TCP访问(不推荐)
+~~~~~~~~~~~~~~~~~~~~
 
 - 如果内部网络非常安全，可以采用直接TCP访问，设置xpra直接监听TCP端口::
 
@@ -166,6 +204,12 @@ Linux使用xpra
 Xpra也支持将整个桌面输出，类似VNC访问。以下是启动fluxbox桌面方法::
 
    xpra start-desktop --start-child=fluxbox
+
+.. note::
+
+   我使用 :ref:`i3` 桌面
+
+   可以考虑对Windows或macOS桌面进行转发，通过服务器运行Windows/macOS虚拟机，实现不占用本地资源，尽享服务器高性能计算。
 
 克隆已经存在显示
 ~~~~~~~~~~~~~~~~~
@@ -189,7 +233,19 @@ Xpra的 ``shadow`` 方式可以用来访问已经存在的桌面::
 macOS
 ---------
 
-macOS使用有点麻烦，不能直接使用 ``xpra`` 命令行。提供的图形界面Xpra，理论上应该是SSH服务器的22端口，访问的xpra是 ``:100`` ，配置如下：
+现在的使用经验
+~~~~~~~~~~~~~~~
+
+最新的 ``xpra`` for macOS已经非常稳定(如果配置正确)，只需要执行::
+
+   xpra attach ssh://huatai@192.168.6.253/7
+
+就可以连接上文在服务器端启动在 ``:7`` 显示桌面的 ``xpra`` 会话，无缝访问会话中所有启动的Linux服务器上的图形程序，并且融入到本地操作系统中，就像本地原生程序。
+
+以前的使用经验
+~~~~~~~~~~~~~~~~
+
+macOS早期旧版本xpra不能直接使用 ``xpra`` 命令行。提供的图形界面Xpra，理论上应该是SSH服务器的22端口，访问的xpra是 ``:100`` ，配置如下：
 
 .. figure:: ../../../_static/linux/desktop/x_window/xpra_ssh.png
    :scale: 50
@@ -231,7 +287,7 @@ macOS使用有点麻烦，不能直接使用 ``xpra`` 命令行。提供的图�
 
 .. note::
 
-   目前还有一点遗憾是尚未设置好高分辨率，因为本地是MacBook Pro高清屏幕，远程映射过来的分辨率略低，字体不够清晰锐利。后续再找解决方法。
+   目前还有一点遗憾是尚未设置好高分辨率，因为本地是MacBook Pro高清屏幕，远程映射过来的分辨率略低，字体不够清晰锐利。这个问题应该是服务器端显卡问题，我觉得后续可以通过 :ref:`vgpu` 方式，在虚拟机中通过注入 NVIDIA 高性能显卡来实现性能提升。
 
 studio环境
 ===========
@@ -248,6 +304,42 @@ studio环境
    xpra start --start=/opt/GoLand-2020.2.3/bin/goland.sh --bind-tcp=127.0.0.1:1100
    xpra start --start=code --bind-tcp=127.0.0.1:1110
 
+z-dev环境
+================
+
+在host主机 ``zcloud`` 上执行iptables端口转发::
+
+   iptables -A PREROUTING -t nat -i eno49 -p tcp --dport 25322 -j DNAT --to 192.168.6.253:22
+   iptables -A FORWARD -p tcp -d 192.168.6.253 --dport 22 -j ACCEPT
+
+.. note::
+
+   这里执行端口转发是因为通过 ``zcloud`` 对外网络接口能够转发到内部局域网的 ``z-dev`` 虚拟机上端口，如果客户端和服务器处于相同内网可以忽略这步
+
+推荐采用单个xpra会话
+------------------------
+
+我在 :ref:`fedora_dev_init` 完整部署了一个支持中文输入的 ``xpra`` 会话，可以在Linux服务器上运行大量高资源消耗的图形程序，同时可以使用非常简单的瘦客户端进行连接(实际上还支持浏览器访问桌面的方式，甚至不需要客户端)。
+
+单独的连接端口方式(已不使用)
+------------------------------
+
+在 :ref:`priv_cloud_infra` 的 ``z-dev`` 虚拟机中运行Fedora 35，安装 ``xpra`` ，并启动对应服务程序::
+
+   xpra start :100 --start=rxvt-unicode
+   xpra start :101 --start=firefox
+
+对应客户端连接::
+
+   xpra attach ssh://huatai@192.168.6.200:25322/100
+   xpra attach ssh://huatai@192.168.6.200:25322/101
+
+只要网络足够快速，可以实现非常流畅的使用体验，以及开发工作。
+
+桌面
+---------
+
+:ref:`docker` 为我们带来一致性的运行环境体验，有一种快速部署开发工作环境的方式是将所有工作都封装在docker镜像中，然后通过
 
 参考
 =====
