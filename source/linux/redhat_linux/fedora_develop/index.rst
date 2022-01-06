@@ -11,6 +11,7 @@ Fedora是面向Red Hat Enterprise Linux 和 CentOS 开发的理想平台，提�
 
    fedora_os_images.rst
    fedora_dev_init.rst
+   fedora_proxy.rst
 
 .. only::  subproject and html
 

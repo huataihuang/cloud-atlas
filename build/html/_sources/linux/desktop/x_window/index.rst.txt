@@ -8,7 +8,6 @@ X Window显示服务器协议
    :maxdepth: 1
 
    remote_x_from_mac.rst
-   xpra.rst
 
 .. only::  subproject and html
 

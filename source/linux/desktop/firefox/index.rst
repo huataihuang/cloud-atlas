@@ -1,15 +1,13 @@
-.. _vs_code:
+.. _firefox:
 
 =================================
-VS Code
+Firefox浏览器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   vs_code_linux.rst
-   vs_code_lsp.rst
-   vs_code_extensions.rst
+   firefox_tridactyl.rst
 
 .. only::  subproject and html
 

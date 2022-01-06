@@ -4,6 +4,11 @@
 Rust Atlas
 =================================
 
+资料
+=======
+
+- `Rust Language Cheat Sheet <https://cheats.rs/>`_
+
 .. toctree::
    :maxdepth: 1
 
