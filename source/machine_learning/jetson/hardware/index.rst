@@ -10,6 +10,7 @@ NVIDIA Jetson硬件
 
    jetson_nano_hardware.rst
    jetson_pcie_err.rst
+   jetson_ext4-fs_err.rst
    jetson_lm_sensor.rst
 
 .. only::  subproject and html

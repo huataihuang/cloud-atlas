@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EXT文件系统 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>EXT4文件系统fsck &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
-    <link rel="next" title="Ext4文件系统上Dropbox疑问" href="dropbox_ext4.html" />
-    <link rel="prev" title="XFS性能优化" href="../xfs/xfs_tunning.html" /> 
+    <link rel="next" title="Linux文件系统Disk Quota" href="../quota/index.html" />
+    <link rel="prev" title="调整ext4根文件系统大小" href="resize_ext4_rootfs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -93,7 +93,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../parted.html">使用parted对磁盘分区</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../choice_linux_filesystem.html">Linux文件系统选择</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../xfs/index.html">XFS文件系统</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">EXT文件系统</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">EXT文件系统</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../quota/index.html">Linux文件系统Disk Quota</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../remount_without_reboot.html">无需重启重新挂载文件系统</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../fstrim.html">fstrim服务及周期TRIM</a></li>
@@ -157,9 +157,10 @@
           <li><a href="../../../index.html">Linux Atlas</a> &raquo;</li>
           <li><a href="../../index.html">Linux存储</a> &raquo;</li>
           <li><a href="../index.html">Linux文件系统</a> &raquo;</li>
-      <li>EXT文件系统</li>
+          <li><a href="index.html">EXT文件系统</a> &raquo;</li>
+      <li>EXT4文件系统fsck</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../../_sources/linux/storage/filesystem/ext/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../../_sources/linux/storage/filesystem/ext/ext4_fsck.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -167,24 +168,116 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ext">
-<span id="id1"></span><h1>EXT文件系统<a class="headerlink" href="#ext" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="dropbox_ext4.html">Ext4文件系统上Dropbox疑问</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mount_ext4_on_macos.html">在macOS中挂载Ext4文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="resize_ext4_rootfs.html">调整ext4根文件系统大小</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ext4_fsck.html">EXT4文件系统fsck</a></li>
+  <section id="ext4fsck">
+<span id="ext4-fsck"></span><h1>EXT4文件系统fsck<a class="headerlink" href="#ext4fsck" title="永久链接至标题">¶</a></h1>
+<section id="fsck">
+<h2>手工 <code class="docutils literal notranslate"><span class="pre">fsck</span></code><a class="headerlink" href="#fsck" title="永久链接至标题">¶</a></h2>
+<p>文件系统检查和修复工具 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 有以下运行要求:</p>
+<ul class="simple">
+<li><p>文件系统 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 时必须确保是非挂载状态(挂载状态执行 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 会导致文件系统损坏)</p></li>
+<li><p>如果没有传递给 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 参数，则会检查 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 文件中的列出设备</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fsck</span></code> 命令实际上是不同Linux文件系统检查器( <code class="docutils literal notranslate"><span class="pre">fsck.*</span></code> )的包装，实际上根据文件系统类型会调用不同的选项</p></li>
 </ul>
+<p>手工执行检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">umount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc1</span>
+
+<span class="n">sudo</span> <span class="n">fsck</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc1</span>
+</pre></div>
 </div>
+<p>参数 <code class="docutils literal notranslate"><span class="pre">-p</span></code> 可以使得 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 自动修复任何发现问题而无需用户干预。</p>
+<p>修复完成后，可以重新挂载文件系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc1</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>启动时检查文件系统<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>大多数Linux发行版，会在系统被标记为 <code class="docutils literal notranslate"><span class="pre">dirty</span></code> 或者重启一定次数后自动在启动时执行 <code class="docutils literal notranslate"><span class="pre">fsck</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我在解决了 <a class="reference internal" href="../../../../machine_learning/jetson/hardware/jetson_pcie_err.html#jetson-pcie-err"><span class="std std-ref">Jetson Nano PCIe Buss Error</span></a> 之后发现 <code class="docutils literal notranslate"><span class="pre">Ext4-fs</span></code> 文件系统报错，促使我尝试检查和修复根文件系统</p>
+</div>
+<ul>
+<li><p>检查当前挂载次数，检查间隔以及最新的fsck检查，需要使用 <code class="docutils literal notranslate"><span class="pre">tune2fs</span></code> 工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tune2fs</span> <span class="o">-</span><span class="n">l</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p1</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;last checked\|mount count&#39;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Mount</span> <span class="n">count</span><span class="p">:</span>              <span class="mi">21</span>
+<span class="n">Maximum</span> <span class="n">mount</span> <span class="n">count</span><span class="p">:</span>      <span class="o">-</span><span class="mi">1</span>
+<span class="n">Last</span> <span class="n">checked</span><span class="p">:</span>             <span class="n">Sat</span> <span class="n">Feb</span> <span class="mi">20</span> <span class="mi">10</span><span class="p">:</span><span class="mi">56</span><span class="p">:</span><span class="mi">51</span> <span class="mi">2021</span>
+</pre></div>
+</div>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">Maximum</span> <span class="pre">mount</span> <span class="pre">count</span></code> 表示当文件系统挂载达到这个数值后将在启动时 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 文件系统，但是如果这个值是 <code class="docutils literal notranslate"><span class="pre">0</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 就永远不会 <code class="docutils literal notranslate"><span class="pre">fsck</span></code></p>
+<ul>
+<li><p>如果希望文件系统每挂载 <code class="docutils literal notranslate"><span class="pre">25</span></code> 次之后就运行一次 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 则设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">tune2fs</span> <span class="o">-</span><span class="n">c</span> <span class="mi">25</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p1</span>
+</pre></div>
+</div>
+</li>
+<li><p>也可以设置两次检查之间间隔，例如设置1个月运行一次:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">tune2fs</span> <span class="o">-</span><span class="n">i</span> <span class="mi">1</span><span class="n">m</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p1</span>
+</pre></div>
+</div>
+</li>
+<li><p>对于使用 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 的现代发行版，只需要内核传递参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fsck</span><span class="o">.</span><span class="n">mode</span><span class="o">=</span><span class="n">force</span>
+<span class="n">fsck</span><span class="o">.</span><span class="n">repair</span><span class="o">=</span><span class="n">yes</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>就可以强制在操作系统启动时执行 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 。例如，对于 <a class="reference internal" href="../../../ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 系统，修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;... fsck.mode=force fsck.repair=yes&quot;</span>
+</pre></div>
+</div>
+<p>然后执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
+</pre></div>
+</div>
+<p>生成新的grub配置后重启，就能在重启后自动进行 <code class="docutils literal notranslate"><span class="pre">fsck</span></code></p>
+<p>不过，对于早期版本，例如Ubuntu 18.04 ，上述方法无效(虽然也使用 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> )，则需要存在 <code class="docutils literal notranslate"><span class="pre">/forcefsck</span></code> 文件才能启动时进行 <code class="docutils literal notranslate"><span class="pre">fsck</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">touch</span> <span class="o">/</span><span class="n">forcefsck</span>
+</pre></div>
+</div>
+</section>
+<section id="fstab">
+<h2><code class="docutils literal notranslate"><span class="pre">fstab</span></code> 选项<a class="headerlink" href="#fstab" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 配置了文件系统挂载，其中最后一列参数决定了 <code class="docutils literal notranslate"><span class="pre">fsck</span></code> 顺序和是否进行 <code class="docutils literal notranslate"><span class="pre">fsck</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># [File System] [Mount Point] [File System Type] [Options] [Dump] [PASS]</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>       <span class="o">/</span>             <span class="n">ext4</span>               <span class="n">defaults</span>  <span class="mi">0</span>      <span class="mi">1</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>       <span class="o">/</span><span class="n">home</span>         <span class="n">ext4</span>               <span class="n">defaults</span>  <span class="mi">0</span>      <span class="mi">2</span>
+<span class="n">server</span><span class="p">:</span><span class="o">/</span><span class="nb">dir</span>     <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">nfs</span>    <span class="n">nfs</span>                <span class="n">defaults</span>  <span class="mi">0</span>      <span class="mi">0</span>
+</pre></div>
+</div>
+<p>最后一列，也就是第 <code class="docutils literal notranslate"><span class="pre">6</span></code> 列( <code class="docutils literal notranslate"><span class="pre">[PASS]</span></code> )选项表示文件系统检查的顺序:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - 不检查</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> - 文件系统将首先检查并且只在同一时间只能做这一个检查</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - 所有标记 <code class="docutils literal notranslate"><span class="pre">2</span></code> 的文件都是放在标记 <code class="docutils literal notranslate"><span class="pre">1</span></code> 的文件系统之后再做检查，并且可以并行检查</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>根文件系统必须设置成 <code class="docutils literal notranslate"><span class="pre">1</span></code> ，其他文件系统可以设置成 <code class="docutils literal notranslate"><span class="pre">2</span></code></p>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://linuxize.com/post/fsck-command-in-linux/">Fsck Command in Linux (Repair File System)</a></p></li>
+<li><p><a class="reference external" href="https://www.2daygeek.com/fsck-repair-corrupted-ext4-file-system-linux/">How to Check and Repair EXT4 Filesystem in Linux</a></p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../xfs/xfs_tunning.html" class="btn btn-neutral float-left" title="XFS性能优化" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dropbox_ext4.html" class="btn btn-neutral float-right" title="Ext4文件系统上Dropbox疑问" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="resize_ext4_rootfs.html" class="btn btn-neutral float-left" title="调整ext4根文件系统大小" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../quota/index.html" class="btn btn-neutral float-right" title="Linux文件系统Disk Quota" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
