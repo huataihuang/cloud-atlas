@@ -1,13 +1,14 @@
-.. _x_window:
+.. _xpra:
 
 =================================
-X Window显示服务器协议
+X持久化远程应用Xpra
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   remote_x_from_mac.rst
+   xpra_startup.rst
+   xpra_chinese_input.rst
 
 .. only::  subproject and html
 

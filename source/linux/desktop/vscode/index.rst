@@ -1,13 +1,16 @@
-.. _x_window:
+.. _vscode:
 
 =================================
-X Window显示服务器协议
+VS Code
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   remote_x_from_mac.rst
+   vs_code_linux.rst
+   vs_code_lsp.rst
+   vs_code_extensions.rst
+   vscode_debugging.rst
 
 .. only::  subproject and html
 

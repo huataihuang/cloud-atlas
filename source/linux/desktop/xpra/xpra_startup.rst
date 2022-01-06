@@ -1,8 +1,8 @@
-.. _xpra:
+.. _xpra_startup:
 
-=======================
-Xpra - X持久化远程应用
-=======================
+================================
+X持久化远程应用Xpra快速起步
+================================
 
 Xpra是一个开源跨平台持久化远程显示服务器以及用于转发应用程序和桌面屏幕的客户端。
 
@@ -247,7 +247,7 @@ macOS
 
 macOS早期旧版本xpra不能直接使用 ``xpra`` 命令行。提供的图形界面Xpra，理论上应该是SSH服务器的22端口，访问的xpra是 ``:100`` ，配置如下：
 
-.. figure:: ../../../_static/linux/desktop/x_window/xpra_ssh.png
+.. figure:: ../../../_static/linux/desktop/xpra/xpra_ssh.png
    :scale: 50
 
 然而，本地却始终看不到 xterm 窗口弹出（服务器端已经如上文启动了 ``xpra start :100 --start=xterm`` )
@@ -269,12 +269,12 @@ macOS早期旧版本xpra不能直接使用 ``xpra`` 命令行。提供的图形�
 
 - 本地启用Xpra客户端，设置TCP访问方式，直接访问本地回环地址 ``127.0.0.1`` 端口 ``1100`` ，由于本地已经做了SSH端口转发，就可以直接访问远程服务器Xpra运行的X应用程序:
 
-.. figure:: ../../../_static/linux/desktop/x_window/xpra_tcp.png
+.. figure:: ../../../_static/linux/desktop/xpra/xpra_tcp.png
    :scale: 50
 
 - 此时本地桌面就会看到远程服务器上运行的大型开发工具应用程序Jetbrains的GoLand，客户端完全没有任何压力，所有的计算编译工作都在远程服务器上完成。可以实现macOS跨平台开发Linux程序：
 
-.. figure:: ../../../_static/linux/desktop/x_window/xpra_remote_goland.png
+.. figure:: ../../../_static/linux/desktop/xpra/xpra_remote_goland.png
    :scale: 30
 
 .. note::
