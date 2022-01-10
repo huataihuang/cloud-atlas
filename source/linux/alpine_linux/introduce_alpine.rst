@@ -18,9 +18,23 @@ Alpine Linux是针对安全目标的轻量级Linux发行版，基于musl libc和
 
 Alpine的一大特点是非常小巧，没有包含过多的内容。这种较小的发行版也更为安全和高效。
 
+特性
+=======
 
+- 轻量级: alpine linux主要用于嵌入式系统和服务器应用程序，所以采用了 busybox(替代大量的GNU程序) 、OpenRC(代替 :ref:`systemd` ) 以及musl 库(用于替代glibc)，通过这种简化使得操作系统非常小巧，避免浪费宝贵的系统资源。不过，这也带来了兼容性不足和功能缺乏。如果你的系统是自己完全掌控，只运行特定目标的应用，这种精简环境会带来性能提升和安全性加强。
+- 稳定性和滚动升级: Alpine Linux使用2种发布模式:
+
+  - ``edge`` 是滚动模式，相对稳定(可能一个周期中有些小问题)
+  - ``stable`` 是每6个月一个发布周期，发布周期内保持稳定修复
+  - ``edge`` 和 ``stable`` 都会得到安全升级，并且 ``stable`` 有2年的支持
+
+- 独特的打包方式: Alpine包管理器是 :ref:`alpine_apk` ，执行效率很高的软件包管理器，有点类似 :ref:`arch_linux` 的 :ref:`pacman` ，使用 ``APKBUILD`` 打包脚本完成(类似Arch Linux的 ``PKGBUILD`` )
+- 社区驱动: Alpine社区相对其他发行版较小，主要的核心开发者沟通在 ``#alpine-linux`` 和 ``#alpine-devel`` IRC
+- 安全: Alpine的主要特点之一就是安全，通过精简系统使得受攻击面减小，特别适合嵌入系统和特定服务器领域。 ( :ref:`alpine_install_arm` )
 
 参考
 ======
 
 - `Meet Alpine Linux, Docker’s Distribution of Choice for Containers <https://thenewstack.io/alpine-linux-heart-docker/>`_
+- `Setting Up a Software Development Environment on Alpine Linux <https://www.overops.com/blog/my-alpine-desktop-setting-up-a-software-development-environment-on-alpine-linux/>`_
+- `Alpine Linux, why no one is using it? <https://www.reddit.com/r/linux/comments/3mqqtx/alpine_linux_why_no_one_is_using_it/>`_
