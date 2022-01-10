@@ -32,7 +32,11 @@ EXT4文件系统fsck
 
 .. note::
 
-   我在解决了 :ref:`jetson_pcie_err` 之后发现 ``Ext4-fs`` 文件系统报错，促使我尝试检查和修复根文件系统
+   我在解决了 :ref:`jetson_pcie_err` 之后发现 :ref:`jetson_ext4-fs_err` 文件系统报错，促使我尝试检查和修复根文件系统。
+
+   采用 ``sudo touch /forcefsck`` 方法(见下文)，但是似乎并没有正确修复。最终我是将TF卡从 :ref:`jetson_nano` 中取出，通过USB转接器连接到另一台主机上，然后执行 ``fsck`` 修复。
+
+   修复完成后，上述 :ref:`jetson_ext4-fs_err` 不再出现，系统工作稳定。
 
 - 检查当前挂载次数，检查间隔以及最新的fsck检查，需要使用 ``tune2fs`` 工具::
 

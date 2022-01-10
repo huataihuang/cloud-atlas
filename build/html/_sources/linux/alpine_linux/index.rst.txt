@@ -11,14 +11,18 @@ Alpine Linux
    think_alpine.rst
    alpine_startup.rst
    alpine_install.rst
+   alpine_install_arm.rst
+   alpine_arm_clock_skew.rst
    alpine_local_backup.rst
    alpine_static_ip.rst
    alpine_setup_disk.rst
    alpine_wireless.rst
+   alpine_wireless_broadcom.rst
    alpine_extended.rst
    alpine_apk.rst
    alpine_kvm.rst
    alpine_nfs.rst
+   alpine_dev.rst
 
 .. only::  subproject and html
 

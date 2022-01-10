@@ -17,6 +17,7 @@ Real Atlas
    real_think/index
    prepare/index
    private_cloud/index
+   edge_cloud/index
    network/index
 
 .. only::  subproject and html
