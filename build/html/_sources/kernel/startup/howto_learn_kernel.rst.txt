@@ -19,7 +19,7 @@ Linux系统编程指开发底层软件，例如存储或网络应用程序。
 
 - `Debugging with GDB: The GNU Source-Level Debugger <https://www.amazon.com/Debugging-GDB-GNU-Source-Level-Debugger/>`_
 
-`Valgrind <http://valgrind.org/>`_ 是常用的内存检查工具。
+- :ref:`valgrind` 是常用的内存检查工具。
 
 系统编程推荐书籍：
 

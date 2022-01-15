@@ -8,3 +8,4 @@
    :maxdepth: 1
 
    edge_cloud_infra.rst
+   edge_jeston.rst

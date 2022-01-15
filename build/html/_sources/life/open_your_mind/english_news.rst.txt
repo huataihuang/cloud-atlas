@@ -97,7 +97,7 @@ ABC，CBS 新闻更偏向于中立，也有认为中立偏左；NBC 新闻被认
 -------------------------------------------
 
 .. figure:: ../../_static/life/open_your_mind/news_real.jpg
-   :scale: 80
+   :scale: 10
 
 上图是 `adfontesmedia.com从两个唯独分析各大媒体可行度图示 <https://www.adfontesmedia.com/the-chart-version-3-0-what-exactly-are-we-reading/>`_ :
 

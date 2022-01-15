@@ -11,8 +11,10 @@ Alpine Linux
    think_alpine.rst
    alpine_startup.rst
    alpine_install.rst
-   alpine_install_arm.rst
-   alpine_arm_clock_skew.rst
+   alpine_install_pi.rst
+   alpine_pi_clock_skew.rst
+   alpine_pi_clone.rst
+   alpine_pi_usb_boot.rst
    alpine_local_backup.rst
    alpine_static_ip.rst
    alpine_setup_disk.rst

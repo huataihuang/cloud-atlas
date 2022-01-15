@@ -231,7 +231,7 @@ DNS解析器配置
 
 - 安装 :ref:`synergy`
 
-- 安装 :ref:`vs_code`
+- 安装 :ref:`vscode`
 
 - 安装音乐播放软件, 截图和图片浏览::
 

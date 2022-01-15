@@ -9,6 +9,8 @@ ssh服务
 
    ssh_tunnel.rst
    entropy_random.rst
+   speed_up_ssh.rst
+   ssh_multiplexing.rst
    
 .. only::  subproject and html
 

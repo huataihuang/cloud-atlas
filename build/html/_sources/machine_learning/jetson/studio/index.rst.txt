@@ -16,6 +16,7 @@ NVIDIA Jetson工作室构建
    linux_tether_vpn.rst
    jetson_remote.rst
    jetson_xpra.rst
+   jetson_xpra_build.rst
    jetson_xfce4.rst
    jetson_ubuntu_20.04.rst
    jetson_swap.rst
