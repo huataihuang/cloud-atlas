@@ -299,7 +299,7 @@ studio环境
    sudo mkdir -p /run/user/502/xpra
    sudo chown -R huatai:staff /run/user/502
 
-- 运行 :ref:`vs_code` GoLand等工具::
+- 运行 :ref:`vscode` GoLand等工具::
 
    xpra start --start=/opt/GoLand-2020.2.3/bin/goland.sh --bind-tcp=127.0.0.1:1100
    xpra start --start=code --bind-tcp=127.0.0.1:1110

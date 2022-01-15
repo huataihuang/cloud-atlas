@@ -1,17 +1,13 @@
-.. _linux_memory_management:
+.. _linux_admin:
 
 =================================
-Linux内存管理
+Linux系统管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
+   os_fork_resource_unavailable.rst
 
 .. only::  subproject and html
 

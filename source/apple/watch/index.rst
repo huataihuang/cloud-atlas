@@ -1,17 +1,13 @@
-.. _linux_memory_management:
+.. _apple_watch:
 
 =================================
-Linux内存管理
+Apple Watch
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
+   update_awatch_nospace.rst
 
 .. only::  subproject and html
 

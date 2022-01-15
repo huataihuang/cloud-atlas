@@ -1,17 +1,13 @@
-.. _linux_memory_management:
+.. _pi_uart:
 
 =================================
-Linux内存管理
+树莓派UART串口通讯
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
+   intro_pi_uart.rst
 
 .. only::  subproject and html
 

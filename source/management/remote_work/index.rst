@@ -1,17 +1,13 @@
-.. _linux_memory_management:
+.. _remote_work:
 
 =================================
-Linux内存管理
+远程工作
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
+   think_remote_work.rst
 
 .. only::  subproject and html
 

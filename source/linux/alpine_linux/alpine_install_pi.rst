@@ -1,7 +1,7 @@
-.. _alpine_install_arm:
+.. _alpine_install_pi:
 
 ===========================
-ARM环境安装Alpine Linux
+树莓派环境安装Alpine Linux
 ===========================
 
 Alpine Linux for Raspberry Pi
@@ -37,7 +37,7 @@ Alpine Linux for Raspberry Pi
    
 执行磁盘划分，完成后如下:
 
-.. literalinclude:: alpine_install_arm/fdisk_p.txt
+.. literalinclude:: alpine_install_pi/fdisk_p.txt
    :language: bash
    :linenos:
    :caption: sys安装模式alpine linux分区
@@ -47,6 +47,13 @@ Alpine Linux for Raspberry Pi
    sudo partprobe
    sudo mkdosfs -F 32 /dev/sdb1
    sudo mkfs.ext4 /dev/sdb2
+
+.. note::
+
+   如果使用 Alpine Linux，要使用 ``mkfs.ext4`` 需要安装 ``e2fsprogs`` 包::
+
+      apk update
+      apk add e2fsprogs
 
 复制Alipine系统
 =================
@@ -59,6 +66,26 @@ Alpine Linux for Raspberry Pi
 
    cd /mnt
    sudo tar zxvf ~/Downloads/alpine-rpi-3.15.0-aarch64.tar.gz
+
+.. note::
+
+   `Classic install or sys mode on Raspberry Pi <https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi>`_ 提到建议在 ``usercfg.txt`` 中添加配置::
+
+      enable_uart=1
+
+   配置激活 :ref:`pi_uart` ，可以用于后续的串口通讯开发，以及系统调试
+
+.. note::
+
+   对于headless使用，可以添加以下参数使得具有足够内存(对于树莓派bootloader需要32兆内存)::
+
+      gpu_mem=32
+
+.. note::
+
+   要支持音频，则添加::
+
+      dtparam=audio=on
 
 - 下载 `headless overlay file <https://github.com/davidmytton/alpine-linux-headless-raspberrypi/releases/download/2021.06.23/headless.apkovl.tar.gz>`_ (我使用headless模式，这样可以不用显示器)，存放到文件系统根目录(不需要解压缩)::
 
@@ -94,51 +121,6 @@ Alpine Linux for Raspberry Pi
 
 此时系统尚未配置root密码，所以可以直接登陆
 
-- 设置存储 ``disk-based`` (sys) 安装::
-
-   mkdir /stage
-   mount /dev/mmcblk0p2 /stage
-   setup-disk -o /media/mmcblk0p1/x-k3s-m-1.apkovl.tar.gz /stage
-
-这里有一个报错::
-
-   ext4 is not supported. Only supported are: vfat
-
-参考 `setup-disk with sys mode on Raspberry Pi 3.13.0 <https://gitlab.alpinelinux.org/alpine/aports/-/issues/12353>`_ ::
-
-   umount /stage
-   mount /dev/mmcblk0p2 /mnt
-   mkdir /mnt/boot && mount /dev/mmcblk0p1 /mnt/boot
-   rm -rf /mnt/boot/*
-   setup-disk -m sys /mnt
-
-这里有报错::
-
-   Installing system on /dev/mmcblk0p2:
-   ERROR: unable to select packages:
-     acct (no such package):
-       required by: world[acct]
-     alpine-base (no such package):
-       required by: world[alpine-base]
-     chrony (no such package):
-       required by: world[chrony]
-     dosfstools (no such package):
-       required by: world[dosfstools]
-     linux-rpi (no such package):
-       required by: world[linux-rpi]
-     openssh (no such package):
-       required by: world[openssh]
-     openssl (no such package):
-       required by: world[openssl]
-     raspberrypi-bootloader (no such package):
-       required by: world[raspberrypi-bootloader]
-     wget (no such package):
-       required by: world[wget]
-     wireless-tools (no such package):
-       required by: world[wireless-tools]
-     wpa_supplicant (no such package):
-       required by: world[wpa_supplicant]
-
 安装
 ===========
 
@@ -168,22 +150,41 @@ Alpine Linux for Raspberry Pi
 
    mount /dev/mmcblk0p2 /mnt
    export FORCE_BOOTFS=1
+   # 这里添加一步创建boot目录
+   mkdir /mnt/boot
    setup-disk -m sys /mnt
+
+.. note::
+
+   这里一定要先执行 ``export FORCE_BOOTFS=1`` 设置这个环境变量，否则执行::
+
+      setup-disk -m sys /mnt
+
+   会提示报错::
+
+      ext4 is not supported. Only supported are: vfat
+
+   所以这里我添加了一步::
+
+      mkdir /mnt/boot
+
+   虽然文档中没有写，但是我发现没有创建 ``/mnt/boot`` 目录会提示错误::
+
+      /sbin/setup-disk: line 473: can't create /mnt/boot/config.txt: nonexistent directory
+      /sbin/setup-disk: line 474: can't create /mnt/boot/cmdline.txt: nonexistent directory
 
 此时提示信息::
 
    ext4 is not supported. Only supported are: vfat
    Continuing at your own risk.
    Installing system on /dev/mmcblk0p2:
-   /sbin/setup-disk: line 473: can't create /mnt/boot/config.txt: nonexistent directory
-   /sbin/setup-disk: line 474: can't create /mnt/boot/cmdline.txt: nonexistent directory
    100%
    => initramfs: creating /boot/initramfs-rpi
    You might need fix the MBR to be able to boot
 
 - 然后重新以读写模式挂载第一个分区，准备进行更新::
 
-   mount -o remount,rw /media/mmcblk0p1
+   mount -o remount,rw /media/mmcblk0p1  # An update in the first partition is required for the next reboot.
 
 - 清理掉旧的 ``boot`` 目录中无用文件::
 
@@ -226,45 +227,21 @@ Alpine Linux for Raspberry Pi
 
    reboot
 
-这里我遇到一个问题，树莓派的时钟不准确，导致启动时提示时钟扭曲(时钟比文件系统的时间戳要早很多)::
+这里我遇到一个问题 :ref:`alpine_pi_clock_skew`
 
-   Clock skew detected with `(null)'
-   Adjusting mtime of '/run/openrc/deptree' to Mon Jan 10 21:44:22 2022
-   WARNING: clock skew detected!
-   ...
-   Checking local filesystems ...
-   Filesystems couldn't be fixed
-   rc: Aborting!
-   fsck: caught SIGTERM, aborting
-   WARNING: clock skew detected!
+系统简单配置
+=================
 
-这个问题导致启动后使用 ``date`` 检查时间显示的是上一次 ``date`` 启动时设置时间，这个时间和当前重启启动时间相去甚远，所以系统会显示时钟错误，无法读写挂载文件系统，也就导致后续一系列网卡无法启动，服务也无法启动。问题是树莓派没有本地 ``rtc`` 设备，所以无法执行 ``hwclock -w --localtime`` 将手工修正的时间记录到BIOS。
+- 添加huatai用户，并设置sudo::
 
-尝试解决的方法:
+   apk add sudo
+   adduser huatai
+   adduser huatai wheel
+   visudo
 
-- 先手工修正以下时间::
+- 作为服务器运行，关闭无线功能::
 
-   date -s "2022-01-10 22:36:04"
-
-- 然后重启一次 ``chronyd`` 服务，让服务能够本地保留一份时钟矫正(注意，需要首先把文件系统改正为读写模式再启动)::
-
-   mount -o remount,rw /
-   /etc/init.d/chronyd restart
-
-- 此时会提示检查文件系统(并挂载)以及启动网络::
-
-   * Checking local filesystems ...
-   * Remounting filesystems ...
-   * Mounting local filesystems ...
-   * Starting networking ...
-   *   lo ...
-   *   eth0 ...
-   * Starting chronyd ...
-
-- 然后启动 :ref:`alpine_wireless` 通过internet矫正时间 - 这一步非常重要，因为只有通过时钟矫正生成正确的 ``/var/lib/chrony/chrony.drift``
-
-
-
+   rc-update del wpa_supplicant boot   
 
 参考
 ======
@@ -272,6 +249,6 @@ Alpine Linux for Raspberry Pi
 - `Installing Alpine Linux on a Raspberry Pi <https://github.com/garrym/raspberry-pi-alpine>`_
 - `Alpine Linux Raspberry Pi <https://wiki.alpinelinux.org/wiki/Raspberry_Pi>`_
 - `Alpine Linux Raspberry Pi - Headless Installation <https://wiki.alpinelinux.org/wiki/Raspberry_Pi_-_Headless_Installation>`_ 无显示器安装
-- `Alpine Linux Classic install or sys mode on Raspberry Pi <https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi>`_ 系统安装模式
+- `Alpine Linux Classic install or sys mode on Raspberry Pi <https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi>`_ 系统安装模式 ``这篇文档是主要的参考``
 - `Setting Up a Software Development Environment on Alpine Linux <https://www.overops.com/blog/my-alpine-desktop-setting-up-a-software-development-environment-on-alpine-linux/>`_-
 - `Is Alpine a good alternative to Raspberry Pi OS (RPi4) when it comes to running a home server + small website (pretty much all Docker-based)? <https://www.reddit.com/r/AlpineLinux/comments/mrk03f/is_alpine_a_good_alternative_to_raspberry_pi_os/>`_

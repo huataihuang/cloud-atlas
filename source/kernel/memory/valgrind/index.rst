@@ -1,17 +1,13 @@
-.. _linux_memory_management:
+.. _valgrind:
 
 =================================
-Linux内存管理
+Valgrind内存Debug
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
+   valgrind_startup.rst
 
 .. only::  subproject and html
 

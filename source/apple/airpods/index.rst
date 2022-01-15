@@ -1,17 +1,11 @@
-.. _linux_memory_management:
+.. _airpods:
 
 =================================
-Linux内存管理
+AirPods
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
 
 .. only::  subproject and html
 
