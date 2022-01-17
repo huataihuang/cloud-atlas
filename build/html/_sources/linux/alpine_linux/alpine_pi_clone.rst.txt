@@ -16,7 +16,7 @@ Clone Alpine Linux (树莓派)
    Units: sectors of 1 * 512 = 512 bytes
 
    Device       Boot StartCHS    EndCHS        StartLBA     EndLBA    Sectors  Size Id Type
-   /dev/mmcblk0p1 *  1,0,1       256,63,32         2048     526335     524288  256M  e Win95 FAT16 (LBA)
+   /dev/mmcblk0p1 *  1,0,1       256,63,32         2048     526335     524288  256M  c Win95 FAT32 (LBA)
    /dev/mmcblk0p2    257,0,1     489,63,32       526336  124735487  124209152 59.2G 83 Linux
 
 启动后，系统挂载::
@@ -31,7 +31,7 @@ Clone Alpine Linux (树莓派)
 操作系统归档
 ===============
 
-通过 :ref:`recover_system_by_tar` 可以备份和恢复Ubuntu这样的操作系统，对于Alpine Linux也类似。不过，可能更为简单(没有 :ref:`grub` )，可以通过TF卡取出进行备份，然后再clone到新的TF卡。
+通过 :ref:`recover_system_by_tar` 可以备份和恢复Ubuntu这样的操作系统，对于Alpine Linux也类似。不过，可能更为简单(没有 ``grub`` )，可以通过TF卡取出进行备份，然后再clone到新的TF卡。
 
 - 源模版Alpine Linux的文件系统挂载::
 
@@ -94,7 +94,7 @@ Clone Alpine Linux (树莓派)
    Disk identifier: 0x00000000
 
    Device     Boot  Start       End   Sectors  Size Id Type
-   /dev/sdf1  *      2048    526335    524288  256M  e W95 FAT16 (LBA)
+   /dev/sdb1  *      2048    526335    524288  256M  c W95 FAT32 (LBA)
    /dev/sdf2       526336 124735487 124209152 59.2G 83 Linux
 
 - 文件系统格式化::

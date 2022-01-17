@@ -70,7 +70,10 @@
 <li class="toctree-l3"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ssh多路传输multiplexing加速</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#multiplexing">Multiplexing的优点</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">设置Multiplexing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multiplex">手工建立multiplex连接</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">结束multiplex连接</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -144,9 +147,155 @@
 <h2>Multiplexing的优点<a class="headerlink" href="#multiplexing" title="永久链接至标题">¶</a></h2>
 <p>SSH multiplexing 的一个优点是克服了创建一个新的TCP连接的消耗。对于一个主机可以接受的连接数量是有限的，并且对于一些主机限制更为明显，这和主机的负载有关，并且开启一个新的连接会有明显的延迟。当使用multiplexing的时候，重用一个已经开启的连接可以明显加速。</p>
 <p>multiplexing和独立会话的区别是，在服务器和客户端，都只看到一个进程（即使多次连接会话）。并且，在服务器和客户机上，可以看到只打开了一个TCP连接；只不过，在客户端，后建立的会话都是通过 <code class="docutils literal notranslate"><span class="pre">stream</span></code> 的本地套接字来访问的。OpenSSH使用现有的TCP连接来实现多个SSH会话，这种方式降低了新建TCP连接的负载。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Multiplexing</span></code> 的创建过程：</p>
+<ul class="simple">
+<li><p>设置 <code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 开启一个本地Unix domain socket</p></li>
+<li><p>其余的所有的ssh命令连接都通过Unix domain socket连接到 <code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 提供了以下优点：</p>
+<ul class="simple">
+<li><p>使用已经存在的unix socket</p></li>
+<li><p>没有新增的TCP/IP连接</p></li>
+<li><p>不再需要密钥交换</p></li>
+<li><p>不再需要认证等</p></li>
+</ul>
+<p>以下是在一个Mac OS X 客户端，登陆过Linux服务器之后，关闭终端，然后又发起4次ssh登陆（没有退出）情况下的检查：</p>
+<ul>
+<li><p>Mac OS X客户端检查进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="mf">192.168.1.1</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">v</span> <span class="n">grep</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到，系统只建立了一个ssh连接进程(有一个 <code class="docutils literal notranslate"><span class="pre">[mux]</span></code> 标记是 <code class="docutils literal notranslate"><span class="pre">Multiplexing</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>huatai          59773   0.0  0.0  2490964    600   ??  Ss    3:03PM   0:00.17 ssh: /Users/huatai/.ssh/192.168.1.1-22-root [mux]
+</pre></div>
+</div>
+<ul>
+<li><p>Mac OS X客户端检查连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="o">|</span> <span class="n">grep</span> <span class="mf">192.168.1.1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到，除了第一个ssh连接是直接连接服务器的22端口，其他ssh连接都是连接本地的socket:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tcp4</span>       <span class="mi">0</span>      <span class="mi">0</span>  <span class="mf">192.168.1.2.51210</span>      <span class="mf">192.168.1.1.22</span>        <span class="n">ESTABLISHED</span>
+<span class="mi">5</span><span class="n">a240da08f6284a9</span> <span class="n">stream</span>      <span class="mi">0</span>      <span class="mi">0</span>                <span class="mi">0</span> <span class="mi">5</span><span class="n">a240da069f57959</span>                <span class="mi">0</span>                <span class="mi">0</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="mf">192.168.1.1</span><span class="o">-</span><span class="mi">22</span><span class="o">-</span><span class="n">root</span><span class="o">.</span><span class="n">FqablQb5EvN7v2Yj</span>
+<span class="mi">5</span><span class="n">a240da083696e09</span> <span class="n">stream</span>      <span class="mi">0</span>      <span class="mi">0</span>                <span class="mi">0</span> <span class="mi">5</span><span class="n">a240da07cccff31</span>                <span class="mi">0</span>                <span class="mi">0</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="mf">192.168.1.1</span><span class="o">-</span><span class="mi">22</span><span class="o">-</span><span class="n">root</span><span class="o">.</span><span class="n">FqablQb5EvN7v2Yj</span>
+<span class="mi">5</span><span class="n">a240da08fe2c701</span> <span class="n">stream</span>      <span class="mi">0</span>      <span class="mi">0</span>                <span class="mi">0</span> <span class="mi">5</span><span class="n">a240da05ffa3f91</span>                <span class="mi">0</span>                <span class="mi">0</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="mf">192.168.1.1</span><span class="o">-</span><span class="mi">22</span><span class="o">-</span><span class="n">root</span><span class="o">.</span><span class="n">FqablQb5EvN7v2Yj</span>
+<span class="mi">5</span><span class="n">a240da08a80ec79</span> <span class="n">stream</span>      <span class="mi">0</span>      <span class="mi">0</span>                <span class="mi">0</span> <span class="mi">5</span><span class="n">a240da069f56441</span>                <span class="mi">0</span>                <span class="mi">0</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="mf">192.168.1.1</span><span class="o">-</span><span class="mi">22</span><span class="o">-</span><span class="n">root</span><span class="o">.</span><span class="n">FqablQb5EvN7v2Yj</span>
+<span class="mi">5</span><span class="n">a240da069f57251</span> <span class="n">stream</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="mi">5</span><span class="n">a240da06f2ca8c9</span>                <span class="mi">0</span>                <span class="mi">0</span>                <span class="mi">0</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="mf">192.168.1.1</span><span class="o">-</span><span class="mi">22</span><span class="o">-</span><span class="n">root</span><span class="o">.</span><span class="n">FqablQb5EvN7v2Yj</span>
+</pre></div>
+</div>
+<ul>
+<li><p>在Linux服务器上观察可以看到进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">ssh</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">v</span> <span class="n">grep</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示只有一个客户端连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root      1052  0.0  0.0  82548  3536 ?        Ss   Jan27   0:05 /usr/sbin/sshd -D
+root     34640  0.0  0.0 140788  4988 ?        Ss   15:03   0:00 sshd: root@pts/0,pts/1,pts/2,pts/3
+</pre></div>
+</div>
+<p>观察客户端ssh连接也确实只有一个:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="o">|</span> <span class="n">grep</span> <span class="mf">192.168.1.2</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tcp</span>        <span class="mi">0</span>     <span class="mi">36</span> <span class="mf">192.168.1.1</span><span class="p">:</span><span class="mi">22</span>         <span class="mf">192.168.1.2</span><span class="p">:</span><span class="mi">51210</span>       <span class="n">ESTABLISHED</span>
+</pre></div>
+</div>
+<p>从上述观察来看，启用了 <code class="docutils literal notranslate"><span class="pre">Multiplexing</span></code> 之后，客户机和服务器只需要建立一个SSH连接，就能够满足客户端大量的并发连接</p>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>设置Multiplexing<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>OpenSSH通过 <code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> ， <code class="docutils literal notranslate"><span class="pre">ControlPath</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ControlPersist</span></code> 配置来实现multiplexing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 决定ssh是否监听控制连接并且如何处理</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ControlPath</span></code> 是控制套接字的位置</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ControlPersist</span></code> 是配合 <code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 设置，如果设置成 <code class="docutils literal notranslate"><span class="pre">yes</span></code> 则会在后台始终开启主连接来接受新的连接，只到被明确地杀死或者通过 <code class="docutils literal notranslate"><span class="pre">-O</span></code> 参数关闭。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><code class="docutils literal notranslate"><span class="pre">ControlPersist</span></code> 选项需要 OpenSSH 5.6以上版本支持，否则会ssh时会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Bad</span> <span class="n">configuration</span> <span class="n">option</span><span class="p">:</span> <span class="n">ControlPersist</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>在用户目录下配置 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> 内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">machine1</span>
+  <span class="n">HostName</span> <span class="n">machine1</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span>
+  <span class="n">ControlPath</span> <span class="o">~/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">controlmasters</span><span class="o">/%</span><span class="n">r</span><span class="o">@%</span><span class="n">h</span><span class="p">:</span><span class="o">%</span><span class="n">p</span>
+  <span class="n">ControlMaster</span> <span class="n">auto</span>
+  <span class="n">ControlPersist</span> <span class="mi">10</span><span class="n">m</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述配置，就会在 <code class="docutils literal notranslate"><span class="pre">~/.ssh/controlmasters/</span></code> 目录下创建控制套接字</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Host</span> <span class="pre">machine1</span></code> 也如果配置成 <code class="docutils literal notranslate"><span class="pre">Host</span> <span class="pre">*</span></code> 则表示匹配所有的主机，则不需要设置 <code class="docutils literal notranslate"><span class="pre">HostName</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ControlPath</span> <span class="pre">~/.ssh/controlmasters/%r&#64;%h:%p</span></code> 设置用于共享连接的控制unix套接字路径。变量 <code class="docutils literal notranslate"><span class="pre">%r</span></code> ， <code class="docutils literal notranslate"><span class="pre">%h</span></code> 和 <code class="docutils literal notranslate"><span class="pre">%p</span></code> 表示远程ssh连接的用户名，主机名和端口。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 设置成 <code class="docutils literal notranslate"><span class="pre">auto</span></code> 则会无条件接受新的连接，如果这个参数设置成 <code class="docutils literal notranslate"><span class="pre">10</span></code> 就只能接受10个多路会话。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ControlPersist</span> <span class="pre">10m</span></code> 设置主连接保持在后台打开的时间是10分钟。如果没有客户端连接，这个后台master连接将自动终止。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>从OpenSSH 6.7开始 <code class="docutils literal notranslate"><span class="pre">%r&#64;%h:%p</span></code> 可以合并成 <code class="docutils literal notranslate"><span class="pre">%C</span></code> ，这个参数会自动生成 <code class="docutils literal notranslate"><span class="pre">%l%h%p%r</span></code> 的哈希，优点是可以唯一标识连接</p>
+</div>
+<p>也可以配置成通用配置(对所有服务器生效):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="o">*</span>
+  <span class="n">ServerAliveInterval</span> <span class="mi">60</span>
+  <span class="n">ControlMaster</span> <span class="n">auto</span>
+  <span class="n">ControlPath</span> <span class="o">~/.</span><span class="n">ssh</span><span class="o">/%</span><span class="n">h</span><span class="o">-%</span><span class="n">p</span><span class="o">-%</span><span class="n">r</span>
+  <span class="n">ControlPersist</span> <span class="n">yes</span>
+  <span class="n">StrictHostKeyChecking</span> <span class="n">no</span>
+  <span class="n">Compression</span> <span class="n">yes</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里还添加了压缩以及不检查服务器SSH key(有安全风险，但是对于有安全控制对测试环境，不断重建服务器并使用相同IP，可能需要这个参数)</p>
+</div>
+<section id="id2">
+<h3>管理连接套接字<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>选项 <code class="docutils literal notranslate"><span class="pre">-O</span></code> 用来管理连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">O</span> <span class="n">check</span> <span class="n">machine1</span>
+<span class="n">ssh</span> <span class="o">-</span><span class="n">O</span> <span class="n">stop</span> <span class="n">machine1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这个 <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">stop</span></code> 会清除掉旧的控制套接字，原先的已经连接的会话不受影响。新的连接将建立新的TCP连接。</p>
+</div>
+</section>
+</section>
+<section id="multiplex">
+<h2>手工建立multiplex连接<a class="headerlink" href="#multiplex" title="永久链接至标题">¶</a></h2>
+<p>使用参数 <code class="docutils literal notranslate"><span class="pre">-M</span></code> 和 <code class="docutils literal notranslate"><span class="pre">-S</span></code> 对应的就是 <code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ControlPath</span></code> ，所以可以使用如下命令创建多路传输:</p>
+<blockquote>
+<div><p>ssh -M -S <a class="reference external" href="mailto:/home/fred/&#46;ssh/controlmasters/fred&#37;&#52;&#48;server&#46;example&#46;org">/home/fred/<span>&#46;</span>ssh/controlmasters/fred<span>&#64;</span>server<span>&#46;</span>example<span>&#46;</span>org</a>:22 server.example.org</p>
+</div></blockquote>
+<p>后续的ssh可以使用 <code class="docutils literal notranslate"><span class="pre">-S</span></code> 参数复用前面创建的控制套接字:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">S</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">fred</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">controlmasters</span><span class="o">/</span><span class="n">fred</span><span class="nd">@server</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span><span class="p">:</span><span class="mi">22</span> <span class="n">server</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>结束multiplex连接<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">O</span> <span class="n">stop</span> <span class="n">server1</span>
+<span class="n">ssh</span> <span class="o">-</span><span class="n">O</span> <span class="n">stop</span> <span class="o">-</span><span class="n">S</span> <span class="o">~/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">controlmasters</span><span class="o">/</span><span class="n">fred</span><span class="nd">@server1</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span><span class="p">:</span><span class="mi">22</span> <span class="n">server1</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Multiplexing">OpenSSH/Cookbook/Multiplexing</a></p></li>
 <li><p><a class="reference external" href="https://blog.flameeyes.eu/2011/01/mostly-unknown-openssh-tricks">Mostly unknown OpenSSH tricks</a></p></li>
