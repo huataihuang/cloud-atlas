@@ -1,8 +1,8 @@
-.. _priv_dnsmasq:
+.. _priv_dnsmasq_ics:
 
-=========================
-私有云DNS服务(dnsmasq)
-=========================
+=========================================
+私有云DNS服务(dnsmasq)和共享因特网(ICS)
+=========================================
 
 在少量部署的虚拟机环境中，通过简单维护各个主机 ``/etc/hosts`` 一致，就能够实现主机解析。但是，一旦开始大规模通过 :ref:`clone_vm_rbd` :ref:`zdata_ceph_rbd_libvirt` ，就很难实时更新每个虚拟机的 ``hosts`` 配置文件。更何况后续还会 :ref:`priv_cloud_infra` 构建 :ref:`kvm_nested_virtual` ，构建数以百计的虚拟机。所以，我们需要构建一个因特网非常基础的 :ref:`dns` ，来提供整个基础架构的域名解析。
 
@@ -32,10 +32,11 @@ dnsmasq是小型网络的轻量级DNS/TFTP和DHCP服务器，特别适合小型�
   - 指定默认域名 ``staging.huatai.me`` 并提供DNS解析服务
   - 绑定DNS请求服务网络接口IP ``listen-address``
   - 指定上游域名解析服务器 ``server``
+  - 同时对网络中提供DHCP服务，以便 :ref:`airport_express_with_dnsmasq_ics` 客户端能动态获得IP配置 
 
 - 执行一个简单的脚本，生成 ``/etc/hosts`` ，这个配置将被 ``dnsmasq`` 加载作为域名解析配置:
 
-.. literalinclude:: ../../infra_service/dns/dnsmasq/deploy_dnsmasq/dnsmasq.conf
+.. literalinclude:: priv_dnsmasq_ics/deploy_dnsmasq.sh
    :language: bash
    :linenos:
    :caption: hosts配置提供dnsmasq域名解析配置
@@ -110,3 +111,15 @@ Fedora使用 :ref:`networkmanager` 管理网络，使用以下命令修订DNS::
    nmcli connection up id "enp1s0"
 
 上述命令会修订 ``/etc/NetworkManager/system-connections/enp1s0.nmconnection`` 对应配置
+
+因特网共享连接
+==================
+
+DNSmasq不仅提供了DNS解析，也同时为内部局域网提供了DHCP服务，以便 :ref:`airport_express_with_dnsmasq_ics` 客户端能够访问Internet
+
+- 在 ``zcloud`` 上执行 ``ics.sh`` 脚本为局域网内部主机提供共享因特网:
+
+.. literalinclude:: priv_dnsmasq_ics/ics.sh
+   :language: bash
+   :linenos:
+   :caption: 共享Internet

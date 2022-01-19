@@ -8,4 +8,4 @@
    :maxdepth: 1
 
    real_think_init.rst
-   real_private_cloud_think.rst
+   real_cloud_think.rst

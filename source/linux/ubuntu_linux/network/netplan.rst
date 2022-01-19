@@ -81,6 +81,34 @@ Netplan会读取 ``/etc/netplan/*.yaml`` 配置文件来设置所有的网络接
 
 - 验证检查 ``ifconfig -a`` 可以看到IP地址已经修改成静态配置IP地址
 
+netplan配置一个网卡多个IP
+==========================
+
+有时候需要在一个网卡上配置多个IP地址，实现单臂网桥路由，netplan也支持 interface alias 。配置方法很简单::
+
+   network:
+     version: 2
+     renderer: networkd
+     ethernets:
+       enp3s0:
+        addresses:
+          - 10.100.1.38/24
+          - 10.100.1.39/24
+        gateway4: 10.100.1.1
+
+或者::
+
+   ethernets:
+     enp3s0:
+      addresses: [ 10.100.1.38/24, 10.100.1.39/24 ] 
+
+执行 ``netplan apply`` 可以看到系统网卡::
+
+   enp3s0
+   enp3s0:1
+
+分配了IP地址 ``10.100.1.38`` 和 ``10.100.1.39``
+
 netplan配置有线802.1x认证
 ============================
 

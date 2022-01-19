@@ -1,17 +1,16 @@
-.. _linux_lvm:
+.. _kodi:
 
 =================================
-Linux LVM逻辑卷管理
+Kodi - 媒体播放
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   lvm_infra.rst
-   striped_lvm.rst
-   lvmcache.rst
-   lvmthin.rst
-   
+   intro_kodi.rst
+   kodi_remote_control.rst
+   kodi_soft_remote_control.rst
+
 .. only::  subproject and html
 
    Indices
