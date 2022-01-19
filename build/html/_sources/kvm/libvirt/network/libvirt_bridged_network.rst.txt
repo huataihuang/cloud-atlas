@@ -212,6 +212,10 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
    :linenos:
    :caption: /etc/netplan/00-cloud-init.yaml
 
+.. note::
+
+   这里我为 ``br0`` ( ``192.168.6.200`` ) 还增加了一个 alias ``br0:1`` ，分配了 ``192.168.7.200`` ，采用方法见 :ref:`netplan` 中配置单个接口多个IP地址方法。
+
 参数 ``forward-delay`` 会设置bridge启动后延迟4秒之后再开始转发
 
 - 执行生效::

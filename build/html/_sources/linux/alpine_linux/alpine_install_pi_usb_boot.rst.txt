@@ -66,88 +66,66 @@
 
 - 执行 ``setup-alpine`` 命令
 
-  - 主机名设置(第一台案例): ``x-k3s-m-1.edge.huatai.me``
-  - 提示有2个网卡 ``eth0 wlan0`` ，默认选择 ``eth0`` ，并配置固定IP地址 ``192.168.7.11`` ，默认网关 ``192.168.7.200``
+  - 主机名设置( :ref:`pi_4` 上运行的第一个工作节点 ): ``x-k3s-n-2.edge.huatai.me``
+  - 提示有2个网卡 ``eth0 wlan0`` ，默认选择 ``eth0`` ，并配置固定IP地址 ``192.168.7.22`` ，默认网关 ``192.168.7.200``
 
-我这里遇到一个问题，默认启动 ``chronyd`` 作为NTP客户端，但是没有校准本机时间，导致无法连接软件仓库进行更新。原因是我配置了无线网卡DHCP同时又配置了有线网卡静态IP地址，都分配了默认网关，导致无法路由访问internet。修正(暂时关闭有线网络 ``default gw`` )路由后，恢复正常时钟同步，才能继续。
+  - 需要注意 :ref:`alpine_pi_clock_skew` ，如果系统启动时钟不准确是无法同步的，所以一定要先执行一次::
+
+     chronyd -q 'server pool.ntp.org -iburst'
+
+  同步好系统时间后，再次启动 ``chronyd`` 服务来维护时钟::
+
+     /etc/init.d/chronyd restart
 
   - 注意，最后要在 ``save config`` 时回答 ``none`` ; 然后还要 ``save cache`` ::
 
-     No disks available. Try boot media /media/mmcblk0p1? (y/n) [n]
-     Enter where to store configs ('floppy', 'mmcblk0p1', 'usb' or 'none') [mmcblk0p1] none
+     Which disk(s) would you like to use? (or '?' for help or 'none') [none]
+     Enter where to store configs ('floppy', 'sda1', 'usb' or 'none') [sda1] none
      Enter apk cache directory (or '?' or 'none') [/var/cache/apk]
 
 - 更新软件::
 
    apk update
 
-添加 SD 卡分区作为系统分区
+添加 sda2 分区作为系统分区
 ============================
 
-由于我们已经在上文中将 ``/dev/mmcblk0p2`` 格式化成 ext4 文件系统，现在开始挂载并配置成系统分区::
+由于我们已经在上文中将 ``/dev/sda2`` 格式化成 ext4 文件系统，现在开始挂载并配置成系统分区::
 
-   mount /dev/mmcblk0p2 /mnt
+   mount /dev/sda2 /mnt
    export FORCE_BOOTFS=1
    # 这里添加一步创建boot目录
    mkdir /mnt/boot
    setup-disk -m sys /mnt
 
-.. note::
-
-   这里一定要先执行 ``export FORCE_BOOTFS=1`` 设置这个环境变量，否则执行::
-
-      setup-disk -m sys /mnt
-
-   会提示报错::
-
-      ext4 is not supported. Only supported are: vfat
-
-   所以这里我添加了一步::
-
-      mkdir /mnt/boot
-
-   虽然文档中没有写，但是我发现没有创建 ``/mnt/boot`` 目录会提示错误::
-
-      /sbin/setup-disk: line 473: can't create /mnt/boot/config.txt: nonexistent directory
-      /sbin/setup-disk: line 474: can't create /mnt/boot/cmdline.txt: nonexistent directory
-
-此时提示信息::
-
-   ext4 is not supported. Only supported are: vfat
-   Continuing at your own risk.
-   Installing system on /dev/mmcblk0p2:
-   100%
-   => initramfs: creating /boot/initramfs-rpi
-   You might need fix the MBR to be able to boot
-
 - 然后重新以读写模式挂载第一个分区，准备进行更新::
 
-   mount -o remount,rw /media/mmcblk0p1  # An update in the first partition is required for the next reboot.
+   mount -o remount,rw /media/sda1  # An update in the first partition is required for the next reboot.
 
 - 清理掉旧的 ``boot`` 目录中无用文件::
 
-   rm -f /media/mmcblk0p1/boot/*  
+   rm -f /media/sda1/boot/*  
    cd /mnt       # We are in the second partition 
-   rm boot/boot  # Drop the unused symbolink link
+   unlink boot/boot  # Drop the unused symbolink link
 
 - 将启动镜像和 ``init ram`` 移动到正确位置::
 
-   mv boot/* /media/mmcblk0p1/boot/
+   mv boot/* /media/sda1/boot/
    rm -Rf boot
-   mkdir media/mmcblk0p1   # It's the mount point for the first partition on the next reboot
+   mkdir media/sda1   # It's the mount point for the first partition on the next reboot
 
 - 创建软连接::
 
-   ln -s media/mmcblk0p1/boot boot
+   ln -s media/sda1/boot boot
 
 - 更新 ``/etc/fstab`` ::
 
-   echo "/dev/mmcblk0p1 /media/mmcblk0p1 vfat defaults 0 0" >> etc/fstab
+   echo "/dev/sda1 /media/sda1 vfat defaults 0 0" >> etc/fstab
    sed -i '/cdrom/d' etc/fstab   # Of course, you don't have any cdrom or floppy on the Raspberry Pi
    sed -i '/floppy/d' etc/fstab
-   cd /media/mmcblk0p1
+   cd /media/sda1
 
-- 因为下次启动，需要标记root文件系统是第二个分区，所以需要修订 ``/media/mmcblk0p1/cmdline.txt`` 
+- 因为下次启动，需要标记root文件系统是第二个分区，所以需要修订 ``/media/sda1/cmdline.txt`` 
 
 原先配置是::
 
@@ -155,11 +133,11 @@
 
 执行以下命令添加 ``root`` 指示::
 
-   sed -i 's/$/ root=\/dev\/mmcblk0p2 /' /media/mmcblk0p1/cmdline.txt
+   sed -i 's/$/ root=\/dev\/sda2 /' /media/mmcblk0p1/cmdline.txt
 
-完成修订后 ``/media/mmcblk0p1/cmdline.txt`` 内容如下::
+完成修订后 ``/media/sda1/cmdline.txt`` 内容如下::
 
-   modules=loop,squashfs,sd-mod,usb-storage quiet console=tty1 root=/dev/mmcblk0p2
+   modules=loop,squashfs,sd-mod,usb-storage quiet console=tty1 root=/dev/sda2
 
 - 重启系统::
 

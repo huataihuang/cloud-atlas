@@ -1,0 +1,50 @@
+.. _iptables_ics:
+
+=================================
+iptables配置因特网共享连接(ICS)
+=================================
+
+Internet Connection Sharing (ICS) 提供了在一台主机上共享给局域网其他主机访问因特网对能力。这台共享主机是作为Internet gateway，其他主机通过这个网关访问Internet:
+
+- 拨号连接
+- PPPoE连接
+- 无线连接
+
+实现的原理是采用 ``iptables`` 的 ``MASQUERADE`` 模式，所有局域网内部主机对外访问时，在gateway主机上做IP地址转换(SNAT)。通常我们会有以下的连接案例::
+
+   Internet <<==>> eth0 <> Ubuntu gateway <> eth1 <<==>> Client PC
+
+- 配置 ``MASQUERATE`` 方法如下::
+
+   sudo iptables -A FORWARD -o eth0 -i eth1 -s 192.168.0.0/24 -m conntrack --ctstate NEW -j ACCEPT
+   sudo iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+   sudo iptables -t nat -F POSTROUTING
+   sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+- 保存iptables::
+
+   sudo iptables-save | sudo tee /etc/iptables.sav
+
+- 编辑 ``/etc/rc.local`` 在启动时恢复上述 ``iptables`` 配置::
+
+   iptables-restore < /etc/iptables.sav
+
+- 此外，还需要解惑gateway的路由功能::
+
+   sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+
+上述路由功能也可以通过 ``sysctl`` 配置 ``/etc/sysctl.conf`` ::
+
+   net.ipv4.ip_forward=1
+
+这样启动时就能恢复内核IP转发功能(路由)
+
+案例
+=======
+
+上述方法，在 :ref:`private_cloud` 部署时 :ref:`priv_dnsmasq_ics` : 完整结合了 :ref:`dnsmasq` 和 :ref:`iptables` 来实现内部网络共享访问因特网。
+
+参考
+=======
+
+- `Ubuntu Help: Internet/ConnectionSharing <https://help.ubuntu.com/community/Internet/ConnectionSharing>`_

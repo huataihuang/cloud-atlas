@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
@@ -193,6 +194,7 @@
 <li><p>指定默认域名 <code class="docutils literal notranslate"><span class="pre">staging.huatai.me</span></code> 并提供DNS解析服务</p></li>
 <li><p>绑定DNS请求服务网络接口IP <code class="docutils literal notranslate"><span class="pre">listen-address</span></code></p></li>
 <li><p>指定上游域名解析服务器 <code class="docutils literal notranslate"><span class="pre">server</span></code></p></li>
+<li><p>同时对网络中提供DHCP服务，以便 <a class="reference internal" href="../../apple/airport/airport_express_with_dnsmasq_ics.html#airport-express-with-dnsmasq-ics"><span class="std std-ref">结合DNSmasq+iptables使用AirPort Express实现无线访问因特网</span></a> 客户端能动态获得IP配置</p></li>
 </ul>
 </div></blockquote>
 <ul class="simple">
@@ -200,23 +202,27 @@
 </ul>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">hosts配置提供dnsmasq域名解析配置</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 本地默认域名</span>
-<span class="linenos"> 2</span><span class="nv">local</span><span class="o">=</span>/staging.huatai.me/
-<span class="linenos"> 3</span><span class="c1"># 转发上游域名解析服务器，请求DNS解析</span>
-<span class="linenos"> 4</span><span class="nv">server</span><span class="o">=</span><span class="m">8</span>.8.8.8
-<span class="linenos"> 5</span><span class="c1"># 监听DNS请求的网卡接口</span>
-<span class="linenos"> 6</span>listen-address<span class="o">=</span><span class="m">192</span>.168.6.200,127.0.0.1
-<span class="linenos"> 7</span><span class="c1"># 扩展主机域名，也就是请求 zcloud 默认扩展成 zcloud.staging.huatai.me</span>
-<span class="linenos"> 8</span>expand-hosts
-<span class="linenos"> 9</span><span class="c1"># 服务器提供解析的域名</span>
-<span class="linenos">10</span><span class="nv">domain</span><span class="o">=</span>staging.huatai.me
-<span class="linenos">11</span><span class="c1"># DNS解析缓存</span>
-<span class="linenos">12</span>cache-size<span class="o">=</span><span class="m">1000</span>
-<span class="linenos">13</span><span class="c1"># DHCP</span>
-<span class="linenos">14</span>dhcp-range<span class="o">=</span><span class="m">192</span>.168.6.21,192.168.6.50,255.255.255.0,12h
-<span class="linenos">15</span>dhcp-option<span class="o">=</span>option:router,192.168.6.200
-<span class="linenos">16</span>dhcp-option<span class="o">=</span>option:dns-server,192.168.6.200
-<span class="linenos">17</span>dhcp-authoritative
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/bin/env bash</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span>. /etc/profile
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="nv">hosts_csv</span><span class="o">=</span>/home/huatai/github.com/cloud-atlas/source/real/private_cloud/priv_cloud_infra/hosts.csv
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="k">function</span> init <span class="o">{</span>
+<span class="linenos"> 8</span>    cat /home/huatai/github.com/cloud-atlas/source/real/private_cloud/priv_cloud_infra/hosts.csv <span class="p">|</span> grep -v <span class="s2">&quot;主机&quot;</span> <span class="p">|</span> awk -F, <span class="s1">&#39;{print $2&quot;  &quot;$3}&#39;</span> &gt; /tmp/hosts
+<span class="linenos"> 9</span><span class="o">}</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="k">function</span> cp_hosts <span class="o">{</span>
+<span class="linenos">12</span>    sudo cp /tmp/hosts /etc/hosts
+<span class="linenos">13</span><span class="o">}</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="k">function</span> restart_dnsmasq <span class="o">{</span>
+<span class="linenos">16</span>    sudo systemctl restart dnsmasq
+<span class="linenos">17</span><span class="o">}</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>init
+<span class="linenos">20</span>cp_hosts
+<span class="linenos">21</span>restart_dnsmasq
 </pre></div>
 </div>
 </div>

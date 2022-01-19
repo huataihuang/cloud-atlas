@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../network/index.html">Network Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../info_service/index.html">Info-Service Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../web/index.html">Web Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../machine_learning/index.html">Machine Learning Atlas</a></li>
@@ -216,8 +217,8 @@
 <ul class="simple">
 <li><p>默认在 <code class="docutils literal notranslate"><span class="pre">/etc/netplan</span></code> 目录下有一个 <code class="docutils literal notranslate"><span class="pre">01-netcfg.yaml</span></code> 内容如下:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">netplan初始DHCP配置</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">netplan初始DHCP配置</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># This file describes the network interfaces available on your system</span>
 <span class="linenos">2</span><span class="c1"># For more information, see netplan(5).</span>
 <span class="linenos">3</span><span class="nt">network</span><span class="p">:</span>
@@ -240,8 +241,8 @@
 <ul class="simple">
 <li><p>编辑 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/01-netcfg.yaml</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">netplan 静态IPP配置</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">netplan 静态IPP配置</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span>
 <span class="linenos"> 2</span>  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="linenos"> 3</span>  <span class="nt">renderer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">networkd</span>
@@ -266,11 +267,38 @@
 </ul>
 </section>
 </section>
+<section id="id6">
+<h2>netplan配置一个网卡多个IP<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<p>有时候需要在一个网卡上配置多个IP地址，实现单臂网桥路由，netplan也支持 interface alias 。配置方法很简单:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
+  <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">renderer</span><span class="p">:</span> <span class="n">networkd</span>
+  <span class="n">ethernets</span><span class="p">:</span>
+    <span class="n">enp3s0</span><span class="p">:</span>
+     <span class="n">addresses</span><span class="p">:</span>
+       <span class="o">-</span> <span class="mf">10.100.1.38</span><span class="o">/</span><span class="mi">24</span>
+       <span class="o">-</span> <span class="mf">10.100.1.39</span><span class="o">/</span><span class="mi">24</span>
+     <span class="n">gateway4</span><span class="p">:</span> <span class="mf">10.100.1.1</span>
+</pre></div>
+</div>
+<p>或者:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ethernets</span><span class="p">:</span>
+  <span class="n">enp3s0</span><span class="p">:</span>
+   <span class="n">addresses</span><span class="p">:</span> <span class="p">[</span> <span class="mf">10.100.1.38</span><span class="o">/</span><span class="mi">24</span><span class="p">,</span> <span class="mf">10.100.1.39</span><span class="o">/</span><span class="mi">24</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>执行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 可以看到系统网卡:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enp3s0</span>
+<span class="n">enp3s0</span><span class="p">:</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>分配了IP地址 <code class="docutils literal notranslate"><span class="pre">10.100.1.38</span></code> 和 <code class="docutils literal notranslate"><span class="pre">10.100.1.39</span></code></p>
+</section>
 <section id="netplan802-1x">
 <h2>netplan配置有线802.1x认证<a class="headerlink" href="#netplan802-1x" title="永久链接至标题">¶</a></h2>
 <p>企业网络常常会使用802.1x网络实现认证，不仅无线可以通过这种方式加强安全，有线网络也可以实现。netplan也支持在有线网络上加上认证功能，配置案例有些类似后文 <code class="docutils literal notranslate"><span class="pre">WPA</span> <span class="pre">Enterprise无线网络</span></code> ，案例 <code class="docutils literal notranslate"><span class="pre">01-eno4-config.yaml</span></code> 如下:</p>
-<div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">netplan 802.1x配置</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">netplan 802.1x配置</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span>
 <span class="linenos"> 2</span>  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="linenos"> 3</span>  <span class="nt">renderer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">networkd</span>
@@ -289,10 +317,10 @@
 </div>
 <p>然后执行 <code class="docutils literal notranslate"><span class="pre">netplan</span> <span class="pre">apply</span></code> 即完成网络激活</p>
 </section>
-<section id="id6">
-<h2>netplan配置无线<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <section id="id7">
-<h3>连接开放无线网络<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<h2>netplan配置无线<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<section id="id8">
+<h3>连接开放无线网络<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h3>
 <p>对于没有密码要求的无线网络，只需要定义access point:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
   <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
@@ -375,7 +403,7 @@
 </section>
 </section>
 <section id="netplan-mac-spoof">
-<span id="id8"></span><h2>netplan mac spoof<a class="headerlink" href="#netplan-mac-spoof" title="永久链接至标题">¶</a></h2>
+<span id="id9"></span><h2>netplan mac spoof<a class="headerlink" href="#netplan-mac-spoof" title="永久链接至标题">¶</a></h2>
 <p>如果使用 <code class="docutils literal notranslate"><span class="pre">networkd</span></code> 后端，则不支持wifi匹配，只能使用接口名字。以下为举例:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
   <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
@@ -507,8 +535,8 @@
 </pre></div>
 </div>
 </section>
-<section id="id9">
-<h2>netplan问题排查<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<section id="id10">
+<h2>netplan问题排查<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>netplan似乎不需要作为服务启动，而仅仅是作为一个前端工具，实际调用的是 networkd 和 NetworkManager来完成配置。我在Jetson Nano的Ubuntu 18.04使用netplan失败，似乎这个版本比较老，和现有netplan文档不能对齐，并且使用也很怪异，所以我还是使用 <a class="reference internal" href="switch_nm.html#switch-nm"><span class="std std-ref">切换NetworkManager</span></a> 重新切回NetworkManager进行管理。</p>
@@ -783,8 +811,8 @@ Nov 05 16:10:30 pi-worker2 wpa_supplicant[1849]: wlan0: CTRL-EVENT-SSID-TEMP-DIS
 </ul>
 <p>然后重启就能够正常连接5G Hz无线网络。</p>
 </section>
-<section id="id10">
-<h2>参考<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h2>
+<section id="id11">
+<h2>参考<a class="headerlink" href="#id11" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.tecmint.com/configure-network-static-ip-address-in-ubuntu/">How to Configure Network Static IP Address in Ubuntu 18.04</a></p></li>
 <li><p><a class="reference external" href="https://netplan.io/examples">Netplan configuration examples</a></p></li>

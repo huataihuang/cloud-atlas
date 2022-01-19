@@ -9,3 +9,4 @@
 
    edge_cloud_infra.rst
    edge_jeston.rst
+   edge_pi.rst

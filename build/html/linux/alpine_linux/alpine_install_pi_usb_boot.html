@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
@@ -94,7 +95,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#alipine">复制Alipine系统</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">启动</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">安装</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sd">添加 SD 卡分区作为系统分区</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sda2">添加 sda2 分区作为系统分区</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id5">系统简单配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
@@ -253,27 +254,31 @@
 <section id="id4">
 <h2>安装<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <p>采用 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 模式，参考 <a class="reference external" href="https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi">Classic install or sys mode on Raspberry Pi</a></p>
-<ul class="simple">
+<ul>
 <li><p>执行 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code> 命令</p>
 <ul>
-<li><p>主机名设置(第一台案例): <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1.edge.huatai.me</span></code></p></li>
-<li><p>提示有2个网卡 <code class="docutils literal notranslate"><span class="pre">eth0</span> <span class="pre">wlan0</span></code> ，默认选择 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> ，并配置固定IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.7.11</span></code> ，默认网关 <code class="docutils literal notranslate"><span class="pre">192.168.7.200</span></code></p></li>
-</ul>
+<li><p>主机名设置( <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 上运行的第一个工作节点 ): <code class="docutils literal notranslate"><span class="pre">x-k3s-n-2.edge.huatai.me</span></code></p></li>
+<li><p>提示有2个网卡 <code class="docutils literal notranslate"><span class="pre">eth0</span> <span class="pre">wlan0</span></code> ，默认选择 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> ，并配置固定IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.7.22</span></code> ，默认网关 <code class="docutils literal notranslate"><span class="pre">192.168.7.200</span></code></p></li>
+<li><p>需要注意 <a class="reference internal" href="alpine_pi_clock_skew.html#alpine-pi-clock-skew"><span class="std std-ref">Alpine Linux在树莓派启动”clock skew”报错</span></a> ，如果系统启动时钟不准确是无法同步的，所以一定要先执行一次:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chronyd</span> <span class="o">-</span><span class="n">q</span> <span class="s1">&#39;server pool.ntp.org -iburst&#39;</span>
+</pre></div>
+</div>
 </li>
 </ul>
-<p>我这里遇到一个问题，默认启动 <code class="docutils literal notranslate"><span class="pre">chronyd</span></code> 作为NTP客户端，但是没有校准本机时间，导致无法连接软件仓库进行更新。原因是我配置了无线网卡DHCP同时又配置了有线网卡静态IP地址，都分配了默认网关，导致无法路由访问internet。修正(暂时关闭有线网络 <code class="docutils literal notranslate"><span class="pre">default</span> <span class="pre">gw</span></code> )路由后，恢复正常时钟同步，才能继续。</p>
-<blockquote>
-<div><ul>
+<p>同步好系统时间后，再次启动 <code class="docutils literal notranslate"><span class="pre">chronyd</span></code> 服务来维护时钟:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">chronyd</span> <span class="n">restart</span>
+</pre></div>
+</div>
+<ul>
 <li><p>注意，最后要在 <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">config</span></code> 时回答 <code class="docutils literal notranslate"><span class="pre">none</span></code> ; 然后还要 <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">cache</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>No disks available. Try boot media /media/mmcblk0p1? (y/n) [n]
-Enter where to store configs (&#39;floppy&#39;, &#39;mmcblk0p1&#39;, &#39;usb&#39; or &#39;none&#39;) [mmcblk0p1] none
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Which disk(s) would you like to use? (or &#39;?&#39; for help or &#39;none&#39;) [none]
+Enter where to store configs (&#39;floppy&#39;, &#39;sda1&#39;, &#39;usb&#39; or &#39;none&#39;) [sda1] none
 Enter apk cache directory (or &#39;?&#39; or &#39;none&#39;) [/var/cache/apk]
 </pre></div>
 </div>
 </li>
 </ul>
-</div></blockquote>
-<ul>
+</li>
 <li><p>更新软件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">update</span>
 </pre></div>
@@ -281,90 +286,61 @@ Enter apk cache directory (or &#39;?&#39; or &#39;none&#39;) [/var/cache/apk]
 </li>
 </ul>
 </section>
-<section id="sd">
-<h2>添加 SD 卡分区作为系统分区<a class="headerlink" href="#sd" title="永久链接至标题">¶</a></h2>
-<p>由于我们已经在上文中将 <code class="docutils literal notranslate"><span class="pre">/dev/mmcblk0p2</span></code> 格式化成 ext4 文件系统，现在开始挂载并配置成系统分区:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span> <span class="o">/</span><span class="n">mnt</span>
+<section id="sda2">
+<h2>添加 sda2 分区作为系统分区<a class="headerlink" href="#sda2" title="永久链接至标题">¶</a></h2>
+<p>由于我们已经在上文中将 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code> 格式化成 ext4 文件系统，现在开始挂载并配置成系统分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="o">/</span><span class="n">mnt</span>
 <span class="n">export</span> <span class="n">FORCE_BOOTFS</span><span class="o">=</span><span class="mi">1</span>
 <span class="c1"># 这里添加一步创建boot目录</span>
 <span class="n">mkdir</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span>
 <span class="n">setup</span><span class="o">-</span><span class="n">disk</span> <span class="o">-</span><span class="n">m</span> <span class="n">sys</span> <span class="o">/</span><span class="n">mnt</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>这里一定要先执行 <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">FORCE_BOOTFS=1</span></code> 设置这个环境变量，否则执行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setup</span><span class="o">-</span><span class="n">disk</span> <span class="o">-</span><span class="n">m</span> <span class="n">sys</span> <span class="o">/</span><span class="n">mnt</span>
-</pre></div>
-</div>
-<p>会提示报错:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ext4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">supported</span><span class="o">.</span> <span class="n">Only</span> <span class="n">supported</span> <span class="n">are</span><span class="p">:</span> <span class="n">vfat</span>
-</pre></div>
-</div>
-</div>
-<p>   所以这里我添加了一步:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   mkdir /mnt/boot
-
-虽然文档中没有写，但是我发现没有创建 ``/mnt/boot`` 目录会提示错误::
-
-   /sbin/setup-disk: line 473: can&#39;t create /mnt/boot/config.txt: nonexistent directory
-   /sbin/setup-disk: line 474: can&#39;t create /mnt/boot/cmdline.txt: nonexistent directory
-</pre></div>
-</div>
-<p>此时提示信息:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ext4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">supported</span><span class="o">.</span> <span class="n">Only</span> <span class="n">supported</span> <span class="n">are</span><span class="p">:</span> <span class="n">vfat</span>
-<span class="n">Continuing</span> <span class="n">at</span> <span class="n">your</span> <span class="n">own</span> <span class="n">risk</span><span class="o">.</span>
-<span class="n">Installing</span> <span class="n">system</span> <span class="n">on</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span><span class="p">:</span>
-<span class="mi">100</span><span class="o">%</span>
-<span class="o">=&gt;</span> <span class="n">initramfs</span><span class="p">:</span> <span class="n">creating</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">initramfs</span><span class="o">-</span><span class="n">rpi</span>
-<span class="n">You</span> <span class="n">might</span> <span class="n">need</span> <span class="n">fix</span> <span class="n">the</span> <span class="n">MBR</span> <span class="n">to</span> <span class="n">be</span> <span class="n">able</span> <span class="n">to</span> <span class="n">boot</span>
-</pre></div>
-</div>
 <ul>
 <li><p>然后重新以读写模式挂载第一个分区，准备进行更新:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">o</span> <span class="n">remount</span><span class="p">,</span><span class="n">rw</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span>  <span class="c1"># An update in the first partition is required for the next reboot.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">o</span> <span class="n">remount</span><span class="p">,</span><span class="n">rw</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sda1</span>  <span class="c1"># An update in the first partition is required for the next reboot.</span>
 </pre></div>
 </div>
 </li>
 <li><p>清理掉旧的 <code class="docutils literal notranslate"><span class="pre">boot</span></code> 目录中无用文件:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">boot</span><span class="o">/*</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sda1</span><span class="o">/</span><span class="n">boot</span><span class="o">/*</span>
 <span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span>       <span class="c1"># We are in the second partition</span>
-<span class="n">rm</span> <span class="n">boot</span><span class="o">/</span><span class="n">boot</span>  <span class="c1"># Drop the unused symbolink link</span>
+<span class="n">unlink</span> <span class="n">boot</span><span class="o">/</span><span class="n">boot</span>  <span class="c1"># Drop the unused symbolink link</span>
 </pre></div>
 </div>
 </li>
 <li><p>将启动镜像和 <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">ram</span></code> 移动到正确位置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="n">boot</span><span class="o">/*</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="n">boot</span><span class="o">/*</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sda1</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span>
 <span class="n">rm</span> <span class="o">-</span><span class="n">Rf</span> <span class="n">boot</span>
-<span class="n">mkdir</span> <span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span>   <span class="c1"># It&#39;s the mount point for the first partition on the next reboot</span>
+<span class="n">mkdir</span> <span class="n">media</span><span class="o">/</span><span class="n">sda1</span>   <span class="c1"># It&#39;s the mount point for the first partition on the next reboot</span>
 </pre></div>
 </div>
 </li>
 <li><p>创建软连接:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">boot</span> <span class="n">boot</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="n">media</span><span class="o">/</span><span class="n">sda1</span><span class="o">/</span><span class="n">boot</span> <span class="n">boot</span>
 </pre></div>
 </div>
 </li>
 <li><p>更新 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;/dev/mmcblk0p1 /media/mmcblk0p1 vfat defaults 0 0&quot;</span> <span class="o">&gt;&gt;</span> <span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;/dev/sda1 /media/sda1 vfat defaults 0 0&quot;</span> <span class="o">&gt;&gt;</span> <span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
 <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;/cdrom/d&#39;</span> <span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>   <span class="c1"># Of course, you don&#39;t have any cdrom or floppy on the Raspberry Pi</span>
 <span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;/floppy/d&#39;</span> <span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
-<span class="n">cd</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sda1</span>
 </pre></div>
 </div>
 </li>
-<li><p>因为下次启动，需要标记root文件系统是第二个分区，所以需要修订 <code class="docutils literal notranslate"><span class="pre">/media/mmcblk0p1/cmdline.txt</span></code></p></li>
+<li><p>因为下次启动，需要标记root文件系统是第二个分区，所以需要修订 <code class="docutils literal notranslate"><span class="pre">/media/sda1/cmdline.txt</span></code></p></li>
 </ul>
 <p>原先配置是:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span>
 </pre></div>
 </div>
 <p>执行以下命令添加 <code class="docutils literal notranslate"><span class="pre">root</span></code> 指示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/$/ root=\/dev\/mmcblk0p2 /&#39;</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">cmdline</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/$/ root=\/dev\/sda2 /&#39;</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">cmdline</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
-<p>完成修订后 <code class="docutils literal notranslate"><span class="pre">/media/mmcblk0p1/cmdline.txt</span></code> 内容如下:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span>
+<p>完成修订后 <code class="docutils literal notranslate"><span class="pre">/media/sda1/cmdline.txt</span></code> 内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
 </pre></div>
 </div>
 <ul>
