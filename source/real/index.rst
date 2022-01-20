@@ -16,7 +16,7 @@ Real Atlas
 
    real_think/index
    prepare/index
-   private_cloud/index
+   priv_cloud/index
    edge_cloud/index
    network/index
 

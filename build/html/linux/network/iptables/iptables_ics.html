@@ -168,18 +168,28 @@
 <li><p>无线连接</p></li>
 </ul>
 <p>实现的原理是采用 <code class="docutils literal notranslate"><span class="pre">iptables</span></code> 的 <code class="docutils literal notranslate"><span class="pre">MASQUERADE</span></code> 模式，所有局域网内部主机对外访问时，在gateway主机上做IP地址转换(SNAT)。通常我们会有以下的连接案例:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Internet</span> <span class="o">&lt;&lt;==&gt;&gt;</span> <span class="n">eth0</span> <span class="o">&lt;&gt;</span> <span class="n">Ubuntu</span> <span class="n">gateway</span> <span class="o">&lt;&gt;</span> <span class="n">eth1</span> <span class="o">&lt;&lt;==&gt;&gt;</span> <span class="n">Client</span> <span class="n">PC</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Internet</span> <span class="o">&lt;&lt;==&gt;&gt;</span> <span class="n">eth0</span> <span class="p">(</span><span class="n">运营商动态分配IP</span><span class="p">)</span> <span class="o">&lt;&gt;</span> <span class="n">Ubuntu</span> <span class="n">gateway</span> <span class="o">&lt;&gt;</span> <span class="n">eth1</span> <span class="p">(</span><span class="mf">192.168.0.254</span><span class="o">/</span><span class="mi">24</span><span class="p">)</span> <span class="o">&lt;&lt;==&gt;&gt;</span> <span class="n">Client</span> <span class="n">PC</span>
 </pre></div>
 </div>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../_images/iptables_ics.png"><img alt="../../../_images/iptables_ics.png" src="../../../_images/iptables_ics.png" style="width: 512.0px; height: 192.0px;" /></a>
+</figure>
 <ul>
 <li><p>配置 <code class="docutils literal notranslate"><span class="pre">MASQUERATE</span></code> 方法如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">o</span> <span class="n">eth0</span> <span class="o">-</span><span class="n">i</span> <span class="n">eth1</span> <span class="o">-</span><span class="n">s</span> <span class="mf">192.168.0.0</span><span class="o">/</span><span class="mi">24</span> <span class="o">-</span><span class="n">m</span> <span class="n">conntrack</span> <span class="o">--</span><span class="n">ctstate</span> <span class="n">NEW</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
 <span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">m</span> <span class="n">conntrack</span> <span class="o">--</span><span class="n">ctstate</span> <span class="n">ESTABLISHED</span><span class="p">,</span><span class="n">RELATED</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
-<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">F</span> <span class="n">POSTROUTING</span>
+<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">F</span> <span class="n">POSTROUTING</span>  <span class="c1">#这步命令可选，因为系统中可能配置了其他nat规则，-F会清除掉所有nat规则</span>
 <span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">POSTROUTING</span> <span class="o">-</span><span class="n">o</span> <span class="n">eth0</span> <span class="o">-</span><span class="n">j</span> <span class="n">MASQUERADE</span>
 </pre></div>
 </div>
 </li>
+</ul>
+<p>虽然最简单的方式是使用 <code class="docutils literal notranslate"><span class="pre">MASQUERADE</span></code> ，但是也可以使用 <code class="docutils literal notranslate"><span class="pre">SNAT</span></code> 配置方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo iptables -t nat -A POSTROUTING ! -d 192.168.0.0/24 -o eth0 -j SNAT --to-source 198.51.100.1
+</pre></div>
+</div>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">198.51.100.1</span></code> 是运营商分配给你的外网IP地址( <code class="docutils literal notranslate"><span class="pre">eth0</span></code> )，所有目标不是 <code class="docutils literal notranslate"><span class="pre">192.168.0.0/24</span></code> 网段的地址 ( <code class="docutils literal notranslate"><span class="pre">!</span> <span class="pre">-d</span> <span class="pre">192.168.0.0/24</span></code> )意味着就是外网流量，都会先将TCP数据包的源地址替换成外网 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> 上地址 <code class="docutils literal notranslate"><span class="pre">198.51.100.1</span></code> ( <code class="docutils literal notranslate"><span class="pre">-j</span> <span class="pre">SNAT</span> <span class="pre">--to-source</span> <span class="pre">198.51.100.1</span></code> )。这样，所有外出因特网的数据包的源地址被替换成外网接口的公网地址，就能够在因特网上路由。</p>
+<ul>
 <li><p>保存iptables:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">iptables</span><span class="o">-</span><span class="n">save</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">iptables</span><span class="o">.</span><span class="n">sav</span>
 </pre></div>
@@ -200,7 +210,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">ipv4</span><span class="o">.</span><span class="n">ip_forward</span><span class="o">=</span><span class="mi">1</span>
 </pre></div>
 </div>
-<p>这样启动时就能恢复内核IP转发功能(路由)</p>
+<p>然后执行 <code class="docutils literal notranslate"><span class="pre">sysctl</span> <span class="pre">-p</span></code> 刷新，或者启动时就能恢复内核IP转发功能(路由)</p>
 <section id="id2">
 <h2>案例<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>上述方法，在 <a class="reference internal" href="../../../real/private_cloud/index.html#private-cloud"><span class="std std-ref">私有云计算构建</span></a> 部署时 <a class="reference internal" href="../../../real/private_cloud/priv_dnsmasq_ics.html#priv-dnsmasq-ics"><span class="std std-ref">私有云DNS服务(dnsmasq)和共享因特网(ICS)</span></a> : 完整结合了 <a class="reference internal" href="../../../infra_service/dns/dnsmasq/index.html#dnsmasq"><span class="std std-ref">DNSmasq</span></a> 和 <a class="reference internal" href="index.html#iptables"><span class="std std-ref">iptables</span></a> 来实现内部网络共享访问因特网。</p>
@@ -209,6 +219,7 @@
 <h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://help.ubuntu.com/community/Internet/ConnectionSharing">Ubuntu Help: Internet/ConnectionSharing</a></p></li>
+<li><p><a class="reference external" href="https://www.systutorials.com/setting-up-gateway-using-iptables-and-route-on-linux/">Setting Up Linux Network Gateway Using iptables and route</a></p></li>
 </ul>
 </section>
 </section>

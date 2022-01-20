@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="私有云DNS服务(dnsmasq)" href="priv_dnsmasq.html" />
+    <link rel="next" title="私有云DNS服务(dnsmasq)和共享因特网(ICS)" href="priv_dnsmasq_ics.html" />
     <link rel="prev" title="私有云架构" href="priv_cloud_infra.html" /> 
 </head>
 
@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
@@ -87,9 +88,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../prepare/index.html">真实云计算的构建准备</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">私有云计算构建</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="priv_cloud_infra.html">私有云架构</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">私有云NTP服务</a></li>
-<li class="toctree-l3"><a class="reference internal" href="priv_dnsmasq.html">私有云DNS服务(dnsmasq)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">私有云NTP服务</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#chrony">安装chrony服务</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">客户端</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="priv_dnsmasq_ics.html">私有云DNS服务(dnsmasq)和共享因特网(ICS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_kvm.html">私有云KVM环境</a></li>
+<li class="toctree-l3"><a class="reference internal" href="priv_ssh.html">私有云SSH访问</a></li>
+<li class="toctree-l3"><a class="reference internal" href="priv_monitor.html">私有云监控</a></li>
 <li class="toctree-l3"><a class="reference internal" href="zdata_ceph.html">私有云数据层 ZData Ceph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="zdata_ceph_rbd_libvirt.html">私有云基于 ZData Ceph 运行虚拟机</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_kvm_sr-iov.html">私有云KVM网络虚拟化sr-iov</a></li>
@@ -147,6 +154,70 @@
 </pre></div>
 </div>
 <p>实际上2个虚拟机的时间差只有2秒钟，但是对于分布式存储系统，时钟不同步会导致很多系统异常。这也提醒我，在部署大规模分布式系统( 可以参考 <a class="reference internal" href="../../openstack/index.html#openstack"><span class="std std-ref">OpenStack Atlas</span></a> 的 <a class="reference internal" href="../../openstack/installation/environment/index.html#openstack-environment"><span class="std std-ref">OpenStack环境</span></a> 基础设置需求)</p>
+<p>由于只有一台物理主机，实际上最准确的也最容易保持的时钟的服务器就是 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 物理主机:</p>
+<ul class="simple">
+<li><p>物理主机有硬件时钟(通过主板电池保证BIOS时钟不会偏差)</p></li>
+<li><p>物理主机只要启动就容易连接Internet(无需复杂的虚拟化)，可以随时完成时间同步</p></li>
+</ul>
+<p>通过 <a class="reference internal" href="../../infra_service/ntp/deploy_ntp.html#deploy-ntp"><span class="std std-ref">部署NTP服务(集群)</span></a> 可以提供整个 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 所有虚拟机时钟同步</p>
+<section id="chrony">
+<h2>安装chrony服务<a class="headerlink" href="#chrony" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">chrony</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">chrony</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/chrony/chrony.conf</span></code> 添加服务配置行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">allow</span> <span class="mf">192.168.6.0</span><span class="o">/</span><span class="mi">24</span>
+<span class="n">allow</span> <span class="mf">192.168.7.0</span><span class="o">/</span><span class="mi">24</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>默认配置中已经有和上级NTP服务器同步配置，所以不需要再指定上级NTP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="n">ntp</span><span class="o">.</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">com</span>        <span class="n">iburst</span> <span class="n">maxsources</span> <span class="mi">4</span>
+<span class="n">pool</span> <span class="mf">0.</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span> <span class="n">iburst</span> <span class="n">maxsources</span> <span class="mi">1</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul>
+<li><p>启动 <code class="docutils literal notranslate"><span class="pre">chrony</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">chrony</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">chrony</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id1">
+<h2>客户端<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>所有虚拟机发行版基本都采用了 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> ，内置了 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_timesyncd.html#systemd-timesyncd"><span class="std std-ref">Systemd Timesyncd服务</span></a> 可以和NTP服务器进行时钟同步</p>
+<ul>
+<li><p>修订客户机 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/timesyncd.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Time</span><span class="p">]</span>
+<span class="n">NTP</span><span class="o">=</span><span class="mf">192.168.6.200</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动和激活 <code class="docutils literal notranslate"><span class="pre">systemd-timesyncd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后监测服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">status</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span>
+</pre></div>
+</div>
+</li>
+<li><p>为方便查看本地时间，检查 <code class="docutils literal notranslate"><span class="pre">/etc/localtime</span></code> 软链接，确保:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">localtime</span> <span class="o">-&gt;</span> <span class="o">../</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">zoneinfo</span><span class="o">/</span><span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 </section>
 
 
@@ -154,7 +225,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="priv_cloud_infra.html" class="btn btn-neutral float-left" title="私有云架构" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="priv_dnsmasq.html" class="btn btn-neutral float-right" title="私有云DNS服务(dnsmasq)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="priv_dnsmasq_ics.html" class="btn btn-neutral float-right" title="私有云DNS服务(dnsmasq)和共享因特网(ICS)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

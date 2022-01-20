@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSH ProxyCommand实现穿透主机访问后端服务器 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Samba服务" href="../samba/index.html" />
+    <link rel="prev" title="ssh多路传输multiplexing加速" href="ssh_multiplexing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Infra-Service Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../ntp/index.html">ntp服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dns/index.html">DNS服务</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">ssh服务</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ssh_key.html">ssh密钥</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ssh_tunnel.html">SSH隧道</a></li>
+<li class="toctree-l3"><a class="reference internal" href="entropy_random.html">熵和随机数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ssh_multiplexing.html">ssh多路传输multiplexing加速</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SSH ProxyCommand实现穿透主机访问后端服务器</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#proxyjump">ProxyJump</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../samba/index.html">Samba服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nfs/index.html">nfs服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../asciinema/index.html">asciinema:终端会话记录和分享</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guacamole/index.html">Apache Guacamole:无客户端远程桌面网关</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Infra-Service Atlas</a> &raquo;</li>
+          <li><a href="index.html">ssh服务</a> &raquo;</li>
+      <li>SSH ProxyCommand实现穿透主机访问后端服务器</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/infra_service/ssh/ssh_proxycommand.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ssh-proxycommand">
+<span id="id1"></span><h1>SSH ProxyCommand实现穿透主机访问后端服务器<a class="headerlink" href="#ssh-proxycommand" title="永久链接至标题">¶</a></h1>
+<p>我在构建 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 时，尝试在物理主机 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 上构建 <a class="reference internal" href="../../web/proxy/squid/squid_ssh_proxy.html#squid-ssh-proxy"><span class="std std-ref">Squid SSH代理</span></a> 访问虚拟化内部局域网的VM。不过，实践发现，传统的 <code class="docutils literal notranslate"><span class="pre">nc</span></code> 构建将SSH访问转发给 <a class="reference internal" href="../../web/proxy/squid/index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 方法比较陈旧，实际上我并没有最终解决这个代理方式访问SSH。不过， <code class="docutils literal notranslate"><span class="pre">openssh</span></code> 最新版本已经内置了代理转发功能，已经不再需要 <code class="docutils literal notranslate"><span class="pre">nc</span></code> 来完成流量转发，而可以直接访问中间代理 SSH 服务器，从而实现穿透主机访问后端服务器。</p>
+<p>SSH代理命令依然是 <code class="docutils literal notranslate"><span class="pre">ProxyCommand</span></code> ，使用方法有所不同:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">&lt;</span><span class="n">target_server</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">o</span> <span class="s2">&quot;ProxyCommand ssh -W %h:%p &lt;jump_server&gt;&quot;</span>
+</pre></div>
+</div>
+<p>举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="mf">192.168.6.253</span> <span class="o">-</span><span class="n">o</span> <span class="s2">&quot;ProxyCommand ssh -W %h:%p 10.10.1.200&quot;</span>
+</pre></div>
+</div>
+<p>就可以实现通过跳板服务器 <code class="docutils literal notranslate"><span class="pre">10.10.1.200</span></code> 直接SSH登陆 <code class="docutils literal notranslate"><span class="pre">192.168.6.253</span></code></p>
+<p>上述命令参数也可以配置在 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> 中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+   <span class="n">HostName</span> <span class="mf">192.168.6.253</span>
+   <span class="n">User</span> <span class="n">huatai</span>
+   <span class="n">ProxyCommand</span> <span class="n">ssh</span> <span class="o">-</span><span class="n">W</span> <span class="o">%</span><span class="n">h</span><span class="p">:</span><span class="o">%</span><span class="n">p</span> <span class="mf">10.10.1.200</span>
+</pre></div>
+</div>
+<p>则直接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+<p>就可以登陆到后端服务器:</p>
+<ul>
+<li><p>注意: 需要输入2次服务器登陆密码或者2次 <a class="reference internal" href="ssh_key.html#ssh-key"><span class="std std-ref">ssh密钥</span></a> ，分别是中间转跳服务器认证和目标服务器认证</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scp</span></code> 命令也可以使用上述配置的 <code class="docutils literal notranslate"><span class="pre">ProxyCommand</span></code> ，所以向 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 上 <code class="docutils literal notranslate"><span class="pre">scp</span></code> 复制文件也非常方便:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="n">file</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="proxyjump">
+<h2>ProxyJump<a class="headerlink" href="#proxyjump" title="永久链接至标题">¶</a></h2>
+<p>和 <code class="docutils literal notranslate"><span class="pre">ProxyCommand</span></code> 类似的还有一个SSH指令是 <code class="docutils literal notranslate"><span class="pre">ProxyJump</span></code> 使用方法类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="o">-</span><span class="n">o</span> <span class="s2">&quot;ProxyJump &lt;User&gt;@&lt;Proxy-Server&gt;&quot;</span> <span class="o">&lt;</span><span class="n">File</span><span class="o">-</span><span class="n">Name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;@&lt;</span><span class="n">Destination</span><span class="o">-</span><span class="n">Server</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">Destination</span><span class="o">-</span><span class="n">Path</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.cyberciti.biz/faq/linux-unix-ssh-proxycommand-passing-through-one-host-gateway-server/">SSH ProxyCommand example: Going through one host to reach another server</a></p></li>
+<li><p><a class="reference external" href="https://www.golinuxcloud.com/ssh-proxy/">4 ways to SSH &amp; SCP via proxy (jump) server in Linux</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ssh_multiplexing.html" class="btn btn-neutral float-left" title="ssh多路传输multiplexing加速" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../samba/index.html" class="btn btn-neutral float-right" title="Samba服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

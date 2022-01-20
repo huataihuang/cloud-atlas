@@ -30,6 +30,6 @@ DHCP配置
 
 完成上述DHCP的IP配置之后，所有连接到AirPod Express的无线客户端都会将 :ref:`hpe_dl360_gen9` 服务器上的网络接口IP ``192.168.6.200`` 作为默认网关，则该服务器需要提供 :ref:`iptables_ics` 以允许无线客户端:
 
-.. literalinclude:: ../../real/private_cloud/priv_dnsmasq_ics/ics.sh
+.. literalinclude:: ../../real/priv_cloud/priv_dnsmasq_ics/ics.sh
    :language: bash
    :caption: 共享Internet连接
