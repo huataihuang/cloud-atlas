@@ -21,7 +21,7 @@
 - OpenStack中的二级虚拟机内部再部署一个 :ref:`kubernetes` 集群，模拟云计算之上的K8S集群，结合 HashiCorp 的 Terraform 来实现全链路的自动化部署
 - 附加：在DL360物理服务器上运行一个精简的Docker容器来做日常开发学习
 
-.. figure:: ../../_static/real/private_cloud/real_cloud.png
+.. figure:: ../../_static/real/priv_cloud/real_cloud.png
    :scale: 80
 
 多层次虚拟化服务器分布
@@ -114,7 +114,7 @@
 
 私有云是我在一台 :ref:`hpe_dl360_gen9` 物理服务器( ``zcloud`` ) 上部署的云计算环境，我将这个环境作为 ``staging`` 环境来运行，所以域名设置为 ``staging.huatai.me`` ：
 
-- 在最初部署环境中，为了快速完成整体架构，我采用 :ref:`dnsmasq` 来实现 :ref:`priv_dnsmasq`
+- 在最初部署环境中，为了快速完成整体架构，我采用 :ref:`dnsmasq` 和 :ref:`iptables_ics` 来实现 :ref:`priv_dnsmasq_ics`
 - 后续不断完善迭代，我将会升级采用 :ref:`bind` 重构整个DNS系统
 
 虚拟化的层级部署

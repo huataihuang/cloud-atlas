@@ -56,7 +56,7 @@ IPv6和restrict
 
 输出类似::
 
-        remote           refid      st t when poll reach   delay   offset  jitter
+   remote           refid           st t when poll reach   delay   offset  jitter
    ==============================================================================
     59.37.9.151     .INIT.          16 u    -   64    0    0.000    0.000   0.000
    *127.127.1.0     .LOCL.           5 l    8   64  177    0.000    0.000   0.000
