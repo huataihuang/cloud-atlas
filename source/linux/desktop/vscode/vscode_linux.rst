@@ -1,4 +1,4 @@
-.. _vs_code_linux:
+.. _vscode_linux:
 
 =====================================
 在Linux上运行Visual Studio Code
@@ -52,6 +52,10 @@ VS Code官方也提供x86_64的yum仓库，所以可以直接安装::
 
    sudo dnf check-update
    sudo dnf install code
+
+.. note::
+
+   :ref:`priv_cloud_infra` 中使用KVM虚拟机 ``z-dev`` 来安装运行vscode，同时通过 :ref:`xpra_startup` 可以直接访问服务器上运行vscode，或者采用 :ref:`vscode_remote_dev_ssh` 。
 
 ARM版本VS Code
 =================

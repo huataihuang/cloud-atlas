@@ -1,4 +1,4 @@
-.. _vs_code_lsp:
+.. _vscode_lsp:
 
 ===================================
 VSCode结合Language Server Protocol

@@ -154,6 +154,10 @@ Linux使用xpra
 
    DISPLAY=:7 rxvt
 
+- 将 :ref:`vscode` 运行在xpra server中::
+
+   DISPLAY=:7 code
+
 .. note::
 
    最好使用 ``screen`` 来运行上述程序，避免退出
@@ -168,7 +172,11 @@ Linux使用xpra
 
 - ssh访问远程xpra服务器主机frodo的 ``:7`` 显示器，所有运行在服务器上的应用都会显示在本地屏幕::
 
-   xpra attach ssh:frodo:7
+   xpra attach ssh://huatai@192.168.6.253/7
+
+.. note::
+
+   由于 ``192.168.6.253`` 是内网IP，不容易通过外部网络访问。结合 :ref:`ssh_proxycommand` 来实现直接访问内部虚拟机上SSH。
 
 聚合桌面应用(最佳方案-screen)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -184,6 +192,19 @@ Linux使用xpra
 - 停止 xpra 显示屏 ``:7`` ::
 
    xpra stop :7
+
+集成ssh-key
+~~~~~~~~~~~~~
+
+我在 :ref:`ssh_proxycommand` 结合使用了 :ref:`ssh_key` 方式认证，通过 ``ssh-agent`` 来实现一次输入密钥密码就可以多次任意访问不同服务器上SSH服务。不过， ``xpra`` 默认没有使用本地 ssh 认证，也就是没有使用 ``ssh-agent`` 缓存的密钥。
+
+要解决这个兼容性，即让 ``xpra`` 能够使用操作系统已经加载的 ``ssh-agent`` 中缓存的密钥，需要使用 ``--ssh=ssh`` 参数，也就是让xpra直接使用本地现有ssh。所以，客户端访问命令可以修订成::
+
+   xpra --ssh=ssh attach ssh://z-dev/7
+
+.. note::
+
+   注意，这里 ``z-dev`` 是使用了 :ref:`priv_ssh` 配置了 ``~/.ssh/config`` ，已经启用了ssh的 ``ProxyCommand``
 
 直接TCP访问(不推荐)
 ~~~~~~~~~~~~~~~~~~~~

@@ -11,6 +11,7 @@
    priv_ntp.rst
    priv_dnsmasq_ics.rst
    priv_kvm.rst
+   z-dev.rst
    priv_ssh.rst
    priv_monitor.rst
    zdata_ceph.rst

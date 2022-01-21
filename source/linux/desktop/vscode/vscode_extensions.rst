@@ -1,4 +1,4 @@
-.. _vs_code_extensions:
+.. _vscode_extensions:
 
 =====================
 VS Code扩展
