@@ -7,10 +7,14 @@ VS Code
 .. toctree::
    :maxdepth: 1
 
-   vs_code_linux.rst
-   vs_code_lsp.rst
-   vs_code_extensions.rst
+   vscode_linux.rst
+   vscode_lsp.rst
+   vscode_extensions.rst
    vscode_debugging.rst
+   vscode_remote_dev.rst
+   vscode_remote_dev_ssh.rst
+   vscode_remote_dev_containers.rst
+   vscode_in_browser.rst
 
 .. only::  subproject and html
 

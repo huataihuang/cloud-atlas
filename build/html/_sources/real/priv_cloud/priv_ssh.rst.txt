@@ -34,22 +34,11 @@ SSH密钥
 
 确保只使用密钥登陆服务器
 
-- 为方便和快速登陆服务器，使用 ``ssh-agent`` 来确保只需要输入一次密钥保护密码: 修订本地客户端 ``~/.bashrc`` 添加如下代码::
+- 为方便和快速登陆服务器，使用 ``ssh-agent`` 来确保只需要输入一次密钥保护密码: 修订本地客户端 ``~/.bashrc`` 添加如下代码:
 
-   if [ -f ~/.agent.env ]; then
-     . ~/.agent.env -s > /dev/null
-   
-     if ! kill -0 $SSH_AGENT_PID > /dev/null 2>&1; then
-       echo
-       echo "Stale agent file found.  Spawning new agent..."
-       eval `ssh-agent -s | tee ~/.agent.env`
-       ssh-add
-     fi
-   else
-     echo "Starting ssh-agent..."
-     eval `ssh-agent -s | tee ~/.agent.env`
-     ssh-add
-   fi
+.. literalinclude:: priv_ssh/bashrc
+   :language: bash
+   :caption: 在用户 ~/.bashrc 中配置 ssh-agent
 
 这样，只有第一次打开终端提示输入密钥密码，后续都会缓存在 ``ssh-agent`` 中，就不需要重复输入保护密码
 

@@ -9,7 +9,7 @@ Fedora开发环境初始化
 
 我安装的Fedora Server版本，默认已经安装了gcc等开发工具，但是也有有些软件开发包会随着开发工作进行发现缺少，所以这里汇总需要安装的软件包::
 
-   sudo dnf install -y git openssl-devel screen tmux
+   sudo dnf install -y git gdb openssl-devel screen tmux
 
 桌面环境
 ===========
@@ -22,3 +22,8 @@ vs code
 =============
 
 采用 :ref:`vs_code_linux` 方法安装 VS Code for Linux，同样使用上文 ``xpra`` 方式在服务器上运行
+
+为方便在服务器(虚拟机)上远程开发，采用:
+
+- :ref:`vscode_remote_dev_ssh`
+- :ref:`vscode_in_browse`

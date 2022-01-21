@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../network/index.html">Network Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../info_service/index.html">Info-Service Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../web/index.html">Web Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../big_data/index.html">Big Data Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../machine_learning/index.html">Machine Learning Atlas</a></li>
@@ -218,7 +219,7 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>在 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 使用Fedora 35，安装 xpra 实现远程服务器开发。</p>
+<p>在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 使用Fedora 35，安装 xpra 实现远程服务器开发。</p>
 </div>
 </section>
 <section id="ubuntu">
@@ -339,6 +340,11 @@
 </pre></div>
 </div>
 </li>
+<li><p>将 <a class="reference internal" href="../vscode/index.html#vscode"><span class="std std-ref">VS Code</span></a> 运行在xpra server中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DISPLAY</span><span class="o">=</span><span class="p">:</span><span class="mi">7</span> <span class="n">code</span>
+</pre></div>
+</div>
+</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
@@ -356,11 +362,15 @@
 </div>
 </li>
 <li><p>ssh访问远程xpra服务器主机frodo的 <code class="docutils literal notranslate"><span class="pre">:7</span></code> 显示器，所有运行在服务器上的应用都会显示在本地屏幕:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xpra</span> <span class="n">attach</span> <span class="n">ssh</span><span class="p">:</span><span class="n">frodo</span><span class="p">:</span><span class="mi">7</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xpra</span> <span class="n">attach</span> <span class="n">ssh</span><span class="p">:</span><span class="o">//</span><span class="n">huatai</span><span class="o">@</span><span class="mf">192.168.6.253</span><span class="o">/</span><span class="mi">7</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>由于 <code class="docutils literal notranslate"><span class="pre">192.168.6.253</span></code> 是内网IP，不容易通过外部网络访问。结合 <a class="reference internal" href="../../../infra_service/ssh/ssh_proxycommand.html#ssh-proxycommand"><span class="std std-ref">SSH ProxyCommand实现穿透主机访问后端服务器</span></a> 来实现直接访问内部虚拟机上SSH。</p>
+</div>
 </section>
 <section id="screen">
 <h4>聚合桌面应用(最佳方案-screen)<a class="headerlink" href="#screen" title="永久链接至标题">¶</a></h4>
@@ -380,6 +390,18 @@
 </div>
 </li>
 </ul>
+</section>
+<section id="ssh-key">
+<h4>集成ssh-key<a class="headerlink" href="#ssh-key" title="永久链接至标题">¶</a></h4>
+<p>我在 <a class="reference internal" href="../../../infra_service/ssh/ssh_proxycommand.html#ssh-proxycommand"><span class="std std-ref">SSH ProxyCommand实现穿透主机访问后端服务器</span></a> 结合使用了 <a class="reference internal" href="../../../infra_service/ssh/ssh_key.html#ssh-key"><span class="std std-ref">ssh密钥</span></a> 方式认证，通过 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 来实现一次输入密钥密码就可以多次任意访问不同服务器上SSH服务。不过， <code class="docutils literal notranslate"><span class="pre">xpra</span></code> 默认没有使用本地 ssh 认证，也就是没有使用 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 缓存的密钥。</p>
+<p>要解决这个兼容性，即让 <code class="docutils literal notranslate"><span class="pre">xpra</span></code> 能够使用操作系统已经加载的 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 中缓存的密钥，需要使用 <code class="docutils literal notranslate"><span class="pre">--ssh=ssh</span></code> 参数，也就是让xpra直接使用本地现有ssh。所以，客户端访问命令可以修订成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xpra</span> <span class="o">--</span><span class="n">ssh</span><span class="o">=</span><span class="n">ssh</span> <span class="n">attach</span> <span class="n">ssh</span><span class="p">:</span><span class="o">//</span><span class="n">z</span><span class="o">-</span><span class="n">dev</span><span class="o">/</span><span class="mi">7</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，这里 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 是使用了 <a class="reference internal" href="../../../real/priv_cloud/priv_ssh.html#priv-ssh"><span class="std std-ref">私有云SSH访问</span></a> 配置了 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> ，已经启用了ssh的 <code class="docutils literal notranslate"><span class="pre">ProxyCommand</span></code></p>
+</div>
 </section>
 <section id="tcp">
 <h4>直接TCP访问(不推荐)<a class="headerlink" href="#tcp" title="永久链接至标题">¶</a></h4>
@@ -521,7 +543,7 @@
 </section>
 <section id="id10">
 <h3>单独的连接端口方式(已不使用)<a class="headerlink" href="#id10" title="永久链接至标题">¶</a></h3>
-<p>在 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 虚拟机中运行Fedora 35，安装 <code class="docutils literal notranslate"><span class="pre">xpra</span></code> ，并启动对应服务程序:</p>
+<p>在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 虚拟机中运行Fedora 35，安装 <code class="docutils literal notranslate"><span class="pre">xpra</span></code> ，并启动对应服务程序:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xpra</span> <span class="n">start</span> <span class="p">:</span><span class="mi">100</span> <span class="o">--</span><span class="n">start</span><span class="o">=</span><span class="n">rxvt</span><span class="o">-</span><span class="n">unicode</span>
 <span class="n">xpra</span> <span class="n">start</span> <span class="p">:</span><span class="mi">101</span> <span class="o">--</span><span class="n">start</span><span class="o">=</span><span class="n">firefox</span>
 </pre></div>

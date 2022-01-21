@@ -184,33 +184,35 @@
 </li>
 </ul>
 <p>确保只使用密钥登陆服务器</p>
-<ul>
-<li><p>为方便和快速登陆服务器，使用 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 来确保只需要输入一次密钥保护密码: 修订本地客户端 <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> 添加如下代码:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if [ -f ~/.agent.env ]; then
+<ul class="simple">
+<li><p>为方便和快速登陆服务器，使用 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 来确保只需要输入一次密钥保护密码: 修订本地客户端 <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> 添加如下代码:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">在用户 ~/.bashrc 中配置 ssh-agent</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="o">[</span> -f ~/.agent.env <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
   . ~/.agent.env -s &gt; /dev/null
 
-  if ! kill -0 $SSH_AGENT_PID &gt; /dev/null 2&gt;&amp;1; then
-    echo
-    echo &quot;Stale agent file found.  Spawning new agent...&quot;
-    eval `ssh-agent -s | tee ~/.agent.env`
+  <span class="k">if</span> ! <span class="nb">kill</span> -0 <span class="nv">$SSH_AGENT_PID</span> &gt; /dev/null <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span>
+    <span class="nb">echo</span> <span class="s2">&quot;Stale agent file found.  Spawning new agent...&quot;</span>
+    <span class="nb">eval</span> <span class="sb">`</span>ssh-agent -s <span class="p">|</span> tee ~/.agent.env<span class="sb">`</span>
     ssh-add
-  fi
-else
-  echo &quot;Starting ssh-agent...&quot;
-  eval `ssh-agent -s | tee ~/.agent.env`
+  <span class="k">fi</span>
+<span class="k">else</span>
+  <span class="nb">echo</span> <span class="s2">&quot;Starting ssh-agent...&quot;</span>
+  <span class="nb">eval</span> <span class="sb">`</span>ssh-agent -s <span class="p">|</span> tee ~/.agent.env<span class="sb">`</span>
   ssh-add
-fi
+<span class="k">fi</span>
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 <p>这样，只有第一次打开终端提示输入密钥密码，后续都会缓存在 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 中，就不需要重复输入保护密码</p>
 </section>
 <section id="id2">
 <h2>穿透访问后端SSH服务器<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>在 <a class="reference internal" href="priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 构建了不同的开发环境和测试环境虚拟机，例如 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 是用来做开发的虚拟机，其IP地址是内网IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.6.253</span></code> 。而日常工作，可能不能时时连接内部局域网，需要从外网访问时，为了方便，需要做端口转发，方便直接访问虚拟机的ssh服务(而无需转跳)。此时，比较简单的方法是使用 <a class="reference internal" href="../../linux/network/iptables/iptables_port_forwarding.html#iptables-port-forwarding"><span class="std std-ref">iptables端口转发(port forwarding)</span></a> ，而优雅方法是采用 <a class="reference internal" href="../../infra_service/ssh/ssh_proxycommand.html#ssh-proxycommand"><span class="std std-ref">SSH ProxyCommand实现穿透主机访问后端服务器</span></a> 。</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">用户目录配置SSH ~/.ssh/config</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">用户目录配置SSH ~/.ssh/config</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host *
     ServerAliveInterval <span class="m">60</span>
     ControlMaster auto
