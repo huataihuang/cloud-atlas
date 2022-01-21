@@ -35,6 +35,19 @@ SSH代理命令依然是 ``ProxyCommand`` ，使用方法有所不同::
 
    scp file z-dev:/home/huatai/
 
+结合 ``ssh-agent``
+=====================
+
+为了方便实现穿透访问后端SSH服务器，结合 :ref:`ssh_key` 的 ``ssh-agent`` 可以不需要重复输入密码或者密钥密码
+
+.. literalinclude:: ssh_proxycommand/zssh.sh
+   :language: bash
+   :caption:
+
+使用 ``ssh-agent`` 缓存了密钥密码之后，只需要执行上述脚本命令(从配置文件中读取出ip和主机名，提取IP，跳板SSH服务器IP从 ``/etc/hosts`` 中获取)::
+
+   zssh.sh z-dev
+
 ProxyJump
 ============
 

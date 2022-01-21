@@ -71,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_multiplexing.html">ssh多路传输multiplexing加速</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">SSH ProxyCommand实现穿透主机访问后端服务器</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ssh-agent">结合 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#proxyjump">ProxyJump</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
@@ -173,6 +174,36 @@
 </div>
 </li>
 </ul>
+<section id="ssh-agent">
+<h2>结合 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code><a class="headerlink" href="#ssh-agent" title="永久链接至标题">¶</a></h2>
+<p>为了方便实现穿透访问后端SSH服务器，结合 <a class="reference internal" href="ssh_key.html#ssh-key"><span class="std std-ref">ssh密钥</span></a> 的 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 可以不需要重复输入密码或者密钥密码</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">ssh_proxycommand/zssh.sh</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">HostName</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">ZcloudIP</span><span class="o">=</span><span class="sb">`</span>cat /etc/hosts <span class="p">|</span> grep zcloud-ip <span class="p">|</span> awk <span class="s1">&#39;{print $1}&#39;</span><span class="sb">`</span>
+
+<span class="nv">priv_cloud</span><span class="o">=</span><span class="s2">&quot;/Users/huatai/github.com/cloud-atlas/source/real/priv_cloud/priv_cloud_infra/hosts.csv&quot;</span>
+
+<span class="nv">edge_cloud</span><span class="o">=</span><span class="s2">&quot;/Users/huatai/github.com/cloud-atlas/source/real/edge_cloud/edge_cloud_infra/hosts.csv&quot;</span>
+
+<span class="nv">priv_ip_host</span><span class="o">=</span><span class="sb">`</span>cat <span class="nv">$priv_cloud</span> <span class="p">|</span> grep <span class="s2">&quot;,</span><span class="nv">$HostName</span><span class="s2">,&quot;</span> <span class="p">|</span> awk -F, <span class="s1">&#39;{print $2&quot;,&quot;$3}&#39;</span><span class="sb">`</span>
+<span class="nv">edge_ip_host</span><span class="o">=</span><span class="sb">`</span>cat <span class="nv">$edge_cloud</span> <span class="p">|</span> grep <span class="s2">&quot;,</span><span class="nv">$HostName</span><span class="s2">,&quot;</span> <span class="p">|</span> awk -F, <span class="s1">&#39;{print $1&quot;,&quot;$2}&#39;</span><span class="sb">`</span>
+
+<span class="nv">HostIP</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$priv_ip_host</span> <span class="nv">$edge_ip_host</span> <span class="p">|</span> grep <span class="nv">$HostName</span> <span class="p">|</span> awk -F, <span class="s1">&#39;{print $1}&#39;</span><span class="sb">`</span>
+
+<span class="k">if</span> <span class="o">[</span> -z <span class="nv">$HostIP</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">&quot;Host </span><span class="nv">$HostName</span><span class="s2"> not found&quot;</span>
+<span class="k">else</span>
+    ssh -o <span class="s2">&quot;ProxyCommand ssh -W %h:%p </span><span class="nv">$ZcloudIP</span><span class="s2">&quot;</span> <span class="nv">$HostIP</span>
+<span class="k">fi</span>
+</pre></div>
+</div>
+</div>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">ssh-agent</span></code> 缓存了密钥密码之后，只需要执行上述脚本命令(从配置文件中读取出ip和主机名，提取IP，跳板SSH服务器IP从 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 中获取):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zssh</span><span class="o">.</span><span class="n">sh</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</section>
 <section id="proxyjump">
 <h2>ProxyJump<a class="headerlink" href="#proxyjump" title="永久链接至标题">¶</a></h2>
 <p>和 <code class="docutils literal notranslate"><span class="pre">ProxyCommand</span></code> 类似的还有一个SSH指令是 <code class="docutils literal notranslate"><span class="pre">ProxyJump</span></code> 使用方法类似:</p>
