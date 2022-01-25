@@ -1,4 +1,4 @@
-.. _vs_code_python:
+.. _vscode_python:
 
 =========================
 在VS Code环境开发Python

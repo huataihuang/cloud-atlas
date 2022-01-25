@@ -15,6 +15,8 @@ VS Code
    vscode_remote_dev_ssh.rst
    vscode_remote_dev_containers.rst
    vscode_in_browser.rst
+   vscode_python.rst
+   vscode_virtualenv.rst
 
 .. only::  subproject and html
 

@@ -13,6 +13,8 @@ Cisco 网络
 .. toctree::
    :maxdepth: 1
 
+   switch/index
+
 .. only::  subproject and html
 
    Indices

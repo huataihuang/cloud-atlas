@@ -21,9 +21,19 @@ Fedora开发环境初始化
 vs code
 =============
 
-采用 :ref:`vs_code_linux` 方法安装 VS Code for Linux，同样使用上文 ``xpra`` 方式在服务器上运行
+采用 :ref:`vscode_linux` 方法安装 VS Code for Linux，同样使用上文 ``xpra`` 方式在服务器上运行
 
 为方便在服务器(虚拟机)上远程开发，采用:
 
 - :ref:`vscode_remote_dev_ssh`
-- :ref:`vscode_in_browse`
+- :ref:`vscode_in_browser`
+
+开发环境
+==============
+
+Fredora对不同语言的支持:
+
+- :ref:`fedora_dev_python`
+- :ref:`fedora_dev_c`
+- :ref:`fedora_dev_nodejs`
+- :ref:`fedora_dev_rust`

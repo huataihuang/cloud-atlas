@@ -25,7 +25,7 @@ Cockpid集成
 
 - Cockpid使用系统现有的API，所以它并没有重新开发子系统或者增加新的工具层
 - 默认Cockpit使用系统的普通用户登陆和权限，网络登陆也支持SSO(single-sign-on)以及其他认证技术
-- ``重点`` : Cockpit自身不消耗系统资源，如果你不实用它，Cockpit甚至不在后台运行，它是通过systemd socket激活 ``按需运行`` 的。 
+- ``重点`` : Cockpit自身不消耗系统资源，如果你不使用它，Cockpit甚至不在后台运行，它是通过systemd socket激活 ``按需运行`` 的。 
 
 安装
 =======
