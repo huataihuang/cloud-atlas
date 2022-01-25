@@ -1,4 +1,4 @@
-.. _vs_code_virtualenv:
+.. _vscode_virtualenv:
 
 ==================================
 在VS Code中使用Python virtualenv
@@ -13,7 +13,7 @@
 
 - 选择指定环境，在 ``Command Palete`` ( ``⇧⌘P`` )中选择使用 ``Python:Select Interpreter``
 
-.. figure:: ../../_static/python/startup/select-interpreters-command.png
+.. figure:: ../../../_static/linux/desktop/vscode/select-interpreters-command.png
 
 .. note::
 
@@ -30,11 +30,11 @@
 
 我使用 General settings中设置 ``python.venvPath`` 指定Python虚拟环境:
 
-.. figure:: ../../_static/python/startup/vscode_venv_path.png
+.. figure:: ../../../_static/linux/desktop/vscode/vscode_venv_path.png
 
 在 Workspace Settings中设置 ``python.pythonPath`` 中设置好自己的解析器(原先设置内容是 ``python`` ，修订成 ``~/venv3/bin/python`` ):
 
-.. figure:: ../../_static/python/startup/vscode_pythonpath.png
+.. figure:: ../../../_static/linux/desktop/vscode/vscode_pythonpath.png
 
 这两个配置完成后，检查 ``$HOME/Library/Application\ Support/Code/User/settings.json`` 可以看到如下配置::
 
@@ -45,7 +45,7 @@
 
 - 完成以上 ``python.venvPath`` 和 ``python.pythonPath`` 设置之后， ``需要重启一次VS Code`` ，然后使用 ``Python:Select Interpreter`` 就会看到默认的解释器就是虚拟环境中的Python了： ``~/venv3/bin/python``
 
-.. figure:: ../../_static/python/startup/current_python_interpreter.png
+.. figure:: ../../../_static/linux/desktop/vscode/current_python_interpreter.png
 
 上述设置之后，在 VS Code中启动一个内建的Terminal可以看到如下输出::
 

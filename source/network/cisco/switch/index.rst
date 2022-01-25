@@ -1,18 +1,15 @@
-.. _python_startup:
+.. _cisco_switch:
 
 =================================
-Python起步
+Cisco 交换设备
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   virtualenv.rst
-   python_in_rhel8.rst
-   python_in_kali.rst
-   install_python3_centos6.rst
-   python_doc.rst
-   pep_8.rst
+   cisco_switch_overview.rst
+   ws-c4948-s.rst
+   switch_4500_config/index
 
 .. only::  subproject and html
 
