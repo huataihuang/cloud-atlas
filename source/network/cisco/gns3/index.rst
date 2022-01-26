@@ -1,16 +1,14 @@
-.. _redis:
+.. _gns3:
 
 =================================
-Redis Atlas
+GNS3 - 网络软件模拟器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_redis.rst
-   install_redis_startup.rst
-   redis_dev_python.rst
-   redis_data_types.rst
+   intro_gns3.rst
+   dynamips.rst
 
 .. only::  subproject and html
 

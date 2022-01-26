@@ -1,7 +1,7 @@
-.. _redis_dev:
+.. _redis_dev_python:
 
 ==================
-Redis开发环境
+Redis开发(Python)
 ==================
 
 在 :ref:`priv_cloud_infra` 中采用 :ref:`fedora_dev_init` 部署 :ref:`z-dev` 开发环境。

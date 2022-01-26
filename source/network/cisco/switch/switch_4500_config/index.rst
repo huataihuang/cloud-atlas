@@ -8,6 +8,7 @@ Cisco Catalyst 4500系列交换机配置
    :maxdepth: 1
 
    switch_4500_overview.rst
+   switch_console.rst
 
 .. only::  subproject and html
 

@@ -14,6 +14,8 @@ Cisco 网络
    :maxdepth: 1
 
    switch/index
+   asa/index
+   gns3/index
 
 .. only::  subproject and html
 

@@ -30,7 +30,7 @@ Fedora发行版默认预装了Python 3，所以开发环境主要集中在如何
 
    source pia_venv/bin/activate
 
-- 然后安装需要的模块 ``pip install`` 案例为 :ref:`redis_dev` ::
+- 然后安装需要的模块 ``pip install`` 案例为 :ref:`redis_dev_python` ::
 
    python -m pip install redis
 

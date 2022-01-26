@@ -23,6 +23,7 @@ macOS
    vim_tmux_iterm_zsh.rst
    macos_nfs.rst
    restore_launchpad.rst
+   macos_ftdi_serial.rst
 
 .. only::  subproject and html
 
