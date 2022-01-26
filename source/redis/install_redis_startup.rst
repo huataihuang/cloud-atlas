@@ -74,12 +74,25 @@ redis软件安装
 
 不过，直接在命令行使用密码是不安全的( ``ps`` 命令会看到这个明文参数 )，所以建议配置环境变量 ``REDISCLI_AUTH`` 保存密码，这样就不必输入密码
 
+.. note::
+
+   为方便后续操作，我在 ``~/.bashrc`` 中添加了以下2行配置::
+
+      export REDISCLI_AUTH=AuthPassword
+      alias redis-cli="redis-cli -h 192.168.6.253"
+
+   这样，我后续执行 ``redis-cli`` 就不需要每次输入主机连接配置和密码了
+
 - 输入 ``info`` 命令，如果正确配置能够看到服务器相关信息
 
 - Redis的命令不区分大小写，通过简单命令 ``ping`` 可以验证服务器连接(如果返回是 ``PONG`` )::
 
    192.168.6.253:6379> ping
    PONG
+
+.. note::
+
+   redis的指令 ``不区分`` 大小写(类似MySQL)
 
 - 另一种方式是检查 ``redis-server`` 进程::
 

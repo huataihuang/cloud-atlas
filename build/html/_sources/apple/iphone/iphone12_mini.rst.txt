@@ -31,7 +31,7 @@ iPhone 12 mini是苹果2020年10月推出的第一代5G手机中最小巧的一�
 ----------
 
 .. figure:: ../../_static/apple/iphone/iphone12_screen.png
-   :scale: 60
+   :scale: 40
 
 iPhone 12的显示屏幕非常艳丽细腻(也许我一直使用落后于时代的手机，第一次使用2020年最新手机非常震撼)，阅读体验极佳(是的，我主要用来阅读咨询和电子书)。
 
@@ -39,7 +39,7 @@ iPhone 12的显示屏幕非常艳丽细腻(也许我一直使用落后于时代�
 -------------
 
 .. figure:: ../../_static/apple/iphone/iphone12_size.png
-   :scale: 60
+   :scale: 40
 
 iPhone 12 mini的优势在尺寸和重量上体现的淋漓尽致:
 

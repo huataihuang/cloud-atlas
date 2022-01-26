@@ -23,7 +23,7 @@
     <link rel="search" title="搜索" href="../search.html" />
     <link rel="copyright" title="版权所有" href="../copyright.html" />
     <link rel="next" title="Network Atlas" href="../network/index.html" />
-    <link rel="prev" title="Redis开发环境" href="redis_dev.html" /> 
+    <link rel="prev" title="Redis开发(Python)" href="redis_dev_python.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -62,9 +62,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Redis Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="intro_redis.html">Redis简介</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install_redis_startup.html">Redis快速安装起步</a></li>
-<li class="toctree-l2"><a class="reference internal" href="redis_dev.html">Redis开发环境</a></li>
+<li class="toctree-l2"><a class="reference internal" href="redis_dev_python.html">Redis开发(Python)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Redis数据结构类型</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#string">String字符串</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#list">List列表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set">Set集合</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hash">Hash散列</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#zset">Zset有序集合</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id1">参考</a></li>
 </ul>
 </li>
@@ -138,7 +142,243 @@
 <ul class="simple">
 <li><p>Redis字符串数据可以存储任何类型数据(binary safe)，例如JPEG图形或者序列化Ruby对象</p></li>
 <li><p>字符串类型最大存储512MB长度</p></li>
+<li><p>可以对整个字符串或者字符串的一部分执行操作</p></li>
+<li><p>整数和浮点数可以执行自增(increment)或者自减(decrement)操作</p></li>
 </ul>
+<p>Redis的字符串数据常用操作命令:</p>
+<ul class="simple">
+<li><p>GET</p></li>
+<li><p>SET</p></li>
+<li><p>DEL</p></li>
+</ul>
+<p>操作案例 - 以 <code class="docutils literal notranslate"><span class="pre">hello</span> <span class="pre">world</span></code> 为 <code class="docutils literal notranslate"><span class="pre">key</span> <span class="pre">value</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ redis-cli
+192.168.6.253:6379&gt; set hello world
+OK
+192.168.6.253:6379&gt; get hello
+&quot;world&quot;
+192.168.6.253:6379&gt; del hello
+(integer) 1
+192.168.6.253:6379&gt; get hello
+(nil)
+192.168.6.253:6379&gt;
+</pre></div>
+</div>
+<p>可以看到当 <code class="docutils literal notranslate"><span class="pre">set</span></code> 成功时，服务器端返回 <code class="docutils literal notranslate"><span class="pre">OK</span></code> ，对应的 <a class="reference internal" href="redis_dev_python.html#redis-dev-python"><span class="std std-ref">Redis开发(Python)</span></a> 中，Python客户端会将这个 <code class="docutils literal notranslate"><span class="pre">OK</span></code> 转换成 <code class="docutils literal notranslate"><span class="pre">True</span></code> 。</p>
+<p>执行 <code class="docutils literal notranslate"><span class="pre">del</span></code> 成功时，服务器端返回 <code class="docutils literal notranslate"><span class="pre">1</span></code> 表示成功删除的值的数量，如果 <code class="docutils literal notranslate"><span class="pre">del</span></code> 2个key，则成功就会返回2:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="nb">set</span> <span class="n">hello</span> <span class="mi">1</span>
+<span class="n">OK</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="nb">set</span> <span class="n">world</span> <span class="mi">2</span>
+<span class="n">OK</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="nb">set</span> <span class="n">redis</span> <span class="mi">3</span>
+<span class="n">OK</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="k">del</span> <span class="n">hello</span> <span class="n">world</span> <span class="n">redisss</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">2</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">get</span> <span class="n">hello</span>
+<span class="p">(</span><span class="n">nil</span><span class="p">)</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">get</span> <span class="n">world</span>
+<span class="p">(</span><span class="n">nil</span><span class="p">)</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">get</span> <span class="n">redis</span>
+<span class="s2">&quot;3&quot;</span>
+</pre></div>
+</div>
+<p>注意，上述 <code class="docutils literal notranslate"><span class="pre">del</span></code> 指令虽然尝试删除3个kv，但是只有2个命中，所以返回值是 <code class="docutils literal notranslate"><span class="pre">2</span></code> : <code class="docutils literal notranslate"><span class="pre">redis</span></code> 这个kv没有成功删除(key拼写错误)</p>
+<p>当 <code class="docutils literal notranslate"><span class="pre">get</span></code> 失败时，服务器端返回 <code class="docutils literal notranslate"><span class="pre">nil</span></code> ，对应的 <a class="reference internal" href="redis_dev_python.html#redis-dev-python"><span class="std std-ref">Redis开发(Python)</span></a> 中，Python客户端会把这个 <code class="docutils literal notranslate"><span class="pre">nill</span></code> 转换成 <code class="docutils literal notranslate"><span class="pre">None</span></code> 。</p>
+</section>
+<section id="list">
+<h2>List列表<a class="headerlink" href="#list" title="永久链接至标题">¶</a></h2>
+<p>List列表是一个链表( <code class="docutils literal notranslate"><span class="pre">linked-list</span></code> )，链表上的每个节点(索引/index)都包含了一个字符串:</p>
+<ul class="simple">
+<li><p>List列表只有一个key，就是列表名，这个列表中保存了多个有索引的值(其实就是数组)</p></li>
+<li><p>从链表的两端推入( <code class="docutils literal notranslate"><span class="pre">lpush</span></code> / <code class="docutils literal notranslate"><span class="pre">rpush</span></code> )或者弹出( <code class="docutils literal notranslate"><span class="pre">lpop</span></code> / <code class="docutils literal notranslate"><span class="pre">rpop</span></code> )元素，元素可以重复</p></li>
+<li><p>根据偏移量对链表进行裁剪(trim)</p></li>
+<li><p>一次可以读取单个( <code class="docutils literal notranslate"><span class="pre">lindex</span></code> )或多个元素( <code class="docutils literal notranslate"><span class="pre">lrange</span></code> )</p></li>
+<li><p>可以根据值查找或移除元素</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>List列表对应 开发语言 实际上是 <code class="docutils literal notranslate"><span class="pre">数组</span></code> ( <code class="docutils literal notranslate"><span class="pre">Array</span> <span class="pre">Data</span> <span class="pre">Structure</span></code> )，也就是带整数下标的字符串。根据数组的整数下标(key)，可以去除数组值(value)</p>
+</div>
+<p>以下案例以 <code class="docutils literal notranslate"><span class="pre">hello-list</span></code> 作为列表名字:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">rpush</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="n">item</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">rpush</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="n">item2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">2</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">rpush</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="n">item</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">3</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">lrange</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;item&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;item2&quot;</span>
+<span class="mi">3</span><span class="p">)</span> <span class="s2">&quot;item&quot;</span>
+</pre></div>
+</div>
+<p>这里使用了 <code class="docutils literal notranslate"><span class="pre">rpush</span></code> 表示从右边向列表中添加元素，一共添加了3个元素，并且元素值可以重复(key是数组下标即可以确保唯一)</p>
+<p>最后一个命令使用 <code class="docutils literal notranslate"><span class="pre">lrange</span></code> 一次去除多个值，这里 起始key是 <code class="docutils literal notranslate"><span class="pre">0</span></code> 表示从第一个开始，结束key是 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 表示最后一个，所以一次就可以把整个列表中所有值都取出来</p>
+<p>以下案例取出指定索引的值:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">lindex</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="mi">1</span>
+<span class="s2">&quot;item2&quot;</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">lindex</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="mi">2</span>
+<span class="s2">&quot;item&quot;</span>
+</pre></div>
+</div>
+<p>以下案例 <code class="docutils literal notranslate"><span class="pre">左弹出</span></code> (相当于删除)值，此时List列表所有值都顺序左移:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">lpop</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span>
+<span class="s2">&quot;item&quot;</span>
+</pre></div>
+</div>
+<p>以下案例 <code class="docutils literal notranslate"><span class="pre">左推入</span></code> 2个值，此时List列表中所有值都会顺序右移。注意，返回数字是 <code class="docutils literal notranslate"><span class="pre">4</span></code> 表示这个List中有4个值:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">lpush</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="n">newitem1</span> <span class="n">newitem2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">4</span>
+</pre></div>
+</div>
+<p>现在我们一次取出整个列表所有值来看看:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">lrange</span> <span class="n">hello</span><span class="o">-</span><span class="nb">list</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;newitem2&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;newitem1&quot;</span>
+<span class="mi">3</span><span class="p">)</span> <span class="s2">&quot;item2&quot;</span>
+<span class="mi">4</span><span class="p">)</span> <span class="s2">&quot;item&quot;</span>
+</pre></div>
+</div>
+<p>可以看到，前面我们 <code class="docutils literal notranslate"><span class="pre">左推入</span></code> 的值就像压入 <strong>弹夹</strong> 的子弹一样，先 <code class="docutils literal notranslate"><span class="pre">左推入</span></code> 压入的 <code class="docutils literal notranslate"><span class="pre">newitem1</span></code> 被后 <code class="docutils literal notranslate"><span class="pre">左推入</span></code> 压入的 <code class="docutils literal notranslate"><span class="pre">newitem2</span></code> 挤到右边，并且所有链上的数据都依次右移位置。</p>
+</section>
+<section id="set">
+<h2>Set集合<a class="headerlink" href="#set" title="永久链接至标题">¶</a></h2>
+<p>Set集合是一个包含字符串对无序收集器(unordered collection):</p>
+<ul class="simple">
+<li><p>Set集合对每个包含字符串都是独一无二、各不相同对</p></li>
+<li><p>可以添加( <code class="docutils literal notranslate"><span class="pre">SADD</span></code> )、获取、移除( <code class="docutils literal notranslate"><span class="pre">SREM</span></code> )单个元素</p></li>
+<li><p>可以检查一个元素是否存在于集合中( <code class="docutils literal notranslate"><span class="pre">SISMEMBERS</span></code> )</p></li>
+<li><p>可以计算集合的交集、并集、差集</p></li>
+<li><p>可以从集合中随机获取元素</p></li>
+</ul>
+<p>注意，Set集合是无序的，也就是说无法像 List列表 一样将元素从集合的某一端推入或弹出。</p>
+<p>以下命令组合向 <code class="docutils literal notranslate"><span class="pre">hello-set</span></code> 集合添加数据，注意，最后一个 <code class="docutils literal notranslate"><span class="pre">sadd</span></code> 是失败的(返回数字是 <code class="docutils literal notranslate"><span class="pre">0</span></code> )，这是因为重复添加了元素(集合不允许重复元素):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">sadd</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">sadd</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">sadd</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item3</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">sadd</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>可以一次性检查所有元素(也就是 <code class="docutils literal notranslate"><span class="pre">smembers</span></code> 没有参数):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">smembers</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;item3&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;item2&quot;</span>
+<span class="mi">3</span><span class="p">)</span> <span class="s2">&quot;item&quot;</span>
+</pre></div>
+</div>
+<p>检查元素是否存在于集合中，注意返回值 <code class="docutils literal notranslate"><span class="pre">0</span></code> 表示不存在(如 <code class="docutils literal notranslate"><span class="pre">item4</span></code> 就不存在):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">sismember</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item4</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">sismember</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item3</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>可以移除集合中的元素，注意，如果重复移除相同元素，则只有第一次返回值是 <code class="docutils literal notranslate"><span class="pre">1</span></code> 表示成功，后续都是返回 <code class="docutils literal notranslate"><span class="pre">0</span></code> 表示失败:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">srem</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">srem</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span> <span class="n">item2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>现在检查集合就会看到只剩下2个元素:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">smembers</span> <span class="n">hello</span><span class="o">-</span><span class="nb">set</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;item3&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;item&quot;</span>
+</pre></div>
+</div>
+<p>可以对于集合进行 <code class="docutils literal notranslate"><span class="pre">交</span></code> ( <code class="docutils literal notranslate"><span class="pre">SINTER</span></code> ) <code class="docutils literal notranslate"><span class="pre">并</span></code> ( <code class="docutils literal notranslate"><span class="pre">SUNION</span></code> ) <code class="docutils literal notranslate"><span class="pre">差</span></code> ( <code class="docutils literal notranslate"><span class="pre">SDIFF</span></code> ) 运算</p>
+</section>
+<section id="hash">
+<h2>Hash散列<a class="headerlink" href="#hash" title="永久链接至标题">¶</a></h2>
+<p>Hash散列是一个包含键值对的无序散列表:</p>
+<ul class="simple">
+<li><p>可以添加、获取、移除单个键值对</p></li>
+<li><p>可以获取所有键值对</p></li>
+</ul>
+<p>Hash散列和 List列表的差异是， 散列的key 由 无序排列的字符串承担，而List列表只有一个一维数组</p>
+<p>以下命令设置Hash散列，注意最后一条设置值失败，因为重复设置相同kv:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hset</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sub</span><span class="o">-</span><span class="n">key1</span> <span class="n">value1</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hset</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sub</span><span class="o">-</span><span class="n">key2</span> <span class="n">value2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hset</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sub</span><span class="o">-</span><span class="n">key1</span> <span class="n">value1</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>获取散列的所有键值对，注意Python客户端会把整个散列转换成Python字典:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hgetall</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;sub-key1&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;value1&quot;</span>
+<span class="mi">3</span><span class="p">)</span> <span class="s2">&quot;sub-key2&quot;</span>
+<span class="mi">4</span><span class="p">)</span> <span class="s2">&quot;value2&quot;</span>
+</pre></div>
+</div>
+<p>删除hash散列的某个kv:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hdel</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sub</span><span class="o">-</span><span class="n">key2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hdel</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sub</span><span class="o">-</span><span class="n">key2</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>获取hash散列的某个kv:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hget</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sub</span><span class="o">-</span><span class="n">key1</span>
+<span class="s2">&quot;value1&quot;</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">hgetall</span> <span class="n">hello</span><span class="o">-</span><span class="nb">hash</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;sub-key1&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;value1&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="zset">
+<h2>Zset有序集合<a class="headerlink" href="#zset" title="永久链接至标题">¶</a></h2>
+<p>Zset有序集合是字符串成员(member)与浮点数分值(score)中间的有序映射:</p>
+<ul class="simple">
+<li><p>元素的排列顺序由分值(score)的大小决定</p></li>
+<li><p>可以添加、获取、删除单个元素</p></li>
+<li><p>可以根据分值范围(range)或者成员来获取元素</p></li>
+</ul>
+<p>有序集合是Redis中唯一一个既可以根据成员访问元素(和散列相同)，又可以根据分值以及分值的排列顺序来访问元素的结构。</p>
+<p>添加有序集合元素，注意不能重复添加相同kv:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zadd</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="mi">728</span> <span class="n">member1</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zadd</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="mi">982</span> <span class="n">member0</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zadd</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="mi">982</span> <span class="n">member0</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>按范围获取整个有序集合:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zrange</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span> <span class="n">withscores</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;member1&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;728&quot;</span>
+<span class="mi">3</span><span class="p">)</span> <span class="s2">&quot;member0&quot;</span>
+<span class="mi">4</span><span class="p">)</span> <span class="s2">&quot;982&quot;</span>
+</pre></div>
+</div>
+<p>在获取有序集合包含的所有元素是，多个元素会按照分值大小进行排序，并且Python可灰度会将元素的分值转换成浮点数</p>
+<p>可以按照分值范围来获取元素:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zrangebyscore</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="mi">0</span> <span class="mi">800</span> <span class="n">withscores</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;member1&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;728&quot;</span>
+</pre></div>
+</div>
+<p>可以移除元素:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zrem</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="n">member1</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">1</span>
+<span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zrem</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="n">member1</span>
+<span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>获取整个有序集合:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">6379</span><span class="o">&gt;</span> <span class="n">zrange</span> <span class="n">hello</span><span class="o">-</span><span class="n">zset</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span> <span class="n">withscores</span>
+<span class="mi">1</span><span class="p">)</span> <span class="s2">&quot;member0&quot;</span>
+<span class="mi">2</span><span class="p">)</span> <span class="s2">&quot;982&quot;</span>
+</pre></div>
+</div>
 </section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
@@ -153,7 +393,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="redis_dev.html" class="btn btn-neutral float-left" title="Redis开发环境" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="redis_dev_python.html" class="btn btn-neutral float-left" title="Redis开发(Python)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../network/index.html" class="btn btn-neutral float-right" title="Network Atlas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
