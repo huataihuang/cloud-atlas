@@ -1,17 +1,13 @@
-.. _linux_memory_management:
+.. _react:
 
 =================================
-Linux内存管理
+React
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   linux_mmu.rst
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
+   intro_react.rst
 
 .. only::  subproject and html
 

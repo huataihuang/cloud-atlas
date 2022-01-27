@@ -1,17 +1,15 @@
-.. _linux_memory_management:
+.. _patternfly:
 
 =================================
-Linux内存管理
+PatternFly
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   linux_mmu.rst
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oomd.rst
+   intro_patternfly.rst
+   patternfly_design.rst
+   patternfly_develop.rst
 
 .. only::  subproject and html
 

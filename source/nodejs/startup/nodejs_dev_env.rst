@@ -8,6 +8,10 @@ Node Version Manager (nvm) 是 node.js 的版本管理器，可以工作在任�
 
 这个工具可以管理和切换 Node.js 版本，以便测试和开发。 （例如，我在使用 `hexo <https://hexo.io>`_ 作为自己的blog撰写平台，就遇到过部分插件对nodejs版本的兼容性要求）
 
+.. note::
+
+   对于node.js没有多版本要求的话，可以使用最新node.js版本，并且为了方便开发，可以采用 :ref:`fedora_dev_nodejs` 。目前，我的开发学习环境就建立在 :ref:`fedora_develop` 。
+
 安装nvm
 ==========
 
