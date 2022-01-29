@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CentOS 7 配置NFS &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="asciinema:终端会话记录和分享" href="../asciinema/index.html" />
+    <link rel="prev" title="nfs服务" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Infra-Service Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../ntp/index.html">ntp服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dns/index.html">DNS服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ssh/index.html">ssh服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samba/index.html">Samba服务</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">nfs服务</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CentOS 7 配置NFS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#linux">设置Linux服务端</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">NFS客户端挂载</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">通过防火墙挂载NFS服务</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../asciinema/index.html">asciinema:终端会话记录和分享</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guacamole/index.html">Apache Guacamole:无客户端远程桌面网关</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Infra-Service Atlas</a> &raquo;</li>
+          <li><a href="index.html">nfs服务</a> &raquo;</li>
+      <li>CentOS 7 配置NFS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/infra_service/nfs/setup_nfs_centos7.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="centos-7-nfs">
+<span id="setup-nfs-centos7"></span><h1>CentOS 7 配置NFS<a class="headerlink" href="#centos-7-nfs" title="永久链接至标题">¶</a></h1>
+<p>CentOS 7使用 <code class="docutils literal notranslate"><span class="pre">systemctl</span></code> 管理和设置NFS，以下按照服务端和客户端设置分别介绍。</p>
+<section id="linux">
+<h2>设置Linux服务端<a class="headerlink" href="#linux" title="永久链接至标题">¶</a></h2>
+<p>将移动硬盘挂载到 <code class="docutils literal notranslate"><span class="pre">/data</span></code> 目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb1</span> <span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+<p>使用以下命令安装 NFS 支持:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">nfs</span><span class="o">-</span><span class="n">utils</span>
+</pre></div>
+</div>
+<p>启动nfs服务并设置nfs相关服务在操作系统启动时启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">rpcbind</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">nfs</span><span class="o">-</span><span class="n">lock</span>
+<span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">nfs</span><span class="o">-</span><span class="n">idmap</span>
+</pre></div>
+</div>
+<p>服务器端设置NFS卷输出，即编辑 <code class="docutils literal notranslate"><span class="pre">/etc/exports</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">data</span>   <span class="mf">192.168.122.0</span><span class="o">/</span><span class="mi">24</span><span class="p">(</span><span class="n">rw</span><span class="p">,</span><span class="n">sync</span><span class="p">,</span><span class="n">no_root_squash</span><span class="p">,</span><span class="n">no_subtree_check</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>参数解析:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/data</span></code> – 共享目录</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">192.168.122.0/24/24</span></code> – 允许访问NFS的客户端IP地址段(这里使用是针对libvirt虚拟化NAT网段)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rw</span></code> – 允许对共享目录进行读写</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sync</span></code> – 实时同步共享目录，设置同步</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">no_root_squash</span></code> – 允许root访问</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">no_all_squash</span></code> - 允许用户授权</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">no_subtree_check</span></code> - 如果卷的一部分被输出，从客户端发出请求文件的一个常规的调用子目录检查验证卷的相应部分。如果是整个卷输出，禁止这个检查可以加速传输。</p></li>
+</ul>
+<section id="nfs">
+<h3>NFS服务器排查<a class="headerlink" href="#nfs" title="永久链接至标题">¶</a></h3>
+<p>启动 <code class="docutils literal notranslate"><span class="pre">nfs-server</span></code> 时候报错</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># systemctl start nfs-server</span>
+<span class="n">Job</span> <span class="k">for</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">service</span> <span class="n">failed</span><span class="o">.</span> <span class="n">See</span> <span class="s1">&#39;systemctl status nfs-server.service&#39;</span> <span class="ow">and</span> <span class="s1">&#39;journalctl -xn&#39;</span> <span class="k">for</span> <span class="n">details</span><span class="o">.</span>
+
+<span class="c1"># systemctl status nfs-server.service</span>
+<span class="n">nfs</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">service</span> <span class="o">-</span> <span class="n">NFS</span> <span class="n">server</span> <span class="ow">and</span> <span class="n">services</span>
+<span class="n">Loaded</span><span class="p">:</span> <span class="n">loaded</span> <span class="p">(</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">nfs</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">service</span><span class="p">;</span> <span class="n">enabled</span><span class="p">)</span>
+<span class="n">Active</span><span class="p">:</span> <span class="n">failed</span> <span class="p">(</span><span class="n">Result</span><span class="p">:</span> <span class="n">exit</span><span class="o">-</span><span class="n">code</span><span class="p">)</span> <span class="n">since</span> <span class="n">Wed</span> <span class="mi">2015</span><span class="o">-</span><span class="mi">09</span><span class="o">-</span><span class="mi">16</span> <span class="mi">16</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">14</span> <span class="n">CST</span><span class="p">;</span> <span class="mi">51</span><span class="n">s</span> <span class="n">ago</span>
+<span class="n">Process</span><span class="p">:</span> <span class="mi">17476</span> <span class="n">ExecStartPre</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">exportfs</span> <span class="o">-</span><span class="n">r</span> <span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">exited</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">FAILURE</span><span class="p">)</span>
+
+<span class="n">Sep</span> <span class="mi">16</span> <span class="mi">16</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">14</span> <span class="n">ats</span><span class="o">-</span><span class="mi">30</span><span class="o">-</span><span class="mi">1</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">Starting</span> <span class="n">NFS</span> <span class="n">server</span> <span class="ow">and</span> <span class="n">services</span><span class="o">...</span>
+<span class="n">Sep</span> <span class="mi">16</span> <span class="mi">16</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">14</span> <span class="n">ats</span><span class="o">-</span><span class="mi">30</span><span class="o">-</span><span class="mi">1</span> <span class="n">exportfs</span><span class="p">[</span><span class="mi">17476</span><span class="p">]:</span> <span class="n">exportfs</span><span class="p">:</span> <span class="o">/</span><span class="n">iso</span> <span class="n">requires</span> <span class="n">fsid</span><span class="o">=</span> <span class="k">for</span> <span class="n">NFS</span> <span class="n">export</span>
+<span class="n">Sep</span> <span class="mi">16</span> <span class="mi">16</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">14</span> <span class="n">ats</span><span class="o">-</span><span class="mi">30</span><span class="o">-</span><span class="mi">1</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">service</span><span class="p">:</span> <span class="n">control</span> <span class="n">process</span> <span class="n">exited</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">exited</span> <span class="n">status</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">Sep</span> <span class="mi">16</span> <span class="mi">16</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">14</span> <span class="n">ats</span><span class="o">-</span><span class="mi">30</span><span class="o">-</span><span class="mi">1</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">start</span> <span class="n">NFS</span> <span class="n">server</span> <span class="ow">and</span> <span class="n">services</span><span class="o">.</span>
+<span class="n">Sep</span> <span class="mi">16</span> <span class="mi">16</span><span class="p">:</span><span class="mi">54</span><span class="p">:</span><span class="mi">14</span> <span class="n">ats</span><span class="o">-</span><span class="mi">30</span><span class="o">-</span><span class="mi">1</span> <span class="n">systemd</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">Unit</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">service</span> <span class="n">entered</span> <span class="n">failed</span> <span class="n">state</span><span class="o">.</span>
+<span class="n">Hint</span><span class="p">:</span> <span class="n">Some</span> <span class="n">lines</span> <span class="n">were</span> <span class="n">ellipsized</span><span class="p">,</span> <span class="n">use</span> <span class="o">-</span><span class="n">l</span> <span class="n">to</span> <span class="n">show</span> <span class="ow">in</span> <span class="n">full</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-nfs-server-config-exports.html">Using exportfs with NFSv4</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NFSv4客户端可以查看NFSv4服务器输出的所有exorts作为一个单一文件系统，称为 NFSv4 伪文件系统( ``NFSv4 pseudo-file system`` )。在Red Hat Enterprise Linux上，这个伪文件系统被标识伪一个单一的，真实文件系统，通过 ``fsid=0`` 选项输出。
+</pre></div>
+</div>
+<p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/exportfs</span></code> ，添加 <code class="docutils literal notranslate"><span class="pre">fsid=0</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">iso</span>    <span class="o">*</span><span class="p">(</span><span class="n">fsid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">rw</span><span class="p">,</span><span class="n">sync</span><span class="p">,</span><span class="n">no_subtree_check</span><span class="p">,</span><span class="n">all_squash</span><span class="p">,</span><span class="n">anonuid</span><span class="o">=</span><span class="mi">36</span><span class="p">,</span><span class="n">anongid</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id1">
+<h2>NFS客户端挂载<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>Linux挂载NFS的客户端非常简单的命令，先创建挂载目录，然后用 <code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">nfs</span></code> 参数挂载就可以了</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">nfs</span>  <span class="mf">192.168.122.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+<p>如果要设置客户端启动时候就挂载NFS，可以配置 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 添加以下内容</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">192.168.122.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span>    <span class="o">/</span><span class="n">data</span>  <span class="n">nfs</span> <span class="n">auto</span><span class="p">,</span><span class="n">rw</span><span class="p">,</span><span class="n">vers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">hard</span><span class="p">,</span><span class="n">intr</span><span class="p">,</span><span class="n">tcp</span><span class="p">,</span><span class="n">rsize</span><span class="o">=</span><span class="mi">32768</span><span class="p">,</span><span class="n">wsize</span><span class="o">=</span><span class="mi">32768</span>      <span class="mi">0</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+<p>然后在客户端简单使用以下命令就可以挂载</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+<p>如果出现以下类似报错，则检查一下系统是否缺少 <code class="docutils literal notranslate"><span class="pre">mount.nfs</span></code> 程序，如果缺少，则表明尚未安装 <code class="docutils literal notranslate"><span class="pre">nfs-utils</span></code> 工具包，需要补充安装后才能作为客户端挂载NFS</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span><span class="p">:</span> <span class="n">wrong</span> <span class="n">fs</span> <span class="nb">type</span><span class="p">,</span> <span class="n">bad</span> <span class="n">option</span><span class="p">,</span> <span class="n">bad</span> <span class="n">superblock</span> <span class="n">on</span> <span class="mf">192.168.122.1</span><span class="p">:</span><span class="o">/</span><span class="n">data</span><span class="p">,</span>
+       <span class="n">missing</span> <span class="n">codepage</span> <span class="ow">or</span> <span class="n">helper</span> <span class="n">program</span><span class="p">,</span> <span class="ow">or</span> <span class="n">other</span> <span class="n">error</span>
+       <span class="p">(</span><span class="k">for</span> <span class="n">several</span> <span class="n">filesystems</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">nfs</span><span class="p">,</span> <span class="n">cifs</span><span class="p">)</span> <span class="n">you</span> <span class="n">might</span>
+       <span class="n">need</span> <span class="n">a</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">mount</span><span class="o">.&lt;</span><span class="nb">type</span><span class="o">&gt;</span> <span class="n">helper</span> <span class="n">program</span><span class="p">)</span>
+
+       <span class="n">In</span> <span class="n">some</span> <span class="n">cases</span> <span class="n">useful</span> <span class="n">info</span> <span class="ow">is</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">syslog</span> <span class="o">-</span> <span class="k">try</span>
+       <span class="n">dmesg</span> <span class="o">|</span> <span class="n">tail</span> <span class="ow">or</span> <span class="n">so</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>通过防火墙挂载NFS服务<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>在生产环境，可能会因为安全需求在NFS服务器和客户端之间部署防火墙。此时，NFS客户端挂载的时候会有如下输出报错</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span><span class="o">.</span><span class="n">nfs</span><span class="p">:</span> <span class="n">Connection</span> <span class="n">timed</span> <span class="n">out</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/nfs-serverconfig.html#s2-nfs-nfs-firewall-config">Running NFS Behind a Firewall</a> 设置防火墙允许访问NFS服务器的服务端口，注意，需要配置NFS服务使用固定端口。</p>
+<p>可以在Linux NFS服务器上执行以下命令获得NFS端口信息</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpcinfo</span> <span class="o">-</span><span class="n">p</span>
+</pre></div>
+</div>
+<p>输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">program</span> <span class="n">vers</span> <span class="n">proto</span>   <span class="n">port</span>  <span class="n">service</span>
+ <span class="mi">100000</span>    <span class="mi">4</span>   <span class="n">tcp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>    <span class="o">&lt;=</span> <span class="n">rpcbind</span> <span class="n">服务</span>
+ <span class="mi">100000</span>    <span class="mi">3</span>   <span class="n">tcp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>    <span class="o">&lt;=</span> <span class="n">rpcbind</span> <span class="n">服务</span>
+ <span class="mi">100000</span>    <span class="mi">2</span>   <span class="n">tcp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>    <span class="o">&lt;=</span> <span class="n">rpcbind</span> <span class="n">服务</span>
+ <span class="mi">100000</span>    <span class="mi">4</span>   <span class="n">udp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>    <span class="o">&lt;=</span> <span class="n">rpcbind</span> <span class="n">服务</span>
+ <span class="mi">100000</span>    <span class="mi">3</span>   <span class="n">udp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>    <span class="o">&lt;=</span> <span class="n">rpcbind</span> <span class="n">服务</span>
+ <span class="mi">100000</span>    <span class="mi">2</span>   <span class="n">udp</span>    <span class="mi">111</span>  <span class="n">portmapper</span>    <span class="o">&lt;=</span> <span class="n">rpcbind</span> <span class="n">服务</span>
+ <span class="mi">100024</span>    <span class="mi">1</span>   <span class="n">udp</span>  <span class="mi">33948</span>  <span class="n">status</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">statd</span> <span class="n">服务</span>
+ <span class="mi">100024</span>    <span class="mi">1</span>   <span class="n">tcp</span>  <span class="mi">35264</span>  <span class="n">status</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">statd</span> <span class="n">服务</span>
+ <span class="mi">100005</span>    <span class="mi">1</span>   <span class="n">udp</span>  <span class="mi">20048</span>  <span class="n">mountd</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="n">服务</span>
+ <span class="mi">100005</span>    <span class="mi">1</span>   <span class="n">tcp</span>  <span class="mi">20048</span>  <span class="n">mountd</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="n">服务</span>
+ <span class="mi">100005</span>    <span class="mi">2</span>   <span class="n">udp</span>  <span class="mi">20048</span>  <span class="n">mountd</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="n">服务</span>
+ <span class="mi">100005</span>    <span class="mi">2</span>   <span class="n">tcp</span>  <span class="mi">20048</span>  <span class="n">mountd</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="n">服务</span>
+ <span class="mi">100005</span>    <span class="mi">3</span>   <span class="n">udp</span>  <span class="mi">20048</span>  <span class="n">mountd</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="n">服务</span>
+ <span class="mi">100005</span>    <span class="mi">3</span>   <span class="n">tcp</span>  <span class="mi">20048</span>  <span class="n">mountd</span>        <span class="o">&lt;=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="n">服务</span>
+ <span class="mi">100003</span>    <span class="mi">3</span>   <span class="n">tcp</span>   <span class="mi">2049</span>  <span class="n">nfs</span>
+ <span class="mi">100003</span>    <span class="mi">4</span>   <span class="n">tcp</span>   <span class="mi">2049</span>  <span class="n">nfs</span>
+ <span class="mi">100227</span>    <span class="mi">3</span>   <span class="n">tcp</span>   <span class="mi">2049</span>  <span class="n">nfs_acl</span>
+ <span class="mi">100003</span>    <span class="mi">3</span>   <span class="n">udp</span>   <span class="mi">2049</span>  <span class="n">nfs</span>
+ <span class="mi">100003</span>    <span class="mi">4</span>   <span class="n">udp</span>   <span class="mi">2049</span>  <span class="n">nfs</span>
+ <span class="mi">100227</span>    <span class="mi">3</span>   <span class="n">udp</span>   <span class="mi">2049</span>  <span class="n">nfs_acl</span>
+ <span class="mi">100021</span>    <span class="mi">1</span>   <span class="n">udp</span>  <span class="mi">48508</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">3</span>   <span class="n">udp</span>  <span class="mi">48508</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">4</span>   <span class="n">udp</span>  <span class="mi">48508</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">1</span>   <span class="n">tcp</span>  <span class="mi">38808</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">3</span>   <span class="n">tcp</span>  <span class="mi">38808</span>  <span class="n">nlockmgr</span>
+ <span class="mi">100021</span>    <span class="mi">4</span>   <span class="n">tcp</span>  <span class="mi">38808</span>  <span class="n">nlockmgr</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rpc.mount</span></code> 服务端口:</p></li>
+</ul>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">lsof</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">rpc.mount</span></code> 命令检查，可以看到 <code class="docutils literal notranslate"><span class="pre">rpc.mount</span></code> 服务使用的端口是</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="mi">27681</span>          <span class="n">root</span>    <span class="mi">7</span><span class="n">u</span>     <span class="n">IPv4</span>           <span class="mi">18221951</span>        <span class="mi">0</span><span class="n">t0</span>        <span class="n">UDP</span> <span class="o">*</span><span class="p">:</span><span class="n">mountd</span>
+<span class="n">rpc</span><span class="o">.</span><span class="n">mount</span> <span class="mi">27681</span>          <span class="n">root</span>    <span class="mi">8</span><span class="n">u</span>     <span class="n">IPv4</span>           <span class="mi">18221953</span>        <span class="mi">0</span><span class="n">t0</span>        <span class="n">TCP</span> <span class="o">*</span><span class="p">:</span><span class="n">mountd</span> <span class="p">(</span><span class="n">LISTEN</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">*:mountd</span></code> 可以从 <code class="docutils literal notranslate"><span class="pre">/etc/serives</span></code> 配置文件中找出对应的端口是 <code class="docutils literal notranslate"><span class="pre">20048</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#grep mountd /etc/services</span>
+<span class="n">mountd</span>          <span class="mi">20048</span><span class="o">/</span><span class="n">tcp</span>               <span class="c1"># NFS mount protocol</span>
+<span class="n">mountd</span>          <span class="mi">20048</span><span class="o">/</span><span class="n">udp</span>               <span class="c1"># NFS mount protocol</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rpc.statd</span></code> 服务端口</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">lsof</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">rpc.statd</span></code> 命令检查可以看到</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpc</span><span class="o">.</span><span class="n">statd</span> <span class="mi">27663</span>       <span class="n">rpcuser</span>    <span class="mi">8</span><span class="n">u</span>     <span class="n">IPv4</span>           <span class="mi">18236210</span>        <span class="mi">0</span><span class="n">t0</span>        <span class="n">UDP</span> <span class="o">*</span><span class="p">:</span><span class="mi">33948</span>
+<span class="n">rpc</span><span class="o">.</span><span class="n">statd</span> <span class="mi">27663</span>       <span class="n">rpcuser</span>    <span class="mi">9</span><span class="n">u</span>     <span class="n">IPv4</span>           <span class="mi">18236212</span>        <span class="mi">0</span><span class="n">t0</span>        <span class="n">TCP</span> <span class="o">*</span><span class="p">:</span><span class="mi">35264</span> <span class="p">(</span><span class="n">LISTEN</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rpcbind</span></code> 服务端口</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">lsof</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">rpcbind</span></code> 命令可以查看到</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rpcbind</span>   <span class="mi">43419</span>           <span class="n">rpc</span>    <span class="mi">4</span><span class="n">u</span>     <span class="n">IPv4</span>              <span class="mi">28734</span>        <span class="mi">0</span><span class="n">t0</span>        <span class="n">TCP</span> <span class="o">*</span><span class="p">:</span><span class="n">sunrpc</span> <span class="p">(</span><span class="n">LISTEN</span><span class="p">)</span>
+<span class="n">rpcbind</span>   <span class="mi">43419</span>           <span class="n">rpc</span>    <span class="mi">7</span><span class="n">u</span>     <span class="n">IPv4</span>           <span class="mi">11838817</span>        <span class="mi">0</span><span class="n">t0</span>        <span class="n">UDP</span> <span class="o">*</span><span class="p">:</span><span class="n">sunrpc</span>
+<span class="n">rpcbind</span>   <span class="mi">43419</span>           <span class="n">rpc</span>    <span class="mi">8</span><span class="n">u</span>     <span class="n">IPv4</span>           <span class="mi">11838818</span>        <span class="mi">0</span><span class="n">t0</span>        <span class="n">UDP</span> <span class="o">*</span><span class="p">:</span><span class="mi">766</span>
+</pre></div>
+</div>
+<p>检查对应端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#grep sunrpc /etc/services</span>
+<span class="n">sunrpc</span>          <span class="mi">111</span><span class="o">/</span><span class="n">tcp</span>         <span class="n">portmapper</span> <span class="n">rpcbind</span>      <span class="c1"># RPC 4.0 portmapper TCP</span>
+<span class="n">sunrpc</span>          <span class="mi">111</span><span class="o">/</span><span class="n">udp</span>         <span class="n">portmapper</span> <span class="n">rpcbind</span>      <span class="c1"># RPC 4.0 portmapper UDP</span>
+</pre></div>
+</div>
+<section id="rpc">
+<h3>设置RPC服务使用端口<a class="headerlink" href="#rpc" title="永久链接至标题">¶</a></h3>
+<p>由于NFS需要rpcbind，动态分配RPC服务端口会导致无法配置防火墙规则。</p>
+<p>默认情况下，NFS使用的rpcbind使用动态设置RPC服务端口，需要修改以下配置：</p>
+<ul>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/sysconfig/nfs</span></code> 文件来设置RPC服务使用的端口</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 需要固定端口设置项前面的&quot;#&quot;符号需要去除，以便激活静态配置端口</span>
+
+<span class="c1"># Optional arguments passed to rpc.mountd. See rpc.mountd(8)</span>
+<span class="n">RPCMOUNTDOPTS</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<span class="c1"># Port rpc.mountd should listen on.</span>
+<span class="n">MOUNTD_PORT</span><span class="o">=</span><span class="mi">892</span>
+
+<span class="c1"># Optional arguments passed to rpc.statd. See rpc.statd(8)</span>
+<span class="n">STATDARG</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<span class="c1"># Port rpc.statd should listen on.</span>
+<span class="n">STATD_PORT</span><span class="o">=</span><span class="mi">662</span>
+
+<span class="c1"># Outgoing port statd should used. The default is port</span>
+<span class="c1"># is random</span>
+<span class="n">STATD_OUTGOING_PORT</span><span class="o">=</span><span class="mi">2020</span>
+</pre></div>
+</div>
+</li>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/lockd.conf</span></code> 中设置 <code class="docutils literal notranslate"><span class="pre">nlockmgr</span></code> 服务端口</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span> <span class="n">lockd</span> <span class="n">nlm_tcpport</span><span class="o">=</span><span class="mi">32768</span>
+<span class="n">options</span> <span class="n">lockd</span> <span class="n">nlm_udpport</span><span class="o">=</span><span class="mi">32768</span>
+<span class="n">options</span> <span class="n">nfs</span> <span class="n">callback_tcpport</span><span class="o">=</span><span class="mi">32764</span>  <span class="c1"># 可选参数</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">callback_tcpport</span></code> 是用于 <code class="docutils literal notranslate"><span class="pre">NFSv4.0</span> <span class="pre">callback</span></code> ，也就是设置 <code class="docutils literal notranslate"><span class="pre">/proc/sys/fs/nfs/nfs_callback_tcpport</span></code> ，并且还需要设置防火墙允许服务器能够连接客户端的端口 <code class="docutils literal notranslate"><span class="pre">32764</span></code> 。不过，对于NFSv4.1或更高版本，不需要此步骤，并且在纯NFSv4环境，也不需要 <code class="docutils literal notranslate"><span class="pre">mountd</span></code>, <code class="docutils literal notranslate"><span class="pre">statd</span></code> 和 <code class="docutils literal notranslate"><span class="pre">lockd</span></code> 的端口。</p>
+<p><code class="docutils literal notranslate"><span class="pre">lockd.conf</span></code> 配置参考 <a class="reference external" href="https://wiki.debian.org/SecuringNFS">Debian SecuringNFS</a></p>
+<p>这个参数也可以通过 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.conf</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/nfs-static-ports.conf</span></code> 内核参数传递</p>
+<ul>
+<li><p>在CentOS 7上，内核参数 <code class="docutils literal notranslate"><span class="pre">fs.nfs.nlm_tcpport</span></code> 和 <code class="docutils literal notranslate"><span class="pre">fs.nfs.nlm_udpport</span></code> 默认都是 <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span><span class="o">.</span><span class="n">nfs</span><span class="o">.</span><span class="n">nfs_callback_tcpport</span> <span class="o">=</span> <span class="mi">32764</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">nfs</span><span class="o">.</span><span class="n">nlm_tcpport</span> <span class="o">=</span> <span class="mi">32768</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">nfs</span><span class="o">.</span><span class="n">nlm_udpport</span> <span class="o">=</span> <span class="mi">32768</span>
+</pre></div>
+</div>
+</li>
+<li><p>重新加载NFS配置和服务（貌似 <code class="docutils literal notranslate"><span class="pre">status</span></code> 服务和 <code class="docutils literal notranslate"><span class="pre">nlockmgr</span></code> 服务端口不生效）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nfs</span><span class="o">-</span><span class="n">config</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>再次使用 <code class="docutils literal notranslate"><span class="pre">rpcinfo</span> <span class="pre">-p</span></code> 确认端口配置是否生效。</p>
+<ul>
+<li><p>改为重启以下服务，此时检查发现 <code class="docutils literal notranslate"><span class="pre">status</span></code> 端口正确改成 <code class="docutils literal notranslate"><span class="pre">662</span></code> ，但是 <code class="docutils literal notranslate"><span class="pre">nlockmgr</span></code> 因为内核没有重新加载模块，所以端口没有修改</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nfs</span><span class="o">-</span><span class="n">idmap</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nfs</span><span class="o">-</span><span class="n">lock</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span>
+<span class="n">systemctl</span> <span class="n">restart</span> <span class="n">rpcbind</span>
+</pre></div>
+</div>
+</li>
+<li><p>通过 <code class="docutils literal notranslate"><span class="pre">sysctl</span></code> 修改 <code class="docutils literal notranslate"><span class="pre">nlockmgr</span></code> 端口，但是发现如果不重新加载内核模块是不能订正 <code class="docutils literal notranslate"><span class="pre">nlockmgr</span></code> 端口</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sysctl</span> <span class="o">-</span><span class="n">w</span> <span class="n">fs</span><span class="o">.</span><span class="n">nfs</span><span class="o">.</span><span class="n">nlm_tcpport</span><span class="o">=</span><span class="mi">32768</span>
+<span class="n">sysctl</span> <span class="o">-</span><span class="n">w</span> <span class="n">fs</span><span class="o">.</span><span class="n">nfs</span><span class="o">.</span><span class="n">nlm_udpport</span><span class="o">=</span><span class="mi">32768</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<blockquote>
+<div><p>暂时没有找到解决方法，所以还是通过重启操作系统来使得 <code class="docutils literal notranslate"><span class="pre">nlockmgr</span></code> 端口调整到 <code class="docutils literal notranslate"><span class="pre">32768</span></code></p>
+</div></blockquote>
+</section>
+<section id="id3">
+<h3>配置防火墙端口<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<blockquote>
+<div><p>NFS的TCP和UDP端口2049</p>
+<p>rpcbind/sunrpc的TCP和UDP端口111</p>
+<p>设置 <code class="docutils literal notranslate"><span class="pre">MOUNTD_PORT</span></code> 的TCP和UDP端口</p>
+<p>设置 <code class="docutils literal notranslate"><span class="pre">STATD_PORT</span></code> 的TCP和UDP端口</p>
+<p>设置 <code class="docutils literal notranslate"><span class="pre">LOCKD_TCPPORT</span></code> 的TCP端口</p>
+<p>设置 <code class="docutils literal notranslate"><span class="pre">LOCKD_UDPPORT</span></code> 的UDP端口</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">firewalld</span></code> 的配置方法：</p></li>
+</ul>
+<p>在 Linux NFS 服务器上使用以下命令开启iptables防火墙允许访问以上端口</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">2049</span><span class="o">/</span><span class="n">tcp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">2049</span><span class="o">/</span><span class="n">udp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">111</span><span class="o">/</span><span class="n">tcp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">111</span><span class="o">/</span><span class="n">udp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">892</span><span class="o">/</span><span class="n">tcp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">892</span><span class="o">/</span><span class="n">udp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">662</span><span class="o">/</span><span class="n">tcp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">662</span><span class="o">/</span><span class="n">udp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">32768</span><span class="o">/</span><span class="n">tcp</span>
+<span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">permanent</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">port</span><span class="o">=</span><span class="mi">32768</span><span class="o">/</span><span class="n">udp</span>
+</pre></div>
+</div>
+<p>在 Linux NFS 服务器上使用以下命令重新加载防火墙规则</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">firewall</span><span class="o">-</span><span class="n">cmd</span> <span class="o">--</span><span class="n">reload</span>
+</pre></div>
+</div>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">iptables</span></code> 的配置方法</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">-</span><span class="n">m</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">2049</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">-</span><span class="n">m</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">2049</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">-</span><span class="n">m</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">111</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">-</span><span class="n">m</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">111</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">-</span><span class="n">m</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">892</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">-</span><span class="n">m</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">892</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">-</span><span class="n">m</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">662</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">-</span><span class="n">m</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">662</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">-</span><span class="n">m</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">32803</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">-</span><span class="n">m</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">32769</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<blockquote>
+<div><p>如果要指定接口，也可以加上参数如 <code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">virbr0-nic</span></code> ，例如 <code class="docutils literal notranslate"><span class="pre">iptables</span> <span class="pre">-A</span> <span class="pre">INPUT</span> <span class="pre">-i</span> <span class="pre">virbr0-nic</span> <span class="pre">-p</span> <span class="pre">tcp</span> <span class="pre">-m</span> <span class="pre">tcp</span> <span class="pre">--dport</span> <span class="pre">2049</span> <span class="pre">-j</span> <span class="pre">ACCEPT</span></code></p>
+</div></blockquote>
+</section>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.unixmen.com/setting-nfs-server-client-centos-7/">Setting Up NFS Server And Client On CentOS 7</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="nfs服务" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../asciinema/index.html" class="btn btn-neutral float-right" title="asciinema:终端会话记录和分享" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
