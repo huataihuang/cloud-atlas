@@ -82,6 +82,12 @@
 
    sudo dnf install cloud-utils-growpart
 
+.. note::
+
+   如果使用 debian/ubuntu ，则安装 ``cloud-guest-utils`` 来获得 ``growpart`` ::
+
+      sudo apt install cloud-guest-utils
+
 - 扩展分区::
 
    growpart /dev/vda 2
