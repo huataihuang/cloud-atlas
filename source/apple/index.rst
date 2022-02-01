@@ -22,6 +22,7 @@ iOS 是苹果公司开发的移动操作系统，目前已经演化成 iOS(iphon
    macos/index
    iphone/index
    watch/index
+   ipad/index
    airpods/index
    music/index
    recovery/index

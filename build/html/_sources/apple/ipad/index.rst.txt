@@ -1,15 +1,13 @@
-.. _nfs:
+.. _ipad:
 
 =================================
-nfs服务
+iPad
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_nfs.rst
-   setup_nfs_centos7.rst
-   setup_nfs_ubuntu20.rst
+   iphone_air1.rst
 
 .. only::  subproject and html
 
