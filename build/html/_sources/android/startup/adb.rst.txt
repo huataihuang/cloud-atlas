@@ -133,6 +133,14 @@ adb的shell可以使用activity manager工具来执行系统活动，例如启�
 
 按下 ``Ctrl+C`` (在Mac上是 ``Command+C`` )就可以停止记录。默认自动停止记录是3分钟，或者启动时设置 ``--time-limit`` 。
 
+备份照片
+-------------
+
+很多国内厂商的Android手机，例如华为，往往是通过自己定制的文件传输程序来备份照片。不仅安装的软件陈旧而且非常麻烦。解决的方法是采用 ``adb`` 获取 ``/mnt/sdcard/DCIM/Camera`` 目录下文件列表，然后再通过 ``adb`` 下载::
+
+   adb shell ls "/mnt/sdcard/DCIM/Camera" | tee files
+   for file in `cat files`;do adb pull /mnt/sdcard/DCIM/Camera/$file;done
+
 参考
 ======
 
