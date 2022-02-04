@@ -47,6 +47,10 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
    sudo certbot certonly --standalone --preferred-challenges http --agree-tos --email your-email-address -d vpn.example.com
 
+.. warning::
+
+   Let's Encrypt提供的证书有效期3个月，所以每3个月需要使用上述命令重新生成一次证书。建议 :ref:`cron_certbot_renew`
+
 - 修改ocserv配置文件 ``/etc/ocserv/ocserv.conf`` ::
 
    # 以下行注释关闭使用系统账号登陆
@@ -71,7 +75,8 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
    max-same-clients = 2
    
    # 启用MTU discovery以提高性能
-   try-mtu-discovery = false
+   #try-mtu-discovery = false
+   try-mtu-discovery = true
    
    # 设置默认域名为vpn.example.com
    default-domain = vpn.example.com

@@ -12,6 +12,9 @@ Linux VPN
    :maxdepth: 1
 
    openconnect_vpn.rst
+   acme.rst
+   cron_certbot_renew.rst
+   ocserv_timeout.rst
    vpnc.rst
    polipo_proxy_yum.rst
 

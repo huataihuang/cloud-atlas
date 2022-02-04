@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Linux VPN &mdash; Cloud Atlas 0.1 文档</title>
+  <title>使用cron定时更新letsencrypt证书 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="OpenConnect VPN" href="openconnect_vpn.html" />
-    <link rel="prev" title="chroot" href="../chroot.html" /> 
+    <link rel="next" title="vpnc - Cisco VPN客户端" href="vpnc.html" />
+    <link rel="prev" title="OpenConnect VPN" href="openconnect_vpn.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -90,11 +90,9 @@
 <li class="toctree-l2"><a class="reference internal" href="../../server/index.html">Linux服务器</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Linux安全</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../chroot.html">chroot</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Linux VPN</a><ul>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Linux VPN</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
-<li class="toctree-l4"><a class="reference internal" href="acme.html">acme.sh维护Let’s Encrypt证书</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cron_certbot_renew.html">使用cron定时更新letsencrypt证书</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ocserv_timeout.html">OpenConnect服务连接超时排查</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">使用cron定时更新letsencrypt证书</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vpnc.html">vpnc - Cisco VPN客户端</a></li>
 <li class="toctree-l4"><a class="reference internal" href="polipo_proxy_yum.html">Polipo代理和YUM代理配置</a></li>
 </ul>
@@ -149,9 +147,10 @@
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Linux Atlas</a> &raquo;</li>
           <li><a href="../index.html">Linux安全</a> &raquo;</li>
-      <li>Linux VPN</li>
+          <li><a href="index.html">Linux VPN</a> &raquo;</li>
+      <li>使用cron定时更新letsencrypt证书</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/linux/security/vpn/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/linux/security/vpn/cron_certbot_renew.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -159,28 +158,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="linux-vpn">
-<span id="id1"></span><h1>Linux VPN<a class="headerlink" href="#linux-vpn" title="永久链接至标题">¶</a></h1>
-<p>在Internet上，安全加密通讯是非常重要基础设置，无论是企业还是个人，都需要使用VPN来保护自由的通讯。</p>
-<p><a class="reference external" href="https://github.com/hwdsl2/setup-ipsec-vpn">IPsec VPN Server Auto Setup Scripts</a> 是一个快速构建IPsec VPN服务器的脚本，并且提供了相关技术索引，将作为本章节学习实践的起步。</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="openconnect_vpn.html">OpenConnect VPN</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acme.html">acme.sh维护Let’s Encrypt证书</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cron_certbot_renew.html">使用cron定时更新letsencrypt证书</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ocserv_timeout.html">OpenConnect服务连接超时排查</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vpnc.html">vpnc - Cisco VPN客户端</a></li>
-<li class="toctree-l1"><a class="reference internal" href="polipo_proxy_yum.html">Polipo代理和YUM代理配置</a></li>
-</ul>
+  <section id="cronletsencrypt">
+<span id="cron-certbot-renew"></span><h1>使用cron定时更新letsencrypt证书<a class="headerlink" href="#cronletsencrypt" title="永久链接至标题">¶</a></h1>
+<p>部署 <a class="reference internal" href="openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 时，VPN的证书是由 <a class="reference external" href="https://letsencrypt.org/">Let’s Encrypt</a> 签发的，这个免费签发的证书有效期3个月，所以需要设置一个定时更新证书脚本:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at:
+   /etc/letsencrypt/live/vpn.huatai.me/fullchain.pem
+   Your key file has been saved at:
+   /etc/letsencrypt/live/vpn.huatai.me/privkey.pem
+   Your cert will expire on 2022-05-04. To obtain a new or tweaked
+   version of this certificate in the future, simply run certbot
+   again. To non-interactively renew *all* of your certificates, run
+   &quot;certbot renew&quot;
+</pre></div>
 </div>
+<p>根据提示可知，需要每3个月重新执行一次 <code class="docutils literal notranslate"><span class="pre">certbot</span> <span class="pre">renew</span></code> 命令来更新证书，所以最简单方式是是使用 <span class="xref std std-ref">cron</span> 定时执行脚本</p>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../chroot.html" class="btn btn-neutral float-left" title="chroot" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="openconnect_vpn.html" class="btn btn-neutral float-right" title="OpenConnect VPN" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="openconnect_vpn.html" class="btn btn-neutral float-left" title="OpenConnect VPN" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="vpnc.html" class="btn btn-neutral float-right" title="vpnc - Cisco VPN客户端" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,16 +1,13 @@
-.. _shell:
+.. _bash:
 
 =================================
-Shell Atlas
+Bash
 =================================
-
-运维工作最基本的能力就是Shell
 
 .. toctree::
    :maxdepth: 1
 
-   bash/index
-   utilities/index
+   list_all_cron_jobs.rst
 
 .. only::  subproject and html
 
