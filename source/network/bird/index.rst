@@ -1,18 +1,13 @@
-.. _network:
+.. _bird:
 
 =================================
-Network Atlas
+Bird网络路由
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   routing/index
-   bird/index
-   cisco/index
-   mikrotik/index
-   packet_analysis/index
-   p2p/index
+   intro_bird.rst
 
 .. only::  subproject and html
 
