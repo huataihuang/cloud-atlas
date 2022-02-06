@@ -16,19 +16,33 @@
    sudo apt update
    sudo apt upgrade
 
-.. note::
+- 树莓派镜像启动时会自动更新firmware，所以通常情况下不需要手工执行 ``rpi-update`` 来更新firmware
 
-   树莓派镜像启动时会自动更新firmware，所以通常情况下不需要手工执行 ``rpi-update`` 来更新firmware
+- 要检查firmware版本，执行命令::
 
-   要检查firmware版本，执行命令::
+   vcgencmd version
 
-      vcgencmd version
+可以看到::
 
-   可以看到::
+   Jan 20 2022 13:56:48
+   Copyright (c) 2012 Broadcom
+   version bd88f66f8952d34e4e0613a85c7a6d3da49e13e2 (clean) (release) (start)
 
-      Jan 20 2022 13:56:48
-      Copyright (c) 2012 Broadcom
-      version bd88f66f8952d34e4e0613a85c7a6d3da49e13e2 (clean) (release) (start)
+- 不过 eeprom 是需要独立更新的(bootloader)::
+
+   sudo rpi-eeprom-update -d -f /lib/firmware/raspberrypi/bootloader/stable/pieeprom-2022-01-25.bin
+   
+然后重启一次系统，重启时会自动刷新eeprom，此时检查::
+
+   vcgencmd bootloader_version
+
+显示为最新版本::
+
+   2022/01/25 14:30:41
+   version 6efe41bd9d1e5546fa3715e72e1775b7bd813237 (release)
+   timestamp 1643121041
+   update-time 1644151535
+   capabilities 0x0000007f
 
 - 使用 ``rasbian`` 自带的 ``raspi-config`` 工具来配置启动顺序
 
@@ -38,9 +52,20 @@
   - B2 USB Boot     Boot from USB if available, otherwise boot from SD Card
   - B3 Network Boot Boot from network if SD card boot fails
 
+选择 ``B1`` 即可(先SD卡，然后USB)
+
+完成后检查启动顺序::
+
+   vcgencmd bootloader_config
+
+显示输出::
+
+   ...
+   BOOT_ORDER=0xf41
+
+表示先TF卡，后USB
+
 - 再将Ubuntu for Raspberry Pi复制到移动硬盘中，通过USB启动
-
-
 
 以下实践仅供参考(归档)
 =========================
