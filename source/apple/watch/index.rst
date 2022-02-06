@@ -8,6 +8,9 @@ Apple Watch
    :maxdepth: 1
 
    update_awatch_nospace.rst
+   watch_7.rst
+   watch_esim.rst
+   watch_health.rst
 
 .. only::  subproject and html
 

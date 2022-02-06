@@ -86,11 +86,12 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Real Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../real_think/index.html">真实世界的技术思考</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../prepare/index.html">真实云计算的构建准备</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../private_cloud/index.html">私有云计算构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../priv_cloud/index.html">私有云计算构建</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">边缘云计算构建</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">边缘云计算架构</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id2">硬件环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#arm">ARM服务器分布</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">网络互联</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="edge_jeston.html">边缘计算Jetson Nano</a></li>
@@ -138,7 +139,7 @@
              
   <section id="edge-cloud-infra">
 <span id="id1"></span><h1>边缘云计算架构<a class="headerlink" href="#edge-cloud-infra" title="永久链接至标题">¶</a></h1>
-<p>我陆续购买多多代 <a class="reference internal" href="../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 设备，在最初构建 <a class="reference internal" href="../private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 时，我采用的还是完整的 <a class="reference internal" href="../../kubernetes/arm/index.html#kubernetes-arm"><span class="std std-ref">ARM架构Kubernetes</span></a> 。不过，我也在思考如何能够尽可能少消耗树莓派的硬件资源来完成更多的计算。轻量级始终是ARM架构(资源有限的系统)的技术关键，类似 <a class="reference internal" href="../../infrastructure/akraino/index.html#akraino"><span class="std std-ref">Akraino边缘计算</span></a> ，我逐步想要在ARM架构上构建一个轻量级的边缘计算平台。</p>
+<p>我陆续购买多多代 <a class="reference internal" href="../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 设备，在最初构建 <a class="reference internal" href="../priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 时，我采用的还是完整的 <a class="reference internal" href="../../kubernetes/arm/index.html#kubernetes-arm"><span class="std std-ref">ARM架构Kubernetes</span></a> 。不过，我也在思考如何能够尽可能少消耗树莓派的硬件资源来完成更多的计算。轻量级始终是ARM架构(资源有限的系统)的技术关键，类似 <a class="reference internal" href="../../infrastructure/akraino/index.html#akraino"><span class="std std-ref">Akraino边缘计算</span></a> ，我逐步想要在ARM架构上构建一个轻量级的边缘计算平台。</p>
 <section id="id2">
 <h2>硬件环境<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <p>我购买过多代树莓派产品以及 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> :</p>
@@ -149,12 +150,18 @@
 <ul>
 <li><p>其中一台 <code class="docutils literal notranslate"><span class="pre">2G</span></code> 内存配置的 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 独立作为监控和管理服务器，提供这个 <a class="reference internal" href="index.html#edge-cloud"><span class="std std-ref">边缘云计算构建</span></a> 的监控</p>
 <ul>
+<li><p>资源有限，并且要有一个 <a class="reference internal" href="../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 体系之外的单独监控，所以该节点运行轻量级监控以及对外通知</p></li>
 <li><p>采用监控( <a class="reference internal" href="../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 结合跟多网络管理平台 )</p></li>
 </ul>
 </li>
-<li><p>另外两台 <code class="docutils literal notranslate"><span class="pre">8G</span></code> 内存配置的 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 则作为工作节点，运行基础服务:</p>
+<li><p>在3台 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 上通过 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 构建基础存储，实现数据镜像</p>
 <ul>
-<li><p>采用 <a class="reference internal" href="../../gluster/index.html#gluster"><span class="std std-ref">Gluster Atlas</span></a> 构建基础存储，实现数据镜像 (如果后续有更为强劲的硬件以及更多节点,3个以上,可能会构建一个 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 架构版本)</p></li>
+<li><p>由于3个 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 的其中一个只有 <code class="docutils literal notranslate"><span class="pre">2G</span></code> 内存，所以这个 <code class="docutils literal notranslate"><span class="pre">2G</span></code> 节点不部署 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> ，仅作为 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储节点</p></li>
+</ul>
+</li>
+<li><p>另外两台 <code class="docutils literal notranslate"><span class="pre">8G</span></code> 内存配置的 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 加入 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 作为工作节点</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">8G</span></code> 节点内存富裕，运行 <a class="reference internal" href="../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 集群监控</p></li>
 </ul>
 </li>
 </ul>
@@ -165,8 +172,8 @@
 </section>
 <section id="arm">
 <h2>ARM服务器分布<a class="headerlink" href="#arm" title="永久链接至标题">¶</a></h2>
-<table class="colwidths-given docutils align-default" id="id3">
-<caption><span class="caption-text">ARM边缘计算主机分配</span><a class="headerlink" href="#id3" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id4">
+<caption><span class="caption-text">ARM边缘计算主机分配</span><a class="headerlink" href="#id4" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 10%" />
@@ -221,11 +228,11 @@
 <td><p>树莓派1B</p></td>
 </tr>
 <tr class="row-odd"><td><p>192.168.7.10</p></td>
-<td><p>x-k3s-a-0</p></td>
+<td><p>x-k3s-n-0</p></td>
 <td><p>4</p></td>
-<td><p>2</p></td>
-<td><p>512SSD</p></td>
-<td><p>树莓派 B4 - 管理/监控/备份</p></td>
+<td><p>4</p></td>
+<td><p>128 SD</p></td>
+<td><p>Jetson Nano - GPU</p></td>
 </tr>
 <tr class="row-even"><td><p>192.168.7.11</p></td>
 <td><p>x-k3s-m-1</p></td>
@@ -249,11 +256,11 @@
 <td><p>树莓派 B3</p></td>
 </tr>
 <tr class="row-odd"><td><p>192.168.7.20</p></td>
-<td><p>x-k3s-n-0</p></td>
+<td><p>x-k3s-a-0</p></td>
 <td><p>4</p></td>
-<td><p>4</p></td>
-<td><p>128 SD</p></td>
-<td><p>Jetson Nano - GPU</p></td>
+<td><p>2</p></td>
+<td><p>512SSD</p></td>
+<td><p>树莓派 B4 - ceph/monitor</p></td>
 </tr>
 <tr class="row-even"><td><p>192.168.7.21</p></td>
 <td><p>x-k3s-n-1</p></td>
@@ -269,20 +276,21 @@
 <td><p>512SSD</p></td>
 <td><p>树莓派 B4</p></td>
 </tr>
-<tr class="row-even"><td><p>192.168.7.23</p></td>
-<td><p>x-k3s-n-3</p></td>
-<td><p>4</p></td>
-<td><p>8</p></td>
-<td><p>512SSD</p></td>
-<td><p>树莓派 B4</p></td>
-</tr>
 </tbody>
 </table>
-<p>ARM架构的边缘计算采用了 <code class="docutils literal notranslate"><span class="pre">192.168.7.x</span></code> 作为网络IP段，和 <a class="reference internal" href="../private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> 隔离，中间采用 3层 <a class="reference internal" href="../../network/cisco/index.html#cisco"><span class="std std-ref">Cisco 网络</span></a> 路由</p>
+<p>ARM架构的边缘计算采用了 <code class="docutils literal notranslate"><span class="pre">192.168.7.x</span></code> 作为网络IP段，和 <a class="reference internal" href="../priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> 隔离，中间采用 3层 <a class="reference internal" href="../../network/cisco/index.html#cisco"><span class="std std-ref">Cisco 网络</span></a> 路由</p>
 <p>虽然也可以在树莓派上实现 <a class="reference internal" href="../../kvm/arm_kvm/index.html#arm-kvm"><span class="std std-ref">ARM硬件环境KVM虚拟化</span></a> ，但是考虑到边缘计算硬件性能有限，所以采用轻量级 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 实现 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 来构建mini集群，目标是实现:</p>
 <ul class="simple">
 <li><p>任意调度计算资源实现服务的伸缩、高可用</p></li>
-<li><p>构建边缘计算场景: 传感器数据采集、存储、传输，以及独立的AI计算，结合 <a class="reference internal" href="../private_cloud/index.html#private-cloud"><span class="std std-ref">私有云计算构建</span></a> 的强大算力，实现云计算的合理分布</p></li>
+<li><p>构建边缘计算场景: 传感器数据采集、存储、传输，以及独立的AI计算，结合 <a class="reference internal" href="../priv_cloud/index.html#priv-cloud"><span class="std std-ref">私有云计算构建</span></a> 的强大算力，实现云计算的合理分布</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>网络互联<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>模拟多机房互联:</p>
+<ul class="simple">
+<li><p>使用 <a class="reference internal" href="../../studio/hardware/thinkpad_x220.html#thinkpad-x220"><span class="std std-ref">ThinkPad X220笔记本</span></a> 构建VPN中心节点，实现多机房集中到中心节点连接</p></li>
+<li><p>在每个集群上启动 <a class="reference internal" href="../../network/bird/index.html#bird"><span class="std std-ref">Bird网络路由</span></a> 路由Daemon来维护动态路由，并结合 <a class="reference internal" href="../../kubernetes/network/k8s_network_infa.html#k8s-network-infra"><span class="std std-ref">Kubernetes网络架构</span></a> 实现不同集群路由</p></li>
 </ul>
 </section>
 </section>

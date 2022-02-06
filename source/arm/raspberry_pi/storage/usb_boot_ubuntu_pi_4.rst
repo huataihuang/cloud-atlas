@@ -4,6 +4,47 @@
 树莓派4 USB存储启动Ubuntu Server 20.04
 =======================================
 
+2022年1月，我实践发现树莓派操作系统 ``raspbian`` 提供的 ``raspi-confi`` 工具已经直接内置了配置启动顺序功能
+
+所以本文复杂的设置已经不再需要，只需要使用 ``raspi-config`` 来完成即可(见最新段落)
+
+设置方法(最新)
+=================
+
+- 先用Raspbian OS启动树莓派，更新::
+
+   sudo apt update
+   sudo apt upgrade
+
+.. note::
+
+   树莓派镜像启动时会自动更新firmware，所以通常情况下不需要手工执行 ``rpi-update`` 来更新firmware
+
+   要检查firmware版本，执行命令::
+
+      vcgencmd version
+
+   可以看到::
+
+      Jan 20 2022 13:56:48
+      Copyright (c) 2012 Broadcom
+      version bd88f66f8952d34e4e0613a85c7a6d3da49e13e2 (clean) (release) (start)
+
+- 使用 ``rasbian`` 自带的 ``raspi-config`` 工具来配置启动顺序
+
+``Advanced Options => A6 Boot Order`` 就可以配置启动顺序，支持:
+
+  - B1 SD Card Boot Boot from SD Card if available, otherwise boot from USB
+  - B2 USB Boot     Boot from USB if available, otherwise boot from SD Card
+  - B3 Network Boot Boot from network if SD card boot fails
+
+- 再将Ubuntu for Raspberry Pi复制到移动硬盘中，通过USB启动
+
+
+
+以下实践仅供参考(归档)
+=========================
+
 .. note::
 
    为了实现USB移动硬盘启动树莓派，我做了多次 :ref:`usb_boot_ubuntu_pi_4` ，所以虽然有了非常详细的排查过程，但是步骤上有些重复和散乱。所以，我重新整理一份操作手册，从我的实践经验来探索USB启动的最佳实践。
