@@ -49,7 +49,6 @@ Clone Alpine Linux (树莓派)
 
 完成clone出来
 
-
 - Alpine Linux自带的 ``tar`` 是基于 ``BusyBox`` 的，所以不支持 GNU tar 的 ``--one-file-system`` 参数，所以处于谨慎，我还是将TF卡取出，挂载在标准Linux的 ``/mnt`` 目录下进行备份和恢复::
 
    mount /dev/sdf2 /mnt

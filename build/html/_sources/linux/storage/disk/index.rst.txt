@@ -12,6 +12,7 @@ Linux磁盘
    check_hd_sn.rst
    linux_partition.rst
    4k_alignment.rst
+   linux_ssd_partition_alignment.rst
    wd_advanced_format.rst
    parted.rst
    mount_img.rst

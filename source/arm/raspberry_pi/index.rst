@@ -17,6 +17,7 @@ Raspberry Pi
    network/index
    storage/index
    uart/index
+   performance/index
    debug/index
    pi_cluster/index
    android/index

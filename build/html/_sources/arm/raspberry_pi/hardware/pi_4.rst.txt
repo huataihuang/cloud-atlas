@@ -22,8 +22,9 @@ Raspberry Pi 4是一个非常小巧的多显示输出桌面级计算机，刚拿
 .. figure:: ../../../_static/arm/raspberry_pi/hardware/pi_4_blueprint-labelled.png
    :scale: 75
 
-- Broadcom BCM2711处理器：4核心Cortex-A72(ARM v8) 64位处理器，主频1.5GHz - 树莓派4b的处理器属于A72架构，比 :ref:`jetson` 的A57架构要先进一代，据评测性能提升了1.8倍。(不过，NVIDIA是买GPU送CPU，所以也不能要求太高)
+- Broadcom BCM2711处理器：4核心Cortex-A72(ARM v8) 64位处理器，主频1.5GHz (2021年11月软件更新后默认turbo-mode从1.5GHz升级到1.8GHz，等同于 :ref:`pi_400` `Your Raspberry Pi 4 may have just got an unexpected speed boost <https://www.zdnet.com/article/your-raspberry-pi-4-may-have-just-got-an-unexpected-speed-boost/>`_ ) 
 
+  - 树莓派4b的处理器属于A72架构，比 :ref:`jetson` 的A57架构要先进一代，据评测性能提升了1.8倍。(不过，NVIDIA是买GPU送CPU，所以也不能要求太高)
   - Cortex-A72(ARM v8) 支持 :ref:`arm_kvm` 
 
 - 提供2GB, 4GB 或 8GB LPDDR4-3200 SDRAM 三种规格

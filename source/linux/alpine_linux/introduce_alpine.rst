@@ -32,6 +32,13 @@ Alpine的一大特点是非常小巧，没有包含过多的内容。这种较�
 - 社区驱动: Alpine社区相对其他发行版较小，主要的核心开发者沟通在 ``#alpine-linux`` 和 ``#alpine-devel`` IRC
 - 安全: Alpine的主要特点之一就是安全，通过精简系统使得受攻击面减小，特别适合嵌入系统和特定服务器领域。 ( :ref:`alpine_install_pi` )
 
+.. note::
+
+   `Top 23 alpine-linux Open-Source Projects <https://www.libhunt.com/topic/alpine-linux>`_ 提供不少可以在alpine linux上借鉴的项目:
+
+   - :ref:`termux_alpine`
+   - :ref:`firefox_sync_server`
+
 参考
 ======
 

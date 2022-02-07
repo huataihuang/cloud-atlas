@@ -1,13 +1,14 @@
 .. _firefox:
 
 =================================
-Firefox浏览器
+Firefox
 =================================
 
 .. toctree::
    :maxdepth: 1
 
    firefox_tridactyl.rst
+   firefox_sync_server.rst
 
 .. only::  subproject and html
 
