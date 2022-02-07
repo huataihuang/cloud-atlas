@@ -4,7 +4,14 @@
 树莓派环境安装Alpine Linux到USB磁盘启动
 ========================================
 
-我在 :ref:`alpine_install_pi` ，系统是安装在TF卡上，性能有限。所以和 :ref:`usb_boot_ubuntu_pi_4` 相似，准备采用USB SSD磁盘来运行。不过，目前 :ref:`alpine_pi_usb_boot_clone` 没有成功，所以本文尝试重新开始系统安装，看能否实现USB磁盘启动运行。
+我在 :ref:`alpine_install_pi` ，系统是安装在TF卡上，性能有限。所以和 :ref:`usb_boot_ubuntu_pi_4` 相似，准备采用USB SSD磁盘来运行。我最初安装Alpine Linux是采用TF卡安装 :ref:`alpine_install_pi` ，然后通过 :ref:`alpine_pi_clone` 可以完成相同硬件环境的Alpine Linux复制安装。不过，这个方式我实践下来，只在同样使用TF卡的 :ref:`pi_3` 上成功，改到使用USB SSD存储的 :ref:`pi_4` 上启动失败。
+
+经过再次尝试实践，我最终采用以下方法成功:
+
+- 直接使用USB SSD磁盘的 :ref:`pi_4` 安装 Alpine Linux，采用 ``sys`` 模式安装，可以正常启动并工作
+- 将上述直接安装于USB SSD的Alpine Linux系统，采用类似clone方式复制系统，是可以成功启动完成多个系统安装的
+
+本文就是在USB磁盘启动环境中安装Alpine Linux的实践记录，完成后，再使用 :ref:`alpine_pi_usb_boot_clone` 完成后续树莓派安装。
 
 下载和镜像
 =============

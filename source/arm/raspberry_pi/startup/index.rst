@@ -8,6 +8,8 @@
    :maxdepth: 1
 
    pi_os.rst
+   raspberry_pi_os.rst
+   pi_firmware_update.rst
    pi_400_4k_display.rst
    pi_400_dual_monitor.rst
    pi_x11_slow.rst

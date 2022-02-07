@@ -1,16 +1,14 @@
-.. _proxy:
+.. _android_apps:
 
 =================================
-Proxy代理服务
+Android 应用
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   pac.rst
-   squid/index
-   varnish/index
-   privoxy/index
+   termux.rst
+   termux_alpine.rst
 
 .. only::  subproject and html
 

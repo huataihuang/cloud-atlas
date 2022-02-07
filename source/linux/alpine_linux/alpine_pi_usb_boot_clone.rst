@@ -4,13 +4,27 @@
 树莓派4 USB存储启动Alpine Linux(clone方式)
 ===============================================
 
-.. warning::
+在通过 :ref:`alpine_pi_clone` 复制部署好用于 :ref:`k3s` 管控节点的3个服务器 ``x-k3s-m-1`` / ``x-k3s-m-2`` / ``x-k3s-m-3`` 之后，需要部署3个工作节点。工作节点采用USB SSD，所以先采用 :ref:`alpine_install_pi_usb_boot` ，然后以这个USB SSD磁盘的模版clone出后续同样硬件环境的Alpine Linux。
 
-   本文尝试通过clone方式通过USB存储启动Alpine Linux，但是我的实践尚未成功，启动树莓派会进入"彩虹"状态，所以后续还要探索...
+备份模版系统
+=============
 
-在通过 :ref:`alpine_pi_clone` 复制部署好用于 :ref:`k3s` 管控节点的3个服务器 ``x-k3s-m-1`` / ``x-k3s-m-2`` / ``x-k3s-m-3`` 之后，需要部署3个工作节点。工作节点采用
+- 目前已经 :ref:`alpine_install_pi_usb_boot` 安装好 ``x-k3s-a-0`` 系统，登陆到这台模版主机上
 
-磁盘分区::
+- 检查磁盘分区和挂载::
+
+   df -h
+
+可以看到分区挂载::
+
+   Filesystem                Size      Used Available Use% Mounted on
+   devtmpfs                 10.0M         0     10.0M   0% /dev
+   shm                     924.3M         0    924.3M   0% /dev/shm
+   /dev/sda2                31.2G    248.3M     29.4G   1% /
+   tmpfs                   369.7M    160.0K    369.6M   0% /run
+   /dev/sda1               252.0M     52.9M    199.2M  21% /media/sda1
+
+- 使用标准fdisk检查磁盘分区::
 
    Disk /dev/sde: 953.86 GiB, 1024175636480 bytes, 2000343040 sectors
    Disk model: My Passport 25F3
@@ -24,62 +38,67 @@
    /dev/sde1  *      2048   526335   524288  256M  c W95 FAT32 (LBA)
    /dev/sde2       526336 67635199 67108864   32G 83 Linux
 
+如果使用alpine linux内置fdisk查看::
+
+   Disk /dev/sda: 954 GB, 1024175636480 bytes, 2000343040 sectors
+   124515 cylinders, 255 heads, 63 sectors/track
+   Units: sectors of 1 * 512 = 512 bytes
+
+   Device  Boot StartCHS    EndCHS        StartLBA     EndLBA    Sectors  Size Id Type
+   /dev/sda1 *  0,32,33     32,194,34         2048     526335     524288  256M  c Win95 FAT32 (LBA)
+   /dev/sda2    32,194,35   114,24,38       526336   67635199   67108864 32.0G 83 Linux
+
+- 按照 :ref:`alpine_pi_clone` 对整个操作系统进行打包::
+
+   cd /
+   tar -cvpzf alpine-sys-ssd.tar.gz --exclude=alpine-sys-ssd.tar.gz --exclude=var/cache --exclude=dev --exclude=proc --exclude=sys --exclude=tmp --exclude=run .
+
 复制系统
 ============
 
-和 :ref:`alpine_pi_clone` 相似复制系统，但是需要注意，使用USB外接移动硬盘，对于系统识别的磁盘名字是 ``/dev/sda`` ，所以在 Alpine Linux 配置中，挂载启动分区是 ``media/sda1``
+将目标主机使用的USB SSD磁盘插入到一台主机，例如我在 ``zcloud`` 上完成操作，使用标准fdisk进行分区::
+
+   fdisk /dev/sde
 
 将移动SSD硬盘插入主机，按照上文做好磁盘分区，然后进行格式化::
 
-   sudo mkdosfs -F 32 /dev/sdf1
-   sudo mkfs.ext4 /dev/sdf2
+   sudo mkdosfs -F 32 /dev/sde1
+   sudo mkfs.ext4 /dev/sde2
 
 - 挂载系统::
 
-    mount /dev/sdf2 /mnt
+    mount /dev/sde2 /mnt
     mkdir -p /mnt/media/sda1
-    mount /dev/sdf1 /mnt/media/sda1
+    mount /dev/sde1 /mnt/media/sda1
 
 .. note::
 
-   请注意，移动硬盘是 ``/dev/sda1`` 所以这里设置的挂载目录必须是 ``/mnt/media/sda1``
+   请注意，使用SSD移动硬盘启动Alpine Linux时，这个移动硬盘分区是 ``/dev/sda1`` 所以这里设置的挂载目录必须是 ``/mnt/media/sda1``
 
 - 复制系统::
 
    cd /mnt
-   tar zxvf ~/alpine-sys.tar.gz 
-
-- 原始的alpine linux使用TF卡，所以启动目录是 ``media/mmcblk0p1`` ，而且打包压缩时候也是这个目录。但是，对于我们后面需要使用SSD移动硬盘，需要把 ``media/mmcblk0p1`` 全部移动到 ``media/sda1`` 下::
-
-   mv media/mmcblk0p1/* media/sda1/
-   rm -r media/mmcblk0p1
-
-- 然后还需要修正软连接::
-
-   unlink boot
-   ln -s media/sda1/boot ./boot
+   tar zxvf ~/alpine-sys-ssd.tar.gz 
 
 - 检查磁盘分区UUID::
 
-   blkid /dev/sdf2
+   blkid /dev/sde2
 
 显示输出::
 
-   /dev/sdf2: UUID="61747208-e1a5-43be-be15-a576e4b41e76" TYPE="ext4" PARTUUID="ab86aefd-02"
+   /dev/sde2: UUID="c5e2356d-6fda-468b-be80-7eb798038100" TYPE="ext4" PARTUUID="ab86aefd-02"
+
+这个分区UUID需要订正到clone后的系统中，这样才能保证新系统启动时正确挂载磁盘
 
 - 修订配置 ``boot/cmdline.txt``  ::
 
-   root=UUID=61747208-e1a5-43be-be15-a576e4b41e76 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4
+   root=UUID=c5e2356d-6fda-468b-be80-7eb798038100 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4
 
 - 修订 ``etc/fstab`` ::
 
-   UUID=61747208-e1a5-43be-be15-a576e4b41e76       /       ext4    rw,relatime 0 0
+   UUID=c5e2356d-6fda-468b-be80-7eb798038100       /       ext4    rw,relatime 0 0
    ...
    /dev/sda1  /media/sda1  vfat defaults 0 0
-
-``boot/config-rpi`` 中有配置会被 ``boot/cmdline.txt`` 覆盖，所以不调整::
-
-   CONFIG_CMDLINE="console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 root=/dev/mmcblk0p2 rootfstype=ext4 rootwait"
 
 - 修订主机名和IP地址配置:
 

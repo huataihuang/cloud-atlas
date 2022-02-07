@@ -1,16 +1,13 @@
-.. _proxy:
+.. _pi_performance:
 
 =================================
-Proxy代理服务
+树莓派性能
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   pac.rst
-   squid/index
-   varnish/index
-   privoxy/index
+   pi_overclock.rst
 
 .. only::  subproject and html
 

@@ -18,7 +18,6 @@ Linux桌面
    vim/index
    vscode/index
    xpra/index
-   firefox/index
    remote_linux_desktop.rst
    light_browser.rst
    netsurf.rst 
