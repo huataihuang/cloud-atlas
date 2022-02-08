@@ -11,6 +11,7 @@ Linux桌面
    rdp/index
    wayland/index
    sway/index
+   suckless/index
    i3.rst
    xfce.rst
    oh_my_zsh.rst

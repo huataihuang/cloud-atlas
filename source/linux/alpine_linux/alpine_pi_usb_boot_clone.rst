@@ -51,7 +51,11 @@
 - 按照 :ref:`alpine_pi_clone` 对整个操作系统进行打包::
 
    cd /
-   tar -cvpzf alpine-sys-ssd.tar.gz --exclude=alpine-sys-ssd.tar.gz --exclude=var/cache --exclude=dev --exclude=proc --exclude=sys --exclude=tmp --exclude=run .
+   tar -cvpzf alpine-sys-ssd.tar.gz --exclude=alpine-sys-ssd.tar.gz --exclude=var/cache --exclude=dev/* --exclude=proc/* --exclude=sys/* --exclude=tmp/* --exclude=run/* .
+
+.. note::
+
+   请注意，这里对于 ``dev`` ``proc`` 等动态虚拟文件系统都采用跳过备份，但是都是对子目录跳过 ( 例如 ``proc/*`` )。这是因为恢复时依然需要创建这些目录，否则启动时会因为缺少这些关键目录而导致系统报错无法正常工作。
 
 复制系统
 ============

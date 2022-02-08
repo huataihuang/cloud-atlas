@@ -8,3 +8,8 @@ Termux - Andorid终端
 
 .. figure:: ../../_static/android/apps/termux_hello_framed.png
    :scale: 60
+
+参考
+========
+
+- `强大的终端模拟器:Termux <https://blog.csdn.net/yshhuang/article/details/83545288>`_

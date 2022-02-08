@@ -65,7 +65,6 @@ Linux SSD分区对齐
 
 可以看到分区开始位置并不是物理扇区边界 ``Partition 1 does not start on physical sector boundary.``
 
-
 我注意到我前2次购买到 ``Disk model: My Passport 25F3`` 设备的 ``Sector size`` 和 ``I/O size (logical/physical)`` 和第3次购买的设备不同，原先是::
 
    Disk /dev/sda: 953.86 GiB, 1024175636480 bytes, 2000343040 sectors

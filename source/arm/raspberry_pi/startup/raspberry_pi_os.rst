@@ -1,4 +1,4 @@
-.. _praspberry_pi_os:
+.. _raspberry_pi_os:
 
 =========================
 Raspbery Pi OS(Raspbian)

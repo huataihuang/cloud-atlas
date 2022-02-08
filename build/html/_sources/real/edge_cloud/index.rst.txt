@@ -10,3 +10,5 @@
    edge_cloud_infra.rst
    edge_jeston.rst
    edge_pi.rst
+   edge_pi_os.rst
+   edge_pi_alpine.rst
