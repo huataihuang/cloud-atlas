@@ -4,7 +4,7 @@
 scrcpy控制Android
 ====================
 
-scrcpy是提供了通过USB或者TCP/IP连接Android设备的应哟过程序，可以工作在Linux, Windows, macOS上:
+scrcpy是提供了通过USB或者TCP/IP连接Android设备的应用程序，可以工作在Linux, Windows, macOS上:
 
 - 请谅解(原生，只显示设备屏幕)
 - 性能(达到30~60fps)
@@ -13,7 +13,10 @@ scrcpy是提供了通过USB或者TCP/IP连接Android设备的应哟过程序，�
 - 快速启动(小于1s)
 - 无需root设备
 
-scrcpy要求Android设备只骚API 21(Android 5.0)，并确保设备激活了adb debugging
+scrcpy要求Android设备支持API 21(Android 5.0)，并确保设备激活了adb debugging
+
+.. figure:: ../../_static/android/hack/scrcpy.jpg
+   :scale: 60
 
 安装scrcpy
 =============
@@ -150,7 +153,7 @@ scrcpy使用adb和设备通讯，而adb可以通过TCP/IP和设备连接
 SSH tunnel
 -------------
 
-要连接远程设备，恶意通过本地 ``adb`` 客户端连接远程 ``adb`` 服务器（需要使用相同的adb协议）::
+要连接远程设备，可以通过本地 ``adb`` 客户端连接远程 ``adb`` 服务器（需要使用相同的adb协议）::
 
    adb kill-server    # kill the local adb server on 5037
    ssh -CN -L5037:localhost:5037 -R27183:localhost:27183 your_remote_computer

@@ -7,6 +7,7 @@ Linux系统管理
 .. toctree::
    :maxdepth: 1
 
+   locale_env.rst
    cron.rst
    os_fork_resource_unavailable.rst
 

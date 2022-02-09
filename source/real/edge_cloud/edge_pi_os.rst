@@ -37,6 +37,14 @@
 
    systemctl enable --now systemd-timesyncd.service
 
+- 配置键盘(默认系统使用了UK键盘布局)，修改 ``/etc/default/keyboard`` ::
+
+   XKBMODEL="pc105"
+   XKBLAYOUT="us"
+   XKBVARIANT=""
+   XKBOPTIONS=""
+   BACKSPACE="guess"
+
 - 配置代理服务器(可选) - APT代理设置 ``/etc/apt/apt.conf.d/01proxy`` 内容如下::
 
    Acquire::http::Proxy "http://192.168.7.200:3128";
@@ -62,9 +70,7 @@
 
 完成初始化系统安装和更新后，部署精简的 :ref:`suckless` ，图形管理器 :ref:`dwm`
 
-- 安装::
-
-   sudo apt install dwm xinit
+编译安装 :ref:`dwm` ...
 
 - 我采用的是字符环境，所以修订 ``~/.xinitrc`` 添加::
 

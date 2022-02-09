@@ -11,6 +11,7 @@
    pi_ubuntu_network.rst
    pi4_usb3_wifi2.4ghz.rst
    raspbian_static_ip.rst
+   router/index
 
 .. only::  subproject and html
 

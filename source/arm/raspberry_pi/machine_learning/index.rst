@@ -1,16 +1,13 @@
-.. _android_apps:
+.. _pi_machine_learning:
 
 =================================
-Android 应用
+树莓派机器学习
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   termux.rst
-   termux_startup.rst
-   termux_alpine.rst
-
+   pi_machine_learning_startup.rst
 
 .. only::  subproject and html
 

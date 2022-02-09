@@ -1,16 +1,13 @@
-.. _android_apps:
+.. _pi_router:
 
 =================================
-Android 应用
+树莓派路由器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   termux.rst
-   termux_startup.rst
-   termux_alpine.rst
-
+   pi_router_startup.rst
 
 .. only::  subproject and html
 
