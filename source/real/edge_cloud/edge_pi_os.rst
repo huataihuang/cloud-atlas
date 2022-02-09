@@ -70,7 +70,30 @@
 
 完成初始化系统安装和更新后，部署精简的 :ref:`suckless` ，图形管理器 :ref:`dwm`
 
-编译安装 :ref:`dwm` ...
+- 安装依赖::
+
+   sudo apt install libx11-dev libxft-dev libxinerama-dev
+
+- 编译安装 :ref:`dwm` ::
+
+    mkdir ~/suckless
+    cd ~/suckless
+    git clone https://git.suckless.org/dwm
+    git clone https://git.suckless.org/st
+    git clone https://git.suckless.org/dmenu 
+
+    cd ~/suckless/st
+    sudo make clean install
+
+    cd ~/suckless/dmenu
+    sudo make clean install
+
+    cd ~/suckless/dwm
+    sudo make clean install
+
+- 安装 ``xinit`` ::
+
+   sudo apt install xinit
 
 - 我采用的是字符环境，所以修订 ``~/.xinitrc`` 添加::
 
@@ -80,6 +103,3 @@
 
    sudo apt install xpra
 
-.. note::
-
-   观察对比了在树莓派上安装 ``chromium`` 需要277MB， ``firefox-esr`` 需要355MB。都是非常庞大的软件，所以考虑为 ``i3`` 配置一个非常轻量级的浏览器

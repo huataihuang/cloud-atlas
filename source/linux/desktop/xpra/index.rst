@@ -9,6 +9,7 @@ X持久化远程应用Xpra
 
    xpra_startup.rst
    xpra_chinese_input.rst
+   xpra_container.rst
 
 .. only::  subproject and html
 
