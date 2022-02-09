@@ -21,6 +21,7 @@ Raspberry Pi
    debug/index
    pi_cluster/index
    android/index
+   machine_learning/index
 
 .. only::  subproject and html
 

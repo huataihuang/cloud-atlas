@@ -9,6 +9,7 @@ Suckless极简桌面
 
    intro_suckless.rst
    dwm.rst
+   dwm_multi-monitor.rst
    st.rst
    surf.rst
    suckless-tools.rst

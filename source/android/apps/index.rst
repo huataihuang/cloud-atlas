@@ -8,7 +8,9 @@ Android 应用
    :maxdepth: 1
 
    termux.rst
+   termux_startup.rst
    termux_alpine.rst
+
 
 .. only::  subproject and html
 
