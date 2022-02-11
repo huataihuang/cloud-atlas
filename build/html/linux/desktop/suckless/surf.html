@@ -97,9 +97,12 @@
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Suckless极简桌面</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="intro_suckless.html">Suckless极简桌面简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dwm.html">dwm - 动态窗口管理器</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dwm_multi-monitor.html">dwm多显示器设置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dwm_xpra.html">结合dwm和xrpa</a></li>
 <li class="toctree-l4"><a class="reference internal" href="st.html">st - X图形精简终端</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">surf - WebKit2/GTK+ 极简浏览器</a></li>
 <li class="toctree-l4"><a class="reference internal" href="suckless-tools.html">suckless工具集</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dwmstatus.html">dwmstatus</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../i3.html">i3窗口管理器</a></li>
@@ -176,10 +179,90 @@
              
   <section id="surf-webkit2-gtk">
 <span id="surf"></span><h1>surf - WebKit2/GTK+ 极简浏览器<a class="headerlink" href="#surf-webkit2-gtk" title="永久链接至标题">¶</a></h1>
+<p><a class="reference external" href="https://surf.suckless.org/">suckless.org surf</a> 是一个简单的</p>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>安装<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>surf依赖 <code class="docutils literal notranslate"><span class="pre">webkit2gtk</span></code> ，所以需要安装开发库:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libwebkit2gtk</span><span class="o">-</span><span class="mf">4.0</span><span class="o">-</span><span class="n">dev</span> <span class="n">libgcr</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+<li><p>另外参考Arch Linux的包列表依赖，补充安装 <code class="docutils literal notranslate"><span class="pre">x11-utils</span></code> (包含 <code class="docutils literal notranslate"><span class="pre">xprop</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">x11</span><span class="o">-</span><span class="n">utils</span>
+</pre></div>
+</div>
+</li>
+<li><p>下载源代码及编译安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">git</span><span class="o">.</span><span class="n">suckless</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">surf</span>
+<span class="n">cd</span> <span class="n">surf</span>
+<span class="n">sudo</span> <span class="n">make</span> <span class="n">clean</span> <span class="n">install</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="id2">
+<h3>surf编译排查<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<p>编译报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Package gcr-3 was not found in the pkg-config search path.
+Perhaps you should add the directory containing `gcr-3.pc&#39;
+to the PKG_CONFIG_PATH environment variable`
+No package &#39;gcr-3&#39; found
+surf.c:9:10: fatal error: glib.h: No such file or directory
+    9 | #include &lt;glib.h&gt;
+    |          ^~~~~~~~
+compilation terminated.
+make: *** [Makefile:31: surf.o] Error
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://www.linux.org/threads/cant-compile-surf-browser-missing-usr-include-glib-h.37767/">Can’t compile surf browser - missing /usr/include/glib.h</a> ，实际上 <code class="docutils literal notranslate"><span class="pre">/usr/include/glib.h</span></code> 已经移动到 <code class="docutils literal notranslate"><span class="pre">/usr/include/glib-2.0/glib.h</span></code> ( 根据 <code class="docutils literal notranslate"><span class="pre">dpkg-query</span> <span class="pre">-S</span> <span class="pre">/usr/include/glib-2.0/glib.h</span></code> 可以看到系统已经安装了 <code class="docutils literal notranslate"><span class="pre">libglib2.0-dev</span></code> : <code class="docutils literal notranslate"><span class="pre">libglib2.0-dev:armhf:</span> <span class="pre">/usr/include/glib-2.0/glib.h</span></code> )</p>
+<p>在上述讨论中建议参考Arch Linux的surf包说明，先确保系统安装好:</p>
+<ul class="simple">
+<li><p>gcr - A library for bits of crypto UI and parsing (补充安装)</p></li>
+<li><p>webkit2gtk (安装 libwebkit2gtk-4.0-dev)</p></li>
+<li><p>xorg-xprop (安装 x11-utils)</p></li>
+<li><p>ca-certificates (ca-certificates-utils) (optional) – SSL verification (已经安装)</p></li>
+<li><p>curl (curl-git, curl-minimal-git) (optional) – default download handler (已经安装)</p></li>
+<li><p>dmenu (optional) – URL-bar (已经安装)</p></li>
+<li><p>tabbed (tabbed-git, tabbed-flexipatch-git) (optional) – tabbed frontend (我后续通过编译安装)</p></li>
+<li><p>xterm (jbxvt-git, xterm-git) (optional) – default download handler (不安装，使用 <a class="reference internal" href="st.html#st"><span class="std std-ref">st - X图形精简终端</span></a> )</p></li>
+</ul>
+<p>我经过反复验证发现:</p>
+<ul class="simple">
+<li><p>需要安装 <code class="docutils literal notranslate"><span class="pre">libgcr-3-dev</span></code> 才能在编译时消除 <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">package</span> <span class="pre">'gcr-3'</span> <span class="pre">found</span></code></p></li>
+<li><p>需要安装 <code class="docutils literal notranslate"><span class="pre">libwebkit2gtk-4.0-dev</span></code> 才能使得 <code class="docutils literal notranslate"><span class="pre">surf</span></code> 编译正确找到 <code class="docutils literal notranslate"><span class="pre">glib.h</span></code> ，也就是说这个 <code class="docutils literal notranslate"><span class="pre">glib.h</span></code> 是属于 <code class="docutils literal notranslate"><span class="pre">libwebkit2gtk-4.0-dev</span></code> 而不是系统的 <code class="docutils literal notranslate"><span class="pre">glib-2.0-dev</span></code></p></li>
+</ul>
+<p><strong>然后编译能够完成</strong></p>
+</section>
+</section>
+<section id="id3">
+<h2>使用<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">surf</span></code> 没有任何常规浏览器的导航栏、菜单等等，就是一个简介的页面，就像一张画纸铺满整个可用的窗口空间。</p>
+<p>是的，屏幕利用率非常高…但是，等等，怎么操作前进后退呢？</p>
+<p>默认的快捷键是以 <code class="docutils literal notranslate"><span class="pre">ctrl</span></code> 引导的:</p>
+</section>
+<section id="id4">
+<h2>使用问题排查<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="google">
+<h3>无法访问google<a class="headerlink" href="#google" title="永久链接至标题">¶</a></h3>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">surf</span></code> 访问 <code class="docutils literal notranslate"><span class="pre">google.com</span></code> 会出现页面空白，终端输出信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">child</span> <span class="n">exited</span> <span class="k">with</span> <span class="n">status</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+<section id="default-css">
+<h3>提示无法读取 <code class="docutils literal notranslate"><span class="pre">default.css</span></code><a class="headerlink" href="#default-css" title="永久链接至标题">¶</a></h3>
+<p>发现访问很多网站时终端信息提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Could</span> <span class="ow">not</span> <span class="n">read</span> <span class="n">style</span> <span class="n">file</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">surf</span><span class="o">/</span><span class="n">styles</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">css</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://surf.suckless.org/">suckless.org surf</a></p></li>
+<li><p><a class="reference external" href="https://www.maketecheasier.com/surf-browser-minimalist-web-browsing-experience/">Use the Surf Browser for a Minimalist Web-Browsing Experience</a></p></li>
 </ul>
 </section>
 </section>

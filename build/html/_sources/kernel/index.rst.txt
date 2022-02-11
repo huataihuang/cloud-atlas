@@ -20,6 +20,7 @@ Kernel Atlas
    perf/index
    admin/index
    memory/index
+   network/index
    power/index
    tracing/index
 

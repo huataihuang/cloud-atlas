@@ -42,6 +42,8 @@ proxy.conf
    Acquire::http::Proxy "http://user:password@proxy.server:port/";
    Acquire::https::Proxy "http://user:password@proxy.server:port/";
 
+.. _apt-file:
+
 文件查找
 =========
 

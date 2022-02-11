@@ -14,6 +14,7 @@ Suckless极简桌面
    st.rst
    surf.rst
    suckless-tools.rst
+   dwmstatus.rst
 
 .. only::  subproject and html
 
