@@ -12,8 +12,6 @@ Android(Pixel 3)直连外接显示器(扩展屏幕)
 
 上述视频输入和输出虽然能够实现功能，但是都比较笨拙，因为都需要外部配备一台电脑才能完成。
 
-实际上，现代的Android手机性能十分强大，甚至赶上了早期的PC电脑，如果能够通过Andorid安装 :ref:`termux` 实现完整的Linux开发环境，通过扩展显示屏，加上蓝牙键盘，就能够获得一个移动开发工作站。类似于 :ref:`chromium_os` 切换平板和电脑模式，国内很多厂商也借助Android强大的功能推出过类似产品(虽然不成熟)，如锤子推出的TNT 和华为推出的PC模式；国外的三星称为 DeX 。
-
 USB-C视频输出
 =====================
 
@@ -58,6 +56,10 @@ Android系统的原生桌面模式
 Android 10的2019年3月13日首个beta版本，引入了一个原生桌面模式。但是在最终发布版本，却隐藏了这个桌面功能。LG公司修改并增强了这个桌面模式，在自家的LG V50 ThinQ 和 LG G8 ThinQ 推出。
 
 2019年11月，根据Android源代码发现，Google已经明确屏蔽了Pixel 4的DisplayPort功能。
+
+.. note::
+
+   Displayport alt mode over usb-c 功能是在内核中支持的(根据XDA论坛)，Google官方镜像内核应该已经关闭这个功能以便强推 ``chromecast`` 。第三方镜像，如LineageOS默认应该是打开该选项(待验证)。
 
 对于没有原生DisplayPort支持的设备，需要使用 ``DisplayLink`` 投影软件，这个功能是使用DisplayLink芯片的连接器或者docking设备，提供的有限的屏幕镜像功能。不过，作为第三方解决方案，使用HDCP加密视频内容的播放可能会被禁止。
 
@@ -107,7 +109,13 @@ Hack解决方案构想
 
 我觉得从硬件上Pixel系列是支持DisplayPort over USB-C的，只是Google的官方Android代码阉割了这个功能。
 
-可以考虑采用第三方系统，例如自己编译Andorid系统来实现
+考虑以下几个方案:
+
+- 安装第三方镜像(LineageOS)
+- 自己编译LineageOS，开启内核支持
+- 在淘宝上购买同时支持 ``chromecast`` 和 ``airplay`` 的无线连接器(国内第三方产支持)
+
+我准备尝试使用 :ref:`pixel_3` 实现移动开发工作站...
 
 参考
 =====

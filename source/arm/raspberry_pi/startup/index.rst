@@ -9,6 +9,8 @@
 
    pi_os.rst
    raspberry_pi_os.rst
+   pi_os_chinese.rst
+   compile_fcitx5.rst
    pi_firmware_update.rst
    pi_400_4k_display.rst
    pi_400_dual_monitor.rst

@@ -1,20 +1,13 @@
-.. _suckless:
+.. _kernel_network:
 
 =================================
-Suckless极简桌面
+Linux内核网络实现
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_suckless.rst
-   dwm.rst
-   dwm_multi-monitor.rst
-   dwm_xpra.rst
-   st.rst
-   surf.rst
-   suckless-tools.rst
-   dwmstatus.rst
+   linux_network_startup.rst
 
 .. only::  subproject and html
 
