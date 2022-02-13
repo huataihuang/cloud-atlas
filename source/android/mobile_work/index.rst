@@ -1,13 +1,13 @@
-.. _shell_utilities:
+.. _android_mobile_work:
 
 =================================
-Shell 实用工具
+Android 移动工作
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   sudo.rst
+   android_mobile_work_think.rst
 
 .. only::  subproject and html
 

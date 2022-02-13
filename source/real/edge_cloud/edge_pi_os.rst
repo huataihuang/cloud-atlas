@@ -68,28 +68,11 @@
 桌面安装配置
 =================
 
-完成初始化系统安装和更新后，部署精简的 :ref:`suckless` ，图形管理器 :ref:`dwm`
+完成初始化系统安装和更新后，部署精简的 :ref:`suckless` ，图形管理器 :ref:`dwm` 。虽然 :ref:`suckless` 系列软件(如 ``dwm`` / ``st`` / ``surf`` )定制都推荐采用源代码编译，但是还是非常花费时间精力的。节约时间精力，可以采用发行版提供软件包之间安装:
 
-- 安装依赖::
+- 安装 ``suckless`` 系列软件::
 
-   sudo apt install libx11-dev libxft-dev libxinerama-dev
-
-- 编译安装 :ref:`dwm` ::
-
-    mkdir ~/suckless
-    cd ~/suckless
-    git clone https://git.suckless.org/dwm
-    git clone https://git.suckless.org/st
-    git clone https://git.suckless.org/dmenu 
-
-    cd ~/suckless/st
-    sudo make clean install
-
-    cd ~/suckless/dmenu
-    sudo make clean install
-
-    cd ~/suckless/dwm
-    sudo make clean install
+   sudo apt install dwm surf st
 
 - 安装 ``xinit`` ::
 
@@ -103,7 +86,15 @@
 
    sudo apt install xpra
 
+.. note::
+
+   :ref:`dwm` 和 :ref:`surf` 使用依赖快捷键并且有很多使用技巧，请参考 :ref:`suckless` 系列文档。经过一定的适应训练，可以充分发挥平铺窗口管理器的优势。
+
 应用程序
 ---------
 
-- 安装中文字体和输入法:
+- 安装中文字体(只需一种字体)::
+
+   sudo apt install fonts-wqy-microhei
+
+中文输入法可以选择 ``fcitx5`` 或者 ``ibus`` ，两者目前都活跃开发，使用非常广泛。发行版通常选择 ``ibus`` 更为流行一些。

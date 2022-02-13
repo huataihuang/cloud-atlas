@@ -8,6 +8,7 @@ Linux桌面
    :maxdepth: 1
 
    x_window/index
+   chinese/index
    rdp/index
    wayland/index
    sway/index
