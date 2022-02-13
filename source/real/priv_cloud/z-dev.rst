@@ -25,6 +25,23 @@
    sudo dnf check-update
    sudo dnf install code
 
+中文环境
+==========
+
+- 安装中文字体::
+
+   sudo dnf install wqy-microhei-fonts
+
+- 安装中文输入法::
+
+   sudo dnf install fcitx5 fcitx5-chinese-addons
+
+- 远程登陆配置中文环境，编辑 ``~/.bashrc`` 添加::
+
+   export GTK_IM_MODULE=fcitx
+   export QT_IM_MODULE=fcitx
+   export XMODIFIERS=@im=fcitx
+
 Xpra环境
 ============
 
@@ -32,18 +49,37 @@ Xpra环境
 
    sudo dnf install xpra
 
-- ``z-dev`` 是内部局域网虚拟机 ``192.168.6.x`` 网段，所以需要配置 :ref:`priv_ssh` 实现通过 ``ProxyCommnad`` 结合 ``ssh-agent`` 直接访问服务哦，这样才能满足后续使用 :ref:`vscode_remote_dev_ssh`
+- ``z-dev`` 是内部局域网虚拟机 ``192.168.6.x`` 网段，所以需要配置 :ref:`priv_ssh` 实现通过 ``ProxyCommnad`` 结合 ``ssh-agent`` 直接访问服务哦，这样才能满足后续使用 :ref:`vscode_remote_dev_ssh` 。
 
-- 在 ``z-dev`` 上启动 ``xpra`` 会话::
+本地工作桌面配置 ``~/.ssh/config`` :
 
-   xpra start :7
-   DISPLAY=:7 firefox
-   DISPLAY=:7 rxvt
-   DISPLAY=:7 code
+.. literalinclude:: ../../infra_service/ssh/ssh_proxycommand/ssh_config
+   :language: bash
+   :caption: 配置ssh proxycommand的config
+
+然后可以直接登陆访问服务器::
+
+   ssh z-dev
+
+- 在 ``z-dev`` 上启动 ``xpra`` 会话以及 :ref:`screen` (所有启动程序在 ``screen`` 中继承 ``DISPLAY`` 设置)::
+
+   xpra start :11 && DISPLAY=:11 screen -S xpra
+
+- 登陆到 ``screen`` 中::
+
+   screen -R xpra
+
+然后在可以启动多个应用程序，如 ``urxvt`` (支持unicode中文显示)/ ``firefox`` 
+
+要实现中文输入，执行::
+
+   fcitx5 &
+
+然后执行 ``fcitx5-configtool`` 配置: ``添加拼音输入法`` ``设置使用shift切换中英文`` 
 
 - 在本地macOS上安装好 ``xpra`` ，然后使用以下命令连接远程服务器上的 ``xpra`` 会话::
 
-   xpra --ssh=ssh attach ssh://z-dev/7
+   xpra --ssh=ssh attach ssh://z-dev/11
 
 远程VS Code开发(SSH)
 =======================
@@ -80,4 +116,4 @@ Xpra环境
    newgrp docker
 
 然后，验证 ``docker ps`` 命令检查环境
-   
+  

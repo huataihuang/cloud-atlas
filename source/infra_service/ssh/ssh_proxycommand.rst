@@ -16,12 +16,11 @@ SSH代理命令依然是 ``ProxyCommand`` ，使用方法有所不同::
 
 就可以实现通过跳板服务器 ``10.10.1.200`` 直接SSH登陆 ``192.168.6.253``
 
-上述命令参数也可以配置在 ``~/.ssh/config`` 中::
+上述命令参数也可以配置在 ``~/.ssh/config`` 中:
 
-   Host z-dev
-      HostName 192.168.6.253
-      User huatai
-      ProxyCommand ssh -W %h:%p 10.10.1.200
+.. literalinclude:: ssh_proxycommand/ssh_config
+   :language: bash
+   :caption: 配置ssh proxycommand的config
 
 则直接::
 
@@ -42,7 +41,7 @@ SSH代理命令依然是 ``ProxyCommand`` ，使用方法有所不同::
 
 .. literalinclude:: ssh_proxycommand/zssh.sh
    :language: bash
-   :caption:
+   :caption: 结合脚本获取IP访问ssh
 
 使用 ``ssh-agent`` 缓存了密钥密码之后，只需要执行上述脚本命令(从配置文件中读取出ip和主机名，提取IP，跳板SSH服务器IP从 ``/etc/hosts`` 中获取)::
 
