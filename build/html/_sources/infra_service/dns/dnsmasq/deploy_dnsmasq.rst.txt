@@ -177,7 +177,7 @@ Manual forwarding
 DHCP服务器(推荐配置)
 ===========================
 
-我在 :ref:`priv_cloud_infra` 采用的DNSmasq实现DNS解析，以及对局域网内部提供DHCP，提供 :ref:`airport_express_with_dnsmasq` ，配置添加::
+我在 :ref:`priv_cloud_infra` 采用的DNSmasq实现DNS解析，以及对局域网内部提供DHCP，提供 :ref:`airport_express_with_dnsmasq_ics` ，配置添加::
 
    dhcp-range=192.168.6.21,192.168.6.50,255.255.255.0,12h
    dhcp-option=option:router,192.168.6.200

@@ -36,7 +36,7 @@
 
    xpra --ssh=ssh attach ssh://x-adm/11
 
-此时，会显示远程服务器上的完整 :ref:`xdm` 桌面:
+此时，会显示远程服务器上的完整 :ref:`dwm` 桌面:
 
 .. note::
 

@@ -8,6 +8,8 @@ Linux中文环境
    :maxdepth: 1
 
    fcitx.rst
+   fbterm.rst
+   kmscon.rst
 
 .. only::  subproject and html
 

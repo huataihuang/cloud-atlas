@@ -8,7 +8,7 @@ systemd-resolved 是通过D-Bus接口向本地应用程序提供网络名字解�
 
 .. note::
 
-   在我部署 :ref:`priv_cloud_infra` 中，采用 :ref:`ubuntu_linux` 20.04 LTS Server 发行版，默认采用 ``systemd-resolved`` 提供本地域名解析。我在 :ref:`priv_dnsmasq` 部署即结合 :ref:`dnsmasq` 和 ``systemd-resolved`` 提供局域网DNS解析。
+   在我部署 :ref:`priv_cloud_infra` 中，采用 :ref:`ubuntu_linux` 20.04 LTS Server 发行版，默认采用 ``systemd-resolved`` 提供本地域名解析。我在 :ref:`priv_dnsmasq_ics` 部署即结合 :ref:`dnsmasq` 和 ``systemd-resolved`` 提供局域网DNS解析。
 
 配置
 ======
@@ -43,7 +43,7 @@ systemd-resolved有4种不同方式来处理DNS解析，其中有2中是主要�
 
 .. note::
 
-   上述配置是我部署 :ref:`zdata_ceph_rbd_libvirt` ，安装过程配置的结果。由于我需要部署 :ref:`priv_dnsmasq` 来提供局域网DNS解析，并且默认域名调整为 ``staging.huatai.me`` ，所以还需要做进一步调整配置。
+   上述配置是我部署 :ref:`zdata_ceph_rbd_libvirt` ，安装过程配置的结果。由于我需要部署 :ref:`priv_dnsmasq_ics` 来提供局域网DNS解析，并且默认域名调整为 ``staging.huatai.me`` ，所以还需要做进一步调整配置。
 
 - 保护resolv.conf模式
 

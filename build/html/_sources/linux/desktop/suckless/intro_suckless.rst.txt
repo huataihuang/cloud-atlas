@@ -31,6 +31,17 @@ suckless开发了图形管理桌面的核心组件:
 - ``dmenu`` 用户自定义菜单，程序启动器
 - :ref:`surf` 不基于chrome/firefox的独立引擎(WebKit)
 
+快速安装
+============
+
+.. note::
+
+   目前感觉编译还是非常花费时间精力，所以最后我还是准备采用发行版提供的软件包
+
+- 安装::
+
+   sudo apt install dwm surf stterm
+
 编译和持续集成
 ================
 

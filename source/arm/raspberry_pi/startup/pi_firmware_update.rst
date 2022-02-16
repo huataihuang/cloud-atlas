@@ -6,7 +6,7 @@
 
 和 :ref:`macos` 相似，树莓派SoC的firmware升级包含在每次操作系统升级中，但是需要注意:
 
-- :ref:`raspbian`
+- :ref:`raspberry_pi_os` 启动时自动升级 ``firmware``
 - 默认只升级 ``firmware`` 但不升级 ``eeprom`` (bootloader)
 
 我最初是在 :ref:`usb_boot_ubuntu_pi_4` 时尝试升级firmware，原因是当时 :ref:`pi_4` 还没有提供从USB启动的 ``bootloader`` ，所以需要手工升级 ``eeprom`` pre版本来获得这个能力。不过，随着树莓派系统的不断升级，目前正式版已经不再需要这个hack手段，可以直接通过 ``raspi-config`` 来完成这个启动顺序配置。

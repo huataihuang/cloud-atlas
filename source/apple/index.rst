@@ -30,6 +30,7 @@ iOS 是苹果公司开发的移动操作系统，目前已经演化成 iOS(iphon
    osx10.9_ios6/index
    one/index
    airport/index
+   mobile_work/index
    xrdp_on_macos.rst
 
 .. only::  subproject and html

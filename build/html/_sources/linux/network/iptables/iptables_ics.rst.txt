@@ -52,7 +52,7 @@ Internet Connection Sharing (ICS) 提供了在一台主机上共享给局域网�
 案例
 =======
 
-上述方法，在 :ref:`private_cloud` 部署时 :ref:`priv_dnsmasq_ics` : 完整结合了 :ref:`dnsmasq` 和 :ref:`iptables` 来实现内部网络共享访问因特网。
+上述方法，在 :ref:`priv_cloud_infra` 部署时 :ref:`priv_dnsmasq_ics` : 完整结合了 :ref:`dnsmasq` 和 :ref:`iptables` 来实现内部网络共享访问因特网。
 
 参考
 =======

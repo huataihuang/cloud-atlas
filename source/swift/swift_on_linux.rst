@@ -64,7 +64,7 @@ Language Server Protocol
 安装
 ---------
 
-:ref:`vs_code_lsp` 可以实现不同语言的智能开发，包括Swift语言，苹果公司提供了 `SourceKit-LSP <https://github.com/apple/sourcekit-lsp>`_ 来实现
+:ref:`vscode_lsp` 可以实现不同语言的智能开发，包括Swift语言，苹果公司提供了 `SourceKit-LSP <https://github.com/apple/sourcekit-lsp>`_ 来实现
 
 - 在 :ref:`ubuntu_linux` 上可以通过以下命令安装 `SourceKit-LSP <https://github.com/apple/sourcekit-lsp>`_ ::
 
@@ -257,7 +257,7 @@ Swift使用 ``lldb`` 来debug程序，这也是Xcode使用的默认debugger。 `
 - 要配置VSCode使用LLDB进行Swift debug，需要在项目中创建一个 ``.vscode`` 目录，并在这个目录下创建2个文件
 
 .. literalinclude:: swift_on_linux/launch.json
-   :language: json
+   :language: bash
    :linenos:
    :caption: .vscode/launch.json
 
@@ -267,7 +267,7 @@ Swift使用 ``lldb`` 来debug程序，这也是Xcode使用的默认debugger。 `
 4. 在运行程序前加载的任务，也就是build程序
 
 .. literalinclude:: swift_on_linux/tasks.json
-   :language: json
+   :language: bash
    :linenos:
    :caption: .vscode/tasks.json
 

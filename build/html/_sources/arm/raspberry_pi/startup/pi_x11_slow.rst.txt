@@ -17,7 +17,7 @@
 采用轻量级Linux
 =================
 
-可能还是要回归Raspberry Pi官方Raspbian系统或者使用轻量级针对SBC的Linux发行版甚至自己使用 :ref:`lfs_linux` 从源代码构建。目前初步计划是重新安装一次精简系统，然后把 :ref:`kali_linux` 改到 :ref:`private_cloud` 中作为虚拟机运行
+可能还是要回归Raspberry Pi官方Raspbian系统或者使用轻量级针对SBC的Linux发行版甚至自己使用 :ref:`lfs_linux` 从源代码构建。目前初步计划是重新安装一次精简系统，然后把 :ref:`kali_linux` 改到 :ref:`priv_cloud` 中作为虚拟机运行
 
 Wayland
 ============

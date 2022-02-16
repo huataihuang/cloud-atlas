@@ -6,7 +6,7 @@
 
 我最初尝试在Jetson Nano上安装Xpra是通过 :ref:`jetson_xpra_build` 实现的，步骤曲折。不过，我在构建 :ref:`edge_cloud_infra` 时，是通过发行版提供的Xpra完成，所以本文记录方法更为通用。
 
-我在 :ref:`edge_jeston` 做了系统精简之后再部署Xpra，如果你喜欢功能大而全的系统，可以忽略我这个精简步骤。
+我在 :ref:`edge_jetson` 做了系统精简之后再部署Xpra，如果你喜欢功能大而全的系统，可以忽略我这个精简步骤。
 
 安装Xpra
 ============

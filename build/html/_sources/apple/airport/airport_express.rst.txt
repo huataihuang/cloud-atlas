@@ -89,7 +89,7 @@ AirPort Express
 - DHCP提供的配置中包含: ``DNS`` 和 ``GATEWAY`` ，这个配置会被 AirPort Express 转发给连接的无线客户端
 - DHCP提供 ``动态IP`` 会被 AirPort Express 转发给连接的无线客户端使用
 
-总之，AirPort Express的无线客户端是通过 ``局域网DHCP服务器`` 获得配置，AirPort Express提供的是一个 ``透明转发`` 。 我发现这个架构非常适合我在 :ref:`priv_cloud_infra` 中提供的 :ref:`priv_dnsmasq` 实现无线扩展，所以我实现了一个 :ref:`airport_express_with_dnsmasq` 部署。
+总之，AirPort Express的无线客户端是通过 ``局域网DHCP服务器`` 获得配置，AirPort Express提供的是一个 ``透明转发`` 。 我发现这个架构非常适合我在 :ref:`priv_cloud_infra` 中提供的 :ref:`priv_dnsmasq_ics` 实现无线扩展，所以我实现了一个 :ref:`airport_express_with_dnsmasq_ics` 部署。
 
 参考
 ========

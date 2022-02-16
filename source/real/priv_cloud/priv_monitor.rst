@@ -1,4 +1,4 @@
-.. priv_monitor:
+.. _priv_monitor:
 
 ====================
 私有云监控

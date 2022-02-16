@@ -94,7 +94,7 @@ Alpine Linux for Raspberry Pi
 
 .. note::
 
-   上述 ``headless`` 提供了树莓派启动到初始化，只要连接到提供DHCP的 :ref:`priv_dnsmasq` ，能够获得IP地址就能自动启动ssh服务提供远程访问以完成进一步配置
+   上述 ``headless`` 提供了树莓派启动到初始化，只要连接到提供DHCP的 :ref:`priv_dnsmasq_ics` ，能够获得IP地址就能自动启动ssh服务提供远程访问以完成进一步配置
 
 .. note::
 
@@ -109,7 +109,7 @@ Alpine Linux for Raspberry Pi
 启动
 =========
 
-- 将SD卡从USB转接器中取出，插入 :ref:`pi_3` ，然后加电启动，此时通过 :ref:`priv_dnsmasq` 提供的DHCP服务，该设备的Alpine Linux启动自动获取IP地址
+- 将SD卡从USB转接器中取出，插入 :ref:`pi_3` ，然后加电启动，此时通过 :ref:`priv_dnsmasq_ics` 提供的DHCP服务，该设备的Alpine Linux启动自动获取IP地址
 
 确定IP地址的方法是检查 dnsmasq 的 ``/var/lib/misc/dnsmasq.leases`` 状态文件，例如::
 

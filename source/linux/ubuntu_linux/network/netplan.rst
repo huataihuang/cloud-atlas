@@ -4,7 +4,7 @@
 netplan网络配置
 ================
 
-Ubuntu发行版默认使用 `Netplan网络配置工具 <https://netplan.io>`_ 配置网络接口，例如我在在 :ref:`pi_ubuntu_network` 中就使用了netplan。netplan支持后端使用 ``networkd`` 或者 ``network-manager`` 进行管理配置。
+Ubuntu发行版默认使用 `netplan.io <https://netplan.io>`_ 配置网络接口，例如我在在 :ref:`pi_ubuntu_network` 中就使用了netplan。netplan支持后端使用 ``networkd`` 或者 ``network-manager`` 进行管理配置。
 
 netplan简介
 =============
@@ -20,7 +20,18 @@ Ubuntu在服务器版本默认激活了netplan来配置管理网络，但是在�
 
 - 安装netplan::
 
-   apt install netplan
+   apt install netplan.io
+
+.. note::
+
+   在 ``Ubuntu 18.04.4 LTS`` 上，提供了2个软件包::
+
+      netplan
+      netplan.io
+
+   建议完整安装 ``netplan.io`` ，这个版本跟随 `netplan.io <https://netplan.io>`_ 官方更新，修复了一些问题。
+
+   当前 ``Ubuntu 20.04.3 LTS`` 已默认安装 ``netplan.io`` ，不再提供旧版本 ``netplan``
 
 使用netplan配置静态IP
 ==========================
@@ -510,9 +521,17 @@ networkctl
    netplan: running with uid=63434 gid=63434 euid=63434 egid=63434
    netplan: no read/write access to /var/lib/plan/netplan.dir/.: No such file or directory
 
-这个版本的netplan可能是早期版本，只能固定读取 ``/var/lib/plan/netplan.dir/`` ，不使用 ``/etc/netplan`` 目录，导致我配置无效。我还发现在 ``/var/lib/plan/netplan.dir/`` 有一个隐含文件::
+这个版本的netplan可能是早期版本( 实践是在 Ubuntu 18 上，安装了 ``netplan`` 而没有安装更完整的  ``netplan.io`` 根据网友impl1874提供信息( `use netplan.io please #10 <https://github.com/huataihuang/cloud-atlas/issues/10>`_ )，需要通过完整安装 ``netplan.io`` 来修复这个问题。
+
+我在上文中补充说明，建议直接安装 ``netplan.io`` )，只能固定读取 ``/var/lib/plan/netplan.dir/`` ，不使用 ``/etc/netplan`` 目录，导致我配置无效。我还发现在 ``/var/lib/plan/netplan.dir/`` 有一个隐含文件::
 
    .netplan-acl -> /etc/plan/netplan-acl
+
+.. warning::
+
+   上述排查是我早期的记录，当时安装的操作系统是 Ubuntu 18 LTS，安装的 ``netplan`` 存在bug，请完整安装 ``netplan.io`` 来避免这个问题。
+
+   最新的 Ubuntu 20.04 LTS 默认即使用 ``netplan.io`` 没有这个问题。
 
 5G Hz无线网络连接
 ===================

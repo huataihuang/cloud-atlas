@@ -16,7 +16,7 @@
 
 .. note::
 
-   我采用 ``extended`` 模式运行Alpine Linux，实际上可以不使用内置硬盘，而是采用非常廉价的外接U盘运行，这样随时可以更换故障节点，无需重装。(当然这也和我规划的 :ref:`real_private_cloud_think` 相关)
+   我采用 ``extended`` 模式运行Alpine Linux，实际上可以不使用内置硬盘，而是采用非常廉价的外接U盘运行，这样随时可以更换故障节点，无需重装。(当然这也和我规划的 :ref:`priv_cloud_infra` 相关)
 
    我选择采用非常小巧的SanDisk CZ430 酷豆U盘，规格32G，只需要 37.90元。
 

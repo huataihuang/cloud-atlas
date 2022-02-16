@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Varnish代理服务" href="../varnish/index.html" />
+    <link rel="next" title="Squid支持WebSocket配置" href="squid_websocket.html" />
     <link rel="prev" title="Squid父级socks代理" href="squid_socks_peer.html" /> 
 </head>
 
@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../network/index.html">Network Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../infra_search/index.html">Search Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../info_service/index.html">Info-Service Atlas</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Web Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../nginx/index.html">Nginx</a></li>
@@ -73,14 +74,19 @@
 <li class="toctree-l4"><a class="reference internal" href="squid_startup.html">Squid快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="squid_socks_peer.html">Squid父级socks代理</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Squid SSH代理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="squid_websocket.html">Squid支持WebSocket配置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_squid5_ubuntu.html">Ubuntu环境编译Squid 5</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../varnish/index.html">Varnish代理服务</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../privoxy/index.html">Privoxy代理服务</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../load_balancer/index.html">负载均衡</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../waf/index.html">Web应用防火墙(WAF)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../webdav/index.html">WebDAV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../websocket/index.html">WebSocket</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../firefox/index.html">Firefox</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../big_data/index.html">Big Data Atlas</a></li>
@@ -142,7 +148,7 @@
              
   <section id="squid-ssh">
 <span id="squid-ssh-proxy"></span><h1>Squid SSH代理<a class="headerlink" href="#squid-ssh" title="永久链接至标题">¶</a></h1>
-<p>通常我们都使用 Squid 作为HTTP/HTTPS代理，例如 <a class="reference internal" href="squid_startup.html#squid-startup"><span class="std std-ref">Squid快速起步</span></a> 可以很方便配置一个用于整个局域网代理的Squid，不仅节约了带宽也加速了软件包分发。我在 <a class="reference internal" href="../../../real/private_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 构建中，所有应用服务，包括用于 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 集群的节点IP地址，都采用 <code class="docutils literal notranslate"><span class="pre">192.168.6.0/24</span></code> 内网网段。这种内部IP地址(测试网段)可以避免和整个办公网络的IP地址冲突，但是也带来了难以直接访问的问题。类似于 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 的 <a class="reference internal" href="../../../kubernetes/concepts/services_networking/ingress.html#ingress"><span class="std std-ref">Ingress</span></a>
+<p>通常我们都使用 Squid 作为HTTP/HTTPS代理，例如 <a class="reference internal" href="squid_startup.html#squid-startup"><span class="std std-ref">Squid快速起步</span></a> 可以很方便配置一个用于整个局域网代理的Squid，不仅节约了带宽也加速了软件包分发。我在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 构建中，所有应用服务，包括用于 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 集群的节点IP地址，都采用 <code class="docutils literal notranslate"><span class="pre">192.168.6.0/24</span></code> 内网网段。这种内部IP地址(测试网段)可以避免和整个办公网络的IP地址冲突，但是也带来了难以直接访问的问题。类似于 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 的 <a class="reference internal" href="../../../kubernetes/concepts/services_networking/ingress.html#ingress"><span class="std std-ref">Ingress</span></a>
 概念，所有内部IP地址上的服务(SSH等)都可以通过一个反向代理来访问，而 <a class="reference internal" href="index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 则是反向代理中最为常用的服务。</p>
 <section id="id1">
 <h2>配置Squid SSH proxy<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
@@ -227,7 +233,7 @@ Connection closed by UNKNOWN port 65535
 <span class="n">Thu</span> <span class="n">Jan</span> <span class="mi">20</span> <span class="mi">15</span><span class="p">:</span><span class="mi">22</span><span class="p">:</span><span class="mi">21</span> <span class="n">CST</span> <span class="mi">2022</span>
 </pre></div>
 </div>
-<p>SSH服务器没有正确完成时钟同步，看来我部署 <a class="reference internal" href="../../../real/private_cloud/priv_ntp.html#priv-ntp"><span class="std std-ref">私有云NTP服务</span></a> 还是存在纰漏，需要有个完善的 <span class="xref std std-ref">priv_monitor</span> 来对基础服务进行全栈监控告警</p>
+<p>SSH服务器没有正确完成时钟同步，看来我部署 <a class="reference internal" href="../../../real/priv_cloud/priv_ntp.html#priv-ntp"><span class="std std-ref">私有云NTP服务</span></a> 还是存在纰漏，需要有个完善的 <a class="reference internal" href="../../../real/priv_cloud/priv_monitor.html#priv-monitor"><span class="std std-ref">私有云监控</span></a> 来对基础服务进行全栈监控告警</p>
 <ul>
 <li><p>检查 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> (SSH服务器)，发现实际上已经配置了 <a class="reference internal" href="../../../linux/redhat_linux/systemd/systemd_timesyncd.html#systemd-timesyncd"><span class="std std-ref">Systemd Timesyncd服务</span></a> ，但是由于疏漏，忘记配置默认启动:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">status</span> <span class="n">systemd</span><span class="o">-</span><span class="n">timesyncd</span>
@@ -280,7 +286,7 @@ Connection closed by UNKNOWN port 65535
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="squid_socks_peer.html" class="btn btn-neutral float-left" title="Squid父级socks代理" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../varnish/index.html" class="btn btn-neutral float-right" title="Varnish代理服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="squid_websocket.html" class="btn btn-neutral float-right" title="Squid支持WebSocket配置" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

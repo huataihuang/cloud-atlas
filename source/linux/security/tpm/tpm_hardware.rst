@@ -8,7 +8,7 @@ Trusted Platform Module(TPM)硬件
 
 .. note::
 
-   我在构建 :ref:`private_cloud` 采用二手 :ref:`hpe_dl360_gen9` ，服务器需要安装一个 ``HP Trusted Platform Module 2.0 Kit 745823-B21`` 模块才能提供TPM支持。这个模块需要到ebay上从美国卖家这里购买，价格大约是300元。从部件手册看还有一个 ``HP Trusted Platform Module Option 488069-B21`` 不知道差异。
+   我在构建 :ref:`priv_cloud_infra` 采用二手 :ref:`hpe_dl360_gen9` ，服务器需要安装一个 ``HP Trusted Platform Module 2.0 Kit 745823-B21`` 模块才能提供TPM支持。这个模块需要到ebay上从美国卖家这里购买，价格大约是300元。从部件手册看还有一个 ``HP Trusted Platform Module Option 488069-B21`` 不知道差异。
 
 TPM功能和原理
 ==============
