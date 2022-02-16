@@ -27,7 +27,20 @@ Raspberry Pi OS中文处理
 - scim 似乎不再活跃开发
 - nimf 似乎非常小众的轻量级输入框架，韩国人开发的
 
-ibus
+fcitx
+--------
+
+- 结合 :ref:`fbterm` 安装 fcitx ::
+
+   sudo apt install fcitx fcitx-frontend-fbterm
+
+- 修改 ``.initrc`` :
+
+.. literalinclude:: ../../../linux/desktop/chinese/fcitx/fcitx_bashrc
+   :language: bash
+   :caption: fcitx环境变量
+
+ibus(失败)
 ----------
 
 - 安装::
@@ -91,7 +104,6 @@ tile窗口管理器设置ibus
    GTK_IM_MODULE=ibus
    QT_IM_MODULE=ibus
    XDG_RUNTIME_DIR=/run/user/502
-
 
 - 启动 ``xpra`` 环境::
 
@@ -173,6 +185,10 @@ fcitx5(失败)
                             Depends: fcitx5-table but it is not installable
    E: Unable to correct problems, you have held broken packages. 
 
+检查了一下，发现仓库并没有提供上述3个软件包
+
+由于我想尝试 :ref:`fbterm` ，但是终端中文输入 ``fcitx-fbterm`` 在最新的 ``fcitx5`` 中已经不再提供，加上安装 ``fcitx5`` 失败，所以我改为安装旧版本 ``fcitx`` 系列
+
 scim(失败)
 ------------
 
@@ -204,7 +220,7 @@ fcitx5需要安装大量软件包，对于我的轻量级系统过于沉重，�
 
 .. note::
 
-   但是反复尝试，发现 ``scim`` 设置过于复杂了，我实在难以搞定切换，虽然也能输入，但是莫名卡顿并中断中文输入。所以最后还是退守使用 fcitx (安装需要占用240MB，非常庞大)
+   但是反复尝试，发现 ``scim`` 设置过于复杂了，我实在难以搞定切换，虽然也能输入，但是莫名卡顿并中断中文输入。所以最后还是退守使用 fcitx 
 
 参考
 =====

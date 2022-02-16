@@ -4,7 +4,7 @@
 重置HomePod mini
 ============================
 
-长时间没有使用 HomePod mini，并且最近调整网络，采用了 :ref:`airport_express_with_dnsmasq` 方式构建无线网络。所以，再次开启HomePod mini之后，发现手机无法连接设备，也不能设置。
+长时间没有使用 HomePod mini，并且最近调整网络，采用了 :ref:`airport_express_with_dnsmasq_ics` 方式构建无线网络。所以，再次开启HomePod mini之后，发现手机无法连接设备，也不能设置。
 
 参考Apple 官方帮助 `Reset HomePod <https://support.apple.com/en-us/HT208244>`_ 有3中方法reset HomePod:
 

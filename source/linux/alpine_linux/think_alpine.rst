@@ -19,7 +19,7 @@ Alpine Liunx思考
 
   - 只需要使用小容量的U盘就可以快速复制大量的alpine系统，即插即用
   - 服务器故障，只需要将U盘换到替换服务器上就可以快速恢复(适合本地无重要数据环境)
-  - 重要业务数据采用 :ref:`ceph` 和 :ref:`gluster` 保存( :ref:`real_private_cloud_think` )
+  - 重要业务数据采用 :ref:`ceph` 和 :ref:`gluster` 保存( :ref:`priv_cloud_infra` )
 
 优势
 =======

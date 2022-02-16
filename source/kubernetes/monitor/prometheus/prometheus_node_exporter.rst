@@ -82,7 +82,7 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 
 .. note::
 
-   这里采用主机名，是因为我已经部署 :ref:`priv_dnsmasq` ，可以在任意主机上解析整个网络所有服务器
+   这里采用主机名，是因为我已经部署 :ref:`priv_dnsmasq_ics` ，可以在任意主机上解析整个网络所有服务器
 
 参考
 =========

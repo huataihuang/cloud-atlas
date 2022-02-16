@@ -1,15 +1,13 @@
-.. _linux_chinese:
+.. _mobile_work:
 
 =================================
-Linux中文环境
+移动工作
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   fcitx.rst
-   fbterm.rst
-   kmscon.rst
+   mobile_work_think.rst
 
 .. only::  subproject and html
 

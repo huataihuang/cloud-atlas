@@ -1,15 +1,15 @@
-.. _linux_chinese:
+.. _infra_search:
 
 =================================
-Linux中文环境
+Search Atlas
 =================================
+
+搜索是现代WEB服务的基石
 
 .. toctree::
    :maxdepth: 1
 
-   fcitx.rst
-   fbterm.rst
-   kmscon.rst
+   intro_search.rst
 
 .. only::  subproject and html
 

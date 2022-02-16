@@ -21,7 +21,7 @@ VS Code远程开发-SSH模式
 ========
 
 - 在 :ref:`hpe_dl360_gen9` 服务器上采用 :ref:`priv_cloud_infra` 部署 :ref:`priv_kvm` 虚拟机 ``z-dev`` 作为开发环境( :ref:`fedora_dev_init` )
-- 在远程服务器 ``z-dev`` 中 :ref:`vs_code_linux` ，并通过 :ref:`xpra_startup` 来验证VS Code正常运行(可选)
+- 在远程服务器 ``z-dev`` 中 :ref:`vscode_linux` ，并通过 :ref:`xpra_startup` 来验证VS Code正常运行(可选)
 
 .. note::
 

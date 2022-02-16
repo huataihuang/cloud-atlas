@@ -19,6 +19,7 @@ Real Atlas
    priv_cloud/index
    edge_cloud/index
    network/index
+   mobile_work/index
 
 .. only::  subproject and html
 

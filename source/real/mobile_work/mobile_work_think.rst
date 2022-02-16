@@ -1,12 +1,18 @@
-.. _android_mobile_work_think:
+.. _mobile_work_think:
 
-=====================
-Android移动工作的思路
-=====================
+====================
+移动工作思考
+====================
 
-我一直在想如何能够充分发挥移动设备的作用:
+1969年7月20日，阿波罗11号登月所使用的 `阿波罗制导计算机 <https://zh.wikipedia.org/wiki/%E9%98%BF%E6%B3%A2%E7%BD%97%E5%88%B6%E5%AF%BC%E8%AE%A1%E7%AE%97%E6%9C%BA>`_ (Apollo Guidance Computer，AGC): 第一台基于硅集成电路的计算机，性能仅相当于上世纪70年代末的第一代家用计算机，如Apple II。
 
-1969年7月20日，阿波罗11号登月所使用的 `阿波罗制导计算机 <https://zh.wikipedia.org/wiki/%E9%98%BF%E6%B3%A2%E7%BD%97%E5%88%B6%E5%AF%BC%E8%AE%A1%E7%AE%97%E6%9C%BA>`_ (Apollo Guidance Computer，AGC): 第一台基于硅集成电路的计算机，性能堪比上世纪70年代末的第一代家用计算机，如Apple II。
+.. figure:: ../../_static/real/mobile_work/apollo_guidance_computer.png
+   :scale: 60
+
+然而这台简陋的计算机，却帮助人类踏上了月球:
+
+.. figure:: ../../_static/real/mobile_work/aldrin_apollo_11.jpg
+   :scale: 60
 
 我们现在拥有的任何一部主流手机，其计算性能，已经远远超过当年的 ``阿波罗制导计算机`` ，然而，仅仅用来发送140个字符的twitter(现在是280字符)以及无法计数的垃圾短视频。拥有性能卓越的计算设备(Smart Phone)，实在是现代人的羞愧。
 
@@ -38,7 +44,7 @@ Android移动工作的思路
 
   - 扩展屏幕(输出): 通过智能手机的有线视频输出( :ref:`android_displayport` ) 或者无线视频输出 ( ``chromecast`` 或 ``airplay`` )
   - 扩展输入: 蓝牙键盘鼠标
-  - 软件组合: 
+  - 软件组合:
 
     - 在Android系统中运行Linux
     - 使用Android原生的浏览器、IM软件等等，通过Andorid分屏功能实现切换帮助提高使用效率
@@ -46,6 +52,21 @@ Android移动工作的思路
 - 具备技术能力来整合各种开源软件实现自己的需求
 
 总之，我构想的移动工作，通过智能手机(Android更具备开放性)，实现随时随地的联网开发运维工作。
+
+iOS移动工作
+============
+
+iOS对屏幕外接输出支持较为完善，有两种方式:
+
+- iOS系统原生支持通过 ``lightening`` 线缆输出屏幕，所以只要有一根合适线缆，就可以把手机/平板的屏幕输出到外接大显示器上 (待实践)
+- :ref:`airplay` 可以通过网络实现iOS/macOS屏幕输出到其他iOS/macOS设备上，也提供兼容Apple TV输出
+
+现有市场上，已经有第三方厂商提供了兼容 :ref:`airplay` 投屏设备，提供屏幕镜像输出，这样可以非常方便把手机/平板这样小屏幕输出到大屏幕上，方便文字类交互工作。
+
+Android移动工作
+=================
+
+我采购了
 
 参考
 ======

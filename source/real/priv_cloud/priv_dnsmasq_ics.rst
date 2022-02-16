@@ -86,8 +86,6 @@ Ubuntu
 
 修订VM以及模版VM ``/etc/netplan/01-netcfg.yaml`` ::
 
-
-
    ...
       nameservers:
           search: [ staging.huatai.me ]

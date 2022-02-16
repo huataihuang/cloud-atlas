@@ -1,15 +1,14 @@
-.. _linux_chinese:
+.. _apple_mobile_work:
 
 =================================
-Linux中文环境
+Apple 移动办公
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   fcitx.rst
-   fbterm.rst
-   kmscon.rst
+   airplay.rst
+   airplay_ugreen.rst
 
 .. only::  subproject and html
 
