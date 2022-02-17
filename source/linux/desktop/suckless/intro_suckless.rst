@@ -4,6 +4,10 @@
 Suckless极简桌面简介
 ======================
 
+.. note::
+
+   由于在suckless上实现中文输入的问题没有解决(非常花费时间)，我暂时放弃使用 ``dwm`` 和 ``surf`` 等软件，改为 :ref:`xfce` 。后续再尝试 :ref:`lfs_linux` 时重新挑战这个精简图形系统。
+
 我在探索 :ref:`i3` 和 :ref:`linux_light_browser` 时，
 
 发现 ``i3`` 窗口管理器实际上核心组件是由 `suckless.org <https://suckless.org/>`_ 开发的一系列工具:
