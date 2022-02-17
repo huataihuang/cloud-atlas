@@ -4,7 +4,11 @@
 surf - WebKit2/GTK+ 极简浏览器
 =================================
 
-`suckless.org surf <https://surf.suckless.org/>`_ 是一个极简化的浏览器
+`suckless.org surf <https://surf.suckless.org/>`_ 是一个极简化的浏览器。surf精简到不包括任何图形控制元素(没有任何导航菜单和按钮)，是通过 ``dmenu``  快捷键控制的。
+
+在surf浏览器上，只包含浏览器页面以及可选的滚动条。Surf的主要功能是通过第三方 ``WebKitGTK`` 库实现，其他程序功能则提供窗口和一系列 ``XProperties`` 来控制该浏览器特性。
+
+Surf支持cookies，但是不包含常规浏览器的常用功能，例如 ``tab`` 浏览，书签以及广告过滤。不过，surf通过patch，脚本和扩展程序来实现这些功能。surf默认只包含调用demnu程序的快捷键支持，其他大多数配置需要修改源代码头文件，然后重新编译来实现。
 
 .. note::
 
@@ -95,5 +99,6 @@ surf编译排查
 参考
 =======
 
+- `wikipedia: surf (web browser) <https://en.wikipedia.org/wiki/Surf_(web_browser)>`_
 - `suckless.org surf <https://surf.suckless.org/>`_
 - `Use the Surf Browser for a Minimalist Web-Browsing Experience <https://www.maketecheasier.com/surf-browser-minimalist-web-browsing-experience/>`_

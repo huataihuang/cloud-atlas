@@ -166,4 +166,9 @@ dmenu 是一个键盘驱动的菜单应用工具，作为 ``dwm`` 项目的一�
 - `dwm tutorial <https://dwm.suckless.org/tutorial/>`_
 - `Dave's Visual Guide to dwm <https://ratfactor.com/dwm>`_
 - `luk707/rpi_dwm.md <https://gist.github.com/luk707/46ef70635a36bcf434fabd7c6c302ce7>`_
-- `Arch Linux 下安装 dwm (平铺式窗口管理器) <https://blog.csdn.net/weixin_44335269/article/details/117886927>`_
+- `Arch Linux 下安装 dwm (平铺式窗口管理器) <https://blog.csdn.net/weixin_44335269/article/details/117886927>`_ ``GIN-18`` 的blog，有不少dwm的使用经验，后续再参考实践
+
+  - `Arch Linux 美化 (st + dwm) <https://blog.csdn.net/weixin_44335269/article/details/117930190>`_
+  - `Arch Linux 下安装 st (终端模拟器) <https://blog.csdn.net/weixin_44335269/article/details/117848592>`_
+
+- `archlinux + dwm系统美化 <https://blog.csdn.net/lanuage/article/details/121568320>`_

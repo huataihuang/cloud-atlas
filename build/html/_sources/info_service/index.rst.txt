@@ -19,6 +19,7 @@ Info-Service Atlas
    :maxdepth: 1
 
    kodi/index
+   matrix/index
 
 .. only::  subproject and html
 
