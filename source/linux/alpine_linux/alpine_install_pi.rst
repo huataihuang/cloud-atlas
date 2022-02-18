@@ -31,6 +31,10 @@ Alpine Linux for Raspberry Pi
   - 第一个分区是 ``fat32`` ，只需要 256MB ，需要设置分区为 ``boot`` 和 ``lba`` 标记
   - 第二个分区是 ``ext4`` 分区，SD卡的剩余空间
 
+.. note::
+
+   注意，准备TF卡分区是在独立的Linux主机上，使用TF卡读卡器连接，所以TF卡被识别成 ``sdb`` ，等到TF卡安装到树莓派上时，会被识别成 ``mmcblk0`` 。这里划分分区时是TF卡读卡器转换过的显示 ``sdb`` ，需要注意后文设备名变化。
+
 ::
 
    fdisk /dev/sdb
@@ -138,6 +142,8 @@ Alpine Linux for Raspberry Pi
      No disks available. Try boot media /media/mmcblk0p1? (y/n) [n]
      Enter where to store configs ('floppy', 'mmcblk0p1', 'usb' or 'none') [mmcblk0p1] none
      Enter apk cache directory (or '?' or 'none') [/var/cache/apk]
+
+此时保存的配置实际上在内存中，只要不重启就不会丢失。接下来执行 ``sys`` 安装，所有数据都会实际存储到TF卡(持久化存储)。
 
 - 更新软件::
 
