@@ -93,7 +93,11 @@
 <li class="toctree-l3"><a class="reference internal" href="edge_jetson.html">边缘计算Jetson Nano</a></li>
 <li class="toctree-l3"><a class="reference internal" href="edge_pi.html">边缘计算树莓派</a></li>
 <li class="toctree-l3"><a class="reference internal" href="edge_pi_os.html">边缘云Raspberry Pi OS桌面</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">边缘云Alpine Linux</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">边缘云Alpine Linux</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#alpine">Alpine安装</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">alpine linux系统初始安装</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../network/index.html">真实荒漠</a></li>
@@ -138,6 +142,181 @@
              
   <section id="alpine-linux">
 <span id="edge-pi-alpine"></span><h1>边缘云Alpine Linux<a class="headerlink" href="#alpine-linux" title="永久链接至标题">¶</a></h1>
+<section id="alpine">
+<h2>Alpine安装<a class="headerlink" href="#alpine" title="永久链接至标题">¶</a></h2>
+<p><a class="reference internal" href="../../linux/alpine_linux/alpine_install_pi.html#alpine-install-pi"><span class="std std-ref">树莓派环境安装Alpine Linux</span></a> 可以提供轻量级的运行环境，配合 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 可以实现ARM环境的 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> ，并进一步实现 <a class="reference internal" href="../../infra_service/index.html#infra-service"><span class="std std-ref">Infra-Service Atlas</span></a></p>
+<ul class="simple">
+<li><p>下载 <a class="reference external" href="https://dl-cdn.alpinelinux.org/alpine/v3.15/releases/aarch64/alpine-rpi-3.15.0-aarch64.tar.gz">alpine-rpi-3.15.0-aarch64.tar.gz</a></p></li>
+</ul>
+<p>在 <a class="reference internal" href="edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 中:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_3.html#pi-3"><span class="std std-ref">树莓派Raspberry Pi 3</span></a> 采用TF卡作为存储</p></li>
+<li><p><a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 采用外接USB磁盘</p></li>
+</ul>
+<p>安装 <a class="reference internal" href="../../linux/alpine_linux/index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> 采用 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 模式，也就是直接设置磁盘分区作为可读写 <code class="docutils literal notranslate"><span class="pre">rw</span></code> 模式</p>
+<ul class="simple">
+<li><p>TF卡或者外接USB磁盘需要划分2个分区:</p>
+<ul>
+<li><p>分区1是 <code class="docutils literal notranslate"><span class="pre">fat32</span></code> ，256MB</p></li>
+<li><p>分区2是 <code class="docutils literal notranslate"><span class="pre">ext4</span></code> ，TF卡使用全部剩余空间，USB外接磁盘则划分32GB(以便将剩余空间用于部署分布式存储 <a class="reference internal" href="../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> )</p></li>
+</ul>
+</li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">sys安装模式alpine linux分区(这里sdb磁盘是因为经过TF卡读卡器转换)</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>Disk /dev/sdb: <span class="m">59</span>.5 GiB, <span class="m">63864569856</span> bytes, <span class="m">124735488</span> sectors
+<span class="linenos"> 2</span>Units: sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+<span class="linenos"> 3</span>Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+<span class="linenos"> 4</span>I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+<span class="linenos"> 5</span>Disklabel type: dos
+<span class="linenos"> 6</span>Disk identifier: 0x00000000
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>Device     Boot  Start       End   Sectors  Size Id Type
+<span class="linenos"> 9</span>/dev/sdb1  *      <span class="m">2048</span>    <span class="m">526335</span>    <span class="m">524288</span>  256M  c W95 FAT32 <span class="o">(</span>LBA<span class="o">)</span>
+<span class="linenos">10</span>/dev/sdb2       <span class="m">526336</span> <span class="m">124735487</span> <span class="m">124209152</span> <span class="m">59</span>.2G <span class="m">83</span> Linux
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>磁盘文件系统格式化:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">partprobe</span>
+<span class="n">sudo</span> <span class="n">mkdosfs</span> <span class="o">-</span><span class="n">F</span> <span class="mi">32</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb1</span>
+<span class="n">sudo</span> <span class="n">mkfs</span><span class="o">.</span><span class="n">ext4</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb2</span>
+</pre></div>
+</div>
+</li>
+<li><p>挂载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb1</span> <span class="o">/</span><span class="n">mnt</span>
+</pre></div>
+</div>
+</li>
+<li><p>解压缩:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">sudo</span> <span class="n">tar</span> <span class="n">zxvf</span> <span class="o">~/</span><span class="n">Downloads</span><span class="o">/</span><span class="n">alpine</span><span class="o">-</span><span class="n">rpi</span><span class="o">-</span><span class="mf">3.15.0</span><span class="o">-</span><span class="n">aarch64</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>完成解压缩后，系统已经初步安装好，现在将TF卡插入 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_3.html#pi-3"><span class="std std-ref">树莓派Raspberry Pi 3</span></a> 主机，连接电源、显示器和键盘后启动</p>
+<ul>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">setup-alpine</span></code> 命令:</p>
+<ul class="simple">
+<li><p>主机名设置(第一台案例): <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1.edge.huatai.me</span></code></p></li>
+<li><p>提示有2个网卡 <code class="docutils literal notranslate"><span class="pre">eth0</span> <span class="pre">wlan0</span></code> ，默认选择 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> ，并配置固定IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.7.11</span></code> ，默认网关 <code class="docutils literal notranslate"><span class="pre">192.168.7.200</span></code></p></li>
+<li><p>最后要在 <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">config</span></code> 时回答 <code class="docutils literal notranslate"><span class="pre">none</span></code> ; 然后还要 <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">cache</span></code></p></li>
+</ul>
+</li>
+<li><p>更新软件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">update</span>
+</pre></div>
+</div>
+</li>
+<li><p>挂载分区2</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>这里 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_3.html#pi-3"><span class="std std-ref">树莓派Raspberry Pi 3</span></a> 使用TF卡，所以分区2是 <code class="docutils literal notranslate"><span class="pre">/dev/mmcblk0p2</span></code></p>
+<p>对于 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 使用USB外接SSD磁盘，则分区2是 <code class="docutils literal notranslate"><span class="pre">/dev/sda2</span></code></p>
+<p>实际方法完全一致，仅设备名区别</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">export</span> <span class="n">FORCE_BOOTFS</span><span class="o">=</span><span class="mi">1</span>
+<span class="c1"># 这里添加一步创建boot目录</span>
+<span class="n">mkdir</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span>
+<span class="n">setup</span><span class="o">-</span><span class="n">disk</span> <span class="o">-</span><span class="n">m</span> <span class="n">sys</span> <span class="o">/</span><span class="n">mnt</span>
+</pre></div>
+</div>
+<ul>
+<li><p>重新以读写模式挂载第一个分区，准备进行更新:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">o</span> <span class="n">remount</span><span class="p">,</span><span class="n">rw</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span>  <span class="c1"># An update in the first partition is required for the next reboot.</span>
+</pre></div>
+</div>
+</li>
+<li><p>清理掉旧的 <code class="docutils literal notranslate"><span class="pre">boot</span></code> 目录中无用文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">boot</span><span class="o">/*</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">mnt</span>       <span class="c1"># We are in the second partition</span>
+<span class="n">rm</span> <span class="n">boot</span><span class="o">/</span><span class="n">boot</span>  <span class="c1"># Drop the unused symbolink link</span>
+</pre></div>
+</div>
+</li>
+<li><p>将启动镜像和 <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">ram</span></code> 移动到正确位置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="n">boot</span><span class="o">/*</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">Rf</span> <span class="n">boot</span>
+<span class="n">mkdir</span> <span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span>   <span class="c1"># It&#39;s the mount point for the first partition on the next reboot</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建软连接:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span><span class="o">/</span><span class="n">boot</span> <span class="n">boot</span>
+</pre></div>
+</div>
+</li>
+<li><p>更新 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;/dev/mmcblk0p1 /media/mmcblk0p1 vfat defaults 0 0&quot;</span> <span class="o">&gt;&gt;</span> <span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;/cdrom/d&#39;</span> <span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>   <span class="c1"># Of course, you don&#39;t have any cdrom or floppy on the Raspberry Pi</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;/floppy/d&#39;</span> <span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">mmcblk0p1</span>
+</pre></div>
+</div>
+</li>
+<li><p>因为下次启动，需要标记root文件系统是第二个分区，所以需要修订 <code class="docutils literal notranslate"><span class="pre">/media/mmcblk0p1/cmdline.txt</span></code> ，完成修订后 <code class="docutils literal notranslate"><span class="pre">/media/mmcblk0p1/cmdline.txt</span></code> 内容如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">mmcblk0p2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>注意，对于使用外接USB磁盘，上述命令中 <code class="docutils literal notranslate"><span class="pre">mmcblk0p</span></code> 都需要修订成 <code class="docutils literal notranslate"><span class="pre">sda</span></code> ，即:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mmcblk0p1</span></code> 改成 <code class="docutils literal notranslate"><span class="pre">sda1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mmcblk0p2</span></code> 改成 <code class="docutils literal notranslate"><span class="pre">sda2</span></code></p></li>
+</ul>
+</div>
+<p>由于树莓派没有硬件时钟，需要解决 <a class="reference internal" href="../../linux/alpine_linux/alpine_pi_clock_skew.html#alpine-pi-clock-skew"><span class="std std-ref">Alpine Linux在树莓派启动”clock skew”报错</span></a> ，所以还需要执行以下步骤:</p>
+<ul>
+<li><p>创建空文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/.</span><span class="n">use</span><span class="o">-</span><span class="n">swclock</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/lib/rc/sh/init.sh</span></code> ，在 <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">proc</span></code> 段落后添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">e</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/.</span><span class="n">use</span><span class="o">-</span><span class="n">swclock</span>  <span class="p">];</span> <span class="n">then</span>
+    <span class="s2">&quot;$RC_LIBEXECDIR&quot;</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">swclock</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span>
+<span class="n">fi</span>
+</pre></div>
+</div>
+</li>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> ，将最后一列指示文件系统fsck的功能关闭( <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">0</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#UUID=7ffc2989-d85a-4600-a9b2-25d45090f466      /       ext4    rw,relatime 0 1</span>
+<span class="n">UUID</span><span class="o">=</span><span class="mi">7</span><span class="n">ffc2989</span><span class="o">-</span><span class="n">d85a</span><span class="o">-</span><span class="mi">4600</span><span class="o">-</span><span class="n">a9b2</span><span class="o">-</span><span class="mi">25</span><span class="n">d45090f466</span>       <span class="o">/</span>       <span class="n">ext4</span>    <span class="n">rw</span><span class="p">,</span><span class="n">relatime</span> <span class="mi">0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+<li><p>重启系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reboot</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id1">
+<h2>alpine linux系统初始安装<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>安装必要系统软件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apk</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apk</span> <span class="n">upgrade</span>
+<span class="n">sudo</span> <span class="n">apk</span> <span class="n">add</span> <span class="n">sudo</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/sudoers</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">wheel</span> <span class="n">ALL</span><span class="o">=</span><span class="p">(</span><span class="n">ALL</span><span class="p">)</span> <span class="n">NOPASSWD</span><span class="p">:</span> <span class="n">ALL</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我自己的账号 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> 位于 <code class="docutils literal notranslate"><span class="pre">wheel</span></code> 组，这样就可以 <code class="docutils literal notranslate"><span class="pre">sudo</span></code> 执行命令无需输入密码</p>
+</section>
 </section>
 
 

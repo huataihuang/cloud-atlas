@@ -174,6 +174,12 @@
              
   <section id="linux-ssd">
 <span id="linux-ssd-partition-alignment"></span><h1>Linux SSD分区对齐<a class="headerlink" href="#linux-ssd" title="永久链接至标题">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>本文是探寻为何新购买的USB SSD磁盘起始扇区不是常规的 <code class="docutils literal notranslate"><span class="pre">2048</span></code> 而是 <code class="docutils literal notranslate"><span class="pre">65535</span></code> ，并且使用了 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 强制手段来对齐到 <code class="docutils literal notranslate"><span class="pre">2048</span></code> ( <code class="docutils literal notranslate"><span class="pre">1MiB</span></code> )。</p>
+<p>不过，虽然可以强制对齐 <code class="docutils literal notranslate"><span class="pre">2048</span></code> ，但是考虑到 <code class="docutils literal notranslate"><span class="pre">USB-to-SATA</span></code> 控制器的参数是厂商提供的，应该有其优化原因(例如大数据块读写)。所以，最终并没有采用本文强制对齐 <code class="docutils literal notranslate"><span class="pre">2048</span></code> 扇区( <code class="docutils literal notranslate"><span class="pre">1MiB</span></code> )，而是按照 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 默认对齐优化方式分区。所以会和之前SSD磁盘分区有些差异，对使用来说没有区别。</p>
+<p>本文仅供参考。</p>
+</div>
 <p>正如 <a class="reference external" href="https://linux-blog.anracom.com/2018/12/03/linux-ssd-partition-alignment-problems-with-external-usb-to-sata-controllers-i/">Linux SSD partition alignment – problems with external USB-to-SATA controllers – I</a> 开头所说: 当你尝试解决一个问题，就会发现你从来没有意料的新问题出现。</p>
 <section id="id1">
 <h2>奇怪的65535起始扇区<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
@@ -269,8 +275,300 @@
 <p><a class="reference external" href="https://support.wdc.com/downloads.aspx?lang=en&amp;p=279">Western Digital Dashboard</a> 提供了Windows版本，我部署使用 <a class="reference internal" href="../../alpine_linux/alpine_extended.html#alpine-extended"><span class="std std-ref">U盘运行Alpine Linux</span></a> ，通过 <a class="reference internal" href="../../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 运行Windows虚拟机来测试SSD 磁盘，验证和排查为何最新购买的SSD磁盘使用了较小的物理扇区(512字节sector)</p>
 </section>
 </section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="mib-alignment">
+<h2>1 MiB-alignment<a class="headerlink" href="#mib-alignment" title="永久链接至标题">¶</a></h2>
+<p>对于SSD磁盘，通常会希望Linux使用 <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">MiB-alignment</span></code> ，也就是以 <code class="docutils literal notranslate"><span class="pre">512</span></code> 字节的逻辑扇区，共计 <code class="docutils literal notranslate"><span class="pre">2048</span></code> 个扇区，磁盘的第一个分区会对齐在 <code class="docutils literal notranslate"><span class="pre">2048</span> <span class="pre">*</span> <span class="pre">512</span> <span class="pre">=</span> <span class="pre">1024</span> <span class="pre">*</span> <span class="pre">1024</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">(MiB)</span> <span class="pre">=</span> <span class="pre">256</span> <span class="pre">*</span> <span class="pre">4096</span></code> 。</p>
+<p>这个第一分区的起始扇区也就是称为具备原生4k支持的AF磁盘，不论磁盘底层使用 <code class="docutils literal notranslate"><span class="pre">512</span></code> 字节还是 <code class="docutils literal notranslate"><span class="pre">4096</span></code> 字节，都能保证 <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">MiB-alignment</span></code> 能够对齐物理扇区。</p>
+<ul>
+<li><p>磁盘通过 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># lsblk /dev/sde</span>
+<span class="n">NAME</span> <span class="n">MAJ</span><span class="p">:</span><span class="n">MIN</span> <span class="n">RM</span>   <span class="n">SIZE</span> <span class="n">RO</span> <span class="n">TYPE</span> <span class="n">MOUNTPOINT</span>
+<span class="n">sde</span>    <span class="mi">8</span><span class="p">:</span><span class="mi">64</span>   <span class="mi">0</span> <span class="mf">931.5</span><span class="n">G</span>  <span class="mi">0</span> <span class="n">disk</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到上述存在比较奇怪问题的 <a class="reference internal" href="../../../arm/raspberry_pi/storage/wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 规格是 <code class="docutils literal notranslate"><span class="pre">931.5G</span></code> 。而我另外购买的2快同样型号 <a class="reference internal" href="../../../arm/raspberry_pi/storage/wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 使用 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 检查却是 <code class="docutils literal notranslate"><span class="pre">953.8G</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># lsblk /dev/sda
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS
+sda      8:0    0 953.8G  0 disk
+├─sda1   8:1    0   256M  0 part /media/sda1
+└─sda2   8:2    0    32G  0 part /
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>当使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">pated</span></code> 分区，就会看到第一个分区始终只能建立在从 <code class="docutils literal notranslate"><span class="pre">65535</span></code> 扇区开始，而这个 <code class="docutils literal notranslate"><span class="pre">65535</span></code> 扇区不是 <code class="docutils literal notranslate"><span class="pre">2048</span></code> 的倍数</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">fdisk和parted分区显示从 65535 开始</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># fdisk /dev/sde</span>
+
+Welcome to fdisk <span class="o">(</span>util-linux <span class="m">2</span>.34<span class="o">)</span>.
+Changes will remain <span class="k">in</span> memory only, <span class="k">until</span> you decide to write them.
+Be careful before using the write command.
+
+
+Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: p
+Disk /dev/sde: <span class="m">931</span>.53 GiB, <span class="m">1000204886016</span> bytes, <span class="m">1953525168</span> sectors
+Disk model: ssport
+Units: sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: <span class="m">4096</span> bytes / <span class="m">33553920</span> bytes
+Disklabel type: dos
+Disk identifier: 0xd7882f4e
+
+Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: n
+Partition <span class="nb">type</span>
+   p   primary <span class="o">(</span><span class="m">0</span> primary, <span class="m">0</span> extended, <span class="m">4</span> free<span class="o">)</span>
+   e   extended <span class="o">(</span>container <span class="k">for</span> logical partitions<span class="o">)</span>
+Select <span class="o">(</span>default p<span class="o">)</span>: p
+Partition number <span class="o">(</span><span class="m">1</span>-4, default <span class="m">1</span><span class="o">)</span>:
+First sector <span class="o">(</span><span class="m">65535</span>-1953525167, default <span class="m">65535</span><span class="o">)</span>:
+Last sector, +/-sectors or +/-size<span class="o">{</span>K,M,G,T,P<span class="o">}</span> <span class="o">(</span><span class="m">65535</span>-1953525167, default <span class="m">1953525167</span><span class="o">)</span>: +256MB
+
+Created a new partition <span class="m">1</span> of <span class="nb">type</span> <span class="s1">&#39;Linux&#39;</span> and of size <span class="m">256</span> MiB.
+
+Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: p
+Disk /dev/sde: <span class="m">931</span>.53 GiB, <span class="m">1000204886016</span> bytes, <span class="m">1953525168</span> sectors
+Disk model: ssport
+Units: sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: <span class="m">4096</span> bytes / <span class="m">33553920</span> bytes
+Disklabel type: dos
+Disk identifier: 0xd7882f4e
+
+Device     Boot Start    End Sectors  Size Id Type
+/dev/sde1       <span class="m">65535</span> <span class="m">589814</span>  <span class="m">524280</span>  256M <span class="m">83</span> Linux
+
+Partition <span class="m">1</span> does not start on physical sector boundary.
+</pre></div>
+</div>
+</div>
+<p><a class="reference external" href="https://linux-blog.anracom.com/2018/12/03/linux-ssd-partition-alignment-problems-with-external-usb-to-sata-controllers-i/">Linux SSD partition alignment – problems with external USB-to-SATA controllers – I</a> 的作者做了一个测试，将SSD移动硬盘从USB外接上拆下来，直接连接到主机的SATA控制器，则再次使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 划分分区就会从 <code class="docutils literal notranslate"><span class="pre">2048</span></code> 扇区开始。这说明:</p>
+<ul class="simple">
+<li><p>通过外接的 <code class="docutils literal notranslate"><span class="pre">USB-to-Sata-controller</span> <span class="pre">bus</span></code> ，磁盘的起始扇区会从 <code class="docutils literal notranslate"><span class="pre">65535</span></code> 的倍数开始</p></li>
+</ul>
+</section>
+<section id="linux">
+<h2>Linux如何搜集和报告磁盘属性<a class="headerlink" href="#linux" title="永久链接至标题">¶</a></h2>
+<p>从 RedHat 的网站上可以找到 <a class="reference external" href="https://people.redhat.com/msnitzer/docs/io-limits.txt">io-limits.txt</a> 说明了 “I/O Limits” 是基于 <code class="docutils literal notranslate"><span class="pre">sysfs</span></code> 和 <code class="docutils literal notranslate"><span class="pre">块设备</span></code> 的 <code class="docutils literal notranslate"><span class="pre">ioctl</span></code> 接口( 如 <code class="docutils literal notranslate"><span class="pre">libblkid</span></code> )获取信息:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">sysfs</span> <span class="pre">interface</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/&lt;</span><span class="n">disk</span><span class="o">&gt;/</span><span class="n">alignment_offset</span>
+<span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/&lt;</span><span class="n">disk</span><span class="o">&gt;/&lt;</span><span class="n">partition</span><span class="o">&gt;/</span><span class="n">alignment_offset</span>
+<span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/&lt;</span><span class="n">disk</span><span class="o">&gt;/</span><span class="n">queue</span><span class="o">/</span><span class="n">physical_block_size</span>
+<span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/&lt;</span><span class="n">disk</span><span class="o">&gt;/</span><span class="n">queue</span><span class="o">/</span><span class="n">logical_block_size</span>
+<span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/&lt;</span><span class="n">disk</span><span class="o">&gt;/</span><span class="n">queue</span><span class="o">/</span><span class="n">minimum_io_size</span>
+<span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">block</span><span class="o">/&lt;</span><span class="n">disk</span><span class="o">&gt;/</span><span class="n">queue</span><span class="o">/</span><span class="n">optimal_io_size</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我们检查这个存在问题的磁盘就可以看到:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">起始扇区65535的磁盘 I/O Limits信息</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ cat /sys/block/sde/alignment_offset
+<span class="m">0</span>
+
+$ cat /sys/block/sde/queue/physical_block_size
+<span class="m">512</span>
+
+$ cat /sys/block/sde/queue/logical_block_size
+<span class="m">512</span>
+
+$ cat /sys/block/sde/queue/minimum_io_size
+<span class="m">4096</span>
+
+$ cat /sys/block/sde/queue/optimal_io_size
+<span class="m">33553920</span>
+</pre></div>
+</div>
+</div>
+<p>而之前正常磁盘的信息</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">起始扇区2048的磁盘 I/O Limits信息</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ cat /sys/block/sda/alignment_offset
+<span class="m">0</span>
+
+$ cat /sys/block/sda/queue/physical_block_size
+<span class="m">4096</span>
+
+$ cat /sys/block/sda/queue/logical_block_size
+<span class="m">512</span>
+
+$ cat /sys/block/sda/queue/minimum_io_size
+<span class="m">4096</span>
+
+$ cat /sys/block/sda/queue/optimal_io_size
+<span class="m">1048576</span>
+</pre></div>
+</div>
+</div>
+<p>上述信息称为 “I/O Limits” 数据</p>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令，我们可以看出上述数据:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsblk</span> <span class="o">-</span><span class="n">o</span>  <span class="n">NAME</span><span class="p">,</span><span class="n">ALIGNMENT</span><span class="p">,</span><span class="n">MIN</span><span class="o">-</span><span class="n">IO</span><span class="p">,</span><span class="n">OPT</span><span class="o">-</span><span class="n">IO</span><span class="p">,</span><span class="n">PHY</span><span class="o">-</span><span class="n">SEC</span><span class="p">,</span><span class="n">LOG</span><span class="o">-</span><span class="n">SEC</span>
+</pre></div>
+</div>
+<p>此时输出对比就可以看到，那块起始扇区异常位于 <code class="docutils literal notranslate"><span class="pre">65535</span></code> 扇区的USB外接SSD磁盘输出如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                          <span class="n">ALIGNMENT</span> <span class="n">MIN</span><span class="o">-</span><span class="n">IO</span>   <span class="n">OPT</span><span class="o">-</span><span class="n">IO</span> <span class="n">PHY</span><span class="o">-</span><span class="n">SEC</span> <span class="n">LOG</span><span class="o">-</span><span class="n">SEC</span>
+<span class="n">sde</span>                                   <span class="mi">0</span>   <span class="mi">4096</span> <span class="mi">33553920</span>     <span class="mi">512</span>     <span class="mi">512</span>
+</pre></div>
+</div>
+<p>而正常输出则是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>   <span class="n">ALIGNMENT</span> <span class="n">MIN</span><span class="o">-</span><span class="n">IO</span>  <span class="n">OPT</span><span class="o">-</span><span class="n">IO</span> <span class="n">PHY</span><span class="o">-</span><span class="n">SEC</span> <span class="n">LOG</span><span class="o">-</span><span class="n">SEC</span>
+<span class="n">sda</span>            <span class="mi">0</span>   <span class="mi">4096</span> <span class="mi">1048576</span>    <span class="mi">4096</span>     <span class="mi">512</span>
+</pre></div>
+</div>
+<p>此外，对比直接连接在SATA接口上的SSD磁盘，会看到这个 <code class="docutils literal notranslate"><span class="pre">optimal_io_size</span></code> 显示是 <code class="docutils literal notranslate"><span class="pre">0</span></code> ，例如，以下是一块intel 内置2.5” SSD固态硬盘:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                          <span class="n">ALIGNMENT</span> <span class="n">MIN</span><span class="o">-</span><span class="n">IO</span>   <span class="n">OPT</span><span class="o">-</span><span class="n">IO</span> <span class="n">PHY</span><span class="o">-</span><span class="n">SEC</span> <span class="n">LOG</span><span class="o">-</span><span class="n">SEC</span>
+<span class="n">sda</span>                                   <span class="mi">0</span>    <span class="mi">512</span>        <span class="mi">0</span>     <span class="mi">512</span>     <span class="mi">512</span>
+</pre></div>
+</div>
+<p>将SSD移动硬盘直接接在SATA接口上，则 <code class="docutils literal notranslate"><span class="pre">optimal_io_size</span></code> 显示是 <code class="docutils literal notranslate"><span class="pre">0</span></code> ，而我购买的 <a class="reference internal" href="../../../arm/raspberry_pi/storage/wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 接在USB接口上显示有2种值，一种是比较正常的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>   <span class="n">ALIGNMENT</span> <span class="n">MIN</span><span class="o">-</span><span class="n">IO</span>  <span class="n">OPT</span><span class="o">-</span><span class="n">IO</span> <span class="n">PHY</span><span class="o">-</span><span class="n">SEC</span> <span class="n">LOG</span><span class="o">-</span><span class="n">SEC</span>
+<span class="n">sda</span>            <span class="mi">0</span>   <span class="mi">4096</span> <span class="mi">1048576</span>    <span class="mi">4096</span>     <span class="mi">512</span>
+</pre></div>
+</div>
+<p>另一种是比较异常的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                          <span class="n">ALIGNMENT</span> <span class="n">MIN</span><span class="o">-</span><span class="n">IO</span>   <span class="n">OPT</span><span class="o">-</span><span class="n">IO</span> <span class="n">PHY</span><span class="o">-</span><span class="n">SEC</span> <span class="n">LOG</span><span class="o">-</span><span class="n">SEC</span>
+<span class="n">sde</span>                                   <span class="mi">0</span>   <span class="mi">4096</span> <span class="mi">33553920</span>     <span class="mi">512</span>     <span class="mi">512</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>导致不同对齐的原因<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>Linux分区工具，例如 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 使用 <code class="docutils literal notranslate"><span class="pre">libblkid</span></code> 的输出信息，而 Linux 则是基于磁盘的属性数据( <code class="docutils literal notranslate"><span class="pre">I/O</span> <span class="pre">Limits</span></code> )来 <code class="docutils literal notranslate"><span class="pre">启发</span></code> 对齐决策，根据: <a class="reference external" href="https://people.redhat.com/msnitzer/docs/io-limits.txt">io-limits.txt</a> 所谓的启发分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;The heuristic parted uses is:</span>
+<span class="mi">1</span><span class="p">)</span>  <span class="n">Always</span> <span class="n">use</span> <span class="n">the</span> <span class="n">reported</span> <span class="s1">&#39;alignment_offset&#39;</span> <span class="k">as</span> <span class="n">the</span> <span class="n">offset</span> <span class="k">for</span> <span class="n">the</span>
+    <span class="n">start</span> <span class="n">of</span> <span class="n">the</span> <span class="n">first</span> <span class="n">primary</span> <span class="n">partition</span><span class="o">.</span>
+<span class="mi">2</span><span class="n">a</span><span class="p">)</span> <span class="n">If</span> <span class="s1">&#39;optimal_io_size&#39;</span> <span class="ow">is</span> <span class="n">defined</span> <span class="p">(</span><span class="ow">not</span> <span class="mi">0</span><span class="p">)</span> <span class="n">align</span> <span class="nb">all</span> <span class="n">partitions</span> <span class="n">on</span> <span class="n">an</span>
+    <span class="s1">&#39;optimal_io_size&#39;</span> <span class="n">boundary</span><span class="o">.</span>
+<span class="mi">2</span><span class="n">b</span><span class="p">)</span> <span class="n">If</span> <span class="s1">&#39;optimal_io_size&#39;</span> <span class="ow">is</span> <span class="n">undefined</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;alignment_offset&#39;</span> <span class="ow">is</span> <span class="mi">0</span>
+    <span class="ow">and</span> <span class="s1">&#39;minimum_io_size&#39;</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">power</span> <span class="n">of</span> <span class="mi">2</span><span class="p">:</span> <span class="n">use</span> <span class="n">a</span> <span class="mi">1</span><span class="n">MB</span> <span class="n">default</span> <span class="n">alignment</span><span class="o">.</span>
+    <span class="o">-</span> <span class="k">as</span> <span class="n">you</span> <span class="n">can</span> <span class="n">see</span> <span class="n">this</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">catch</span> <span class="nb">all</span> <span class="k">for</span> <span class="s2">&quot;legacy&quot;</span> <span class="n">devices</span> <span class="n">which</span>
+      <span class="n">don</span><span class="s1">&#39;t appear to provide &quot;I/O hints&quot;; so in the default case all</span>
+      <span class="n">partitions</span> <span class="n">will</span> <span class="n">align</span> <span class="n">on</span> <span class="n">a</span> <span class="mi">1</span><span class="n">MB</span> <span class="n">boundary</span><span class="o">.</span>
+    <span class="o">-</span> <span class="n">NOTE</span><span class="p">:</span> <span class="n">we</span> <span class="n">can</span><span class="s1">&#39;t distinguish between a &quot;legacy&quot; device and modern</span>
+      <span class="n">device</span> <span class="n">that</span> <span class="n">provides</span> <span class="s2">&quot;I/O hints&quot;</span> <span class="k">with</span> <span class="n">alignment_offset</span><span class="o">=</span><span class="mi">0</span> <span class="ow">and</span>
+      <span class="n">optimal_io_size</span><span class="o">=</span><span class="mf">0.</span>  <span class="n">Such</span> <span class="n">a</span> <span class="n">device</span> <span class="n">might</span> <span class="n">be</span> <span class="n">a</span> <span class="n">single</span> <span class="n">SAS</span> <span class="mi">4</span><span class="n">K</span> <span class="n">device</span><span class="o">.</span>
+      <span class="n">So</span> <span class="n">worst</span> <span class="n">case</span> <span class="n">we</span> <span class="n">lose</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="n">MB</span> <span class="n">of</span> <span class="n">space</span> <span class="n">at</span> <span class="n">the</span> <span class="n">start</span> <span class="n">of</span> <span class="n">the</span> <span class="n">disk</span><span class="o">.</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>由于异常磁盘报告: <code class="docutils literal notranslate"><span class="pre">optimal_io_size:</span> <span class="pre">33553920</span> <span class="pre">(bytes)</span></code> (32MB)，则 <code class="docutils literal notranslate"><span class="pre">33553920</span> <span class="pre">/</span> <span class="pre">512</span> <span class="pre">=</span> <span class="pre">65535</span></code> ，所以就会把磁盘分区的起始扇区决定为 <strong>65535</strong></p>
+<p>而正常的磁盘报告: <code class="docutils literal notranslate"><span class="pre">optimal_io_size:</span> <span class="pre">1048576</span> <span class="pre">(bytes)</span></code> (1MB)，则 <code class="docutils literal notranslate"><span class="pre">1048576</span> <span class="pre">/</span> <span class="pre">512</span> <span class="pre">=</span> <span class="pre">2048</span></code> ，则把磁盘分区的起始扇区决定为 <strong>2048</strong></p>
+<p>注意，对于直接通过SATA接口连接的intel SSD磁盘，报告的 <code class="docutils literal notranslate"><span class="pre">optimal_io_size:</span> <span class="pre">0</span></code> ，则Linux内核自动把扇区对齐到 1MB 位置。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>为什么我最近购买的 <a class="reference internal" href="../../../arm/raspberry_pi/storage/wd_passport_ssd.html#wd-passport-ssd"><span class="std std-ref">西部数据Passport SSD移动硬盘</span></a> 会报告一个非常高的 <code class="docutils literal notranslate"><span class="pre">optimal_io_value</span></code> ，高达 32MiB ？</p>
+</div>
+</section>
+<section id="gdisk">
+<h2>gdisk<a class="headerlink" href="#gdisk" title="永久链接至标题">¶</a></h2>
+<p>由于Linux的分区工具，是通过 <code class="docutils literal notranslate"><span class="pre">libblkid</span></code> 库来监测磁盘拓扑参数(I/O limits)，通过 <code class="docutils literal notranslate"><span class="pre">heuristic</span> <span class="pre">rules</span></code> (启发式规则)来决定对齐，这就导致了SSD磁盘接在内置SATA磁盘接口和USB转换SATA外置接口不同的参数，引发不同的对齐策略。</p>
+<p>虽然 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 和 <code class="docutils literal notranslate"><span class="pre">prated</span></code> 都是使用 <code class="docutils literal notranslate"><span class="pre">libblkid</span></code> 库，导致磁盘起始扇区没有实现 <code class="docutils literal notranslate"><span class="pre">1MiB-alignment</span></code> ，但是，如果使用 <code class="docutils literal notranslate"><span class="pre">gdisk</span></code> 则会忽略这个问题，即使通过外接 <code class="docutils literal notranslate"><span class="pre">USB-to-SATA-controller</span></code> 依然会执行 <code class="docutils literal notranslate"><span class="pre">1MiB-alignment</span></code> 。</p>
+<p>此外，虽然 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 不能忽略 <code class="docutils literal notranslate"><span class="pre">65535</span></code> 的起始扇区，但是 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 却提供了强制创建分区(忽略对齐 <code class="docutils literal notranslate"><span class="pre">65535</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># parted /dev/sde mkpart primary fat32 1MiB 257MiB
+Warning: The resulting partition is not properly aligned for best performance: 4000000s % 65535s !=
+0s
+Ignore/Cancel? i
+Information: You may need to update /etc/fstab.
+</pre></div>
+</div>
+<p>可以看到，上面 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 命令强制创建分区从 <code class="docutils literal notranslate"><span class="pre">1MiB</span></code> 开始，也就是 <code class="docutils literal notranslate"><span class="pre">2048</span></code> 扇区开始，同时结束是 <code class="docutils literal notranslate"><span class="pre">257MiB</span></code> ，则分区空间就是 256 MB。</p>
+<p>然后通过 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span> <span class="pre">/dev/sde</span></code> 命令可以检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde</span><span class="p">:</span> <span class="mf">931.53</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1000204886016</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">1953525168</span> <span class="n">sectors</span>
+<span class="n">Disk</span> <span class="n">model</span><span class="p">:</span> <span class="n">ssport</span>
+<span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">33553920</span> <span class="nb">bytes</span>
+<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">dos</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mh">0xd7882f4e</span>
+
+<span class="n">Device</span>     <span class="n">Boot</span> <span class="n">Start</span>    <span class="n">End</span> <span class="n">Sectors</span>  <span class="n">Size</span> <span class="n">Id</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde1</span>        <span class="mi">2048</span> <span class="mi">526335</span>  <span class="mi">524288</span>  <span class="mi">256</span><span class="n">M</span>  <span class="n">c</span> <span class="n">W95</span> <span class="n">FAT32</span> <span class="p">(</span><span class="n">LBA</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>然后再添加第二个分区:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="n">ext4</span> <span class="mi">257</span><span class="n">MiB</span> <span class="mi">32</span><span class="n">GiB</span>
+</pre></div>
+</div>
+<p>不过，我发现 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 划分的分区只能指定 <code class="docutils literal notranslate"><span class="pre">start</span></code> 和 <code class="docutils literal notranslate"><span class="pre">end</span></code> ，所以实际划分的分区大小和之前使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 划分分区使用 <code class="docutils literal notranslate"><span class="pre">+32G</span></code> 获得的分区大小有一点点区别。所以最终第2个分区我是使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 来添加的。使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 命令添加分区可以直接指定扇区或分区大小(只有第一个分区受到 <code class="docutils literal notranslate"><span class="pre">65535</span></code> 影响无法指定 <code class="docutils literal notranslate"><span class="pre">2048</span></code> ，第二个分区已经超出 <code class="docutils literal notranslate"><span class="pre">65535</span></code> 就还是可以使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span></code> 来管理分配的)</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">/dev/sde</span></code> 划分第二个分区步骤如下:</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">在parted强制划分第一个分区从2048扇区开始，再用fdisk添加第二个扇区</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: p
+Disk /dev/sde: <span class="m">931</span>.53 GiB, <span class="m">1000204886016</span> bytes, <span class="m">1953525168</span> sectors
+Disk model: ssport
+Units: sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: <span class="m">4096</span> bytes / <span class="m">33553920</span> bytes
+Disklabel type: dos
+Disk identifier: 0xd7882f4e
+
+Device     Boot Start    End Sectors  Size Id Type
+/dev/sde1        <span class="m">2048</span> <span class="m">526335</span>  <span class="m">524288</span>  256M  c W95 FAT32 <span class="o">(</span>LBA<span class="o">)</span>
+
+Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: n
+Partition <span class="nb">type</span>
+   p   primary <span class="o">(</span><span class="m">1</span> primary, <span class="m">0</span> extended, <span class="m">3</span> free<span class="o">)</span>
+   e   extended <span class="o">(</span>container <span class="k">for</span> logical partitions<span class="o">)</span>
+Select <span class="o">(</span>default p<span class="o">)</span>: p
+Partition number <span class="o">(</span><span class="m">2</span>-4, default <span class="m">2</span><span class="o">)</span>:
+First sector <span class="o">(</span><span class="m">526336</span>-1953525167, default <span class="m">589815</span><span class="o">)</span>: <span class="m">526336</span>
+Last sector, +/-sectors or +/-size<span class="o">{</span>K,M,G,T,P<span class="o">}</span> <span class="o">(</span><span class="m">526336</span>-1953525167, default <span class="m">1953525167</span><span class="o">)</span>: <span class="m">67635199</span>
+
+Created a new partition <span class="m">2</span> of <span class="nb">type</span> <span class="s1">&#39;Linux&#39;</span> and of size <span class="m">32</span> GiB.
+
+Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: p
+Disk /dev/sde: <span class="m">931</span>.53 GiB, <span class="m">1000204886016</span> bytes, <span class="m">1953525168</span> sectors
+Disk model: ssport
+Units: sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: <span class="m">4096</span> bytes / <span class="m">33553920</span> bytes
+Disklabel type: dos
+Disk identifier: 0xd7882f4e
+
+Device     Boot  Start      End  Sectors  Size Id Type
+/dev/sde1         <span class="m">2048</span>   <span class="m">526335</span>   <span class="m">524288</span>  256M  c W95 FAT32 <span class="o">(</span>LBA<span class="o">)</span>
+/dev/sde2       <span class="m">526336</span> <span class="m">67635199</span> <span class="m">67108864</span>   32G <span class="m">83</span> Linux
+
+Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: w
+The partition table has been altered.
+Calling ioctl<span class="o">()</span> to re-read partition table.
+Syncing disks.
+</pre></div>
+</div>
+</div>
+<p>完成后可以看到，分区的扇区和之前 <a class="reference internal" href="../../alpine_linux/alpine_install_pi_usb_boot.html#alpine-install-pi-usb-boot"><span class="std std-ref">树莓派环境安装Alpine Linux到USB磁盘启动</span></a> 完全一致。</p>
+<p>然后就可以完成 <a class="reference internal" href="../../alpine_linux/alpine_pi_usb_boot_clone.html#alpine-pi-usb-boot-clone"><span class="std std-ref">树莓派4 USB存储启动Alpine Linux(clone方式)</span></a></p>
+<ul>
+<li><p>不过，上述强制分区对齐到 <code class="docutils literal notranslate"><span class="pre">1MiB</span></code> 上，使用 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 检查分区是显示不对齐的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde</span><span class="p">:</span> <span class="mf">931.53</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">1000204886016</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">1953525168</span> <span class="n">sectors</span>
+<span class="n">Disk</span> <span class="n">model</span><span class="p">:</span> <span class="n">ssport</span>
+<span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">33553920</span> <span class="nb">bytes</span>
+<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">dos</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mh">0xd7882f4e</span>
+
+<span class="n">Device</span>     <span class="n">Boot</span>  <span class="n">Start</span>      <span class="n">End</span>  <span class="n">Sectors</span>  <span class="n">Size</span> <span class="n">Id</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde1</span>         <span class="mi">2048</span>   <span class="mi">526335</span>   <span class="mi">524288</span>  <span class="mi">256</span><span class="n">M</span>  <span class="n">c</span> <span class="n">W95</span> <span class="n">FAT32</span> <span class="p">(</span><span class="n">LBA</span><span class="p">)</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sde2</span>       <span class="mi">526336</span> <span class="mi">67635199</span> <span class="mi">67108864</span>   <span class="mi">32</span><span class="n">G</span> <span class="mi">83</span> <span class="n">Linux</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>检查命令显示如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># parted /dev/sde align-check opt 1</span>
+<span class="mi">1</span> <span class="ow">not</span> <span class="n">aligned</span><span class="p">:</span> <span class="mi">2048</span><span class="n">s</span> <span class="o">%</span> <span class="mi">65535</span><span class="n">s</span> <span class="o">!=</span> <span class="mi">0</span><span class="n">s</span>
+
+<span class="c1"># parted /dev/sde align-check opt 2</span>
+<span class="mi">2</span> <span class="ow">not</span> <span class="n">aligned</span><span class="p">:</span> <span class="mi">526336</span><span class="n">s</span> <span class="o">%</span> <span class="mi">65535</span><span class="n">s</span> <span class="o">!=</span> <span class="mi">0</span><span class="n">s</span>
+</pre></div>
+</div>
+</section>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://linux-blog.anracom.com/2018/12/03/linux-ssd-partition-alignment-problems-with-external-usb-to-sata-controllers-i/">Linux SSD partition alignment – problems with external USB-to-SATA controllers – I</a></p></li>
 <li><p><a class="reference external" href="https://unix.stackexchange.com/questions/303354/why-does-fdisk-insist-on-starting-the-first-partition-at-sector-65535-mib-31-99">Why does fdisk insist on starting the first partition at sector 65535 (MiB 31.9995…)</a></p></li>
