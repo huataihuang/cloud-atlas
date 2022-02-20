@@ -231,8 +231,8 @@ Linux分区工具，例如 ``parted`` 使用 ``libblkid`` 的输出信息，而 
 
    为什么我最近购买的 :ref:`wd_passport_ssd` 会报告一个非常高的 ``optimal_io_value`` ，高达 32MiB ？
 
-gdisk
-=========
+parted忽略 ``heuristic``
+=========================
 
 由于Linux的分区工具，是通过 ``libblkid`` 库来监测磁盘拓扑参数(I/O limits)，通过 ``heuristic rules`` (启发式规则)来决定对齐，这就导致了SSD磁盘接在内置SATA磁盘接口和USB转换SATA外置接口不同的参数，引发不同的对齐策略。
 
