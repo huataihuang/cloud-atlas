@@ -296,9 +296,95 @@ mmcblk0      179:0    0  29.3G  0 disk
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="mi">0</span><span class="o">%</span> <span class="mi">256</span><span class="n">MB</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>在 <a class="reference internal" href="linux_ssd_partition_alignment.html#linux-ssd-partition-alignment"><span class="std std-ref">Linux SSD分区对齐</span></a> 实践时，我发现这里的 <code class="docutils literal notranslate"><span class="pre">parted</span> <span class="pre">-a</span> <span class="pre">optimal</span></code> 参数起始位置设置 <code class="docutils literal notranslate"><span class="pre">0%</span></code> 实际上就是 <code class="docutils literal notranslate"><span class="pre">1MiB</span> <span class="pre">alignment</span></code> 。不过，对于USB转SATA接口的控制器，如果控制器提供给Linux内核的 <code class="docutils literal notranslate"><span class="pre">I/O</span> <span class="pre">limits</span></code> 参数 <code class="docutils literal notranslate"><span class="pre">optimize_io_size</span></code> 是特殊的 <code class="docutils literal notranslate"><span class="pre">33553920</span></code> (32MiB)，则会导致 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 使用 <code class="docutils literal notranslate"><span class="pre">0%</span></code> 无法对齐。</p>
+</div>
+<ul>
+<li><p>调整分区大小: <code class="docutils literal notranslate"><span class="pre">resizepart</span></code> 命令可以调整分区大小</p></li>
+<li><p>删除分区 - 这里数字 <code class="docutils literal notranslate"><span class="pre">1</span></code> 表示分区1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">rm</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+<li><p>挽救分区</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">rescure</span></code> 可以恢复开始和结束点之间的分区，如果在这个开始和结束点之间的分区被找到， <code class="docutils literal notranslate"><span class="pre">parted</span></code> 就会尝试恢复:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(parted) rescue
+Start? 1
+End? 15000
+(parted) print
+Model: Unknown (unknown)
+Disk /dev/sdb1: 15.0GB
+Sector size (logical/physical): 512B/512B
+Partition Table: loop
+Disk Flags:
+Number Start End Size File system Flags
+1 0.00B 15.0GB 15.0GB ext4
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>修改分区标记 - 支持多种分区标记:</p>
+<ul>
+<li><p>boot</p></li>
+<li><p>root</p></li>
+<li><p>swap</p></li>
+<li><p>hidden</p></li>
+<li><p>raid</p></li>
+<li><p>lvm</p></li>
+<li><p>lba</p></li>
+<li><p>legacy_boot</p></li>
+<li><p>irst</p></li>
+<li><p>esp</p></li>
+<li><p>palo</p></li>
+</ul>
+</li>
+</ul>
+<p>举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">parted</span><span class="p">)</span> <span class="nb">set</span> <span class="mi">2</span> <span class="n">boot</span> <span class="n">on</span>
+</pre></div>
+</div>
 </section>
 <section id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<h2>案例实践<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>在 <a class="reference internal" href="../../lfs_linux/index.html#lfs-linux"><span class="std std-ref">LFS(Linux from scratch)</span></a> 磁盘分区准备工作中，使用 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 来完成分区</p>
+<ul>
+<li><p>初始化磁盘分区表（擦除原先的所有数据）:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mklabel</span> <span class="n">gpt</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建第一个 <code class="docutils literal notranslate"><span class="pre">sda1</span></code> 分区，用于EFI启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mkpart</span> <span class="n">ESP</span> <span class="n">fat32</span> <span class="mi">0</span><span class="o">%</span> <span class="mi">256</span><span class="n">MB</span>
+<span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="nb">set</span> <span class="mi">1</span> <span class="n">esp</span> <span class="n">on</span>
+</pre></div>
+</div>
+</li>
+<li><p>主分区59G空间，剩余用于swap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="n">ext4</span> <span class="mi">256</span><span class="n">MB</span> <span class="mi">59</span><span class="n">GB</span>
+<span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="n">linux</span><span class="o">-</span><span class="n">swap</span> <span class="mi">59</span><span class="n">GB</span> <span class="mi">100</span><span class="o">%</span>
+</pre></div>
+</div>
+</li>
+<li><p>完成后最后检查 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span> <span class="pre">/dev/sda</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span><span class="p">:</span> <span class="mf">56.5</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">60666413056</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">118489088</span> <span class="n">sectors</span>
+<span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">Sector</span> <span class="n">size</span> <span class="p">(</span><span class="n">logical</span><span class="o">/</span><span class="n">physical</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">size</span> <span class="p">(</span><span class="n">minimum</span><span class="o">/</span><span class="n">optimal</span><span class="p">):</span> <span class="mi">512</span> <span class="nb">bytes</span> <span class="o">/</span> <span class="mi">512</span> <span class="nb">bytes</span>
+<span class="n">Disklabel</span> <span class="nb">type</span><span class="p">:</span> <span class="n">gpt</span>
+<span class="n">Disk</span> <span class="n">identifier</span><span class="p">:</span> <span class="mi">25</span><span class="n">AAF5C2</span><span class="o">-</span><span class="mi">70</span><span class="n">A9</span><span class="o">-</span><span class="mi">4</span><span class="n">B7A</span><span class="o">-</span><span class="mi">8350</span><span class="o">-</span><span class="n">C11F96658DC1</span>
+
+<span class="n">Device</span>         <span class="n">Start</span>       <span class="n">End</span>   <span class="n">Sectors</span>  <span class="n">Size</span> <span class="n">Type</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>       <span class="mi">2048</span>    <span class="mi">499711</span>    <span class="mi">497664</span>  <span class="mi">243</span><span class="n">M</span> <span class="n">EFI</span> <span class="n">System</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>     <span class="mi">499712</span> <span class="mi">115234815</span> <span class="mi">114735104</span> <span class="mf">54.7</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">filesystem</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda3</span>  <span class="mi">115234816</span> <span class="mi">118487039</span>   <span class="mi">3252224</span>  <span class="mf">1.6</span><span class="n">G</span> <span class="n">Linux</span> <span class="n">swap</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://opensource.com/article/18/11/partition-format-drive-linux">How to partition and format a drive on Linux</a></p></li>
 <li><p><a class="reference external" href="https://www.tecmint.com/parted-command-to-create-resize-rescue-linux-disk-partitions/">8 Linux ‘Parted’ Commands to Create, Resize and Rescue Disk Partitions</a></p></li>

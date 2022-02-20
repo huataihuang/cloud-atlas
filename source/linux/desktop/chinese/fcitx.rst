@@ -71,3 +71,5 @@ dwm配置
 
 - `arch linux: Fcitx5 <https://wiki.archlinux.org/title/Fcitx5>`_
 - `arch linux: Fcitx <https://wiki.archlinux.org/title/fcitx>`_
+- `Debian Wiki: Fcitx5 <https://wiki.debian.org/l18n/Fcitx5>`_
+- `Fcitx官方: Install Fcitx 5 <https://fcitx-im.org/wiki/Install_Fcitx_5>`_

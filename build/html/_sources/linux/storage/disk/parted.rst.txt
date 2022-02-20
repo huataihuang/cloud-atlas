@@ -123,6 +123,83 @@ parted是一个创建和维护分区表的工具，提供了交互模式和直�
 
    parted -a optimal /dev/sda mkpart primary 0% 256MB
 
+.. note::
+
+   在 :ref:`linux_ssd_partition_alignment` 实践时，我发现这里的 ``parted -a optimal`` 参数起始位置设置 ``0%`` 实际上就是 ``1MiB alignment`` 。不过，对于USB转SATA接口的控制器，如果控制器提供给Linux内核的 ``I/O limits`` 参数 ``optimize_io_size`` 是特殊的 ``33553920`` (32MiB)，则会导致 ``parted`` 使用 ``0%`` 无法对齐。
+
+- 调整分区大小: ``resizepart`` 命令可以调整分区大小
+
+- 删除分区 - 这里数字 ``1`` 表示分区1::
+
+   parted /dev/sda rm 1
+
+- 挽救分区
+
+``rescure`` 可以恢复开始和结束点之间的分区，如果在这个开始和结束点之间的分区被找到， ``parted`` 就会尝试恢复::
+
+   (parted) rescue
+   Start? 1
+   End? 15000
+   (parted) print
+   Model: Unknown (unknown)
+   Disk /dev/sdb1: 15.0GB
+   Sector size (logical/physical): 512B/512B
+   Partition Table: loop
+   Disk Flags:
+   Number Start End Size File system Flags
+   1 0.00B 15.0GB 15.0GB ext4
+
+- 修改分区标记 - 支持多种分区标记:
+
+  - boot
+  - root
+  - swap
+  - hidden
+  - raid
+  - lvm
+  - lba
+  - legacy_boot
+  - irst
+  - esp
+  - palo
+
+举例::
+
+   (parted) set 2 boot on
+
+案例实践
+============
+
+在 :ref:`lfs_linux` 磁盘分区准备工作中，使用 ``parted`` 来完成分区
+
+- 初始化磁盘分区表（擦除原先的所有数据）::
+
+   parted /dev/sda mklabel gpt
+
+- 创建第一个 ``sda1`` 分区，用于EFI启动::
+
+   parted -a optimal /dev/sda mkpart ESP fat32 0% 256MB
+   parted /dev/sda set 1 esp on
+
+- 主分区59G空间，剩余用于swap::
+
+   parted -a optimal /dev/sda mkpart primary ext4 256MB 59GB
+   parted -a optimal /dev/sda mkpart primary linux-swap 59GB 100%
+
+- 完成后最后检查 ``fdisk -l /dev/sda`` ::
+
+   Disk /dev/sda: 56.5 GiB, 60666413056 bytes, 118489088 sectors
+   Units: sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+   Disklabel type: gpt
+   Disk identifier: 25AAF5C2-70A9-4B7A-8350-C11F96658DC1
+
+   Device         Start       End   Sectors  Size Type
+   /dev/sda1       2048    499711    497664  243M EFI System
+   /dev/sda2     499712 115234815 114735104 54.7G Linux filesystem
+   /dev/sda3  115234816 118487039   3252224  1.6G Linux swap
+
 参考
 =======
 
