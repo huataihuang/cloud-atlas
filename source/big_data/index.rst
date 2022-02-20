@@ -30,7 +30,7 @@ Big Data Atlas
    influxdb.rst
    telegraf.rst
    balena.rst
-   jupyter.rst
+   jupyter/index
 
 .. only::  subproject and html
 
