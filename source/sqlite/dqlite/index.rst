@@ -1,16 +1,13 @@
-.. _jupyter:
+.. _dqlite:
 
 =================================
-Jupyter - 数据科学开发平台
+分布式SQLite - Dqlite
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_jupyter.rst
-   install_jupyter.rst
-   jupyter_slideshow.rst
-   jupyter_startup.rst
+   dqlite_arch.rst
 
 .. only::  subproject and html
 

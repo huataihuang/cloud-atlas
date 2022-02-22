@@ -15,23 +15,69 @@ Jupyter安装
 
    jupyter notebook
 
-使用pip安装Jupyter
---------------------
+使用pip安装
+============
 
-我个人使用的是Python 3的虚拟环境，所以先切换到Python virtualenv环境，然后直接通过pip安装::
+建议使用Python 3的 :ref:`virtualenv` ，以下实践在 :ref:`priv_cloud_infra` 的 ``z-dev`` ( :ref:`fedora_develop` )完成
+
+- Fedora作为开发环境，默认已经安装了 ``python3`` ``python3-pip`` 可以直接使用模块::
+
+   python3 -m pip
+   python3 -m venv
+
+- :ref:`ubuntu_linux` 平台通过以下命令安装 pip 和 venv 模块::
+
+   sudo apt install python3-pip python3-venv
+
+- 创建Python3虚拟环境 ``virtualenv`` ::
+
+   cd ~
+   python3 -m venv venv3
+
+- 切换到Python virtualenv环境::
+
+   source venv3/bin/active
+
+- 升级pip::
 
    pip install --upgrade pip
-   pip install jupyter
 
-安装以后再执行命令运行::
+安装JupyterLab
+-------------------
+
+- 使用pip安装 JupyterLab::
+
+   pip install jupyterlab
+
+- 安装以后命令运行::
+
+   jupyter-lab
+
+此时会提示访问服务器的URL，注意访问是通过 ``localhost`` 本地回环地址访问，所以建议采用 :ref:`priv_ssh` 中 :ref:`ssh_proxycommand` 方法访问:
+
+.. literalinclude:: ../../real/priv_cloud/priv_ssh/config
+   :language: bash
+   :caption: 用户目录配置SSH ~/.ssh/config
+
+安装Jupyter Notebook
+-------------------------
+
+- 使用pip安装 Jupyter Notebook::
+
+   pip install notebook
+
+- 然后运行::
 
    jupyter notebook
+
+安装Voilà
+------------
+
+- 使用pip安装 Voilà::
+
+   pip install voila
 
 使用
 =======
 
-- 基本使用方法就是直接启动notebook server::
-
-   jupyter notebook
-
-此时会启动Jupyter Notebook Server，监听在 ``http://localhost:8888`` ，并打开浏览器提供交互界面，看到的是Notebook Dashbook。
+JupyterLab 和 Jupyter Notebook的功能相同，运行启动都是监听在 ``http://localhost:8888`` ，并打开浏览器提供交互界面，可以选择其一运行，并开始下一阶段开发学习。
