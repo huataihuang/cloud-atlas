@@ -11,6 +11,7 @@ Linux网络
    ip_command.rst
    axel.rst
    iptables/index
+   socat.rst
    hostapd/index
    dpdk/index
    ethtool/index

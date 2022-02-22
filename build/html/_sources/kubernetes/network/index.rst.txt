@@ -9,7 +9,9 @@ Kubernetes只支持基于Container Network Interface(CNI)的网络，需要通�
 .. toctree::
    :maxdepth: 1
 
+   cni.rst
    k8s_network_infa.rst
+   ingress/index
    flannel/index
    cilium/index
    calico/index

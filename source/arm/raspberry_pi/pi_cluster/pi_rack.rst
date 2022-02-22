@@ -59,3 +59,13 @@
   - 如果NanoPi的USB供电稳定，甚至可以省却USB电源，通过NanoPi实现树莓派的电力供应
 
 如果上述方案总体成本能够低于 :ref:`turing_pi` ，则可以尝试；如果高于或接近 :ref:`turing_pi` ，则还是采用 :ref:`turing_pi` 实现集群
+
+软件
+=========
+
+树莓派硬件性能有限，为了能够充分发挥硬件性能，精简操作系统和应用软件势在必行:
+
+- 操作系统采用 :ref:`alpine_linux` : 轻量级最小化安装
+- IaaS平台采用 :ref:`k3s` : 适合 :ref:`edge_cloud` 的轻量级 :ref:`kubernetes`
+
+

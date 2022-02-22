@@ -24,6 +24,10 @@ Jupyter Note
 .. figure:: ../../_static/big_data/jupyter/juypter_notes.png
    :scale: 50
 
+Jupyter Notebook WEB环境中，可以编写程序、运行代码查看输出和可视化结果，而且提供了编排文本和撰写查看复杂数学公式功能。通过强大的REPL交互开发环境(Read-Eval-Pring-Loop, 读取用户输入-执行代码-输出结果-循环上述操作)，用户可以非常方便实现交互式开发以及丰富的文档功能。
+
+最早Jupyter是起源于Python交互式开发环境 IPython Notebook，后来将IPython和Python解释器剥离，实现对多种语言的支持，已经只吃了40多种语言，成为非常成功对交互式集成开发平台。
+
 Jupyter Lab
 ===============
 
@@ -31,6 +35,25 @@ Jupyter Lab是下一代Notebook界面，提供了最新的基于web的交互开�
 
 .. figure:: ../../_static/big_data/jupyter/juypterlab.png
    :scale: 50
+
+Jupyter Hub
+=============
+
+Jupyter Hub特点:
+
+- 多用户notebook，用于企业、教学和研究机构多用户协作
+- Jupyter Hub可以通过PAM，OAuth或者集成到自建的目录服务系统中来提供用户管理和认证
+- 可以现场(on-site)或远程(off-site)将Jupyter Notebook部署到企业的上千个用户中
+- 通过Docker和Kubernetes实现容器化部署，隔离用户进程以及简化软件安装
+
+Voila
+===========
+
+``Voilà`` 可以将notebooks转换成安全的、独立的web应用，以便定制和共享
+
+.. figure:: ../../_static/big_data/jupyter/voila.png
+   :scale: 50
+
 
 参考
 =========
