@@ -7,6 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
+   block_vs_object_storage.rst
    rockstor/index
 
 .. only::  subproject and html

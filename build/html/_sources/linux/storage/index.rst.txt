@@ -9,6 +9,7 @@ Linux存储
 
    disk/index
    nvme/index
+   iscsi/index
    pmem/index
    spdk/index
    filesystem/index
