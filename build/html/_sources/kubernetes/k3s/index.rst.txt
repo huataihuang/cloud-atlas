@@ -9,5 +9,6 @@ K3s - 轻量级Kubernetes
 
    introduce_k3s.rst
    k3s_arch.rst
-   arm_k3s_deploy.rst
+   pi_k3s_deploy.rst
+   k3s_ha_etcd.rst
    longhorn/index

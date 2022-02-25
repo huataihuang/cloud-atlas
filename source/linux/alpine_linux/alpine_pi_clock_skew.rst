@@ -328,6 +328,17 @@ Alpine Linux在树莓派启动"clock skew"报错
 
 然后重启系统，就不再出现文件系统不能挂载的问题了。不过，这个workaround是绕过了fsck，可能存在隐患
 
+解决步骤三: 使用chrony同步时钟
+-------------------------------
+
+上述两个步骤解决了alpine的启动问题，但是还是需要注意，一定要正确配置主机 ``chrony`` 进行时间同步，否则树莓派的时间不准确会导致各种部署问题。
+
+- 修订 ``/etc/chrony/chrony.conf`` :
+
+.. literalinclude:: ../../infra_service/ntp/deploy_ntp/chrony-client.conf
+   :language: bash
+   :caption: chrony客户端配置 /etc/chrony/chrony.conf
+
 参考
 =======
 

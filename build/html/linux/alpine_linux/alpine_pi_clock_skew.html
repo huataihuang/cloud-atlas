@@ -98,7 +98,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id4">文件系统修复(未解决)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id5">临时的手工处理方法</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id6">最终解决方法</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_pi_clone.html">Clone Alpine Linux (树莓派)</a></li>
@@ -111,7 +111,10 @@
 <li class="toctree-l3"><a class="reference internal" href="alpine_wireless_broadcom.html">设置Alpine Linux无线(Broadcom)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_extended.html">U盘运行Alpine Linux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_apk.html">Alpine Linux包管理apk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openrc/index.html">OpenRC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uefi/index.html">Alpine Linux UEFI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_kvm.html">Alpine Linux运行KVM虚拟化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="alpine_docker.html">Alpine Linux运行Docker</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_nfs.html">Alpine Linux配置NFS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_dev.html">Alpine Linux软件开发环境构建</a></li>
 </ul>
@@ -416,8 +419,8 @@ WARNING: clock skew detected!
 </pre></div>
 </div>
 <p>显示:</p>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">sudo tune2fs -l /dev/sdf2 输出</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">sudo tune2fs -l /dev/sdf2 输出</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tune2fs <span class="m">1</span>.45.5 <span class="o">(</span><span class="m">07</span>-Jan-2020<span class="o">)</span>
 Filesystem volume name:   &lt;none&gt;
 Last mounted on:          /
@@ -573,9 +576,28 @@ fsck: caught SIGTERM, aborting
 </ul>
 <p>然后重启系统，就不再出现文件系统不能挂载的问题了。不过，这个workaround是绕过了fsck，可能存在隐患</p>
 </section>
-</section>
 <section id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
+<h3>解决步骤三: 使用chrony同步时钟<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<p>上述两个步骤解决了alpine的启动问题，但是还是需要注意，一定要正确配置主机 <code class="docutils literal notranslate"><span class="pre">chrony</span></code> 进行时间同步，否则树莓派的时间不准确会导致各种部署问题。</p>
+<ul class="simple">
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/chrony/chrony.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">chrony客户端配置 /etc/chrony/chrony.conf</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#pool pool.ntp.org iburst</span>
+<span class="c1">#initstepslew 10 pool.ntp.org</span>
+pool <span class="m">192</span>.168.7.200 iburst
+initstepslew <span class="m">10</span> <span class="m">192</span>.168.7.200
+driftfile /var/lib/chrony/chrony.drift
+rtcsync
+cmdport <span class="m">0</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://gitlab.alpinelinux.org/alpine/aports/-/issues/8093">Raspberry Pi: Clock skew messages on startup; simple fix</a> 最终采用这个hack方法解决OpenRC报错 <code class="docutils literal notranslate"><span class="pre">Clock</span> <span class="pre">skew</span></code> ，不过文件系统拒绝挂载的问题是我采用了workaroud方式fix的</p></li>
 <li><p><a class="reference external" href="https://gitlab.alpinelinux.org/alpine/aports/-/issues/9032">Add hardware clock earlier Raspberry Pi</a></p></li>

@@ -43,6 +43,9 @@
 客户端
 ===========
 
+systemd-timesyncd客户端
+------------------------
+
 所有虚拟机发行版基本都采用了 :ref:`systemd` ，内置了 :ref:`systemd_timesyncd` 可以和NTP服务器进行时钟同步
 
 - 修订客户机 ``/etc/systemd/timesyncd.conf`` ::
@@ -62,3 +65,16 @@
 - 为方便查看本地时间，检查 ``/etc/localtime`` 软链接，确保::
 
    /etc/localtime -> ../usr/share/zoneinfo/Asia/Shanghai
+
+.. _chrony_client:
+
+chrony客户端
+----------------
+
+在 :ref:`edge_cloud` 的 :ref:`pi_4` 上部署 :ref:`alpine_linux` 构建 :ref:`k3s` 。树莓派没有硬件时钟，配置 :ref:`chrony` 同步时钟:
+
+- 配置 ``/etc/chrony/chrony.conf`` 设置 ``192.168.7.200`` 作为NTP服务器:
+
+.. literalinclude:: ../../infra_service/ntp/deploy_ntp/chrony-client.conf
+   :language: bash
+   :caption: chrony客户端配置 /etc/chrony/chrony.conf

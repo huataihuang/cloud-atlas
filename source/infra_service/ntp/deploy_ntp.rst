@@ -69,6 +69,15 @@ timesyncd客户端配置
 
 请参考 :ref:`systemd_timesyncd`
 
+chrony客户端配置
+======================
+
+- 修订 ``/etc/chrony/chrony.conf`` 配置服务器指向NTP服务器地址:
+
+.. literalinclude:: deploy_ntp/chrony-client.conf
+   :language: bash
+   :caption: chrony客户端配置 /etc/chrony/chrony.conf
+
 参考
 ======
 

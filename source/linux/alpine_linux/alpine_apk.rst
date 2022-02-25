@@ -26,7 +26,7 @@ apk软件仓库
 
    根据 ``/etc/alpine-release`` 配置可以知道本机的版本，所以对应选择 ``v3.14``
 
-   ``main`` 只包含基础软件包，很多软件包都位于 ``community`` ，例如 ``libvirt-daemon`` 等虚拟化软件
+   ``main`` 只包含基础软件包，很多软件包都位于 ``community`` ，例如 ``libvirt-daemon`` / ``docker`` 等虚拟化软件
 
 更新系统
 ==============

@@ -19,6 +19,7 @@ Docker Atlas
    network/index
    gpu/index
    logs/index
+   gui/index
 
 .. only::  subproject and html
 
