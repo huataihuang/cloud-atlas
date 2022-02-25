@@ -139,7 +139,7 @@ alpine linux系统初始安装
 - 安装必要系统软件::
 
    sudo apk update && sudo apk upgrade
-   sudo apk add sudo
+   sudo apk add sudo curl
 
 - 修订 ``/etc/sudoers`` ::
 

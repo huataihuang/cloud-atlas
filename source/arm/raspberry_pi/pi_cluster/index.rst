@@ -22,7 +22,7 @@ Raspberry Pi Cluster
 .. toctree::
    :maxdepth: 1
 
-   pi_rack.rst
+   pi_stack.rst
    diskless_pi_cluster.rst
    autodeploy_pi_os.rst
 

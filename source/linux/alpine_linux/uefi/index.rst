@@ -1,16 +1,15 @@
-.. _xpra:
+.. _alpine_uefi:
 
 =================================
-X持久化远程应用Xpra
+Alpine Linux UEFI
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   xpra_startup.rst
-   xpra_chinese_input.rst
-   xpra_shadow.rst
-   xpra_multicast_dns.rst
+   alpine_uefi_startup.rst
+   alpine_bootloader.rst
+   alpine_convert_bios_uefi.rst
 
 .. only::  subproject and html
 

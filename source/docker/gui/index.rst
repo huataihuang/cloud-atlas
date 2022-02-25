@@ -1,16 +1,16 @@
-.. _xpra:
+.. _docker_gui:
 
 =================================
-X持久化远程应用Xpra
+Docker GUI应用
 =================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   xpra_startup.rst
-   xpra_chinese_input.rst
-   xpra_shadow.rst
-   xpra_multicast_dns.rst
+   docker_gui_arch.rst
+   xpra_container.rst
+   x11docker.rst
+   tiny_remote_desktop.rst
 
 .. only::  subproject and html
 
