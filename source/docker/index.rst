@@ -11,6 +11,7 @@ Docker Atlas
    docker_in_docker/index
    images/index
    moby/index
+   config/index
    linuxserver/index
    init/index
    admin/index
