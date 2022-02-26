@@ -11,6 +11,7 @@ Life Atlas
 .. toctree::
    :maxdepth: 1
 
+   future_experience_technologies.rst
    open_your_mind/index
    sport/index
 

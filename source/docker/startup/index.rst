@@ -11,6 +11,7 @@ Docker 起步
    install_docker_linux.rst
    install_docker_centos8.rst
    install_docker_macos.rst
+   post_install/index
    docker_macos_file_share.rst
    docker_run.rst
    docker_debug.rst

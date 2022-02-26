@@ -17,6 +17,7 @@ Linux存储
    zfs/index
    btrfs/index
    stratis/index
+   openmediavault/index
    bcache/index
 
 .. only::  subproject and html
