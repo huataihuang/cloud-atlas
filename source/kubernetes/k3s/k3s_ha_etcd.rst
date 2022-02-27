@@ -38,7 +38,7 @@ K3s高可用etcd
 - :strike:`在 macOS 上` 在 :ref:`alpine_linux` 环境节点 ``x-k3s-a-0`` 
 
   - 建立容器运行一个开发环境 ``x-dev`` 
-  - 然后编译 ``cfssl`` 
+  - 然后 :ref:`alpine_cfssl`
   - 再按照 :ref:`etcd_tls` 方法完成 ``cfssl`` 安装
 
 

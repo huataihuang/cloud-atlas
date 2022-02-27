@@ -57,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../docker_in_docker/index.html">Docker in Docker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../images/index.html">Docker 镜像</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../moby/index.html">Docker Moby</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/index.html">Docker配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../linuxserver/index.html">Docker LinuxServer.io</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../init/index.html">Docker init进程管理器</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker 管理</a><ul class="current">
@@ -231,71 +232,71 @@
 <p>Dockerfile案例分为Ubuntu和CentOS</p>
 </div>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">ubuntu18.04-ssh</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
-<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># Build ubuntu18.04 image with ssh:</span>
-<span class="linenos"> 2</span><span class="c"># ---------------------------------</span>
-<span class="linenos"> 3</span><span class="c"># docker build -f ubuntu18.04-ssh -t local:ubuntu18.04-ssh .</span>
-<span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="c"># create container:</span>
-<span class="linenos"> 6</span><span class="c"># -----------------</span>
-<span class="linenos"> 7</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:ubuntu18.04-ssh</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="c"># create container with volume:</span>
-<span class="linenos">10</span><span class="c"># -----------------------------</span>
-<span class="linenos">11</span><span class="c"># docker volume create data</span>
-<span class="linenos">12</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:ubuntu18.04-ssh</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="c"># create container with volume and static ip:</span>
-<span class="linenos">15</span><span class="c"># -------------------------------------------</span>
-<span class="linenos">16</span><span class="c"># docker volume create data</span>
-<span class="linenos">17</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="linenos">18</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="linenos">19</span><span class="c">#   --net data-net --ip 172.18.0.11 local:ubuntu18.04-ssh</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="c"># create container with volume and static ip, then limit resource and map port:</span>
-<span class="linenos">22</span><span class="c"># -----------------------------------------------------------------------------</span>
-<span class="linenos">23</span><span class="c"># docker volume create data</span>
-<span class="linenos">24</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="linenos">25</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="linenos">26</span><span class="c">#   --net data-net --ip 172.18.0.11 --memory=2048M --cpus=&quot;1.5&quot; \</span>
-<span class="linenos">27</span><span class="c">#   -p 2211:22 local:ubuntu18.04-ssh</span>
-<span class="linenos">28</span>
-<span class="linenos">29</span><span class="k">FROM</span> <span class="s">docker.io/ubuntu:latest</span>
-<span class="linenos">30</span><span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
-<span class="linenos">31</span>
-<span class="linenos">32</span><span class="k">RUN</span> apt update
-<span class="linenos">33</span><span class="k">RUN</span> apt -y upgrade
-<span class="linenos">34</span><span class="k">RUN</span> apt -y install openssh-server iproute2 net-tools sudo vim screen dnsutils gnupg iputils-ping
-<span class="linenos">35</span>
-<span class="linenos">36</span><span class="c"># Prepare sshd host key</span>
-<span class="hll"><span class="linenos">37</span><span class="k">RUN</span> ssh-keygen -A
-</span><span class="linenos">38</span><span class="k">RUN</span> mkdir /run/sshd
-<span class="linenos">39</span>
-<span class="linenos">40</span><span class="c"># add account &quot;huatai&quot; and give sudo vprivilege</span>
-<span class="linenos">41</span><span class="c"># groupid 20(dialout=&gt;staff) userid 501</span>
-<span class="linenos">42</span><span class="k">RUN</span> groupdel staff
-<span class="linenos">43</span><span class="k">RUN</span> groupmod --new-name staff dialout
-<span class="linenos">44</span><span class="k">RUN</span> useradd -g <span class="m">20</span> -u <span class="m">501</span> -d /home/huatai -m -s /bin/bash huatai
-<span class="linenos">45</span><span class="k">RUN</span> usermod -aG sudo huatai
-<span class="linenos">46</span><span class="k">RUN</span> sed -i <span class="s1">&#39;/^%sudo/d&#39;</span> /etc/sudoers
-<span class="linenos">47</span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%sudo   ALL=(ALL:ALL) NOPASSWD:ALL&quot;</span> &gt;&gt; /etc/sudoers
-<span class="linenos">48</span>
-<span class="linenos">49</span><span class="c"># Add ssh public key for login</span>
-<span class="linenos">50</span><span class="k">RUN</span> mkdir -p /home/huatai/.ssh
-<span class="hll"><span class="linenos">51</span><span class="k">COPY</span> authorized_keys /home/huatai/.ssh/authorized_keys
-</span><span class="linenos">52</span><span class="k">RUN</span> chown -R huatai:staff /home/huatai/.ssh
-<span class="linenos">53</span><span class="k">RUN</span> chmod <span class="m">600</span> /home/huatai/.ssh/authorized_keys
-<span class="linenos">54</span><span class="k">RUN</span> chmod <span class="m">700</span> /home/huatai/.ssh
-<span class="linenos">55</span>
-<span class="linenos">56</span><span class="c"># run service when container started - sshd</span>
-<span class="hll"><span class="linenos">57</span><span class="k">EXPOSE</span><span class="s"> 22:1122</span>
-</span><span class="linenos">58</span><span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
-<span class="linenos">59</span>
-<span class="linenos">60</span><span class="c"># ----------</span>
-<span class="linenos">61</span><span class="c"># WANT run sshd and get a bash</span>
-<span class="linenos">62</span><span class="c"># ENTRYPOINT will not be override by commandline</span>
-<span class="linenos">63</span><span class="c"># ----------</span>
-<span class="hll"><span class="linenos">64</span><span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+<div class="code-block-caption"><span class="caption-text">dockerfile/ubuntu18.04-ssh</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Build ubuntu18.04 image with ssh:</span>
+<span class="c"># ---------------------------------</span>
+<span class="c"># docker build -f ubuntu18.04-ssh -t local:ubuntu18.04-ssh .</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:ubuntu18.04-ssh</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:ubuntu18.04-ssh</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.11 local:ubuntu18.04-ssh</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.11 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 2211:22 local:ubuntu18.04-ssh</span>
+
+<span class="k">FROM</span> <span class="s">docker.io/ubuntu:latest</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span> apt update
+<span class="k">RUN</span> apt -y upgrade
+<span class="k">RUN</span> apt -y install openssh-server iproute2 net-tools sudo vim screen dnsutils gnupg iputils-ping
+
+<span class="c"># Prepare sshd host key</span>
+<span class="hll"><span class="k">RUN</span> ssh-keygen -A
+</span><span class="k">RUN</span> mkdir /run/sshd
+
+<span class="c"># add account &quot;huatai&quot; and give sudo vprivilege</span>
+<span class="c"># groupid 20(dialout=&gt;staff) userid 501</span>
+<span class="k">RUN</span> groupdel staff
+<span class="k">RUN</span> groupmod --new-name staff dialout
+<span class="k">RUN</span> useradd -g <span class="m">20</span> -u <span class="m">501</span> -d /home/huatai -m -s /bin/bash huatai
+<span class="k">RUN</span> usermod -aG sudo huatai
+<span class="k">RUN</span> sed -i <span class="s1">&#39;/^%sudo/d&#39;</span> /etc/sudoers
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%sudo   ALL=(ALL:ALL) NOPASSWD:ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/huatai/.ssh
+<span class="hll"><span class="k">COPY</span> authorized_keys /home/huatai/.ssh/authorized_keys
+</span><span class="k">RUN</span> chown -R huatai:staff /home/huatai/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/huatai/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/huatai/.ssh
+
+<span class="c"># run service when container started - sshd</span>
+<span class="hll"><span class="k">EXPOSE</span><span class="s"> 22:1122</span>
+</span><span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="hll"><span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
 </span></pre></div>
 </div>
 </div>
@@ -317,138 +318,184 @@
 <p>如果要在容器内部使用某个用户身份执行命令，则在命令前先使用 <code class="docutils literal notranslate"><span class="pre">USER</span></code> 指令切换，例如 <code class="docutils literal notranslate"><span class="pre">USER</span> <span class="pre">huatai</span></code> 切换。类似 Python的 <code class="docutils literal notranslate"><span class="pre">virtualenv</span></code> 环境创建，都需要先切换身份再执行指令。</p>
 </div>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">centos7-ssh</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
-<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># Build centos 7 image with ssh:</span>
-<span class="linenos"> 2</span><span class="c"># ------------------------------</span>
-<span class="linenos"> 3</span><span class="c"># docker build -f centos7-ssh -t local:centos7-ssh</span>
-<span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="c"># create container:</span>
-<span class="linenos"> 6</span><span class="c"># -----------------</span>
-<span class="linenos"> 7</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos7-ssh</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="c"># create container with volume:</span>
-<span class="linenos">10</span><span class="c"># -----------------------------</span>
-<span class="linenos">11</span><span class="c"># docker volume create data</span>
-<span class="linenos">12</span><span class="c"># docker run -itd -p 1122:22--hostname myserver --name myserver -v data:/data local:centos7-ssh</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="c"># create container with volume and static ip:</span>
-<span class="linenos">15</span><span class="c"># -------------------------------------------</span>
-<span class="linenos">16</span><span class="c"># docker volume create data</span>
-<span class="linenos">17</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="linenos">18</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="linenos">19</span><span class="c">#   --net data-net --ip 172.18.0.11 local:centos7-ssh</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="c"># create container with volume and static ip, then limit resource and map port:</span>
-<span class="linenos">22</span><span class="c"># -----------------------------------------------------------------------------</span>
-<span class="linenos">23</span><span class="c"># docker volume create data</span>
-<span class="linenos">24</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="linenos">25</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="linenos">26</span><span class="c">#   --net data-net --ip 172.18.0.11 --memory=2048M --cpus=&quot;1.5&quot; \</span>
-<span class="linenos">27</span><span class="c">#   -p 22 -p 8080:80 local:centos7-ssh</span>
-<span class="linenos">28</span>
-<span class="linenos">29</span><span class="k">FROM</span> <span class="s">docker.io/centos:7</span>
-<span class="linenos">30</span><span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
-<span class="linenos">31</span>
-<span class="linenos">32</span><span class="k">RUN</span> yum clean all
-<span class="linenos">33</span><span class="k">RUN</span> yum -y update
-<span class="linenos">34</span>
-<span class="linenos">35</span><span class="k">RUN</span> yum -y install which sudo openssh-clients openssh-server initscripts
-<span class="linenos">36</span>
-<span class="linenos">37</span><span class="c"># Prepare sshd host key</span>
-<span class="linenos">38</span><span class="k">RUN</span> ssh-keygen -A
-<span class="linenos">39</span>
-<span class="linenos">40</span><span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
-<span class="linenos">41</span><span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
-<span class="linenos">42</span><span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
-<span class="linenos">43</span><span class="k">RUN</span> usermod -aG wheel admin
-<span class="linenos">44</span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
-<span class="linenos">45</span>
-<span class="linenos">46</span><span class="c"># Add ssh public key for login</span>
-<span class="linenos">47</span><span class="k">RUN</span> mkdir -p /home/admin/.ssh
-<span class="linenos">48</span><span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
-<span class="linenos">49</span><span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
-<span class="linenos">50</span><span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
-<span class="linenos">51</span><span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
-<span class="linenos">52</span>
-<span class="linenos">53</span><span class="c"># run service when container started - sshd</span>
-<span class="linenos">54</span><span class="k">EXPOSE</span><span class="s"> 22:1122</span>
-<span class="linenos">55</span><span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
-<span class="linenos">56</span>
-<span class="linenos">57</span><span class="c"># ----------</span>
-<span class="linenos">58</span><span class="c"># WANT run sshd and get a bash</span>
-<span class="linenos">59</span><span class="c"># ENTRYPOINT will not be override by commandline</span>
-<span class="linenos">60</span><span class="c"># ----------</span>
-<span class="linenos">61</span><span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+<div class="code-block-caption"><span class="caption-text">dockerfile/centos7-ssh</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Build centos 7 image with ssh:</span>
+<span class="c"># ------------------------------</span>
+<span class="c"># docker build -f centos7-ssh -t local:centos7-ssh</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos7-ssh</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd -p 1122:22--hostname myserver --name myserver -v data:/data local:centos7-ssh</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.11 local:centos7-ssh</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.11 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 22 -p 8080:80 local:centos7-ssh</span>
+
+<span class="k">FROM</span> <span class="s">docker.io/centos:7</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span> yum clean all
+<span class="k">RUN</span> yum -y update
+
+<span class="k">RUN</span> yum -y install which sudo openssh-clients openssh-server initscripts
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span> ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span> usermod -aG wheel admin
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="s"> 22:1122</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
 </pre></div>
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">centos8-ssh</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
-<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># Build centos 8 image with ssh:</span>
-<span class="linenos"> 2</span><span class="c"># ------------------------------</span>
-<span class="linenos"> 3</span><span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
-<span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="c"># create container:</span>
-<span class="linenos"> 6</span><span class="c"># -----------------</span>
-<span class="linenos"> 7</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="c"># create container with volume:</span>
-<span class="linenos">10</span><span class="c"># -----------------------------</span>
-<span class="linenos">11</span><span class="c"># docker volume create data</span>
-<span class="linenos">12</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="c"># create container with volume and static ip:</span>
-<span class="linenos">15</span><span class="c"># -------------------------------------------</span>
-<span class="linenos">16</span><span class="c"># docker volume create data</span>
-<span class="linenos">17</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="linenos">18</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="linenos">19</span><span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="c"># create container with volume and static ip, then limit resource and map port:</span>
-<span class="linenos">22</span><span class="c"># -----------------------------------------------------------------------------</span>
-<span class="linenos">23</span><span class="c"># docker volume create data</span>
-<span class="linenos">24</span><span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
-<span class="linenos">25</span><span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
-<span class="linenos">26</span><span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
-<span class="linenos">27</span><span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
-<span class="linenos">28</span>
-<span class="linenos">29</span><span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
-<span class="linenos">30</span><span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
-<span class="linenos">31</span>
-<span class="linenos">32</span><span class="k">RUN</span> dnf clean all
-<span class="linenos">33</span><span class="k">RUN</span> dnf -y update
-<span class="linenos">34</span>
-<span class="linenos">35</span><span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server initscripts
-<span class="linenos">36</span>
-<span class="linenos">37</span><span class="c"># Prepare sshd host key</span>
-<span class="linenos">38</span><span class="k">RUN</span> ssh-keygen -A
-<span class="linenos">39</span>
-<span class="linenos">40</span><span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
-<span class="linenos">41</span><span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
-<span class="linenos">42</span><span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
-<span class="linenos">43</span><span class="k">RUN</span> usermod -aG wheel admin
-<span class="linenos">44</span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
-<span class="linenos">45</span>
-<span class="linenos">46</span><span class="c"># Add ssh public key for login</span>
-<span class="linenos">47</span><span class="k">RUN</span> mkdir -p /home/admin/.ssh
-<span class="linenos">48</span><span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
-<span class="linenos">49</span><span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
-<span class="linenos">50</span><span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
-<span class="linenos">51</span><span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
-<span class="linenos">52</span><span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
-<span class="linenos">53</span>
-<span class="linenos">54</span><span class="c"># run service when container started - sshd</span>
-<span class="linenos">55</span><span class="k">EXPOSE</span><span class="s"> 22:1122</span>
-<span class="linenos">56</span><span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
-<span class="linenos">57</span>
-<span class="linenos">58</span><span class="c"># ----------</span>
-<span class="linenos">59</span><span class="c"># WANT run sshd and get a bash</span>
-<span class="linenos">60</span><span class="c"># ENTRYPOINT will not be override by commandline</span>
-<span class="linenos">61</span><span class="c"># ----------</span>
-<span class="linenos">62</span><span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+<div class="code-block-caption"><span class="caption-text">dockerfile/centos8-ssh</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Build centos 8 image with ssh:</span>
+<span class="c"># ------------------------------</span>
+<span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
+
+<span class="k">FROM</span> <span class="s">docker.io/centos:8</span>
+<span class="k">MAINTAINER</span><span class="s"> vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span> dnf clean all
+<span class="k">RUN</span> dnf -y update
+
+<span class="k">RUN</span> dnf -y install which sudo openssh-clients openssh-server initscripts
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span> ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span> groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span> useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span> usermod -aG wheel admin
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span> mkdir -p /home/admin/.ssh
+<span class="k">COPY</span> authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span> chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span> chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span> mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="s"> 22:1122</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span> /usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
 </pre></div>
 </div>
 </div>
+<section id="alpine-linux-ssh">
+<h3>alpine linux ssh容器<a class="headerlink" href="#alpine-linux-ssh" title="永久链接至标题">¶</a></h3>
+<p>随着云计算发展， <a class="reference internal" href="../../real/edge_cloud/index.html#edge-cloud"><span class="std std-ref">边缘云计算构建</span></a> 成为轻量级容器技术的运用场景。使用 <a class="reference internal" href="../../linux/alpine_linux/index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> 实现精简的Linux容器可以最大化系统硬件性能发挥，同时降低系统被攻击面。</p>
+<p>我在 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 部署中采用 Alpine Linux 构建运行容器，采用如下Dockerfile构建支持ssh的容器:</p>
+<ul class="simple">
+<li><p>使用密码登陆的ssh容器 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">dockerfile/alpine-ssh</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
+<span class="k">RUN</span> apk add --update --no-cache openssh
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s1">&#39;PasswordAuthentication yes&#39;</span> &gt;&gt; /etc/ssh/sshd_config
+<span class="k">RUN</span> adduser -h /home/huatai -s /bin/sh -D huatai
+<span class="k">RUN</span> <span class="nb">echo</span> -n <span class="s1">&#39;huatai:some_password_here&#39;</span> <span class="p">|</span> chpasswd
+<span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&quot;/entrypoint.sh&quot;</span><span class="p">]</span>
+<span class="k">EXPOSE</span><span class="s"> 22</span>
+<span class="k">COPY</span> entrypoint.sh /
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>并准备 <code class="docutils literal notranslate"><span class="pre">entrypoint.sh</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">dockerfile/entrypoint.sh</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+ssh-keygen -A
+<span class="nb">exec</span> /usr/sbin/sshd -D -e <span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>然后执行构建镜像命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">-</span><span class="n">v</span> <span class="n">entrypoint</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">alpine</span><span class="o">-</span><span class="n">ssh</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用以下命令启动容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">alpine</span><span class="o">-</span><span class="n">ssh</span> <span class="o">--</span><span class="n">name</span> <span class="n">alpine</span><span class="o">-</span><span class="n">ssh</span> <span class="o">-</span><span class="n">p</span> <span class="mi">122</span><span class="p">:</span><span class="mi">22</span> <span class="n">alpine</span><span class="o">-</span><span class="n">ssh</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述Dockerfile参考 <a class="reference external" href="https://www.cyberciti.biz/faq/how-to-install-openssh-server-on-alpine-linux-including-docker/">How to install OpenSSH server on Alpine Linux (including Docker)</a> ，原文提供的Dockerfile方法非常精简</p>
+</section>
 </section>
 <section id="id2">
 <h2>启动容器<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>

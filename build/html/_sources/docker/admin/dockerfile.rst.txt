@@ -72,9 +72,8 @@ docker build参数
 
    Dockerfile案例分为Ubuntu和CentOS
 
-.. literalinclude:: ubuntu18.04-ssh
+.. literalinclude:: dockerfile/ubuntu18.04-ssh
    :language: dockerfile
-   :linenos:
    :caption:
    :emphasize-lines: 37,51,57,64
 
@@ -93,16 +92,44 @@ docker build参数
 
    如果要在容器内部使用某个用户身份执行命令，则在命令前先使用 ``USER`` 指令切换，例如 ``USER huatai`` 切换。类似 Python的 ``virtualenv`` 环境创建，都需要先切换身份再执行指令。
 
-.. literalinclude:: centos7-ssh
+.. literalinclude:: dockerfile/centos7-ssh
    :language: dockerfile
-   :linenos:
    :caption:
 
-.. literalinclude:: centos8-ssh
+.. literalinclude:: dockerfile/centos8-ssh
    :language: dockerfile
-   :linenos:
    :caption:
 
+alpine linux ssh容器
+-----------------------
+
+随着云计算发展， :ref:`edge_cloud` 成为轻量级容器技术的运用场景。使用 :ref:`alpine_linux` 实现精简的Linux容器可以最大化系统硬件性能发挥，同时降低系统被攻击面。
+
+我在 :ref:`k3s` 部署中采用 Alpine Linux 构建运行容器，采用如下Dockerfile构建支持ssh的容器:
+
+- 使用密码登陆的ssh容器 ``Dockerfile`` :
+
+.. literalinclude:: dockerfile/alpine-ssh
+   :language: dockerfile
+   :caption:
+
+- 并准备 ``entrypoint.sh`` :
+
+.. literalinclude:: dockerfile/entrypoint.sh
+   :language: bash
+   :caption:
+
+- 然后执行构建镜像命令::
+
+   chmod +x -v entrypoint.sh
+   docker build -t alpine-ssh .
+
+- 使用以下命令启动容器::
+
+   docker run -itd --hostname alpine-ssh --name alpine-ssh -p 122:22 alpine-ssh:latest
+
+上述Dockerfile参考 `How to install OpenSSH server on Alpine Linux (including Docker) <https://www.cyberciti.biz/faq/how-to-install-openssh-server-on-alpine-linux-including-docker/>`_ ，原文提供的Dockerfile方法非常精简
+   
 启动容器
 =============
 
