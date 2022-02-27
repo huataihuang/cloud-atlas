@@ -23,6 +23,7 @@ Alpine Linux
    alpine_wireless_broadcom.rst
    alpine_extended.rst
    alpine_apk.rst
+   alpine_ssh_docker.rst
    openrc/index
    uefi/index
    alpine_kvm.rst

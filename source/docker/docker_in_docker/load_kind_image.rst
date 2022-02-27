@@ -23,9 +23,8 @@ kind提供了将docker镜像加载到集群每个node节点上的操作命令，
 
 - 创建Dockerfile目录 ``docker`` ，然后进入该目录，在该目录下存放 ``centos8-ssh`` 文件
 
-.. literalinclude:: ../admin/centos8-ssh
+.. literalinclude:: ../admin/dockerfile/centos8-ssh
    :language: dockerfile
-   :linenos:
    :caption:
 
 .. note::

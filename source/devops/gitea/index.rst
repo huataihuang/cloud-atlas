@@ -1,19 +1,13 @@
-.. _devops:
+.. _gitea:
 
 =================================
-DevOps Atlas
+Gitea
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   thought/index
-   sre/index
-   jenkins/index
-   gitea/index
-   terraform/index
-   utils/index
-   docs/index
+   intro_gitea.rst
 
 .. only::  subproject and html
 
