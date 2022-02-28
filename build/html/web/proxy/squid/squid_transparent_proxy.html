@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Squid代理服务 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>Squid透明代理 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Squid简介" href="introduce_squid.html" />
-    <link rel="prev" title="Proxy Auto-Config(PAC)" href="../pac.html" /> 
+    <link rel="next" title="Ubuntu环境编译Squid 5" href="build_squid5_ubuntu.html" />
+    <link rel="prev" title="Squid支持WebSocket配置" href="squid_websocket.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -70,13 +70,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../../cache/index.html">Web缓存技术</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Proxy代理服务</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../pac.html">Proxy Auto-Config(PAC)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Squid代理服务</a><ul>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Squid代理服务</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="introduce_squid.html">Squid简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="squid_startup.html">Squid快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="squid_socks_peer.html">Squid父级socks代理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="squid_ssh_proxy.html">Squid SSH代理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="squid_websocket.html">Squid支持WebSocket配置</a></li>
-<li class="toctree-l4"><a class="reference internal" href="squid_transparent_proxy.html">Squid透明代理</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Squid透明代理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_squid5_ubuntu.html">Ubuntu环境编译Squid 5</a></li>
 </ul>
 </li>
@@ -137,9 +137,10 @@
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Web Atlas</a> &raquo;</li>
           <li><a href="../index.html">Proxy代理服务</a> &raquo;</li>
-      <li>Squid代理服务</li>
+          <li><a href="index.html">Squid代理服务</a> &raquo;</li>
+      <li>Squid透明代理</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/web/proxy/squid/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/web/proxy/squid/squid_transparent_proxy.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -148,26 +149,67 @@
            <div itemprop="articleBody">
              
   <section id="squid">
-<span id="id1"></span><h1>Squid代理服务<a class="headerlink" href="#squid" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
+<span id="squid-transparent-proxy"></span><h1>Squid透明代理<a class="headerlink" href="#squid" title="永久链接至标题">¶</a></h1>
+<p>我在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 中使用 <a class="reference internal" href="../../../apple/airport/index.html#apple-airport"><span class="std std-ref">Apple AirPort</span></a> 结合 <a class="reference internal" href="../../../real/priv_cloud/priv_dnsmasq_ics.html#priv-dnsmasq-ics"><span class="std std-ref">私有云DNS服务(dnsmasq)和共享因特网(ICS)</span></a> 实现了局域网内部无线客户端能够共享上网。同时，为了解决带宽资源，同时方便内部服务器快速安装和更新软件，在 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 主机上部署了 <a class="reference internal" href="index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 作为代理。进一步，通过 <a class="reference internal" href="../../../real/network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 解决了访问Google等 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 软件仓库更新软件问题。</p>
+<p>不过，对于普通用户而言，例如手机客户端，连接到WiFi上，虽然通过 <a class="reference internal" href="../../../linux/network/iptables/iptables_ics.html#iptables-ics"><span class="std std-ref">iptables配置因特网共享连接(ICS)</span></a> 确实能够上网。但是，受阻于GFW，无法自由访问信息。配置手机客户端的代理也非常麻烦，切换网络还要切换代理。所以，更好的解决方法是使用 <code class="docutils literal notranslate"><span class="pre">透明代理</span></code> ，也就是让所有客户端外出访问能够自动经过代理服务器，这样只需要在代理服务器上实现 <code class="docutils literal notranslate"><span class="pre">翻墙</span></code> 就能够解决用户的 <code class="docutils literal notranslate"><span class="pre">痛点</span></code> 。</p>
+<p>透明代理的原理其实非常简单，就是在网关的内网接口上启用 <code class="docutils literal notranslate"><span class="pre">iptables</span></code> 的转发，将访问WEB端口重定向到 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 的代理端口上；此时还需要激活 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 的 <code class="docutils literal notranslate"><span class="pre">intercept</span></code> (拦截) 功能，这样就能实现对客户端无感的透明代理。</p>
+<section id="id1">
+<h2>透明代理配置<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduce_squid.html">Squid简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="squid_startup.html">Squid快速起步</a></li>
-<li class="toctree-l1"><a class="reference internal" href="squid_socks_peer.html">Squid父级socks代理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="squid_ssh_proxy.html">Squid SSH代理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="squid_websocket.html">Squid支持WebSocket配置</a></li>
-<li class="toctree-l1"><a class="reference internal" href="squid_transparent_proxy.html">Squid透明代理</a></li>
-<li class="toctree-l1"><a class="reference internal" href="build_squid5_ubuntu.html">Ubuntu环境编译Squid 5</a></li>
-</ul>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/squid/squid.conf</span></code> 配置，添加一个 <code class="docutils literal notranslate"><span class="pre">intercept</span></code> 配置行，注意，需要有两个代理端口，一个是传统的 <code class="docutils literal notranslate"><span class="pre">forward</span> <span class="pre">proxy</span></code> 一个是 <code class="docutils literal notranslate"><span class="pre">intercept</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">8080</span>
+<span class="n">http_port</span> <span class="mi">3128</span> <span class="n">intercep</span>
+</pre></div>
 </div>
+</li>
+<li><p>修订 <a class="reference internal" href="../../../real/priv_cloud/priv_dnsmasq_ics.html#priv-dnsmasq-ics"><span class="std std-ref">私有云DNS服务(dnsmasq)和共享因特网(ICS)</span></a> 中的 <code class="docutils literal notranslate"><span class="pre">ics.sh</span></code> (配置MASQUERADE)脚本，添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># squid transparent proxy</span>
+<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">i</span> <span class="n">br0</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">80</span> <span class="o">-</span><span class="n">j</span> <span class="n">DNAT</span> <span class="o">--</span><span class="n">to</span> <span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span>
+<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">i</span> <span class="n">br0</span><span class="p">:</span><span class="mi">1</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">80</span> <span class="o">-</span><span class="n">j</span> <span class="n">DNAT</span> <span class="o">--</span><span class="n">to</span> <span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span>
+<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">i</span> <span class="n">eno4</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">80</span> <span class="o">-</span><span class="n">j</span> <span class="n">REDIRECT</span> <span class="o">--</span><span class="n">to</span><span class="o">-</span><span class="n">port</span> <span class="mi">3128</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>完整脚本参考 <a class="reference internal" href="../../../real/priv_cloud/priv_dnsmasq_ics.html#priv-dnsmasq-ics"><span class="std std-ref">私有云DNS服务(dnsmasq)和共享因特网(ICS)</span></a> 中的 <code class="docutils literal notranslate"><span class="pre">ics.sh</span></code></p>
+</section>
+<section id="no-forward-proxy-ports">
+<h2>No forward-proxy ports<a class="headerlink" href="#no-forward-proxy-ports" title="永久链接至标题">¶</a></h2>
+<p>注意，在 <code class="docutils literal notranslate"><span class="pre">squid.conf</span></code> 配置中如果只配置一行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">3128</span> <span class="n">intercept</span>
+</pre></div>
+</div>
+<p>来代替原先默认的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">3128</span>
+</pre></div>
+</div>
+<p>就会出现 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 无法启动问题。此时检查 <code class="docutils literal notranslate"><span class="pre">systemctl</span> <span class="pre">status</span> <span class="pre">squid</span></code> 会看到如下报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">No</span> <span class="n">forward</span><span class="o">-</span><span class="n">proxy</span> <span class="n">ports</span> <span class="n">configured</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>这个报错原因实际上是因为 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 在配置 <code class="docutils literal notranslate"><span class="pre">intercept</span></code> 模式端口同时还需要保留一个 <code class="docutils literal notranslate"><span class="pre">forward</span> <span class="pre">proxy</span></code> 端口，也就是不惜类似如下配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">8080</span>
+<span class="n">http_port</span> <span class="mi">3128</span> <span class="n">intercept</span>
+</pre></div>
+</div>
+<p>即使实际上不使用 <code class="docutils literal notranslate"><span class="pre">forward</span> <span class="pre">proxy</span></code> 也需要配置一行 <code class="docutils literal notranslate"><span class="pre">http_port</span> <span class="pre">8080</span></code> (其他端口也可以)</p>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://linuxtechlab.com/squid-transparent-proxy-server-complete-configuration/">Squid Transparent proxy server : How to configure</a></p></li>
+<li><p><a class="reference external" href="https://wiki.squid-cache.org/KnowledgeBase/NoForwardProxyPorts">squid-cache wiki: No forward-proxy ports</a></p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../pac.html" class="btn btn-neutral float-left" title="Proxy Auto-Config(PAC)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="introduce_squid.html" class="btn btn-neutral float-right" title="Squid简介" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="squid_websocket.html" class="btn btn-neutral float-left" title="Squid支持WebSocket配置" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="build_squid5_ubuntu.html" class="btn btn-neutral float-right" title="Ubuntu环境编译Squid 5" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

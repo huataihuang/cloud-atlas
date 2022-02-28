@@ -185,7 +185,13 @@
 <p>完成上述DHCP的IP配置之后，所有连接到AirPod Express的无线客户端都会将 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器上的网络接口IP <code class="docutils literal notranslate"><span class="pre">192.168.6.200</span></code> 作为默认网关，则该服务器需要提供 <a class="reference internal" href="../../linux/network/iptables/iptables_ics.html#iptables-ics"><span class="std std-ref">iptables配置因特网共享连接(ICS)</span></a> 以允许无线客户端:</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">共享Internet连接</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo iptables -A FORWARD -o eno4 -i br0 -s <span class="m">192</span>.168.6.0/24 -m conntrack --ctstate NEW -j ACCEPT
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># squid transparent proxy</span>
+sudo iptables -t nat -A PREROUTING -i br0 -p tcp --dport <span class="m">80</span> -j DNAT --to <span class="m">192</span>.168.6.200:3128
+sudo iptables -t nat -A PREROUTING -i br0:1 -p tcp --dport <span class="m">80</span> -j DNAT --to <span class="m">192</span>.168.6.200:3128
+sudo iptables -t nat -A PREROUTING -i eno4 -p tcp --dport <span class="m">80</span> -j REDIRECT --to-port <span class="m">3128</span>
+
+<span class="c1"># masquerade 192.168.6.0/24 &amp; 192.168.7.0/24</span>
+sudo iptables -A FORWARD -o eno4 -i br0 -s <span class="m">192</span>.168.6.0/24 -m conntrack --ctstate NEW -j ACCEPT
 sudo iptables -A FORWARD -o eno4 -i br0:1 -s <span class="m">192</span>.168.7.0/24 -m conntrack --ctstate NEW -j ACCEPT
 sudo iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 sudo iptables -t nat -A POSTROUTING -o eno4 -j MASQUERADE

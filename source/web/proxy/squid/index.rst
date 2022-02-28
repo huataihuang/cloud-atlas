@@ -12,7 +12,9 @@ Squid代理服务
    squid_socks_peer.rst
    squid_ssh_proxy.rst
    squid_websocket.rst
+   squid_transparent_proxy.rst
    build_squid5_ubuntu.rst
+
 
 .. only::  subproject and html
 
