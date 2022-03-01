@@ -152,9 +152,12 @@
 <span id="squid-transparent-proxy"></span><h1>Squid透明代理<a class="headerlink" href="#squid" title="永久链接至标题">¶</a></h1>
 <p>我在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 中使用 <a class="reference internal" href="../../../apple/airport/index.html#apple-airport"><span class="std std-ref">Apple AirPort</span></a> 结合 <a class="reference internal" href="../../../real/priv_cloud/priv_dnsmasq_ics.html#priv-dnsmasq-ics"><span class="std std-ref">私有云DNS服务(dnsmasq)和共享因特网(ICS)</span></a> 实现了局域网内部无线客户端能够共享上网。同时，为了解决带宽资源，同时方便内部服务器快速安装和更新软件，在 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 主机上部署了 <a class="reference internal" href="index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 作为代理。进一步，通过 <a class="reference internal" href="../../../real/network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 解决了访问Google等 <a class="reference internal" href="../../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 软件仓库更新软件问题。</p>
 <p>不过，对于普通用户而言，例如手机客户端，连接到WiFi上，虽然通过 <a class="reference internal" href="../../../linux/network/iptables/iptables_ics.html#iptables-ics"><span class="std std-ref">iptables配置因特网共享连接(ICS)</span></a> 确实能够上网。但是，受阻于GFW，无法自由访问信息。配置手机客户端的代理也非常麻烦，切换网络还要切换代理。所以，更好的解决方法是使用 <code class="docutils literal notranslate"><span class="pre">透明代理</span></code> ，也就是让所有客户端外出访问能够自动经过代理服务器，这样只需要在代理服务器上实现 <code class="docutils literal notranslate"><span class="pre">翻墙</span></code> 就能够解决用户的 <code class="docutils literal notranslate"><span class="pre">痛点</span></code> 。</p>
-<p>透明代理的原理其实非常简单，就是在网关的内网接口上启用 <code class="docutils literal notranslate"><span class="pre">iptables</span></code> 的转发，将访问WEB端口重定向到 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 的代理端口上；此时还需要激活 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 的 <code class="docutils literal notranslate"><span class="pre">intercept</span></code> (拦截) 功能，这样就能实现对客户端无感的透明代理。</p>
-<section id="id1">
-<h2>透明代理配置<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>透明代理需要代理服务器实现 <code class="docutils literal notranslate"><span class="pre">中间人</span></code> HTTPS代理，但是这种透明代理模式需要用代理服务器的SSL/TLS证书代替客户端想要访问的网站SSL/TLS证书。这种模式对于客户端是不能容忍的安全隐患，虽然可以通过导入代理服务器的自签名证书来绕过这个验证问题，但是对于客户端部署有要求，所以实际使用效果并不是完全透明，依然需要配置客户端。</p>
+<p>实践发现另一个问题是 <a class="reference internal" href="squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 失效，虽然我最终实现了透明代理，但是无法使用之前配置的 <a class="reference internal" href="squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 翻墙，所以感觉非常沮丧。有可能有其他方法可以克服这个问题，但是暂时没有精力来继续折腾了。</p>
+<p>在 <code class="docutils literal notranslate"><span class="pre">squid透明代理</span></code> 探索过程中，发现通过 <a class="reference internal" href="../../../infra_service/dns/dnsmasq/dnsmasq_dhcp_pac.html#dnsmasq-dhcp-pac"><span class="std std-ref">DNSmasq DHCP配置提供PAC(auto-proxy-config)下载</span></a> 实现动态配置客户端代理，可以更为方便实现局域网 <code class="docutils literal notranslate"><span class="pre">透明</span></code> 翻墙访问。</p>
+<section id="http">
+<h2>http透明代理<a class="headerlink" href="#http" title="永久链接至标题">¶</a></h2>
+<p>http透明代理的原理其实非常简单，就是在网关的内网接口上启用 <code class="docutils literal notranslate"><span class="pre">iptables</span></code> 的转发，将访问WEB端口重定向到 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 的代理端口上；此时还需要激活 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 的 <code class="docutils literal notranslate"><span class="pre">intercept</span></code> (拦截) 功能，这样就能实现对客户端无感的透明代理。</p>
 <ul>
 <li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/squid/squid.conf</span></code> 配置，添加一个 <code class="docutils literal notranslate"><span class="pre">intercept</span></code> 配置行，注意，需要有两个代理端口，一个是传统的 <code class="docutils literal notranslate"><span class="pre">forward</span> <span class="pre">proxy</span></code> 一个是 <code class="docutils literal notranslate"><span class="pre">intercept</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">8080</span>
@@ -173,8 +176,104 @@
 </ul>
 <p>完整脚本参考 <a class="reference internal" href="../../../real/priv_cloud/priv_dnsmasq_ics.html#priv-dnsmasq-ics"><span class="std std-ref">私有云DNS服务(dnsmasq)和共享因特网(ICS)</span></a> 中的 <code class="docutils literal notranslate"><span class="pre">ics.sh</span></code></p>
 </section>
-<section id="no-forward-proxy-ports">
-<h2>No forward-proxy ports<a class="headerlink" href="#no-forward-proxy-ports" title="永久链接至标题">¶</a></h2>
+<section id="https">
+<h2>https透明代理<a class="headerlink" href="#https" title="永久链接至标题">¶</a></h2>
+<p>https代理实现则比较复杂，早期的squid并没有提供透明拦截SSL连接(transparently intercept SSL connections)。不过，从2011 年开始，squid开始支持作为SSL中间人代理(act as a man in the middle)。这个设置背后的原理就是解密HTTPS连接然后进行内容过滤。</p>
+<p>不过，需要担心的是透明代理打断了HTTPS流量，也就导致了可能存在到的和法律问题。不过，对于个人使用或者能够控制安全性的环境，可以采用这种模式。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>透明代理HTTPS相当于代理服务器是中间人，需要绝对保障代理服务器安全，否则会导致安全泄密。</p>
+</div>
+<p>技术上，在编译 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 源代码时候，需要激活 <code class="docutils literal notranslate"><span class="pre">--enable-ssl</span></code> 选项以支持 <code class="docutils literal notranslate"><span class="pre">SslBump</span></code> ，也就是squid透明连接SSL流量的技术要求。</p>
+<section id="ssl-key">
+<h3>SSL key<a class="headerlink" href="#ssl-key" title="永久链接至标题">¶</a></h3>
+<p>一个非常重要的步骤是为终端用户创建squid使用的证书，在测试环境，可以采用自签名证书。生产环境，则使用 <code class="docutils literal notranslate"><span class="pre">let's</span> <span class="pre">encryption</span></code> 提供的证书。</p>
+<ul>
+<li><p>生成SSL key:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span>
+<span class="c1"># This puts the private key and the self-signed certificate in the same file</span>
+<span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="n">new</span> <span class="o">-</span><span class="n">newkey</span> <span class="n">rsa</span><span class="p">:</span><span class="mi">4096</span> <span class="o">-</span><span class="n">sha256</span> <span class="o">-</span><span class="n">days</span> <span class="mi">3650</span> <span class="o">-</span><span class="n">nodes</span> <span class="o">-</span><span class="n">x509</span> <span class="o">-</span><span class="n">keyout</span> <span class="n">myCA</span><span class="o">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">out</span> <span class="n">myCA</span><span class="o">.</span><span class="n">pem</span>
+<span class="c1"># This can be added to browsers</span>
+<span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="ow">in</span> <span class="n">myCA</span><span class="o">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">outform</span> <span class="n">DER</span> <span class="o">-</span><span class="n">out</span> <span class="n">myCA</span><span class="o">.</span><span class="n">der</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="ssl">
+<h3>初始化SSL数据库<a class="headerlink" href="#ssl" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>初始化SSL数据库: Squid需要生成一个新的 <code class="docutils literal notranslate"><span class="pre">fake</span></code> (伪造) 自签名证书用来 <code class="docutils literal notranslate"><span class="pre">bump</span></code> (碰撞) SSL连接，这些都会保存在一个目录中:</p></li>
+</ul>
+<p>以下是Ubuntu 20中执行命令(用户名是 <code class="docutils literal notranslate"><span class="pre">proxy</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">security_file_certgen</span> <span class="o">-</span><span class="n">c</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl_db</span> <span class="o">-</span><span class="n">M</span> <span class="mi">4</span><span class="n">MB</span>
+<span class="n">sudo</span> <span class="n">chown</span> <span class="n">proxy</span><span class="p">:</span><span class="n">proxy</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl_db</span>
+</pre></div>
+</div>
+<p>以下是 Fedora系统执行命令(用户名是 <code class="docutils literal notranslate"><span class="pre">squid</span></code> ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib64</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">security_file_certgen</span> <span class="o">-</span><span class="n">c</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl_db</span> <span class="o">-</span><span class="n">M</span> <span class="mi">4</span><span class="n">MB</span>
+<span class="n">sudo</span> <span class="n">chown</span> <span class="n">squid</span><span class="p">:</span><span class="n">squid</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl_db</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>修正客户端证书<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
+<p>客户端默认不使用自签名证书，所以需要做以下修复:</p>
+<ul class="simple">
+<li><p>浏览器: 使用 <code class="docutils literal notranslate"><span class="pre">myCA.der</span></code> 来导入证书</p></li>
+<li><p>Linux: 复制cert文件到 <code class="docutils literal notranslate"><span class="pre">/etc/pki/ca-trust/source/anchors</span></code> 目录下然后运行 <code class="docutils literal notranslate"><span class="pre">update-ca-trust</span></code></p></li>
+<li><p>Node.js: 待验证</p></li>
+<li><p>Headless Chrome (Puppeteer): 待验证</p></li>
+</ul>
+</section>
+<section id="iptables">
+<h3>配置iptables<a class="headerlink" href="#iptables" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">PREROUTING</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">i</span> <span class="n">br0</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">443</span> <span class="o">-</span><span class="n">j</span> <span class="n">DNAT</span> <span class="o">--</span><span class="n">to</span> <span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span>
+<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">i</span> <span class="n">br0</span><span class="p">:</span><span class="mi">1</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">443</span> <span class="o">-</span><span class="n">j</span> <span class="n">DNAT</span> <span class="o">--</span><span class="n">to</span> <span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span>
+<span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">i</span> <span class="n">eno4</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">443</span> <span class="o">-</span><span class="n">j</span> <span class="n">REDIRECT</span> <span class="o">--</span><span class="n">to</span><span class="o">-</span><span class="n">port</span> <span class="mi">3128</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h3>配置<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">/etc/squid/squid.conf</span></code> 中配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">8080</span>
+<span class="n">http_port</span> <span class="mi">3128</span> <span class="n">intercept</span>
+<span class="n">http_port</span> <span class="mi">3129</span> <span class="n">intercept</span> <span class="n">ssl</span><span class="o">-</span><span class="n">bump</span> <span class="n">cert</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">cert</span><span class="o">/</span><span class="n">myCA</span><span class="o">.</span><span class="n">pem</span> \
+  <span class="n">generate</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">certificates</span><span class="o">=</span><span class="n">on</span> <span class="n">dynamic_cert_mem_cache_size</span><span class="o">=</span><span class="mi">4</span><span class="n">MB</span>
+
+<span class="c1"># For squid 3.5.x</span>
+<span class="c1"># sslcrtd_program /usr/local/squid/libexec/ssl_crtd -s /var/lib/ssl_db -M 4MB</span>
+
+<span class="c1"># For squid 4.x</span>
+<span class="c1"># sslcrtd_program /usr/local/squid/libexec/security_file_certgen -s /var/lib/ssl_db -M 4MB</span>
+
+<span class="n">sslcrtd_program</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">security_file_certgen</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl_db</span> <span class="o">-</span><span class="n">M</span> <span class="mi">4</span><span class="n">MB</span>
+
+<span class="n">acl</span> <span class="n">step1</span> <span class="n">at_step</span> <span class="n">SslBump1</span>
+
+<span class="n">ssl_bump</span> <span class="n">peek</span> <span class="n">step1</span>
+<span class="n">ssl_bump</span> <span class="n">bump</span> <span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">squid</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后观察 <code class="docutils literal notranslate"><span class="pre">/var/log/squid/*.log</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="http-no-forward-proxy-ports">
+<h2>HTTP透明代理错误:No forward-proxy ports<a class="headerlink" href="#http-no-forward-proxy-ports" title="永久链接至标题">¶</a></h2>
 <p>注意，在 <code class="docutils literal notranslate"><span class="pre">squid.conf</span></code> 配置中如果只配置一行:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">3128</span> <span class="n">intercept</span>
 </pre></div>
@@ -195,11 +294,236 @@
 </div>
 <p>即使实际上不使用 <code class="docutils literal notranslate"><span class="pre">forward</span> <span class="pre">proxy</span></code> 也需要配置一行 <code class="docutils literal notranslate"><span class="pre">http_port</span> <span class="pre">8080</span></code> (其他端口也可以)</p>
 </section>
-<section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="https-error-invalid-request">
+<h2>HTTPS透明代理:error:invalid-request<a class="headerlink" href="#https-error-invalid-request" title="永久链接至标题">¶</a></h2>
+<p>启动了https透明代理，我发现日志中出现大量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1646123605.853</span>      <span class="mi">0</span> <span class="mf">192.168.6.22</span> <span class="n">NONE_NONE</span><span class="o">/</span><span class="mi">400</span> <span class="mi">3685</span> <span class="o">-</span> <span class="n">error</span><span class="p">:</span><span class="n">invalid</span><span class="o">-</span><span class="n">request</span> <span class="o">-</span> <span class="n">HIER_NONE</span><span class="o">/-</span> <span class="n">text</span><span class="o">/</span><span class="n">html</span>
+<span class="mf">1646123606.086</span>      <span class="mi">0</span> <span class="mf">192.168.6.22</span> <span class="n">NONE_NONE</span><span class="o">/</span><span class="mi">000</span> <span class="mi">0</span> <span class="o">-</span> <span class="n">error</span><span class="p">:</span><span class="n">transaction</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">headers</span> <span class="o">-</span> <span class="n">HIER_NONE</span><span class="o">/-</span> <span class="o">-</span>
+<span class="mf">1646123606.094</span>      <span class="mi">0</span> <span class="mf">192.168.6.22</span> <span class="n">NONE_NONE</span><span class="o">/</span><span class="mi">400</span> <span class="mi">3685</span> <span class="o">-</span> <span class="n">error</span><span class="p">:</span><span class="n">invalid</span><span class="o">-</span><span class="n">request</span> <span class="o">-</span> <span class="n">HIER_NONE</span><span class="o">/-</span> <span class="n">text</span><span class="o">/</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>这个报错似乎是因为配置了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">3129</span> <span class="n">intercept</span> <span class="n">ssl</span><span class="o">-</span><span class="n">bump</span> <span class="n">cert</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">cert</span><span class="o">/</span><span class="n">myCA</span><span class="o">.</span><span class="n">pem</span> \
+  <span class="n">generate</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">certificates</span><span class="o">=</span><span class="n">on</span> <span class="n">dynamic_cert_mem_cache_size</span><span class="o">=</span><span class="mi">4</span><span class="n">MB</span>
+</pre></div>
+</div>
+<p>修改成 <code class="docutils literal notranslate"><span class="pre">https_port</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">https_port</span> <span class="mi">3129</span> <span class="n">intercept</span> <span class="n">ssl</span><span class="o">-</span><span class="n">bump</span> <span class="n">cert</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">cert</span><span class="o">/</span><span class="n">myCA</span><span class="o">.</span><span class="n">pem</span> \
+  <span class="n">generate</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">certificates</span><span class="o">=</span><span class="n">on</span> <span class="n">dynamic_cert_mem_cache_size</span><span class="o">=</span><span class="mi">4</span><span class="n">MB</span>
+</pre></div>
+</div>
+<p>此时日志报错显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==&gt;</span> <span class="n">access</span><span class="o">.</span><span class="n">log</span> <span class="o">&lt;==</span>
+<span class="mf">1646124814.877</span>    <span class="mi">164</span> <span class="mf">192.168.6.22</span> <span class="n">NONE_NONE</span><span class="o">/</span><span class="mi">000</span> <span class="mi">0</span> <span class="n">CONNECT</span> <span class="mf">203.119.129.34</span><span class="p">:</span><span class="mi">443</span> <span class="o">-</span> <span class="n">ORIGINAL_DST</span><span class="o">/</span><span class="mf">203.119.129.34</span> <span class="o">-</span>
+<span class="mf">1646124815.121</span>     <span class="mi">80</span> <span class="mf">192.168.6.22</span> <span class="n">NONE_NONE</span><span class="o">/</span><span class="mi">000</span> <span class="mi">0</span> <span class="n">CONNECT</span> <span class="mf">59.82.15.79</span><span class="p">:</span><span class="mi">443</span> <span class="o">-</span> <span class="n">ORIGINAL_DST</span><span class="o">/</span><span class="mf">59.82.15.79</span> <span class="o">-</span>
+
+<span class="o">==&gt;</span> <span class="n">cache</span><span class="o">.</span><span class="n">log</span> <span class="o">&lt;==</span>
+<span class="mi">2022</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">36</span> <span class="n">kid1</span><span class="o">|</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">failure</span> <span class="k">while</span> <span class="n">accepting</span> <span class="n">a</span> <span class="n">TLS</span> <span class="n">connection</span> <span class="n">on</span> <span class="n">conn239</span> <span class="n">local</span><span class="o">=</span><span class="mf">117.18.232.200</span><span class="p">:</span><span class="mi">443</span> <span class="n">remote</span><span class="o">=</span><span class="mf">192.168.6.22</span><span class="p">:</span><span class="mi">53993</span> <span class="n">FD</span> <span class="mi">28</span> <span class="n">flags</span><span class="o">=</span><span class="mi">33</span><span class="p">:</span> <span class="mh">0x5561efffa6a0</span><span class="o">*</span><span class="mi">1</span>
+    <span class="n">current</span> <span class="n">master</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">master55</span>
+</pre></div>
+</div>
+<p>这个报错其实已经说明建立了HTTPS代理了，仔细观察 <code class="docutils literal notranslate"><span class="pre">/var/lib/ssl_db/certs</span></code> 可以看到缓存了大量的远端服务器证书</p>
+<p><code class="docutils literal notranslate"><span class="pre">failure</span> <span class="pre">while</span> <span class="pre">accepting</span> <span class="pre">a</span> <span class="pre">TLS</span></code> 表示当尝试TLS连接失败。参考 <a class="reference external" href="https://wiki.squid-cache.org/ConfigExamples/Intercept/SslBumpExplicit">Intercept HTTPS CONNECT messages with SSL-Bump</a> 提到 <code class="docutils literal notranslate"><span class="pre">Modern</span> <span class="pre">DH/EDH</span> <span class="pre">ciphers</span> <span class="pre">usage</span></code> :</p>
+<p>现代化 DH/EDH exchanges/ciphers 选项 <code class="docutils literal notranslate"><span class="pre">tls-dh=</span></code> 所以我尝试 (这个方法估计可行，类似tls配置):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">https_port</span> <span class="mi">3129</span> <span class="n">intercept</span> <span class="n">ssl</span><span class="o">-</span><span class="n">bump</span> <span class="n">cert</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span><span class="n">myCA</span><span class="o">.</span><span class="n">pem</span> \
+  <span class="n">generate</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">certificates</span><span class="o">=</span><span class="n">on</span> <span class="n">dynamic_cert_mem_cache_size</span><span class="o">=</span><span class="mi">4</span><span class="n">MB</span> \
+  <span class="n">tls</span><span class="o">-</span><span class="n">dh</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span><span class="n">dhparam</span><span class="o">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+<p>但是此时报错变成监测到不正确端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==&gt;</span> <span class="n">cache</span><span class="o">.</span><span class="n">log</span> <span class="o">&lt;==</span>
+<span class="mi">2022</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span> <span class="mi">20</span><span class="p">:</span><span class="mi">47</span><span class="p">:</span><span class="mi">48</span> <span class="n">kid1</span><span class="o">|</span> <span class="n">SECURITY</span> <span class="n">ALERT</span><span class="p">:</span> <span class="n">Host</span> <span class="n">header</span> <span class="n">forgery</span> <span class="n">detected</span> <span class="n">on</span> <span class="n">conn27</span> <span class="n">local</span><span class="o">=</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span> <span class="n">remote</span><span class="o">=</span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">56774</span> <span class="n">FD</span> <span class="mi">16</span> <span class="n">flags</span><span class="o">=</span><span class="mi">33</span> <span class="p">(</span><span class="n">intercepted</span> <span class="n">port</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">match</span> <span class="mi">443</span><span class="p">)</span>
+    <span class="n">current</span> <span class="n">master</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">master57</span>
+<span class="mi">2022</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span> <span class="mi">20</span><span class="p">:</span><span class="mi">47</span><span class="p">:</span><span class="mi">48</span> <span class="n">kid1</span><span class="o">|</span> <span class="n">SECURITY</span> <span class="n">ALERT</span><span class="p">:</span> <span class="n">By</span> <span class="n">user</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Mozilla</span><span class="o">/</span><span class="mf">5.0</span> <span class="p">(</span><span class="n">X11</span><span class="p">;</span> <span class="n">Fedora</span><span class="p">;</span> <span class="n">Linux</span> <span class="n">x86_64</span><span class="p">;</span> <span class="n">rv</span><span class="p">:</span><span class="mf">96.0</span><span class="p">)</span> <span class="n">Gecko</span><span class="o">/</span><span class="mi">20100101</span> <span class="n">Firefox</span><span class="o">/</span><span class="mf">96.0</span>
+    <span class="n">current</span> <span class="n">master</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">master57</span>
+<span class="mi">2022</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span> <span class="mi">20</span><span class="p">:</span><span class="mi">47</span><span class="p">:</span><span class="mi">48</span> <span class="n">kid1</span><span class="o">|</span> <span class="n">SECURITY</span> <span class="n">ALERT</span><span class="p">:</span> <span class="n">on</span> <span class="n">URL</span><span class="p">:</span> <span class="n">www</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="mi">443</span>
+    <span class="n">current</span> <span class="n">master</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">master57</span>
+<span class="mi">2022</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span> <span class="mi">20</span><span class="p">:</span><span class="mi">47</span><span class="p">:</span><span class="mi">48</span> <span class="n">kid1</span><span class="o">|</span> <span class="n">kick</span> <span class="n">abandoning</span> <span class="n">conn27</span> <span class="n">local</span><span class="o">=</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span> <span class="n">remote</span><span class="o">=</span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">56774</span> <span class="n">FD</span> <span class="mi">16</span> <span class="n">flags</span><span class="o">=</span><span class="mi">33</span>
+    <span class="n">connection</span><span class="p">:</span> <span class="n">conn27</span> <span class="n">local</span><span class="o">=</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span> <span class="n">remote</span><span class="o">=</span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">56774</span> <span class="n">FD</span> <span class="mi">16</span> <span class="n">flags</span><span class="o">=</span><span class="mi">33</span>
+
+<span class="o">==&gt;</span> <span class="n">access</span><span class="o">.</span><span class="n">log</span> <span class="o">&lt;==</span>
+<span class="mf">1646138868.558</span>      <span class="mi">0</span> <span class="mf">192.168.6.253</span> <span class="n">NONE_NONE</span><span class="o">/</span><span class="mi">409</span> <span class="mi">4212</span> <span class="n">CONNECT</span> <span class="n">www</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="mi">443</span> <span class="o">-</span> <span class="n">HIER_NONE</span><span class="o">/-</span> <span class="n">text</span><span class="o">/</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>此外，根据该文档提示 <code class="docutils literal notranslate"><span class="pre">TLS</span></code> ，有一个 squid 外连网站的设置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sslproxy_cipher EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:HIGH:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
+</pre></div>
+</div>
+<p>或者使用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sslproxy_cipher HIGH:MEDIUM:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
+</pre></div>
+</div>
+<p>或者使用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>tls_outgoing_options cipher=HIGH:MEDIUM:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
+</pre></div>
+</div>
+<p>我尝试了一下 <code class="docutils literal notranslate"><span class="pre">sslproxy_cipher</span> <span class="pre">HIGH:MEDIUM:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS</span></code> ，结果，访问 google 也同样出现:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2022</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span> <span class="mi">20</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">41</span> <span class="n">kid1</span><span class="o">|</span> <span class="n">SECURITY</span> <span class="n">ALERT</span><span class="p">:</span> <span class="n">Host</span> <span class="n">header</span> <span class="n">forgery</span> <span class="n">detected</span> <span class="n">on</span> <span class="n">conn29</span> <span class="n">local</span><span class="o">=</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span> <span class="n">remote</span><span class="o">=</span><span class="mf">192.168.6.253</span><span class="p">:</span><span class="mi">56782</span> <span class="n">FD</span> <span class="mi">18</span> <span class="n">flags</span><span class="o">=</span><span class="mi">33</span> <span class="p">(</span><span class="n">intercepted</span> <span class="n">port</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">match</span> <span class="mi">443</span><span class="p">)</span>
+ <span class="n">current</span> <span class="n">master</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">master61</span>
+</pre></div>
+</div>
+<p>我注意到一个奇怪的问题，我的配置中设置了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">8080</span>
+<span class="n">http_port</span> <span class="mi">3128</span> <span class="n">intercept</span>
+<span class="n">https_port</span> <span class="mi">3129</span> <span class="n">intercept</span> <span class="n">ssl</span><span class="o">-</span><span class="n">bump</span> <span class="n">cert</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span><span class="n">myCA</span><span class="o">.</span><span class="n">pem</span> \
+  <span class="n">generate</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">certificates</span><span class="o">=</span><span class="n">on</span> <span class="n">dynamic_cert_mem_cache_size</span><span class="o">=</span><span class="mi">4</span><span class="n">MB</span>
+</pre></div>
+</div>
+<p>https端口明明是 3129 为何日志中显示是 3128?</p>
+<p>汗，我发现我忘记修改浏览器的网络设置，原来浏览器的网络设置了 通过 <code class="docutils literal notranslate"><span class="pre">192.168.6.200:8123</span></code> 代理，这样浏览器是明确设置了代理，而现在squid是配置了透明代理(443)，这就导致了两者冲突。</p>
+<p>同样，在Linux终端中设置环境变量 <code class="docutils literal notranslate"><span class="pre">http_proxy=http://192.168.6.200:3128/</span></code> 也会导致直接访问 <code class="docutils literal notranslate"><span class="pre">3128</span></code> 端口也会有同样的日志报错。原理相同</p>
+<p>类似 <a class="reference external" href="https://www.spinics.net/lists/squid/msg92601.html">Re: “intercepted port does not match 443”</a> 一定要确保透明代理时客户端不能配置代理设置，否则冲突</p>
+</section>
+<section id="id3">
+<h2>另一种证书配置<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>解决参考: <a class="reference external" href="https://elatov.github.io/2019/01/using-squid-to-proxy-ssl-sites/">Using Squid to Proxy SSL Sites</a></p>
+<p>重新生成证书(需要合并CA证书):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="n">new</span> <span class="o">-</span><span class="n">newkey</span> <span class="n">rsa</span><span class="p">:</span><span class="mi">2048</span> <span class="o">-</span><span class="n">sha256</span> <span class="o">-</span><span class="n">days</span> <span class="mi">3650</span> <span class="o">-</span><span class="n">nodes</span> <span class="o">-</span><span class="n">x509</span> <span class="o">-</span><span class="n">extensions</span> <span class="n">v3_ca</span> <span class="o">-</span><span class="n">keyout</span> <span class="n">squid</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">out</span> <span class="n">squid</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">.</span><span class="n">pem</span>
+
+<span class="c1"># 结合文件</span>
+<span class="n">cat</span> <span class="n">squid</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">.</span><span class="n">pem</span> <span class="n">squid</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">pem</span> <span class="o">&gt;&gt;</span> <span class="n">squid</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+<ul>
+<li><p>移动到证书目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span>
+<span class="n">sudo</span> <span class="n">mv</span> <span class="n">squid</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">pem</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span>
+<span class="n">sudo</span> <span class="n">chown</span> <span class="n">proxy</span><span class="p">:</span><span class="n">proxy</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span>
+</pre></div>
+</div>
+</li>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/squid/squid.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">3128</span> <span class="n">intercept</span>
+<span class="n">https_port</span> <span class="mi">3129</span> <span class="n">intercept</span> <span class="n">ssl</span><span class="o">-</span><span class="n">bump</span> <span class="n">cert</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span><span class="n">squid</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">pem</span> \
+  <span class="n">generate</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">certificates</span><span class="o">=</span><span class="n">on</span> <span class="n">dynamic_cert_mem_cache_size</span><span class="o">=</span><span class="mi">16</span><span class="n">MBB</span>
+
+<span class="n">sslcrtd_program</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">squid</span><span class="o">/</span><span class="n">security_file_certgen</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl_db</span> <span class="o">-</span><span class="n">M</span> <span class="mi">16</span><span class="n">MB</span>
+
+<span class="n">acl</span> <span class="n">step1</span> <span class="n">at_step</span> <span class="n">SslBump1</span>
+<span class="n">ssl_bump</span> <span class="n">peek</span> <span class="n">step1</span>
+<span class="n">ssl_bump</span> <span class="n">bump</span> <span class="nb">all</span>
+<span class="n">ssl_bump</span> <span class="n">splice</span> <span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时启动报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Mar</span> <span class="mi">01</span> <span class="mi">17</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">55</span> <span class="n">zcloud</span> <span class="n">squid</span><span class="p">[</span><span class="mi">499390</span><span class="p">]:</span> <span class="n">FATAL</span><span class="p">:</span> <span class="n">mimeLoadIcon</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">parse</span> <span class="n">internal</span> <span class="n">URL</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">zcloud</span><span class="p">:</span><span class="mi">0</span><span class="o">/</span><span class="n">squid</span><span class="o">-</span><span class="n">internal</span><span class="o">-</span><span class="n">static</span><span class="o">/</span><span class="n">icons</span><span class="o">/</span><span class="n">silk</span><span class="o">/</span><span class="n">image</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p>这个报错是因为使用了 <code class="docutils literal notranslate"><span class="pre">transparent</span></code> 模式之后，无法处理下载文件，所以还要在添加一行不带 <code class="docutils literal notranslate"><span class="pre">interrupt</span></code> 的配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http_port</span> <span class="mi">8080</span>
+</pre></div>
+</div>
+<p>但是即使能够运行squid，还是会出现日志中有:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2022</span><span class="o">/</span><span class="mi">03</span><span class="o">/</span><span class="mi">01</span> <span class="mi">17</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">00</span> <span class="n">kid1</span><span class="o">|</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">failure</span> <span class="k">while</span> <span class="n">accepting</span> <span class="n">a</span> <span class="n">TLS</span> <span class="n">connection</span> <span class="n">on</span> <span class="n">conn1486</span> <span class="n">local</span><span class="o">=</span><span class="mf">203.119.129.34</span><span class="p">:</span><span class="mi">443</span> <span class="n">remote</span><span class="o">=</span><span class="mf">192.168.6.22</span><span class="p">:</span><span class="mi">63105</span> <span class="n">FD</span> <span class="mi">24</span> <span class="n">flags</span><span class="o">=</span><span class="mi">33</span><span class="p">:</span> <span class="mh">0x563fb47ef180</span><span class="o">*</span><span class="mi">1</span>
+ <span class="n">current</span> <span class="n">master</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">master57</span>
+</pre></div>
+</div>
+<p>这说明证书方法配置可以，但是还是需要解决 squid 向远端发送请求问题</p>
+</section>
+<section id="id4">
+<h2>完整参考配置<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>以下是我经过实践和不断摸索，初步形成的能够工作的 <code class="docutils literal notranslate"><span class="pre">squid</span> <span class="pre">透明代理</span></code> 配置:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">squid透明代理 squid.conf</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>acl localnet src <span class="m">0</span>.0.0.1-0.255.255.255  <span class="c1"># RFC 1122 &quot;this&quot; network (LAN)</span>
+acl localnet src <span class="m">10</span>.0.0.0/8             <span class="c1"># RFC 1918 local private network (LAN)</span>
+acl localnet src <span class="m">100</span>.64.0.0/10          <span class="c1"># RFC 6598 shared address space (CGN)</span>
+acl localnet src <span class="m">169</span>.254.0.0/16         <span class="c1"># RFC 3927 link-local (directly plugged) machines</span>
+acl localnet src <span class="m">172</span>.16.0.0/12          <span class="c1"># RFC 1918 local private network (LAN)</span>
+acl localnet src <span class="m">192</span>.168.0.0/16         <span class="c1"># RFC 1918 local private network (LAN)</span>
+acl localnet src fc00::/7               <span class="c1"># RFC 4193 local private network range</span>
+acl localnet src fe80::/10              <span class="c1"># RFC 4291 link-local (directly plugged) machines</span>
+
+acl SSL_ports port <span class="m">443</span>
+acl Safe_ports port <span class="m">80</span>          <span class="c1"># http</span>
+acl Safe_ports port <span class="m">21</span>          <span class="c1"># ftp</span>
+acl Safe_ports port <span class="m">22</span>          <span class="c1"># ssh</span>
+acl Safe_ports port <span class="m">443</span>         <span class="c1"># https</span>
+acl Safe_ports port <span class="m">70</span>          <span class="c1"># gopher</span>
+acl Safe_ports port <span class="m">210</span>         <span class="c1"># wais</span>
+acl Safe_ports port <span class="m">1025</span>-65535  <span class="c1"># unregistered ports</span>
+acl Safe_ports port <span class="m">280</span>         <span class="c1"># http-mgmt</span>
+acl Safe_ports port <span class="m">488</span>         <span class="c1"># gss-http</span>
+acl Safe_ports port <span class="m">591</span>         <span class="c1"># filemaker</span>
+acl Safe_ports port <span class="m">777</span>         <span class="c1"># multiling http</span>
+acl CONNECT method CONNECT
+
+http_upgrade_request_protocols WebSocket allow all
+
+http_access deny !Safe_ports
+
+http_access deny CONNECT !SSL_ports
+
+http_access allow localhost manager
+http_access deny manager
+
+http_access allow localnet
+http_access allow localhost
+
+http_access deny all
+
+http_port <span class="m">8080</span>
+http_port <span class="m">3128</span> intercept
+https_port <span class="m">3129</span> intercept ssl-bump <span class="nv">cert</span><span class="o">=</span>/etc/squid/certs/myCA.pem <span class="se">\</span>
+  generate-host-certificates<span class="o">=</span>on <span class="nv">dynamic_cert_mem_cache_size</span><span class="o">=</span>4MB
+  <span class="c1">#tls-dh=/etc/squid/certs/dhparam.pem</span>
+  <span class="c1">#options=SINGLE_DH_USE,SINGLE_ECDH_USE tls-dh=/etc/squid/certs/dhparam.pem</span>
+
+sslproxy_cipher HIGH:MEDIUM:!RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS
+
+sslcrtd_program /usr/lib/squid/security_file_certgen -s /var/lib/ssl_db -M 4MB
+
+acl step1 at_step SslBump1
+ssl_bump peek step1
+ssl_bump bump all
+ssl_bump splice all
+
+<span class="c1">#sslproxy_cert_error allow all</span>
+<span class="c1">#sslproxy_flags DONT_VERIFY_PEER</span>
+<span class="c1">#tls_outgoing_options options=NO_SSLv3,SINGLE_DH_USE,SINGLE_ECDH_USE</span>
+
+cache_dir ufs /var/spool/squid <span class="m">100</span> <span class="m">16</span> <span class="m">256</span>
+
+coredump_dir /var/spool/squid
+
+refresh_pattern ^ftp:           <span class="m">1440</span>    <span class="m">20</span>%     <span class="m">10080</span>
+refresh_pattern ^gopher:        <span class="m">1440</span>    <span class="m">0</span>%      <span class="m">1440</span>
+refresh_pattern -i <span class="o">(</span>/cgi-bin/<span class="p">|</span><span class="se">\?</span><span class="o">)</span> <span class="m">0</span>     <span class="m">0</span>%      <span class="m">0</span>
+refresh_pattern .               <span class="m">0</span>       <span class="m">20</span>%     <span class="m">4320</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id5">
+<h2>客户端配置<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>实际上客户端此时如果没有导入服务器证书，浏览器或者下载工具都会拒绝 https 连接，因为都发现了中间人攻击。</p>
+<p>此时可以在浏览器中点击 <code class="docutils literal notranslate"><span class="pre">Advanced</span></code> ，然后接受安全风险并继续访问</p>
+<ul>
+<li><p>当使用firefox访问 <a class="reference external" href="https://baidu.com">https://baidu.com</a> ，则只要接受 <code class="docutils literal notranslate"><span class="pre">squid</span></code> 自签名证书就可以继续访问，只是浏览器上会多一个感叹号</p></li>
+<li><p>但是访问 <a class="reference external" href="https://www.google.com">https://www.google.com</a> 则不行，因为google的安全策略(HSTS)不允许证书例外:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>www.google.com has a security policy called HTTP Strict Transport Security (HSTS), which means that Firefox can only connect to it securely. You can’t add an exception to visit this site.
+</pre></div>
+</div>
+</li>
+</ul>
+<p>要彻底解决这个问题，还是需要将前面生成的服务器证书 <code class="docutils literal notranslate"><span class="pre">/etc/squid/certs/myCA.der</span></code> 导入到浏览器中，之后访问所有的https网站都能正常工作了</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>也是就是说，虽然透明代理可以减少客户端的代理配置，但是实际上并不是很容易使用，必须在浏览器和操作系统中导入这个中间人(代理服务器)证书才能正常工作。这种情况，也就只有技术人员自己使用，或者企业对证书有完全控制，能够在企业电脑或移动设备中安装企业证书才能解决。</p>
+<p>这个实践我虽然完成，但是并没有达到预期的简便易用目标。这也是现代HTTPS加密安全性带来的限制，要想绕开安全加密，实际上并不是非常容易(安全性有保障)。</p>
+</div>
+</section>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference external" href="https://wiki.squid-cache.org/ConfigExamples/Intercept/SslBumpExplicit">Intercept HTTPS CONNECT messages with SSL-Bump</a> 官方文档，是标准</p></li>
+<li><p><a class="reference external" href="https://elatov.github.io/2019/01/using-squid-to-proxy-ssl-sites/">Using Squid to Proxy SSL Sites</a></p></li>
+<li><p><a class="reference external" href="https://dev.to/suntong/a-short-guide-on-squid-transparent-proxy-ssl-bumping-k5c">A short guide on Squid transparent proxy &amp; SSL bumping</a> 这个文档系列有点混乱</p></li>
 <li><p><a class="reference external" href="https://linuxtechlab.com/squid-transparent-proxy-server-complete-configuration/">Squid Transparent proxy server : How to configure</a></p></li>
 <li><p><a class="reference external" href="https://wiki.squid-cache.org/KnowledgeBase/NoForwardProxyPorts">squid-cache wiki: No forward-proxy ports</a></p></li>
+<li><p><a class="reference external" href="https://bbs.archlinux.org/viewtopic.php?id=256961">Transparent Squid Proxy for HTTPS</a></p></li>
 </ul>
 </section>
 </section>
