@@ -9,6 +9,7 @@ DNSmasq
 
    introduce_dnsmasq.rst
    deploy_dnsmasq.rst
+   dnsmasq_dhcp_pac.rst
 
 .. only::  subproject and html
 
