@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nginx部署WPAD服务 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Web缓存技术" href="../cache/index.html" />
+    <link rel="prev" title="Nginx的root和alias指令" href="nginx_root_alias.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_search/index.html">Search Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Web Atlas</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Nginx</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ubuntu_install_nginx.html">Ubuntu环境安装Nginx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nginx_virtual_host.html">Nginx virtual host配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="self_signed_ssl_nginx.html">配置Nginx自签名SSL证书</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nginx_root_alias.html">Nginx的root和alias指令</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Nginx部署WPAD服务</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nginx">安装配置Nginx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">异常排查</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">存在问题</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cache/index.html">Web缓存技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../proxy/index.html">Proxy代理服务</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../load_balancer/index.html">负载均衡</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../waf/index.html">Web应用防火墙(WAF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../webdav/index.html">WebDAV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../websocket/index.html">WebSocket</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../firefox/index.html">Firefox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Web Atlas</a> &raquo;</li>
+          <li><a href="index.html">Nginx</a> &raquo;</li>
+      <li>Nginx部署WPAD服务</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/web/nginx/nginx_wpad.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="nginxwpad">
+<span id="nginx-wpad"></span><h1>Nginx部署WPAD服务<a class="headerlink" href="#nginxwpad" title="永久链接至标题">¶</a></h1>
+<p>通过 <a class="reference internal" href="../../infra_service/dns/wpad_protocol.html#wpad-protocol"><span class="std std-ref">Web代理自动发现(Web Proxy Auto-Discovery,WPAD)协议</span></a> 可以为组织内部客户端自动配置代理服务，例如实现 <a class="reference internal" href="../proxy/squid/squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 。在 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 部署了 <a class="reference internal" href="../../real/priv_cloud/priv_dnsmasq_ics.html#priv-dnsmasq-ics"><span class="std std-ref">私有云DNS服务(dnsmasq)和共享因特网(ICS)</span></a> 同时也部署了 <a class="reference internal" href="../proxy/squid/squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 来提供翻墙。</p>
+<p>对于局域网内部客户端，部署 <a class="reference internal" href="../../apple/airport/airport_express_with_dnsmasq_ics.html#airport-express-with-dnsmasq-ics"><span class="std std-ref">结合DNSmasq+iptables使用AirPort Express实现无线访问因特网</span></a> ，并部署 <a class="reference internal" href="../../infra_service/dns/dnsmasq/dnsmasq_dns_wpad.html#dnsmasq-dns-wpad"><span class="std std-ref">DNSmasq部署DNS WPAD(WEB代理自动发现)</span></a> 和/或  <a class="reference internal" href="../../infra_service/dns/dnsmasq/dnsmasq_dhcp_wpad.html#dnsmasq-dhcp-wpad"><span class="std std-ref">DNSmasq部署DHCP WPAD(WEB代理自动发现)</span></a> 实现自动配置移动客户端来使用代理服务器。</p>
+<p>上述构建WPAD都需要有一个WEB服务器提供 WPAD/PAC 配置文件瞎子啊，本文提供实践记录 Nginx 部署 WPAD/PAC 下载服务。</p>
+<section id="nginx">
+<h2>安装配置Nginx<a class="headerlink" href="#nginx" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="ubuntu_install_nginx.html#ubuntu-install-nginx"><span class="std std-ref">Ubuntu环境安装Nginx</span></a></p></li>
+<li><p><a class="reference internal" href="nginx_virtual_host.html#nginx-virtual-host"><span class="std std-ref">Nginx virtual host配置</span></a> 配置好 <code class="docutils literal notranslate"><span class="pre">wpad.staging.huatai.me</span></code> 这个虚拟主机 - <a class="reference internal" href="../../infra_service/dns/wpad_protocol.html#wpad-protocol"><span class="std std-ref">Web代理自动发现(Web Proxy Auto-Discovery,WPAD)协议</span></a> 要求针对域名提供的主机名必须是 <code class="docutils literal notranslate"><span class="pre">wpad.&lt;domain&gt;</span></code> - <code class="docutils literal notranslate"><span class="pre">/etc/nginx/sites-available/wpad</span></code> 内容如下</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Nginx虚拟主机wpad的配置 /etc/nginx/sites-available/wpad</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span>server {
+    listen 80;
+    listen [::]:80;
+    
+    root /var/www/wpad/html;
+    index index.html index.htm index.nginx-debian.html;
+    
+    server_name wapd wpad.staging.huatai.me;
+    
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/nginx/mime.types</span></code> 添加一段:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">application</span><span class="o">/</span><span class="n">x</span><span class="o">-</span><span class="n">ns</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">autoconfig</span>     <span class="n">pac</span><span class="p">;</span>
+<span class="n">application</span><span class="o">/</span><span class="n">x</span><span class="o">-</span><span class="n">ns</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">autoconfig</span>     <span class="n">dat</span><span class="p">;</span>
+<span class="n">application</span><span class="o">/</span><span class="n">x</span><span class="o">-</span><span class="n">ns</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">autoconfig</span>     <span class="n">da</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这样nginx下载 <code class="docutils literal notranslate"><span class="pre">.pac</span></code> 以及 <code class="docutils literal notranslate"><span class="pre">.dat</span></code> 文件会添加这个header头部</p>
+<ul class="simple">
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code> 内容如下:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">/var/www/wpad/html/wpad.dat</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span>function FindProxyForURL(url, host) {
+    var proxy = &quot;PROXY proxy.staging.huatai.me:8123; DIRECT&quot;;
+
+// If the hostname matches, send proxy.
+    if (dnsDomainIs(host, &quot;blocked.domain.com&quot;) ||
+        shExpMatch(host, &quot;(*.facebook.com|facebook.com)&quot; ||
+        shExpMatch(host, &quot;(*.google.com|google.com)&quot;))
+    return proxy;
+
+// If the requested website is hosted within the internal network, send direct.
+    if (isPlainHostName(host) ||
+        shExpMatch(host, &quot;*.local&quot;) ||
+        isInNet(dnsResolve(host), &quot;10.0.0.0&quot;, &quot;255.0.0.0&quot;) ||
+        isInNet(dnsResolve(host), &quot;172.16.0.0&quot;,  &quot;255.240.0.0&quot;) ||
+        isInNet(dnsResolve(host), &quot;192.168.0.0&quot;,  &quot;255.255.0.0&quot;) ||
+        isInNet(dnsResolve(host), &quot;127.0.0.0&quot;, &quot;255.255.255.0&quot;))
+    return &quot;DIRECT&quot;;
+
+// DEFAULT RULE: direct
+    return &quot;DIRECT&quot;;
+}
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>验证nginx配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">t</span>
+</pre></div>
+</div>
+</li>
+<li><p>重启nginx生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nginx</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>配置客户端</p>
+</section>
+<section id="id1">
+<h2>异常排查<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<section id="virtual-hostwpda-dat">
+<h3>未从virtual host下载wpda.dat<a class="headerlink" href="#virtual-hostwpda-dat" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>客户端 似乎不能成功下载，nginx日志如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==&gt;</span> <span class="n">access</span><span class="o">.</span><span class="n">log</span> <span class="o">&lt;==</span>
+<span class="mf">192.168.6.22</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">02</span><span class="o">/</span><span class="n">Mar</span><span class="o">/</span><span class="mi">2022</span><span class="p">:</span><span class="mi">17</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">12</span> <span class="o">+</span><span class="mi">0800</span><span class="p">]</span> <span class="s2">&quot;GET /wpad.dat HTTP/1.1&quot;</span> <span class="mi">200</span> <span class="mi">809</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.3 Safari/605.1.15&quot;</span>
+<span class="mf">192.168.6.40</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">02</span><span class="o">/</span><span class="n">Mar</span><span class="o">/</span><span class="mi">2022</span><span class="p">:</span><span class="mi">17</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">01</span> <span class="o">+</span><span class="mi">0800</span><span class="p">]</span> <span class="s2">&quot;GET /wpad.dat HTTP/1.1&quot;</span> <span class="mi">404</span> <span class="mi">134</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;CFNetworkAgent (unknown version) CFNetwork/1329 Darwin/21.3.0&quot;</span>
+<span class="mf">192.168.6.22</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">02</span><span class="o">/</span><span class="n">Mar</span><span class="o">/</span><span class="mi">2022</span><span class="p">:</span><span class="mi">17</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">09</span> <span class="o">+</span><span class="mi">0800</span><span class="p">]</span> <span class="s2">&quot;GET /wpad.dat HTTP/1.1&quot;</span> <span class="mi">404</span> <span class="mi">197</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36 DingTalk(6.3.25-macOS-15385707) nw Channel/201200&quot;</span>
+<span class="mf">192.168.6.22</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">02</span><span class="o">/</span><span class="n">Mar</span><span class="o">/</span><span class="mi">2022</span><span class="p">:</span><span class="mi">17</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">09</span> <span class="o">+</span><span class="mi">0800</span><span class="p">]</span> <span class="s2">&quot;GET /wpad.dat HTTP/1.1&quot;</span> <span class="mi">404</span> <span class="mi">197</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36 DingTalk(6.3.25-macOS-15385707) nw Channel/201200&quot;</span>
+<span class="mf">192.168.6.22</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">02</span><span class="o">/</span><span class="n">Mar</span><span class="o">/</span><span class="mi">2022</span><span class="p">:</span><span class="mi">17</span><span class="p">:</span><span class="mi">55</span><span class="p">:</span><span class="mi">40</span> <span class="o">+</span><span class="mi">0800</span><span class="p">]</span> <span class="s2">&quot;GET /wpad.dat HTTP/1.1&quot;</span> <span class="mi">404</span> <span class="mi">134</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;CFNetworkAgent (unknown version) CFNetwork/1329 Darwin/21.3.0&quot;</span>
+<span class="mf">192.168.6.40</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">02</span><span class="o">/</span><span class="n">Mar</span><span class="o">/</span><span class="mi">2022</span><span class="p">:</span><span class="mi">17</span><span class="p">:</span><span class="mi">55</span><span class="p">:</span><span class="mi">50</span> <span class="o">+</span><span class="mi">0800</span><span class="p">]</span> <span class="s2">&quot;GET /wpad.dat HTTP/1.1&quot;</span> <span class="mi">404</span> <span class="mi">134</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;CFNetworkAgent (unknown version) CFNetwork/1329 Darwin/21.3.0&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示文件不存在，但是用浏览器访问 <a class="reference external" href="http://wpad.staging.huatai.me/wpad.dat">http://wpad.staging.huatai.me/wpad.dat</a> 是可以下载的</p>
+<ul>
+<li><p>我尝试做了一个软连接，将默认目录下也软连接一个 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span>
+<span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">../</span><span class="n">wpad</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">wpad</span><span class="o">.</span><span class="n">dat</span> <span class="o">./</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>然后客户端就能正常下载 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code> ，似乎是解析了域名 <code class="docutils literal notranslate"><span class="pre">wpad.staging.huatai.me</span></code> 得到IP地址之后，客户端是通过IP地址来下载文件的。(待排查)</p>
+</section>
+<section id="wpad-dat">
+<h3>无法正确解析 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code><a class="headerlink" href="#wpad-dat" title="永久链接至标题">¶</a></h3>
+<p>时间有限，我还没有排查出为何前述的 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code> 文件被客户端下载之后，并没有匹配上域名 <code class="docutils literal notranslate"><span class="pre">facebook.com</span></code> 来访问代理服务器。</p>
+<p>我做了一个简化，将 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code> 文件修改成只返回代理服务器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">function</span> <span class="n">FindProxyForURL</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s2">&quot;PROXY proxy.staging.huatai.me:3128&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>则验证完全正常，也就是客户端能够正确获得代理服务器配置，并始终通过 <a class="reference internal" href="../proxy/squid/index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 代理访问internet，解决了翻墙。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>后续再排查 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code> 问题，目前初步验证整个 <code class="docutils literal notranslate"><span class="pre">nginx</span> <span class="pre">+</span> <span class="pre">wpad</span> <span class="pre">+</span> <span class="pre">dnsmasq</span></code> 能够走通整个代理服务器自动配置流程，初步达成目标。</p>
+</div>
+</section>
+</section>
+<section id="id2">
+<h2>存在问题<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p>(待排查)iphone客户端似乎不断下载 <code class="docutils literal notranslate"><span class="pre">wpad.dat</span></code> 从 nginx 的 access.log 日志看访问非常频繁，并且是每个浏览器或者客户端都会下载</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://nguvu.org/pfsense/pfSense-WPAD-PAC-proxy-configuration/">pfSense WPAD/PAC proxy configuration guide</a></p></li>
+<li><p><a class="reference external" href="https://wiki.gentoo.org/wiki/ProxyAutoConfig">gentoo linux wiki: ProxyautoConfig</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="nginx_root_alias.html" class="btn btn-neutral float-left" title="Nginx的root和alias指令" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../cache/index.html" class="btn btn-neutral float-right" title="Web缓存技术" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

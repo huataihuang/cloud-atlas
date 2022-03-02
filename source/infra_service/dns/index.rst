@@ -8,6 +8,7 @@ DNS服务
    :maxdepth: 1
 
    compare_dns_software.rst
+   wpad_protocol.rst
    bind/index
    dnsmasq/index
 

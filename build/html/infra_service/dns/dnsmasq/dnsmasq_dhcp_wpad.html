@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DNSmasq &mdash; Cloud Atlas 0.1 文档</title>
+  <title>DNSmasq部署DHCP WPAD(WEB代理自动发现) &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="dnsmasq简介" href="introduce_dnsmasq.html" />
-    <link rel="prev" title="BIND简介" href="../bind/introduce_bind.html" /> 
+    <link rel="next" title="ssh服务" href="../../ssh/index.html" />
+    <link rel="prev" title="DNSmasq部署DNS WPAD(WEB代理自动发现)" href="dnsmasq_dns_wpad.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -68,11 +68,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../compare_dns_software.html">DNS软件比较</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../wpad_protocol.html">Web代理自动发现(Web Proxy Auto-Discovery,WPAD)协议</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../bind/index.html">BIND</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">DNSmasq</a><ul>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">DNSmasq</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="introduce_dnsmasq.html">dnsmasq简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deploy_dnsmasq.html">部署DNSmasq</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dnsmasq_dns_wpad.html">DNSmasq部署DNS WPAD(WEB代理自动发现)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="dnsmasq_dhcp_wpad.html">DNSmasq部署DHCP WPAD(WEB代理自动发现)</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">DNSmasq部署DHCP WPAD(WEB代理自动发现)</a></li>
 </ul>
 </li>
 </ul>
@@ -133,9 +133,10 @@
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Infra-Service Atlas</a> &raquo;</li>
           <li><a href="../index.html">DNS服务</a> &raquo;</li>
-      <li>DNSmasq</li>
+          <li><a href="index.html">DNSmasq</a> &raquo;</li>
+      <li>DNSmasq部署DHCP WPAD(WEB代理自动发现)</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/infra_service/dns/dnsmasq/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/infra_service/dns/dnsmasq/dnsmasq_dhcp_wpad.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -143,24 +144,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="dnsmasq">
-<span id="id1"></span><h1>DNSmasq<a class="headerlink" href="#dnsmasq" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="introduce_dnsmasq.html">dnsmasq简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="deploy_dnsmasq.html">部署DNSmasq</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dnsmasq_dns_wpad.html">DNSmasq部署DNS WPAD(WEB代理自动发现)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dnsmasq_dhcp_wpad.html">DNSmasq部署DHCP WPAD(WEB代理自动发现)</a></li>
-</ul>
+  <section id="dnsmasqdhcp-wpad-web">
+<span id="dnsmasq-dhcp-wpad"></span><h1>DNSmasq部署DHCP WPAD(WEB代理自动发现)<a class="headerlink" href="#dnsmasqdhcp-wpad-web" title="永久链接至标题">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>目前通用的 <a class="reference internal" href="../wpad_protocol.html#wpad-protocol"><span class="std std-ref">Web代理自动发现(Web Proxy Auto-Discovery,WPAD)协议</span></a> 部署方式是采用DNS方式，该方式得到所有主流浏览器的支持。不过，也可以使用传统的 DHCP option 方式提供 <code class="docutils literal notranslate"><span class="pre">WPAD</span></code> 配置，指定客户端下载对应的 <code class="docutils literal notranslate"><span class="pre">wpad</span></code> 配置文件( <code class="docutils literal notranslate"><span class="pre">PAC</span></code> 文件 )</p>
 </div>
+<p><a class="reference internal" href="../wpad_protocol.html#wpad-protocol"><span class="std std-ref">Web代理自动发现(Web Proxy Auto-Discovery,WPAD)协议</span></a> 实现中，DHCP配置优先级高于DNS，所以配置了本文支持 <code class="docutils literal notranslate"><span class="pre">WPAD</span></code> 的DNSmasq之后，可以不用 <a class="reference internal" href="dnsmasq_dns_wpad.html#dnsmasq-dns-wpad"><span class="std std-ref">DNSmasq部署DNS WPAD(WEB代理自动发现)</span></a> 。</p>
+<section id="dnsmasqdhcp">
+<h2>DNSmasq配置DHCP<a class="headerlink" href="#dnsmasqdhcp" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.d/dhcp.conf</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dhcp</span><span class="o">-</span><span class="n">option</span><span class="o">=</span><span class="mi">252</span><span class="p">,</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">wpad</span><span class="o">.</span><span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span><span class="n">wpad</span><span class="o">.</span><span class="n">dat</span>
+</pre></div>
+</div>
+</li>
+<li><p>重启dnsmasq:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">dnsmasq</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="nginx">
+<h2>配置nginx<a class="headerlink" href="#nginx" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../../web/nginx/nginx_wpad.html#nginx-wpad"><span class="std std-ref">Nginx部署WPAD服务</span></a> 提供 <code class="docutils literal notranslate"><span class="pre">WPAD</span></code> 配置文件下载</p></li>
+</ul>
+</section>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://documentation.clearos.com/content:en_us:kb_o_web_proxy_auto-detection_configuration">Web Proxy Auto-detection Configuration</a></p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../bind/introduce_bind.html" class="btn btn-neutral float-left" title="BIND简介" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="introduce_dnsmasq.html" class="btn btn-neutral float-right" title="dnsmasq简介" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dnsmasq_dns_wpad.html" class="btn btn-neutral float-left" title="DNSmasq部署DNS WPAD(WEB代理自动发现)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../ssh/index.html" class="btn btn-neutral float-right" title="ssh服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
