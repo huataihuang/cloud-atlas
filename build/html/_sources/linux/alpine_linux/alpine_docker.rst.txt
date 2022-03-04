@@ -65,8 +65,6 @@ Alpine Linux运行Docker
    WARNING: No kernel memory TCP limit support
    WARNING: No oom kill disable support
 
-
-
 完整配置如下:
 
 参考

@@ -12,7 +12,7 @@ Squid透明代理
 
 实践发现另一个问题是 :ref:`squid_socks_peer` 失效，虽然我最终实现了透明代理，但是无法使用之前配置的 :ref:`squid_socks_peer` 翻墙，所以感觉非常沮丧。有可能有其他方法可以克服这个问题，但是暂时没有精力来继续折腾了。
 
-在 ``squid透明代理`` 探索过程中，发现通过 :ref:`dnsmasq_dhcp_pac` 实现动态配置客户端代理，可以更为方便实现局域网 ``透明`` 翻墙访问。
+在 ``squid透明代理`` 探索过程中，发现通过 :ref:`dnsmasq_dhcp_wpad` 或 :ref:`dnsmasq_dns_wpad` 结合 :ref:`nginx_wpad` 实现动态配置客户端代理，可以更为方便实现局域网 ``透明`` 翻墙访问。
 
 http透明代理
 ===============

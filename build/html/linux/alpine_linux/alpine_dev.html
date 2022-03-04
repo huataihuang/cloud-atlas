@@ -107,7 +107,11 @@
 <li class="toctree-l3"><a class="reference internal" href="alpine_docker.html">Alpine Linux运行Docker</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_nfs.html">Alpine Linux配置NFS</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Alpine Linux软件开发环境构建</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#docker">Docker运行环境</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">安装编译环境</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">桌面</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">镜像构建</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -179,8 +183,91 @@
   <section id="alpine-linux">
 <span id="alpine-dev"></span><h1>Alpine Linux软件开发环境构建<a class="headerlink" href="#alpine-linux" title="永久链接至标题">¶</a></h1>
 <p>我在尝试 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_3.html#pi-3"><span class="std std-ref">树莓派Raspberry Pi 3</span></a> + <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 混合集群部署 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 时，读到 <a class="reference external" href="https://www.overops.com/blog/my-alpine-desktop-setting-up-a-software-development-environment-on-alpine-linux/">Setting Up a Software Development Environment on Alpine Linux</a> ，发现很有启发，也是一个有趣的挑战。在一个轻量级的ARM环境中，实现软件开发、 <a class="reference internal" href="../../devops/index.html#devops"><span class="std std-ref">DevOps Atlas</span></a> ，并采用 <a class="reference internal" href="../../real/edge_cloud/index.html#edge-cloud"><span class="std std-ref">边缘云计算构建</span></a> 构建一个ARM集群。</p>
+<p>为什么会选择 <code class="docutils literal notranslate"><span class="pre">Alpine</span> <span class="pre">Linux</span></code> 来构建软件开发环境呢？</p>
+<p>从 <a class="reference internal" href="introduce_alpine.html#introduce-alpine"><span class="std std-ref">Alpine Linux简介</span></a> 可以看到，Alpine是一个非常非常轻量级的Linux系统，并且适合运行容器( <a class="reference internal" href="../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> )。这对于我们开发者来说，是非常适合的 <a class="reference internal" href="../../devops/index.html#devops"><span class="std std-ref">DevOps Atlas</span></a> 环境。</p>
+<p>构建思路:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 上安装 <a class="reference internal" href="index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> ，然后安装 <a class="reference internal" href="../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> ，此时系统占用磁盘空间约500MB</p></li>
+<li><p>所有工作环境都在 Docker 容器中构建，并进一步迁移到 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 集群环境</p></li>
+<li><p>保持 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 物理主机上运行的OS最精简模式</p></li>
+</ul>
+<section id="docker">
+<h2>Docker运行环境<a class="headerlink" href="#docker" title="永久链接至标题">¶</a></h2>
+<p>在 <a class="reference internal" href="alpine_docker.html#alpine-docker"><span class="std std-ref">Alpine Linux运行Docker</span></a> ，然后采用 <a class="reference internal" href="../../docker/admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a></p>
+<ul class="simple">
+<li><p>使用密码登陆的ssh容器 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">提供ssh和sudo的alpine构建Dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
+<span class="k">RUN</span> apk add --update --no-cache openssh sudo
+<span class="k">RUN</span> apk update <span class="o">&amp;&amp;</span> apk upgrade
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s1">&#39;PasswordAuthentication yes&#39;</span> &gt;&gt; /etc/ssh/sshd_config
+<span class="k">RUN</span> adduser -u <span class="m">502</span> -G wheel -h /home/huatai -s /bin/sh -D huatai
+<span class="k">RUN</span> <span class="nb">echo</span> -n <span class="s1">&#39;huatai:some_password_here&#39;</span> <span class="p">|</span> chpasswd
+<span class="k">RUN</span> <span class="nb">echo</span> <span class="s1">&#39;%wheel ALL=(ALL) NOPASSWD: ALL&#39;</span> &gt;&gt; /etc/sudoers
+<span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&quot;/entrypoint.sh&quot;</span><span class="p">]</span>
+<span class="k">EXPOSE</span><span class="s"> 22</span>
+<span class="k">COPY</span> entrypoint.sh /
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>并准备 <code class="docutils literal notranslate"><span class="pre">entrypoint.sh</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">启动ssh脚本</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+ssh-keygen -A
+<span class="nb">exec</span> /usr/sbin/sshd -D -e <span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>然后执行构建镜像命令:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">-</span><span class="n">v</span> <span class="n">entrypoint</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">alpine</span><span class="o">-</span><span class="n">ssh</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>使用以下命令启动容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">x</span><span class="o">-</span><span class="n">dev</span> <span class="o">--</span><span class="n">name</span> <span class="n">x</span><span class="o">-</span><span class="n">dev</span> <span class="o">-</span><span class="n">p</span> <span class="mi">122</span><span class="p">:</span><span class="mi">22</span> <span class="n">alpine</span><span class="o">-</span><span class="n">ssh</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>安装编译环境<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>类似Ubuntu的 <code class="docutils literal notranslate"><span class="pre">build-essential</span></code> ， <a class="reference internal" href="index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> 提供了 <code class="docutils literal notranslate"><span class="pre">build-base</span></code> 组合安装包，可以安装大多数常用build工具，包括 <code class="docutils literal notranslate"><span class="pre">g++</span></code> <code class="docutils literal notranslate"><span class="pre">make</span></code> 和 <code class="docutils literal notranslate"><span class="pre">binutils</span></code> 。如果要开发 C++，则可以安装一些附加工具包，如 <code class="docutils literal notranslate"><span class="pre">cmake</span></code> ，以及 <code class="docutils literal notranslate"><span class="pre">linux-headers</span></code> 等。</p>
+<ul>
+<li><p>安装编译环境 <code class="docutils literal notranslate"><span class="pre">build-base</span></code> (占用 204MB)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apk</span> <span class="n">add</span> <span class="n">build</span><span class="o">-</span><span class="n">base</span>
+</pre></div>
+</div>
+</li>
+<li><p>安装debug工具 <code class="docutils literal notranslate"><span class="pre">gdb</span></code> 以及 <code class="docutils literal notranslate"><span class="pre">strace</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apk</span> <span class="n">add</span> <span class="n">gdb</span> <span class="n">strace</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>桌面<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我采用字符界面远程开发，所以没有安装桌面。不过作为轻量级Linux发行版，你可以对应安装一个轻量级的 <a class="reference internal" href="../desktop/xfce.html#xfce"><span class="std std-ref">Xfce</span></a> 桌面。参考文档是 <a class="reference external" href="https://wiki.alpinelinux.org/wiki/Xfce">alpine linux wiki: Xfce</a></p>
+<p>或许以后我会尝试运行Alpine Linux桌面</p>
+</div>
+<p>原文作者采用了Xfce桌面，并且为了能够方便开发，安装了JetBrains IDE系列。原因是Alpine Linux使用musl库，如果使用 <code class="docutils literal notranslate"><span class="pre">musl-glibc</span></code> 兼容库非常费劲。而JetBrains是Java程序，OpenJDK(IcedTea项目)可以顺畅在Alpine Linux上运行，所以选择JetBrains全家桶可以非常方便开发工作。</p>
+</section>
+<section id="id3">
+<h2>镜像构建<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>经过验证后，可以将上述步骤添加到 Alpine Linux 的Dockerfile，以便后续重新构建开发环境，并一步步打磨完善:</p>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.overops.com/blog/my-alpine-desktop-setting-up-a-software-development-environment-on-alpine-linux/">Setting Up a Software Development Environment on Alpine Linux</a></p></li>
 </ul>
