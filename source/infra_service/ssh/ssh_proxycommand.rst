@@ -50,12 +50,17 @@ SSH代理命令依然是 ``ProxyCommand`` ，使用方法有所不同::
 ProxyJump
 ============
 
-和 ``ProxyCommand`` 类似的还有一个SSH指令是 ``ProxyJump`` 使用方法类似::
+和 ``ProxyCommand`` 类似的还有一个SSH指令是 ``ProxyJump`` (OpenSSH 7.3引入)使用方法类似::
 
    scp -o "ProxyJump <User>@<Proxy-Server>" <File-Name> <User>@<Destination-Server>:<Destination-Path>
+
+``ProxyJump`` 指令还支持多跳(神奇)::
+
+   ssh -J jumpuser1@jumphost1,jumpuser2@jumphost2,...,jumpuserN@jumphostN user@host
 
 参考
 =======
 
 - `SSH ProxyCommand example: Going through one host to reach another server <https://www.cyberciti.biz/faq/linux-unix-ssh-proxycommand-passing-through-one-host-gateway-server/>`_
 - `4 ways to SSH & SCP via proxy (jump) server in Linux <https://www.golinuxcloud.com/ssh-proxy/>`_
+- `An SSH tunnel via multiple hops <https://superuser.com/questions/96489/an-ssh-tunnel-via-multiple-hops>`_

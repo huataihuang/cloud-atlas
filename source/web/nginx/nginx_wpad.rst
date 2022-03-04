@@ -31,9 +31,17 @@ Nginx部署WPAD服务
 
 - 配置 ``wpad.dat`` 内容如下:
 
+.. warning::
+
+   这个 ``wpad.dat`` 存在错误，并没有如我预期那样匹配需要翻墙的域名如 ``facebook.com`` 通过代理访问，所以这里我只是记录待后续有时间再修正。读者如果有兴趣验证并解决，请通过 issue 告知我订正方法，多谢。
+
 .. literalinclude:: ../proxy/pac/liberty.pac
    :language: html
    :caption: /var/www/wpad/html/wpad.dat
+
+.. note::
+
+   我实际采用下文简化版 ``wpad.dat`` ，将所有流量都通过 :ref:`squid` 代理。不过，因为我部署了 :ref:`squid_socks_peer` ，将墙内和墙外的 ``squid`` 代理服务器连接，只有需要翻墙的流量才会经过外网代理。所以总体上不影响我的使用。 ``PAC`` 配置改进待后续有时间再进行。
 
 - 验证nginx配置::
 

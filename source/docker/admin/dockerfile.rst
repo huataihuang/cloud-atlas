@@ -126,9 +126,11 @@ alpine linux ssh容器
 
 - 使用以下命令启动容器::
 
-   docker run -itd --hostname alpine-ssh --name alpine-ssh -p 122:22 alpine-ssh:latest
+   docker run -itd --hostname x-dev --name x-dev -p 122:22 alpine-ssh:latest
 
-上述Dockerfile参考 `How to install OpenSSH server on Alpine Linux (including Docker) <https://www.cyberciti.biz/faq/how-to-install-openssh-server-on-alpine-linux-including-docker/>`_ ，原文提供的Dockerfile方法非常精简
+上述Dockerfile参考 `How to install OpenSSH server on Alpine Linux (including Docker) <https://www.cyberciti.biz/faq/how-to-install-openssh-server-on-alpine-linux-including-docker/>`_ ，原文提供的Dockerfile方法非常精简，我做了一点点修改:
+
+  - 增加sudo，并配置普通用户 ``huatai`` 能够免密码sudo
    
 启动容器
 =============
