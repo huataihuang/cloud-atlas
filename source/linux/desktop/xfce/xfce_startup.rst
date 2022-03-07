@@ -1,12 +1,12 @@
-.. _xfce:
+.. _xfce_startup:
 
 ============
-Xfce
+Xfce快速起步
 ============
 
 Xfce是我最喜欢的轻量级桌面，兼顾了Gnome丰富的功能和LXDE资源节约，达到了够用好用的平衡。这个桌面系统开发历史悠久，交互方式非常稳定。整个桌面仅包含必要的组件，但能够完成日常工作的方方面面，是最适合硬件性能有限或者专注于充分发挥系统性能到关键目标的开发者。
 
-.. figure:: ../../_static/linux/desktop/xfce_layers.png
+.. figure:: ../../../_static/linux/desktop/xfce/xfce_layers.png
    :scale: 80
 
 .. note::
@@ -127,7 +127,7 @@ Keyboard Layout之谜
 
 - 通过 ``respi-config`` 交互工具可以设置 (参考 `Changing the Keyboard Layout for your Raspberry Pi <https://pimylifeup.com/raspberry-pi-keyboard-layout/>`_ ) 键盘布局，这个交互设置实际上就是调整 ``/etc/default/keyboard`` :
 
-.. literalinclude:: xfce/keyboard
+.. literalinclude:: xfce_startup/keyboard
    :language: bash
    :linenos:
    :caption:
@@ -136,14 +136,14 @@ Keyboard Layout之谜
 
 但是，当我启动Xfce4桌面，我意外发现键盘布局悄悄变成了UK布局。我反复检查Xfce的配置 ``keyboard`` 确实是使用 ``Use system defaults`` :
 
-.. figure::  ../../_static/linux/desktop/xfce_keyboard_layout.png
+.. figure::  ../../../_static/linux/desktop/xfce/xfce_keyboard_layout.png
    :scale: 50
 
 我尝试了使用参考 `debian wiki - keyboard <https://wiki.debian.org/Keyboard>`_ 方法通过 ``setxkbmap us`` 调整，但是只是设置瞬间正常，一会就又变成UK布局。折腾好久，我偶然发现输入法 ``fcitx`` 没有启动时候在Xfce中keyboard layout是正常的，一旦启动 ``fcitx`` 就立即切换成了UK布局。
 
 打开 ``fcitx-config-gtk3`` 我恍然发现，原来 ``fcitx`` 启动时候加载了 ``UK`` 布局键盘作为英文输入:
 
-.. figure::  ../../_static/linux/desktop/fcitx_keyboard.png
+.. figure::  ../../../_static/linux/desktop/xfce/fcitx_keyboard.png
    :scale: 50
 
 解决方法就是删除 ``fcitx`` 输入设置中的UK布局键盘，添加一个US布局键盘。
