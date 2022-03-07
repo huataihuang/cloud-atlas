@@ -14,7 +14,8 @@ Linux桌面
    sway/index
    suckless/index
    i3.rst
-   xfce.rst
+   xfce/index
+   kde/index
    oh_my_zsh.rst
    tmux.rst
    vim/index
