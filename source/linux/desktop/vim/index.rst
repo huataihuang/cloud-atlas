@@ -11,6 +11,7 @@ Vim
 
    install_vim.rst
    install_vim_centos6.rst
+   light_vim.rst
    vim_native_package_loading.rst
    vim_basic.rst
 
