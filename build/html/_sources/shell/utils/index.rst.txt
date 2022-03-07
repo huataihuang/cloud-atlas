@@ -9,6 +9,7 @@ Shell 实用工具
 
    sudo.rst
    screen.rst
+   htop.rst
 
 .. only::  subproject and html
 

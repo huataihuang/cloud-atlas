@@ -22,14 +22,18 @@ SAS和SATA
 
 在HP服务器文档中会经常看到 ``SFF`` 和 ``LFF`` 磁盘，实际上就是 2.5寸和3.5寸磁盘。所谓 ``SFF`` 意思是 small form factor ，即小形状因素，指的是小型化的电脑组件和接口。在服务器相关文档，一般SFF硬盘就是指2.5"硬盘。此外，在网络领域，有专业术语 ``SFP`` 表示 small form-factor pluggable(SFP)，是一种紧凑型，热插拔网络接口模块，通常是光线接口，或者电缆。( `Small form-factor pluggable transceiver <https://en.wikipedia.org/wiki/Small_form-factor_pluggable_transceiver>`_ )
 
-
-
 NVMe和SSD
 =============
 
 SSD即Solid Storage Device（固态存储设备)，是目前主流的存储设备，具有高性能和高稳定性，在台式机、笔记本以及服务器领域都有广泛使用。
 
 NVMe 是 NVM Express (Non-Volatile Memory Express)规范，是访问高速存储介质接口协议，目前已经逐渐替代了传统的 SATA/SAS 接口。NVMe协议可以基本不用修改现有的硬盘(HDD)存储系统，并且对于新型高速存储介质(SSD)，NVMe通过高速的PCIe接口直接访问存储设备。并且NVMe针对多核处理器有优化，因为该协议是 :ref:`numa` 优化协议，允许多个处理器核心共享队列、优先级。
+
+.. note::
+
+   时间来到了2022年，去年我还在纠结到底应该购买大容量传统硬盘还是再多花一点钱购买容量偏小的SSD( :ref:`nvme` )。然而，现实是，磁记录迟迟没有快速发展，反而倒退到不得不混淆 :ref:`hdd_pmr_cmr_smr` 来苟延残喘。
+
+   参考 `论文阅读：大规模企业存储部署中的SSD可靠性 <https://mp.weixin.qq.com/s/eZajvFeNSeyPbo3fi6H3vw>`_ ，从数据中心来看，机械硬盘的故障率已经(10倍)高于SSD，对于性能和性价比来说，可见的未来，大容量存储将是SSD的市场，仅在非常狭窄的领域可能会使用磁记录。
 
 NVMe 接口形状和标准
 -----------------------

@@ -55,6 +55,17 @@ Docker运行环境
 
    sudo apk add gdb strace
 
+安装编辑器构建IDE
+====================
+
+我采用 :ref:`vim` 来构建开发IDE，采用 :ref:`light_vim` 来构建自己的开发环境
+
+最终完整的 ``x-dev`` 完整 Dockerfile:
+
+.. literalinclude:: alpine_dev/alpine_dev
+   :language: dockerfile
+   :caption: alpine构建开发环境的Dockerfile
+
 桌面
 ========
 
