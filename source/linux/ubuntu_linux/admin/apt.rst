@@ -18,6 +18,9 @@ contrib/non-free软件包
 APT代理
 ========
 
+HTTP
+------
+
 在墙内很多软件仓库由于GFW屏蔽，导致系统部署存在很大障碍。主要的解决方法是构建 :ref:`linux_vpn` 结合 :ref:`squid` 代理来翻墙，例如我在部署CentOS/SUSE的系统就采用 :ref:`polipo_proxy_yum` 。
 
 Ubuntu/Debian使用的APT软件包管理也支持代理配置，这里我结合 :ref:`squid_socks_peer` 实现完美翻墙代理。
@@ -33,6 +36,23 @@ Ubuntu/Debian使用的APT软件包管理也支持代理配置，这里我结合 
 修改成::
 
    "http://username:password@yourproxyaddress:proxyport";
+
+上述翻墙方式采用本地运行 :ref:`squid` 代理服务器，所以APT代理设置是 ``http`` 协议，实际在 :ref:`` 采用如下配置::
+
+   Acquire::http::Proxy "http://192.168.6.200:3128/";
+
+SOCKS
+---------
+
+如果是临时或者简化配置，本地不部署 :ref:`squid` 代理也可以，只要简单使用 :ref:`ssh_tunnel` ::
+
+   ssh -D 10080 -C huatai@<remote_server>
+
+然后配置本地APT使用代理 ``/etc/apt/apt.conf.d/proxy.conf`` ::
+
+   Acquire::http::Proxy "socks5h://127.0.0.1:10080";
+   Acquire::https::Proxy "socks5h://127.0.0.1:10080";
+   Acquire::socks::Proxy "socks5h://127.0.0.1:10080";
 
 proxy.conf
 ============

@@ -174,9 +174,88 @@
 </section>
 <section id="id1">
 <h2>使用adb安装应用<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>点击 <code class="docutils literal notranslate"><span class="pre">anbox</span></code> 图标运行，如果一切正常，屏幕闪过以下黑屏，然后在任务栏会有一个最小化隐藏窗口title <code class="docutils literal notranslate"><span class="pre">org.anbox.appmgr</span></code> 由于虚拟机中内部没有任何应用，所以这是正常的</p></li>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">adb</span></code> 检查虚拟机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">deivces</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>应该看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">List</span> <span class="n">of</span> <span class="n">devices</span> <span class="n">attached</span>
+<span class="n">emulator</span><span class="o">-</span><span class="mi">5558</span>   <span class="n">device</span>
+</pre></div>
+</div>
+<ul>
+<li><p>执行安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">install</span> <span class="n">apk</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>安装Android应用</p>
+<p>对于ARM应用，会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">install</span> <span class="n">alilang</span><span class="o">.</span><span class="n">apk</span><span class="p">:</span> <span class="n">Failure</span> <span class="p">[</span><span class="n">INSTALL_FAILED_NO_MATCHING_ABIS</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">extract</span> <span class="n">native</span> <span class="n">libraries</span><span class="p">,</span> <span class="n">res</span><span class="o">=-</span><span class="mi">113</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>这是因为模拟默认只能运行X86的Android应用。解决方法是安装 <code class="docutils literal notranslate"><span class="pre">Google</span> <span class="pre">PlayStore</span></code> 来提供ARM模拟。见下文</p>
+<section id="id2">
+<h3>排查<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h3>
+<ul>
+<li><p>启动 <code class="docutils literal notranslate"><span class="pre">anbox</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我这里遇到报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">07</span> <span class="mi">15</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span><span class="mi">55</span> <span class="p">]</span> <span class="p">[</span><span class="n">launch</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">214</span><span class="nd">@operator</span><span class="p">()]</span> <span class="n">Session</span> <span class="n">manager</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">become</span> <span class="n">ready</span>
+</pre></div>
+</div>
+<p>并立即返回到终端桌面，而桌面系统没有提供任何anbox相关的窗口</p>
+<p>不过， <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">-aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">anbox</span></code> 显示有如下进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root         788  0.0  0.0 379264 11296 ?        Ssl  07:25   0:01 /snap/anbox/186/usr/bin/anbox container-manager --data-path=/var/snap/anbox/common/ --android-image=/snap/anbox/186/android.img --daemon
+huatai      5425 41.2  4.6 3218936 757476 ?      Sl   08:24   0:42 /snap/anbox/186/usr/bin/anbox session-manager
+root        5462  0.0  0.0 385564  7992 ?        Ss   08:24   0:00 [lxc monitor] /var/snap/anbox/common/containers default
+100000      5498  0.0  0.0  16732  4464 pts/0    Sl   08:24   0:00 /system/bin/anboxd
+110000      6209  0.6  0.5 1074124 97096 pts/0   Sl   08:25   0:00 org.anbox.appmgr
+</pre></div>
+</div>
+<p>似乎已经运行起来</p>
+<ul>
+<li><p>重新登录一次桌面，首次登录检查 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">anbox</span></code> 显示有一个 <code class="docutils literal notranslate"><span class="pre">container-manager</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="mi">186</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span> <span class="n">container</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="n">common</span><span class="o">/</span> <span class="o">--</span><span class="n">android</span><span class="o">-</span><span class="n">image</span><span class="o">=/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="mi">186</span><span class="o">/</span><span class="n">android</span><span class="o">.</span><span class="n">img</span> <span class="o">--</span><span class="n">daemon</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>参考 <a class="reference external" href="https://github.com/anbox/anbox/issues/1854">Unable to launch anbox in Ubuntu 21.04 #1854</a> 似乎启动会话要添加一个环境变量 <code class="docutils literal notranslate"><span class="pre">EGL_PLATFORM=x11</span></code></p>
+<p>果然，修订 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/desktop/applications/anbox_appmgr.desktop</span></code> 将:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Exec</span><span class="o">=</span><span class="n">env</span> <span class="n">BAMF_DESKTOP_FILE_HINT</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">snapd</span><span class="o">/</span><span class="n">desktop</span><span class="o">/</span><span class="n">applications</span><span class="o">/</span><span class="n">anbox_appmgr</span><span class="o">.</span><span class="n">desktop</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">%</span><span class="n">U</span>
+</pre></div>
+</div>
+<p>修改成:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Exec</span><span class="o">=</span><span class="n">env</span> <span class="n">EGL_PLATFORM</span><span class="o">=</span><span class="n">x11</span> <span class="n">BAMF_DESKTOP_FILE_HINT</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">snapd</span><span class="o">/</span><span class="n">desktop</span><span class="o">/</span><span class="n">applications</span><span class="o">/</span><span class="n">anbox_appmgr</span><span class="o">.</span><span class="n">desktop</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">%</span><span class="n">U</span>
+</pre></div>
+</div>
+<p>然后点击运行anbox图标，则屏幕闪过之后，不再退出 <code class="docutils literal notranslate"><span class="pre">org.anbox.appmgr</span></code> ，此时在终端执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">devices</span>
+</pre></div>
+</div>
+<p>可以看到模拟设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">List</span> <span class="n">of</span> <span class="n">devices</span> <span class="n">attached</span>
+<span class="n">emulator</span><span class="o">-</span><span class="mi">5558</span>   <span class="n">device</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="google-play-store">
 <h2>安装Google Play Store<a class="headerlink" href="#google-play-store" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>目前尚未解决anbox运行，所以本段落待实践</p>
+</div>
 <p><a class="reference external" href="https://github.com/geeks-r-us/anbox-playstore-installer">geeks-r-us / anbox-playstore-installer</a> 提供了自动安装Google Playstore的脚本</p>
 <ul>
 <li><p>安装依赖工具:</p>
@@ -207,8 +286,8 @@
 </li>
 </ul>
 </section>
-<section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.how2shout.com/linux/how-to-install-anbox-on-ubuntu-20-04-lts-focal-fossa/">How to install Anbox on Ubuntu 20.04 LTS focal fossa</a></p></li>
 </ul>

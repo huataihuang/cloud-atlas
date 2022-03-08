@@ -94,4 +94,8 @@ Android应用
 
 我使用 :ref:`ubuntu_linux` 主要原因就是软件兼容性，特别是针对Ubuntu开发或优化的应用。
 
+代理翻墙
+-------------
 
+- 解决本机翻墙安装应用采用 :ref:`apt` 的SOCKS代理配置方法
+- Firefox提供了直接设置 SOCKS5 代理配置，不过 ``Konqueror`` 暂时没有找到合适方法( 虽然官方文档 `Configuring Konqueror <https://docs.kde.org/trunk5/en/konqueror/konqueror/config.html>`_ 说明可以通过 ``Settings → Configure Konqueror...`` 配置代理，但是我使用Kubuntu的Konqueror未提供该配置项 )
