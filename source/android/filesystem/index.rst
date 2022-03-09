@@ -1,15 +1,13 @@
-.. _golang:
+.. _android_filesystem:
 
 =================================
-Go Atlas
+Android 文件系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   go_on_fedora.rst
-   pi_golang.rst
-   go_startup.rst
+   binderfs.rst
 
 .. only::  subproject and html
 

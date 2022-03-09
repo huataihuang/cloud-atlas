@@ -10,7 +10,9 @@ Docker Moby
    introduce_moby.rst
    nsenter.rst
    macos_docker_shell.rst
-   docker_cgroup_v2.rst
+   docker_20.10.rst
+   fuse-overlayfs.rst
+   docker_cgroup_v2/index
    containerd/index
    runc/index
    buildkit/index

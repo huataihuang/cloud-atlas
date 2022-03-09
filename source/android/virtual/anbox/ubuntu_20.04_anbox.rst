@@ -27,7 +27,11 @@ Ubuntu 20.04 LTS运行Anbox
 使用adb安装应用
 ===============
 
-- 点击 ``anbox`` 图标运行，如果一切正常，屏幕闪过以下黑屏，然后在任务栏会有一个最小化隐藏窗口title ``org.anbox.appmgr`` 由于虚拟机中内部没有任何应用，所以这是正常的
+- 重新登录一次桌面，首次登录检查 ``ps aux | grep anbox`` 显示有一个 ``container-manager`` ::
+
+   /snap/anbox/186/usr/bin/anbox container-manager --data-path=/var/snap/anbox/common/ --android-image=/snap/anbox/186/android.img --daemon
+
+- 点击 ``anbox`` 图标运行(我这里出现一个问题就是窗口不显示内容)
 
 - 执行 ``adb`` 检查虚拟机::
 
@@ -73,28 +77,94 @@ Ubuntu 20.04 LTS运行Anbox
 
 似乎已经运行起来
 
-- 重新登录一次桌面，首次登录检查 ``ps aux | grep anbox`` 显示有一个 ``container-manager`` ::
+参考官方安装文档，发现有一步是安装内核模块，必须确保::
 
-   /snap/anbox/186/usr/bin/anbox container-manager --data-path=/var/snap/anbox/common/ --android-image=/snap/anbox/186/android.img --daemon
+   ls -1 /dev/{ashmem,binder}
 
-参考 `Unable to launch anbox in Ubuntu 21.04 #1854 <https://github.com/anbox/anbox/issues/1854>`_ 似乎启动会话要添加一个环境变量 ``EGL_PLATFORM=x11``
+输出必须有2个内核模块::
 
-果然，修订 ``/var/lib/snapd/desktop/applications/anbox_appmgr.desktop`` 将::
+   /dev/ashmem
+   /dev/binder
 
-   Exec=env BAMF_DESKTOP_FILE_HINT=/var/lib/snapd/desktop/applications/anbox_appmgr.desktop /snap/bin/anbox.appmgr %U
+但是我发现我的系统异常没有 ``binder`` 设备::
 
-修改成::
+   ls: cannot access '/dev/binder': No such file or directory
+   /dev/ashmem
 
-   Exec=env EGL_PLATFORM=x11 BAMF_DESKTOP_FILE_HINT=/var/lib/snapd/desktop/applications/anbox_appmgr.desktop /snap/bin/anbox.appmgr %U
+但是从内核模块来看，已经加载过了::
 
-然后点击运行anbox图标，则屏幕闪过之后，不再退出 ``org.anbox.appmgr`` ，此时在终端执行::
+   lsmod | grep -e ashmem_linux -e binder_linux
 
-   adb devices
+输出显示::
 
-可以看到模拟设备::
+   ashmem_linux           20480  0
+   binder_linux          200704  0
 
-   List of devices attached
-   emulator-5558   device
+参考 `unable to access '/ dev / binder': No such file or directory #20 <https://github.com/anbox/anbox-modules/issues/20>`_ ，原来最新的Anbox已经不再需要静态 ``binder`` 设备，而是默认使用 :ref:`binderfs` 动态分配binder设备。安装 ``edge`` 通道版本就能和 Ubuntu 20.04 一起工作::
+
+   sudo snap install --edge --devmode anbox
+   sudo modprobe ashmem_linux
+
+此外参考 `many: add support for binderfs #1309  <https://github.com/anbox/anbox/pull/1309>`_ :
+
+最新开始使用 binderfs 作为内核文件系统，可以动态分配binder设备。从Ubuntu 19.04 开始Anbox只要系统系统提供binderfs就使用它，只有binderfs不可用的时候，才会使用静态的 ``/dev/binder`` 设备。
+
+.. note::
+
+   `Android Binderfs <https://brauner.github.io/2019/01/09/android-binderfs.html>`_ 介绍了Android Binder是一个进程间通讯(IPC)机制，在所有Android设备中都使用，已经加入到上游Linux内核驱动.
+
+- 挂载 binderfs (可能不需要手工操作)::
+
+   sudo mkdir /dev/binderfs
+   sudo mount -t binder binder /dev/binderfs
+
+这个命令应该能够解决 binder 设备问题
+
+- 使用 ``edge`` 版本的Anbox，运行 ``anbox.appmgr`` 会提示报错::
+
+   [ 2022-03-09 15:09:07 ] [daemon.cpp:61@Run] [org.freedesktop.DBus.Error.ServiceUnknown] The name org.anbox was not provided by any .service files
+
+这个问题参考 `The name org.anbox was not provided by any .service files #1889 <https://github.com/anbox/anbox/issues/1889>`_ 起其中提到 `Fuseteam / systemd-service-files <https://github.com/fuseteam/systemd-service-files>`_ 创建使用 ``EGL_PLATFORM=x11`` 参数来启动 systemd service 文件。不过，实际上系统有一个 ``snap.anbox.container-manager.service`` 已经激活启动
+
+当前我已经找到了如何激活 ``binderfs`` (见上文手工mount方法)，按照文档说明，就是要启动 ``snap.anbox.container-manager.service`` 如何传递进去 ``EGL_PLATFORM=x11`` 变量。
+
+检查 ``/etc/systemd/system/snap.anbox.container-manager.service`` 文件可以看到，这个服务启动时会使用 ``/etc/environment`` 配置::
+
+   ...
+   [Service]
+   EnvironmentFile=-/etc/environment
+   ...
+
+所以我在 ``/etc/environment`` 加上一行::
+
+   EGL_PLATFORM=x11
+
+然后重启操作系统，打开终端查看::
+   
+   env | grep EGL
+
+可以看到环境变量已经生效::
+
+   EGL_PLATFORM=x11
+
+上述方法取保了 ``snap.anbox.container-manager.service`` 也是使用了这个环境变量。
+
+再次运行::
+
+   anbox.appmgr
+
+此时虽然还出现报错信息::
+
+   [ 2022-03-09 15:48:17 ] [application_manager_client.cpp:38@TryLaunch] Failed to launch activity: [org.freedesktop.DBus.Error.Timeout] Connection timed out
+
+但是却能够正常看到Andorid界面了
+
+安装内核模块
+-------------
+
+要支持Android容器的mandatory内核子系统 ``ashmem`` 和 ``binder`` ，需要安装2个DKMS内核模块，内核源代码是由Anbox项目维护的。从 Ubuntu 19.04 开始，标准发行版(内核>=5.0)已经包含了 ``binder`` 和 ``ashmem`` ，所以不再需要从第三方PPA安装了。
+
+不过，我发现 :ref:`kubuntu` 没有提供 ``anbox-modules-dkms`` ，但是官方文档中所引用的 ``ppa:morphis/anbox-support`` 已经太陈旧了，无法使用。参考上文，现在应该直接使用 ``binderfs`` 。
 
 安装Google Play Store
 =======================
@@ -129,4 +199,5 @@ Ubuntu 20.04 LTS运行Anbox
 参考
 ======
 
+- `Install Anbox <https://docs.anbox.io/userguide/install.html>`_ 官方文档，以此为基础
 - `How to install Anbox on Ubuntu 20.04 LTS focal fossa <https://www.how2shout.com/linux/how-to-install-anbox-on-ubuntu-20-04-lts-focal-fossa/>`_

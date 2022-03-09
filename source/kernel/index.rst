@@ -16,7 +16,7 @@ Kernel Atlas
    flame_graph.rst
    kms.rst
    filesystem/index
-   bpf/index
+   ebpf/index
    perf/index
    admin/index
    memory/index

@@ -1,15 +1,13 @@
-.. _golang:
+.. _trivy:
 
 =================================
-Go Atlas
+Trivy - 容器漏洞和误配置扫描器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   go_on_fedora.rst
-   pi_golang.rst
-   go_startup.rst
+   intro_trivy.rst
 
 .. only::  subproject and html
 
