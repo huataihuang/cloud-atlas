@@ -75,6 +75,22 @@ diskless模式更新内核
 
    update-kernel /media/sdXY/boot/
 
+添加软件包
+=============
+
+使用 ``add`` 可以从软件仓库安装一个软件包，所有依赖的软件包也会同时安装。如果有多个仓库，则 ``add`` 命令会安装最新的 软件包::
+
+   apk add openssh
+   apk add openssh openntp vim
+
+默认只使用 ``main`` 仓库，软件是非常核心的，通常会同时激活 ``community`` 仓库，见上文。
+
+如果只是想从 ``edge/testing`` 仓库安装一个软件包，但是不修改软件仓库配置，可以使用如下命令::
+
+   apk add cfssl --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+
+这里仓库名见上文repo配置。这里案例是 :ref:`alpine_cfssl`
+
 基础软件安装
 ==================
 
@@ -86,6 +102,7 @@ diskless模式更新内核
    apk add lsblk cfdisk e2fsprogs
    # lspci等维护工具
    apk add pciutils
+
 
 参考
 ========

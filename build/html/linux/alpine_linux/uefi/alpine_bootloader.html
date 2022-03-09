@@ -188,10 +188,51 @@
 <li><p>Grub</p></li>
 <li><p>EFI Boot Stub</p></li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>其实系统不使用bootloader也能启动，实际上 alpine linux 默认没有安装 bootloader (类似 <a class="reference internal" href="../../../arm/raspberry_pi/startup/raspberry_pi_os.html#raspberry-pi-os"><span class="std std-ref">Raspbery Pi OS(Raspbian)</span></a> )，见下文。</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
-<p>本文实践在后续我 <a class="reference internal" href="alpine_convert_bios_uefi.html#alpine-convert-bios-uefi"><span class="std std-ref">Alpine Linux转换BIOS到UEFI</span></a> 时再整理</p>
+<p>我在 <a class="reference internal" href="../alpine_install_pi_usb_boot.html#alpine-install-pi-usb-boot"><span class="std std-ref">树莓派环境安装Alpine Linux到USB磁盘启动</span></a> 还没有意识到 <a class="reference internal" href="../../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> 默认firmware使用的是传统的BIOS模式，这导致不能满足服务器架构的ARM <a class="reference external" href="https://developer.arm.com/architectures/platform-design/server-systems#faq3">SBBR</a> ，出现 <a class="reference internal" href="../openrc/pi_acpid_crashed.html#pi-acpid-crashed"><span class="std std-ref">排查树莓派OpenRC:acpid crashed</span></a> 现象。解决的方法是需要转换成 <a class="reference internal" href="../../../arm/raspberry_pi/uefi/pi_uefi_acpi.html#pi-uefi-acpi"><span class="std std-ref">树莓派UEFI+ACPI</span></a> 。</p>
+<p>本文将分析 <a class="reference internal" href="../index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> 所使用的不同Bootloader，为后续转换UEFI做准备。此外， <a class="reference internal" href="../alpine_docker.html#alpine-docker"><span class="std std-ref">Alpine Linux运行Docker</span></a> 需要修订内核参数，也需要深入了解Bootloader。</p>
 </div>
+<section id="refind">
+<h2>rEFInd<a class="headerlink" href="#refind" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rEFInd</span></code> 提供了一个图形化方式EFI启动菜单，并且可以允许启动到能够找到的分区上的操作系统。我最早在MacBook安装多操作系统启动(macOS + Linux)时使用过这个工具，确实对于MacBook上切换操作系统比较方便。</p>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">refind</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">refind</span>  <span class="c1"># 在debian/Ubuntu上安装refind</span>
+<span class="n">refind</span><span class="o">-</span><span class="n">install</span> <span class="o">--</span><span class="n">alldrivers</span>  <span class="c1"># 将refind安装到EFI分区，此时 --alldrivers 参数会为多个分区的操作系统准备启动项</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在 <code class="docutils literal notranslate"><span class="pre">/mdeia/sdXY</span></code> (假设这是EFI分区)的配种加上默认启动Alpine:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s1">&#39;&quot;Alpine&quot; &quot;modules=loop,squashfs,sd-mod,usb-storage quiet initrd=</span><span class="se">\b</span><span class="s1">oot\intel-ucode.img initrd=</span><span class="se">\b</span><span class="s1">oot</span><span class="se">\a</span><span class="s1">md-ucode.img initrd=</span><span class="se">\b</span><span class="s1">oot\initramfs-lts&quot;&#39;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">sdXY</span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">refind_linux</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+</section>
+<section id="alpinebootloader">
+<span id="alpine-without-bootloader"></span><h2>alpine不使用bootloader<a class="headerlink" href="#alpinebootloader" title="永久链接至标题">¶</a></h2>
+<p>我仔细检查了  <a class="reference internal" href="../alpine_install_pi_usb_boot.html#alpine-install-pi-usb-boot"><span class="std std-ref">树莓派环境安装Alpine Linux到USB磁盘启动</span></a> 的系统，发现并默认并没有安装上述4种bootloader中的任何一个。但是系统只要设置了 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 是启动分区(并挂载到 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> )就能够启动。</p>
+<p>内核启动参数是通过 <code class="docutils literal notranslate"><span class="pre">/media/sda1</span></code> (启动分区)的根目录下 <code class="docutils literal notranslate"><span class="pre">cmdline.txt</span></code> 配置的:</p>
+<p>我是怎么看出来的呢？</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/cmdline</span></code> 的内容是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coherent_pool</span><span class="o">=</span><span class="mi">1</span><span class="n">M</span> <span class="mf">8250.</span><span class="n">nr_uarts</span><span class="o">=</span><span class="mi">0</span> <span class="n">snd_bcm2835</span><span class="o">.</span><span class="n">enable_compat_alsa</span><span class="o">=</span><span class="mi">0</span> <span class="n">snd_bcm2835</span><span class="o">.</span><span class="n">enable_hdmi</span><span class="o">=</span><span class="mi">1</span> <span class="n">bcm2708_fb</span><span class="o">.</span><span class="n">fbwidth</span><span class="o">=</span><span class="mi">0</span> <span class="n">bcm2708_fb</span><span class="o">.</span><span class="n">fbheight</span><span class="o">=</span><span class="mi">0</span> <span class="n">bcm2708_fb</span><span class="o">.</span><span class="n">fbswap</span><span class="o">=</span><span class="mi">1</span> <span class="n">smsc95xx</span><span class="o">.</span><span class="n">macaddr</span><span class="o">=</span><span class="n">DC</span><span class="p">:</span><span class="n">A6</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="n">C5</span><span class="p">:</span><span class="mi">48</span><span class="p">:</span><span class="mi">9</span><span class="n">C</span> <span class="n">vc_mem</span><span class="o">.</span><span class="n">mem_base</span><span class="o">=</span><span class="mh">0x3eb00000</span> <span class="n">vc_mem</span><span class="o">.</span><span class="n">mem_size</span><span class="o">=</span><span class="mh">0x3ff00000</span>  <span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/media/sda1/cmdline.txt</span></code> 内容是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到上述 <code class="docutils literal notranslate"><span class="pre">/media/sda1/cmdline.txt</span></code> 内容就是内核参数的最后一部分，所以在 <a class="reference internal" href="../alpine_docker.html#alpine-docker"><span class="std std-ref">Alpine Linux运行Docker</span></a> 中配置内核参数需要修订的是 <code class="docutils literal notranslate"><span class="pre">/media/sda1/cmdline.txt</span></code> 而不是 <code class="docutils literal notranslate"><span class="pre">/media/sda1/boot/cmdline.txt</span></code> (是 <code class="docutils literal notranslate"><span class="pre">/boot</span></code> 软连接到 <code class="docutils literal notranslate"><span class="pre">/media/sda1/boot</span></code> )。</p>
+<p>这块内容和我之前在 <a class="reference internal" href="../alpine_install_pi_usb_boot.html#alpine-install-pi-usb-boot"><span class="std std-ref">树莓派环境安装Alpine Linux到USB磁盘启动</span></a> 操作有关，我感觉当时没有仔细检查 <code class="docutils literal notranslate"><span class="pre">添加</span> <span class="pre">sda2</span> <span class="pre">分区作为系统分区</span></code> 操作时的分区内容。有待后续再次实践时验证。</p>
+</section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">

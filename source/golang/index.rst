@@ -9,6 +9,7 @@ Go Atlas
 
    go_on_fedora.rst
    pi_golang.rst
+   go_startup.rst
 
 .. only::  subproject and html
 

@@ -80,6 +80,15 @@ squid转发配置实例
    :linenos:
    :caption: squid_liberty.conf - 添加到 /etc/squid/squid.conf
 
+不足之处
+===========
+
+- 由于YouTube的视频内容有特别安全设置 `Caching YouTube Content <https://wiki.squid-cache.org/ConfigExamples/DynamicContent/YouTube>`_ 似乎无法实现
+
+  - 只能浏览YouTube网站，但是无法播放视频
+  - `mikenye/youtube-dl <https://github.com/mikenye/docker-youtube-dl>`_ 提供了下载YouTube订阅视频的方法，不过我没有实践过
+  - 比较好的实现方法应该是使用 `youtube-dl <https://youtube-dl.org>`_ 编写定制工具来自己下载YouTube视频
+
 参考
 =======
 

@@ -85,6 +85,8 @@
 
    我暂时不调整，采用默认设置，看看能否顺利运行kubernetes
 
+   `Docker Engine 20.10 Released: Supports cgroups v2 and Dual Logging <https://www.infoq.com/news/2021/01/docker-engine-cgroups-logging/>`_ 详细功能请参考 :ref:`docker_20.10`
+
 激活cgroups limit支持
 -------------------------
 

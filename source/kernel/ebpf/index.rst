@@ -1,13 +1,13 @@
-.. _bpf:
+.. _ebpf:
 
 ===============================
-Linux BPF
+eBPF
 ===============================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_ebpf.rst
+   intro_ebpf.rst
 
 .. only::  subproject and html
 

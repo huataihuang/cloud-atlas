@@ -10,6 +10,7 @@ Docker Atlas
    startup/index
    docker_in_docker/index
    images/index
+   rootless/index
    moby/index
    config/index
    linuxserver/index
@@ -21,6 +22,7 @@ Docker Atlas
    gpu/index
    logs/index
    gui/index
+   security/index
 
 .. only::  subproject and html
 

@@ -54,4 +54,22 @@ Hello, World!
    mkdir hello_world
    cd hello_world
 
-- 最简单的Rust程序
+- 最简单的Rust程序:
+
+.. literalinclude:: rust_startup/main.rs
+   :language: rust
+   :caption: Rust Hello World
+
+- 然后执行以下命令编译和运行::
+
+   rustc main.rs
+   ./main
+
+输出显示::
+
+   Hello, world!
+
+参考
+=======
+
+- 「Rust权威指南」

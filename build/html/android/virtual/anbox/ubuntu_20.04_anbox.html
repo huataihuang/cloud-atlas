@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Bliss ROMs / Bliss OS" href="../../bliss/index.html" />
+    <link rel="next" title="Android 文件系统" href="../../filesystem/index.html" />
     <link rel="prev" title="Kali Linux ARM环境运行Anbox" href="anbox_kali_arm.html" /> 
 </head>
 
@@ -100,6 +100,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../filesystem/index.html">Android 文件系统</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../bliss/index.html">Bliss ROMs / Bliss OS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../develop/index.html">Android 开发</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../apps/index.html">Android 应用</a></li>
@@ -175,7 +176,12 @@
 <section id="id1">
 <h2>使用adb安装应用<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul>
-<li><p>点击 <code class="docutils literal notranslate"><span class="pre">anbox</span></code> 图标运行，如果一切正常，屏幕闪过以下黑屏，然后在任务栏会有一个最小化隐藏窗口title <code class="docutils literal notranslate"><span class="pre">org.anbox.appmgr</span></code> 由于虚拟机中内部没有任何应用，所以这是正常的</p></li>
+<li><p>重新登录一次桌面，首次登录检查 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">anbox</span></code> 显示有一个 <code class="docutils literal notranslate"><span class="pre">container-manager</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="mi">186</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span> <span class="n">container</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="n">common</span><span class="o">/</span> <span class="o">--</span><span class="n">android</span><span class="o">-</span><span class="n">image</span><span class="o">=/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="mi">186</span><span class="o">/</span><span class="n">android</span><span class="o">.</span><span class="n">img</span> <span class="o">--</span><span class="n">daemon</span>
+</pre></div>
+</div>
+</li>
+<li><p>点击 <code class="docutils literal notranslate"><span class="pre">anbox</span></code> 图标运行(我这里出现一个问题就是窗口不显示内容)</p></li>
 <li><p>执行 <code class="docutils literal notranslate"><span class="pre">adb</span></code> 检查虚拟机:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">deivces</span>
 </pre></div>
@@ -223,31 +229,92 @@ root        5462  0.0  0.0 385564  7992 ?        Ss   08:24   0:00 [lxc monitor]
 </pre></div>
 </div>
 <p>似乎已经运行起来</p>
+<p>参考官方安装文档，发现有一步是安装内核模块，必须确保:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ls</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="p">{</span><span class="n">ashmem</span><span class="p">,</span><span class="n">binder</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>输出必须有2个内核模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">ashmem</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">binder</span>
+</pre></div>
+</div>
+<p>但是我发现我的系统异常没有 <code class="docutils literal notranslate"><span class="pre">binder</span></code> 设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ls</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">access</span> <span class="s1">&#39;/dev/binder&#39;</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">ashmem</span>
+</pre></div>
+</div>
+<p>但是从内核模块来看，已经加载过了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsmod</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">e</span> <span class="n">ashmem_linux</span> <span class="o">-</span><span class="n">e</span> <span class="n">binder_linux</span>
+</pre></div>
+</div>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ashmem_linux</span>           <span class="mi">20480</span>  <span class="mi">0</span>
+<span class="n">binder_linux</span>          <span class="mi">200704</span>  <span class="mi">0</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://github.com/anbox/anbox-modules/issues/20">unable to access ‘/ dev / binder’: No such file or directory #20</a> ，原来最新的Anbox已经不再需要静态 <code class="docutils literal notranslate"><span class="pre">binder</span></code> 设备，而是默认使用 <a class="reference internal" href="../../filesystem/binderfs.html#binderfs"><span class="std std-ref">binderfs文件系统</span></a> 动态分配binder设备。安装 <code class="docutils literal notranslate"><span class="pre">edge</span></code> 通道版本就能和 Ubuntu 20.04 一起工作:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">snap</span> <span class="n">install</span> <span class="o">--</span><span class="n">edge</span> <span class="o">--</span><span class="n">devmode</span> <span class="n">anbox</span>
+<span class="n">sudo</span> <span class="n">modprobe</span> <span class="n">ashmem_linux</span>
+</pre></div>
+</div>
+<p>此外参考 <a class="reference external" href="https://github.com/anbox/anbox/pull/1309">many: add support for binderfs #1309</a> :</p>
+<p>最新开始使用 binderfs 作为内核文件系统，可以动态分配binder设备。从Ubuntu 19.04 开始Anbox只要系统系统提供binderfs就使用它，只有binderfs不可用的时候，才会使用静态的 <code class="docutils literal notranslate"><span class="pre">/dev/binder</span></code> 设备。</p>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://brauner.github.io/2019/01/09/android-binderfs.html">Android Binderfs</a> 介绍了Android Binder是一个进程间通讯(IPC)机制，在所有Android设备中都使用，已经加入到上游Linux内核驱动.</p>
+</div>
 <ul>
-<li><p>重新登录一次桌面，首次登录检查 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">anbox</span></code> 显示有一个 <code class="docutils literal notranslate"><span class="pre">container-manager</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="mi">186</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span> <span class="n">container</span><span class="o">-</span><span class="n">manager</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="n">common</span><span class="o">/</span> <span class="o">--</span><span class="n">android</span><span class="o">-</span><span class="n">image</span><span class="o">=/</span><span class="n">snap</span><span class="o">/</span><span class="n">anbox</span><span class="o">/</span><span class="mi">186</span><span class="o">/</span><span class="n">android</span><span class="o">.</span><span class="n">img</span> <span class="o">--</span><span class="n">daemon</span>
+<li><p>挂载 binderfs (可能不需要手工操作):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">binderfs</span>
+<span class="n">sudo</span> <span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">binder</span> <span class="n">binder</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">binderfs</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>参考 <a class="reference external" href="https://github.com/anbox/anbox/issues/1854">Unable to launch anbox in Ubuntu 21.04 #1854</a> 似乎启动会话要添加一个环境变量 <code class="docutils literal notranslate"><span class="pre">EGL_PLATFORM=x11</span></code></p>
-<p>果然，修订 <code class="docutils literal notranslate"><span class="pre">/var/lib/snapd/desktop/applications/anbox_appmgr.desktop</span></code> 将:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Exec</span><span class="o">=</span><span class="n">env</span> <span class="n">BAMF_DESKTOP_FILE_HINT</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">snapd</span><span class="o">/</span><span class="n">desktop</span><span class="o">/</span><span class="n">applications</span><span class="o">/</span><span class="n">anbox_appmgr</span><span class="o">.</span><span class="n">desktop</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">%</span><span class="n">U</span>
+<p>这个命令应该能够解决 binder 设备问题</p>
+<ul>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">edge</span></code> 版本的Anbox，运行 <code class="docutils literal notranslate"><span class="pre">anbox.appmgr</span></code> 会提示报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">09</span> <span class="mi">15</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mi">07</span> <span class="p">]</span> <span class="p">[</span><span class="n">daemon</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">61</span><span class="nd">@Run</span><span class="p">]</span> <span class="p">[</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">DBus</span><span class="o">.</span><span class="n">Error</span><span class="o">.</span><span class="n">ServiceUnknown</span><span class="p">]</span> <span class="n">The</span> <span class="n">name</span> <span class="n">org</span><span class="o">.</span><span class="n">anbox</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">provided</span> <span class="n">by</span> <span class="nb">any</span> <span class="o">.</span><span class="n">service</span> <span class="n">files</span>
 </pre></div>
 </div>
-<p>修改成:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Exec</span><span class="o">=</span><span class="n">env</span> <span class="n">EGL_PLATFORM</span><span class="o">=</span><span class="n">x11</span> <span class="n">BAMF_DESKTOP_FILE_HINT</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">snapd</span><span class="o">/</span><span class="n">desktop</span><span class="o">/</span><span class="n">applications</span><span class="o">/</span><span class="n">anbox_appmgr</span><span class="o">.</span><span class="n">desktop</span> <span class="o">/</span><span class="n">snap</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span> <span class="o">%</span><span class="n">U</span>
+</li>
+</ul>
+<p>这个问题参考 <a class="reference external" href="https://github.com/anbox/anbox/issues/1889">The name org.anbox was not provided by any .service files #1889</a> 起其中提到 <a class="reference external" href="https://github.com/fuseteam/systemd-service-files">Fuseteam / systemd-service-files</a> 创建使用 <code class="docutils literal notranslate"><span class="pre">EGL_PLATFORM=x11</span></code> 参数来启动 systemd service 文件。不过，实际上系统有一个 <code class="docutils literal notranslate"><span class="pre">snap.anbox.container-manager.service</span></code> 已经激活启动</p>
+<p>当前我已经找到了如何激活 <code class="docutils literal notranslate"><span class="pre">binderfs</span></code> (见上文手工mount方法)，按照文档说明，就是要启动 <code class="docutils literal notranslate"><span class="pre">snap.anbox.container-manager.service</span></code> 如何传递进去 <code class="docutils literal notranslate"><span class="pre">EGL_PLATFORM=x11</span></code> 变量。</p>
+<p>检查 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/snap.anbox.container-manager.service</span></code> 文件可以看到，这个服务启动时会使用 <code class="docutils literal notranslate"><span class="pre">/etc/environment</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="p">[</span><span class="n">Service</span><span class="p">]</span>
+<span class="n">EnvironmentFile</span><span class="o">=-/</span><span class="n">etc</span><span class="o">/</span><span class="n">environment</span>
+<span class="o">...</span>
 </pre></div>
 </div>
-<p>然后点击运行anbox图标，则屏幕闪过之后，不再退出 <code class="docutils literal notranslate"><span class="pre">org.anbox.appmgr</span></code> ，此时在终端执行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">devices</span>
+<p>所以我在 <code class="docutils literal notranslate"><span class="pre">/etc/environment</span></code> 加上一行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EGL_PLATFORM</span><span class="o">=</span><span class="n">x11</span>
 </pre></div>
 </div>
-<p>可以看到模拟设备:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">List</span> <span class="n">of</span> <span class="n">devices</span> <span class="n">attached</span>
-<span class="n">emulator</span><span class="o">-</span><span class="mi">5558</span>   <span class="n">device</span>
+<p>然后重启操作系统，打开终端查看:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">EGL</span>
 </pre></div>
 </div>
+<p>可以看到环境变量已经生效:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EGL_PLATFORM</span><span class="o">=</span><span class="n">x11</span>
+</pre></div>
+</div>
+<p>上述方法取保了 <code class="docutils literal notranslate"><span class="pre">snap.anbox.container-manager.service</span></code> 也是使用了这个环境变量。</p>
+<p>再次运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anbox</span><span class="o">.</span><span class="n">appmgr</span>
+</pre></div>
+</div>
+<p>此时虽然还出现报错信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">09</span> <span class="mi">15</span><span class="p">:</span><span class="mi">48</span><span class="p">:</span><span class="mi">17</span> <span class="p">]</span> <span class="p">[</span><span class="n">application_manager_client</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">38</span><span class="nd">@TryLaunch</span><span class="p">]</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">launch</span> <span class="n">activity</span><span class="p">:</span> <span class="p">[</span><span class="n">org</span><span class="o">.</span><span class="n">freedesktop</span><span class="o">.</span><span class="n">DBus</span><span class="o">.</span><span class="n">Error</span><span class="o">.</span><span class="n">Timeout</span><span class="p">]</span> <span class="n">Connection</span> <span class="n">timed</span> <span class="n">out</span>
+</pre></div>
+</div>
+<p>但是却能够正常看到Andorid界面了</p>
+</section>
+<section id="id3">
+<h3>安装内核模块<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
+<p>要支持Android容器的mandatory内核子系统 <code class="docutils literal notranslate"><span class="pre">ashmem</span></code> 和 <code class="docutils literal notranslate"><span class="pre">binder</span></code> ，需要安装2个DKMS内核模块，内核源代码是由Anbox项目维护的。从 Ubuntu 19.04 开始，标准发行版(内核&gt;=5.0)已经包含了 <code class="docutils literal notranslate"><span class="pre">binder</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ashmem</span></code> ，所以不再需要从第三方PPA安装了。</p>
+<p>不过，我发现 <a class="reference internal" href="../../../linux/desktop/kde/kubuntu.html#kubuntu"><span class="std std-ref">Kubuntu - Ubuntu的KDE桌面发行版</span></a> 没有提供 <code class="docutils literal notranslate"><span class="pre">anbox-modules-dkms</span></code> ，但是官方文档中所引用的 <code class="docutils literal notranslate"><span class="pre">ppa:morphis/anbox-support</span></code> 已经太陈旧了，无法使用。参考上文，现在应该直接使用 <code class="docutils literal notranslate"><span class="pre">binderfs</span></code> 。</p>
 </section>
 </section>
 <section id="google-play-store">
@@ -286,9 +353,10 @@ root        5462  0.0  0.0 385564  7992 ?        Ss   08:24   0:00 [lxc monitor]
 </li>
 </ul>
 </section>
-<section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference external" href="https://docs.anbox.io/userguide/install.html">Install Anbox</a> 官方文档，以此为基础</p></li>
 <li><p><a class="reference external" href="https://www.how2shout.com/linux/how-to-install-anbox-on-ubuntu-20-04-lts-focal-fossa/">How to install Anbox on Ubuntu 20.04 LTS focal fossa</a></p></li>
 </ul>
 </section>
@@ -299,7 +367,7 @@ root        5462  0.0  0.0 385564  7992 ?        Ss   08:24   0:00 [lxc monitor]
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="anbox_kali_arm.html" class="btn btn-neutral float-left" title="Kali Linux ARM环境运行Anbox" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../bliss/index.html" class="btn btn-neutral float-right" title="Bliss ROMs / Bliss OS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../../filesystem/index.html" class="btn btn-neutral float-right" title="Android 文件系统" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

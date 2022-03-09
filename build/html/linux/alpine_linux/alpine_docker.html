@@ -107,6 +107,8 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Alpine Linux运行Docker</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">安装</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">隔离容器</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alpinedocker">alpine的Docker容器资源限制配置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blkio">blkio 资源限制报错</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
@@ -240,6 +242,27 @@ echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 &gt;&gt; /etc
 </pre></div>
 </div>
 <p>详细的配置参数参考 <a class="reference external" href="https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file">Docker docs Reference / Command-line reference / Daemon CLI(dockerd) Daemon configuration file</a></p>
+<p>我实际采用配置:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">alpine 运行docker的 /etc/docker/daemon.json</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">&quot;userns-remap&quot;</span><span class="p">:</span> <span class="nt">&quot;dockremap&quot;</span>
+  <span class="nt">&quot;experimental&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="nt">&quot;live-restore&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="nt">&quot;ipv6&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="nt">&quot;icc&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="nt">&quot;no-new-privileges&quot;</span><span class="p">:</span> <span class="kc">false</span>
+  <span class="nt">&quot;log-driver&quot;</span><span class="p">:</span> <span class="s2">&quot;json-file&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;log-opts&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;max-size&quot;</span><span class="p">:</span> <span class="s2">&quot;100m&quot;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="alpinedocker">
+<h2>alpine的Docker容器资源限制配置<a class="headerlink" href="#alpinedocker" title="永久链接至标题">¶</a></h2>
 <ul>
 <li><p>执行 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 检查配置，可能会看到:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="p">:</span> <span class="n">No</span> <span class="n">memory</span> <span class="n">limit</span> <span class="n">support</span>
@@ -250,12 +273,66 @@ echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 &gt;&gt; /etc
 </div>
 </li>
 </ul>
+<p>这个问题在 <a class="reference external" href="https://gist.github.com/ruanbekker/fcc906bdcb2fed5937f7ce73a97e1001">ruanbekker/k3s_on_alpine.md</a> 提供了处理方法</p>
+<p>此外，之前我在 <a class="reference internal" href="../../kubernetes/arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 也遇到同样问题，处理方法请参考该文档。不过在 <a class="reference internal" href="../../kubernetes/arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 采用了 <a class="reference internal" href="../redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 所支持的 <a class="reference internal" href="../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> : <a class="reference external" href="https://www.infoq.com/news/2021/01/docker-engine-cgroups-logging/">Docker Engine 20.10 Released: Supports cgroups v2 and Dual Logging</a></p>
+<ul>
+<li><p>执行cgroup的fs挂载配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;cgroup /sys/fs/cgroup cgroup defaults 0 0&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
+</pre></div>
+</div>
+</li>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/cgconfig.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">cgconfig</span><span class="o">.</span><span class="n">conf</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
+<span class="n">mount</span> <span class="p">{</span>
+  <span class="n">cpuacct</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpuacct</span><span class="p">;</span>
+  <span class="n">memory</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">memory</span><span class="p">;</span>
+  <span class="n">devices</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">devices</span><span class="p">;</span>
+  <span class="n">freezer</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">freezer</span><span class="p">;</span>
+  <span class="n">net_cls</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">net_cls</span><span class="p">;</span>
+  <span class="n">blkio</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">blkio</span><span class="p">;</span>
+  <span class="n">cpuset</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpuset</span><span class="p">;</span>
+  <span class="n">cpu</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpu</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+</li>
+<li><p>如果系统使用 <a class="reference internal" href="uefi/alpine_bootloader.html#alpine-bootloader"><span class="std std-ref">Alpine Linux Bootloader</span></a> <code class="docutils literal notranslate"><span class="pre">Syslinux</span></code> (名字是 <code class="docutils literal notranslate"><span class="pre">extlinux</span></code> ) 则修订内核参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/default_kernel_opts=&quot;pax_nouderef quiet rootfstype=ext4&quot;/default_kernel_opts=&quot;pax_nouderef quiet rootfstype=ext4 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory&quot;/g&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">update</span><span class="o">-</span><span class="n">extlinux</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>我的系统没有找到 <code class="docutils literal notranslate"><span class="pre">/etc/update-extlinux.conf</span></code> ，仔细核对之后我发现实际上默认安装 <a class="reference internal" href="uefi/alpine_bootloader.html#alpine-without-bootloader"><span class="std std-ref">alpine不使用bootloader</span></a></p>
+</div>
+<p>不过，我的 <a class="reference internal" href="alpine_install_pi_usb_boot.html#alpine-install-pi-usb-boot"><span class="std std-ref">树莓派环境安装Alpine Linux到USB磁盘启动</span></a> 没有使用bootloader，所以直接修订 <code class="docutils literal notranslate"><span class="pre">/media/sda1/cmdline.txt</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cgroup_enable</span><span class="o">=</span><span class="n">cpuset</span> <span class="n">cgroup_memory</span><span class="o">=</span><span class="mi">1</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">memory</span>
+</pre></div>
+</div>
 <p>完整配置如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">cpuset</span> <span class="n">cgroup_memory</span><span class="o">=</span><span class="mi">1</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">memory</span>
+</pre></div>
+</div>
+<p>然后重启系统，然后再次执行 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 就不会出现上述报错</p>
+</section>
+<section id="blkio">
+<h2>blkio 资源限制报错<a class="headerlink" href="#blkio" title="永久链接至标题">¶</a></h2>
+<p>我在 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_3.html#pi-3"><span class="std std-ref">树莓派Raspberry Pi 3</span></a> 上使用 TF卡作为存储，同样的安装和部署，发现 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">info</span></code> 有如下WARNING:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="p">:</span> <span class="n">No</span> <span class="n">blkio</span> <span class="n">throttle</span><span class="o">.</span><span class="n">read_bps_device</span> <span class="n">support</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">No</span> <span class="n">blkio</span> <span class="n">throttle</span><span class="o">.</span><span class="n">write_bps_device</span> <span class="n">support</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">No</span> <span class="n">blkio</span> <span class="n">throttle</span><span class="o">.</span><span class="n">read_iops_device</span> <span class="n">support</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">No</span> <span class="n">blkio</span> <span class="n">throttle</span><span class="o">.</span><span class="n">write_iops_device</span> <span class="n">support</span>
+</pre></div>
+</div>
+<p>由于 <a class="reference internal" href="#alpine-docker"><span class="std std-ref">Alpine Linux运行Docker</span></a> 使用的是 <a class="reference internal" href="../../docker/moby/docker_cgroup_v2.html#docker-20-10"><span class="std std-ref">Docker 20.10</span></a> ，支持 <a class="reference internal" href="../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> ，我在想是否可以通过转换操作系统 cgroup v1 到 v2 来解决这个问题？</p>
 </section>
 <section id="id3">
 <h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.alpinelinux.org/wiki/Docker">alpine linux wiki: Docker</a></p></li>
+<li><p><a class="reference external" href="https://gist.github.com/ruanbekker/fcc906bdcb2fed5937f7ce73a97e1001">ruanbekker/k3s_on_alpine.md</a></p></li>
 </ul>
 </section>
 </section>

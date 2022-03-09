@@ -55,16 +55,28 @@ Docker运行环境
 
    sudo apk add gdb strace
 
+golang
+---------
+
+- 通过仓库安装golang::
+
+   sudo apk add go
+
+参考 :ref:`go_startup` 验证
+
+rust
+-----------
+
+- 通过仓库安装rust::
+
+   sudo apk add rust
+
+参考 :ref:`rust_startup` 验证
+
 安装编辑器构建IDE
 ====================
 
 我采用 :ref:`vim` 来构建开发IDE，采用 :ref:`light_vim` 来构建自己的开发环境
-
-最终完整的 ``x-dev`` 完整 Dockerfile:
-
-.. literalinclude:: alpine_dev/alpine_dev
-   :language: dockerfile
-   :caption: alpine构建开发环境的Dockerfile
 
 桌面
 ========
@@ -81,6 +93,12 @@ Docker运行环境
 =========
 
 经过验证后，可以将上述步骤添加到 Alpine Linux 的Dockerfile，以便后续重新构建开发环境，并一步步打磨完善:
+
+最终完整的 ``x-dev`` 完整 Dockerfile:
+
+.. literalinclude:: alpine_dev/alpine_dev
+   :language: dockerfile
+   :caption: alpine构建开发环境的Dockerfile
 
 参考
 =======
