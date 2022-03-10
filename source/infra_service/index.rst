@@ -20,6 +20,7 @@ Infra-Service Atlas
 
    ntp/index
    dns/index
+   tls/index
    ssh/index
    samba/index
    nfs/index

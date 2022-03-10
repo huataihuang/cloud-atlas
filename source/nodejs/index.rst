@@ -13,6 +13,7 @@ Node.js Atlas
    koa/index
    egg/index
    ghost_cms/index
+   deploy/index
 
 
 .. only::  subproject and html

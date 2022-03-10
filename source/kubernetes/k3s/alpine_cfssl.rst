@@ -11,14 +11,15 @@ Alpine Linux环境安装cfssl
 
 - 采用 :ref:`alpine_dev` 的Dockerfile配置:
 
-.. literalinclude:: ../../linux/alpine_linux/alpine_dev/alpine_dev
+.. literalinclude:: ../../linux/alpine_linux/alpine_dev/alpine-dev
    :language: dockerfile
    :caption: alpine构建开发环境的Dockerfile
 
-- 执行以下命令构建镜像并启动容器::
+- 执行以下命令构建镜像并启动容器:
 
-   docker build -t alpine-ssh .
-   docker run -itd --hostname x-dev --name x-dev -p 122:22 alpine-ssh:latest
+.. literalinclude:: ../../linux/alpine_linux/alpine_dev/alpine-dev_docker
+   :language: bash
+   :caption: 构建alpine开发环境docker容器
 
 - 登陆容器::
 
@@ -34,9 +35,26 @@ Alpine Linux环境安装cfssl
 通过源代码编译安装cfssl
 =========================
 
-通过 :ref:`alpine_dev` 安装的 :ref:`golang` 编译 ``cfssl`` 工具链可以验证Go编译环境安装是否正确
+通过 :ref:`alpine_dev` 安装的 :ref:`golang` 编译 ``cfssl`` 工具链可以验证Go编译环境安装是否正确::
+
+   git clone git@github.com:cloudflare/cfssl.git
+   cd cfssl
+   make
+
+编译完成后在 ``bin`` 目录下有以下执行文件::
+
+   bin
+   ├── cfssl
+   ├── cfssl-bundle
+   ├── cfssl-certinfo
+   ├── cfssl-newkey
+   ├── cfssl-scan
+   ├── cfssljson
+   ├── mkbundle
+   ├── multirootca
+   └── rice
 
 参考
 ======
 
-- 
+- `GitHub:cloudflare/cfssl <https://github.com/cloudflare/cfssl>`_

@@ -111,7 +111,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id1">安装编译环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ide">安装编辑器构建IDE</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">桌面</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">镜像构建</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">容器构建</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
@@ -290,16 +290,19 @@ ssh-keygen -A
 <p>原文作者采用了Xfce桌面，并且为了能够方便开发，安装了JetBrains IDE系列。原因是Alpine Linux使用musl库，如果使用 <code class="docutils literal notranslate"><span class="pre">musl-glibc</span></code> 兼容库非常费劲。而JetBrains是Java程序，OpenJDK(IcedTea项目)可以顺畅在Alpine Linux上运行，所以选择JetBrains全家桶可以非常方便开发工作。</p>
 </section>
 <section id="id3">
-<h2>镜像构建<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>容器构建<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <p>经过验证后，可以将上述步骤添加到 Alpine Linux 的Dockerfile，以便后续重新构建开发环境，并一步步打磨完善:</p>
-<p>最终完整的 <code class="docutils literal notranslate"><span class="pre">x-dev</span></code> 完整 Dockerfile:</p>
+<ul class="simple">
+<li><p>最终完整的 <code class="docutils literal notranslate"><span class="pre">x-dev</span></code> 完整 Dockerfile:</p></li>
+</ul>
 <div class="literal-block-wrapper docutils container" id="id8">
 <div class="code-block-caption"><span class="caption-text">alpine构建开发环境的Dockerfile</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
 <span class="k">RUN</span> apk update <span class="o">&amp;&amp;</span> apk upgrade
 <span class="k">RUN</span> apk add --no-cache openssh sudo
 <span class="k">RUN</span> apk add --no-cache build-base gdb strace
-<span class="k">RUN</span> apk add --no-cache vim htop
+<span class="k">RUN</span> apk add --no-cache go rust
+<span class="k">RUN</span> apk add --no-cache git vim htop
 <span class="k">RUN</span> <span class="nb">echo</span> <span class="s1">&#39;PasswordAuthentication yes&#39;</span> &gt;&gt; /etc/ssh/sshd_config
 <span class="k">RUN</span> adduser -u <span class="m">502</span> -G wheel -h /home/huatai -s /bin/sh -D huatai
 <span class="k">RUN</span> <span class="nb">echo</span> -n <span class="s1">&#39;huatai:some_password_here&#39;</span> <span class="p">|</span> chpasswd
@@ -310,11 +313,87 @@ ssh-keygen -A
 </pre></div>
 </div>
 </div>
+<ul class="simple">
+<li><p>执行以下命令构建镜像并启动容器:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">构建alpine开发环境docker容器</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t alpine-dev .
+docker run -itd --hostname x-dev --name x-dev -p <span class="m">122</span>:22 alpine-dev:latest
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>登陆容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="mf">127.0.0.1</span> <span class="o">-</span><span class="n">p</span> <span class="mi">122</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<section id="node">
+<h3>node容器构建案例<a class="headerlink" href="#node" title="永久链接至标题">¶</a></h3>
+<ul class="simple">
+<li><p>构建运行Node的容器环境案例:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">alpine构建开运行node的容器Dockerfile</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
+<span class="k">RUN</span> apk update <span class="o">&amp;&amp;</span> apk upgrade
+<span class="k">RUN</span> apk add --no-cache nodejs npm
+<span class="k">RUN</span> addgroup -S node <span class="o">&amp;&amp;</span> adduser -S node -G node
+<span class="k">USER</span><span class="s"> node</span>
+<span class="k">RUN</span> mkdir /home/node/code
+<span class="k">WORKDIR</span><span class="s"> /home/node/code</span>
+<span class="k">COPY</span> --chown<span class="o">=</span>node:node app.js ./
+<span class="k">EXPOSE</span><span class="s"> 3000</span>
+<span class="k">CMD</span> <span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="s2">&quot;app.js&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>准备一个 <code class="docutils literal notranslate"><span class="pre">app.js</span></code> 作为演示案例:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">nodejs Hello World</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">hostname</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">port</span> <span class="o">=</span> <span class="mf">3000</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">server</span> <span class="o">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">((</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">=</span> <span class="mf">200</span><span class="p">;</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span><span class="p">(</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="s1">&#39;text/plain&#39;</span><span class="p">);</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s1">&#39;Hello World&#39;</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">hostname</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Server running at http://</span><span class="si">${</span><span class="nx">hostname</span><span class="si">}</span><span class="sb">:</span><span class="si">${</span><span class="nx">port</span><span class="si">}</span><span class="sb">/`</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>执行以下命令构建镜像并启动容器:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">构建alpine运行node的容器</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t alpine-node .
+docker run -itd --hostname x-node --name x-node -p <span class="m">3000</span>:3000 alpine-node:latest
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>以上是构建node容器的案例，实际上通过容器运行node建议采用nodejs官方 <a class="reference external" href="https://github.com/nodejs/docker-node">nodejs / docker-node</a> 来运行</p>
+</div>
+</section>
 </section>
 <section id="id4">
 <h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.overops.com/blog/my-alpine-desktop-setting-up-a-software-development-environment-on-alpine-linux/">Setting Up a Software Development Environment on Alpine Linux</a></p></li>
+<li><p><a class="reference external" href="https://btholt.github.io/complete-intro-to-containers/making-our-own-alpine-nodejs-container">Making Our Own Alpine Node.js Container</a> 提供了一个构建node运行环境的容器案例，我在上文参考引用了文中Dockerfile</p></li>
+<li><p><a class="reference external" href="https://nodejs.org/en/docs/guides/getting-started-guide/">How do I start with Node.js after I installed it?</a></p></li>
 </ul>
 </section>
 </section>
