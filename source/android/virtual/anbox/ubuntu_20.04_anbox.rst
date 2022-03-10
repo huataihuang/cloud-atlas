@@ -159,8 +159,17 @@ Ubuntu 20.04 LTS运行Anbox
 
 但是却能够正常看到Andorid界面了
 
-安装内核模块
--------------
+.. figure:: ../../../_static/android/virtual/anbox/anbox_playstore.png
+   :scale: 60
+
+.. note::
+
+   我的 :ref:`mbp15_late_2013` 存在SMART报错无法安装macOS，我强行安装 :ref:`kubuntu` 后发现SSD确实存在问题， ``iowait`` 非常高，少量的磁盘读写都会导致系统运行缓慢。目前看来一些类似 ``time out`` 的报错极有可能和SSD故障有关，特别是首次启动 ``anbox.appmgr`` 大量磁盘读写会导致系统hang死或者anbox直接退出；不过，再次启动anbox则因为服务已经启动并且有缓存，则启动不报错。
+
+   我准备在 :ref:`macbook_nvme` 之后重新尝试Anbox，目前试验基本已经找到了解决方案，下次实践应该会比较顺利。
+
+安装内核模块(现在不需要了)
+----------------------------
 
 要支持Android容器的mandatory内核子系统 ``ashmem`` 和 ``binder`` ，需要安装2个DKMS内核模块，内核源代码是由Anbox项目维护的。从 Ubuntu 19.04 开始，标准发行版(内核>=5.0)已经包含了 ``binder`` 和 ``ashmem`` ，所以不再需要从第三方PPA安装了。
 
