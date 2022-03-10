@@ -33,9 +33,9 @@ K3s高可用etcd
 
 使用 ``cfssl`` 签发证书，不过 :ref:`alpine_linux` 只在 ``edge`` 仓库提供了 ``cfssl`` 。当前我使用alpine linux的stable仓库，不能同时激活stable和edge。
 
-``cfssl`` 官方提供了linux amd64版本，也可以在 macOS 上通过 brew 安装。由于签发证书是独立工作，我采用:
+``cfssl`` 官方提供了linux amd64版本，也可以在 macOS 上通过 brew 安装。不过我为了能够独立在 :ref:`pi_stack` 环境完成所有工作，采用:
 
-- :strike:`在 macOS 上` 在 :ref:`alpine_linux` 环境节点 ``x-k3s-a-0`` 
+- 在 :ref:`alpine_linux` 环境节点 ``x-k3s-a-0`` 
 
   - 建立容器运行一个开发环境 ``x-dev`` 
   - 然后 :ref:`alpine_cfssl`

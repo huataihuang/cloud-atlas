@@ -89,18 +89,55 @@ rust
 
 原文作者采用了Xfce桌面，并且为了能够方便开发，安装了JetBrains IDE系列。原因是Alpine Linux使用musl库，如果使用 ``musl-glibc`` 兼容库非常费劲。而JetBrains是Java程序，OpenJDK(IcedTea项目)可以顺畅在Alpine Linux上运行，所以选择JetBrains全家桶可以非常方便开发工作。
 
-镜像构建
+容器构建
 =========
 
 经过验证后，可以将上述步骤添加到 Alpine Linux 的Dockerfile，以便后续重新构建开发环境，并一步步打磨完善:
 
-最终完整的 ``x-dev`` 完整 Dockerfile:
+- 最终完整的 ``x-dev`` 完整 Dockerfile:
 
-.. literalinclude:: alpine_dev/alpine_dev
+.. literalinclude:: alpine_dev/alpine-dev
    :language: dockerfile
    :caption: alpine构建开发环境的Dockerfile
+
+- 执行以下命令构建镜像并启动容器:
+
+.. literalinclude:: alpine_dev/alpine-dev_docker
+   :language: bash
+   :caption: 构建alpine开发环境docker容器
+
+- 登陆容器::
+
+   ssh 127.0.0.1 -p 122
+
+node容器构建案例
+------------------
+
+- 构建运行Node的容器环境案例:
+
+.. literalinclude:: alpine_dev/alpine-node
+   :language: dockerfile
+   :caption: alpine构建开运行node的容器Dockerfile
+
+- 准备一个 ``app.js`` 作为演示案例:
+
+.. literalinclude:: alpine_dev/app.js
+   :language: javascript
+   :caption: nodejs Hello World
+
+- 执行以下命令构建镜像并启动容器:
+
+.. literalinclude:: alpine_dev/alpine-node_docker
+   :language: bash
+   :caption: 构建alpine运行node的容器
+
+.. note::
+
+   以上是构建node容器的案例，实际上通过容器运行node建议采用nodejs官方 `nodejs / docker-node <https://github.com/nodejs/docker-node>`_ 来运行
 
 参考
 =======
 
 - `Setting Up a Software Development Environment on Alpine Linux <https://www.overops.com/blog/my-alpine-desktop-setting-up-a-software-development-environment-on-alpine-linux/>`_
+- `Making Our Own Alpine Node.js Container <https://btholt.github.io/complete-intro-to-containers/making-our-own-alpine-nodejs-container>`_ 提供了一个构建node运行环境的容器案例，我在上文参考引用了文中Dockerfile
+- `How do I start with Node.js after I installed it? <https://nodejs.org/en/docs/guides/getting-started-guide/>`_

@@ -1,20 +1,13 @@
-.. _nodejs:
+.. _nodejs_deploy:
 
 =================================
-Node.js Atlas
+Node.js部署
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_nodejs.rst
-   startup/index
-   electron/index
-   koa/index
-   egg/index
-   ghost_cms/index
-   deploy/index
-
+   expose_local_nodejs_to_world.rst
 
 .. only::  subproject and html
 
