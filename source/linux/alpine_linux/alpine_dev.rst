@@ -117,7 +117,7 @@ node容器构建案例
 
 .. literalinclude:: alpine_dev/alpine-node
    :language: dockerfile
-   :caption: alpine构建开运行node的容器Dockerfile
+   :caption: alpine构建运行node的容器Dockerfile
 
 - 准备一个 ``app.js`` 作为演示案例:
 

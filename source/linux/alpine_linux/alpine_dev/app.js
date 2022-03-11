@@ -1,6 +1,8 @@
 const http = require('http');
 
-const hostname = '127.0.0.1';
+//const hostname = '127.0.0.1';
+//容器化运行，node需要监听在所有端口才能publish port
+const hostname = '0.0.0.0';
 const port = 3000;
 
 const server = http.createServer((req, res) => {

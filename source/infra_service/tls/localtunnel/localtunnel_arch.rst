@@ -23,7 +23,7 @@ localtunnel架构
 localtunnel
 ===============
 
-实际上早在十几年前(2010年)，有一个开源工具 `progrium/localtunnel <https://github.com/progrium/localtunnel>`_ 巧妙地实现了tunnel方式，将NAT局域网中地服务器输出到因特网上。并且，这个开源项目实现了多个语言版本:
+实际上早在十几年前(2010年)，有一个开源工具 `progrium/localtunnel <https://github.com/progrium/localtunnel>`_ 巧妙地实现了long-lived TCP tunnel方式，将NAT局域网中地服务器输出到因特网上。并且，这个开源项目实现了多个语言版本:
 
 - `prototype版本 <https://github.com/progrium/localtunnel/tree/prototype>`_ 2010年早期，采用Python Twisted实现整个系统
 - `v1版本 <https://github.com/progrium/localtunnel/tree/v1>`_ 2010年中期，采用OpenSS包装方式，客户端使用Ruby，服务端使用Python Twisted
@@ -32,15 +32,20 @@ localtunnel
 
 ``localtunnel`` 现在已经不再开发，但是这个开源项目继续影响着世界，还有其他人开发了 :ref:`nodejs` 版本 `localtunnel.me <https://theboroer.github.io/localtunnel-www/>`_ ( :ref:`expose_local_nodejs_to_world` )，并且产生了商业化公司 `ngrok.com <https://ngrok.com/>`_ 提供快速简便的方法将个人无公网IP的服务器输出到因特网上。
 
-商业服务
-----------
+ngrok
+=============
 
-`ngrok.com <https://ngrok.com/>`_ 是最流行的tunnel服务公司，使用Go开发，提供不同平台架构的客户端，可以快速把本地服务通过它的站点向外输出。价格大约和VPS或者租用小型虚拟机差不多。
+`ngrok.com <https://ngrok.com/>`_ 是最流行的tunnel服务公司，使用Go开发，提供不同平台架构的客户端，可以快速把本地服务通过它的站点向外输出:
+
+- 通过 ``ngrok.com`` 的一个随机子域名(如 ``3gf892ks.ngrok.com`` )
+- 价格大约和VPS或者租用小型虚拟机差不多。
+
+`ngrok DEVELOPMENT.md <https://github.com/inconshreveable/ngrok/blob/master/docs/DEVELOPMENT.md>`_ 提供了较为详细的原理说明
 
 localtunnel原理
 =================
 
-待续...
+
 
 参考
 =====

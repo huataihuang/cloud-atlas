@@ -23,6 +23,7 @@ Docker Atlas
    logs/index
    gui/index
    security/index
+   debug/index
 
 .. only::  subproject and html
 

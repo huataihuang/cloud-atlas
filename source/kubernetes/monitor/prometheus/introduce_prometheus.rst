@@ -37,7 +37,7 @@ Prometheus 简介
 
 .. note::
 
-   在Linux内核中，增强型Berkely包过滤器(enhanced Berkeley Packet Filters, eBPF)允许详细剖析从文件系统操作到网络异常的内核事件。强烈建议阅读 `Linux Extended BPF (eBPF) Tracing Tools <http://www.brendangregg.com/ebpf.html>`_ 来学习如何通过 :ref:`bpf` 实现性能分析。
+   在Linux内核中，增强型Berkely包过滤器(enhanced Berkeley Packet Filters, eBPF)允许详细剖析从文件系统操作到网络异常的内核事件。强烈建议阅读 `Linux Extended BPF (eBPF) Tracing Tools <http://www.brendangregg.com/ebpf.html>`_ 来学习如何通过 :ref:`ebpf` 实现性能分析。
 
 - 跟踪(Tracing)
 

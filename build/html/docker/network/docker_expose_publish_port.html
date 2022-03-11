@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker的expose和publish端口差异和关系 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Docker GPU设备" href="../gpu/index.html" />
+    <link rel="prev" title="配置Docker使用代理" href="docker_proxy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Docker Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">Docker 起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../docker_in_docker/index.html">Docker in Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../images/index.html">Docker 镜像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rootless/index.html">Docker Rootless模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../moby/index.html">Docker Moby</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/index.html">Docker配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../linuxserver/index.html">Docker LinuxServer.io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../init/index.html">Docker init进程管理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html">Docker 管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/index.html">Docker 环境运行应用程序案例</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Docker存储</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker网络</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="docker_proxy.html">配置Docker使用代理</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Docker的expose和publish端口差异和关系</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dockerfileexpose">Dockerfile中的EXPOSE指令</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exposepublish">EXPOSE和PUBLISH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#publish">PUBLISH端口</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">PUBLISH <code class="docutils literal notranslate"><span class="pre">所有</span></code> 端口</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">使用端口范围</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">什么时候不需要 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> 端口</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">且慢，真的能访问容器内部的 <code class="docutils literal notranslate"><span class="pre">3000</span></code> 端口服务了吗?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">Docker GPU设备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logs/index.html">Docker 日志</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gui/index.html">Docker GUI应用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../security/index.html">Docker安全</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">Docker异常排查</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_search/index.html">Search Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐助</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Docker Atlas</a> &raquo;</li>
+          <li><a href="index.html">Docker网络</a> &raquo;</li>
+      <li>Docker的expose和publish端口差异和关系</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/docker/network/docker_expose_publish_port.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dockerexposepublish">
+<span id="docker-expose-publish-port"></span><h1>Docker的expose和publish端口差异和关系<a class="headerlink" href="#dockerexposepublish" title="永久链接至标题">¶</a></h1>
+<section id="dockerfileexpose">
+<h2>Dockerfile中的EXPOSE指令<a class="headerlink" href="#dockerfileexpose" title="永久链接至标题">¶</a></h2>
+<p>在配置 <a class="reference internal" href="../admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 时候，你会注意到Dockerfile中往往会有一行配置了容器 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 端口的配置，例如:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">alpine构建运行node的容器Dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
+<span class="k">RUN</span> apk update <span class="o">&amp;&amp;</span> apk upgrade
+<span class="k">RUN</span> apk add --no-cache nodejs npm
+<span class="k">RUN</span> addgroup -S node <span class="o">&amp;&amp;</span> adduser -S node -G node
+<span class="k">USER</span><span class="s"> node</span>
+<span class="k">RUN</span> mkdir /home/node/code
+<span class="k">WORKDIR</span><span class="s"> /home/node/code</span>
+<span class="k">COPY</span> --chown<span class="o">=</span>node:node app.js ./
+<span class="k">USER</span><span class="s"> root</span>
+<span class="hll"><span class="k">EXPOSE</span><span class="s"> 3000</span>
+</span><span class="k">CMD</span> <span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="s2">&quot;app.js&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>这里我的案例是 <a class="reference internal" href="../../linux/alpine_linux/alpine_dev.html#alpine-dev"><span class="std std-ref">Alpine Linux软件开发环境构建</span></a> 时一个运行 <a class="reference internal" href="../../nodejs/index.html#nodejs"><span class="std std-ref">Node.js Atlas</span></a> 的容器，采用Node.js官方指导文档 <a class="reference external" href="https://nodejs.org/en/docs/guides/getting-started-guide/">How do I start with Node.js after I installed it?</a> 中的Hello World代码 <code class="docutils literal notranslate"><span class="pre">app.js</span></code> :</p>
+<blockquote>
+<div><div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">nodejs Hello World (绑定127.0.0.1)</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">hostname</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">;</span>
+<span class="hll"><span class="kd">const</span> <span class="nx">port</span> <span class="o">=</span> <span class="mf">3000</span><span class="p">;</span>
+</span>
+<span class="kd">const</span> <span class="nx">server</span> <span class="o">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">((</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">=</span> <span class="mf">200</span><span class="p">;</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span><span class="p">(</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="s1">&#39;text/plain&#39;</span><span class="p">);</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s1">&#39;Hello World&#39;</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">hostname</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Server running at http://</span><span class="si">${</span><span class="nx">hostname</span><span class="si">}</span><span class="sb">:</span><span class="si">${</span><span class="nx">port</span><span class="si">}</span><span class="sb">/`</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div>
+</div></blockquote>
+<p>你看，多么完美匹配: Dockerfile 中的 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span> <span class="pre">3000</span></code> 对应 js 中指令 <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">port</span> <span class="pre">=</span> <span class="pre">3000;</span></code> ，那么我们执行以下 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令，就能在网络中访问容器中这个服务了么:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">alpine</span><span class="o">-</span><span class="n">node</span> <span class="o">.</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+<p>并不是如此，此时检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>               <span class="n">COMMAND</span>        <span class="n">CREATED</span>             <span class="n">STATUS</span>             <span class="n">PORTS</span>     <span class="n">NAMES</span>
+<span class="mi">588</span><span class="n">f22fe8980</span>   <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>  <span class="s2">&quot;node app.js&quot;</span>  <span class="n">About</span> <span class="n">a</span> <span class="n">minute</span> <span class="n">ago</span>  <span class="n">Up</span> <span class="n">About</span> <span class="n">a</span> <span class="n">minute</span>  <span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span>  <span class="n">recursing_newton</span>
+</pre></div>
+</div>
+<p>这里端口显示 <code class="docutils literal notranslate"><span class="pre">3000/tcp</span></code> 是表示容器内部的端口 <code class="docutils literal notranslate"><span class="pre">3000</span></code> ，但是，为何docker没有在 <code class="docutils literal notranslate"><span class="pre">host</span></code> 主机上把这个容器内部的 <code class="docutils literal notranslate"><span class="pre">3000</span></code> 端口透出? 现在在物理主机上执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="o">|</span> <span class="n">grep</span> <span class="mi">3000</span>
+</pre></div>
+</div>
+<p>可以看到完全是空的，也就是在外部无法访问容器内部端口</p>
+</section>
+<section id="exposepublish">
+<h2>EXPOSE和PUBLISH<a class="headerlink" href="#exposepublish" title="永久链接至标题">¶</a></h2>
+<p>在Docker的概念中， <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 和 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> 是两个不同但是又有关联的概念:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 端口只是在 <a class="reference internal" href="../admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 的 <code class="docutils literal notranslate"><span class="pre">metadata</span></code> 中定义了暴露端口</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">必须</span></code> 在容器启动时候 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> (发布) 端口才能使得外部能够访问容器内部的服务端口</p></li>
+</ul>
+<p>也就是说， <code class="docutils literal notranslate"><span class="pre">exposing</span></code> 端口不能立即生效，这个状态只是容器内部的应用服务器监听端口，并没有 <code class="docutils literal notranslate"><span class="pre">binding</span></code> (绑定) 到物理主机的网络接口上。</p>
+<p><a class="reference internal" href="../admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中列出 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 端口可以帮助用户在启动容器时候配置正确的端口转发规则，特别是使用非标准端口。</p>
+<ul>
+<li><p>使用以下命令可以查看运行容器定义的 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">ps</span> <span class="o">--</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;table {{.ID}}</span><span class="se">\t</span><span class="s2">{{.Image}}</span><span class="se">\t</span><span class="s2">{{.Ports}}&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                <span class="n">PORTS</span>
+<span class="mi">588</span><span class="n">f22fe8980</span>   <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>   <span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span>
+</pre></div>
+</div>
+<ul>
+<li><p>使用以下命令可以检查镜像中 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 端口而无需启动容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">inspect</span> <span class="o">--</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;{{json .Config.ExposedPorts}}&quot;</span> <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;3000/tcp&quot;</span><span class="p">:{}}</span>
+</pre></div>
+</div>
+<p>这样用户在启动容器时候就可以配置相应的 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> 端口了，见下文。</p>
+</section>
+<section id="publish">
+<h2>PUBLISH端口<a class="headerlink" href="#publish" title="永久链接至标题">¶</a></h2>
+<p>既然 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 端口只是定义可暴露端口而并没有输出端口，我们就需要在 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令中 <code class="docutils literal notranslate"><span class="pre">显式</span></code> 地 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> (发布)端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="o">-</span><span class="n">p</span> <span class="mi">3000</span><span class="p">:</span><span class="mi">3000</span> <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+<p>然后检查 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code> 可以看到明显不同的端口信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                <span class="n">COMMAND</span>            <span class="n">CREATED</span>          <span class="n">STATUS</span>          <span class="n">PORTS</span>                                         <span class="n">NAMES</span>
+<span class="n">f01c8a82dc61</span>   <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>   <span class="s2">&quot;node app.js&quot;</span>      <span class="mi">34</span> <span class="n">seconds</span> <span class="n">ago</span>   <span class="n">Up</span> <span class="mi">32</span> <span class="n">seconds</span>   <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">3000</span><span class="o">-&gt;</span><span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">3000</span><span class="o">-&gt;</span><span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span>     <span class="n">objective_blackwell</span>
+</pre></div>
+</div>
+<p>可以看到，此时物理主机所有接口上 <code class="docutils literal notranslate"><span class="pre">3000</span></code> 端口都被映射到容器内部 <code class="docutils literal notranslate"><span class="pre">3000</span></code> 端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">3000</span><span class="o">-&gt;</span><span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">3000</span><span class="o">-&gt;</span><span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span>
+</pre></div>
+</div>
+<p>此时在物理主机上执行 <code class="docutils literal notranslate"><span class="pre">netstat</span> <span class="pre">-an</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">3000</span></code> 会看到物理主机上已经打开了 <code class="docutils literal notranslate"><span class="pre">3000</span></code> 端口监听:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">3000</span>            <span class="mf">0.0.0.0</span><span class="p">:</span><span class="o">*</span>               <span class="n">LISTEN</span>
+<span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="p">:::</span><span class="mi">3000</span>                 <span class="p">:::</span><span class="o">*</span>                    <span class="n">LISTEN</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>PUBLISH <code class="docutils literal notranslate"><span class="pre">所有</span></code> 端口<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">docker</span></code> 运行时候还提供了一个 <code class="docutils literal notranslate"><span class="pre">--publish-all</span></code> 参数，也就是 <code class="docutils literal notranslate"><span class="pre">-P</span></code> (大写)，会将Dockerfile中所有 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 列出的端口全部 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> 出去:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">itd</span> <span class="o">-</span><span class="n">P</span> <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+<p>此时 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span> <span class="n">ID</span>   <span class="n">IMAGE</span>                <span class="n">COMMAND</span>            <span class="n">CREATED</span>          <span class="n">STATUS</span>          <span class="n">PORTS</span>                                         <span class="n">NAMES</span>
+<span class="mi">0</span><span class="n">af8544b5cc0</span>   <span class="n">alpine</span><span class="o">-</span><span class="n">node</span><span class="p">:</span><span class="n">latest</span>   <span class="s2">&quot;node app.js&quot;</span>      <span class="mi">3</span> <span class="n">seconds</span> <span class="n">ago</span>    <span class="n">Up</span> <span class="mi">1</span> <span class="n">second</span>     <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">49153</span><span class="o">-&gt;</span><span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span> <span class="p">:::</span><span class="mi">49153</span><span class="o">-&gt;</span><span class="mi">3000</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">elegant_yonath</span>
+</pre></div>
+</div>
+<p>虽然非常简单，但是有一个问题，就是在 <code class="docutils literal notranslate"><span class="pre">host</span></code> 主机上输出的端口是随机的，对于测试工作来说比较方便，但是如果是对外提供稳定服务则显然不受控制。</p>
+</section>
+<section id="id2">
+<h2>使用端口范围<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>有时候容器内部需要 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span></code> 一个端口范围:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXPOSE</span> <span class="mi">8000</span><span class="o">-</span><span class="mi">8100</span>
+</pre></div>
+</div>
+<p>可以通过以下命令方式将 <code class="docutils literal notranslate"><span class="pre">host</span></code> 主机上的一段端口范围和容器内部对应起来:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">p</span> <span class="mi">6000</span><span class="o">-</span><span class="mi">6100</span><span class="p">:</span><span class="mi">8000</span><span class="o">-</span><span class="mi">8100</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>当然也可以使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">--publish-all</span></code> 把这100个端口直接输出，只不过物理主机上随机100个端口监听管理起来非常不方便。</p>
+</section>
+<section id="id3">
+<h2>什么时候不需要 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> 端口<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>如果你的容器只是在 <code class="docutils literal notranslate"><span class="pre">host</span></code> 物理主机内部做一个开发环境，并不对外通讯，你可以创建一个独立的内部网络，然后将这些容器连接到这个独立网络，而不会对外暴露(安全性):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">network</span> <span class="n">create</span> <span class="n">demo</span><span class="o">-</span><span class="n">network</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">network</span> <span class="n">demo</span><span class="o">-</span><span class="n">network</span> <span class="o">--</span><span class="n">name</span> <span class="n">web</span> <span class="n">web</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">network</span> <span class="n">demo</span><span class="o">-</span><span class="n">network</span> <span class="o">--</span><span class="n">name</span> <span class="n">database</span> <span class="n">database</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>且慢，真的能访问容器内部的 <code class="docutils literal notranslate"><span class="pre">3000</span></code> 端口服务了吗?<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>如果你完全参考我上文的案例，并使用 <code class="docutils literal notranslate"><span class="pre">EXPOSE</span> <span class="pre">3000</span></code> 结合 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-p</span> <span class="pre">3000:3000</span> <span class="pre">alpine-node:latest</span></code> 来运行Nodes.js案例程序，你会惊讶地发现，依然无法访问应用界面的 <code class="docutils literal notranslate"><span class="pre">Hellow</span> <span class="pre">World</span></code> ，原因就是 <code class="docutils literal notranslate"><span class="pre">app-localhost.js</span></code> 使用了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">hostname</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>这使得容器内部应用程序只监听回环地址；而 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 的 <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> 指令是映射到容器内部的虚拟网卡上，所以无法访问。</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/container_loopback.png"><img alt="../../_images/container_loopback.png" src="../../_images/container_loopback.png" style="width: 647.0px; height: 455.0px;" /></a>
+</figure>
+<p>解决方法是修改 <code class="docutils literal notranslate"><span class="pre">app.js</span></code> 监听 <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> ，如下:</p>
+<blockquote>
+<div><div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">nodejs Hello World (绑定0.0.0.0)</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">);</span>
+
+<span class="c1">//const hostname = &#39;127.0.0.1&#39;;</span>
+<span class="c1">//容器化运行，node需要监听在所有端口才能publish port</span>
+<span class="hll"><span class="kd">const</span> <span class="nx">hostname</span> <span class="o">=</span> <span class="s1">&#39;0.0.0.0&#39;</span><span class="p">;</span>
+</span><span class="kd">const</span> <span class="nx">port</span> <span class="o">=</span> <span class="mf">3000</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">server</span> <span class="o">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">((</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">=</span> <span class="mf">200</span><span class="p">;</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span><span class="p">(</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="s1">&#39;text/plain&#39;</span><span class="p">);</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s1">&#39;Hello World&#39;</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">hostname</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Server running at http://</span><span class="si">${</span><span class="nx">hostname</span><span class="si">}</span><span class="sb">:</span><span class="si">${</span><span class="nx">port</span><span class="si">}</span><span class="sb">/`</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div>
+</div></blockquote>
+<p>则此时容器内服务会监听在内部虚拟机接口 <code class="docutils literal notranslate"><span class="pre">172.17.0.2</span></code> 上，就能通过Docker <code class="docutils literal notranslate"><span class="pre">PUBLISH</span></code> 端口映射到外部进行通讯:</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/container_all_interfaces.png"><img alt="../../_images/container_all_interfaces.png" src="../../_images/container_all_interfaces.png" style="width: 650.0px; height: 460.0px;" /></a>
+</figure>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.cloudsavvyit.com/14880/whats-the-difference-between-exposing-and-publishing-a-docker-port/">What’s the Difference Between Exposing and Publishing a Docker Port?</a></p></li>
+<li><p><a class="reference external" href="https://pythonspeed.com/articles/docker-connection-refused/">Connection refused? Docker networking and how it impacts your image</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="docker_proxy.html" class="btn btn-neutral float-left" title="配置Docker使用代理" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gpu/index.html" class="btn btn-neutral float-right" title="Docker GPU设备" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
