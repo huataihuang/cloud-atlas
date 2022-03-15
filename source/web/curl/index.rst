@@ -1,20 +1,13 @@
-.. _devops:
+.. _curl:
 
 =================================
-DevOps Atlas
+curl
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   thought/index
-   sre/index
-   git/index
-   jenkins/index
-   gitea/index
-   terraform/index
-   utils/index
-   docs/index
+   curl_proxy.rst
 
 .. only::  subproject and html
 

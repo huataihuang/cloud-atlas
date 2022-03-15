@@ -9,11 +9,11 @@ Homebrew
 
 - 只要主机联网，通过以下命令就能够直接安装homebrew::
 
-   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 .. note::
 
-   最新的macOS，如 macOS Catalina已经内置了Homebrew，不需要单独安装。只需要执行 ``brew update`` 就会更新最新的brew-core，也就可以直接安装必要的软件了。
+   :strike:`最新的macOS，如 macOS Catalina已经内置了Homebrew，不需要单独安装。` 只需要执行 ``brew update`` 就会更新最新的brew-core，也就可以直接安装必要的软件了。
 
 .. note::
 
@@ -32,10 +32,22 @@ Homebrew
       echo '--no-alpn' > ~/.curlrc
       export HOMEBREW_CURLRC=1
 
-   有可能再出现error 60，不过那是因为网络超时导致(GFW)重试即可::
+   有可能再出现error 60，不过那是因为网络超时导致(GFW干扰)::
 
       fatal: RPC failed; curl 56 LibreSSL SSL_read: SSL_ERROR_SYSCALL, errno 60
       fatal: the remote end hung up unexpectedly
+
+安装网络阻塞问题的解决方法
+------------------------------
+
+安装Homebrew的最大麻烦是 GFW 对GitHub的干扰(并不是完全不通，但是不断间歇阻塞会浪费大量的时间精力)，解决的方法是使用代理。安装脚本中涉及到 ``curl`` 和 ``git`` 都需要配置代理。我采用的方法是:
+
+- :ref:`squid_socks_peer` 方案可以在本地构建一个squid代理，通过墙外到二级代理实现无障碍访问
+- :ref:`curl_proxy`
+- :ref:`git_proxy`
+
+使用brew
+=========
 
 - brew使用帮助::
 

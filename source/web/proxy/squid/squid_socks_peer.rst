@@ -76,9 +76,9 @@ squid转发配置实例
 
 以下为实践配置，用于访问 twitter, facebook, wikipedia 等404网站，并不断更新:
 
-.. literalinclude:: squid_liberty.conf
+.. literalinclude:: squid_socks_peer/squid_liberty.conf
    :linenos:
-   :caption: squid_liberty.conf - 添加到 /etc/squid/squid.conf
+   :caption: squid_liberty.conf - 本地转发墙外squid
 
 不足之处
 ===========

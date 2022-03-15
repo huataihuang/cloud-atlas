@@ -66,7 +66,10 @@ iOS对屏幕外接输出支持较为完善，有两种方式:
 Android移动工作
 =================
 
-我采购了
+我使用 :ref:`pixel_3` 来实现移动办公，主要有两种模式:
+
+- :ref:`termux` 实现在 :ref:`android` 系统内部运行一个微型Linux系统，实现完整的 :ref:`termux_dev` 以及 :ref:`termux_proxy` ，这样只需要一台简单的瘦客户机(有浏览器和termianl)，就可以实现访问办公网络以及无障碍访问互联网信息
+- 对于没有完整瘦客户机的情况，如果有一个外接显示器和蓝牙键盘，那么采用 :ref:`android_mobile_work_solutions` 中 :ref:`termux` 结合外界显示器来实现
 
 参考
 ======
