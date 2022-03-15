@@ -29,6 +29,7 @@ Web是Internet最主要的服务，也是汇集主要云计算技术的应用服
    webdav/index
    websocket/index
    firefox/index
+   curl/index
 
 .. only::  subproject and html
 

@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    mobile_work_think.rst
+   mobile_macos_dev.rst
 
 .. only::  subproject and html
 

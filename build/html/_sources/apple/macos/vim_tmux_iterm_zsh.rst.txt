@@ -100,6 +100,16 @@ zsh已经是macOS推荐的内置shell，Oh-my-zsh提供了定制框架，能够�
 
    sudo python3 -m pip install -U watchdog
 
+完整的安装脚本
+=================
+
+为方便再次完成上述 :ref:`macos` 新系统初始化，整理为以下安装脚本:
+
+.. literalinclude:: vim_tmux_iterm_zsh/macos_dev_init.sh
+   :language: bash
+   :linenos:
+   :caption: macOS开发环境初始化脚本
+
 参考
 ======
 
