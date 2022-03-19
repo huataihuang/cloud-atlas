@@ -17,7 +17,6 @@
    pi_400_desktop.rst
    pi_4b_4k_display.rst
    pi_display_accelerate
-   raspi_config.rst
    noobs.rst
    pi_quick_start.rst
    ubuntu64bit_pi.rst

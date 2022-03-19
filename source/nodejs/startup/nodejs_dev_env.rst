@@ -4,7 +4,7 @@
 Node.js开发环境
 =====================
 
-Node Version Manager (nvm) 是 node.js 的版本管理器，可以工作在任何 POSIX兼容的shell环境，运行于unix, macOS 和 Windoes WSL。
+`Node Version Manager (nvm) <https://github.com/nvm-sh/nvm>`_ 是 node.js 的版本管理器，可以工作在任何 POSIX兼容的shell环境，运行于unix, macOS 和 Windoes WSL。
 
 这个工具可以管理和切换 Node.js 版本，以便测试和开发。 （例如，我在使用 `hexo <https://hexo.io>`_ 作为自己的blog撰写平台，就遇到过部分插件对nodejs版本的兼容性要求）
 
@@ -17,7 +17,7 @@ Node Version Manager (nvm) 是 node.js 的版本管理器，可以工作在任�
 
 - 执行安装脚本::
 
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
 上述命令脚本将clone一个nvm代码仓库到 ``~/.nvm`` ，并尝试在profile环境中加入一下内容(我手工加到 ``~/.zshrc`` )::
 

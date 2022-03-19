@@ -13,6 +13,7 @@ Raspberry Pi
 
    hardware/index
    startup/index
+   config/index
    admin/index
    network/index
    storage/index
