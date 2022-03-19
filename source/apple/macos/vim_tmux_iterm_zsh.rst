@@ -18,7 +18,8 @@ Vim
 
 虽然macOS内置了vim，但是版本比较陈旧不适合运行很多高级功能，例如不支持you-complete-me的最新版本，所以我们也通过 :ref:`homebrew` 安装::
 
-   brew install vim
+   #编译you-complete-me需要使用macvim，所以替换vim
+   brew install macvim
    # 要安装 you-complete-vim 还需要cmake
    brew install cmake
 
@@ -59,12 +60,12 @@ zsh已经是macOS推荐的内置shell，Oh-my-zsh提供了定制框架，能够�
 
 这里 ``~/.zshrc`` 中用户目录配置需要修改成你自己的home目录。
 
-- 安装npm（参考 :ref:`nodejs_dev_env` ）::
+- 安装npm（参考 :ref:`nodejs_dev_env` ） - 参考原文使用npm安装 `spaceship-prompt <https://github.com/denysdovhan/spaceship-prompt>`_ ::
 
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
    nvm install node
 
-- 下载spaceVIM::
+- 安装 `spaceship-prompt <https://github.com/denysdovhan/spaceship-prompt>`_ ::
 
    npm install -g spaceship-prompt
 
@@ -77,12 +78,26 @@ zsh已经是macOS推荐的内置shell，Oh-my-zsh提供了定制框架，能够�
 
 - 修改 ``~/.zshrc`` 注释掉一些还没有安装的插件，确保启动终端不再报错
 
+- ``spaceship-prompt`` 使用了 `Powerline Font <https://github.com/powerline/fonts>`_ ，需要安装以后才能展示非常忙美观的字符图标::
+
+   # clone
+   git clone https://github.com/powerline/fonts.git --depth=1
+   # install
+   cd fonts
+   ./install.sh
+   # clean-up a bit
+   cd ..
+   rm -rf fonts
+
+完成安装以后，可以在 ``iterm2`` 中配置字体，例如选择对编程优化的 ``Fira Mono for Powerline`` 字体(15)
+
 - 打开 ``vim`` ，执行命令::
 
    :PluginInstall
 
 - 如果在编译安装 you-complete-me 时候有些报错则通过以下方式fix::
 
+   # 之前使用vim发现确实编译失败，所以改为macvim
    brew install cmake macvim
    cd ~/.vim/bundle/YouCompleteMe
    ./install.py

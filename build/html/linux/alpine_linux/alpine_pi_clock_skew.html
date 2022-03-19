@@ -23,7 +23,7 @@
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
     <link rel="next" title="Clone Alpine Linux (树莓派)" href="alpine_pi_clone.html" />
-    <link rel="prev" title="树莓派环境安装Alpine Linux" href="alpine_install_pi.html" /> 
+    <link rel="prev" title="树莓派一代安装Alpine Linux" href="alpine_install_pi_1.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="alpine_startup.html">Alpine Linux快速起步</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_install.html">安装Alpine Linux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_install_pi.html">树莓派环境安装Alpine Linux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="alpine_install_pi_1.html">树莓派一代安装Alpine Linux</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Alpine Linux在树莓派启动”clock skew”报错</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">手工恢复网络和服务</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rtc">为树莓派添加 <code class="docutils literal notranslate"><span class="pre">rtc</span></code> 设备(硬件方法，未实践)</a></li>
@@ -544,14 +545,28 @@ Checksum:                 0xf4b935de
 </pre></div>
 </div>
 </li>
-<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/lib/rc/sh/init.sh</span></code> ，在 <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">proc</span></code> 段落后添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">e</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/.</span><span class="n">use</span><span class="o">-</span><span class="n">swclock</span> <span class="p">];</span> <span class="n">then</span>
-    <span class="s2">&quot;$RC_LIBEXECDIR&quot;</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">swclock</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span>
-<span class="n">fi</span>
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/lib/rc/sh/init.sh</span></code> ，在 <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">proc</span></code> 段落后添加:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">在 mountproc 段落后面添加</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>...
+
+<span class="k">if</span> <span class="nv">$mountproc</span><span class="p">;</span> <span class="k">then</span>
+        ebegin <span class="s2">&quot;Mounting /proc&quot;</span>
+        <span class="k">if</span> ! fstabinfo --mount /proc<span class="p">;</span> <span class="k">then</span>
+                mount -n -t proc -o noexec,nosuid,nodev proc /proc
+        <span class="k">fi</span>
+        eend <span class="nv">$?</span>
+<span class="k">fi</span>
+
+<span class="hll"><span class="k">if</span> <span class="o">[</span> -e /etc/init.d/.use-swclock <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class="hll">    <span class="s2">&quot;</span><span class="nv">$RC_LIBEXECDIR</span><span class="s2">&quot;</span>/sbin/swclock /etc/init.d
+</span><span class="hll"><span class="k">fi</span>
+</span>
+...
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>上述方法很巧妙，使得OpenRC使用系统时间设置 <code class="docutils literal notranslate"><span class="pre">/etc/inid.d</span></code> 的时间戳，这样就不会出现启动时候报错 <code class="docutils literal notranslate"><span class="pre">Clock</span> <span class="pre">skew</span> <span class="pre">detected</span> <span class="pre">with</span> <span class="pre">'(null)'</span></code> 。</p>
@@ -583,8 +598,8 @@ fsck: caught SIGTERM, aborting
 <ul class="simple">
 <li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/chrony/chrony.conf</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">chrony客户端配置 /etc/chrony/chrony.conf</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">chrony客户端配置 /etc/chrony/chrony.conf</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#pool pool.ntp.org iburst</span>
 <span class="c1">#initstepslew 10 pool.ntp.org</span>
 pool <span class="m">192</span>.168.7.200 iburst
@@ -614,7 +629,7 @@ cmdport <span class="m">0</span>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="alpine_install_pi.html" class="btn btn-neutral float-left" title="树莓派环境安装Alpine Linux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="alpine_install_pi_1.html" class="btn btn-neutral float-left" title="树莓派一代安装Alpine Linux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="alpine_pi_clone.html" class="btn btn-neutral float-right" title="Clone Alpine Linux (树莓派)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

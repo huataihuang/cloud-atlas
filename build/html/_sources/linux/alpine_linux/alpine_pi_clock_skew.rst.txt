@@ -299,11 +299,12 @@ Alpine Linux在树莓派启动"clock skew"报错
 
    /etc/init.d/.use-swclock
 
-- 修改 ``/lib/rc/sh/init.sh`` ，在 ``mount proc`` 段落后添加::
+- 修改 ``/lib/rc/sh/init.sh`` ，在 ``mount proc`` 段落后添加:
 
-   if [ -e /etc/init.d/.use-swclock ]; then
-       "$RC_LIBEXECDIR"/sbin/swclock /etc/init.d
-   fi
+.. literalinclude:: alpine_pi_clock_skew/init.sh
+   :language: bash
+   :caption: 在 mountproc 段落后面添加
+   :emphasize-lines: 11-13
 
 .. note::
 

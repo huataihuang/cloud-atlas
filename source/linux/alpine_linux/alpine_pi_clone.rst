@@ -75,7 +75,7 @@ Clone Alpine Linux (树莓派)
 
    mv alpine-sys.tar.gz ~/  
    umount /mnt/media/mmcblk0p1
-   mount /mnt
+   umount /mnt
 
 准备TF卡
 ===========

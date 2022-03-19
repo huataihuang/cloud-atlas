@@ -12,6 +12,7 @@ Alpine Linux
    alpine_startup.rst
    alpine_install.rst
    alpine_install_pi.rst
+   alpine_install_pi_1.rst
    alpine_pi_clock_skew.rst
    alpine_pi_clone.rst
    alpine_install_pi_usb_boot.rst
