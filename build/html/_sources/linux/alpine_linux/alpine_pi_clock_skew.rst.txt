@@ -295,11 +295,13 @@ Alpine Linux在树莓派启动"clock skew"报错
 
 我仔细检查了原先 ``diskless`` (没有使用sys方式安装到磁盘) 的Alpine Linux启动信息，发现也是同样出现 ``clock skew`` 报错。只不过，对于diskless，默认就是 ``ro`` 只读挂载 ``/dev/mmcblk0p1`` 。所以，diskless模式启动即使存在 ``clock skew`` 也不影响运行。
 
-- 创建空文件::
+- 创建空文件:
 
-   /etc/init.d/.use-swclock
+.. literalinclude:: alpine_pi_clock_skew/use-swclock
+   :language: bash
+   :caption: 创建 /etc/init.d/.use-swclock 空文件
 
-- 修改 ``/lib/rc/sh/init.sh`` ，在 ``mount proc`` 段落后添加:
+- 修改 ``/lib/rc/sh/init.sh`` ，在 ``mountproc`` 段落后添加:
 
 .. literalinclude:: alpine_pi_clock_skew/init.sh
    :language: bash
@@ -322,17 +324,20 @@ Alpine Linux在树莓派启动"clock skew"报错
 
 既然是文件系统检查错误，我们 ``可不可以放弃检查呢?``
 
-- 修改 ``/etc/fstab`` ，将最后一列指示文件系统fsck的功能关闭::
+- 修改 ``/etc/fstab`` ，将最后一列指示文件系统fsck的功能关闭:
 
-   #UUID=ea1024e0-3e6f-4552-8ebd-18b775e9648b/ext4rw,rel            atime 0 1
-   UUID=ea1024e0-3e6f-4552-8ebd-18b775e9648b/ext4rw,relatime            0 0
+.. literalinclude:: alpine_pi_clock_skew/fstab
+   :language: bash
+   :caption: 配置/etc/fstab关闭磁盘fsck绕过文件系统时间扭曲
 
 然后重启系统，就不再出现文件系统不能挂载的问题了。不过，这个workaround是绕过了fsck，可能存在隐患
 
-解决步骤三: 使用chrony同步时钟
--------------------------------
+解决步骤三: 使用chrony同步时钟(我的环境需要，你不必)
+------------------------------------------------------
 
 上述两个步骤解决了alpine的启动问题，但是还是需要注意，一定要正确配置主机 ``chrony`` 进行时间同步，否则树莓派的时间不准确会导致各种部署问题。
+
+我的局域网限制所以树莓派无法直接访问internet同步时间，这里设置了局域网内部NTP服务器作为时间同步源。如果你的树莓派能够直接访问internet上的NTP服务器，这步可以忽略
 
 - 修订 ``/etc/chrony/chrony.conf`` :
 

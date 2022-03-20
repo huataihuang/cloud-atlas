@@ -26,4 +26,4 @@
 .. toctree::
    :maxdepth: 1
 
-   mini_k3s_hardware.rst
+   mini_k3s_prepare.rst

@@ -15,10 +15,11 @@ Alpine Linux运行Docker
 
    addgroup huatai docker
 
-- 启动Docker服务 - 参考 :ref:`openrc` ::
+- 启动Docker服务 - 参考 :ref:`openrc` :
 
-   sudo rc-update add docker boot
-   sudo service docker start
+.. literalinclude:: alpine_docker/docker_openrc
+   :language: bash
+   :caption: openrc 添加和启动 docker服务
 
 .. note::
 
@@ -27,12 +28,11 @@ Alpine Linux运行Docker
 隔离容器
 ===========
 
-执行以下命令添加 ``dockremap`` ::
+执行以下命令添加 ``dockremap`` :
 
-   adduser -SDHs /sbin/nologin dockremap
-   addgroup -S dockremap
-   echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f3):65536 >> /etc/subuid
-   echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 >> /etc/subgid
+.. literalinclude:: alpine_docker/dockremap
+   :language: bash
+   :caption: 添加dockremap(安全配置)
 
 此时生成的 ``/etc/subuid`` 内容::
 
@@ -78,24 +78,17 @@ alpine的Docker容器资源限制配置
 
 此外，之前我在 :ref:`arm_k8s_deploy` 也遇到同样问题，处理方法请参考该文档。不过在 :ref:`arm_k8s_deploy` 采用了 :ref:`systemd` 所支持的 :ref:`cgroup_v2` : `Docker Engine 20.10 Released: Supports cgroups v2 and Dual Logging <https://www.infoq.com/news/2021/01/docker-engine-cgroups-logging/>`_
 
-- 执行cgroup的fs挂载配置::
+- 执行cgroup的fs挂载配置:
 
-   echo "cgroup /sys/fs/cgroup cgroup defaults 0 0" >> /etc/fstab
+.. literalinclude:: alpine_docker/cgroup_fstab
+   :language: bash
+   :caption: 配置cgroup的fs挂载配置 /etc/fstab
 
-- 创建 ``/etc/cgconfig.conf`` ::
+- 创建 ``/etc/cgconfig.conf`` :
 
-   cat > /etc/cgconfig.conf <<EOF
-   mount {
-     cpuacct = /cgroup/cpuacct;
-     memory = /cgroup/memory;
-     devices = /cgroup/devices;
-     freezer = /cgroup/freezer;
-     net_cls = /cgroup/net_cls;
-     blkio = /cgroup/blkio;
-     cpuset = /cgroup/cpuset;
-     cpu = /cgroup/cpu;
-   }
-   EOF
+.. literalinclude:: alpine_docker/create_cgconfig.conf
+   :language: bash
+   :caption: 创建 /etc/cgconfig.conf
 
 - 如果系统使用 :ref:`alpine_bootloader` ``Syslinux`` (名字是 ``extlinux`` ) 则修订内核参数::
 
@@ -105,9 +98,11 @@ alpine的Docker容器资源限制配置
 
    我的系统没有找到 ``/etc/update-extlinux.conf`` ，仔细核对之后我发现实际上默认安装 :ref:`alpine_without_bootloader` 
 
-不过，我的 :ref:`alpine_install_pi_usb_boot` 没有使用bootloader，所以直接修订 ``/media/sda1/cmdline.txt`` 添加::
+不过，我的 :ref:`alpine_install_pi_usb_boot` 没有使用bootloader，所以直接修订 ``/media/sda1/cmdline.txt`` 添加:
 
-   cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory
+.. literalinclude:: alpine_docker/cmdline.txt
+   :language: bash
+   :caption: /media/sda1/cmdline.txt 添加内核参数
 
 完整配置如下::
 

@@ -20,7 +20,8 @@ apk软件仓库
 .. literalinclude:: alpine_apk/repositories
    :language: bash
    :linenos:
-   :caption:
+   :caption: 激活community仓库
+   :emphasize-lines: 3
 
 .. note::
 

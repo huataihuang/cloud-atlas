@@ -275,25 +275,49 @@
 </ul>
 </div>
 <p>由于树莓派没有硬件时钟，需要解决 <a class="reference internal" href="../../linux/alpine_linux/alpine_pi_clock_skew.html#alpine-pi-clock-skew"><span class="std std-ref">Alpine Linux在树莓派启动”clock skew”报错</span></a> ，所以还需要执行以下步骤:</p>
+<ul class="simple">
+<li><p>创建空文件:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">创建 /etc/init.d/.use-swclock 空文件</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo touch /etc/init.d/.use-swclock
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/lib/rc/sh/init.sh</span></code> ，在 <code class="docutils literal notranslate"><span class="pre">mountproc</span></code> 段落后添加:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">在 mountproc 段落后面添加</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>...
+
+<span class="k">if</span> <span class="nv">$mountproc</span><span class="p">;</span> <span class="k">then</span>
+        ebegin <span class="s2">&quot;Mounting /proc&quot;</span>
+        <span class="k">if</span> ! fstabinfo --mount /proc<span class="p">;</span> <span class="k">then</span>
+                mount -n -t proc -o noexec,nosuid,nodev proc /proc
+        <span class="k">fi</span>
+        eend <span class="nv">$?</span>
+<span class="k">fi</span>
+
+<span class="hll"><span class="k">if</span> <span class="o">[</span> -e /etc/init.d/.use-swclock <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class="hll">    <span class="s2">&quot;</span><span class="nv">$RC_LIBEXECDIR</span><span class="s2">&quot;</span>/sbin/swclock /etc/init.d
+</span><span class="hll"><span class="k">fi</span>
+</span>
+...
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> ，将最后一列指示文件系统fsck的功能关闭( <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">0</span></code> ):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">配置/etc/fstab关闭磁盘fsck绕过文件系统时间扭曲</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#UUID=ea1024e0-3e6f-4552-8ebd-18b775e9648b/ext4rw,rel            atime 0 1</span>
+<span class="nv">UUID</span><span class="o">=</span>ea1024e0-3e6f-4552-8ebd-18b775e9648b/ext4rw,relatime            <span class="m">0</span> <span class="m">0</span>
+</pre></div>
+</div>
+</div>
 <ul>
-<li><p>创建空文件:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/.</span><span class="n">use</span><span class="o">-</span><span class="n">swclock</span>
-</pre></div>
-</div>
-</li>
-<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/lib/rc/sh/init.sh</span></code> ，在 <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">proc</span></code> 段落后添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">e</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="o">/.</span><span class="n">use</span><span class="o">-</span><span class="n">swclock</span>  <span class="p">];</span> <span class="n">then</span>
-    <span class="s2">&quot;$RC_LIBEXECDIR&quot;</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">swclock</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span>
-<span class="n">fi</span>
-</pre></div>
-</div>
-</li>
-<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> ，将最后一列指示文件系统fsck的功能关闭( <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">0</span></code> ):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#UUID=7ffc2989-d85a-4600-a9b2-25d45090f466      /       ext4    rw,relatime 0 1</span>
-<span class="n">UUID</span><span class="o">=</span><span class="mi">7</span><span class="n">ffc2989</span><span class="o">-</span><span class="n">d85a</span><span class="o">-</span><span class="mi">4600</span><span class="o">-</span><span class="n">a9b2</span><span class="o">-</span><span class="mi">25</span><span class="n">d45090f466</span>       <span class="o">/</span>       <span class="n">ext4</span>    <span class="n">rw</span><span class="p">,</span><span class="n">relatime</span> <span class="mi">0</span> <span class="mi">0</span>
-</pre></div>
-</div>
-</li>
 <li><p>重启系统:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reboot</span>
 </pre></div>

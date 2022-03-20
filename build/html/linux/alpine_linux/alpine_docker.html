@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="alpine_startup.html">Alpine Linux快速起步</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_install.html">安装Alpine Linux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_install_pi.html">树莓派环境安装Alpine Linux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="alpine_install_pi_1.html">树莓派一代安装Alpine Linux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_pi_clock_skew.html">Alpine Linux在树莓派启动”clock skew”报错</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_pi_clone.html">Clone Alpine Linux (树莓派)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_install_pi_usb_boot.html">树莓派环境安装Alpine Linux到USB磁盘启动</a></li>
@@ -195,13 +196,15 @@
 </pre></div>
 </div>
 </li>
-<li><p>启动Docker服务 - 参考 <a class="reference internal" href="openrc/index.html#openrc"><span class="std std-ref">OpenRC</span></a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rc</span><span class="o">-</span><span class="n">update</span> <span class="n">add</span> <span class="n">docker</span> <span class="n">boot</span>
-<span class="n">sudo</span> <span class="n">service</span> <span class="n">docker</span> <span class="n">start</span>
+<li><p>启动Docker服务 - 参考 <a class="reference internal" href="openrc/index.html#openrc"><span class="std std-ref">OpenRC</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">openrc 添加和启动 docker服务</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo rc-update add docker boot
+sudo service docker start
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 <div class="admonition note">
 <p class="admonition-title">注解</p>
 <p>我没有安装 <code class="docutils literal notranslate"><span class="pre">docker-compose</span></code> ，后续容器编排主要采用 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a></p>
@@ -209,12 +212,15 @@
 </section>
 <section id="id2">
 <h2>隔离容器<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>执行以下命令添加 <code class="docutils literal notranslate"><span class="pre">dockremap</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>adduser -SDHs /sbin/nologin dockremap
+<p>执行以下命令添加 <code class="docutils literal notranslate"><span class="pre">dockremap</span></code> :</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">添加dockremap(安全配置)</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>adduser -SDHs /sbin/nologin dockremap
 addgroup -S dockremap
-echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f3):65536 &gt;&gt; /etc/subuid
-echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 &gt;&gt; /etc/subgid
+<span class="nb">echo</span> dockremap:<span class="k">$(</span>cat /etc/passwd<span class="p">|</span>grep dockremap<span class="p">|</span>cut -d: -f3<span class="k">)</span>:65536 &gt;&gt; /etc/subuid
+<span class="nb">echo</span> dockremap:<span class="k">$(</span>cat /etc/passwd<span class="p">|</span>grep dockremap<span class="p">|</span>cut -d: -f4<span class="k">)</span>:65536 &gt;&gt; /etc/subgid
 </pre></div>
+</div>
 </div>
 <p>此时生成的 <code class="docutils literal notranslate"><span class="pre">/etc/subuid</span></code> 内容:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dockremap</span><span class="p">:</span><span class="mi">101</span><span class="p">:</span><span class="mi">65536</span>
@@ -243,8 +249,8 @@ echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 &gt;&gt; /etc
 </div>
 <p>详细的配置参数参考 <a class="reference external" href="https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file">Docker docs Reference / Command-line reference / Daemon CLI(dockerd) Daemon configuration file</a></p>
 <p>我实际采用配置:</p>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">alpine 运行docker的 /etc/docker/daemon.json</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">alpine 运行docker的 /etc/docker/daemon.json</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="nt">&quot;userns-remap&quot;</span><span class="p">:</span> <span class="nt">&quot;dockremap&quot;</span>
   <span class="nt">&quot;experimental&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
@@ -275,28 +281,36 @@ echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 &gt;&gt; /etc
 </ul>
 <p>这个问题在 <a class="reference external" href="https://gist.github.com/ruanbekker/fcc906bdcb2fed5937f7ce73a97e1001">ruanbekker/k3s_on_alpine.md</a> 提供了处理方法</p>
 <p>此外，之前我在 <a class="reference internal" href="../../kubernetes/arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 也遇到同样问题，处理方法请参考该文档。不过在 <a class="reference internal" href="../../kubernetes/arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 采用了 <a class="reference internal" href="../redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 所支持的 <a class="reference internal" href="../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> : <a class="reference external" href="https://www.infoq.com/news/2021/01/docker-engine-cgroups-logging/">Docker Engine 20.10 Released: Supports cgroups v2 and Dual Logging</a></p>
+<ul class="simple">
+<li><p>执行cgroup的fs挂载配置:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">配置cgroup的fs挂载配置 /etc/fstab</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;cgroup /sys/fs/cgroup cgroup defaults 0 0&quot;</span> &gt;&gt; /etc/fstab
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/cgconfig.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">创建 /etc/cgconfig.conf</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat &gt; /etc/cgconfig.conf <span class="s">&lt;&lt;EOF</span>
+<span class="s">mount {</span>
+<span class="s">  cpuacct = /cgroup/cpuacct;</span>
+<span class="s">  memory = /cgroup/memory;</span>
+<span class="s">  devices = /cgroup/devices;</span>
+<span class="s">  freezer = /cgroup/freezer;</span>
+<span class="s">  net_cls = /cgroup/net_cls;</span>
+<span class="s">  blkio = /cgroup/blkio;</span>
+<span class="s">  cpuset = /cgroup/cpuset;</span>
+<span class="s">  cpu = /cgroup/cpu;</span>
+<span class="s">}</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
 <ul>
-<li><p>执行cgroup的fs挂载配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;cgroup /sys/fs/cgroup cgroup defaults 0 0&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
-</pre></div>
-</div>
-</li>
-<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/cgconfig.conf</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">cgconfig</span><span class="o">.</span><span class="n">conf</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
-<span class="n">mount</span> <span class="p">{</span>
-  <span class="n">cpuacct</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpuacct</span><span class="p">;</span>
-  <span class="n">memory</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">memory</span><span class="p">;</span>
-  <span class="n">devices</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">devices</span><span class="p">;</span>
-  <span class="n">freezer</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">freezer</span><span class="p">;</span>
-  <span class="n">net_cls</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">net_cls</span><span class="p">;</span>
-  <span class="n">blkio</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">blkio</span><span class="p">;</span>
-  <span class="n">cpuset</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpuset</span><span class="p">;</span>
-  <span class="n">cpu</span> <span class="o">=</span> <span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cpu</span><span class="p">;</span>
-<span class="p">}</span>
-<span class="n">EOF</span>
-</pre></div>
-</div>
-</li>
 <li><p>如果系统使用 <a class="reference internal" href="uefi/alpine_bootloader.html#alpine-bootloader"><span class="std std-ref">Alpine Linux Bootloader</span></a> <code class="docutils literal notranslate"><span class="pre">Syslinux</span></code> (名字是 <code class="docutils literal notranslate"><span class="pre">extlinux</span></code> ) 则修订内核参数:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/default_kernel_opts=&quot;pax_nouderef quiet rootfstype=ext4&quot;/default_kernel_opts=&quot;pax_nouderef quiet rootfstype=ext4 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory&quot;/g&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">update</span><span class="o">-</span><span class="n">extlinux</span><span class="o">.</span><span class="n">conf</span>
 </pre></div>
@@ -308,8 +322,11 @@ echo dockremap:$(cat /etc/passwd|grep dockremap|cut -d: -f4):65536 &gt;&gt; /etc
 <p>我的系统没有找到 <code class="docutils literal notranslate"><span class="pre">/etc/update-extlinux.conf</span></code> ，仔细核对之后我发现实际上默认安装 <a class="reference internal" href="uefi/alpine_bootloader.html#alpine-without-bootloader"><span class="std std-ref">alpine不使用bootloader</span></a></p>
 </div>
 <p>不过，我的 <a class="reference internal" href="alpine_install_pi_usb_boot.html#alpine-install-pi-usb-boot"><span class="std std-ref">树莓派环境安装Alpine Linux到USB磁盘启动</span></a> 没有使用bootloader，所以直接修订 <code class="docutils literal notranslate"><span class="pre">/media/sda1/cmdline.txt</span></code> 添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cgroup_enable</span><span class="o">=</span><span class="n">cpuset</span> <span class="n">cgroup_memory</span><span class="o">=</span><span class="mi">1</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">memory</span>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">/media/sda1/cmdline.txt 添加内核参数</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">cgroup_enable</span><span class="o">=</span>cpuset <span class="nv">cgroup_memory</span><span class="o">=</span><span class="m">1</span> <span class="nv">cgroup_enable</span><span class="o">=</span>memory
 </pre></div>
+</div>
 </div>
 <p>完整配置如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modules</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span><span class="n">squashfs</span><span class="p">,</span><span class="n">sd</span><span class="o">-</span><span class="n">mod</span><span class="p">,</span><span class="n">usb</span><span class="o">-</span><span class="n">storage</span> <span class="n">quiet</span> <span class="n">console</span><span class="o">=</span><span class="n">tty1</span> <span class="n">root</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">cpuset</span> <span class="n">cgroup_memory</span><span class="o">=</span><span class="mi">1</span> <span class="n">cgroup_enable</span><span class="o">=</span><span class="n">memory</span>
