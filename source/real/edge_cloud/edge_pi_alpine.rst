@@ -114,20 +114,25 @@ Alpine安装
 
 由于树莓派没有硬件时钟，需要解决 :ref:`alpine_pi_clock_skew` ，所以还需要执行以下步骤:
 
-- 创建空文件::
+- 创建空文件:
 
-   /etc/init.d/.use-swclock
+.. literalinclude:: ../../linux/alpine_linux/alpine_pi_clock_skew/use-swclock
+   :language: bash
+   :caption: 创建 /etc/init.d/.use-swclock 空文件
 
-- 修改 ``/lib/rc/sh/init.sh`` ，在 ``mount proc`` 段落后添加::
 
-   if [ -e /etc/init.d/.use-swclock  ]; then
-       "$RC_LIBEXECDIR"/sbin/swclock /etc/init.d
-   fi
+- 修改 ``/lib/rc/sh/init.sh`` ，在 ``mountproc`` 段落后添加:
 
-- 修改 ``/etc/fstab`` ，将最后一列指示文件系统fsck的功能关闭( ``0 0`` )::
+.. literalinclude:: ../../linux/alpine_linux/alpine_pi_clock_skew/init.sh
+   :language: bash
+   :caption: 在 mountproc 段落后面添加
+   :emphasize-lines: 11-13
 
-   #UUID=7ffc2989-d85a-4600-a9b2-25d45090f466      /       ext4    rw,relatime 0 1
-   UUID=7ffc2989-d85a-4600-a9b2-25d45090f466       /       ext4    rw,relatime 0 0
+- 修改 ``/etc/fstab`` ，将最后一列指示文件系统fsck的功能关闭( ``0 0`` ):
+
+.. literalinclude:: ../../linux/alpine_linux/alpine_pi_clock_skew/fstab
+   :language: bash
+   :caption: 配置/etc/fstab关闭磁盘fsck绕过文件系统时间扭曲
 
 - 重启系统::
 
