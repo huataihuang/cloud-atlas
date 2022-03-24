@@ -38,33 +38,7 @@ alpine linux初始化
 :ref:`alpine_docker`
 ======================
 
-执行以下步骤实现 :ref:`alpine_docker` :
-
-- 安装docker ::
-
-   apk add docker
-
-- 将自己的账号加入到 ``docker`` 组::
-
-   addgroup huatai docker
-
-- 启动Docker服务 - 参考 :ref:`openrc` :
-
- .. literalinclude:: ../../../linux/alpine_linux/alpine_docker/docker_openrc
-    :language: bash
-    :caption: openrc 添加和启动 docker服务
-
-- 执行以下命令添加 ``dockremap`` :   
-
-.. literalinclude:: ../../../linux/alpine_linux/alpine_docker/dockremap
-   :language: bash
-   :caption: 添加dockremap(安全配置)
-
-- 创建 ``/etc/docker/daemon.json`` :
-
-.. literalinclude:: ../../../linux/alpine_linux/alpine_docker/daemon.json
-   :language: json
-   :caption: alpine 运行docker的 /etc/docker/daemon.json
+执行以下步骤完成 :ref:`alpine_linux` 操作系统调整。注意，默认不需要安装 :ref:`alpine_docker` ，因为 :ref:`k3s` 包含了 :ref:`containerd` 和 :ref:`runc`
 
 - 执行cgroup的fs挂载配置:
 
@@ -88,7 +62,7 @@ alpine linux初始化
 
 .. note::
 
-   我这里遇到一个问题，配置最低的 :ref:`pi_1` 内存不到 180MB ，而安装了 docker 之后，启动即只剩 16MB 。看起来，至少要512MB内存规格的树莓派才可能运行服务了。
+   我这里遇到一个问题，配置最低的 :ref:`pi_1` 内存不到 180MB ，而安装了 docker 之后， 启动即只剩 ``16MB`` 。看起来，至少要512MB内存规格的树莓派才可能运行服务了。
 
    这个问题待后续尝试 :strike:`淘一个二手树莓派` ? (2022年3月，芯片荒加上新冠疫情，树莓派售价飞涨，比之前购买时上价格翻倍，简直疯了)
 

@@ -10,6 +10,7 @@ Shell Atlas
    :maxdepth: 1
 
    bash/index
+   ash/index
    utils/index
 
 .. only::  subproject and html

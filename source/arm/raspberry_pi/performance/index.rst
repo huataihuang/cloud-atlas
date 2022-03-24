@@ -7,6 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
+   pi_benchmark.rst
    pi_overclock.rst
 
 .. only::  subproject and html

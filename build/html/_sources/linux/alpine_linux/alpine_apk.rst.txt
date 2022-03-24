@@ -103,6 +103,8 @@ diskless模式更新内核
    apk add lsblk cfdisk e2fsprogs
    # lspci等维护工具
    apk add pciutils
+   # 下载工具
+   apk add curl axel
 
 
 参考
