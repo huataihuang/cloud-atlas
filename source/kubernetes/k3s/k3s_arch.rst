@@ -6,7 +6,7 @@ K3s架构
 
 在k3s集群中，一个节点运行控制平面的节点被称为 ``server`` ，而一个节点只运行 ``kubelet`` 则被称为 ``agent`` 。
 
-在 ``server`` 和 ``agent`` 上都有容器运行时( ``container runtime`` ) 和对应 ``kubeproxy`` 来管理集群见的网络流量和tunneling。
+在 ``server`` 和 ``agent`` 上都有容器运行时( ``container runtime`` ) 和对应 ``kubeproxy`` 来管理集群间的网络流量和tunneling。
 
 .. figure:: ../../_static/kubernetes/k3s/k3s.png
    :scale: 60
@@ -50,6 +50,12 @@ K3s发行版支持不同的架构:
 - AMD64
 - ARM64
 - ARMv7
+
+.. note::
+
+   我最初没有注意到 ``k3s`` 发行版支持的ARM最低架构是 ``ARMv7`` (虽然软件包打包为 ``armhf`` 看上去也是32位架构)，所以规划采用 :ref:`pi_1` 来构建 :ref:`the_most_smallest_cheapest_k8s` 。但是， :ref:`pi_1` 是 :ref:`armv6` 微架构，导致运行出现 :ref:`arm_illegal_instruction` 。
+
+   最终，我采用 :ref:`build_k3s` 自己构建 :ref:`armv6` 的 ``k3s`` 执行程序。
 
 作为轻量级Kuberntes发行版， ``K3s`` 可以运行在:
 

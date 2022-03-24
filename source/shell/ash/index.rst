@@ -1,14 +1,13 @@
-.. _containerd:
+.. _ash:
 
 =================================
-Containerd
+ash
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   containerd_runtime.rst
-   estargz_lazy_pulling.rst
+   ash_startup.rst
 
 .. only::  subproject and html
 

@@ -1,7 +1,7 @@
 .. _jetson_nano_hardware:
 
 ========================
-Jetson Nano硬件概览
+Jetson Nano硬件规格
 ========================
 
 `NVIDIA Jetson Nano <https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-nano/>`_ 是面向AI的嵌入式系统，采用ARM Contrex-A57架构结合了NVIDIA的 Maxwel架构GPU:

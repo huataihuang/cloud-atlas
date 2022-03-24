@@ -169,22 +169,9 @@ shell环境解决ssh-agent对会话的要求
 
 如果不想为每个打开的shell窗口都运行一个代理（或者在这些窗口之间复制和粘贴环境设置），可以在 ``~/.profile`` 中加入如下代码
 
-.. code:: bash
-
-   if [ -f ~/.agent.env ]; then
-     . ~/.agent.env -s > /dev/null
-
-     if ! kill -0 $SSH_AGENT_PID > /dev/null 2>&1; then
-       echo
-       echo "Stale agent file found.  Spawning new agent..."
-       eval `ssh-agent -s | tee ~/.agent.env`
-       ssh-add
-     fi
-   else
-     echo "Starting ssh-agent..."
-     eval `ssh-agent -s | tee ~/.agent.env`
-     ssh-add
-   fi
+.. literalinclude:: ssh_key/profile
+   :language: bash
+   :caption: 在 ~/.profile 添加ssh-agent配置
 
 以上脚本会维护一个 ``~/.agent.env`` 文件以及指向当前运行的 ``ssh-agent`` 的环境。如果代理失败，将会自动打开一个新的终端窗口并添加密钥，所有后续的终端窗口都可以共享这个窗口。
 

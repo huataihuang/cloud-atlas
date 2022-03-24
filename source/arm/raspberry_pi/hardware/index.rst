@@ -4,6 +4,11 @@
 树莓派硬件
 =================================
 
+参考
+========
+
+- `Wikipedia: Raspberry Pi <https://en.wikipedia.org/wiki/Raspberry_Pi>`_
+
 .. toctree::
    :maxdepth: 1
 
