@@ -41,5 +41,7 @@ K3s高可用etcd
   - 然后 :ref:`alpine_cfssl`
   - 再按照 :ref:`etcd_tls` 方法完成 ``cfssl`` 安装
 
+.. note::
 
+   Red Hat :ref:`openshift` 所使用的 etcd 镜像就是采用上游 etcd镜像 (基于 Alpine Linux OS) `install: use origin-v4.0 etcd image #511 <https://github.com/openshift/machine-config-operator/pull/511>`_
 
