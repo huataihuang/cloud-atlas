@@ -1,13 +1,13 @@
-.. _android_build:
+.. _build_pi:
 
 =================================
-制作 Android 镜像
+构建树莓派系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   android_build_env.rst
+   cross_compile_pi.rst
 
 .. only::  subproject and html
 

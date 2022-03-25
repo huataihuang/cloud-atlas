@@ -31,6 +31,24 @@
 
    mkdir -p build/data && make download && make generate
 
+- 编译完整发布代码::
+
+   make
+
+编译完成后将生成 ``./dist/artifacts/k3s``
+
+.. note::
+
+   ``k3s`` 的编译是在Docker容器中进行的，所以需要确保容器能够畅通访问internet。从我的编译经验来看，需要配置 :ref:`squid_socks_peer` 并设置 :ref:`docker_proxy`
+
+.. note::
+
+   在 :ref:`pi_1` 上编译 ``k3s`` 是非常漫长的过程，也许应该采用 :ref:`cross_compile_pi`
+
+.. note::
+
+   在 :ref:`pi_1` 上编译 ``k3s`` 我还遇到一个问题是内存不足，编译过程有一个 ``compile`` 步骤被oomkill了，导致最终build失败。目前，我临时采用添加512MB swap来尝试绕过。
+
 代理
 --------
 

@@ -21,6 +21,7 @@ Raspberry Pi
    uefi/index
    performance/index
    debug/index
+   build/index
    pi_cluster/index
    android/index
    machine_learning/index
