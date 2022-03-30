@@ -47,7 +47,7 @@ systemd日志通过journalctl管理，可以检查使用磁盘量和清理：
    journalctl --vacuum-time=2d
    journalctl --vacuum-size=500M
 
-- 如果要手工删除日志问价，一定要在删除前轮转一次journal日志::
+- 如果要手工删除日志文件，一定要在删除前轮转一次journal日志::
 
    systemctl kill --kill-who=main --signal=SIGUSR2 systemd-journald.service
 

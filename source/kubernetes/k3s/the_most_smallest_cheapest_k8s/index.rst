@@ -27,5 +27,5 @@
    :maxdepth: 1
 
    mini_k3s_prepare.rst
-   mini_k3s_deploy.rst
    build_k3s.rst
+   mini_k3s_deploy.rst

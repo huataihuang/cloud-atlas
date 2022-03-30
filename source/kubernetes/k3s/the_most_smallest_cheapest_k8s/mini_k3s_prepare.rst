@@ -38,7 +38,13 @@ alpine linux初始化
 :ref:`alpine_docker`
 ======================
 
-执行以下步骤完成 :ref:`alpine_linux` 操作系统调整。注意，默认不需要安装 :ref:`alpine_docker` ，因为 :ref:`k3s` 包含了 :ref:`containerd` 和 :ref:`runc`
+执行以下步骤完成 :ref:`alpine_linux` 操作系统调整。
+
+.. note::
+
+   默认不需要安装 :ref:`alpine_docker` ，因为 :ref:`k3s` 包含了 :ref:`containerd` 和 :ref:`runc`
+
+   不过 :ref:`build_k3s` 则需要先安装 :ref:`alpine_docker` ，因为所有编译过程都是在容器中完成
 
 - 执行cgroup的fs挂载配置:
 
@@ -59,11 +65,3 @@ alpine linux初始化
    :caption: /media/mmcblk0p1/cmdline.txt 添加内核参数
 
 - 重启主机，然后检查 ``docker info`` 输出信息
-
-.. note::
-
-   我这里遇到一个问题，配置最低的 :ref:`pi_1` 内存不到 180MB ，而安装了 docker 之后， 启动即只剩 ``16MB`` 。看起来，至少要512MB内存规格的树莓派才可能运行服务了。
-
-   这个问题待后续尝试 :strike:`淘一个二手树莓派` ? (2022年3月，芯片荒加上新冠疫情，树莓派售价飞涨，比之前购买时上价格翻倍，简直疯了)
-
-   可能不能构建3节点集群，先尝试2节点简化部署，然后将这个内存极为有限的节点作为一个调度演示节点？运行极为轻量级的内存节点？削减 ``dockerd`` 和 ``containerd`` 的内存占用？
