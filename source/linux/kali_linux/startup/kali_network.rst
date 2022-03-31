@@ -48,38 +48,31 @@ Kali Linux网络配置
 无线网络配置
 ==============
 
-- 配置 ``/etc/default/crda`` 设置5GHz无线网络必须指定的国家编码(也可以在 ``wpa_supplicant.conf`` 配置中指定 ``country=CN`` )::
+- 配置 ``/etc/default/crda`` 设置5GHz无线网络必须指定的国家编码(也可以在 ``wpa_supplicant.conf`` 配置中指定 ``country=CN`` ) ( :ref:`_wifi_5ghz_country_code` )::
 
    REGDOMAIN=CN
 
-使用 :ref:`networkmanager` 中的 ``nmcli`` 命令配置
+使用 :ref:`networkmanager` :ref:`nmcli_wifi`
 
 - 检查无线网络AP::
 
    sudo nmcli device wifi list
 
-显示::
+- 增加连接到 ``home`` 热点的网络连接:
 
-   IN-USE  BSSID              SSID    MODE   CHAN  RATE        SIGNAL  BARS  SECURITY
-   ...
-           80:A2:35:45:8D:D8  office  Infra  56    130 Mbit/s  52      **    WPA2 802.1X
-   ...
-           80:A2:35:45:B2:00  home    Infra  8     130 Mbit/s  80      ***   WPA2
-
-- 增加连接到 ``home`` 热点的网络连接::
-
-   nmcli con add con-name home ifname wlp3s0 type wifi ssid home \
-    wifi-sec.key-mgmt wpa-psk wifi-sec.psk MYPASSWORD
+.. literalinclude:: ../../../linux/ubuntu_linux/network/networkmanager/nmcli_wifi_wpa-psk
+   :language: bash
+   :caption: nmcli添加wpa-psk认证wifi
 
 - 连接 ``home`` 热点::
 
    nmcli con up home
 
-- 增加连接到 ``office`` 热点的网络连接::
+- 增加连接到 ``office`` 热点的网络连接:
 
-   nmcli con add con-name office ifname wlan0 type wifi ssid office \
-    wifi-sec.key-mgmt wpa-eap 802-1x.eap peap 802-1x.phase2-auth mschapv2 \
-    802-1x.identity "USERNAME" 802-1x.password "MYPASSWORD"
+.. literalinclude:: ../../../linux/ubuntu_linux/network/networkmanager/nmcli_wifi_wpa-eap
+   :language: bash
+   :caption: nmcli添加wpa-eap认证(802.1x)wifi
 
 - 连接 ``office`` 热点::
 

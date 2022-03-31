@@ -9,6 +9,7 @@
 
    edge_cloud_infra.rst
    edge_jetson.rst
+   edge_jetson_net.rst
    edge_pi.rst
    edge_pi_os.rst
    edge_pi_alpine.rst

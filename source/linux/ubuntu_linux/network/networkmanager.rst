@@ -199,10 +199,96 @@ nmcli命令案例
    nmcli con mod "static-eth0" ipv4.dns "xxx.xxx.120.1,8.8.8.8"
    nmcli con up id "static-eth0"
 
+配置单网卡多IP(IP Aliasing)
+==============================
+
+我没有找到直接使用 ``nmcli`` 来添加IP别名的命令行文档，不过 NetworkManager 有一个终端交互界面程序 ``nmtui`` (Text User Interface for controlling NetworkmNager)，可以非常方便配置网络以及IP Aliasing:
+
+- 运行::
+
+   nmtui
+
+- 选择菜单 ``Edit a connection => eth0 =>`` 则在下图中，可以为 ``eth0`` 添加多个IP地址:
+
+.. figure:: ../../../_static/linux/ubuntu_linux/network/nmtui_ip_aliasing.png
+   :scale: 40
+
+- 实际完成后可以检查 ``/etc/NetworkManager/system-connections/eth0`` :
+
+.. literalinclude:: networkmanager/eth0
+   :language: bash
+   :emphasize-lines: 15,16
+   :caption: nmtui配置/etc/NetworkManager/system-connections/eth0的单网卡多IP(IP Aliasing)
+
+- 然后需要重启一次网卡来激活::
+
+   nmcli con down eth0
+   nmcli con up eth0
+
+- 观察 ``ip addr list`` 就可以看到 ``eth0`` 上绑定了2个IP地址::
+
+   3: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+       link/ether 00:00:00:00:00:01 brd ff:ff:ff:ff:ff:ff
+       inet 192.168.7.23/24 brd 192.168.7.255 scope global noprefixroute eth0
+          valid_lft forever preferred_lft forever
+       inet 192.168.6.23/24 brd 192.168.6.255 scope global noprefixroute eth0
+          valid_lft forever preferred_lft forever
+       inet6 fe80::1f6:d793:b68c:bbcd/64 scope link noprefixroute
+          valid_lft forever preferred_lft forever
+
+.. note::
+
+   不过，NetworkManager不直接支持 ``IP Aliasing`` 的 ``eth0`` 和 ``eth0:1`` 这样的配置   
+
+.. _nmcli_wifi:
+
 配置无线网络
 ===============
 
-我在 :ref:`kali_network` 实践中有一个配置无线网络的案例
+我在 :ref:`kali_network` 实践中有一个配置无线网络的案例，汇总整理在这里
+
+- 对于5GHz无线网络必须指定的国家编码，否则会导致非常奇怪的连接不存在全为0的SSID热点 ( :ref:`wifi_5ghz_country_code` ):
+
+  - 配置 ``wpa_supplicant.conf`` ::
+
+     ``country=CN``
+
+  - 或者配置 ``/etc/default/crda`` ::
+
+     REGDOMAIN=CN
+
+- 检查无线网络AP::
+
+   sudo nmcli device wifi list
+
+显示::
+
+   IN-USE  BSSID              SSID    MODE   CHAN  RATE        SIGNAL  BARS  SECURITY
+   ...
+           80:A2:35:45:8D:D8  office  Infra  56    130 Mbit/s  52      **    WPA2 802.1X
+   ...
+           80:A2:35:45:B2:00  home    Infra  8     130 Mbit/s  80      ***   WPA2   
+
+- 增加连接到 ``home`` 热点(WPA认证)的网络连接:
+
+.. literalinclude:: networkmanager/nmcli_wifi_wpa-psk
+   :language: bash
+   :caption: nmcli添加wpa-psk认证wifi
+   
+- 添加连接到 ``office`` 热点的网络连接:
+
+.. literalinclude:: networkmanager/nmcli_wifi_wpa-eap
+   :language: bash
+   :caption: nmcli添加wpa-eap认证(802.1x)wifi
+
+- 执行以下命令连接到 ``home`` 热点::
+
+
+   nmcli con up home
+
+如果要连接 ``office`` 热点则使用::
+
+   nmcli con up office
 
 MAC Spoofing
 ===============
@@ -234,3 +320,4 @@ NetworkManager的Mac Spoofing是通过 ``ethernet.cloned-mac-address`` 和 ``wif
 - `CONFIGURING IP NETWORKING WITH NMCLI <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_nmcli>`_
 - `MAC Address Spoofing in NetworkManager 1.4.0 <https://blogs.gnome.org/thaller/2016/08/26/mac-address-spoofing-in-networkmanager-1-4-0/>`_
 - `Configuring Wi-Fi on Debian 10 <https://linuxhint.com/wi-fi_configuring_debian_10/>`_
+- `How To Add Secondary IP / Alias On Network Interface in RHEL/CentOS 7 <https://ma.ttias.be/how-to-add-secondary-ip-alias-on-network-interface-in-rhel-centos-7/>`_

@@ -393,9 +393,141 @@
 </li>
 </ul>
 </section>
-<section id="id6">
-<h2>配置无线网络<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
-<p>我在 <a class="reference internal" href="../../kali_linux/startup/kali_network.html#kali-network"><span class="std std-ref">Kali Linux网络配置</span></a> 实践中有一个配置无线网络的案例</p>
+<section id="ip-ip-aliasing">
+<h2>配置单网卡多IP(IP Aliasing)<a class="headerlink" href="#ip-ip-aliasing" title="永久链接至标题">¶</a></h2>
+<p>我没有找到直接使用 <code class="docutils literal notranslate"><span class="pre">nmcli</span></code> 来添加IP别名的命令行文档，不过 NetworkManager 有一个终端交互界面程序 <code class="docutils literal notranslate"><span class="pre">nmtui</span></code> (Text User Interface for controlling NetworkmNager)，可以非常方便配置网络以及IP Aliasing:</p>
+<ul>
+<li><p>运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmtui</span>
+</pre></div>
+</div>
+</li>
+<li><p>选择菜单 <code class="docutils literal notranslate"><span class="pre">Edit</span> <span class="pre">a</span> <span class="pre">connection</span> <span class="pre">=&gt;</span> <span class="pre">eth0</span> <span class="pre">=&gt;</span></code> 则在下图中，可以为 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> 添加多个IP地址:</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../_images/nmtui_ip_aliasing.png"><img alt="../../../_images/nmtui_ip_aliasing.png" src="../../../_images/nmtui_ip_aliasing.png" style="width: 600.8000000000001px; height: 481.6px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>实际完成后可以检查 <code class="docutils literal notranslate"><span class="pre">/etc/NetworkManager/system-connections/eth0</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">nmtui配置/etc/NetworkManager/system-connections/eth0的单网卡多IP(IP Aliasing)</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>connection<span class="o">]</span>
+<span class="nv">id</span><span class="o">=</span>eth0
+<span class="nv">uuid</span><span class="o">=</span>a94fa1de-b290-3b83-9f49-137981396543
+<span class="nv">type</span><span class="o">=</span>ethernet
+autoconnect-priority<span class="o">=</span>-999
+<span class="nv">permissions</span><span class="o">=</span>
+<span class="nv">timestamp</span><span class="o">=</span><span class="m">1648732842</span>
+
+<span class="o">[</span>ethernet<span class="o">]</span>
+auto-negotiate<span class="o">=</span><span class="nb">true</span>
+mac-address<span class="o">=</span><span class="m">00</span>:00:00:00:00:01
+mac-address-blacklist<span class="o">=</span>
+
+<span class="o">[</span>ipv4<span class="o">]</span>
+<span class="hll"><span class="nv">address1</span><span class="o">=</span><span class="m">192</span>.168.7.23/24
+</span><span class="hll"><span class="nv">address2</span><span class="o">=</span><span class="m">192</span>.168.6.23/24
+</span>dns-search<span class="o">=</span>
+<span class="nv">method</span><span class="o">=</span>manual
+
+<span class="o">[</span>ipv6<span class="o">]</span>
+addr-gen-mode<span class="o">=</span>stable-privacy
+dns-search<span class="o">=</span>
+ip6-privacy<span class="o">=</span><span class="m">0</span>
+<span class="nv">method</span><span class="o">=</span>auto
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>然后需要重启一次网卡来激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">con</span> <span class="n">down</span> <span class="n">eth0</span>
+<span class="n">nmcli</span> <span class="n">con</span> <span class="n">up</span> <span class="n">eth0</span>
+</pre></div>
+</div>
+</li>
+<li><p>观察 <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span> <span class="pre">list</span></code> 就可以看到 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> 上绑定了2个IP地址:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="p">:</span> <span class="n">eth0</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">pfifo_fast</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span>
+    <span class="n">inet</span> <span class="mf">192.168.7.23</span><span class="o">/</span><span class="mi">24</span> <span class="n">brd</span> <span class="mf">192.168.7.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">noprefixroute</span> <span class="n">eth0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet</span> <span class="mf">192.168.6.23</span><span class="o">/</span><span class="mi">24</span> <span class="n">brd</span> <span class="mf">192.168.6.255</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">noprefixroute</span> <span class="n">eth0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="mi">1</span><span class="n">f6</span><span class="p">:</span><span class="n">d793</span><span class="p">:</span><span class="n">b68c</span><span class="p">:</span><span class="n">bbcd</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span> <span class="n">noprefixroute</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>不过，NetworkManager不直接支持 <code class="docutils literal notranslate"><span class="pre">IP</span> <span class="pre">Aliasing</span></code> 的 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> 和 <code class="docutils literal notranslate"><span class="pre">eth0:1</span></code> 这样的配置</p>
+</div>
+</section>
+<section id="nmcli-wifi">
+<span id="id6"></span><h2>配置无线网络<a class="headerlink" href="#nmcli-wifi" title="永久链接至标题">¶</a></h2>
+<p>我在 <a class="reference internal" href="../../kali_linux/startup/kali_network.html#kali-network"><span class="std std-ref">Kali Linux网络配置</span></a> 实践中有一个配置无线网络的案例，汇总整理在这里</p>
+<ul>
+<li><p>对于5GHz无线网络必须指定的国家编码，否则会导致非常奇怪的连接不存在全为0的SSID热点 ( <a class="reference internal" href="wpa_supplicant.html#wifi-5ghz-country-code"><span class="std std-ref">5G Hz无线网络国家代码</span></a> ):</p>
+<ul>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>``country=CN``
+</pre></div>
+</div>
+</li>
+<li><p>或者配置 <code class="docutils literal notranslate"><span class="pre">/etc/default/crda</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REGDOMAIN</span><span class="o">=</span><span class="n">CN</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>检查无线网络AP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nmcli</span> <span class="n">device</span> <span class="n">wifi</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IN</span><span class="o">-</span><span class="n">USE</span>  <span class="n">BSSID</span>              <span class="n">SSID</span>    <span class="n">MODE</span>   <span class="n">CHAN</span>  <span class="n">RATE</span>        <span class="n">SIGNAL</span>  <span class="n">BARS</span>  <span class="n">SECURITY</span>
+<span class="o">...</span>
+        <span class="mi">80</span><span class="p">:</span><span class="n">A2</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span><span class="mi">8</span><span class="n">D</span><span class="p">:</span><span class="n">D8</span>  <span class="n">office</span>  <span class="n">Infra</span>  <span class="mi">56</span>    <span class="mi">130</span> <span class="n">Mbit</span><span class="o">/</span><span class="n">s</span>  <span class="mi">52</span>      <span class="o">**</span>    <span class="n">WPA2</span> <span class="mf">802.1</span><span class="n">X</span>
+<span class="o">...</span>
+        <span class="mi">80</span><span class="p">:</span><span class="n">A2</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span><span class="n">B2</span><span class="p">:</span><span class="mi">00</span>  <span class="n">home</span>    <span class="n">Infra</span>  <span class="mi">8</span>     <span class="mi">130</span> <span class="n">Mbit</span><span class="o">/</span><span class="n">s</span>  <span class="mi">80</span>      <span class="o">***</span>   <span class="n">WPA2</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>增加连接到 <code class="docutils literal notranslate"><span class="pre">home</span></code> 热点(WPA认证)的网络连接:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">nmcli添加wpa-psk认证wifi</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nmcli con add con-name home ifname wlp3s0 <span class="nb">type</span> wifi ssid home <span class="se">\</span>
+      wifi-sec.key-mgmt wpa-psk wifi-sec.psk MYPASSWORD
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>添加连接到 <code class="docutils literal notranslate"><span class="pre">office</span></code> 热点的网络连接:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">nmcli添加wpa-eap认证(802.1x)wifi</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nmcli con add con-name office ifname wlan0 <span class="nb">type</span> wifi ssid office <span class="se">\</span>
+  wifi-sec.key-mgmt wpa-eap <span class="m">802</span>-1x.eap peap <span class="m">802</span>-1x.phase2-auth mschapv2 <span class="se">\</span>
+  <span class="m">802</span>-1x.identity <span class="s2">&quot;USERNAME&quot;</span> <span class="m">802</span>-1x.password <span class="s2">&quot;MYPASSWORD&quot;</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>执行以下命令连接到 <code class="docutils literal notranslate"><span class="pre">home</span></code> 热点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">con</span> <span class="n">up</span> <span class="n">home</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果要连接 <code class="docutils literal notranslate"><span class="pre">office</span></code> 热点则使用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">con</span> <span class="n">up</span> <span class="n">office</span>
+</pre></div>
+</div>
 </section>
 <section id="mac-spoofing">
 <h2>MAC Spoofing<a class="headerlink" href="#mac-spoofing" title="永久链接至标题">¶</a></h2>
@@ -432,6 +564,7 @@
 <li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-configuring_ip_networking_with_nmcli">CONFIGURING IP NETWORKING WITH NMCLI</a></p></li>
 <li><p><a class="reference external" href="https://blogs.gnome.org/thaller/2016/08/26/mac-address-spoofing-in-networkmanager-1-4-0/">MAC Address Spoofing in NetworkManager 1.4.0</a></p></li>
 <li><p><a class="reference external" href="https://linuxhint.com/wi-fi_configuring_debian_10/">Configuring Wi-Fi on Debian 10</a></p></li>
+<li><p><a class="reference external" href="https://ma.ttias.be/how-to-add-secondary-ip-alias-on-network-interface-in-rhel-centos-7/">How To Add Secondary IP / Alias On Network Interface in RHEL/CentOS 7</a></p></li>
 </ul>
 </section>
 </section>
