@@ -8,7 +8,8 @@ ssh服务
    :maxdepth: 1
 
    ssh_key.rst
-   ssh_tunnel.rst
+   ssh_tunneling.rst
+   ssh_tunneling_remote_port_forwarding.rst
    entropy_random.rst
    speed_up_ssh.rst
    ssh_multiplexing.rst
