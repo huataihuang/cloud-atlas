@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ssh服务 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>SSH Tunneling: 远程服务端口转发 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="ssh密钥" href="ssh_key.html" />
-    <link rel="prev" title="Ngrok架构" href="../tls/ngrok/ngrok_arch.html" /> 
+    <link rel="next" title="熵和随机数" href="entropy_random.html" />
+    <link rel="prev" title="SSH隧道" href="ssh_tunneling.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -66,10 +66,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../ntp/index.html">ntp服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dns/index.html">DNS服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tls/index.html">TLS(Transport Layer Security)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">ssh服务</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">ssh服务</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="ssh_key.html">ssh密钥</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_tunneling.html">SSH隧道</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ssh_tunneling_remote_port_forwarding.html">SSH Tunneling: 远程服务端口转发</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SSH Tunneling: 远程服务端口转发</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ssh">一条简单的SSH命令</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="entropy_random.html">熵和随机数</a></li>
 <li class="toctree-l3"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_multiplexing.html">ssh多路传输multiplexing加速</a></li>
@@ -131,9 +135,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Infra-Service Atlas</a> &raquo;</li>
-      <li>ssh服务</li>
+          <li><a href="index.html">ssh服务</a> &raquo;</li>
+      <li>SSH Tunneling: 远程服务端口转发</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/infra_service/ssh/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/infra_service/ssh/ssh_tunneling_remote_port_forwarding.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -141,27 +146,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ssh">
-<span id="id1"></span><h1>ssh服务<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="ssh_key.html">ssh密钥</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_tunneling.html">SSH隧道</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_tunneling_remote_port_forwarding.html">SSH Tunneling: 远程服务端口转发</a></li>
-<li class="toctree-l1"><a class="reference internal" href="entropy_random.html">熵和随机数</a></li>
-<li class="toctree-l1"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_multiplexing.html">ssh多路传输multiplexing加速</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_proxycommand.html">SSH ProxyCommand实现穿透主机访问后端服务器</a></li>
+  <section id="ssh-tunneling">
+<span id="ssh-tunneling-remote-port-forwarding"></span><h1>SSH Tunneling: 远程服务端口转发<a class="headerlink" href="#ssh-tunneling" title="永久链接至标题">¶</a></h1>
+<p><a class="reference internal" href="ssh_tunneling.html#ssh-tunneling"><span class="std std-ref">SSH隧道</span></a> 可以为应用服务(端口)访问提供加密隧道，可以非常方便实现远程访问内网服务器。此外，SSH端口转发还有一个非常强大的远程服务端口转发功能，可以将远程服务器上的端口访问反向映射回本地主机。这个功能在以下场景非常实用:</p>
+<ul class="simple">
+<li><p>国内运营商(电信、移动、联通)个人家庭宽带大多都不提供互联网公网IP地址，计算机爱好者不能方便地在家中架设对外提供服务的计算机。你可以在公有云上租用一个非常廉价的VPS，然后采用SSH Tunneling的远程服务端口转发，将VPS的80和443端口映射到家中的主机服务端口上，这样就可以向互联网提供服务</p></li>
+<li><p>如果需要临时将内部主机(例如家中的开发测试主机)的调试端口开放给外部用户联调，也可以使用 SSH Tunneling的远程服务端口转发实现</p></li>
 </ul>
+<p>实际上，这个简单的SSH Tunneling远程端口服务转发就是 <a class="reference internal" href="../tls/localtunnel/index.html#localtunnel"><span class="std std-ref">localtunnel</span></a> 的底层实现原理，可以用来构建个人服务器，对internet提供服务。</p>
+<section id="ssh">
+<h2>一条简单的SSH命令<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h2>
+<p>使用以下命令，可以从本地主机上发起一个远程端口转发，建立 <a class="reference internal" href="ssh_tunneling.html#ssh-tunneling"><span class="std std-ref">SSH隧道</span></a> 之后，internet用户就可以通过访问远程服务器上的 <code class="docutils literal notranslate"><span class="pre">REMOTE_PORT</span></code> 访问到你本地局域网 <code class="docutils literal notranslate"><span class="pre">DESTINATION</span></code> 主机的 <code class="docutils literal notranslate"><span class="pre">DESTINATION_PORT</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">R</span> <span class="p">[</span><span class="n">REMOTE</span><span class="p">:]</span><span class="n">REMOTE_PORT</span><span class="p">:</span><span class="n">DESTINATION</span><span class="p">:</span><span class="n">DESTINATION_PORT</span> <span class="p">[</span><span class="n">USER</span><span class="o">@</span><span class="p">]</span><span class="n">SSH_SERVER</span>
+</pre></div>
 </div>
+</section>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://linuxize.com/post/how-to-setup-ssh-tunneling/">How to Set up SSH Tunneling (Port Forwarding)</a></p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../tls/ngrok/ngrok_arch.html" class="btn btn-neutral float-left" title="Ngrok架构" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ssh_key.html" class="btn btn-neutral float-right" title="ssh密钥" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ssh_tunneling.html" class="btn btn-neutral float-left" title="SSH隧道" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="entropy_random.html" class="btn btn-neutral float-right" title="熵和随机数" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

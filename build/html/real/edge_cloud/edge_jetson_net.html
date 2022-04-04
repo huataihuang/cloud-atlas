@@ -190,7 +190,31 @@
 </section>
 <section id="hp-ilo">
 <h2>端口转发 - <a class="reference internal" href="../../linux/server/hardware/hpe/hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a><a class="headerlink" href="#hp-ilo" title="永久链接至标题">¶</a></h2>
-<p><a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 的带外管理网口是内部独立网段 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> 上的 <code class="docutils literal notranslate"><span class="pre">192.168.6.254</span></code> ，从外部无法直接访问，所以我通过 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> 的 <a class="reference internal" href="../../infra_service/ssh/ssh_tunnel.html#ssh-tunnel"><span class="std std-ref">SSH隧道</span></a> 做端口转发，这样只要ssh登陆到网关主机( <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> )就可以从外部访问到服务器的 <a class="reference internal" href="../../linux/server/hardware/hpe/hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a></p>
+<p><a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 的带外管理网口是内部独立网段 <code class="docutils literal notranslate"><span class="pre">192.168.6.x</span></code> 上的 <code class="docutils literal notranslate"><span class="pre">192.168.6.254</span></code> ，从外部无法直接访问，所以我通过 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> 的 <a class="reference internal" href="../../infra_service/ssh/ssh_tunneling.html#ssh-tunneling"><span class="std std-ref">SSH隧道</span></a> 做端口转发，这样只要ssh登陆到网关主机( <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> )就可以从外部访问到服务器的 <a class="reference internal" href="../../linux/server/hardware/hpe/hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a></p>
+<ul class="simple">
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> (采用 <a class="reference internal" href="../../infra_service/ssh/ssh_multiplexing.html#ssh-multiplexing"><span class="std std-ref">ssh多路传输multiplexing加速</span></a> 结合 <a class="reference internal" href="../../infra_service/ssh/ssh_tunneling.html#ssh-tunneling"><span class="std std-ref">SSH隧道</span></a> ):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">~/.ssh/config 配置所有主机登陆激活ssh multiplexing,压缩以及不检查服务器SSH key(注意风险控制)</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host *
+  ServerAliveInterval <span class="m">60</span>
+  ControlMaster auto
+  ControlPath ~/.ssh/%h-%p-%r
+  ControlPersist yes
+  StrictHostKeyChecking no
+  Compression yes
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">~/.ssh/config 配置SSH端口转发</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host jetson
+    HostName <span class="m">192</span>.168.7.23
+    LocalForward <span class="m">25443</span> <span class="m">192</span>.168.6.254:443
+    LocalForward <span class="m">8443</span>  <span class="m">192</span>.168.6.204:8443
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 

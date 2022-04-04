@@ -99,15 +99,11 @@ OpenSSH通过 ``ControlMaster`` ， ``ControlPath`` 和 ``ControlPersist`` 配�
 
    从OpenSSH 6.7开始 ``%r@%h:%p`` 可以合并成 ``%C`` ，这个参数会自动生成 ``%l%h%p%r`` 的哈希，优点是可以唯一标识连接
 
-也可以配置成通用配置(对所有服务器生效)::
+也可以配置成通用配置(对所有服务器生效):
 
-   Host *
-     ServerAliveInterval 60
-     ControlMaster auto
-     ControlPath ~/.ssh/%h-%p-%r
-     ControlPersist yes
-     StrictHostKeyChecking no
-     Compression yes
+.. literalinclude:: ssh_multiplexing/ssh_config
+   :language: bash
+   :caption: 配置所有主机登陆激活ssh multiplexing,压缩以及不检查服务器SSH key(注意风险控制)
 
 .. note::
 

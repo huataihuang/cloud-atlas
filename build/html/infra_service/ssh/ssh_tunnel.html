@@ -69,7 +69,8 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">ssh服务</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="ssh_key.html">ssh密钥</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">SSH隧道</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">SSH命令行端口转发</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="entropy_random.html">熵和随机数</a></li>
@@ -78,6 +79,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ssh_proxycommand.html">SSH ProxyCommand实现穿透主机访问后端服务器</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../syslog/index.html">syslog服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../samba/index.html">Samba服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../nfs/index.html">nfs服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../asciinema/index.html">asciinema:终端会话记录和分享</a></li>
@@ -145,11 +147,55 @@
              
   <section id="ssh">
 <span id="ssh-tunnel"></span><h1>SSH隧道<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h1>
+<p>SSH Tunneling (SSH隧道)也称为SSH port forwarding(SSH端口转发)，这是一个非常有用的工具，可以实现类似 <a class="reference internal" href="../../web/proxy/squid/squid_socks_peer.html#squid-socks-peer"><span class="std std-ref">Squid父级socks代理</span></a> 架构中穿透GFW实现多级代理，也可以用一条简单SSH命令(VPN)实现自由翻墙。</p>
+<p>SSH提供了一种通过端口转发，可以在SSH智商实现任何TCP/IP端口隧道，也就是应用数据流被定向到加密的SSH连接中，以避免传输过程中被拦截或解密。这种SSH tunneling方式也使得原本不支持加密通讯的应用程序实现了网络加密。</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/ssh_tunneling_secure_app.png"><img alt="../../_images/ssh_tunneling_secure_app.png" src="../../_images/ssh_tunneling_secure_app.png" style="width: 784.5px; height: 239.0px;" /></a>
+</figure>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>SSH命令行端口转发<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>我在 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 中需要访问 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器的带外管理 <a class="reference internal" href="../../linux/server/hardware/hpe/hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a> ，带外管理采用内部IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.6.254</span></code> 。要访问这个内部IP地址的 <code class="docutils literal notranslate"><span class="pre">443</span></code> 端口才能够访问 <a class="reference internal" href="../../linux/server/hardware/hpe/hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a> 的WEB管理界面。</p>
+<p>我采用了旁路的 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> 构建SSH端口转发，即 ssh 到 jetson nano 主机上，在这个SSH会话中启用SSH端口转发:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="mf">192.168.7.23</span> <span class="o">-</span><span class="n">L</span> <span class="mi">25443</span><span class="p">:</span><span class="mf">192.168.6.254</span><span class="p">:</span><span class="mi">443</span>
+</pre></div>
+</div>
+<p>这样，当 <code class="docutils literal notranslate"><span class="pre">ssh</span></code> 到 <code class="docutils literal notranslate"><span class="pre">192.168.7.23</span></code> 上时，本地主机访问本机回环地址 <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> 的 <code class="docutils literal notranslate"><span class="pre">25443</span></code> 端口，就会被SSH tunneling通过 <code class="docutils literal notranslate"><span class="pre">192.168.7.23</span></code> 转发到远程 <code class="docutils literal notranslate"><span class="pre">192.168.6.254</span></code> 的 <code class="docutils literal notranslate"><span class="pre">443</span></code> 端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MyDesktop</span> <span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">25443</span> <span class="o">=&gt;</span> <span class="n">ssh</span> <span class="n">tunneling</span> <span class="o">=&gt;</span> <span class="mf">192.168.7.23</span> <span class="o">=&gt;</span> <span class="n">data</span> <span class="n">forwarding</span> <span class="o">=&gt;</span> <span class="mf">192.168.6.254</span><span class="p">:</span><span class="mi">443</span>
+</pre></div>
+</div>
+<p>上述 <code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">``</span> <span class="pre">命令输入参数较多，可以通过本地笔记本上的ssh配置文件</span> <span class="pre">``~/.ssh/config</span></code> 来完成:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">~/.ssh/config 配置SSH端口转发</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host jetson
+    HostName <span class="m">192</span>.168.7.23
+    LocalForward <span class="m">25443</span> <span class="m">192</span>.168.6.254:443
+</pre></div>
+</div>
+</div>
+<p>这样实现SSH端口转发只需要简单执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">jetson</span>
+</pre></div>
+</div>
+<p>此外，在配置头部加上 <a class="reference internal" href="ssh_multiplexing.html#ssh-multiplexing"><span class="std std-ref">ssh多路传输multiplexing加速</span></a> 配置，更是如虎添翼，一次ssh登陆就可以保持SSH tunneling持续:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">~/.ssh/config 配置所有主机登陆激活ssh multiplexing,压缩以及不检查服务器SSH key(注意风险控制)</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host *
+  ServerAliveInterval <span class="m">60</span>
+  ControlMaster auto
+  ControlPath ~/.ssh/%h-%p-%r
+  ControlPersist yes
+  StrictHostKeyChecking no
+  Compression yes
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.ssh.com/academy/ssh/tunneling">SSH Tunnel</a></p></li>
 <li><p><a class="reference external" href="https://www.ssh.com/academy/ssh/tunneling">What Is SSH Port Forwarding, aka SSH Tunneling?</a></p></li>
+<li><p><a class="reference external" href="http://matt.might.net/articles/ssh-hacks/">SSH: More than secure shell</a></p></li>
 </ul>
 </section>
 </section>

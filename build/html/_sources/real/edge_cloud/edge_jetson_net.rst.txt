@@ -41,5 +41,16 @@ Jetson Nano WiFi
 端口转发 - :ref:`hp_ilo`
 ==========================
 
-:ref:`hpe_dl360_gen9` 的带外管理网口是内部独立网段 ``192.168.6.x`` 上的 ``192.168.6.254`` ，从外部无法直接访问，所以我通过 :ref:`jetson_nano` 的 :ref:`ssh_tunnel` 做端口转发，这样只要ssh登陆到网关主机( :ref:`jetson_nano` )就可以从外部访问到服务器的 :ref:`hp_ilo`
+:ref:`hpe_dl360_gen9` 的带外管理网口是内部独立网段 ``192.168.6.x`` 上的 ``192.168.6.254`` ，从外部无法直接访问，所以我通过 :ref:`jetson_nano` 的 :ref:`ssh_tunneling` 做端口转发，这样只要ssh登陆到网关主机( :ref:`jetson_nano` )就可以从外部访问到服务器的 :ref:`hp_ilo`
+
+- 配置 ``~/.ssh/config`` (采用 :ref:`ssh_multiplexing` 结合 :ref:`ssh_tunneling` ):
+
+.. literalinclude:: ../../infra_service/ssh/ssh_multiplexing/ssh_config
+   :language: bash
+   :caption: ~/.ssh/config 配置所有主机登陆激活ssh multiplexing,压缩以及不检查服务器SSH key(注意风险控制)
+
+.. literalinclude:: ../../infra_service/ssh/ssh_tunneling/ssh_config
+   :language: bash
+   :caption: ~/.ssh/config 配置SSH端口转发
+
 
