@@ -68,6 +68,14 @@ SSH命令行端口转发
        LocalForward 33062 db2:3306
        LocalForward 33063 db3:3306
 
+进阶
+=======
+
+SSH Tunneling有更为神奇和强大的能力:
+
+- :ref:`ssh_tunneling_remote_port_forwarding` 将没有公网IP的内网主机对外提供服务
+- :ref:`ssh_tunneling_dynamic_port_forwarding` 自由访问Internet的利器
+
 参考
 ======
 
