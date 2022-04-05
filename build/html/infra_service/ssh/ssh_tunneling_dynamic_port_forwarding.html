@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SSH Tunneling: 远程服务端口转发 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>SSH Tunneling: 动态端口转发 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -23,7 +23,7 @@
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
     <link rel="next" title="熵和随机数" href="entropy_random.html" />
-    <link rel="prev" title="SSH隧道" href="ssh_tunneling.html" /> 
+    <link rel="prev" title="SSH Tunneling: 远程服务端口转发" href="ssh_tunneling_remote_port_forwarding.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -69,8 +69,11 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">ssh服务</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="ssh_key.html">ssh密钥</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_tunneling.html">SSH隧道</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">SSH Tunneling: 远程服务端口转发</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#ssh">一条简单的SSH命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ssh_tunneling_remote_port_forwarding.html">SSH Tunneling: 远程服务端口转发</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SSH Tunneling: 动态端口转发</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">一条简单的命令</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#firefox">设置Firefox浏览器使用代理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#socks">设置操作系统网络通过socks代理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
@@ -136,9 +139,9 @@
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Infra-Service Atlas</a> &raquo;</li>
           <li><a href="index.html">ssh服务</a> &raquo;</li>
-      <li>SSH Tunneling: 远程服务端口转发</li>
+      <li>SSH Tunneling: 动态端口转发</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/infra_service/ssh/ssh_tunneling_remote_port_forwarding.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/infra_service/ssh/ssh_tunneling_dynamic_port_forwarding.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -147,86 +150,52 @@
            <div itemprop="articleBody">
              
   <section id="ssh-tunneling">
-<span id="ssh-tunneling-remote-port-forwarding"></span><h1>SSH Tunneling: 远程服务端口转发<a class="headerlink" href="#ssh-tunneling" title="永久链接至标题">¶</a></h1>
-<p><a class="reference internal" href="ssh_tunneling.html#ssh-tunneling"><span class="std std-ref">SSH隧道</span></a> 可以为应用服务(端口)访问提供加密隧道，可以非常方便实现远程访问内网服务器。此外，SSH端口转发还有一个非常强大的远程服务端口转发功能，可以将远程服务器上的端口访问反向映射回本地主机。这个功能在以下场景非常实用:</p>
-<ul class="simple">
-<li><p>国内运营商(电信、移动、联通)个人家庭宽带大多都不提供互联网公网IP地址，计算机爱好者不能方便地在家中架设对外提供服务的计算机。你可以在公有云上租用一个非常廉价的VPS，然后采用SSH Tunneling的远程服务端口转发，将VPS的80和443端口映射到家中的主机服务端口上，这样就可以向互联网提供服务</p></li>
-<li><p>如果需要临时将内部主机(例如家中的开发测试主机)的调试端口开放给外部用户联调，也可以使用 SSH Tunneling的远程服务端口转发实现</p></li>
-</ul>
-<p>实际上，这个简单的SSH Tunneling远程端口服务转发就是 <a class="reference internal" href="../tls/localtunnel/index.html#localtunnel"><span class="std std-ref">localtunnel</span></a> 的底层实现原理，可以用来构建个人服务器，对internet提供服务。</p>
-<section id="ssh">
-<h2>一条简单的SSH命令<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h2>
-<p>使用以下命令，可以从本地主机上发起一个远程端口转发，建立 <a class="reference internal" href="ssh_tunneling.html#ssh-tunneling"><span class="std std-ref">SSH隧道</span></a> 之后，internet用户就可以通过访问远程服务器上的 <code class="docutils literal notranslate"><span class="pre">REMOTE_PORT</span></code> 访问到你本地局域网 <code class="docutils literal notranslate"><span class="pre">DESTINATION</span></code> 主机的 <code class="docutils literal notranslate"><span class="pre">DESTINATION_PORT</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">R</span> <span class="p">[</span><span class="n">REMOTE</span><span class="p">:]</span><span class="n">REMOTE_PORT</span><span class="p">:</span><span class="n">DESTINATION</span><span class="p">:</span><span class="n">DESTINATION_PORT</span> <span class="p">[</span><span class="n">USER</span><span class="o">@</span><span class="p">]</span><span class="n">SSH_SERVER</span>
-</pre></div>
-</div>
-<p>例如，我使用 <a class="reference internal" href="../../devops/docs/sphinx_doc/index.html#sphinx-doc"><span class="std std-ref">Sphinx文档</span></a> 撰写 <a class="reference external" href="https://cloud-atlas.readthedocs.io/zh_CN/lastest/index.html">readthedocs平台上的云图</a> ，但是每次都要推送到 github 上次啊能刷新到readthedocs平台，显然比较繁琐。假如互联网上有人想要阅读我最新撰写的文档，那最快捷的方式就是使用互联网上的一个VPS做远程服务端口转发。</p>
-<ul>
-<li><p>在我撰写的 <code class="docutils literal notranslate"><span class="pre">Cloud</span> <span class="pre">Atlas</span></code> 的html目录下启动Python3 的 <code class="docutils literal notranslate"><span class="pre">http.server</span></code> 模块服务:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">cloud</span><span class="o">-</span><span class="n">atlas</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">html</span>
-<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">http</span><span class="o">.</span><span class="n">server</span> <span class="mi">20080</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>此时我的笔记本上启动了一个简单的http服务，监听端口是 <code class="docutils literal notranslate"><span class="pre">20080</span></code></p>
-<ul>
-<li><p>现在登陆到远程VPS上，启用远程端口映射:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">R</span> <span class="mi">20080</span><span class="p">:</span><span class="o">&lt;</span><span class="n">myserver_ip</span><span class="o">&gt;</span><span class="p">:</span><span class="mi">20080</span> <span class="n">user</span><span class="o">@&lt;</span><span class="n">myserver_ip</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>举例:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#ssh -R 20080:192.168.10.101:20080 huatai@cloud-atlas.huatai.me</span>
-<span class="n">ssh</span> <span class="o">-</span><span class="n">R</span> <span class="mi">20080</span><span class="p">:</span><span class="n">localhost</span><span class="p">:</span><span class="mi">20080</span> <span class="n">huatai</span><span class="nd">@cloud</span><span class="o">-</span><span class="n">atlas</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
-</pre></div>
-</div>
+<span id="ssh-tunneling-dynamic-port-forwarding"></span><h1>SSH Tunneling: 动态端口转发<a class="headerlink" href="#ssh-tunneling" title="永久链接至标题">¶</a></h1>
+<p>动态端口转发可以在本地(ssh 客户端)主机上创建一个socket作为一个SOCKS代理服务器。当客户端连接这个端口，连接就被转发到远程(ssh服务器)主机，然后被转发成为ssh服务器的动态端口，数据流就会主机转发到目标主机时显示为ssh服务器上的动态端口和IP。数据返回也会通过这个加密通道返回给连接ssh客户端上socket的应用。</p>
+<p>这个加密隧道对于客户端程序(ssh客户端主机上的应用)是透明的，为客户端程序提供了加密VPN通道。</p>
 <section id="id1">
-<h3>异常排查<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h3>
-<p>我遇到一个奇怪的问题，执行了上述命令之后，在远程服务器上检查:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="o">|</span> <span class="n">grep</span> <span class="mi">20080</span>
+<h2>一条简单的命令<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>在Linux, macOS 或其他Unix系统上，只需要如下命令 ( <code class="docutils literal notranslate"><span class="pre">-D</span></code> 参数 ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">D</span> <span class="p">[</span><span class="n">LOCAL_IP</span><span class="p">:]</span><span class="n">LOCAL_PORT</span> <span class="p">[</span><span class="n">USER</span><span class="o">@</span><span class="p">]</span><span class="n">SSH_SERVER</span>
 </pre></div>
 </div>
-<p>却发现远程服务器端口是绑定在 <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> 上，而不是所有网络借口:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">20080</span>         <span class="mf">0.0.0.0</span><span class="p">:</span><span class="o">*</span>               <span class="n">LISTEN</span>
-<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="p">::</span><span class="mi">1</span><span class="p">:</span><span class="mi">20080</span>               <span class="p">:::</span><span class="o">*</span>                    <span class="n">LISTEN</span>
+</li>
+</ul>
+<p>其中参数:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[LOCAL_IP:]LOCAL_PORT</span></code> 是本地主机IP地址和端口，如果没有提供 <code class="docutils literal notranslate"><span class="pre">LOCAL_IP</span></code> 则ssh客户端绑定到回环地址 <code class="docutils literal notranslate"><span class="pre">localhost</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[USER&#64;]SERVER_IP</span></code> 远程SSH服务器地址和用户名</p></li>
+</ul>
+</div></blockquote>
+<p>例如我经常使用的:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">D</span> <span class="mi">8123</span> <span class="o">-</span><span class="n">C</span> <span class="n">huatai</span><span class="nd">@vpn</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
 </pre></div>
 </div>
-<p>而且即使我添加了远端服务器的IP地址指定 <code class="docutils literal notranslate"><span class="pre">[REMOTE:]REMOTE_PORT</span></code> 也是如此</p>
-<p>仔细看了一下服务器端的 <code class="docutils literal notranslate"><span class="pre">/etc/ssh/sshd_config</span></code> 配置，以下配置似乎可疑:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#GatewayPorts no</span>
-</pre></div>
-</div>
-<p>也就是说，默认 <code class="docutils literal notranslate"><span class="pre">sshd</span></code> 是设置为 <code class="docutils literal notranslate"><span class="pre">GatewayPorts</span> <span class="pre">no</span></code> 。</p>
-<p>在 <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">ssh</span></code> 中有说明:</p>
-<p>By default, TCP listening sockets on the server will be bound to the loopback interface only. This may be overridden by specifying a bind_address. An empty bind_address, or the address ‘*’, indicates that the remote socket should listen on all interfaces. Specifying a remote bind_address will only succeed if the server’s GatewayPorts option is enabled (see sshd_config(5)).</p>
-<p>即，如果要绑定所有接口，则使用 <code class="docutils literal notranslate"><span class="pre">*</span></code> 或者空白的远程服务器地址；但是要使得远程服务器的指定绑定地址，只有激活 <code class="docutils literal notranslate"><span class="pre">GatewayPorts</span> <span class="pre">yes</span></code> 才行。</p>
-<p>所以，需要在服务器上配置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GatewayPorts</span> <span class="n">yes</span>
-</pre></div>
-</div>
-<p>然后再次执行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">R</span> <span class="mi">20080</span><span class="p">:</span><span class="n">localhost</span><span class="p">:</span><span class="mi">20080</span> <span class="n">huatai</span><span class="nd">@cloud</span><span class="o">-</span><span class="n">atlas</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
-</pre></div>
-</div>
-<p>此时在服务器上检查:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="o">|</span> <span class="n">grep</span> <span class="mi">20080</span>
-</pre></div>
-</div>
-<p>就可以看到:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">20080</span>           <span class="mf">0.0.0.0</span><span class="p">:</span><span class="o">*</span>               <span class="n">LISTEN</span>
-<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="p">:::</span><span class="mi">20080</span>                <span class="p">:::</span><span class="o">*</span>                    <span class="n">LISTEN</span>
-</pre></div>
-</div>
-<p>此时访问 <a class="reference external" href="http://cloud-atlas.huatai.me:20080/">http://cloud-atlas.huatai.me:20080/</a> 就会看到自己本地笔记本上的 python http.server 显示有访问，同时浏览器中可以看到自己的WEB页面，这表明已经将本地主机上的服务输出到因特网上，对外提供服务。</p>
+<p>则建立起本地socks加密代理</p>
 </section>
+<section id="firefox">
+<h2>设置Firefox浏览器使用代理<a class="headerlink" href="#firefox" title="永久链接至标题">¶</a></h2>
+<p>Firefox浏览器支持通过 socks 代理访问internet，即可以通过上述ssh动态端口转发先建立加密通道。然后设置Firefox通过加密通道访问internet即可以科学上网。</p>
+<p>不过，需要注意的是， <code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">-D</span></code> 构建的是socks代理，不是 <code class="docutils literal notranslate"><span class="pre">ssl/http/ftp</span></code> 代理，所以设置Firefox的时候需要去除 <code class="docutils literal notranslate"><span class="pre">ssl/http/ftp</span></code> 代理配置，只保留 <code class="docutils literal notranslate"><span class="pre">socks</span></code> 代理配置，否则不能正确工作。</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/firefox_socks_proxy1.png"><img alt="../../_images/firefox_socks_proxy1.png" src="../../_images/firefox_socks_proxy1.png" style="width: 350.7px; height: 420.0px;" /></a>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p>必须同时配置 <code class="docutils literal notranslate"><span class="pre">Proxy</span> <span class="pre">DNS</span> <span class="pre">when</span> <span class="pre">using</span> <span class="pre">SOCKS</span> <span class="pre">v5</span></code> ，这是因为必须将DNS解析也通过加密转发通过墙外的VPS进行域名解析，以避免GFW对DNS的污染。</p>
+<p>现代最新版本的Firefox/Chrome都支持 <code class="docutils literal notranslate"><span class="pre">DNS</span> <span class="pre">over</span> <span class="pre">HTTPS</span></code> ，则启用了 <code class="docutils literal notranslate"><span class="pre">DNS</span> <span class="pre">over</span> <span class="pre">HTTPS</span></code> 就不许此设置。</p>
+</div>
+</section>
+<section id="socks">
+<h2>设置操作系统网络通过socks代理<a class="headerlink" href="#socks" title="永久链接至标题">¶</a></h2>
+<p>通过ssh动态端口转发可以让firefox这样的浏览器通过socket代理自由访问internet （</p>
 </section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://linuxize.com/post/how-to-setup-ssh-tunneling/">How to Set up SSH Tunneling (Port Forwarding)</a></p></li>
-<li><p><a class="reference external" href="https://superuser.com/questions/1194105/ssh-troubleshooting-remote-port-forwarding-failed-for-listen-port-errors">SSH: Troubleshooting “Remote port forwarding failed for listen port” errors</a></p></li>
 </ul>
 </section>
 </section>
@@ -235,7 +204,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ssh_tunneling.html" class="btn btn-neutral float-left" title="SSH隧道" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ssh_tunneling_remote_port_forwarding.html" class="btn btn-neutral float-left" title="SSH Tunneling: 远程服务端口转发" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="entropy_random.html" class="btn btn-neutral float-right" title="熵和随机数" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
