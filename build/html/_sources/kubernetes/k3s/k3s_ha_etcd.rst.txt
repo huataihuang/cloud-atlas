@@ -22,11 +22,11 @@ K3s高可用etcd
 下载etcd
 ==========
 
-`etcd-io / etcd Releases <https://github.com/etcd-io/etcd/releases/>`_ 提供了最新版本，当前 ``3.5.2`` :
+- `etcd-io / etcd Releases <https://github.com/etcd-io/etcd/releases/>`_ 提供了最新版本，当前 ``3.5.2`` :
 
-.. literalinclude:: k3s_ha_etcd/download_etcd.sh
+.. literalinclude:: ../deployment/etcd/install_run_local_etcd/install_etcd.sh
    :language: bash
-   :caption: 下载etcd的linux版本脚本
+   :caption: 下载并安装etcd脚本 install_etcd.sh
 
 生成和分发证书
 =================
@@ -45,3 +45,12 @@ K3s高可用etcd
 
    Red Hat :ref:`openshift` 所使用的 etcd 镜像就是采用上游 etcd镜像 (基于 Alpine Linux OS) `install: use origin-v4.0 etcd image #511 <https://github.com/openshift/machine-config-operator/pull/511>`_
 
+- 初始化证书授权:
+
+
+参考
+=======
+
+- `Setting up Etcd Cluster with TLS Authentication Enabled <https://medium.com/nirman-tech-blog/setting-up-etcd-cluster-with-tls-authentication-enabled-49c44e4151bb>`_
+- `etcd Security Guide <https://github.com/ericchiang/etcd-security-guide>`_
+- `Generate self-signed certificates <https://github.com/coreos/docs/blob/master/os/generate-self-signed-certificates.md>`_ CoreOS官方(etcd开发公司)提供的指导文档

@@ -8,6 +8,8 @@
 
    `在线etcd模拟实验室 <http://play.etcd.io/install>`_ 提供了在线模拟部署etcd的实验，并且这个 `etcdlabs <https://github.com/coreos/etcdlabs>`_ 是 `etcd.io <https://etcd.io>`_ 官方开源项目，方便进行模拟学习。
 
+本文是最基础的 ``etcd`` 集群配置，没有使用 :ref:`etcd_tls` ，所以仅作为测试使用。实际生产集群部署应采用 :ref:`deploy_etcd_cluster_with_tls_auth`
+
 部署服务器采用 :ref:`studio_ip` 中  ``dev`` 环境的 ``etcd-1`` / ``etcd-2`` / ``etcd-3`` 这3台开发服务器（虚拟机）。 
 
 静态etcd集群
@@ -25,7 +27,7 @@
    useradd -c "etcd user" -d /var/lib/etcd -s /bin/false -g etcd -u 1501 etcd
    chown -R etcd:etcd /var/lib/etcd
 
-- 下载etcd和etcdctl: 方法参考 :ref:`install_etcd_linux`
+- 下载etcd和etcdctl: 方法参考 :ref:`install_etcd`
 
 由于静态etcd集群是知道所有集群节点，地址以及集群的大小，所以使用 ``initial-cluster`` 参数来使用offline bootstrap配置，每个节点可以通过环境变量或者命令行参数来启动初始化。
 

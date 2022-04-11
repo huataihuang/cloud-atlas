@@ -178,7 +178,26 @@
 <li><p>内核异常(Kernel issues) 例如内核死锁，异常的文件系统</p></li>
 <li><p>容器运行时异常(Container runtime issues) 例如无响应的运行时daemon</p></li>
 </ul>
-<p>node-problem-detector 从不同的daemon采集节点问题，然后把这些异常暴露给上层，这样上层 <a class="reference internal" href="#remedy-system"><span class="std std-ref">Remedy Systems(纠正系统)</span></a></p>
+<p>node-problem-detector 从不同的daemon采集节点问题，然后把这些异常暴露给上层，这样上层 <a class="reference internal" href="#remedy-system"><span class="std std-ref">Remedy Systems(纠正系统)</span></a> 就能感知这些问题。</p>
+<section id="api-problem-api">
+<h2>异常API(Problem API)<a class="headerlink" href="#api-problem-api" title="永久链接至标题">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">node-problem-detector</span></code> 使用 <code class="docutils literal notranslate"><span class="pre">Event</span></code> (事件) 和 <code class="docutils literal notranslate"><span class="pre">NodeCondition</span></code> (节点状况)来向apiserver报告问题:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NodeCondition</span></code> : 导致pods无不可用都持久性错误会被报告为 <code class="docutils literal notranslate"><span class="pre">NodeCondition</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Event</span></code> : 有限影响pod的临时性异常将被报告为 <code class="docutils literal notranslate"><span class="pre">Event</span></code></p></li>
+</ul>
+</section>
+<section id="daemon-problem-daemon">
+<h2>异常Daemon(Problem Daemon)<a class="headerlink" href="#daemon-problem-daemon" title="永久链接至标题">¶</a></h2>
+<p>Problem Daemon是一个 <code class="docutils literal notranslate"><span class="pre">node-problem-detector</span></code> 的子服务进程。这个Problem Daemon是用来监控特定类型节点异常以及报告给 <code class="docutils literal notranslate"><span class="pre">node-problem-detector</span></code> 。</p>
+<p>一个problem daemon应该是:</p>
+<ul class="simple">
+<li><p>一个设计成采用用户案例方式的tiny daemon</p></li>
+<li><p>一个现有节点监考你孤独监控服务集成到 <code class="docutils literal notranslate"><span class="pre">node-problem-detector</span></code></p></li>
+</ul>
+<p>当前，problem daemon是作为 <code class="docutils literal notranslate"><span class="pre">node-problem-detector</span></code> 二进制程序的一个 <code class="docutils literal notranslate"><span class="pre">goroutine</span></code> 来运行，未来将分离 <code class="docutils literal notranslate"><span class="pre">node-problem-detector</span></code> 和 <code class="docutils literal notranslate"><span class="pre">problem</span> <span class="pre">daemon</span></code> 到不同容器，然后将两个容器组合成特定pod。</p>
+<p>每一类problem daemon可以设置相应的 <code class="docutils literal notranslate"><span class="pre">build</span> <span class="pre">tags</span></code> 在汇编时候禁用，。如果在汇编时禁用，则所有的编译依赖，全局变量以及后台goroutines将被从编译执行包中裁剪掉。</p>
+</section>
 <section id="remedy-systems">
 <span id="remedy-system"></span><h2>Remedy Systems(纠正系统)<a class="headerlink" href="#remedy-systems" title="永久链接至标题">¶</a></h2>
 <p>remedy system是一个用于通过NPD检测出问题后自动实现纠正的进程。remedy system关注node-problem-detector发现的事件或节点状态，并采取行动将Kubernetes集群恢复到健康状态：</p>

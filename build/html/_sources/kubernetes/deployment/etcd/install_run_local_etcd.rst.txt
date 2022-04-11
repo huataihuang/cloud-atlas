@@ -10,57 +10,20 @@
 
    本文实践是开发测试环境单机运行，服务监听 127.0.0.1 端口，所以没有任何安全加密认证，仅供测试。
 
-.. _install_etcd_linux:
+.. _install_etcd:
 
-Linux安装etcd
+Linux/macOS安装etcd
 =====================
 
-- 执行以下安装::
+.. note::
 
-   ETCD_VER=v3.4.7
+   下载安装脚本适配 x86 和 ARM 的Linux，以及x86的 macOS
 
-   # choose either URL
-   GOOGLE_URL=https://storage.googleapis.com/etcd
-   GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
-   DOWNLOAD_URL=${GOOGLE_URL}
+- `etcd-io / etcd Releases <https://github.com/etcd-io/etcd/releases/>`_ 提供了最新版本，当前 ``3.5.2`` :
 
-   rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
-   rm -rf /tmp/etcd-download-test && mkdir -p /tmp/etcd-download-test
-
-   curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
-   tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-download-test --strip-components=1
-   rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
-
-   /tmp/etcd-download-test/etcd --version
-   /tmp/etcd-download-test/etcdctl version
-
-   sudo cp /tmp/etcd-download-test/etcd /usr/local/sbin/etcd
-   sudo cp /tmp/etcd-download-test/etcdctl /usr/local/bin/etcdctl
-
-macOS安装local etcd
-=====================
-
-- 执行以下安装::
-
-   ETCD_VER=v3.4.7
-
-   # choose either URL
-   GOOGLE_URL=https://storage.googleapis.com/etcd
-   GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
-   DOWNLOAD_URL=${GOOGLE_URL}
-
-   rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip
-   rm -rf /tmp/etcd-download-test && mkdir -p /tmp/etcd-download-test
-
-   curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip
-   unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip
-   mv /tmp/etcd-${ETCD_VER}-darwin-amd64/* /tmp/etcd-download-test && rm -rf /tmp/etcd-${ETCD_VER}-darwin-amd64
-
-   /tmp/etcd-download-test/etcd --version
-   /tmp/etcd-download-test/etcdctl version
-
-   sudo cp /tmp/etcd-download-test/etcd /usr/local/sbin/etcd
-   sudo cp /tmp/etcd-download-test/etcdctl /usr/local/bin/etcdctl
+.. literalinclude:: install_run_local_etcd/install_etcd.sh
+   :language: bash
+   :caption: 下载etcd的linux版本脚本 install_etcd.sh
 
 验证local single etcd
 ========================

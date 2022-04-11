@@ -10,4 +10,5 @@
    install_run_local_etcd.rst
    deploy_etcd_cluster.rst
    etcd_tls.rst
+   deploy_etcd_cluster_with_tls_auth.rst
    runtime_config_etcd.rst

@@ -162,6 +162,8 @@ opensolaris环境中，进入操作系统可以看到 ssh-agent 已经启动。
 -  当在图形环境中（也就是多个用户），每个登陆会话都会启动一个新的ssh-agent副本，这样每次都需要使用 ``ssh-add`` 向每个新的 ``ssh-agent`` 副本添加专用密钥。
 -  ``ssh-agent`` 的缺省设置和 ``cron`` 作业不兼容，由于 ``cron`` 作业是 ``cron`` 进程启动的，这些作业无法从它们的环境中继承 ``SSH_AUTH_SOCK`` 变量，因此也无法知道 ``ssh-agent`` 进程正在运行以及如何同它联系。
 
+.. _ssh-agent_profile:
+
 shell环境解决ssh-agent对会话的要求
 ----------------------------------
 

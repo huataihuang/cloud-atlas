@@ -23,7 +23,7 @@
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
     <link rel="next" title="Longhorn k8s分布式存储" href="longhorn/index.html" />
-    <link rel="prev" title="Alpine Linux环境安装cfssl" href="alpine_cfssl.html" /> 
+    <link rel="prev" title="编译安装cfssl(Alpine Linux)" href="alpine_cfssl.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -85,10 +85,11 @@
 <li class="toctree-l3"><a class="reference internal" href="introduce_k3s.html">K3s简介</a></li>
 <li class="toctree-l3"><a class="reference internal" href="k3s_arch.html">K3s架构</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pi_k3s_deploy.html">在树莓派上部署K3s</a></li>
-<li class="toctree-l3"><a class="reference internal" href="alpine_cfssl.html">Alpine Linux环境安装cfssl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="alpine_cfssl.html">编译安装cfssl(Alpine Linux)</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">K3s高可用etcd</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#etcd">下载etcd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">生成和分发证书</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="longhorn/index.html">Longhorn k8s分布式存储</a></li>
@@ -176,8 +177,8 @@
 </div>
 <p><a class="reference internal" href="../administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> 是Kuberntes主流的持久化数据存储，提供了分布式存储能力。在 <code class="docutils literal notranslate"><span class="pre">K3s</span></code> 的高可用部署环境，使用 <code class="docutils literal notranslate"><span class="pre">external</span> <span class="pre">etcd</span></code> 是最稳定可靠的部署模型。</p>
 <p>在 <a class="reference internal" href="../../arm/raspberry_pi/pi_cluster/pi_stack.html#pi-stack"><span class="std std-ref">树莓派堆叠</span></a> 环境采用3台 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_3.html#pi-3"><span class="std std-ref">树莓派Raspberry Pi 3</span></a> 硬件部署3节点 <a class="reference internal" href="../administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> 集群:</p>
-<table class="colwidths-given docutils align-default" id="id2">
-<caption><span class="caption-text">树莓派k3s管控服务器</span><a class="headerlink" href="#id2" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id3">
+<caption><span class="caption-text">树莓派k3s管控服务器</span><a class="headerlink" href="#id3" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 60%" />
@@ -201,11 +202,23 @@
 </table>
 <section id="etcd">
 <h2>下载etcd<a class="headerlink" href="#etcd" title="永久链接至标题">¶</a></h2>
-<p><a class="reference external" href="https://github.com/etcd-io/etcd/releases/">etcd-io / etcd Releases</a> 提供了最新版本，当前 <code class="docutils literal notranslate"><span class="pre">3.5.2</span></code> :</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">下载etcd的linux版本脚本</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/etcd-io/etcd/releases/">etcd-io / etcd Releases</a> 提供了最新版本，当前 <code class="docutils literal notranslate"><span class="pre">3.5.2</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">下载并安装etcd脚本 install_etcd.sh</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ETCD_VER</span><span class="o">=</span>v3.5.2
-<span class="nv">ARCH</span><span class="o">=</span><span class="sb">`</span>uname -m<span class="sb">`</span>
+<span class="nv">KERNEAL</span><span class="o">=</span><span class="sb">`</span>uname -s<span class="sb">`</span> <span class="c1"># Linux / Darwin</span>
+<span class="nv">ARCH</span><span class="o">=</span><span class="sb">`</span>uname -m<span class="sb">`</span> <span class="c1"># x86_64 / aarch64</span>
+
+<span class="k">if</span> <span class="o">[</span> <span class="si">${</span><span class="nv">KERNEL</span><span class="si">}</span> <span class="o">==</span> <span class="s2">&quot;Linux&quot;</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    <span class="nv">KERNEL</span><span class="o">=</span><span class="s2">&quot;linux&quot;</span>
+<span class="k">else</span> <span class="o">[</span> <span class="si">${</span><span class="nv">KERNEL</span><span class="si">}</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    <span class="nv">KERNEL</span><span class="o">=</span><span class="s2">&quot;darwin&quot;</span>
+<span class="k">else</span>
+    <span class="nb">echo</span> <span class="s2">&quot;Not Linux or macOS, exit!&quot;</span>
+    <span class="nb">exit</span> <span class="m">0</span>
+<span class="k">fi</span>
 
 <span class="k">if</span> <span class="o">[</span> <span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span> <span class="o">==</span> <span class="s2">&quot;x86_64&quot;</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
     <span class="nv">ARCH</span><span class="o">=</span><span class="s2">&quot;amd64&quot;</span>
@@ -221,12 +234,12 @@
 <span class="nv">GITHUB_URL</span><span class="o">=</span>https://github.com/etcd-io/etcd/releases/download
 <span class="nv">DOWNLOAD_URL</span><span class="o">=</span><span class="si">${</span><span class="nv">GOOGLE_URL</span><span class="si">}</span>
 
-rm -f /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-linux-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz
+rm -f /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-<span class="si">${</span><span class="nv">KERNEL</span><span class="si">}</span>-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz
 rm -rf /tmp/etcd-download-test <span class="o">&amp;&amp;</span> mkdir -p /tmp/etcd-download-test
 
-curl -L <span class="si">${</span><span class="nv">DOWNLOAD_URL</span><span class="si">}</span>/<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-linux-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz -o /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-linux-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz
-tar xzvf /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-linux-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz -C /tmp/etcd-download-test --strip-components<span class="o">=</span><span class="m">1</span>
-rm -f /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-linux-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz
+curl -L <span class="si">${</span><span class="nv">DOWNLOAD_URL</span><span class="si">}</span>/<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-<span class="si">${</span><span class="nv">KERNEL</span><span class="si">}</span>-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz -o /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-<span class="si">${</span><span class="nv">KERNEL</span><span class="si">}</span>-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz
+tar xzvf /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-<span class="si">${</span><span class="nv">KERNEL</span><span class="si">}</span>-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz -C /tmp/etcd-download-test --strip-components<span class="o">=</span><span class="m">1</span>
+rm -f /tmp/etcd-<span class="si">${</span><span class="nv">ETCD_VER</span><span class="si">}</span>-<span class="si">${</span><span class="nv">KERNEL</span><span class="si">}</span>-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz
 
 /tmp/etcd-download-test/etcd --version
 /tmp/etcd-download-test/etcdctl version
@@ -247,7 +260,7 @@ sudo mv /tmp/etcd-download-test/etcdutl /usr/local/bin
 <li><p>在 <a class="reference internal" href="../../linux/alpine_linux/index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> 环境节点 <code class="docutils literal notranslate"><span class="pre">x-k3s-a-0</span></code></p>
 <ul>
 <li><p>建立容器运行一个开发环境 <code class="docutils literal notranslate"><span class="pre">x-dev</span></code></p></li>
-<li><p>然后 <a class="reference internal" href="alpine_cfssl.html#alpine-cfssl"><span class="std std-ref">Alpine Linux环境安装cfssl</span></a></p></li>
+<li><p>然后 <a class="reference internal" href="alpine_cfssl.html#alpine-cfssl"><span class="std std-ref">编译安装cfssl(Alpine Linux)</span></a></p></li>
 <li><p>再按照 <a class="reference internal" href="../deployment/etcd/etcd_tls.html#etcd-tls"><span class="std std-ref">etcd集群TLS设置</span></a> 方法完成 <code class="docutils literal notranslate"><span class="pre">cfssl</span></code> 安装</p></li>
 </ul>
 </li>
@@ -256,6 +269,17 @@ sudo mv /tmp/etcd-download-test/etcdutl /usr/local/bin
 <p class="admonition-title">注解</p>
 <p>Red Hat <a class="reference internal" href="../../openshift/index.html#openshift"><span class="std std-ref">OpenShift Atlas</span></a> 所使用的 etcd 镜像就是采用上游 etcd镜像 (基于 Alpine Linux OS) <a class="reference external" href="https://github.com/openshift/machine-config-operator/pull/511">install: use origin-v4.0 etcd image #511</a></p>
 </div>
+<ul class="simple">
+<li><p>初始化证书授权:</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://medium.com/nirman-tech-blog/setting-up-etcd-cluster-with-tls-authentication-enabled-49c44e4151bb">Setting up Etcd Cluster with TLS Authentication Enabled</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ericchiang/etcd-security-guide">etcd Security Guide</a></p></li>
+<li><p><a class="reference external" href="https://github.com/coreos/docs/blob/master/os/generate-self-signed-certificates.md">Generate self-signed certificates</a> CoreOS官方(etcd开发公司)提供的指导文档</p></li>
+</ul>
 </section>
 </section>
 
@@ -263,7 +287,7 @@ sudo mv /tmp/etcd-download-test/etcdutl /usr/local/bin
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="alpine_cfssl.html" class="btn btn-neutral float-left" title="Alpine Linux环境安装cfssl" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="alpine_cfssl.html" class="btn btn-neutral float-left" title="编译安装cfssl(Alpine Linux)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="longhorn/index.html" class="btn btn-neutral float-right" title="Longhorn k8s分布式存储" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
