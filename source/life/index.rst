@@ -14,6 +14,7 @@ Life Atlas
    future_experience_technologies.rst
    open_your_mind/index
    sport/index
+   skill/index
 
 .. only::  subproject and html
 

@@ -1,17 +1,16 @@
-.. _dnsmasq:
+.. _life_skill:
+
 
 =================================
-DNSmasq
+生活技能
 =================================
+
+我们希望自己是一个丰富多彩的人，一个不仅仅是只会IT技术的人...
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_dnsmasq.rst
-   deploy_dnsmasq.rst
-   dnsmasq_domains_for_subnets.rst
-   dnsmasq_dns_wpad.rst
-   dnsmasq_dhcp_wpad.rst
+   wikihow.rst
 
 .. only::  subproject and html
 
