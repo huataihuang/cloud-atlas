@@ -77,4 +77,4 @@ USB armory是一个开源硬件设计的USB计算棒，目前 `Mk II第二代产
 
 - :ref:`pi-tail`
 
-在手机上连接 :ref:`pi_zero` ，通过手机屏幕运行VNC访问Pi Zero上运行煮面，就好像一个随身电脑
+在手机上连接 :ref:`pi_zero` ，通过手机屏幕运行VNC访问Pi Zero上运行桌面，就好像一个随身电脑

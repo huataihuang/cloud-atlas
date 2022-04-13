@@ -28,7 +28,11 @@ ARM版本的Kali Linux安装和其他ARM Linux操作系统安装方法类似，�
 
    disable_overscan=1   
 
-然后重启一次系统生效
+此外，还需要激活::
+
+   dtoverlay=vc4-fkms-v3d
+
+激活了 ``dtoverlay=vc4-fkms-v3d`` 才能识别出我的4k显示器，并支持30Hz下4k显示
 
 初始设置
 =========
