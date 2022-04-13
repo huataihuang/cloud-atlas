@@ -6,7 +6,7 @@ Kali Linux作为日常Linux工作平台
 
 虽然Kali Linux是作为安全渗透而闻名的Linux发行版，但是实际上Kali是基于Debian/Ubuntu开发的Linux，继承了APT仓库的大量应用程序，也可以作为日常开发和工作平台。要作为日常Linux工作平台，就涉及到一些日常工作软件和环境的设置。我现在就是使用 :ref:`pi_400` 运行ARM版本Kali Linux，作为一个轻量级桌面来远程工作于服务器集群，主要的密集运算和持久化数据都在 :ref:`real` 云上，仅在ARM设备上实现移动办公。所以，我会在本文实践一些桌面日常工作平台设置。
 
-Offiec
+Office
 ==========
 
 实际上我日常对Office的需求很少:
