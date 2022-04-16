@@ -9,6 +9,7 @@ sway - i3兼容Wayland compositor
 
    introduce_sway.rst
    build_sway_on_pi.rst
+   run_sway_on_pi.rst
 
 .. only::  subproject and html
 

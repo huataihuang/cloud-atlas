@@ -23,17 +23,21 @@ debian/ubuntu
 
 我使用 :ref:`kubuntu` 20.04 LTS版本，没有提供 ``kde-config-fcitx5`` ，所以需要使用文本编辑配置。如果是 ``20.10+`` 则可以直接使用图形界面配置。
 
-- 配置 ``~/.cofig/Fcitx5/profile`` (待实践,以下参考修改):
+- 配置 ``/etc/environment`` :
 
-.. literalinclude:: fcitx/profile
+.. literalinclude:: fcitx/environment
    :language: bash
-   :caption: Fcitx5配置案例，按需修改
+   :caption: 启用fcitx5环境变量配置 /etc/environment
 
-- 可以添加 ``~/.config/Fcitx/conf/pinyin.conf`` ::
+- 重新启动系统，然后登陆图形桌面，在终端中输入 ``fcitx5-configtool`` 进行配置
+
+- 可以添加 ``~/.config/fcitx5/conf/pinyin.conf`` ::
 
    PageSize=9
 
 这样一行候选字是9个，方便更快选择。此外在输入中文时按 ``左shift`` 键就可中英文切换。
+
+详细实践见 :ref:`fcitx_sway`
 
 参考
 ======

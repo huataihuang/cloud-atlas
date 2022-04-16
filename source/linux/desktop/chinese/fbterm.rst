@@ -82,9 +82,9 @@ FbTerm - 支持UTF-8中文的字符终端
 
    旧版本 ``fcitx`` 只需要 85MB 空间，比 ``fcitx5`` 动辄244MB安装空间要小很多
 
-- 配置 ``~/.xinitrc`` 或 ``~/.bashrc`` 添加:
+- 配置 ``~/.xinitrc`` 或 ``~/.bashrc`` 或者标准环境配置文件 ``/etc/environment`` 添加:
 
-.. literalinclude:: fcitx/fcitx_bashrc
+.. literalinclude:: fcitx/environment
    :language: bash
    :caption: fcitx环境变量
 
