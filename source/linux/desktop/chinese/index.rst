@@ -12,6 +12,7 @@ Linux中文环境
    linux_chinese_view.rst
    fcitx.rst
    fcitx_dwm.rst
+   fcitx_sway.rst
    compile_fcitx5.rst
    fbterm.rst
    kmscon.rst

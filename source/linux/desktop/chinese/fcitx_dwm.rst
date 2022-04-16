@@ -8,12 +8,14 @@ dwm环境fcitx
 
    我还没有解决在dwm环境使用中文输入法，所以本文记录 ``dwm环境fcitx`` 是我的前期实践记录，留待后续继续排查，待继续...
 
+   不过，我在 :ref:`pi_400` 上使用 :ref:`sway` 可以 :ref:`fcitx_sway` ，同样是平铺式窗口管理器，所以目前我改为使用 :ref:`sway`
+
 配置
 =======
 
-- 配置环境变量: 如果是 :ref:`xpra` 远程桌面配置 ``~/.bashrc`` ，如果是本地终端字符环境使用 ``startx`` 启动也可以配置 ``~/.xinitrc`` ，添加以下内容:
+- 配置环境变量: 如果是 :ref:`xpra` 远程桌面配置 ``~/.bashrc`` ，如果是本地终端字符环境使用 ``startx`` 启动也可以配置 ``~/.xinitrc`` 。不过，按照fcitx官方文档，建议采用通用的 ``/etc/environment`` 配置文件:
 
-.. literalinclude:: fcitx/fcitx_bashrc
+.. literalinclude:: fcitx/environment
    :language: bash
    :caption: fcitx环境变量
 
