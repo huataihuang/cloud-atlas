@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ssh服务 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>SSH ProxyJump多跳访问主机 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="ssh密钥" href="ssh_key.html" />
-    <link rel="prev" title="Ngrok架构" href="../tls/ngrok/ngrok_arch.html" /> 
+    <link rel="next" title="syslog服务" href="../syslog/index.html" />
+    <link rel="prev" title="SSH ProxyCommand实现穿透主机访问后端服务器" href="ssh_proxycommand.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -66,7 +66,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../ntp/index.html">ntp服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dns/index.html">DNS服务</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tls/index.html">TLS(Transport Layer Security)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">ssh服务</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">ssh服务</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="ssh_key.html">ssh密钥</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_tunneling.html">SSH隧道</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_tunneling_remote_port_forwarding.html">SSH Tunneling: 远程服务端口转发</a></li>
@@ -75,7 +75,12 @@
 <li class="toctree-l3"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_multiplexing.html">ssh多路传输multiplexing加速</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_proxycommand.html">SSH ProxyCommand实现穿透主机访问后端服务器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ssh_proxyjump.html">SSH ProxyJump多跳访问主机</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SSH ProxyJump多跳访问主机</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#proxyjump">命令行ProxyJump</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">配置方式多跳ProxyJump</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../syslog/index.html">syslog服务</a></li>
@@ -133,9 +138,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Infra-Service Atlas</a> &raquo;</li>
-      <li>ssh服务</li>
+          <li><a href="index.html">ssh服务</a> &raquo;</li>
+      <li>SSH ProxyJump多跳访问主机</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/infra_service/ssh/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/infra_service/ssh/ssh_proxyjump.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -143,29 +149,76 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ssh">
-<span id="id1"></span><h1>ssh服务<a class="headerlink" href="#ssh" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="ssh_key.html">ssh密钥</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_tunneling.html">SSH隧道</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_tunneling_remote_port_forwarding.html">SSH Tunneling: 远程服务端口转发</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_tunneling_dynamic_port_forwarding.html">SSH Tunneling: 动态端口转发</a></li>
-<li class="toctree-l1"><a class="reference internal" href="entropy_random.html">熵和随机数</a></li>
-<li class="toctree-l1"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_multiplexing.html">ssh多路传输multiplexing加速</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_proxycommand.html">SSH ProxyCommand实现穿透主机访问后端服务器</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh_proxyjump.html">SSH ProxyJump多跳访问主机</a></li>
-</ul>
+  <section id="ssh-proxyjump">
+<span id="id1"></span><h1>SSH ProxyJump多跳访问主机<a class="headerlink" href="#ssh-proxyjump" title="永久链接至标题">¶</a></h1>
+<p>使用 <a class="reference internal" href="ssh_proxycommand.html#ssh-proxycommand"><span class="std std-ref">SSH ProxyCommand实现穿透主机访问后端服务器</span></a> 可以很方便实现2跳SSH，不过，在实现3跳或者更多N跳SSH访问并不直观，使用配置也较为繁琐。SSH的 <code class="docutils literal notranslate"><span class="pre">ProxyJump</span></code> 指令在 <code class="docutils literal notranslate"><span class="pre">ProxyCommand</span></code> 指令之上构建爱你了一个自动在远程主机上执行ssh命令，跳到目标主机并且转发所有通过流量的解决方案。</p>
+<section id="proxyjump">
+<h2>命令行ProxyJump<a class="headerlink" href="#proxyjump" title="永久链接至标题">¶</a></h2>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">-J</span></code> 参数可以穿透主机跳下一跳主机:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">J</span> <span class="n">host1</span> <span class="n">host2</span>
+</pre></div>
 </div>
+<p>而且可以添加用户名和端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">J</span> <span class="n">user1</span><span class="nd">@host1</span><span class="p">:</span><span class="n">port1</span> <span class="n">user2</span><span class="nd">@host2</span> <span class="o">-</span><span class="n">p</span> <span class="n">port2</span>
+</pre></div>
+</div>
+<p>甚至可以多跳:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">J</span> <span class="n">user</span><span class="nd">@host1</span><span class="p">:</span><span class="n">port1</span><span class="p">,</span><span class="n">user2</span><span class="nd">@host2</span><span class="p">:</span><span class="n">port2</span> <span class="n">user3</span><span class="nd">@host3</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>配置方式多跳ProxyJump<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> 类似如下可以实现跳越:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">=&gt;</span> <span class="n">pixel</span> <span class="o">=&gt;</span> <span class="n">zcloud</span> <span class="o">=&gt;</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">SSH ProxyJump多跳配置文件 ~/.ssh/config</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host pixel
+    HostName <span class="m">192</span>.168.10.9
+    Port <span class="m">8022</span>
+    User u0_a299
+    LocalForward <span class="m">8443</span> <span class="m">127</span>.0.0.1:8443
+
+Host zcloud
+    HostName <span class="m">192</span>.168.7.200
+    ProxyJump pixel
+    LocalForward <span class="m">8443</span> <span class="m">192</span>.168.6.25:8443
+
+Host z-dev
+    HostName <span class="m">192</span>.168.6.253
+    ProxyJump zcloud
+    LocalForward <span class="m">8443</span> <span class="m">127</span>.0.0.1:443
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>则简单执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>就可以连跳3次SSH访问到内部服务器</p>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.gentoo.org/wiki/SSH_jump_host">gentoo linux wiki: SSH jump host</a></p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../tls/ngrok/ngrok_arch.html" class="btn btn-neutral float-left" title="Ngrok架构" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ssh_key.html" class="btn btn-neutral float-right" title="ssh密钥" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ssh_proxycommand.html" class="btn btn-neutral float-left" title="SSH ProxyCommand实现穿透主机访问后端服务器" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../syslog/index.html" class="btn btn-neutral float-right" title="syslog服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

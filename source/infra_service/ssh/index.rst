@@ -15,6 +15,7 @@ ssh服务
    speed_up_ssh.rst
    ssh_multiplexing.rst
    ssh_proxycommand.rst
+   ssh_proxyjump.rst
    
 .. only::  subproject and html
 
