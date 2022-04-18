@@ -74,10 +74,7 @@ Office
 ARM运行环境应用软件
 =======================
 
-我是在 :ref:`pi_400` 这样的ARM平台运行Kali Linux： ARM 环境可以原生运行Android应用程序，所以我采用 :ref:`anbox` 来安装Android应用。各种商用软件在Android都提供了应用程序，可以满足日常工作需求。
-
-
-
+由于各种原因，我是在 :ref:`pi_400` 这样的ARM平台运行Kali Linux： ARM 环境可以原生运行Android应用程序，或许可以通过 :ref:`anbox` 来安装Android应用。各种商用软件在Android都提供了应用程序，可以满足日常工作需求。
 
 参考
 ========

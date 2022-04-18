@@ -25,6 +25,7 @@ Linux桌面
    light_browser.rst
    netsurf.rst 
    synergy.rst
+   hidclient.rst
    terminal_emulator.rst
    uxvrt_ch_font.rst
 

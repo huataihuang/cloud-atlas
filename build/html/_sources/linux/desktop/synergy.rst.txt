@@ -13,6 +13,10 @@ Synergy:主机间共享键盘鼠标
 
 .. note::
 
+   Synergy已经停止开源发展(STL加密通讯功能需要付费)，所以社区有人从synergy开源版本 1.9 codebase fork新的项目 `Barrier <https://github.com/debauchee/barrier>`_ 专注于修复原先 1.9 系列的bug,不过该项目功能有限。详细使用Barrier方法参考 `Share your keyboard and mouse between Linux and Raspberry Pi <https://jasa-pengukuran.com/share-your-keyboard-and-mouse-between-linux-and-raspberry-pi/>`_
+
+.. note::
+
    Synergy是我购买的一款非常有价值的软件：对于类似我这样跨平台工作的人来说，能够无缝在多台电脑(不同操作系统)共享一套键盘鼠标，极大提高了工作效率：
 
    - 多屏幕显示内容
