@@ -70,9 +70,11 @@ TLS证书采用 ``cfssl`` 工具构建，完整步骤见 :ref:`etcd_tls` 。分�
 
    sh deploy_etcd_certificates.sh
 
-这样在 ``etcd`` 主机上分别有对应主机的配置文件 ``/etc/etcd`` 目录下有(以下案例是 ``x-k3s-m-1`` )::
+这样在 ``etcd`` 主机上分别有对应主机的配置文件 ``/etc/etcd`` 目录下有(以下案例是 ``x-k3s-m-1`` ):
 
-   ca.pem             server-key.pem     server.pem         x-k3s-m-1-key.pem  x-k3s-m-1.pem
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcd_certificates_list
+   :language: bash
+   :caption: x-k3s-m-1 主机证书案例
 
 配置启动服务脚本
 ===================

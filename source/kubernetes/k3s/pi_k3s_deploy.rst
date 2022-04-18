@@ -13,4 +13,4 @@
 部署步骤
 ==========
 
-- :ref:`k3s_ha_etcd`
+- :ref:`k3s_ha_etcd` 部署高可用独立运行的 :ref:`etcd` 集群

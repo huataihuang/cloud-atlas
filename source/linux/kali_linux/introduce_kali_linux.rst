@@ -54,7 +54,9 @@ Kali Linux是有 `Offensive Security <http://www.offensive-security.com/>`_ 开�
 - :ref:`pi_400`
 - :ref:`pi_zero`
 
- 树莓派Zero是一个非常小巧的类似口香糖大小的单片机，通过转换USB连接笔记本，可以非常方便携带使用，是一个非常有意思的玩具。
+树莓派Zero是一个非常小巧的类似口香糖大小的单片机，通过转换USB连接笔记本，可以非常方便携带使用，是一个非常有意思的玩具。
+
+我现在使用 :ref:`pi_400` 作为主要的桌面主机，用来做日常的开发和学习。为了能够使用轻量级桌面来降低硬件需求，我采用 :ref:`run_sway_on_kali_pi` 。这种解决方案可以流畅地在性能有限的 :ref:`raspberry_pi` 上可以运行Firefox浏览器，并在终端中通过vim进行不同语言的开发工作。
 
 其他有趣的Kali版本
 ---------------------

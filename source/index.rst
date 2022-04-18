@@ -93,7 +93,6 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    apple/index
    windows/index
    real/index
-   appendix/index
    management/index
    life/index
    copyright
@@ -101,6 +100,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    donate
    thanks
    roadmap
+   appendix/index
 
 
 Indices and tables
