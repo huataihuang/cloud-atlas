@@ -10,6 +10,10 @@ K3s高可用etcd
 
    本文采用的是 exteneral etcd 模式，对应 :ref:`ha_k8s_external`
 
+.. note::
+
+   详细部署和异常排查实践请参考 :ref:`deploy_etcd_cluster_with_tls_auth`
+
 :ref:`etcd` 是Kuberntes主流的持久化数据存储，提供了分布式存储能力。在 ``K3s`` 的高可用部署环境，使用 ``external etcd`` 是最稳定可靠的部署模型。
 
 在 :ref:`pi_stack` 环境采用3台 :ref:`pi_3` 硬件部署3节点 :ref:`etcd` 集群:
@@ -123,13 +127,75 @@ K3s高可用etcd
 
    sh deploy_etcd_certificates.sh
 
-这样在 ``etcd`` 主机上分别有对应主机的配置文件 ``/etc/etcd`` 目录下有(以下案例是 ``x-k3s-m-1`` )::
+这样在 ``etcd`` 主机上分别有对应主机的配置文件 ``/etc/etcd`` 目录下有(以下案例是 ``x-k3s-m-1`` ):
 
-   ca.pem
-   server-key.pem
-   server.pem
-   x-k3s-m-1-key.pem
-   x-k3s-m-1.pem
+.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/etcd_certificates_list
+   :language: bash
+   :caption: x-k3s-m-1 主机证书案例
+
+:ref:`openrc` 启动etcd脚本
+===========================
+
+在 :ref:`alpine_linux` 上采用 :ref:`openrc` 服务脚本来控制 ``etcd`` ，采用配置文件来管理服务：
+
+- 准备配置文件 ``conf.yml`` (这个配置文件是 `edge/testing仓库etcd <https://pkgs.alpinelinux.org/package/edge/testing/aarch64/etcd>`_ 的etcd 配置文件 ``/etc/etcd/conf.yml`` 基础上修订，增加配置占位符方便后续通过脚本修订):
+
+.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/conf.yml
+   :language: yaml
+   :caption: etcd配置文件 /etc/etcd/conf.yml
+
+- 修订etcd配置的脚本 ``config_etcd.sh`` :
+
+.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/config_etcd.sh
+   :language: bash
+   :caption: 修订etcd配置的脚本 config_etcd.sh
+
+- 执行以下部署脚本 ``deploy_etcd_config.sh`` :
+
+.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_config.sh
+   :language: bash
+   :caption: 执行etcd修订脚本 deploy_etcd_config.sh
+
+::
+
+   sh deploy_etcd_config.sh
+
+然后验证每台管控服务器上 ``/etc/etcd/config.yml`` 配置文件中的占位符是否已经正确替换成主机名。正确情况下， ``/etc/etcd/conf.yml`` 中对应 ``占位符`` 都会被替换成对应主机的IP地址或者域名
+
+- 准备配置文件 ``conf.d-etcd`` 和 ``init.d-etcd`` (从alpine linux软件仓库 ``etcd-openrc`` 软件包提取)
+
+.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/conf.d-etcd
+   :language: bash
+   :caption: openrc的etcd配置文件 /etc/conf.d/etcd
+
+.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/init.d-etcd
+   :language: bash
+   :caption: openrc的etcd服务配置文件 /etc/init.d/etcd
+
+- 然后执行以下 ``deploy_etcd_service.sh`` :
+
+.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_service.sh
+   :language: bash
+   :caption: 分发openrc的etcd服务脚本 deploy_etcd_service.sh
+
+::
+
+   sh deploy_etcd_service.sh
+
+- 在3台管控服务器上启动服务::
+
+   sudo service etcd start
+
+验证etcd集群
+===============
+
+现在 ``etcd`` 集群已经启动，我们使用以下命令检查集群是否正常工作::
+
+   curl --cacert ca.pem --cert client.pem --key client-key.pem https://etcd.edge.huatai.me:2379/health
+
+此时返回信息应该是::
+
+   {"health":"true","reason":""}
 
 参考
 =======

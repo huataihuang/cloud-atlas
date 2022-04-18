@@ -1,8 +1,8 @@
-.. _run_sway_on_pi:
+.. _run_sway_on_kali_pi:
 
-=============================
-在树莓派上运行sway窗口管理器
-=============================
+========================================
+在树莓派上运行Kali Linux和sway窗口管理器
+========================================
 
 安装
 ======
@@ -23,13 +23,13 @@
 
 - 配置定制，先将全局配置复制到个人目录下:
 
-.. literalinclude:: run_sway_on_pi/cp_sway_config
+.. literalinclude:: run_sway_on_kali_pi/cp_sway_config
    :language: bash
    :caption: 复制sway个人配置
 
 - 我的配置:
 
-.. literalinclude:: run_sway_on_pi/sway_config
+.. literalinclude:: run_sway_on_kali_pi/sway_config
    :language: bash
    :caption: sway个人配置
 
@@ -68,6 +68,23 @@
    set $menu wofi --show=drun --lines=5 --prompt=""
 
 - 重新加载 ``sway`` 配置: ``Shift + mod4 + c`` ，然后就可以通过 ``mod4 + d`` 加载应用加载器，非常类似macOS环境的Spotlight搜索功能加载应用程序。
+
+Firefox
+==========
+
+在 Firefox 的 ``about:supprt`` 页面可以观察Firefox是否已经完全切换到 native wayland :
+
+- ``Window Protocol`` 应该是 ``wayland`` ，如果显示 ``xwayland`` 则建议设置环境变朗 ``set -x MOZ_ENABLE_WAYLAND 1`` 然后在启动Firefox观察
+
+Chroium
+=========
+
+配置 ``~/.config/chromium-flags.conf`` 添加以下行::
+
+   --enable-features=UseOzonePlatform
+   --ozone-platform=wayland
+
+可以使chromium 运行在wayland模式。
 
 参考
 ======
