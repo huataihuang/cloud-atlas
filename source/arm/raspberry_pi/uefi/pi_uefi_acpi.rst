@@ -4,7 +4,10 @@
 树莓派UEFI+ACPI
 ==================
 
-我在 :ref:`edge_cloud` 上部署 :ref:`alpine_linux` ， :ref:`pi_acpid_crashed` 发现，常规树莓派firmware并没有支持ACPI，无法实现ARM的Server Base Boot Requirement (SBBR)规范。现象就是，由于系统没有 ``/dev/input/event0`` 设备而导致 ``acpid`` 服务 ``crashed`` 。
+我在 :ref:`edge_cloud` 上部署 :ref:`alpine_linux` ， :ref:`pi_acpid_crashed` 发现，常规树莓派firmware并没有支持ACPI，无法实现ARM的Server Base Boot Requirement (SBBR)规范:
+
+- 由于系统没有 ``/dev/input/event0`` 设备而导致 ``acpid`` 服务 ``crashed`` 。
+- 缺少 ``/sys/class/backlight/`` 设备目录及控制文件，无法通过 ``ACPI`` 接口调整 :ref:`linux_backlight`
 
 ARM SBSA和SBBR
 =================

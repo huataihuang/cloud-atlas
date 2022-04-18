@@ -10,6 +10,7 @@ Linux系统管理
    locale_env.rst
    cron.rst
    os_fork_resource_unavailable.rst
+   linux_backlight.rst
 
 .. only::  subproject and html
 
