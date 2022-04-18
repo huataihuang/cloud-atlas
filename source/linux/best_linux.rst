@@ -34,6 +34,7 @@ Linux是完全开源的操作系统，任何人都能够定制自己的发行版
 - `Solus <https://getsol.us/>`_ 面向开发者的滚动版本，提供了众多开发环境
 - `NethServer <https://www.nethserver.org/>`_ 面向小型企业的易于管理的服务器版本，提供了大量服务，易于配置，基于CentOS的发行版
 - `OPNsense <https://opnsense.org/>`_ 实际上这个版本并非基于Linux，而是基于FreeBSD的一个安全分支HardenedBSD，提供了入侵保护功能的最佳防火墙发行版，值得研究
+- `DietPi <https://dietpi.com/>`_ 基于Debian定制的面向有限硬件资源(最小化CPU和内存使用)的SBC的Linux发行版，提供了种类繁多的针对不同SBC(包括 :ref:`raspberry_pi` 、 :ref:`pine64` )
 
 参考
 =======

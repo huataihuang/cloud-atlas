@@ -25,6 +25,14 @@ Pine64的理念是PINE64是一个社区平台。这个观点的简化理解就�
 
 在设备发售之前，你就可以参与提交产品功能需求，建议修改以及改进文档。在设备进入工厂生产线之前，硬件开发(不管是成功还是失败)也是完全开放的。可以通过论坛、IRC，记录以及在线交谈记录，不论是硬件还是软件开发，你都可以贡献你的时间和技能。
 
+软件生态
+=========
+
+Linux发行版
+-----------------
+
+- `Arch Linux ARM on Mobile <https://github.com/dreemurrs-embedded/Pine64-Arch>`_ 聚焦于在移动设备中运行 :ref:`arch_linux` ARM版本，当前仅支持 :ref:`pinephone` 和 PineTab。我注意到这个Arch Linux ARM on Mobile项目采用了 :ref:`waydroid` 作为Andorid兼容层(可以可以使用 :ref:`anbox` )，提供了在ARM设备的Linux标准发行版运行Android程序的思路。
+
 参考
 ========
 
