@@ -15,6 +15,7 @@ for Raspberry Pi 3 <https://konstakang.com/devices/rpi3/LineageOS15.1/>`_
    :maxdepth: 1
 
    android_for_pi.rst
+   android_studio_in_pi.rst
    kindleberry.rst
    emteria_os.rst
 
