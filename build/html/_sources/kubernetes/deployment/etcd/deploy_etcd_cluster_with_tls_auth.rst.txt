@@ -264,6 +264,46 @@ TLS证书采用 ``cfssl`` 工具构建，完整步骤见 :ref:`etcd_tls` 。分�
 
 上述 ``server.json`` 非常巧妙使用了可以同时解析为多个real server的域名 ``etcd.edge.huatai.me`` ，也就是生产环境上，可以配置这个域名轮转到这3台服务器的IP上，或者使用一个 :ref:`load_balancer` 分发到这3个real server上，域名解析绑定到负载均衡的VIP上。
 
+- 为方便维护，配置 ``etcdctl`` 环境变量，添加到用户自己的 profile中:
+
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_env
+   :language: bash
+   :caption: etcdctl 使用的环境变量
+
+然后可以检查::
+
+   etcdctl member list
+
+输出类似::
+
+   9bfd4ef1e72d26, started, x-k3s-m-3, https://x-k3s-m-3.edge.huatai.me:2380, https://x-k3s-m-3.edge.huatai.me:2379, false
+   7e8d94ba496c072d, started, x-k3s-m-1, https://x-k3s-m-1.edge.huatai.me:2380, https://x-k3s-m-1.edge.huatai.me:2379, false
+   a01cb65343e64610, started, x-k3s-m-2, https://x-k3s-m-2.edge.huatai.me:2380, https://x-k3s-m-2.edge.huatai.me:2379, false
+
+为方便观察，可以使用表格输出模式::
+
+   etcdctl --write-out=table endpoint status
+
+输出显示::
+
+   +---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+   |         ENDPOINT          |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
+   +---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+   | https://192.168.7.11:2379 | 7e8d94ba496c072d |   3.5.2 |   20 kB |     false |      false |         7 |        237 |                237 |        |
+   | https://192.168.7.12:2379 | a01cb65343e64610 |   3.5.2 |   20 kB |     false |      false |         7 |        237 |                237 |        |
+   | https://192.168.7.13:2379 |   9bfd4ef1e72d26 |   3.5.2 |   20 kB |      true |      false |         7 |        237 |                237 |        |
+   +---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+检查健康状况::
+
+   etcdctl endpoint health
+
+输出显示::
+
+   https://192.168.7.13:2379 is healthy: successfully committed proposal: took = 67.98523ms
+   https://192.168.7.12:2379 is healthy: successfully committed proposal: took = 64.634362ms
+   https://192.168.7.11:2379 is healthy: successfully committed proposal: took = 67.330493ms
+
 参考
 ======
 
@@ -271,3 +311,4 @@ TLS证书采用 ``cfssl`` 工具构建，完整步骤见 :ref:`etcd_tls` 。分�
 - `Setting up Etcd Cluster with TLS Authentication Enabled <https://medium.com/nirman-tech-blog/setting-up-etcd-cluster-with-tls-authentication-enabled-49c44e4151bb>`_ 这篇文档非常详细指导了如何使用cfssl工具来生成etcd服务器证书，以及签名客户端证书
 - `Deploy a secure etcd cluster <https://pcocc.readthedocs.io/en/latest/deps/etcd-production.html>`_
 - `How To Setup a etcd Cluster On Linux – Beginners Guide <https://devopscube.com/setup-etcd-cluster-linux/>`_ 提供了一个生成 :ref:`systemd` 配置的脚本
+- `How to check Cluster status <https://etcd.io/docs/v3.5/tutorials/how-to-check-cluster-status/>`_

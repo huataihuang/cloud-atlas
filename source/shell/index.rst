@@ -10,6 +10,7 @@ Shell Atlas
    :maxdepth: 1
 
    bash/index
+   zsh/index
    ash/index
    utils/index
 

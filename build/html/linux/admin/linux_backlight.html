@@ -76,7 +76,8 @@
 <li class="toctree-l3"><a class="reference internal" href="os_fork_resource_unavailable.html">执行报错”fork failed: Resource temporarily unavailable”</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Linux屏幕背光</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">硬件接口</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">树莓派</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -163,7 +164,7 @@
 <p>当黎明或深夜时，使用Linux主机进行开发和运维工作，你会感到屏幕的背光十分刺目，让你双眼酸痛。然而，显示器的内置硬件调整菜单非常原始，调整起来既麻烦又无法快速恢复。这时候，你会想是否可以像Mac主机一样，通过快捷按键来调整屏幕亮度呢？</p>
 <p>在Linux系统中，除了硬件厂商直接提供的特定快捷键外，还可以提供过两种软件方式来设置屏幕亮度:</p>
 <ul class="simple">
-<li><p>通过 <span class="xref std std-ref">acpi</span> 、显卡或者平台驱动，可以将屏幕背光控制输出到 <code class="docutils literal notranslate"><span class="pre">/sys/class/backlight</span></code> ，这样就能通过用户侧 <code class="docutils literal notranslate"><span class="pre">backlight</span></code> 工具来控制</p></li>
+<li><p>通过 ACPI ( <a class="reference internal" href="../../arm/raspberry_pi/uefi/pi_uefi_acpi.html#pi-uefi-acpi"><span class="std std-ref">树莓派UEFI+ACPI</span></a> )、显卡或者平台驱动，可以将屏幕背光控制输出到 <code class="docutils literal notranslate"><span class="pre">/sys/class/backlight</span></code> ，这样就能通过用户侧 <code class="docutils literal notranslate"><span class="pre">backlight</span></code> 工具来控制</p></li>
 <li><p>通过 <code class="docutils literal notranslate"><span class="pre">setpci</span></code> 可以向显卡寄存器设置值</p></li>
 </ul>
 <div class="admonition note">
@@ -175,6 +176,33 @@
 <section id="acpi">
 <h3>ACPI<a class="headerlink" href="#acpi" title="永久链接至标题">¶</a></h3>
 <p>屏幕背光亮度是同u哦设置LEDs的能源级别实现的，这个能源级别通常使用视频的ACPI内核模块控制。这个模块的接口通过 <code class="docutils literal notranslate"><span class="pre">sysfs</span></code> 目录 <code class="docutils literal notranslate"><span class="pre">/sys/class/backlight/</span></code> 来提供。</p>
+<p>需要注意ACPI BIOS提供了通过通用ACPI接口控制背光的，但是没有具体模式的实现。所以需要硬件提供ACPI驱动注册，并且不能使用任何笔记本专用驱动。满足上述条件之后，就可以在内核启动参数中添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">acpi_backlight</span><span class="o">=</span><span class="n">vendor</span>
+</pre></div>
+</div>
+<p>如果是thinkpad设备，则还需要激活 <code class="docutils literal notranslate"><span class="pre">thinkpad-acpi</span></code> 驱动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">thinkpad</span><span class="o">-</span><span class="n">acpi</span><span class="o">.</span><span class="n">brightness_enable</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>注意，内核接口需要有 <code class="docutils literal notranslate"><span class="pre">/proc/acpi/video</span></code> ，对于 <a class="reference internal" href="../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 需要 <a class="reference internal" href="../../arm/raspberry_pi/uefi/index.html#pi-uefi"><span class="std std-ref">树莓派UEFI</span></a> 支持才能实现:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">acpi</span><span class="o">/</span><span class="n">video</span><span class="o">/</span>
+ <span class="o">|</span>
+ <span class="o">+-</span> <span class="o">&lt;</span><span class="n">GFX</span> <span class="n">card</span><span class="o">&gt;</span>
+ <span class="o">|</span>   <span class="o">|</span>
+ <span class="o">|</span>   <span class="o">+-</span> <span class="o">&lt;</span><span class="n">Display</span> <span class="n">Device</span><span class="o">&gt;</span>
+ <span class="o">|</span>   <span class="o">|</span>   <span class="o">|</span>
+ <span class="o">|</span>   <span class="o">|</span>   <span class="o">+-</span> <span class="n">EDID</span>
+ <span class="o">|</span>   <span class="o">|</span>   <span class="o">+-</span> <span class="n">brightness</span>
+ <span class="o">|</span>   <span class="o">|</span>   <span class="o">+-</span> <span class="n">state</span>
+ <span class="o">|</span>   <span class="o">|</span>   <span class="o">+-</span> <span class="n">info</span>
+ <span class="o">|</span>   <span class="o">+-</span> <span class="o">...</span>
+ <span class="o">+-</span> <span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注解</p>
+<p><a class="reference external" href="https://wiki.ubuntu.com/Kernel/Debugging/Backlight">ubuntu wiki: Backlight</a> 文档中有很多检查案例方法，待后续 <a class="reference internal" href="../../arm/raspberry_pi/uefi/pi_uefi_acpi.html#pi-uefi-acpi"><span class="std std-ref">树莓派UEFI+ACPI</span></a> 环境具备后实践</p>
+</div>
 <p>通过以下命令可以检查目录下显卡型号:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ls</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">class</span><span class="o">/</span><span class="n">backlight</span><span class="o">/</span>
 </pre></div>
@@ -219,9 +247,16 @@
 </section>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>树莓派<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p><a class="reference external" href="https://github.com/linusg/rpi-backlight">linusg/rpi-backlight</a> 是一个Python模块可以用来控制树莓派官方提供的Raspberry Pi 7” touch display显示器的功耗和亮度。并且提供了详细的 <a class="reference external" href="https://rpi-backlight.readthedocs.io/en/latest/index.html">rpi-backlight Documentation</a> 。</p>
+<p>结合光线传感器，可以实现 <a class="reference external" href="http://www.yoctopuce.com/EN/article/automated-brightness-control-for-the-raspberry-pi">Automated brightness control for the Raspberry Pi</a></p>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/backlight">arch linux wiki: Backlight</a></p></li>
+<li><p><a class="reference external" href="https://wiki.ubuntu.com/Kernel/Debugging/Backlight">ubuntu wiki: Backlight</a></p></li>
+<li><p><a class="reference external" href="https://danmc.net/posts/sway-backlight/">Display Backlight Control in the Sway</a> 控制背光原理是相通的，不过本文提供了在 <a class="reference internal" href="../desktop/sway/index.html#sway"><span class="std std-ref">sway - i3兼容Wayland compositor</span></a> 环境绑定快捷键调整背光亮度的方法</p></li>
 </ul>
 </section>
 </section>

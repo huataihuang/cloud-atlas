@@ -32,8 +32,8 @@ K3s高可用etcd
    :language: bash
    :caption: 下载并安装etcd脚本 install_etcd.sh
 
-生成和分发证书
-=================
+生成和分发服务器证书
+======================
 
 使用 ``cfssl`` 签发证书，不过 :ref:`alpine_linux` 只在 ``edge`` 仓库提供了 ``cfssl`` 。当前我使用alpine linux的stable仓库，不能同时激活stable和edge。
 
@@ -196,6 +196,8 @@ K3s高可用etcd
 此时返回信息应该是::
 
    {"health":"true","reason":""}
+
+为方便日常维护，为 ``etcdctl`` 配置环境变量
 
 参考
 =======

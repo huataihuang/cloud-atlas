@@ -25,6 +25,13 @@ ARM SBSA和SBBR
 
 :ref:`pi_3` 也有对应的 `64-bit Tiano Core UEFI firmware for the Raspberry Pi 3B <https://github.com/tianocore/edk2-platforms/tree/master/Platform/RaspberryPi/RPi3>`_ 。`
 
+.. note::
+
+   `Alternate Guide – Running Windows 10 on the Pi 4 <https://rpi4-uefi.dev/alternate-guide-running-windows-10-on-the-pi-4/>`_ 介绍了在UEFI模式下树莓派可以用来安装Windows 10 ARM版本，详细的操作可以参考:
+
+   - `How to Install Windows 10 on Raspberry Pi 4 [Full Guide] [Clone Disk] <https://www.partitionwizard.com/clone-disk/windows-10-on-raspberry-pi-4.html>`_
+   - `How to Install Windows 10 on a Raspberry Pi 4 <https://www.tomshardware.com/how-to/install-windows-10-raspberry-pi>`_
+
 参考
 =====
 

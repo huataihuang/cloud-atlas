@@ -13,4 +13,6 @@
 部署步骤
 ==========
 
+- :ref:`prepare_k3s_alpine` 调整 :ref:`alpine_linux` 内核
 - :ref:`k3s_ha_etcd` 部署高可用独立运行的 :ref:`etcd` 集群
+- :ref:`k3s_install` 通过安装脚本安装k3s，使用扩展etcd

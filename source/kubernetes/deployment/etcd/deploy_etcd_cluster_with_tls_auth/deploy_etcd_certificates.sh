@@ -28,5 +28,8 @@ for host in `cat etcd_hosts`;do
     scp ca.pem ${host}:/tmp/etcd_tls/
     scp server.pem ${host}:/tmp/etcd_tls/
     scp server-key.pem ${host}:/tmp/etcd_tls/
+    scp client.csr ${host}:/tmp/etcd_tls/
+    scp client.pem ${host}:/tmp/etcd_tls/
+    scp client-key.pem ${host}:/tmp/etcd_tls/
     ssh $host 'sudo cp /tmp/etcd_tls/* /etc/etcd/;sudo chown etcd:etcd /etc/etcd/*'
 done
