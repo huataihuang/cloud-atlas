@@ -8,7 +8,7 @@
 
 .. note::
 
-   最近在部署 :ref:`k3s` 集群时候，偶然发现原来有人和我类似的思路，并且已经实践并分享了方案和经验，请参考 `rpi4cluster.com <https://rpi4cluster.com/>`_ 
+   最近在部署 :ref:`k3s` 集群时候，偶然发现原来有人和我类似的思路，并且已经实践并分享了方案和经验，请参考 `rpi4cluster.com <https://rpi4cluster.com/>`_ ，方案和文档非常清晰完备。
 
    我准备借鉴并尝试不同的应用应用迭代，构建适合自己同时能够进一步完善的解决方案。
 
@@ -27,13 +27,13 @@
 
     - 采用监控( :ref:`prometheus` 结合跟多网络管理平台 )
 
-  - 在3台 :ref:`pi_4` 上通过 :ref:`ceph` 构建基础存储，实现数据镜像
+  - 在3台 :ref:`pi_4` 作为工作节点( ``worker`` )
 
-    - 由于3个 :ref:`pi_4` 的其中一个只有 ``2G`` 内存，所以这个 ``2G`` 节点不部署 :ref:`k3s` ，仅作为 :ref:`ceph` 存储节点
+    - 由于3个 :ref:`pi_4` 的其中一个只有 ``2G`` 内存，调度只分配监控服务 :ref:`prometheus` / :ref:`grafana` / :ref:`thanos` 来构建集群监控
 
   - 另外两台 ``8G`` 内存配置的 :ref:`pi_4` 加入 :ref:`k3s` 作为工作节点
 
-    - ``8G`` 节点内存富裕，运行 :ref:`prometheus` 集群监控
+    - ``8G`` 节点内存，部署 :ref:`jankins` (集成在 :ref:`ranther` 中作为 pipeline)
 
 - :ref:`jetson_nano` - 构建边缘云计算( :ref:`machine_learning` )
 - :ref:`pi_400` - 作为管理和操作

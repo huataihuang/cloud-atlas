@@ -1,7 +1,7 @@
 .. _set_linux_system_proxy:
 
 ============================
-config linux system proxy
+配置linux系统级代理
 ============================
 
 debian/ubuntu system-wide proxy

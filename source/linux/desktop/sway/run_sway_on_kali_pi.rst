@@ -38,9 +38,17 @@
 
 由于 ``sway`` 使用了前沿的 :ref:`wayland` 图形显示服务，所以有些应用可能无法native支持，或者需要特殊运行参数
 
-- firefox可以直接运行在纯 ``wayland`` 的 ``sway`` 环境；但是chromium需要指定参数(上文中 sway 配置中采用快捷键绑定启动参数)::
+- firefox可以直接运行在纯 ``wayland`` 的 ``sway`` 环境
+
+- chromium需要指定参数(上文中 sway 配置中采用快捷键绑定启动参数)::
 
    chromium --enable-features=UseOzonePlatform --ozone-platform=wayland
+
+- :ref:`set_linux_system_proxy` 但是chromium不生效，所以在启动参数上添加 ``--proxy-server`` 参数，所以chromium参数如下( 参考 `Configure Proxy for Chromium and Google Chrome From Command Line on Linux <https://www.linuxbabe.com/desktop-linux/configure-proxy-chromium-google-chrome-command-line>`_ )::
+
+   chromium --enable-features=UseOzonePlatform --ozone-platform=wayland --proxy-server="http://192.168.10.9:3128"
+
+如果使用socks5代理，则类似参数 ``--proxy-server="socks5://127.0.0.1:1080"`` 。更为方便的方法是使用 :ref:`ssh_tunnel_gfw_autoproxy` 方案中的 ``Proxy SwitchyOmega``
 
 - chromium不能使用 :ref:`fcitx` 输入中文，但是firefox可以，暂时采用双浏览器还没有解决这个问题
 

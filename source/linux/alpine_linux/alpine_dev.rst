@@ -89,6 +89,10 @@ rust
 
 原文作者采用了Xfce桌面，并且为了能够方便开发，安装了JetBrains IDE系列。原因是Alpine Linux使用musl库，如果使用 ``musl-glibc`` 兼容库非常费劲。而JetBrains是Java程序，OpenJDK(IcedTea项目)可以顺畅在Alpine Linux上运行，所以选择JetBrains全家桶可以非常方便开发工作。
 
+此外，由于 Google 提供的 Android Studio就是基于JetBrains IDE，所以 :ref:`android_studio_in_pi` 也是可行的(只不过为了通用方便，容器内通常运行 :ref:`ubuntu_linux` )。
+
+考虑到树莓派性能有限，并且在 :ref:`edge_cloud_infra` 我只有3台 :ref:`pi_4` (后续横向扩容)需要部署 :ref:`k3s` 以及在此基础上集成 :ref:`rancher` 系统，所以我没有部署任何桌面系统，而是将非常消耗计算资源的容器和虚拟机运行在 :ref:`hp_dl360_gen9` 服务器部署的 :ref:`priv_cloud_infra` 中。
+
 容器构建
 =========
 
@@ -134,6 +138,15 @@ node容器构建案例
 .. note::
 
    以上是构建node容器的案例，实际上通过容器运行node建议采用nodejs官方 `nodejs / docker-node <https://github.com/nodejs/docker-node>`_ 来运行
+
+镜像制作和迁移
+====================
+
+- 在完成了容器内部应用升级和安装之后，执行以下命令保存镜像::
+
+   docker commit x-dev local:x-dev
+
+- 然后将镜像导出备份，以及 :ref:`copy_docker_image_without_registry`
 
 参考
 =======
