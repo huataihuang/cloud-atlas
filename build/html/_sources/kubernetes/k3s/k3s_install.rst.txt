@@ -230,6 +230,18 @@ etcd客户端证书分发
   - ``K3S_URL`` 配置 ``k3s`` 的apiserver地址，请注意端口是  ``6443`` ( ``apiserver`` )
   - 我这里配置使用了域名解析 ``apiserver.edge.huatai.me`` ，这个域名解析实际就是3台管控服务器的IP地址: ``k3s`` 使用物理主机的IP地址做了反向代理到内部的 ``apiserver`` pods ( :ref:`k3s_arch` )
 
+.. note::
+
+   如果在最初部署 ``k3s`` 时没有传递参数 ``K3S_TOKEN`` ，则 ``k3s`` 会生成随机字符串作为token。 获取token方式::
+
+      cat /var/lib/rancher/k3s/server/node-token
+
+   然后在安装客户端时候就可以使用上述token::
+
+      curl -sfL https://get.k3s.io | K3S_URL=https://apiserver.edge.huatai.me:6443 K3S_TOKEN="token_strings" sh - 
+
+   详细剋参考 `k3s: Join a new worker node to an existing cluster <https://pet2cattle.com/2021/04/k3s-join-nodes>`_
+
 - 完成安装后，在管控服务器执行检查::
 
    kubectl get nodes
@@ -250,5 +262,5 @@ etcd客户端证书分发
 - `K3s Cluster Datastore Options <https://rancher.com/docs/k3s/latest/en/installation/datastore/>`_
 - `K3s High Availability with an External DB <https://rancher.com/docs/k3s/latest/en/installation/ha/>`_
 - `K3s High Availability with Embedded DB <https://rancher.com/docs/k3s/latest/en/installation/ha-embedded/>`_
-- `Setting up a HA Kubernetes cluster using K3S <https://gabrieltanner.org/blog/ha-kubernetes-cluster-using-k3s>`_
+- `Setting up a HA Kubernetes cluster using K3S <https://gabrieltanner.org/blog/ha-kubernetes-cluster-using-k3s>`_ 使用了 :ref:`docker_compose` 来构建 :ref:`mysql` 数据库作为 :ref:`k3s` 存储，使用 :ref:`nginx` / :ref:`haproxy` 构建负载均衡，以及结合 :ref:`ansible` 完成部署
 - `rpi4cluster.com => K3s-Current => Kubernetes Install <https://rpi4cluster.com/k3s/k3s-kube-setting/>`_

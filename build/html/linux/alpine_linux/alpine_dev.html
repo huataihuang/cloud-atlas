@@ -54,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rancher/index.html">Rancher Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
@@ -113,7 +114,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#ide">安装编辑器构建IDE</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">桌面</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">容器构建</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">镜像制作和迁移</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -199,8 +201,8 @@
 <ul class="simple">
 <li><p>使用密码登陆的ssh容器 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">提供ssh和sudo的alpine构建Dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">提供ssh和sudo的alpine构建Dockerfile</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
 <span class="k">RUN</span> apk add --update --no-cache openssh sudo
 <span class="k">RUN</span> apk update <span class="o">&amp;&amp;</span> apk upgrade
@@ -217,8 +219,8 @@
 <ul class="simple">
 <li><p>并准备 <code class="docutils literal notranslate"><span class="pre">entrypoint.sh</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">启动ssh脚本</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">启动ssh脚本</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
 ssh-keygen -A
 <span class="nb">exec</span> /usr/sbin/sshd -D -e <span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>
@@ -289,6 +291,8 @@ ssh-keygen -A
 <p>或许以后我会尝试运行Alpine Linux桌面</p>
 </div>
 <p>原文作者采用了Xfce桌面，并且为了能够方便开发，安装了JetBrains IDE系列。原因是Alpine Linux使用musl库，如果使用 <code class="docutils literal notranslate"><span class="pre">musl-glibc</span></code> 兼容库非常费劲。而JetBrains是Java程序，OpenJDK(IcedTea项目)可以顺畅在Alpine Linux上运行，所以选择JetBrains全家桶可以非常方便开发工作。</p>
+<p>此外，由于 Google 提供的 Android Studio就是基于JetBrains IDE，所以 <a class="reference internal" href="../../arm/raspberry_pi/android/android_studio_in_pi.html#android-studio-in-pi"><span class="std std-ref">在树莓派4上运行android studio开发</span></a> 也是可行的(只不过为了通用方便，容器内通常运行 <a class="reference internal" href="../ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> )。</p>
+<p>考虑到树莓派性能有限，并且在 <a class="reference internal" href="../../real/edge_cloud/edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 我只有3台 <a class="reference internal" href="../../arm/raspberry_pi/hardware/pi_4.html#pi-4"><span class="std std-ref">树莓派Raspberry Pi 4</span></a> (后续横向扩容)需要部署 <a class="reference internal" href="../../kubernetes/k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 以及在此基础上集成 <a class="reference internal" href="../../rancher/index.html#rancher"><span class="std std-ref">Rancher Atlas</span></a> 系统，所以我没有部署任何桌面系统，而是将非常消耗计算资源的容器和虚拟机运行在 <span class="xref std std-ref">hp_dl360_gen9</span> 服务器部署的 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 中。</p>
 </section>
 <section id="id3">
 <h2>容器构建<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
@@ -296,8 +300,8 @@ ssh-keygen -A
 <ul class="simple">
 <li><p>最终完整的 <code class="docutils literal notranslate"><span class="pre">x-dev</span></code> 完整 Dockerfile:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">alpine构建开发环境的Dockerfile</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">alpine构建开发环境的Dockerfile</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
 <span class="k">RUN</span> apk update <span class="o">&amp;&amp;</span> apk upgrade
 <span class="k">RUN</span> apk add --no-cache openssh sudo bind-tools
@@ -317,8 +321,8 @@ ssh-keygen -A
 <ul class="simple">
 <li><p>执行以下命令构建镜像并启动容器:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">构建alpine开发环境docker容器</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">构建alpine开发环境docker容器</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t alpine-dev .
 docker run -itd --hostname x-dev --name x-dev -p <span class="m">122</span>:22 alpine-dev:latest
 </pre></div>
@@ -336,8 +340,8 @@ docker run -itd --hostname x-dev --name x-dev -p <span class="m">122</span>:22 a
 <ul class="simple">
 <li><p>构建运行Node的容器环境案例:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">alpine构建运行node的容器Dockerfile</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">alpine构建运行node的容器Dockerfile</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">alpine:latest</span>
 <span class="k">RUN</span> apk update <span class="o">&amp;&amp;</span> apk upgrade
 <span class="k">RUN</span> apk add --no-cache nodejs npm
@@ -355,8 +359,8 @@ docker run -itd --hostname x-dev --name x-dev -p <span class="m">122</span>:22 a
 <ul class="simple">
 <li><p>准备一个 <code class="docutils literal notranslate"><span class="pre">app.js</span></code> 作为演示案例:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">nodejs Hello World</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">nodejs Hello World</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">);</span>
 
 <span class="c1">//const hostname = &#39;127.0.0.1&#39;;</span>
@@ -379,8 +383,8 @@ docker run -itd --hostname x-dev --name x-dev -p <span class="m">122</span>:22 a
 <ul class="simple">
 <li><p>执行以下命令构建镜像并启动容器:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">构建alpine运行node的容器</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">构建alpine运行node的容器</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t alpine-node .
 docker run -itd --hostname x-node --name x-node -p <span class="m">3000</span>:3000 alpine-node:latest
 </pre></div>
@@ -393,7 +397,18 @@ docker run -itd --hostname x-node --name x-node -p <span class="m">3000</span>:3
 </section>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>镜像制作和迁移<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<ul>
+<li><p>在完成了容器内部应用升级和安装之后，执行以下命令保存镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">commit</span> <span class="n">x</span><span class="o">-</span><span class="n">dev</span> <span class="n">local</span><span class="p">:</span><span class="n">x</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+<li><p>然后将镜像导出备份，以及 <a class="reference internal" href="../../docker/admin/copy_docker_image_without_registry.html#copy-docker-image-without-registry"><span class="std std-ref">无需Docker Registry复制Docker镜像</span></a></p></li>
+</ul>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.overops.com/blog/my-alpine-desktop-setting-up-a-software-development-environment-on-alpine-linux/">Setting Up a Software Development Environment on Alpine Linux</a></p></li>
 <li><p><a class="reference external" href="https://btholt.github.io/complete-intro-to-containers/making-our-own-alpine-nodejs-container">Making Our Own Alpine Node.js Container</a> 提供了一个构建node运行环境的容器案例，我在上文参考引用了文中Dockerfile</p></li>
