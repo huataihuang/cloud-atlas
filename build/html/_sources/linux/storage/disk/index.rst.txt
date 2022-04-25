@@ -17,6 +17,7 @@ Linux磁盘
    parted.rst
    mount_img.rst
    intel_ssd_dc_series.rst
+   using_apple_superdrive_on_linux.rst
 
 .. only::  subproject and html
 

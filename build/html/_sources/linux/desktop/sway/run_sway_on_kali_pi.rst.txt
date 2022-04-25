@@ -52,6 +52,24 @@
 
 - chromium不能使用 :ref:`fcitx` 输入中文，但是firefox可以，暂时采用双浏览器还没有解决这个问题
 
+- ``audacious`` 启动需要传递 ``-Q`` 参数(QT界面)，使用默认的 ``-G`` (GTK界面)无法打开display
+
+- 音乐播放需要使用 :ref:`mpd` 服务，特别需要注意默认配置不能使用HDMI输出，需要定制 ``mpd.conf`` 配置
+
+- VLC可能是最好的视频播放软件，但是我的 :ref:`sway` 环境运行在 :ref:`pi_400` 需要配置正确的音频设备 :ref:`alsa` 以及正确的视频设备 :ref:`wayland` :
+
+  - 音频输出输出:
+
+    - ``Output module: ALSA audio output``
+    - ``Device: bcm2835 HDMI 1,bcm2835 HDMI 1 Default Audio Device``
+
+  - 视频设备输出:
+
+    - ``Output: Wayland shared memory video output``
+    - ``Fullscreen Video Device: HDMI-A-1``
+
+这是我的 :ref:`pi_400` 硬件环境配置，你的设备可能不同，请尝试对应的硬件设备配置。
+
 ``$mod + d`` 不能唤起菜单
 -----------------------------
 
@@ -101,3 +119,4 @@ Chroium
 - `使用Wayland和sway <https://blog.tiantian.cool/wayland/>`_
 - `arch linux: sway <https://wiki.archlinux.org/title/Sway>`_
 - `Full Wayland Setup on Arch Linux <https://www.fosskers.ca/en/blog/wayland>`_ 这篇文档非常详细介绍了Wayland的配置以及系列软件，工作配置可做借鉴
+- `Working with Wayland and Sway <https://grimoire.science/working-with-wayland-and-sway/>`_ 介绍sway桌面使用经验

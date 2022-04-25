@@ -10,6 +10,7 @@ sway - i3兼容Wayland compositor
    introduce_sway.rst
    build_sway_on_pi.rst
    run_sway_on_kali_pi.rst
+   wayland_sway_video.rst
 
 .. only::  subproject and html
 

@@ -604,6 +604,16 @@ That's It...!!! We are done...!!!
 
    参考 `How to install electronic-wechat on Arch Linux <https://snapcraft.io/install/electronic-wechat/arch>`_
 
+Rambox和Franz
+===============
+
+Rambox和 `Franz <https://github.com/meetfranz/franz>`_ 提供了将消息应用(WhatsApp, Facebook Messenger, Slack, WeChat, Telegram等)包装成单一应用，可以跨平台运行在Windows，Mac, Linux等平台。类似的还有 ``Fedi`` (基于Frank)， ``Station``, ``Utopia`` , ``Hamsket`` 。这些应用大多都是基于 electronic 的web应用包装，所以运行起来非常消耗内存。优点是只要消息应用的服务方提供WEB方式，都能够包装到应用中。详细的应用对比可以参考
+`Rambox Alternatives <https://alternativeto.net/software/rambox/>`_
+
+.. note::
+
+   我现在的工作平台已经转到使用 :ref:`wayland` 的 :ref:`sway` 窗口管理器，上述基于electronic的WEB应用实现都依赖X11，所以我没有具体实践，仅作记录。
+
 参考
 =======
 

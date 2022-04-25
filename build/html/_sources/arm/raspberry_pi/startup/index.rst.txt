@@ -15,6 +15,7 @@
    pi_400_dual_monitor.rst
    pi_x11_slow.rst
    pi_400_desktop.rst
+   pi_400_audio.rst
    pi_4b_4k_display.rst
    pi_display_accelerate
    noobs.rst
