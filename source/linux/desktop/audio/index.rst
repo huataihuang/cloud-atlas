@@ -1,16 +1,16 @@
-.. _sway:
+.. _linux_audio:
 
 =================================
-sway - i3兼容Wayland compositor
+Linux音频
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_sway.rst
-   build_sway_on_pi.rst
-   run_sway_on_kali_pi.rst
-   wayland_sway_video.rst
+   alsa.rst
+   pulseaudio.rst
+   play_music_on_linux.rst
+   mpd.rst
 
 .. only::  subproject and html
 

@@ -13,14 +13,15 @@ Linux桌面
    wayland/index
    sway/index
    suckless/index
-   i3.rst
    xfce/index
    kde/index
-   oh_my_zsh.rst
-   tmux.rst
+   xpra/index
    vim/index
    vscode/index
-   xpra/index
+   audio/index
+   i3.rst
+   oh_my_zsh.rst
+   tmux.rst
    remote_linux_desktop.rst
    light_browser.rst
    netsurf.rst 
