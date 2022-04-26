@@ -14,10 +14,19 @@ PulseAudio在激活 ``Avahi`` 时可以提供一个易用的网络流，可以�
 树莓派
 =========
 
-我在 :ref:`install_kali_pi` 发现系统运行了 ``pulseaudio`` 服务非常消耗资源，大约消耗了 10% 的CPU资源。虽然没有任何声音在播放，并且硬件设备 :ref:`pi_400` 没有提供直接声音输出口，需要通过 :ref:``
+我在 :ref:`install_kali_pi` 发现系统运行了 ``pulseaudio`` 服务非常消耗资源，大约消耗了 10% 的CPU资源。虽然没有任何声音在播放，并且硬件设备 :ref:`pi_400` 没有提供直接声音输出口，我实际是采用 :ref:`mpd` 直接使用 :ref:`alsa` ，所以我在 :ref:`pi_400` 运行 :ref:`kali_linux` 配置关闭了 ``pulseaudio`` :
+
+- 修改 ``/etc/pulse/client.conf`` ( 或 ``~/.pulse/client.conf`` ) 将::
+
+   ; autospawn = yes
+
+修改成::
+
+   ; autospawn = no
 
 参考
 ======
 
 - `WikiPedia: PulseAudio <https://en.wikipedia.org/wiki/PulseAudio>`_
 - `arch linux: PulseAudio <https://wiki.archlinux.org/title/PulseAudio>`_
+- `PulseAudio on Linux <https://learn.foundry.com/nuke/content/timeline_environment/managetimelines/audio_pulse.html>`_

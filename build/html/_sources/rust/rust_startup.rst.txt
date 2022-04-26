@@ -12,15 +12,15 @@ Rust是开源基金会Mozilla推动开发，借鉴了现代语言研究成果，
 安装Rust
 ===========
 
-- 在Linux或macOS中安装只需要执行一下命令::
+- 在Linux或macOS中安装只需要执行一下命令:
 
-   curl https://sh.rustup.rs -sSf | sh
+.. literalinclude:: rust_startup/install_rust.sh
+   :language: bash
+   :caption: Liinux平台安装Rust
 
-上述命令会下载并执行脚本安装rustup工具，并安装最新Rust稳定版本。安装过程会自动将Rust工具链添加到环境变量 ``$PATH`` ，重新登录终端就生效，或者直接执行::
+如果需要查看安装参数帮助::
 
-   source $HOME/.cargo/env
-
-Windows环境安装则需要访问Rust官网按网页说明执行，操作系统需要同时安装Visual Studio的C++构建工具。
+   curl https://sh.rustup.rs -sSf | sh -s -- --help
 
 更新Rust
 ------------
