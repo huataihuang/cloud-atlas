@@ -10,9 +10,11 @@
 debian/ubuntu
 -----------------
 
-- 安装::
+- 安装:
 
-   sudo apt install fcitx5 fcitx5-chinese-addons
+.. literalinclude:: fcitx/apt_install_fcitx
+   :language: bash
+   :caption: apt安装fcitx
 
 会依赖安装 ``fcitx5-frontend-qt5 fcitx5-frontend-gtk3`` 。
 
@@ -28,6 +30,11 @@ debian/ubuntu
 .. literalinclude:: fcitx/environment
    :language: bash
    :caption: 启用fcitx5环境变量配置 /etc/environment
+
+如果是在 ``/etc/profile`` 中配置环境变量，则建议再添加以下内容::
+
+   #如果在 profile 中配置，则再加上以下命令执行export
+   export GTK_IM_MODULE QT_IM_MODULE XMODIFIERS INPUT_METHOD SDL_IM_MODULE GLFW_IM_MODULE
 
 - 重新启动系统，然后登陆图形桌面，在终端中输入 ``fcitx5-configtool`` 进行配置
 

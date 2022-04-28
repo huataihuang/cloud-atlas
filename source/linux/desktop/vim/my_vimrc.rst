@@ -72,6 +72,15 @@ relative行号
    set background=dark
    colorscheme dracula
 
+完整 ``my_configs.vim``
+---------------------------
+
+- 最终完成 ``~/.vim_runtime/my_configs.vim`` :
+
+.. literalinclude:: my_vimrc/my_configs.vim
+   :language: bash
+   :caption: ~/.vim_runtime/my_configs.vim
+
 插件安装
 ==========
 
@@ -110,14 +119,22 @@ YouCompleteMe插件
     - `jedi-vim - awesome Python autocompletion with VIM <https://github.com/davidhalter/jedi-vim>`_ (一个内建了自动代码完成库 `Jedi <http://github.com/davidhalter/jedi>`_ 的VIM)
     - 查看 `cm-core / YouCompleteMe <https://github.com/ycm-core/YouCompleteMe>`_ 项目就可以看到 ``YouCompleteMe`` 自身就是包含 ``a Jedi-based completion engine for Python 2 and 3``
 
+.. note::
+
+   在 :ref:`redhat_linux` 系列中，使用 :ref:`fedora_develop` ，则安装 ``vim-enhanced`` 软件包::
+
+      sudo dnf install vim-enhanced
+
 安装完成后检查 ``/etc/alternative/vim`` 可以看到原先软链接到 ``/usr/bin/vim.basic`` 被修订成 ``/usr/bin/vim.nox`` ::
 
    $ ls -lh /etc/alternatives/vim
    lrwxrwxrwx 1 root root 16 Apr 26 07:24 /etc/alternatives/vim -> /usr/bin/vim.nox
 
-- 完整安装依赖(包括支持python的vim版本，以及cmake等)::
+- 完整安装依赖(包括支持python的vim版本，以及cmake等):
 
-   sudo apt install build-essential cmake vim-nox python3-dev
+.. literalinclude:: my_vimrc/vimrc_dep_dev
+   :language: bash
+   :caption: 编译YouCompleteMe依赖软件安装
 
 安装自己需要的开发软件
 
@@ -129,7 +146,9 @@ YouCompleteMe插件
 
 - 安装 :ref:`golang` / :ref:`nodejs` (支持TypeScript)
 
-   sudo apt install golang nodejs npm -y
+.. literalinclude:: my_vimrc/vimrc_go_nodejs
+   :language: bash
+   :caption: 安装Go和node.js
 
 - 进入YouCompleteMe目录::
 
