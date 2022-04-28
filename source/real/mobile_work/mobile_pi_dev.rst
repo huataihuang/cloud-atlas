@@ -24,7 +24,16 @@ Raspberry Pi OS
 安装Raspberry Pi OS
 =======================
 
-- 安装过程非常简单，以下仅记录一些特定点
+- 安装过程结合了:
+
+  - :ref:`debian_init`
+
+    - :ref:`host_time_init`
+    - :ref:`run_sway`
+    - :ref:`linux_chinese_view`
+    - :ref:`fcitx_sway`
+
+- 切换用户默认SHELL到 :ref:`zsh`
 
 - 修订时区:
 
@@ -38,14 +47,115 @@ Raspberry Pi OS
    :language: bash
    :caption: APT更新整个系统
 
-- 安装 :ref:`sway` 图形管理器::
+- 字符集配置UTF-8:
 
-   sudo apt install sway
+.. literalinclude:: ../../linux/desktop/chinese/linux_chinese_view/localegen
+   :language: bash
+   :caption: 字符集支持UTF-8
 
-安装完成后，执行 ``sway`` 就可以进入桌面，不过为了能够更为方便，修订 ``~/.zshrc`` 添加以下内容方便自动启动 ``sway`` :
+- 安装中文字体:
+
+.. literalinclude:: ../../linux/desktop/chinese/linux_chinese_view/apt_install_fonts-wqy
+   :language: bash
+   :caption: apt安装文泉驿字体
+
+- 安装 :ref:`sway` 图形管理器:
+
+.. literalinclude:: ../../linux/desktop/sway/run_sway/apt_install_sway
+   :language: bash
+   :caption: apt安装sway
+
+- 修订 ``~/.zshrc`` 添加以下内容方便自动启动 ``sway`` :
 
 .. literalinclude:: ../../linux/desktop/sway/run_sway/zshrc_sway
    :language: bash
    :caption: 复制sway个人配置
 
-- 安装应用软件、中文字体和输入法
+- 创建 ``sway`` 个人定制配置文件 ``~/.config/sway/config`` :
+
+.. literalinclude:: ../../linux/desktop/sway/run_sway/sway_config
+   :language: bash
+   :caption: sway个人配置
+
+- 配置 ``/etc/environment`` 添加以下环境变量适配QT5应用:
+
+.. literalinclude:: ../../linux/desktop/sway/run_sway/qt5_app_environment
+   :language: bash
+   :caption: QT5应用环境变量 /etc/environment
+
+- 安装中文输入法:
+
+.. literalinclude:: ../../linux/desktop/chinese/fcitx/apt_install_fcitx
+   :language: bash
+   :caption: apt安装fcitx
+
+- 配置 ``/etc/environment`` :
+
+.. literalinclude:: ../../linux/desktop/chinese/fcitx/environment
+   :language: bash
+   :caption: 启用fcitx5环境变量配置 /etc/environment
+
+- 安装应用软件:
+
+.. literalinclude:: ../../linux/ubuntu_linux/debian_init/debian_init_app
+   :language: bash
+   :caption: debian系安装应用
+
+- 重新登陆后自动进入 :ref:`sway`
+
+- 在 ``sway`` 环境中，直接 ``Mod4+return`` 启动终端，然后执行 ``fcitx5-configtool`` 进行配置，完成配置后退出重新登陆即可输入中文
+
+开发环境
+=========
+
+采用 :ref:`my_vimrc` 部署开发环境
+
+- 基于 `Ultimate vimrc <https://github.com/amix/vimrc>`_ 定制
+
+.. literalinclude:: ../../linux/desktop/vim/my_vimrc/install_ultimate_vimrc.sh
+   :language: bash
+   :caption: 安装Ultimate vimrc Awsome版本
+
+- 配置 ``~/.vim_runtime/my_configs.vim`` :
+
+.. literalinclude:: ../../linux/desktop/vim/my_vimrc/my_configs.vim
+   :language: bash
+   :caption: ~/.vim_runtime/my_configs.vim
+
+- :ref:`my_vimrc` 基础依赖安装:
+
+.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_dep_dev
+   :language: bash
+   :caption: 编译YouCompleteMe依赖软件安装
+
+- 安装Rust:
+
+.. literalinclude:: ../../rust/rust_startup/install_rust.sh
+   :language: bash
+   :caption: Liinux平台安装Rust 
+
+- 安装 :ref:`golang` / :ref:`nodejs` :
+
+.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_go_nodejs
+   :language: bash
+   :caption: 安装Go和node.js
+
+- 配置 :ref:`go_proxy` :
+
+.. literalinclude:: ../../golang/go_proxy/alias_go_proxy.sh
+   :language: bash
+   :caption: alias设置go代理
+
+- 配置 :ref:`npm_proxy` :
+
+.. literalinclude:: ../../nodejs/startup/npm_proxy/alias_npm_proxy.sh
+   :language: bash
+   :caption: alias设置npm代理
+
+- 按需编译YouCompleteMe：
+
+.. literalinclude:: ../../linux/desktop/vim/my_vimrc/compile_youcompleteme.sh
+   :language: bash
+   :caption: 按需编译YouCompleteMe
+
+现在，一切就绪，使用 ``vim`` 可以开始进行开发学习

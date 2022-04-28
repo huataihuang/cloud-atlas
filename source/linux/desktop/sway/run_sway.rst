@@ -43,6 +43,12 @@
    :language: bash
    :caption: sway个人配置
 
+- GTK应用默认启用wayland所以无需配置，但是QT5应用应用需要设置环境变量引导程序启用Wayland - 配置 ``/etc/environment`` 添加
+
+.. literalinclude:: run_sway/qt5_app_environment
+   :language: bash
+   :caption: QT5应用环境变量 /etc/environment
+
 问题和解决方法
 ====================
 
@@ -108,8 +114,9 @@
 
    sudo apt install wofi
 
-然后配置设置::
+然后配置设置(注释掉默认的 ``$menu`` 配置)::
 
+   #set $menu dmenu_path | dmenu | xargs swaymsg exec --
    set $menu wofi --show=drun --lines=5 --prompt=""
 
 - 重新加载 ``sway`` 配置: ``Shift + mod4 + c`` ，然后就可以通过 ``mod4 + d`` 加载应用加载器，非常类似macOS环境的Spotlight搜索功能加载应用程序。

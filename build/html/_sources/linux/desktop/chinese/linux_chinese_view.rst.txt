@@ -9,13 +9,11 @@ Linux中文显示
 
 现代Linux环境中文显示已经非常简单
 
-- 设置字符集支持 :ref:`locale_env` : 配置 ``/etc/locale.gen`` ::
+- 设置字符集支持 :ref:`locale_env` : 配置 ``/etc/locale.gen`` :
 
-   en_US.UTF-8 UTF-8
-
-然后执行::
-
-   localegen
+.. literalinclude:: linux_chinese_view/localegen
+   :language: bash
+   :caption: 字符集支持UTF-8
 
 .. note::
 
@@ -23,9 +21,11 @@ Linux中文显示
 
       zh_CN.UTF-8 UTF-8
 
-- 安装中文字体，只需要安装 ``文泉驿`` 字体已经足够美观，我安装 ``微米黑`` ::
+- 安装中文字体，只需要安装 ``文泉驿`` 字体已经足够美观，我安装 ``微米黑`` :
 
-   sudo apt install fonts-wqy-microhei
+.. literalinclude:: linux_chinese_view/apt_install_fonts-wqy
+   :language: bash
+   :caption: apt安装文泉驿字体
 
 完成以上步骤以后，在 :ref:`x_window` 图形界面中，已经能够很好显示中文。
 
