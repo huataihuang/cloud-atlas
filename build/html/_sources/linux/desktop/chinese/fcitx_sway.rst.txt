@@ -23,7 +23,7 @@ sway窗口管理器使用fcitx5
 
 - 按照 :ref:`sway` 配置标准方法，先复制全局配置到个人配置目录下:
 
-.. literalinclude:: ../sway/run_sway_on_kali_pi/cp_sway_config
+.. literalinclude:: ../sway/run_sway/cp_sway_config
    :language: bash
    :caption: 复制sway个人配置 
 

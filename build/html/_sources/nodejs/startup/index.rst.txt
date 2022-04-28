@@ -8,6 +8,7 @@ Node.js起步
    :maxdepth: 1
 
    nodejs_dev_env.rst
+   npm_proxy.rst
    run_nodejs.rst
 
 .. only::  subproject and html

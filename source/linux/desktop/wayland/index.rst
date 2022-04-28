@@ -9,6 +9,8 @@ wayland显示服务器协议
 
    introduce_wayland.rst
    build_wayland_on_pi.rst
+   wayland_qt.rst
+   dumb_buffer_permission_denied.rst
 
 .. only::  subproject and html
 

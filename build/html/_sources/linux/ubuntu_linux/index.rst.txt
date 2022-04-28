@@ -14,6 +14,7 @@ Ubuntu Linux
    ubuntu_desktop.rst
    upgrade_ubuntu.rst
    ubuntu_hibernate.rst
+   debian_init.rst
    admin/index
    cgroup/index
    network/index

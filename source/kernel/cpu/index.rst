@@ -12,4 +12,3 @@ CPU架构
    cpu_prefetch.rst
    intel/index
    amd/index
-   arm/index

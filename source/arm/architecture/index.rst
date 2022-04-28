@@ -13,6 +13,7 @@ ARM 架构随想
 
    arm_cloud.rst
    arm_cpu.rst
+   arm_infra.rst
    arm_microarch.rst
    arm_illegal_instruction.rst
    mpam/index

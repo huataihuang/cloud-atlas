@@ -44,7 +44,7 @@ Ubuntu/Debian使用的APT软件包管理也支持代理配置，这里我结合 
 SOCKS
 ---------
 
-如果是临时或者简化配置，本地不部署 :ref:`squid` 代理也可以，只要简单使用 :ref:`ssh_tunnel` ::
+如果是临时或者简化配置，本地不部署 :ref:`squid` 代理也可以，只要简单使用 :ref:`ssh_tunneling` ::
 
    ssh -D 10080 -C huatai@<remote_server>
 

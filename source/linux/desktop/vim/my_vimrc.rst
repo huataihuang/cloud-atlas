@@ -90,7 +90,7 @@ relative行号
 YouCompleteMe插件
 ------------------
 
-- 需要注意，默认 ;ref:`kali_linux` 安装的是 ``vim.basic`` ::
+- 需要注意，默认 :ref:`kali_linux` 安装的是 ``vim.basic`` ::
 
    $ ls -lh /etc/alternatives/vim            
    lrwxrwxrwx 1 root root 18 Feb 10 04:06 /etc/alternatives/vim -> /usr/bin/vim.basic
@@ -133,7 +133,9 @@ YouCompleteMe插件
 
 - 进入YouCompleteMe目录::
 
-   cd ~/.vim_runtime/my_plugins/YouCompleteMe
+   cd ~/.vim_runtime/my_plugins/
+   git clone https://github.com/ycm-core/YouCompleteMe.git
+   cd YouCompleteMe
 
 由于 ``golang.org`` 网站被GFW屏蔽，所以会导致编译时无法获取go模块，需要 :ref:`go_proxy` :
 
@@ -141,11 +143,27 @@ YouCompleteMe插件
    :language: bash
    :caption: alias设置go代理
 
+由于 ``npm`` 需要访问 ``npmjs.com`` 已经被GFW屏蔽( ``npm.org`` 没有屏蔽，但是重定向到 ``npmjs.com`` )，所以也要 :ref:`npm_proxy` :
+
+.. literalinclude:: ../../../nodejs/startup/npm_proxy/alias_npm_proxy.sh
+   :language: bash
+   :caption: alias设置npm代理
+
 按需编译YouCompleteMe：
 
 .. literalinclude:: my_vimrc/compile_youcompleteme.sh
    :language: bash
    :caption: 按需编译YouCompleteMe
+
+使用YouCompleteMe
+--------------------
+
+编译安装 ``YouCompleteMe`` 之后，使用 ``vim`` 打开任何支持开发语言的项目，都会自动创建索引并支持代码自动完成功能。这对提高开发效率非常有帮助，几乎就是IDE的完备功能。不过需要注意，类似 :ref:`golang` 项目构建索引需要访问Internet上的golang网站，如果被GFW屏蔽，会导致 ``vim`` 长时间停滞在 ``loading packages``
+状态而导致代码自动完成功能失效。
+
+所以，务必确保 :ref:`go_proxy` 配置正确，即上述采用 ``alias`` 来保证 go 能够安装模块。
+
+
 
 参考
 =======

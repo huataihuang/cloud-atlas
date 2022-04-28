@@ -9,6 +9,7 @@ syslog服务
 
    dmesg.rst
    rsyslog/index
+   syslog-ng/index
 
 .. only::  subproject and html
 

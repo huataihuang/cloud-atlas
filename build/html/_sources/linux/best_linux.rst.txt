@@ -15,12 +15,12 @@ Linux是完全开源的操作系统，任何人都能够定制自己的发行版
 
 - :ref:`gentoo_linux` 源代码编译，最大限度发挥硬件性能，对操作系统原理需要深入学习，是磨炼技术最佳平台
 - :ref:`arch_linux` 精巧的滚动发行版本，时刻保持软件最新并且Arch Linux文档是开源社区最完备的发行版之一(另一个是 :ref:`gentoo_linux` )，对于学习非常有利
-- :ref:`apline_linux` 专注于轻量级，适合 :ref:`arm` 架构，对硬件要求低，更为安全
+- :ref:`alpine_linux` 专注于轻量级，适合 :ref:`arm` 架构，对硬件要求低，更为安全
 
 目前我主要使用:
 
 - :ref:`ubuntu_linux` - 构建 :ref:`priv_cloud_infra`
-- :ref:`apline_linux` - 构建 :ref:`edge_cloud_infra`
+- :ref:`alpine_linux` - 构建 :ref:`edge_cloud_infra`
 - Fedora - 开发
 
 我感兴趣并且想尝试的版本
