@@ -47,7 +47,7 @@ PatternFly开发
 
 .. note::
 
-   ``npm run start:dev`` 输出信息提示 ``Project is running at http://localhost:9000/`` ，所以通过 :ref:`ssh_tunnel` 方式建立访问服务器通道(我的程序运行在远端 ``z-dev`` 虚拟机中，如果你只是本地电脑开发，可忽略这步)
+   ``npm run start:dev`` 输出信息提示 ``Project is running at http://localhost:9000/`` ，所以通过 :ref:`ssh_tunneling` 方式建立访问服务器通道(我的程序运行在远端 ``z-dev`` 虚拟机中，如果你只是本地电脑开发，可忽略这步)
 
 .. note::
 

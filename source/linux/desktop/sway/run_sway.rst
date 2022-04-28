@@ -1,17 +1,27 @@
-.. _run_sway_on_kali_pi:
+.. _run_sway:
 
 ========================================
-在树莓派上运行Kali Linux和sway窗口管理器
+运行sway窗口管理器
 ========================================
 
 安装
 ======
 
-- :ref:`kali_linux` 环境安装 ``sway`` ::
+- :ref:`kali_linux` 环境安装 ``sway`` :
 
-   sudo apt install sway
+.. literalinclude:: run_sway/apt_install_sway
+   :language: bash
+   :caption: apt安装sway
 
 :ref:`kali_linux` 默认使用的图形登陆管理器可以自动管理 ``sway`` 的登陆会话，并且会正确设置 :ref:`wayland` 显示服务，所以只需要在图形登陆管理器中选择 ``sway`` 登陆就是这个平铺WM了。
+
+我最终改为 ``Raspberry Pi OS`` 工作环境，采用精简安装，没有安装窗口管理器。那么最方便自动启动 ``sway`` 的方法是在环境配置(例如  ``~/.zshrc`` )添加以下内容:
+
+.. literalinclude:: run_sway/zshrc_sway
+   :language: bash
+   :caption: 复制sway个人配置
+
+这样启动到字符终端就会立即启动 ``sway`` ，而 ``sway`` 图形管理器退出后会立即再次启动 ``tty`` ，也就是再次自动登陆到 ``sway``
 
 使用设置
 ==========
@@ -23,13 +33,13 @@
 
 - 配置定制，先将全局配置复制到个人目录下:
 
-.. literalinclude:: run_sway_on_kali_pi/cp_sway_config
+.. literalinclude:: run_sway/cp_sway_config
    :language: bash
    :caption: 复制sway个人配置
 
 - 我的配置:
 
-.. literalinclude:: run_sway_on_kali_pi/sway_config
+.. literalinclude:: run_sway/sway_config
    :language: bash
    :caption: sway个人配置
 
@@ -69,6 +79,15 @@
     - ``Fullscreen Video Device: HDMI-A-1``
 
 这是我的 :ref:`pi_400` 硬件环境配置，你的设备可能不同，请尝试对应的硬件设备配置。
+
+- 浏览器
+
+  - `qutebrowser <https://github.com/qutebrowser/qutebrowser>`_ 是基于QT5的使用vim键盘方式控制浏览器
+  - `Konqueror <https://invent.kde.org/network/konqueror>`_ 是KDE默认浏览器，功能包含了浏览器和文件管理器功能: 缺点是太沉重了，如果不是使用KDE环境则过于复杂
+  - `Falkon <https://invent.kde.org/network/falkon>`_ 也是KDE开发的浏览器，功能精简，经过验证我发现这个浏览器兼容性好(因为引擎就是chromium的精简QTWebkit核心)而且占用资源少，是理想的 :ref:`sway` 配套浏览器
+  - `Otter Browser <https://github.com/OtterBrowser/otter-browser>`_ 基于QT5的继承Opera 12的浏览器，但是这个浏览器没有收录在软件仓库，需要源代码编译安装，太过折腾
+
+最终我在 :ref:`mobile_pi_dev` 中采用 ``Falkon`` 作为主力浏览器
 
 ``$mod + d`` 不能唤起菜单
 -----------------------------

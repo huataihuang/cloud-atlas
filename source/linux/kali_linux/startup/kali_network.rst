@@ -48,7 +48,7 @@ Kali Linux网络配置
 无线网络配置
 ==============
 
-- 配置 ``/etc/default/crda`` 设置5GHz无线网络必须指定的国家编码(也可以在 ``wpa_supplicant.conf`` 配置中指定 ``country=CN`` ) ( :ref:`_wifi_5ghz_country_code` )::
+- 配置 ``/etc/default/crda`` 设置5GHz无线网络必须指定的国家编码(也可以在 ``wpa_supplicant.conf`` 配置中指定 ``country=CN`` ) ::
 
    REGDOMAIN=CN
 

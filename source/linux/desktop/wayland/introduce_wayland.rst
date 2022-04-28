@@ -4,6 +4,10 @@
 Wayland简介
 ================
 
+.. note::
+
+   `The Wayland Protocol（自译中文版） <https://wayland.axionl.me/>_` ( `AxionL的博客 <https://axionl.me/>`_ ) 完整翻译了 `The Wayland Protocol <https://wayland-book.com/>`_ 的前10章，是系统学习Wayland协议非常好的书籍。英文原版还有11、12章。建议阅读学习！
+
 Wayland是一个显示服务器协议，目标是替代X Window System，实现一个现代、安全和简单的窗口系统。在Wayland协议中显示服务器被称为 ``compositors`` ，这是因为Wayland也作为 ``compositing window managers`` (wayland支持的窗口管理器分2类：平铺窗口管理器和堆叠窗口管理器，例如 :ref:`sway` 属于平铺窗口管理器，而KDE的KWin和Gnome的Mutter属于堆叠窗口管理器) 。主要的桌面系统，例如KDE Plasma和GNOME都已经实现了各自的Wayland compositors。
 
 .. note::
@@ -31,7 +35,7 @@ Plasma(使用KWin)则在所有版本中支持GBM，不过只从Plasma 5.16才开
 :ref:`sway`
 =============
 
-:ref:`sway` 是一个平铺窗口管理器，完全用C愿意啊编写，非常快速并且占用资源少。我日常 :ref:`run_sway_on_kali_pi` ，经过实践验证，采用Wayland图形现实服务的 :ref:`sway` 窗口管理器是最轻量级且满足开发运维工作的桌面(无需任何花哨的效果)。
+:ref:`sway` 是一个平铺窗口管理器，完全用C愿意啊编写，非常快速并且占用资源少。我日常 :ref:`run_sway` ，经过实践验证，采用Wayland图形现实服务的 :ref:`sway` 窗口管理器是最轻量级且满足开发运维工作的桌面(无需任何花哨的效果)。
 
 ``sway`` 也是替代 :ref:`i3` 的完全基于 :ref:`wayland` 的轻量级窗口管理器解决方案。
 

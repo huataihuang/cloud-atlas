@@ -1,15 +1,11 @@
-.. _syslog:
+.. _syslog-ng:
 
 =================================
-syslog服务
+syslog-ng服务
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   dmesg.rst
-   rsyslog/index
-   syslog-ng/index
 
 .. only::  subproject and html
 

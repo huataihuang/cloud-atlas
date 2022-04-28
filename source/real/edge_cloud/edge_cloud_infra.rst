@@ -33,7 +33,7 @@
 
   - 另外两台 ``8G`` 内存配置的 :ref:`pi_4` 加入 :ref:`k3s` 作为工作节点
 
-    - ``8G`` 节点内存，部署 :ref:`jankins` (集成在 :ref:`ranther` 中作为 pipeline)
+    - ``8G`` 节点内存，部署 :ref:`jenkins` (集成在 :ref:`rancher` 中作为 pipeline)
 
 - :ref:`jetson_nano` - 构建边缘云计算( :ref:`machine_learning` )
 - :ref:`pi_400` - 作为管理和操作

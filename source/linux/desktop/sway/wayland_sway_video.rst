@@ -10,4 +10,4 @@ Wayland+Sway视频播放
    :language: bash
    :caption: wayland+sway环境VLC crash信息
 
-这个错误原因实际上是因为VLC默认没有配置 :ref:`wayland` 作为视频输出设备，解决的方法简述见 :ref:`run_sway_on_kali_pi`
+这个错误原因实际上是因为VLC默认没有配置 :ref:`wayland` 作为视频输出设备，解决的方法简述见 :ref:`run_sway`
