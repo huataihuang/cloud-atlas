@@ -47,7 +47,7 @@ MPD通过 ``mpd.conf`` 配置，该配置可以按用户模式和系统模式:
 
 - 修订 ``~/.config/mpd/mpd.conf`` :
 
-.. literalinclude:: mpd/mpd.conf
+.. literalinclude:: mpd/pi_os_mpd.conf
    :language: bash
    :caption: ~/.config/mpd/mpd.conf 配置案例
 
@@ -93,22 +93,38 @@ MPD通过 ``mpd.conf`` 配置，该配置可以按用户模式和系统模式:
 音频配置
 -----------
 
-如果使用了 :ref:`alsa` 在默认设备使用 ``autodection`` 就可以工作，无需任何配置。
+如果使用了 :ref:`alsa` 在默认设备使用 ``autodection`` 就可以工作，无需任何配置。 **确实如此**
 
-不过我在 :ref:`pi_400` 上使用HDMI输出，需要明确配置ALSA音频输出定义才能工作： 这个精确的设备定义可以通过 ``aply --list-pcm`` 获得
+不过我在 :ref:`pi_400` 上使用HDMI输出，需要明确配置ALSA音频输出定义才能工作： 精确的设备定义可以通过 ``aplay --list-pcm`` 获得
 
-.. literalinclude:: mpd/aplay_list-pcm
+.. literalinclude:: mpd/kali_aplay_list-pcm
    :language: bash
-   :caption: aplay --list-pcm 输出信息
+   :caption: Kali Linux 上 aplay --list-pcm 输出信息
 
-以下是配置案例:
+以下是 :ref:`kali_linux` 在 :ref:`pi_400` 的配置案例:
 
 .. literalinclude:: mpd/mpd_audio_output.conf
    :language: bash
    :caption: ~/.config/mpd/mpd.conf audio_output 配置案例
 
-将上述配置添加到 ``~/.config/mpd/mpd.conf`` 中，然后重启 ``mpd`` 服务，就能够正确定义音频输出
+但是我在 ``Raspberry Pi OS`` 上执行 ``aplay --list-pcm`` 显示的信息就和 :ref:`kali_linux` 不同，如下:
 
+.. literalinclude:: mpd/pi_os_aplay_list-pcm
+   :language: bash
+   :caption: Raspberry Pi OS 上 aplay --list-pcm 输出信息
+
+但是，我在 ``Raspberry Pi OS`` 没有找到如 :ref:`kali_linux` 的配置设备方法，反而是完全遵循 `Debian Wiki: mpd <https://wiki.debian.org/mpd>`_ ，即不配置任何设备，只设置::
+
+   audio_output {
+           type            "alsa"
+           name            "My ALSA Device"
+   }   
+
+却完全工作正常。所以我在 ``Raspberry Pi OS`` 使用的是如下配置:
+   
+.. literalinclude:: mpd/pi_os_mpd.conf
+   :language: bash
+   :caption: 我现在在Raspberry Pi OS 使用的 ~/.config/mpd/mpd.conf 配置
 
 .. note::
 
