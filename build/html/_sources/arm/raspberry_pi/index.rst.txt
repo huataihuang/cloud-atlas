@@ -17,6 +17,7 @@ Raspberry Pi
    admin/index
    network/index
    storage/index
+   display/index
    uart/index
    uefi/index
    performance/index

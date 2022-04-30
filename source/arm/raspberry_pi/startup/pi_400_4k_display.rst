@@ -4,6 +4,10 @@
 Raspberry Pi 400的4K显示
 =========================
 
+.. warning::
+
+   经过实践，我发现 :ref:`pi_400` 确实能够支持两台 ``4K`` 显示器，但是都只能工作在 ``30Hz`` 刷新率。并且，和 :ref:`pi_4` 不同， :ref:`pi_400` 即使只使用1台连接在 ``HDMI0`` 上的显示器，也不能达到 ``60Hz`` 刷新率。详情情参考 :ref:`pi_400_display_config` 。
+
 从 :ref:`pi_4` 的技术规格可以看到支持双路4K显示，这对于软件开发者来说是非常完美的，因为我们阅读代码需要有非常大显示器以及高分辨率来提高效率。
 
 从 :ref:`pi_400` 的 `Raspberry Pi 400 Tech Specs <https://www.raspberrypi.org/products/raspberry-pi-400/specifications/>`_ 可以看到： ``2 × micro HDMI ports (supports up to 4Kp60)`` 和 :ref:`pi_4` 完全一致。由于Raspberry Pi 400支持4k显示输出，并且有完整的外壳和键盘，作为轻量级开发桌面非常适合Linux爱好者。
