@@ -1,17 +1,14 @@
-.. _performance_tools:
+.. _phoronix_test_suite:
 
 =================================
-性能工具集
+Phoronix性能测试套件
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   sysbench.rst
-   unixbench.rst
-   hdparm.rst
-   phoronix_test_suite/index
-   fio/index
+   pts_startup.rst
+   openpenchmarking.rst
 
 .. only::  subproject and html
 
