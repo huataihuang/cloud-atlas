@@ -10,6 +10,7 @@
    sysbench.rst
    unixbench.rst
    hdparm.rst
+   phoronix_test_suite/index
    fio/index
 
 .. only::  subproject and html
