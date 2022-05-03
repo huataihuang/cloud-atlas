@@ -28,10 +28,14 @@ Linux轻量级浏览器
 
 我有安装重量级的桌面，而尝试 :ref:`i3` 窗口管理器。不过，通过资料对比，我意外发现，原来 :ref:`suckless` 是轻量级窗口管理器的底层基石，其组件 :ref:`surf` 使用了现代化的浏览器引擎( ``WebKit2/GTK+`` )，同时又完美契合了 :ref:`dwm` 极简主义(minimalist)动态窗口管理器(dynamic window manager)。这更加吸引我探索 ``suckless`` 系列...
 
-经过短暂体验，我选择 :ref:`surf` 作为轻量级浏览器:
+:strike:`经过短暂体验，我选择surf作为轻量级浏览器` ( :ref:`surf` )
+
+结合 :ref:`run_sway` 我尝试不同的支持 :ref:`wayland` 的浏览器，对比使用选择 ``falkon`` 作为主要替代 ``chromium`` 的轻量级浏览器:
 
 - 配合 :ref:`dwm` 或 :ref:`i3` 
-- 现代化的 WebKit 引擎，且使用轻量级的 GTK+
+- 现代化的 WebKit 引擎，基于 QT5，速度轻快而且能够完成 ``chromium`` 的工作(目前大量的网站基于chrome技术构建，所以兼容性极为重要)
+- 对 :ref:`wayland` 支持较佳(因为QT5已经是支持wayland)，可以充分发挥图形化性能
+- 能够在 :ref:`sway` 环境完美支持 :ref:`fcitx` 中文输入
 
 轻量级浏览器对比(归档)
 ==========================
@@ -58,7 +62,7 @@ Otter浏览器同样也是基于Qt框架实现，依赖和前述的Falkon和Qute
 
 .. note::
 
-   由于我使用xfce，非常倾向使用GTK程序，所以很多轻量级浏览器所依赖的Qt库就需要安装大量的软件包，运行也需要加载Qt库，其实和我所期望的轻量级运行有差距。
+   :strike:`由于我使用xfce，非常倾向使用GTK程序，所以很多轻量级浏览器所依赖的Qt库就需要安装大量的软件包，运行也需要加载Qt库，其实和我所期望的轻量级运行有差距。` 现在采用 :ref:`wayland` 上 :ref:`run_sway` ，轻量级桌面可以在 :ref:`raspberry_pi` 上满足日常开发运维要求。底层QT5可以支持Wayland环境，所以目前选择应用以QT5为主。
 
 - :ref:`netsurf`
 
