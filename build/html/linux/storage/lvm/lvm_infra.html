@@ -22,7 +22,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="条带化逻辑卷管理(LVM)" href="striped_lvm.html" />
+    <link rel="next" title="部署LVM卷管理" href="deploy_lvm.html" />
     <link rel="prev" title="Linux LVM逻辑卷管理" href="index.html" /> 
 </head>
 
@@ -97,6 +97,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../filesystem/index.html">Linux文件系统</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Linux LVM逻辑卷管理</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">LVM架构</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deploy_lvm.html">部署LVM卷管理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="striped_lvm.html">条带化逻辑卷管理(LVM)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lvmcache.html">LVM卷缓存</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lvmthin.html">精简模式LVM</a></li>
@@ -197,17 +198,17 @@
 <li><p>LVM实现是通过一个 <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">mapper</span></code> 概念来实现的，这是一个简单的基于块级别的方案，实现通过创建虚拟块设备和映射这些块内容到另外其他块设备。LVM的这种 <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">mapper</span></code> 也允许 <code class="docutils literal notranslate"><span class="pre">I/O</span></code> 重定向服务，这样可以和其他卷管理共享（如 <code class="docutils literal notranslate"><span class="pre">EVMS</span></code> ）。</p></li>
 </ul>
 <p>下图是 LVM 逻辑卷组件，可以看到 <code class="docutils literal notranslate"><span class="pre">PV</span> <span class="pre">=&gt;</span> <span class="pre">VG</span> <span class="pre">=&gt;</span> <span class="pre">LV</span></code> 的层次结构:</p>
-<figure class="align-default" id="id6">
+<figure class="align-default" id="id8">
 <img alt="../../../_images/basic-lvm-volume.png" src="../../../_images/basic-lvm-volume.png" />
 <figcaption>
-<p><span class="caption-text">LVM逻辑卷组件</span><a class="headerlink" href="#id6" title="永久链接至图片">¶</a></p>
+<p><span class="caption-text">LVM逻辑卷组件</span><a class="headerlink" href="#id8" title="永久链接至图片">¶</a></p>
 </figcaption>
 </figure>
 <p>逻辑卷管理提供了磁盘存储的高层视图，以便管理员能够灵活分配存储给应用程序和用户。逻辑卷管理允许以用户定义组来分配存储卷，允许将存储设置为卷组名如”development”和”sales”，而不用使用设备名，如”sda”和”sdb”。</p>
 <section id="id3">
 <h3>定义<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h3>
-<table class="colwidths-given docutils align-default" id="id7">
-<caption><span class="caption-text">LVM概念表</span><a class="headerlink" href="#id7" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id9">
+<caption><span class="caption-text">LVM概念表</span><a class="headerlink" href="#id9" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 60%" />
@@ -250,10 +251,10 @@
 <li><p>LVM元数据包含系统中LVM卷组的配置详情，默认情况下，卷组中每个物理卷的元数据区域都会保留一个一样的元数据副本，这为磁盘故障时回复LVM卷组提供依据。LVM元数据很小，以ASCII格式保存</p></li>
 <li><p>LVM允许每个物理卷中保存0, 1 或者 2个元数据副本。默认为1个副本，当在物理卷中配置元数据副本数量之后，无法再更改该号码。如果不小心覆盖了磁盘的起始部分，则可以使用设备末尾的元数据的第二个副本来恢复元数据</p></li>
 </ul>
-<figure class="align-default" id="id8">
+<figure class="align-default" id="id10">
 <img alt="../../../_images/physvol.png" src="../../../_images/physvol.png" />
 <figcaption>
-<p><span class="caption-text">LVM物理卷</span><a class="headerlink" href="#id8" title="永久链接至图片">¶</a></p>
+<p><span class="caption-text">LVM物理卷</span><a class="headerlink" href="#id10" title="永久链接至图片">¶</a></p>
 </figcaption>
 </figure>
 </section>
@@ -276,30 +277,29 @@
 </div>
 <section id="id4">
 <h4>LVM逻辑卷分类<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h4>
-<ul class="simple">
-<li><p>线性逻辑卷</p></li>
-</ul>
+<section id="id5">
+<h5>线性逻辑卷<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h5>
 <p>线性逻辑卷就是聚合多个物理卷成为一个逻辑卷，目的就是扩展磁盘空间:</p>
-<figure class="align-default" id="id9">
+<figure class="align-default" id="id11">
 <img alt="../../../_images/uneven_vols.png" src="../../../_images/uneven_vols.png" />
 <figcaption>
-<p><span class="caption-text">线性逻辑卷，卷组VG1上构建LV1和LV2逻辑卷</span><a class="headerlink" href="#id9" title="永久链接至图片">¶</a></p>
+<p><span class="caption-text">线性逻辑卷，卷组VG1上构建LV1和LV2逻辑卷</span><a class="headerlink" href="#id11" title="永久链接至图片">¶</a></p>
 </figcaption>
 </figure>
-<ul class="simple">
-<li><p>条带化逻辑卷</p></li>
-</ul>
+</section>
+<section id="striped-lvm">
+<h5>条带化逻辑卷( <a class="reference internal" href="striped_lvm.html#striped-lvm"><span class="std std-ref">条带化逻辑卷管理(LVM)</span></a> )<a class="headerlink" href="#striped-lvm" title="永久链接至标题">¶</a></h5>
 <p>当在LVM逻辑卷上写入数据，文件系统把数据分布到底层的物理卷。可以通过创建一个条带化的逻辑卷来控制数据写入到物理卷。对于大型的顺序读写，可以提高数据I/O的效率。</p>
 <p>条带化通过 <code class="docutils literal notranslate"><span class="pre">round-robin</span></code> 方式将数据写入不同物理卷，磁盘 <code class="docutils literal notranslate"><span class="pre">I/O</span></code> 是并行的。某些情况下，可以达到物理卷性能的线性叠加。</p>
-<figure class="align-default" id="id10">
+<figure class="align-default" id="id12">
 <img alt="../../../_images/stripedvol.png" src="../../../_images/stripedvol.png" />
 <figcaption>
-<p><span class="caption-text">条代化逻辑卷: 数据条代1,2,3分别写入3个物理卷，而从条代4～6又分别写入3个磁盘，从而达到并发提高性能</span><a class="headerlink" href="#id10" title="永久链接至图片">¶</a></p>
+<p><span class="caption-text">条代化逻辑卷: 数据条代1,2,3分别写入3个物理卷，而从条代4～6又分别写入3个磁盘，从而达到并发提高性能</span><a class="headerlink" href="#id12" title="永久链接至图片">¶</a></p>
 </figcaption>
 </figure>
-<ul class="simple">
-<li><p>RAID逻辑卷</p></li>
-</ul>
+</section>
+<section id="raid">
+<h5>RAID逻辑卷<a class="headerlink" href="#raid" title="永久链接至标题">¶</a></h5>
 <p>LVM 支持 RAID 0、1、4、5、6 和 10：</p>
 <blockquote>
 <div><ul class="simple">
@@ -308,9 +308,9 @@
 <li><p>创建 RAID 逻辑卷时，LVM 会为阵列中的每个数据或奇偶校验子卷创建一个元数据子卷</p></li>
 </ul>
 </div></blockquote>
-<ul class="simple">
-<li><p>精简配置逻辑卷(精简卷)</p></li>
-</ul>
+</section>
+<section id="lvmthin">
+<h5>精简配置逻辑卷( <a class="reference internal" href="lvmthin.html#lvmthin"><span class="std std-ref">精简模式LVM</span></a> )<a class="headerlink" href="#lvmthin" title="永久链接至标题">¶</a></h5>
 <p>精简模式置备的逻辑卷可以创建大于可用扩展的逻辑卷:</p>
 <blockquote>
 <div><ul class="simple">
@@ -320,9 +320,9 @@
 <li><p>精简卷支持新的复制时写入（COW）快照逻辑卷部署，这将允许很多虚拟设备在精简池中共享相同数据</p></li>
 </ul>
 </div></blockquote>
-<ul class="simple">
-<li><p>快照逻辑卷(snapshot)</p></li>
-</ul>
+</section>
+<section id="snapshot">
+<h5>快照逻辑卷(snapshot)<a class="headerlink" href="#snapshot" title="永久链接至标题">¶</a></h5>
 <p><code class="docutils literal notranslate"><span class="pre">snapshot</span></code> 提供了不中断服务的情况下瞬间创建一个设备虚拟映像的方式。如果在一个snapshot执行之后对原始设备进行的修改，则snapshot将生成一个变化数据区域的副本，这样可以用来重构设备的状态。</p>
 <blockquote>
 <div><ul class="simple">
@@ -350,10 +350,35 @@
 </ul>
 </div></blockquote>
 </section>
+<section id="id6">
+<h5>精简配置的快照逻辑卷<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h5>
+<p>精简配置的快照逻辑卷(精简快照卷)可以将很多虚拟设备保存在同一个数据卷，这不仅简化了管理过程，也允许在快照卷之间共享数据:</p>
+<ul class="simple">
+<li><p>使用相同原始卷的多个快照时，精简快照卷可以减少磁盘用量</p></li>
+<li><p>对于同一个来源的多个快照，对原始卷的写入采用COW操作保留数据。增加原始卷的快照数量应该不会导致很大的性能下降(我理解对于大量的快照，写时复制特性就是只有快照也有写入操作才会叠加原始卷的数据修改，否则理论上只有一个原始卷有数据变动，而快照卷只读情况下几乎不会触发数据写)</p></li>
+<li><p>精简快照卷可以作为另一个快照的逻辑卷来源，也就是任意深度的递归快照(一个快好的快照的快照…)</p></li>
+<li><p>精简逻辑卷的快照也是一个精简逻辑卷。在有求COW操作前，或者到快照已写入前，不会消耗数据空间</p></li>
+<li><p>当删除精简配置快照卷的原始卷是，该原始卷的每个快照都会变成独立的精简卷。</p></li>
+</ul>
+<p>精简快照卷的限制:</p>
+<ul class="simple">
+<li><p>不能更改精简卷的快大小: 如果精简卷的快大小较大(例如，1MB)，并且需要一个短期存在的快照且使用大块的效率不高时，建议使用旧的快照功能</p></li>
+<li><p>不能限制精简快照卷的大小: 如果需要，快照将使用完精简池中所有空间，这可能不适合某些业务场景</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>在使用精简配置时，存储管理员 <code class="docutils literal notranslate"><span class="pre">必须</span></code> 监控存储池，并且在存储池被完全耗尽前添加更多存储容量!!!</p>
+</div>
+</section>
+<section id="lvmcache">
+<h5><a class="reference internal" href="lvmcache.html#lvmcache"><span class="std std-ref">LVM卷缓存</span></a><a class="headerlink" href="#lvmcache" title="永久链接至标题">¶</a></h5>
+<p>LVM支持在较慢的块设备中使用快速快设备(例如SSD驱动器)作为写入或写入缓存。可以通过创建缓存逻辑池来提高现有逻辑卷的性能，或者创建新的缓存逻辑卷。这种解决方案通过小的、快速设备结合大型且缓慢的存储，可以经济地实现海量存储。</p>
 </section>
 </section>
-<section id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+</section>
+</section>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)">Logical Volume Manager (Linux)</a></p></li>
 <li><p><a class="reference external" href="http://www.howtoforge.com/linux_lvm">A Beginner’s Guide To LVM</a></p></li>
@@ -372,7 +397,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Linux LVM逻辑卷管理" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="striped_lvm.html" class="btn btn-neutral float-right" title="条带化逻辑卷管理(LVM)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="deploy_lvm.html" class="btn btn-neutral float-right" title="部署LVM卷管理" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
