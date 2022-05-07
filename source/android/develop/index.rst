@@ -8,6 +8,7 @@ Android 开发
    :maxdepth: 1
 
    diving_android_code.rst
+   android_ndk.rst
    startup/index
 
 .. only::  subproject and html

@@ -83,8 +83,43 @@ proxy.conf
 
 此外，你可以可以通过 `Ubuntu Packages Search <http://packages.ubuntu.com/>`_ 网站来查找软件包。
 
+``apt-add-repository``
+============================
+
+第三方软件仓库也称为  ``Launchpad PPA (Personal Package Archive)`` 
+
+第三方软件仓库需要使用 ``apt-add-repository`` 命令添加，不过这个工具命令默认没有安装，所以首先执行::
+
+   sudo apt install software-properties-common
+   sudo apt update
+
+然后可以使用以下命令添加PPA::
+
+   sudo add-apt-repository ppa:apandada1/foliate
+
+然后更新仓库::
+
+   sudo apt update
+
+此时可能报错::
+
+   ...
+   Get:5 http://ppa.launchpad.net/apandada1/foliate/ubuntu kinetic InRelease [17.5 kB]
+   Err:5 http://ppa.launchpad.net/apandada1/foliate/ubuntu kinetic InRelease
+     The following signatures couldn't be verified because the public key is not available: NO_PUBKEY A507B2BBA7803E3B
+   Reading package lists... Done
+   W: GPG error: http://ppa.launchpad.net/apandada1/foliate/ubuntu kinetic InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY A507B2BBA7803E3B
+   E: The repository 'http://ppa.launchpad.net/apandada1/foliate/ubuntu kinetic InRelease' is not signed.
+   N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+   N: See apt-secure(8) manpage for repository creation and user configuration details.
+
+则执行以下命令::
+
+   sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A507B2BBA7803E3B
+
 参考
 ========
 
 - `Configure proxy for APT? <https://askubuntu.com/questions/257290/configure-proxy-for-apt>`_
 - `How do I find the package that provides a file? <https://askubuntu.com/questions/481/how-do-i-find-the-package-that-provides-a-file>`_
+- `How to Fix 'add-apt-repository command not found' on Ubuntu & Debian <https://phoenixnap.com/kb/add-apt-repository-command-not-found-ubuntu>`_
