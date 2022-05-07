@@ -22,6 +22,8 @@ Waydroid甚至还开发了集成化的Linux发行版 ``Waydroid-Linux`` ，基�
 
    我准备在自己的旧笔记本上安装 :ref:`arch_linux`  (甚至使用 :ref:`lfs_linux` ) 来运行Waydroid，尝试构建适合移动办公的Linux系统。
 
+
+
 参考
 ========
 
