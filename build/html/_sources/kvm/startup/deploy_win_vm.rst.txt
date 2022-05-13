@@ -4,7 +4,7 @@
 部署Windows KVM虚拟机
 =============================
 
-在 :ref:`kvm_docker_in_studio` 部署了KVM运行环境之后，就可以 :ref:`create_vm` ，在一台物理服务器上模拟规模化部署的集群。不过，和Linux Guest不同，Windows虚拟机由于闭源以及驱动上的缺陷，运行比较困难，消耗戏院也较多。
+在 :ref:`kvm_docker_in_studio` 部署了KVM运行环境之后，就可以 :ref:`create_vm` ，在一台物理服务器上模拟规模化部署的集群。不过，和Linux Guest不同，Windows虚拟机由于闭源以及驱动上的缺陷，运行比较困难，消耗资源也较多。
 
 本文记录部署Windows虚拟机的，以及一些特殊的配制调整。我计划在后续学习和实践性能优化。
 

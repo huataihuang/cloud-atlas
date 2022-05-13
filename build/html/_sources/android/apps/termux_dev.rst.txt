@@ -12,6 +12,6 @@ Termux开发环境
 - 安装工具和开发系统:
 
 .. literalinclude:: termux_dev/termux_apt_install.sh
-   :language: bash                                                                                                                                                                                                                            
-   :linenos:                                                                                                                                                                                                                                  
+   :language: bash
+   :linenos:
    :caption: termux中安装软件包(apt)

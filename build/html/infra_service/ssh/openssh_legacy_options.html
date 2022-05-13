@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SSH ProxyJump多跳访问主机 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>OpenSSH 遗留选项 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="OpenSSH 遗留选项" href="openssh_legacy_options.html" />
-    <link rel="prev" title="SSH ProxyCommand实现穿透主机访问后端服务器" href="ssh_proxycommand.html" /> 
+    <link rel="next" title="syslog服务" href="../syslog/index.html" />
+    <link rel="prev" title="SSH ProxyJump多跳访问主机" href="ssh_proxyjump.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -76,14 +76,11 @@
 <li class="toctree-l3"><a class="reference internal" href="speed_up_ssh.html">SSH加速</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_multiplexing.html">ssh多路传输multiplexing加速</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ssh_proxycommand.html">SSH ProxyCommand实现穿透主机访问后端服务器</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">SSH ProxyJump多跳访问主机</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#proxyjump">命令行ProxyJump</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">配置方式多跳ProxyJump</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#allowtcpforwarding">关闭 <code class="docutils literal notranslate"><span class="pre">AllowTcpForwarding</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ssh_proxyjump.html">SSH ProxyJump多跳访问主机</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">OpenSSH 遗留选项</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="openssh_legacy_options.html">OpenSSH 遗留选项</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../syslog/index.html">syslog服务</a></li>
@@ -142,9 +139,9 @@
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Infra-Service Atlas</a> &raquo;</li>
           <li><a href="index.html">ssh服务</a> &raquo;</li>
-      <li>SSH ProxyJump多跳访问主机</li>
+      <li>OpenSSH 遗留选项</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/infra_service/ssh/ssh_proxyjump.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/infra_service/ssh/openssh_legacy_options.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -152,81 +149,84 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ssh-proxyjump">
-<span id="id1"></span><h1>SSH ProxyJump多跳访问主机<a class="headerlink" href="#ssh-proxyjump" title="永久链接至标题">¶</a></h1>
-<p>使用 <a class="reference internal" href="ssh_proxycommand.html#ssh-proxycommand"><span class="std std-ref">SSH ProxyCommand实现穿透主机访问后端服务器</span></a> 可以很方便实现2跳SSH，不过，在实现3跳或者更多N跳SSH访问并不直观，使用配置也较为繁琐。SSH的 <code class="docutils literal notranslate"><span class="pre">ProxyJump</span></code> 指令在 <code class="docutils literal notranslate"><span class="pre">ProxyCommand</span></code> 指令之上构建一个自动在远程主机上执行ssh命令，跳到目标主机并且转发所有通过流量的解决方案。</p>
-<section id="proxyjump">
-<h2>命令行ProxyJump<a class="headerlink" href="#proxyjump" title="永久链接至标题">¶</a></h2>
-<p>使用 <code class="docutils literal notranslate"><span class="pre">-J</span></code> 参数可以穿透主机跳下一跳主机:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">J</span> <span class="n">host1</span> <span class="n">host2</span>
-</pre></div>
-</div>
-<p>而且可以添加用户名和端口:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">J</span> <span class="n">user1</span><span class="nd">@host1</span><span class="p">:</span><span class="n">port1</span> <span class="n">user2</span><span class="nd">@host2</span> <span class="o">-</span><span class="n">p</span> <span class="n">port2</span>
-</pre></div>
-</div>
-<p>甚至可以多跳:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">J</span> <span class="n">user</span><span class="nd">@host1</span><span class="p">:</span><span class="n">port1</span><span class="p">,</span><span class="n">user2</span><span class="nd">@host2</span><span class="p">:</span><span class="n">port2</span> <span class="n">user3</span><span class="nd">@host3</span>
-</pre></div>
-</div>
-</section>
-<section id="id2">
-<h2>配置方式多跳ProxyJump<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<ul>
-<li><p>配置 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> 类似如下可以实现跳越:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">=&gt;</span> <span class="n">pixel</span> <span class="o">=&gt;</span> <span class="n">zcloud</span> <span class="o">=&gt;</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">SSH ProxyJump多跳配置文件 ~/.ssh/config</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host pixel
-    HostName <span class="m">192</span>.168.10.9
-    Port <span class="m">8022</span>
-    User u0_a299
-    LocalForward <span class="m">8443</span> <span class="m">127</span>.0.0.1:8443
-
-Host zcloud
-    HostName <span class="m">192</span>.168.7.200
-    ProxyJump pixel
-    LocalForward <span class="m">8443</span> <span class="m">192</span>.168.6.25:8443
-
-Host z-dev
-    HostName <span class="m">192</span>.168.6.253
-    ProxyJump zcloud
-    LocalForward <span class="m">8443</span> <span class="m">127</span>.0.0.1:443
-</pre></div>
-</div>
-</div>
-<ul>
-<li><p>则简单执行:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>就可以连跳3次SSH访问到内部服务器</p>
-</section>
-<section id="allowtcpforwarding">
-<h2>关闭 <code class="docutils literal notranslate"><span class="pre">AllowTcpForwarding</span></code><a class="headerlink" href="#allowtcpforwarding" title="永久链接至标题">¶</a></h2>
-<p>出于安全原因，需要关闭中间转跳服务器的ProxyJump功能，则在中间服务器的 <code class="docutils literal notranslate"><span class="pre">/etc/sshd_config</span></code> 中添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AllowTcpForwarding</span> <span class="n">no</span>
-</pre></div>
-</div>
-<p>则上述ProxyJump就会被断开(中间SSH服务器拒绝发起到目标服务器的TCP连接，所以不能构建tunnel)，使用 <code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">-vvv</span></code>  检查时客户端显示:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
-<span class="n">Stdio</span> <span class="n">forwarding</span> <span class="n">request</span> <span class="n">failed</span><span class="p">:</span> <span class="n">Session</span> <span class="nb">open</span> <span class="n">refused</span> <span class="n">by</span> <span class="n">peer</span>
-<span class="n">kex_exchange_identification</span><span class="p">:</span> <span class="n">Connection</span> <span class="n">closed</span> <span class="n">by</span> <span class="n">remote</span> <span class="n">host</span>
-</pre></div>
-</div>
-<p>但是，除非禁止用户shell访问，否则依然可能被forwarder绕过。</p>
-</section>
-<section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+  <section id="openssh">
+<span id="openssh-legacy-options"></span><h1>OpenSSH 遗留选项<a class="headerlink" href="#openssh" title="永久链接至标题">¶</a></h1>
+<p>OpenSSH实现了标准SSH实现的所有兼容加密算法，但是由于一些旧算法被发现强度较弱，所以默认不会激活。</p>
+<p>当SSH客户端连接到服务器时，双方都会列出连接的参数，即以下 ssh_config 关键字:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://wiki.gentoo.org/wiki/SSH_jump_host">gentoo linux wiki: SSH jump host</a></p></li>
-<li><p><a class="reference external" href="https://unix.stackexchange.com/questions/14160/ssh-tunneling-error-channel-1-open-failed-administratively-prohibited-open">SSH tunneling error: “channel 1: open failed: administratively prohibited: open failed”</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">KexAlgorithms</span></code> : 用于生成每个连接密钥的密钥交换方式</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HostkeyAlgorithms</span></code> : 针对SSH客户端用于接受SSH服务器认证的公钥算法</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ciphers</span></code> : 加密连接的密码</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MACs</span></code> : 检测流量篡改的消息认证码</p></li>
+</ul>
+<p>要实现成功连接，上述每个参数的多个可选项中至少有一个选项是双方支持选择的</p>
+<p>如果客户端和服务器不能协商连接参数，对于OpenSSH 7.0及以上版本，会出现一个错误消息类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">negotiate</span> <span class="k">with</span> <span class="n">legacyhost</span><span class="p">:</span> <span class="n">no</span> <span class="n">matching</span> <span class="n">key</span> <span class="n">exchange</span> <span class="n">method</span> <span class="n">found</span><span class="o">.</span>
+<span class="n">Their</span> <span class="n">offer</span><span class="p">:</span> <span class="n">diffie</span><span class="o">-</span><span class="n">hellman</span><span class="o">-</span><span class="n">group1</span><span class="o">-</span><span class="n">sha1</span>
+</pre></div>
+</div>
+<p>这意味着服务器端采用了默认没有激活的遗留选项，需要通过客户端配置来激活遗留选项，才能顺利访问SSH服务器</p>
+<p>上述案例中，客户端和服务器不能协商密钥交换算法，服务器只提供了单一的 <code class="docutils literal notranslate"><span class="pre">diffie-hellman-group1-sha1</span></code> 方式，虽然OpenSSH支持这种方式，但是由于该算法强度弱且存在Logjam攻击理论可能性，所以OpenSSH默认没有开启支持。</p>
+<p>在用户认证过程中有一系列相关选项:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PubkeyAcceptedKeyTypes</span></code>  (ssh/sshd) : 公钥算法是客户端发起尝试，由服务器接受的公钥认证(例如，通过 <code class="docutils literal notranslate"><span class="pre">.ssh/authorized_keys</span></code> 公钥认证)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HostbasedKeyTypes</span></code> (ssh) 和 <code class="docutils literal notranslate"><span class="pre">HostbasedAcceptedKeyTypes</span></code> (sshd) : 密钥类型由客户端发起尝试，然后由服务器接受基于主机的认证(例如，通过 <code class="docutils literal notranslate"><span class="pre">.rhosts</span></code> 或 <code class="docutils literal notranslate"><span class="pre">.shosts</span></code> )</p></li>
+</ul>
+<p>在认证过程中客户端和服务器不匹配会导致认证失败，例如上面的案例就是密钥交换协商失败，此时需要采用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">oKexAlgorithms</span><span class="o">=+</span><span class="n">diffie</span><span class="o">-</span><span class="n">hellman</span><span class="o">-</span><span class="n">group1</span><span class="o">-</span><span class="n">sha1</span> <span class="n">user</span><span class="nd">@legacyhost</span>
+</pre></div>
+</div>
+<p>或则在 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> 配置中添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">somehost</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span>
+    <span class="n">KexAlgorithms</span> <span class="o">+</span><span class="n">diffie</span><span class="o">-</span><span class="n">hellman</span><span class="o">-</span><span class="n">group1</span><span class="o">-</span><span class="n">sha1</span>
+</pre></div>
+</div>
+<p>这里使用了 <code class="docutils literal notranslate"><span class="pre">+</span></code> 表示不是取代默认的密钥交换算法，而是 <strong>附加</strong>  。这样只要服务器升级支持更好的加密密钥交换算法就会自动使用更好更强的密钥交换算法。</p>
+<p>其他的遗留支持选项还有类似主机认证，可能出现如下提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">negotiate</span> <span class="k">with</span> <span class="n">legacyhost</span><span class="p">:</span> <span class="n">no</span> <span class="n">matching</span> <span class="n">host</span> <span class="n">key</span> <span class="nb">type</span> <span class="n">found</span><span class="o">.</span> <span class="n">Their</span> <span class="n">offer</span><span class="p">:</span> <span class="n">ssh</span><span class="o">-</span><span class="n">dss</span>
+</pre></div>
+</div>
+<p>OpenSSH 7.0以及更高版本也是默认禁止了 <code class="docutils literal notranslate"><span class="pre">ssh-dss(DSA)</span></code> 公钥算法，因为这个算法太孱弱，建议不要使用。当然也和上文类似，我们可以临时支持:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">oHostKeyAlgorithms</span><span class="o">=+</span><span class="n">ssh</span><span class="o">-</span><span class="n">dss</span> <span class="n">user</span><span class="nd">@legacyhost</span>
+</pre></div>
+</div>
+<p>也有配置方法 <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">somehost</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span>
+    <span class="n">HostKeyAlgorithms</span> <span class="o">+</span><span class="n">ssh</span><span class="o">-</span><span class="n">dss</span>
+</pre></div>
+</div>
+<p>OpenSSH提供命令参数 <code class="docutils literal notranslate"><span class="pre">-Q</span></code> 可以查询服务器支持的算法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">Q</span> <span class="n">cipher</span>       <span class="c1"># List supported ciphers</span>
+<span class="n">ssh</span> <span class="o">-</span><span class="n">Q</span> <span class="n">mac</span>          <span class="c1"># List supported MACs</span>
+<span class="n">ssh</span> <span class="o">-</span><span class="n">Q</span> <span class="n">key</span>          <span class="c1"># List supported public key types</span>
+<span class="n">ssh</span> <span class="o">-</span><span class="n">Q</span> <span class="n">kex</span>          <span class="c1"># List supported key exchange algorithms</span>
+</pre></div>
+</div>
+<p>举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">Q</span> <span class="n">cipher</span> <span class="n">myserver</span>
+</pre></div>
+</div>
+<p>可能看到输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="n">des</span><span class="o">-</span><span class="n">cbc</span>
+<span class="n">aes128</span><span class="o">-</span><span class="n">cbc</span>
+<span class="n">aes192</span><span class="o">-</span><span class="n">cbc</span>
+<span class="n">aes256</span><span class="o">-</span><span class="n">cbc</span>
+<span class="n">aes128</span><span class="o">-</span><span class="n">ctr</span>
+<span class="n">aes192</span><span class="o">-</span><span class="n">ctr</span>
+<span class="n">aes256</span><span class="o">-</span><span class="n">ctr</span>
+<span class="n">aes128</span><span class="o">-</span><span class="n">gcm</span><span class="nd">@openssh</span><span class="o">.</span><span class="n">com</span>
+<span class="n">aes256</span><span class="o">-</span><span class="n">gcm</span><span class="nd">@openssh</span><span class="o">.</span><span class="n">com</span>
+<span class="n">chacha20</span><span class="o">-</span><span class="n">poly1305</span><span class="nd">@openssh</span><span class="o">.</span><span class="n">com</span>
+</pre></div>
+</div>
+<p>通过使用 <code class="docutils literal notranslate"><span class="pre">-G</span></code> 参数可能可以列出所有实际用于连接ssh服务器使用的配置，包括选择的 <code class="docutils literal notranslate"><span class="pre">Ciphers</span></code> , <code class="docutils literal notranslate"><span class="pre">MACs</span></code> , <code class="docutils literal notranslate"><span class="pre">HostKeyAlgorithms</span></code> 和 <code class="docutils literal notranslate"><span class="pre">KexAlgorithms</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">G</span> <span class="n">user</span><span class="nd">@myserver</span>
+</pre></div>
+</div>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.openssh.com/legacy.html">OpenSSH Legacy Options</a></p></li>
 </ul>
 </section>
 </section>
@@ -235,8 +235,8 @@ Host z-dev
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ssh_proxycommand.html" class="btn btn-neutral float-left" title="SSH ProxyCommand实现穿透主机访问后端服务器" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="openssh_legacy_options.html" class="btn btn-neutral float-right" title="OpenSSH 遗留选项" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ssh_proxyjump.html" class="btn btn-neutral float-left" title="SSH ProxyJump多跳访问主机" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../syslog/index.html" class="btn btn-neutral float-right" title="syslog服务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -16,6 +16,7 @@ ssh服务
    ssh_multiplexing.rst
    ssh_proxycommand.rst
    ssh_proxyjump.rst
+   openssh_legacy_options.rst
    
 .. only::  subproject and html
 

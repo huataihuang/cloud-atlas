@@ -15,6 +15,25 @@ Node的众所周知标签、申明、瑕疵
 - ``node.kubernetes.io/instance-type`` 在 ``cloudprovider`` 中定义虚拟机规格类型，这个是云计算常用的规格，例如 ``g2.2xlarge`` , ``m3.medium`` 等等
 - ``topology.kubernetes.io/zone`` 这个标签是云计算厂商用于标记不同zone的机房拓扑，例如 ``topology.kubernetes.io/zone=us-east-1c`` 。这个标签在 ``节点`` (Node) 和 ``持久化卷`` (PersistentVolume)非常有用。
 
+创建标签和删除标签
+===================
+
+- 创建节点标签::
+
+   kubectl label node <nodename> <labelname>=<value>
+
+- 删除节点标签::
+
+   kubectl label node <nodenMe> <labelname>-
+
+- 删除多个节点标签::
+
+   kubectl label <node1> <node2> <labelname>-
+
+- 删除所有节点标签( **慎用** )::
+
+   kubectl label --all <labelname>-
+
 标签实践
 =========
 
@@ -83,4 +102,4 @@ Node的众所周知标签、申明、瑕疵
 
 - `Labels and Selectors <https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/>`_
 - `ValidationError: missing required field “selector” in io.k8s.api.v1.DeploymentSpec <https://stackoverflow.com/questions/59480373/validationerror-missing-required-field-selector-in-io-k8s-api-v1-deploymentsp>`_
-- 
+- `How to delete a node label by command and api? <https://stackoverflow.com/questions/34067979/how-to-delete-a-node-label-by-command-and-api>`_ 
