@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ceph 部署 &mdash; Cloud Atlas 0.1 文档</title>
+  <title>压缩Ceph监控服务存储 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -22,8 +22,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="安装Ceph" href="install_ceph.html" />
-    <link rel="prev" title="Stuido环境Docker容器运行Ceph" href="../ceph_docker_in_studio.html" /> 
+    <link rel="next" title="Ceph磁盘健康度SMART监控" href="ceph_disk_health_smart_mon.html" />
+    <link rel="prev" title="Ceph告警: MON_DISK_LOW" href="warn_mon_disk_low.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,13 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../ceph_recommend.html">Ceph部署软硬件推荐</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rdma.html">Remote Direct Memory Access(RDMA)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ceph_docker_in_studio.html">Stuido环境Docker容器运行Ceph</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Ceph 部署</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="install_ceph.html">安装Ceph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="centos_sig_ceph.html">CentOS SIG部署Ceph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="install_ceph_manual/index.html">手工部署Ceph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="install_ceph_manual_zdata/index.html">Ceph 手工部署zdata集群(暂未成功)</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy/index.html">Ceph 部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../mgr/index.html">Ceph Manager Daemon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rbd/index.html">Ceph Block Device(RBD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../spdk/index.html">Ceph SPDK</a></li>
@@ -67,7 +61,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../cephfs/index.html">CephFS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../config/index.html">Ceph 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../geo-replication/index.html">Ceph Geo-replication (远程灾备)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/index.html">Ceph 管理</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Ceph 管理</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="warn_mon_disk_low.html">Ceph告警: MON_DISK_LOW</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">压缩Ceph监控服务存储</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ceph_disk_health_smart_mon.html">Ceph磁盘健康度SMART监控</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../debug/index.html">Ceph 故障排查</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Ceph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arch/index.html">Ceph 架构</a></li>
@@ -137,9 +139,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Ceph Atlas</a> &raquo;</li>
-      <li>Ceph 部署</li>
+          <li><a href="index.html">Ceph 管理</a> &raquo;</li>
+      <li>压缩Ceph监控服务存储</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/ceph/deploy/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/ceph/admin/ceph_compact_mon_store.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -148,23 +151,38 @@
            <div itemprop="articleBody">
              
   <section id="ceph">
-<span id="ceph-deploy"></span><h1>Ceph 部署<a class="headerlink" href="#ceph" title="永久链接至标题">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="install_ceph.html">安装Ceph</a></li>
-<li class="toctree-l1"><a class="reference internal" href="centos_sig_ceph.html">CentOS SIG部署Ceph</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install_ceph_manual/index.html">手工部署Ceph</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install_ceph_manual_zdata/index.html">Ceph 手工部署zdata集群(暂未成功)</a></li>
-</ul>
+<span id="ceph-compact-mon-store"></span><h1>压缩Ceph监控服务存储<a class="headerlink" href="#ceph" title="永久链接至标题">¶</a></h1>
+<p>长期运行的Ceph存储，会发现 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mon/ceph-`hostname`/store.db/</span></code> 目录下存储了大量的 <code class="docutils literal notranslate"><span class="pre">.sst</span></code> 文件以及 <code class="docutils literal notranslate"><span class="pre">.log</span></code> 文件，占用大量磁盘空间，可能会触发 <a class="reference internal" href="warn_mon_disk_low.html#warn-mon-disk-low"><span class="std std-ref">Ceph告警: MON_DISK_LOW</span></a> 。此时我们可以通过压缩mon存储容量来缩减磁盘占用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mon</span><span class="o">.&lt;</span><span class="n">HOST_NAME</span><span class="o">&gt;</span> <span class="n">compact</span>
+</pre></div>
 </div>
+<p>例如:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mon</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">compact</span>
+</pre></div>
+</div>
+<p>此外，我们可以配置 Ceph mon 进程在启动时进行压缩，即配置 <code class="docutils literal notranslate"><span class="pre">[mon]</span></code> 段落如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mon</span><span class="p">]</span>
+<span class="n">mon_compact_on_start</span> <span class="o">=</span> <span class="n">true</span>
+</pre></div>
+</div>
+<p>然后重启 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mon</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/4/html-single/troubleshooting_guide/index#compacting-the-monitor-store_diag">Ceph Compacting the monitor store</a></p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../ceph_docker_in_studio.html" class="btn btn-neutral float-left" title="Stuido环境Docker容器运行Ceph" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="install_ceph.html" class="btn btn-neutral float-right" title="安装Ceph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="warn_mon_disk_low.html" class="btn btn-neutral float-left" title="Ceph告警: MON_DISK_LOW" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ceph_disk_health_smart_mon.html" class="btn btn-neutral float-right" title="Ceph磁盘健康度SMART监控" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

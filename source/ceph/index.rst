@@ -23,6 +23,8 @@ Ceph Atlas
    cephfs/index
    config/index
    geo-replication/index
+   admin/index
+   debug/index
    arm/index
    arch/index
    tunning/index

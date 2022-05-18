@@ -160,59 +160,6 @@
              
   <section id="ceph-mon">
 <span id="install-ceph-mon"></span><h1>安装 ceph-mon<a class="headerlink" href="#ceph-mon" title="永久链接至标题">¶</a></h1>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>2021年10月我购买了 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 构建 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> ，底层数据存储层采用Ceph实现。为了完整控制部署并了解Ceph组件安装，采用本文手工部署Ceph方式安装。本文在原先 <a class="reference internal" href="../install_ceph_manual_zdata/index.html#install-ceph-manual-zdata"><span class="std std-ref">Ceph 手工部署zdata集群(暂未成功)</span></a> 基础上重新开始。</p>
-<p>部署采用3个 <a class="reference internal" href="../../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机，通过 <a class="reference internal" href="../../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 方式 pass-through <a class="reference internal" href="../../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> <a class="reference internal" href="../../../linux/storage/nvme/nvme.html#nvme"><span class="std std-ref">NVMe存储</span></a> 存储。也就是一共有3个 <a class="reference internal" href="../../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 虚拟机来完成Ceph集群部署:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> (192.168.6.204)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> (192.168.6.205)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> (192.168.6.206)</p></li>
-</ul>
-<p>操作系统采用 <a class="reference internal" href="../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04.3 LTS</p>
-</div>
-<section id="ceph">
-<h2>获取Ceph软件<a class="headerlink" href="#ceph" title="永久链接至标题">¶</a></h2>
-<p>最简易获取软件的方法还是采用发行版的软件仓库，例如 <code class="docutils literal notranslate"><span class="pre">apt</span></code> (Debian/Ubuntu) 或 <code class="docutils literal notranslate"><span class="pre">yum</span></code> (RHEL/CentOS) ，如果使用非 <code class="docutils literal notranslate"><span class="pre">deb</span></code> 或 <code class="docutils literal notranslate"><span class="pre">rpm</span></code> 的软件包管理，则可以使用官方提供的tar包安装二进制可执行程序。</p>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>在多台服务器上同时操作，可以使用 <a class="reference internal" href="../../../devops/utils/pssh.html#pssh"><span class="std std-ref">pssh - 并行SSH</span></a></p>
-</div>
-</section>
-<section id="id1">
-<h2>安装Ceph软件<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>为了能够完整了解Ceph集群部署过程，本文档没有使用 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ceph-adm</span></code> 工具，而是采用手工通过APT包管理工具进行部署。</p>
-</div>
-<ul>
-<li><p>安装Ceph软件包（在每个节点上执行）:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">ceph</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mds</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p><a class="reference external" href="https://docs.ceph.com/en/pacific/install/install-storage-cluster/">INSTALL CEPH STORAGE CLUSTER</a> 提供了 APT 和 YUM 仓库安装方法</p>
-<p>对于通过对象存储模式使用Ceph，需要安装 <code class="docutils literal notranslate"><span class="pre">Ceph</span> <span class="pre">Object</span> <span class="pre">Gateway</span></code> ，我将另外撰写文章；对于虚拟化平台使用Ceph块设备则需要通过 <code class="docutils literal notranslate"><span class="pre">librdb</span></code> 驱动，我也会另外撰写实践文章。</p>
-</div>
-</section>
-<section id="id2">
-<h2>Ceph集群的初始<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
-<p>Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量相同（或更多）的OSD运行在集群中。 monitor部署是整个集群设置的重要步骤，例如存储池的副本数量，每个OSD的placement groups数量，心跳间隔，是否需要认证等等。这些配置都有默认值，但是在部署生产集群需要仔细调整这些配置。</p>
-<p>本案例采用3个节点：</p>
-<figure class="align-default" id="id5">
-<img alt="../../../_images/simple_3nodes_cluster.png" src="../../../_images/simple_3nodes_cluster.png" />
-<figcaption>
-<p><span class="caption-text">Figure 1: 三节点Ceph集群</span><a class="headerlink" href="#id5" title="永久链接至图片">¶</a></p>
-</figcaption>
-</figure>
-<div class="admonition note">
-<p class="admonition-title">注解</p>
-<p>我在部署初始采用1个monitor，准备后续再通过monitor方式扩容(缩容及替换)来演练生产环境的维护。</p>
-</div>
-</section>
 <section id="monitor-bootstrapping">
 <h2>监控引导(monitor bootstrapping)<a class="headerlink" href="#monitor-bootstrapping" title="永久链接至标题">¶</a></h2>
 <p>引导启动一个监控器（理论上就是Ceph存储集群）需要一系列要求：</p>
@@ -267,8 +214,8 @@
 </li>
 </ul>
 <p>配置案例:</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">/etc/ceph/ceph.conf</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">/etc/ceph/ceph.conf</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="o">[</span>global<span class="o">]</span>
 <span class="linenos"> 2</span><span class="nv">fsid</span> <span class="o">=</span> 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17
 <span class="linenos"> 3</span>mon initial <span class="nv">members</span> <span class="o">=</span> z-b-data-1
@@ -522,14 +469,14 @@
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h2>下一步<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<section id="id1">
+<h2>下一步<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="install_ceph_mgr.html#install-ceph-mgr"><span class="std std-ref">安装 ceph-mgr</span></a></p></li>
 </ul>
 </section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://docs.ceph.com/docs/master/install/">Ceph document - Installation (Manual)</a></p></li>
 </ul>

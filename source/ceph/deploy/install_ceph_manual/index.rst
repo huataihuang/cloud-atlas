@@ -20,6 +20,7 @@
    mon_clock_sync.rst
    add_ceph_osds_more.rst
    add_ceph_mds.rst
+   ceph_var_disk.rst
 
 
 .. only::  subproject and html
