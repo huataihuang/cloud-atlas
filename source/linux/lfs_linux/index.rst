@@ -16,6 +16,8 @@ LFS(Linux from scratch)
 .. toctree::
    :maxdepth: 1
 
+   lfs_prepare.rst
+
 .. only::  subproject and html
 
    Indices
