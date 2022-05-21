@@ -22,3 +22,4 @@
    z-k8s.rst
    priv_docker.rst
    priv_k8s_docker_centos.rst
+   real_unattended_upgrade.rst

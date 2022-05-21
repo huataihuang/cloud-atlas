@@ -365,6 +365,53 @@ Ubuntu20虚拟机模板
    sudo apt update
    sudo apt upgrade
 
+扩展虚拟机磁盘
+===============
+
+为了节约虚拟机磁盘占用，你可以看到我在构建虚拟机模版时候，只使用 ``6G`` LVM卷作为虚拟机磁盘，所以每个clone出来的虚拟机，以及创建的虚拟机，最初的时候都只有6G容量。显然，随着系统长期运行，虚拟机内部显然可能会出现容量不足现象。此时就需要 :ref:`libvirt_lvm_pool_resize_vm_disk` : 以下举例将 ``z-dev`` 的虚拟机磁盘扩展到 32G
+
+在物理主机执行
+----------------
+
+- 物理主机上(虚拟机外)执行以下命令将虚拟机磁盘LVM卷扩容到32G
+
+.. literalinclude:: ../../kvm/libvirt/storage/libvirt_lvm_pool_resize_vm_disk/lvresize_32g
+   :language: bash
+   :caption: 修订z-dev虚拟机的LVM卷到32G容量
+
+.. literalinclude:: ../../kvm/libvirt/storage/libvirt_lvm_pool_resize_vm_disk/virsh_blockresize_32g
+   :language: bash
+   :caption: virsh blocksize命令刷新z-dev虚拟机libvirt卷容量
+
+在虚拟机内部执行
+------------------
+
+- 安装 ``cloud-utils-growpart`` (提供 ``growpart`` 工具):
+
+.. literalinclude:: ../../kvm/libvirt/storage/libvirt_lvm_pool_resize_vm_disk/dnf_install_cloud-utils-growpart
+   :language: bash
+   :caption: RedHat系虚拟机内部通过dnf安装cloud-utils-growpart
+
+如果使用 debian/ubuntu ，则安装 ``cloud-guest-utils`` 来获得 ``growpart`` :
+
+.. literalinclude:: ../../kvm/libvirt/storage/libvirt_lvm_pool_resize_vm_disk/apt_install_cloud-guest-utils
+   :language: bash
+   :caption: Debian/Ubuntu系虚拟机内部通过apt安装cloud-guest-utils
+
+- 扩展分区:
+
+.. literalinclude:: ../../kvm/libvirt/storage/libvirt_lvm_pool_resize_vm_disk/growpart_vda2
+   :language: bash
+   :caption: 在虚拟机内部通过growpart命令扩展分区2
+
+- 使用 :ref:`xfs_growfs` 在线扩展XFS文件系统:
+
+.. literalinclude:: ../../kvm/libvirt/storage/libvirt_lvm_pool_resize_vm_disk/xfs_growfs_root_fs
+   :language: bash
+   :caption: 在虚拟机内部通过XFS的维护命令xfs_growfs将根目录分区扩展
+
+完成上述操作之后，虚拟机的磁盘就在线扩展到所需容量，可以满足进一步业务需求
+
 clone虚拟机
 =============
 
