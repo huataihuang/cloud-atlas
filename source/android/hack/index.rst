@@ -13,6 +13,7 @@ Android Hack
    magisk.rst
    magisk_root_ota.rst
    pixel_3_chinese_volte.rst
+   pixel_6_volte.rst
    change_build_prop.rst
    android_busybox.rst
    android_sshd.rst

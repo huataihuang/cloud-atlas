@@ -6,7 +6,7 @@ Magisk
 
 .. warning::
 
-   由于Andorid技术进展，在Pixel设备上，采用了动态分区以及双启动分区技术，特别是Android 10开始采用了内核安全加强，导致 :ref:`twrp` 已经无法在Pixel的Android 10上工作。所以，我会在
+   由于Andorid技术进展，在Pixel设备上，采用了动态分区以及双启动分区技术，特别是Android 10开始采用了内核安全加强，导致 :ref:`twrp` 已经无法在Pixel的Android 10上工作。所以，本文重新更新撰写，按照最新版本安装方法重新撰写。
 
 .. note::
 
@@ -51,7 +51,114 @@ Magisk可以实现的功能包括:
 安装Magisk
 =============
 
-在 :ref:`root_pixel` 中介绍了如何安装Magisk
+在 :ref:`root_pixel` 中介绍了如何安装Magisk，但是方法只适合非Pixel设备。对于 :ref:`pixel_3` 这样的采用动态分区以及双启动分区技术的设备，需要参考 `topjohnwu / Magisk <https://github.com/topjohnwu/Magisk>`_ 官方最新方法操作。
+
+- 一定要从GitHub上 `topjohnwu/Magisk <https://github.com/topjohnwu/Magisk>`_ 官方下载release版本，其他不可靠来源的安装都会导致重大安全隐患。例如，安装最新release版本 `Magisk app <https://github.com/topjohnwu/Magisk/releases/latest>`_
+
+- 安装完 Magisk 之后，首次运行，请检查主屏幕，是否检测到 ``Ramdisk`` ，类似下图:
+
+.. figure:: ../../_static/android/hack/device_info.png
+   :scale: 40
+
+这里的 ``Ramdisk`` 检测表示使用设备是否在启动分区使用了 ``ramdisk`` ，如果设备没有boot ramdisk，则需要采用Recovery方式，即要激活Magisk需要每次都重启到recovery。例如，对于三星Galaxy S10手机，需要采用boot into recovery。
+
+对于使用 ``boot ramdisk`` 的设备，需要获取 ``boot.img`` 的副本
+
+对于 ``不`` 使用 ``boot ramdisk`` 的设备，则需要一份 ``recovery.img`` 的副本
+
+- 现在需要检查设备是否使用独立的 ``vbmeta`` 分区:
+
+  - 如果官方firmware软件包中有一个 ``vbmeta.img`` ，就表明你的设备使用了 ``vbmeta`` 分区
+  - 也可以使用如下命令检查设备
+
+::
+
+   adb shell ls -l /dev/block/by-name
+
+输出中有 ``vbmeta`` , ``vbmeta_a`` 或者 ``vbmeta_b`` ，则表示设备是使用独立的 ``vbmeta`` 分区的。例如，我的 :ref:`pixel_3` 输出就有::
+
+   ...
+   lrwxrwxrwx 1 root root 16 1971-01-10 12:45 vbmeta_a -> /dev/block/sde10
+   lrwxrwxrwx 1 root root 16 1971-01-10 12:45 vbmeta_b -> /dev/block/sde22
+   ...
+
+综上，对于我的 :ref:`pixel_3` :
+
+  - 使用 boot ramdisk
+  - 使用独立的 ``vbmeta`` 分区
+  - 基于第一条，应该使用 ``boot.img`` 镜像
+
+Patching Images
+-----------------
+
+- 我之前在 :ref:`magisk_root_ota` 采用Google Android官方下载的 factory image 中的 ``boot.img`` ，但是目前我已经不再使用Google 官方 Android ，改为 :ref:`lineageos_19.1_pixel_3` 。所以参考 `How to Root LineageOS ROM via Magisk Boot.img <https://www.droidwin.com/root-lineageos-magisk-boot-img/>`_ 
+
+但是，需要注意 :ref:`lineageos_19.1_pixel_3` 下载的 ``lineage-19.1-20220517-nightly-blueline-signed.zip`` 解压以后有一个 ``payload.bin`` ，但是没有常规的 ``system.img`` ``vendor.img`` 和 ``boot.img`` 等分区文件。实际上，这些文件都包含在 ``payload.bin`` 这个大文件中，我们需要解压缩这个文件来获得镜像文件。
+
+``payload.bin`` 不是zip或rar压缩文件，而是一种Payload Dumper Tool的特殊应用程序格式
+
+- `cyxx / extract_android_ota_payload <https://github.com/cyxx/extract_android_ota_payload>`_ 提供了一个 ``extract_android_ota_payload.py`` ，执行以下命令先安装需要的python模块::
+
+   git clone https://github.com/cyxx/extract_android_ota_payload.git
+   cd extract_android_ota_payload
+   python3 -m pip install -r requirements.txt
+
+- 然后执行解压 ``payload.bin`` 文件::
+
+   python3 extract_android_ota_payload.py payload.bin
+
+就能获得 ``boot.img`` 文件(以及其他)
+
+- 将 ``boot.img`` 推送到手机中::
+
+   adb push boot.img /sdcard/Download/boot.img
+
+- 在手机上运行前面安装好的 ``Magisk`` 程序，然后点击 ``Install`` 按钮，此时 ``Magisk`` 会让你选择需要patch的文件，则选择刚才上传到手机中的 ``boot.img`` 文件，并继续
+
+此时手机终端会提示生成了文件: ``/storage/emulated/0/Download/magisk_patched-24300_DHRRP.img`` （其实就是位于 ``/sdcard/Download/`` 目录下)
+
+- 将patched过的镜像下载到电脑上::
+
+   adb pull /sdcard/Download/magisk_patched-24300_DHRRP.img
+
+- 将Android设备重启到Bootlader/Fastboot模式::
+
+   adb reboot bootloader
+
+并检查设备状态::
+
+   fastboot devices
+
+可以看到::
+
+   912X1U972  fastboot
+
+- 将补丁过的 ``boot.img`` 刷入::
+
+   fastboot flash boot magisk_patched-24300_DHRRP.img
+
+此时补丁过的boot镜像就会刷入到手机的当前激活的slot::
+
+   Sending 'boot_b' (65536 KB)                        OKAY [  0.330s]
+   Writing 'boot_b'                                   OKAY [  0.278s]
+   Finished. Total time: 0.937s
+
+- 对于使用独立的 ``vbmeta`` 分区，可以使用以下命令对 ``vbmeta`` 分区进行patch::
+
+   fastboot flash vbmeta --disable-verity --disable-verification vbmeta.img
+
+- 然后重启设备::
+
+   fastboot reboot
+
+- 完成后检查 ``Magisk`` 应用，可以看到是 ``Installed`` 状态
+
+旧版Magisk安装(归档)
+======================
+
+.. warning::
+
+   以下旧版安装方法是非Pixel设备的操作方法，仅归档参考。我在 :ref:`pixel_3` 设备实践见前文。
 
 安装 Magisk 需要解锁 Bootloader 并刷入第三方 Recovery。
 
@@ -67,8 +174,8 @@ Magisk可以实现的功能包括:
 
    也可以把Magisk的zip文件push到手机的 ``/sdcard`` 目录下，然后通过 TWRP 的 ``Install`` 功能进行安装。
 
-安装Magisk Manager
-====================
+旧版Magisk Manager
+-----------------------
 
 * 将 MagiskManager-v7.5.0.apk 推送到手机的 ``/sdcard`` 目录::
 
@@ -158,6 +265,7 @@ Magisk Hide可以绕过这些检测。
 参考
 =======
 
+- `How to Root LineageOS ROM via Magisk Boot.img <https://www.droidwin.com/root-lineageos-magisk-boot-img/>`_
 - `神奇的 Magisk <https://www.jianshu.com/p/393f5e51716e>`_
 - `Android 玩家不可错过的神器：Magisk Manager <https://zhuanlan.zhihu.com/p/61302392>`_
 - `What is Magisk? <https://www.xda-developers.com/what-is-magisk/>`_ 官方介绍

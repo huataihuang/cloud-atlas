@@ -16,6 +16,8 @@ Android 设备
    nexus_5.rst
    pixel.rst
    pixel_3.rst
+   pixel_3_usb_audio.rst
+   chromecast.rst
 
 .. only::  subproject and html
 
