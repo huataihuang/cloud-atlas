@@ -13,8 +13,9 @@ root Android
 
 - :ref:`unlock_bootloader` 以便刷入第三方OS
 - :ref:`root_pixel` 以便释放所有的能力
-- 编译LineageOS系统
-- 刷入自己编译的LineageOS系统
+- :strike:`编译LineageOS系统` (目前无精力)
+- :strike:`刷入自己编译的LineageOS系统` (目前无精力)
+- :ref:`lineageos_19.1_pixel_3`
 
 Termux
 ========

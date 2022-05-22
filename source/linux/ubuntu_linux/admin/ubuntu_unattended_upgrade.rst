@@ -1,4 +1,4 @@
-.. _unattended_upgrade:
+.. _ubuntu_unattended_upgrade:
 
 ==================
 Ubuntu无人值守升级
@@ -53,11 +53,13 @@ unatted-upgrades简介
 
 ``unattended-upgrades`` 服务提供了自动的安全补丁安装。
 
-- 如果 ``unattended-upgrades`` 软件包省委安装，可以通过命令安装::
+- 如果 ``unattended-upgrades`` 软件包没有默认安装，可以通过命令安装:
 
-   sudo apt install unattended-upgrades
+.. literalinclude:: ubuntu_unattended_upgrade/apt_install_unattended-upgrades
+   :language: bash
+   :caption: 使用apt命令安装unattended-upgrades软件包
 
-- 安装完成后激活::
+- 安装完成后使用以下命令交互激活::
 
    sudo dpkg-reconfigure --priority=low unattended-upgrades
 
@@ -65,6 +67,12 @@ unatted-upgrades简介
 
    APT::Periodic::Update-Package-Lists "1";
    APT::Periodic::Unattended-Upgrade "1";
+
+- 如果不使用激活命令，也可以直接使用以下直接生成配置的方式来激活 ``unattended-upgrades`` :
+
+.. literalinclude:: ubuntu_unattended_upgrade/enable_unattended-upgrades
+   :language: bash
+   :caption: 命令行激活unattended-upgrades
 
 当apt任务启动时，它将随机在 0 到 ``APT::Periodic::RandomSleep`` 秒数之间休眠，默认是1800秒，也就是停止最多30分钟，这样可以避免大量用户同时访问镜像网站而导致压力过大。只有使用本地镜像才可以将这个值设为0。
 

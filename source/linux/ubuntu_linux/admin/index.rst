@@ -12,7 +12,7 @@ Ubuntu系统管理
    disable_snap.rst
    tar_multi_boot_ubuntu.rst
    recover_system_by_tar.rst
-   unattended_upgrade.rst
+   ubuntu_unattended_upgrade.rst
    ubuntu_grub.rst
 
 .. only::  subproject and html
