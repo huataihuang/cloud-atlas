@@ -16,6 +16,7 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -156,19 +157,19 @@
            <div itemprop="articleBody">
              
   <section id="ceph-osds-zdata">
-<span id="add-ceph-osds-zdata"></span><h1>添加Ceph OSDs (zdata)<a class="headerlink" href="#ceph-osds-zdata" title="永久链接至标题">¶</a></h1>
+<span id="add-ceph-osds-zdata"></span><h1>添加Ceph OSDs (zdata)<a class="headerlink" href="#ceph-osds-zdata" title="Permalink to this heading">¶</a></h1>
 <p>在完成了初始 <a class="reference internal" href="../install_ceph_manual/install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a> 之后，就可以添加 OSDs。只有完成了足够的OSDs部署(满足对象数量，例如 <code class="docutils literal notranslate"><span class="pre">osd</span> <span class="pre">pool</span> <span class="pre">default</span> <span class="pre">size</span> <span class="pre">=2</span></code> 要求集群至少具备2个OSDs)才能达到 <code class="docutils literal notranslate"><span class="pre">active</span> <span class="pre">+</span> <span class="pre">clean</span></code> 状态。在完成了 <code class="docutils literal notranslate"><span class="pre">bootstap</span></code> Ceph monitor之后，集群就具备了一个默认的 <code class="docutils literal notranslate"><span class="pre">CRUSH</span></code> map，但是此时 <code class="docutils literal notranslate"><span class="pre">CRUSH</span></code> map还没有具备任何Ceph OSD Daemons map到一个Ceph节点。</p>
 <p>Ceph提供了一个 <code class="docutils literal notranslate"><span class="pre">ceph-vlume</span></code> 工具，用来准备一个逻辑卷，磁盘或分区给Ceph使用，通过增加索引来创建OSD ID，并且将新的OSD添加到CRUSH map。需要在每个要添加OSD的节点上执行该工具。</p>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>我有3个服务器节点提供存储，需要分别在这3个节点上部署OSD服务。</p>
 </div>
 <section id="bluestore">
-<h2>bluestore<a class="headerlink" href="#bluestore" title="永久链接至标题">¶</a></h2>
+<h2>bluestore<a class="headerlink" href="#bluestore" title="Permalink to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../arch/bluestore.html#bluestore"><span class="std std-ref">Ceph后端存储引擎BlueStore</span></a> 是最新的Ceph采用的默认高性能存储引擎，底层不再使用OS的文件系统，可以直接管理磁盘硬件。</p>
 <p>需要部署OSD的服务器首先准备存储，通常采用LVM卷作为底层存储块设备，这样可以通过LVM逻辑卷灵活调整块设备大小(有可能随着数据存储增长需要调整设备)。不过，作为我的实践环境 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 每个 <a class="reference internal" href="../../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机仅有一个pass-through PCIe NVMe存储，所以我没有划分不同存储设备来分别存放 <code class="docutils literal notranslate"><span class="pre">block</span></code> / <code class="docutils literal notranslate"><span class="pre">block.db</span></code> 和 <code class="docutils literal notranslate"><span class="pre">block.wal</span></code> 。并且也因为无法扩展存储，我就没有使用LVM卷，而直接采用磁盘分区。</p>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>生产环境请使用LVM卷作为底层设备 - 参考 <a class="reference internal" href="../../config/bluestore_config.html#bluestore-config"><span class="std std-ref">Ceph BlueStore配置</span></a></p>
 <p>我的部署实践是在3台虚拟机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 上完成，分区完全一致</p>
 </div>
@@ -194,12 +195,12 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>以上分区操作在3台存储虚拟机上完成</p>
 </div>
 </section>
 <section id="ceph-volume-lvm-create">
-<h2>尝试一: <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">lvm</span> <span class="pre">create</span></code><a class="headerlink" href="#ceph-volume-lvm-create" title="永久链接至标题">¶</a></h2>
+<h2>尝试一: <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">lvm</span> <span class="pre">create</span></code><a class="headerlink" href="#ceph-volume-lvm-create" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>创建第一个OSD，注意我使用了统一的 <code class="docutils literal notranslate"><span class="pre">data</span></code> 存储来存放所有数据，包括 <code class="docutils literal notranslate"><span class="pre">block.db</span></code> 和 <code class="docutils literal notranslate"><span class="pre">block.wal</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">create</span> <span class="o">--</span><span class="n">data</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p1</span>
@@ -208,11 +209,11 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>实际上Ceph在底层就是使用LVM卷来作为存储，即使指定使用磁盘分区，也是在这个磁盘分区上创建一个 LVM 逻辑卷再用于BlueStore。这样的好处应该是后续可以通过扩容底层LVM卷，可以不断扩容BlueStore的OSD存储大小。</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>使用 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">lvm</span> <span class="pre">create</span></code> 命令一次就可以完成OSD卷创建和激活。此外，也可以把命令拆分成先 <code class="docutils literal notranslate"><span class="pre">prepare</span></code> 再 <code class="docutils literal notranslate"><span class="pre">activate</span></code> 两个步骤:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">prepare</span> <span class="o">--</span><span class="n">data</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p1</span>
 <span class="n">sudo</span> <span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="nb">list</span>
@@ -317,13 +318,13 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>我仔细看了Red Hat的manual install文档，发现Red Hat文档拆解的命令更为详细，实际上只要把 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span></code> 的包装的命令拆细成更多的实际命令，就可以绕过这个不传递cluster名字的问题。</p>
 <p>例如 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span></code> 没有 <code class="docutils literal notranslate"><span class="pre">--cluster</span></code> 参数，但是被包装的 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 命令是有 <code class="docutils literal notranslate"><span class="pre">--cluster</span></code> 参数的，所以拆细以后的命令应该可以实现。最主要是分析 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span></code> 实际操作命令</p>
 </div>
 </section>
 <section id="id1">
-<h2>拆解命令尝试<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>拆解命令尝试<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <p>仔细看了 <a class="reference external" href="https://lists.ceph.io/hyperkitty/list/ceph-users&#64;ceph.io/thread/KLHVIJCNUA5UP2FSY44UX3A67UFSNX5G/">Manual deployment of an OSD failed</a> 讨论，看起来方法是先执行 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">create</span></code> 命令时带参数 <code class="docutils literal notranslate"><span class="pre">--cluster</span> <span class="pre">&lt;CLUSTER&gt;</span></code> ，然后对出错的子命令再单独单独执行，此时加上传递集群或配置文件的参数。</p>
 <ul>
 <li><p>重新开始创建:</p>
@@ -372,7 +373,7 @@
 <p>也就是使用了 <code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">-</span></code> 就会等待标准输入，这是一个输入入文件</p>
 </section>
 <section id="ceph-conf">
-<h2>尝试ceph.conf<a class="headerlink" href="#ceph-conf" title="永久链接至标题">¶</a></h2>
+<h2>尝试ceph.conf<a class="headerlink" href="#ceph-conf" title="Permalink to this heading">¶</a></h2>
 <p>由于太多命令采用了 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 默认集群名字，所以我尝试做一个软链接看看究竟是哪些命令运行:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span>
 <span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="n">zdata</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span> <span class="n">ceph</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">keyring</span>
@@ -433,7 +434,7 @@ Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyr
 <p>可以看到出错在于启动过程</p>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://docs.ceph.com/docs/master/install/">Ceph document - Installation (Manual)</a></p></li>
 </ul>

@@ -16,6 +16,7 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -164,20 +165,20 @@
            <div itemprop="articleBody">
              
   <section id="zram">
-<span id="id1"></span><h1>zram - 基于内存的压缩块存储设备<a class="headerlink" href="#zram" title="永久链接至标题">¶</a></h1>
+<span id="id1"></span><h1>zram - 基于内存的压缩块存储设备<a class="headerlink" href="#zram" title="Permalink to this heading">¶</a></h1>
 <p>zram是一个Linux内核模块，可以用来创建最高5:1压缩率的基于RAM的块设备。zram设备可以和其他块设备一样使用。通常zram被用于作为swap设备来扩展主机内存。它们也可以用来存储 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 并且用于作为一个压缩性RAM设备。</p>
 <p>Fedora 33+ 使用系统内存的一半来创建一个zram swap设备，并且限制最大使用4GB空间，使用的工具名为 <code class="docutils literal notranslate"><span class="pre">zram-generator</span></code> 。</p>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>现代大规模集群的日志采集是分析集群性能的重要基础，由于日志采集写磁盘非常消耗系统资源并且效率低下，如果能够实现日志即时传输出去，就不需要持久化存储(磁盘)，完全可以使用 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code>  来存储日志。</p>
 <p>在 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 上结合 <code class="docutils literal notranslate"><span class="pre">zram</span></code> ，就可以大幅度压缩 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 占用的内存空间，把宝贵的内存用于应用系统。所消耗的只是压缩处理的cpu资源，通常系统cpu资源都有剩余，所以这种架构对于大型集群的日志采集应该是有很大帮助。我后续会做一个实践汇总。</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p><a class="reference internal" href="../../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> 官方操作系统 L4T 的 <a class="reference internal" href="../../../machine_learning/jetson/studio/jetson_swap.html#jetson-swap"><span class="std std-ref">Jetson Nano的swap</span></a> 就是采用zram来实现的。</p>
 </div>
 <section id="id2">
-<h2>zram基本使用<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>zram基本使用<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">zram</span></code> 内核模块必须在使用zram之前加载，可以通过 <code class="docutils literal notranslate"><span class="pre">modprobe</span> <span class="pre">zram</span></code> 加载，不过默认只有1个zram设备。如果你希望创建4个zram设备，则使用 <code class="docutils literal notranslate"><span class="pre">modprobe</span> <span class="pre">zram</span> <span class="pre">num_devices=4</span></code> 。</p>
 <p>也可以通过创建 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/zswap.conf</span></code> 配置实现:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span> <span class="n">zram</span> <span class="n">num_devices</span><span class="o">=</span><span class="mi">4</span>
@@ -205,7 +206,7 @@
 </div>
 </section>
 <section id="id3">
-<h2>创建设备<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>创建设备<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <p>zram设备可以创建为 <code class="docutils literal notranslate"><span class="pre">/dev/zram0</span></code> ， <code class="docutils literal notranslate"><span class="pre">/dev/zram1</span></code> 依次类推。添加的设备数量可以通过读取 <code class="docutils literal notranslate"><span class="pre">/sys/class/zram-control/hot_add</span></code> 来获得:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">class</span><span class="o">/</span><span class="n">zram</span><span class="o">-</span><span class="n">control</span><span class="o">/</span><span class="n">hot_add</span>
 </pre></div>
@@ -232,7 +233,7 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>zram不会使用任何实际内存，直到设备开始填充数据。举例，一个2GB的zram设备存储了5.8MB数据，压缩以后数据实际只有443.9K，仅使用780K存储空间，而不会使用2GB内存。</p>
 </div>
 <p>zram块设备初始化成基于RAM的压缩swap，只需要使用 <code class="docutils literal notranslate"><span class="pre">mkswap</span></code> 初始化设备，然后用 <code class="docutils literal notranslate"><span class="pre">swapon</span></code> 激活。使用 <code class="docutils literal notranslate"><span class="pre">swapon</span></code> 参数 <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">32767</span></code> 将给予zram设备最高优先级:</p>
@@ -242,7 +243,7 @@
 </div>
 </section>
 <section id="id4">
-<h2>删除zram设备<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>删除zram设备<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
 <p>当zswap设备在使用时你不能删除它，需要首先umount文件系统或者swap设备，然后通过 <code class="docutils literal notranslate"><span class="pre">/sys/class/zram-control/hot_remove</span></code> 来移除:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">swapoff</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">zram0</span>
 <span class="n">echo</span> <span class="mi">0</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">class</span><span class="o">/</span><span class="n">zram</span><span class="o">-</span><span class="n">control</span><span class="o">/</span><span class="n">hot_remove</span>
@@ -250,11 +251,11 @@
 </div>
 </section>
 <section id="id5">
-<h2>检查设备<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<h2>检查设备<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">util-linux</span></code> 软件包提供了一个工具 <code class="docutils literal notranslate"><span class="pre">zramctl</span></code> 可以用来检查设备的真实压缩率以及其他信息，这些信息也可以通过 <code class="docutils literal notranslate"><span class="pre">/sys/block/zram{devicenumber}/</span></code> 目录下的文件提供。</p>
 </section>
 <section id="zramswap">
-<h2>使用zram作为swap的脚本<a class="headerlink" href="#zramswap" title="永久链接至标题">¶</a></h2>
+<h2>使用zram作为swap的脚本<a class="headerlink" href="#zramswap" title="Permalink to this heading">¶</a></h2>
 <p>以下是一个简单的脚本用来创建zram swap设备，注意，这个脚本假设你还没有使用zram，并提供了启动的systemd配置:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">/usr/local/bin/zramswap-on</span></code> :</p></li>
@@ -316,26 +317,26 @@
 </ul>
 </section>
 <section id="id6">
-<h2>zram压缩算法对比<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h2>
+<h2>zram压缩算法对比<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>比较zram压缩算法的简单方法是向zram设备文件系统中复制大文件或者大量文件，观察不同压缩算法的zram设备耗时、压缩后空间</p></li>
 <li><p>也可以通过设置zram设备作为swap，然后编译大型软件(如Chromium)来对比观察，例如在6GB总系统内存虚拟机中设置3GB zram swap，并添加HDD后端的swap来观察编译时间</p></li>
 </ul>
 <section id="id7">
-<h3>性能影响<a class="headerlink" href="#id7" title="永久链接至标题">¶</a></h3>
+<h3>性能影响<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
 <p>根据 <a class="reference external" href="https://linuxreviews.org/Zram">LinuxReviews docs: Zram</a> 的测试，使用缓慢的旧型号Athlon 5350 APU with a slow HDD as a swap device in addition to a zram swap device 测试:</p>
 <ul class="simple">
 <li><p>使用50%的物理内存配置为zram swap，得到的编译收益最大，不过zstd和lzo-rle两种算法差别不大</p></li>
 </ul>
 <p>但是，使用新型 Ryzen 2600, 6 Cores/Threads (QEMU VM), 8 GiB RAM 设备，则配置2G zram swap得到性能收益(虽然不多)，但配置4G zram swap则性能下降。</p>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>使用zram的swap配置和具体硬件相关，可能需要做不断的验证测试才能找到合适比例。</p>
 </div>
 </section>
 </section>
 <section id="id8">
-<h2>zram工具<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h2>
+<h2>zram工具<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">util-linux</span></code> 软件包提供的zramctl提供了设置和配置zram的功能</p>
 <ul>
 <li><p>检查设备:</p>
@@ -360,7 +361,7 @@
 </li>
 </ul>
 <section id="zram-generator">
-<h3>zram-generator<a class="headerlink" href="#zram-generator" title="永久链接至标题">¶</a></h3>
+<h3>zram-generator<a class="headerlink" href="#zram-generator" title="Permalink to this heading">¶</a></h3>
 <p>从Fedora 33+ 开始默认提供了一个 <code class="docutils literal notranslate"><span class="pre">zram-generator</span></code> 的工具 ，这个工具是 <a class="reference external" href="https://github.com/systemd/zram-generator">systemd/zram-generator</a></p>
 <p>zram-generator 用于配置最大4GB zram ，或者是系统内存的一半。默认使用 <code class="docutils literal notranslate"><span class="pre">lzo-rle</span></code> 压缩算法。可以通过 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/zram-generator.conf</span></code> 来覆盖默认的 <code class="docutils literal notranslate"><span class="pre">/usr/lib/systemd/zram-generator.conf</span></code> 配置。</p>
 <ul>
@@ -403,7 +404,7 @@
 </section>
 </section>
 <section id="id9">
-<h2>参考<a class="headerlink" href="#id9" title="永久链接至标题">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://linuxreviews.org/Zram">LinuxReviews docs: Zram</a></p></li>
 </ul>

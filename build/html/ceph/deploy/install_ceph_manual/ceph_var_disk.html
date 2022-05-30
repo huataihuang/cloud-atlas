@@ -16,6 +16,7 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -162,12 +163,12 @@
            <div itemprop="articleBody">
              
   <section id="var-lib-ceph">
-<span id="ceph-var-disk"></span><h1><code class="docutils literal notranslate"><span class="pre">/var/lib/ceph</span></code> 目录独立存储<a class="headerlink" href="#var-lib-ceph" title="永久链接至标题">¶</a></h1>
+<span id="ceph-var-disk"></span><h1><code class="docutils literal notranslate"><span class="pre">/var/lib/ceph</span></code> 目录独立存储<a class="headerlink" href="#var-lib-ceph" title="Permalink to this heading">¶</a></h1>
 <p>我在运维了一段时间Ceph存储，发现 <a class="reference internal" href="../../admin/warn_mon_disk_low.html#warn-mon-disk-low"><span class="std std-ref">Ceph告警: MON_DISK_LOW</span></a> 线上Ceph <code class="docutils literal notranslate"><span class="pre">MON_DISK_LOW</span></code> 。这个问题在于虚拟机初始分配存储空间极小(为了节约磁盘)，而Ceph在运行时需要确保 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph</span></code> 运行目录有足够空间，所以会不断检测该目录所在磁盘剩余空间百分比。如果没有特别配置， <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph</span></code>
 实际上占用的是根文件系统空间，初始配置根磁盘空间不足就会带来上述告警。</p>
 <p>在部署 <a class="reference internal" href="../../../real/priv_cloud/zdata_ceph.html#zdata-ceph"><span class="std std-ref">私有云数据层 ZData Ceph</span></a> ，运行 <a class="reference internal" href="../../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 虚拟机采用的是物理主机 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 的系统磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 上划分 <a class="reference internal" href="../../../linux/storage/lvm/index.html#linux-lvm"><span class="std std-ref">Linux LVM逻辑卷管理</span></a> 实现的 <a class="reference internal" href="../../../kvm/libvirt/storage/libvirt_lvm_pool.html#libvirt-lvm-pool"><span class="std std-ref">libvirt LVM卷管理存储池</span></a> 。所以，要为虚拟机添加一个独立磁盘，就可以将上述 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph</span></code> 完整迁移过去</p>
 <section id="id1">
-<h2>虚拟机独立磁盘添加<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>虚拟机独立磁盘添加<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>首先检查 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 物理主机上已经构建的虚拟机存储卷:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvs</span>
@@ -282,7 +283,7 @@
 </div>
 </section>
 <section id="cephvar">
-<h2>Ceph的var目录迁移<a class="headerlink" href="#cephvar" title="永久链接至标题">¶</a></h2>
+<h2>Ceph的var目录迁移<a class="headerlink" href="#cephvar" title="Permalink to this heading">¶</a></h2>
 <p>重启虚拟机之后，可以看到每个Ceph虚拟机都有一个 <code class="docutils literal notranslate"><span class="pre">vdb</span></code> 虚拟磁盘 <code class="docutils literal notranslate"><span class="pre">fdisk</span> <span class="pre">-l</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span><span class="p">:</span> <span class="mi">2</span> <span class="n">GiB</span><span class="p">,</span> <span class="mi">2147483648</span> <span class="nb">bytes</span><span class="p">,</span> <span class="mi">4194304</span> <span class="n">sectors</span>
 <span class="n">Units</span><span class="p">:</span> <span class="n">sectors</span> <span class="n">of</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">512</span> <span class="o">=</span> <span class="mi">512</span> <span class="nb">bytes</span>
@@ -295,7 +296,7 @@
 <p>以下操作需要停止Ceph工作节点的ceph相关服务，并且迁移 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph</span></code> 目录，所以务必顺序操作，即完成一台服务器改造之后，恢复服务，确保 Ceph 集群运行正常。然后才可以操作下一个节点。这是通过Ceph分布式存储的容灾特性完成节点轮转维护，但是不可同时对多个节点操作，否则会导致数据故障。</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>以下操作在每台Ceph节点进行，操作步骤一致</p>
 </div>
 <ul>

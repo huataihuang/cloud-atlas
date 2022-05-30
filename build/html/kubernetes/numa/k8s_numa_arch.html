@@ -16,6 +16,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -164,11 +165,11 @@
            <div itemprop="articleBody">
              
   <section id="kubernetes-numa">
-<span id="k8s-numa-arch"></span><h1>Kubernetes NUMA实现架构<a class="headerlink" href="#kubernetes-numa" title="永久链接至标题">¶</a></h1>
+<span id="k8s-numa-arch"></span><h1>Kubernetes NUMA实现架构<a class="headerlink" href="#kubernetes-numa" title="Permalink to this heading">¶</a></h1>
 <p>当Kubernetes部署到裸金属服务器(直接物理主机，非 <a class="reference internal" href="../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 虚拟机环境) ，就会面对一个现状：服务器的负载锁使用的物理资源分布，从内存、CPU到存储和I/O，会戏剧性地影响性能。直到最近的Kubernetes用户还没有直接方式来影响这个硬件和软件的关键因素，也就是通常所说的资源拓扑(Resource Topology)。</p>
 <p>2021年开始Kubernetes引入了 <code class="docutils literal notranslate"><span class="pre">Topology</span> <span class="pre">Aware</span> <span class="pre">Scheduling</span></code> (拓扑感知调度)功能，使得kubernel控制平面(control plane)可以在pod调度到节点到时候控制资源拓扑限制(keep to Resource Topology constraints)。这个技术实现是从Kubernetes 1.17引入到 <code class="docutils literal notranslate"><span class="pre">Topology</span> <span class="pre">Manager</span></code> ，在kuberlet中节点级别的资源拓扑实现强制限制。</p>
 <section id="id1">
-<h2>资源拓扑的意义<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>资源拓扑的意义<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../kernel/memory/numa/index.html#numa"><span class="std std-ref">NUMA架构</span></a> (Non-Uniform Mmeory Access，非一致性内存访问)是计算机平台中允许不同处理器以不同速度访问不同部分(regions)的内存的架构。这个CPU, 内存以及PCI设备的位置，也就是我们所说的资源拓扑 <code class="docutils literal notranslate"><span class="pre">Resource</span> <span class="pre">Topology</span></code> 。</p>
 <p>虽然任何CPU核心都能访问系统中所有内存，但是存在一些性能影响，例如以下拓扑结构示意图中，CPU core 1 访问近端的内存就比其访问靠近CPU core 7的远端内存要快:</p>
 <figure class="align-default" id="id3">
@@ -180,7 +181,7 @@
 <p>简单来说，底层操作系统会管理大多数和numa相关工作，在Kubernetes集群中也是如此。但是，当你试图从裸金属服务器上压榨出低延迟性能，你就需要为特定应用分配隔离的资源。随着添加新型资源，这项工作会更复杂。</p>
 <p>对于 I/O 关键的工作负载，位于远端NUMA zone的网卡会降低数据到达应用程序的速度。高性能负载，例如运行在5G网络，甚至不能在这种情况下运作。</p>
 <section id="numa">
-<h3>资源对齐的NUMA系统<a class="headerlink" href="#numa" title="永久链接至标题">¶</a></h3>
+<h3>资源对齐的NUMA系统<a class="headerlink" href="#numa" title="Permalink to this heading">¶</a></h3>
 <p>以下案例是一个请求 2个 CPU 和 1个 PCI设备的 Pod，分别是:</p>
 <figure class="align-default" id="id4">
 <a class="reference internal image-reference" href="../../_images/k8s_numa_arch_2.png"><img alt="A NUMA System with no Resource Alignment" src="../../_images/k8s_numa_arch_2.png" style="width: 489.0px; height: 185.4px;" /></a>
@@ -202,7 +203,7 @@
 </section>
 </section>
 <section id="topology-managertopology-aware-scheduling">
-<h2>Topology Manager和Topology Aware Scheduling<a class="headerlink" href="#topology-managertopology-aware-scheduling" title="永久链接至标题">¶</a></h2>
+<h2>Topology Manager和Topology Aware Scheduling<a class="headerlink" href="#topology-managertopology-aware-scheduling" title="Permalink to this heading">¶</a></h2>
 <figure class="align-default" id="id6">
 <a class="reference internal image-reference" href="../../_images/k8s_numa_arch_4.png"><img alt="System Level Diagram of Topology-Aware Scheduling" src="../../_images/k8s_numa_arch_4.png" style="width: 718.8px; height: 359.4px;" /></a>
 <figcaption>
@@ -223,7 +224,7 @@
 </figure>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://cloud.redhat.com/blog/topology-aware-scheduling-in-kubernetes-part-1-the-high-level-business-case">Topology Aware Scheduling in Kubernetes Part 1: The High Level Business Case</a></p></li>
 <li><p><a class="reference external" href="https://cloud.redhat.com/blog/topology-awareness-in-kubernetes-part-2-dont-we-already-have-a-topology-manager">Topology Awareness in Kubernetes Part 2: Don’t we already have a Topology Manager?</a></p></li>

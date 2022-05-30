@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/translations.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -157,16 +158,16 @@
            <div itemprop="articleBody">
              
   <section id="kvm">
-<span id="kvm-vdisk-live"></span><h1>KVM虚拟机动态添加、调整磁盘<a class="headerlink" href="#kvm" title="永久链接至标题">¶</a></h1>
+<span id="kvm-vdisk-live"></span><h1>KVM虚拟机动态添加、调整磁盘<a class="headerlink" href="#kvm" title="Permalink to this heading">¶</a></h1>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>通过组合合适的VM文件系统功能（例如支持在线resize的XFS文件系统）和QEMU底层 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">qemu-monitor-command</span></code> 指令可以实现在线动态调整虚拟机磁盘容量，无需停机，对维护在线应用非常方便。不过，这里虚拟机磁盘扩容（resize）部分步骤需要在VM内部使用操作系统命令，所以适合自建自用的测试环境。</p>
 <p>生产环境reize虚拟机磁盘系统，可采用 <a class="reference external" href="http://libguestfs.org/">libguestfs</a> 来修改虚拟机磁盘镜像。 <code class="docutils literal notranslate"><span class="pre">libguestfs</span></code> 可以查看和编辑guest内部文件，脚本化修改VM，监控磁盘使用和空闲状态，以及创建虚拟机，P2V,V2V，以及备份，clone虚拟机，构建虚拟机，格式化磁盘，resize磁盘等等。详细请参考 <a class="reference internal" href="#kvm-vdisk-live"><span class="std std-ref">KVM虚拟机动态添加、调整磁盘</span></a></p>
 </div>
 <section id="id1">
-<h2>创建虚拟机磁盘<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>创建虚拟机磁盘<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>我的这个案例实践是为了在 <a class="reference internal" href="../linux/suse_linux/index.html#suse-linux"><span class="std std-ref">SUSE Linux</span></a> 完成 <a class="reference internal" href="../gluster/build/build_gluser_suse.html#build-gluser-suse"><span class="std std-ref">SUSE编译glusterfs</span></a> ：由于生产环境使用了非常古老的SLES 12 SP3，需要构建一个虚拟机环境来编译GlusterFS。由于编译环境需要安装SDK等iso环境软件包，我采用为虚拟机挂载一块独立磁盘来存储iso镜像。</p>
 <p>磁盘初始化时候设置5G，显然这不够存储多个iso镜像。我在这里会演示如何动态扩展虚拟机磁盘。</p>
 </div>
@@ -202,7 +203,7 @@ vda    253:0    0   16G  0 disk
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p><a class="reference internal" href="../linux/suse_linux/index.html#suse-linux"><span class="std std-ref">SUSE Linux</span></a> 默认使用了 <a class="reference internal" href="../linux/storage/btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> ，这是一种非常先进的集成了卷管理和文件系统的存储。在FaceBook公司内部得到广泛使用。</p>
 </div>
 <ul>
@@ -213,7 +214,7 @@ vda    253:0    0   16G  0 disk
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>由于 <code class="docutils literal notranslate"><span class="pre">libvirtd</span></code> 出于安全因素默认关闭了虚拟磁盘类型自动检测功能，并且默认使用的 <code class="docutils literal notranslate"><span class="pre">raw</span></code> 磁盘格式，所以如果不指定磁盘驱动类型会导致添加的虚拟磁盘被是被成 <code class="docutils literal notranslate"><span class="pre">raw</span></code> 格式，就会在虚拟机内部看到非常奇怪的极小容量的磁盘。为了避免这个问题，所以一定要明确指定 <code class="docutils literal notranslate"><span class="pre">--driver</span> <span class="pre">qemu</span> <span class="pre">--subdriver</span> <span class="pre">qcow2</span></code> 。</p>
 </div>
 <p>如果虚拟磁盘插入正确，可以看到终端返回信息 <code class="docutils literal notranslate"><span class="pre">Disk</span> <span class="pre">attached</span> <span class="pre">successfully</span></code> ，此时在虚拟机内部再次使用 <code class="docutils literal notranslate"><span class="pre">lsblk</span></code> 命令检查输出如下:</p>
@@ -228,7 +229,7 @@ vdb    253:16   0    5G  0 disk
 <p>可以看到虚拟机新增加了一块 <code class="docutils literal notranslate"><span class="pre">vdb</span></code> 磁盘。</p>
 </section>
 <section id="id2">
-<h2>动态扩容<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>动态扩容<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>在虚拟机 <code class="docutils literal notranslate"><span class="pre">sles12-sp3</span></code> 中格式化并挂载XFS文件系统:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkfs</span><span class="o">.</span><span class="n">xfs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span>
@@ -299,7 +300,7 @@ Is another process using the image [/var/lib/libvirt/images/sles12_data.qcow2]?
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>对于最新的Guest内核， <code class="docutils literal notranslate"><span class="pre">virtio-blk</span></code> 设备大小是自动更新的，所以会马上看到容量改变。对于旧内核需要重启guest系统。对于SCSI设备，需要在guest操作系统中触发一次扫描:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">class</span><span class="o">/</span><span class="n">scsi_device</span><span class="o">/</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="o">/</span><span class="n">device</span><span class="o">/</span><span class="n">rescan</span>
 </pre></div>

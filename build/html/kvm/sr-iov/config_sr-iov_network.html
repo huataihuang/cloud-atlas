@@ -16,6 +16,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -169,14 +170,14 @@
            <div itemprop="articleBody">
              
   <section id="sr-iov">
-<span id="config-sr-iov-network"></span><h1>配置SR-IOV网络虚拟化<a class="headerlink" href="#sr-iov" title="永久链接至标题">¶</a></h1>
+<span id="config-sr-iov-network"></span><h1>配置SR-IOV网络虚拟化<a class="headerlink" href="#sr-iov" title="Permalink to this heading">¶</a></h1>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>对于高速 40Gbps Intel服务器网卡，需要在guest虚拟机使用 <a class="reference internal" href="../../linux/network/dpdk/index.html#linux-dpdk"><span class="std std-ref">Linux DPDK</span></a> 才能充分发挥性能!</p>
 <p>请参考 <a class="reference external" href="https://www.intel.com/content/www/us/en/support/articles/000005722/ethernet-products.html">Frequently Asked Questions for SR-IOV on Intel Ethernet Server Adapters</a> 说明获得不同以太网卡对SR-IOV的支持功能</p>
 </div>
 <section id="id1">
-<h2>实践环境<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>实践环境<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <p>我的实践是在 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上，采用配套Intel 4x 千兆网卡，主控芯片是 <code class="docutils literal notranslate"><span class="pre">I350</span> <span class="pre">Gigabit</span> <span class="pre">Network</span> <span class="pre">Connection</span> <span class="pre">(rev</span> <span class="pre">01)</span></code> 。根据 <a class="reference external" href="https://www.intel.com/content/www/us/en/products/docs/network-io/ethernet/10-25-40-gigabit-adapters/ethernet-i350-server-adapter-brief.html">Intel Ethernet Server Adapter I350: Product Brief</a> :</p>
 <ul class="simple">
 <li><p>Support for PCI-SIG SR-IOV specification: Up to 8 Virtual Functions per Port</p></li>
@@ -185,7 +186,7 @@
 <p><a class="reference external" href="https://www.intel.com/content/www/us/en/products/details/ethernet/gigabit-controllers/i350-controllers/downloads.html">Intel Ethernet Controller I350</a> 提供了相关驱动和软件下载，建议更新firmwware</p>
 </section>
 <section id="id2">
-<h2>SR-IOV概述<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>SR-IOV概述<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <p>SR-IOV提供了将单一物理PCI资源( <code class="docutils literal notranslate"><span class="pre">PF</span></code> )切分成虚拟PCI功能( <code class="docutils literal notranslate"><span class="pre">VF</span></code> )，以便注入(inject)VM提供高性能。对于网卡VF，数据流是绕过物理服务器的网络堆栈来实现 <code class="docutils literal notranslate"><span class="pre">北向-南向</span></code> 网络高性能。</p>
 <p>有多种方式可以将一个 SR-IOV 网卡 VF 注入一个KVM虚拟机:</p>
 <ul class="simple">
@@ -195,7 +196,7 @@
 </ul>
 </section>
 <section id="id3">
-<h2>准备<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>准备<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>内核增加 <code class="docutils literal notranslate"><span class="pre">intel_iommu=on</span></code> 和 <code class="docutils literal notranslate"><span class="pre">iommu=pt</span></code> 参数，编辑 <code class="docutils literal notranslate"><span class="pre">/etc/default/grbu</span></code> 配置( <a class="reference internal" href="../iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on iommu=pt vfio-pci.ids=144d:a80a,10de:1b39&quot;</span>
@@ -204,7 +205,7 @@
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p><code class="docutils literal notranslate"><span class="pre">iommu=pt</span></code> 参数 非常关键，虽然文档中仅说明这个参数影响性能，但是我实践发现，如果不激活这个参数，则虽然调整 <code class="docutils literal notranslate"><span class="pre">/sys/class/net/eno49/device/sriov_numvfs</span></code> 参数能够看到 <code class="docutils literal notranslate"><span class="pre">eno49v0</span></code> 到 <code class="docutils literal notranslate"><span class="pre">eno49v6</span></code> 多个eth设备，但是使用 <code class="docutils literal notranslate"><span class="pre">lspci</span></code> 却无法看到对应的 <code class="docutils literal notranslate"><span class="pre">Ethernet</span> <span class="pre">Controller</span> <span class="pre">Virtual</span> <span class="pre">Function</span></code> ，所以这个内核参数一定要激活。</p>
 </div>
 <p>然后执行重建grub:</p>
@@ -259,7 +260,7 @@
 </pre></div>
 </div>
 <section id="vf">
-<h3>VF配置<a class="headerlink" href="#vf" title="永久链接至标题">¶</a></h3>
+<h3>VF配置<a class="headerlink" href="#vf" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">/sys/class/net/&lt;device</span> <span class="pre">name&gt;/device/sriov_numvfs</span></code> 参数设置了 SR-IOV 网络设备VF数量，例如 <code class="docutils literal notranslate"><span class="pre">eno49</span></code> 默认设置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">class</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">eno49</span><span class="o">/</span><span class="n">device</span><span class="o">/</span><span class="n">sriov_numvfs</span>
@@ -319,7 +320,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>另一种重置方法是卸载 <code class="docutils literal notranslate"><span class="pre">igbvf</span></code> 和 <code class="docutils literal notranslate"><span class="pre">igb</span></code> 内核模块:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">rmmod</span> <span class="n">igbvf</span>
 <span class="n">sudo</span> <span class="n">rmmod</span> <span class="n">igb</span>
@@ -368,7 +369,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>Linux Kernel version 3.8.x 及以上版本可以通过上述调整 <code class="docutils literal notranslate"><span class="pre">sriov_numvfs</span></code> 方法动态调整VF数量。但是，对于 3.7.x 或更低版本，则不能动态调整，而是要在加载内核模块时传递参数:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modprobe</span> <span class="n">idb</span> <span class="n">max_vfs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span>
 </pre></div>
@@ -398,7 +399,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 </section>
 </section>
 <section id="vmvf">
-<h2>VM注入VF设备<a class="headerlink" href="#vmvf" title="永久链接至标题">¶</a></h2>
+<h2>VM注入VF设备<a class="headerlink" href="#vmvf" title="Permalink to this heading">¶</a></h2>
 <p>和 <a class="reference internal" href="../iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 中向VM注入 PCIe 设备(NVMe 或 GPU) 一样，根据 <code class="docutils literal notranslate"><span class="pre">lspci</span></code> 输出的 VF 设备的ID 的 3个数字字段分别对应了 <code class="docutils literal notranslate"><span class="pre">bus=</span>&#160; <span class="pre">slot=</span> <span class="pre">function=</span></code> ，配置一个 <code class="docutils literal notranslate"><span class="pre">eno49vf0.xml</span></code> 来对应:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">04</span><span class="p">:</span><span class="mf">10.0</span> <span class="n">Ethernet</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Intel</span> <span class="n">Corporation</span> <span class="n">I350</span> <span class="n">Ethernet</span> <span class="n">Controller</span> <span class="n">Virtual</span> <span class="n">Function</span> <span class="p">(</span><span class="n">rev</span> <span class="mi">01</span><span class="p">)</span>
 </pre></div>
@@ -471,7 +472,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 </ul>
 </section>
 <section id="vfmac">
-<h2>启动时激活VF以及固定MAC地址<a class="headerlink" href="#vfmac" title="永久链接至标题">¶</a></h2>
+<h2>启动时激活VF以及固定MAC地址<a class="headerlink" href="#vfmac" title="Permalink to this heading">¶</a></h2>
 <p>上述实践步骤完整展示了如何构建VF并注入虚拟机的方法，不过也有一些细节可以改进:</p>
 <ul class="simple">
 <li><p>在启动时如何自动激活VF</p></li>
@@ -496,7 +497,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 <p>不过，现代操作系统已经采用更为巧妙的 <a class="reference internal" href="../../linux/redhat_linux/systemd/udev.html#udev"><span class="std std-ref">Linux udev管理设备</span></a> 来实现设配配置，结合到 <a class="reference internal" href="libvirt_network_pool_sr-iov.html#libvirt-network-pool-sr-iov"><span class="std std-ref">Libvirt管理SR-IOV虚拟网络池</span></a> 可以灵活配置。</p>
 </section>
 <section id="id4">
-<h2>下一步<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<h2>下一步<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
 <p>可以看到，如果通过这种查询 VF 的 pci id，然后编写设备XML文件，逐个添加到虚拟机中，存在以下不足:</p>
 <ul class="simple">
 <li><p>从PF通过SR-IOV虚拟化出来的VF设备众多，手工编写XML即使有脚本协助也非常繁琐</p></li>
@@ -506,7 +507,7 @@ i2c_algo_bit           16384  3 igb,mgag200,nouveau
 <p>实际上， <a class="reference internal" href="../libvirt/index.html#libvirt"><span class="std std-ref">Libvirt虚拟机管理器</span></a> 提供了一个非常巧妙管理VF的方法 <a class="reference internal" href="libvirt_network_pool_sr-iov.html#libvirt-network-pool-sr-iov"><span class="std std-ref">Libvirt管理SR-IOV虚拟网络池</span></a></p>
 </section>
 <section id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.intel.com/content/www/us/en/developer/articles/technical/configure-sr-iov-network-virtual-functions-in-linux-kvm.html">Configure SR-IOV Network Virtual Functions in Linux KVM</a></p></li>
 <li><p><a class="reference external" href="https://usermanual.wiki/Pdf/xl710sriovconfigguidegbelinuxbrief.51018661/view">SR-IOV Configuration Guide Intel Ethernet CNA X710 &amp; XL710 on Red Hat Enterprise Linux 7</a></p></li>

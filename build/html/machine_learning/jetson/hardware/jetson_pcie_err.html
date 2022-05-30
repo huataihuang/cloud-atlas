@@ -16,6 +16,7 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -145,7 +146,7 @@
            <div itemprop="articleBody">
              
   <section id="jetson-nano-pcie-buss-error">
-<span id="jetson-pcie-err"></span><h1>Jetson Nano PCIe Buss Error<a class="headerlink" href="#jetson-nano-pcie-buss-error" title="永久链接至标题">¶</a></h1>
+<span id="jetson-pcie-err"></span><h1>Jetson Nano PCIe Buss Error<a class="headerlink" href="#jetson-nano-pcie-buss-error" title="Permalink to this heading">¶</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>本文实践让我大跌眼镜，这个TF卡读写错误最终发现只是第三方转接器质量问题导致的不稳定…虽然我最初反复排查以为是Jetson Nano的硬件缺陷或者是内核bug,但是万万没有想到是一个小小的转接器印刷电路板质量问题。</p>
@@ -155,7 +156,7 @@
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>这个文件系统只读有可能是我通过dd复制TF卡，把原先旧卡中某些缺陷带入到新卡？我现在重新用新卡完整通过L4T重新安装，再继续观察。</p>
 </div>
 <p>检查系统日志中有PCIe错误:</p>
@@ -197,7 +198,7 @@ iwlwifi          39.0°C
 <p>PCIe活跃状态电源管理(PCIe Active State Power Management)是将链路转换成低电能状态，在Jetson Nano的Ubuntu使用的内核版本较低，转换电能状态时会导致设备触发一些错误。</p>
 <p>在内核启动参数中添加 <code class="docutils literal notranslate"><span class="pre">pcie_aspm=off</span></code> 可以使这种错误消息不再出现，但是这也会增加电能消耗，因为实际上主机这是关闭了节能功能。</p>
 <section id="id1">
-<h2>修改启动参数<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>修改启动参数<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>检查当前内核运行参数:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cmdline</span>
@@ -245,13 +246,13 @@ LABEL primary
 </div>
 </section>
 <section id="id2">
-<h2>实践经验<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>实践经验<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <p>从之前验证来看，使用 <code class="docutils literal notranslate"><span class="pre">pcie_aspm=off</span></code> 确实可以消除内核报错，并且印象中好像很少再出现文件系统只读问题。对比之下，我最近一次重装jetson系统，没有添加这个内核参数，则非常容易出现文件系统只读以及上述内核报错。</p>
 <p>不过，我最终偶然发现，这个SD卡读写错误问题实际上是转接器的质量问题: 这真是出乎我的意料。实际上Jetson Nano并没有硬件问题，而是我购买的第三方装机外壳使用了一个TF卡转接器把原装的TF卡延伸到机壳外部方便装卸。然而这个转接卡电路板质量较差，我偶然拆机时发现电路印刷线路已经脱落翘起，导致TF卡安装后接触不良。</p>
 <p>我尝试拆掉转接器，把TF卡直接插在Jetson Nano原装TF卡槽中，则之后使用就再也没有出现过TF卡读写错误。这真是一个非常令人哭笑不得的实践经验!</p>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://askubuntu.com/questions/863150/pcie-bus-error-severity-corrected-type-physical-layer-id-00e5receiver-id">PCIe Bus Error: severity=Corrected, type=Physical Layer, id=00e5(Receiver ID)</a></p></li>
 <li><p><a class="reference external" href="https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%20Linux%20Driver%20Package%20Development%20Guide/uboot_guide.html">NVIDIA U-Boot Customization</a></p></li>

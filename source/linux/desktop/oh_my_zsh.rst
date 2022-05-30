@@ -101,6 +101,29 @@ agnoster
 
    推荐在编码工作环境，使用 `Solarized Dark colorscheme <https://ethanschoonover.com/solarized/>`_ ，字体清晰色调柔和。我在 :ref:`kali_linux` 的桌面默认使用的 QTerminal 风格也是非常简约美观，不用调整也非常舒适。
 
+排查Oh My Zsh缓慢
+==================
+
+在使用Oh My Zsh时候，我发现返回提示符时候非常缓慢。最初还不太在意，但是发现非常影响效率。这通常是由于插件引起的，需要找出存在问题的插件。
+
+打开debug模式::
+
+   set -x
+
+如果跟踪信息太长，可以通过重定向到文件::
+
+   exec 2>zsh.err
+
+也可以再次返回提示终端::
+
+   exec 2>/dev/tty
+
+其实我的git代码目录过于庞大，导致Oh My Zsh的提示功能影响，所以在git仓库目录下执行关闭::
+
+   git config --add oh-my-zsh.hide-dirty 1
+
+然后再次登陆shell，就可以看到提示会非常快了
+
 参考
 =====
 
@@ -110,3 +133,5 @@ agnoster
 - `Oh My Zsh + PowerLevel10k = terminal <https://dev.to/abdfnx/oh-my-zsh-powerlevel10k-cool-terminal-1no0>`_
 - `Make your terminal beautiful and fast with ZSH shell and PowerLevel10K <https://medium.com/@shivam1/make-your-terminal-beautiful-and-fast-with-zsh-shell-and-powerlevel10k-6484461c6efb>`_
 - `romkatv/powerlevel10k <https://github.com/romkatv/powerlevel10k>`_
+- `oh-my-zsh's prompt is slow: how to fix this <https://unix.stackexchange.com/questions/565905/oh-my-zshs-prompt-is-slow-how-to-fix-this>`_
+- `Speeding Up My Shell (Oh My Zsh) <https://blog.mattclemente.com/2020/06/26/oh-my-zsh-slow-to-load/>`_ 非常详尽的指南

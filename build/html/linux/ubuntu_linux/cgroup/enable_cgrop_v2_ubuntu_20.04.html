@@ -16,6 +16,7 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -168,7 +169,7 @@
            <div itemprop="articleBody">
              
   <section id="ubuntu-20-04-ltscgroup-v2">
-<span id="enable-cgrop-v2-ubuntu-20-04"></span><h1>在Ubuntu 20.04 LTS激活Cgroup v2<a class="headerlink" href="#ubuntu-20-04-ltscgroup-v2" title="永久链接至标题">¶</a></h1>
+<span id="enable-cgrop-v2-ubuntu-20-04"></span><h1>在Ubuntu 20.04 LTS激活Cgroup v2<a class="headerlink" href="#ubuntu-20-04-ltscgroup-v2" title="Permalink to this heading">¶</a></h1>
 <p>在 <a class="reference internal" href="../../../kubernetes/deployment/bootstrap_kubernetes_ha/index.html#bootstrap-kubernetes-ha"><span class="std std-ref">Kubernetes集群引导(高可用)</span></a> 部署过程中，安装 <a class="reference internal" href="../../../kubernetes/deployment/container_runtimes.html#container-runtimes"><span class="std std-ref">容器运行环境</span></a> ，有一个有关 cgroup 版本的选项，可以选择 <a class="reference internal" href="../../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> 或 <a class="reference internal" href="../../../kernel/cgroup/cgroup_v1.html#cgroup-v1"><span class="std std-ref">Control Group v1</span></a> 。虽然对于容器运行通常没有感知，但是对于精细话的磁盘IO控制，需要 Cgroup v2支持。目前，很多上游发行版已经开始默认采用 cgroup v2:</p>
 <ul class="simple">
 <li><p>Fedora (since 31)</p></li>
@@ -178,7 +179,7 @@
 <li><p>Ubuntu (since 21.10)</p></li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p><a class="reference external" href="https://www.phoronix.com/scan.php?page=news_item&amp;px=Ubuntu-21.10-systemd-cgroup">Ubuntu 21.10 Systemd To Finally Ship With Cgroup v2 By Default</a> 算是比较迟缓支持cgroup v2，原因是Ubuntu主推的snap系统迟迟没有支持cgroup v2。不过，从Ubuntu 20.10 开始也默认激活cgroup v2。</p>
 </div>
 <p>cgroup v2 for containers  需要内核版本 4.15 或更高，而建议在 5.2 或更高再使用 cgroup v2。我在 <a class="reference internal" href="../../../kubernetes/deployment/bootstrap_kubernetes_ha/index.html#bootstrap-kubernetes-ha"><span class="std std-ref">Kubernetes集群引导(高可用)</span></a> 部署中采用 Ubuntu Linux 20.04 LTS，实际上内核已经是 5.4 ，满足使用 cgroup v2要求。并且，我在服务器中没有使用snap技术，所以，我为了能够实践更为精细准确的容器磁盘IO控制，启用 cgoup v2。</p>
@@ -192,7 +193,7 @@
 </pre></div>
 </div>
 <section id="cgroup-v2">
-<h2>检查 cgroup v2<a class="headerlink" href="#cgroup-v2" title="永久链接至标题">¶</a></h2>
+<h2>检查 cgroup v2<a class="headerlink" href="#cgroup-v2" title="Permalink to this heading">¶</a></h2>
 <p>如果系统存在 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup/cgroup.controllers</span></code> ，则表明已经使用了 cgroup v2 ，否则就是使用 cgroup v1。</p>
 <p>在没有激活之前，检查:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ls</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">controllers</span>
@@ -204,7 +205,7 @@
 </div>
 </section>
 <section id="id1">
-<h2>激活 cgroup v2<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<h2>激活 cgroup v2<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置在 <code class="docutils literal notranslate"><span class="pre">GRUB_CMDLINE_LINUX</span></code> 添加参数:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemd</span><span class="o">.</span><span class="n">unified_cgroup_hierarchy</span><span class="o">=</span><span class="mi">1</span>
@@ -224,7 +225,7 @@
 </ul>
 </section>
 <section id="cpu-cpuset-i-o">
-<h2>激活CPU, CPUSET 和 I/O 托管<a class="headerlink" href="#cpu-cpuset-i-o" title="永久链接至标题">¶</a></h2>
+<h2>激活CPU, CPUSET 和 I/O 托管<a class="headerlink" href="#cpu-cpuset-i-o" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>重启后检查:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">controllers</span>
@@ -262,12 +263,12 @@
 </ul>
 <p>修订 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 配置之后，需要重新登陆或者或者重启主机，建议重启主机。</p>
 <div class="admonition note">
-<p class="admonition-title">注解</p>
+<p class="admonition-title">备注</p>
 <p>我暂时没有实践这部分调整</p>
 </div>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://rootlesscontaine.rs/getting-started/common/cgroup2/">Rootless Containers cgroup v2</a></p></li>
 </ul>
