@@ -124,7 +124,7 @@ Raspberry Pi OS
 
 - :ref:`my_vimrc` 基础依赖安装:
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_dep_dev
+.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_ubuntu_dep_dev
    :language: bash
    :caption: 编译YouCompleteMe依赖软件安装
 
@@ -136,7 +136,7 @@ Raspberry Pi OS
 
 - 安装 :ref:`golang` / :ref:`nodejs` :
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_go_nodejs
+.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_ubuntu_go_nodejs
    :language: bash
    :caption: 安装Go和node.js
 

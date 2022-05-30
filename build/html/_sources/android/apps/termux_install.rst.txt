@@ -12,7 +12,7 @@ Termux安装
 
 需要注意Termux不支持没有NEON SIMD的ARM设备，例如基于Nvidia Tegra 2 CPU。
 
-可以安装 :ref:`f-droid` 客户端来安装应用，也可以直接下载安装 ``com.termux_118.apk`` APK软件包直接运行安装 - 安装方法和其他APK没有什么两样，安装后运行 ``Termux`` 会出现一个终端界面，然后有一些提示信息指导我们下一步操作。
+可以安装 :ref:`f-droid` 客户端来安装应用，也可以直接下载安装 `termux apk <https://f-droid.org/en/packages/com.termux/>`_ APK软件包直接运行安装 - 安装方法和其他APK没有什么两样，安装后运行 ``Termux`` 会出现一个终端界面，然后有一些提示信息指导我们下一步操作。
 
 更新系统
 ==========

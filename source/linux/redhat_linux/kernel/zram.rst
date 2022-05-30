@@ -99,19 +99,19 @@ zram块设备初始化成基于RAM的压缩swap，只需要使用 ``mkswap`` 初
 
 - ``/usr/local/bin/zramswap-on`` :
 
-.. literalinclude:: zramswap/zramswap-on
+.. literalinclude:: zram/zramswap-on
    :language: bash
    :linenos:
 
 - ``/usr/local/bin/zramswap-off`` :
 
-.. literalinclude:: zramswap/zramswap-off
+.. literalinclude:: zram/zramswap-off
    :language: bash
    :linenos:
 
 - ``/etc/systemd/system/create-zram-swap.service`` :
 
-.. literalinclude:: zramswap/create-zram-swap.service
+.. literalinclude:: zram/create-zram-swap.service
    :language: bash
    :linenos:
 

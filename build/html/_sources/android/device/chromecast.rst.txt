@@ -15,6 +15,10 @@ Google针对流媒体推出的 ``Chromecast`` 设备提供了两款:
 - 支持软件升级
 - 支持4K HDR(需要电视机内置支持高贷款数字内容保护HDCP 2.2才能支持4K内容)
 
+.. note::
+
+   我在淘宝上购买了 ``Chromecast with Google TV`` ，2022年5月底售价是385元
+
 Chromecast with Google TV
 ==============================
 
@@ -25,6 +29,11 @@ Chromecast with Google TV
 
 .. figure:: ../../_static/android/device/chromecast_tv_using.png
    :scale: 50
+
+使用体验
+==========
+
+
 
 参考
 =======
