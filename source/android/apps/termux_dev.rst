@@ -9,9 +9,9 @@ Termux开发环境
 安装软件包
 =============
 
-- 安装工具和开发系统:
+- 安装工具:
 
-.. literalinclude:: termux_dev/termux_apt_install.sh
+.. literalinclude:: termux_dev/termux_apt_tool
    :language: bash
    :linenos:
    :caption: termux中安装软件包(apt)
@@ -19,7 +19,35 @@ Termux开发环境
 环境配置
 ============
 
+- 将默认SHELL改成 :ref:`termux_zsh`
+
 - :ref:`ssh_key` 配置
 
 - :ref:`ssh_multiplexing` 配置
 
+
+开发软件
+===========
+
+`Termux Development Environments <https://wiki.termux.com/wiki/Development_Environments>`_ 提供了termux软件开发，信息科学教育以及实验的软件列表:
+
+- 安装 python , c , go , rust :
+
+.. literalinclude:: termux_dev/termux_apt_dev
+   :language: bash
+   :linenos:
+   :caption: termux中安装软件包(apt)
+
+vim
+=======
+
+采用 :ref:`my_vimrc` 定制
+
+文档撰写
+============
+
+配置 :ref:`write_doc` 环境:
+
+- :ref:`sphinx_doc`
+- MkDocs
+- :ref:`hugo`

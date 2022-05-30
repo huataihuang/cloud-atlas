@@ -26,11 +26,11 @@ Termux提供的功能
 使用Termux可以实现很多用户侧功能:
 
 - 使用Python处理数据
-- 在开发环境进行编程
+- 在开发环境进行编程 - clang, python, vim
 - 下载和管理文件
 - 学习Linux命令行
 - 运行SSH客户端
-- 同步和备份文件
+- 同步和备份文件 - yncthing, rsync, rclone
 
 在Termux的仓库中提供了超过1000个软件包，并且如果没有找到需要的二进制执行程序，你甚至可以自己编译 - 因为Termux提供了各种开发软件的编译器，例如C, C++, Go, Rust等，也包含了常见的解释器语言，如 NodeJS, Python, Ruby。
 
