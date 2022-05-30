@@ -15,3 +15,11 @@ Termux开发环境
    :language: bash
    :linenos:
    :caption: termux中安装软件包(apt)
+
+环境配置
+============
+
+- :ref:`ssh_key` 配置
+
+- :ref:`ssh_multiplexing` 配置
+

@@ -11,12 +11,20 @@ kubeadm是用于自举kubernetes集群的工具，我们将使用kubeadm结合ku
 
 - 硬件: 2CPU / 2GB内存 ，并且服务器必须 ``禁用`` swap，否则kubelet可能工作不正常（kubeadm初始化系统时会检查swap，如存在swap会报错）
 
+批量关闭所有Kubernetes服务器上swap::
+
+   pssh -ih kube 'sudo swapoff -a'
+   pssh -ih kube "sudo sed -i -e '/swap/s/^UUID=/#UUID=/g' /etc/fstab" 
+
 .. note::
 
-   批量关闭所有Kubernetes服务器上swap::
+   Kubernetes安装部署文档都会有这样一步关闭swap的操作，并且安装过程会检测swap。那么究竟为何Kubernetes会反复强调要禁用swap呢？
 
-      pssh -ih kube 'sudo swapoff -a'
-      pssh -ih kube "sudo sed -i -e '/swap/s/^UUID=/#UUID=/g' /etc/fstab" 
+   参考 `Why Kubernetes Hates Linux Swap? <https://medium.com/tailwinds-navigator/kubernetes-tip-why-disable-swap-on-linux-3505f0250263>`_ :
+
+   - Linux系统对swap管理( :ref:`linux_mmu` )是一种内建的启发式管理活跃内存以及内存交换
+   - Kubernetes Pod的QoS调度Pod是基于可用资源，但是目前还不能结合Linux主机的内存管理，所以无法保障Pod运行稳定性: Kubernetes是假设100%使用率的尖峰实例，如果调度到配置了swap的节点，会出现性能急剧下降，对于大规模部署应用性能产生波动
+   - Kubernetes v1.22引入了alpha支持swap memory - `New in Kubernetes v1.22: alpha support for using swap memory <https://kubernetes.io/blog/2021/08/09/run-nodes-with-swap-alpha/>`_ ，可以在后期实践
 
 - 网络：每个主机具有唯一主机名，MAC地址以及 ``product_uuid`` ，并且开放必要管控端口(见下文)
 - 操作系统：采用符合要求OS，通常 Ubuntu 16.04+, CentOS 7, Fedora 25/26

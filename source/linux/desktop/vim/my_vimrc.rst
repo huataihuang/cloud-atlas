@@ -121,7 +121,7 @@ YouCompleteMe插件
 
 .. note::
 
-   在 :ref:`redhat_linux` 系列中，使用 :ref:`fedora_develop` ，则安装 ``vim-enhanced`` 软件包::
+   在 :ref:`redhat_linux` 系列中，使用 :ref:`fedora` ，则安装 ``vim-enhanced`` 软件包::
 
       sudo dnf install vim-enhanced
 
@@ -132,13 +132,21 @@ YouCompleteMe插件
 
 - 完整安装依赖(包括支持python的vim版本，以及cmake等):
 
-.. literalinclude:: my_vimrc/vimrc_dep_dev
+.. literalinclude:: my_vimrc/vimrc_ubuntu_dep_dev
    :language: bash
-   :caption: 编译YouCompleteMe依赖软件安装
+   :caption: Ubuntu编译YouCompleteMe依赖软件安装
+
+.. literalinclude:: my_vimrc/vimrc_fedora_dep_dev
+   :language: bash
+   :caption: Fedora编译YouCompleteMe依赖软件安装
+
+.. note::
+
+   对于 :ref:`fedora` 需要安装 ``python3-devel`` ，不过默认可能已经安装
 
 安装自己需要的开发软件
 
-- 安装Rust:
+- 安装 :ref:`rust` :
 
 .. literalinclude:: ../../../rust/rust_startup/install_rust.sh
    :language: bash
@@ -146,9 +154,13 @@ YouCompleteMe插件
 
 - 安装 :ref:`golang` / :ref:`nodejs` (支持TypeScript)
 
-.. literalinclude:: my_vimrc/vimrc_go_nodejs
+.. literalinclude:: my_vimrc/vimrc_ubuntu_go_nodejs
    :language: bash
-   :caption: 安装Go和node.js
+   :caption: Ubuntu安装Go和node.js
+
+.. literalinclude:: my_vimrc/vimrc_fedora_go_nodejs
+   :language: bash
+   :caption: Fedora安装Go和node.js
 
 - 进入YouCompleteMe目录::
 
@@ -168,11 +180,17 @@ YouCompleteMe插件
    :language: bash
    :caption: alias设置npm代理
 
+由于 YouCompleteMe 编译需要从github下载 ``clangd`` 源代码tar包，所以还需要配置 :ref:`fedora_proxy`
+
 按需编译YouCompleteMe：
 
 .. literalinclude:: my_vimrc/compile_youcompleteme.sh
    :language: bash
    :caption: 按需编译YouCompleteMe
+
+如果出现编译错误，可以按照提示采用debug模式来观察哪里出现错误::
+
+   /usr/bin/python3 /home/huatai/.vim_runtime/my_plugins/YouCompleteMe/third_party/ycmd/build.py --clangd-completer --go-completer --ts-completer --rust-completer --verbose
 
 使用YouCompleteMe
 --------------------
