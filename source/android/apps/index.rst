@@ -13,7 +13,9 @@ Android 应用
    termux_install.rst
    termux_zsh.rst
    termux_dev.rst
+   termux_ycm.rst
    termux_docker.rst
+   termux_proot.rst
    termux_alpine.rst
    termux_proxy.rst
 
