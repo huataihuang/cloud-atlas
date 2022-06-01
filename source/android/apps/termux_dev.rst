@@ -41,7 +41,11 @@ Termux开发环境
 vim
 =======
 
-采用 :ref:`my_vimrc` 定制
+采用 :ref:`my_vimrc` 定制，但是需要安装编译依赖:
+
+.. literalinclude:: termux_ycm/vimrc_termux_dep_dev
+   :language: bash
+   :caption: termux安装编译YCM依赖软件包
 
 文档撰写
 ============

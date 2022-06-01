@@ -162,11 +162,11 @@ YouCompleteMe插件
    :language: bash
    :caption: Fedora安装Go和node.js
 
-- 进入YouCompleteMe目录::
+- 进入YouCompleteMe目录:
 
-   cd ~/.vim_runtime/my_plugins/
-   git clone https://github.com/ycm-core/YouCompleteMe.git
-   cd YouCompleteMe
+.. literalinclude:: my_vimrc/vimrc_prepare_ycm
+   :language: bash
+   :caption: 准备YCM目录
 
 由于 ``golang.org`` 网站被GFW屏蔽，所以会导致编译时无法获取go模块，需要 :ref:`go_proxy` :
 
@@ -179,6 +179,12 @@ YouCompleteMe插件
 .. literalinclude:: ../../../nodejs/startup/npm_proxy/alias_npm_proxy.sh
    :language: bash
    :caption: alias设置npm代理
+
+配置 ``git`` 代理:
+
+.. literalinclude:: ../../../devops/git/git_proxy/git_config_http.proxy
+   :language: bash
+   :caption: 全局配置git使用HTTP/HTTPS代理
 
 由于 YouCompleteMe 编译需要从github下载 ``clangd`` 源代码tar包，所以还需要配置 :ref:`fedora_proxy`
 

@@ -11,6 +11,7 @@ zsh已经成为 :ref:`macos` 默认SHELL,也是Linux发行版逐渐受到欢迎�
 
    intro_zsh.rst
    zsh_completion.rst
+   zsh_autosuggestions.rst
 
 .. only::  subproject and html
 

@@ -23,6 +23,12 @@ Termux特点
 
    简直就是一个随身的开发平台，如果android手机能够外接显示器扩展，几乎就是一个全功能的Linux开发平台
 
+一些有用资料
+===============
+
+- `Hax4Us <https://hax4us.github.io>`_ 提供了很多使用Termux定制Android的文章，可以参考配置。
+- `Termux 高级终端安装使用配置教程 <https://www.sqlsec.com/2018/05/termux.html>`_ 是国内网友写的非常详尽的Termux指南，非常完备，值得学习参考
+
 参考
 ========
 
