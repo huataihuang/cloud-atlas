@@ -114,14 +114,17 @@ CentOS 8通过dnf安装python 2virtualenv
 Python 3 venv
 ====================
 
-- :ref:`python_in_rhel8` 默认安装Python 3，或者在Ubuntu/Debian系统中按照上文方法完成 ``pip3`` 和 ``venv`` 安装，所以构建虚拟沙箱环境非常简单::
+- :ref:`python_in_rhel8` 默认安装Python 3，或者在Ubuntu/Debian系统中按照上文方法完成 ``pip3`` 和 ``venv`` 安装，所以构建虚拟沙箱环境非常简单:
 
-   cd ~
-   python3 -m venv venv3
+.. literalinclude:: virtualenv/venv
+   :language: bash
+   :caption: venv初始化
 
-- 激活::
+- 激活:
 
-   source venv3/bin/active
+.. literalinclude:: virtualenv/venv_active
+   :language: bash
+   :caption: 激活venv
 
 .. note::
 

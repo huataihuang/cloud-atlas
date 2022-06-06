@@ -14,6 +14,7 @@ DevOps 文档
    write_doc.rst
    joplin.rst
    sphinx_doc/index
+   mkdocs/index
    hugo/index
    kindle/index
    pandoc.rst
