@@ -119,14 +119,17 @@ Ubuntu Linux现在默认安装了Python3，所以也仅安装pip::
 设置virtualenv
 ----------------
 
-- 创建工作目录下的Python 3 Virtualenv::
+- 创建工作目录下的Python 3 Virtualenv:
 
-   cd ~
-   python3 -m venv venv3
+.. literalinclude:: ../../python/startup/virtualenv/venv
+   :language: bash
+   :caption: venv初始化
 
-- 使用Virtualenv (每次使用Python3 Virtualenv之前要激活，后续所有基于文档撰写都使用此环境) ::
+- 使用Virtualenv (每次使用Python3 Virtualenv之前要激活，后续所有基于文档撰写都使用此环境) :
 
-   . ~/venv3/bin/activate
+.. literalinclude:: ../../python/startup/virtualenv/venv_active
+   :language: bash
+   :caption: 激活venv
 
 Sphinx Doc
 ============

@@ -14,6 +14,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    self_signed_ssl_nginx.rst
    nginx_root_alias.rst
    nginx_wpad.rst
+   auth/index
 
 .. only::  subproject and html
 

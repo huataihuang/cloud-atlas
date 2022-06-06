@@ -18,6 +18,8 @@ Termux ZSH
 
 - 安装 :ref:`oh-my-zsh`
 
+  - 激活 :ref:`zsh_autosuggestions` 可以方便使用
+
 参考
 ========
 
