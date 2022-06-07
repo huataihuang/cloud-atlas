@@ -274,7 +274,13 @@ nmcli命令案例
 .. literalinclude:: networkmanager/nmcli_wifi_wpa-psk
    :language: bash
    :caption: nmcli添加wpa-psk认证wifi
+
+- 我在 :ref:`edge_cloud_infra` 为 :ref:`edge_jetson_net` 的无线网络配置静态IP以便能够构建 :ref:`k3s` 工作节点:
    
+.. literalinclude:: networkmanager/nmcli_wifi_wpa-psk_static_ip
+   :language: bash
+   :caption: nmcli添加wpa-psk认证wifi的静态IP地址
+
 - 添加连接到 ``office`` 热点的网络连接:
 
 .. literalinclude:: networkmanager/nmcli_wifi_wpa-eap
@@ -282,7 +288,6 @@ nmcli命令案例
    :caption: nmcli添加wpa-eap认证(802.1x)wifi
 
 - 执行以下命令连接到 ``home`` 热点::
-
 
    nmcli con up home
 
@@ -321,3 +326,4 @@ NetworkManager的Mac Spoofing是通过 ``ethernet.cloned-mac-address`` 和 ``wif
 - `MAC Address Spoofing in NetworkManager 1.4.0 <https://blogs.gnome.org/thaller/2016/08/26/mac-address-spoofing-in-networkmanager-1-4-0/>`_
 - `Configuring Wi-Fi on Debian 10 <https://linuxhint.com/wi-fi_configuring_debian_10/>`_
 - `How To Add Secondary IP / Alias On Network Interface in RHEL/CentOS 7 <https://ma.ttias.be/how-to-add-secondary-ip-alias-on-network-interface-in-rhel-centos-7/>`_
+- `How to connect to wifi using nmcli with a static IP address and password? <https://unix.stackexchange.com/questions/270217/how-to-connect-to-wifi-using-nmcli-with-a-static-ip-address-and-password>`_
