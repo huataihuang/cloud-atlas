@@ -18,7 +18,7 @@ Termux ZSH
 
 - 安装 :ref:`oh-my-zsh`
 
-  - 激活 :ref:`zsh_autosuggestions` 可以方便使用
+  - :strike:`激活` :ref:`zsh_autosuggestions` 可以方便使用，但是会导致shell加载非常缓慢，所以我还是放弃了这个插件
 
 参考
 ========
