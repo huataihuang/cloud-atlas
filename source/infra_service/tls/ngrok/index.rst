@@ -8,6 +8,7 @@ Ngrok
    :maxdepth: 1
 
    ngrok_arch.rst
+   deploy_ngrok.rst
    
 .. only::  subproject and html
 
