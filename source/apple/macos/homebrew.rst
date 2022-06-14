@@ -13,10 +13,6 @@ Homebrew
 
 .. note::
 
-   :strike:`最新的macOS，如 macOS Catalina已经内置了Homebrew，不需要单独安装。` 只需要执行 ``brew update`` 就会更新最新的brew-core，也就可以直接安装必要的软件了。
-
-.. note::
-
    会提示安装 Xcode command tools，请按照提示安装命令行工具，并继续安装Homebrew
 
 .. note::

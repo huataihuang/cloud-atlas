@@ -6,6 +6,14 @@ ThinkPad X220上运行Arch Linux
 
 在 :ref:`ubuntu_on_thinkpad_x220` 一段时间后，感觉还有一些不满意：主要是 :ref:`thinkpad_x220` 对Linux非常友好，能够hack BIOS释放更大性能，可玩性高，所以权衡之后，转为采用arch linux来运行底层操作系统，部署了桌面系统作为个人开发平台。
 
+在 :ref:`thinkpad_x220` 上可以自动识别网络设备，所以安装比 :ref:`archlinux_on_mbp` 方便很多::
+
+   ip link
+
+可以看到::
+
+
+
 当然，Ubuntu对商业软件支持更为完善，对于生产系统，还是建议使用Ubuntu，或者更为保守稳定的RHEL。
 
 安装
@@ -19,6 +27,17 @@ ThinkPad X220上运行Arch Linux
 - 通过U盘启动
 
 启动后进入的是字符终端，安装方式类似Gentoo。
+
+有线网络设置
+==============
+
+- 配置::
+
+   ip address add 192.168.6.199/24 dev enp0s25
+   ip route add 0.0.0.0 via 192.168.6.200 dev enp0s25
+   ip link set enp0s25 up
+
+默认安装系统是已经启动了sshd服务，所以上述配置IP之后，就可以远程登陆系统进行下一步安装
 
 无线网络设置
 ================
