@@ -30,6 +30,7 @@ Linux桌面
    hidclient.rst
    terminal_emulator.rst
    uxvrt_ch_font.rst
+   keepassxc.rst
 
 .. only::  subproject and html
 

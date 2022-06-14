@@ -7,6 +7,7 @@ Android 应用
 .. toctree::
    :maxdepth: 1
 
+   keepass2android.rst
    f-droid.rst
    termux.rst
    termux_startup.rst

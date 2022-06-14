@@ -8,8 +8,9 @@ Arch Linux
    :maxdepth: 1
 
    archlinux_on_mbp.rst
-   archlinux_on_mbp_u_disk.rst
    archlinux_on_thinkpad_x220.rst
+   archlinux_on_thinkpad_x220_u_disk.rst
+   archlinux_config_ip.rst
    best_archlinux.rst
    archlinux_ms_fonts.rst
    pacman.rst

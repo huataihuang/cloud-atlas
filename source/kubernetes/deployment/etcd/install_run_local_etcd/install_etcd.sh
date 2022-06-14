@@ -1,10 +1,10 @@
-ETCD_VER=v3.5.2
-KERNEAL=`uname -s` # Linux / Darwin
+ETCD_VER=v3.5.4
+KERNEL=`uname -s` # Linux / Darwin
 ARCH=`uname -m` # x86_64 / aarch64
 
 if [ ${KERNEL} == "Linux" ];then
     KERNEL="linux"
-else [ ${KERNEL} == "Darwin" ];then
+elif [ ${KERNEL} == "Darwin" ];then
     KERNEL="darwin"
 else
     echo "Not Linux or macOS, exit!"
