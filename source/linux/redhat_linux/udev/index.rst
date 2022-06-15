@@ -1,14 +1,16 @@
-.. _cockpit:
+.. _udev:
 
 =================================
-Cockpit服务器统一管理平台
+udev
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
-   
+   intro_udev.rst
+   udev_set_device_owner.rst
+   udev_rename_nic.rst
+
 .. only::  subproject and html
 
    Indices

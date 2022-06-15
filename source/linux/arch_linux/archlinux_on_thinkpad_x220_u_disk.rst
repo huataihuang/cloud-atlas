@@ -374,6 +374,11 @@ Root密码及用户账号
 无线网络
 ===========
 
+系统默认采用了 :ref:`systemd` ，所以通常可以直接 :ref:`systemd_networkd_wlan` ，对于复杂的 ``802.1x和EAP`` 认证，可以 :ref:`wpa_supplicant`
+
+WEP/WPA2网络
+-----------------
+
 
 
 参考

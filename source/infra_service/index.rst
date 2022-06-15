@@ -22,6 +22,7 @@ Infra-Service Atlas
    dns/index
    tls/index
    ssh/index
+   mosh/index
    syslog/index
    samba/index
    nfs/index

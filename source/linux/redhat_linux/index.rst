@@ -10,6 +10,7 @@ RedHat Linux
    centos/index
    admin/index
    systemd/index
+   udev/index
    cgroup/index
    fedora/index
    kernel/index

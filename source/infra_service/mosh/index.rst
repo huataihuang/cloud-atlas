@@ -1,13 +1,13 @@
-.. _cockpit:
+.. _mosh:
 
 =================================
-Cockpit服务器统一管理平台
+Mosh(mobile shell)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
+   intro_mosh.rst
    
 .. only::  subproject and html
 

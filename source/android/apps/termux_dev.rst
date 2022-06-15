@@ -53,5 +53,5 @@ vim
 配置 :ref:`write_doc` 环境:
 
 - :ref:`sphinx_doc`
-- MkDocs
+- :ref:`mkdocs`
 - :ref:`hugo`
