@@ -1,4 +1,4 @@
-.. _introduce_akraino:
+.. _intro_akraino:
 
 =========================
 Akraino边缘计算架构简介

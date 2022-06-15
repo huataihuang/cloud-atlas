@@ -20,11 +20,15 @@ Termux ZSH
 
    :strike:`我发现启用了 oh-my-zsh 之后系统响应非常迟钝，似乎对于硬件要求较高，所以我暂时放弃采用 zsh ，改为传统的 bash`
 
-   Termux中运行软件缓慢似乎和DNS解析有关，或者说需要连接互联网。我偶然发现，当启动了VPN翻墙，则Termux中运行操作命令立即灵活了起来(不论是bash还是zsh)。这个问题我还没有最终定位，但是至少可以确定Termux的运行缓慢和GFW阻塞网络有关。也许有部分功能依赖于网络JS资源？
+   参考 `termux-* hangs #1151 <https://github.com/termux/termux-app/issues/1151>`_ 这个hang问题似乎和 `Termux:API <https://wiki.termux.com/wiki/Termux:API>`_ 相关，通过执行::
+
+      pkg install termux-api
+
+   安装 ``Termux:API`` 提供应用调用，似乎可以缓解(解决)应用莫名卡住的问题
 
 - 安装 oh-my-zsh
 
-  - :strike:`激活` :ref:`zsh_autosuggestions` 可以方便使用，但是会导致shell加载非常缓慢，所以我还是放弃了这个插件
+  - :strike:`激活` :ref:`zsh_autosuggestions` 可以方便使用 :strike:`但是会导致shell加载非常缓慢，所以我还是放弃了这个插件`
 
 参考
 ========

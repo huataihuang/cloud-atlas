@@ -7,7 +7,7 @@ Akraino边缘计算
 .. toctree::
    :maxdepth: 1
 
-   introduce_akraino.rst
+   intro_akraino.rst
 
 .. only::  subproject and html
 

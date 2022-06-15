@@ -20,9 +20,12 @@ systemd-networkd配置
    :linenos:
    :caption:
 
-- 配置5GHz无线网络的国家代码 ``/etc/default/crda`` (重要：对于使用5GHz无线必须配置) ::
+- 配置5GHz无线网络的国家代码 ``/etc/default/crda`` (重要：对于使用5GHz无线必须配置) :
 
-   REGDOMAIN=CN
+.. literalinclude:: systemd_networkd/crda
+   :language: bash
+   :linenos:
+   :caption: 5GHz无线网络国家代码配置 /etc/default/crda
 
 - 创建 ``/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`` :
 

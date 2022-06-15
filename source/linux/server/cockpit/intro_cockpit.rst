@@ -1,10 +1,16 @@
-.. _introduce_cockpit:
+.. _intro_cockpit:
 
 =====================
 Cockpit简介
 =====================
 
 Cockpit是Linux服务器的系统管理平台，可以用于管理容器、存储以及配置网络和检查日志。Cockpit提供了一个WEB管理界面，非常容易使用。主流发行版集成了Cockpit，适合部署到服务器上，提供集群服务器管理。
+
+.. note::
+
+   另一个非常著名的WEB管理Linux服务器平台是 `webmin <https://www.webmin.com/>`_ ，提供了类似Apache, Samba, MySQL等服务的配置管理
+
+   我理解Cockpit更适合管理底层设备(存储、网络等)，而webmin则专注于服务配置
 
 快速起步
 ==========
