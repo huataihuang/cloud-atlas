@@ -69,6 +69,63 @@ arch linux配置IP(静态或动态)
    :language: ini
    :caption: /etc/systemd/network/eth0.network
 
+- 如果已经设置过 ``netctl`` 则需要停止并移除 ``netctl`` ，如果需要还可停止 ``dhcpcd`` ::
+
+   sudo systemctl disable netctl@eth0.service
+   sudo pacman -Rns netctl
+   sudo systemctl stop dhcpcd
+   sudo systemctl disable dhcpcd
+
+- 启动并激活 ``systemd-networkd`` ::
+
+   sudo systemctl enable systemd-networkd
+   sudo systemctl start systemd-networkd
+
+:ref:`wpa_supplicant`
+==========================
+
+- 安装 ``rfkill`` 和 ``wpa_supplicant`` ::
+
+   sudo pacman -S rfkill wpa_supplicant
+
+- 检查网卡状态::
+
+   rfkill list
+
+如果无线网卡状态是 ``Soft blocked`` 则启动它::
+
+   rfkill unblock wifi
+
+- 配置office的无线 ``/etc/wpa_supplicant/wpa_supplicant.conf`` :
+
+.. literalinclude:: ../ubuntu_linux/network/wpa_supplicant/wpa_supplicant-office.conf
+   :language: bash
+   :linenos:
+   :caption: /etc/wpa_supplicant/wpa_supplicant.conf
+
+- 复制 ``wpa_supplicant.service`` 配置::
+
+   sudo cp /lib/systemd/system/wpa_supplicant.service /etc/systemd/system/wpa_supplicant.service
+
+- 修订 ``/etc/systemd/system/wpa_supplicant.service`` 指定接口::
+
+   ExecStart=/sbin/wpa_supplicant -u -s -c /etc/wpa_supplicant.conf -i wlan0
+
+- 激活 ``wpa_supplicant.service`` ::
+
+   sudo systemctl enable wpa_supplicant.service
+
+- 配置 ``/etc/systemd/system/dhclient.service`` :
+
+.. literalinclude:: archlinux_config_ip/dhclient.service
+   :language: bash
+   :linenos:
+   :caption: /etc/systemd/system/dhclient.service
+
+- 然后激活服务::
+
+   sudo systemctl enable dhclient.service
+
 参考
 =======
 
