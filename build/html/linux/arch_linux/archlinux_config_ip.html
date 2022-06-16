@@ -180,6 +180,10 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">netctl</span></code></p></li>
 <li><p><a class="reference internal" href="../redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a></p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>以下案例网络设备命名已经采用了 <a class="reference internal" href="../redhat_linux/udev/udev_rename_nic.html#udev-rename-nic"><span class="std std-ref">通过udev重命名网络设备名</span></a> ，所以有线网络接口为 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> / 无线网络接口 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code></p>
+</div>
 <section id="ip">
 <h2>配置静态IP<a class="headerlink" href="#ip" title="Permalink to this heading">¶</a></h2>
 <section id="netctl">
@@ -199,7 +203,65 @@
 <p>(可选)对于网络配置，如果识别的网卡命名不是默认约定的 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> 和 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code> 会带来一些困扰。所以，如果需要可以先采用 <a class="reference internal" href="../redhat_linux/udev/udev_rename_nic.html#udev-rename-nic"><span class="std std-ref">通过udev重命名网络设备名</span></a> 。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>以下案例网络设备命名已经采用了 <a class="reference internal" href="../redhat_linux/udev/udev_rename_nic.html#udev-rename-nic"><span class="std std-ref">通过udev重命名网络设备名</span></a> ，所以有线网络接口为 <code class="docutils literal notranslate"><span class="pre">eth0</span></code> / 无线网络接口 <code class="docutils literal notranslate"><span class="pre">wlan0</span></code></p>
+<p>我在 <a class="reference internal" href="archlinux_on_thinkpad_x220_u_disk.html#archlinux-on-thinkpad-x220-u-disk"><span class="std std-ref">ThinkPad X220上运行Arch Linux(U盘)</span></a> 没有采用 <code class="docutils literal notranslate"><span class="pre">netctl</span></code> 而是采用 <a class="reference internal" href="../redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> ，所以这段只做记录</p>
+</div>
+<ul>
+<li><p>复制配置案例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netctl</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">ethernet</span><span class="o">-</span><span class="n">static</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netctl</span><span class="o">/</span><span class="n">eth0</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/netctl/eth0</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">/etc/netctl/eth0</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">Description</span><span class="o">=</span><span class="s">&#39;A basic static ethernet connection&#39;</span><span class="w"></span>
+<span class="na">Interface</span><span class="o">=</span><span class="s">eth0</span><span class="w"></span>
+<span class="na">Connection</span><span class="o">=</span><span class="s">ethernet</span><span class="w"></span>
+<span class="na">IP</span><span class="o">=</span><span class="s">static</span><span class="w"></span>
+<span class="na">Address</span><span class="o">=</span><span class="s">(&#39;192.168.6.199/24&#39;)</span><span class="w"></span>
+<span class="na">Gateway</span><span class="o">=</span><span class="s">(&#39;192.168.6.200&#39;)</span><span class="w"></span>
+<span class="na">DNS</span><span class="o">=</span><span class="s">(&#39;192.168.6.200&#39; &#39;192.168.7.200&#39;)</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>激活每次自动启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">netctl</span> <span class="n">enable</span> <span class="n">eth0</span>
+</pre></div>
+</div>
+</li>
+<li><p>最后启动网卡:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">netctl</span> <span class="n">start</span> <span class="n">eth0</span>
+</pre></div>
+</div>
+</li>
+<li><p>既然是静态分配IP，我们可以关闭和禁止dhcp服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">dhcpcd</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">disable</span> <span class="n">dhcpcd</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="systemd-networkd">
+<h3><a class="reference internal" href="../redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 方法<a class="headerlink" href="#systemd-networkd" title="Permalink to this heading">¶</a></h3>
+<p>使用 <a class="reference internal" href="../redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 的 <a class="reference internal" href="../redhat_linux/systemd/systemd_networkd.html#systemd-networkd"><span class="std std-ref">Systemd Networkd服务</span></a> 配置静态IP地址的方法更为通用</p>
+<ul class="simple">
+<li><p>编辑创建一个网络profile: <code class="docutils literal notranslate"><span class="pre">/etc/systemd/network/eth0.network</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">/etc/systemd/network/eth0.network</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[Match]</span><span class="w"></span>
+<span class="na">Name</span><span class="o">=</span><span class="s">eth0</span><span class="w"></span>
+
+<span class="k">[Network]</span><span class="w"></span>
+<span class="na">Address</span><span class="o">=</span><span class="s">192.168.6.199/24</span><span class="w"></span>
+<span class="na">Gateway</span><span class="o">=</span><span class="s">192.168.6.200</span><span class="w"></span>
+<span class="na">DNS</span><span class="o">=</span><span class="s">192.168.6.200</span><span class="w"></span>
+<span class="na">DNS</span><span class="o">=</span><span class="s">192.168.7.200</span><span class="w"></span>
+</pre></div>
+</div>
 </div>
 </section>
 </section>
