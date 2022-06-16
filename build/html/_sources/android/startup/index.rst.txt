@@ -11,6 +11,7 @@ Android 起步
    unlock_bootloader.rst
    root_pixel.rst
    twrp.rst
+   fix_android_boot_loop.rst
 
 .. only::  subproject and html
 

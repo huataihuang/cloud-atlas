@@ -8,6 +8,7 @@ Android 应用
    :maxdepth: 1
 
    keepass2android.rst
+   android_ebook.rst
    f-droid.rst
    termux.rst
    termux_startup.rst
