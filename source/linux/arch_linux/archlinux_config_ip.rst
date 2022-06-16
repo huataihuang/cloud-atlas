@@ -9,6 +9,10 @@ arch linux配置IP(静态或动态)
 - ``netctl``
 - :ref:`systemd_networkd`
 
+.. note::
+
+   以下案例网络设备命名已经采用了 :ref:`udev_rename_nic` ，所以有线网络接口为 ``eth0`` / 无线网络接口 ``wlan0`` 
+
 配置静态IP
 ==============
 
@@ -29,8 +33,41 @@ arch linux配置IP(静态或动态)
 
 .. note::
 
-   以下案例网络设备命名已经采用了 :ref:`udev_rename_nic` ，所以有线网络接口为 ``eth0`` / 无线网络接口 ``wlan0`` 
+   我在 :ref:`archlinux_on_thinkpad_x220_u_disk` 没有采用 ``netctl`` 而是采用 :ref:`systemd_networkd` ，所以这段只做记录
 
+- 复制配置案例::
+
+   sudo cp /etc/netctl/examples/ethernet-static /etc/netctl/eth0
+
+- 修订 ``/etc/netctl/eth0`` :
+
+.. literalinclude:: archlinux_config_ip/netctl_eth0
+   :language: ini
+   :caption: /etc/netctl/eth0
+
+- 激活每次自动启动::
+
+   sudo netctl enable eth0
+
+- 最后启动网卡::
+
+   sudo netctl start eth0
+
+- 既然是静态分配IP，我们可以关闭和禁止dhcp服务::
+
+   sudo systemctl stop dhcpcd
+   sudo systemctl disable dhcpcd
+
+:ref:`systemd_networkd` 方法
+-------------------------------
+
+使用 :ref:`systemd` 的 :ref:`systemd_networkd` 配置静态IP地址的方法更为通用
+
+- 编辑创建一个网络profile: ``/etc/systemd/network/eth0.network`` :
+
+.. literalinclude:: archlinux_config_ip/eth0.network
+   :language: ini
+   :caption: /etc/systemd/network/eth0.network
 
 参考
 =======
