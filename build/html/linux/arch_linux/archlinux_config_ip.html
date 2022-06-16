@@ -80,6 +80,7 @@
 <li class="toctree-l3"><a class="reference internal" href="archlinux_on_thinkpad_x220_u_disk.html">ThinkPad X220上运行Arch Linux(U盘)</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">arch linux配置IP(静态或动态)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ip">配置静态IP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#wpa-supplicant"><span class="xref std std-ref">wpa_supplicant</span></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
 </ul>
 </li>
@@ -263,7 +264,105 @@
 </pre></div>
 </div>
 </div>
+<ul>
+<li><p>如果已经设置过 <code class="docutils literal notranslate"><span class="pre">netctl</span></code> 则需要停止并移除 <code class="docutils literal notranslate"><span class="pre">netctl</span></code> ，如果需要还可停止 <code class="docutils literal notranslate"><span class="pre">dhcpcd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">disable</span> <span class="n">netctl</span><span class="nd">@eth0</span><span class="o">.</span><span class="n">service</span>
+<span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">Rns</span> <span class="n">netctl</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">stop</span> <span class="n">dhcpcd</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">disable</span> <span class="n">dhcpcd</span>
+</pre></div>
+</div>
+</li>
+<li><p>启动并激活 <code class="docutils literal notranslate"><span class="pre">systemd-networkd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">systemd</span><span class="o">-</span><span class="n">networkd</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </section>
+</section>
+<section id="wpa-supplicant">
+<h2><a class="reference internal" href="../ubuntu_linux/network/wpa_supplicant.html#wpa-supplicant"><span class="std std-ref">使用wpa_supplicant连接无线网络</span></a><a class="headerlink" href="#wpa-supplicant" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">rfkill</span></code> 和 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">rfkill</span> <span class="n">wpa_supplicant</span>
+</pre></div>
+</div>
+</li>
+<li><p>检查网卡状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rfkill</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>如果无线网卡状态是 <code class="docutils literal notranslate"><span class="pre">Soft</span> <span class="pre">blocked</span></code> 则启动它:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rfkill</span> <span class="n">unblock</span> <span class="n">wifi</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>配置office的无线 <code class="docutils literal notranslate"><span class="pre">/etc/wpa_supplicant/wpa_supplicant.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">/etc/wpa_supplicant/wpa_supplicant.conf</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nv">ctrl_interface</span><span class="o">=</span>/var/run/wpa_supplicant
+<span class="linenos"> 2</span><span class="c1"># 配置Country Code支持5G Hz无线连接</span>
+<span class="linenos"> 3</span><span class="nv">country</span><span class="o">=</span>CN
+<span class="linenos"> 4</span><span class="c1"># ap_scan支持扫描隐藏的SSID</span>
+<span class="linenos"> 5</span><span class="nv">ap_scan</span><span class="o">=</span><span class="m">1</span>
+<span class="linenos"> 6</span><span class="nv">network</span><span class="o">={</span>
+<span class="linenos"> 7</span>  <span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;SSID-OFFICE&quot;</span>
+<span class="linenos"> 8</span>  <span class="nv">key_mgmt</span><span class="o">=</span>WPA-EAP
+<span class="linenos"> 9</span>  <span class="nv">eap</span><span class="o">=</span>PEAP
+<span class="linenos">10</span>  <span class="nv">phase1</span><span class="o">=</span><span class="s2">&quot;peaplabel=0&quot;</span>
+<span class="linenos">11</span>  <span class="nv">phase2</span><span class="o">=</span><span class="s2">&quot;auth=MSCHAPV2&quot;</span>
+<span class="linenos">12</span>  <span class="nv">identity</span><span class="o">=</span><span class="s2">&quot;user_name&quot;</span>
+<span class="linenos">13</span>  <span class="nv">password</span><span class="o">=</span><span class="s2">&quot;user_password&quot;</span>
+<span class="linenos">14</span><span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>复制 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant.service</span></code> 配置:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">service</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/wpa_supplicant.service</span></code> 指定接口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">sbin</span><span class="o">/</span><span class="n">wpa_supplicant</span> <span class="o">-</span><span class="n">u</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">conf</span> <span class="o">-</span><span class="n">i</span> <span class="n">wlan0</span>
+</pre></div>
+</div>
+</li>
+<li><p>激活 <code class="docutils literal notranslate"><span class="pre">wpa_supplicant.service</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/systemd/system/dhclient.service</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">/etc/systemd/system/dhclient.service</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="o">[</span>Unit<span class="o">]</span>
+<span class="linenos"> 2</span><span class="nv">Description</span><span class="o">=</span> DHCP Client
+<span class="linenos"> 3</span><span class="nv">Before</span><span class="o">=</span>network.target
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="o">[</span>Service<span class="o">]</span>
+<span class="linenos"> 6</span><span class="nv">Type</span><span class="o">=</span>simple
+<span class="linenos"> 7</span><span class="nv">ExecStart</span><span class="o">=</span>/sbin/dhclient wlan0 -v
+<span class="linenos"> 8</span><span class="nv">ExecStop</span><span class="o">=</span>/sbin/dhclient wlan0 -r
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="o">[</span>Install<span class="o">]</span>
+<span class="linenos">11</span><span class="nv">WantedBy</span><span class="o">=</span>multi-user.target
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>然后激活服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">dhclient</span><span class="o">.</span><span class="n">service</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>

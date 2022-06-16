@@ -97,7 +97,7 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
 
 而无线网络则替换 ``IEEE8021X`` 成 ``WPA-EAP`` 并且移除 ``ap_scan=0`` :
 
-.. literalinclude:: wpa_supplicant-office.conf
+.. literalinclude:: wpa_supplicant/wpa_supplicant-office.conf
    :language: bash
    :linenos:
    :caption:
@@ -107,7 +107,7 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
 
 - 一个非常简单的wpa_supplicant脚本，结合前面配置文件启动并连接无线:
 
-.. literalinclude:: start_wifi
+.. literalinclude:: wpa_supplicant/start_wifi
    :language: bash
    :linenos:
    :caption:
