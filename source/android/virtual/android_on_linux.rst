@@ -36,7 +36,11 @@ Shashlik
 
 不过，从 `Shashlik GitHub项目 <http://github.com/shashlik>`_ 来看，开发工作停留在2016年，所以仅参考，不做尝试。
 
+:ref:`android-x86`
+======================
+
 参考
 =====
 
 - `10 Best Android Emulators for Linux 2020 – Run Android Apps on Linux <https://securedyou.com/best-android-emulators-for-linux-run-android-apps/>`_
+- `5 Best Android Emulators For Linux [2022 Edition] – Free And Paid <https://fossbytes.com/best-android-emulators-linux/>`_

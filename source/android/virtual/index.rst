@@ -10,6 +10,7 @@ Android 虚拟化
    android_on_linux.rst
    linux_on_android.rst
    archon.rst
+   android-x86.rst
    waydroid/index
    anbox/index
 

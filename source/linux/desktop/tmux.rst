@@ -132,6 +132,9 @@ tmux-config
 参考
 =======
 
+- `tmux vs. screen <https://superuser.com/questions/236158/tmux-vs-screen>`_
+- `Tmux vs. Screen tool comparison <https://linuxhint.com/tmux_vs_screen/>`_
+- `How to Use tmux on Linux (and Why It’s Better Than Screen) <https://www.howtogeek.com/671422/how-to-use-tmux-on-linux-and-why-its-better-than-screen/>`_
 - `Excellent Utilities: tmux – terminal multiplexer software <https://www.linuxlinks.com/excellent-utilities-tmux-terminal-multiplexer-software/>`_
 - `Tips for using tmux <https://www.redhat.com/sysadmin/tips-using-tmux>`_
 - `In tmux can I resize a pane to an absolute value <https://stackoverflow.com/questions/16145078/in-tmux-can-i-resize-a-pane-to-an-absolute-value>`_
