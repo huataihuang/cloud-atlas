@@ -10,6 +10,7 @@ MkDocs文档
    intro_mkdocs.rst
    install_mkdocs.rst
    write_docs_with_mkdocs.rst
+   mkdocs_chinese_search.rst
 
 .. only::  subproject and html
 

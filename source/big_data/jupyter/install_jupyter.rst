@@ -18,7 +18,7 @@ Jupyter安装
 使用pip安装
 ============
 
-建议使用Python 3的 :ref:`virtualenv` ，以下实践在 :ref:`priv_cloud_infra` 的 ``z-dev`` ( :ref:`fedora_develop` )完成
+建议使用Python 3的 :ref:`virtualenv` ，以下实践在 :ref:`priv_cloud_infra` 的 ``z-dev`` ( :ref:`fedora` )完成
 
 - Fedora作为开发环境，默认已经安装了 ``python3`` ``python3-pip`` 可以直接使用模块::
 

@@ -68,7 +68,7 @@ Magisk提供的主要功能:
 
    `firmware.mobi <https://firmware.mobi/>`_ 提供的Pixel 3修订过的boot.img当前最高只支持Android 10(其他Pixel系列也是如此)，尚未支持最新的Android 11。不过，我参考 `How to Install OTA Updates on Rooted Android Devices using Magisk [Without Losing Root] <https://www.thecustomdroid.com/install-ota-update-rooted-android-device-guide/>`_ 中网友 ``Dhananjay Bhardwaj`` 建议，直接从Google Android官方下载的factory image，解压缩获得的 ``boot.img`` 来完成整个Magisk补丁boot.img安装过程的，整个过程非常顺利。
 
-    另外一种方法，我感觉可以采用 :ref:`lineageos_18.1_pixel_3` 先安装Lineages OS 18.1 (基于android 11，提供了定制的boot.img)，然后刷入 :ref:`twrp` (看网上文档应该能够在LineageOS上刷入TWRP，因为其boot.img是定制过的) ，最后再安装Magisk。不过，这个步骤无法使用Google原厂提供的Android 11，所以也就无法使用本文所描述的通过Magisk来实现root过Android OTA升级。
+    另外一种方法，我感觉可以采用 :ref:`lineageos_19.1_pixel_3` 先安装Lineages OS 19.1 (基于android 12，提供了定制的boot.img)，然后刷入 :ref:`twrp` (看网上文档应该能够在LineageOS上刷入TWRP，因为其boot.img是定制过的) ，最后再安装Magisk。不过，这个步骤无法使用Google原厂提供的Android 11，所以也就无法使用本文所描述的通过Magisk来实现root过Android OTA升级。
 
 - 将修订过的boot image(请参考 :ref:`android_11_pixel_3` 下载官方factory image，然后解压缩获得本步骤所使用的 ``boot.img`` )传送到手机的存储中::
 

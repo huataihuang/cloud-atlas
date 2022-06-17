@@ -13,6 +13,14 @@
    docs/
        index.md
 
+如何合理布局
+================
+
+其实我也是依样画葫芦，在网上能够找到大量的采用 MkDocs 撰写的文档库，可以直接clone下来参考构建自己的文档。例如，我参考 `Argo CD 官方文档 <https://argoproj.github.io/argo-cd/>`_ 的 `Argo CD 手册案例 <https://github.com/argoproj/argo-cd/blob/master/mkdocs.yml>`_ ，构建文档索引:
+
+.. literalinclude:: write_docs_with_mkdocs/mkdocs.yml
+   :language: bash
+   :caption: mkdocs.yml
 
 
 参考
