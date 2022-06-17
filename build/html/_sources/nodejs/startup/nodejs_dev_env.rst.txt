@@ -10,7 +10,7 @@ Node.js开发环境
 
 .. note::
 
-   对于node.js没有多版本要求的话，可以使用最新node.js版本，并且为了方便开发，可以采用 :ref:`fedora_dev_nodejs` 。目前，我的开发学习环境就建立在 :ref:`fedora_develop` 。
+   对于node.js没有多版本要求的话，可以使用最新node.js版本，并且为了方便开发，可以采用 :ref:`fedora_dev_nodejs` 。目前，我的开发学习环境就建立在 :ref:`fedora` 。
 
 安装nvm
 ==========

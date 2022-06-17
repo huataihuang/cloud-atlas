@@ -8,7 +8,7 @@ Zsh有一个非常有用的插件 `zsh-autosuggestions <https://github.com/zsh-u
 
 .. warning::
 
-   autosuggestions 虽然非常灵活，但是我发现在 :ref:`pixel3` 中 :ref:`termux` 启用这个插件会极大消耗资源，导致shell提示符响应以及 :ref:`vim` 开启文件非常缓慢，所以最终我放弃这个插件。
+   autosuggestions 虽然非常灵活，但是我发现在 :ref:`pixel_3` 中 :ref:`termux` 启用这个插件会极大消耗资源，导致shell提示符响应以及 :ref:`vim` 开启文件非常缓慢，所以最终我放弃这个插件。(实际排查可能还有其他原因，后续再看是否可以恢复)
 
 - 在 Oh My Zsh环境安装::
 

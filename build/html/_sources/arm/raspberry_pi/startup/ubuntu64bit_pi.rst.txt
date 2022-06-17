@@ -89,7 +89,7 @@ Ubuntu for Raspberry Pi默认已经识别了树莓派的无线网卡，之前在
 停用unattended-upgrades(可选)
 ------------------------------
 
-当前为了能够控制升级，特别是 :ref:`usb_boot_ubuntu_pi_4` 需要手工处理内核解压缩，同时为了能够降低系统内存消耗。我关闭了 :ref:`unattended_upgrade` ::
+当前为了能够控制升级，特别是 :ref:`usb_boot_ubuntu_pi_4` 需要手工处理内核解压缩，同时为了能够降低系统内存消耗。我关闭了 :ref:`ubuntu_unattended_upgrade` ::
 
    systemctl disable unattended-upgrades
    systemctl stop unattended-upgrades

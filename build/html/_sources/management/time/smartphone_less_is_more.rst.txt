@@ -43,7 +43,7 @@
 Android
 ----------
 
-Google原厂提供的factory image内置了Google全家桶，这导致我 :ref:`android_11_pixel_3` 后想做精简而不可得。所以，我采用 :ref:`lineageos_18.1_pixel_3` 以及自己编译LineageOS来实现一个纯净的原生Android。
+Google原厂提供的factory image内置了Google全家桶，这导致我 :ref:`android_11_pixel_3` 后想做精简而不可得。所以，我采用 :ref:`lineageos_19.1_pixel_3` 以及自己编译LineageOS来实现一个纯净的原生Android。
 
 iPhone
 ---------

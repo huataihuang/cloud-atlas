@@ -16,7 +16,7 @@
 
 .. note::
 
-   2021年底，我在 :ref:`priv_cloud_infra` 重新实现了开发环境 ``z-dev`` ，采用 :ref:`fedora_develop` 环境，所以我的Swift for Linux也是在Fedora 35上实践的。
+   2021年底，我在 :ref:`priv_cloud_infra` 重新实现了开发环境 ``z-dev`` ，采用 :ref:`fedora` 环境，所以我的Swift for Linux也是在Fedora 35上实践的。
 
 如果你在Ubuntu环境下安装，则下载对应的toolchain，然后使用以下命令安装(注意 ``FILE`` 替换成下载的文件名) ::
 
@@ -32,7 +32,7 @@
 
    swift --version
 
-输出类似( :ref:`fedora_develop` )::
+输出类似( :ref:`fedora` )::
 
    Swift version 5.5.2 (swift-5.5.2-RELEASE)
    Target: x86_64-unknown-linux-gnu

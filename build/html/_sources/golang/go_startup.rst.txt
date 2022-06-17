@@ -34,8 +34,6 @@ github
 
 则会 ``git clone https://github.com/adonovan/gopl.io/`` 到 ``/home/huatai/go/src`` 目录下，然后编译 ``gopl.io/ch1/helloworld`` 输出到 ``/home/huatai/go/bin`` 目录下生成二进制可执行程序 ``helloworld``
 
-
-
 参考
 =======
 
