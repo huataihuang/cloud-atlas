@@ -100,7 +100,6 @@ arch linux配置IP(静态或动态)
 
 .. literalinclude:: ../ubuntu_linux/network/wpa_supplicant/wpa_supplicant-office.conf
    :language: bash
-   :linenos:
    :caption: /etc/wpa_supplicant/wpa_supplicant.conf
 
 - 复制 ``wpa_supplicant.service`` 配置::
@@ -109,24 +108,43 @@ arch linux配置IP(静态或动态)
 
 - 修订 ``/etc/systemd/system/wpa_supplicant.service`` 指定接口::
 
-   ExecStart=/sbin/wpa_supplicant -u -s -c /etc/wpa_supplicant.conf -i wlan0
+   ExecStart=/sbin/wpa_supplicant -u -s -c /etc/wpa_supplicant/wpa_supplicant.conf -i wlan0
 
 - 激活 ``wpa_supplicant.service`` ::
 
    sudo systemctl enable wpa_supplicant.service
 
+- 安装 ``dhclient`` ::
+
+   sudo pacman -S dhclient
+
 - 配置 ``/etc/systemd/system/dhclient.service`` :
 
 .. literalinclude:: archlinux_config_ip/dhclient.service
    :language: bash
-   :linenos:
    :caption: /etc/systemd/system/dhclient.service
 
 - 然后激活服务::
 
    sudo systemctl enable dhclient.service
 
+- 注意，我的主机有2个接口，我的配置要求是:
+
+  - 有线网卡配置静态IP地址，并且提供DNS解析，但是取消掉默认网关(默认路由从无线网络)
+  - 无线网络使用DHCP获得IP，但是忽略掉DHCP分配的DNS(DNS采用有线网络内网的 :ref:`priv_dnsmasq_ics` )
+
+这里需要配置 ``dhclient`` 但是忽略掉DHCP分配的DNS，通常方式是修订 ``/etc/dhcp/dhclient.conf`` ，设置和有线网卡静态IP地址一致的DNS配置::
+
+   supersede domain-name-servers 192.168.6.200;
+
+不过，由于我使用了简化的 ``dhclient.service`` 配置，并没有指定配置文件，所以采用手工修订 ``/etc/resolv.conf`` ，然后执行以下命令将文件设置为不可修改::
+
+   chattr +i /etc/resolv.conf
+
+这样就不会被DHCP错误修改DNS配置
+
 参考
 =======
 
 - `How To Configure Static And Dynamic IP Address In Arch Linux <https://ostechnix.com/configure-static-dynamic-ip-address-arch-linux/>`_
+- `Linux Make Sure /etc/resolv.conf Never Get Updated By DHCP Client <https://www.cyberciti.biz/faq/dhclient-etcresolvconf-hooks/>`_

@@ -36,5 +36,17 @@
 - https://fonts.gstatic.com/
 - https://fonts.googleapis.com/
 
-解决方法要么构建VPN，要么将引用上述两个Google的网址替换成国内镜像网站
+解决方法要么构建VPN，要么将引用上述两个Google的网址替换成国内镜像网站。后者方法稍微麻烦一些，但是不需要翻墙，所以对于景德镇居民来说还是很必要的:
 
+- 执行以下命令来修正python库，注意，这里我使用的是 :ref:`virtualenv` ，所以 ``lib`` 位于 ``~/venv3`` 目录下:
+
+.. literalinclude:: install_mkdocs/replace_google_fonts
+   :language: bash
+   :caption: 替换Python库中mkdocs引用google fonts的URL
+
+- 然后重新构建网站
+
+参考
+=======
+
+- `MKDocs Material 安装常见问题 <http://data42.cn/learnings/MKDocs%20Manual/>`_
