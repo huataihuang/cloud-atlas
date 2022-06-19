@@ -15,6 +15,7 @@ Linux文件系统
    quota/index
    remount_without_reboot.rst
    fstrim.rst
+   chattr.rst
 
 .. only::  subproject and html
 

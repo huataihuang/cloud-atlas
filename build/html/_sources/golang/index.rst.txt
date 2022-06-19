@@ -11,6 +11,7 @@ Go Atlas
    pi_golang.rst
    go_proxy.rst
    go_startup.rst
+   go_startup_tips.rst
    go_package.rst
 
 .. only::  subproject and html

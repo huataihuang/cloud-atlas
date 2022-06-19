@@ -22,6 +22,9 @@
    :language: bash
    :caption: mkdocs.yml
 
+.. note::
+
+   我发现 `Mkdocs 配置和使用 <https://www.xncoding.com/2020/03/01/tool/mkdocs.html>`_ 写得非常清晰，值得学习参考。珠玉在前，我就不再重复了。后续我可能会根据实践再补充本文，不过目前我还是简单使用，主要用于工作文档记录，就暂且这样吧。
 
 参考
 ======
