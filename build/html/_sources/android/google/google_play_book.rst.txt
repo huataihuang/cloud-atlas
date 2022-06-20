@@ -25,46 +25,7 @@ Google Play Books书籍同步是值得记录一下方法的，因为你找不到
 
 Google Play Books最基本的跨平台阅读和管理电子书方法就是使用浏览器，只要你使用浏览器登陆了Google账号，就可以在应用栏找到 ``My Books`` ，这个入口就能够找到自己购买的书籍，也能够管理自己的电子书上传下载。
 
-Fix "Books on Google Play is not available in your country yet"
-=================================================================
-
-非常吊诡的是， `谷歌退出中国大陆事件 <https://zh.wikipedia.org/wiki/谷歌退出中国大陆事件>`_ 之后，Google其实还是保留了部分中国业务，并一定程度上保持和中国政府合作。所以，Google Play Store上移除了部分中国政府不允许的应用和服务，其中就包括了Google Books。
-
-当你默认安装Google Android系统并注册好Google账号(翻墙)，根据GPS定位，Google会默认注册你的账号是 Chinese(CN)。此时即使你翻墙访问Google Play Store，你也找不到一些应用，包括Google Books。
-
-并且当你尝试访问 `Google Play Books <https://play.google.com/books/>`_ 网站，也会看到如下提示::
-
-   Sorry! Books on Google Play is not available in your country yet.
-   
-   We're working to bring the content you love to more countries as quickly as possible.
-   
-   Please check back again soon.
-
-这个问题并不能通过VPN翻墙解决，而是需要修订你账号的Country配置。
-
-.. warning::
-
-   Google修订Country设置每年只允许一次，所以一旦修改国家注册地，再次修改只有等下一年!!!
-
-修改Google账号国家注册地
----------------------------
-
-- 打开浏览器(电脑或Android手机)，访问 `Google Pay <https://pay.google.com/>`_ 网站
-- 点击 ``Settings`` ，此时可以看到 ``Country/Region`` 项显示 ``Chinese(CN)``
-- 在 ``Country/Region`` 项点击 ``Edit``
-- 选择 ``Create new profile`` ，此时在 ``Create a new payments profile`` 
-
-.. figure:: ../../_static/android/google/create_google_payments_profile.png
-   :scale: 60
-
-- 按照提示导引选择国家，例如选择 Unite State (US)
-
-- 需要填写一个美国地址，可以在 `BestRandoms网站: Random address in United States <https://www.bestrandoms.com/random-address-in-us>`_ 找到一个随机生成的美国地址，填写并提交
-
-- 等待48小时，Google Play会修改你的 ``country/region``
-
 参考
 ========
 
 - `How to Read Google Books on Mac <https://www.epubor.com/how-to-read-google-books-on-mac.html>`_
-- `This item isn’t available in your country on Play Store (FIX) <https://mobileinternist.com/this-item-isnt-available-in-your-country>`_
