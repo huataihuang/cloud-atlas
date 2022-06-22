@@ -15,4 +15,5 @@ Kubernetes实践
 
    kubectl_get.rst
    kubectl_delete.rst
+   k8s_restart_pod.rst
    storage/index
