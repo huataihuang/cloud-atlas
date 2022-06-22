@@ -18,4 +18,5 @@ Kubernetes排查
    k8s_notready_node.rst
    k8s_master_pod_create_error.rst
    debug_k8s_restart_pods.rst
+   get_pods_restart_time.rst
    k8s_stuck_in_podinit.rst

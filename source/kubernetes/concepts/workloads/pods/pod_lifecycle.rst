@@ -24,4 +24,8 @@ Pod生命周期
 
       kubectl scale --replicas=0 deployment/<pod name> --namespace=<namespace>
 
-   参考 `Suspending a container in a kubernetes pod <https://stackoverflow.com/questions/43617044/suspending-a-container-in-a-kubernetes-pod>`_
+参考
+===========
+
+- `Suspending a container in a kubernetes pod <https://stackoverflow.com/questions/43617044/suspending-a-container-in-a-kubernetes-pod>`_
+- `How to Restart Pods in Kubernetes [Step-by-Step] <https://adamtheautomator.com/restart-pod-kubernetes/>`_

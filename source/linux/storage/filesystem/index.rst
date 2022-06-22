@@ -13,6 +13,7 @@ Linux文件系统
    xfs/index
    ext/index
    quota/index
+   linux_overlayfs.rst
    remount_without_reboot.rst
    fstrim.rst
    chattr.rst
