@@ -69,8 +69,39 @@ Android 12 Phantom Process Killer
 
 其他详细情况可以参考 `Phantom Process Killing In Android 12 Is Breaking Apps <https://issuetracker.google.com/issues/205156966?pli=1>`_
 
+设置进程运行在Android手机大核
+--------------------------------
+
+- 执行以下命令找出 ``termux`` 进程号::
+
+   ps aux | grep termux
+
+假设父进程号是 
+
+- 查看手机处理器大小核::
+
+   cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_max_freq
+
+此时输出::
+
+   1766400
+   1766400
+   1766400
+   1766400
+   2803200
+   2803200
+   2803200
+   2803200
+
+可以看出手机的后4个核心是 Turbo 。我们把进程绑定较好的 4个CPU核心::
+
+- 添加CPU绑定::
+
+   taskset --pid --all-tasks 4,5,6,7 5903
+
 参考
 =======
 
 - `Android 12’s new background app limitations could be a major headache for power users <https://www.xda-developers.com/android-12-background-app-limitations-major-headache/>`_
 - `Phantom Process Killing In Android 12 Is Breaking Apps <https://issuetracker.google.com/issues/205156966?pli=1>`_
+- `how to run termux program on power-efficient cpu core? <https://stackoverflow.com/questions/71731060/how-to-run-termux-program-on-power-efficient-cpu-core>`_
