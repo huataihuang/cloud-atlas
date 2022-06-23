@@ -17,6 +17,7 @@ Android 应用
    termux_dev.rst
    termux_nginx.rst
    termux_background_running.rst
+   android_12_background_limit_termux.rst
    termux_browser.rst
    termux_ycm.rst
    termux_docker.rst

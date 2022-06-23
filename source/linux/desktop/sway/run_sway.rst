@@ -146,3 +146,4 @@ Chroium
 - `arch linux: sway <https://wiki.archlinux.org/title/Sway>`_
 - `Full Wayland Setup on Arch Linux <https://www.fosskers.ca/en/blog/wayland>`_ 这篇文档非常详细介绍了Wayland的配置以及系列软件，工作配置可做借鉴
 - `Working with Wayland and Sway <https://grimoire.science/working-with-wayland-and-sway/>`_ 介绍sway桌面使用经验
+- `Getting started with the i3 window manager on Linux <https://opensource.com/article/18/8/getting-started-i3-window-manager#:~:text=Getting%20started%20with%20the%20i3%20window%20manager%20on,are%20Linux%20containers%3F%20...%204%20Replacing%20GDM.%20>`_

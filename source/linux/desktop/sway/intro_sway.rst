@@ -1,4 +1,4 @@
-.. _introduce_sway:
+.. _intro_sway:
 
 ==========================
 sway平铺式窗口管理器简介
@@ -34,7 +34,8 @@ sway继承了i3简洁的窗口管理能力，并且提供了基于现代化 :ref
 Sway使用要点
 ===============
 
-- Sway不支持NVIDIA闭源驱动，必须使用开源的Nouveau驱动，所以建议使用支持开源更好的AMD或Intel显卡。
+- :strike:`Sway不支持NVIDIA闭源驱动，必须使用开源的Nouveau驱动，所以建议使用支持开源更好的AMD或Intel显卡。`
+- `Sway 1.7有限支持NVIDIA显卡选项Zero-Copy Direct Scanout <https://www.phoronix.com/scan.php?page=news_item&px=Sway-1.7-rc2>`_ ， :ref:`sway_with_nvidia` 
 - 部分登陆管理器支持Wayland，所以要小心选择登陆管理器。建议使用字符界面启动sway，如果要自动登陆，可以在 ``.bash_profile`` 中添加::
 
    # If running from tty1 start sway
