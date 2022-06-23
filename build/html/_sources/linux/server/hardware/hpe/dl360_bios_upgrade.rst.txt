@@ -47,7 +47,7 @@ Reddit的帖子 `HPE DL380 Gen 9 Firmware/Bios update <https://www.reddit.com/r/
  
    tar xf scexe_tmp6469
 
-就可以获得最终文件 ``P89_2.90_04_29_2021.signed.flash`` ，请根据HPE官方下载页面 `System ROM Flash Binary - HPE ProLiant DL380 Gen9/DL360 Gen9 (P89) <https://support.hpe.com/hpesc/public/swd/detail?swItemId=MTX_68f3978e0a8e4e56b66a1d3a09#tab2>`_ 提供的checksum值进行校验::
+就可以获得最终文件 ``P89_2.90_04_29_2021.signed.flash`` ，请根据HPE官方下载页面 `System ROM Flash Binary - HPE ProLiant DL380 Gen9/DL360 Gen9 (P89) <https://support.hpe.com/connect/s/softwaredetails?language=en_US&softwareId=MTX_6abac704c0e149548008362d7b>`_ 提供的checksum值进行校验::
 
    sha256sum P89_2.90_04_29_2021.signed.flash
 
@@ -167,8 +167,20 @@ rpm包升级(未完成)
 
 .. csv-table:: HPE DL360 gen9 Firmware Version
    :file: dl360_bios_upgrade/dl360_firmware.csv
-   :widths: 45, 25, 18, 12
+   :widths: 25, 25, 20, 15, 15
    :header-rows: 1
+
+.. note::
+
+   - BIOS软件需要注册HP服务才能下载最新版本，否则只能下载早期版本； iLO软件可以直接官方下载，但是需要SN才能激活使用
+   - 可以通过firmware的文件名通过google找到下载源: `RU-BOARD: HP Service Pack for ProLiant (SPP) <http://forum.ru-board.com/topic.cgi?forum=81&topic=8803&glp>`_ 提供了各个版本的下载信息，其中可以找到 `DL380 Gen9 iLO 2.80 + BIOS P89_2.96_05_17_2022 <https://disk.yandex.ru/d/nlsqpYbuMrnLcg>`_ (和 DL360 Gen9共用)
+   - 网卡的firmware则可以直接下载，无需注册
+   - 存储firmware可以更新以获得更好的性能和稳定性
+
+推荐更新:
+
+- 存储firmware
+- 网卡firmware
 
 参考
 =======
