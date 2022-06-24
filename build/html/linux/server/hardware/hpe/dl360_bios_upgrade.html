@@ -173,11 +173,18 @@
   <section id="hpe-dl360-bios">
 <span id="dl360-bios-upgrade"></span><h1>HPE DL360 BIOS升级<a class="headerlink" href="#hpe-dl360-bios" title="Permalink to this heading">¶</a></h1>
 <p>HP服务器的驱动升级以及各种软件包下载都需要购买HPE服务，这对个人购买的二手服务器显然不合适。</p>
+<p>我购买的二手 <a class="reference internal" href="hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器是 2015年8月8日 的BIOS版本，所以我想能够升级到最新的BIOS以便增加稳定性和性能。不过，对于没有HP支持的二手服务器，如何搜索找到下载是一个非常折腾的过程。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>在eBay上有 <code class="docutils literal notranslate"><span class="pre">HPE</span> <span class="pre">Service</span> <span class="pre">Pack</span> <span class="pre">ProLiant</span> <span class="pre">SPP</span> <span class="pre">HP</span> <span class="pre">Latest</span> <span class="pre">G7</span> <span class="pre">G8</span> <span class="pre">G9</span> <span class="pre">G10</span> <span class="pre">Servers</span> <span class="pre">-</span> <span class="pre">Direct</span> <span class="pre">Download</span></code> 销售，SSP包括了HPE不同型号服务器的升级包，售价约50美金。</p>
+<p>在YouTube上 <a class="reference external" href="https://www.youtube.com/watch?v=twNEtYLwCIc">How to Update HPE Enterprise Server Using a SPP on a USB - 1159</a> (这位播主讲解很生动)，我没有想到其实HP服务器更新firmware是如此简单的步骤(通过制作USB key启动，点几下鼠标就可以完成升级)。</p>
+<p>强烈建议你观看这个视频，你就可以明白怎么完成HPE服务器的firmware升级了。这比阅读本文要直观很多，也可以节约你很多时间(不用像我花费了太多的摸索时间)</p>
+<p>此外 <a class="reference external" href="https://www.youtube.com/watch?v=MTjY5xzUkIk">How to Update the System BIOS &amp; Firmware in an HP Ptroliant Servers</a> 是YouTube上另一个操作视频，其实内容差不多，只不过多了一个通过 <a class="reference internal" href="hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a> 步骤。</p>
+<p>如果你想看操作文档，可以参考:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.adaptive.lv/en/2021/07/28/updating-hewlett-packard-enterprise-servers-using-hpe-spp/">Updating Hewlett-Packard Enterprise servers using HPE SPP</a> 提供了一步步操作截图</p></li>
+<li><p><a class="reference external" href="http://itdoc.hitachi.co.jp/manuals/ha8000v/hard/Gen10/SUM/881504-008_en.pdf">Smart Update Manager 8.5.0 User Guide</a> 提供了官方文档</p></li>
+</ul>
 </div>
-<p>我购买的二手 <a class="reference internal" href="hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器是 2015年8月8日 的BIOS版本，所以我想能够升级到最新的BIOS以便增加稳定性和性能。</p>
 <section id="id1">
 <h2>下载<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <p>Reddit的帖子 <a class="reference external" href="https://www.reddit.com/r/homelab/comments/k037h2/hpe_dl380_gen_9_firmwarebios_update/">HPE DL380 Gen 9 Firmware/Bios update</a> 提供了线索: 根据 <code class="docutils literal notranslate"><span class="pre">SPP</span> <span class="pre">for</span> <span class="pre">G9</span> <span class="pre">and</span> <span class="pre">G10</span></code> 关键字在Google搜索，果然可以找到下载资源:</p>
@@ -193,6 +200,7 @@
 <p class="admonition-title">备注</p>
 <p>下载建议使用 <a class="reference internal" href="../../../network/axel.html#axel"><span class="std std-ref">Axel下载工具</span></a> 加速</p>
 </div>
+<p>虽然我开始时候觉得SPP光盘太庞大了，不如单独下载需要的firmware软件进行更新。并且我也是这样做的，见下文 <code class="docutils literal notranslate"><span class="pre">下载(更新)</span></code> 。但是后来我发现实际上服务器硬件明细极其繁杂，靠人工一个个查找、核对、下载、更新非常麻烦，而且也很难确定是否要更新。所以我最后还是决定先采用 <a class="reference internal" href="../../../ubuntu_linux/admin/run_centos_in_chroot_under_ubuntu.html#run-centos-in-chroot-under-ubuntu"><span class="std std-ref">在Ubuntu中构建chroot环境运行CentOS</span></a> 在Ubuntu系统是chroot成CentOS，然后就可以使用官方SPP光盘进行系统更新。(见下文)</p>
 </section>
 <section id="id2">
 <h2>下载(更新)<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
@@ -225,7 +233,7 @@
 <h2>升级准备<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>请注意，虽然我下载了 SPP ISO 文件，但是我发现还不是最终最新版本，所以我采用了上文通过google找到的 <code class="docutils literal notranslate"><span class="pre">P89_2.90_04_29_2021.signed.flash</span></code> 来更新BIOS</p>
+<p>最初虽然我下载了 SPP ISO 文件，但是我发现还不是最终最新版本，所以我采用了上文通过google找到的 <code class="docutils literal notranslate"><span class="pre">P89_2.90_04_29_2021.signed.flash</span></code> 来更新BIOS。不过，我发现手工升级实在太繁琐了，所以最后还是采用标准SPP光盘进行自动更新。不过，我的物理服务器操作系统安装的是 <a class="reference internal" href="../../../ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，不是HP官方支持系统。所以，我先采用 <a class="reference internal" href="../../../ubuntu_linux/admin/run_centos_in_chroot_under_ubuntu.html#run-centos-in-chroot-under-ubuntu"><span class="std std-ref">在Ubuntu中构建chroot环境运行CentOS</span></a> ，然后再执行本段升级操作。</p>
 </div>
 <ul>
 <li><p>挂载下载的iso文件:</p>
@@ -253,12 +261,75 @@
 <p>如需更进一步的 Service Pack for ProLiant 信息，可以访问这个网站： <a class="reference external" href="https://www.hpe.com/servers/spp">https://www.hpe.com/servers/spp</a></p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
+<p>运行 <code class="docutils literal notranslate"><span class="pre">launch_sum.sh</span></code> 会检查系统是否具备一些基础工具，例如对于 <a class="reference internal" href="../../../ubuntu_linux/admin/run_centos_in_chroot_under_ubuntu.html#run-centos-in-chroot-under-ubuntu"><span class="std std-ref">在Ubuntu中构建chroot环境运行CentOS</span></a> ，还需要安装以下工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">pciutils</span> <span class="n">dmidecode</span> <span class="n">unzip</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
 <p><code class="docutils literal notranslate"><span class="pre">launch_sum.sh</span></code> 脚本实际上执行的是 <code class="docutils literal notranslate"><span class="pre">packages/smartupdate</span></code> ，该脚本只支持在 <code class="docutils literal notranslate"><span class="pre">redhat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">SuSE</span></code> 平台运行</p>
 </div>
+<p>我是在 <a class="reference internal" href="hp_ilo/index.html#hp-ilo"><span class="std std-ref">HP服务器iLO技术</span></a> 提供的终端控制台执行 <code class="docutils literal notranslate"><span class="pre">launch_sum.sh</span></code> 脚本，原本以为通过iLo控制台可以避免升级过程中网络断开或者磁盘中断等问题，但是没想到提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Copying</span> <span class="nb">sum</span> <span class="n">files</span> <span class="n">to</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">localsum</span>
+<span class="n">sum_service_x64</span> <span class="n">started</span> <span class="n">successfully</span> <span class="n">on</span> <span class="n">port</span> <span class="mi">63001</span> <span class="ow">and</span> <span class="n">secure</span> <span class="n">port</span> <span class="mf">63002.</span> <span class="n">FTP</span> <span class="ow">is</span> <span class="n">disabled</span><span class="o">.</span>
+<span class="n">auditLog</span><span class="p">[</span><span class="mi">93095</span><span class="p">]:</span> <span class="n">Disabling</span> <span class="n">blocked</span> <span class="n">firewall</span> <span class="n">rules</span>
+<span class="n">Error</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">launch</span> <span class="n">browser</span>
+</pre></div>
+</div>
+</section>
+<section id="step-by-step">
+<h2>更新步骤(Step by Step)<a class="headerlink" href="#step-by-step" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>此时可以通过访问服务器IP的63002端口来打开 <code class="docutils literal notranslate"><span class="pre">Smart</span> <span class="pre">Update</span> <span class="pre">Manager</span></code> 管理界面: <a class="reference external" href="https://192.168.6.200:63002/">https://192.168.6.200:63002/</a></p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hp_smart_update_manager.png"><img alt="../../../../_images/hp_smart_update_manager.png" src="../../../../_images/hp_smart_update_manager.png" style="width: 411.0px; height: 348.0px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>输入 <code class="docutils literal notranslate"><span class="pre">root</span></code> 用户账号密码，登陆到Smart Update Manager界面，然后点击 <code class="docutils literal notranslate"><span class="pre">Localhost</span> <span class="pre">Guided</span> <span class="pre">Update</span></code> :</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hp_smart_update_manager_1.png"><img alt="../../../../_images/hp_smart_update_manager_1.png" src="../../../../_images/hp_smart_update_manager_1.png" style="width: 370.8px; height: 268.2px;" /></a>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>这里似乎有一点点异常，页面没有自动显示出来，不过刷新一下chrome页面就可以看到下一步</p>
+</div>
+<ul class="simple">
+<li><p>在下一个页面选择更新类型，这里选择 <code class="docutils literal notranslate"><span class="pre">Interactive</span></code> 交互模式:</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hp_smart_update_manager_2.png"><img alt="../../../../_images/hp_smart_update_manager_2.png" src="../../../../_images/hp_smart_update_manager_2.png" style="width: 411.0px; height: 463.79999999999995px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>此时开始检测:</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hp_smart_update_manager_3.png"><img alt="../../../../_images/hp_smart_update_manager_3.png" src="../../../../_images/hp_smart_update_manager_3.png" style="width: 494.4px; height: 403.8px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>检查完成后，点击下一步，进入 <code class="docutils literal notranslate"><span class="pre">review</span></code> 步骤:</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hp_smart_update_manager_3.png"><img alt="../../../../_images/hp_smart_update_manager_3.png" src="../../../../_images/hp_smart_update_manager_3.png" style="width: 494.4px; height: 403.8px;" /></a>
+</figure>
+<p><code class="docutils literal notranslate"><span class="pre">注意</span></code> 存在红色点的问题项必须取消选择才能进入下一步 <code class="docutils literal notranslate"><span class="pre">Deploy</span></code></p>
+<p>在这个 <code class="docutils literal notranslate"><span class="pre">review</span></code> 页面检查无误后点击 <code class="docutils literal notranslate"><span class="pre">Deploy</span></code> 按钮</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hp_smart_update_manager_4.png"><img alt="../../../../_images/hp_smart_update_manager_4.png" src="../../../../_images/hp_smart_update_manager_4.png" style="width: 571.6px; height: 676.8000000000001px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>由于我只需要更新firmware(所有OS系统软件是安装在 <a class="reference internal" href="../../../ubuntu_linux/admin/run_centos_in_chroot_under_ubuntu.html#run-centos-in-chroot-under-ubuntu"><span class="std std-ref">在Ubuntu中构建chroot环境运行CentOS</span></a>  <span class="sphinxnotes-strike">所以对我的案例么有用处，我仅需要更新firmware，其他系统软件都依赖Ubuntu系统发行版，或者后续根据需要通过alien转换DEB包独立安装</span> ，考虑到可以 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> 到CentOS系统中运行，所以我还是按照默认推荐安装)</p></li>
+<li><p>安装完成后显示如下页面，按照提示重启系统就可以完成整个服务器系统更新:</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/hp_smart_update_manager_5.png"><img alt="../../../../_images/hp_smart_update_manager_5.png" src="../../../../_images/hp_smart_update_manager_5.png" style="width: 524.4px; height: 416.8px;" /></a>
+</figure>
 </section>
 <section id="ilo-webfirmware">
 <h2>通过iLO WEB更新firmware<a class="headerlink" href="#ilo-webfirmware" title="Permalink to this heading">¶</a></h2>
-<p><a class="reference external" href="https://www.youtube.com/watch?v=MTjY5xzUkIk">How to Update the System BIOS &amp; Firmware in an HP Proliant Servers</a> 是YouTube 上一个操作视频，可以参考。</p>
+<p>以下步骤是只使用 firmware 文件通过iLO WEB界面上传来更新，这个步骤一次只能更新一个组件，效率较低。不过，如果只是更新BIOS的话，这个方法是比较方便的。要完整更新服务器所有firmware，还是采用上文 <code class="docutils literal notranslate"><span class="pre">更新步骤(Step</span> <span class="pre">by</span> <span class="pre">Step)</span></code></p>
 <section id="rpm">
 <h3>rpm包升级(未完成)<a class="headerlink" href="#rpm" title="Permalink to this heading">¶</a></h3>
 <p>需要找到服务器对应的BIOS firmware文件名，可以根据HPE支持网站搜索看到 <a class="reference external" href="https://support.hpe.com/hpesc/public/swd/detail?swItemId=MTX_75e3e6e7f3484a39a8bf19fa24">* RECOMMENDED * Online ROM Flash Component for Linux - HPE ProLiant DL380 Gen9/DL360 Gen9 (P89) Servers</a> 文件名是:</p>
