@@ -6,11 +6,20 @@ HPE DL360 BIOS升级
 
 HP服务器的驱动升级以及各种软件包下载都需要购买HPE服务，这对个人购买的二手服务器显然不合适。
 
+我购买的二手 :ref:`hpe_dl360_gen9` 服务器是 2015年8月8日 的BIOS版本，所以我想能够升级到最新的BIOS以便增加稳定性和性能。不过，对于没有HP支持的二手服务器，如何搜索找到下载是一个非常折腾的过程。
+
 .. note::
 
-   在eBay上有 ``HPE Service Pack ProLiant SPP HP Latest G7 G8 G9 G10 Servers - Direct Download`` 销售，SSP包括了HPE不同型号服务器的升级包，售价约50美金。
+   在YouTube上 `How to Update HPE Enterprise Server Using a SPP on a USB - 1159 <https://www.youtube.com/watch?v=twNEtYLwCIc>`_ (这位播主讲解很生动)，我没有想到其实HP服务器更新firmware是如此简单的步骤(通过制作USB key启动，点几下鼠标就可以完成升级)。
 
-我购买的二手 :ref:`hpe_dl360_gen9` 服务器是 2015年8月8日 的BIOS版本，所以我想能够升级到最新的BIOS以便增加稳定性和性能。
+   强烈建议你观看这个视频，你就可以明白怎么完成HPE服务器的firmware升级了。这比阅读本文要直观很多，也可以节约你很多时间(不用像我花费了太多的摸索时间)
+
+   此外 `How to Update the System BIOS & Firmware in an HP Ptroliant Servers <https://www.youtube.com/watch?v=MTjY5xzUkIk>`_ 是YouTube上另一个操作视频，其实内容差不多，只不过多了一个通过 :ref:`hp_ilo` 步骤。
+
+   如果你想看操作文档，可以参考:
+
+   - `Updating Hewlett-Packard Enterprise servers using HPE SPP <https://www.adaptive.lv/en/2021/07/28/updating-hewlett-packard-enterprise-servers-using-hpe-spp/>`_ 提供了一步步操作截图
+   - `Smart Update Manager 8.5.0 User Guide <http://itdoc.hitachi.co.jp/manuals/ha8000v/hard/Gen10/SUM/881504-008_en.pdf>`_ 提供了官方文档
 
 下载
 =========
@@ -27,6 +36,8 @@ Reddit的帖子 `HPE DL380 Gen 9 Firmware/Bios update <https://www.reddit.com/r/
 .. note::
 
    下载建议使用 :ref:`axel` 加速
+
+虽然我开始时候觉得SPP光盘太庞大了，不如单独下载需要的firmware软件进行更新。并且我也是这样做的，见下文 ``下载(更新)`` 。但是后来我发现实际上服务器硬件明细极其繁杂，靠人工一个个查找、核对、下载、更新非常麻烦，而且也很难确定是否要更新。所以我最后还是决定先采用 :ref:`run_centos_in_chroot_under_ubuntu` 在Ubuntu系统是chroot成CentOS，然后就可以使用官方SPP光盘进行系统更新。(见下文)
 
 下载(更新)
 ===========
@@ -60,7 +71,7 @@ Reddit的帖子 `HPE DL380 Gen 9 Firmware/Bios update <https://www.reddit.com/r/
 
 .. note::
 
-   请注意，虽然我下载了 SPP ISO 文件，但是我发现还不是最终最新版本，所以我采用了上文通过google找到的 ``P89_2.90_04_29_2021.signed.flash`` 来更新BIOS
+   最初虽然我下载了 SPP ISO 文件，但是我发现还不是最终最新版本，所以我采用了上文通过google找到的 ``P89_2.90_04_29_2021.signed.flash`` 来更新BIOS。不过，我发现手工升级实在太繁琐了，所以最后还是采用标准SPP光盘进行自动更新。不过，我的物理服务器操作系统安装的是 :ref:`ubuntu_linux` ，不是HP官方支持系统。所以，我先采用 :ref:`run_centos_in_chroot_under_ubuntu` ，然后再执行本段升级操作。
 
 - 挂载下载的iso文件::
 
@@ -88,12 +99,71 @@ Service Pack for ProLiant 集合了固件以及系统软件元件，均经过测
 
 .. note::
 
+   运行 ``launch_sum.sh`` 会检查系统是否具备一些基础工具，例如对于 :ref:`run_centos_in_chroot_under_ubuntu` ，还需要安装以下工具::
+
+      sudo yum install -y pciutils dmidecode unzip
+
+.. note::
+
    ``launch_sum.sh`` 脚本实际上执行的是 ``packages/smartupdate`` ，该脚本只支持在 ``redhat`` 和 ``SuSE`` 平台运行
+
+我是在 :ref:`hp_ilo` 提供的终端控制台执行 ``launch_sum.sh`` 脚本，原本以为通过iLo控制台可以避免升级过程中网络断开或者磁盘中断等问题，但是没想到提示信息::
+
+   Copying sum files to /var/tmp/localsum
+   sum_service_x64 started successfully on port 63001 and secure port 63002. FTP is disabled.
+   auditLog[93095]: Disabling blocked firewall rules
+   Error: cannot launch browser
+
+更新步骤(Step by Step)
+========================
+
+- 此时可以通过访问服务器IP的63002端口来打开 ``Smart Update Manager`` 管理界面: https://192.168.6.200:63002/
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hp_smart_update_manager.png
+   :scale: 60
+
+- 输入 ``root`` 用户账号密码，登陆到Smart Update Manager界面，然后点击 ``Localhost Guided Update`` :
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hp_smart_update_manager_1.png
+   :scale: 60
+
+.. note::
+
+   这里似乎有一点点异常，页面没有自动显示出来，不过刷新一下chrome页面就可以看到下一步
+
+- 在下一个页面选择更新类型，这里选择 ``Interactive`` 交互模式:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hp_smart_update_manager_2.png
+   :scale: 60
+
+- 此时开始检测:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hp_smart_update_manager_3.png
+   :scale: 60
+
+- 检查完成后，点击下一步，进入 ``review`` 步骤:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hp_smart_update_manager_3.png
+   :scale: 60
+
+``注意`` 存在红色点的问题项必须取消选择才能进入下一步 ``Deploy``
+
+在这个 ``review`` 页面检查无误后点击 ``Deploy`` 按钮
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hp_smart_update_manager_4.png
+   :scale: 40
+
+- 由于我只需要更新firmware(所有OS系统软件是安装在 :ref:`run_centos_in_chroot_under_ubuntu`  :strike:`所以对我的案例么有用处，我仅需要更新firmware，其他系统软件都依赖Ubuntu系统发行版，或者后续根据需要通过alien转换DEB包独立安装` ，考虑到可以 ``chroot`` 到CentOS系统中运行，所以我还是按照默认推荐安装)
+
+- 安装完成后显示如下页面，按照提示重启系统就可以完成整个服务器系统更新:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/hp_smart_update_manager_5.png
+   :scale: 40
 
 通过iLO WEB更新firmware
 ==========================
 
-`How to Update the System BIOS & Firmware in an HP Proliant Servers <https://www.youtube.com/watch?v=MTjY5xzUkIk>`_ 是YouTube 上一个操作视频，可以参考。
+以下步骤是只使用 firmware 文件通过iLO WEB界面上传来更新，这个步骤一次只能更新一个组件，效率较低。不过，如果只是更新BIOS的话，这个方法是比较方便的。要完整更新服务器所有firmware，还是采用上文 ``更新步骤(Step by Step)``
 
 rpm包升级(未完成)
 --------------------

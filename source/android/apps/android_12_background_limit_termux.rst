@@ -76,7 +76,7 @@ Android 12 Phantom Process Killer
 
    ps aux | grep termux
 
-假设父进程号是 
+假设这里看到父进程号是 ``5903``
 
 - 查看手机处理器大小核::
 
@@ -98,6 +98,40 @@ Android 12 Phantom Process Killer
 - 添加CPU绑定::
 
    taskset --pid --all-tasks 4,5,6,7 5903
+
+不过上述策略其实并不是优化解，因为Android系统会根据需要做动态频率调整，特别是 ``turbo`` CPU核心，在没有插电的情况下会降频，甚至频率低于小核，使得绑定效果反而更差。例如，以下是手机没有插电时候待机状态CPU当前主频::
+
+   sudo cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
+
+可以看到大核心有时候会低到825600Hz，甚至比小核心还要低。不过，大多数情况下，大核心的主频还是比小核心要高::
+
+   ➜  ~ sudo cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
+   1766400
+   1766400
+   1766400
+   1766400
+   2803200
+   2803200
+   2803200
+   2803200
+   ➜  ~ sudo cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
+   652800
+   652800
+   652800
+   652800
+   1363200
+   1363200
+   1363200
+   1363200
+   ➜  ~ sudo cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
+   1766400
+   1766400
+   1766400
+   1766400
+   1286400
+   1286400
+   1286400
+   1286400
 
 参考
 =======
