@@ -9,6 +9,7 @@ OpenShift是由Red Hat开发的容器化软件结合，围绕Docker容器编排�
 .. toctree::
    :maxdepth: 1
 
+   intro_openshift.rst
    openshift_architecture.rst
    codeready_containers.rst
 

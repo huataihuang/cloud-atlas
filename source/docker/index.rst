@@ -12,6 +12,7 @@ Docker Atlas
    images/index
    rootless/index
    moby/index
+   podman/index
    config/index
    linuxserver/index
    init/index
