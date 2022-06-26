@@ -18,6 +18,7 @@ Infrastructure Atlas
    storage/index
    cloud_gaming/index
    akraino/index
+   starlingx/index
 
 .. only::  subproject and html
 
