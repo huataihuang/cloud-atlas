@@ -23,7 +23,9 @@ OpenShift容器化应用是通过以下技术来实现的:
 - 使用 OperatorHub 和 模版 来开发应用
 - 将应用程序打包和部署成 Operator (尚未理解)
 
-OpenShift 没有采用常规的操作系统作为基础镜像，而是采用专用于容器的CoreOS。对于企业市场，采用的是 RHEL CoreOS，你可以认为是类似于 :ref:`fedora_coreos` 的RHEL定制版本。由于我的实践采用社区 ``OKD`` ，所以对应采用的就是 :ref:`fedora_coreos` 。
+OpenShift 没有采用常规的操作系统作为基础镜像，而是采用专用于容器的CoreOS。对于企业市场，采用的是 RHEL CoreOS，你可以认为是类似于 :ref:`fedora_coreos` 的RHEL定制版本。由于我的实践采用社区 ``OKD`` ，所以对应采用的就是 :ref:`fedora_coreos` 。实际上，各个容器厂商和发行版厂商都有针对容器化技术的精简定制系统，例如Docker采用 :ref:`alpine_linux` 作为基础镜像。
+
+
 
 组件
 ======

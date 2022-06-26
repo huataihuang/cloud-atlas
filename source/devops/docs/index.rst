@@ -11,6 +11,7 @@ DevOps 文档
 .. toctree::
    :maxdepth: 1
 
+   think_write_doc.rst
    write_doc.rst
    joplin.rst
    sphinx_doc/index

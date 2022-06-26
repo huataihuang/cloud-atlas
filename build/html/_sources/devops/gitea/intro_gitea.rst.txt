@@ -10,7 +10,12 @@ Gitea简介
 
 .. note::
 
-   轻量级Git仓库也可以选择 `Gogs - A painless self-hosted Git service <https://gogs.io/>`_ ，是 Gitea 的来源项目，两者区别不大，主要差异是社区驱动方式差异。
+   轻量级Git仓库也可以选择 `Gogs - A painless self-hosted Git service <https://gogs.io/>`_ ，是 Gitea 的来源项目，两者区别不大，主要差异是社区驱动方式差异:
+
+   - Gogs是unknown(中文昵称:无闻 `无闻的博客unknwon.io <https://unknwon.io/>`_ )发起，且是主要代码贡献者和唯一维护人。无闻的博客是中英文双语，提供了一些开发和自我管理的见解，不过更新不多
+   - Gitea是在Gogs基础上fork出的新开发分支，主要区别是由社区决定加入特性，所以新特性多一些
+
+   `从 Gogs vs Gitea 看中外文化差异 #16 <https://github.com/wolfogre/blog-utterances/issues/16>`_ 提供了两者对比的一些观点，有意思
 
 .. note::
 
