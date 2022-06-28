@@ -20,3 +20,4 @@ Kubernetes排查
    debug_k8s_restart_pods.rst
    get_pods_restart_time.rst
    k8s_stuck_in_podinit.rst
+   pod_stuck_terminating.rst

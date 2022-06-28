@@ -17,6 +17,7 @@ Gluster Atlas
    geo-replication/index
    debug/index
    tendrl/index
+   minio/index
 
 .. only::  subproject and html
 

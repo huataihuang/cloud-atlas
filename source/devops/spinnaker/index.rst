@@ -1,21 +1,13 @@
-.. _devops:
+.. _spinnaker:
 
 =================================
-DevOps Atlas
+Spinnaker
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   thought/index
-   sre/index
-   git/index
-   jenkins/index
-   spinnaker/index
-   gitea/index
-   terraform/index
-   utils/index
-   docs/index
+   intro_spinnaker.rst
 
 .. only::  subproject and html
 

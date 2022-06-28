@@ -61,9 +61,19 @@ tmux的 ``前导键`` 是 ``ctrl-b`` ，也就是按下 ``ctrl-b`` 就进入发�
 
    和 ``screen`` 不同，即使之前有会话连接着，你的新attach依然能够连接会话
 
+- 可以重新命名会话(以下案例将会话0重命名成works)::
+
+   tmux rename-session -t 0 works
+
+可以用快捷键重命名当前会话: ``ctrl-b`` 加上 ``$``
+
 - 如果系统有多个会话，则使用参数 ``-t`` 来指定连接到哪个会话::
 
-   tmux a -t 1
+   tmux a -t works
+
+- 断开当前会话快捷键 ``ctrl-b`` 加上 ``d``
+
+- 列出当前会话所有窗口 ``ctrl-b`` 加上 ``s``
 
 - 你可以创建多个会话，每个会话使用参数 ``-s`` 来指定会话名字::
 
@@ -84,8 +94,6 @@ tmux的 ``前导键`` 是 ``ctrl-b`` ，也就是按下 ``ctrl-b`` 就进入发�
 
 - 使用 ``ctrl-b`` 然后 ``w`` 可以列出当前会话(sesion)中所有的窗口(window)
 
-
-
 分割窗口(pane)
 ---------------
 
@@ -96,9 +104,20 @@ tmux的 ``前导键`` 是 ``ctrl-b`` ，也就是按下 ``ctrl-b`` 就进入发�
 - 调整pane大小的方法:
 
   - ``ctrl-b`` 然后 ``alt-方向键`` 按照方向调整pane大小
-  - 如果在安装 ``alt`` 键时候快速按方向键，则可以连续调整
+  - 如果在按住 ``alt`` 键时候快速按方向键，则可以连续调整
 
-- 终端切换：在单个终端会话中，我们现在有3个终端，通过按下 ``ctrl-b`` 加上 ``方向键`` 我们可以切换不同终端
+- 终端切换：在单个终端会话中，我们现在有3个终端
+
+  - 按下 ``ctrl-b`` 加上 ``方向键`` 我们可以切换不同终端
+  - 按下 ``ctrl-b`` 加上  ``;`` 切换上一个窗格
+  - 按下 ``ctrl-b`` 加上 ``o`` 切换下一个窗格
+  - 按下 ``ctrl-b`` 加上 ``{`` 当前窗格与上一个窗格交换位置
+  - 按下 ``ctrl-b`` 加上 ``}`` 当前窗格与下一个窗格交换位置
+  - 按下 ``ctrl+b`` 加上 ``ctrl+o`` ：所有窗格向前移动一个位置，第一个窗格变成最后一个窗格。
+  - 按下 ``ctrl+b`` 加上 ``alt+o`` ：所有窗格向后移动一个位置，最后一个窗格变成第一个窗格。
+  - 按下 ``ctrl+b`` 加上 ``x`` ：关闭当前窗格。
+  - 按下 ``ctrl+b`` 加上 ``!`` ：将当前窗格拆分为一个独立窗口。
+  - 按下 ``ctrl+b`` 加上 ``z`` ：当前窗格全屏显示，再使用一次会变回原来大小。
 
 - 断开会话使用 ``ctrl-b`` 加上 ``d``
 
@@ -139,3 +158,4 @@ tmux-config
 - `Tips for using tmux <https://www.redhat.com/sysadmin/tips-using-tmux>`_
 - `In tmux can I resize a pane to an absolute value <https://stackoverflow.com/questions/16145078/in-tmux-can-i-resize-a-pane-to-an-absolute-value>`_
 - `Adjusting screen split pane sizes in tmux <https://superuser.com/questions/863295/adjusting-screen-split-pane-sizes-in-tmux>`_
+- `Tmux 使用教程 <https://www.ruanyifeng.com/blog/2019/10/tmux.html>`_

@@ -1,21 +1,14 @@
-.. _devops:
+.. _minio:
 
 =================================
-DevOps Atlas
+MinIO存储
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   thought/index
-   sre/index
-   git/index
-   jenkins/index
-   spinnaker/index
-   gitea/index
-   terraform/index
-   utils/index
-   docs/index
+   intro_minio.rst
+   minio_vs_glusterfs.rst
 
 .. only::  subproject and html
 
