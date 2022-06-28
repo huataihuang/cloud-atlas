@@ -12,6 +12,7 @@ Kindle在，书未老
    use_kindle_read_pdf.rst
    kindle_book_format.rst
    convert_doc_to_kindle.rst
+   reset_restart_kindle.rst
 
 
 .. only::  subproject and html

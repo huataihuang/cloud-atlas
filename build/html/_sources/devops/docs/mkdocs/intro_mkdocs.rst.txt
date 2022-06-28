@@ -11,3 +11,5 @@ MkDocs简介
 - 我需要一个完全自由的撰写平台
 
 我在工作中，常用MarkDown格式记录文档，并且这个格式也是公司内部文档的通用撰写格式。自然而然，我也就想到使用MarkDown作为个人工作笔记的格式，自然而然就会选择开源静态文档生成工具 `MkDocs静态文档网站生成器 <https://www.mkdocs.org>`_ 。
+
+`基于mkdocs-material搭建个人静态博客(含支持的markdown语法) <https://cyent.github.io/markdown-with-mkdocs-material/>`_ 提供了非常好的使用指南，非常推荐参考

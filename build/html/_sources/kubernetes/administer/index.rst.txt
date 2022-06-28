@@ -17,6 +17,7 @@ Kubernetes管理
    drain_node.rst
    remove_node.rst
    set_k8s_worker_internal_ip.rst
+   get_pods_on_node.rst
    kubeadm_administer/index
    etcd/index
    coredns/index

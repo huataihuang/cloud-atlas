@@ -266,13 +266,24 @@
 </pre></div>
 </div>
 <p>可以看出手机的后4个核心是 Turbo 。我们把进程绑定较好的 4个CPU核心:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">添加CPU绑定</span><span class="p">::</span>
+<ul>
+<li><p>添加CPU绑定:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">taskset</span> <span class="o">--</span><span class="n">pid</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">tasks</span> <span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span> <span class="mi">5903</span>
 </pre></div>
 </div>
-<blockquote>
-<div><p>taskset –pid –all-tasks 4,5,6,7 5903</p>
-</div></blockquote>
-<p>不过上述策略其实并不是优化解，因为Android系统会根据需要做动态频率调整，特别是 <code class="docutils literal notranslate"><span class="pre">turbo</span></code> CPU核心，在没有插电的情况下会降频，甚至频率低于小核，使得绑定效果反而更差。例如，以下是手机没有插电时候待机状态CPU当前主频:</p>
+</li>
+</ul>
+<p>快速脚本:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">termux_pid</span><span class="o">=</span><span class="sb">`</span>ps aux <span class="p">|</span> grep termux <span class="p">|</span> grep -v grep <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> sort -n <span class="p">|</span> head -1<span class="sb">`</span>
+taskset --pid --all-tasks <span class="m">4</span>,5,6,7 <span class="nv">$termux_pid</span>
+</pre></div>
+</div>
+<p>此时提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pid</span> <span class="mi">5903</span><span class="s1">&#39;s current affinity mask: ff</span>
+<span class="n">pid</span> <span class="mi">5903</span><span class="s1">&#39;s new affinity mask: 67</span>
+</pre></div>
+</div>
+<p>不过上述策略可能并不是优化解(我还没有想出更好的方法)，因为Android系统会根据需要做动态频率调整，特别是 <code class="docutils literal notranslate"><span class="pre">turbo</span></code> CPU核心，在没有插电的情况下会降频，甚至频率低于小核，使得绑定效果反而更差。例如，以下是手机没有插电时候待机状态CPU当前主频:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">devices</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">cpu</span><span class="o">/</span><span class="n">cpu</span><span class="o">*/</span><span class="n">cpufreq</span><span class="o">/</span><span class="n">cpuinfo_cur_freq</span>
 </pre></div>
 </div>

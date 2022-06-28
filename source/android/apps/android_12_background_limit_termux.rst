@@ -93,13 +93,23 @@ Android 12 Phantom Process Killer
    2803200
    2803200
 
-可以看出手机的后4个核心是 Turbo 。我们把进程绑定较好的 4个CPU核心::
+可以看出手机的后4个核心是 Turbo 。我们把进程绑定较好的 4个CPU核心:
 
 - 添加CPU绑定::
 
    taskset --pid --all-tasks 4,5,6,7 5903
 
-不过上述策略其实并不是优化解，因为Android系统会根据需要做动态频率调整，特别是 ``turbo`` CPU核心，在没有插电的情况下会降频，甚至频率低于小核，使得绑定效果反而更差。例如，以下是手机没有插电时候待机状态CPU当前主频::
+快速脚本:
+
+.. literalinclude:: android_12_background_limit_termux/termux_tunning
+   :language: bash
+
+此时提示::
+
+   pid 5903's current affinity mask: ff
+   pid 5903's new affinity mask: 67
+
+不过上述策略可能并不是优化解(我还没有想出更好的方法)，因为Android系统会根据需要做动态频率调整，特别是 ``turbo`` CPU核心，在没有插电的情况下会降频，甚至频率低于小核，使得绑定效果反而更差。例如，以下是手机没有插电时候待机状态CPU当前主频::
 
    sudo cat /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq
 
