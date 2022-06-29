@@ -9,6 +9,7 @@ Kubernetes持续集成和持续部署
 
    kubernetes_ci_cd_overview.rst
    tekton/index
+   spinnaker/index
 
 参考
 =======
