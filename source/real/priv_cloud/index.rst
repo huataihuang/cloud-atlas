@@ -15,7 +15,9 @@
    priv_ssh.rst
    priv_monitor.rst
    zdata_ceph.rst
+   priv_lvm.rst
    zdata_ceph_rbd_libvirt.rst
+   priv_etcd.rst
    priv_kvm_sr-iov.rst
    priv_cloud_infra_prometheus.rst
    z-k8s_env.rst

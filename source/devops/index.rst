@@ -11,7 +11,6 @@ DevOps Atlas
    sre/index
    git/index
    jenkins/index
-   spinnaker/index
    gitea/index
    terraform/index
    utils/index
