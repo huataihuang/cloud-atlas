@@ -4,6 +4,15 @@
 使用MkDocs撰写文档
 ========================
 
+初始化文档
+===============
+
+在 :ref:`install_mkdocs` 之后，就可以开始撰写文档。第一个步骤是初始化文档结构:
+
+.. literalinclude:: write_docs_with_mkdocs/mkdocs_new
+   :language: bash
+   :caption: mkdocs new 创建 works 项目目录结构
+
 文档布局
 =========
 

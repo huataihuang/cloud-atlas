@@ -21,6 +21,7 @@ Big Data Atlas
    presto_vs_impala.rst
    message_queue/index
    hadoop/index
+   maxcompute/index.rst
    spark/index
    flink/index
    presto/index
