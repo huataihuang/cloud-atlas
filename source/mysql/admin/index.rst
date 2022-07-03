@@ -1,13 +1,13 @@
-.. _spinnaker:
+.. _mysql_admin:
 
 =================================
-Spinnaker
+MySQL 管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_spinnaker.rst
+   mysql_user_grant.rst
 
 .. only::  subproject and html
 

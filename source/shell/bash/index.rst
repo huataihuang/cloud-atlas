@@ -8,6 +8,7 @@ Bash
    :maxdepth: 1
 
    list_all_cron_jobs.rst
+   here_document.rst
 
 .. only::  subproject and html
 

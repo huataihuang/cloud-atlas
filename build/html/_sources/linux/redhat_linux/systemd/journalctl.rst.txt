@@ -29,6 +29,15 @@ journalctl是一个从systemd日志服务journald查询和显示日志的工具�
 
    journalctl -u service-name.service -f
 
+- 查看服务故障的方法通常是::
+
+   systemctl status etcd.service
+   journalctl -xe
+
+不过， ``journalctl`` 输出的日志行是不回行的，所以日志太长会被截断。那么怎么能够看到完整的日志呢？ 参考 `journalctl: how to prevent text from truncating in terminal <https://unix.stackexchange.com/questions/229188/journalctl-how-to-prevent-text-from-truncating-in-terminal>`_ ，方法就是输出到 ``less`` 查看::
+
+   journalctl -xe | less
+
 清理日志
 ===========
 

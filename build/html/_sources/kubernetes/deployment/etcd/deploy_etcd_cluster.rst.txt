@@ -20,12 +20,11 @@
 准备安装环境
 =============
 
-- 在安装节点创建 etcd 目录以及用户和用户组::
+- 在安装节点创建 etcd 目录以及用户和用户组:
 
-   sudo mkdir -p /etc/etcd /var/lib/etcd
-   groupadd -f -g 1501 etcd
-   useradd -c "etcd user" -d /var/lib/etcd -s /bin/false -g etcd -u 1501 etcd
-   chown -R etcd:etcd /var/lib/etcd
+.. literalinclude::  deploy_etcd_cluster/useradd_etcd
+   :language: bash
+   :caption: useradd添加etcd用户账号
 
 - 下载etcd和etcdctl: 方法参考 :ref:`install_etcd`
 
