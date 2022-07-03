@@ -1,0 +1,26 @@
+cat << EOF > /lib/systemd/system/etcd.service
+[Unit]
+Description=etcd service
+Documentation=https://github.com/coreos/etcd
+ 
+[Service]
+User=etcd
+Type=notify
+ExecStart=/usr/local/bin/etcd \\
+ --name ${ETCD_NAME} \\
+ --data-dir /var/lib/etcd \\
+ --initial-advertise-peer-urls http://${ETCD_HOST_IP}:2380 \\
+ --listen-peer-urls http://${ETCD_HOST_IP}:2380 \\
+ --listen-client-urls http://${ETCD_HOST_IP}:2379,http://127.0.0.1:2379 \\
+ --advertise-client-urls http://${ETCD_HOST_IP}:2379 \\
+ --initial-cluster-token etcd-cluster-1 \\
+ --initial-cluster etcd-1=http://10.142.0.2:2380,etcd-2=http://10.142.0.4:2380,etcd-3=http://10.142.0.3:2380 \\
+ --initial-cluster-state new \\
+ --heartbeat-interval 1000 \\
+ --election-timeout 5000
+Restart=on-failure
+RestartSec=5
+ 
+[Install]
+WantedBy=multi-user.target
+EOF

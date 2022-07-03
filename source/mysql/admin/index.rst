@@ -1,14 +1,13 @@
-.. _bash:
+.. _mysql_admin:
 
 =================================
-Bash
+MySQL 管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   list_all_cron_jobs.rst
-   here_document.rst
+   mysql_user_grant.rst
 
 .. only::  subproject and html
 
