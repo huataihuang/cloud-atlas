@@ -60,6 +60,18 @@ Fix "Books on Google Play is not available in your country yet"
 
 清理方法是进入服务后，点 ``Storage & cache`` ，然后点 ``Clear cache`` ，然后点 ``Clear storage``  
 
+可能需要更换VPN的IP
+=======================
+
+.. warning::
+
+   实际上我采用了上述步骤并没有解决Google Play国家区域问题，依然无法使用 Google Books。我在注册 Spotify 也遇到了这个问题，Spotify反复提示我使用了代理或者VPN，最初我以为是应用检测到我本地开启了VPN程序，就改成 :ref:`vpn_hotspot`
+   方式，即手机开启VPN翻墙，然后手机启动热点共享给电脑使用。这样电脑上没有设置任何proxy配置，电脑上也没有启动VPN。但是没有想到，Spotify依然提示我使用代理和VPN不能提供服务。
+
+   所以，我推测是我使用的自建 :ref:`openconnect_vpn` ，底层VPS服务商的IP地址已经被这些Internet服务商列为黑名单，也就是无法作为正常的个人用IP。
+
+参考 `YouTube上的中国注册Spotify指南 <https://www.youtube.com/watch?v=WtT-_ZS-a5A&list=LL&index=1>`_ ，我使用 `WHOER <https://whoer.net/>`_ 检查了自己访问外部显示的IP地址和DNS，都正常显示了美国，但是依然无法通过Spotify的VPN和代理检查步骤。可见我所使用的VPS的IP地址可能已经被服务商列为黑名单，需要想办法换其他VPS的IP地址测试。
+
 参考
 ========
 

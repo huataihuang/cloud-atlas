@@ -15,6 +15,7 @@ RHEL(Red Hat Enterprise Linux)官方手册提供了系统的内核管理、监�
    :maxdepth: 1
 
    kdump_guide/index
+   grubby.rst
    zram.rst
 
 .. only::  subproject and html

@@ -19,3 +19,4 @@
 
    ubuntu_host_setup.rst
    phy_server_setup_old.rst
+   ipmi_conman.rst

@@ -228,9 +228,9 @@ unmarshaling JSON
 
 输出类似::
 
-   9bfd4ef1e72d26, started, z-b-data-3, https://z-b-data-3.staging.huatai.me:2380, https://z-b-data-3.staging.huatai.me:2379, false
-   7e8d94ba496c072d, started, z-b-data-1, https://z-b-data-1.staging.huatai.me:2380, https://z-b-data-1.staging.huatai.me:2379, false
-   a01cb65343e64610, started, z-b-data-2, https://z-b-data-2.staging.huatai.me:2380, https://z-b-data-2.staging.huatai.me:2379, false
+   64e2be2269f59c43, started, z-b-data-3, https://192.168.6.206:2380, https://192.168.6.206:2379, false
+   73d6903628b74671, started, z-b-data-1, https://192.168.6.204:2380, https://192.168.6.204:2379, false
+   cbea9b1cda087dbf, started, z-b-data-2, https://192.168.6.205:2380, https://192.168.6.205:2379, false
 
 为方便观察，可以使用表格输出模式::
 
@@ -238,13 +238,11 @@ unmarshaling JSON
 
 输出显示::
 
-   +---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
-   |         ENDPOINT          |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
-   +---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
-   | https://192.168.6.204:2379 | 7e8d94ba496c072d |   3.5.2 |   20 kB |     false |      false |         7 |        237 |                237 |        |
-   | https://192.168.6.205:2379 | a01cb65343e64610 |   3.5.2 |   20 kB |     false |      false |         7 |        237 |                237 |        |
-   | https://192.168.6.206:2379 |   9bfd4ef1e72d26 |   3.5.2 |   20 kB |      true |      false |         7 |        237 |                237 |        |
-   +---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+   +-------------------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+   |              ENDPOINT               |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
+   +-------------------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+   | https://etcd.staging.huatai.me:2379 | 73d6903628b74671 |   3.5.4 |   20 kB |      true |      false |         2 |         22 |                 22 |        |
+   +-------------------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 
 检查健康状况::
 
@@ -252,9 +250,7 @@ unmarshaling JSON
 
 输出显示::
 
-   https://192.168.6.206:2379 is healthy: successfully committed proposal: took = 67.98523ms
-   https://192.168.6.205:2379 is healthy: successfully committed proposal: took = 64.634362ms
-   https://192.168.6.204:2379 is healthy: successfully committed proposal: took = 67.330493ms
+   https://etcd.staging.huatai.me:2379 is healthy: successfully committed proposal: took = 12.150298ms
 
 参考
 ======
