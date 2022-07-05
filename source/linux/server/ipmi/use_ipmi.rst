@@ -23,9 +23,9 @@ IPMI硬件和软件要求
 
 在Linux平台上要配置IPMI需要有 ``/dev/ipmi0`` 设备存在，如果缺少该设备， ``ipmitool`` 工具就无法工作。此时需要使用如下方法创建设备：
 
-- 如果是SuSE，RedHat或CentOS执行(需要安装 ``OpenIPMI`` 工具包)::
+- 如果是SuSE，RedHat或CentOS执行(需要安装 ``OpenIPMI`` 工具包)，在 :ref:`systemd` 体系中，是 ``openipmi.service``
 
-   /etc/init.d/ipmi start
+   systemctl enable --now openipmi.service
 
 - 在Debian平台执行::
 
@@ -33,22 +33,21 @@ IPMI硬件和软件要求
    modprobe impi_si
 
 配置IPMI网络
-=============
+============
 
-为了充分发挥IPMI的功能，例如可以通过带外管理IP地址远程管理服务器，需要为服务器配置IPMI网络(通常是服务器的第一块网卡集成了BMC，配置IP后可以远程带外管理)::
+为了充分发挥IPMI的功能，例如可以通过带外管理IP地址远程管理服务器，需要为服务器配置IPMI网络(通常是服务器的第一块网卡集成了BMC，配置IP后可以远程带外管理):
 
-   ipmitool lan set 1 ipsrc static
-   ipmitool lan set 1 ipaddr 192.168.1.211
-   ipmitool lan set 1 netmask 255.255.255.0
-   ipmitool lan set 1 defgw ipaddr 192.168.1.254
-   ipmitool lan set 1 defgw macaddr 00:0e:0c:aa:8e:13
-   ipmitool lan set 1 arp respond on
-   ipmitool lan set 1 auth ADMIN MD5
-   ipmitool lan set 1 access on
+.. literalinclude:: use_ipmi/config_ipmi_addr
+   :language: bash
+   :caption: 配置IPMI网络
+
+.. note::
+
+   在这里使用 ``set 2`` 对 channel 2 进行配置，实践发现，实际上ipmi可能使用不同的channel(尚未理解，我在实践中发现有使用channel 1也有channel 2，这里是在 我的 :ref:`hpe_dl360_gen9` 服务器上配置，使用的是 ``channel 2`` ；在通常情况下，这个channel是1)。例如有可能  ``sudo ipmitool lan print 1`` 显示 ``Invalid channel: 1`` 。而此时尝试 ``sudo ipmitool lan print 2`` 才有输出，则证明服务器采用的是 ``channel 2`` 。你可以尝试一下 ``sudo ipmitool lan print`` 
 
 - 检查配置::
 
-   ipmitool lan print 1
+   ipmitool lan print 2
 
 - 配置admin权限用户账号::
 
@@ -62,9 +61,9 @@ IPMI硬件和软件要求
 
 可以通过以下命令检查系统中已经具有的帐号::
 
-   ipmitool user list 1
+   ipmitool user list 2
 
-这里 ``1`` 表示 ``channel 1``
+这里 ``2`` 表示 ``channel 2``
 
 显示输出::
 
@@ -78,7 +77,7 @@ IPMI硬件和软件要求
 
    ipmitool user set name 5 jack
 
-此时再次检查 ``ipmitool user list 1`` 就会看到::
+此时再次检查 ``ipmitool user list 2`` 就会看到::
 
    ID  Name     Callin  Link AuthIPMI Msg   Channel Priv Limi       t
    1                    false   false      true       ADMINISTRATOR
@@ -93,9 +92,9 @@ IPMI硬件和软件要求
 
 - 设置用户能够远程管理服务器::
 
-   ipmitool channel setaccess 1 5 link=on ipmi=on callin=on privilege=4
+   ipmitool channel setaccess 2 5 link=on ipmi=on callin=on privilege=4
 
-- 此时再使用 ``ipmitool user list 1`` 可以看到用户 ``jack`` 已经具备了完全的帐号::
+- 此时再使用 ``ipmitool user list 2`` 可以看到用户 ``jack`` 已经具备了完全的帐号::
 
    ID  Name     Callin  Link AuthIPMI Msg   Channel Priv Lim        it
    ...
@@ -104,6 +103,31 @@ IPMI硬件和软件要求
 - 激活用户帐号::
 
    ipmitool user enable 5
+
+综合上述配置账号的步骤，可以合并成如下操作:
+
+.. literalinclude:: use_ipmi/config_ipmi_admin
+   :language: bash
+   :caption: 配置IPMI的admin账号
+
+注意，这里配置 ``setaccess`` 是按照 ``channel`` 和 ``id`` 来进行的，所以会提示信息::
+
+   Set User Access (channel 2 id 1) successful.
+
+.. note::
+
+   ``[privilege=level]`` 配置参数可以在 ``ipmitool channel setaccess`` 输出看到::
+
+      Possible privilege levels are:
+         1   Callback level
+         2   User level
+         3   Operator level
+         4   Administrator level
+         5   OEM Proprietary level
+        15   No access
+
+   所以设置值为 ``4`` 就是管理员级别
+
 
 用户配置权限级别
 ==================
@@ -227,23 +251,30 @@ IPMI不仅可以本机执行，也可以通过网络访问方式执行 ( ``-I la
 
 - 重启服务器
 
-这是最常用都ipmi命令，通常服务器死机时候可通过 ``power reset`` 硬关机并重启::
+这是最常用都ipmi命令，通常服务器死机时候可通过 ``power reset`` 硬关机并重启:
 
-   ipmitool -I lanplus -H IP -U username -P password power reset
+.. literalinclude:: use_ipmi/ipmi_power_reset
+   :language: bash
+   :caption: 重启服务器
 
 - 远程访问终端
 
-在服务器操作系统启动之前，物理服务器有一个硬件初始化过程，这部分信息通过IPMI访问可以完整观察到。此外，如果服务器出现内核crash，也会在串口终端输出信息。执行以下命令远程访问串口终端::
+在服务器操作系统启动之前，物理服务器有一个硬件初始化过程，这部分信息通过IPMI访问可以完整观察到。此外，如果服务器出现内核crash，也会在串口终端输出信息。执行以下命令远程访问串口终端:
 
-   ipmitool -I lanplus -H IP  -U username -P password -E sol activate
+.. literalinclude:: use_ipmi/ipmi_sol_activate
+   :language: bash
+   :caption: 通过IPMI访问控制台
 
 - 检查服务器sol日志（故障原因）
 
-当物理服务器出现硬件故障，例如cpu，内存，板卡，风扇等。这些硬件日志都会记录在服务的SOL日志中，就可以通过以下命令检查::
+当物理服务器出现硬件故障，例如cpu，内存，板卡，风扇等。这些硬件日志都会记录在服务的SOL日志中，就可以通过以下命令检查:
 
-   ipmitool -I lanplus -H IP  -U username sel list
+.. literalinclude:: use_ipmi/ipmi_sel_list
+   :language: bash
+   :caption: 通过IPMI获取系统日志
 
-   # 或者ssh登陆服务器主机Linux操作系统执行，root用户执行命令无需账号密码
+或者ssh登陆服务器主机Linux操作系统执行，root用户执行命令无需账号密码::
+
    ipmitool sel list
 
 IPMI配置服务器启动模式
@@ -337,3 +368,4 @@ raw参数说明:
 
 - `Using Intelligent Platform Management Interface (IPMI) <https://www.ibm.com/support/knowledgecenter/#!/linuxonibm/liaai/ipmi/ipmikick.htm>`_
 - `IPMI-Chassis Device <https://github.com/erik-smit/oohhh-what-does-this-ipmi-doooo-no-deedee-nooooo/blob/master/1-discovering/snippets/Computercheese/IPMI-Chassis%20Device%20Commands.txt>`_
+- `Example of BMC Configuration Using IPMItool <https://docs.oracle.com/en/database/oracle/oracle-database/12.2/cwaix/example-of-bmc-configuration-using-ipmitool.html#GUID-11E563E0-3688-4FE9-8440-81402A7AC23A>`_

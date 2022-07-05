@@ -16,6 +16,7 @@ LFS(Linux from scratch)
 .. toctree::
    :maxdepth: 1
 
+   intro_lfs.rst
    lfs_prepare.rst
 
 .. only::  subproject and html
