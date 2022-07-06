@@ -13,10 +13,11 @@
 上述基础环境构建之后，具备了 :ref:`priv_cloud_infra` 规划中为 ``z-k8s`` 集群准备的虚拟机:
 
 - ``z-k8s-m-1`` ~ ``z-k8s-m-3`` 三台管控服务器
-- ``z-k8s-n-1`` ~ ``z-k8s-n-10`` 10台工作节点服务器
+- ``z-k8s-n-1`` ~ ``z-k8s-n-5`` 5台工作节点服务器
 
   - ``z-k8s-n-1`` / ``z-k8s-n-2`` 注入 :ref:`sr-iov` VF网卡，测试网络性能优化
   - ``z-k8s-n-3`` / ``z-k8s-n-4`` 注入 :ref:`tesla_p10` 的 :ref:`vgpu` 为Kubernetes提供GPU运算能力，构建 :ref:`machine_learning` 运行环境
+  - ``z-k8s-n-5`` 常规节点
 
 - 为最大化 :ref:`etcd` 性能，ETCD服务部署在 :ref:`zdata_ceph` 相同的高性能存储虚拟机 ``z-b-data-1`` 到 ``z-b-data-3`` 三台虚拟机中
 
@@ -39,9 +40,3 @@
    14   z-k8s-n-3    running
    15   z-k8s-n-4    running
    16   z-k8s-n-5    running
-   17   z-k8s-n-6    running
-   18   z-k8s-n-7    running
-   19   z-k8s-n-8    running
-   20   z-k8s-n-9    running
-   21   z-k8s-n-10   running
-

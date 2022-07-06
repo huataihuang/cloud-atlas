@@ -14,6 +14,7 @@ Kubernetes管理
    kubernetes_dashboard.rst
    configure_pods_and_containers.rst
    delete_cluster.rst
+   cordon_node.rst
    drain_node.rst
    remove_node.rst
    set_k8s_worker_internal_ip.rst
