@@ -8,6 +8,7 @@ TLS(Transport Layer Security)
    :maxdepth: 1
 
    tls_arch.rst
+   openssl_gencert_files.rst
    localtunnel/index
    ngrok/index
    

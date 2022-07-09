@@ -27,10 +27,10 @@ Kubernetes集群引导(高可用)
    :maxdepth: 1
 
    prepare_z-k8s.rst
-   ha_k8s_lb/index
    ha_etcd.rst
    ha_k8s.rst
-   ha_k8s_dnsrr/index
-   create_ha_k8s.rst
    ha_k8s_stacked.rst
    ha_k8s_external.rst
+   create_ha_k8s.rst
+   ha_k8s_dnsrr/index
+   ha_k8s_lb/index

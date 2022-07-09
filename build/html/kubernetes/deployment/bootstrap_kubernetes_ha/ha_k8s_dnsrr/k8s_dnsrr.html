@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>基于DNS轮询和HAProxy构建高可用Kubernetes &mdash; Cloud Atlas 0.1 文档</title>
+  <title>基于DNS轮询构建高可用Kubernetes &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
-    <link rel="next" title="使用kubeadm创建高可用集群" href="../create_ha_k8s.html" />
+    <link rel="next" title="基于负载均衡的高可用Kubernetes集群" href="../ha_k8s_lb/index.html" />
     <link rel="prev" title="高可用Kubernetes集群kubeadm" href="ha_k8s_kubeadm.html" /> 
 </head>
 
@@ -64,13 +64,13 @@
 <li class="toctree-l3"><a class="reference internal" href="../../bootstrap_kubernetes_single/index.html">Kubernetes集群引导(单master)</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">Kubernetes集群引导(高可用)</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../prepare_z-k8s.html">z-k8s高可用Kubernetes集群准备</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../ha_k8s_lb/index.html">基于负载均衡的高可用Kubernetes集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../ha_etcd.html">高可用etcd集群部署</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../ha_k8s.html">高可用(HA)Kubernetes集群</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="index.html">基于DNSRR的高可用Kubernetes集群</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../create_ha_k8s.html">使用kubeadm创建高可用集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../ha_k8s_stacked.html">堆叠型管控/etcd节点高可用集群</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../ha_k8s_external.html">扩展etcd节点高可用集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../create_ha_k8s.html">使用kubeadm创建高可用集群</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">基于DNSRR的高可用Kubernetes集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ha_k8s_lb/index.html">基于负载均衡的高可用Kubernetes集群</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../stateless_application/index.html">Kubernetes部署无状态应用</a></li>
@@ -176,7 +176,7 @@
           <li><a href="../../index.html">Kubernetes部署</a> &raquo;</li>
           <li><a href="../index.html">Kubernetes集群引导(高可用)</a> &raquo;</li>
           <li><a href="index.html">基于DNSRR的高可用Kubernetes集群</a> &raquo;</li>
-      <li>基于DNS轮询和HAProxy构建高可用Kubernetes</li>
+      <li>基于DNS轮询构建高可用Kubernetes</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -186,12 +186,117 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="dnshaproxykubernetes">
-<span id="k8s-dnsrr"></span><h1>基于DNS轮询和HAProxy构建高可用Kubernetes<a class="headerlink" href="#dnshaproxykubernetes" title="Permalink to this heading">¶</a></h1>
+  <section id="dnskubernetes">
+<span id="k8s-dnsrr"></span><h1>基于DNS轮询构建高可用Kubernetes<a class="headerlink" href="#dnskubernetes" title="Permalink to this heading">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>在 <a class="reference internal" href="../ha_k8s_lb/index.html#ha-k8s-lb"><span class="std std-ref">基于负载均衡的高可用Kubernetes集群</span></a> 部署中，负载均衡采用的是 <a class="reference internal" href="../../../../web/load_balancer/haproxy/index.html#haproxy"><span class="std std-ref">HAProxy</span></a> 结合keeplived实现VIP自动漂移。可以在部署基础上改造DNSRR到负载均衡模式</p>
 </div>
+<p>在完成 <a class="reference internal" href="../../etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a> ，具备了扩展etcd架构，就可以开始部署本文 <code class="docutils literal notranslate"><span class="pre">基于DNS轮询构建高可用Kubernetes</span></code> 。后续再补充 <a class="reference internal" href="../../../../web/load_balancer/haproxy/index.html#haproxy"><span class="std std-ref">HAProxy</span></a> 这样的负载均衡，就可以进一步改造成 <a class="reference internal" href="../ha_k8s_lb/index.html#ha-k8s-lb"><span class="std std-ref">基于负载均衡的高可用Kubernetes集群</span></a> 架构。</p>
+<section id="etcd">
+<h2>准备etcd访问证书<a class="headerlink" href="#etcd" title="Permalink to this heading">¶</a></h2>
+<p>由于是访问外部扩展etcd集群，所以首先需要将etcd证书复制到管控服务器节点，以便管控服务器服务(如apiserver)启动后能够正常读写etcd:</p>
+<ul class="simple">
+<li><p>在管控服务器 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-3</span></code> 上创建 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 访问证书目录，并将 <a class="reference internal" href="../../etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a> 准备好的证书复制过来:</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">etcd</span></code> 客户端所需要的证书可以从 <a class="reference internal" href="../../etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a> 配置的 <code class="docutils literal notranslate"><span class="pre">etctctl</span></code> 客户端配置找到对应文件</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">etcd客户端配置:使用证书</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">ETCDCTL_API</span><span class="o">=</span><span class="m">3</span>
+<span class="c1">#export ETCDCTL_ENDPOINTS=&#39;https://etcd.staging.huatai.me:2379&#39;</span>
+<span class="nb">export</span> <span class="nv">ETCDCTL_ENDPOINTS</span><span class="o">=</span>https://192.168.6.204:2379,https://192.168.6.205:2379,https://192.168.6.206:2379
+<span class="hll"><span class="nb">export</span> <span class="nv">ETCDCTL_CACERT</span><span class="o">=</span>/etc/etcd/ca.pem
+</span><span class="hll"><span class="nb">export</span> <span class="nv">ETCDCTL_CERT</span><span class="o">=</span>/etc/etcd/client.pem
+</span><span class="hll"><span class="nb">export</span> <span class="nv">ETCDCTL_KEY</span><span class="o">=</span>/etc/etcd/client-key.pem
+</span></pre></div>
+</div>
+</div>
+<p>将上述 <code class="docutils literal notranslate"><span class="pre">etcdctl</span></code> 客户端配置文件和Kubernetes访问etcd配置文件一一对应如下:</p>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">kubernetes apiserver访问etcd证书对应关系</span><a class="headerlink" href="#id3" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>cfssl生成etcd客户端密钥</p></th>
+<th class="head"><p>对应k8s访问etcd密钥文件</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ca.pem</p></td>
+<td><p>ca.crt</p></td>
+</tr>
+<tr class="row-odd"><td><p>client.pem</p></td>
+<td><p>apiserver-etcd-client.crt</p></td>
+</tr>
+<tr class="row-even"><td><p>client-key.pem</p></td>
+<td><p>apiserver-etcd-client.key</p></td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><p>分发kubernetes的apiserver使用的etcd证书:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">分发kubernetes的apiserver使用的etcd证书</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> host <span class="k">in</span> z-k8s-m-1 z-k8s-m-2 z-k8s-m-3<span class="p">;</span><span class="k">do</span>
+   scp /etc/etcd/ca.pem <span class="nv">$host</span>:/tmp/ca.crt
+   scp /etc/etcd/client.pem <span class="nv">$host</span>:/tmp/apiserver-etcd-client.crt
+   scp /etc/etcd/client-key.pem <span class="nv">$host</span>:/tmp/apiserver-etcd-client.key
+   
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mkdir -p /etc/kubernetes/pki/etcd&#39;</span> 
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mv /tmp/ca.crt /etc/kubernetes/pki/etcd/ca.crt&#39;</span>
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mv /tmp/apiserver-etcd-client.crt /etc/kubernetes/pki/apiserver-etcd-client.crt&#39;</span>
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mv /tmp/apiserver-etcd-client.key /etc/kubernetes/pki/apiserver-etcd-client.key&#39;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我是在具备密钥认证管理主机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 上作为客户端，通过ssh远程登录到 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-3</span></code> ，执行上述 <code class="docutils literal notranslate"><span class="pre">deploy_k8s_etcd_key.sh</span></code> 分发密钥</p>
+</div>
+</section>
+<section id="control-plane-ndoe">
+<h2>配置第一个管控节点(control plane ndoe)<a class="headerlink" href="#control-plane-ndoe" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">kubeadm-config.yaml</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">创建第一个管控节点配置 kubeadm-config.yaml</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">LOAD_BALANCER_DNS</span><span class="o">=</span>apiserver.staging.huatai.me
+<span class="nv">LOAD_BALANCER_PORT</span><span class="o">=</span><span class="m">6443</span>
+<span class="nv">ETCD_0_IP</span><span class="o">=</span><span class="m">192</span>.168.6.204
+<span class="nv">ETCD_1_IP</span><span class="o">=</span><span class="m">192</span>.168.6.205
+<span class="nv">ETCD_2_IP</span><span class="o">=</span><span class="m">192</span>.168.6.206
+
+cat <span class="s">&lt;&lt; EOF &gt; kubeadm-config.yaml</span>
+<span class="s">---</span>
+<span class="s">apiVersion: kubeadm.k8s.io/v1beta3</span>
+<span class="s">kind: ClusterConfiguration</span>
+<span class="s">kubernetesVersion: stable</span>
+<span class="s">controlPlaneEndpoint: &quot;${LOAD_BALANCER_DNS}:${LOAD_BALANCER_PORT}&quot; # change this (see below)</span>
+<span class="s">etcd:</span>
+<span class="s">  external:</span>
+<span class="s">    endpoints:</span>
+<span class="s">      - https://${ETCD_0_IP}:2379 # change ETCD_0_IP appropriately</span>
+<span class="s">      - https://${ETCD_1_IP}:2379 # change ETCD_1_IP appropriately</span>
+<span class="s">      - https://${ETCD_2_IP}:2379 # change ETCD_2_IP appropriately</span>
+<span class="s">    caFile: /etc/kubernetes/pki/etcd/ca.crt</span>
+<span class="s">    certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt</span>
+<span class="s">    keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/">Creating Highly Available Clusters with kubeadm</a> 官方文档综合了 <a class="reference internal" href="../ha_k8s_stacked.html#ha-k8s-stacked"><span class="std std-ref">堆叠型管控/etcd节点高可用集群</span></a> 和 <a class="reference internal" href="../ha_k8s_external.html#ha-k8s-external"><span class="std std-ref">扩展etcd节点高可用集群</span></a> ，我在本文实践中拆解了 <a class="reference internal" href="../ha_k8s_external.html#ha-k8s-external"><span class="std std-ref">扩展etcd节点高可用集群</span></a></p></li>
+</ul>
+</section>
 </section>
 
 
@@ -199,7 +304,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="ha_k8s_kubeadm.html" class="btn btn-neutral float-left" title="高可用Kubernetes集群kubeadm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../create_ha_k8s.html" class="btn btn-neutral float-right" title="使用kubeadm创建高可用集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../ha_k8s_lb/index.html" class="btn btn-neutral float-right" title="基于负载均衡的高可用Kubernetes集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

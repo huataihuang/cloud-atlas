@@ -197,8 +197,8 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="../../../../real/priv_cloud/z-k8s_env.html#z-k8s-env"><span class="std std-ref">构建Kubernetes云计算环境</span></a> 准备就绪，现在具备服务器列表如下:</p></li>
 </ul>
-<table class="docutils align-default" id="id3">
-<caption><span class="caption-text">z-k8s高可用Kubernetes集群服务器列表</span><a class="headerlink" href="#id3" title="永久链接至表格">¶</a></caption>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">z-k8s高可用Kubernetes集群服务器列表</span><a class="headerlink" href="#id5" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 20%" />
@@ -264,13 +264,37 @@
 </pre></div>
 </div>
 </li>
-<li><p>所有Kubernetes服务器部署 <a class="reference internal" href="../../../../real/priv_cloud/priv_docker.html#priv-docker"><span class="std std-ref">私有云docker环境</span></a> : 使用 <a class="reference internal" href="../../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 。完成后在所有节点上验证 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code> 正常工作</p></li>
+<li><p>所有Kubernetes服务器部署 <a class="reference internal" href="../../../../real/priv_cloud/priv_docker.html#priv-docker"><span class="std std-ref">私有云docker环境</span></a> : 使用 <a class="reference internal" href="../../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> ，详细过程见前文 <a class="reference internal" href="../prepare_z-k8s.html#prepare-z-k8s"><span class="std std-ref">z-k8s高可用Kubernetes集群准备</span></a> 。完成后在所有节点上验证 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code> 正常工作</p></li>
 </ul>
 <section id="id2">
 <h3>网络<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
-<p>虚拟机运行环境是 <a class="reference internal" href="../../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，默认启用防火墙，需要配置防火墙满足以下要求:</p>
-<table class="docutils align-default" id="id4">
-<caption><span class="caption-text">管控平台节点防火墙开启端口</span><a class="headerlink" href="#id4" title="永久链接至表格">¶</a></caption>
+<p>虚拟机运行环境是 <a class="reference internal" href="../../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，我对比了默认安装iptables规则:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">iptables</span> <span class="o">-</span><span class="n">L</span>
+</pre></div>
+</div>
+<p>可以看到 <code class="docutils literal notranslate"><span class="pre">INPOUT</span></code> 和 <code class="docutils literal notranslate"><span class="pre">OUTPUT</span></code> 链默认是空的，所以没有任何阻塞:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Chain</span> <span class="n">INPUT</span> <span class="p">(</span><span class="n">policy</span> <span class="n">ACCEPT</span><span class="p">)</span>
+<span class="n">target</span>     <span class="n">prot</span> <span class="n">opt</span> <span class="n">source</span>               <span class="n">destination</span>
+
+<span class="o">...</span>
+<span class="n">Chain</span> <span class="n">OUTPUT</span> <span class="p">(</span><span class="n">policy</span> <span class="n">ACCEPT</span><span class="p">)</span>
+<span class="n">target</span>     <span class="n">prot</span> <span class="n">opt</span> <span class="n">source</span>               <span class="n">destination</span>
+
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>为了简化部署，特别是对于内部系统，可以忽略防火墙配置。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>Kubernetes系统极其复杂，不应该直接面对外部网络，而且在网络边缘应该部署强限制的防火墙进行防护。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>生产环境，特别是现在 <code class="docutils literal notranslate"><span class="pre">零信任网络</span></code> ，应该在每个服务器节点部署 <a class="reference internal" href="../../../../linux/network/iptables/index.html#iptables"><span class="std std-ref">iptables</span></a> 安全规则。我可能后续再改进这方面部署</p>
+</div>
+<p>如果服务器启用防火墙，需要配置防火墙满足以下要求:</p>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text">管控平台节点防火墙开启端口</span><a class="headerlink" href="#id6" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 10%" />
@@ -319,8 +343,8 @@
 </tr>
 </tbody>
 </table>
-<table class="docutils align-default" id="id5">
-<caption><span class="caption-text">工作节点防火墙开启端口</span><a class="headerlink" href="#id5" title="永久链接至表格">¶</a></caption>
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-text">工作节点防火墙开启端口</span><a class="headerlink" href="#id7" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 10%" />
@@ -352,8 +376,8 @@
 </tbody>
 </table>
 <p><span class="sphinxnotes-strike">为了方便配置，采用 ufw 配置防火墙，配置方法如下:</span> ( <a class="reference internal" href="../../../../linux/ubuntu_linux/admin/ufw.html#ufw"><span class="std std-ref">ufw防火墙服务</span></a> 类似 <a class="reference internal" href="../../../../linux/redhat_linux/index.html#redhat-linux"><span class="std std-ref">RedHat Linux</span></a> 平台的 <a class="reference internal" href="../../../../linux/redhat_linux/admin/firewalld.html#firewalld"><span class="std std-ref">firewalld防护墙服务</span></a> )</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">使用ufw配置kubernetes节点防火墙</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">使用ufw配置kubernetes节点防火墙</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt update <span class="o">&amp;&amp;</span> sudo apt-upgrade -y
 sudo apt install ufw -y
 sudo ufw allow ssh
@@ -369,8 +393,79 @@ sudo ufw status
 </pre></div>
 </div>
 </div>
-<p>为简化netfilter链，依然采用 <a class="reference internal" href="../../../../linux/network/iptables/index.html#iptables"><span class="std std-ref">iptables</span></a> 增加允许访问的TCP端口到管控和工作节点:</p>
+<ul class="simple">
+<li><p><span class="sphinxnotes-strike">为防火墙部署，可以采用iptables增加允许访问的TCP端口到管控和工作节点:</span></p>
+<ul>
+<li><p><a class="reference internal" href="../../../../linux/network/iptables/iptables_open_ports.html#iptables-open-ports"><span class="std std-ref">iptables打开访问端口</span></a></p></li>
+<li><p><a class="reference internal" href="../../../../linux/network/iptables/iptables_persistent.html#iptables-persistent"><span class="std std-ref">iptables配置持久化</span></a></p></li>
+</ul>
+</li>
+<li><p>实际上，在安装Kubernetes集群有一个最大的障碍是 <code class="docutils literal notranslate"><span class="pre">GFW</span></code> ，Google的软件仓库(完全屏蔽)以及GitHub仓库(半屏蔽)都需要搭建梯子才能正常访问，对于本文实践采用 <a class="reference internal" href="../../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 体系，所以需要构建 <a class="reference internal" href="../../../../real/network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> ，就能够进行下一步安装。</p></li>
+</ul>
 </section>
+</section>
+<section id="kubeadm-kubelet-kubectl">
+<h2>安装kubeadm, kubelet 和 kubectl<a class="headerlink" href="#kubeadm-kubelet-kubectl" title="Permalink to this heading">¶</a></h2>
+<p>在所有节点上需要安装以下软件包:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 启动cluster的命令工具</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 运行在集群所有服务器节点的组件，用于启动pod和容器</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kubectl</span></code> 和集群通讯的工具</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>本文实践为 Ubuntu 20.04 ，采用 <a class="reference internal" href="../../../../linux/ubuntu_linux/admin/apt.html#apt"><span class="std std-ref">APT包管理</span></a> 安装软件包</p>
+</div>
+<ul class="simple">
+<li><p>安装Kubernetes软件仓库需要的 <code class="docutils literal notranslate"><span class="pre">apt</span></code> 包:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">apt安装k8s仓库所需软件包</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt update
+sudo apt install -y apt-transport-https ca-certificates curl
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>下载Google云公钥:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">安装Google云公钥</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>添加Kubernetes <code class="docutils literal notranslate"><span class="pre">apt</span></code> 仓库:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">apt添加k8s仓库</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main&quot;</span> <span class="p">|</span> sudo tee /etc/apt/sources.list.d/kubernetes.list
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">apt</span></code> 更新并安装 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> , <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> , <code class="docutils literal notranslate"><span class="pre">kubectl</span></code> ，然后将版本锁定:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">apt安装kubelet/kubeadm/kubectl</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt update
+sudo apt install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h2>容器运行时<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<p>对于Kubernetes运行的容器运行时需要按照 <a class="reference internal" href="../../container_runtimes.html#container-runtimes"><span class="std std-ref">容器运行环境</span></a> 进行调整(更多运行时适配，可以参考 <a class="reference internal" href="../../../container_runtimes/index.html#k8s-container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a> )</p>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">Installing kubeadm</a></p></li>
+<li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/troubleshooting-kubeadm/">Troubleshooting kubeadm</a></p></li>
+</ul>
 </section>
 </section>
 

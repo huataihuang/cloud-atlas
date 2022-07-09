@@ -67,26 +67,22 @@ iptables打开访问端口
 
 可以看到新添加的tcp port 80规则位于第5行。
 
+打开一段端口范围
+==================
+
+对于需要打开连续的多个端口，可以采用类似::
+
+   iptables -A INPUT -p tcp --match multiport --dports 1024:3000 -j ACCEPT
+
 iptables配置持久化
 =====================
 
-Red Hat Linux/CentOS
--------------------------
-
-在RHEL/CentOS中，可以通过以下命令将iptables配置持久化:
-
-.. code:: bash
-
-   service iptables save
-
-则规则会保存到 ``/etc/sysconfig/iptables`` 即使重启 ``iptables`` 服务则也可以使配置生效
-
-Debian/Ubuntu
----------------------
-
-Debian/Ubuntu需要安装 ``iptables-persistent`` 软件包来持久化
+上述配置 ``iptables`` 是动态完成，重启操作系统就会失效。所以，我们还需要执行 :ref:`iptables_persistent`
 
 参考
 ====
 
 - `Open http port ( 80 ) in iptables on CentOS <http://www.binarytides.com/open-http-port-iptables-centos/>`_ 这篇文档很简明，本文翻译自这个文档
+- `Allow web traffic in iptables software firewall <https://docs.rackspace.com/support/how-to/allow-web-traffic-in-iptables/>`_
+- `What is the correct way to open a range of ports in iptables <https://serverfault.com/questions/594835/what-is-the-correct-way-to-open-a-range-of-ports-in-iptables>`_
+- `How To Install iptables-persistent on Ubuntu 20.04 <https://installati.one/ubuntu/20.04/iptables-persistent/>`_
