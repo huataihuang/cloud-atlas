@@ -81,6 +81,10 @@ tmux的 ``前导键`` 是 ``ctrl-b`` ，也就是按下 ``ctrl-b`` 就进入发�
 
    tmux new -s "coding"
 
+.. note::
+
+   一定要使用小写的 ``-s`` 参数创建新会话名字，如果使用大写 ``-S`` 或者忘记 ``new`` 命令(直接使用 ``tmux -s "coding"`` )则会导致后续找不到这个会话 ``tmux ls`` 显示不出来也无法重新连接，非常蒙圈。
+
 - 然后可以连接到指定的 ``database upgrade`` 会话::
 
    tmux attach -t "database upgrade"

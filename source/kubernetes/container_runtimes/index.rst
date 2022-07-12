@@ -1,4 +1,4 @@
-.. _k8s_container_runtimes:
+.. _container_runtimes:
 
 ============================================
 Kubernetes 容器运行时(Container Runtimes)
@@ -7,7 +7,9 @@ Kubernetes 容器运行时(Container Runtimes)
 .. toctree::
    :maxdepth: 1
 
+   container_runtimes_startup.rst
    cri-o.rst
+   containerd/index
 
 .. only::  subproject and html
 

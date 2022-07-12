@@ -65,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="kubernetes_dashboard.html">Kubernetes仪表盘</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configure_pods_and_containers.html">配置pod和容器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="delete_cluster.html">删除Kubernetes集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cordon_node.html">暂停节点调度(cordon)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="drain_node.html">安全地清空一个Kubernetes节点</a></li>
 <li class="toctree-l3"><a class="reference internal" href="remove_node.html">从Kubernetes集群删除节点</a></li>
 <li class="toctree-l3"><a class="reference internal" href="set_k8s_worker_internal_ip.html">指定Kubernetes工作节点内网IP</a></li>
@@ -183,6 +184,16 @@
 <p class="admonition-title">警告</p>
 <p>如果没有任何限定条件全量查询，会对apiserver和etcd产生极大的压力，甚至长时间无法返回数据。所以，绝不推荐采用这样粗暴的方式</p>
 </div>
+<p>那么，如何能够查询出成千上万个node节点中特定节点上的pod呢？其实有非常简单的方法，就类似 <a class="reference internal" href="../../sql/index.html#sql"><span class="std std-ref">SQL Atlas</span></a> 一样，采用查询条件 <code class="docutils literal notranslate"><span class="pre">--field-selector</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">namespaces</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span> <span class="o">--</span><span class="n">field</span><span class="o">-</span><span class="n">selector</span> <span class="n">spec</span><span class="o">.</span><span class="n">nodeName</span><span class="o">=&lt;</span><span class="n">node</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>这个添加了特定查询条件的查询效率极高，可以瞬间从上万个节点的集群中查询出指定节点的运行pod，并且对apiserver和etcd无压力。</p>
+<p>另外一种方式也能获得指定节点上的容器，不过这种方式是为了获得指定节点较为详细的配置和监控信息，附带提供了运行pods的列表及状态，所以功能较为复杂、查询较为缓慢。如果要快速定位节点问题，可以尝试这个方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>kubectl describe node $NODE
+</pre></div>
+</div>
+<p>输出信息还包含了node节点以及容器的负载概括，以及关键事件，可以快速发现一些运维问题。不过，这个 <code class="docutils literal notranslate"><span class="pre">describe</span> <span class="pre">node</span></code> 方式很沉重，仅仅用来查询节点上的pods有些杀鸡用牛刀了。</p>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">

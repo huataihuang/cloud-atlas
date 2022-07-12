@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
-    <link rel="next" title="基于负载均衡的高可用Kubernetes集群" href="../ha_k8s_lb/index.html" />
+    <link rel="next" title="kubeadm集群重置" href="kubeadm_reset.html" />
     <link rel="prev" title="高可用Kubernetes集群kubeadm" href="ha_k8s_kubeadm.html" /> 
 </head>
 
@@ -60,7 +60,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../startup/index.html">Kubernetes快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../concepts/index.html">Kubernetes概念辨析</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Kubernetes部署</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../../container_runtimes.html">容器运行环境</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../bootstrap_kubernetes_single/index.html">Kubernetes集群引导(单master)</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">Kubernetes集群引导(高可用)</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../prepare_z-k8s.html">z-k8s高可用Kubernetes集群准备</a></li>
@@ -200,8 +199,8 @@
 <li><p>在管控服务器 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-3</span></code> 上创建 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 访问证书目录，并将 <a class="reference internal" href="../../etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a> 准备好的证书复制过来:</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">etcd</span></code> 客户端所需要的证书可以从 <a class="reference internal" href="../../etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a> 配置的 <code class="docutils literal notranslate"><span class="pre">etctctl</span></code> 客户端配置找到对应文件</p>
-<div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">etcd客户端配置:使用证书</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">etcd客户端配置:使用证书</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">ETCDCTL_API</span><span class="o">=</span><span class="m">3</span>
 <span class="c1">#export ETCDCTL_ENDPOINTS=&#39;https://etcd.staging.huatai.me:2379&#39;</span>
 <span class="nb">export</span> <span class="nv">ETCDCTL_ENDPOINTS</span><span class="o">=</span>https://192.168.6.204:2379,https://192.168.6.205:2379,https://192.168.6.206:2379
@@ -212,8 +211,8 @@
 </div>
 </div>
 <p>将上述 <code class="docutils literal notranslate"><span class="pre">etcdctl</span></code> 客户端配置文件和Kubernetes访问etcd配置文件一一对应如下:</p>
-<table class="docutils align-default" id="id3">
-<caption><span class="caption-text">kubernetes apiserver访问etcd证书对应关系</span><a class="headerlink" href="#id3" title="永久链接至表格">¶</a></caption>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text">kubernetes apiserver访问etcd证书对应关系</span><a class="headerlink" href="#id6" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 60%" />
@@ -238,8 +237,8 @@
 <ul class="simple">
 <li><p>分发kubernetes的apiserver使用的etcd证书:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">分发kubernetes的apiserver使用的etcd证书</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">分发kubernetes的apiserver使用的etcd证书</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> host <span class="k">in</span> z-k8s-m-1 z-k8s-m-2 z-k8s-m-3<span class="p">;</span><span class="k">do</span>
    scp /etc/etcd/ca.pem <span class="nv">$host</span>:/tmp/ca.crt
    scp /etc/etcd/client.pem <span class="nv">$host</span>:/tmp/apiserver-etcd-client.crt
@@ -261,12 +260,14 @@
 <section id="control-plane-ndoe">
 <h2>配置第一个管控节点(control plane ndoe)<a class="headerlink" href="#control-plane-ndoe" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>创建 <code class="docutils literal notranslate"><span class="pre">kubeadm-config.yaml</span></code> :</p></li>
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">create_kubeadm-config.sh</span></code> 脚本 :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">创建第一个管控节点配置 kubeadm-config.yaml</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">LOAD_BALANCER_DNS</span><span class="o">=</span>apiserver.staging.huatai.me
-<span class="nv">LOAD_BALANCER_PORT</span><span class="o">=</span><span class="m">6443</span>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">创建第一个管控节点配置 kubeadm-config.yaml</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">K8S_API_ENDPOINT</span><span class="o">=</span>z-k8s-api.staging.huatai.me
+<span class="nv">K8S_API_ENDPOINT_PORT</span><span class="o">=</span><span class="m">6443</span>
+<span class="nv">K8S_CLUSTER_NAME</span><span class="o">=</span>z-k8s
+
 <span class="nv">ETCD_0_IP</span><span class="o">=</span><span class="m">192</span>.168.6.204
 <span class="nv">ETCD_1_IP</span><span class="o">=</span><span class="m">192</span>.168.6.205
 <span class="nv">ETCD_2_IP</span><span class="o">=</span><span class="m">192</span>.168.6.206
@@ -276,13 +277,14 @@ cat <span class="s">&lt;&lt; EOF &gt; kubeadm-config.yaml</span>
 <span class="s">apiVersion: kubeadm.k8s.io/v1beta3</span>
 <span class="s">kind: ClusterConfiguration</span>
 <span class="s">kubernetesVersion: stable</span>
-<span class="s">controlPlaneEndpoint: &quot;${LOAD_BALANCER_DNS}:${LOAD_BALANCER_PORT}&quot; # change this (see below)</span>
+<span class="s">clusterName: ${K8S_CLUSTER_NAME}</span>
+<span class="s">controlPlaneEndpoint: &quot;${K8S_API_ENDPOINT}:${K8S_API_ENDPOINT_PORT}&quot;</span>
 <span class="s">etcd:</span>
 <span class="s">  external:</span>
 <span class="s">    endpoints:</span>
-<span class="s">      - https://${ETCD_0_IP}:2379 # change ETCD_0_IP appropriately</span>
-<span class="s">      - https://${ETCD_1_IP}:2379 # change ETCD_1_IP appropriately</span>
-<span class="s">      - https://${ETCD_2_IP}:2379 # change ETCD_2_IP appropriately</span>
+<span class="s">      - https://${ETCD_0_IP}:2379</span>
+<span class="s">      - https://${ETCD_1_IP}:2379</span>
+<span class="s">      - https://${ETCD_2_IP}:2379</span>
 <span class="s">    caFile: /etc/kubernetes/pki/etcd/ca.crt</span>
 <span class="s">    certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt</span>
 <span class="s">    keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key</span>
@@ -290,11 +292,288 @@ cat <span class="s">&lt;&lt; EOF &gt; kubeadm-config.yaml</span>
 </pre></div>
 </div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><a class="reference external" href="https://medium.com/&#64;kosta709/kubernetes-by-kubeadm-config-yamls-94e2ee11244">Kubernetes by kubeadm config yamls</a> 提供了 <code class="docutils literal notranslate"><span class="pre">kubeadm-config.yaml</span></code> 配置案例，例如如何修订集群名，网段等。实际上可以进一步参考官方文档定制 apiserver / controller / scheduler 的配置，在这篇文档中也有介绍和引用。非常好</p>
+</div>
+<ul class="simple">
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">sh</span> <span class="pre">create_kubeadm-config.sh</span></code> 生成 <code class="docutils literal notranslate"><span class="pre">kubeadm-config.yaml</span></code> 配置文件</p></li>
+<li><p>创建第一个管控节点:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">初始化第一个管控节点 kubeadm init</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo kubeadm init --config kubeadm-config.yaml --upload-certs
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>实际上只要保证网络畅通(翻墙)，并且做好前置准备工作， <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 初始化会非常丝滑地完成。此时终端会提示一些非常有用地信息，例如如何启动集群，如何配置管理环境。</p>
+</div>
+<p>如果一切顺利，会有如下提示信息:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">初始化第一个管控节点 kubeadm init 输出信息</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>init<span class="o">]</span> Using Kubernetes version: v1.24.2
+<span class="o">[</span>preflight<span class="o">]</span> Running pre-flight checks
+        <span class="o">[</span>WARNING SystemVerification<span class="o">]</span>: missing optional cgroups: hugetlb blkio
+<span class="o">[</span>preflight<span class="o">]</span> Pulling images required <span class="k">for</span> setting up a Kubernetes cluster
+<span class="o">[</span>preflight<span class="o">]</span> This might take a minute or two, depending on the speed of your internet connection
+<span class="o">[</span>preflight<span class="o">]</span> You can also perform this action <span class="k">in</span> beforehand using <span class="s1">&#39;kubeadm config images pull&#39;</span>
+<span class="o">[</span>certs<span class="o">]</span> Using certificateDir folder <span class="s2">&quot;/etc/kubernetes/pki&quot;</span>
+<span class="o">[</span>certs<span class="o">]</span> Generating <span class="s2">&quot;ca&quot;</span> certificate and key
+<span class="o">[</span>certs<span class="o">]</span> Generating <span class="s2">&quot;apiserver&quot;</span> certificate and key
+<span class="o">[</span>certs<span class="o">]</span> apiserver serving cert is signed <span class="k">for</span> DNS names <span class="o">[</span>apiserver.staging.huatai.me kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local z-k8s-m-1<span class="o">]</span> and IPs <span class="o">[</span><span class="m">10</span>.96.0.1 <span class="m">192</span>.168.6.101<span class="o">]</span>
+<span class="o">[</span>certs<span class="o">]</span> Generating <span class="s2">&quot;apiserver-kubelet-client&quot;</span> certificate and key
+<span class="o">[</span>certs<span class="o">]</span> Generating <span class="s2">&quot;front-proxy-ca&quot;</span> certificate and key
+<span class="o">[</span>certs<span class="o">]</span> Generating <span class="s2">&quot;front-proxy-client&quot;</span> certificate and key
+<span class="o">[</span>certs<span class="o">]</span> External etcd mode: Skipping etcd/ca certificate authority generation
+<span class="o">[</span>certs<span class="o">]</span> External etcd mode: Skipping etcd/server certificate generation
+<span class="o">[</span>certs<span class="o">]</span> External etcd mode: Skipping etcd/peer certificate generation
+<span class="o">[</span>certs<span class="o">]</span> External etcd mode: Skipping etcd/healthcheck-client certificate generation
+<span class="o">[</span>certs<span class="o">]</span> External etcd mode: Skipping apiserver-etcd-client certificate generation
+<span class="o">[</span>certs<span class="o">]</span> Generating <span class="s2">&quot;sa&quot;</span> key and public key
+<span class="o">[</span>kubeconfig<span class="o">]</span> Using kubeconfig folder <span class="s2">&quot;/etc/kubernetes&quot;</span>
+<span class="o">[</span>kubeconfig<span class="o">]</span> Writing <span class="s2">&quot;admin.conf&quot;</span> kubeconfig file
+<span class="o">[</span>kubeconfig<span class="o">]</span> Writing <span class="s2">&quot;kubelet.conf&quot;</span> kubeconfig file
+<span class="o">[</span>kubeconfig<span class="o">]</span> Writing <span class="s2">&quot;controller-manager.conf&quot;</span> kubeconfig file
+<span class="o">[</span>kubeconfig<span class="o">]</span> Writing <span class="s2">&quot;scheduler.conf&quot;</span> kubeconfig file
+<span class="o">[</span>kubelet-start<span class="o">]</span> Writing kubelet environment file with flags to file <span class="s2">&quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span>
+<span class="o">[</span>kubelet-start<span class="o">]</span> Writing kubelet configuration to file <span class="s2">&quot;/var/lib/kubelet/config.yaml&quot;</span>
+<span class="o">[</span>kubelet-start<span class="o">]</span> Starting the kubelet
+<span class="o">[</span>control-plane<span class="o">]</span> Using manifest folder <span class="s2">&quot;/etc/kubernetes/manifests&quot;</span>
+<span class="o">[</span>control-plane<span class="o">]</span> Creating static Pod manifest <span class="k">for</span> <span class="s2">&quot;kube-apiserver&quot;</span>
+<span class="o">[</span>control-plane<span class="o">]</span> Creating static Pod manifest <span class="k">for</span> <span class="s2">&quot;kube-controller-manager&quot;</span>
+<span class="o">[</span>control-plane<span class="o">]</span> Creating static Pod manifest <span class="k">for</span> <span class="s2">&quot;kube-scheduler&quot;</span>
+<span class="o">[</span>wait-control-plane<span class="o">]</span> Waiting <span class="k">for</span> the kubelet to boot up the control plane as static Pods from directory <span class="s2">&quot;/etc/kubernetes/manifests&quot;</span>. This can take up to 4m0s
+<span class="o">[</span>apiclient<span class="o">]</span> All control plane components are healthy after <span class="m">16</span>.010266 seconds
+<span class="o">[</span>upload-config<span class="o">]</span> Storing the configuration used <span class="k">in</span> ConfigMap <span class="s2">&quot;kubeadm-config&quot;</span> <span class="k">in</span> the <span class="s2">&quot;kube-system&quot;</span> Namespace
+<span class="o">[</span>kubelet<span class="o">]</span> Creating a ConfigMap <span class="s2">&quot;kubelet-config&quot;</span> <span class="k">in</span> namespace kube-system with the configuration <span class="k">for</span> the kubelets <span class="k">in</span> the cluster
+<span class="o">[</span>upload-certs<span class="o">]</span> Storing the certificates <span class="k">in</span> Secret <span class="s2">&quot;kubeadm-certs&quot;</span> <span class="k">in</span> the <span class="s2">&quot;kube-system&quot;</span> Namespace
+<span class="o">[</span>upload-certs<span class="o">]</span> Using certificate key:
+&lt;CERTIFICATE KEY&gt;
+<span class="o">[</span>mark-control-plane<span class="o">]</span> Marking the node z-k8s-m-1 as control-plane by adding the labels: <span class="o">[</span>node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers<span class="o">]</span>
+<span class="o">[</span>mark-control-plane<span class="o">]</span> Marking the node z-k8s-m-1 as control-plane by adding the taints <span class="o">[</span>node-role.kubernetes.io/master:NoSchedule node-role.kubernetes.io/control-plane:NoSchedule<span class="o">]</span>
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Using token: &lt;TOKEN&gt;
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Configured RBAC rules to allow Node Bootstrap tokens to get nodes
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Configured RBAC rules to allow Node Bootstrap tokens to post CSRs <span class="k">in</span> order <span class="k">for</span> nodes to get long term certificate credentials
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Configured RBAC rules to allow certificate rotation <span class="k">for</span> all node client certificates <span class="k">in</span> the cluster
+<span class="o">[</span>bootstrap-token<span class="o">]</span> Creating the <span class="s2">&quot;cluster-info&quot;</span> ConfigMap <span class="k">in</span> the <span class="s2">&quot;kube-public&quot;</span> namespace
+<span class="o">[</span>kubelet-finalize<span class="o">]</span> Updating <span class="s2">&quot;/etc/kubernetes/kubelet.conf&quot;</span> to point to a rotatable kubelet client certificate and key
+<span class="o">[</span>addons<span class="o">]</span> Applied essential addon: CoreDNS
+<span class="o">[</span>kubelet-check<span class="o">]</span> Initial timeout of 40s passed.
+<span class="o">[</span>addons<span class="o">]</span> Applied essential addon: kube-proxy
+
+Your Kubernetes control-plane has initialized successfully!
+</pre></div>
+</div>
+</div>
+<p>表明集群第一个管控节点初始化成功!</p>
+<ul class="simple">
+<li><p>此时根据提示，执行以下命令为自己的账户准备好管理配置</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">配置个人账户的管理k8s环境</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p <span class="nv">$HOME</span>/.kube
+sudo cp -i /etc/kubernetes/admin.conf <span class="nv">$HOME</span>/.kube/config
+sudo chown <span class="k">$(</span>id -u<span class="k">)</span>:<span class="k">$(</span>id -g<span class="k">)</span> <span class="nv">$HOME</span>/.kube/config
+</pre></div>
+</div>
+</div>
+<p>并且提供了如何添加管控平面节点的操作命令(包含密钥，所以必须保密)，以及添加工作节点的命令(包含密钥，所以必须保密)</p>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>容器没有启动问题<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>我这里遇到一个问题，就是 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 显示初始化成功，但是我使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code> 居然看不到任何容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+</pre></div>
+</div>
+<p>这怎么回事？</p>
+<ul>
+<li><p>检查端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="o">|</span> <span class="n">grep</span> <span class="mi">6443</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到端口已经监听:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">39868</span>     <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="n">ESTABLISHED</span>
+<span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">38514</span>     <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="n">ESTABLISHED</span>
+<span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">40006</span>     <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="n">TIME_WAIT</span>
+<span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">39982</span>     <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="n">TIME_WAIT</span>
+<span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">39926</span>     <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="n">ESTABLISHED</span>
+<span class="n">tcp</span>        <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">40070</span>     <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="n">TIME_WAIT</span>
+<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="p">:::</span><span class="mi">6443</span>                 <span class="p">:::</span><span class="o">*</span>                    <span class="n">LISTEN</span>
+<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="p">::</span><span class="mi">1</span><span class="p">:</span><span class="mi">51780</span>               <span class="p">::</span><span class="mi">1</span><span class="p">:</span><span class="mi">6443</span>                <span class="n">ESTABLISHED</span>
+<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">39868</span>     <span class="n">ESTABLISHED</span>
+<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="p">::</span><span class="mi">1</span><span class="p">:</span><span class="mi">6443</span>                <span class="p">::</span><span class="mi">1</span><span class="p">:</span><span class="mi">51780</span>               <span class="n">ESTABLISHED</span>
+<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">38514</span>     <span class="n">ESTABLISHED</span>
+<span class="n">tcp6</span>       <span class="mi">0</span>      <span class="mi">0</span> <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">6443</span>      <span class="mf">192.168.6.101</span><span class="p">:</span><span class="mi">39926</span>     <span class="n">ESTABLISHED</span>
+</pre></div>
+</div>
+<p>难道现在真的已经不再使用docker，直接使用 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 这样的 <a class="reference internal" href="../../../container_runtimes/index.html#container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a></p>
+<ul>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">top</span></code> 输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tasks</span><span class="p">:</span> <span class="mi">149</span> <span class="n">total</span><span class="p">,</span>   <span class="mi">1</span> <span class="n">running</span><span class="p">,</span> <span class="mi">148</span> <span class="n">sleeping</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">stopped</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">zombie</span>
+<span class="o">%</span><span class="n">Cpu</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="mf">3.0</span> <span class="n">us</span><span class="p">,</span>  <span class="mf">1.8</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span> <span class="mf">92.7</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">2.2</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.2</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.2</span> <span class="n">st</span>
+<span class="n">MiB</span> <span class="n">Mem</span> <span class="p">:</span>   <span class="mf">3929.8</span> <span class="n">total</span><span class="p">,</span>   <span class="mf">2579.8</span> <span class="n">free</span><span class="p">,</span>    <span class="mf">531.7</span> <span class="n">used</span><span class="p">,</span>    <span class="mf">818.4</span> <span class="n">buff</span><span class="o">/</span><span class="n">cache</span>
+<span class="n">MiB</span> <span class="n">Swap</span><span class="p">:</span>      <span class="mf">0.0</span> <span class="n">total</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">free</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">used</span><span class="o">.</span>   <span class="mf">3179.4</span> <span class="n">avail</span> <span class="n">Mem</span>
+
+    <span class="n">PID</span> <span class="n">USER</span>      <span class="n">PR</span>  <span class="n">NI</span>    <span class="n">VIRT</span>    <span class="n">RES</span>    <span class="n">SHR</span> <span class="n">S</span>  <span class="o">%</span><span class="n">CPU</span>  <span class="o">%</span><span class="n">MEM</span>     <span class="n">TIME</span><span class="o">+</span> <span class="n">COMMAND</span>
+  <span class="mi">18408</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span> <span class="mi">1173260</span> <span class="mi">336344</span>  <span class="mi">71252</span> <span class="n">S</span>   <span class="mf">4.6</span>   <span class="mf">8.4</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">32.39</span> <span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span>
+    <span class="mi">437</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span> <span class="mi">1855336</span>  <span class="mi">97924</span>  <span class="mi">63844</span> <span class="n">S</span>   <span class="mf">2.0</span>   <span class="mf">2.4</span>   <span class="mi">2</span><span class="p">:</span><span class="mf">49.35</span> <span class="n">kubelet</span>
+  <span class="mi">19247</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>  <span class="mi">818924</span>  <span class="mi">89480</span>  <span class="mi">59096</span> <span class="n">S</span>   <span class="mf">2.0</span>   <span class="mf">2.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">02.62</span> <span class="n">kube</span><span class="o">-</span><span class="n">controller</span>
+    <span class="mi">422</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span> <span class="mi">1296700</span>  <span class="mi">60624</span>  <span class="mi">30648</span> <span class="n">S</span>   <span class="mf">0.7</span>   <span class="mf">1.5</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">51.12</span> <span class="n">containerd</span>
+    <span class="mi">262</span> <span class="n">root</span>      <span class="mi">19</span>  <span class="o">-</span><span class="mi">1</span>   <span class="mi">93020</span>  <span class="mi">37364</span>  <span class="mi">36260</span> <span class="n">S</span>   <span class="mf">0.3</span>   <span class="mf">0.9</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">07.20</span> <span class="n">systemd</span><span class="o">-</span><span class="n">journal</span>
+  <span class="mi">18028</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>       <span class="mi">0</span>      <span class="mi">0</span>      <span class="mi">0</span> <span class="n">I</span>   <span class="mf">0.3</span>   <span class="mf">0.0</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.05</span> <span class="n">kworker</span><span class="o">/</span><span class="mi">1</span><span class="p">:</span><span class="mi">0</span><span class="o">-</span><span class="n">events</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到系统已经运行了 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> 和 <code class="docutils literal notranslate"><span class="pre">kube-controller</span></code> ，说明Kubernetes相关容器已经运行，否则也不会有这些进程。</p>
+<ul>
+<li><p>检查节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Unable</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span><span class="p">:</span> <span class="n">Forbidden</span>
+</pre></div>
+</div>
+<p>why?</p>
+<p>想到我部署采用DNSRR，也就是解析 <code class="docutils literal notranslate"><span class="pre">apiserver.staging.huatai.me</span></code> 域名可能是访问目前尚未加入管控的另外2个服务器，所以我尝试把DNS解析修改成只解析到节点1，也就是第一个加入管控的节点IP。但是依然没有解决</p>
+<ul>
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">kubelet.service</span></code> 日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">journalctl</span> <span class="o">-</span><span class="n">u</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">service</span> <span class="o">|</span> <span class="n">less</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>看到启动kubelet之后有报错信息，首先就是有关网络没有就绪的错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">40</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">E0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">40.420728</span>     <span class="mi">437</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">2424</span><span class="p">]</span> <span class="s2">&quot;Error getting node&quot;</span> <span class="n">err</span><span class="o">=</span><span class="s2">&quot;node </span><span class="se">\&quot;</span><span class="s2">z-k8s-m-1</span><span class="se">\&quot;</span><span class="s2"> not found&quot;</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">40</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">E0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">40.521709</span>     <span class="mi">437</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">2424</span><span class="p">]</span> <span class="s2">&quot;Error getting node&quot;</span> <span class="n">err</span><span class="o">=</span><span class="s2">&quot;node </span><span class="se">\&quot;</span><span class="s2">z-k8s-m-1</span><span class="se">\&quot;</span><span class="s2"> not found&quot;</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">40</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">E0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">40.581769</span>     <span class="mi">437</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">2349</span><span class="p">]</span> <span class="s2">&quot;Container runtime network not ready&quot;</span> <span class="n">networkReady</span><span class="o">=</span><span class="s2">&quot;NetworkReady=false reason:NetworkPluginNotReady message:Network plugin returns error: cni plugin not initialized&quot;</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">40</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">E0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">40.622654</span>     <span class="mi">437</span> <span class="n">kubelet</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">2424</span><span class="p">]</span> <span class="s2">&quot;Error getting node&quot;</span> <span class="n">err</span><span class="o">=</span><span class="s2">&quot;node </span><span class="se">\&quot;</span><span class="s2">z-k8s-m-1</span><span class="se">\&quot;</span><span class="s2"> not found&quot;</span>
+<span class="o">...</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">41</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">I0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">41.796597</span>     <span class="mi">437</span> <span class="n">kubelet_node_status</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">70</span><span class="p">]</span> <span class="s2">&quot;Attempting to register node&quot;</span> <span class="n">node</span><span class="o">=</span><span class="s2">&quot;z-k8s-m-1&quot;</span>
+<span class="o">...</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">43</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">I0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">43.232192</span>     <span class="mi">437</span> <span class="n">kubelet_node_status</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">108</span><span class="p">]</span> <span class="s2">&quot;Node was previously registered&quot;</span> <span class="n">node</span><span class="o">=</span><span class="s2">&quot;z-k8s-m-1&quot;</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">43</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">I0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">43.232303</span>     <span class="mi">437</span> <span class="n">kubelet_node_status</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">73</span><span class="p">]</span> <span class="s2">&quot;Successfully registered node&quot;</span> <span class="n">node</span><span class="o">=</span><span class="s2">&quot;z-k8s-m-1&quot;</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">43</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">I0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">43.427832</span>     <span class="mi">437</span> <span class="n">apiserver</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">52</span><span class="p">]</span> <span class="s2">&quot;Watching apiserver&quot;</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">43</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">I0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">43.438830</span>     <span class="mi">437</span> <span class="n">topology_manager</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">200</span><span class="p">]</span> <span class="s2">&quot;Topology Admit Handler&quot;</span>
+<span class="o">...</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">43</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">E0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">43.440795</span>     <span class="mi">437</span> <span class="n">pod_workers</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">951</span><span class="p">]</span> <span class="s2">&quot;Error syncing pod, skipping&quot;</span> <span class="n">err</span><span class="o">=</span><span class="s2">&quot;network is not ready: container runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:Network plugin returns error: cni plugin not initialized&quot;</span> <span class="n">pod</span><span class="o">=</span><span class="s2">&quot;kube-system/cor</span>
+<span class="n">edns</span><span class="o">-</span><span class="mi">6</span><span class="n">d4b75cb6d</span><span class="o">-</span><span class="n">pf7bs</span><span class="s2">&quot; podUID=79bc049c-0f1a-4387-aeed-ccfb04dfe7ca</span>
+<span class="n">Jul</span> <span class="mi">11</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">43</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span> <span class="n">kubelet</span><span class="p">[</span><span class="mi">437</span><span class="p">]:</span> <span class="n">E0711</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">43.440978</span>     <span class="mi">437</span> <span class="n">pod_workers</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">951</span><span class="p">]</span> <span class="s2">&quot;Error syncing pod, skipping&quot;</span> <span class="n">err</span><span class="o">=</span><span class="s2">&quot;network is not ready: container runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:Network plugin returns error: cni plugin not initialized&quot;</span> <span class="n">pod</span><span class="o">=</span><span class="s2">&quot;kube-system/cor</span>
+<span class="n">edns</span><span class="o">-</span><span class="mi">6</span><span class="n">d4b75cb6d</span><span class="o">-</span><span class="n">m2hf6</span><span class="s2">&quot; podUID=b2d40bb9-f431-4c53-a164-215bfcd4da47</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>可以看到访问 apiserver 失败，并且网络 cni plugin 没有初始化。想起来当时在官方文档中看到过必须初始化网络之后才能正常工作。(虽然我之前在 <a class="reference internal" href="../../bootstrap_kubernetes_single/single_master_k8s.html#single-master-k8s"><span class="std std-ref">创建单一控制平面(单master)集群</span></a> 经验是无需cni也至少能够看到pod运行，并且能够使用 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code> )</p>
+<p>此外，在 <a class="reference internal" href="../../../container_runtimes/index.html#container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a> 从官方文档查到 kubernetes 1.24 之后移除了docker支持，是否不再支持使用docker ?  我检查了 <a class="reference internal" href="../../../container_runtimes/index.html#container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a> 中对运行时检查 <code class="docutils literal notranslate"><span class="pre">sockets</span></code> 方法，确认系统只有 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 的sockets文件</p>
+<p>仔细检查了 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 输出信息，可以看到提示安装cni的方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">You</span> <span class="n">should</span> <span class="n">now</span> <span class="n">deploy</span> <span class="n">a</span> <span class="n">pod</span> <span class="n">network</span> <span class="n">to</span> <span class="n">the</span> <span class="n">cluster</span><span class="o">.</span>
+<span class="n">Run</span> <span class="s2">&quot;kubectl apply -f [podnetwork].yaml&quot;</span> <span class="k">with</span> <span class="n">one</span> <span class="n">of</span> <span class="n">the</span> <span class="n">options</span> <span class="n">listed</span> <span class="n">at</span><span class="p">:</span>
+  <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">concepts</span><span class="o">/</span><span class="n">cluster</span><span class="o">-</span><span class="n">administration</span><span class="o">/</span><span class="n">addons</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/troubleshooting-cni-plugin-related-errors/">Troubleshooting CNI plugin-related errors</a> 提供了排查CNI插件的建议。其中在文档开始就提出:</p>
+<ul class="simple">
+<li><p>为避免CNI plugin相关错误，首先应该将 <a class="reference internal" href="../../../container_runtimes/index.html#container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a> 升级到对应Kubernetes版本的已经验证正常工作的CNI plugins版本。例如，对于 Kubernetes 1.24 需要满足:</p>
+<ul>
+<li><p>containerd v1.6.4 或更高版本， v1.5.11 或更高版本</p></li>
+<li><p>CRI-O v1.24.0 或更新版本</p></li>
+</ul>
+</li>
+</ul>
+<p>我检查了一下我的 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 版本，发现是采用发行版安装的 <code class="docutils literal notranslate"><span class="pre">docker.io</span></code> ，所以版本不是最新， <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 的版本只是 <code class="docutils literal notranslate"><span class="pre">1.5.9</span></code> ，所以很可能是版本过低无法适配。该文档还提示:</p>
+<p>在Kubernetes， <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 运行时哦人添加一个回环接口 <code class="docutils literal notranslate"><span class="pre">lo</span></code> 给pods作为默认特性。containerd运行时配置通过一个 CNI plugin <code class="docutils literal notranslate"><span class="pre">loopback</span></code> 来实现，这是 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 发行包默认分发的一部分，例如 <code class="docutils literal notranslate"><span class="pre">containerd</span></code>  v1.6.0 以及更高版本就将一个CNI v1.0.0兼容loopback插件作为默认CNI plugins。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>根据上文排查，无法正常启动 <code class="docutils literal notranslate"><span class="pre">kubeadmin</span> <span class="pre">init</span></code> 容器是因为Kubernetes 1.24，也就是我安装的最新K8s已经移除了CNI plugin，将这部分工作移交给容器运行时自带的CNI plugin来完成。这就要求配套使用最新版本(或满足版本要求)的 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 运行时。最新版本的 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 运行时默认启动 <code class="docutils literal notranslate"><span class="pre">loopback</span></code> 就提供了kubernetes管控平面pods运行的条件，这样从开始就可以拉起 Kubernetes 的管控pods，为下一步安装不同的 <a class="reference internal" href="../../../network/index.html#kubernetes-network"><span class="std std-ref">Kubernetes网络</span></a> 提供初始运行条件。当Kubernetes集群正常运行后，通过 <a class="reference internal" href="../../../network/cilium/cilium_install_with_external_etcd.html#cilium-install-with-external-etcd"><span class="std std-ref">在扩展etcd环境安装cilium</span></a> 就可以直接在运行起来的kubernetes集群上完成网络定制。</p>
+<p><a class="reference external" href="https://containerd.io/releases/">containerd versioning and release</a> 提供了支持 Kubernetes 不同版本所对应当 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 版本，确实明确指出 Kubernetes 1.24 需要 <code class="docutils literal notranslate"><span class="pre">containerd</span> <span class="pre">1.64+，1.5.11+</span></code></p>
+</div>
+<ul class="simple">
+<li><p>重试通过 <a class="reference internal" href="../../../container_runtimes/containerd/install_containerd_official_binaries.html#install-containerd-official-binaries"><span class="std std-ref">安装containerd官方执行程序</span></a> 将发行版 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 升级到 1.64+ 来修复</p></li>
+<li><p><a class="reference internal" href="kubeadm_reset.html#kubeadm-reset"><span class="std std-ref">kubeadm集群重置</span></a></p></li>
+</ul>
+</section>
+<section id="network-plugins">
+<h2>Network Plugins<a class="headerlink" href="#network-plugins" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>在Kubernetes 1.24之前，CNI plugins可以通过 kubelet 使用 <code class="docutils literal notranslate"><span class="pre">cni-bin-dir</span></code> 和 <code class="docutils literal notranslate"><span class="pre">network-plugin</span></code> 命令参数来管理。但是在 Kubernetes 1.24 中，这些参数已经被移除，因为CNI管理已经不属于kubelet范围。</p>
+</div>
+<p>针对不同的 <a class="reference internal" href="../../../container_runtimes/index.html#container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a> ，需要采用不同的方式安装CNI plugins:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/containerd/containerd/blob/main/script/setup/install-cni">containerd安装CNI plugins官方文档</a></p></li>
+<li><p><a class="reference external" href="https://github.com/cri-o/cri-o/blob/main/contrib/cni/README.md">CRI-O安装CNI plugins官方文档</a></p></li>
+</ul>
+<section id="containerd-cni-plugins">
+<h3>containerd CNI plugins安装<a class="headerlink" href="#containerd-cni-plugins" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>一种方法是参考 <a class="reference external" href="https://k21academy.com/docker-kubernetes/three-node-kubernetes-cluster/">How To Setup A Three Node Kubernetes Cluster For CKA: Step By Step</a> 提供了通过containerd内置工具生成默认配置(实际上这个方法是Kubernetes官方文档配置containerd默认网络的方法，正确)</p></li>
+<li><p>(该方法不正确)从 <a class="reference external" href="https://github.com/containerd/containerd/blob/main/script/setup/install-cni">containerd安装CNI plugins官方文档</a> <code class="docutils literal notranslate"><span class="pre">install-cni</span></code> 脚本中获取生成配置部分:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">安装containerd CNI plugins脚本 install-cni 生成配置部分</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env bash</span>
+
+<span class="nv">CNI_CONFIG_DIR</span><span class="o">=</span>/etc/cni/net.d
+
+cat <span class="s">&lt;&lt; EOF | tee $CNI_CONFIG_DIR/10-containerd-net.conflist</span>
+<span class="s">{</span>
+<span class="s">  &quot;cniVersion&quot;: &quot;1.0.0&quot;,</span>
+<span class="s">  &quot;name&quot;: &quot;containerd-net&quot;,</span>
+<span class="s">  &quot;plugins&quot;: [</span>
+<span class="s">    {</span>
+<span class="s">      &quot;type&quot;: &quot;bridge&quot;,</span>
+<span class="s">      &quot;bridge&quot;: &quot;cni0&quot;,</span>
+<span class="s">      &quot;isGateway&quot;: true,</span>
+<span class="s">      &quot;ipMasq&quot;: true,</span>
+<span class="s">      &quot;promiscMode&quot;: true,</span>
+<span class="s">      &quot;ipam&quot;: {</span>
+<span class="s">        &quot;type&quot;: &quot;host-local&quot;,</span>
+<span class="s">        &quot;ranges&quot;: [</span>
+<span class="s">          [{</span>
+<span class="s">            &quot;subnet&quot;: &quot;10.88.0.0/16&quot;</span>
+<span class="s">          }],</span>
+<span class="s">          [{</span>
+<span class="s">            &quot;subnet&quot;: &quot;2001:4860:4860::/64&quot;</span>
+<span class="s">          }]</span>
+<span class="s">        ],</span>
+<span class="s">        &quot;routes&quot;: [</span>
+<span class="s">          { &quot;dst&quot;: &quot;0.0.0.0/0&quot; },</span>
+<span class="s">          { &quot;dst&quot;: &quot;::/0&quot; }</span>
+<span class="s">        ]</span>
+<span class="s">      }</span>
+<span class="s">    },</span>
+<span class="s">    {</span>
+<span class="s">      &quot;type&quot;: &quot;portmap&quot;,</span>
+<span class="s">      &quot;capabilities&quot;: {&quot;portMappings&quot;: true}</span>
+<span class="s">    }</span>
+<span class="s">  ]</span>
+<span class="s">}</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="cilium">
+<h3>安装cilium<a class="headerlink" href="#cilium" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/">Creating Highly Available Clusters with kubeadm</a> 官方文档综合了 <a class="reference internal" href="../ha_k8s_stacked.html#ha-k8s-stacked"><span class="std std-ref">堆叠型管控/etcd节点高可用集群</span></a> 和 <a class="reference internal" href="../ha_k8s_external.html#ha-k8s-external"><span class="std std-ref">扩展etcd节点高可用集群</span></a> ，我在本文实践中拆解了 <a class="reference internal" href="../ha_k8s_external.html#ha-k8s-external"><span class="std std-ref">扩展etcd节点高可用集群</span></a></p></li>
+<li><p><a class="reference external" href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#network-plugin-requirements">Network Plugins</a></p></li>
+<li><p><a class="reference external" href="https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/">cilium Quick Installation</a></p></li>
 </ul>
 </section>
 </section>
@@ -304,7 +583,7 @@ cat <span class="s">&lt;&lt; EOF &gt; kubeadm-config.yaml</span>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="ha_k8s_kubeadm.html" class="btn btn-neutral float-left" title="高可用Kubernetes集群kubeadm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../ha_k8s_lb/index.html" class="btn btn-neutral float-right" title="基于负载均衡的高可用Kubernetes集群" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="kubeadm_reset.html" class="btn btn-neutral float-right" title="kubeadm集群重置" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -7,7 +7,7 @@ Ubuntu Cgroup
 .. toctree::
    :maxdepth: 1
 
-   enable_cgrop_v2_ubuntu_20.04.rst
+   enable_cgroup_v2_ubuntu_20.04.rst
 
 .. only::  subproject and html
 

@@ -8,10 +8,13 @@ Kubernetes部署
 
 最新的实践采用 :ref:`z-k8s_env` 准备的KVM虚拟化环境，实践中引用的服务器列表请参考 :ref:`priv_cloud_infra`
 
+.. note::
+
+   Kubernetes运行依赖 :ref:`container_runtimes` ，所以务必在部署Kubernetes之前完成对应 :ref:`container_runtimes` 的安装配置( **一定要使用满足K8s版本要求的runtimes** ，例如 K8s 1.24 必须使用 :ref:`containerd` 1.6.4+,1.5.11+ )
+
 .. toctree::
    :maxdepth: 1
 
-   container_runtimes.rst
    bootstrap_kubernetes_single/index
    bootstrap_kubernetes_ha/index
    stateless_application/index

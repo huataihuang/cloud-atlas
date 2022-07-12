@@ -11,4 +11,4 @@
    本文结合了多个实践文档的再次综合实践:
 
    - :ref:`priv_etcd_tls`
-   - :ref:``
+   - :ref:`priv_deploy_etcd_cluster_with_tls_auth`

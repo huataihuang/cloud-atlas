@@ -4,6 +4,8 @@
 Docker Moby
 =================================
 
+Docker Moby项目包含了 :ref:`containerd` ，将在 :ref:`kubernetes` 中详述
+
 .. toctree::
    :maxdepth: 2
 
@@ -13,7 +15,6 @@ Docker Moby
    docker_20.10.rst
    fuse-overlayfs.rst
    docker_cgroup_v2/index
-   containerd/index
    runc/index
    buildkit/index
    linuxkit/index
