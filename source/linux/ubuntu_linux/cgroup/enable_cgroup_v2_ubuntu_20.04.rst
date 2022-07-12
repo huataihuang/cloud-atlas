@@ -1,4 +1,4 @@
-.. _enable_cgrop_v2_ubuntu_20.04:
+.. _enable_cgroup_v2_ubuntu_20.04:
 
 ===================================
 在Ubuntu 20.04 LTS激活Cgroup v2
@@ -47,7 +47,7 @@ cgroup v2 for containers  需要内核版本 4.15 或更高，而建议在 5.2 �
 
    systemd.unified_cgroup_hierarchy=1
 
-- 然后执行更新grup::
+- 然后执行更新group::
 
    sudo update-grub
 

@@ -1,7 +1,7 @@
-.. _container_runtimes:
+.. _container_runtimes_startup:
 
 ====================
-容器运行环境
+容器运行环境快速起步
 ====================
 
 在Kubernetes的Pod中运行容器，系统需要具备一个container runtime。并且Kubernetes支持多种contrainer runtime:
@@ -10,6 +10,19 @@
 - CRI-O
 - Containerd
 - 其他CRI runtimes: frakti
+
+默认情况下，Kubernetes使用 ``Container Runtime Interface(CRI)`` 来和选择的容器运行时交互。如果没有指定运行时，则 :ref:`kubeadm` 自动尝试检测安装的容器运行
+
+.. note::
+
+   Docker Engine没有直接实现CRI，所以在Kubernetes中使用 :ref:`docker` 需要一个附加的服务 ``cri-dockerd`` 来使用传统的Docker Engine。但是，这个支持将在 kubelet 1.24 被移除
+
+Kubernetes通过以下约定来检测支持的endpoints:
+
+.. csv-table:: kubernetes检测runtime运行时endpoints
+      :file: container_runtimes_startup/runtime_socket.csv
+      :widths: 50, 50
+      :header-rows: 1
 
 Cgroup驱动
 ===========
@@ -33,7 +46,7 @@ Cgroup v2
 - 切换到 cgroup v2 时，用户体验不应有任何明显差异， 除非用户直接在节点上或在容器内访问 cgroup 文件系统。 为了使用它，CRI 运行时也必须支持 cgroup v2。
 
 
-Ubuntu 20.10 才开始默认使用cgroup v2，原因是snap系统尚未支持。不过，对于我不使用snap，且想要实践最新的 :ref:`cgroup_v2` 来更精细化管控资源，所以 :ref:`enable_cgrop_v2_ubuntu_20.04` 。以下修订在每个节点上完成:
+Ubuntu 20.10 才开始默认使用cgroup v2，原因是snap系统尚未支持。不过，对于我不使用snap，且想要实践最新的 :ref:`cgroup_v2` 来更精细化管控资源，所以 :ref:`enable_cgroup_v2_ubuntu_20.04` 。以下修订在每个节点上完成:
 
 - 修改 ``/etc/default/grub`` 配置在 ``GRUB_CMDLINE_LINUX`` 添加参数::
 
@@ -44,12 +57,26 @@ Ubuntu 20.10 才开始默认使用cgroup v2，原因是snap系统尚未支持。
    sudo update-grub
    sudo reboot
 
-Docker
-=========
+容器运行时(container runtimes)
+=================================
+
+Kubernetes不需要(现在甚至不太支持)完整的Docker，只需要提供 Container Runtime Interface(CRI)的容器运行时(runtime)
+
+:ref:`containerd`
+-------------------
+
+完整步骤待整理，见 :ref:`install_containerd_official_binaries`
+
+Docker(适用于K8s 1.24版本之前)
+=================================
+
+.. warning::
+
+   从 Kubernetes 1.24 开始已经移除了Docker支持，默认不再需要使用Docker，而是直接采取原生CRI的 :ref:`container_runtimes` ，如 :ref:`containerd` 。
 
 .. note::
 
-   我的个人实践目前仅限于Docker作为Kubernetes的runtime，其他容器运行环境可能会在某些需要的时候尝试实践。
+   :strike:`我的个人实践目前仅限于Docker作为Kubernetes的runtime，其他容器运行环境可能会在某些需要的时候尝试实践。`
 
 Ubuntu 16.04
 ----------------

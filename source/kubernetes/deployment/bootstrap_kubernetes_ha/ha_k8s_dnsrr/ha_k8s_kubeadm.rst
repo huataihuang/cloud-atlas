@@ -78,6 +78,17 @@
 
 - 实际上，在安装Kubernetes集群有一个最大的障碍是 ``GFW`` ，Google的软件仓库(完全屏蔽)以及GitHub仓库(半屏蔽)都需要搭建梯子才能正常访问，对于本文实践采用 :ref:`ubuntu_linux` 体系，所以需要构建 :ref:`apt_proxy_arch` ，就能够进行下一步安装。
 
+容器运行时( :ref:`container_runtimes` )
+========================================
+
+.. note::
+
+   这是非常关键的步骤，特别是Kubernetes最新版本 1.24 移除了Docker支持直接采用类似 :ref:`containerd` 这样的容器运行时，就要求容器运行时配置完整的CNI plugins才能自举Kubernetes的管控平面
+
+   详细步骤见: :ref:`install_containerd_official_binaries`
+
+- 执行 :ref:`container_runtimes_startup` 为每个节点安装好容器运行时
+
 安装kubeadm, kubelet 和 kubectl
 ==================================
 
@@ -118,7 +129,7 @@
 容器运行时
 =============
 
-对于Kubernetes运行的容器运行时需要按照 :ref:`container_runtimes` 进行调整(更多运行时适配，可以参考 :ref:`k8s_container_runtimes` )
+对于Kubernetes运行的容器运行时需要按照 :ref:`container_runtimes` 进行调整
 
 参考
 ======
