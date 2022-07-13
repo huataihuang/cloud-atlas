@@ -14,6 +14,8 @@ Alpine Linux
    alpine_install_pi.rst
    alpine_install_pi_1.rst
    alpine_pi_clock_skew.rst
+   alpine_chrony.rst
+   alpine_dnsmasq.rst
    alpine_pi_clone.rst
    alpine_install_pi_usb_boot.rst
    alpine_pi_usb_boot_clone.rst
