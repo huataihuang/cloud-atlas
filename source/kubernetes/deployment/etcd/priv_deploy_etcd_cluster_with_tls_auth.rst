@@ -222,9 +222,11 @@ unmarshaling JSON
    :language: bash
    :caption: etcdctl 使用的环境变量
 
-然后可以检查::
+然后可以检查:
 
-   etcdctl member list
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_member_list
+   :language: bash
+   :caption: etcdctl 检查集群成员列表(member list)
 
 输出类似::
 
@@ -232,9 +234,11 @@ unmarshaling JSON
    73d6903628b74671, started, z-b-data-1, https://192.168.6.204:2380, https://192.168.6.204:2379, false
    cbea9b1cda087dbf, started, z-b-data-2, https://192.168.6.205:2380, https://192.168.6.205:2379, false
 
-为方便观察，可以使用表格输出模式::
+为方便观察，可以使用表格输出模式:
 
-   etcdctl --write-out=table endpoint status
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_status
+   :language: bash
+   :caption: etcdctl 检查endpoint状态(表格形式输出)
 
 输出显示::
 
@@ -246,9 +250,11 @@ unmarshaling JSON
 
 注意，每次刷新显示的 ``ID`` 是轮转变化的，分别是3个实际的etcd节点。这种方式观察不是很方便(同时观察3个节点状态)
 
-检查健康状况::
+检查健康状况:
 
-   etcdctl endpoint health
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_health
+   :language: bash
+   :caption: etcdctl 检查endpoint健康状态(查看节点响应情况)
 
 输出显示::
 
@@ -268,9 +274,11 @@ unmarshaling JSON
 
 现在就可以检查etcd集群的所有节点:
 
-- 检查节点状态::
+- 检查节点状态:
 
-   etcdctl --write-out=table endpoint status
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_status
+   :language: bash
+   :caption: etcdctl 检查endpoint状态(表格形式输出)
 
 现在就可以看到3个节点状态的详细信息::
 
@@ -282,9 +290,11 @@ unmarshaling JSON
    | https://192.168.6.206:2379 | 64e2be2269f59c43 |   3.5.4 |   20 kB |     false |      false |         2 |         57 |                 57 |        |
    +----------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 
-- 检查节点健康状况::
+- 检查节点健康状况:
 
-   etcdctl --write-out=table endpoint health
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_health
+   :language: bash
+   :caption: etcdctl 检查endpoint健康状态(查看节点响应情况)
 
 现在也能看到3个节点健康情况::
 
@@ -295,6 +305,13 @@ unmarshaling JSON
    | https://192.168.6.205:2379 |   true | 10.327062ms |       |
    | https://192.168.6.206:2379 |   true | 10.631616ms |       |
    +----------------------------+--------+-------------+-------+
+
+- (重要步骤)由于 ``etcd`` 已经完成部署，之前在 ``/etc/etcd/conf.yml`` 配置集群状态，需要从 ``new`` 改为 ``existing`` ，表明集群已经建设完成::
+
+   # Initial cluster state ('new' or 'existing').
+   initial-cluster-state: 'existing'
+
+后续系统重启，etcd重启就会按照已经建成的etcd来运行，不用再进行初始化
 
 参考
 ======
