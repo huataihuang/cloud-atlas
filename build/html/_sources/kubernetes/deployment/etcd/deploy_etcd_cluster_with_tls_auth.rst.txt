@@ -270,9 +270,11 @@ TLS证书采用 ``cfssl`` 工具构建，完整步骤见 :ref:`etcd_tls` 。分�
    :language: bash
    :caption: etcdctl 使用的环境变量
 
-然后可以检查::
+然后可以检查:
 
-   etcdctl member list
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_member_list
+   :language: bash
+   :caption: etcdctl 检查集群成员列表(member list)
 
 输出类似::
 
@@ -280,9 +282,11 @@ TLS证书采用 ``cfssl`` 工具构建，完整步骤见 :ref:`etcd_tls` 。分�
    7e8d94ba496c072d, started, x-k3s-m-1, https://x-k3s-m-1.edge.huatai.me:2380, https://x-k3s-m-1.edge.huatai.me:2379, false
    a01cb65343e64610, started, x-k3s-m-2, https://x-k3s-m-2.edge.huatai.me:2380, https://x-k3s-m-2.edge.huatai.me:2379, false
 
-为方便观察，可以使用表格输出模式::
+为方便观察，可以使用表格输出模式:
 
-   etcdctl --write-out=table endpoint status
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_status
+   :language: bash
+   :caption: etcdctl 检查endpoint状态(表格形式输出)
 
 输出显示::
 
@@ -294,9 +298,11 @@ TLS证书采用 ``cfssl`` 工具构建，完整步骤见 :ref:`etcd_tls` 。分�
    | https://192.168.7.13:2379 |   9bfd4ef1e72d26 |   3.5.2 |   20 kB |      true |      false |         7 |        237 |                237 |        |
    +---------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 
-检查健康状况::
+检查健康状况:
 
-   etcdctl endpoint health
+.. literalinclude:: deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_health
+   :language: bash
+   :caption: etcdctl 检查endpoint健康状态(查看节点响应情况)
 
 输出显示::
 

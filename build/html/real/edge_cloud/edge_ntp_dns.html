@@ -99,7 +99,11 @@
 <li class="toctree-l3"><a class="reference internal" href="edge_pi.html">边缘计算树莓派</a></li>
 <li class="toctree-l3"><a class="reference internal" href="edge_pi_os.html">边缘云Raspberry Pi OS桌面</a></li>
 <li class="toctree-l3"><a class="reference internal" href="edge_pi_alpine.html">边缘云Alpine Linux</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">边缘云NTP和DNS服务</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">边缘云NTP和DNS服务</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ntp-chrony">部署NTP服务: <span class="xref std std-ref">chrony</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dns-dns">部署DNS服务: <span class="xref std std-ref">dns</span></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../network/index.html">真实荒漠</a></li>
@@ -152,9 +156,118 @@
 <p>这两个关键服务也是同时提供给 <a class="reference internal" href="edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 共用的。</p>
 <p>随着 <a class="reference internal" href="../priv_cloud/index.html#priv-cloud"><span class="std std-ref">私有云计算构建</span></a> 和 <a class="reference internal" href="index.html#edge-cloud"><span class="std std-ref">边缘云计算构建</span></a> 拆分(部署到隔离的两个网络)， <a class="reference internal" href="edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 缺乏 <a class="reference internal" href="../../infra_service/dns/index.html#dns"><span class="std std-ref">DNS服务</span></a> 和 <a class="reference internal" href="../../infra_service/ntp/index.html#ntp"><span class="std std-ref">ntp服务</span></a> 支持，会产生异常。所以，独立在 alpine linux 环境下重新部署:</p>
 <ul class="simple">
-<li><p><span class="xref std std-ref">alpine_chrony</span></p></li>
+<li><p><a class="reference internal" href="../../linux/alpine_linux/alpine_chrony.html#alpine-chrony"><span class="std std-ref">Alpine Linux运行chrony(NTP服务)</span></a></p></li>
 <li><p><a class="reference internal" href="../../linux/alpine_linux/alpine_dnsmasq.html#alpine-dnsmasq"><span class="std std-ref">Alpine Linux运行dnsmasq</span></a></p></li>
 </ul>
+<p>在集群中部署 <a class="reference internal" href="../../infra_service/ntp/index.html#ntp"><span class="std std-ref">ntp服务</span></a> 和 <a class="reference internal" href="../../infra_service/dns/index.html#dns"><span class="std std-ref">DNS服务</span></a> 是非常不起眼但是又非常重要的步骤:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 这样低成本SBC系统没有RTC时钟，每次系统重启如果没有 <a class="reference internal" href="../../linux/alpine_linux/alpine_chrony.html#alpine-chrony"><span class="std std-ref">Alpine Linux运行chrony(NTP服务)</span></a> 提供时钟矫正将无法正常运行( <a class="reference internal" href="../../linux/alpine_linux/alpine_pi_clock_skew.html#alpine-pi-clock-skew"><span class="std std-ref">Alpine Linux在树莓派启动”clock skew”报错</span></a> )</p></li>
+<li><p>集群( <a class="reference internal" href="../../distributed_system/index.html#distributed-system"><span class="std std-ref">Distributed System Atlas</span></a> )业务跨节点调度和通讯强依赖每个节点时钟一致，任何时钟扭曲都会造成应用异常甚至崩溃</p></li>
+<li><p><a class="reference internal" href="../../kubernetes/administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> 等服务使用域名解析来完成节点互相访问，所以在 <a class="reference internal" href="edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 如果不提供 <a class="reference internal" href="../../linux/alpine_linux/alpine_dnsmasq.html#alpine-dnsmasq"><span class="std std-ref">Alpine Linux运行dnsmasq</span></a> DNS解析，则 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 甚至找不到peer节点导致无法启动(例如我在配置中采用了主机名而不是直接的IP)</p></li>
+</ul>
+<section id="ntp-chrony">
+<h2>部署NTP服务: <a class="reference internal" href="../../infra_service/ntp/chrony/index.html#chrony"><span class="std std-ref">chrony ntp服务</span></a><a class="headerlink" href="#ntp-chrony" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>使用 <a class="reference internal" href="../../linux/alpine_linux/alpine_apk.html#alpine-apk"><span class="std std-ref">Alpine Linux包管理apk</span></a> 安装 <code class="docutils literal notranslate"><span class="pre">chrony</span></code> (也可能在 <a class="reference internal" href="../../linux/alpine_linux/alpine_install_pi_usb_boot.html#alpine-install-pi-usb-boot"><span class="std std-ref">树莓派环境安装Alpine Linux到USB磁盘启动</span></a> 已经安装过)</p></li>
+<li><p>选择一台服务器，例如 <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1</span></code> 作为服务器，配置 <code class="docutils literal notranslate"><span class="pre">/etc/chrony/chrony.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">chrony服务器的/etc/chrony/chrony.conf配置</span><a class="headerlink" href="#id1" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># chrony server config</span>
+
+pool pool.ntp.org iburst
+initstepslew <span class="m">10</span> pool.ntp.org
+
+allow <span class="m">192</span>.168.7.0/24
+
+driftfile /var/lib/chrony/chrony.drift
+rtcsync
+cmdport <span class="m">0</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>重启 <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1</span></code> 上 <code class="docutils literal notranslate"><span class="pre">chronyd</span></code> 服务，则该NTP服务器会和internet上时钟服务器进行时钟同步，并为局域网内部服务器提供NTP服务:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">alpine linux系统中重启chronyd服务</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo service chronyd restart
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>除了 <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1</span></code> 外，其他 <a class="reference internal" href="edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 主机都是NTP客户端，则都以 <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1</span></code> 为NTP服务器，配置 <code class="docutils literal notranslate"><span class="pre">/etc/chrony/chrony.conf</span></code> 如下:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">chrony服务端的/etc/chrony/chrony.conf配置</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># chrony client config</span>
+
+pool <span class="m">192</span>.168.7.11 iburst
+initstepslew <span class="m">10</span> <span class="m">192</span>.168.7.11
+
+driftfile /var/lib/chrony/chrony.drift
+rtcsync
+cmdport <span class="m">0</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>同样NTP客户端也需要重启chronyd来以 <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1</span></code> 为基准矫正时间:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">alpine linux系统中重启chronyd服务</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo service chronyd restart
+</pre></div>
+</div>
+</div>
+<p>完成上述部署之后，请仔细核对所有节点，确保时钟一致。则我们就可以开始下一步部署</p>
+</section>
+<section id="dns-dns">
+<h2>部署DNS服务: <a class="reference internal" href="../../infra_service/dns/index.html#dns"><span class="std std-ref">DNS服务</span></a><a class="headerlink" href="#dns-dns" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference internal" href="edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 作为边缘云，要求系统精简轻量级，所以部署DNS服务也是选择轻量级的 <a class="reference internal" href="../../infra_service/dns/dnsmasq/index.html#dnsmasq"><span class="std std-ref">DNSmasq</span></a></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../linux/alpine_linux/alpine_apk.html#alpine-apk"><span class="std std-ref">Alpine Linux包管理apk</span></a> 安装:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">alpine linux安装DNSmasq</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apk update
+apk upgrade
+apk add dnsmasq
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>参考 <a class="reference internal" href="../../infra_service/dns/dnsmasq/deploy_dnsmasq.html#deploy-dnsmasq"><span class="std std-ref">部署DNSmasq</span></a> 配置 <code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">alpine linux配置DNSmasq /etc/dnsmasq.conf</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 本地默认域名</span>
+<span class="nv">local</span><span class="o">=</span>/edge.huatai.me/
+<span class="c1"># 转发上游域名解析服务器，请求DNS解析</span>
+<span class="nv">server</span><span class="o">=</span><span class="m">8</span>.8.8.8
+<span class="c1"># 监听DNS请求的网卡接口</span>
+listen-address<span class="o">=</span><span class="m">192</span>.168.6.200,127.0.0.1
+<span class="c1"># 扩展主机域名，也就是请求 zcloud 默认扩展成 zcloud.edge.huatai.me</span>
+expand-hosts
+<span class="c1"># 服务器提供解析的域名</span>
+<span class="nv">domain</span><span class="o">=</span>edge.huatai.me
+<span class="c1"># DNS解析缓存</span>
+cache-size<span class="o">=</span><span class="m">1000</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>启动dnsmasq并且将dnsmasq服务配置成启动时启动:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">alpine linux启动dnsmasq摒弃配置DNSmasq系统启动时启动</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span> sudo service dnsmasq start
+ sudo rc-update add dnsmasq
+</pre></div>
+</div>
+</div>
+<p>完成上述部署后，在所有节点都通过 <code class="docutils literal notranslate"><span class="pre">host</span></code> 命令接茬DNS解析，确保能够解析集群中所有服务器的IP地址。</p>
+</section>
 </section>
 
 

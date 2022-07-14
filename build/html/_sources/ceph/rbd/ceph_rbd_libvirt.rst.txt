@@ -225,6 +225,32 @@ RBD镜像
    -----------------------------------------------------
    new-libvirt-image   libvirt-pool/new-libvirt-image
 
+virsh存储池激活问题
+---------------------
+
+为了在物理服务器重启自动启动3个提供ceph存储的虚拟机，通过 :ref:`virsh_manage_vm` 配置了存储虚拟机 ``autostart`` 。同时也配置了自动启动存储池 ``autostart`` 。但是看起来底层ceph启动速度比较慢，尚未就就绪的时候libvirt存储池 ``images_rbd`` 就会激活失败。此时::
+
+   virsh pool-list --all
+
+显示该libvirt存储池没有激活::
+
+    Name           State      Autostart
+   --------------------------------------
+    boot-scratch   active     yes
+    images         active     yes
+    images_lvm     active     yes
+    images_rbd     inactive   yes
+    nvram          active     yes 
+
+不过，不影响使用这个存储池的虚拟机使用存储，所有使用 ``images_rbd`` 的虚拟机都能正常运行。只是，无法使用 ``virsh vol-list images_rbd`` ，会提示错误::
+
+   error: Failed to list volumes
+   error: Requested operation is not valid: storage pool 'images_rbd' is not active
+
+解决方法可以通过再次激活存储卷(这个命令可以添加到启动脚本中自动激活一次)::
+
+   virsh pool-start images_rbd
+
 创建虚拟机
 ------------
 

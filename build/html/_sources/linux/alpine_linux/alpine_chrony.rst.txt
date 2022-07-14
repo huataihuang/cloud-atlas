@@ -28,9 +28,11 @@ chrony配置
    :language: bash
    :caption: chrony服务器的/etc/chrony/chrony.conf配置
 
-- 然后在服务器 ``x-k3s-m-1`` 上执行以下命令重启 ``chrony`` 服务，很快就矫正了时间::
+- 然后在服务器 ``x-k3s-m-1`` 上执行以下命令重启 ``chrony`` 服务，很快就矫正了时间:
 
-   /etc/init.d/chronyd restart
+.. literalinclude:: alpine_chrony/restart_chronyd
+   :language: bash
+   :caption: alpine linux系统中重启chronyd服务
 
 - 在 :ref:`edge_cloud_infra` 中其他节点都以 ``x-k3s-m-1`` 为NTP服务器，配置 ``/etc/chrony/chrony.conf`` 如下:
 

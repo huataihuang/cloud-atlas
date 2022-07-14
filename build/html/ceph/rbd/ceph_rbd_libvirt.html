@@ -89,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes_from_scratch/index.html">Kubernetes From Scratch (KFS) Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rancher/index.html">Rancher Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
@@ -404,6 +405,32 @@ virsh secret-set-value --secret &quot;$SECRET_UUID&quot; --base64 &quot;$(sudo c
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span>                <span class="n">Path</span>
 <span class="o">-----------------------------------------------------</span>
 <span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>   <span class="n">libvirt</span><span class="o">-</span><span class="n">pool</span><span class="o">/</span><span class="n">new</span><span class="o">-</span><span class="n">libvirt</span><span class="o">-</span><span class="n">image</span>
+</pre></div>
+</div>
+</section>
+<section id="virsh">
+<h3>virsh存储池激活问题<a class="headerlink" href="#virsh" title="Permalink to this heading">¶</a></h3>
+<p>为了在物理服务器重启自动启动3个提供ceph存储的虚拟机，通过 <a class="reference internal" href="../../kvm/startup/virsh_manage_vm.html#virsh-manage-vm"><span class="std std-ref">virsh管理虚拟机</span></a> 配置了存储虚拟机 <code class="docutils literal notranslate"><span class="pre">autostart</span></code> 。同时也配置了自动启动存储池 <code class="docutils literal notranslate"><span class="pre">autostart</span></code> 。但是看起来底层ceph启动速度比较慢，尚未就就绪的时候libvirt存储池 <code class="docutils literal notranslate"><span class="pre">images_rbd</span></code> 就会激活失败。此时:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="nb">list</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+<p>显示该libvirt存储池没有激活:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">Name</span>           <span class="n">State</span>      <span class="n">Autostart</span>
+<span class="o">--------------------------------------</span>
+ <span class="n">boot</span><span class="o">-</span><span class="n">scratch</span>   <span class="n">active</span>     <span class="n">yes</span>
+ <span class="n">images</span>         <span class="n">active</span>     <span class="n">yes</span>
+ <span class="n">images_lvm</span>     <span class="n">active</span>     <span class="n">yes</span>
+ <span class="n">images_rbd</span>     <span class="n">inactive</span>   <span class="n">yes</span>
+ <span class="n">nvram</span>          <span class="n">active</span>     <span class="n">yes</span>
+</pre></div>
+</div>
+<p>不过，不影响使用这个存储池的虚拟机使用存储，所有使用 <code class="docutils literal notranslate"><span class="pre">images_rbd</span></code> 的虚拟机都能正常运行。只是，无法使用 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">vol-list</span> <span class="pre">images_rbd</span></code> ，会提示错误:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="nb">list</span> <span class="n">volumes</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">Requested</span> <span class="n">operation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span> <span class="n">storage</span> <span class="n">pool</span> <span class="s1">&#39;images_rbd&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">active</span>
+</pre></div>
+</div>
+<p>解决方法可以通过再次激活存储卷(这个命令可以添加到启动脚本中自动激活一次):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">pool</span><span class="o">-</span><span class="n">start</span> <span class="n">images_rbd</span>
 </pre></div>
 </div>
 </section>

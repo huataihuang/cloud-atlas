@@ -9,12 +9,11 @@ Alpine Linux运行dnsmasq
 软件安装
 ==========
 
-- 依然是 :ref:`alpine_apk` 安装::
+- 依然是 :ref:`alpine_apk` 安装:
 
-   apk update
-   apk upgrade
-
-   apk add dnsmasq
+.. literalinclude:: alpine_dnsmasq/apk_add_dnsmasq
+   :language: bash
+   :caption: alpine linux安装DNSmasq
 
 安装后默认 ``/etc/dnsmasq.conf`` 配置文件
 
@@ -27,5 +26,9 @@ Alpine Linux运行dnsmasq
    :language: bash
    :caption: alpine linux配置DNSmasq /etc/dnsmasq.conf
 
+- 启动dnsmasq并且将dnsmasq服务配置成启动时启动(重要，因为所有服务都会依赖DNS解析，如 :ref:`k3s_ha_etcd` ):
 
+.. literalinclude:: alpine_dnsmasq/start_enable_dnsmasq
+   :language: bash
+   :caption: alpine linux启动dnsmasq摒弃配置DNSmasq系统启动时启动
 

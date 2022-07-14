@@ -129,7 +129,7 @@
 容器运行时
 =============
 
-对于Kubernetes运行的容器运行时需要按照 :ref:`container_runtimes` 进行调整
+对于Kubernetes运行的容器运行时需要按照 :ref:`container_runtimes` 进行调整。与时俱进，我现在改为采用 :ref:`containerd` 替代 :ref:`docker` ，详细步骤见 :ref:`prepare_z-k8s`
 
 参考
 ======
