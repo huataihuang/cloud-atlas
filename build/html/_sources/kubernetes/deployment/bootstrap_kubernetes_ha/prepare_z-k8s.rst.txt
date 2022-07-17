@@ -11,7 +11,7 @@ KVM虚拟机运行环境已经按照 :ref:`z-k8s_env` 准备就绪，现在具�
    :widths: 20, 20, 60
    :header-rows: 1
 
-在 ``z-k8s`` 集群的管控节点和工作节点，全面安装 Docker 运行时
+在 ``z-k8s`` 集群的管控节点和工作节点，全面安装 :strike:`Docker` :ref:`containerd` 运行时
 
 - 基础数据存储服务器 ``z-b-data-X`` :
 
@@ -20,26 +20,78 @@ KVM虚拟机运行环境已经按照 :ref:`z-k8s_env` 准备就绪，现在具�
 
 - 管控节点 ``z-k8s-m-X`` :
 
-  - 安装Docker/Kubelet/Kubeadm
+  - 安装containerd/Kubelet/Kubeadm
 
 - 工作节点 ``z-k8s-n-X`` :
 
-  - 安装Docker/Kubelet/Kubeadm
+  - 安装containerd/Kubelet/Kubeadm
 
 .. note::
 
    Kubernetes 1.24 移除了Docker直接支持，推荐使用 :ref:`containerd` 作为运行时，不仅可以节约资源而且更为安全(减少攻击面)。不过 ``containerd`` 文档资料较少，不如 :ref:`docker` 有较为丰富的文档。例如，我 :ref:`docker_btrfs_driver` 存储容器镜像，但是 :ref:`containerd_btrfs` 支持非常有限(不成熟)，无法充分发挥 :ref:`btrfs` 的优秀特性(实际依然是 :ref:`overlayfs` on btrfs)，性能和稳定性不佳。
+
+.. note::
+
+   我原先在 :ref:`bootstrap_kubernetes_single` 部署 :ref:`kubeadm` 有详细步骤，本文是再次实践，以完成 :ref:`bootstrap_kubernetes_ha`
 
 安装 :ref:`containerd` 运行时(最新部署)
 =========================================
 
 - ``containerd`` 轻量级原生支持Kubernetes规范，所以重点实践
 - 文件系统改为常规 :ref:`xfs` 避免不成熟的 :ref:`containerd_btrfs`
-- 需要实践 :ref:`estargz_lazy_pulling`
+- 实践 :ref:`estargz_lazy_pulling`
 
-... 待续
+首先采用 :ref:`containerd_xfs` 将containerd所使用的存储目录文件系统，由之前 :ref:`docker_btrfs_driver`  切换为 :ref:`xfs` :
 
-安装Docker运行时(废弃)
+- 卸载 ``docker`` :
+
+.. literalinclude:: ../../container_runtimes/containerd/containerd_xfs/uninstall_docker
+   :language: bash
+   :caption: 卸载docker.io
+
+- 新格式化成 :ref:`xfs` :
+
+.. literalinclude:: ../../container_runtimes/containerd/containerd_xfs/convert_btrfs_to_xfs
+   :language: bash
+   :caption: 将btrfs磁盘转换成xfs
+
+然后采用 :ref:`install_containerd_official_binaries` 完成以下 ``containerd`` 安装:
+
+- 从 `containernetworking github仓库 <https://github.com/containernetworking/plugins/releases>`_ 下载安装包，并从 从 `containerd github仓库containerd.service <https://github.com/containerd/containerd/blob/main/containerd.service>`_ 下载 ``containerd.service`` :
+
+.. literalinclude:: ../../container_runtimes/containerd/install_containerd_official_binaries/install_containerd
+   :language: bash
+   :caption: 安装最新v1.6.6 containerd官方二进制程序
+
+.. literalinclude:: ../../container_runtimes/containerd/install_containerd_official_binaries/containerd_systemd
+   :language: bash
+   :caption: 安装containerd的systemd配置文件
+
+然后安装 ``runc`` :
+
+- 从 `containerd github仓库runc <https://github.com/opencontainers/runc/releases>`_ 下载 ``runc`` 安装:
+
+.. literalinclude:: ../../container_runtimes/containerd/install_containerd_official_binaries/install_runc
+   :language: bash
+   :caption: 安装runc
+
+- 从 `containernetworking github仓库 <https://github.com/containernetworking/plugins/releases>`_ 下载安装cni-plugins:
+
+.. literalinclude:: ../../container_runtimes/containerd/install_containerd_official_binaries/install_cni-plugins
+   :language: bash
+   :caption: 安装cni-plugins
+
+- 执行以下命令创建containerd的默认网络配置(该步骤可以提供kubernetes集群节点自举所依赖的网络):
+
+.. literalinclude:: ../../container_runtimes/containerd/install_containerd_official_binaries/generate_containerd_config_k8s
+   :language: bash
+   :caption: 生成Kuberntes自举所需的默认containerd网络配置
+
+.. note::
+
+   完成了 :ref:`container_runtimes` 安装后，需要进一步完成 :ref:`kubeadm` 中网络和cgroup配置，见下文
+
+安装Docker运行时(归档)
 ========================
 
 - 安装 :ref:`container_runtimes` Docker ::
@@ -172,3 +224,40 @@ btrfs存储驱动
 
    docker info
 
+转发IPv4和允许iptables查看bridged流量
+=======================================
+
+- 执行以下脚本配置 sysctl :
+
+.. literalinclude:: prepare_z-k8s/k8s_iptables
+   :language: bash
+   :caption: 配置k8s节点iptalbes
+
+配置Cgroup v2
+=================
+
+在 :ref:`container_runtimes_startup` 详细说明了 Kubernetes 可以使用 :ref:`cgroup_v2` 来更精细化管控资源。配置方法是在内核参数传递 ``systemd.unified_cgroup_hierarchy=1`` 。当时我配置采用修订 ``/etc/default/grub`` 在 ``GRUB_CMDLINE_LINUX`` 行添加上述参数，然后再执行 ``sudo update-grub`` 更新启动。
+
+另外一种常用的修订内核参数方法是使用 :ref:`grubby` 工具:
+
+.. literalinclude:: prepare_z-k8s/k8s_cgroupv2
+   :language: bash
+   :caption: 配置k8s节点cgroup v2
+
+配置 :ref:`systemd` cgroup驱动
+================================
+
+- 修订 ``/etc/containerd/config.toml`` 的 ``systemd`` cgroup 驱动使用 ``runc`` (参见 :ref:`install_containerd_official_binaries` ):
+
+.. literalinclude:: ../../container_runtimes/containerd/install_containerd_official_binaries/config.toml_runc_systemd_cgroup
+   :language: bash
+   :caption: 配置containerd的runc使用systemd cgroup驱动
+
+重启 containerd ::
+
+   sudo systemctl restart containerd
+
+参考
+======
+
+- `Container Runtimes <https://kubernetes.io/docs/setup/production-environment/container-runtimes/>`_

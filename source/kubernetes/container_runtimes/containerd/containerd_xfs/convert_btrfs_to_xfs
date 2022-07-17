@@ -1,0 +1,15 @@
+sudo umount /var/lib/docker
+sudo sed -i 's/^\/dev\/vdb1/#\/dev\/vdb1/g' /etc/fstab
+sudo mkfs.xfs -f -n ftype=1 /dev/vdb1
+echo "/dev/vdb1  /var/lib/containerd  xfs  defaults,uquota,pquota  0 1" | sudo tee -a /etc/fstab
+
+sudo systemctl stop containerd
+sudo mv /var/lib/containerd /var/lib/containerd.bak
+
+sudo mkdir /var/lib/containerd
+sudo mount /var/lib/containerd
+
+sudo su -
+(cd /var/lib/containerd.bak && tar cf - .) | (cd /var/lib/containerd && tar xf -)
+
+sudo systemctl start containerd

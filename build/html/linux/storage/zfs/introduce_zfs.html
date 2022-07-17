@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="Btrfs - Linux存储系统" href="../btrfs/index.html" />
+    <link rel="next" title="ZFS vs. Btrfs" href="zfs_vs_btrfs.html" />
     <link rel="prev" title="ZFS - Linux存储系统" href="index.html" /> 
 </head>
 
@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../openstack/index.html">OpenStack Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../docker/index.html">Docker Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kubernetes_from_scratch/index.html">Kubernetes From Scratch (KFS) Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rancher/index.html">Rancher Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../openshift/index.html">OpenShift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../sql/index.html">SQL Atlas</a></li>
@@ -99,6 +100,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../lvm/index.html">Linux LVM逻辑卷管理</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">ZFS - Linux存储系统</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">ZFS简介</a></li>
+<li class="toctree-l4"><a class="reference internal" href="zfs_vs_btrfs.html">ZFS vs. Btrfs</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../btrfs/index.html">Btrfs - Linux存储系统</a></li>
@@ -170,12 +172,14 @@
              
   <section id="zfs">
 <span id="introduce-zfs"></span><h1>ZFS简介<a class="headerlink" href="#zfs" title="Permalink to this heading">¶</a></h1>
-<p>在很久很久以前的1980年代(计算机行业真是风云变换)，计算机行业曾经有一个技术非常超前公司Sun(提出了震撼人心的”网络就是计算机”)。</p>
+<section id="id1">
+<h2>ZFS历史<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>在很久很久以前的1980年代(计算机行业真是风云变换)，计算机行业曾经有一个技术非常超前公司Sun(提出了震撼人心的 <code class="docutils literal notranslate"><span class="pre">网络就是计算机</span></code> )。</p>
 <p>这家影响了计算机行业的伟大公司，发明了JAVA和Solaris。曾经碾压Linux的Solaris操作系统，直到今天依然有着影响深远的文件系统ZFS，被移植到BSD和Linux系统，依然是众多文件系统中的翘楚。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>John Gage 在 1980 年代提出了“网络就是计算机”宣传口号，之后被 Sun 使用了数十年，直到 2010 年被甲骨文收购。</p>
-<p>2019年，CDN 服务商Cloudflare 得到了这个口号，宣布它已经注册了商标。John Gage 对此到看得很开。但其他前 Sun 雇员则认为 “网络就是计算机”永远是 Sun 的口号，无论是不是商标。  – <a class="reference external" href="https://www.solidot.org/story?sid=61575">Cloudflare 得到了 Sun 的“网络就是计算机”商标</a></p>
+<p>2019年，CDN 服务商Cloudflare 得到了这个口号，宣布它已经注册了商标。John Gage 对此到看得很开。但其他前 Sun 雇员则认为 “网络就是计算机” 永远是 Sun 的口号，无论是不是商标。  – <a class="reference external" href="https://www.solidot.org/story?sid=61575">Cloudflare 得到了 Sun 的“网络就是计算机”商标</a></p>
 </div>
 <p>今天(2020年)来回看ZFS文件系统，你会发现历时20年(2001年Matthew Ahrens 和 Jeff Bonwick开发出了ZFS)最初作为Sun Microsystem公司的Solaris核心文件系统，焕发出了强大的生命力：</p>
 <ul class="simple">
@@ -183,17 +187,36 @@
 <li><p>同年， <a class="reference external" href="https://zfsonlinux.org/">ZFS on Linux</a> 项目将ZFS引入Linux</p></li>
 <li><p>2013年， <a class="reference external" href="http://www.open-zfs.org/wiki/Main_Page">OpenZFS项目</a> 创建，维护和管理了核心ZFS代码，被广泛用于Unix-like系统中 (从2010年8月的OpenSolaris中Fork出代码)</p></li>
 </ul>
-<section id="id1">
-<h2>我的实践规划<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>ZFS集成了逻辑卷管理的文件系统，具有高扩展性，并且提供了大量保护措施防止数据损坏(存储在磁盘中数据可能会 <code class="docutils literal notranslate"><span class="pre">腐败</span></code> )，并且支持大存储容量、提供高性能数据压缩、卷管理也提供了快照以及写时复制、连续性完整性检查和自动修复，以及高级的RAID-Z(类似RAID5/6)，并且提供原生NFSv4 ACL等功能。</p>
+<p>ZFS最初是Solaris平台的专有软件，虽然企业级性能非常强大，但是由于闭源，所以和BSD/Linux没有什么关系。但是随着Sun公司的商业战略调整(因为受到Linux的竞争压力)，Solaris从2005年开始开源大部分系统，使得ZFS基于CDDL协议进入开源领域，作为OpenSolaris项目的一部分。</p>
+<p>2010年Sun被Oralce收购，Oracle停滞了OpenSolaris和ZFS开源更新，使得Oracle ZFS转为闭源。因此2013年，开源社区成立了 <a class="reference external" href="https://illumos.org">illumos</a> 项目继续维护现有开源的Solaris项目，并且在2013年成立OpenZFS继续ZFS的开源发展。OpenZFS维护了核心ZFS代码，以及相关验证和集成工作，使得OpenZFS在UNIX系统中广泛使用。</p>
+</section>
+<section id="id2">
+<h2>ZFS特点<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>ZFS是 128 位文件系统，这个设计如此超前，以至于理论极限可能在当前现实中永远无法遇到 (OMG，我只能赞叹) – 项目领导Bonwick曾说：”要填满一个128位的文件系统，将耗尽地球上所有存储设备。除非你拥有煮沸整个海洋的能量，不然你不可能将其填满。”</p>
+<p>特性:</p>
+<ul class="simple">
+<li><p>写时复制</p></li>
+<li><p>快照</p></li>
+<li><p>克隆</p></li>
+<li><p>动态条带化</p></li>
+<li><p>可变块尺寸</p></li>
+<li><p>轻量化文件系统创建</p></li>
+<li><p>透明加密</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>我的实践规划<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <p>我在很多年前就开始接触和使用ZFS，最早是在一家电子邮件服务商公司工作时，部署和维护 Solaris 系统，曾经学习和使用 ZFS ，对其超前的性能和功能有很深的印象(另一项Solaris杀手锏技术是zones，也就是后来大火的容器技术)。</p>
 <p>我现在将 <a class="reference internal" href="../../desktop/kde/kubuntu.html#kubuntu"><span class="std std-ref">Kubuntu - Ubuntu的KDE桌面发行版</span></a> 作为自己的一台旧笔记本 <a class="reference internal" href="../../../apple/macos/mbp15_late_2013.html#mbp15-late-2013"><span class="std std-ref">MacBook Pro 15” Late 2013</span></a> 运行系统，考虑到 <a class="reference internal" href="../../ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 从 20.04 LTS开始试验性引入ZFS，后续更作为主要文件系统支持，发展前景可观。加上ZFS确实是目前最先进的本地文件系统，技术上值得再次探索。</p>
 <p>我在桌面上实践ZFS，并计划在后续 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 作为主要的存储架构来部署，不断增加实践经验。</p>
 </section>
-<section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://itsfoss.com/what-is-zfs/">What is ZFS? Why are People Crazy About it?</a></p></li>
 <li><p><a class="reference external" href="https://en.wikipedia.org/wiki/ZFS">Wikipedia ZFS</a></p></li>
+<li><p><a class="reference external" href="https://zh.m.wikipedia.org/zh-hans/ZFS">Wikipedia中文 ZFS</a></p></li>
 </ul>
 </section>
 </section>
@@ -203,7 +226,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="ZFS - Linux存储系统" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../btrfs/index.html" class="btn btn-neutral float-right" title="Btrfs - Linux存储系统" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="zfs_vs_btrfs.html" class="btn btn-neutral float-right" title="ZFS vs. Btrfs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

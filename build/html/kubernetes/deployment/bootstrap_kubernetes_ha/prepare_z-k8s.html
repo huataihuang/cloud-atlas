@@ -188,8 +188,8 @@
   <section id="z-k8skubernetes">
 <span id="prepare-z-k8s"></span><h1>z-k8s高可用Kubernetes集群准备<a class="headerlink" href="#z-k8skubernetes" title="Permalink to this heading">¶</a></h1>
 <p>KVM虚拟机运行环境已经按照 <a class="reference internal" href="../../../real/priv_cloud/z-k8s_env.html#z-k8s-env"><span class="std std-ref">构建Kubernetes云计算环境</span></a> 准备就绪，现在具备服务器列表如下:</p>
-<table class="docutils align-default" id="id1">
-<caption><span class="caption-text">z-k8s高可用Kubernetes集群服务器列表</span><a class="headerlink" href="#id1" title="永久链接至表格">¶</a></caption>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">z-k8s高可用Kubernetes集群服务器列表</span><a class="headerlink" href="#id3" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 20%" />
@@ -248,7 +248,7 @@
 </tr>
 </tbody>
 </table>
-<p>在 <code class="docutils literal notranslate"><span class="pre">z-k8s</span></code> 集群的管控节点和工作节点，全面安装 Docker 运行时</p>
+<p>在 <code class="docutils literal notranslate"><span class="pre">z-k8s</span></code> 集群的管控节点和工作节点，全面安装 <span class="sphinxnotes-strike">Docker</span> <a class="reference internal" href="../../container_runtimes/containerd/index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> 运行时</p>
 <ul class="simple">
 <li><p>基础数据存储服务器 <code class="docutils literal notranslate"><span class="pre">z-b-data-X</span></code> :</p>
 <ul>
@@ -258,12 +258,12 @@
 </li>
 <li><p>管控节点 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-X</span></code> :</p>
 <ul>
-<li><p>安装Docker/Kubelet/Kubeadm</p></li>
+<li><p>安装containerd/Kubelet/Kubeadm</p></li>
 </ul>
 </li>
 <li><p>工作节点 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-X</span></code> :</p>
 <ul>
-<li><p>安装Docker/Kubelet/Kubeadm</p></li>
+<li><p>安装containerd/Kubelet/Kubeadm</p></li>
 </ul>
 </li>
 </ul>
@@ -271,17 +271,113 @@
 <p class="admonition-title">备注</p>
 <p>Kubernetes 1.24 移除了Docker直接支持，推荐使用 <a class="reference internal" href="../../container_runtimes/containerd/index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> 作为运行时，不仅可以节约资源而且更为安全(减少攻击面)。不过 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 文档资料较少，不如 <a class="reference internal" href="../../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 有较为丰富的文档。例如，我 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 存储容器镜像，但是 <a class="reference internal" href="../../container_runtimes/containerd/containerd_btrfs.html#containerd-btrfs"><span class="std std-ref">containerd的btrfs</span></a> 支持非常有限(不成熟)，无法充分发挥 <a class="reference internal" href="../../../linux/storage/btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> 的优秀特性(实际依然是 <a class="reference internal" href="../../../kernel/filesystem/overlayfs.html#overlayfs"><span class="std std-ref">OverlayFS文件系统</span></a> on btrfs)，性能和稳定性不佳。</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我原先在 <a class="reference internal" href="../bootstrap_kubernetes_single/index.html#bootstrap-kubernetes-single"><span class="std std-ref">Kubernetes集群引导(单master)</span></a> 部署 <a class="reference internal" href="../bootstrap_kubernetes_single/kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a> 有详细步骤，本文是再次实践，以完成 <a class="reference internal" href="index.html#bootstrap-kubernetes-ha"><span class="std std-ref">Kubernetes集群引导(高可用)</span></a></p>
+</div>
 <section id="containerd">
 <h2>安装 <a class="reference internal" href="../../container_runtimes/containerd/index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> 运行时(最新部署)<a class="headerlink" href="#containerd" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">containerd</span></code> 轻量级原生支持Kubernetes规范，所以重点实践</p></li>
 <li><p>文件系统改为常规 <a class="reference internal" href="../../../linux/storage/filesystem/xfs/index.html#xfs"><span class="std std-ref">XFS文件系统</span></a> 避免不成熟的 <a class="reference internal" href="../../container_runtimes/containerd/containerd_btrfs.html#containerd-btrfs"><span class="std std-ref">containerd的btrfs</span></a></p></li>
-<li><p>需要实践 <a class="reference internal" href="../../container_runtimes/containerd/estargz_lazy_pulling.html#estargz-lazy-pulling"><span class="std std-ref">用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展)</span></a></p></li>
+<li><p>实践 <a class="reference internal" href="../../container_runtimes/containerd/estargz_lazy_pulling.html#estargz-lazy-pulling"><span class="std std-ref">用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展)</span></a></p></li>
 </ul>
-<p>… 待续</p>
+<p>首先采用 <a class="reference internal" href="../../container_runtimes/containerd/containerd_xfs.html#containerd-xfs"><span class="std std-ref">containerd存储xfs文件系统</span></a> 将containerd所使用的存储目录文件系统，由之前 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a>  切换为 <a class="reference internal" href="../../../linux/storage/filesystem/xfs/index.html#xfs"><span class="std std-ref">XFS文件系统</span></a> :</p>
+<ul class="simple">
+<li><p>卸载 <code class="docutils literal notranslate"><span class="pre">docker</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">卸载docker.io</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl stop docker
+sudo systemctl stop docker.socket
+sudo apt purge docker.io
+sudo apt autoremove
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>新格式化成 <a class="reference internal" href="../../../linux/storage/filesystem/xfs/index.html#xfs"><span class="std std-ref">XFS文件系统</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">将btrfs磁盘转换成xfs</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo umount /var/lib/docker
+sudo sed -i <span class="s1">&#39;s/^\/dev\/vdb1/#\/dev\/vdb1/g&#39;</span> /etc/fstab
+sudo mkfs.xfs -f -n <span class="nv">ftype</span><span class="o">=</span><span class="m">1</span> /dev/vdb1
+<span class="nb">echo</span> <span class="s2">&quot;/dev/vdb1  /var/lib/containerd  xfs  defaults,uquota,pquota  0 1&quot;</span> <span class="p">|</span> sudo tee -a /etc/fstab
+
+sudo systemctl stop containerd
+sudo mv /var/lib/containerd /var/lib/containerd.bak
+
+sudo mkdir /var/lib/containerd
+sudo mount /var/lib/containerd
+
+sudo su -
+<span class="o">(</span><span class="nb">cd</span> /var/lib/containerd.bak <span class="o">&amp;&amp;</span> tar cf - .<span class="o">)</span> <span class="p">|</span> <span class="o">(</span><span class="nb">cd</span> /var/lib/containerd <span class="o">&amp;&amp;</span> tar xf -<span class="o">)</span>
+
+sudo systemctl start containerd
+</pre></div>
+</div>
+</div>
+<p>然后采用 <a class="reference internal" href="../../container_runtimes/containerd/install_containerd_official_binaries.html#install-containerd-official-binaries"><span class="std std-ref">安装containerd官方执行程序</span></a> 完成以下 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 安装:</p>
+<ul class="simple">
+<li><p>从 <a class="reference external" href="https://github.com/containernetworking/plugins/releases">containernetworking github仓库</a> 下载安装包，并从 从 <a class="reference external" href="https://github.com/containerd/containerd/blob/main/containerd.service">containerd github仓库containerd.service</a> 下载 <code class="docutils literal notranslate"><span class="pre">containerd.service</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">安装最新v1.6.6 containerd官方二进制程序</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/containerd/containerd/releases/download/v1.6.6/containerd-1.6.6-linux-amd64.tar.gz
+sudo tar Cxzvf /usr/local containerd-1.6.6-linux-amd64.tar.gz
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">安装containerd的systemd配置文件</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo mkdir -p /usr/local/lib/systemd/system
+sudo curl https://raw.githubusercontent.com/containerd/containerd/main/containerd.service -o /usr/local/lib/systemd/system/containerd.service
+sudo systemctl daemon-reload
+sudo unlink /etc/systemd/system/containerd.service
+sudo systemctl <span class="nb">enable</span> containerd
+</pre></div>
+</div>
+</div>
+<p>然后安装 <code class="docutils literal notranslate"><span class="pre">runc</span></code> :</p>
+<ul class="simple">
+<li><p>从 <a class="reference external" href="https://github.com/opencontainers/runc/releases">containerd github仓库runc</a> 下载 <code class="docutils literal notranslate"><span class="pre">runc</span></code> 安装:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">安装runc</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/opencontainers/runc/releases/download/v1.1.3/runc.amd64
+sudo install -m <span class="m">755</span> runc.amd64 /usr/local/sbin/runc
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>从 <a class="reference external" href="https://github.com/containernetworking/plugins/releases">containernetworking github仓库</a> 下载安装cni-plugins:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">安装cni-plugins</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
+sudo mkdir -p /opt/cni/bin
+tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>执行以下命令创建containerd的默认网络配置(该步骤可以提供kubernetes集群节点自举所依赖的网络):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">生成Kuberntes自举所需的默认containerd网络配置</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo mkdir /etc/containerd
+containerd config default <span class="p">|</span> sudo tee /etc/containerd/config.toml
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>完成了 <a class="reference internal" href="../../container_runtimes/index.html#container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a> 安装后，需要进一步完成 <a class="reference internal" href="../bootstrap_kubernetes_single/kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a> 中网络和cgroup配置，见下文</p>
+</div>
 </section>
 <section id="docker">
-<h2>安装Docker运行时(废弃)<a class="headerlink" href="#docker" title="Permalink to this heading">¶</a></h2>
+<h2>安装Docker运行时(归档)<a class="headerlink" href="#docker" title="Permalink to this heading">¶</a></h2>
 <ul>
 <li><p>安装 <a class="reference internal" href="../../container_runtimes/index.html#container-runtimes"><span class="std std-ref">Kubernetes 容器运行时(Container Runtimes)</span></a> Docker</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
@@ -331,8 +427,8 @@
 <ul class="simple">
 <li><p>准备设备XML文件</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">rbd磁盘设备XML</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">rbd磁盘设备XML</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">&lt;disk</span> <span class="na">type=</span><span class="s">&#39;network&#39;</span> <span class="na">device=</span><span class="s">&#39;disk&#39;</span><span class="nt">&gt;</span>
 <span class="linenos"> 2</span>  <span class="nt">&lt;driver</span> <span class="na">name=</span><span class="s">&#39;qemu&#39;</span> <span class="na">type=</span><span class="s">&#39;raw&#39;</span> <span class="na">cache=</span><span class="s">&#39;none&#39;</span> <span class="na">io=</span><span class="s">&#39;native&#39;</span><span class="nt">/&gt;</span>
 <span class="linenos"> 3</span>  <span class="nt">&lt;auth</span> <span class="na">username=</span><span class="s">&#39;libvirt&#39;</span><span class="nt">&gt;</span>
@@ -367,8 +463,8 @@
 <ul class="simple">
 <li><p>脚本 <code class="docutils literal notranslate"><span class="pre">vm_docker-disk.sh</span></code> 帮助完成上述自动化过程</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">rbd磁盘(用于docker)注入脚本</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">rbd磁盘(用于docker)注入脚本</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/bin/env bash</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span>. /etc/profile
@@ -483,8 +579,8 @@
 </li>
 <li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/docker/daemon.json</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">创建Docker btrfs配置脚本</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">创建Docker btrfs配置脚本</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>cat &gt; /etc/docker/daemon.json <span class="s">&lt;&lt; EOF</span>
 <span class="linenos"> 2</span><span class="s">{</span>
 <span class="linenos"> 3</span><span class="s">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span>
@@ -512,6 +608,72 @@
 </ul>
 </section>
 </section>
+</section>
+<section id="ipv4iptablesbridged">
+<h2>转发IPv4和允许iptables查看bridged流量<a class="headerlink" href="#ipv4iptablesbridged" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>执行以下脚本配置 sysctl :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">配置k8s节点iptalbes</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt;EOF | sudo tee /etc/modules-load.d/k8s.conf</span>
+<span class="s">overlay</span>
+<span class="s">br_netfilter</span>
+<span class="s">EOF</span>
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+<span class="c1"># sysctl params required by setup, params persist across reboots</span>
+cat <span class="s">&lt;&lt;EOF | sudo tee /etc/sysctl.d/k8s.conf</span>
+<span class="s">net.bridge.bridge-nf-call-iptables  = 1</span>
+<span class="s">net.bridge.bridge-nf-call-ip6tables = 1</span>
+<span class="s">net.ipv4.ip_forward                 = 1</span>
+<span class="s">EOF</span>
+
+<span class="c1"># Apply sysctl params without reboot</span>
+sudo sysctl --system
+</pre></div>
+</div>
+</div>
+</section>
+<section id="cgroup-v2">
+<h2>配置Cgroup v2<a class="headerlink" href="#cgroup-v2" title="Permalink to this heading">¶</a></h2>
+<p>在 <a class="reference internal" href="../../container_runtimes/container_runtimes_startup.html#container-runtimes-startup"><span class="std std-ref">容器运行环境快速起步</span></a> 详细说明了 Kubernetes 可以使用 <a class="reference internal" href="../../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> 来更精细化管控资源。配置方法是在内核参数传递 <code class="docutils literal notranslate"><span class="pre">systemd.unified_cgroup_hierarchy=1</span></code> 。当时我配置采用修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 在 <code class="docutils literal notranslate"><span class="pre">GRUB_CMDLINE_LINUX</span></code> 行添加上述参数，然后再执行 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">update-grub</span></code> 更新启动。</p>
+<p>另外一种常用的修订内核参数方法是使用 <a class="reference internal" href="../../../linux/redhat_linux/kernel/grubby.html#grubby"><span class="std std-ref">grubby修改内核参数</span></a> 工具:</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">配置k8s节点cgroup v2</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install grubby -y
+sudo grubby --update-kernel<span class="o">=</span>ALL <span class="se">\</span>
+    --args<span class="o">=</span><span class="s2">&quot;systemd.unified_cgroup_hierarchy=1&quot;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="systemd-cgroup">
+<h2>配置 <a class="reference internal" href="../../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> cgroup驱动<a class="headerlink" href="#systemd-cgroup" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/containerd/config.toml</span></code> 的 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> cgroup 驱动使用 <code class="docutils literal notranslate"><span class="pre">runc</span></code> (参见 <a class="reference internal" href="../../container_runtimes/containerd/install_containerd_official_binaries.html#install-containerd-official-binaries"><span class="std std-ref">安装containerd官方执行程序</span></a> ):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">配置containerd的runc使用systemd cgroup驱动</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc<span class="o">]</span>
+  ...
+  <span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc.options<span class="o">]</span>
+    <span class="nv">SystemdCgroup</span> <span class="o">=</span> <span class="nb">true</span>
+</pre></div>
+</div>
+</div>
+<p>重启 containerd</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">containerd</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">Container Runtimes</a></p></li>
+</ul>
 </section>
 </section>
 

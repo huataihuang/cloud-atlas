@@ -72,6 +72,8 @@
 <li class="toctree-l4"><a class="reference internal" href="install_containerd.io_packages.html">安装containerd.io软件包</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">安装containerd官方执行程序</a></li>
 <li class="toctree-l4"><a class="reference internal" href="estargz_lazy_pulling.html">用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containerd_btrfs.html">containerd的btrfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containerd_xfs.html">containerd存储xfs文件系统</a></li>
 </ul>
 </li>
 </ul>
@@ -100,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../develop/index.html">Kubernetes开发</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../kubernetes_from_scratch/index.html">Kubernetes From Scratch (KFS) Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rancher/index.html">Rancher Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../openshift/index.html">OpenShift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../sql/index.html">SQL Atlas</a></li>
@@ -189,10 +192,12 @@ sudo apt autoremove
 <ul class="simple">
 <li><p>从 <a class="reference external" href="https://github.com/containerd/containerd/releases">containerd 官方发布</a> 下载最新版本 v1.6.6 :</p></li>
 </ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">安装最新v1.6.6 containerd官方二进制程序</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/containerd/containerd/releases/download/v1.6.6/containerd-1.6.6-linux-amd64.tar.gz
-
 sudo tar Cxzvf /usr/local containerd-1.6.6-linux-amd64.tar.gz
 </pre></div>
+</div>
 </div>
 <p>以上会获得如下执行文件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">bin</span><span class="o">/</span><span class="n">containerd</span><span class="o">-</span><span class="n">shim</span>
@@ -210,10 +215,16 @@ sudo tar Cxzvf /usr/local containerd-1.6.6-linux-amd64.tar.gz
 </section>
 <section id="systemd">
 <h2>配置systemd启动脚本<a class="headerlink" href="#systemd" title="Permalink to this heading">¶</a></h2>
-<p>从 <a class="reference external" href="https://github.com/containerd/containerd/blob/main/containerd.service">containerd github仓库containerd.service</a> 下载 <code class="docutils literal notranslate"><span class="pre">containerd.service</span></code> 保存为 <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/systemd/system/containerd.service</span></code> ，然后执行以下激活命令:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
-<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">containerd</span>
+<p>从 <a class="reference external" href="https://github.com/containerd/containerd/blob/main/containerd.service">containerd github仓库containerd.service</a> 下载 <code class="docutils literal notranslate"><span class="pre">containerd.service</span></code> 保存为 <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/systemd/system/containerd.service</span></code> 并激活:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">安装containerd的systemd配置文件</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo mkdir -p /usr/local/lib/systemd/system
+sudo curl https://raw.githubusercontent.com/containerd/containerd/main/containerd.service -o /usr/local/lib/systemd/system/containerd.service
+sudo systemctl daemon-reload
+sudo unlink /etc/systemd/system/containerd.service
+sudo systemctl <span class="nb">enable</span> containerd
 </pre></div>
+</div>
 </div>
 <p>这里可能会有报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Failed</span> <span class="n">to</span> <span class="n">enable</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Unit</span> <span class="n">file</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">containerd</span><span class="o">.</span><span class="n">service</span> <span class="ow">is</span> <span class="n">masked</span><span class="o">.</span>
@@ -228,17 +239,24 @@ sudo tar Cxzvf /usr/local containerd-1.6.6-linux-amd64.tar.gz
 <section id="runc">
 <h2>安装runc<a class="headerlink" href="#runc" title="Permalink to this heading">¶</a></h2>
 <p>从 <a class="reference external" href="https://github.com/opencontainers/runc/releases">containerd github仓库runc</a> 下载 <code class="docutils literal notranslate"><span class="pre">runc</span></code> 存储到 <code class="docutils literal notranslate"><span class="pre">/usr/local/sbin/runc</span></code> ，然后执行以下命令安装:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">install</span> <span class="o">-</span><span class="n">m</span> <span class="mi">755</span> <span class="n">runc</span><span class="o">.</span><span class="n">amd64</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">runc</span>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">安装runc</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/opencontainers/runc/releases/download/v1.1.3/runc.amd64
+sudo install -m <span class="m">755</span> runc.amd64 /usr/local/sbin/runc
 </pre></div>
+</div>
 </div>
 </section>
 <section id="cni-plugins">
 <h2>安装CNI plugins<a class="headerlink" href="#cni-plugins" title="Permalink to this heading">¶</a></h2>
 <p>从 <a class="reference external" href="https://github.com/containernetworking/plugins/releases">containernetworking github仓库</a> 下载安装包，然后执行以下命令安装:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">containernetworking</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="n">v1</span><span class="mf">.1.1</span><span class="o">/</span><span class="n">cni</span><span class="o">-</span><span class="n">plugins</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">v1</span><span class="mf">.1.1</span><span class="o">.</span><span class="n">tgz</span>
-<span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">cni</span><span class="o">/</span><span class="nb">bin</span>
-<span class="n">tar</span> <span class="n">Cxzvf</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">cni</span><span class="o">/</span><span class="nb">bin</span> <span class="n">cni</span><span class="o">-</span><span class="n">plugins</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="o">-</span><span class="n">v1</span><span class="mf">.1.1</span><span class="o">.</span><span class="n">tgz</span>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">安装cni-plugins</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
+sudo mkdir -p /opt/cni/bin
+tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
 </pre></div>
+</div>
 </div>
 </section>
 <section id="id2">
@@ -246,8 +264,8 @@ sudo tar Cxzvf /usr/local containerd-1.6.6-linux-amd64.tar.gz
 <ul class="simple">
 <li><p>执行以下命令创建containerd的默认网络配置:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">生成Kuberntes自举所需的默认containerd网络配置</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">生成Kuberntes自举所需的默认containerd网络配置</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo mkdir /etc/containerd
 containerd config default <span class="p">|</span> sudo tee /etc/containerd/config.toml
 </pre></div>
@@ -264,8 +282,8 @@ containerd config default <span class="p">|</span> sudo tee /etc/containerd/conf
 <ul class="simple">
 <li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/containerd/config.toml</span></code> 激活 <a class="reference internal" href="../../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> cgroup驱动 <code class="docutils literal notranslate"><span class="pre">runc</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">配置containerd的runc使用systemd cgroup驱动</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">配置containerd的runc使用systemd cgroup驱动</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc<span class="o">]</span>
   ...
   <span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc.options<span class="o">]</span>

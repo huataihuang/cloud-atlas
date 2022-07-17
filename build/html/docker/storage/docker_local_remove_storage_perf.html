@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker本地和远程存储性能(参考) &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="Docker网络" href="../network/index.html" />
+    <link rel="prev" title="NFS存储Docker镜像" href="docker_images_on_nfs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ansible/index.html">Ansible Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Docker Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">Docker 起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../docker_in_docker/index.html">Docker in Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../images/index.html">Docker 镜像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rootless/index.html">Docker Rootless模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../moby/index.html">Docker Moby</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../podman/index.html">podman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/index.html">Docker配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../linuxserver/index.html">Docker LinuxServer.io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../init/index.html">Docker init进程管理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/index.html">Docker 管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/index.html">Docker 环境运行应用程序案例</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Docker存储</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="docker_storage_manage.html">Docker存储管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_volume.html">Docker 卷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_bind_mount.html">Docker 捆绑挂载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_tmpfs_mount.html">Docker内存文件系统(tmpfs)挂载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_storage_driver.html">Docker存储驱动</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_btrfs_driver.html">Docker btrfs 存储驱动</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_overlay_driver.html">Docker OverlayFS存储引擎</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_devicemapper_driver.html">Docker Device mapper存储驱动</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_unionfs.html">Docker UnionFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_size_quota.html">Docker容器规格Quota</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_run_add_host_device.html">添加host设备到容器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_container_nfs.html">Docker容器使用NFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="docker_images_on_nfs.html">NFS存储Docker镜像</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Docker本地和远程存储性能(参考)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">本地存储架构</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../network/index.html">Docker网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">Docker GPU设备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logs/index.html">Docker 日志</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gui/index.html">Docker GUI应用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../security/index.html">Docker安全</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">Docker异常排查</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes/index.html">Kubernetes Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes_from_scratch/index.html">Kubernetes From Scratch (KFS) Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rancher/index.html">Rancher Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_search/index.html">Search Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐赠</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Docker Atlas</a> &raquo;</li>
+          <li><a href="index.html">Docker存储</a> &raquo;</li>
+      <li>Docker本地和远程存储性能(参考)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/docker/storage/docker_local_remove_storage_perf.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="docker">
+<span id="docker-local-remove-storage-perf"></span><h1>Docker本地和远程存储性能(参考)<a class="headerlink" href="#docker" title="Permalink to this heading">¶</a></h1>
+<p>在 <a class="reference external" href="https://www.storageconference.us/2017/Presentations/PerformanceAnalysisOfContainerizedApplications-slides.pdf">PERFORMANCE ANALYSIS OF CONTAINERIZED APPLICATIONS ON LOCAL AND REMOTE STORAGE</a> 有一些有意思的参考信息:</p>
+<section id="id1">
+<h2>本地存储架构<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/docker_storage_arch.png"><img alt="../../_images/docker_storage_arch.png" src="../../_images/docker_storage_arch.png" style="width: 683.0px; height: 564.5px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>使用 <a class="reference internal" href="../../linux/storage/nvme/nvme.html#nvme"><span class="std std-ref">NVMe存储</span></a> 作为存储，通过精心优化配置可以接近于裸设备性能</p></li>
+</ul>
+<section id="id2">
+<h3>文件系统对比<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>通过Docker文件系统(Aufs, Btrfs, Overlayfs):</p>
+<ul>
+<li><p>Aufs(Advanced multi-layered Unification FileSystem): 高速可靠的统一文件系统</p></li>
+<li><p>Btrfs(B-tree文件系统):现代化CoW文件系统，可以实现很多高级特性，如失效冗余,容易修复和管理</p></li>
+<li><p>Overlayfs: 现代化的统一文件系统，比Aufs设计简化，所以潜在更快一些</p></li>
+</ul>
+</li>
+</ul>
+<p>测试采用 <a class="reference internal" href="../../performance/performance_tools/fio/index.html#fio"><span class="std std-ref">fio 存储性能测试</span></a> :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>libaio: 异步IO</p></li>
+<li><p>32个并发任务，iodepth 32</p></li>
+</ul>
+</div></blockquote>
+<section id="ext4xfs">
+<h4>EXT4和XFS<a class="headerlink" href="#ext4xfs" title="Permalink to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>EXT4的随机读(RR) IOPS比raw低25%，但是XFS能够接近于raw</p></li>
+<li><p>XFS的几乎所有性能都接近raw，但是随机写(RW)性能不佳</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>XFS允许多个进程一起读一饿文件，而EXT4要求读操作使用 mutex locks</p>
+</div>
+<p>XFS在很高的线程数量时随机写性能下降( <code class="docutils literal notranslate"><span class="pre">后续可以实践验证</span></code> ): (独占锁exclusive locking影响写性能)</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/xfs_random_writes_high_thead.png"><img alt="../../_images/xfs_random_writes_high_thead.png" src="../../_images/xfs_random_writes_high_thead.png" style="width: 748.5px; height: 576.0px;" /></a>
+</figure>
+</section>
+<section id="btrfs">
+<h4>Btrfs性能解析<a class="headerlink" href="#btrfs" title="Permalink to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Btrfs在小磁盘块性能不佳</p></li>
+<li><p>Btrfs在读取文件数据前必须读取文件扩展(file extent)，所以块越小也就需要读取更多file extent，导致Btrfs对小文件性能不佳，而大数据块则降低了读取metadata所以Btrfs性能此时就提升上来了</p></li>
+<li><p>Btrfs由于采用了CoW，所以对于随机写(RW)性能不佳</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/btrfs_random_write.png"><img alt="../../_images/btrfs_random_write.png" src="../../_images/btrfs_random_write.png" style="width: 755.0px; height: 566.0px;" /></a>
+</figure>
+</section>
+</section>
+<section id="id3">
+<h3>虚拟块设备<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>通过 <a class="reference internal" href="docker_devicemapper_driver.html#docker-devicemapper-driver"><span class="std std-ref">Docker Device mapper存储驱动</span></a> 提供了精简配置(thin provisioning)和快照(snapshotting)能力</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">loop-lvm</span></code> 通过 <code class="docutils literal notranslate"><span class="pre">稀疏文件</span></code> (sparse files)可以构建精简配置池(thin-provisioned pools)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">direct-lvm</span></code> 通过 <code class="docutils literal notranslate"><span class="pre">块设备</span></code> (block device)可以直接创建精简池(thin pools)，这也是Docker推荐方式</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>通过使用 <a class="reference internal" href="docker_devicemapper_driver.html#docker-devicemapper-driver"><span class="std std-ref">Docker Device mapper存储驱动</span></a> 可以充分发挥Docker的存储性能(毕竟LVM卷是非常薄的逻辑层，性能几乎无损)，同时带来灵活的管理存储能力(精简配置和快照)，所以是非常推荐的存储方案</p>
+</div>
+</section>
+<section id="data-volume-v">
+<h3>数据卷(data volume, -v)<a class="headerlink" href="#data-volume-v" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference internal" href="docker_volume.html#docker-volume"><span class="std std-ref">Docker 卷</span></a> 提供了数据持久化，并且可以在不同容器间共享数据</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><a class="reference external" href="https://blog.mobyproject.org/where-are-containerds-graph-drivers-145fc9b7255">Where are containerd’s graph drivers?</a> 介绍了Graph drivers</p>
+</div>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/docker_lvm_perf.png"><img alt="../../_images/docker_lvm_perf.png" src="../../_images/docker_lvm_perf.png" style="width: 759.5px; height: 521.5px;" /></a>
+</figure>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">direct-lvm</span></code> 在随机读和随机写上性能不佳</p></li>
+<li><p>LVM,device mapper和dm-thinp内核模块引入了附加读代码路径和负担，所以可能不适合IO敏感读应用负载</p></li>
+</ul>
+</section>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.storageconference.us/2017/Presentations/PerformanceAnalysisOfContainerizedApplications-slides.pdf">PERFORMANCE ANALYSIS OF CONTAINERIZED APPLICATIONS ON LOCAL AND REMOTE STORAGE</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="docker_images_on_nfs.html" class="btn btn-neutral float-left" title="NFS存储Docker镜像" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../network/index.html" class="btn btn-neutral float-right" title="Docker网络" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
