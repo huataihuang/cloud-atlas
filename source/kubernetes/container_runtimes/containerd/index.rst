@@ -13,6 +13,7 @@ containerd运行时(runtime)
    install_containerd_official_binaries.rst
    estargz_lazy_pulling.rst
    containerd_btrfs.rst
+   containerd_xfs.rst
 
 .. only::  subproject and html
 

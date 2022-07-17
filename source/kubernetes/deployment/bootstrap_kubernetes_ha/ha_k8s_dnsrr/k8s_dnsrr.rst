@@ -196,7 +196,7 @@ why?
 - 重试通过 :ref:`install_containerd_official_binaries` 将发行版 ``containerd`` 升级到 1.64+ 来修复
 - :ref:`kubeadm_reset`
 
-
+``完整步骤见`` :ref:`prepare_z-k8s` ，我完整重做一遍来解决这个启动问题
 
 Network Plugins
 ==================

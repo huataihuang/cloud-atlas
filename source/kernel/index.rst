@@ -15,6 +15,7 @@ Kernel Atlas
    process/index
    flame_graph.rst
    kms.rst
+   accounting/index
    filesystem/index
    ebpf/index
    perf/index

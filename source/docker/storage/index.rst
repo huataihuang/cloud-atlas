@@ -16,11 +16,13 @@ Docker存储
    docker_storage_driver.rst
    docker_btrfs_driver.rst
    docker_overlay_driver.rst
+   docker_devicemapper_driver.rst
    docker_unionfs.rst
    docker_size_quota.rst
    docker_run_add_host_device.rst
    docker_container_nfs.rst
    docker_images_on_nfs.rst
+   docker_local_remove_storage_perf.rst
 
 .. only::  subproject and html
 

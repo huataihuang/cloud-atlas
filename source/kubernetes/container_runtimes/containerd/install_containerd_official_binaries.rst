@@ -22,11 +22,9 @@
 
 - 从 `containerd 官方发布 <https://github.com/containerd/containerd/releases>`_ 下载最新版本 v1.6.6 :
 
-.. code:: bash
-
-   wget https://github.com/containerd/containerd/releases/download/v1.6.6/containerd-1.6.6-linux-amd64.tar.gz
-   
-   sudo tar Cxzvf /usr/local containerd-1.6.6-linux-amd64.tar.gz
+.. literalinclude:: install_containerd_official_binaries/install_containerd
+   :language: bash
+   :caption: 安装最新v1.6.6 containerd官方二进制程序
 
 以上会获得如下执行文件::
 
@@ -44,10 +42,11 @@
 配置systemd启动脚本
 =====================
 
-从 `containerd github仓库containerd.service <https://github.com/containerd/containerd/blob/main/containerd.service>`_ 下载 ``containerd.service`` 保存为 ``/usr/local/lib/systemd/system/containerd.service`` ，然后执行以下激活命令::
+从 `containerd github仓库containerd.service <https://github.com/containerd/containerd/blob/main/containerd.service>`_ 下载 ``containerd.service`` 保存为 ``/usr/local/lib/systemd/system/containerd.service`` 并激活:
 
-   sudo systemctl daemon-reload
-   sudo systemctl enable containerd
+.. literalinclude:: install_containerd_official_binaries/containerd_systemd
+   :language: bash
+   :caption: 安装containerd的systemd配置文件
 
 这里可能会有报错::
 
@@ -62,18 +61,20 @@
 安装runc
 ==========
 
-从 `containerd github仓库runc <https://github.com/opencontainers/runc/releases>`_ 下载 ``runc`` 存储到 ``/usr/local/sbin/runc`` ，然后执行以下命令安装::
+从 `containerd github仓库runc <https://github.com/opencontainers/runc/releases>`_ 下载 ``runc`` 存储到 ``/usr/local/sbin/runc`` ，然后执行以下命令安装:
 
-   sudo install -m 755 runc.amd64 /usr/local/sbin/runc
+.. literalinclude:: install_containerd_official_binaries/install_runc
+   :language: bash
+   :caption: 安装runc
 
 安装CNI plugins
 ==================
 
-从 `containernetworking github仓库 <https://github.com/containernetworking/plugins/releases>`_ 下载安装包，然后执行以下命令安装::
+从 `containernetworking github仓库 <https://github.com/containernetworking/plugins/releases>`_ 下载安装包，然后执行以下命令安装:
 
-   wget https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
-   sudo mkdir -p /opt/cni/bin
-   tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
+.. literalinclude:: install_containerd_official_binaries/install_cni-plugins
+   :language: bash
+   :caption: 安装cni-plugins
 
 创建默认containerd网络配置
 =============================
