@@ -57,12 +57,65 @@ crictl命令案例
 
 .. literalinclude:: ../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_pods
    :language: bash
+   :caption: crictl pods 列出主机上的pod
 
 - 可以指定某个pods检查::
 
    crictl pods --name kube-apiserver-z-k8s-m-1
 
-- 可以按照label列出
+- 列出所有本地镜像::
+
+   crictl images
+
+显示类似:
+
+.. literalinclude:: ../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_images
+   :language: bash
+   :caption: crictl pods 列出主机上的镜像
+
+使用 ``crictl images -a`` 还可以进一步显示完整的镜像ID( ``sha256`` 签名 )
+
+- 列出主机上容器(这个命令类似 :ref:`docker` 的 ``docker ps -a`` : 注意是所有容器，包括了运行状态和停止状态的所有容器 )::
+
+   crictl ps -a
+
+显示输出:
+
+.. literalinclude:: ../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_containers
+   :language: bash
+   :caption: crictl pods 列出主机上的容器
+
+如果只需要查看正在运行的容器(不显示停止的容器)，则去掉 ``-a`` 参数
+
+- 执行容器中的命令( 类似 ``docker`` 或者 ``kubectl`` 提供的 ``exec`` 指令，直接在容器内部运行命令 )::
+
+   crictl exec -it fd65e2a037600 ls
+
+举例显示::
+
+   bin  boot  dev  etc  go-runner  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+
+但是，并不是所有容器都可以执行，例如上文中只有 ``kube-proxy-vwqsn`` 这个pod提供都容器执行成功；而我尝试对 ``kube-apiserver-z-k8s-m-1`` 等对应容器执行 ``ls`` 命令都是失败::
+
+   crictl exec -it 901b1dc06eed1 ls
+
+提示不能打开 ``/dev/pts/0`` 设备::
+
+   FATA[0000] execing command in container: Internal error occurred: error executing command in container: failed to exec in container: failed to start exec "3152d5e5f78f25a91d5e2a659c6e8036bf07978dbb8db5c95d1470089b968c9d": OCI runtime exec failed: exec failed: unable to start container process: open /dev/pts/0: operation not permitted: unknown
+
+为何在容器内部没有 ``/dev/pts/0`` 设备？ (我暂时没有找到解决方法)
+
+- 检查容器日志(这里检查 apiserver 日志)::
+
+   crictl logs 901b1dc06eed1
+
+可以看到容器的详细日志
+
+并且可以指定最后多少行日志，例如查看最后20行日志::
+
+   crictl logs --tail=20 901b1dc06eed1
+
+
 
 参考
 ======

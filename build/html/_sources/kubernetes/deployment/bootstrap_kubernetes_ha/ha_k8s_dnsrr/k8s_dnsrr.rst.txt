@@ -230,6 +230,30 @@ why?
 .. literalinclude:: k8s_dnsrr/crictl_pods
    :language: bash
 
+- 检查镜像::
+
+   crictl images
+
+输出显示:
+
+.. literalinclude:: k8s_dnsrr/crictl_images
+
+- 检查容器::
+
+   crictl ps -a
+
+显示主机上运行的容器:
+
+.. literalinclude:: k8s_dnsrr/crictl_containers
+
+以上的排查可以看到 ``z-k8s-m-1`` 服务器上各个容器以及pods是运行正常的
+
+- 检查容器日志，例如检查 apiserver 容器日志::
+
+   crictl logs 901b1dc06eed1
+
+未发现报错，看起来 apiserver 运行正常
+
 Network Plugins
 ==================
 
