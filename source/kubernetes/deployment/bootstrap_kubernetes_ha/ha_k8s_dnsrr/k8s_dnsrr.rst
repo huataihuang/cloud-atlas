@@ -4,6 +4,10 @@
 基于DNS轮询构建高可用Kubernetes
 ========================================
 
+.. warning::
+
+   我在重新部署 :ref:`priv_cloud_infra` 的Kubernetes集群，采用最新的 1.24 版本。虽然之前已经有一些部署经验，但是这次从头开始部署还是遇到不少挫折，走了不少弯路，所以本文记述比较杂乱(因为我断断续续进行，前后记述有所重复)。如果你希望有一个便捷精简且可重复正确完成的参考手册，请阅读 :ref:`z-k8s` ，我将在这篇文档中去芜存菁，系统整理如何快速完成高可用Kubernetes部署。
+
 .. note::
 
    在 :ref:`ha_k8s_lb` 部署中，负载均衡采用的是 :ref:`haproxy` 结合keeplived实现VIP自动漂移。可以在部署基础上改造DNSRR到负载均衡模式
@@ -193,10 +197,38 @@ why?
 
    `containerd versioning and release <https://containerd.io/releases/>`_ 提供了支持 Kubernetes 不同版本所对应当 ``containerd`` 版本，确实明确指出 Kubernetes 1.24 需要 ``containerd 1.64+，1.5.11+``
 
-- 重试通过 :ref:`install_containerd_official_binaries` 将发行版 ``containerd`` 升级到 1.64+ 来修复
-- :ref:`kubeadm_reset`
+再次排查启动问题
+===================
 
-``完整步骤见`` :ref:`prepare_z-k8s` ，我完整重做一遍来解决这个启动问题
+我采用以下方式重新开始部署
+
+- 执行 :ref:`kubeadm_reset` 删除掉存在异常的k8s集群
+- 重试通过 :ref:`install_containerd_official_binaries` 将发行版 ``containerd`` 升级到 1.64+ ，每个节点都执行一遍，确保采用最新 ``containerd``
+- 改进 ``kubeadm-config.yaml`` 自定义集群名(见上文，已经修订到配置中)
+
+重新执行了 ``kubeadmin init`` 但是发现 ``kubectl get nodes`` 依然出现报错 ``Unable to connect to the server: Forbidden``
+
+.. note::
+
+   我没有想到从熟悉的 :ref:`docker` 切换到 :ref:`containerd` 遇到这么多麻烦:
+
+   - Kubernetes 1.24 中无法使用 ``docker`` 命令，而 ``ctr`` 命令实践下来也是存在问题的(实际容器已经启动，但是没有任何管理输出)
+   - 需要完整切换到Kubernetes 1.24所使用的标准 cri 接口命令 :ref:`crictl` 才能观察容器运行情况
+
+- 按照 :ref:`crictl` 配置好 ``/etc/crictl.conf`` :
+
+.. literalinclude:: ../../../debug/crictl/crictl.yaml
+   :language: yaml
+   :caption: crictl配置文件 /etc/crictl.yaml
+
+- 执行pods检查::
+
+   crictl pods
+
+输出显示:
+
+.. literalinclude:: k8s_dnsrr/crictl_pods
+   :language: bash
 
 Network Plugins
 ==================

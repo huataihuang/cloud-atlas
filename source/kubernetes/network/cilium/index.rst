@@ -13,5 +13,6 @@ Cilium结合了Envoy实现代理并且使用Kernel的BPF实现数据包过滤和
 .. toctree::
    :maxdepth: 1
 
+   intro_cilium.rst
    cilium_startup.rst
    cilium_install_with_external_etcd.rst
