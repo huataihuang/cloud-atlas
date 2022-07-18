@@ -71,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../ingress/index.html">Kubernetes Ingress控制器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../flannel/index.html">Flannel网络</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Cilium网络</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="intro_cilium.html">cilium技术简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="cilium_startup.html">cilium快速起步</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">在扩展etcd环境安装cilium</a></li>
 </ul>
@@ -175,8 +176,153 @@
   <section id="etcdcilium">
 <span id="cilium-install-with-external-etcd"></span><h1>在扩展etcd环境安装cilium<a class="headerlink" href="#etcdcilium" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="cilium_startup.html#cilium-startup"><span class="std std-ref">cilium快速起步</span></a> 介绍了快速安装cilium的方法，但是只是适合比较简单环境，即采用堆叠etcd模式环境，而在采用外部独立etcd集群，则需要做一些调整，把 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 集群配置传递给cilium安装程序</p>
+<p>cilium使用外部KV存储(通常是 <a class="reference internal" href="../../administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> )优点:</p>
+<ul class="simple">
+<li><p>使用外部扩展KV存储可以解决Kubernetes大量事件传播开销极大的问题</p></li>
+<li><p>使用外部扩展KV存储可以避免cilium将状态存储在Kubernetes自定义资源(CRD)中</p></li>
+<li><p>使用外部扩展KV存储可以支持更多pod和节点</p></li>
+</ul>
+<p>运行cilium环境要求:</p>
+<ul class="simple">
+<li><p>Kubernetes &gt;= 1.16</p></li>
+<li><p>Linux kernel &gt;= 4.9</p></li>
+<li><p>Kubernetes使用CNI模式</p></li>
+<li><p>在所有工作节点挂载了 <a class="reference internal" href="../../../kernel/ebpf/index.html#ebpf"><span class="std std-ref">eBPF</span></a> 文件系统</p></li>
+<li><p><strong>建议</strong> : 在 <code class="docutils literal notranslate"><span class="pre">kube-controller-manager</span></code> 上激活 <code class="docutils literal notranslate"><span class="pre">PodCIDR</span></code> 分配( <code class="docutils literal notranslate"><span class="pre">--allocate-node-cidrs</span></code> )</p></li>
+</ul>
+<section id="cilium">
+<h2>配置Cilium<a class="headerlink" href="#cilium" title="Permalink to this heading">¶</a></h2>
+<p>Cilium需要在ConfigMap中配置扩展外部KV存储，这个配置是通过 <a class="reference internal" href="../../deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 完成的，所以需要首先安装 <code class="docutils literal notranslate"><span class="pre">helm3</span></code> :</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">在Linux平台安装helm</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://get.helm.sh/helm-v3.9.1-linux-amd64.tar.gz
+tar -zxvf helm-v3.9.1-linux-amd64.tar.gz
+sudo mv linux-amd64/helm /usr/local/bin/helm
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>设置cilium Helm仓库:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">设置cilium Helm仓库</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm repo add cilium https://helm.cilium.io/
+</pre></div>
+</div>
+</div>
+<p>此时提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;cilium&quot;</span> <span class="n">has</span> <span class="n">been</span> <span class="n">added</span> <span class="n">to</span> <span class="n">your</span> <span class="n">repositories</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>通过 <a class="reference internal" href="../../deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 部署Cilium:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">为cilium配置访问etcd的Kubernetes secret，安装cilium采用SSL模式访问etcd</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">VERSION</span><span class="o">=</span><span class="m">1</span>.11.7
+
+<span class="nv">ETCD_0_IP</span><span class="o">=</span><span class="m">192</span>.168.6.204
+<span class="nv">ETCD_1_IP</span><span class="o">=</span><span class="m">192</span>.168.6.205
+<span class="nv">ETCD_2_IP</span><span class="o">=</span><span class="m">192</span>.168.6.206
+
+kubectl create secret generic -n kube-system cilium-etcd-secrets <span class="se">\</span>
+    --from-file<span class="o">=</span>etcd-client-ca.crt<span class="o">=</span>/etc/kubernetes/pki/etcd/ca.crt <span class="se">\</span>
+    --from-file<span class="o">=</span>etcd-client.key<span class="o">=</span>/etc/kubernetes/pki/apiserver-etcd-client.key <span class="se">\</span>
+    --from-file<span class="o">=</span>etcd-client.crt<span class="o">=</span>/etc/kubernetes/pki/apiserver-etcd-client.crt
+
+helm install cilium cilium/cilium --version <span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span> <span class="se">\</span>
+  --namespace kube-system <span class="se">\</span>
+  --set etcd.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  --set etcd.ssl<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  --set <span class="s2">&quot;etcd.endpoints[0]=https://</span><span class="si">${</span><span class="nv">ETCD_0_IP</span><span class="si">}</span><span class="s2">:2379&quot;</span> <span class="se">\</span>
+  --set <span class="s2">&quot;etcd.endpoints[1]=https://</span><span class="si">${</span><span class="nv">ETCD_1_IP</span><span class="si">}</span><span class="s2">:2379&quot;</span> <span class="se">\</span>
+  --set <span class="s2">&quot;etcd.endpoints[2]=https://</span><span class="si">${</span><span class="nv">ETCD_2_IP</span><span class="si">}</span><span class="s2">:2379&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>执行安装以后提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">W0719</span> <span class="mi">01</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">50.091851</span>  <span class="mi">995900</span> <span class="n">warnings</span><span class="o">.</span><span class="n">go</span><span class="p">:</span><span class="mi">70</span><span class="p">]</span> <span class="n">spec</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">nodeAffinity</span><span class="o">.</span><span class="n">requiredDuringSchedulingIgnoredDuringExecution</span><span class="o">.</span><span class="n">nodeSelectorTerms</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">matchExpressions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span> <span class="ow">is</span> <span class="n">deprecated</span> <span class="n">since</span> <span class="n">v1</span><span class="mf">.14</span><span class="p">;</span> <span class="n">use</span> <span class="s2">&quot;kubernetes.io/os&quot;</span> <span class="n">instead</span>
+<span class="n">NAME</span><span class="p">:</span> <span class="n">cilium</span>
+<span class="n">LAST</span> <span class="n">DEPLOYED</span><span class="p">:</span> <span class="n">Tue</span> <span class="n">Jul</span> <span class="mi">19</span> <span class="mi">01</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">48</span> <span class="mi">2022</span>
+<span class="n">NAMESPACE</span><span class="p">:</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
+<span class="n">STATUS</span><span class="p">:</span> <span class="n">deployed</span>
+<span class="n">REVISION</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">TEST</span> <span class="n">SUITE</span><span class="p">:</span> <span class="kc">None</span>
+<span class="n">NOTES</span><span class="p">:</span>
+<span class="n">You</span> <span class="n">have</span> <span class="n">successfully</span> <span class="n">installed</span> <span class="n">Cilium</span> <span class="k">with</span> <span class="n">Hubble</span><span class="o">.</span>
+
+<span class="n">Your</span> <span class="n">release</span> <span class="n">version</span> <span class="ow">is</span> <span class="mf">1.11.7</span><span class="o">.</span>
+
+<span class="n">For</span> <span class="nb">any</span> <span class="n">further</span> <span class="n">help</span><span class="p">,</span> <span class="n">visit</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">cilium</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">en</span><span class="o">/</span><span class="n">v1</span><span class="mf">.11</span><span class="o">/</span><span class="n">gettinghelp</span>
+</pre></div>
+</div>
+<p>此时，在安装了 cilium 这样的 CNI 之后，在 <a class="reference internal" href="../../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr.html#k8s-dnsrr"><span class="std std-ref">基于DNS轮询构建高可用Kubernetes</span></a> 部署过程中没有运行起来的coredns容器就能够分配IP地址并运行起来:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">安装cilium CNI网络之后coredns就可以运行，此时 kubectl get pods 输出可以看到所有pods已分配IP并运行</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>NAME                                READY   STATUS    RESTARTS   AGE     IP              NODE        NOMINATED NODE   READINESS GATES
+cilium-7c5nv                        <span class="m">1</span>/1     Running   <span class="m">0</span>          8m40s   <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+cilium-operator-68dffdc9f7-cqvqr    <span class="m">1</span>/1     Running   <span class="m">0</span>          8m40s   <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+cilium-operator-68dffdc9f7-rph4w    <span class="m">0</span>/1     Pending   <span class="m">0</span>          8m40s   &lt;none&gt;          &lt;none&gt;      &lt;none&gt;           &lt;none&gt;
+coredns-6d4b75cb6d-jnfmj            <span class="m">1</span>/1     Running   <span class="m">0</span>          25h     <span class="m">10</span>.0.0.241      z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+coredns-6d4b75cb6d-nm5fz            <span class="m">1</span>/1     Running   <span class="m">0</span>          25h     <span class="m">10</span>.0.0.141      z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+kube-apiserver-z-k8s-m-1            <span class="m">1</span>/1     Running   <span class="m">0</span>          25h     <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+kube-controller-manager-z-k8s-m-1   <span class="m">1</span>/1     Running   <span class="m">0</span>          25h     <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+kube-proxy-vwqsn                    <span class="m">1</span>/1     Running   <span class="m">0</span>          25h     <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+kube-scheduler-z-k8s-m-1            <span class="m">1</span>/1     Running   <span class="m">0</span>          25h     <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+</pre></div>
+</div>
+</div>
+</section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>验证安装<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>安装最新版本Cilium CLI:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">安装cilium CLI</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
+rm cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cilium</span> <span class="n">status</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时屏幕会输出:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">cilium 状态验证</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>    /¯¯<span class="se">\</span>
+ /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Cilium:         OK
+ <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    Operator:       <span class="m">1</span> errors, <span class="m">1</span> warnings
+ /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Hubble:         disabled
+ <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    ClusterMesh:    disabled
+    <span class="se">\_</span>_/
+
+Deployment        cilium-operator    Desired: <span class="m">2</span>, Ready: <span class="m">1</span>/2, Available: <span class="m">1</span>/2, Unavailable: <span class="m">1</span>/2
+DaemonSet         cilium             Desired: <span class="m">1</span>, Ready: <span class="m">1</span>/1, Available: <span class="m">1</span>/1
+Containers:       cilium-operator    Running: <span class="m">1</span>, Pending: <span class="m">1</span>
+                  cilium             Running: <span class="m">1</span>
+Cluster Pods:     <span class="m">2</span>/2 managed by Cilium
+Image versions    cilium             quay.io/cilium/cilium:v1.11.7@sha256:66a6f72a49e55e21278d07a99ff2cffa7565ed07f2578d54b5a92c1a492a6597: <span class="m">1</span>
+                  cilium-operator    quay.io/cilium/operator-generic:v1.11.7@sha256:0f8ed5d815873d20848a360df3f2ebbd4116481ff817d3f295557801e0b45900: <span class="m">2</span>
+Errors:           cilium-operator    cilium-operator                     <span class="m">1</span> pods of Deployment cilium-operator are not ready
+Warnings:         cilium-operator    cilium-operator-68dffdc9f7-rph4w    pod is pending
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>这里显示 <code class="docutils literal notranslate"><span class="pre">cilium-operator</span></code> 配置了2个pod，但只有1个pod运行是因为目前我正在bootstrap管控节点，当前只运行了一个管控节点，所以deployment配置了2个replicas只能先运行1个。稍后完成管控节点扩容后就能保证有足够master节点运行 <code class="docutils literal notranslate"><span class="pre">cilium-operator</span></code></p>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.cilium.io/en/stable/gettingstarted/k8s-install-external-etcd/">cilium Getting Started Guides: Installation with external etcd</a></p></li>
 </ul>

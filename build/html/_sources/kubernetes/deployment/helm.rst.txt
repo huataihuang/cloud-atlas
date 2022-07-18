@@ -28,11 +28,11 @@ Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和�
    tar -zxvf helm-v2.14.1-darwin-amd64.tar.gz
    sudo mv darwin-amd64/helm /usr/local/bin/helm
 
-- 在 Linux 安装::
+- 在 Linux 安装:
 
-   wget https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz
-   tar -zxvf helm-v2.14.1-linux-amd64.tar.gz
-   sudo mv linux-amd64/helm /usr/local/bin/helm
+.. literalinclude:: helm/linux_helm_install
+   :language: bash
+   :caption: 在Linux平台安装helm
 
 .. note::
 

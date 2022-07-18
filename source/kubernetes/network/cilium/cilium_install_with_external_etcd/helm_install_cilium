@@ -1,0 +1,18 @@
+VERSION=1.11.7
+
+ETCD_0_IP=192.168.6.204
+ETCD_1_IP=192.168.6.205
+ETCD_2_IP=192.168.6.206
+
+kubectl create secret generic -n kube-system cilium-etcd-secrets \
+    --from-file=etcd-client-ca.crt=/etc/kubernetes/pki/etcd/ca.crt \
+    --from-file=etcd-client.key=/etc/kubernetes/pki/apiserver-etcd-client.key \
+    --from-file=etcd-client.crt=/etc/kubernetes/pki/apiserver-etcd-client.crt
+
+helm install cilium cilium/cilium --version ${VERSION} \
+  --namespace kube-system \
+  --set etcd.enabled=true \
+  --set etcd.ssl=true \
+  --set "etcd.endpoints[0]=https://${ETCD_0_IP}:2379" \
+  --set "etcd.endpoints[1]=https://${ETCD_1_IP}:2379" \
+  --set "etcd.endpoints[2]=https://${ETCD_2_IP}:2379"

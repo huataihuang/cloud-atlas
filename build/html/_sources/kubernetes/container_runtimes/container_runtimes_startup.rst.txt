@@ -15,7 +15,7 @@
 
 .. note::
 
-   Docker Engine没有直接实现CRI，所以在Kubernetes中使用 :ref:`docker` 需要一个附加的服务 ``cri-dockerd`` 来使用传统的Docker Engine。但是，这个支持将在 kubelet 1.24 被移除
+   Docker Engine没有直接实现CRI，所以在Kubernetes中使用 :ref:`docker` 需要一个附加的服务 ``cri-dockerd`` 来使用传统的Docker Engine。
 
 Kubernetes通过以下约定来检测支持的endpoints:
 
@@ -72,11 +72,11 @@ Docker(适用于K8s 1.24版本之前)
 
 .. warning::
 
-   从 Kubernetes 1.24 开始已经移除了Docker支持，默认不再需要使用Docker，而是直接采取原生CRI的 :ref:`container_runtimes` ，如 :ref:`containerd` 。
+   从 Kubernetes 1.24 开始 :strike:`已经移除了Docker支持，默认不再需要使用Docker` (依然可以使用 ``Docker Engine`` ，但是需要安装Mirantis公司(这家公司收购了企业版Docker Engine)提供的 ``cri-dockerd`` ，建议直接采取原生CRI的 :ref:`container_runtimes` ，如 :ref:`containerd` 。
 
 .. note::
 
-   :strike:`我的个人实践目前仅限于Docker作为Kubernetes的runtime，其他容器运行环境可能会在某些需要的时候尝试实践。`
+   :strike:`我的个人实践目前仅限于Docker作为Kubernetes的runtime，其他容器运行环境可能会在某些需要的时候尝试实践。` 我之前实践是采用Docker Engine作为runtime，但是从 Kubernetes 1.24 开始，我改为直接使用 :ref:`containerd` 部署。
 
 Ubuntu 16.04
 ----------------
