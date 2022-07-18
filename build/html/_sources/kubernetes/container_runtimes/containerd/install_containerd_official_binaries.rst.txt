@@ -76,6 +76,23 @@
    :language: bash
    :caption: 安装cni-plugins
 
+上述方法也是 `How To Setup A Three Node Kubernetes Cluster For CKA: Step By Step <https://k21academy.com/docker-kubernetes/three-node-kubernetes-cluster/>`_ 提供的通过containerd内置工具生成默认配置(实际上这个方法是Kubernetes官方文档配置containerd默认网络的方法)
+
+此外，从 `containerd安装CNI plugins官方文档 <https://github.com/containerd/containerd/blob/main/script/setup/install-cni>`_ ``install-cni`` 脚本中获取生成配置部分(但是该方法不是Kubernetes官方文档推荐，似乎没有成功):
+
+.. literalinclude:: install_containerd_official_binaries/install-cni
+   :language: bash
+   :caption: 安装containerd CNI plugins脚本 install-cni 生成配置部分
+
+.. note::
+
+   在Kubernetes 1.24之前，CNI plugins可以通过 kubelet 使用 ``cni-bin-dir`` 和 ``network-plugin`` 命令参数来管理。但是在 Kubernetes 1.24 中，这些参数已经被移除，因为CNI管理已经不属于kubelet范围。
+
+针对不同的 :ref:`container_runtimes` ，需要采用不同的方式安装CNI plugins:
+
+- `containerd安装CNI plugins官方文档 <https://github.com/containerd/containerd/blob/main/script/setup/install-cni>`_
+- `CRI-O安装CNI plugins官方文档 <https://github.com/cri-o/cri-o/blob/main/contrib/cni/README.md>`_
+
 创建默认containerd网络配置
 =============================
 
