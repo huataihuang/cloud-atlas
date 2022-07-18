@@ -254,32 +254,50 @@ why?
 
 未发现报错，看起来 apiserver 运行正常
 
-Network Plugins
-==================
+万般无奈，我再次 google 了一下，终于 ``蚌埠住了`` :
+
+.. figure:: ../../../../_static/kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/marmot.gif
+
+``Unable to connect to the server: Forbidden`` 报错原因很简单:  ``z-k8s-m-1`` **设置了http代理**
+
+原来，在最初为了翻墙下载google仓库文件，我配置了 :ref:`curl_proxy` ，原来报错信息是因为代理服务器拒绝导致的。多么可笑的失误啊!!!
+
+简单注释掉代理配置的环境变量就顺利可以执行 ``kubectl`` 了::
+
+   unset http_proxy
+   unset https_proxy
 
 .. note::
 
-   在Kubernetes 1.24之前，CNI plugins可以通过 kubelet 使用 ``cni-bin-dir`` 和 ``network-plugin`` 命令参数来管理。但是在 Kubernetes 1.24 中，这些参数已经被移除，因为CNI管理已经不属于kubelet范围。
+   不过，也别灰心...
 
-针对不同的 :ref:`container_runtimes` ，需要采用不同的方式安装CNI plugins:
+   这一周的折腾，至少对Kubernetes的 :ref:`container_runtimes` 等新技术有了进一步了解，也顺带学习了一些相关技术...不放弃
 
-- `containerd安装CNI plugins官方文档 <https://github.com/containerd/containerd/blob/main/script/setup/install-cni>`_
-- `CRI-O安装CNI plugins官方文档 <https://github.com/cri-o/cri-o/blob/main/contrib/cni/README.md>`_
+- 现在终于能够通过 ``kubectl`` 管理新部署的集群了::
 
-containerd CNI plugins安装
---------------------------
+   kubectl get nodes
 
-- 一种方法是参考 `How To Setup A Three Node Kubernetes Cluster For CKA: Step By Step <https://k21academy.com/docker-kubernetes/three-node-kubernetes-cluster/>`_ 提供了通过containerd内置工具生成默认配置(实际上这个方法是Kubernetes官方文档配置containerd默认网络的方法，正确)
+显示输出::
 
--  (该方法不正确)从 `containerd安装CNI plugins官方文档 <https://github.com/containerd/containerd/blob/main/script/setup/install-cni>`_ ``install-cni`` 脚本中获取生成配置部分:
+   NAME        STATUS     ROLES           AGE   VERSION
+   z-k8s-m-1   NotReady   control-plane   18h   v1.24.2
 
-.. literalinclude:: k8s_dnsrr/install-cni
+- 检查 pods ::
+
+   kubectl get pods -n kube-system -o wide
+
+此时输出:
+
+.. literalinclude:: k8s_dnsrr/kubectl_get_pods_before_net
    :language: bash
-   :caption: 安装containerd CNI plugins脚本 install-cni 生成配置部分
+   :caption: 没有安装网络前无法启动coredns，此时 kubectl get pods 输出
 
+.. note::
 
-安装cilium
-------------
+   目前还有2个问题没有解决:
+
+   - ``z-k8s-m-1`` 节点状态是 ``NotReady``
+   - ``coredns`` 管控pods无法启动(网络没有配置)
 
 参考
 ========
