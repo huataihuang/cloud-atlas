@@ -23,6 +23,10 @@ crictl
    sudo tar zxvf critest-$VERSION-linux-amd64.tar.gz -C /usr/local/bin
    rm -f critest-$VERSION-linux-amd64.tar.gz
 
+.. note::
+
+   我在部署 :ref:`priv_cloud_infra` 的Kubernetes集群 :ref:`ha_k8s_dnsrr` 时，完全摈弃了 :ref:`docker` 改为推荐的 :ref:`container_runtimes` :ref:`containerd` 。此时无法使用 ``docker`` 命令，需要采用Kubernetes规范的CRI工具，也就是 ``crictl`` 。这个工具安装采用了 :ref:`install_containerd_official_binaries` 步骤完成，详细步骤也可参考 :ref:`prepare_z-k8s`
+
 使用crictl
 ==============
 
@@ -32,21 +36,33 @@ crictl
 - 可以通过设置环境变量 ``CONTAINER_RUNTIME_ENDPOINT`` 和 ``CONTAINER_RUNTIME_ENDPOINT``
 - 可以通过配置文件的endpoint设置 ``--config=/etc/crictl.yaml``
 
-当前配置为 ``/etc/crictl.yaml`` ::
+当前配置为 ``/etc/crictl.yaml`` :
 
-   runtime-endpoint: unix:///var/run/dockershim.sock
-   image-endpoint: unix:///var/run/dockershim.sock
-   timeout: 10
-   debug: true
+.. literalinclude:: crictl/crictl.yaml
+   :language: yaml
+   :caption: crictl配置文件 /etc/crictl.yaml
 
 crictl命令案例
 ==============
+
+.. note::
+
+   实践案例见 :ref:`k8s_dnsrr`
 
 - 列出pods::
 
    crictl pods
 
+输出显示类似:
 
+.. literalinclude:: ../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_pods
+   :language: bash
+
+- 可以指定某个pods检查::
+
+   crictl pods --name kube-apiserver-z-k8s-m-1
+
+- 可以按照label列出
 
 参考
 ======
