@@ -296,8 +296,58 @@ why?
 
    目前还有2个问题没有解决:
 
-   - ``z-k8s-m-1`` 节点状态是 ``NotReady``
-   - ``coredns`` 管控pods无法启动(网络没有配置)
+   - ``z-k8s-m-1`` 节点状态是 ``NotReady`` 
+   - ``coredns`` 管控pods无法启动(网络没有配置) 
+
+     - 这个问题我之前在 :ref:`single_master_k8s` 已经有经验，只要为Kubernetes集群安装正确的网络接口即可启动容器
+     - 请注意，Kubernetes集群的3大组件 ``apiserver`` / ``scheduler`` / ``controller-manager`` 都是使用物理主机的IP地址 ``192.168.6.101`` ，也就是说，即使没有安装网络接口组件这3个管控组件也是能够启动的；这也是为何在 ``kubeadm-config.yaml`` 配置的 ``controlPlaneEndpoint`` 项域名 ``z-k8s-api.staging.huatai.me`` 就是指向物理主机IP地址的解析
+
+安装 :ref:`cilium`
+======================
+
+需要注意，针对 :ref:`priv_deploy_etcd_cluster_with_tls_auth` (扩展外部etcd)需要采用 :ref:`cilium_install_with_external_etcd` :
+
+- 首先在节点安装 :ref:`helm` :
+
+.. literalinclude:: ../../helm/linux_helm_install
+   :language: bash
+   :caption: 在Linux平台安装helm
+
+- 设置cilium Helm仓库:
+
+.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/helm_repo_add_cilium
+   :language: bash
+   :caption: 设置cilium Helm仓库
+
+- 通过 :ref:`helm` 部署Cilium:
+
+.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/helm_install_cilium
+   :language: bash
+   :caption: 为cilium配置访问etcd的Kubernetes secret，安装cilium采用SSL模式访问etcd
+
+- 此时，在安装了 cilium 这样的 CNI 之后，之前部署过程中没有运行起来的coredns容器就能够分配IP地址并运行起来::
+
+   kubectl -n kube-system get pods -o wide
+
+输出显示:
+
+.. literalinclude:: k8s_dnsrr/kubectl_get_pods_after_net
+   :language: bash
+   :caption: 安装cilium CNI网络之后coredns就可以运行，此时 kubectl get pods 输出可以看到所有pods已分配IP并运行
+
+- 安装cilium客户端:
+
+.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/install_cilium_cli
+   :language: bash
+   :caption: 安装cilium CLI
+
+- 检查::
+
+   cilium status
+
+.. note::
+
+   至此，已初步完成了管控节点安装，接下来就是添加更多管控节点，以及增加工作节点
 
 参考
 ========
@@ -305,3 +355,4 @@ why?
 - `Creating Highly Available Clusters with kubeadm <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/>`_ 官方文档综合了 :ref:`ha_k8s_stacked` 和 :ref:`ha_k8s_external` ，我在本文实践中拆解了 :ref:`ha_k8s_external`
 - `Network Plugins <https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#network-plugin-requirements>`_
 - `cilium Quick Installation <https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/>`_
+- `kubesphere主节点执行kubectl命令提示Unable to connect to the server: Forbidden <https://kubesphere.com.cn/forum/d/5945-kubespherekubectlunable-to-connect-to-the-server-forbidden>`_ 感谢这位网友提供的信息: ``找到问题了，是设置了http代理的问题...unset http_proxy...通过master节点30880端口访问是没有问题的，只是执行在master节点执行kubectl命令报错，在worker节点上执行kubectl命令没有任何问题`` 
