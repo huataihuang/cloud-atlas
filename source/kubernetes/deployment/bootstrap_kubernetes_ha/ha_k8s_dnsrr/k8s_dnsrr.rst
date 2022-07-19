@@ -349,7 +349,101 @@ why?
 
    至此，已初步完成了管控节点安装，接下来就是添加更多管控节点，以及增加工作节点。这个操作可以从最初 ``kubeadmin init`` 输出的提示信息中获取(如果你当时保存了输出信息)
 
+添加第二个管控节点
+====================
 
+- 按照 ``kubeadm init`` 输出信息，在第二个管控节点 ``z-k8s-m-2`` 上执行节点添加:
+
+.. literalinclude:: k8s_dnsrr/kubeadm_join_control-plane
+   :language: bash
+   :caption: kubeadm join添加control-plane节点
+
+管控节点添加排查
+-----------------
+
+.. note::
+
+   ``kubeadm`` 初始化集群时候生成的 ``certificate`` 和 ``token`` (24小时) 都是有一定有效期限。所以如果在初始化之后，再经过较长时间才添加管控节点和工作节点，就会遇到 ``token`` 和 ``certificate`` 相关错误。此时，需要重新上传certifiate和重新生成token。并且，对于使用 external etcd，还需要通过 ``kubeadm-config.yaml`` 传递etcd参数。
+
+我在执行 ``kubeadm join`` 管控节点添加遇到报错::
+
+   error execution phase preflight: couldn't validate the identity of the API Server: could not find a JWS signature in the cluster-info ConfigMap for token ID "XXXXXXX"
+   To see the stack trace of this error execute with --v=5 or higher
+
+上述报错是因为原有的token已经过期，所以需要重新生成:
+
+.. literalinclude:: k8s_dnsrr/kubeadm_token_create
+   :language: bash
+   :caption: kubeadm token create命令重新生成token(解决初始化集群时token过期问题)
+
+- 然后再次执行 ``kubeadm init`` 命令，但是把tokern替换成新生成的有效token(依然保留之前的 ``--certificate-key`` )，此时会提示 ``kubeadm-certs`` 没有找到::
+
+   ...
+   [download-certs] Downloading the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+   error execution phase control-plane-prepare/download-certs: error downloading certs: error downloading the secret: Secret "kubeadm-certs" was not found in the "kube-system" Namespace. This Secret might have expired. Please, run `kubeadm init phase upload-certs --upload-certs` on a control plane to generate a new one
+   To see the stack trace of this error execute with --v=5 or higher
+
+根据提示，实际上 ``kubeadm token create`` 只是针对worker节点，对于管控节点，还需要重新上传certificates( 参考 `How do I find the join command for kubeadm on the master? <https://stackoverflow.com/questions/51126164/how-do-i-find-the-join-command-for-kubeadm-on-the-master>`_ )。也就是对于token失效的时候，新加入管控节点需要有2步:
+
+- 在已经工作的管控节点上重新上传certifiates:
+
+.. literalinclude:: k8s_dnsrr/kubeadm_init_phase_upload-certs
+   :language: bash
+   :caption: kubeadm init 重新上传证书
+
+此时提示重新生成了证书::
+
+   [upload-certs] Storing the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+   [upload-certs] Using certificate key:
+   XXXXXXXXXX
+
+- 然后执行重建toke命令(前面执行过可以不用重复):
+
+.. literalinclude:: k8s_dnsrr/kubeadm_token_create
+   :language: bash
+   :caption: kubeadm token create命令重新生成token(解决初始化集群时token过期问题)
+
+- 可以执行检查token命令::
+
+   kubeadm token list
+
+就显示出刚才重新生成的token
+
+- 将生成的 ``certificate`` 拼接到 ``kubeadm join`` 命令(使用新生成的token)再次添加管控节点。然而还是报错::
+
+   [download-certs] Downloading the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+   error execution phase control-plane-prepare/download-certs: error downloading certs: the Secret does not include the required certificate or key - name: external-etcd.crt, path: /etc/kubernetes/pki/apiserver-etcd-client.crt
+   To see the stack trace of this error execute with --v=5 or higher
+
+原来重新生成 ``cartificate`` 的默认命令是针对内部etcd的， ``对于外部etcd，重新初始化证书还是要使用 "包含" etcd配置信息的 kubeadm-config.yaml`` ( 参考 `Control plane certs not working with external etcd #1886 <https://github.com/kubernetes/kubeadm/issues/1886>`_ )，即:
+
+.. literalinclude:: k8s_dnsrr/kubeadm_init_phase_upload-certs_external_etcd
+   :language: bash
+   :caption: 使用external etcd时，kubeadm init 重新上传证书需要使用 kubeadm-config.yaml
+
+添加工作节点
+==================
+
+- 按照 ``kubeadm init`` 输出信息，在工作节点 ``z-k8s-n-1`` 等上执行:
+
+.. literalinclude:: k8s_dnsrr/kubeadm_join_worker
+   :language: bash
+   :caption: kubeadm join添加worker节点
+
+完成检查
+===========
+
+- 最终完成后检查 ``nodes`` 和 ``podes`` 得到完整列表:
+
+.. literalinclude:: k8s_dnsrr/kubectl_get_nodes
+   :language: bash
+   :caption: 完成扩展etcd的K8s集群后检查kubectl get nodes
+
+.. literalinclude:: k8s_dnsrr/kubectl_get_pods
+   :language: bash
+   :caption: 完成扩展etcd的K8s集群后检查kubectl get pods
+
+集群创建成功!!!
 
 参考
 ========
