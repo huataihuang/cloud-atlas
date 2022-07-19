@@ -90,6 +90,27 @@ Cilium需要在ConfigMap中配置扩展外部KV存储，这个配置是通过 :r
 
    这里显示 ``cilium-operator`` 配置了2个pod，但只有1个pod运行是因为目前我正在bootstrap管控节点，当前只运行了一个管控节点，所以deployment配置了2个replicas只能先运行1个。稍后完成管控节点扩容后就能保证有足够master节点运行 ``cilium-operator``
 
+- :ref:`k8s_dnsrr` 第一个管控节点安装好 ``cilium`` 之后 :ref:`coredns` 就可以分配到IP地址运行起来。接下来可以完成第二、第三个管控节点以及各个工作节点添加，直到整个集群建立
+
+.. note::
+
+   只需要在第一个管控节点上安装 :ref:`helm` 以及 ``cilium`` 客户端(验证)，通过 ``helm`` 就可以为整个集群安装部署 ``cilium`` 网络，扩展安装非常方便。
+
+- 当 :ref:`k8s_dnsrr` 工作节点正确运行之后，就可以通过 ``cilium`` 客户端来验证网络连接性::
+
+   cilium connectivity test
+
+``cilium connectivity test`` 是一个非常 ``赞`` 的探针功能，自动构建了同一个worker节点和不同worker节点上的 ``cilium-test`` 容器相互间进行网络联通测试::
+
+   $ kubectl get pods -o wide -n cilium-test
+   NAME                              READY   STATUS    RESTARTS   AGE     IP           NODE        NOMINATED NODE   READINESS GATES
+   client-7df6cfbf7b-kc4mz           1/1     Running   0          5m50s   10.0.3.103   z-k8s-n-1   <none>           <none>
+   client2-547996d7d8-pv4n5          1/1     Running   0          4m38s   10.0.3.210   z-k8s-n-1   <none>           <none>
+   echo-other-node-d79544ccf-hxjzb   2/2     Running   0          57s     10.0.7.132   z-k8s-n-4   <none>           <none>
+   echo-same-node-5d466d5444-kbgzl   2/2     Running   0          2m5s    10.0.3.68    z-k8s-n-1   <none>           <none>
+
+完成测试后会在终端显示测试结果
+
 参考
 ======
 

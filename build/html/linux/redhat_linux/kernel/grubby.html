@@ -169,8 +169,164 @@
              
   <section id="grubby">
 <span id="id1"></span><h1>grubby修改内核参数<a class="headerlink" href="#grubby" title="Permalink to this heading">¶</a></h1>
+<p>在做 <a class="reference internal" href="../../../kernel/index.html#kernel"><span class="std std-ref">Kernel Atlas</span></a> 内核参数配置时，例如 <a class="reference internal" href="../../ubuntu_linux/admin/ubuntu_grub.html#ubuntu-grub"><span class="std std-ref">Ubuntu修订Grub内核启动参数</span></a> 采用修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置文件，然后通过 <code class="docutils literal notranslate"><span class="pre">update-grub</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">grub2-mkconfig</span> <span class="pre">-o</span> <span class="pre">/boot/grub2/grub.cfg</span></code> 完成内核参数修订 (包括 <a class="reference internal" href="../index.html#redhat-linux"><span class="std std-ref">RedHat Linux</span></a> 也支持这种方式)。</p>
+<p>不过，这种修订方式需要编辑配置文件，不适合通过脚本自动化完成海量服务器修订。(自己编写 <code class="docutils literal notranslate"><span class="pre">sed</span></code> 脚本虽然也能批量处理，但是通用性较差且容易误处理)所以， <code class="docutils literal notranslate"><span class="pre">grubby</span></code> 工具提供了读取Grub信息以及持久化修订 <code class="docutils literal notranslate"><span class="pre">grub.cfg</span></code> 的能力，可以完成批量处理 GRUB 2 配置文件，适合对生产环境海量服务器修订。</p>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>查看内核信息<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>要找出系统默认启动内核执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">default</span><span class="o">-</span><span class="n">kernel</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出案例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.18.11</span><span class="o">-</span><span class="mf">100.</span><span class="n">fc35</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+<ul>
+<li><p>查看默认内核的索引值:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">default</span><span class="o">-</span><span class="n">index</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出案例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>这个索引值也就是对应前面 <code class="docutils literal notranslate"><span class="pre">--default-kernel</span></code> 的 <code class="docutils literal notranslate"><span class="pre">/boot/vmlinuz-5.18.11-100.fc35.x86_64</span></code></p>
+<ul>
+<li><p>现在我们可以查看系统中有那些内核，并且找出其对应grub的索引值(这个索引值用于配置系统启动时加载的内核，见下文):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">info</span><span class="o">=</span><span class="n">ALL</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>上述命令显示出所有内核以及配置项，例如在 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 这个 <a class="reference internal" href="../fedora/index.html#fedora"><span class="std std-ref">Fedora</span></a> 系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">index</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;/boot/vmlinuz-5.18.11-100.fc35.x86_64&quot;</span>
+<span class="n">args</span><span class="o">=</span><span class="s2">&quot;ro console=ttyS0,115200&quot;</span>
+<span class="n">root</span><span class="o">=</span><span class="s2">&quot;UUID=23fc0f61-894e-4b8e-a623-fb4290bb23e8&quot;</span>
+<span class="n">initrd</span><span class="o">=</span><span class="s2">&quot;/boot/initramfs-5.18.11-100.fc35.x86_64.img&quot;</span>
+<span class="n">title</span><span class="o">=</span><span class="s2">&quot;Fedora Linux (5.18.11-100.fc35.x86_64) 35 (Server Edition)&quot;</span>
+<span class="nb">id</span><span class="o">=</span><span class="s2">&quot;784e41a278df4e3e804b451ac3bb4c3e-5.18.11-100.fc35.x86_64&quot;</span>
+<span class="n">index</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;/boot/vmlinuz-5.18.10-100.fc35.x86_64&quot;</span>
+<span class="n">args</span><span class="o">=</span><span class="s2">&quot;ro console=ttyS0,115200&quot;</span>
+<span class="n">root</span><span class="o">=</span><span class="s2">&quot;UUID=23fc0f61-894e-4b8e-a623-fb4290bb23e8&quot;</span>
+<span class="n">initrd</span><span class="o">=</span><span class="s2">&quot;/boot/initramfs-5.18.10-100.fc35.x86_64.img&quot;</span>
+<span class="n">title</span><span class="o">=</span><span class="s2">&quot;Fedora Linux (5.18.10-100.fc35.x86_64) 35 (Server Edition)&quot;</span>
+<span class="nb">id</span><span class="o">=</span><span class="s2">&quot;784e41a278df4e3e804b451ac3bb4c3e-5.18.10-100.fc35.x86_64&quot;</span>
+<span class="n">index</span><span class="o">=</span><span class="mi">2</span>
+<span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;/boot/vmlinuz-5.18.5-100.fc35.x86_64&quot;</span>
+<span class="n">args</span><span class="o">=</span><span class="s2">&quot;ro console=ttyS0,115200&quot;</span>
+<span class="n">root</span><span class="o">=</span><span class="s2">&quot;UUID=23fc0f61-894e-4b8e-a623-fb4290bb23e8&quot;</span>
+<span class="n">initrd</span><span class="o">=</span><span class="s2">&quot;/boot/initramfs-5.18.5-100.fc35.x86_64.img&quot;</span>
+<span class="n">title</span><span class="o">=</span><span class="s2">&quot;Fedora Linux (5.18.5-100.fc35.x86_64) 35 (Server Edition)&quot;</span>
+<span class="nb">id</span><span class="o">=</span><span class="s2">&quot;784e41a278df4e3e804b451ac3bb4c3e-5.18.5-100.fc35.x86_64&quot;</span>
+<span class="n">index</span><span class="o">=</span><span class="mi">3</span>
+<span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;/boot/vmlinuz-0-rescue-784e41a278df4e3e804b451ac3bb4c3e&quot;</span>
+<span class="n">args</span><span class="o">=</span><span class="s2">&quot;ro console=ttyS0,115200&quot;</span>
+<span class="n">root</span><span class="o">=</span><span class="s2">&quot;UUID=23fc0f61-894e-4b8e-a623-fb4290bb23e8&quot;</span>
+<span class="n">initrd</span><span class="o">=</span><span class="s2">&quot;/boot/initramfs-0-rescue-784e41a278df4e3e804b451ac3bb4c3e.img&quot;</span>
+<span class="n">title</span><span class="o">=</span><span class="s2">&quot;Fedora Linux (0-rescue-784e41a278df4e3e804b451ac3bb4c3e) 35 (Server Edition)&quot;</span>
+<span class="nb">id</span><span class="o">=</span><span class="s2">&quot;784e41a278df4e3e804b451ac3bb4c3e-0-rescue&quot;</span>
+</pre></div>
+</div>
+<p>可以看到系统中有4个grub启动项，分别对应了4种内核。我们也可以看到默认启动的是索引 <code class="docutils literal notranslate"><span class="pre">0</span></code> 的内核 <code class="docutils literal notranslate"><span class="pre">/boot/vmlinuz-5.18.11-100.fc35.x86_64</span></code></p>
+<ul>
+<li><p>可以指定查看某个内核的参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">info</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.18.11</span><span class="o">-</span><span class="mf">100.</span><span class="n">fc35</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">index</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;/boot/vmlinuz-5.18.11-100.fc35.x86_64&quot;</span>
+<span class="n">args</span><span class="o">=</span><span class="s2">&quot;ro console=ttyS0,115200&quot;</span>
+<span class="n">root</span><span class="o">=</span><span class="s2">&quot;UUID=23fc0f61-894e-4b8e-a623-fb4290bb23e8&quot;</span>
+<span class="n">initrd</span><span class="o">=</span><span class="s2">&quot;/boot/initramfs-5.18.11-100.fc35.x86_64.img&quot;</span>
+<span class="n">title</span><span class="o">=</span><span class="s2">&quot;Fedora Linux (5.18.11-100.fc35.x86_64) 35 (Server Edition)&quot;</span>
+<span class="nb">id</span><span class="o">=</span><span class="s2">&quot;784e41a278df4e3e804b451ac3bb4c3e-5.18.11-100.fc35.x86_64&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>修订内核参数<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<section id="id4">
+<h3>修订不同的启动内核<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<ul>
+<li><p>如果需要回滚内核，例如将默认启动内核从 <code class="docutils literal notranslate"><span class="pre">0</span></code> 改为 <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">default</span><span class="o">-</span><span class="n">index</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>也可以直接指定内核:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">default</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.18.10</span><span class="o">-</span><span class="mf">100.</span><span class="n">fc35</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h3>修改内核参数<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">grubby</span></code> 提供了参数 <code class="docutils literal notranslate"><span class="pre">--update-kernel</span></code> 可以对指定内核或者所有内核的参数进行修改:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--update-kernel=ALL</span></code> 同时对所有内核的参数进行修订</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--update-kernel</span> <span class="pre">/boot/vmlinuz-5.18.11-100.fc35.x86_64</span></code> 则对指定内核 <code class="docutils literal notranslate"><span class="pre">/boot/vmlinuz-5.18.11-100.fc35.x86_64</span></code> 进行参数修订</p></li>
+</ul>
+<p>提供了2种内核参数修改方法:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--args</span></code> 添加或修改内核参数(如果能够匹配上现有内核参数就是修改)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--remove-args</span></code> 删除内核参数</p></li>
+</ul>
+<p>举例:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">remove</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;rhgb quiet&quot;</span> <span class="o">--</span><span class="n">args</span><span class="o">=</span><span class="n">console</span><span class="o">=</span><span class="n">ttyS0</span><span class="p">,</span><span class="mi">115200</span> <span class="o">--</span><span class="n">update</span><span class="o">-</span><span class="n">kernel</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">4.2.0</span><span class="o">-</span><span class="mf">1.</span><span class="n">fc23</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+<p>完成后可以使用 <code class="docutils literal notranslate"><span class="pre">--info</span></code> 检查对应内核的参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">info</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">4.2.0</span><span class="o">-</span><span class="mf">1.</span><span class="n">fc23</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+<p>上文也说了，如果 <code class="docutils literal notranslate"><span class="pre">--args</span></code> 参数匹配上了现有的内核参数，则是对现有参数进行修改，举例，修改内核串口参数比特率9660:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=ttyS0,9660&quot;</span> <span class="o">--</span><span class="n">update</span><span class="o">-</span><span class="n">kernel</span> <span class="o">/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.18.11</span><span class="o">-</span><span class="mf">100.</span><span class="n">fc35</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id6">
+<h2>增加内核项<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<p>有时候我们需要验证同一个内核的不同内核参数，我们可以采用添加入口项方式。</p>
+<ul>
+<li><p>例如，手工编译了一个新的 <code class="docutils literal notranslate"><span class="pre">testing</span></code> 内核，需要测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">kernel</span><span class="o">=/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.18.11</span><span class="o">-</span><span class="mf">100.</span><span class="n">testing</span><span class="o">.</span><span class="n">x86_64</span> \
+  <span class="o">--</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Fedora Linux (5.18.11-100.testing.x86_64)&quot;</span> \
+  <span class="o">--</span><span class="n">initrd</span><span class="o">=</span><span class="s2">&quot;/boot/initramfs-5.18.11-100.testing.x86_64.img&quot;</span> \
+  <span class="o">--</span><span class="n">copy</span><span class="o">-</span><span class="n">default</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">--copy-default</span></code> 参数可以把现有系统的默认内核参数全部复制过来</p>
+<ul>
+<li><p>例如，我们需要测试新的 <code class="docutils literal notranslate"><span class="pre">testing</span></code> 内核不同参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">kernel</span><span class="o">=/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.18.11</span><span class="o">-</span><span class="mf">100.</span><span class="n">testing</span><span class="o">.</span><span class="n">x86_64</span> \
+  <span class="o">--</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Fedora Linux (5.18.11-100.testing.x86_64) console 9660&quot;</span> \
+  <span class="o">--</span><span class="n">initrd</span><span class="o">=</span><span class="s2">&quot;/boot/initramfs-5.18.11-100.testing.x86_64.img&quot;</span> \
+  <span class="o">--</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=ttyS0,9660&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>测试完成后可以删除内核项:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">remove</span><span class="o">-</span><span class="n">kernel</span><span class="o">=/</span><span class="n">boot</span><span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="mf">5.18.11</span><span class="o">-</span><span class="mf">100.</span><span class="n">testing</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.golinuxcloud.com/grubby-command-examples/">12 practical grubby command examples (cheat sheet)</a></p></li>
 <li><p><a class="reference external" href="https://dba010.com/2022/03/22/change-default-kernel-using-grubby-tool/">Change default kernel using grubby Tool</a></p></li>

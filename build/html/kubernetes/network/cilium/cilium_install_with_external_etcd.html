@@ -320,6 +320,30 @@ Warnings:         cilium-operator    cilium-operator-68dffdc9f7-rph4w    pod is 
 <p class="admonition-title">备注</p>
 <p>这里显示 <code class="docutils literal notranslate"><span class="pre">cilium-operator</span></code> 配置了2个pod，但只有1个pod运行是因为目前我正在bootstrap管控节点，当前只运行了一个管控节点，所以deployment配置了2个replicas只能先运行1个。稍后完成管控节点扩容后就能保证有足够master节点运行 <code class="docutils literal notranslate"><span class="pre">cilium-operator</span></code></p>
 </div>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr.html#k8s-dnsrr"><span class="std std-ref">基于DNS轮询构建高可用Kubernetes</span></a> 第一个管控节点安装好 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> 之后 <a class="reference internal" href="../../administer/coredns/index.html#coredns"><span class="std std-ref">CoreDNS</span></a> 就可以分配到IP地址运行起来。接下来可以完成第二、第三个管控节点以及各个工作节点添加，直到整个集群建立</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>只需要在第一个管控节点上安装 <a class="reference internal" href="../../deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 以及 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> 客户端(验证)，通过 <code class="docutils literal notranslate"><span class="pre">helm</span></code> 就可以为整个集群安装部署 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> 网络，扩展安装非常方便。</p>
+</div>
+<ul>
+<li><p>当 <a class="reference internal" href="../../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr.html#k8s-dnsrr"><span class="std std-ref">基于DNS轮询构建高可用Kubernetes</span></a> 工作节点正确运行之后，就可以通过 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> 客户端来验证网络连接性:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cilium</span> <span class="n">connectivity</span> <span class="n">test</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">connectivity</span> <span class="pre">test</span></code> 是一个非常 <code class="docutils literal notranslate"><span class="pre">赞</span></code> 的探针功能，自动构建了同一个worker节点和不同worker节点上的 <code class="docutils literal notranslate"><span class="pre">cilium-test</span></code> 容器相互间进行网络联通测试:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ kubectl get pods -o wide -n cilium-test
+NAME                              READY   STATUS    RESTARTS   AGE     IP           NODE        NOMINATED NODE   READINESS GATES
+client-7df6cfbf7b-kc4mz           1/1     Running   0          5m50s   10.0.3.103   z-k8s-n-1   &lt;none&gt;           &lt;none&gt;
+client2-547996d7d8-pv4n5          1/1     Running   0          4m38s   10.0.3.210   z-k8s-n-1   &lt;none&gt;           &lt;none&gt;
+echo-other-node-d79544ccf-hxjzb   2/2     Running   0          57s     10.0.7.132   z-k8s-n-4   &lt;none&gt;           &lt;none&gt;
+echo-same-node-5d466d5444-kbgzl   2/2     Running   0          2m5s    10.0.3.68    z-k8s-n-1   &lt;none&gt;           &lt;none&gt;
+</pre></div>
+</div>
+<p>完成测试后会在终端显示测试结果</p>
 </section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
