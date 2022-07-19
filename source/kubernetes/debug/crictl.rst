@@ -115,7 +115,111 @@ crictl命令案例
 
    crictl logs --tail=20 901b1dc06eed1
 
+运行pod sandbox
+==================
 
+使用 ``crictl`` 运行pod sandobx可以用来debug容器运行时。
+
+- 创建 ``pod-config.json`` 
+
+.. literalinclude:: crictl/pod-config.json
+   :language: json
+   :caption: pod-config.json
+
+- 执行以下命令运行sandbox::
+
+   crictl runp pod-config.json
+
+我遇到报错::
+
+   E0719 20:50:53.394867 2319718 remote_runtime.go:201] "RunPodSandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: expected cgroupsPath to be of format \"slice:prefix:name\" for systemd cgroups, got \"/k8s.io/81805934b02f89c87f1babefc460beb28679e184b777ebb8082942c3776a8d5b\" instead: unknown"
+   FATA[0001] run pod sandbox: rpc error: code = Unknown desc = failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: expected cgroupsPath to be of format "slice:prefix:name" for systemd cgroups, got "/k8s.io/81805934b02f89c87f1babefc460beb28679e184b777ebb8082942c3776a8d5b" instead: unknown
+
+参考 `Impossible to create or start a container after reboot (OCI runtime create failed: expected cgroupsPath to be of format \"slice:prefix:name\" for systemd cgroups, got \"/kubepods/burstable/...") #4857 <https://github.com/containerd/containerd/issues/4857>`_ :
+
+原因是 ``kubelet`` / ``crictl`` / ``containerd`` 所使用的 cgroup 驱动不一致导致的: 有两种 cgroup 驱动，一种是 ``cgroupfs cgroup driver`` ，另一种是 ``systemd cgroup driver`` ：
+
+- 我在 :ref:`prepare_z-k8s` 时采用了 ``cgroup v2`` (通过 :ref:`systemd` )，同时在 :ref:`containerd_systemdcgroup_true` ，这样 :ref:`containerd` 就会使用 ``systemd cgroup driver``
+- :ref:`kubeadm-config` 默认已经激活了 ``kubelet`` 使用 ``systemd cgroup driver`` （从 Kubernetes 1.22 开始，默认 ``kubelet`` 就是使用 ``systemd cgroup driver`` 无需特别配置
+- 但是 ``crictl`` 默认配置没有采用 ``systemd cgroup driver`` ，可以通过以下命令检查::
+
+   crictl info | grep system
+
+可以看到输出::
+
+   "systemdCgroup": false,
+
+``crictl info`` 显示信息错误，这个异常可以参考 `crictl info get wrong container runtime cgroupdrives when use containerd. #728 <https://github.com/kubernetes-sigs/cri-tools/issues/728>`_ ，但是这个bug应该在 `Change the type of CRI runtime option #5300 <https://github.com/containerd/containerd/pull/5300>`_ 已经修复
+
+我仔细看了以下 ``crictl info | grep systemd`` 输出，发现有2个地方和cgroup有关::
+
+            "SystemdCgroup": true
+    "systemdCgroup": false,
+
+为何一个是 ``true`` 一个是 ``false``
+
+检查 ``/etc/containerd/config.toml`` 中也有几处和 ``systemdCgroup`` 有关::
+
+   [plugins]
+     ...
+     [plugins."io.containerd.grpc.v1.cri"]
+       ...
+       systemd_cgroup = false
+       ...
+     ...
+       [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+         ...
+         SystemdCgroup = true
+
+我尝试修改上面 ``systemd_cgroup = false`` 改为 ``systemd_cgroup = true`` ，结果重启 ``containerd`` 就挂掉了，节点 NotReady。检查 ``containerd`` 的服务状态显示::
+
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.548636577+08:00" level=info msg="loading plugin \"io.containerd.tracing.processor.v1.otlp\"..." type=io.containerd.tracing.processor.v1
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.548669143+08:00" level=info msg="skip loading plugin \"io.containerd.tracing.processor.v1.otlp\"..." error="no OpenTelemetry endpoint: skip plugin" type=io.containerd.tracing.processor.v1
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.548696451+08:00" level=info msg="loading plugin \"io.containerd.internal.v1.tracing\"..." type=io.containerd.internal.v1
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.548761787+08:00" level=error msg="failed to initialize a tracing processor \"otlp\"" error="no OpenTelemetry endpoint: skip plugin"
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.548852549+08:00" level=info msg="loading plugin \"io.containerd.grpc.v1.cri\"..." type=io.containerd.grpc.v1
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.549391266+08:00" level=warning msg="failed to load plugin io.containerd.grpc.v1.cri" error="invalid plugin config: `systemd_cgroup` only works for runtime io.containerd.runtime.v1.linux"
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.549774946+08:00" level=info msg=serving... address=/run/containerd/containerd.sock.ttrpc
+   Jul 19 23:28:15 z-k8s-n-1 containerd[2321243]: time="2022-07-19T23:28:15.549940533+08:00" level=info msg=serving... address=/run/containerd/containerd.sock
+
+我感觉这个修订必须得下线节点，将节点清空然后才能修改配置，否则会导致之前创建的容器都不可用
+
+.. note::
+
+   我仔细核对 ``containerd`` 配置 ``config.toml`` ，其实有2个地方配置 ``systemd cgroup driver`` ，之前在 :ref:`prepare_z-k8s` 参考官方文档仅修订一处
+
+.. note::
+
+   这个问题暂时没有解决，我准备再添加一个空白节点来验证
+
+创建容器
+==========
+
+- 下载busybox镜像::
+
+   crictl pull busybox
+
+显示::
+
+   Image is up to date for sha256:62aedd01bd8520c43d06b09f7a0f67ba9720bdc04631a8242c65ea995f3ecac8
+
+- 创建 pod 配置:
+
+.. literalinclude:: crictl/pod-config.json
+   :language: json
+   :caption: pod-config.json
+
+.. literalinclude:: crictl/container-config.json
+   :language: json
+   :caption: container-config.json
+
+- 创建::
+
+   crictl create f84dd361f8dc51518ed291fbadd6db537b0496536c1d2d6c05ff943ce8c9a54f container-config.json pod-config.json
+
+这里的字串是之前创建 sandbox返回的
+
+   
 
 参考
 ======

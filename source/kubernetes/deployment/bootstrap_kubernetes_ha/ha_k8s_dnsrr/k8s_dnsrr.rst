@@ -45,6 +45,8 @@
 
    我是在具备密钥认证管理主机 ``z-b-data-1`` 上作为客户端，通过ssh远程登录到 ``z-k8s-m-1`` / ``z-k8s-m-2`` / ``z-k8s-m-3`` ，执行上述 ``deploy_k8s_etcd_key.sh`` 分发密钥
 
+.. _kubeadm-config:
+
 配置第一个管控节点(control plane ndoe)
 =======================================
 
@@ -53,6 +55,14 @@
 .. literalinclude:: k8s_dnsrr/create_kubeadm-config
    :language: bash
    :caption: 创建第一个管控节点配置 kubeadm-config.yaml
+
+.. note::
+
+   在 :ref:`containerd_systemdcgroup_true` :ref:`containerd` 就会使用 ``systemd cgroup driver`` 。对应 ``kubelet`` 也需要使用 ``systemd cgroup driver`` : 在Kubernetes官方文档 `Configuring a cgroup driver <https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/>`_ 指明了:
+
+   - ``kubelet`` 可以通过 ``kubeadm-config.yaml`` 中指定 ``cgroupDriver: systemd`` 明确配置 ``kubelet`` 使用 ``systemd cgroup driver`` ，这样 ``kubeadm init`` 创建的集群中 ``kubelet`` 就会正确使用 ``systemd cgroup driver``
+   - 从 Kubernetes 1.22 开始，即使没有明确配置 ``cgroupDriver: systemd`` ， ``kubelet`` 也是默认使用 ``systemd cgroup driver``
+   - 如果集群创建时没有指定 ``systemd cgroup driver`` (且版本低于1.22)，则可以通过 ``kubectl edit cm kubelet-config -n kube-system`` 修订 ``cgroupDriver: systemd``
 
 .. note::
 
