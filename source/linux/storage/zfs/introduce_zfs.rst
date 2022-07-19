@@ -29,6 +29,10 @@ ZFS最初是Solaris平台的专有软件，虽然企业级性能非常强大，�
 
 2010年Sun被Oralce收购，Oracle停滞了OpenSolaris和ZFS开源更新，使得Oracle ZFS转为闭源。因此2013年，开源社区成立了 `illumos <https://illumos.org>`_ 项目继续维护现有开源的Solaris项目，并且在2013年成立OpenZFS继续ZFS的开源发展。OpenZFS维护了核心ZFS代码，以及相关验证和集成工作，使得OpenZFS在UNIX系统中广泛使用。
 
+.. note::
+
+   `Don’t Use ZFS on Linux: Linus Torvalds <https://itsfoss.com/linus-torvalds-zfs/>`_ Linux社区灵魂Linus并不信任Oracle公司，以及拒绝将ZFS引入Linux内核，除非Oracle采用GPL协议fableZFS。
+
 ZFS特点
 ==========
 
