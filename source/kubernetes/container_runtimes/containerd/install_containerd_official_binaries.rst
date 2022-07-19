@@ -108,6 +108,8 @@
 
    吐槽一下，Kubernetes官方文档真是 "博大精深" ，每个细节可能就是一个关键点，但是真的如同说明书一样味同嚼蜡。
 
+.. _containerd_systemdcgroup_true:
+
 配置 :ref:`systemd` cgroup驱动
 ===============================
 
