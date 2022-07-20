@@ -17,6 +17,8 @@ Linux内核追踪
    debug_d_process.rst
    bad_rip_value.rst
    debug_system_crash.rst
+   strace.rst
+   debug_lscpu_slow.rst
    kdump/index
 
 .. only::  subproject and html

@@ -4,6 +4,10 @@
 CPU性能伸缩技术概述
 =====================
 
+`CPU performance scaling <https://docs.kernel.org/admin-guide/pm/cpufreq.html>`_ 能够让操作系统按需调整CPU 频率来节约电能或者提高性能。CPU频率伸缩性可以按照系统负载自动响应，针对ACPI 事件调整，或者使用用户空间程序手工调整。
+
+
+
 参考
 =======
 
