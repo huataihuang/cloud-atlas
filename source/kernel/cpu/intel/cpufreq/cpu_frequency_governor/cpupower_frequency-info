@@ -1,0 +1,1 @@
+cpupower frequency-info
