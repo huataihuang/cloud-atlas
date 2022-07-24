@@ -14,3 +14,4 @@
    edge_pi_os.rst
    edge_pi_alpine.rst
    edge_ntp_dns.rst
+   edge_pi_k3s.rst

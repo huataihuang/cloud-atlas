@@ -14,5 +14,6 @@ K3s - 轻量级Kubernetes
    alpine_cfssl.rst
    k3s_ha_etcd.rst
    k3s_install.rst
+   k3s_squid/index
    longhorn/index
    the_most_smallest_cheapest_k8s/index
