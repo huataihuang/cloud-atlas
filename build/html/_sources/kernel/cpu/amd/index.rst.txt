@@ -9,3 +9,4 @@ AMD CPU架构
 
    zen.rst
    zen_2.rst
+   amd_cpu_c-state.rst

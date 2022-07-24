@@ -100,7 +100,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#cpufreq">对比 <span class="xref std std-ref">cpufreq</span></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">移除 <span class="xref std std-ref">cpufreq</span></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">排障</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">测试一</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">测试三</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">测试四</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">总结</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="kdump/index.html">Linux内核Kdump</a></li>
@@ -165,8 +169,8 @@
 <p>我最近的一个案例：升级了服务器的内核，并且按照运行 <a class="reference internal" href="../../kubernetes/virtual/gvisor/index.html#gvisor"><span class="std std-ref">gVisor安全容器</span></a> 需求，开启了 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 相关内核参数。被升级的服务器是比较早期安装的系统，由于生产环境内核经过多次迭代，近期安装的内核版本看起来差异不大(仅小版本序号变化)，但是内核参数变化极大，而且还可能存在hotfix差异，所以我对安装软件包(kernel+hotfix)和内核参数进行了比对。</p>
 <p>升级完内核，安装完hotfix包，并且使用 <a class="reference internal" href="../../linux/redhat_linux/kernel/grubby.html#grubby"><span class="std std-ref">grubby修改内核参数</span></a> 对内核参数差异进行订正，确保了升级后的服务器内核参数和新安装服务器完全一致，看起来应该没有问题了。</p>
 <p>然而，我非常惊讶地发现，系统中出现了很多 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 进程，每个进程都占用了 100% 的CPU资源:</p>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">top显示大量的lscpu占用100%的CPU资源</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">top显示大量的lscpu占用100%的CPU资源</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>top - <span class="m">15</span>:11:36 up <span class="m">21</span>:10,  <span class="m">1</span> user,  load average: <span class="m">144</span>.45, <span class="m">149</span>.28, <span class="m">156</span>.12
 Tasks: <span class="m">2280</span> total,  <span class="m">52</span> running, <span class="m">1584</span> sleeping,   <span class="m">0</span> stopped,   <span class="m">0</span> zombie
 %Cpu<span class="o">(</span>s<span class="o">)</span>: <span class="m">21</span>.2 us, <span class="m">15</span>.6 sy,  <span class="m">0</span>.0 ni, <span class="m">62</span>.2 id,  <span class="m">0</span>.0 wa,  <span class="m">0</span>.0 hi,  <span class="m">1</span>.0 si,  <span class="m">0</span>.0 st
@@ -213,8 +217,8 @@ sys  0m52.720s
 <ul class="simple">
 <li><p>使用 <a class="reference internal" href="strace.html#strace"><span class="std std-ref">strace系统调用跟踪</span></a> 来检查 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 究竟做了什么事: 可以看到 正常的主机 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 只有2位数的 <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">syscall</span></code> ，但是异常主机则高达 2w 的 <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">syscall</span></code></p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">strace -c lscpu可以看到异常的lscpu调用了大量的read syscall</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">strace -c lscpu可以看到异常的lscpu调用了大量的read syscall</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">$time</span> strace -c lscpu
 ...
 % <span class="nb">time</span>     seconds  usecs/call     calls    errors syscall
@@ -246,8 +250,8 @@ sys	0m49.882s
 </pre></div>
 </div>
 </div>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">strace -c lscpu可以看到正常的lscpu只有几十次read syscall</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">strace -c lscpu可以看到正常的lscpu只有几十次read syscall</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">$time</span> strace -c lscpu
 ...
 % <span class="nb">time</span>     seconds  usecs/call     calls    errors syscall
@@ -372,15 +376,15 @@ sys  0m0.096s
 <ul class="simple">
 <li><p>检查 CPU governor:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">cpupower frequency-info 命令检查CPU主频伸缩策略</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">cpupower frequency-info 命令检查CPU主频伸缩策略</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cpupower frequency-info
 </pre></div>
 </div>
 </div>
 <p>可以看到:</p>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">海光7285处理器 cpupower frequency-info 显示异常的处理器主频范围（1.20 GHz - 2.00 GHz)</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">海光7285处理器 cpupower frequency-info 显示异常的处理器主频范围（1.20 GHz - 2.00 GHz)</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>analyzing CPU <span class="m">0</span>:
   driver: acpi-cpufreq
   CPUs which run at the same hardware frequency: <span class="m">0</span>
@@ -404,7 +408,7 @@ sys  0m0.096s
 </pre></div>
 </div>
 </div>
-<p>我推测系统加载了 <code class="docutils literal notranslate"><span class="pre">Scaling</span> <span class="pre">drivers</span></code> ，但是不确定是哪种，照理说 AMD 处理器 支持 <code class="docutils literal notranslate"><span class="pre">amd_pstate</span></code> 需要处理器有 <code class="docutils literal notranslate"><span class="pre">cppc</span></code> flag，则可以传递内核参数 <code class="docutils literal notranslate"><span class="pre">amd_pstate.replace=1</span></code> 来激活。不过，海光的这款 <code class="docutils literal notranslate"><span class="pre">7285</span></code> 处理器并没有这个 <code class="docutils literal notranslate"><span class="pre">cppc</span></code> flag，并且我的内核参数也没有激活 <code class="docutils literal notranslate"><span class="pre">amd_pstate.replace=1</span></code></p>
+<p>我推测系统加载了 <code class="docutils literal notranslate"><span class="pre">Scaling</span> <span class="pre">drivers</span></code> ，但是不确定是哪种，照理说 AMD 处理器 支持 <code class="docutils literal notranslate"><span class="pre">amd_pstate</span></code> 需要处理器有 <code class="docutils literal notranslate"><span class="pre">cppc</span></code> flag，则可以传递内核参数 <code class="docutils literal notranslate"><span class="pre">amd_pstate.replace=1</span></code> 来激活。不过，海光的这款 <code class="docutils literal notranslate"><span class="pre">7285</span></code> 处理器并没有这个 <code class="docutils literal notranslate"><span class="pre">cppc</span></code> flag(国产化海光处理器阉割了 <a class="reference internal" href="../cpu/amd/zen.html#amd-zen"><span class="std std-ref">AMD Zen微架构</span></a> 的加密和电源管理功能，或者说替换了原架构中的这部分功能，但做得极不完善 )并且我的内核参数也没有激活 <code class="docutils literal notranslate"><span class="pre">amd_pstate.replace=1</span></code></p>
 <p>在参考文档 <a class="reference external" href="https://wiki.archlinux.org/title/CPU_frequency_scaling">arch linux: CPU frequency scaling</a> 中关于 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 内核模块检查方法如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ls /usr/lib/modules/$(uname -r)/kernel/drivers/cpufreq/
 </pre></div>
@@ -461,22 +465,202 @@ sys  0m0.125s
 </div>
 </li>
 </ul>
-<p>但不是每次都这么块，也有耗时3秒或者7秒，甚至依然耗时49秒的。但是，有进展，说明 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 功能确实影响</p>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>为何正常装机模版的服务器启动时候没有加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块？我并没有找到内核模块blacklist配置，存疑</p>
+<p>但不是每次都这么块，也有耗时3秒或者7秒，甚至依然耗时49秒的。但是，有进展，说明 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 功能确实影响 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 。 <a class="reference internal" href="../../kubernetes/administer/drain_node.html#drain-node"><span class="std std-ref">安全地清空一个Kubernetes节点</span></a> (确保该主机上无运行程序)，我重新测试了 <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">lscpu</span></code> ，所有测试都显示响应恢复到正常水平。</p>
+<section id="acpi-cpufreq">
+<h3>正常服务器没有加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 原因<a class="headerlink" href="#acpi-cpufreq" title="Permalink to this heading">¶</a></h3>
+<p>为何正常装机模版的服务器启动时候没有加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块？</p>
+<p>我在正常装机模版安装的服务器上执行内核 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块加载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">modprobe</span> <span class="n">acpi_cpufreq</span>
+</pre></div>
 </div>
+<p>出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modprobe</span><span class="p">:</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">insert</span> <span class="s1">&#39;acpi_cpufreq&#39;</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">device</span>
+</pre></div>
+</div>
+<p>这个报错参考:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://access.redhat.com/solutions/253803">How to use ACPI CPUfreq driver in Red Hat Enterprise Linux 7 ?</a></p></li>
+<li><p><a class="reference external" href="https://bbs.archlinux.org/viewtopic.php?id=141272">ERROR: could not insert ‘acpi_cpufreq’: No such device</a></p></li>
+</ul>
+</div></blockquote>
+<p>有以下条件需要满足:</p>
+<ul class="simple">
+<li><p>BIOS中需要启用电源管理(Power Profile)，并且配置 <code class="docutils literal notranslate"><span class="pre">Power</span> <span class="pre">Regulator</span></code> 为 <code class="docutils literal notranslate"><span class="pre">OS</span> <span class="pre">Control</span> <span class="pre">Mode</span></code> ，也就是 <code class="docutils literal notranslate"><span class="pre">电源管理调节器</span></code> 采用 <code class="docutils literal notranslate"><span class="pre">操作系统控制模式</span></code></p></li>
+<li><p>内核启动参数关闭了 <code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> : <code class="docutils literal notranslate"><span class="pre">intel_pstate=disable</span></code></p></li>
+</ul>
+<p>咨询了同事，海光服务器BIOS设置应该是关闭 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 支持的，也就是说应该是关闭电源管理。</p>
+<p>对比异常服务器能够自动加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> ，而后续新服务器自动拒绝加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> ，说明:</p>
+<ul class="simple">
+<li><p>早期服务器BIOS没有关闭电源管理功能，所以我按照最新装机模版服务器配置了 <code class="docutils literal notranslate"><span class="pre">processor.max_cstate=0</span></code> 就自动加载了 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 模块，自动启用了 <a class="reference internal" href="../cpu/intel/cpufreq/index.html#cpufreq"><span class="std std-ref">CPU频率 性能伸缩(Performance Scaling)</span></a> 功能</p></li>
+<li><p>而最新模版安装的海光服务器，由于BIOS关闭电源管理功能，所以即使配置了内核参数 <code class="docutils literal notranslate"><span class="pre">processor.max_cstate=0</span></code> 也无影响，不会加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块，也就不受海光 <a class="reference internal" href="../cpu/intel/cpufreq/index.html#cpufreq"><span class="std std-ref">CPU频率 性能伸缩(Performance Scaling)</span></a> 功能缺陷影响</p></li>
+</ul>
+</section>
 </section>
 <section id="id3">
 <h2>排障<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <p>排除法方案:</p>
 <ul class="simple">
-<li><p>测试一: 将异常服务器上pods迁移走，然后重启服务器，在保留 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 开启情况下(即还是加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> )，测试 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code></p></li>
-<li><p>测试二: 异常服务器配置 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块加载黑名单，然后重启服务器确保 <strong>没有加载</strong> <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> ，测试 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code></p></li>
+<li><p>测试一: <a class="reference internal" href="../../kubernetes/administer/drain_node.html#drain-node"><span class="std std-ref">安全地清空一个Kubernetes节点</span></a> (确保该主机上无运行程序)，然后对比加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 性能(同时运行 <a class="reference internal" href="../../performance/performance_tools/sysbench.html#sysbench"><span class="std std-ref">Sysbench性能测试</span></a> 进行性能压力)</p></li>
+<li><p>(取消)测试二: 将异常服务器上pods迁移走，然后重启服务器，在保留 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 开启情况下(即还是加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> )，测试 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code></p></li>
+<li><p>测试三: 异常服务器配置 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块加载黑名单，然后重启服务器确保 <strong>没有加载</strong> <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> ，测试 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code></p></li>
+<li><p>测试四(补充): 实际测试一和三都没有彻底解决 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 缓慢问题(测试三有改善)，但是我google到 <a class="reference internal" href="../cpu/amd/amd_cpu_c-state.html#amd-cpu-c-state-freezing"><span class="std std-ref">ADM Ryzon处理器随机”冻结”问题</span></a></p></li>
 </ul>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>测试一<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>服务器 <a class="reference internal" href="../../kubernetes/administer/drain_node.html#drain-node"><span class="std std-ref">安全地清空一个Kubernetes节点</span></a> 我对比加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> :</p>
+<ul>
+<li><p>加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 模块前后执行 <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">lscpu</span></code> 结果都很快，完全没有延迟，这说明当服务器没有负载情况下不影响 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 运行</p></li>
+<li><p>为了模拟主机压力，我执行 <a class="reference internal" href="../../performance/performance_tools/sysbench.html#sysbench"><span class="std std-ref">Sysbench性能测试</span></a> (但是很不幸，依然没有出现 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 延迟)</p>
+<blockquote>
+<div><p>sysbench cpu –cpu-max-prime=20000000 –threads=128 run</p>
+</div></blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<p>压测时候显示 <code class="docutils literal notranslate"><span class="pre">top</span></code> :</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">sysbench cpu 压测128个CPU核心时候top输出</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>top - <span class="m">14</span>:43:09 up <span class="m">1</span> day, <span class="m">20</span>:42,  <span class="m">4</span> users,  load average: <span class="m">112</span>.87, <span class="m">44</span>.50, <span class="m">17</span>.59
+Tasks: <span class="m">1221</span> total,   <span class="m">1</span> running, <span class="m">593</span> sleeping,   <span class="m">0</span> stopped,   <span class="m">0</span> zombie
+%Cpu<span class="o">(</span>s<span class="o">)</span>: <span class="m">99</span>.9 us,  <span class="m">0</span>.1 sy,  <span class="m">0</span>.0 ni,  <span class="m">0</span>.0 id,  <span class="m">0</span>.0 wa,  <span class="m">0</span>.0 hi,  <span class="m">0</span>.0 si,  <span class="m">0</span>.0 st
+KiB Mem : <span class="m">52787315</span>+total, <span class="m">48091430</span>+free, <span class="m">12048776</span> used, <span class="m">34910060</span> buff/cache
+KiB Swap:        <span class="m">0</span> total,        <span class="m">0</span> free,        <span class="m">0</span> used. <span class="m">49341356</span>+avail Mem
+
+   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+<span class="m">459519</span> admin     <span class="m">20</span>   <span class="m">0</span>  <span class="m">102328</span>   <span class="m">7132</span>   <span class="m">5228</span> S <span class="m">12713</span>  <span class="m">0</span>.0 <span class="m">257</span>:00.14 sysbench
+  <span class="m">3879</span> root      <span class="m">10</span> -10  <span class="m">295268</span> <span class="m">113360</span>  <span class="m">20816</span> S   <span class="m">6</span>.2  <span class="m">0</span>.0   <span class="m">2523</span>:02 AliYunDun
+ <span class="m">12960</span> root      <span class="m">20</span>   <span class="m">0</span> <span class="m">8805024</span> <span class="m">105620</span>  <span class="m">58904</span> S   <span class="m">4</span>.9  <span class="m">0</span>.0 <span class="m">404</span>:38.87 containerd
+</pre></div>
+</div>
+</div>
+<p>同时不断刷新 <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">lscpu</span></code> ，发现几乎没有延迟，最多也就1秒钟左右</p>
+<p>我观察发现 <code class="docutils literal notranslate"><span class="pre">sysbench</span> <span class="pre">cpu</span></code> 测试完全是 <code class="docutils literal notranslate"><span class="pre">user</span></code> 态测试，纯计算，没有任何 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 压力，而之前出现异常 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 响应慢，是有比较大的 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 压力。这说明系统存在大量的 <code class="docutils literal notranslate"><span class="pre">system</span> <span class="pre">calls</span></code></p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>排查方向有误？ 既然系统有大量的 <code class="docutils literal notranslate"><span class="pre">system</span> <span class="pre">calls</span></code> ，是否需要排查来源 - <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 缓慢可能是因为CPU忙于处理 <code class="docutils literal notranslate"><span class="pre">system</span> <span class="pre">call</span></code> 无法响应查询？</p>
+</div>
+</section>
+<section id="id5">
+<h2>测试三<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>异常服务器配置 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块加载黑名单: 配置 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/blacklist-cpufreq.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">blacklist</span> <span class="n">acpi_cpufreq</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>重启服务器后检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsmod</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">cpufreq</span>
+</pre></div>
+</div>
+<p>发现之前加载的2个 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 相关内核模块都没有加载</p>
+<ul class="simple">
+<li><p>检查 <code class="docutils literal notranslate"><span class="pre">cpupower</span> <span class="pre">frequency-info</span></code> ：</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">禁止acpi_cpufreq内核模块加载之后检查cpupower frequency-info</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>analyzing CPU <span class="m">0</span>:
+  no or unknown cpufreq driver is active on this CPU
+  CPUs which run at the same hardware frequency: Not Available
+  CPUs which need to have their frequency coordinated by software: Not Available
+  maximum transition latency:  Cannot determine or is not supported.
+Not Available
+  available cpufreq governors: Not Available
+  Unable to determine current policy
+  current CPU frequency: Unable to call hardware
+  current CPU frequency:  Unable to call to kernel
+  boost state support:
+    Supported: no
+    Active: no
+    Boost States: <span class="m">0</span>
+    Total States: <span class="m">3</span>
+    Pstate-P0:  2000MHz
+    Pstate-P1:  1600MHz
+    Pstate-P2:  1200MHz
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>检查CPU核心主频:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">cpupower</span> <span class="n">monitor</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>现在输出类似:</p>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">禁止acpi_cpufreq内核模块加载之后检查CPU主频</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>              <span class="p">|</span> Mperf
+ PKG<span class="p">|</span>CORE<span class="p">|</span> CPU<span class="p">|</span> C0   <span class="p">|</span> Cx   <span class="p">|</span> Freq
+   <span class="m">0</span><span class="p">|</span>   <span class="m">0</span><span class="p">|</span>   <span class="m">0</span><span class="p">|</span> <span class="m">39</span>.86<span class="p">|</span> <span class="m">60</span>.14<span class="p">|</span>  <span class="m">2450</span>
+   <span class="m">0</span><span class="p">|</span>   <span class="m">0</span><span class="p">|</span>  <span class="m">64</span><span class="p">|</span> <span class="m">39</span>.09<span class="p">|</span> <span class="m">60</span>.91<span class="p">|</span>  <span class="m">2452</span>
+   <span class="m">0</span><span class="p">|</span>   <span class="m">1</span><span class="p">|</span>   <span class="m">1</span><span class="p">|</span> <span class="m">42</span>.94<span class="p">|</span> <span class="m">57</span>.06<span class="p">|</span>  <span class="m">2466</span>
+   <span class="m">0</span><span class="p">|</span>   <span class="m">1</span><span class="p">|</span>  <span class="m">65</span><span class="p">|</span> <span class="m">39</span>.03<span class="p">|</span> <span class="m">60</span>.97<span class="p">|</span>  <span class="m">2467</span>
+   <span class="m">0</span><span class="p">|</span>   <span class="m">2</span><span class="p">|</span>   <span class="m">2</span><span class="p">|</span> <span class="m">39</span>.07<span class="p">|</span> <span class="m">60</span>.93<span class="p">|</span>  <span class="m">2471</span>
+   <span class="m">0</span><span class="p">|</span>   <span class="m">2</span><span class="p">|</span>  <span class="m">66</span><span class="p">|</span> <span class="m">38</span>.91<span class="p">|</span> <span class="m">61</span>.09<span class="p">|</span>  <span class="m">2471</span>
+   <span class="m">0</span><span class="p">|</span>   <span class="m">3</span><span class="p">|</span>   <span class="m">3</span><span class="p">|</span> <span class="m">38</span>.70<span class="p">|</span> <span class="m">61</span>.30<span class="p">|</span>  <span class="m">2465</span>
+   <span class="m">0</span><span class="p">|</span>   <span class="m">3</span><span class="p">|</span>  <span class="m">67</span><span class="p">|</span> <span class="m">38</span>.71<span class="p">|</span> <span class="m">61</span>.29<span class="p">|</span>  <span class="m">2465</span>
+...
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id6">
+<h2>测试四<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<p>虽然屏蔽了 <a class="reference internal" href="../cpu/intel/cpufreq/acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> ，但是没有彻底解决 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 缓慢问题，但是我发现和 <a class="reference internal" href="../cpu/amd/amd_cpu_c-state.html#amd-cpu-c-state-freezing"><span class="std std-ref">ADM Ryzon处理器随机”冻结”问题</span></a> 相似的情况，也就是系统此时还是激活了 <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> ，因为检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">module</span><span class="o">/</span><span class="n">intel_idle</span><span class="o">/</span><span class="n">parameters</span><span class="o">/</span><span class="n">max_cstate</span>
+</pre></div>
+</div>
+<p>显示输出是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">9</span>
+</pre></div>
+</div>
+<p>也就是说对于启用了 <code class="docutils literal notranslate"><span class="pre">OS</span> <span class="pre">Control</span> <span class="pre">Mode</span></code> 的 Power Management Profile ( <a class="reference internal" href="../cpu/intel/cpufreq/acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> )，还是会启用处理器最高达到9的深度c-state。</p>
+<ul class="simple">
+<li><p>配置内核，关闭 <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">关闭AMD的cstate避免”冻结”问题</span><a class="headerlink" href="#id17" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>processor.max_cstate<span class="o">=</span><span class="m">1</span> intel_idle.max_cstate<span class="o">=</span><span class="m">0</span>
+</pre></div>
+</div>
+</div>
+<p>重启服务器后再次验证， <strong>执行 lscpu 已经不再出现长时间卡顿现象</strong></p>
+</section>
+<section id="id7">
+<h2>总结<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>线上早期部署的国产化海光服务器没有配置任何有关电源管理的内核参数，所以当时BIOS即使配置了 <a class="reference internal" href="../cpu/intel/cpufreq/acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> 中提到的 <code class="docutils literal notranslate"><span class="pre">OS</span> <span class="pre">Control</span> <span class="pre">Mode</span></code> 的 Power Management Profile 也没有影响</p></li>
+<li><p>后期上线的服务器启用了 <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> 内核配置，但是国产化海光服务器的硬件BIOS上完全关闭了电源管理功能，所以也没有任何影响(压根底层BIOS就没有激活电源管理，上层OS启用 <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> 内核配置是无效的)</p></li>
+<li><p>但是，如果将后期服务器的内核参数移植到前期部署的国产化海光服务器，就误打误撞触发了BUG:</p>
+<ul>
+<li><p>自动加载了 <a class="reference internal" href="../cpu/intel/cpufreq/acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> 内核模块会硬件限制海光处理器的主频范围，max主频强制为 2.0G Hz(低于最高的2.4G Hz)</p></li>
+<li><p>即使屏蔽了 <a class="reference internal" href="../cpu/intel/cpufreq/acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> 内核模块，也存在因为 <a class="reference internal" href="../cpu/amd/amd_cpu_c-state.html#amd-cpu-c-state-freezing"><span class="std std-ref">ADM Ryzon处理器随机”冻结”问题</span></a> 缺陷，必须将 <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> 彻底关闭(配置 <code class="docutils literal notranslate"><span class="pre">intel_idle.max_cstate=0</span></code> )，强制处理器 full runBUG:</p></li>
+<li><p>自动加载了 <a class="reference internal" href="../cpu/intel/cpufreq/acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> 内核模块会硬件限制海光处理器的主频范围，max主频强制为 2.0G Hz(低于最高的2.4G Hz)</p></li>
+<li><p>即使屏蔽了 <a class="reference internal" href="../cpu/intel/cpufreq/acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> 内核模块，也存在因为 <a class="reference internal" href="../cpu/amd/amd_cpu_c-state.html#amd-cpu-c-state-freezing"><span class="std std-ref">ADM Ryzon处理器随机”冻结”问题</span></a> 缺陷，必须将 <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> 彻底关闭(配置 <code class="docutils literal notranslate"><span class="pre">intel_idle.max_cstate=0</span></code> )，强制处理器 full run</p></li>
+</ul>
+</li>
+</ul>
+<p>总之，线上环境是非常容易体现 <a class="reference internal" href="../../infrastructure/how_complex_systems_fail.html#how-complex-systems-fail"><span class="std std-ref">复杂系统是如何失败的</span></a> ，需要:</p>
+<ul class="simple">
+<li><p>降低复杂化</p></li>
+<li><p>透明</p></li>
+<li><p>标准化</p></li>
+</ul>
+</section>
+<section id="id8">
+<h2>参考<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://unix.stackexchange.com/questions/49095/debugging-hanging-bash-process">Debugging hanging bash process</a></p></li>
+<li><p><a class="reference external" href="https://docs.oracle.com/cd/E19159-01/820-2974/gboyx/index.html">To Collect Debug Data on a Hung or Unresponsive Application Server Process</a></p></li>
+<li><p><a class="reference external" href="https://www.brendangregg.com/blog/2014-05-11/strace-wow-much-syscall.html">strace Wow Much Syscall</a></p></li>
+<li><p><a class="reference external" href="https://www.kernel.org/doc/html/v4.14/admin-guide/pm/cpufreq.html">CPU Performance Scaling</a></p></li>
+<li><p><a class="reference external" href="https://docs.kernel.org/admin-guide/pm/cpuidle.html">CPU Idle Time Management</a></p></li>
+</ul>
 </section>
 </section>
 

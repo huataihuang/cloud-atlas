@@ -94,11 +94,14 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">排查Linux D住进程原因</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#d">查询僵尸和D进程</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">进程信息排查</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#load-calc-d">再次出现 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 系统进程D</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bad_rip_value.html">“Bad RIP value”含义</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debug_system_crash.html">排查系统crash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="strace.html">strace系统调用跟踪</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debug_lscpu_slow.html">排查lscpu缓慢</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kdump/index.html">Linux内核Kdump</a></li>
 </ul>
 </li>
@@ -210,7 +213,11 @@
 </pre></div>
 </div>
 </div>
-<p>可以看到上述 <code class="docutils literal notranslate"><span class="pre">blink</span></code> 进程在 <code class="docutils literal notranslate"><span class="pre">entry_SYSCALL_64_after_hwframe+0x44/0xa9</span></code> 出现异常阻塞</p>
+<p>可以看到:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 系统进程在 <code class="docutils literal notranslate"><span class="pre">ret_from_fork+0x1f/0x30</span></code> 出现异常阻塞</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blink</span></code> 进程在 <code class="docutils literal notranslate"><span class="pre">entry_SYSCALL_64_after_hwframe+0x44/0xa9</span></code> 出现异常阻塞</p></li>
+</ul>
 </section>
 <section id="id1">
 <h2>进程信息排查<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
@@ -268,6 +275,118 @@
 </pre></div>
 </div>
 </div>
+</section>
+<section id="load-calc-d">
+<h2>再次出现 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 系统进程D<a class="headerlink" href="#load-calc-d" title="Permalink to this heading">¶</a></h2>
+<p>我在 <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#amd-cpu-c-state"><span class="std std-ref">ADM Ryzon处理器随机”冻结”问题</span></a> ，调整了内核参数( <code class="docutils literal notranslate"><span class="pre">processor.max_cstate=1</span> <span class="pre">intel_idle.max_cstate=0</span></code> )关闭海光CPU的电源管理，禁止进入idle状态( <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> )。但是，服务器重启，再次出现 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 进程D。检查进程堆栈，也和上文相同。</p>
+<ul>
+<li><p>我尝试上文方法 <a class="reference internal" href="sysrq.html#sysrq"><span class="std std-ref">Linux “魔力” 系统请求组合键 SysRq</span></a> 的提供了 <code class="docutils literal notranslate"><span class="pre">t</span></code> 指令dump出当前任务的信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sysrq</span><span class="o">-</span><span class="n">trigger</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>结果发现这次命令卡住没有返回，同时系统一下子出现了更多的D进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ps r -A | grep D
+   PID TTY      STAT   TIME COMMAND
+  1016 ?        D      0:06 [load_calc]
+ 13693 ?        D      0:00 runc init
+ 13806 ?        D      0:00 runc init
+ 13895 ?        D      0:00 runc init
+ 14020 ?        D      0:00 runc init
+ 14073 ?        D      0:00 runc init
+ 14095 ?        D      0:00 runc init
+ 16303 ?        Dl     0:00 runsc --version
+ 18678 ?        Dl     0:00 runsc --version
+458475 ?        D      0:01 [kworker/u256:0+]
+</pre></div>
+</div>
+<p>重复出现如下调用 :</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">重复出现大量 entry_SYSCALL_64_after_hwframe D住</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> RIP: <span class="m">0033</span>:0x460193
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> Code: <span class="m">63</span> d5 <span class="m">48</span> 8b <span class="m">34</span> d0 e8 1c ae fb ff <span class="m">83</span> c5 <span class="m">01</span> <span class="m">48</span> <span class="m">89</span> d8 <span class="m">89</span> 2d a8 <span class="m">87</span> <span class="m">28</span> <span class="m">00</span> <span class="m">48</span> <span class="m">83</span> c4 <span class="m">08</span> 5b 5d c3 <span class="m">66</span> 0f 1f <span class="m">84</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> b3 <span class="m">01</span> c7 &lt;<span class="m">05</span>&gt; a4 <span class="m">87</span> <span class="m">28</span> <span class="m">00</span> <span class="m">01</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> b2 <span class="m">01</span> <span class="m">48</span> <span class="m">01</span> eb <span class="m">80</span> 3b 7b 0f <span class="m">85</span> cc fe ff
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> RSP: 002b:000000c0009a1df8 EFLAGS: <span class="m">00000286</span> ORIG_RAX: 00000000000000ca
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> RAX: ffffffffffffffda RBX: 000000c000259180 RCX: <span class="m">0000000000460193</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> RDX: <span class="m">0000000000000000</span> RSI: <span class="m">0000000000000080</span> RDI: 000000c0002592c8
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> RBP: 000000c0009a1e40 R08: <span class="m">0000000000000000</span> R09: <span class="m">0000000000000000</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> R10: <span class="m">0000000000000000</span> R11: <span class="m">0000000000000286</span> R12: <span class="m">0000000000000005</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> R13: <span class="m">0000000000000001</span> R14: 000000c00152e360 R15: <span class="m">0000000000000010</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> resource-agent  S    <span class="m">0</span> <span class="m">24480</span>   <span class="m">9939</span> 0x00000080
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> Call Trace:
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  ? __schedule+0x396/0x6a0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  schedule+0x33/0xc0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  futex_wait_queue_me+0xc1/0x120
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  futex_wait+0xf6/0x250
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  ? get_futex_key+0x3a9/0x420
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  do_futex+0xb8/0x600
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  __x64_sys_futex+0xa3/0x1a0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  ? __audit_syscall_exit+0x206/0x290
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  do_syscall_64+0x7b/0x200
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span>  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">退出用户态也卡住</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> RIP: <span class="m">0033</span>:0x40a821
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> Code: <span class="m">00</span> <span class="m">17</span> 4b <span class="m">00</span> <span class="m">00</span> <span class="m">11</span> <span class="m">00</span> <span class="m">19</span> <span class="m">00</span> f0 a5 6e <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">08</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> bf 7e <span class="m">00</span> <span class="m">00</span> <span class="m">12</span> <span class="m">00</span> 0d <span class="m">00</span> <span class="m">40</span> <span class="m">15</span> <span class="m">44</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">72</span> &lt;<span class="m">05</span>&gt; <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> a5 1f <span class="m">00</span> <span class="m">00</span> <span class="m">12</span> <span class="m">00</span> 0d <span class="m">00</span> b0 <span class="m">51</span> <span class="m">45</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> RSP: 002b:000000c0016d3ed8 EFLAGS: <span class="m">00000206</span> ORIG_RAX: ffffffffffffff13
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> RAX: <span class="m">0000000000000000</span> RBX: <span class="m">0000000000000000</span> RCX: 00000000026e4e00
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> RDX: 000000c0031b6800 RSI: 000000c0031b5000 RDI: <span class="m">0000000000000002</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> RBP: 000000c0016d3e40 R08: <span class="m">0000000000000000</span> R09: <span class="m">0000000000000000</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> R10: <span class="m">0000000000000000</span> R11: <span class="m">0000000000000286</span> R12: <span class="m">0000000000000075</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> R13: <span class="m">0000000002675000</span> R14: <span class="m">0000000000000000</span> R15: <span class="m">0000000000000000</span>
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> resource-agent  S    <span class="m">0</span> <span class="m">49034</span>   <span class="m">9939</span> 0x00000080
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> Call Trace:
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? __schedule+0x396/0x6a0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? sched_clock+0x5/0x10
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? sched_clock_cpu+0xc/0xa0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? record_times+0x16/0x80
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? psi_group_change+0x47/0x200
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? psi_task_switch+0xa9/0x170
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? __schedule+0x396/0x6a0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? schedule+0x33/0xc0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? exit_to_usermode_loop+0x6e/0x100
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? prepare_exit_to_usermode+0x9c/0xc0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span>  ? retint_user+0x8/0x8
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> resource-agent  R  running task        <span class="m">0</span> <span class="m">71826</span>   <span class="m">9939</span> 0x00000080
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> Call Trace:
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:50 <span class="m">2022</span><span class="o">]</span>  ? __schedule+0x396/0x6a0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:50 <span class="m">2022</span><span class="o">]</span>  schedule+0x33/0xc0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:50 <span class="m">2022</span><span class="o">]</span>  exit_to_usermode_loop+0x6e/0x100
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:50 <span class="m">2022</span><span class="o">]</span>  prepare_exit_to_usermode+0x9c/0xc0
+<span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:50 <span class="m">2022</span><span class="o">]</span>  retint_user+0x8/0x8
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>系统大量的内核进程开始运行，异常缓慢:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#ps r -A
+   PID TTY      STAT   TIME COMMAND
+    26 ?        R      0:00 [migration/3]
+    27 ?        R      0:11 [ksoftirqd/3]
+    77 ?        R      0:00 [migration/13]
+    78 ?        R      0:00 [ksoftirqd/13]
+   226 ?        R      1:18 [migration/42]
+   313 ?        R      0:00 [migration/59]
+   314 ?        R      0:00 [ksoftirqd/59]
+   498 ?        R      0:00 [migration/96]
+   499 ?        R      0:00 [ksoftirqd/96]
+   518 ?        R      0:00 [migration/100]
+   519 ?        R      0:00 [ksoftirqd/100]
+   578 ?        R      0:00 [migration/112]
+   579 ?        R      0:00 [ksoftirqd/112]
+   653 ?        R      0:00 [migration/127]
+   654 ?        R      0:00 [ksoftirqd/127]
+   742 ?        R      0:01 [kworker/42:1-mm]
+  1016 ?        D      0:06 [load_calc]
+</pre></div>
+</div>
+</li>
+<li><p>采用 <a class="reference internal" href="kdump/kernel_crash_dump.html#kernel-crash-dump"><span class="std std-ref">内核崩溃dump解决方案</span></a> 强制core dump，重启服务器</p></li>
+</ul>
+<p>重启后 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 系统进程依然 <code class="docutils literal notranslate"><span class="pre">D</span></code> 但是看不出其他异常，系统运行应用完全正常。这个问题后续再想办法排查…</p>
 </section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>

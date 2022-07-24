@@ -24,7 +24,15 @@ Sysbench性能测试
 
    sudo apt install sysbench
 
-- 在CentOS或者Fedora，需要使用EPEL仓库安装
+- 在CentOS或者Fedora，需要使用EPEL仓库安装:
+
+.. literalinclude:: ../../linux/redhat_linux/admin/dnf/yum_install_epel
+   :language: bash
+   :caption: yum命令安装EPEL仓库
+
+然后执行::
+
+   sudo yum install sysbench
 
 使用
 =======
@@ -62,6 +70,10 @@ Sysbench性能测试
    :language: bash
    :emphasize-lines: 18-19
    :caption: sysbench cpu 
+
+.. note::
+
+   sysbench执行CPU测试是纯计算，也就是全部是 ``user space`` 运行，没有任何 ``system calls`` ，所以和真实的生产环境压力有很大不同。真实环境的CPU计算会涉及大量的 ``system calls`` 所以CPU资源很大部分被 ``sys`` 吃掉了。
 
 测试线程工作负载
 -----------------

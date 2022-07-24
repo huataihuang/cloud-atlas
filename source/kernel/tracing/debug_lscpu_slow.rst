@@ -144,7 +144,7 @@
    :language: bash
    :caption: 海光7285处理器 cpupower frequency-info 显示异常的处理器主频范围（1.20 GHz - 2.00 GHz)
 
-我推测系统加载了 ``Scaling drivers`` ，但是不确定是哪种，照理说 AMD 处理器 支持 ``amd_pstate`` 需要处理器有 ``cppc`` flag，则可以传递内核参数 ``amd_pstate.replace=1`` 来激活。不过，海光的这款 ``7285`` 处理器并没有这个 ``cppc`` flag，并且我的内核参数也没有激活 ``amd_pstate.replace=1`` 
+我推测系统加载了 ``Scaling drivers`` ，但是不确定是哪种，照理说 AMD 处理器 支持 ``amd_pstate`` 需要处理器有 ``cppc`` flag，则可以传递内核参数 ``amd_pstate.replace=1`` 来激活。不过，海光的这款 ``7285`` 处理器并没有这个 ``cppc`` flag(国产化海光处理器阉割了 :ref:`amd_zen` 的加密和电源管理功能，或者说替换了原架构中的这部分功能，但做得极不完善 )并且我的内核参数也没有激活 ``amd_pstate.replace=1`` 
 
 在参考文档 `arch linux: CPU frequency scaling <https://wiki.archlinux.org/title/CPU_frequency_scaling>`_ 中关于 ``cpufreq`` 内核模块检查方法如下::
 
@@ -197,19 +197,146 @@
    user 0m0.010s
    sys  0m0.125s
 
-但不是每次都这么块，也有耗时3秒或者7秒，甚至依然耗时49秒的。但是，有进展，说明 ``cpufreq`` 功能确实影响
+但不是每次都这么块，也有耗时3秒或者7秒，甚至依然耗时49秒的。但是，有进展，说明 ``cpufreq`` 功能确实影响 ``lscpu`` 。 :ref:`drain_node` (确保该主机上无运行程序)，我重新测试了 ``time lscpu`` ，所有测试都显示响应恢复到正常水平。
 
-.. note::
+正常服务器没有加载 ``acpi_cpufreq`` 原因
+------------------------------------------
 
-   为何正常装机模版的服务器启动时候没有加载 ``acpi_cpufreq`` 内核模块？我并没有找到内核模块blacklist配置，存疑
+为何正常装机模版的服务器启动时候没有加载 ``acpi_cpufreq`` 内核模块？
+
+我在正常装机模版安装的服务器上执行内核 ``acpi_cpufreq`` 内核模块加载::
+
+   sudo modprobe acpi_cpufreq
+
+出现报错::
+
+   modprobe: ERROR: could not insert 'acpi_cpufreq': No such device
+
+这个报错参考:
+
+  - `How to use ACPI CPUfreq driver in Red Hat Enterprise Linux 7 ? <https://access.redhat.com/solutions/253803>`_
+  - `ERROR: could not insert 'acpi_cpufreq': No such device <https://bbs.archlinux.org/viewtopic.php?id=141272>`_
+
+有以下条件需要满足:
+
+- BIOS中需要启用电源管理(Power Profile)，并且配置 ``Power Regulator`` 为 ``OS Control Mode`` ，也就是 ``电源管理调节器`` 采用 ``操作系统控制模式``
+- 内核启动参数关闭了 ``intel_pstate`` : ``intel_pstate=disable``
+
+咨询了同事，海光服务器BIOS设置应该是关闭 ``cpufreq`` 支持的，也就是说应该是关闭电源管理。
+
+对比异常服务器能够自动加载 ``acpi_cpufreq`` ，而后续新服务器自动拒绝加载 ``acpi_cpufreq`` ，说明:
+
+- 早期服务器BIOS没有关闭电源管理功能，所以我按照最新装机模版服务器配置了 ``processor.max_cstate=0`` 就自动加载了 ``acpi_cpufreq`` 模块，自动启用了 :ref:`cpufreq` 功能
+- 而最新模版安装的海光服务器，由于BIOS关闭电源管理功能，所以即使配置了内核参数 ``processor.max_cstate=0`` 也无影响，不会加载 ``acpi_cpufreq`` 内核模块，也就不受海光 :ref:`cpufreq` 功能缺陷影响
 
 排障
 =======
 
 排除法方案:
 
-- 测试一: 将异常服务器上pods迁移走，然后重启服务器，在保留 ``cpufreq`` 开启情况下(即还是加载 ``acpi_cpufreq`` )，测试 ``lscpu`` 
-- 测试二: 异常服务器配置 ``acpi_cpufreq`` 内核模块加载黑名单，然后重启服务器确保 **没有加载** ``acpi_cpufreq`` ，测试 ``lscpu``
+- 测试一: :ref:`drain_node` (确保该主机上无运行程序)，然后对比加载 ``acpi_cpufreq`` 性能(同时运行 :ref:`sysbench` 进行性能压力)
+- (取消)测试二: 将异常服务器上pods迁移走，然后重启服务器，在保留 ``cpufreq`` 开启情况下(即还是加载 ``acpi_cpufreq`` )，测试 ``lscpu`` 
+- 测试三: 异常服务器配置 ``acpi_cpufreq`` 内核模块加载黑名单，然后重启服务器确保 **没有加载** ``acpi_cpufreq`` ，测试 ``lscpu``
+- 测试四(补充): 实际测试一和三都没有彻底解决 ``lscpu`` 缓慢问题(测试三有改善)，但是我google到 :ref:`amd_cpu_c-state_freezing` 
+
+测试一
+===========
+
+- 服务器 :ref:`drain_node` 我对比加载 ``acpi_cpufreq`` :
+
+  - 加载 ``acpi_cpufreq`` 模块前后执行 ``time lscpu`` 结果都很快，完全没有延迟，这说明当服务器没有负载情况下不影响 ``lscpu`` 运行
+  - 为了模拟主机压力，我执行 :ref:`sysbench` (但是很不幸，依然没有出现 ``lscpu`` 延迟)
+
+     sysbench cpu --cpu-max-prime=20000000 --threads=128 run
+
+压测时候显示 ``top`` :
+
+.. literalinclude:: debug_lscpu_slow/sysbench_top
+   :language: bash
+   :caption: sysbench cpu 压测128个CPU核心时候top输出
+
+同时不断刷新 ``time lscpu`` ，发现几乎没有延迟，最多也就1秒钟左右
+
+我观察发现 ``sysbench cpu`` 测试完全是 ``user`` 态测试，纯计算，没有任何 ``sys`` 压力，而之前出现异常 ``lscpu`` 响应慢，是有比较大的 ``sys`` 压力。这说明系统存在大量的 ``system calls``
+
+.. warning::
+
+   排查方向有误？ 既然系统有大量的 ``system calls`` ，是否需要排查来源 - ``lscpu`` 缓慢可能是因为CPU忙于处理 ``system call`` 无法响应查询？
+
+测试三
+=========
+
+- 异常服务器配置 ``acpi_cpufreq`` 内核模块加载黑名单: 配置 ``/etc/modprobe.d/blacklist-cpufreq.conf`` ::
+
+   blacklist acpi_cpufreq
+
+重启服务器后检查::
+
+  lsmod | grep cpufreq
+
+发现之前加载的2个 ``cpufreq`` 相关内核模块都没有加载
+
+- 检查 ``cpupower frequency-info`` ：
+
+.. literalinclude:: debug_lscpu_slow/cpupower_frequency-info_after_disable_acpi_cpufreq
+   :language: bash
+   :caption: 禁止acpi_cpufreq内核模块加载之后检查cpupower frequency-info
+
+- 检查CPU核心主频::
+
+   sudo cpupower monitor
+
+现在输出类似:
+
+.. literalinclude:: debug_lscpu_slow/cpupower_monitor_after_disable_acpi_cpufreq
+   :language: bash
+   :caption: 禁止acpi_cpufreq内核模块加载之后检查CPU主频
+
+测试四
+===========
+
+虽然屏蔽了 :ref:`acpi_cpufreq` ，但是没有彻底解决 ``lscpu`` 缓慢问题，但是我发现和 :ref:`amd_cpu_c-state_freezing` 相似的情况，也就是系统此时还是激活了 :ref:`cpu_c-state` ，因为检查::
+
+   cat /sys/module/intel_idle/parameters/max_cstate
+
+显示输出是::
+
+   9
+
+也就是说对于启用了 ``OS Control Mode`` 的 Power Management Profile ( :ref:`acpi_cpufreq` )，还是会启用处理器最高达到9的深度c-state。
+
+- 配置内核，关闭 :ref:`cpu_c-state` :
+
+.. literalinclude:: ../cpu/amd/amd_cpu_c-state/disable_cstate
+   :language: bash
+   :caption: 关闭AMD的cstate避免"冻结"问题
+
+重启服务器后再次验证， **执行 lscpu 已经不再出现长时间卡顿现象**
+
+总结
+=======
+
+- 线上早期部署的国产化海光服务器没有配置任何有关电源管理的内核参数，所以当时BIOS即使配置了 :ref:`acpi_cpufreq` 中提到的 ``OS Control Mode`` 的 Power Management Profile 也没有影响
+- 后期上线的服务器启用了 :ref:`cpu_c-state` 内核配置，但是国产化海光服务器的硬件BIOS上完全关闭了电源管理功能，所以也没有任何影响(压根底层BIOS就没有激活电源管理，上层OS启用 :ref:`cpu_c-state` 内核配置是无效的)
+- 但是，如果将后期服务器的内核参数移植到前期部署的国产化海光服务器，就误打误撞触发了BUG:
+
+  - 自动加载了 :ref:`acpi_cpufreq` 内核模块会硬件限制海光处理器的主频范围，max主频强制为 2.0G Hz(低于最高的2.4G Hz)
+  - 即使屏蔽了 :ref:`acpi_cpufreq` 内核模块，也存在因为 :ref:`amd_cpu_c-state_freezing` 缺陷，必须将 :ref:`cpu_c-state` 彻底关闭(配置 ``intel_idle.max_cstate=0`` )，强制处理器 full runBUG:
+
+  - 自动加载了 :ref:`acpi_cpufreq` 内核模块会硬件限制海光处理器的主频范围，max主频强制为 2.0G Hz(低于最高的2.4G Hz)
+  - 即使屏蔽了 :ref:`acpi_cpufreq` 内核模块，也存在因为 :ref:`amd_cpu_c-state_freezing` 缺陷，必须将 :ref:`cpu_c-state` 彻底关闭(配置 ``intel_idle.max_cstate=0`` )，强制处理器 full run
+
+总之，线上环境是非常容易体现 :ref:`how_complex_systems_fail` ，需要:
+
+- 降低复杂化
+- 透明
+- 标准化
 
 参考
 =====
+
+- `Debugging hanging bash process <https://unix.stackexchange.com/questions/49095/debugging-hanging-bash-process>`_
+- `To Collect Debug Data on a Hung or Unresponsive Application Server Process <https://docs.oracle.com/cd/E19159-01/820-2974/gboyx/index.html>`_
+- `strace Wow Much Syscall <https://www.brendangregg.com/blog/2014-05-11/strace-wow-much-syscall.html>`_
+- `CPU Performance Scaling <https://www.kernel.org/doc/html/v4.14/admin-guide/pm/cpufreq.html>`_
+- `CPU Idle Time Management <https://docs.kernel.org/admin-guide/pm/cpuidle.html>`_
