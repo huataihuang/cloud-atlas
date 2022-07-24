@@ -11,6 +11,7 @@ Infrastructure Atlas
 .. toctree::
    :maxdepth: 1
 
+   how_complex_systems_fail.rst
    best_open_source.rst
    wikipedia_base.rst
    fedoraproject_base.rst

@@ -28,9 +28,11 @@ DNF从Yum分支出来，使用专注于性能的C语言库hawkey进行依赖关�
 
    yum install epel-release
 
-或者参考 `Extra Packages for Enterprise Linux (EPEL) <https://www.fedoraproject.org/wiki/EPEL>`_ ::
+或者参考 `Extra Packages for Enterprise Linux (EPEL) <https://www.fedoraproject.org/wiki/EPEL>`_ :
 
-   yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+.. literalinclude:: dnf/yum_install_epel
+   :language: bash
+   :caption: yum命令安装EPEL仓库
 
 - 然后安装 ``DNF`` 包::
 
