@@ -321,9 +321,6 @@
 - 但是，如果将后期服务器的内核参数移植到前期部署的国产化海光服务器，就误打误撞触发了BUG:
 
   - 自动加载了 :ref:`acpi_cpufreq` 内核模块会硬件限制海光处理器的主频范围，max主频强制为 2.0G Hz(低于最高的2.4G Hz)
-  - 即使屏蔽了 :ref:`acpi_cpufreq` 内核模块，也存在因为 :ref:`amd_cpu_c-state_freezing` 缺陷，必须将 :ref:`cpu_c-state` 彻底关闭(配置 ``intel_idle.max_cstate=0`` )，强制处理器 full runBUG:
-
-  - 自动加载了 :ref:`acpi_cpufreq` 内核模块会硬件限制海光处理器的主频范围，max主频强制为 2.0G Hz(低于最高的2.4G Hz)
   - 即使屏蔽了 :ref:`acpi_cpufreq` 内核模块，也存在因为 :ref:`amd_cpu_c-state_freezing` 缺陷，必须将 :ref:`cpu_c-state` 彻底关闭(配置 ``intel_idle.max_cstate=0`` )，强制处理器 full run
 
 总之，线上环境是非常容易体现 :ref:`how_complex_systems_fail` ，需要:

@@ -12,6 +12,7 @@ CPU频率 性能伸缩(Performance Scaling)
    acpi_cpufreq.rst
    cpu_p-state.rst
    cpu_c-state.rst
+   cpuidle.rst
 
 .. only::  subproject and html
 

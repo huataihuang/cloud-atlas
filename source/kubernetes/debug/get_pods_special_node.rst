@@ -25,6 +25,14 @@
    LABEL="kubernetes.io/arch=arm64"
    for node in $(kubectl get nodes -l $LABEL -ojsonpath='{.items[*].metadata.name}'); do kubectl get pods -A -owide --field-selector spec.nodeName=$node; done
 
+- ``--field-selector`` 也提供了反过来的过滤，例如想查询出非 ``kube-system`` namespace的pods::
+
+   kubectl get pods -A --field-selector metadata.namespace!=kube-system
+
+.. note::
+
+   :ref:`field-selector` 是查询关键，但是不是所有 ``filed label`` 都支持
+
 .. note::
 
    Kubernetes目前支持AND交集的多标签查询，也即是只支持同时满足多个标签的节点查询，但不支持这些标签的OR满足
