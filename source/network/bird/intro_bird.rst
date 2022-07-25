@@ -23,7 +23,7 @@ BIRD(BIRD Internet Routing Daemon)是比Quagga(Zebra)更为复杂和全面的路
 
 -  London Internet Exchange (LINX), LONAP, DE-CIX 和 MSK-IX 这些互联网骨干交换中心都使用BIND作为路由服务器
 - Netflix(流媒体巨头)，Equinix(世界最大数据中心和基础架构服务上)，Amazon(Twitch游戏平台)，甚至思科也将BIRD作为可选解决方案提供给客户
-- 2012年Euro-IX调查显示，BIND是欧洲互联网交换使用最多的路由服务器
+- 2012年Euro-IX调查显示，BIRD是欧洲互联网交换使用最多的路由服务器
 
 在 :ref:`kubernetes_network` 解决方案中，企业级的 :ref:`calico` 和 :ref:`cilium` 都选择BIRD作为路由解决基础架构。也就是说，如果需要实现超大规模多Kubernetes集群的容器网络路由，BIRD是生产级别的解决方案。
 
