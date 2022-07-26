@@ -4,6 +4,9 @@
 CPU频率调节器
 ======================
 
+cpufreq governor
+===================
+
 - 检查 cpufreq governor :
 
 .. literalinclude:: cpu_frequency_governor/cpupower_frequency-info
@@ -19,6 +22,7 @@ CPU频率调节器
 .. literalinclude:: cpu_frequency_governor/cpupower_frequency-info_output
    :language: bash
    :caption: cpupower frequency-info 命令输出案例
+
 
 参考
 ======
