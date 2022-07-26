@@ -163,10 +163,31 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">cpupower</span></code> 配置了 <code class="docutils literal notranslate"><span class="pre">performance</span></code> governor</p></li>
 <li><p>当使用 <code class="docutils literal notranslate"><span class="pre">acpi-cpufreq</span></code> 驱动时，处理器的主频被限制在 <code class="docutils literal notranslate"><span class="pre">1.20</span> <span class="pre">GHz</span> <span class="pre">-</span> <span class="pre">2.00</span> <span class="pre">GHz</span></code> ，可能无法达到硬件实际最高主频 <code class="docutils literal notranslate"><span class="pre">2.40</span> <span class="pre">GHz</span></code></p></li>
-<li><p>当出现CPU <code class="docutils literal notranslate"><span class="pre">sys</span></code> 压力时，会阻塞 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 运行可能和 <span class="xref std std-ref">cpuidle</span> 缺陷有关</p></li>
+<li><p>当出现CPU <code class="docutils literal notranslate"><span class="pre">sys</span></code> 压力时，会阻塞 <code class="docutils literal notranslate"><span class="pre">lscpu</span></code> 运行可能和 <a class="reference internal" href="cpuidle.html#cpuidle"><span class="std std-ref">CPU空闲时间管理(CPU Idle Time Management)</span></a> 缺陷有关</p></li>
 </ul>
 <p>那么为何我升级内核(修订内核参数)的早期海光服务器会加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块进而启动了 <code class="docutils literal notranslate"><span class="pre">acpi-cpufreq</span></code> 驱动的 <a class="reference internal" href="index.html#cpufreq"><span class="std std-ref">CPU频率 性能伸缩(Performance Scaling)</span></a> 功能呢?</p>
-<p>而公司</p>
+<p>原因就在于:</p>
+<section id="bios-uefi-power-management">
+<h2>BIOS/UEFI 配置Power Management策略<a class="headerlink" href="#bios-uefi-power-management" title="Permalink to this heading">¶</a></h2>
+<p>在现代服务器的 BIOS/UEFI 配置中，有关电源管理选项决定了主机是否采用 <code class="docutils literal notranslate"><span class="pre">OS</span></code> 控制电源管理模式:</p>
+<ul class="simple">
+<li><p>例如 <a class="reference internal" href="../../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器，在 <code class="docutils literal notranslate"><span class="pre">System</span> <span class="pre">configuration</span> <span class="pre">---&gt;</span> <span class="pre">Bios</span> <span class="pre">---&gt;</span> <span class="pre">Power</span> <span class="pre">Management</span></code> 配置中，有一个 <code class="docutils literal notranslate"><span class="pre">Power</span> <span class="pre">Profile</span></code> 配置项，当选择 <code class="docutils literal notranslate"><span class="pre">OS</span> <span class="pre">Control</span> <span class="pre">Mode</span></code></p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/power_management_os_control_mode.png"><img alt="../../../../_images/power_management_os_control_mode.png" src="../../../../_images/power_management_os_control_mode.png" style="width: 616.0px; height: 167.20000000000002px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>并且内核参数配置了 <code class="docutils literal notranslate"><span class="pre">intel_pstate=disable</span></code> ，则系统启动时就会尝试加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我的实践发现，如果 <strong>没有</strong> 配置 <code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> 选项，只要BIOS激活 <code class="docutils literal notranslate"><span class="pre">OS</span> <span class="pre">Control</span> <span class="pre">Mode</span></code> 的电源管理策略，也会自动加载 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>如果BIOS已经激活 <code class="docutils literal notranslate"><span class="pre">OS</span> <span class="pre">Control</span> <span class="pre">Mode</span></code> 电源管理策略，但是要禁用 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> ，就需要把 <code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 内核模块加入黑名单避免加载。详见 <a class="reference internal" href="../../../tracing/debug_lscpu_slow.html#debug-lscpu-slow"><span class="std std-ref">排查lscpu缓慢</span></a></p>
+</div>
+</section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">

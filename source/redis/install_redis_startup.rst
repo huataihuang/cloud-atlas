@@ -15,6 +15,31 @@ redis软件安装
 
    sudo systemctl enable --now redis
 
+源代码编译安装
+---------------
+
+- 在 :ref:`fedora` 开发环境非常方便编译安装( redis 使用非常标准c语言开发 )::
+
+   wget https://download.redis.io/redis-stable.tar.gz
+   tar -xzvf redis-stable.tar.gz
+   cd redis-stable
+   make
+
+完成编译后，在 ``src`` 目录下有以下Redis执行程序:
+
+  - ``redis-server``
+  - ``redis-cli``
+
+- 安装::
+
+   make install
+
+- 启动::
+
+   redis-server
+
+按下 ``ctrl-c`` 终止
+   
 配置
 ========
 
