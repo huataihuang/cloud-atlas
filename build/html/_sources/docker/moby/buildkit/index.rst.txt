@@ -1,11 +1,18 @@
 .. _buildkit:
 
-==============
-BuildKit
-==============
+=================================
+Buildkit
+=================================
 
 
-参考
-=======
+.. toctree::
+   :maxdepth: 2
 
-- `moby/buildkit <https://github.com/moby/buildkit>`_
+   buildkit_startup.rst
+
+.. only::  subproject and html
+
+   Indices
+   =======
+
+   * :ref:`genindex`

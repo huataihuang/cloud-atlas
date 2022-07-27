@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../startup/index.html">Kubernetes快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/index.html">Kubernetes概念辨析</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../deployment/index.html">Kubernetes部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../deploy_app/index.html">Kubernetes部署应用</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../manage_object/index.html">Kubernetes管理对象</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../access_application/index.html">Kubernetes访问应用</a></li>
@@ -187,7 +188,172 @@
 <li><p>支持容器镜像签名和验证</p></li>
 </ul>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>安装<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>从 <a class="reference external" href="https://github.com/containerd/nerdctl/releases">nerdctl releases</a> 下载软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="n">xfz</span> <span class="n">nerdctl</span><span class="o">-</span><span class="mf">0.22.0</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">sudo</span> <span class="n">mv</span> <span class="n">nerdctl</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>官方下载有两种软件包:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Minimal (nerdctl-0.22.0-linux-amd64.tar.gz): nerdctl only</p></li>
+<li><p>Full (nerdctl-full-0.22.0-linux-amd64.tar.gz): Includes dependencies such as containerd, runc, and CNI</p></li>
+</ul>
+</div></blockquote>
+<p>我安装的是Minimal版本，其他组件按需各自安装</p>
+</section>
+<section id="id3">
+<h2>快速起步<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>有root权限方式:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="o">--</span><span class="n">now</span> <span class="n">containerd</span>
+<span class="n">sudo</span> <span class="n">nerdctl</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="n">nginx</span><span class="p">:</span><span class="n">alpine</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>由于我是安装了 <a class="reference internal" href="index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> 服务，是通过root模式运行的，所以后续操作以这个root权限方式为准。也就是后续 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 命令操作都是使用 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">nerdctl</span></code></p>
+</div>
+<ul>
+<li><p>无root权限方式(端口1024以上):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">containerd</span><span class="o">-</span><span class="n">rootless</span><span class="o">-</span><span class="n">setuptool</span><span class="o">.</span><span class="n">sh</span> <span class="n">install</span>
+<span class="n">nerdctl</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">p</span> <span class="mi">8080</span><span class="p">:</span><span class="mi">80</span> <span class="n">nginx</span><span class="p">:</span><span class="n">alpine</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>实践:镜像<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 对镜像的制作是采用 <a class="reference internal" href="../../../docker/moby/buildkit/index.html#buildkit"><span class="std std-ref">Buildkit</span></a> 实现的，请先安装 <code class="docutils literal notranslate"><span class="pre">buildkit</span></code> 并运行 <code class="docutils literal notranslate"><span class="pre">buildkitd</span></code> 服务进程</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">使用root身份运行buildkitd，启动后工作在前台等待客户端连接</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo buildkitd
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>我这里采用 <a class="reference internal" href="../../../docker/admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 的 <code class="docutils literal notranslate"><span class="pre">centos8-ssh</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">CentOS 8的Dockerfile，包括ssh安装</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Build centos 8 image with ssh:</span>
+<span class="c"># ------------------------------</span>
+<span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">docker.io/centos:8</span>
+<span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span><span class="w"> </span>dnf clean all
+<span class="k">RUN</span><span class="w"> </span>dnf -y update
+
+<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span><span class="w"> </span>ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span><span class="w"> </span>/usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+</pre></div>
+</div>
+</div>
+<p>执行以下命令构建:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">nerdctl build构建容器镜像</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl build -t local:centos8-ssh .
+</pre></div>
+</div>
+</div>
+<p>此时提示信息:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">nerdctl build构建容器镜像的输出信息</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>+<span class="o">]</span> Building <span class="m">53</span>.6s <span class="o">(</span><span class="m">7</span>/19<span class="o">)</span>
+ <span class="o">=</span>&gt; <span class="o">[</span>internal<span class="o">]</span> load build definition from Dockerfile                                                                                                                                <span class="m">0</span>.6s
+ <span class="o">=</span>&gt; <span class="o">=</span>&gt; transferring dockerfile: <span class="m">1</span>.00kB                                                                                                                                              <span class="m">0</span>.0s
+ <span class="o">=</span>&gt; <span class="o">[</span>internal<span class="o">]</span> load .dockerignore                                                                                                                                                   <span class="m">0</span>.7s
+ <span class="o">=</span>&gt; <span class="o">=</span>&gt; transferring context: 2B                                                                                                                                                     <span class="m">0</span>.0s
+ <span class="o">=</span>&gt; <span class="o">[</span>internal<span class="o">]</span> load metadata <span class="k">for</span> docker.io/library/centos:8                                                                                                                        <span class="m">10</span>.7s
+ <span class="o">=</span>&gt; <span class="o">[</span> <span class="m">1</span>/15<span class="o">]</span> FROM docker.io/library/centos:8@sha256:a27fd8080b517143cbbbab9dfb7c8571c40d67d534bbdee55bd6c473f432b177                                                                <span class="m">32</span>.7s
+ <span class="o">=</span>&gt; <span class="o">=</span>&gt; resolve docker.io/library/centos:8@sha256:a27fd8080b517143cbbbab9dfb7c8571c40d67d534bbdee55bd6c473f432b177                                                                   <span class="m">0</span>.2s
+ <span class="o">=</span>&gt; <span class="o">=</span>&gt; sha256:a1d0c75327776413fa0db9ed3adcdbadedc95a662eb1d360dad82bb913f8a1d1 <span class="m">83</span>.52MB / <span class="m">83</span>.52MB                                                                                   <span class="m">27</span>.0s
+ <span class="o">=</span>&gt; <span class="o">=</span>&gt; extracting sha256:a1d0c75327776413fa0db9ed3adcdbadedc95a662eb1d360dad82bb913f8a1d1                                                                                           <span class="m">5</span>.0s
+ <span class="o">=</span>&gt; <span class="o">[</span>internal<span class="o">]</span> load build context                                                                                                                                                   <span class="m">0</span>.7s
+ <span class="o">=</span>&gt; <span class="o">=</span>&gt; transferring context: 266B                                                                                                                                                   <span class="m">0</span>.0s
+ <span class="o">=</span>&gt; <span class="o">[</span> <span class="m">2</span>/15<span class="o">]</span> RUN dnf clean all                                                                                                                                                       <span class="m">2</span>.1s
+ <span class="o">=</span>&gt; ERROR <span class="o">[</span> <span class="m">3</span>/15<span class="o">]</span> RUN dnf -y update                                                                                                                                                 <span class="m">7</span>.3s
+------
+ &gt; <span class="o">[</span> <span class="m">3</span>/15<span class="o">]</span> RUN dnf -y update:
+<span class="c1">#0 7.032 CentOS Linux 8 - AppStream                      6.1  B/s |  38  B     00:06</span>
+<span class="c1">#0 7.041 Error: Failed to download metadata for repo &#39;appstream&#39;: Cannot prepare internal mirrorlist: No URLs in mirrorlist</span>
+------
+Dockerfile:5
+--------------------
+   <span class="m">3</span> <span class="p">|</span>
+   <span class="m">4</span> <span class="p">|</span>     RUN dnf clean all
+   <span class="m">5</span> <span class="p">|</span> &gt;&gt;&gt; RUN dnf -y update
+   <span class="m">6</span> <span class="p">|</span>
+   <span class="m">7</span> <span class="p">|</span>     RUN dnf -y install which sudo openssh-clients openssh-server initscripts
+--------------------
+error: failed to solve: process <span class="s2">&quot;/bin/sh -c dnf -y update&quot;</span> did not <span class="nb">complete</span> successfully: <span class="nb">exit</span> code: <span class="m">1</span>
+FATA<span class="o">[</span><span class="m">0053</span><span class="o">]</span> unrecognized image format
+</pre></div>
+</div>
+</div>
+<p>这里报错应该是网络问题，待修复…</p>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/containerd/nerdctl">nerdctl: Docker-compatible CLI for containerd</a></p></li>
 <li><p><a class="reference external" href="https://docs.rancherdesktop.io/tutorials/working-with-images">Rancher desktop: Working with Images</a></p></li>
