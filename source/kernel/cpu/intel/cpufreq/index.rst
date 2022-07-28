@@ -12,6 +12,7 @@ CPU频率 性能伸缩(Performance Scaling)
    cpufreq_monitor.rst
    acpi_cpufreq.rst
    cpu_p-state.rst
+   cpu_p-state_linux.rst
    cpu_c-state.rst
    cpuidle.rst
 
