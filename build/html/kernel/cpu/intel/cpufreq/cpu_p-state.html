@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
-    <link rel="next" title="CPU c-state" href="cpu_c-state.html" />
+    <link rel="next" title="CPU p-state 的Linux配置" href="cpu_p-state_linux.html" />
     <link rel="prev" title="ACPI cpufreq" href="acpi_cpufreq.html" /> 
 </head>
 
@@ -157,14 +157,139 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>.._cpu_p-state:</p>
-<section id="cpu-p-state">
-<h1>CPU p-state<a class="headerlink" href="#cpu-p-state" title="Permalink to this heading">¶</a></h1>
-<section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+  <section id="cpu-p-state">
+<span id="id1"></span><h1>CPU p-state<a class="headerlink" href="#cpu-p-state" title="Permalink to this heading">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>本段为 <a class="reference external" href="https://events.linuxfoundation.org/sites/events/files/slides/LinuxConEurope_2015.pdf">Balancing Power and Performance in the Linux Kernel</a> 概要摘录</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">P-state</span></code> 是CPU频率和操作点电压的结合。</p>
+<p>处理器性能和主频是直接相关的。增加主频可以增加处理器性。反之，即哪个低主频则降低性能。如果将主频减半，计算任务就会降低一半速度。不过，如果降低主频，但是增加CPU使用率并且降低idle时间百分比，则会影响电池使用时间。</p>
+<p>引入 <code class="docutils literal notranslate"><span class="pre">P-state</span></code> 的两个主要原因是：</p>
+<ul class="simple">
+<li><p>降低尖峰时热能负载</p></li>
+<li><p>降低能耗</p></li>
+</ul>
+<section id="linux">
+<h2>Linux内核的能耗和性能平衡<a class="headerlink" href="#linux" title="Permalink to this heading">¶</a></h2>
+<section id="idle">
+<h3>idle的不同级别<a class="headerlink" href="#idle" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>runtime idle</p></li>
+<li><p>suspended</p></li>
+<li><p>off</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>激活电源管理<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>CPU激活电源管理（cpufreq） - P-states 或 DVFS</p></li>
+<li><p>设备激活电源管理 - 一些设备支持PCIe ASPM</p></li>
+<li><p>GPU则自我管理</p></li>
+</ul>
+</section>
+<section id="p-state">
+<h3>选择正确的p-state<a class="headerlink" href="#p-state" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>调节器(Governors)反映了用户策略决定：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> 只支持 <code class="docutils literal notranslate"><span class="pre">powersave</span></code> 和 <code class="docutils literal notranslate"><span class="pre">performance</span></code> 策略，其他驱动支持更多策略( <a class="reference internal" href="acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> )</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> 是一个调节器，并且hw驱动是一个整体，所以传统上这个governor是和hw驱动隔离的。</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> “performance” 策略总是选择最高的 <code class="docutils literal notranslate"><span class="pre">p-state</span></code></p>
+<ul>
+<li><p>完全不考虑节能</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> “powersave” 策略尝试平衡性能和节能</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> 驱动监视使用率并能够决定何时增加或减少 <code class="docutils literal notranslate"><span class="pre">p-state</span></code> 。这个方式和其他governors类似。</p></li>
+</ul>
+</section>
+</section>
+<section id="id3">
+<h2><code class="docutils literal notranslate"><span class="pre">p-state</span></code> 划分<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">P0</span> <span class="pre">-</span> <span class="pre">P1</span></code> 是 turbo范围</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">P1</span> <span class="pre">-</span> <span class="pre">Pn</span></code> 是 保证范围（操作系统可见的状态）</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Pn</span> <span class="pre">-</span> <span class="pre">LFM</span></code> 是 温度控制范围</p></li>
+</ul>
+<figure class="align-default" id="id10">
+<a class="reference internal image-reference" href="../../../../_images/p-state.png"><img alt="p-state划分" src="../../../../_images/p-state.png" style="width: 370.0px; height: 436.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">p-state划分</span><a class="headerlink" href="#id10" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id4">
+<h2>P-state的硬件协作<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>共享相同电压域的CPU核心对一个 <code class="docutils literal notranslate"><span class="pre">p-state</span></code> 投票</p></li>
+<li><p>每个CPU核心的最高 <code class="docutils literal notranslate"><span class="pre">p-state</span></code> 赢得投票</p></li>
+<li><p>APERF/MPERF必须用于查看哪个 <code class="docutils literal notranslate"><span class="pre">p-state</span></code> 被批准</p></li>
+</ul>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">acpi_cpufreq</span></code> 已经被废弃(Intel处理器不建议使用 <a class="reference internal" href="acpi_cpufreq.html#acpi-cpufreq"><span class="std std-ref">ACPI cpufreq</span></a> (OS control mode)，而是采用CPU硬件电源管理</p>
+</div></blockquote>
+</section>
+<section id="id5">
+<h2>P-state的操作系统限制<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>能力/使用率不足以决定何时伸缩</p></li>
+<li><p>采样率可能导致不正确的使用计算</p></li>
+<li><p>伸缩性的收益不明确</p></li>
+</ul>
+</section>
+<section id="p-state-hwp">
+<h2>硬件P-state(HWP)<a class="headerlink" href="#p-state-hwp" title="Permalink to this heading">¶</a></h2>
+<p>Intel Speed Shift Technology (HWP)</p>
+<ul class="simple">
+<li><p>最有效的主频是运行时计算（Pe） - 基于系统和负载</p></li>
+<li><p>EPP表示Energy Performance Perference（能源执行性能优先） - 将决定如何强化算法（Pa） - 基于系统，负载，OS</p></li>
+<li><p>算法将在Pa和Pe之间操作</p></li>
+</ul>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">HWP</span></code>即 Hardware P-State</p>
+</div></blockquote>
+<figure class="align-default" id="id11">
+<a class="reference internal image-reference" href="../../../../_images/hwp.png"><img alt="HWP" src="../../../../_images/hwp.png" style="width: 404.0px; height: 433.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">HWP</span><a class="headerlink" href="#id11" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id12">
+<a class="reference internal image-reference" href="../../../../_images/hwp_msr.png"><img alt="HWP MSR" src="../../../../_images/hwp_msr.png" style="width: 780.0px; height: 348.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">HWP MSR</span><a class="headerlink" href="#id12" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id13">
+<a class="reference internal image-reference" href="../../../../_images/hwp_capabilities_register.png"><img alt="HWP capabilities MSR" src="../../../../_images/hwp_capabilities_register.png" style="width: 437.0px; height: 166.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">HWP capabilities MSR</span><a class="headerlink" href="#id13" title="永久链接至图片">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id6">
+<h2>Linux实现<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> 驱动检查CPU flag</p></li>
+<li><p>默认所有白名单CPU都激活</p></li>
+<li><p>只支持自动模式</p></li>
+<li><p>没有EPP输出</p></li>
+<li><p>Min和Max pstate是通过min和max perf_pct sysfs文件获取</p></li>
+</ul>
+<p>请参考 <a class="reference internal" href="cpu_p-state_linux.html#cpu-p-state-linux"><span class="std std-ref">CPU p-state 的Linux配置</span></a></p>
+</section>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://vstinner.github.io/intel-cpus.html">Intel CPUs: P-state, C-state, Turbo Boost, CPU frequency, etc.</a></p></li>
 <li><p><a class="reference external" href="https://www.kernel.org/doc/html/v4.19/admin-guide/pm/intel_pstate.html">intel_pstate CPU Performance Scaling Driver</a></p></li>
+<li><p><a class="reference external" href="https://events.linuxfoundation.org/sites/events/files/slides/LinuxConEurope_2015.pdf">Balancing Power and Performance in the Linux Kernel</a> Intel开源中心提供的有关能耗和性能平衡的介绍文档</p></li>
+<li><p><a class="reference external" href="https://www.kernel.org/doc/Documentation/cpu-freq/intel-pstate.txt">cpu-freq/intel-pstate.txt</a> 内核 <code class="docutils literal notranslate"><span class="pre">intel_pstate</span></code> 驱动说明，也是 <a class="reference external" href="https://events.linuxfoundation.org/sites/events/files/slides/LinuxConEurope_2015.pdf">Balancing Power and Performance in the Linux Kernel</a> 的一个完整阐述</p></li>
+<li><p><a class="reference external" href="https://software.intel.com/en-us/blogs/2008/05/29/what-exactly-is-a-p-state-pt-1">What exactly is a P-state</a> Intel developer’s Manual: Chapter14 - power and thermal management</p></li>
+<li><p><a class="reference external" href="http://www.hotchips.org/wp-content/uploads/hc_archives/hc23/HC23.19.9-Desktop-CPUs/HC23.19.921.SandyBridge_Power_10-Rotem-Intel.pdf">Power management architecture of the 2nd generation Intel Core microarchitecture formerly codenamed Sandy Bridge</a></p></li>
 </ul>
 </section>
 </section>
@@ -174,7 +299,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="acpi_cpufreq.html" class="btn btn-neutral float-left" title="ACPI cpufreq" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cpu_c-state.html" class="btn btn-neutral float-right" title="CPU c-state" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cpu_p-state_linux.html" class="btn btn-neutral float-right" title="CPU p-state 的Linux配置" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
