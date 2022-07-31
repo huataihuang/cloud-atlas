@@ -1,17 +1,14 @@
-.. _linux_security:
+.. _mitre_attack:
 
 =================================
-Linux安全
+MITRE ATT&CK
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   chroot.rst
-   vpn/index
-   tpm/index
-   hunting_for_persistence_in_linux/index
-   mitre_attack/index
+   intro_mitre_attack.rst
 
 .. only::  subproject and html
 
