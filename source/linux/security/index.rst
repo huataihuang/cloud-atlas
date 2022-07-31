@@ -10,6 +10,8 @@ Linux安全
    chroot.rst
    vpn/index
    tpm/index
+   hunting_for_persistence_in_linux/index
+   mitre_attack/index
 
 .. only::  subproject and html
 
