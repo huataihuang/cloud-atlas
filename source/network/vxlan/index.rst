@@ -1,19 +1,13 @@
-.. _network:
+.. _vxlan:
 
 =================================
-Network Atlas
+VXLAN网络
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   routing/index
-   vxlan/index
-   bird/index
-   cisco/index
-   mikrotik/index
-   packet_analysis/index
-   p2p/index
+   vxlan_overview.rst
 
 .. only::  subproject and html
 
