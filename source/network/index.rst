@@ -8,6 +8,7 @@ Network Atlas
    :maxdepth: 1
 
    routing/index
+   vxlan/index
    bird/index
    cisco/index
    mikrotik/index
