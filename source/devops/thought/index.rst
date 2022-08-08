@@ -8,6 +8,8 @@ DevOps 思考集锦
    :maxdepth: 1
 
    think_devops.rst
+   think_devopser.rst
+   csdiy.rst 
    roast_cloud_native.rst
    continuous_integration.rst
    gitops.rst
