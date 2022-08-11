@@ -1,0 +1,64 @@
+# USE DOCKER
+# docker build --rm -t local/centos-stream-8-systemd .
+# docker run -itd --privileged=true -p 1122:22 --hostname myserver --name myserver local:centos-stream-8-systemd
+
+# USE nerdctl (containerd)
+# nerdctl build -t centos-stream-8-systemd .
+# nerdctl run -it --privileged=true -p 1122:22 --hostname centos-stream-8 --name centos-stream-8 centos-stream-8-systemd:latest
+# nerdctl run -d --privileged=true -p 1122:22 --hostname centos-stream-8 --name centos-stream-8 centos-stream-8-systemd:latest
+
+FROM centos:latest
+MAINTAINER vincent huatai <vincent@huatai.me>
+
+ENV container docker
+
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*;
+
+#VOLUME [ "/sys/fs/cgroup" ]
+
+RUN --mount=type=bind,target=/sys/fs/cgroup \
+    --mount=type=bind,target=/sys/fs/fuse \
+    --mount=type=tmpfs,target=/tmp \
+    --mount=type=tmpfs,target=/run \
+    --mount=type=tmpfs,target=/run/lock
+
+RUN dnf clean all
+RUN dnf --disablerepo '*' --enablerepo extras swap centos-linux-repos centos-stream-repos -y
+RUN dnf distro-sync -y
+RUN dnf -y update
+
+RUN dnf -y install which sudo openssh-clients openssh-server initscripts
+
+# Prepare sshd host key
+RUN ssh-keygen -A
+
+# add account "admin" and give sudo privilege
+RUN groupadd -g 505 admin
+RUN useradd -g 505 -u 505 -d /home/admin -m admin
+RUN usermod -aG wheel admin
+RUN echo "%wheel        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+
+# Add ssh public key for login
+RUN mkdir -p /home/admin/.ssh
+COPY authorized_keys /home/admin/.ssh/authorized_keys
+RUN chown -R admin:admin /home/admin/.ssh
+RUN chmod 600 /home/admin/.ssh/authorized_keys
+RUN chmod 700 /home/admin/.ssh
+RUN mv /var/run/nologin /var/run/nologin.bak
+
+# run service when container started - sshd
+EXPOSE 22:1122
+
+# systemd
+# CMD ["/usr/sbin/init"]
+
+ENTRYPOINT [ "/usr/lib/systemd/systemd" ]
+CMD [ "log-level=info", "unit=sysinit.target" ]

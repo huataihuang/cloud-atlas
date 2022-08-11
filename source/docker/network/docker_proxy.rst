@@ -52,6 +52,10 @@ Docker客户端环境变量
    --env FTP_PROXY="ftp://127.0.0.1:3001"
    --env NO_PROXY="*.test.example.com,.example2.com"
 
+.. note::
+
+   需要注意Docker配置环境变量 ``HTTP_PROXY`` 是全大写字母，我测试发现全小写字母 ``http_proxy`` 不生效
+
 Docker服务器Proxy
 ===================
 

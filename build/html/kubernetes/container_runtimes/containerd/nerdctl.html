@@ -220,6 +220,28 @@
 <p class="admonition-title">备注</p>
 <p>由于我是安装了 <a class="reference internal" href="index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> 服务，是通过root模式运行的，所以后续操作以这个root权限方式为准。也就是后续 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 命令操作都是使用 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">nerdctl</span></code></p>
 </div>
+<p>这里我遇到一个报错，显示GFW阻挡了镜像下载:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FATA</span><span class="p">[</span><span class="mi">0016</span><span class="p">]</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">copy</span><span class="p">:</span> <span class="n">httpReadSeeker</span><span class="p">:</span> <span class="n">failed</span> <span class="nb">open</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">do</span> <span class="n">request</span><span class="p">:</span> <span class="n">Get</span> <span class="s2">&quot;https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/b6/b692a91e4e1582db97076184dae0b2f4a7a86b68c4fe6f91affa50ae06369bf5/data?verify=1660148606-x7zt9HGf2yYAnJhu906wV</span><span class="si">%2F</span><span class="s2">XXVwA%3D&quot;</span><span class="p">:</span> <span class="n">net</span><span class="o">/</span><span class="n">http</span><span class="p">:</span> <span class="n">TLS</span> <span class="n">handshake</span> <span class="n">timeout</span>
+</pre></div>
+</div>
+<p>通过配置 <a class="reference internal" href="../../../docker/network/docker_proxy.html#docker-proxy"><span class="std std-ref">配置Docker使用代理</span></a> 环境变量:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">HTTP_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span><span class="o">/</span>
+<span class="n">export</span> <span class="n">HTTPS_PROXY</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">192.168.6.200</span><span class="p">:</span><span class="mi">3128</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>然后再次执行就能正常下载镜像并运行容器。此时检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="n">ps</span>
+</pre></div>
+</div>
+<p>可以看到本地运行了容器(类似docker):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONTAINER</span> <span class="n">ID</span>    <span class="n">IMAGE</span>                             <span class="n">COMMAND</span>                   <span class="n">CREATED</span>               <span class="n">STATUS</span>    <span class="n">PORTS</span>                 <span class="n">NAMES</span>
+<span class="mi">71696</span><span class="n">cbb5444</span>    <span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">library</span><span class="o">/</span><span class="n">nginx</span><span class="p">:</span><span class="n">latest</span>    <span class="s2">&quot;/docker-entrypoint.…&quot;</span>    <span class="n">About</span> <span class="n">a</span> <span class="n">minute</span> <span class="n">ago</span>    <span class="n">Up</span>        <span class="mf">0.0.0.0</span><span class="p">:</span><span class="mi">80</span><span class="o">-&gt;</span><span class="mi">80</span><span class="o">/</span><span class="n">tcp</span>    <span class="n">nginx</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>直接使用 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">run</span></code> 是在本地运行容器，没有运行在Kuberntes集群，所以不需要使用 <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">k8s.io</span></code></p>
+</div>
 <ul>
 <li><p>无root权限方式(端口1024以上):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">containerd</span><span class="o">-</span><span class="n">rootless</span><span class="o">-</span><span class="n">setuptool</span><span class="o">.</span><span class="n">sh</span> <span class="n">install</span>
@@ -228,12 +250,68 @@
 </div>
 </li>
 </ul>
-</section>
 <section id="id4">
-<h2>实践:镜像<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h3>容器探索<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>我在下文尝试通过 <a class="reference internal" href="../../../docker/moby/buildkit/index.html#buildkit"><span class="std std-ref">Buildkit</span></a> 构建镜像遇到容器内部不能通网络的问题，所以，我返回来先验证官方镜像是否能够正常运行，并排查网络</p>
+<ul>
+<li><p>进入 <code class="docutils literal notranslate"><span class="pre">nginx</span></code> 容器:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">nginx</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>验证可以进入容器内部，不过此时容器内部缺少很多网络排查工具，甚至都没有提供ps命令</p>
+<p>检查发现，原来默认 <code class="docutils literal notranslate"><span class="pre">nginx:lastest</span></code> 镜像是基于 <a class="reference internal" href="../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，可以使用 <a class="reference internal" href="../../../linux/ubuntu_linux/admin/apt.html#apt"><span class="std std-ref">APT包管理</span></a> ，并且能够通internet。这就好办了，安装工具:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">update</span>
+<span class="n">apt</span> <span class="n">upgrade</span>
+<span class="n">apt</span> <span class="n">install</span> <span class="n">iproute2</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="mi">2</span><span class="p">:</span> <span class="n">eth0</span><span class="nd">@if13</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">noqueue</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">mode</span> <span class="n">DEFAULT</span> <span class="n">group</span> <span class="n">default</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">16</span><span class="p">:</span><span class="mi">4</span><span class="n">f</span><span class="p">:</span><span class="n">d5</span><span class="p">:</span><span class="mi">8</span><span class="n">c</span><span class="p">:</span><span class="n">e0</span><span class="p">:</span><span class="mi">86</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span> <span class="n">link</span><span class="o">-</span><span class="n">netnsid</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<ul>
+<li><p>路由:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">route</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">default</span> <span class="n">via</span> <span class="mf">10.4.0.1</span> <span class="n">dev</span> <span class="n">eth0</span>
+<span class="mf">10.4.0.0</span><span class="o">/</span><span class="mi">24</span> <span class="n">dev</span> <span class="n">eth0</span> <span class="n">proto</span> <span class="n">kernel</span> <span class="n">scope</span> <span class="n">link</span> <span class="n">src</span> <span class="mf">10.4.0.2</span>
+</pre></div>
+</div>
+<p>为什么容器内部默认就能够连接外网呢？这明显就是类似 <a class="reference internal" href="../../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 的NAT网络么</p>
+<ul>
+<li><p>在物理主机上检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brctl</span> <span class="n">show</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>果然可以看到 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 启动了一个交换网络:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bridge</span> <span class="n">name</span>     <span class="n">bridge</span> <span class="nb">id</span>               <span class="n">STP</span> <span class="n">enabled</span>     <span class="n">interfaces</span>
+<span class="n">nerdctl0</span>                <span class="mf">8000.</span><span class="n">d20bcb07c7c8</span>       <span class="n">no</span>              <span class="n">veth482da55d</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2>实践:镜像<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 对镜像的制作是采用 <a class="reference internal" href="../../../docker/moby/buildkit/index.html#buildkit"><span class="std std-ref">Buildkit</span></a> 实现的，请先安装 <code class="docutils literal notranslate"><span class="pre">buildkit</span></code> 并运行 <code class="docutils literal notranslate"><span class="pre">buildkitd</span></code> 服务进程</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">使用root身份运行buildkitd，启动后工作在前台等待客户端连接</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">使用root身份运行buildkitd，启动后工作在前台等待客户端连接</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo buildkitd
 </pre></div>
 </div>
@@ -241,8 +319,8 @@
 <ul class="simple">
 <li><p>我这里采用 <a class="reference internal" href="../../../docker/admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 的 <code class="docutils literal notranslate"><span class="pre">centos8-ssh</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">CentOS 8的Dockerfile，包括ssh安装</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">CentOS 8的Dockerfile，包括ssh安装</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Build centos 8 image with ssh:</span>
 <span class="c"># ------------------------------</span>
 <span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
@@ -309,15 +387,15 @@
 </div>
 </div>
 <p>执行以下命令构建:</p>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">nerdctl build构建容器镜像</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">nerdctl build构建容器镜像</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl build -t local:centos8-ssh .
 </pre></div>
 </div>
 </div>
 <p>此时提示信息:</p>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">nerdctl build构建容器镜像的输出信息</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">nerdctl build构建容器镜像的输出信息</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>+<span class="o">]</span> Building <span class="m">53</span>.6s <span class="o">(</span><span class="m">7</span>/19<span class="o">)</span>
  <span class="o">=</span>&gt; <span class="o">[</span>internal<span class="o">]</span> load build definition from Dockerfile                                                                                                                                <span class="m">0</span>.6s
  <span class="o">=</span>&gt; <span class="o">=</span>&gt; transferring dockerfile: <span class="m">1</span>.00kB                                                                                                                                              <span class="m">0</span>.0s
@@ -334,9 +412,9 @@
  <span class="o">=</span>&gt; ERROR <span class="o">[</span> <span class="m">3</span>/15<span class="o">]</span> RUN dnf -y update                                                                                                                                                 <span class="m">7</span>.3s
 ------
  &gt; <span class="o">[</span> <span class="m">3</span>/15<span class="o">]</span> RUN dnf -y update:
-<span class="c1">#0 7.032 CentOS Linux 8 - AppStream                      6.1  B/s |  38  B     00:06</span>
-<span class="c1">#0 7.041 Error: Failed to download metadata for repo &#39;appstream&#39;: Cannot prepare internal mirrorlist: No URLs in mirrorlist</span>
-------
+<span class="hll"><span class="c1">#0 7.032 CentOS Linux 8 - AppStream                      6.1  B/s |  38  B     00:06</span>
+</span><span class="hll"><span class="c1">#0 7.041 Error: Failed to download metadata for repo &#39;appstream&#39;: Cannot prepare internal mirrorlist: No URLs in mirrorlist</span>
+</span>------
 Dockerfile:5
 --------------------
    <span class="m">3</span> <span class="p">|</span>
@@ -350,13 +428,185 @@ FATA<span class="o">[</span><span class="m">0053</span><span class="o">]</span> 
 </pre></div>
 </div>
 </div>
-<p>这里报错应该是网络问题，待修复…</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>需要注意 <code class="docutils literal notranslate"><span class="pre">buildkitd.toml</span></code> 配置默认的 <code class="docutils literal notranslate"><span class="pre">namespace</span></code> 是 <code class="docutils literal notranslate"><span class="pre">k8s.io</span></code> 标识针对 Kubernetes，这也是我最初不知道的要点。我刚开始还奇怪 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">images</span></code> 为何总是空的，原来正确方法是:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nerdctl</span> <span class="o">-</span><span class="n">n</span> <span class="n">k8s</span><span class="o">.</span><span class="n">io</span> <span class="n">images</span>
+</pre></div>
+</div>
+<p>这样才能看到Kubernetes集群中的镜像</p>
+</div>
+<p>在上述报错信息的同时， <code class="docutils literal notranslate"><span class="pre">buildkitd</span></code> 控制台也输出了报错信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERRO</span><span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">10</span><span class="n">T22</span><span class="p">:</span><span class="mi">58</span><span class="p">:</span><span class="mi">40</span><span class="o">+</span><span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">]</span> <span class="o">/</span><span class="n">moby</span><span class="o">.</span><span class="n">buildkit</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">Control</span><span class="o">/</span><span class="n">Solve</span> <span class="n">returned</span> <span class="n">error</span><span class="p">:</span> <span class="n">rpc</span> <span class="n">error</span><span class="p">:</span> <span class="n">code</span> <span class="o">=</span> <span class="n">Unknown</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">process</span> <span class="s2">&quot;/bin/sh -c dnf -y update&quot;</span> <span class="n">did</span> <span class="ow">not</span> <span class="n">complete</span> <span class="n">successfully</span><span class="p">:</span> <span class="n">exit</span> <span class="n">code</span><span class="p">:</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>我以为 <code class="docutils literal notranslate"><span class="pre">buildkit</span></code> 默认想去连接 <code class="docutils literal notranslate"><span class="pre">docker0</span></code> 这个本地NAT网络，但是上文可以看到，只安装 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 只创建了 <code class="docutils literal notranslate"><span class="pre">nerdctl0</span></code> 命名的NAT网络。该如何配置 <code class="docutils literal notranslate"><span class="pre">buildkit</span></code> 去使用指定的 <code class="docutils literal notranslate"><span class="pre">bridge</span></code> 呢？</p>
+<p>虽然我的节点位于Kubernetes中，并且安装了 <a class="reference internal" href="../../network/cilium/index.html#cilium"><span class="std std-ref">Cilium网络</span></a> ，看起来网络配置不正确</p>
+<p><code class="docutils literal notranslate"><span class="pre">唉，瞎猜不是好习惯，我后来才发现我根本没有仔细看报错信息</span></code> 实际是Docker的centos8镜像中默认仓库配置问题: 上面提示不是已经说了是 <code class="docutils literal notranslate"><span class="pre">repo</span> <span class="pre">'appstream'</span></code> mirrorlist错误么?</p>
+<p>我尝试通过 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">buildkitd</span> <span class="pre">--oci-worker=false</span> <span class="pre">--containerd-worker=true</span></code> 运行 <code class="docutils literal notranslate"><span class="pre">buildkitd</span></code> （指定使用containerd worker) ，但是依然没有解决这个问题</p>
+<p>但是，我注意到 <code class="docutils literal notranslate"><span class="pre">buildkitd</span></code> 的终端输出信息显示:</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">nerdctl build失败，显示使用了 systemd-resolve</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>WARN<span class="o">[</span><span class="m">2022</span>-08-11T00:48:34+08:00<span class="o">]</span> using host network as the default
+WARN<span class="o">[</span><span class="m">2022</span>-08-11T00:48:34+08:00<span class="o">]</span> git <span class="nb">source</span> cannot be enabled: failed to find git binary: exec: <span class="s2">&quot;git&quot;</span>: executable file not found <span class="k">in</span> <span class="nv">$PATH</span>
+INFO<span class="o">[</span><span class="m">2022</span>-08-11T00:48:34+08:00<span class="o">]</span> found worker <span class="s2">&quot;ndtir74093ai7v0l9y6qrxppp&quot;</span>, <span class="nv">labels</span><span class="o">=</span>map<span class="o">[</span>org.mobyproject.buildkit.worker.containerd.namespace:default org.mobyproject.buildkit.worker.containerd.uuid:c1b0bbf7-00fd-4fd9-8ff7-5fe4da6fa866 org.mobyproject.buildkit.worker.executor:containerd org.mobyproject.buildkit.worker.hostname:z-k8s-m-1 org.mobyproject.buildkit.worker.network:host org.mobyproject.buildkit.worker.snapshotter:overlayfs<span class="o">]</span>, <span class="nv">platforms</span><span class="o">=[</span>linux/amd64 linux/amd64/v2 linux/amd64/v3 linux/386<span class="o">]</span>
+INFO<span class="o">[</span><span class="m">2022</span>-08-11T00:48:34+08:00<span class="o">]</span> found <span class="m">1</span> workers, <span class="nv">default</span><span class="o">=</span><span class="s2">&quot;ndtir74093ai7v0l9y6qrxppp&quot;</span>
+WARN<span class="o">[</span><span class="m">2022</span>-08-11T00:48:34+08:00<span class="o">]</span> currently, only the default worker can be used.
+INFO<span class="o">[</span><span class="m">2022</span>-08-11T00:48:34+08:00<span class="o">]</span> running server on /run/buildkit/buildkitd.sock
+ERRO<span class="o">[</span><span class="m">2022</span>-08-11T00:54:49+08:00<span class="o">]</span> unexpected error getting ingest status of <span class="s2">&quot;layer-sha256:a1d0c75327776413fa0db9ed3adcdbadedc95a662eb1d360dad82bb913f8a1d1&quot;</span>: context canceled
+<span class="hll">INFO<span class="o">[</span><span class="m">2022</span>-08-11T00:54:54+08:00<span class="o">]</span> detected <span class="m">127</span>.0.0.53 nameserver, assuming systemd-resolved, so using resolv.conf: /run/systemd/resolve/resolv.conf
+</span>ERRO<span class="o">[</span><span class="m">2022</span>-08-11T00:55:02+08:00<span class="o">]</span> /moby.buildkit.v1.Control/Solve returned error: rpc error: <span class="nv">code</span> <span class="o">=</span> Unknown <span class="nv">desc</span> <span class="o">=</span> process <span class="s2">&quot;/bin/sh -c dnf -y update&quot;</span> did not <span class="nb">complete</span> successfully: <span class="nb">exit</span> code: <span class="m">1</span>
+</pre></div>
+</div>
+</div>
+<p>等等，怎么会因为检测到DNS服务，就自说自话使用了 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/resolv.conf</span></code> 作为本地解析器配置？</p>
+<p>检查了一下主机，确实运行了 <code class="docutils literal notranslate"><span class="pre">systemd-resolved</span></code> ，配置文件 <code class="docutils literal notranslate"><span class="pre">/run/systemd/resolve/resolv.conf</span></code> 内容也没有错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nameserver</span> <span class="mf">192.168.6.200</span>
+<span class="n">search</span> <span class="n">staging</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span>
+</pre></div>
+</div>
+<p>我在 <code class="docutils literal notranslate"><span class="pre">192.168.6.200</span></code> 上运行的 DNSmasq ，修订配置添加 <code class="docutils literal notranslate"><span class="pre">log-queries</span></code> (开启DNS查询日志)，然后重启dnsmasq，再次执行 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">build</span></code> ，观察DNS服务器端是否收到查询请求: 确实收到了DNS查询</p>
+<p><strong>我发现我犯了一个低级错误</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#0 1.355 CentOS Linux 8 - AppStream                       66  B/s |  38  B     00:00</span>
+<span class="c1">#0 1.366 Error: Failed to download metadata for repo &#39;appstream&#39;: Cannot prepare internal mirrorlist: No URLs in mirrorlist</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://stackoverflow.com/questions/70963985/error-failed-to-download-metadata-for-repo-appstream-cannot-prepare-internal">Error: Failed to download metadata for repo ‘appstream’: Cannot prepare internal mirrorlist: No URLs in mirrorlist</a> 很简单，CentOS已经走到了生命尽头，需要切换到 <code class="docutils literal notranslate"><span class="pre">stream</span></code> 版本才能正常工作，所以Docker官方镜像已经无法直接使用</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CentOS</span> <span class="mi">8</span> <span class="n">reached</span> <span class="n">EOL</span> <span class="n">on</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">31</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../../_images/marmot.gif" src="../../../_images/marmot.gif" />
+</figure>
+<ul class="simple">
+<li><p>修复的方法是采用在Dockerfile中增加切换 <code class="docutils literal notranslate"><span class="pre">CentOS</span> <span class="pre">Stream</span> <span class="pre">8</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">CentOS Stream 8(取代已经 EOL CentOS 8)的Dockerfile，包括ssh安装</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Build centos 8 image with ssh:</span>
+<span class="c"># ------------------------------</span>
+<span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">centos:latest</span>
+<span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span><span class="w"> </span>dnf clean all
+<span class="hll"><span class="k">RUN</span><span class="w"> </span>dnf --disablerepo <span class="s1">&#39;*&#39;</span> --enablerepo extras swap centos-linux-repos centos-stream-repos -y
+</span><span class="hll"><span class="k">RUN</span><span class="w"> </span>dnf distro-sync -y
+</span><span class="k">RUN</span><span class="w"> </span>dnf -y update
+
+<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span><span class="w"> </span>ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span><span class="w"> </span>/usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>然后执行:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">nerdctl build构建容器镜像centos-stream-8-ssh</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl build -t local:centos-stream-8-ssh .
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>然后运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="n">local</span><span class="p">:</span><span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">ssh</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>现在就可以ssh进入容器了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">admin</span><span class="o">@</span><span class="mf">192.168.6.101</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span>
+</pre></div>
+</div>
+<p>但是，使用 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">run</span> <span class="pre">-it</span></code> 命令启动，不能退出，一旦退出容器也就终止了。此时再次执行 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">start</span> <span class="pre">centos-stream-8</span></code> 会报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">failed</span> <span class="n">to</span> <span class="n">create</span> <span class="n">shim</span> <span class="n">task</span><span class="p">:</span> <span class="n">OCI</span> <span class="n">runtime</span> <span class="n">create</span> <span class="n">failed</span><span class="p">:</span> <span class="n">runc</span> <span class="n">create</span> <span class="n">failed</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">allocate</span> <span class="n">tty</span> <span class="k">if</span> <span class="n">runc</span> <span class="n">will</span> <span class="n">detach</span> <span class="n">without</span> <span class="n">setting</span> <span class="n">console</span> <span class="n">socket</span><span class="p">:</span> <span class="n">unknown</span>
+</pre></div>
+</div>
+<p>实际上 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 有一个参数 <code class="docutils literal notranslate"><span class="pre">-d</span></code> 可以启动时直接放到后台运行，但是这个参数和 <code class="docutils literal notranslate"><span class="pre">-t</span></code> 冲突，暂时不知道如何解决:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="n">local</span><span class="p">:</span><span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">ssh</span>
+</pre></div>
+</div>
 </section>
-<section id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<section id="nerdctlkubernetes">
+<h2>nerdctl结合Kubernetes<a class="headerlink" href="#nerdctlkubernetes" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 可以直接为本地Kubernetes构建镜像而无需registry:</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">nerdctl build为本地Kubernetes构建镜像</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nerdctl --namespace k8s.io build -t centos-stream-8 .
+
+kubectl apply -f - <span class="s">&lt;&lt;EOF</span>
+<span class="s">apiVersion: v1</span>
+<span class="s">kind: Pod</span>
+<span class="s">metadata:</span>
+<span class="s">  name: centos-stream-8</span>
+<span class="s">spec:</span>
+<span class="s">  containers:</span>
+<span class="s">    - name: centos-stream-8</span>
+<span class="s">      image: centos-stream-8</span>
+<span class="s">      imagePullPolicy: Never</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id6">
+<h2>参考<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/containerd/nerdctl">nerdctl: Docker-compatible CLI for containerd</a></p></li>
 <li><p><a class="reference external" href="https://docs.rancherdesktop.io/tutorials/working-with-images">Rancher desktop: Working with Images</a></p></li>
+<li><p><a class="reference external" href="https://itnext.io/rancher-desktop-and-nerdctl-for-local-k8s-dev-d1348629932a">Rancher Desktop and nerdctl for local K8s dev</a></p></li>
 </ul>
 </section>
 </section>

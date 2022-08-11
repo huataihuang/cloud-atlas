@@ -458,6 +458,83 @@
 </pre></div>
 </div>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>2021年12月31日，CentOS 8系列终止更新，所以在 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 中使用dokcer.io官方镜像已经无法正常更新。解决方法是切换到 <code class="docutils literal notranslate"><span class="pre">CentOS</span> <span class="pre">Stream</span> <span class="pre">8</span></code> 。以下为修订后Dockerfile</p>
+</div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">2021年12月31日之后需要切换到CentOS Stream 8</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Build centos 8 image with ssh:</span>
+<span class="c"># ------------------------------</span>
+<span class="c"># docker build -f centos8-ssh -t local:centos8-ssh</span>
+
+<span class="c"># create container:</span>
+<span class="c"># -----------------</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos8-ssh</span>
+
+<span class="c"># create container with volume:</span>
+<span class="c"># -----------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip:</span>
+<span class="c"># -------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 local:centos8-ssh</span>
+
+<span class="c"># create container with volume and static ip, then limit resource and map port:</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+<span class="c"># docker volume create data</span>
+<span class="c"># docker network create --subnet=172.18.0.0/16 data-net</span>
+<span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver -v data:/data \</span>
+<span class="c">#   --net data-net --ip 172.18.0.252 --memory=2048M --cpus=&quot;1.5&quot; \</span>
+<span class="c">#   -p 22 -p 8080:80 local:centos8-ssh</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">centos:latest</span>
+<span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">RUN</span><span class="w"> </span>dnf clean all
+<span class="hll"><span class="k">RUN</span><span class="w"> </span>dnf --disablerepo <span class="s1">&#39;*&#39;</span> --enablerepo extras swap centos-linux-repos centos-stream-repos -y
+</span><span class="hll"><span class="k">RUN</span><span class="w"> </span>dnf distro-sync -y
+</span><span class="k">RUN</span><span class="w"> </span>dnf -y update
+
+<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span><span class="w"> </span>ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>
+<span class="c">#CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span>
+
+<span class="c"># ----------</span>
+<span class="c"># WANT run sshd and get a bash</span>
+<span class="c"># ENTRYPOINT will not be override by commandline</span>
+<span class="c"># ----------</span>
+<span class="k">ENTRYPOINT</span><span class="w"> </span>/usr/sbin/sshd <span class="o">&amp;&amp;</span> /bin/bash
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><a class="reference internal" href="../init/docker_systemd.html#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 需要比较繁杂的配置(探索)，不过现在 <a class="reference external" href="https://hub.docker.com/_/centos">CentOS DockerHUB官方镜像</a> 也提供了非常方便的 <a class="reference internal" href="../init/docker_centos_systemd.html#docker-centos-systemd"><span class="std std-ref">Docker CentOS容器运行systemd</span></a> (详见该文Dockerfile)</p>
+</div>
 <section id="alpine-linux-ssh">
 <h3>alpine linux ssh容器<a class="headerlink" href="#alpine-linux-ssh" title="Permalink to this heading">¶</a></h3>
 <p>随着云计算发展， <a class="reference internal" href="../../real/edge_cloud/index.html#edge-cloud"><span class="std std-ref">边缘云计算构建</span></a> 成为轻量级容器技术的运用场景。使用 <a class="reference internal" href="../../linux/alpine_linux/index.html#alpine-linux"><span class="std std-ref">Alpine Linux</span></a> 实现精简的Linux容器可以最大化系统硬件性能发挥，同时降低系统被攻击面。</p>
@@ -465,8 +542,8 @@
 <ul class="simple">
 <li><p>使用密码登陆的ssh容器 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">dockerfile/alpine-ssh</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">dockerfile/alpine-ssh</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">alpine:latest</span>
 <span class="k">RUN</span><span class="w"> </span>apk add --update --no-cache openssh sudo
 <span class="k">RUN</span><span class="w"> </span>apk update <span class="o">&amp;&amp;</span> apk upgrade
@@ -483,8 +560,8 @@
 <ul class="simple">
 <li><p>并准备 <code class="docutils literal notranslate"><span class="pre">entrypoint.sh</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">dockerfile/entrypoint.sh</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">dockerfile/entrypoint.sh</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
 ssh-keygen -A
 <span class="nb">exec</span> /usr/sbin/sshd -D -e <span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>

@@ -11,6 +11,7 @@ containerd运行时(runtime)
    containerd_startup.rst
    install_containerd.io_packages.rst
    install_containerd_official_binaries.rst
+   containerd_centos_systemd.rst
    estargz_lazy_pulling.rst
    nerdctl.rst
    containerd_btrfs.rst

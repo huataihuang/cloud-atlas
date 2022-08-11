@@ -195,7 +195,35 @@
 </pre></div>
 </div>
 </div>
-<p>然后就可以使用 <a class="reference internal" href="../../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 工具执行 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">build</span></code> 指令来构建镜像</p>
+<ul class="simple">
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/buildkit/buildkitd.toml</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">配置 /etc/buildkit/buildkitd.toml</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>worker.oci<span class="o">]</span>
+  <span class="nv">enabled</span> <span class="o">=</span> <span class="nb">false</span>
+
+<span class="o">[</span>worker.containerd<span class="o">]</span>
+  <span class="nv">enabled</span> <span class="o">=</span> <span class="nb">true</span>
+  <span class="c1"># namespace should be &quot;k8s.io&quot; for Kubernetes (including Rancher Desktop)</span>
+  <span class="nv">namespace</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>然后就可以使用 <a class="reference internal" href="../../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 工具执行 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">build</span></code> 指令来构建镜像。但是我发现手工启动的 <code class="docutils literal notranslate"><span class="pre">buildkitd</span></code> 并没有使用 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 的网络，所以还是需要配置一个 <code class="docutils literal notranslate"><span class="pre">buildkit</span></code> 的 systemd 服务，或者(仔细看了readme)在运行参数中添加 <code class="docutils literal notranslate"><span class="pre">containd</span></code> 参数:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">the</span> <span class="n">OCI</span> <span class="p">(</span><span class="n">runc</span><span class="p">)</span> <span class="n">worker</span> <span class="ow">is</span> <span class="n">used</span><span class="o">.</span> <span class="n">You</span> <span class="n">can</span> <span class="nb">set</span> <span class="o">--</span><span class="n">oci</span><span class="o">-</span><span class="n">worker</span><span class="o">=</span><span class="n">false</span> <span class="o">--</span><span class="n">containerd</span><span class="o">-</span><span class="n">worker</span><span class="o">=</span><span class="n">true</span> <span class="n">to</span> <span class="n">use</span> <span class="n">the</span> <span class="n">containerd</span> <span class="n">worker</span><span class="o">.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>重新运行(指定使用conterd worker):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">使用root身份运行buildkitd，并且指定使用 containerd worker</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo buildkitd --oci-worker<span class="o">=</span><span class="nb">false</span> --containerd-worker<span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</div>
+</div>
+<p>不过，没有解决 <a class="reference internal" href="../../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 中 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">build</span></code> 网络不通问题</p>
 </section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
