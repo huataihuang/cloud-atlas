@@ -100,6 +100,19 @@ docker build参数
    :language: dockerfile
    :caption:
 
+.. warning::
+
+   2021年12月31日，CentOS 8系列终止更新，所以在 :ref:`nerdctl` 中使用dokcer.io官方镜像已经无法正常更新。解决方法是切换到 ``CentOS Stream 8`` 。以下为修订后Dockerfile
+
+.. literalinclude:: dockerfile/centos-stream-8-ssh
+   :language: dockerfile
+   :caption: 2021年12月31日之后需要切换到CentOS Stream 8
+   :emphasize-lines: 33-34
+
+.. note::
+
+   :ref:`docker_systemd` 需要比较繁杂的配置(探索)，不过现在 `CentOS DockerHUB官方镜像 <https://hub.docker.com/_/centos>`_ 也提供了非常方便的 :ref:`docker_centos_systemd` (详见该文Dockerfile)
+
 alpine linux ssh容器
 -----------------------
 
