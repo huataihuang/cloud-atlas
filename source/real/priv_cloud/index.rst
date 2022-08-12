@@ -22,6 +22,9 @@
    priv_etcd.rst
    z-k8s_env.rst
    z-k8s.rst
+   z-k8s_nerdctl.rst
+   z-k8s_cilium_ingress.rst
+   z-k8s_docker_registry.rst
    priv_docker.rst
    priv_k8s_docker_centos.rst
    real_unattended_upgrade.rst

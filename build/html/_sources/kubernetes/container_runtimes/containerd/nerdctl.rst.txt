@@ -215,7 +215,7 @@ nerdctl 是 ``containerd`` 子项目，提供Docker兼容的CLI命令:
 
    failed to create shim task: OCI runtime create failed: runc create failed: cannot allocate tty if runc will detach without setting console socket: unknown
 
-实际上 ``nerdctl`` 有一个参数 ``-d`` 可以启动时直接放到后台运行，但是这个参数和 ``-t`` 冲突，暂时不知道如何解决::
+实际上 ``nerdctl`` 有一个参数 ``-d`` 可以启动时直接放到后台运行::
 
    sudo nerdctl run -d -p 1122:22 --hostname centos-stream-8 --name centos-stream-8 local:centos-stream-8-ssh
 
@@ -224,9 +224,146 @@ nerdctl结合Kubernetes
 
 ``nerdctl`` 可以直接为本地Kubernetes构建镜像而无需registry:
 
+- 这里采用 :ref:`containerd_centos_systemd` 实践验证通过的 ``Dockerfile`` :
+
+.. literalinclude:: containerd_centos_systemd/centos-stream-8-systemd
+   :language: dockerfile
+   :caption: CentOS Stream 8 启用systemd(正确)
+
+- 执行以下命令为Kuberntes构建镜像:
+
 .. literalinclude:: nerdctl/nerdctl_build_for_kubernetes
    :language: bash
    :caption: nerdctl build为本地Kubernetes构建镜像
+
+- 现在通过 ``nerdctl`` 命令可以检查到新生成到镜像::
+
+   sudo nerdctl -n k8s.io images
+
+显示::
+
+   REPOSITORY                            TAG        IMAGE ID        CREATED          PLATFORM       SIZE         BLOB SIZE
+   ...
+   centos-stream-8-systemd               latest     758665d16a77    5 minutes ago    linux/amd64    705.0 MiB    282.0 MiB
+   ...
+
+- 然后在Kubernetes集群生成pod:
+
+.. literalinclude:: nerdctl/kubectl_apply_nerdctl_build_for_kubernetes
+   :language: bash
+   :caption: 执行kubeclt apply 将 nerdctl build为本地Kubernetes构建镜像 生成可运行pod
+
+.. note::
+
+   对于 :ref:`containerd_centos_systemd` ，需要采用 :ref:`k8s_privileged_pod`
+
+此时提示::
+
+   pod/centos-stream-8 created
+
+- 但是，此时检查并不一定会看到pod运行了::
+
+   kubectl get pods
+
+显示::
+
+   NAME              READY   STATUS              RESTARTS   AGE
+   centos-stream-8   0/1     ErrImageNeverPull   0          3m7s
+
+这是因为没有使用  :ref:`docker_registry` ，需要将镜像导入到每个调度到的节点上才能启动。
+
+- 检查新创建的pod调度到哪个节点::
+
+   $ kubectl get pods -o wide
+   NAME              READY   STATUS              RESTARTS   AGE     IP           NODE        NOMINATED NODE   READINESS GATES
+   centos-stream-8   0/1     ErrImageNeverPull   0          4m41s   10.0.4.224   z-k8s-n-2   <none>           <none>
+
+我们需要使用类似 ``docker save`` 的命令来导出镜像，复制到该节点::
+
+   sudo nerdctl save centos-stream-8-systemd > centos-stream-8-systemd.tar
+
+- 然后在目标节点 ``z-k8s-n-2`` 上导入这个镜像::
+
+   sudo nerdctl -n k8s.io load < centos-stream-8-systemd.tar
+
+完成后再次检查集群::
+
+   kubectl get pods -o wide
+
+就可以看到pod容器正常运行了::
+
+   NAME              READY   STATUS    RESTARTS   AGE   IP           NODE        NOMINATED NODE   READINESS GATES
+   centos-stream-8   1/1     Running   0          17m   10.0.4.224   z-k8s-n-2   <none>           <none>
+
+不过，此时运行的容器网络还没有配置好，所以从外部还不能 ``ssh`` 登陆这个容器。但是，容器内部是可以访问外部的，例如，我们可以通过 ``kubectl exec`` 登陆到容器的内部检查::
+
+   kubectl exec -it centos-stream-8 -- /bin/bash
+
+检查容器内部::
+
+   [root@centos-stream-8 /]# df -h
+   Filesystem      Size  Used Avail Use% Mounted on
+   overlay         9.4G  2.3G  7.1G  24% /
+   tmpfs            64M     0   64M   0% /dev
+   /dev/vda2       6.3G  4.2G  2.2G  67% /etc/hosts
+   /dev/vdb1       9.4G  2.3G  7.1G  24% /etc/hostname
+   shm              64M     0   64M   0% /dev/shm
+   tmpfs           2.0G  8.1M  2.0G   1% /run
+   [root@centos-stream-8 /]# ip addr
+   1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+       link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       inet 127.0.0.1/8 scope host lo
+          valid_lft forever preferred_lft forever
+       inet6 ::1/128 scope host
+          valid_lft forever preferred_lft forever
+   14: eth0@if15: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+       link/ether 4a:a2:3f:b5:da:ae brd ff:ff:ff:ff:ff:ff link-netnsid 0
+       inet 10.0.4.224/32 scope global eth0
+          valid_lft forever preferred_lft forever
+       inet6 fe80::48a2:3fff:feb5:daae/64 scope link
+          valid_lft forever preferred_lft forever 
+
+可以在内部安装软件包::
+
+   dnf install net-tools -y
+
+检查路由::
+
+   # netstat -rn
+   Kernel IP routing table
+   Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+   0.0.0.0         10.0.4.25       0.0.0.0         UG        0 0          0 eth0
+   10.0.4.25       0.0.0.0         255.255.255.255 UH        0 0          0 eth0
+
+检查容器内部进程::
+
+   top
+
+显示::
+
+   top - 22:48:00 up 37 days, 47 min,  0 users,  load average: 0.02, 0.03, 0.00
+   Tasks:   6 total,   1 running,   5 sleeping,   0 stopped,   0 zombie
+   %Cpu(s):  2.3 us,  1.0 sy,  0.0 ni, 96.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+   MiB Mem :   3929.8 total,    537.3 free,    438.8 used,   2953.6 buff/cache
+   MiB Swap:      0.0 total,      0.0 free,      0.0 used.   3191.6 avail Mem
+   
+       PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+         1 root      20   0   90104  10248   8236 S   0.0   0.3   0:00.21 systemd
+        28 root      20   0   87388   8360   7508 S   0.0   0.2   0:00.13 systemd-journal
+        35 dbus      20   0   54108   4124   3696 S   0.0   0.1   0:00.00 dbus-daemon
+        36 root      20   0   76628   7280   6372 S   0.0   0.2   0:00.00 sshd
+        39 root      20   0   15104   3824   3252 S   0.0   0.1   0:00.07 bash
+       103 root      20   0   52080   4360   3712 R   0.0   0.1   0:00.00 top
+
+接下来，我们需要配置 :ref:`ingress` 对外暴露SSH服务，在 :ref:`cilium` 中， 内置的 :ref:`cilium_k8s_ingress` 采用 ``Envoy`` 实现
+
+也可以采用多种 :ref:`ingress_controller` ，例如我准备部署:
+
+- :ref:`nginx_ingress`
+- :ref:`haproxy_ingress`
+- :ref:`istio_ingress`
+
+
 
 参考
 ======

@@ -22,6 +22,8 @@ Kubernetes部署
    etcd/index
    deploy_pod/index
    nginx_ingress.rst
+   haproxy_ingress.rst
+   istio_ingress.rst
    docker_registry.rst
    helm.rst
    draft.rst

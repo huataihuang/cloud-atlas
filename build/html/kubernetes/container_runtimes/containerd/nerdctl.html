@@ -72,6 +72,7 @@
 <li class="toctree-l4"><a class="reference internal" href="containerd_startup.html">containerd快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="install_containerd.io_packages.html">安装containerd.io软件包</a></li>
 <li class="toctree-l4"><a class="reference internal" href="install_containerd_official_binaries.html">安装containerd官方执行程序</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containerd_centos_systemd.html">Containerd环境CentOS容器运行systemd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="estargz_lazy_pulling.html">用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展)</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">nerdctl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="containerd_btrfs.html">containerd的btrfs</a></li>
@@ -574,7 +575,7 @@ ERRO<span class="o">[</span><span class="m">2022</span>-08-11T00:54:49+08:00<spa
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">failed</span> <span class="n">to</span> <span class="n">create</span> <span class="n">shim</span> <span class="n">task</span><span class="p">:</span> <span class="n">OCI</span> <span class="n">runtime</span> <span class="n">create</span> <span class="n">failed</span><span class="p">:</span> <span class="n">runc</span> <span class="n">create</span> <span class="n">failed</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">allocate</span> <span class="n">tty</span> <span class="k">if</span> <span class="n">runc</span> <span class="n">will</span> <span class="n">detach</span> <span class="n">without</span> <span class="n">setting</span> <span class="n">console</span> <span class="n">socket</span><span class="p">:</span> <span class="n">unknown</span>
 </pre></div>
 </div>
-<p>实际上 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 有一个参数 <code class="docutils literal notranslate"><span class="pre">-d</span></code> 可以启动时直接放到后台运行，但是这个参数和 <code class="docutils literal notranslate"><span class="pre">-t</span></code> 冲突，暂时不知道如何解决:</p>
+<p>实际上 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 有一个参数 <code class="docutils literal notranslate"><span class="pre">-d</span></code> 可以启动时直接放到后台运行:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1122</span><span class="p">:</span><span class="mi">22</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="o">--</span><span class="n">name</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="n">local</span><span class="p">:</span><span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">ssh</span>
 </pre></div>
 </div>
@@ -582,11 +583,107 @@ ERRO<span class="o">[</span><span class="m">2022</span>-08-11T00:54:49+08:00<spa
 <section id="nerdctlkubernetes">
 <h2>nerdctl结合Kubernetes<a class="headerlink" href="#nerdctlkubernetes" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 可以直接为本地Kubernetes构建镜像而无需registry:</p>
+<ul class="simple">
+<li><p>这里采用 <a class="reference internal" href="containerd_centos_systemd.html#containerd-centos-systemd"><span class="std std-ref">Containerd环境CentOS容器运行systemd</span></a> 实践验证通过的 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> :</p></li>
+</ul>
 <div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">nerdctl build为本地Kubernetes构建镜像</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nerdctl --namespace k8s.io build -t centos-stream-8 .
+<div class="code-block-caption"><span class="caption-text">CentOS Stream 8 启用systemd(正确)</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># USE DOCKER</span>
+<span class="c"># docker build --rm -t local/centos-stream-8-systemd .</span>
+<span class="c"># docker run -itd --privileged=true -p 1122:22 --hostname myserver --name myserver local:centos-stream-8-systemd</span>
 
-kubectl apply -f - <span class="s">&lt;&lt;EOF</span>
+<span class="c"># USE nerdctl (containerd)</span>
+<span class="c"># nerdctl build -t centos-stream-8-systemd .</span>
+<span class="c"># nerdctl run -it --privileged=true -p 1122:22 --hostname centos-stream-8 --name centos-stream-8 centos-stream-8-systemd:latest</span>
+<span class="c"># nerdctl run -d --privileged=true -p 1122:22 --hostname centos-stream-8 --name centos-stream-8 centos-stream-8-systemd:latest</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">centos:latest</span>
+<span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">ENV</span><span class="w"> </span>container docker
+
+<span class="k">RUN</span><span class="w"> </span><span class="o">(</span><span class="nb">cd</span> /lib/systemd/system/sysinit.target.wants/<span class="p">;</span> <span class="k">for</span> i <span class="k">in</span> *<span class="p">;</span> <span class="k">do</span> <span class="o">[</span> <span class="nv">$i</span> <span class="o">==</span> <span class="se">\</span>
+systemd-tmpfiles-setup.service <span class="o">]</span> <span class="o">||</span> rm -f <span class="nv">$i</span><span class="p">;</span> <span class="k">done</span><span class="o">)</span><span class="p">;</span> <span class="se">\</span>
+rm -f /lib/systemd/system/multi-user.target.wants/*<span class="p">;</span><span class="se">\</span>
+rm -f /etc/systemd/system/*.wants/*<span class="p">;</span><span class="se">\</span>
+rm -f /lib/systemd/system/local-fs.target.wants/*<span class="p">;</span> <span class="se">\</span>
+rm -f /lib/systemd/system/sockets.target.wants/*udev*<span class="p">;</span> <span class="se">\</span>
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*<span class="p">;</span> <span class="se">\</span>
+rm -f /lib/systemd/system/basic.target.wants/*<span class="p">;</span><span class="se">\</span>
+rm -f /lib/systemd/system/anaconda.target.wants/*<span class="p">;</span>
+
+<span class="c">#VOLUME [ &quot;/sys/fs/cgroup&quot; ]</span>
+
+<span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/cgroup <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/fuse <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/tmp <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run/lock
+
+<span class="k">RUN</span><span class="w"> </span>dnf clean all
+<span class="k">RUN</span><span class="w"> </span>dnf --disablerepo <span class="s1">&#39;*&#39;</span> --enablerepo extras swap centos-linux-repos centos-stream-repos -y
+<span class="k">RUN</span><span class="w"> </span>dnf distro-sync -y
+<span class="k">RUN</span><span class="w"> </span>dnf -y update
+
+<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+
+<span class="c"># Prepare sshd host key</span>
+<span class="k">RUN</span><span class="w"> </span>ssh-keygen -A
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>mv /var/run/nologin /var/run/nologin.bak
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>
+
+<span class="c"># systemd</span>
+<span class="c"># CMD [&quot;/usr/sbin/init&quot;]</span>
+
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;/usr/lib/systemd/systemd&quot;</span><span class="w"> </span><span class="p">]</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;log-level=info&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unit=sysinit.target&quot;</span><span class="w"> </span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>执行以下命令为Kuberntes构建镜像:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">nerdctl build为本地Kubernetes构建镜像</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nerdctl --namespace k8s.io build -t centos-stream-8-systemd .
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>现在通过 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 命令可以检查到新生成到镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="o">-</span><span class="n">n</span> <span class="n">k8s</span><span class="o">.</span><span class="n">io</span> <span class="n">images</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REPOSITORY</span>                            <span class="n">TAG</span>        <span class="n">IMAGE</span> <span class="n">ID</span>        <span class="n">CREATED</span>          <span class="n">PLATFORM</span>       <span class="n">SIZE</span>         <span class="n">BLOB</span> <span class="n">SIZE</span>
+<span class="o">...</span>
+<span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">systemd</span>               <span class="n">latest</span>     <span class="mi">758665</span><span class="n">d16a77</span>    <span class="mi">5</span> <span class="n">minutes</span> <span class="n">ago</span>    <span class="n">linux</span><span class="o">/</span><span class="n">amd64</span>    <span class="mf">705.0</span> <span class="n">MiB</span>    <span class="mf">282.0</span> <span class="n">MiB</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>然后在Kubernetes集群生成pod:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">执行kubeclt apply 将 nerdctl build为本地Kubernetes构建镜像 生成可运行pod</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl apply -f - <span class="s">&lt;&lt;EOF</span>
 <span class="s">apiVersion: v1</span>
 <span class="s">kind: Pod</span>
 <span class="s">metadata:</span>
@@ -594,12 +691,131 @@ kubectl apply -f - <span class="s">&lt;&lt;EOF</span>
 <span class="s">spec:</span>
 <span class="s">  containers:</span>
 <span class="s">    - name: centos-stream-8</span>
-<span class="s">      image: centos-stream-8</span>
+<span class="s">      image: centos-stream-8-systemd</span>
 <span class="s">      imagePullPolicy: Never</span>
+<span class="s">      securityContext:</span>
+<span class="s">        privileged: true</span>
 <span class="s">EOF</span>
 </pre></div>
 </div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>对于 <a class="reference internal" href="containerd_centos_systemd.html#containerd-centos-systemd"><span class="std std-ref">Containerd环境CentOS容器运行systemd</span></a> ，需要采用 <a class="reference internal" href="../../deployment/deploy_pod/k8s_privileged_pod.html#k8s-privileged-pod"><span class="std std-ref">Kubernetes特权Pod</span></a></p>
+</div>
+<p>此时提示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pod</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="n">created</span>
+</pre></div>
+</div>
+<ul>
+<li><p>但是，此时检查并不一定会看到pod运行了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>              <span class="n">READY</span>   <span class="n">STATUS</span>              <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">ErrImageNeverPull</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="n">m7s</span>
+</pre></div>
+</div>
+<p>这是因为没有使用  <a class="reference internal" href="../../deployment/docker_registry.html#docker-registry"><span class="std std-ref">在Kubernetes中部署私有Docker镜像仓库</span></a> ，需要将镜像导入到每个调度到的节点上才能启动。</p>
+<ul>
+<li><p>检查新创建的pod调度到哪个节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ kubectl get pods -o wide
+NAME              READY   STATUS              RESTARTS   AGE     IP           NODE        NOMINATED NODE   READINESS GATES
+centos-stream-8   0/1     ErrImageNeverPull   0          4m41s   10.0.4.224   z-k8s-n-2   &lt;none&gt;           &lt;none&gt;
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我们需要使用类似 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">save</span></code> 的命令来导出镜像，复制到该节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="n">save</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">systemd</span> <span class="o">&gt;</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">systemd</span><span class="o">.</span><span class="n">tar</span>
+</pre></div>
+</div>
+<ul>
+<li><p>然后在目标节点 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-2</span></code> 上导入这个镜像:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nerdctl</span> <span class="o">-</span><span class="n">n</span> <span class="n">k8s</span><span class="o">.</span><span class="n">io</span> <span class="n">load</span> <span class="o">&lt;</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="n">systemd</span><span class="o">.</span><span class="n">tar</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>完成后再次检查集群:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+<p>就可以看到pod容器正常运行了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>              <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>        <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">17</span><span class="n">m</span>   <span class="mf">10.0.4.224</span>   <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>不过，此时运行的容器网络还没有配置好，所以从外部还不能 <code class="docutils literal notranslate"><span class="pre">ssh</span></code> 登陆这个容器。但是，容器内部是可以访问外部的，例如，我们可以通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">exec</span></code> 登陆到容器的内部检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="o">--</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>检查容器内部:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">root</span><span class="nd">@centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="o">/</span><span class="p">]</span><span class="c1"># df -h</span>
+<span class="n">Filesystem</span>      <span class="n">Size</span>  <span class="n">Used</span> <span class="n">Avail</span> <span class="n">Use</span><span class="o">%</span> <span class="n">Mounted</span> <span class="n">on</span>
+<span class="n">overlay</span>         <span class="mf">9.4</span><span class="n">G</span>  <span class="mf">2.3</span><span class="n">G</span>  <span class="mf">7.1</span><span class="n">G</span>  <span class="mi">24</span><span class="o">%</span> <span class="o">/</span>
+<span class="n">tmpfs</span>            <span class="mi">64</span><span class="n">M</span>     <span class="mi">0</span>   <span class="mi">64</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vda2</span>       <span class="mf">6.3</span><span class="n">G</span>  <span class="mf">4.2</span><span class="n">G</span>  <span class="mf">2.2</span><span class="n">G</span>  <span class="mi">67</span><span class="o">%</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb1</span>       <span class="mf">9.4</span><span class="n">G</span>  <span class="mf">2.3</span><span class="n">G</span>  <span class="mf">7.1</span><span class="n">G</span>  <span class="mi">24</span><span class="o">%</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hostname</span>
+<span class="n">shm</span>              <span class="mi">64</span><span class="n">M</span>     <span class="mi">0</span>   <span class="mi">64</span><span class="n">M</span>   <span class="mi">0</span><span class="o">%</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">shm</span>
+<span class="n">tmpfs</span>           <span class="mf">2.0</span><span class="n">G</span>  <span class="mf">8.1</span><span class="n">M</span>  <span class="mf">2.0</span><span class="n">G</span>   <span class="mi">1</span><span class="o">%</span> <span class="o">/</span><span class="n">run</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@centos</span><span class="o">-</span><span class="n">stream</span><span class="o">-</span><span class="mi">8</span> <span class="o">/</span><span class="p">]</span><span class="c1"># ip addr</span>
+<span class="mi">1</span><span class="p">:</span> <span class="n">lo</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">LOOPBACK</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">65536</span> <span class="n">qdisc</span> <span class="n">noqueue</span> <span class="n">state</span> <span class="n">UNKNOWN</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">loopback</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span> <span class="n">brd</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+    <span class="n">inet</span> <span class="mf">127.0.0.1</span><span class="o">/</span><span class="mi">8</span> <span class="n">scope</span> <span class="n">host</span> <span class="n">lo</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="p">::</span><span class="mi">1</span><span class="o">/</span><span class="mi">128</span> <span class="n">scope</span> <span class="n">host</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+<span class="mi">14</span><span class="p">:</span> <span class="n">eth0</span><span class="nd">@if15</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">BROADCAST</span><span class="p">,</span><span class="n">MULTICAST</span><span class="p">,</span><span class="n">UP</span><span class="p">,</span><span class="n">LOWER_UP</span><span class="o">&gt;</span> <span class="n">mtu</span> <span class="mi">1500</span> <span class="n">qdisc</span> <span class="n">noqueue</span> <span class="n">state</span> <span class="n">UP</span> <span class="n">group</span> <span class="n">default</span> <span class="n">qlen</span> <span class="mi">1000</span>
+    <span class="n">link</span><span class="o">/</span><span class="n">ether</span> <span class="mi">4</span><span class="n">a</span><span class="p">:</span><span class="n">a2</span><span class="p">:</span><span class="mi">3</span><span class="n">f</span><span class="p">:</span><span class="n">b5</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="n">ae</span> <span class="n">brd</span> <span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span><span class="p">:</span><span class="n">ff</span> <span class="n">link</span><span class="o">-</span><span class="n">netnsid</span> <span class="mi">0</span>
+    <span class="n">inet</span> <span class="mf">10.0.4.224</span><span class="o">/</span><span class="mi">32</span> <span class="n">scope</span> <span class="k">global</span> <span class="n">eth0</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+    <span class="n">inet6</span> <span class="n">fe80</span><span class="p">::</span><span class="mi">48</span><span class="n">a2</span><span class="p">:</span><span class="mi">3</span><span class="n">fff</span><span class="p">:</span><span class="n">feb5</span><span class="p">:</span><span class="n">daae</span><span class="o">/</span><span class="mi">64</span> <span class="n">scope</span> <span class="n">link</span>
+       <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
+</pre></div>
+</div>
+<p>可以在内部安装软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">net</span><span class="o">-</span><span class="n">tools</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+<p>检查路由:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># netstat -rn</span>
+<span class="n">Kernel</span> <span class="n">IP</span> <span class="n">routing</span> <span class="n">table</span>
+<span class="n">Destination</span>     <span class="n">Gateway</span>         <span class="n">Genmask</span>         <span class="n">Flags</span>   <span class="n">MSS</span> <span class="n">Window</span>  <span class="n">irtt</span> <span class="n">Iface</span>
+<span class="mf">0.0.0.0</span>         <span class="mf">10.0.4.25</span>       <span class="mf">0.0.0.0</span>         <span class="n">UG</span>        <span class="mi">0</span> <span class="mi">0</span>          <span class="mi">0</span> <span class="n">eth0</span>
+<span class="mf">10.0.4.25</span>       <span class="mf">0.0.0.0</span>         <span class="mf">255.255.255.255</span> <span class="n">UH</span>        <span class="mi">0</span> <span class="mi">0</span>          <span class="mi">0</span> <span class="n">eth0</span>
+</pre></div>
+</div>
+<p>检查容器内部进程:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span>
+</pre></div>
+</div>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">-</span> <span class="mi">22</span><span class="p">:</span><span class="mi">48</span><span class="p">:</span><span class="mi">00</span> <span class="n">up</span> <span class="mi">37</span> <span class="n">days</span><span class="p">,</span> <span class="mi">47</span> <span class="nb">min</span><span class="p">,</span>  <span class="mi">0</span> <span class="n">users</span><span class="p">,</span>  <span class="n">load</span> <span class="n">average</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.00</span>
+<span class="n">Tasks</span><span class="p">:</span>   <span class="mi">6</span> <span class="n">total</span><span class="p">,</span>   <span class="mi">1</span> <span class="n">running</span><span class="p">,</span>   <span class="mi">5</span> <span class="n">sleeping</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">stopped</span><span class="p">,</span>   <span class="mi">0</span> <span class="n">zombie</span>
+<span class="o">%</span><span class="n">Cpu</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="mf">2.3</span> <span class="n">us</span><span class="p">,</span>  <span class="mf">1.0</span> <span class="n">sy</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">ni</span><span class="p">,</span> <span class="mf">96.7</span> <span class="nb">id</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">wa</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">hi</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">si</span><span class="p">,</span>  <span class="mf">0.0</span> <span class="n">st</span>
+<span class="n">MiB</span> <span class="n">Mem</span> <span class="p">:</span>   <span class="mf">3929.8</span> <span class="n">total</span><span class="p">,</span>    <span class="mf">537.3</span> <span class="n">free</span><span class="p">,</span>    <span class="mf">438.8</span> <span class="n">used</span><span class="p">,</span>   <span class="mf">2953.6</span> <span class="n">buff</span><span class="o">/</span><span class="n">cache</span>
+<span class="n">MiB</span> <span class="n">Swap</span><span class="p">:</span>      <span class="mf">0.0</span> <span class="n">total</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">free</span><span class="p">,</span>      <span class="mf">0.0</span> <span class="n">used</span><span class="o">.</span>   <span class="mf">3191.6</span> <span class="n">avail</span> <span class="n">Mem</span>
+
+    <span class="n">PID</span> <span class="n">USER</span>      <span class="n">PR</span>  <span class="n">NI</span>    <span class="n">VIRT</span>    <span class="n">RES</span>    <span class="n">SHR</span> <span class="n">S</span>  <span class="o">%</span><span class="n">CPU</span>  <span class="o">%</span><span class="n">MEM</span>     <span class="n">TIME</span><span class="o">+</span> <span class="n">COMMAND</span>
+      <span class="mi">1</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">90104</span>  <span class="mi">10248</span>   <span class="mi">8236</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.3</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.21</span> <span class="n">systemd</span>
+     <span class="mi">28</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">87388</span>   <span class="mi">8360</span>   <span class="mi">7508</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.13</span> <span class="n">systemd</span><span class="o">-</span><span class="n">journal</span>
+     <span class="mi">35</span> <span class="n">dbus</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">54108</span>   <span class="mi">4124</span>   <span class="mi">3696</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.1</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.00</span> <span class="n">dbus</span><span class="o">-</span><span class="n">daemon</span>
+     <span class="mi">36</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">76628</span>   <span class="mi">7280</span>   <span class="mi">6372</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.2</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.00</span> <span class="n">sshd</span>
+     <span class="mi">39</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">15104</span>   <span class="mi">3824</span>   <span class="mi">3252</span> <span class="n">S</span>   <span class="mf">0.0</span>   <span class="mf">0.1</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.07</span> <span class="n">bash</span>
+    <span class="mi">103</span> <span class="n">root</span>      <span class="mi">20</span>   <span class="mi">0</span>   <span class="mi">52080</span>   <span class="mi">4360</span>   <span class="mi">3712</span> <span class="n">R</span>   <span class="mf">0.0</span>   <span class="mf">0.1</span>   <span class="mi">0</span><span class="p">:</span><span class="mf">00.00</span> <span class="n">top</span>
+</pre></div>
+</div>
+<p>接下来，我们需要配置 <a class="reference internal" href="../../concepts/services_networking/ingress.html#ingress"><span class="std std-ref">Ingress</span></a> 对外暴露SSH服务，在 <a class="reference internal" href="../../network/cilium/index.html#cilium"><span class="std std-ref">Cilium网络</span></a> 中， 内置的 <a class="reference internal" href="../../network/cilium/cilium_k8s_ingress.html#cilium-k8s-ingress"><span class="std std-ref">Cilium Kubernetes Ingress</span></a> 采用 <code class="docutils literal notranslate"><span class="pre">Envoy</span></code> 实现</p>
+<p>也可以采用多种 <a class="reference internal" href="../../concepts/services_networking/ingress_controller.html#ingress-controller"><span class="std std-ref">Ingress控制器(controller)</span></a> ，例如我准备部署:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../deployment/nginx_ingress.html#nginx-ingress"><span class="std std-ref">部署Nginx Ingress Controller</span></a></p></li>
+<li><p><a class="reference internal" href="../../deployment/haproxy_ingress.html#haproxy-ingress"><span class="std std-ref">部署HAProxy Ingress Controller</span></a></p></li>
+<li><p><a class="reference internal" href="../../deployment/istio_ingress.html#istio-ingress"><span class="std std-ref">部署Istio Ingress Controller</span></a></p></li>
+</ul>
 </section>
 <section id="id6">
 <h2>参考<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
