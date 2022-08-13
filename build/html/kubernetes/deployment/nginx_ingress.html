@@ -23,8 +23,8 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="在Kubernetes中部署私有Docker镜像仓库" href="docker_registry.html" />
-    <link rel="prev" title="Kubernetes环境部署Django应用" href="deploy_pod/k8s_django.html" /> 
+    <link rel="next" title="部署HAProxy Ingress Controller" href="haproxy_ingress.html" />
+    <link rel="prev" title="Kubernetes特权Pod" href="deploy_pod/k8s_privileged_pod.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -71,6 +71,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="haproxy_ingress.html">部署HAProxy Ingress Controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="istio_ingress.html">部署Istio Ingress Controller</a></li>
 <li class="toctree-l3"><a class="reference internal" href="docker_registry.html">在Kubernetes中部署私有Docker镜像仓库</a></li>
 <li class="toctree-l3"><a class="reference internal" href="helm.html">Helm - Kubernetes包管理器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="draft.html">Draft - Kubernetes应用部署工具</a></li>
@@ -80,6 +82,7 @@
 <li class="toctree-l3"><a class="reference internal" href="k8s_hosts_in_mbp/index.html">在单台MBP笔记本上部署Kubernetes</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy_app/index.html">Kubernetes部署应用</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../manage_object/index.html">Kubernetes管理对象</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../access_application/index.html">Kubernetes访问应用</a></li>
@@ -322,7 +325,7 @@
 </li>
 </ul>
 <p>参考 <a class="reference external" href="https://github.com/helm/charts/issues/10856">[stable/cert-manager] v0.6.0 fails to install w/ missing webhook tls secret</a> :</p>
-<p><strong>如果在一个已经存在的namespace上部署， ``必须确保`` 这个namespace具备一个附加的label才能部署成功</strong></p>
+<p><strong>如果在一个已经存在的namespace上部署， “必须确保” 这个namespace具备一个附加的label才能部署成功</strong></p>
 <p>果然，我检查了 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace，发现确实没有加上标签 <code class="docutils literal notranslate"><span class="pre">certmanager.k8s.io/disable-validation:</span> <span class="pre">&quot;true&quot;</span></code> ，所以补上之前漏掉的命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">label</span> <span class="n">namespace</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">certmanager</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">disable</span><span class="o">-</span><span class="n">validation</span><span class="o">=</span><span class="s2">&quot;true&quot;</span>
 </pre></div>
@@ -334,7 +337,7 @@
 <p>删除以后，Kubernetes会自动重建新的 <code class="docutils literal notranslate"><span class="pre">cert-manager-webhook</span></code> ，就能够成功。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>cert-manager 官方文档采用单独建立 <code class="docutils literal notranslate"><span class="pre">cerrt-manager</span></code> namespce （请参考 <a class="reference external" href="https://github.com/jetstack/cert-manager/blob/master/docs/tutorials/acme/quick-start/index.rst">Cert Manager Quick Start</a> ），不过，我的部署参考 <a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes">How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes</a> 步骤4 ，将 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> 安装在 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace，所以执行将标签添加到 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace</p>
+<p>cert-manager 官方文档采用单独建立 <code class="docutils literal notranslate"><span class="pre">cerrt-manager</span></code> namespace （请参考 <a class="reference external" href="https://github.com/jetstack/cert-manager/blob/master/docs/tutorials/acme/quick-start/index.rst">Cert Manager Quick Start</a> ），不过，我的部署参考 <a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes">How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes</a> 步骤4 ，将 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> 安装在 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace，所以执行将标签添加到 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> namespace</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">label</span> <span class="n">namespace</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">certmanager</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">disable</span><span class="o">-</span><span class="n">validation</span><span class="o">=</span><span class="s2">&quot;true&quot;</span>
 </pre></div>
 </div>
@@ -355,8 +358,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="deploy_pod/k8s_django.html" class="btn btn-neutral float-left" title="Kubernetes环境部署Django应用" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="docker_registry.html" class="btn btn-neutral float-right" title="在Kubernetes中部署私有Docker镜像仓库" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="deploy_pod/k8s_privileged_pod.html" class="btn btn-neutral float-left" title="Kubernetes特权Pod" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="haproxy_ingress.html" class="btn btn-neutral float-right" title="部署HAProxy Ingress Controller" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

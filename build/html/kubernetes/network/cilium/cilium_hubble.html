@@ -24,7 +24,7 @@
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="Cilium Kubernetes Ingress" href="cilium_k8s_ingress.html" />
-    <link rel="prev" title="在扩展etcd环境安装cilium" href="cilium_install_with_external_etcd.html" /> 
+    <link rel="prev" title="升级Cilium" href="cilium_upgrade.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,7 +47,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../studio/index.html">Studio Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../infrastructure/index.html">Infrastructure Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../devops/index.html">DevOps Atlas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ansible/index.html">Ansible Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../kvm/index.html">KVM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ceph/index.html">Ceph Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../gluster/index.html">Gluster Atlas</a></li>
@@ -75,6 +74,8 @@
 <li class="toctree-l4"><a class="reference internal" href="intro_cilium.html">cilium技术简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="cilium_startup.html">cilium快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="cilium_install_with_external_etcd.html">在扩展etcd环境安装cilium</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cilium_kubeproxy_free.html">Cilium完全取代kube-proxy运行Kubernetes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cilium_upgrade.html">升级Cilium</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Cilium Hubble可观测性</a></li>
 <li class="toctree-l4"><a class="reference internal" href="cilium_k8s_ingress.html">Cilium Kubernetes Ingress</a></li>
 <li class="toctree-l4"><a class="reference internal" href="cilium_l7-aware_traffic_management.html">Cilium 7层 流量管理</a></li>
@@ -180,6 +181,140 @@
   <section id="cilium-hubble">
 <span id="id1"></span><h1>Cilium Hubble可观测性<a class="headerlink" href="#cilium-hubble" title="Permalink to this heading">¶</a></h1>
 <p>在初步完成 <a class="reference internal" href="cilium_install_with_external_etcd.html#cilium-install-with-external-etcd"><span class="std std-ref">在扩展etcd环境安装cilium</span></a> 之后，建议部署Cilium的核心组件 Hubble 来实现网络流量的观测。</p>
+<p>Hubble是Cilium的可观测层，用于获得集群范围观察Kubernetes集群的网络和安全层。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我在 <a class="reference internal" href="../../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr.html#k8s-dnsrr"><span class="std std-ref">基于DNS轮询构建高可用Kubernetes</span></a> 采用 <a class="reference internal" href="cilium_install_with_external_etcd.html#cilium-install-with-external-etcd"><span class="std std-ref">在扩展etcd环境安装cilium</span></a> ，完成后默认还没有激活 <code class="docutils literal notranslate"><span class="pre">hubble</span></code> 。此时，通过以下命令检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cilium</span> <span class="n">status</span>
+</pre></div>
+</div>
+<p>输出:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">cilium安装完成后状态验证</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>    /¯¯<span class="se">\</span>
+ /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Cilium:         OK
+ <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    Operator:       <span class="m">1</span> errors, <span class="m">1</span> warnings
+ /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Hubble:         disabled
+ <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    ClusterMesh:    disabled
+    <span class="se">\_</span>_/
+
+Deployment        cilium-operator    Desired: <span class="m">2</span>, Ready: <span class="m">1</span>/2, Available: <span class="m">1</span>/2, Unavailable: <span class="m">1</span>/2
+DaemonSet         cilium             Desired: <span class="m">1</span>, Ready: <span class="m">1</span>/1, Available: <span class="m">1</span>/1
+Containers:       cilium-operator    Running: <span class="m">1</span>, Pending: <span class="m">1</span>
+                  cilium             Running: <span class="m">1</span>
+Cluster Pods:     <span class="m">2</span>/2 managed by Cilium
+Image versions    cilium             quay.io/cilium/cilium:v1.11.7@sha256:66a6f72a49e55e21278d07a99ff2cffa7565ed07f2578d54b5a92c1a492a6597: <span class="m">1</span>
+                  cilium-operator    quay.io/cilium/operator-generic:v1.11.7@sha256:0f8ed5d815873d20848a360df3f2ebbd4116481ff817d3f295557801e0b45900: <span class="m">2</span>
+Errors:           cilium-operator    cilium-operator                     <span class="m">1</span> pods of Deployment cilium-operator are not ready
+Warnings:         cilium-operator    cilium-operator-68dffdc9f7-rph4w    pod is pending
+</pre></div>
+</div>
+</div>
+</div>
+<section id="ciliumhubble">
+<h2>激活Cilium的Hubble<a class="headerlink" href="#ciliumhubble" title="Permalink to this heading">¶</a></h2>
+<p>有两种方式可以激活Hubble:</p>
+<ul class="simple">
+<li><p>方法一: 使用 <code class="docutils literal notranslate"><span class="pre">Cilcium</span> <span class="pre">CLI</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Cilium CLI激活Hubble</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cilium hubble <span class="nb">enable</span>
+</pre></div>
+</div>
+</div>
+<p>这里可能会出现报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">enable</span> <span class="n">Hubble</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">retrieve</span> <span class="n">helm</span> <span class="n">values</span> <span class="n">secret</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">cilium</span><span class="o">-</span><span class="n">cli</span><span class="o">-</span><span class="n">helm</span><span class="o">-</span><span class="n">values</span><span class="p">:</span> <span class="n">secrets</span> <span class="s2">&quot;cilium-cli-helm-values&quot;</span> <span class="ow">not</span> <span class="n">found</span>
+</pre></div>
+</div>
+<p>这是因为安装前通过 helm 安装，所以我改为方法二是可以直接成功等。但是，实际上 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> 客户端如果调用 <code class="docutils literal notranslate"><span class="pre">helm</span></code> 还是需要使用 <code class="docutils literal notranslate"><span class="pre">kube-system/cilium-cli-helm-values</span></code> 这个secret密钥，例如后续 <code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">hubble</span> <span class="pre">port-forward</span></code> ，所以还是需要补充完整。 参考 <a class="reference external" href="https://github.com/cilium/cilium-cli/issues/927">Cilium connectivity test fails: unable to retrieve helm values secret kube-system/cilium-cli-helm-values #927</a> ，这个问题似乎是版本bug，所以我采用 <a class="reference internal" href="cilium_upgrade.html#cilium-upgrade"><span class="std std-ref">升级Cilium</span></a> 修复</p>
+<ul class="simple">
+<li><p>方法二: 使用 <a class="reference internal" href="../../deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">使用Helm激活Hubble</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm upgrade cilium cilium/cilium --version <span class="m">1</span>.11.7 <span class="se">\</span>
+   --namespace kube-system <span class="se">\</span>
+   --reuse-values <span class="se">\</span>
+   --set hubble.relay.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+   --set hubble.ui.enabled<span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</div>
+</div>
+<p>由于我之前安装的cilium版本是 1.11.7 ，当前有新版本可以更新，提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Release &quot;cilium&quot; has been upgraded. Happy Helming!
+NAME: cilium
+LAST DEPLOYED: Sat Aug 13 15:18:40 2022
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 2
+TEST SUITE: None
+NOTES:
+You have successfully installed Cilium with Hubble Relay and Hubble UI.
+
+Your release version is 1.11.7.
+
+For any further help, visit https://docs.cilium.io/en/v1.11/gettinghelp
+</pre></div>
+</div>
+<p>激活 <code class="docutils literal notranslate"><span class="pre">Hubble</span></code> 之后，再次使用 <code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">status</span></code> 可以验证</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">cilium激活Hubble之后状态</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>    /¯¯<span class="se">\</span>
+ /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Cilium:         OK
+ <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    Operator:       OK
+<span class="hll"> /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Hubble:         OK
+</span> <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    ClusterMesh:    disabled
+    <span class="se">\_</span>_/
+
+Deployment        hubble-relay       Desired: <span class="m">1</span>, Ready: <span class="m">1</span>/1, Available: <span class="m">1</span>/1
+Deployment        cilium-operator    Desired: <span class="m">2</span>, Ready: <span class="m">2</span>/2, Available: <span class="m">2</span>/2
+DaemonSet         cilium             Desired: <span class="m">8</span>, Ready: <span class="m">8</span>/8, Available: <span class="m">8</span>/8
+Deployment        hubble-ui          Desired: <span class="m">1</span>, Ready: <span class="m">1</span>/1, Available: <span class="m">1</span>/1
+Containers:       cilium             Running: <span class="m">8</span>
+                  cilium-operator    Running: <span class="m">2</span>
+                  hubble-ui          Running: <span class="m">1</span>
+                  hubble-relay       Running: <span class="m">1</span>
+Cluster Pods:     <span class="m">9</span>/9 managed by Cilium
+Image versions    cilium             quay.io/cilium/cilium:v1.11.7@sha256:66a6f72a49e55e21278d07a99ff2cffa7565ed07f2578d54b5a92c1a492a6597: <span class="m">8</span>
+                  cilium-operator    quay.io/cilium/operator-generic:v1.11.7@sha256:0f8ed5d815873d20848a360df3f2ebbd4116481ff817d3f295557801e0b45900: <span class="m">2</span>
+                  hubble-ui          quay.io/cilium/hubble-ui:v0.9.0@sha256:0ef04e9a29212925da6bdfd0ba5b581765e41a01f1cc30563cef9b30b457fea0: <span class="m">1</span>
+                  hubble-ui          quay.io/cilium/hubble-ui-backend:v0.9.0@sha256:000df6b76719f607a9edefb9af94dfd1811a6f1b6a8a9c537cba90bf12df474b: <span class="m">1</span>
+                  hubble-relay       quay.io/cilium/hubble-relay:v1.11.7@sha256:df6248b57528eadcf2fac6a27b47bad629ce1c868457a9a2e4835a47e0f18bd3: <span class="m">1</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="hubble">
+<h2>安装Hubble客户端<a class="headerlink" href="#hubble" title="Permalink to this heading">¶</a></h2>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">cilium激活Hubble之后状态</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">HUBBLE_VERSION</span><span class="o">=</span><span class="k">$(</span>curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt<span class="k">)</span>
+<span class="nv">HUBBLE_ARCH</span><span class="o">=</span>amd64
+<span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;</span><span class="k">$(</span>uname -m<span class="k">)</span><span class="s2">&quot;</span> <span class="o">=</span> <span class="s2">&quot;aarch64&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span> <span class="nv">HUBBLE_ARCH</span><span class="o">=</span>arm64<span class="p">;</span> <span class="k">fi</span>
+curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/<span class="nv">$HUBBLE_VERSION</span>/hubble-linux-<span class="si">${</span><span class="nv">HUBBLE_ARCH</span><span class="si">}</span>.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+sha256sum --check hubble-linux-<span class="si">${</span><span class="nv">HUBBLE_ARCH</span><span class="si">}</span>.tar.gz.sha256sum
+sudo tar xzvfC hubble-linux-<span class="si">${</span><span class="nv">HUBBLE_ARCH</span><span class="si">}</span>.tar.gz /usr/local/bin
+rm hubble-linux-<span class="si">${</span><span class="nv">HUBBLE_ARCH</span><span class="si">}</span>.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="hubble-api">
+<h2>验证Hubble API<a class="headerlink" href="#hubble-api" title="Permalink to this heading">¶</a></h2>
+<p>要访问Hubble API，需要在本地主机创建一个端口转发，这样就能够让Hubble客户端通过本地 <code class="docutils literal notranslate"><span class="pre">4245</span></code> 访问Kubernetes集群的Hubble  Relay 服务(原理是通过 <a class="reference internal" href="../../administer/port_forward_access_k8s_app.html#port-forward-access-k8s-app"><span class="std std-ref">使用端口转发来访问Kubernetes集群应用</span></a> )</p>
+<ul>
+<li><p>启动hubble端口转发:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cilium</span> <span class="n">hubble</span> <span class="n">port</span><span class="o">-</span><span class="n">forward</span><span class="o">&amp;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">port</span> <span class="n">forward</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">retrieve</span> <span class="n">helm</span> <span class="n">values</span> <span class="n">secret</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">cilium</span><span class="o">-</span><span class="n">cli</span><span class="o">-</span><span class="n">helm</span><span class="o">-</span><span class="n">values</span><span class="p">:</span> <span class="n">secrets</span> <span class="s2">&quot;cilium-cli-helm-values&quot;</span> <span class="ow">not</span> <span class="n">found</span>
+</pre></div>
+</div>
+</section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -192,7 +327,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cilium_install_with_external_etcd.html" class="btn btn-neutral float-left" title="在扩展etcd环境安装cilium" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cilium_upgrade.html" class="btn btn-neutral float-left" title="升级Cilium" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="cilium_k8s_ingress.html" class="btn btn-neutral float-right" title="Cilium Kubernetes Ingress" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

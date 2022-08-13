@@ -355,6 +355,10 @@ why?
 
    cilium status
 
+.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/cilium_status_after_install
+   :language: bash
+   :caption: cilium安装完成后状态验证
+
 .. note::
 
    至此，已初步完成了管控节点安装，接下来就是添加更多管控节点，以及增加工作节点。这个操作可以从最初 ``kubeadmin init`` 输出的提示信息中获取(如果你当时保存了输出信息)

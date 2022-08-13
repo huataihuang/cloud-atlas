@@ -20,7 +20,7 @@ Prometheus Kubernetes Manifest文件
 创建Namespace和ClusterRole
 =============================
 
-- 首先创建一个用于所有监控组件的Kubernetes namespce，这样可以避免Prometheus Kubernetes部署对象被部署到默认namespace::
+- 首先创建一个用于所有监控组件的Kubernetes namespace，这样可以避免Prometheus Kubernetes部署对象被部署到默认namespace::
 
    kubectl create namespace monitoring
 

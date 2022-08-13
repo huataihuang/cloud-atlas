@@ -53,7 +53,6 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    studio/index
    infrastructure/index
    devops/index
-   ansible/index
    kvm/index
    ceph/index
    gluster/index

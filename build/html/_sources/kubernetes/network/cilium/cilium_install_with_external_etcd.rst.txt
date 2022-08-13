@@ -82,9 +82,9 @@ Cilium需要在ConfigMap中配置扩展外部KV存储，这个配置是通过 :r
 
 此时屏幕会输出:
 
-.. literalinclude:: cilium_install_with_external_etcd/cilium_status
+.. literalinclude:: cilium_install_with_external_etcd/cilium_status_after_install
    :language: bash
-   :caption: cilium 状态验证
+   :caption: cilium安装完成后状态验证
 
 .. note::
 

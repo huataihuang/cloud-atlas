@@ -25,7 +25,25 @@ Cilium的底层基础是现代化Linux内核提供的 :ref:`ebpf` ，支持动�
 Hubble
 ========
 
-Hubble是一个分布式网络和安全可观测系统，基于Cilium和eBPF，能够以完全透明的方式深入了解服务的通信和行为以及网络基础设施。 通过 :ref:`ebpf` 所有可见行都是可编程的，通过动态方法最大程度减少开销，同时根据用户要求提供深入和详细的可见性:
+.. note::
+
+   Hubble 也就是著名的 ``哈勃空间望远镜`` ( NASA `Hubble Space Telescope <https://www.nasa.gov/mission_pages/hubble/main/index.html>`_ )
+
+   .. figure:: ../../../_static/kubernetes/network/cilium/hubble_telescope.png
+      :scale: 70
+
+   NASA `Hubble Space Telescope <https://www.nasa.gov/mission_pages/hubble/main/index.html>`_ 将为你打开新的世界:
+
+   .. figure:: ../../../_static/kubernetes/network/cilium/hubble_m51.jpg
+      :scale: 70
+
+Hubble是一个分布式网络和安全可观测系统，基于Cilium和eBPF，能够以完全透明的方式深入了解服务的通信和行为以及网络基础设施。 
+
+你可以看到 ``Hubble`` 开源项目的Logo就是 ``哈勃空间望远镜`` ，象征着对网络系统的观测:
+
+.. figure:: ../../../_static/kubernetes/network/cilium/hubble.png
+
+通过 :ref:`ebpf` 所有可见行都是可编程的，通过动态方法最大程度减少开销，同时根据用户要求提供深入和详细的可见性:
 
 - 服务依赖和通讯地图
 
