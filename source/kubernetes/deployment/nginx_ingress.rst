@@ -130,7 +130,7 @@ volume "certs"挂载异常
 
 参考 `[stable/cert-manager] v0.6.0 fails to install w/ missing webhook tls secret <https://github.com/helm/charts/issues/10856>`_ :
 
-**如果在一个已经存在的namespace上部署， ``必须确保`` 这个namespace具备一个附加的label才能部署成功**
+**如果在一个已经存在的namespace上部署， "必须确保" 这个namespace具备一个附加的label才能部署成功**
 
 果然，我检查了 ``kube-system`` namespace，发现确实没有加上标签 ``certmanager.k8s.io/disable-validation: "true"`` ，所以补上之前漏掉的命令::
 
@@ -144,7 +144,7 @@ volume "certs"挂载异常
 
 .. note::
 
-   cert-manager 官方文档采用单独建立 ``cerrt-manager`` namespce （请参考 `Cert Manager Quick Start <https://github.com/jetstack/cert-manager/blob/master/docs/tutorials/acme/quick-start/index.rst>`_ ），不过，我的部署参考 `How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes <https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes>`_ 步骤4 ，将 ``cert-manager`` 安装在 ``kube-system`` namespace，所以执行将标签添加到 ``kube-system`` namespace ::
+   cert-manager 官方文档采用单独建立 ``cerrt-manager`` namespace （请参考 `Cert Manager Quick Start <https://github.com/jetstack/cert-manager/blob/master/docs/tutorials/acme/quick-start/index.rst>`_ ），不过，我的部署参考 `How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes <https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes>`_ 步骤4 ，将 ``cert-manager`` 安装在 ``kube-system`` namespace，所以执行将标签添加到 ``kube-system`` namespace ::
 
       kubectl label namespace kube-system certmanager.k8s.io/disable-validation="true"
 
