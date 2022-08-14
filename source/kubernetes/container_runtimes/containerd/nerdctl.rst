@@ -363,7 +363,65 @@ nerdctl结合Kubernetes
 - :ref:`haproxy_ingress`
 - :ref:`istio_ingress`
 
+简单的NodePort输出验证
+=======================
 
+.. note::
+
+   参考 :ref:`cilium_kubeproxy_free` 验证方法，将ssh服务输出到集群
+
+- 首先为前面创建的 ``centos-stream-8`` 添加标签::
+
+   kubectl label pods centos-stream-8 run=dev
+
+添加了 ``run=dev`` 标签之后，就可以配置服务
+
+现在我们检查 ``run=dev`` 标签的pods::
+
+   kubectl get pods -l run=dev -o wide
+
+显示::
+
+   NAME              READY   STATUS    RESTARTS   AGE    IP           NODE        NOMINATED NODE   READINESS GATES
+   centos-stream-8   1/1     Running   0          2d2h   10.0.4.224   z-k8s-n-2   <none>           <none>
+
+- 为实例创建NodePort :ref:`kubernetes_services` ::
+
+   kubectl expose pods centos-stream-8 --type=NodePort --port=22
+
+此时提示::
+
+   service/centos-stream-8 exposed
+
+注意如果没有标签的pods是无法输出，会报错(这也是为何前面需要先给pod添加标签的原因，因为kubernetes输出服务端口是根据labels确定的)::
+
+   error: couldn't retrieve selectors via --selector flag or introspection: the pod has no labels and cannot be exposed
+
+- 检查输出的NodePort服务::
+
+   kubectl get svc centos-stream-8
+
+显示::
+
+   NAME              TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+   centos-stream-8   NodePort   10.111.120.89   <none>        22:30134/TCP   106s
+
+- 同样，我们再次检查 ``cilium service list`` ::
+
+   kubectl -n kube-system exec ds/cilium -- cilium service list
+
+输出就有::
+
+   ...
+   16   10.111.120.89:22      ClusterIP      1 => 10.0.4.224:22
+   17   192.168.6.102:30134   NodePort       1 => 10.0.4.224:22
+   18   0.0.0.0:30134         NodePort       1 => 10.0.4.224:22
+
+现在我们就可以访问::
+
+   ssh admin@192.168.6.102 -p 30134
+
+登陆到容器内部进行运维
 
 参考
 ======
