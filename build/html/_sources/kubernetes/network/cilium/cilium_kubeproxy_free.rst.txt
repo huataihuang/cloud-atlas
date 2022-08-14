@@ -145,6 +145,88 @@ Cilium提供了完全取代 ``kube-proxy`` 的运行模式。比较简单的方�
    16m         Normal   Pulling             pod/my-nginx-df7bbf6f5-457mh    Pulling image "nginx"
    16m         Normal   Pulling             pod/my-nginx-df7bbf6f5-6gndk    Pulling image "nginx"
 
+不过看起来还是下载镜像较慢，最终还是运行起来了::
+
+   NAME                       READY   STATUS    RESTARTS   AGE   IP           NODE        NOMINATED NODE   READINESS GATES
+   my-nginx-df7bbf6f5-457mh   1/1     Running   0          12h   10.0.6.22    z-k8s-n-5   <none>           <none>
+   my-nginx-df7bbf6f5-6gndk   1/1     Running   0          12h   10.0.3.160   z-k8s-n-1   <none>           <none>
+
+- 为两个实例创建 NodePort :ref:`kubernetes_services` ::
+
+   kubectl expose deployment my-nginx --type=NodePort --port=80
+
+提示信息::
+
+   service/my-nginx exposed
+
+- 检查 NodePort 服务::
+
+   kubectl get svc my-nginx
+
+状态显示::
+
+   NAME       TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+   my-nginx   NodePort   10.101.117.255   <none>        80:30828/TCP   110s
+
+- 现在我们可以通过 ``cilium service list`` 命令来验证 Cilium eBPF kube-proxy 替换所创建的新的 NodePort 服务:
+
+.. literalinclude:: cilium_kubeproxy_free/cilium_service_list
+   :language: bash
+   :caption: 检查cilium DaemonSet的服务列表
+
+输出显示:
+
+.. literalinclude:: cilium_kubeproxy_free/cilium_service_list_output
+   :language: bash
+   :caption: 检查cilium DaemonSet的服务列表输出信息
+   :emphasize-lines: 23-28
+
+- 通过以下命令获取服务输出的NodePort端口::
+
+   node_port=$(kubectl get svc my-nginx -o=jsonpath='{@.spec.ports[0].nodePort}')
+
+实际上，现在我们有3种方式访问，从前文 ``cilium service list`` 可以看到:
+
+  - 10.101.117.255:80     ClusterIP
+  - 192.168.6.102:30828   NodePort
+  - 0.0.0.0:30828         NodePort
+
+对应:
+
+  - 在集群任何节点上访问 10.101.117.255 端口 80
+  - 访问 ``z-k8s-m-2`` (192.168.6.102) 端口 30828
+  - 访问集群任何节点的端口 30828
+
+都能够看到nginx的页面(这里举例访问 ``z-k8s-n-2`` 192.168.6.112)::
+
+   curl 192.168.6.112:30828
+
+输出可以看到::
+
+   <!DOCTYPE html>
+   <html>
+   <head>
+   <title>Welcome to nginx!</title>
+   <style>
+   html { color-scheme: light dark;  }
+   body { width: 35em; margin: 0 auto;
+   font-family: Tahoma, Verdana, Arial, sans-serif; }
+   </style>
+   </head>
+   <body>
+   <h1>Welcome to nginx!</h1>
+   <p>If you see this page, the nginx web server is successfully installed and
+   working. Further configuration is required.</p>
+
+   <p>For online documentation and support please refer to
+   <a href="http://nginx.org/">nginx.org</a>.<br/>
+   Commercial support is available at
+   <a href="http://nginx.com/">nginx.com</a>.</p>
+
+   <p><em>Thank you for using nginx.</em></p>
+   </body>
+   </html>
+
 参考
 =====
 

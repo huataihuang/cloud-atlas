@@ -375,6 +375,131 @@ For any further help, visit https://docs.cilium.io/en/v1.11/gettinghelp
 <span class="mi">16</span><span class="n">m</span>         <span class="n">Normal</span>   <span class="n">Pulling</span>             <span class="n">pod</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">df7bbf6f5</span><span class="o">-</span><span class="mi">6</span><span class="n">gndk</span>    <span class="n">Pulling</span> <span class="n">image</span> <span class="s2">&quot;nginx&quot;</span>
 </pre></div>
 </div>
+<p>不过看起来还是下载镜像较慢，最终还是运行起来了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                       <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>        <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">my</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">df7bbf6f5</span><span class="o">-</span><span class="mi">457</span><span class="n">mh</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">12</span><span class="n">h</span>   <span class="mf">10.0.6.22</span>    <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">5</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">my</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">df7bbf6f5</span><span class="o">-</span><span class="mi">6</span><span class="n">gndk</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">12</span><span class="n">h</span>   <span class="mf">10.0.3.160</span>   <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul>
+<li><p>为两个实例创建 NodePort <a class="reference internal" href="../../concepts/services_networking/kubernetes_services.html#kubernetes-services"><span class="std std-ref">Kubeernetes服务(services)</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployment</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span> <span class="o">--</span><span class="nb">type</span><span class="o">=</span><span class="n">NodePort</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">80</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>提示信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">service</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">nginx</span> <span class="n">exposed</span>
+</pre></div>
+</div>
+<ul>
+<li><p>检查 NodePort 服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">svc</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>状态显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>       <span class="n">TYPE</span>       <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>       <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>        <span class="n">AGE</span>
+<span class="n">my</span><span class="o">-</span><span class="n">nginx</span>   <span class="n">NodePort</span>   <span class="mf">10.101.117.255</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="p">:</span><span class="mi">30828</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">110</span><span class="n">s</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>现在我们可以通过 <code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">service</span> <span class="pre">list</span></code> 命令来验证 Cilium eBPF kube-proxy 替换所创建的新的 NodePort 服务:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system <span class="nb">exec</span> ds/cilium -- cilium service list
+</pre></div>
+</div>
+</div>
+<p>输出显示:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表输出信息</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ID   Frontend              Service Type   Backend
+<span class="m">1</span>    <span class="m">10</span>.104.129.196:443    ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.114:4244
+                                          <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.102:4244
+                                          <span class="nv">3</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.115:4244
+                                          <span class="nv">4</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.101:4244
+                                          <span class="nv">5</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.103:4244
+                                          <span class="nv">6</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.112:4244
+                                          <span class="nv">7</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.113:4244
+                                          <span class="nv">8</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.111:4244
+<span class="m">2</span>    <span class="m">10</span>.108.4.221:8080     ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.5.157:8080
+<span class="m">3</span>    <span class="m">10</span>.96.0.1:443         ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.101:6443
+                                          <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.102:6443
+                                          <span class="nv">3</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.103:6443
+<span class="m">4</span>    <span class="m">10</span>.96.0.10:53         ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.0.141:53
+                                          <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.0.241:53
+<span class="m">5</span>    <span class="m">10</span>.96.0.10:9153       ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.0.141:9153
+                                          <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.0.241:9153
+<span class="m">6</span>    <span class="m">10</span>.100.109.59:8080    ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.7.132:8080
+<span class="m">9</span>    <span class="m">192</span>.168.6.102:31066   NodePort       <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.5.157:8080
+<span class="m">10</span>   <span class="m">0</span>.0.0.0:31066         NodePort       <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.5.157:8080
+<span class="m">11</span>   <span class="m">192</span>.168.6.102:30798   NodePort       <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.7.132:8080
+<span class="m">12</span>   <span class="m">0</span>.0.0.0:30798         NodePort       <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.7.132:8080
+<span class="hll"><span class="m">13</span>   <span class="m">10</span>.101.117.255:80     ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.3.160:80
+</span><span class="hll">                                          <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.6.22:80
+</span><span class="hll"><span class="m">14</span>   <span class="m">192</span>.168.6.102:30828   NodePort       <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.3.160:80
+</span><span class="hll">                                          <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.6.22:80
+</span><span class="hll"><span class="m">15</span>   <span class="m">0</span>.0.0.0:30828         NodePort       <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.3.160:80
+</span><span class="hll">                                          <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">10</span>.0.6.22:80
+</span></pre></div>
+</div>
+</div>
+<ul>
+<li><p>通过以下命令获取服务输出的NodePort端口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>node_port=$(kubectl get svc my-nginx -o=jsonpath=&#39;{@.spec.ports[0].nodePort}&#39;)
+</pre></div>
+</div>
+</li>
+</ul>
+<p>实际上，现在我们有3种方式访问，从前文 <code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">service</span> <span class="pre">list</span></code> 可以看到:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>10.101.117.255:80     ClusterIP</p></li>
+<li><p>192.168.6.102:30828   NodePort</p></li>
+<li><p>0.0.0.0:30828         NodePort</p></li>
+</ul>
+</div></blockquote>
+<p>对应:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>在集群任何节点上访问 10.101.117.255 端口 80</p></li>
+<li><p>访问 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> (192.168.6.102) 端口 30828</p></li>
+<li><p>访问集群任何节点的端口 30828</p></li>
+</ul>
+</div></blockquote>
+<p>都能够看到nginx的页面(这里举例访问 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-2</span></code> 192.168.6.112):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="mf">192.168.6.112</span><span class="p">:</span><span class="mi">30828</span>
+</pre></div>
+</div>
+<p>输出可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+&lt;style&gt;
+html { color-scheme: light dark;  }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+&lt;p&gt;If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.&lt;/p&gt;
+
+&lt;p&gt;For online documentation and support please refer to
+&lt;a href=&quot;http://nginx.org/&quot;&gt;nginx.org&lt;/a&gt;.&lt;br/&gt;
+Commercial support is available at
+&lt;a href=&quot;http://nginx.com/&quot;&gt;nginx.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Thank you for using nginx.&lt;/em&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></div>
+</div>
 </section>
 <section id="id3">
 <h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>

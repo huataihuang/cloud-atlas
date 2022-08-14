@@ -182,7 +182,29 @@
 <span id="cilium-upgrade"></span><h1>升级Cilium<a class="headerlink" href="#cilium" title="Permalink to this heading">¶</a></h1>
 <section id="id1">
 <h2>Cilium升级前检查<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
-<p>在滚动升级Kubernetes时，Kubernetes会首先终止pod，然后拉取新镜像版本，并最终基于新镜像创建容器。为了降低agent的中断实践并且避免更新过程中出现 <code class="docutils literal notranslate"><span class="pre">ErrImagePull</span></code> ，建议预先拉取镜像和进行模拟检查(pre-flight check)。如果采用 :ref:</p>
+<p>在滚动升级Kubernetes时，Kubernetes会首先终止pod，然后拉取新镜像版本，并最终基于新镜像创建容器。为了降低agent的中断实践并且避免更新过程中出现 <code class="docutils literal notranslate"><span class="pre">ErrImagePull</span></code> ，建议预先拉取镜像和进行模拟检查(pre-flight check)。如果采用 <a class="reference internal" href="cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 则需要在升级在生成 <code class="docutils literal notranslate"><span class="pre">cilium-preflight.yaml</span></code> 配置文件中指定 Kubernetes API服务器IP地址和端口。</p>
+</section>
+<section id="pre-flight">
+<h2>运行pre-flight检查(必须)<a class="headerlink" href="#pre-flight" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>由于我已经采用了 <a class="reference internal" href="cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 模式，所以我这里执行 <a class="reference internal" href="../../deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 的 <code class="docutils literal notranslate"><span class="pre">kubeproxy-free</span></code> 模式:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">使用Helm运行pre-flight检查(hubeproxy-free模式)</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm install cilium-preflight cilium/cilium --version <span class="m">1</span>.12.0 <span class="se">\</span>
+  --namespace<span class="o">=</span>kube-system <span class="se">\</span>
+  --set preflight.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  --set <span class="nv">agent</span><span class="o">=</span><span class="nb">false</span> <span class="se">\</span>
+  --set operator.enabled<span class="o">=</span><span class="nb">false</span> <span class="se">\</span>
+  --set <span class="nv">k8sServiceHost</span><span class="o">=</span><span class="m">192</span>.168.6.101 <span class="se">\</span>
+  --set <span class="nv">k8sServicePort</span><span class="o">=</span><span class="m">6443</span>
+</pre></div>
+</div>
+</div>
+<p>这里可能会遇到无法下载问题:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span><span class="p">:</span> <span class="n">INSTALLATION</span> <span class="n">FAILED</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">download</span> <span class="s2">&quot;cilium/cilium&quot;</span> <span class="n">at</span> <span class="n">version</span> <span class="s2">&quot;1.12.0&quot;</span>
+</pre></div>
+</div>
 </section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
