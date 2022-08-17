@@ -1,7 +1,7 @@
-.. _k8s_workloads_pods:
+.. _pods:
 
 ======================
-Kubernetes Pods
+Pods
 ======================
 
 .. toctree::

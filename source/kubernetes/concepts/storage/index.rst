@@ -1,13 +1,13 @@
-.. _kubernetes_storage:
+.. _k8s_storage_concept:
 
 ======================
-Kubernetes存储
+Kubernetes存储概念
 ======================
 
 .. toctree::
    :maxdepth: 1
 
-   kubernetes_volumes.rst
+   k8s_volumes.rst
    k8s_persistent_volumes.rst
 
 .. only::  subproject and html

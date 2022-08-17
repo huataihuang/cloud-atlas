@@ -1,4 +1,4 @@
-.. _kubernetes_volumes:
+.. _k8s_volumes:
 
 ================
 Kubernetes卷

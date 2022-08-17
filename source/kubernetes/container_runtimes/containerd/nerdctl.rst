@@ -179,6 +179,11 @@ nerdctl 是 ``containerd`` 子项目，提供Docker兼容的CLI命令:
 
 我在 ``192.168.6.200`` 上运行的 DNSmasq ，修订配置添加 ``log-queries`` (开启DNS查询日志)，然后重启dnsmasq，再次执行 ``nerdctl build`` ，观察DNS服务器端是否收到查询请求: 确实收到了DNS查询
 
+.. _centos_8_convert_stream:
+
+CentOS 8转换CentOS Stream
+-----------------------------
+
 **我发现我犯了一个低级错误** ::
 
    #0 1.355 CentOS Linux 8 - AppStream                       66  B/s |  38  B     00:00

@@ -111,7 +111,7 @@ docker build参数
 
 .. note::
 
-   :ref:`docker_systemd` 需要比较繁杂的配置(探索)，不过现在 `CentOS DockerHUB官方镜像 <https://hub.docker.com/_/centos>`_ 也提供了非常方便的 :ref:`docker_centos_systemd` (详见该文Dockerfile)
+   :ref:`docker_systemd` 需要比较繁杂的配置(探索)，不过现在 `CentOS DockerHUB官方镜像 <https://hub.docker.com/_/centos>`_ 也提供了非常方便的 :ref:`docker_systemd` (详见该文Dockerfile)
 
 alpine linux ssh容器
 -----------------------

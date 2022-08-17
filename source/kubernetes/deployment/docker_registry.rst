@@ -370,7 +370,7 @@ Docker Registry Pod定义
 
 .. note::
 
-   注意configMap类型卷中 ``mountPath`` 是从容器外映射到容器内的目录，而 ``configMap`` 则是该目录下的子目录映射。详细参考 :ref:`kubernetes_volumes`
+   注意configMap类型卷中 ``mountPath`` 是从容器外映射到容器内的目录，而 ``configMap`` 则是该目录下的子目录映射。详细参考 :ref:`k8s_volumes`
 
 异常排查
 ---------
