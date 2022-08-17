@@ -1,11 +1,13 @@
-.. _kubernetes_workloads_controllers:
+.. _controllers:
 
 ========================
-Kubernetes Controllers
+Controllers
 ========================
 
 .. toctree::
    :maxdepth: 1
-
+   
+   deployment.rst
    replicaset.rst
+   statefulset.rst
    daemonset.rst

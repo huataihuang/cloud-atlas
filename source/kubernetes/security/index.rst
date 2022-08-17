@@ -13,3 +13,4 @@ Kubernetes安全
    kubernetes_rbac.rst
    kccss_kube-scan.rst
    grafeas.rst
+   tetragon/index
