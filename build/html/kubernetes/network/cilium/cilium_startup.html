@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="在扩展etcd环境安装cilium" href="cilium_install_with_external_etcd.html" />
+    <link rel="next" title="Cilium网络安装" href="installation/index.html" />
     <link rel="prev" title="cilium技术简介" href="intro_cilium.html" /> 
 </head>
 
@@ -73,14 +73,11 @@
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Cilium网络</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="intro_cilium.html">cilium技术简介</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">cilium快速起步</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cilium_install_with_external_etcd.html">在扩展etcd环境安装cilium</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cilium_kubeproxy_free.html">Cilium完全取代kube-proxy运行Kubernetes</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cilium_upgrade.html">升级Cilium</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cilium_hubble.html">Cilium Hubble可观测性</a></li>
-<li class="toctree-l4"><a class="reference internal" href="inspect_network_flows_with_cli.html">命令行解析网络流量</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cilium_service_map_hubble_ui.html">Cilium服务地图和Hubble UI</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cilium_k8s_ingress.html">Cilium Kubernetes Ingress</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cilium_l7-aware_traffic_management.html">Cilium 7层 流量管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation/index.html">Cilium网络安装</a></li>
+<li class="toctree-l4"><a class="reference internal" href="observability/index.html">Cilium网络可观测性</a></li>
+<li class="toctree-l4"><a class="reference internal" href="networking/index.html">Cilium网络配置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cilium_cluster_mesh.html">Cilium Cluster Mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="service_mesh/index.html">Cilium Service Mesh</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../calico/index.html">Calico网络</a></li>
@@ -188,10 +185,13 @@
 </ul>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">安装cilium cli</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
-sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
-sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
-rm cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">CILIUM_CLI_VERSION</span><span class="o">=</span><span class="k">$(</span>curl -s https://raw.githubusercontent.com/cilium/cilium-cli/master/stable.txt<span class="k">)</span>
+<span class="nv">CLI_ARCH</span><span class="o">=</span>amd64
+<span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;</span><span class="k">$(</span>uname -m<span class="k">)</span><span class="s2">&quot;</span> <span class="o">=</span> <span class="s2">&quot;aarch64&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span> <span class="nv">CLI_ARCH</span><span class="o">=</span>arm64<span class="p">;</span> <span class="k">fi</span>
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/<span class="si">${</span><span class="nv">CILIUM_CLI_VERSION</span><span class="si">}</span>/cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+sha256sum --check cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz /usr/local/bin
+rm cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
 </pre></div>
 </div>
 </div>
@@ -204,7 +204,7 @@ rm cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}
 </ul>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>上述安装是简化版，如果采用扩展etcd(外部)，则按照 <a class="reference internal" href="cilium_install_with_external_etcd.html#cilium-install-with-external-etcd"><span class="std std-ref">在扩展etcd环境安装cilium</span></a></p>
+<p>上述安装是简化版，如果采用扩展etcd(外部)，则按照 <a class="reference internal" href="installation/cilium_install_with_external_etcd.html#cilium-install-with-external-etcd"><span class="std std-ref">在扩展etcd环境安装cilium</span></a></p>
 </div>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
@@ -219,7 +219,7 @@ rm cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="intro_cilium.html" class="btn btn-neutral float-left" title="cilium技术简介" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cilium_install_with_external_etcd.html" class="btn btn-neutral float-right" title="在扩展etcd环境安装cilium" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation/index.html" class="btn btn-neutral float-right" title="Cilium网络安装" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -325,13 +325,13 @@ why?
 
 - 设置cilium Helm仓库:
 
-.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/helm_repo_add_cilium
+.. literalinclude:: ../../../network/cilium/installation/cilium_install_with_external_etcd/helm_repo_add_cilium
    :language: bash
    :caption: 设置cilium Helm仓库
 
 - 通过 :ref:`helm` 部署Cilium:
 
-.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/helm_install_cilium
+.. literalinclude:: ../../../network/cilium/installation/cilium_install_with_external_etcd/helm_install_cilium
    :language: bash
    :caption: 为cilium配置访问etcd的Kubernetes secret，安装cilium采用SSL模式访问etcd
 
@@ -347,7 +347,7 @@ why?
 
 - 安装cilium客户端:
 
-.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/install_cilium_cli
+.. literalinclude:: ../../../network/cilium/installation/cilium_install_with_external_etcd/install_cilium_cli
    :language: bash
    :caption: 安装cilium CLI
 
@@ -355,7 +355,7 @@ why?
 
    cilium status
 
-.. literalinclude:: ../../../network/cilium/cilium_install_with_external_etcd/cilium_status_after_install
+.. literalinclude:: ../../../network/cilium/installation/cilium_install_with_external_etcd/cilium_status_after_install
    :language: bash
    :caption: cilium安装完成后状态验证
 
