@@ -16,7 +16,7 @@ Hubble是Cilium的可观测层，用于获得集群范围观察Kubernetes集群�
 
    输出:
 
-   .. literalinclude:: cilium_install_with_external_etcd/cilium_status_after_install
+   .. literalinclude:: ../installation/cilium_install_with_external_etcd/cilium_status_after_install
       :language: bash
       :caption: cilium安装完成后状态验证
 
@@ -63,7 +63,7 @@ Hubble是Cilium的可观测层，用于获得集群范围观察Kubernetes集群�
 
 .. literalinclude:: cilium_hubble/install_hubble_client
    :language: bash
-   :caption: cilium激活Hubble之后状态
+   :caption: 安装hubble客户端
 
 验证Hubble API
 =================

@@ -25,7 +25,7 @@ cilium使用外部KV存储(通常是 :ref:`etcd` )优点:
 
 Cilium需要在ConfigMap中配置扩展外部KV存储，这个配置是通过 :ref:`helm` 完成的，所以需要首先安装 ``helm3`` :
 
-.. literalinclude:: ../../deployment/helm/linux_helm_install
+.. literalinclude:: ../../../deployment/helm/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 
@@ -63,7 +63,7 @@ Cilium需要在ConfigMap中配置扩展外部KV存储，这个配置是通过 :r
 
 此时，在安装了 cilium 这样的 CNI 之后，在 :ref:`k8s_dnsrr` 部署过程中没有运行起来的coredns容器就能够分配IP地址并运行起来:
 
-.. literalinclude:: ../../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubectl_get_pods_after_net
+.. literalinclude:: ../../../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubectl_get_pods_after_net
    :language: bash
    :caption: 安装cilium CNI网络之后coredns就可以运行，此时 kubectl get pods 输出可以看到所有pods已分配IP并运行
 

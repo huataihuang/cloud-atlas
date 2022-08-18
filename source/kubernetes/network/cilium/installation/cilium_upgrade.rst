@@ -48,9 +48,7 @@ Cilium升级前检查
    
    For any further help, visit https://docs.cilium.io/en/v1.12/gettinghelp
 
-- 在完成了 ``cilium-preflight.yaml`` apply之后，检查::
-
-   kubectl get daemonset -n kube-system | sed -n '1p;/cilium/p'
+- 在完成了 ``cilium-preflight.yaml`` apply之后，检查:
 
 .. literalinclude:: cilium_upgrade/helm_cilium-preflight_check
    :language: bash

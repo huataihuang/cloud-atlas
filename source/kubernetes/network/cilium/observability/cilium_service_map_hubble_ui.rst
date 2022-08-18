@@ -38,24 +38,24 @@ Cilium服务地图和Hubble UI
 
 - 在操作界面中，Hubble提供了根据 ``namespace`` 来观察网络数据流的下拉选项，可以用来观察不同应用层(应用按照namespace组织):
 
-.. figure:: ../../../_static/kubernetes/network/cilium/hubble_service_map_namespace_selector.png
+.. figure:: ../../../../_static/kubernetes/network/cilium/observability/hubble_service_map_namespace_selector.png
    :scale: 50
 
 如何观察(案例)
 ===================
 
-你应该还记得在 :ref:`` 有一个cilium提供的检测工作节点间网络连通性的测试命令(实际就是构建2个pods，相互间互打流量，并测试到外网 ``1.1.1.1`` 的流量)::
+你应该还记得 :ref:`cilium_install_with_external_etcd` 有一个cilium提供的检测工作节点间网络连通性的测试命令(实际就是构建2个pods，相互间互打流量，并测试到外网 ``1.1.1.1`` 的流量)::
 
    while true; do cilium connectivity test; done
 
 然后我们就可以通过 ``cilium-test`` 这个namespace选择后观察，访问URL http://localhost:12000/cilium-test 就会看到如下测试情况(这里是截图，正在测试访问外网 1.1.1.1):
 
-.. figure:: ../../../_static/kubernetes/network/cilium/hubble_cilium_test_1.png
+.. figure:: ../../../../_static/kubernetes/network/cilium/observability/hubble_cilium_test_1.png
    :scale: 50
 
 这里会观察到 ``1.1.1.1`` 访问链路上有一根红线，表示访问有错误。此时只要点击一下 ``one.one.one.one`` 这个图框，就可以看到进一步的子项目测试详情:
 
-.. figure:: ../../../_static/kubernetes/network/cilium/hubble_cilium_test_2.png
+.. figure:: ../../../../_static/kubernetes/network/cilium/observability/hubble_cilium_test_2.png
    :scale: 50
 
 可以很清晰地看到访问 1.1.1.1 的HTTPS服务失败

@@ -15,11 +15,8 @@ Cilium结合了Envoy实现代理并且使用Kernel的BPF实现数据包过滤和
 
    intro_cilium.rst
    cilium_startup.rst
-   cilium_install_with_external_etcd.rst
-   cilium_kubeproxy_free.rst
-   cilium_upgrade.rst
-   cilium_hubble.rst
-   inspect_network_flows_with_cli.rst
-   cilium_service_map_hubble_ui.rst
-   cilium_k8s_ingress.rst
-   cilium_l7-aware_traffic_management.rst
+   installation/index
+   observability/index
+   networking/index
+   cilium_cluster_mesh.rst
+   service_mesh/index
