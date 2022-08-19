@@ -68,6 +68,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Kubernetes网络</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../../cni.html">容器网络接口(CNI)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../k8s_network_infa.html">Kubernetes网络架构</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dynamic_dns_loadbalancing_without_cloud_provider.html">没有云计算服务环境下动态DNS和负载均衡</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../ingress/index.html">Kubernetes Ingress控制器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../flannel/index.html">Flannel网络</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">Cilium网络</a><ul class="current">
@@ -217,8 +218,8 @@
 </li>
 </ul>
 <p>上述 <code class="docutils literal notranslate"><span class="pre">basic-ingress.yaml</span></code> 内容如下:</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">部署ingress案例 basic-ingress.yaml</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">部署ingress案例 basic-ingress.yaml</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic ingress for istio bookinfo demo application, which can be found in below</span><span class="w"></span>
 <span class="c1"># https://raw.githubusercontent.com/istio/istio/release-1.11/samples/bookinfo/platform/kube/bookinfo.yaml</span><span class="w"></span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
@@ -278,13 +279,80 @@
 <span class="n">basic</span><span class="o">-</span><span class="n">ingress</span>   <span class="n">cilium</span>   <span class="o">*</span>                 <span class="mi">80</span>      <span class="mi">12</span><span class="n">m</span>
 </pre></div>
 </div>
-<p>这里 <code class="docutils literal notranslate"><span class="pre">service</span></code> (svc) 没有分配外部IP( <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code> )是因为没有外部provider提供IP分配，这里我们为了简化，可以参考 <a class="reference external" href="https://stackoverflow.com/questions/44519980/assign-external-ip-to-a-kubernetes-service">Assign External IP to a Kubernetes Service</a> 手工配置一个固定IP地址。实际生产环境，需要部署IP分配服务，例如，可以参考 <a class="reference internal" href="../../dynamic_dns_loadbalancing_without_cloud_provider.html#dynamic-dns-loadbalancing-without-cloud-provider"><span class="std std-ref">没有云计算服务环境下动态DNS和负载均衡</span></a> 的方案，采用 <span class="xref std std-ref">metallb</span> 服务来分配IP地址和对外公告。</p>
-<p>不过，参考 <a class="reference external" href="https://isovalent.com/blog/post/cilium-release-112/">Cilium 1.12 – Ingress, Multi-Cluster, Service Mesh, External Workloads, and much more</a> :</p>
+<p>这里 <code class="docutils literal notranslate"><span class="pre">service</span></code> (svc) 没有分配外部IP( <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code> )是因为没有外部provider提供IP分配，通常在云计算平台，由AWS, Azure等分配IP，所以没有问题。但是对于自己在裸服务器上构建Kubernetes，就需要自己部署 <a class="reference internal" href="../../metallb/index.html#metallb"><span class="std std-ref">Kubernetes MetalLB 负载均衡</span></a> 提供IP给load balancer服务 (我最初阅读文档以为部署 <a class="reference internal" href="../networking/ipam/index.html#cilium-ipam"><span class="std std-ref">Cilium IP 地址管理(IPAM)</span></a> 可以为LoadBalancer Expose服务提供IP地址，但是仔细阅读IPAM文档，发现这个IP是提供给节点上pods的，不是提供给Ingress这样的LoadBalance的)</p>
+<p>完整输出ingress服务配置方法见 <a class="reference internal" href="../../metallb/metallb_with_cilium.html#metallb-with-cilium"><span class="std std-ref">在Cilium网络部署MetalLB</span></a> ，可以实现为裸服务器配置负载均衡实现ingress的服务输出</p>
+<section id="id1">
+<h3>一些思考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>参考 <a class="reference external" href="https://stackoverflow.com/questions/44110876/kubernetes-service-external-ip-pending">Kubernetes service external ip pending</a> <code class="docutils literal notranslate"><span class="pre">Damith</span> <span class="pre">Udayanga</span></code> 的回答:</p>
+<p>在 Kubernetes 中，输出一组Pods上运行的应用程序到外部称为 <a class="reference internal" href="../../../concepts/services_networking/kubernetes_services.html#kubernetes-services"><span class="std std-ref">Kubeernetes服务(services)</span></a> 。在Kuberntes中有4种服务：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ClusterIP 服务仅在集群内部可以访问</p></li>
+<li><p>NodePort 通过 <code class="docutils literal notranslate"><span class="pre">NodeIP:NodePort</span></code> 向集群外提供服务通讯。默认的node port范围是 <code class="docutils literal notranslate"><span class="pre">30000-32767</span></code> ，这个端口范围可以通过集群创建时 <code class="docutils literal notranslate"><span class="pre">--service-node-port-range</span></code> 修改</p></li>
+<li><p>LoadBalancer 使用云厂商的负载均衡输出服务到外部</p></li>
+<li><p>ExternalName 映射服务到externalName字段的内容(例如 foo.bar.example.com)，通过返回带有这个值的CNAME记录。不需要设置代理</p></li>
+</ul>
+</div></blockquote>
+<p>只有LoadBalancer需要External-IP字段值，并且这个模式只在Kubernetes集群可以为协作服务指定IP地址时才能工作。可以使用 <a class="reference internal" href="../../metallb/index.html#metallb"><span class="std std-ref">Kubernetes MetalLB 负载均衡</span></a> 负载均衡来为load balnacer服务提供IP。</p>
+<p>此外 <a class="reference external" href="https://stackoverflow.com/questions/44110876/kubernetes-service-external-ip-pending">Kubernetes service external ip pending</a> <code class="docutils literal notranslate"><span class="pre">Thilee</span></code> 的回答也是基于 <a class="reference internal" href="../../metallb/index.html#metallb"><span class="std std-ref">Kubernetes MetalLB 负载均衡</span></a> 解决，并且提供了操作步骤可以参考。</p>
+<p>在 <a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Kubernetes文档/概念/服务、负载均衡和联网/Ingress</a> 对 <code class="docutils literal notranslate"><span class="pre">Ingress</span> <span class="pre">是什么？</span></code> 做了定义:</p>
+<p>Ingress 公开从集群外部到集群内服务的 HTTP 和 HTTPS 路由。流量路由由 Ingress 资源上定义的规则控制。 (不太好理解是么? 我理解Ingres就是类似Nginx的locate规则，将流量在Kubernetes集群内部分担到不同的pods)</p>
+<p>Ingress 不会公开任意端口或协议。 将 HTTP 和 HTTPS 以外的服务公开到 Internet 时，通常使用 Service.Type=NodePort 或 Service.Type=LoadBalancer 类型的 Service。</p>
+<p>注意这里的关键点: Ingress如果使用 <code class="docutils literal notranslate"><span class="pre">Service.Type=LoadBalancer</span></code> 是需要控制外部云服务商的负载均衡来暴露服务。这是为什么呢?</p>
+<p>(我的架构理解)原因是Pod不断在Kubernetes集群生死，实际上是不固定运行在任意Node节点的。如果将一个对外IP地址直接由Ingress来管理，那这个对外IP应该浮动在Kubernetes集群的哪个Node上呢？当然，也可以任意绑定到一个Node上，然后做反向负载均衡访问到实际的pods上，但是这个管理复杂。Kubernetes的Ingress实际上采用了:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>开启 <code class="docutils literal notranslate"><span class="pre">nodePort</span></code> 映射，将运行pods的服务端口映射到Node的指定端口</p></li>
+<li><p>控制外部云厂商提供的负载均衡，配置云厂商的负载均衡realserver的IP指向当前运行pod的Node节点IP，以及realserver的Port指向 <code class="docutils literal notranslate"><span class="pre">nodePort</span></code> ，这样云厂商的负载均衡就会把流量正确引向运行pod的工作节点的工作端口</p></li>
+<li><p>当Pods出现死亡并重新生成Pod(可能调度到其他Node)，则Ingress立即就知道这个新Node节点IP( <code class="docutils literal notranslate"><span class="pre">nodePort</span></code> 不变 )，就会立即修订云厂商的负载均衡realserver的IP地址，也就确保流量服务不断</p></li>
+</ul>
+</div></blockquote>
+<p>例如我上面这个案例检查 service</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">svc</span> <span class="n">cilium</span><span class="o">-</span><span class="n">ingress</span><span class="o">-</span><span class="n">basic</span><span class="o">-</span><span class="n">ingress</span> <span class="o">-</span><span class="n">o</span> <span class="n">yaml</span>
+</pre></div>
+</div>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ports</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">http</span>
+  <span class="n">nodePort</span><span class="p">:</span> <span class="mi">32598</span>
+  <span class="n">port</span><span class="p">:</span> <span class="mi">80</span>
+  <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+  <span class="n">targetPort</span><span class="p">:</span> <span class="mi">80</span>
+<span class="n">sessionAffinity</span><span class="p">:</span> <span class="kc">None</span>
+<span class="nb">type</span><span class="p">:</span> <span class="n">LoadBalancer</span>
+</pre></div>
+</div>
+<p>你可以看到Pod映射到运行该Pod的Node的端口 <code class="docutils literal notranslate"><span class="pre">nodePort</span></code> 是 <code class="docutils literal notranslate"><span class="pre">32598</span></code> ，而要求对外服务的 <code class="docutils literal notranslate"><span class="pre">port</span></code> 是 <code class="docutils literal notranslate"><span class="pre">80</span></code> ，这也就是告诉ingress配置云厂商的LoadBalancer，负载均衡VIP的realserver的端口是 <code class="docutils literal notranslate"><span class="pre">32598</span></code> 指向Node的IP，而负载均衡VIP对外的服务端口是 <code class="docutils literal notranslate"><span class="pre">80</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我将部署 <a class="reference internal" href="../../metallb/index.html#metallb"><span class="std std-ref">Kubernetes MetalLB 负载均衡</span></a> 来替代云厂商的Load Balancer实现这个协作</p>
+</div>
+<p><strong>验证是不是需要先启用LoadBalancer</strong> ?</p>
+<ul>
+<li><p>先查看pods(对应ingress配置的service):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                              <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>     <span class="n">IP</span>           <span class="n">NODE</span>        <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">details</span><span class="o">-</span><span class="n">v1</span><span class="o">-</span><span class="mi">586577784</span><span class="n">f</span><span class="o">-</span><span class="n">fwhmx</span>       <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">23</span><span class="n">h</span>     <span class="mf">10.0.4.182</span>   <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">productpage</span><span class="o">-</span><span class="n">v1</span><span class="o">-</span><span class="mi">589</span><span class="n">b848cc9</span><span class="o">-</span><span class="n">lcx9x</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">23</span><span class="n">h</span>     <span class="mf">10.0.6.70</span>    <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">5</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>这个验证探索后续补充…</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>IPAM不是给ingress提供IP的，而是给Pods提供IP:</p>
+<p>参考 <a class="reference external" href="https://isovalent.com/blog/post/cilium-release-112/">Cilium 1.12 – Ingress, Multi-Cluster, Service Mesh, External Workloads, and much more</a> :</p>
 <p>Dynamic Allocation of Pod CIDRs (beta)</p>
 <p>When Cilium is the primary CNI, it is responsible for the allocation and management of IP addresses used by Kubernetes Pods. Cilium has many different IP Address Management (IPAM) modes, but the most popular choices for self-managed Kubernetes installations are the Kubernetes and Cluster Pool IPAM modes.</p>
+</div>
+</section>
 <section id="external-ip">
 <h3>手工分配EXTERNAL IP(不成功)<a class="headerlink" href="#external-ip" title="Permalink to this heading">¶</a></h3>
-<p>这里我们为了简化，可以参考 <a class="reference external" href="https://stackoverflow.com/questions/44519980/assign-external-ip-to-a-kubernetes-service">Assign External IP to a Kubernetes Service</a> 手工配置一个固定IP地址。实际生产环境，需要部署IP分配服务，例如，可以参考 <a class="reference internal" href="../../dynamic_dns_loadbalancing_without_cloud_provider.html#dynamic-dns-loadbalancing-without-cloud-provider"><span class="std std-ref">没有云计算服务环境下动态DNS和负载均衡</span></a> 的方案，采用 <span class="xref std std-ref">metallb</span> 服务来分配IP地址和对外公告。
+<p>这里我们为了简化，可以参考 <a class="reference external" href="https://stackoverflow.com/questions/44519980/assign-external-ip-to-a-kubernetes-service">Assign External IP to a Kubernetes Service</a> 手工配置一个固定IP地址。实际生产环境，需要部署IP分配服务，例如，可以参考 <a class="reference internal" href="../../dynamic_dns_loadbalancing_without_cloud_provider.html#dynamic-dns-loadbalancing-without-cloud-provider"><span class="std std-ref">没有云计算服务环境下动态DNS和负载均衡</span></a> 的方案，采用 <a class="reference internal" href="../../metallb/index.html#metallb"><span class="std std-ref">Kubernetes MetalLB 负载均衡</span></a> 服务来分配IP地址和对外公告。
 - 手工分配EXTERNAL-IP:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">patch</span> <span class="n">svc</span> <span class="n">cilium</span><span class="o">-</span><span class="n">ingress</span><span class="o">-</span><span class="n">basic</span><span class="o">-</span><span class="n">ingress</span> <span class="o">-</span><span class="n">p</span> <span class="s1">&#39;{&quot;spec&quot;:{&quot;externalIPs&quot;:[&quot;192.168.6.151&quot;]}}&#39;</span>
 </pre></div>
@@ -302,7 +370,7 @@
 <span class="n">cilium</span><span class="o">-</span><span class="n">ingress</span><span class="o">-</span><span class="n">basic</span><span class="o">-</span><span class="n">ingress</span>   <span class="n">LoadBalancer</span>   <span class="mf">10.100.187.26</span>   <span class="mf">192.168.6.151</span>   <span class="mi">80</span><span class="p">:</span><span class="mi">32598</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">85</span><span class="n">m</span>
 </pre></div>
 </div>
-<p>但是，此时还访问不了这个IP，因为 <code class="docutils literal notranslate"><span class="pre">ingress</span></code> 还没有地址:</p>
+<p>但是，此时还访问不了这个IP，因为 <code class="docutils literal notranslate"><span class="pre">ingress</span></code> 还没有地址 why?</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">ingress</span> <span class="n">basic</span><span class="o">-</span><span class="n">ingress</span>
 </pre></div>
 </div>
@@ -318,16 +386,13 @@
 </div>
 </li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>我放弃手工配置，还是参考 <a class="reference internal" href="../networking/ipam/index.html#cilium-ipam"><span class="std std-ref">Cilium IP 地址管理(IPAM)</span></a> 来分配IP地址, 待续</p>
-</div>
 </section>
 </section>
-<section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.cilium.io/en/stable/gettingstarted/servicemesh/http/">Cilium docs: Kubernetes Ingress Support &gt;&gt; Ingress HTTP Example</a></p></li>
+<li><p><a class="reference external" href="https://docs.openshift.com/container-platform/3.11/admin_guide/tcp_ingress_external_ports.html">Assigning Unique External IPs for Ingress Traffic</a></p></li>
 </ul>
 </section>
 </section>
