@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>部署Kubernetes集群(z-k8s) &mdash; Cloud Atlas 0.1 文档</title>
+  <title>Kubernetes集群(z-k8s) &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -24,7 +24,7 @@
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
     <link rel="next" title="Kubernetes集群(z-k8s)使用nerdctl" href="z-k8s_nerdctl.html" />
-    <link rel="prev" title="构建Kubernetes云计算环境" href="z-k8s_env.html" /> 
+    <link rel="prev" title="Kubernetes集群(z-k8s)kubeadm" href="z-k8s_kubeadm.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -103,10 +103,16 @@
 <li class="toctree-l3"><a class="reference internal" href="zdata_ceph_rbd_libvirt.html">私有云基于 ZData Ceph 运行虚拟机</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_kvm_sr-iov.html">私有云KVM网络虚拟化sr-iov</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_cloud_infra_prometheus.html">私有云Prometheus部署</a></li>
-<li class="toctree-l3"><a class="reference internal" href="priv_etcd.html">私有云etcd服务</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_env.html">构建Kubernetes云计算环境</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">部署Kubernetes集群(z-k8s)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#systemdcgroup-v2">启用systemd的cgroup v2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="priv_etcd.html">私有云etcd服务</a></li>
+<li class="toctree-l3"><a class="reference internal" href="z-k8s_runtime.html">准备Kubernetes集群(z-k8s)容器运行时</a></li>
+<li class="toctree-l3"><a class="reference internal" href="z-k8s_kubeadm.html">Kubernetes集群(z-k8s)kubeadm</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#etcd">准备etcd访问证书</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#control-plane-ndoe">配置第一个管控节点(control plane ndoe)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cilium">安装 <span class="xref std std-ref">cilium</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">添加第二个管控节点</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">添加工作节点</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_nerdctl.html">Kubernetes集群(z-k8s)使用nerdctl</a></li>
@@ -148,7 +154,7 @@
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Real Atlas</a> &raquo;</li>
           <li><a href="index.html">私有云计算构建</a> &raquo;</li>
-      <li>部署Kubernetes集群(z-k8s)</li>
+      <li>Kubernetes集群(z-k8s)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/real/priv_cloud/z-k8s.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -159,48 +165,300 @@
            <div itemprop="articleBody">
              
   <section id="kubernetes-z-k8s">
-<span id="z-k8s"></span><h1>部署Kubernetes集群(z-k8s)<a class="headerlink" href="#kubernetes-z-k8s" title="Permalink to this heading">¶</a></h1>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>在部署 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 之前，首先需要部署高可用的 <a class="reference internal" href="priv_etcd.html#priv-etcd"><span class="std std-ref">私有云etcd服务</span></a> 。在高可用 <a class="reference internal" href="../../kubernetes/administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> 基础上，才能部署高可用Kubernetes。</p>
+<span id="z-k8s"></span><h1>Kubernetes集群(z-k8s)<a class="headerlink" href="#kubernetes-z-k8s" title="Permalink to this heading">¶</a></h1>
+<p>部署 <code class="docutils literal notranslate"><span class="pre">基于DNS轮询构建高可用Kubernetes</span></code> ，后续部署集群改造成 <a class="reference internal" href="../../web/load_balancer/haproxy/index.html#haproxy"><span class="std std-ref">HAProxy</span></a> 负载均衡的 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_lb/index.html#ha-k8s-lb"><span class="std std-ref">基于负载均衡的高可用Kubernetes集群</span></a> 架构</p>
+<section id="etcd">
+<h2>准备etcd访问证书<a class="headerlink" href="#etcd" title="Permalink to this heading">¶</a></h2>
+<p>由于是访问外部扩展etcd集群，所以首先需要将etcd证书复制到管控服务器节点，以便管控服务器服务(如apiserver)启动后能够正常读写etcd:</p>
+<ul class="simple">
+<li><p>在管控服务器 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-3</span></code> 上创建 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 访问证书目录，并将 <a class="reference internal" href="priv_etcd.html#priv-etcd"><span class="std std-ref">私有云etcd服务</span></a> 准备好的证书复制过来:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">etcd客户端配置:使用证书</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">ETCDCTL_API</span><span class="o">=</span><span class="m">3</span>
+<span class="c1">#export ETCDCTL_ENDPOINTS=&#39;https://etcd.staging.huatai.me:2379&#39;</span>
+<span class="nb">export</span> <span class="nv">ETCDCTL_ENDPOINTS</span><span class="o">=</span>https://192.168.6.204:2379,https://192.168.6.205:2379,https://192.168.6.206:2379
+<span class="hll"><span class="nb">export</span> <span class="nv">ETCDCTL_CACERT</span><span class="o">=</span>/etc/etcd/ca.pem
+</span><span class="hll"><span class="nb">export</span> <span class="nv">ETCDCTL_CERT</span><span class="o">=</span>/etc/etcd/client.pem
+</span><span class="hll"><span class="nb">export</span> <span class="nv">ETCDCTL_KEY</span><span class="o">=</span>/etc/etcd/client-key.pem
+</span></pre></div>
 </div>
-<section id="systemdcgroup-v2">
-<h2>启用systemd的cgroup v2<a class="headerlink" href="#systemdcgroup-v2" title="Permalink to this heading">¶</a></h2>
-<p>用于部署 <code class="docutils literal notranslate"><span class="pre">z-k8s</span></code> Kubernetes集群的虚拟机都采用了Ubuntu 20.04，不过，默认没有启用 <a class="reference internal" href="../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a> 。实际上Kubernetes已经支持cgroup v2，可以更好控制资源分配，所以，调整内核参数 <a class="reference internal" href="../../linux/ubuntu_linux/cgroup/enable_cgroup_v2_ubuntu_20.04.html#enable-cgroup-v2-ubuntu-20-04"><span class="std std-ref">在Ubuntu 20.04 LTS激活Cgroup v2</span></a> 。</p>
+</div>
+<p>将上述 <code class="docutils literal notranslate"><span class="pre">etcdctl</span></code> 客户端配置文件和Kubernetes访问etcd配置文件一一对应如下:</p>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">kubernetes apiserver访问etcd证书对应关系</span><a class="headerlink" href="#id4" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>cfssl生成etcd客户端密钥</p></th>
+<th class="head"><p>对应k8s访问etcd密钥文件</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ca.pem</p></td>
+<td><p>ca.crt</p></td>
+</tr>
+<tr class="row-odd"><td><p>client.pem</p></td>
+<td><p>apiserver-etcd-client.crt</p></td>
+</tr>
+<tr class="row-even"><td><p>client-key.pem</p></td>
+<td><p>apiserver-etcd-client.key</p></td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><p>分发kubernetes的apiserver使用的etcd证书:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">分发kubernetes的apiserver使用的etcd证书</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> host <span class="k">in</span> z-k8s-m-1 z-k8s-m-2 z-k8s-m-3<span class="p">;</span><span class="k">do</span>
+   scp /etc/etcd/ca.pem <span class="nv">$host</span>:/tmp/ca.crt
+   scp /etc/etcd/client.pem <span class="nv">$host</span>:/tmp/apiserver-etcd-client.crt
+   scp /etc/etcd/client-key.pem <span class="nv">$host</span>:/tmp/apiserver-etcd-client.key
+   
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mkdir -p /etc/kubernetes/pki/etcd&#39;</span> 
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mv /tmp/ca.crt /etc/kubernetes/pki/etcd/ca.crt&#39;</span>
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mv /tmp/apiserver-etcd-client.crt /etc/kubernetes/pki/apiserver-etcd-client.crt&#39;</span>
+   ssh <span class="nv">$host</span> <span class="s1">&#39;sudo mv /tmp/apiserver-etcd-client.key /etc/kubernetes/pki/apiserver-etcd-client.key&#39;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>在 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes_ha/prepare_z-k8s.html#prepare-z-k8s"><span class="std std-ref">z-k8s高可用Kubernetes集群准备</span></a> 详述，本文做提纲挈领</p>
+<p>我是在具备密钥认证管理主机 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 上作为客户端，通过ssh远程登录到 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-k8s-m-3</span></code> ，执行上述 <code class="docutils literal notranslate"><span class="pre">deploy_k8s_etcd_key.sh</span></code> 分发密钥</p>
+</div>
+</section>
+<section id="control-plane-ndoe">
+<h2>配置第一个管控节点(control plane ndoe)<a class="headerlink" href="#control-plane-ndoe" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">create_kubeadm-config.sh</span></code> 脚本 :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">创建第一个管控节点配置 kubeadm-config.yaml</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">K8S_API_ENDPOINT</span><span class="o">=</span>z-k8s-api.staging.huatai.me
+<span class="nv">K8S_API_ENDPOINT_PORT</span><span class="o">=</span><span class="m">6443</span>
+<span class="nv">K8S_CLUSTER_NAME</span><span class="o">=</span>z-k8s
+
+<span class="nv">ETCD_0_IP</span><span class="o">=</span><span class="m">192</span>.168.6.204
+<span class="nv">ETCD_1_IP</span><span class="o">=</span><span class="m">192</span>.168.6.205
+<span class="nv">ETCD_2_IP</span><span class="o">=</span><span class="m">192</span>.168.6.206
+
+cat <span class="s">&lt;&lt; EOF &gt; kubeadm-config.yaml</span>
+<span class="s">---</span>
+<span class="s">apiVersion: kubeadm.k8s.io/v1beta3</span>
+<span class="s">kind: ClusterConfiguration</span>
+<span class="s">kubernetesVersion: stable</span>
+<span class="s">clusterName: ${K8S_CLUSTER_NAME}</span>
+<span class="s">controlPlaneEndpoint: &quot;${K8S_API_ENDPOINT}:${K8S_API_ENDPOINT_PORT}&quot;</span>
+<span class="s">etcd:</span>
+<span class="s">  external:</span>
+<span class="s">    endpoints:</span>
+<span class="s">      - https://${ETCD_0_IP}:2379</span>
+<span class="s">      - https://${ETCD_1_IP}:2379</span>
+<span class="s">      - https://${ETCD_2_IP}:2379</span>
+<span class="s">    caFile: /etc/kubernetes/pki/etcd/ca.crt</span>
+<span class="s">    certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt</span>
+<span class="s">    keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">sh</span> <span class="pre">create_kubeadm-config.sh</span></code> 生成 <code class="docutils literal notranslate"><span class="pre">kubeadm-config.yaml</span></code> 配置文件</p></li>
+<li><p>创建第一个管控节点:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">初始化第一个管控节点 kubeadm init</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo kubeadm init --config kubeadm-config.yaml --upload-certs
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>根据提示，执行以下命令为自己的账户准备好管理配置</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">配置个人账户的管理k8s环境</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p <span class="nv">$HOME</span>/.kube
+sudo cp -i /etc/kubernetes/admin.conf <span class="nv">$HOME</span>/.kube/config
+sudo chown <span class="k">$(</span>id -u<span class="k">)</span>:<span class="k">$(</span>id -g<span class="k">)</span> <span class="nv">$HOME</span>/.kube/config
+</pre></div>
+</div>
+</div>
+<p>并且提供了如何添加管控平面节点的操作命令(包含密钥，所以必须保密)，以及添加工作节点的命令(包含密钥，所以必须保密)</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>由于 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> 取代了 <code class="docutils literal notranslate"><span class="pre">docker</span></code> ，所以运维方式已经改变，详情参考 <a class="reference internal" href="z-k8s_nerdctl.html#z-k8s-nerdctl"><span class="std std-ref">Kubernetes集群(z-k8s)使用nerdctl</span></a></p>
 </div>
 <ul>
-<li><p>修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置在 <code class="docutils literal notranslate"><span class="pre">GRUB_CMDLINE_LINUX</span></code> 添加参数:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemd</span><span class="o">.</span><span class="n">unified_cgroup_hierarchy</span><span class="o">=</span><span class="mi">1</span>
-</pre></div>
-</div>
-</li>
-<li><p>然后执行更新grup:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
-</pre></div>
-</div>
-</li>
-<li><p>重启系统:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">shutdown</span> <span class="o">-</span><span class="n">r</span> <span class="n">now</span>
-</pre></div>
-</div>
-</li>
-<li><p>重启后登陆系统检查:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="o">/</span><span class="n">cgroup</span><span class="o">.</span><span class="n">controllers</span>
+<li><p>检查Kubernetes节点和pods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+
+<span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>可以看到:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cpuset</span> <span class="n">cpu</span> <span class="n">io</span> <span class="n">memory</span> <span class="n">pids</span> <span class="n">rdma</span>
-</pre></div>
-</div>
-<p>表明系统已经激活 <a class="reference internal" href="../../kernel/cgroup/cgroup_v2.html#cgroup-v2"><span class="std std-ref">Control Group v2</span></a></p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>所有 <code class="docutils literal notranslate"><span class="pre">z-k8s</span></code> 集群节点都这样完成修订</p>
+<p>如果出现 <code class="docutils literal notranslate"><span class="pre">Unable</span> <span class="pre">to</span> <span class="pre">connect</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">server:</span> <span class="pre">Forbidden</span></code> 请检查操作系统是否设置了代理服务器环境变量，我吃过苦头</p>
+</div>
+<p>输出:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">没有安装网络前无法启动coredns，此时 kubectl get pods 输出</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>NAME                                READY   STATUS    RESTARTS   AGE   IP              NODE        NOMINATED NODE   READINESS GATES
+coredns-6d4b75cb6d-jnfmj            <span class="m">0</span>/1     Pending   <span class="m">0</span>          18h   &lt;none&gt;          &lt;none&gt;      &lt;none&gt;           &lt;none&gt;
+coredns-6d4b75cb6d-nm5fz            <span class="m">0</span>/1     Pending   <span class="m">0</span>          18h   &lt;none&gt;          &lt;none&gt;      &lt;none&gt;           &lt;none&gt;
+kube-apiserver-z-k8s-m-1            <span class="m">1</span>/1     Running   <span class="m">0</span>          18h   <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+kube-controller-manager-z-k8s-m-1   <span class="m">1</span>/1     Running   <span class="m">0</span>          18h   <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+kube-proxy-vwqsn                    <span class="m">1</span>/1     Running   <span class="m">0</span>          18h   <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+kube-scheduler-z-k8s-m-1            <span class="m">1</span>/1     Running   <span class="m">0</span>          18h   <span class="m">192</span>.168.6.101   z-k8s-m-1   &lt;none&gt;           &lt;none&gt;
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>目前还有2个问题没有解决:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">z-k8s-m-1</span></code> 节点状态是 <code class="docutils literal notranslate"><span class="pre">NotReady</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">coredns</span></code> 管控pods无法启动(网络没有配置)</p>
+<ul>
+<li><p>这个问题我之前在 <a class="reference internal" href="../../kubernetes/deployment/bootstrap_kubernetes_single/single_master_k8s.html#single-master-k8s"><span class="std std-ref">创建单一控制平面(单master)集群</span></a> 已经有经验，只要为Kubernetes集群安装正确的网络接口即可启动容器</p></li>
+<li><p>请注意，Kubernetes集群的3大组件 <code class="docutils literal notranslate"><span class="pre">apiserver</span></code> / <code class="docutils literal notranslate"><span class="pre">scheduler</span></code> / <code class="docutils literal notranslate"><span class="pre">controller-manager</span></code> 都是使用物理主机的IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.6.101</span></code> ，也就是说，即使没有安装网络接口组件这3个管控组件也是能够启动的；这也是为何在 <code class="docutils literal notranslate"><span class="pre">kubeadm-config.yaml</span></code> 配置的 <code class="docutils literal notranslate"><span class="pre">controlPlaneEndpoint</span></code> 项域名 <code class="docutils literal notranslate"><span class="pre">z-k8s-api.staging.huatai.me</span></code> 就是指向物理主机IP地址的解析</p></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="cilium">
+<h2>安装 <a class="reference internal" href="../../kubernetes/network/cilium/index.html#cilium"><span class="std std-ref">Cilium网络</span></a><a class="headerlink" href="#cilium" title="Permalink to this heading">¶</a></h2>
+<p>需要注意，针对 <a class="reference internal" href="../../kubernetes/deployment/etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a> (扩展外部etcd)需要采用 <a class="reference internal" href="../../kubernetes/network/cilium/installation/cilium_install_with_external_etcd.html#cilium-install-with-external-etcd"><span class="std std-ref">在扩展etcd环境安装cilium</span></a> :</p>
+<ul class="simple">
+<li><p>首先在节点安装 <a class="reference internal" href="../../kubernetes/deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">在Linux平台安装helm</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://get.helm.sh/helm-v3.9.1-linux-amd64.tar.gz
+tar -zxvf helm-v3.9.1-linux-amd64.tar.gz
+sudo mv linux-amd64/helm /usr/local/bin/helm
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>设置cilium Helm仓库:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">设置cilium Helm仓库</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm repo add cilium https://helm.cilium.io/
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>通过 <a class="reference internal" href="../../kubernetes/deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 部署Cilium:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">为cilium配置访问etcd的Kubernetes secret，安装cilium采用SSL模式访问etcd</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">VERSION</span><span class="o">=</span><span class="m">1</span>.11.7
+
+<span class="nv">ETCD_0_IP</span><span class="o">=</span><span class="m">192</span>.168.6.204
+<span class="nv">ETCD_1_IP</span><span class="o">=</span><span class="m">192</span>.168.6.205
+<span class="nv">ETCD_2_IP</span><span class="o">=</span><span class="m">192</span>.168.6.206
+
+kubectl create secret generic -n kube-system cilium-etcd-secrets <span class="se">\</span>
+    --from-file<span class="o">=</span>etcd-client-ca.crt<span class="o">=</span>/etc/kubernetes/pki/etcd/ca.crt <span class="se">\</span>
+    --from-file<span class="o">=</span>etcd-client.key<span class="o">=</span>/etc/kubernetes/pki/apiserver-etcd-client.key <span class="se">\</span>
+    --from-file<span class="o">=</span>etcd-client.crt<span class="o">=</span>/etc/kubernetes/pki/apiserver-etcd-client.crt
+
+helm install cilium cilium/cilium --version <span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span> <span class="se">\</span>
+  --namespace kube-system <span class="se">\</span>
+  --set etcd.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  --set etcd.ssl<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  --set <span class="s2">&quot;etcd.endpoints[0]=https://</span><span class="si">${</span><span class="nv">ETCD_0_IP</span><span class="si">}</span><span class="s2">:2379&quot;</span> <span class="se">\</span>
+  --set <span class="s2">&quot;etcd.endpoints[1]=https://</span><span class="si">${</span><span class="nv">ETCD_1_IP</span><span class="si">}</span><span class="s2">:2379&quot;</span> <span class="se">\</span>
+  --set <span class="s2">&quot;etcd.endpoints[2]=https://</span><span class="si">${</span><span class="nv">ETCD_2_IP</span><span class="si">}</span><span class="s2">:2379&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>在安装 <a class="reference internal" href="../../kubernetes/network/cilium/index.html#cilium"><span class="std std-ref">Cilium网络</span></a> 之前，务必检查官方发行版的最新版本号，将上文安装脚本的 <code class="docutils literal notranslate"><span class="pre">VERSION=1.11.7</span></code> 替换成正确版本。这样可以在安装后不用再做 <a class="reference internal" href="../../kubernetes/network/cilium/installation/cilium_upgrade.html#cilium-upgrade"><span class="std std-ref">升级Cilium</span></a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>正确安装了 <a class="reference internal" href="../../kubernetes/network/cilium/index.html#cilium"><span class="std std-ref">Cilium网络</span></a>  CNI 之后，之前部署过程中没有运行起来的coredns容器就能够分配IP地址并运行起来</p>
+</div>
+<ul class="simple">
+<li><p>安装cilium客户端:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">安装cilium CLI</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
+rm cilium-linux-amd64.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cilium</span> <span class="n">status</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">cilium安装完成后状态验证</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>    /¯¯<span class="se">\</span>
+ /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Cilium:         OK
+ <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    Operator:       <span class="m">1</span> errors, <span class="m">1</span> warnings
+ /¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span>   Hubble:         disabled
+ <span class="se">\_</span>_/¯¯<span class="se">\_</span>_/    ClusterMesh:    disabled
+    <span class="se">\_</span>_/
+
+Deployment        cilium-operator    Desired: <span class="m">2</span>, Ready: <span class="m">1</span>/2, Available: <span class="m">1</span>/2, Unavailable: <span class="m">1</span>/2
+DaemonSet         cilium             Desired: <span class="m">1</span>, Ready: <span class="m">1</span>/1, Available: <span class="m">1</span>/1
+Containers:       cilium-operator    Running: <span class="m">1</span>, Pending: <span class="m">1</span>
+                  cilium             Running: <span class="m">1</span>
+Cluster Pods:     <span class="m">2</span>/2 managed by Cilium
+Image versions    cilium             quay.io/cilium/cilium:v1.11.7@sha256:66a6f72a49e55e21278d07a99ff2cffa7565ed07f2578d54b5a92c1a492a6597: <span class="m">1</span>
+                  cilium-operator    quay.io/cilium/operator-generic:v1.11.7@sha256:0f8ed5d815873d20848a360df3f2ebbd4116481ff817d3f295557801e0b45900: <span class="m">2</span>
+Errors:           cilium-operator    cilium-operator                     <span class="m">1</span> pods of Deployment cilium-operator are not ready
+Warnings:         cilium-operator    cilium-operator-68dffdc9f7-rph4w    pod is pending
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id1">
+<h2>添加第二个管控节点<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>按照 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 输出信息，在第二个管控节点 <code class="docutils literal notranslate"><span class="pre">z-k8s-m-2</span></code> 上执行节点添加:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">kubeadm join添加control-plane节点</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubeadm join z-k8s-api.staging.huatai.me:6443 --token &lt;token&gt; <span class="se">\</span>
+      --discovery-token-ca-cert-hash sha256:&lt;hash&gt; <span class="se">\</span>
+      --control-plane --certificate-key &lt;hash&gt;
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h2>添加工作节点<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>按照 <code class="docutils literal notranslate"><span class="pre">kubeadm</span> <span class="pre">init</span></code> 输出信息，在工作节点 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-1</span></code> 等上执行:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">kubeadm join添加worker节点</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubeadm join z-k8s-api.staging.huatai.me:6443 --token &lt;token&gt; <span class="se">\</span>
+        --discovery-token-ca-cert-hash &lt;hash&gt;
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 初始化集群时候生成的 <code class="docutils literal notranslate"><span class="pre">certificate</span></code> 和 <code class="docutils literal notranslate"><span class="pre">token</span></code> (24小时) 都是有一定有效期限。所以如果在初始化之后，再经过较长时间才添加管控节点和工作节点，就会遇到 <code class="docutils literal notranslate"><span class="pre">token</span></code> 和 <code class="docutils literal notranslate"><span class="pre">certificate</span></code> 相关错误。此时，需要重新上传certifiate和重新生成token。并且，对于使用 external etcd，还需要通过 <code class="docutils literal notranslate"><span class="pre">kubeadm-config.yaml</span></code> 传递etcd参数。</p>
 </div>
 </section>
 </section>
@@ -209,7 +467,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="z-k8s_env.html" class="btn btn-neutral float-left" title="构建Kubernetes云计算环境" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="z-k8s_kubeadm.html" class="btn btn-neutral float-left" title="Kubernetes集群(z-k8s)kubeadm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="z-k8s_nerdctl.html" class="btn btn-neutral float-right" title="Kubernetes集群(z-k8s)使用nerdctl" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

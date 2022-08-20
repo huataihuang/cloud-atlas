@@ -21,9 +21,11 @@ etcd集群证书生成
 发行版安装cfssl
 --------------------
 
-在 :ref:`priv_cloud_infra` 所使用的数据层3台虚拟机都是使用 :ref:`ubuntu_linux` ，ubuntu发行版提供了 ``golang-cfssl`` 软件包，直接提供了 Cloudflare 的 ``cfssl`` 工具，所以直接安装非常方便::
+在 :ref:`priv_cloud_infra` 所使用的数据层3台虚拟机都是使用 :ref:`ubuntu_linux` ，ubuntu发行版提供了 ``golang-cfssl`` 软件包，直接提供了 Cloudflare 的 ``cfssl`` 工具，所以直接安装非常方便:
 
-   sudo apt install golang-cfssl
+.. literalinclude:: priv_etcd_tls/apt_install_cfssl
+   :language: bash
+   :caption: ubuntu发行版提供Cloudflare的cfssl工具
 
 证书生成
 ==========
@@ -37,7 +39,7 @@ etcd集群证书生成
 初始化证书认证
 ------------------
 
-- 之前在 :ref:`etcd_tls` 实践中是盛昌默认 ``cfssl`` 选项，然后在此基础上修订。不过，我们既然有基础了，就直接配置 ``ca-config.json`` (有效期限10年):
+- 之前在 :ref:`etcd_tls` 实践中是产生默认 ``cfssl`` 选项，然后在此基础上修订。不过，我们既然有基础了，就直接配置 ``ca-config.json`` (有效期限10年):
 
 .. literalinclude:: priv_etcd_tls/ca-config.json
    :language: json

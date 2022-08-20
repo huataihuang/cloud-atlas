@@ -19,8 +19,10 @@
    zdata_ceph_rbd_libvirt.rst
    priv_kvm_sr-iov.rst
    priv_cloud_infra_prometheus.rst
-   priv_etcd.rst
    z-k8s_env.rst
+   priv_etcd.rst
+   z-k8s_runtime.rst
+   z-k8s_kubeadm.rst
    z-k8s.rst
    z-k8s_nerdctl.rst
    z-k8s_cilium_ingress.rst

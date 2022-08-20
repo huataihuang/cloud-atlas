@@ -16,10 +16,10 @@ Kubernetes部署
    :maxdepth: 1
 
    bootstrap_kubernetes_single/index
+   etcd/index
    bootstrap_kubernetes_ha/index
    stateless_application/index
    operator/index
-   etcd/index
    deploy_pod/index
    nginx_ingress.rst
    haproxy_ingress.rst
