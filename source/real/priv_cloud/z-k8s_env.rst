@@ -19,6 +19,11 @@
   - ``z-k8s-n-3`` / ``z-k8s-n-4`` 注入 :ref:`tesla_p10` 的 :ref:`vgpu` 为Kubernetes提供GPU运算能力，构建 :ref:`machine_learning` 运行环境
   - ``z-k8s-n-5`` 常规节点
 
+.. csv-table:: z-k8s高可用Kubernetes集群服务器列表
+   :file: ../../kubernetes/deployment/bootstrap_kubernetes_ha/prepare_z-k8s/z-k8s_hosts.csv
+   :widths: 20, 20, 60
+   :header-rows: 1
+
 - 为最大化 :ref:`etcd` 性能，ETCD服务部署在 :ref:`zdata_ceph` 相同的高性能存储虚拟机 ``z-b-data-1`` 到 ``z-b-data-3`` 三台虚拟机中
 
 - 部署 ``z-k8s`` 集群虚拟机如下::
