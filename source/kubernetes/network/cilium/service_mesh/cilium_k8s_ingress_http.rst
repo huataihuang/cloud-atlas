@@ -94,6 +94,8 @@ Ingress 不会公开任意端口或协议。 将 HTTP 和 HTTPS 以外的服务�
 
 注意这里的关键点: Ingress如果使用 ``Service.Type=LoadBalancer`` 是需要控制外部云服务商的负载均衡来暴露服务。这是为什么呢? 
 
+``我的理解可能是错误的`` (待进一步学习后再来修订)
+
 (我的架构理解)原因是Pod不断在Kubernetes集群生死，实际上是不固定运行在任意Node节点的。如果将一个对外IP地址直接由Ingress来管理，那这个对外IP应该浮动在Kubernetes集群的哪个Node上呢？当然，也可以任意绑定到一个Node上，然后做反向负载均衡访问到实际的pods上，但是这个管理复杂。Kubernetes的Ingress实际上采用了:
 
   - 开启 ``nodePort`` 映射，将运行pods的服务端口映射到Node的指定端口

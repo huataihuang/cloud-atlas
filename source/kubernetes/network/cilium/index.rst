@@ -20,3 +20,5 @@ Cilium结合了Envoy实现代理并且使用Kernel的BPF实现数据包过滤和
    networking/index
    cilium_cluster_mesh.rst
    service_mesh/index
+   operations/index
+   monitoring_metrics/index

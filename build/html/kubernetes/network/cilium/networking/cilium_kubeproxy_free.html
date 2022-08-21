@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
-    <link rel="next" title="Cilium网络可观测性" href="../observability/index.html" />
+    <link rel="next" title="Cilium IP 地址管理(IPAM)" href="ipam/index.html" />
     <link rel="prev" title="Cilium网络配置" href="index.html" /> 
 </head>
 
@@ -68,21 +68,24 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Kubernetes网络</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../../cni.html">容器网络接口(CNI)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../k8s_network_infa.html">Kubernetes网络架构</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dynamic_dns_loadbalancing_without_cloud_provider.html">没有云计算服务环境下动态DNS和负载均衡</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../ingress/index.html">Kubernetes Ingress控制器</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../flannel/index.html">Flannel网络</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">Cilium网络</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../intro_cilium.html">cilium技术简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cilium_startup.html">cilium快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../installation/index.html">Cilium网络安装</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="index.html">Cilium网络配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../observability/index.html">Cilium网络可观测性</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../cilium_k8s_ingress.html">Cilium Kubernetes Ingress</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../cilium_l7-aware_traffic_management.html">Cilium 7层 流量管理</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">Cilium网络配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cilium_cluster_mesh.html">Cilium Cluster Mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../service_mesh/index.html">Cilium Service Mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../operations/index.html">Cilium 操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../monitoring_metrics/index.html">Cilium 的监控和Metrics</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../calico/index.html">Calico网络</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../weave/index.html">weave网络</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../metallb/index.html">Kubernetes MetalLB 负载均衡</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../in_action/index.html">Kubernetes实践</a></li>
@@ -209,16 +212,20 @@ iptables-save <span class="p">|</span> grep -v KUBE <span class="p">|</span> ipt
 </pre></div>
 </div>
 </div>
-<ul>
-<li><p>设置Helm仓库:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">repo</span> <span class="n">add</span> <span class="n">cilium</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">helm</span><span class="o">.</span><span class="n">cilium</span><span class="o">.</span><span class="n">io</span><span class="o">/</span>
-</pre></div>
-</div>
-</li>
-<li><p>执行以下命令进行安装:</p></li>
+<ul class="simple">
+<li><p>设置Helm仓库:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">设置cilium Helm仓库</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm repo add cilium https://helm.cilium.io/
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>执行以下命令进行安装:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">API_SERVER_IP</span><span class="o">=</span><span class="m">192</span>.168.6.101
 <span class="c1"># Kubeadm default is 6443</span>
 <span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
@@ -236,8 +243,8 @@ helm install cilium cilium/cilium --version <span class="m">1</span>.11.7 <span 
 </div>
 <p>原因官方文档是以第一次初始安装cilium为准，也就是直接删除掉kube-proxy之后，立即进行cilium安装。而我的操作步骤是，安装了cilium之后，再删除掉kube-proxy并重新安装cilium，所以就会出现冲突报错。这个问题参考 <a class="reference external" href="https://stackoverflow.com/questions/70464815/cannot-install-kubernetes-helm-chart-error-cannot-re-use-a-name-that-is-still-i">Cannot install kubernetes helm chart Error: cannot re-use a name that is still in use</a> ，也就是采用 <a class="reference internal" href="../../../deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 提供的
 <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> 命令代替 <code class="docutils literal notranslate"><span class="pre">install</span></code> 命令，就可以重新安装:</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">API_SERVER_IP</span><span class="o">=</span><span class="m">192</span>.168.6.101
 <span class="c1"># Kubeadm default is 6443</span>
 <span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
@@ -311,8 +318,8 @@ For any further help, visit https://docs.cilium.io/en/v1.11/gettinghelp
 <ul class="simple">
 <li><p>准备 <code class="docutils literal notranslate"><span class="pre">my-nginx.yaml</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">部署Nginx my-nginx.yaml</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">部署Nginx my-nginx.yaml</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -408,15 +415,15 @@ For any further help, visit https://docs.cilium.io/en/v1.11/gettinghelp
 <ul class="simple">
 <li><p>现在我们可以通过 <code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">service</span> <span class="pre">list</span></code> 命令来验证 Cilium eBPF kube-proxy 替换所创建的新的 NodePort 服务:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system <span class="nb">exec</span> ds/cilium -- cilium service list
 </pre></div>
 </div>
 </div>
 <p>输出显示:</p>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表输出信息</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表输出信息</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ID   Frontend              Service Type   Backend
 <span class="m">1</span>    <span class="m">10</span>.104.129.196:443    ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.114:4244
                                           <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.102:4244
@@ -515,7 +522,7 @@ Commercial support is available at
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Cilium网络配置" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../observability/index.html" class="btn btn-neutral float-right" title="Cilium网络可观测性" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ipam/index.html" class="btn btn-neutral float-right" title="Cilium IP 地址管理(IPAM)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
