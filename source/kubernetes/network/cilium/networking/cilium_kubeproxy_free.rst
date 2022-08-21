@@ -26,9 +26,11 @@ Cilium提供了完全取代 ``kube-proxy`` 的运行模式。比较简单的方�
    :language: bash
    :caption: 移除Kubernetes集群Kube-proxy DaemonSet
 
-- 设置Helm仓库::
+- 设置Helm仓库:
 
-   helm repo add cilium https://helm.cilium.io/
+.. literalinclude:: ../installation/cilium_install_with_external_etcd/helm_repo_add_cilium
+   :language: bash
+   :caption: 设置cilium Helm仓库
 
 - 执行以下命令进行安装:
 
