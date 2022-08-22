@@ -63,6 +63,10 @@ Cilium提供了已经组织好的 :ref:`prometheus` 和 :ref:`grafana` ，可以
 .. literalinclude:: cilium_with_prometheus_grafana/expose_prometheus
    :caption: 输出Grafana端口到本地主机
 
+.. note::
+
+   这里prometheus默认端口是9090
+
 
 参考
 =======

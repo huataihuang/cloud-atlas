@@ -20,6 +20,7 @@ Real Atlas
    edge_cloud/index
    network/index
    mobile_work/index
+   mobile_cloud/index
 
 .. only::  subproject and html
 
