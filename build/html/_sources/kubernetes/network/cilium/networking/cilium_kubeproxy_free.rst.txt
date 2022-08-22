@@ -229,6 +229,113 @@ Cilium提供了完全取代 ``kube-proxy`` 的运行模式。比较简单的方�
    </body>
    </html>
 
+.. _cilium_hubproxy_free_socketlb_bypass:
+
+Socket LoadBalancer Bypass in Pod Namespace
+==============================================
+
+在 :ref:`cilium_istio_startup` 配置Cilium时，如果部署的Cilium采用本文 kube-proxy replacement 模式( ``kube-proxy_free`` )，就需要调整 Cilium 的socket load balancing，配置 ``socketLB.hostNamespaceOnly=true`` ，否则会导致Istio的加密和遥测功能失效。
+
+由于我已经在上文中启用了 ``hub-proxy_free`` ，所以，在部署 :ref:`cilium_istio_startup` 的第一个步骤就是本段落配置更新，激活 ``socketLB.hostNamespaceOnly=true`` :
+
+.. warning::
+
+   我这里配置错误了，折腾了一下才解决，请参考下文的排查和纠正。最后我给出一个正确的简化配置(不修订默认值)。Cilium有很多强大的网络功能配置需要联动，并且和底层云计算underlay网络(vxlan等)有关，所以调整要非常小心。
+
+.. literalinclude:: cilium_kubeproxy_free/socketlb_hostnamespaceonly
+   :language: bash
+   :caption: 更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(存在错误，无法启动cilium)
+
+不过，我这次更新遇到奇怪的问题，就是节点上的 ``cilium`` 不断crash::
+
+   $ kubectl get pods -n kube-system -o wide
+   NAME                                READY   STATUS             RESTARTS      AGE    IP              NODE        NOMINATED NODE   READINESS GATES
+   cilium-2brxn                        0/1     CrashLoopBackOff   4 (67s ago)   3m4s   192.168.6.103   z-k8s-m-3   <none>           <none>
+   cilium-6rhms                        1/1     Running            0             25h    192.168.6.115   z-k8s-n-5   <none>           <none>
+   cilium-mzrkm                        0/1     CrashLoopBackOff   4 (79s ago)   3m5s   192.168.6.113   z-k8s-n-3   <none>           <none>
+   cilium-operator-6dfc84b7fc-m8ftr    1/1     Running            0             3m5s   192.168.6.114   z-k8s-n-4   <none>           <none>
+   cilium-operator-6dfc84b7fc-sxjp5    1/1     Running            0             3m6s   192.168.6.113   z-k8s-n-3   <none>           <none>
+   cilium-pmdj4                        1/1     Running            0             25h    192.168.6.102   z-k8s-m-2   <none>           <none>
+   cilium-qjxcc                        0/1     CrashLoopBackOff   4 (81s ago)   3m5s   192.168.6.101   z-k8s-m-1   <none>           <none>
+   cilium-t5n4c                        1/1     Running            0             25h    192.168.6.114   z-k8s-n-4   <none>           <none>
+   cilium-vjqlr                        1/1     Running            0             25h    192.168.6.111   z-k8s-n-1   <none>           <none>
+   cilium-vk624                        0/1     CrashLoopBackOff   4 (74s ago)   3m4s   192.168.6.112   z-k8s-n-2   <none>           <none>
+
+检查pods::
+
+   kubectl -n kube-system describe pods cilium-vk624
+
+显示容器健康检查失败:
+
+.. literalinclude:: cilium_kubeproxy_free/socketlb_hostnamespaceonly_fail
+   :language: bash
+   :caption: 激活 socketLB.hostNamespaceOnly 出现pods不断crash
+   :emphasize-lines: 18-19
+
+检查也可以看到::
+
+   kubectl -n kube-system exec ds/cilium -- cilium status --verbose
+
+显示有异常::
+
+   ...
+   Encryption:               Disabled
+   Cluster health:           4/8 reachable   (2022-08-22T16:34:16Z)
+     Name                    IP              Node          Endpoints
+     z-k8s-n-4 (localhost)   192.168.6.114   reachable     reachable
+     z-k8s-m-1               192.168.6.101   unreachable   reachable
+     z-k8s-m-2               192.168.6.102   reachable     reachable
+     z-k8s-m-3               192.168.6.103   unreachable   reachable
+     z-k8s-n-1               192.168.6.111   reachable     reachable
+     z-k8s-n-2               192.168.6.112   unreachable   reachable
+     z-k8s-n-3               192.168.6.113   unreachable   reachable
+     z-k8s-n-5               192.168.6.115   reachable     reachable
+
+检查crash的pod日志::
+
+   kubectl -n kube-system logs cilium-vk624
+
+发现错误是参数错误:
+
+.. literalinclude:: cilium_kubeproxy_free/socketlb_hostnamespaceonly_fail_pod_log
+   :language: bash
+   :caption: 激活 socketLB.hostNamespaceOnly 后crash pod日志
+   :emphasize-lines: 3,326
+
+关键点是::
+
+   ...
+   level=warning msg="If auto-direct-node-routes is enabled, then you are recommended to also configure ipv4-native-routing-cidr. If ipv4-native-routing-cidr is not configured, this may lead to pod to pod traffic being masqueraded, which can cause problems with performance, observability and policy" subsys=config
+   ...
+   evel=fatal msg="Error while creating daemon" error="invalid daemon configuration: native routing cidr must be configured with option --ipv4-native-routing-cidr in combination with --enable-ipv4-masquerade --tunnel=disabled --ipam=cluster-pool --enable-ipv4=true" subsys=daemon
+   
+这个原因:
+
+注意 ``tunnel`` 配置参数只有3个 ``{vxlan, geneve, disabled}`` ，其中 ``geneve`` 是BGP模式tunnel
+
+一旦关闭 ``tunnel`` ，则必须同时配置 ``ipv4-native-routing-cidr: x.x.x.x/y`` 表示不执行封包的路由 参考 `Cilium Concepts >> Networking >> Routing >> Native-Routing <https://docs.cilium.io/en/v1.12/concepts/networking/routing/#native-routing>`_
+
+cilium 默认就启用了 ``Encapsulation`` (封包)，不需要配置，这样就可以和 underlying 网络架构配合无需更多配置。此时所有集群节点之间采用 ``mesh of tunnels`` 的UDP封包协议，如VXLAN或Geneve。所有Cilium node的流量都是封包的。
+
+所以，我现在修订为:
+
+.. literalinclude:: cilium_kubeproxy_free/socketlb_hostnamespaceonly_fix
+   :language: bash
+   :caption: 重新更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio，部分配置恢复默认
+
+综上所述，实际上我走了弯路，应该保持默认配置情况下有限修订，简化配置如下(以此为准):
+
+.. literalinclude:: cilium_kubeproxy_free/socketlb_hostnamespaceonly_simple
+   :language: bash
+   :caption: 简化且正确配置方法: 更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(不修改默认配置)
+
+.. note::
+
+   有关路由和加速请参考:
+
+   - `Direct Server Return (DSR) <https://docs.cilium.io/en/v1.12/gettingstarted/kubeproxy-free/#direct-server-return-dsr>`_
+   - `Cilium Concepts >> Networking >> Routing <https://docs.cilium.io/en/v1.12/concepts/networking/routing/>`_ 这篇文章非常重要
+
 参考
 =====
 

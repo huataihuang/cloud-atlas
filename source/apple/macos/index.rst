@@ -12,6 +12,7 @@ macOS
    introduce_macos_studio.rst
    mbp15_late_2013.rst
    macbook_nvme.rst
+   apple_silicon_m1_pro.rst
    macos_install_drive.rst
    macos_studio_startup.rst
    macos_share_file.rst
