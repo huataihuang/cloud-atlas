@@ -16,6 +16,7 @@ Infrastructure Atlas
    wikipedia_base.rst
    fedoraproject_base.rst
    opencompute/index
+   openinfra/index
    storage/index
    cloud_gaming/index
    akraino/index

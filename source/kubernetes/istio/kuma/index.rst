@@ -1,12 +1,11 @@
-.. _istio:
+.. _kuma:
 
 ===============================
-Istio服务网格
+Kuma - 基于Envoy的Service Mesh
 ===============================
 
 .. toctree::
    :maxdepth: 1
 
-   istio_architecture.rst
-   envoy/index
-   kuma/index
+   kuma_arch.rst
+

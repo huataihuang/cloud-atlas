@@ -4,14 +4,12 @@
 Service Mesh架构
 ==================
 
-.. note:
-
 微服务和云原生
 ================
 
 在 :ref:`introduce_docker` 中，我们介绍了微服务是由小而独立的组件组成，组件通过网络互联，能够满足横向扩展 ``scale out`` 的软件开发形式。微服务是目前主流的分布式系统架构风格：
 
-- 服务具有可观测性 (Observability) 
+- 服务具有可观测性 (Observability)  (如 :ref:`opentelemetry` 的实现 :ref:`jaeger` ，如 :ref:`cilium_observability` )
   
   - 提供平台全局检测进程运行状态、CPU和内存消耗
   - 能够非常快捷对个体、批量进行操作
@@ -29,7 +27,7 @@ Service Mesh架构
 Kubernetes在引入了服务网格( `Service Mesh <https://www.cncf.io/blog/2017/04/26/service-mesh-critical-component-cloud-native-stack/>`_ ) :
 
 - Service Mesh的集成是透明代理，通过 sidecar proxy拦截到微服务间流量后再通过控制平面配置管理微服务的行为。
-- Service Mesh将流量管理哦那个Kubernetes中解耦，Service Mesh内部的流量无需 ``kuube-proxy`` 组件的支持，通过更接近微服务应用层的抽象，管理服务间的流量、安全性和可观察性。
+- Service Mesh将流量管理从Kubernetes中解耦，Service Mesh内部的流量无需 ``kube-proxy`` 组件的支持，通过更接近微服务应用层的抽象，管理服务间的流量、安全性和可观察性。
 - Envoy xDS定义了Service Mesh配置的协议标准
 
 服务网格可以理解成集成了动态路由、服务发现、负载均衡以及性能数据跟踪的分布式网络基础设施:

@@ -14,6 +14,7 @@ Kubernetes监控
    prometheus/index
    m3/index
    grafana/index
+   opentelemetry/index
    jaeger/index
    node_health/index
    netdata.rst
