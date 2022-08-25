@@ -20,6 +20,7 @@ DevOps 文档
    hugo/index
    kindle/index
    pandoc.rst
+   ffmpeg.rst
 
 .. only::  subproject and html
 

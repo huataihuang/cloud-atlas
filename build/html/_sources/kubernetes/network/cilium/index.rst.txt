@@ -14,6 +14,7 @@ Cilium结合了Envoy实现代理并且使用Kernel的BPF实现数据包过滤和
    :maxdepth: 1
 
    intro_cilium.rst
+   cilium_1.12.rst
    cilium_component.rst
    cilium_startup.rst
    installation/index

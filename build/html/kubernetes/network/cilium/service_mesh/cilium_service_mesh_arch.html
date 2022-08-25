@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../../copyright.html" />
-    <link rel="next" title="Cilium Kubernetes Ingress" href="cilium_k8s_ingress.html" />
+    <link rel="next" title="eBPF如何改进Service Mesh(Sidecar-free)" href="ebpf_enhance_service_mesh_sidecarfree.html" />
     <link rel="prev" title="Cilium Service Mesh" href="index.html" /> 
 </head>
 
@@ -73,6 +73,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../flannel/index.html">Flannel网络</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">Cilium网络</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../intro_cilium.html">cilium技术简介</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cilium_1.12.html">Cilium 1.12 - 架构和改进</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cilium_component.html">Cilium组件</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cilium_startup.html">cilium快速起步</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../installation/index.html">Cilium网络安装</a></li>
@@ -190,15 +191,66 @@
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../../_images/cilium_new_service_mesh.png"><img alt="../../../../_images/cilium_new_service_mesh.png" src="../../../../_images/cilium_new_service_mesh.png" style="width: 511.0px; height: 378.0px;" /></a>
 </figure>
+<p>Cilium现在能够降低复杂性，并且在service mesh层允许用户基于需求来选择使用sidecar或者deamonset(sidecar-free)方式运行一个service mesh。</p>
 <section id="service-mesh">
 <h2>企业级Service Mesh<a class="headerlink" href="#service-mesh" title="Permalink to this heading">¶</a></h2>
 <p>随着企业级Service Mesh兴起，企业级网络需要服务网格(service mesh)不仅是WEB扩展应用，而是要求将Kubernetes网络/CNI层和Service Mesh层紧密结合，并且创造出新的结合两者的层次:</p>
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../../_images/enterprise_grade_service_mesh.png"><img alt="../../../../_images/enterprise_grade_service_mesh.png" src="../../../../_images/enterprise_grade_service_mesh.png" style="width: 684.0px; height: 482.0px;" /></a>
 </figure>
+<ul class="simple">
+<li><p><strong>良好的集成到公有云和本地</strong> : 与Kubernetes类似，service mesh主要专注在公有云中支持基础设施的部署。随着企业开始采用service mesh，对本地等效功能以及将云和本地结合在一起的能力的需求正在迅速上升。多云(multi-cloud)和多集群(multi-cluster)要求从底层架构供应商提供跨云的连接性、安全性和可观测性。</p></li>
+<li><p><strong>网络层操作</strong> : 网络层的控制不仅是和本地现有企业网络组件结合，而且要求必须满足云中关于 分段(segmentation)，加密(encryption)和可视化(visibility)。这包括提供注入网络策略、出口网关，透明加密，BGP，SRv6以及传统的防火墙集成等功能。</p></li>
+<li><p><strong>应用程序协议层操作</strong> : Service Mesh需要了解HTTP和gRPC等应用层协议，以通过实现流量管理、金丝雀发布、跟踪以及L7授权。这是通过实现Ingress和Gateway API来实现的。</p></li>
+</ul>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>Service Mesh定义<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>随着分布式应用程序的引入，额外的可见性，连接性和安全性要求已经浮出水面:</p>
+<ul class="simple">
+<li><p>应用程序组件通过不受信任的网络跨云和场所边界(premises boundaries)，负载均衡需要理解应用程序协议，弹性(resiliency)变得至关重要(crucial)</p></li>
+<li><p>安全性必须发展成发送者和接受者可以互相验证身份的模型</p></li>
+</ul>
+<p>在分布式应用程序的早期阶段，上述需求是通过将逻辑直接嵌入到应用程序来解决。而现在，service mesh从应用程序中提取这些特性并将上述特性作为基础架构提供给应用程序而不再需要一一改写程序。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>简而言之，服务网格(service mesh)就是为应用程序提供 <code class="docutils literal notranslate"><span class="pre">可见性</span></code> / <code class="docutils literal notranslate"><span class="pre">连接性</span></code> / <code class="docutils literal notranslate"><span class="pre">安全性</span></code> 的基础设施，其实现的关键技术就是能够理解应用通讯协议的七层代理服务(提供加密卸载)。</p>
+</div>
+<p>现今service mesh提供了以下特性:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">弹性连接</span></code> (Resilient Connectivity) : service mesh负责跨越云、集群、场所边界的通许，提供弹性和容错性(你可以理解成service mesh负责任意复杂的网络加密通讯)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">7层网络流量管理</span></code> (L7 Traffic Management) : 支持7层网络(HTTP, REST, gRPC, WebSocket等)流量的负载均衡、速率限制和弹性(你可以理解成service mesh通过7层负载均衡实现网络全方面管理，因为7层解析已经到达应用层，所以应用通讯对于service mesh是没有秘密的)</p>
+<ul>
+<li><p>这个强大的功能让我有点疑惑，service mesh的7层代理已经完全剖析了应用层，虽然带来了强大的观察能力，但是对云计算的客户来说，这个基础设施如果掌握在云厂商手里是否存在泄密的可能？</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">基于身份的安全性</span></code> (Identity-based Security) : 依靠网络标识符来实现安全性已经不够了，发送和接收服务必须能够基于身份而不是网络标识符来相互验证(全面使用证书和签名来认证通讯双方身份)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">可观测性和跟踪</span></code> (Observability &amp; Tracing) : tracing和metrics的可观察性对于理解、监控和故障排查非常重要，也是确保应用程序的稳定性、性能和可用性的关键</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">透明度</span></code> (Transparency) : <code class="docutils literal notranslate"><span class="pre">可见性</span></code> / <code class="docutils literal notranslate"><span class="pre">连接性</span></code> / <code class="docutils literal notranslate"><span class="pre">安全性</span></code> 功能必须以透明的方式提供给应用程序，无需应用改造</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>Cilium Service Mesh<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>Cilium Service Mesh的特点就是: 高效性和功能性的平衡。</p>
+<p>简单来说就是:</p>
+<ul class="simple">
+<li><p>对于Service Mesh的 4层协议 ，包括IP, TCP 和UDP 协议，Cilium使用 <a class="reference internal" href="../../../../kernel/ebpf/index.html#ebpf"><span class="std std-ref">eBPF</span></a> 作为高效的内核数据路径来高速处理</p></li>
+<li><p>对于HTTP, Kafka, gRPC 和 DNS 等应用层协议，使用 <a class="reference internal" href="../../../istio/envoy/index.html#envoy"><span class="std std-ref">Envoy负载均衡/反向代理</span></a> 等代理进行解析</p></li>
+<li><p>对于超出Cilium功能的Service Mesh用例，则使用 <a class="reference internal" href="../../../istio/index.html#istio"><span class="std std-ref">Istio服务网格</span></a> 处理，通过全功能的Istio管理的sidecar实现7层策略</p></li>
+<li><p>Cilium提供了Istio自动优化，如缩短sidecar网络路径注入(shortening the sidecar network path injection)，并且避免应用程序和sidecar之间未加密数据暴露</p></li>
+</ul>
+</section>
+<section id="sidecar-sidecar-free">
+<h2>Sidecar 和 Sidecar-free 的选择<a class="headerlink" href="#sidecar-sidecar-free" title="Permalink to this heading">¶</a></h2>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../../_images/cilium_service_mesh.png"><img alt="../../../../_images/cilium_service_mesh.png" src="../../../../_images/cilium_service_mesh.png" style="width: 705.6px; height: 369.59999999999997px;" /></a>
+</figure>
+<section id="sidecar">
+<h3>Sidecar的性能影响<a class="headerlink" href="#sidecar" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://isovalent.com/blog/post/cilium-service-mesh/">Cilium Service Mesh – Everything You Need to Know</a></p></li>
 <li><p><a class="reference external" href="https://isovalent.com/blog/post/cilium-release-112/">Cilium 1.12 – Ingress, Multi-Cluster, Service Mesh, External Workloads, and much more</a></p></li>
@@ -211,7 +263,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Cilium Service Mesh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cilium_k8s_ingress.html" class="btn btn-neutral float-right" title="Cilium Kubernetes Ingress" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ebpf_enhance_service_mesh_sidecarfree.html" class="btn btn-neutral float-right" title="eBPF如何改进Service Mesh(Sidecar-free)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

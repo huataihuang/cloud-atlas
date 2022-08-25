@@ -23,6 +23,44 @@ Cilium集成Istio的方案为Cilium增强了通过Istio sidecar代理实现的�
    :language: bash
    :caption: 简化且正确配置方法: 更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(不修改默认配置)
 
+安装cilium-istioctl
+=======================
+
+- 检查确认cilium已经运行在集群中::
+
+   cilium status
+
+- 下载 ``cilium enhanced istioctl`` :
+
+.. literalinclude:: cilium_istio_startup/download_cilium-istioctl
+   :language: bash
+   :caption: 下载cilium增强istioctl
+
+- 部署默认istio配置到Kubernetes:
+
+.. literalinclude:: cilium_istio_startup/cilium-istioctl_install
+   :language: bash
+   :caption: 安装cilium增强istioctl
+
+提示信息::
+
+   ✔ Istio core installed
+   ✔ Istiod installed
+   ✔ Ingress gateways installed
+   ✔ Installation complete
+   Thank you for installing Istio 1.10.  Please take a few minutes to tell us about your install/upgrade experience!  https://forms.gle/KjkrDnMPByq7akrYA
+
+- 添加一个namespace标签让Istio能够在部署应用时自动注入 :ref:`envoy` sidecar 代理:
+
+.. literalinclude:: cilium_istio_startup/label_namespace_enable_istio-injection
+   :language: bash
+   :caption: 为namespace添加标签，以便istio能够自动注入sidecar proxy
+
+.. note::
+
+   `Cilium Getting Started Using Istio <https://docs.cilium.io/en/stable/gettingstarted/istio/>`_ 提供了Istio官方案例部署步骤，用于验证，我还没有实践。我准备系统学习istio，可能会补充
+  
+
 参考
 ======
 
