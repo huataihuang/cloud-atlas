@@ -21,6 +21,7 @@ DevOps 文档
    kindle/index
    pandoc.rst
    ffmpeg.rst
+   imagemagick.rst
 
 .. only::  subproject and html
 

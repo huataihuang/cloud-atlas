@@ -1,0 +1,90 @@
+cat > otelcol.yaml << EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otelcol-hubble
+  namespace: kube-system
+spec:
+  mode: daemonset
+  image: ghcr.io/cilium/hubble-otel/otelcol:v0.1.1
+  env:
+    # set NODE_IP environment variable using downwards API
+    - name: NODE_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+  volumes:
+    # this example connect to Hubble socket of Cilium agent
+    # using host port and TLS
+    - name: hubble-tls
+      projected:
+        defaultMode: 256
+        sources:
+          - secret:
+              name: hubble-relay-client-certs
+              items:
+                - key: tls.crt
+                  path: client.crt
+                - key: tls.key
+                  path: client.key
+                - key: ca.crt
+                  path: ca.crt
+    # it's possible to use the UNIX socket also, for which
+    # the following volume will be needed
+    # - name: cilium-run
+    #   hostPath:
+    #     path: /var/run/cilium
+    #     type: Directory
+  volumeMounts:
+    # - name: cilium-run
+    #   mountPath: /var/run/cilium
+    - name: hubble-tls
+      mountPath: /var/run/hubble-tls
+      readOnly: true
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:55690
+      hubble:
+        # NODE_IP is substituted by the collector at runtime
+        # the '\' prefix is required only in order for this config to be
+        # inlined in the guide and make it easy to paste, i.e. to avoid
+        # shell subtituting it
+        endpoint: \${NODE_IP}:4244 # unix:///var/run/cilium/hubble.sock
+        buffer_size: 100
+        include_flow_types:
+          # this sets an L7 flow filter, removing this section will
+          # disable filtering and result all types of flows being turned
+          # into spans;
+          # other type filters can be set, the names are same as what's
+          # used in 'hubble observe -t <type>'
+          traces: ["l7"]
+        tls:
+          insecure_skip_verify: true
+          ca_file: /var/run/hubble-tls/ca.crt
+          cert_file: /var/run/hubble-tls/client.crt
+          key_file: /var/run/hubble-tls/client.key
+    processors:
+      batch:
+        timeout: 30s
+        send_batch_size: 100
+
+    exporters:
+      jaeger:
+        endpoint: jaeger-default-collector.jaeger.svc.cluster.local:14250
+        tls:
+          insecure: true
+
+    service:
+      telemetry:
+        logs:
+          level: info
+      pipelines:
+        traces:
+          receivers: [hubble, otlp]
+          processors: [batch]
+          exporters: [jaeger]
+EOF
+kubectl apply -f otelcol.yaml

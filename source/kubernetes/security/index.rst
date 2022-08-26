@@ -14,3 +14,4 @@ Kubernetes安全
    kccss_kube-scan.rst
    grafeas.rst
    tetragon/index
+   cert-manager/index

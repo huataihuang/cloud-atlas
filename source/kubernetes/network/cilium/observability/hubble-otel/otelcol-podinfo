@@ -1,0 +1,32 @@
+cat > otelcol-podinfo.yaml << EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otelcol-podinfo
+  namespace: podinfo
+spec:
+  mode: sidecar
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          http: {}
+    exporters:
+      logging:
+        loglevel: info
+      otlp:
+        endpoint: otelcol-hubble-collector.kube-system.svc.cluster.local:55690
+        tls:
+          insecure: true
+
+    service:
+      telemetry:
+        logs:
+          level: info
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [otlp, logging]
+
+EOF
+kubectl apply -f otelcol-podinfo.yaml
