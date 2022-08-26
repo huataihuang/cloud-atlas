@@ -1,0 +1,57 @@
+cat > visibility-policies.yaml << EOF
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: default-allow
+spec:
+  endpointSelector: {}
+  egress:
+    - toEntities:
+        - cluster
+        - world
+    - toEndpoints:
+        - {}
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: dns-visibility
+spec:
+  endpointSelector: {}
+  egress:
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+        rules:
+          dns:
+            - matchPattern: "*"
+    - toFQDNs:
+      - matchPattern: "*"
+    - toEndpoints:
+      - {}
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: http-visibility
+  namespace: podinfo
+spec:
+  endpointSelector: {}
+  egress:
+    - toPorts:
+      - ports:
+        - port: "9898"
+          protocol: TCP
+        rules:
+          http:
+          - method: ".*"
+    - toEndpoints:
+      - {}
+EOF
+kubectl apply -f visibility-policies.yaml
