@@ -9,4 +9,3 @@ Istio服务网格
 
    istio_architecture.rst
    envoy/index
-   kuma/index
