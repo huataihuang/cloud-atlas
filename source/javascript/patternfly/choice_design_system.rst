@@ -31,3 +31,9 @@
 =========
 
 `Design Systems Gallery <https://designsystemsrepo.com/design-systems-recent/>`_ 汇总列出了大量的设计系统，包括我前面所说的PatternFly / Clarity / material-ui 。实际上，你可以看到这个网站上列出了上百个设计系统，让人眼花缭乱。这里提供了各个公司的设计UX指南以及框架，例如Ant Design(蚂蚁的UX)，以及SAP,GitLab等等
+
+**后来我想了一下，其实选择UX框架并不重要** 因为实际底层还是 ``Augular`` 和 ``React`` ，再底层其实还是 :ref:`javascript` 。真正技术核心还是以 ``Augular`` 和 ``React`` 为主，所以只要能够掌握 ``Augular`` 或者 ``React`` ，那么切换UX框架也是比较容易的。这样我也就不再纠结Design System的选择了，选择符合自己工作需求为主。目前我选择 ``PatternFly`` 主要原因是:
+
+- 目前开源软件巨头Red Hat主要采用自己开的 ``PatternFly`` ，例如 :ref:`openshift` 和 :ref:`ovirt` 等。所以熟悉这个UX框架，也方便比较深入学习Red Hat系列的软件
+- ``PattenFly`` 底层使用了 TypeScript ，并且基于 ``React`` ，这两个技术都是目前非常主流的 :ref:`javascript` 开发框架
+- 后端可以采用 :ref:`golang` 或者 :ref:`rust` 来实现，方便开发基础软件

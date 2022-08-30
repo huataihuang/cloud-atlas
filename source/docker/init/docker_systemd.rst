@@ -80,10 +80,9 @@ Fedora 34 systemd in Docker Container
 
 Fedora 34官方镜像没有包含 :ref:`systemd` ，所以需要Dockerfile增加安装步骤
 
-.. literalinclude:: docker_systemd/fedora-systemd.dockerfile
+.. literalinclude:: docker_systemd/fedora-systemd.dockerfile_start_fail
    :language: dockerfile
-   :linenos:
-   :caption: fedora-systemd.dockerfile
+   :caption: fedora官方镜像增加systemd，但是此时启动失败
 
 ::
 
@@ -247,6 +246,12 @@ systemd运行总结
 - bind mount ``/sys/fs/fuse`` 不是必须的，但是可以避免很多依赖fuse运行的软件问题
 - systemd 希望在随时随地都使用 ``tmpfs`` ，但是如果运行在 ``unprivileged`` (非特权) 模式就不能随时随地挂载 ``tmpfs`` ，所以需要预先挂载 ``tmpfs`` 到 ``/tmp`` , ``/run`` 和 ``/run/lock``
 - 由于你实际上不希望在容器内部启动任何图形应用，所以需要在最后指定 ``sysinit.target`` 作为 default unit 来启动，而不是使用 ``multi-user.target`` 或其他模式
+
+我的最终修订版本Dockerfile for fedora with systemd:
+
+.. literalinclude:: docker_systemd/fedora-systemd.dockerfile
+   :language: dockerfile
+   :caption: fedora官方镜像增加systemd，注释中包含启动方法
 
 Docker容器运行systemd实践
 ==========================

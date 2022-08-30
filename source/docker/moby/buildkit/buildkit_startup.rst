@@ -20,11 +20,10 @@ Buildkit是一个以高效、富有表现力和可重复的方式将源代码转
 安装
 =======
 
-- 从 `buildkit releases <https://github.com/moby/buildkit/releases>`_ 下载最新执行包，解压缩后移动到 ``/usr/bin`` 目录下::
+- 从 `buildkit releases <https://github.com/moby/buildkit/releases>`_ 下载最新执行包，解压缩后移动到 ``/usr/bin`` 目录下:
 
-   tar xfz buildkit-v0.10.3.linux-amd64.tar.gz
-   cd bin
-   sudo mv * /usr/bin/
+.. literalinclude:: buildkit_startup/install_buildkit
+   :language: bash
 
 - 运行(需要先安装和运行 OCI(runc) 和 containerd):
 
