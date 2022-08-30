@@ -17,10 +17,10 @@ nerdctl 是 ``containerd`` 子项目，提供Docker兼容的CLI命令:
 安装
 ======
 
-- 从 `nerdctl releases <https://github.com/containerd/nerdctl/releases>`_ 下载软件包::
+- 从 `nerdctl releases <https://github.com/containerd/nerdctl/releases>`_ 下载软件包:
 
-   tar xfz nerdctl-0.22.0-linux-amd64.tar.gz
-   sudo mv nerdctl /usr/bin/
+.. literalinclude:: nerdctl/install_nerdctl
+   :language: bash
 
 官方下载有两种软件包:
 

@@ -108,7 +108,11 @@
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_runtime.html">准备Kubernetes集群(z-k8s)容器运行时</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_kubeadm.html">Kubernetes集群(z-k8s)kubeadm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s.html">Kubernetes集群(z-k8s)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)使用nerdctl</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)使用nerdctl</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#buildkit">buildkit安装和准备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nerdctl">使用nerdctl构建镜像</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_ingress.html">Kubernetes集群(z-k8s)部署Cilium Ingress</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_docker_registry.html">Kubernetes集群(z-k8s)部署镜像Redgistry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="priv_docker.html">私有云docker环境</a></li>
@@ -161,6 +165,114 @@
   <section id="kubernetes-z-k8s-nerdctl">
 <span id="z-k8s-nerdctl"></span><h1>Kubernetes集群(z-k8s)使用nerdctl<a class="headerlink" href="#kubernetes-z-k8s-nerdctl" title="Permalink to this heading">¶</a></h1>
 <p>在完成 <a class="reference internal" href="z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 之后，我们需要使用 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 来完成镜像制作和管理，已经推送镜像到 <a class="reference internal" href="z-k8s_docker_registry.html#z-k8s-docker-registry"><span class="std std-ref">Kubernetes集群(z-k8s)部署镜像Redgistry</span></a> 以实现应用部署</p>
+<section id="buildkit">
+<h2>buildkit安装和准备<a class="headerlink" href="#buildkit" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>安装 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> (minimal版本，即只安装 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> ):</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ARCH</span><span class="o">=</span>amd64
+<span class="nv">VER</span><span class="o">=</span><span class="m">0</span>.22.2
+
+<span class="c1">#命令行下载因转跳失败，所以还是浏览器下载后解压缩</span>
+<span class="c1">#curl https://github.com/containerd/nerdctl/releases/download/v${VER}/nerdctl-${VER}-linux-${ARCH}.tar.gz -o nerdctl-${VER}-linux-${ARCH}.tar.gz</span>
+
+tar xfz nerdctl-<span class="si">${</span><span class="nv">VER</span><span class="si">}</span>-linux-<span class="si">${</span><span class="nv">ARCH</span><span class="si">}</span>.tar.gz
+sudo mv nerdctl /usr/bin/
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>从 <a class="reference external" href="https://github.com/moby/buildkit/releases">buildkit releases</a> 下载最新 <a class="reference internal" href="../../docker/moby/buildkit/index.html#buildkit"><span class="std std-ref">Buildkit</span></a> 解压缩后移动到 <code class="docutils literal notranslate"><span class="pre">/usr/bin</span></code> 目录下 :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tar xfz buildkit-v0.10.4.linux-amd64.tar.gz
+<span class="nb">cd</span> bin
+sudo mv * /usr/bin/
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>运行(需要先安装和运行 OCI(runc) 和 containerd):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">使用root身份运行buildkitd，启动后工作在前台等待客户端连接</span><a class="headerlink" href="#id1" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo buildkitd
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/buildkit/buildkitd.toml</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">配置 /etc/buildkit/buildkitd.toml</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>worker.oci<span class="o">]</span>
+  <span class="nv">enabled</span> <span class="o">=</span> <span class="nb">false</span>
+
+<span class="o">[</span>worker.containerd<span class="o">]</span>
+  <span class="nv">enabled</span> <span class="o">=</span> <span class="nb">true</span>
+  <span class="c1"># namespace should be &quot;k8s.io&quot; for Kubernetes (including Rancher Desktop)</span>
+  <span class="nv">namespace</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>然后就可以使用 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 工具执行 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">build</span></code> 指令来构建镜像。</p>
+</section>
+<section id="nerdctl">
+<h2>使用nerdctl构建镜像<a class="headerlink" href="#nerdctl" title="Permalink to this heading">¶</a></h2>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，注释中包含启动方法</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># 使用 DOCKER</span>
+<span class="c"># docker build --rm -t local/fedora-systemd .</span>
+<span class="c"># docker run -itd --privileged=true -p 1122:22 --hostname fedora --name fedora local:fedora-systemd</span>
+
+<span class="c"># 使用 nerdctl (containerd)</span>
+<span class="c"># nerdctl build -t fedora-systemd .</span>
+<span class="c"># 交互方式运行</span>
+<span class="c"># nerdctl run -it --privileged=true -p 1122:22 --hostname fedora --name fedora fedora-systemd:latest</span>
+<span class="c"># 后台运行</span>
+<span class="c"># nerdctl run -d --privileged=true -p 1122:22 --hostname fedora --name fedora fedora-systemd:latest</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">fedora:latest</span>
+<span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">ENV</span><span class="w"> </span>container docker
+
+<span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/cgroup <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/fuse <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/tmp <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run/lock
+
+<span class="k">RUN</span><span class="w"> </span>dnf clean all
+<span class="k">RUN</span><span class="w"> </span>dnf -y update
+
+<span class="c"># Fedora docker官方镜像默认未包含systemd,通过initscripts安装</span>
+<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+<span class="k">RUN</span><span class="w"> </span>systemctl <span class="nb">enable</span> sshd
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
+<span class="c">#RUN mv /var/run/nologin /var/run/nologin.bak</span>
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>
+
+<span class="c"># systemd</span>
+<span class="c"># CMD [&quot;/usr/sbin/init&quot;]</span>
+
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;/usr/lib/systemd/systemd&quot;</span><span class="w"> </span><span class="p">]</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;log-level=info&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unit=sysinit.target&quot;</span><span class="w"> </span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 
 

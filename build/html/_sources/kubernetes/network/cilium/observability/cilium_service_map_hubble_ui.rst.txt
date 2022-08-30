@@ -71,7 +71,34 @@ Cilium服务地图和Hubble UI
    ❌ no-policies/pod-to-world/https-to-one-one-one-one-index-1: cilium-test/client-7df6cfbf7b-gdzjs (10.0.5.91) -> one-one-one-one-https-index (one.one.one.one:443)
    connectivity test failed: 1 tests failed
 
+Cilium企业版增强
+===================
+
+开源版本Hubble在跟踪展示上有比较大的限制(不过基本能力就绪)，在企业版上提供了更为清晰的跟踪能力以及从进程图形化展示网络流量的方法(我没有使用，但是根据文档截图可以感受和推测):
+
+- 提供基于时间线的网络访问流量观察:
+
+.. figure:: ../../../../_static/kubernetes/network/cilium/observability/hubble-ui-timescape.png
+   :scale: 50
+
+上述功能应该可以定制开发，主要是将时序数据查询
+
+- Syscal变量的进程上下文:
+
+.. figure:: ../../../../_static/kubernetes/network/cilium/observability/process_tree.png
+   :scale: 25 
+
+上述功能可以根据 ``systemd-cgls`` 命令分析进程树来对应查询网络流量
+
+- 从 :ref:`ebpf` 的socket级别采集TCP和网络流量Metrics
+
+.. figure:: ../../../../_static/kubernetes/network/cilium/observability/tcp-metrics.png
+   :scale: 35
+
+总之，对于企业版功能，可以从开源社区版进行自开发定制，但是会比较复杂和消耗人力。
+
 参考
 =======
 
 - `Cilium: Service Map & Hubble UI <https://docs.cilium.io/en/stable/gettingstarted/hubble/>`_
+- `Isovalent Cilium Enterprise 1.10: Timescape, Runtime Observability & Enforcement, Hubble RBAC <https://isovalent.com/blog/post/2021-09-release/>`_

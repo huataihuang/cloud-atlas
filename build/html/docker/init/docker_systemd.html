@@ -233,17 +233,17 @@ lrwxrwxrwx 1 root root 20 Sep  7 18:37 /usr/sbin/init -&gt; /lib/systemd/systemd
 </div>
 <p>Fedora 34官方镜像没有包含 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> ，所以需要Dockerfile增加安装步骤</p>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">fedora-systemd.dockerfile</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
-<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">FROM</span><span class="w"> </span><span class="s">fedora:34</span>
-<span class="linenos"> 2</span><span class="k">MAINTAINER</span><span class="w"> </span><span class="s">huatai</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">ENV</span><span class="w"> </span>container docker
-<span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="k">RUN</span><span class="w"> </span>dnf -y update <span class="o">&amp;&amp;</span> dnf -y install systemd <span class="o">&amp;&amp;</span> dnf clean all
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">VOLUME</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/run&quot;</span><span class="w"> </span><span class="p">]</span>
-<span class="linenos"> 9</span><span class="c">#CMD [&quot;/usr/bin/init&quot;]</span>
-<span class="linenos">10</span><span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/sbin/init&quot;</span><span class="p">]</span>
+<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，但是此时启动失败</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">fedora:34</span>
+<span class="k">MAINTAINER</span><span class="w"> </span><span class="s">huatai</span>
+
+<span class="k">ENV</span><span class="w"> </span>container docker
+
+<span class="k">RUN</span><span class="w"> </span>dnf -y update <span class="o">&amp;&amp;</span> dnf -y install systemd <span class="o">&amp;&amp;</span> dnf clean all
+
+<span class="k">VOLUME</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/run&quot;</span><span class="w"> </span><span class="p">]</span>
+<span class="c">#CMD [&quot;/usr/bin/init&quot;]</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/sbin/init&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -447,6 +447,63 @@ Exiting PID 1...
 <li><p>systemd 希望在随时随地都使用 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> ，但是如果运行在 <code class="docutils literal notranslate"><span class="pre">unprivileged</span></code> (非特权) 模式就不能随时随地挂载 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> ，所以需要预先挂载 <code class="docutils literal notranslate"><span class="pre">tmpfs</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> , <code class="docutils literal notranslate"><span class="pre">/run</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/run/lock</span></code></p></li>
 <li><p>由于你实际上不希望在容器内部启动任何图形应用，所以需要在最后指定 <code class="docutils literal notranslate"><span class="pre">sysinit.target</span></code> 作为 default unit 来启动，而不是使用 <code class="docutils literal notranslate"><span class="pre">multi-user.target</span></code> 或其他模式</p></li>
 </ul>
+<p>我的最终修订版本Dockerfile for fedora with systemd:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，注释中包含启动方法</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># 使用 DOCKER</span>
+<span class="c"># docker build --rm -t local/fedora-systemd .</span>
+<span class="c"># docker run -itd --privileged=true -p 1122:22 --hostname fedora --name fedora local:fedora-systemd</span>
+
+<span class="c"># 使用 nerdctl (containerd)</span>
+<span class="c"># nerdctl build -t fedora-systemd .</span>
+<span class="c"># 交互方式运行</span>
+<span class="c"># nerdctl run -it --privileged=true -p 1122:22 --hostname fedora --name fedora fedora-systemd:latest</span>
+<span class="c"># 后台运行</span>
+<span class="c"># nerdctl run -d --privileged=true -p 1122:22 --hostname fedora --name fedora fedora-systemd:latest</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">fedora:latest</span>
+<span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
+
+<span class="k">ENV</span><span class="w"> </span>container docker
+
+<span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/cgroup <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/fuse <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/tmp <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run <span class="se">\</span>
+    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run/lock
+
+<span class="k">RUN</span><span class="w"> </span>dnf clean all
+<span class="k">RUN</span><span class="w"> </span>dnf -y update
+
+<span class="c"># Fedora docker官方镜像默认未包含systemd,通过initscripts安装</span>
+<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+<span class="k">RUN</span><span class="w"> </span>systemctl <span class="nb">enable</span> sshd
+
+<span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
+<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
+<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
+<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+
+<span class="c"># Add ssh public key for login</span>
+<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
+<span class="c">#RUN mv /var/run/nologin /var/run/nologin.bak</span>
+
+<span class="c"># run service when container started - sshd</span>
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>
+
+<span class="c"># systemd</span>
+<span class="c"># CMD [&quot;/usr/sbin/init&quot;]</span>
+
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;/usr/lib/systemd/systemd&quot;</span><span class="w"> </span><span class="p">]</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;log-level=info&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unit=sysinit.target&quot;</span><span class="w"> </span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 <section id="id2">
