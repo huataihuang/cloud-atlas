@@ -24,7 +24,7 @@
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
     <link rel="next" title="Kubernetes集群(z-k8s)部署Cilium Ingress" href="z-k8s_cilium_ingress.html" />
-    <link rel="prev" title="Kubernetes集群(z-k8s)" href="z-k8s.html" /> 
+    <link rel="prev" title="Kubernetes集群(z-k8s)配置Cilium集成MetalLB" href="z-k8s_cilium_metallb.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -108,9 +108,13 @@
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_runtime.html">准备Kubernetes集群(z-k8s)容器运行时</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_kubeadm.html">Kubernetes集群(z-k8s)kubeadm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s.html">Kubernetes集群(z-k8s)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_kubeproxy_free.html">Kubernetes集群(z-k8s)配置Cilium完全取代kube-proxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_istio.html">Kubernetes集群(z-k8s)配置Cilium结合Istio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_metallb.html">Kubernetes集群(z-k8s)配置Cilium集成MetalLB</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)使用nerdctl</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#buildkit">buildkit安装和准备</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#nerdctl">使用nerdctl构建镜像</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nerdctlkubernetespod">使用nerdctl在Kubernetes上运行pod容器</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_ingress.html">Kubernetes集群(z-k8s)部署Cilium Ingress</a></li>
@@ -216,6 +220,9 @@ sudo mv * /usr/bin/
 </section>
 <section id="nerdctl">
 <h2>使用nerdctl构建镜像<a class="headerlink" href="#nerdctl" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>在目录下编辑一个 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 内容如下(另外还要准备一个公钥文件 <code class="docutils literal notranslate"><span class="pre">authorized_keys</span></code> 用于镜像中眠密码登陆):</p></li>
+</ul>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，注释中包含启动方法</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># 使用 DOCKER</span>
@@ -272,6 +279,116 @@ sudo mv * /usr/bin/
 </pre></div>
 </div>
 </div>
+<ul class="simple">
+<li><p>执行以下命令构建镜像:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">nerdctl build构建支持systemd的Fedora镜像</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nerdctl build -t fedora-systemd .
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>完成后检查镜像:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">nerdctl images命令检查刚才生成的支持systemd的Fedora镜像</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl images
+</pre></div>
+</div>
+</div>
+<p>可以看到刚才生成的镜像:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">nerdctl images命令显示刚才生成的镜像</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>REPOSITORY                 TAG       IMAGE ID        CREATED         PLATFORM       SIZE         BLOB SIZE
+fedora-systemd             latest    c910cbc325a4    <span class="m">31</span> hours ago    linux/amd64    <span class="m">717</span>.0 MiB    <span class="m">389</span>.2 MiB
+</pre></div>
+</div>
+</div>
+</section>
+<section id="nerdctlkubernetespod">
+<h2>使用nerdctl在Kubernetes上运行pod容器<a class="headerlink" href="#nerdctlkubernetespod" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 可以直接将镜像推送到 <a class="reference internal" href="z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 集群中作为pod运行:</p>
+<ul class="simple">
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">apply</span></code> 命令在Kubernetes集群 <a class="reference internal" href="z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 中构建运行pod:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">kubectl apply运行pod(yaml)</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl apply -f - <span class="s">&lt;&lt;EOF</span>
+<span class="s">apiVersion: v1</span>
+<span class="s">kind: Pod</span>
+<span class="s">metadata:</span>
+<span class="s">  name: z-dev</span>
+<span class="s">spec:</span>
+<span class="s">  containers:</span>
+<span class="s">    - name: z-dev</span>
+<span class="s">      image: fedora-systemd</span>
+<span class="s">      imagePullPolicy: Never</span>
+<span class="s">      securityContext:</span>
+<span class="s">        privileged: true</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>这里还没有 <a class="reference internal" href="../../kubernetes/deploy_app/registry/index.html#k8s-deploy-registry"><span class="std std-ref">Kubernetes部署registry仓库</span></a> ，所以需要手工将镜像复制到调度的节点来运行期容器</p>
+</div>
+<ul>
+<li><p>检查当前调度 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 的节点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                              <span class="n">READY</span>   <span class="n">STATUS</span>     <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>        <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">z</span><span class="o">-</span><span class="n">dev</span>                             <span class="mi">0</span><span class="o">/</span><span class="mi">2</span>     <span class="n">Init</span><span class="p">:</span><span class="mi">0</span><span class="o">/</span><span class="mi">2</span>   <span class="mi">0</span>          <span class="mi">9</span><span class="n">s</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>       <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">4</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>需要将镜像导出复制到 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-4</span></code> 来运行容器:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">nerdcrl save保存导出fedora_systemd镜像</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl save fedora-systemd &gt; fedora-systemd.tar
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>将保存镜像复制到目标主机 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-4</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="n">fedora</span><span class="o">-</span><span class="n">systemd</span><span class="o">.</span><span class="n">tar</span> <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">4</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-4</span></code> 服务器上执行以下命令导入镜像:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">nerdcrl load加载fedora_systemd镜像</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl -n k8s.io load &lt; fedora-systemd.tar
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>完成 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-4</span></code> 镜像导入后，该节点就能正常运行 <code class="docutils literal notranslate"><span class="pre">fedora-systemd</span></code> 镜像的pod，此时:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>就可以看到容器正常运行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                              <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>           <span class="n">NODE</span>        <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">z</span><span class="o">-</span><span class="n">dev</span>                             <span class="mi">2</span><span class="o">/</span><span class="mi">2</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">20</span><span class="n">m</span>   <span class="mf">10.0.7.153</span>   <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">4</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>此时，虽然我们可以通过:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span> <span class="o">--</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>登陆到 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 系统内部，但是毕竟不如直接ssh方便，而这个容器已经是 <a class="reference internal" href="../../docker/init/docker_systemd.html#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 运行了 <a class="reference internal" href="../../infra_service/ssh/index.html#ssh"><span class="std std-ref">ssh服务</span></a> 。所以，此时我们需要完成 <a class="reference internal" href="z-k8s_cilium_ingress.html#z-k8s-cilium-ingress"><span class="std std-ref">Kubernetes集群(z-k8s)部署Cilium Ingress</span></a> 才能通过外部网络访问 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code></p>
+</div>
 </section>
 </section>
 
@@ -279,7 +396,7 @@ sudo mv * /usr/bin/
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="z-k8s.html" class="btn btn-neutral float-left" title="Kubernetes集群(z-k8s)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="z-k8s_cilium_metallb.html" class="btn btn-neutral float-left" title="Kubernetes集群(z-k8s)配置Cilium集成MetalLB" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="z-k8s_cilium_ingress.html" class="btn btn-neutral float-right" title="Kubernetes集群(z-k8s)部署Cilium Ingress" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

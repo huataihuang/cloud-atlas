@@ -24,6 +24,9 @@
    z-k8s_runtime.rst
    z-k8s_kubeadm.rst
    z-k8s.rst
+   z-k8s_cilium_kubeproxy_free.rst
+   z-k8s_cilium_istio.rst
+   z-k8s_cilium_metallb.rst
    z-k8s_nerdctl.rst
    z-k8s_cilium_ingress.rst
    z-k8s_docker_registry.rst
