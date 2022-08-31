@@ -84,6 +84,23 @@ nvme-cli用户工具
    :linenos:
    :caption: nvme smart-log 输出
 
+``smart-log-add``  输出信息中参数说明(不是所有设备都支持， ``smart-log`` 包含了部分参数):
+
+.. csv-table:: nvme smart-log输出参数说明
+   :file: nvme-cli/nvme_smart-log.csv
+   :widths: 15, 15, 70
+   :header-rows: 1
+
+- 安装 ``smartmontools`` 工具之后，使用 ``smartctl`` 可以更为方便检查SMART信息::
+
+   smartctl --all /dev/nvme0n1
+
+输出:
+
+.. literalinclude:: nvme-cli/nvme_smartctl.txt
+   :language: bash
+   :caption: smartctl --all /dev/nvme0n1 输出信息
+
 - 检查firmware 日志页面::
 
    sudo nvme fw-log /dev/nvme0n1
@@ -170,3 +187,4 @@ SSD厂商通常会在SSD的生产周期内多次发布firmware更新，不过一
 
 - `NVMe management command line interface <https://github.com/linux-nvme/nvme-cli>`_
 - `Open Source NVMe™ Management Utility – NVMe Command Line Interface (NVMe-CLI) <https://nvmexpress.org/open-source-nvme-management-utility-nvme-command-line-interface-nvme-cli/>`_
+- `Using NVMe Command Line Tools to Check NVMe Flash Health <https://www.percona.com/blog/2017/02/09/using-nvme-command-line-tools-to-check-nvme-flash-health/>`_
