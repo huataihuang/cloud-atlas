@@ -108,7 +108,10 @@
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_runtime.html">准备Kubernetes集群(z-k8s)容器运行时</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_kubeadm.html">Kubernetes集群(z-k8s)kubeadm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s.html">Kubernetes集群(z-k8s)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)配置Cilium完全取代kube-proxy</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)配置Cilium完全取代kube-proxy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#kube-proxy">已经安装 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 的替换</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_istio.html">Kubernetes集群(z-k8s)配置Cilium结合Istio</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_metallb.html">Kubernetes集群(z-k8s)配置Cilium集成MetalLB</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_nerdctl.html">Kubernetes集群(z-k8s)使用nerdctl</a></li>
@@ -163,8 +166,78 @@
              
   <section id="kubernetes-z-k8s-ciliumkube-proxy">
 <span id="z-k8s-cilium-kubeproxy-free"></span><h1>Kubernetes集群(z-k8s)配置Cilium完全取代kube-proxy<a class="headerlink" href="#kubernetes-z-k8s-ciliumkube-proxy" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="../../kubernetes/network/cilium/networking/cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 提供优化的网络架构，但是对于已经部署 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 的集群需要谨慎操作。</p>
-<p>待整理…</p>
+<p><a class="reference internal" href="../../kubernetes/network/cilium/networking/cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 提供优化的网络架构</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>在 <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 初始化集群时候就可以跳过安装 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> :</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">kubeadm初始化集群时跳过安装kube-proxy</span><a class="headerlink" href="#id1" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubeadm init --skip-phases<span class="o">=</span>addon/kube-proxy
+</pre></div>
+</div>
+</div>
+<p>但是对于已经部署 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 的集群需要谨慎操作(会断网)</p>
+</div>
+<section id="kube-proxy">
+<h2>已经安装 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 的替换<a class="headerlink" href="#kube-proxy" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>对于已经安装了 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 作为 DaemonSet 的Kubernetes集群，则通过以下命令移除 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code></p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>删除kube-proxy会导致现有服务中断链接，并且停止流量，直到Cilium替换完全安装好才能恢复</p>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">移除Kubernetes集群Kube-proxy DaemonSet</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system delete ds kube-proxy
+<span class="c1"># Delete the configmap as well to avoid kube-proxy being reinstalled during a Kubeadm upgrade (works only for K8s 1.19 and newer)</span>
+kubectl -n kube-system delete cm kube-proxy
+<span class="c1"># Run on each node with root permissions:</span>
+iptables-save <span class="p">|</span> grep -v KUBE <span class="p">|</span> iptables-restore
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>设置Helm仓库:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">设置cilium Helm仓库</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm repo add cilium https://helm.cilium.io/
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>执行以下命令启用 cilium kube-proxy free 支持:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#API_SERVER_IP=192.168.6.101</span>
+<span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
+<span class="c1"># Kubeadm default is 6443</span>
+<span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
+helm upgrade cilium cilium/cilium --version <span class="m">1</span>.11.7 <span class="se">\</span>
+    --namespace kube-system <span class="se">\</span>
+    --set <span class="nv">kubeProxyReplacement</span><span class="o">=</span>strict <span class="se">\</span>
+    --set <span class="nv">k8sServiceHost</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_IP</span><span class="si">}</span> <span class="se">\</span>
+    --set <span class="nv">k8sServicePort</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_PORT</span><span class="si">}</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>这里执行 <code class="docutils literal notranslate"><span class="pre">helm</span> <span class="pre">upgrade</span></code> 是因为我采用的是安装 <a class="reference internal" href="z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 时已经部署 <a class="reference internal" href="../../kubernetes/network/cilium/index.html#cilium"><span class="std std-ref">Cilium网络</span></a> ，现在是更新配置。如果在安装时就启用 <code class="docutils literal notranslate"><span class="pre">kube-proxy-free</span></code> 则使用 <code class="docutils literal notranslate"><span class="pre">helm</span> <span class="pre">install</span></code></p>
+</div>
+<ul class="simple">
+<li><p>现在我们可以检查cilium是否在每个节点正常工作:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">kubectl检查cilium的pods是否在各个节点正常运行</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system get pods -l k8s-app<span class="o">=</span>cilium -o wide
+</pre></div>
+</div>
+</div>
+<p>完成上述步骤即完成了 Kube-proxy 完全替换成 Cilium ，验证是否工作正常可通过 <a class="reference internal" href="z-k8s_cilium_ingress.html#z-k8s-cilium-ingress"><span class="std std-ref">Kubernetes集群(z-k8s)部署Cilium Ingress</span></a></p>
+</section>
 </section>
 
 

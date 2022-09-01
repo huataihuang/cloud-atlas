@@ -4,7 +4,7 @@
 在Cilium网络部署MetalLB
 ========================
 
-我在 :ref:`cilium_k8s_ingress_http` 配置 ingress 输出 http服务时，遇到一个问题: 默认配置 LoadBalancer 类型服务，但是由于是裸机部署，并没哟云厂商提供的负载均衡。所以Ingress一直没有分配到IP地址，也没有对应的 External-IP。
+我在 :ref:`cilium_k8s_ingress_http` 配置 ingress 输出 http服务时，遇到一个问题: 默认配置 LoadBalancer 类型服务，但是由于是裸机部署，并没有云厂商提供的负载均衡。所以Ingress一直没有分配到IP地址，也没有对应的 External-IP。
 
 解决方法是部署 metallb 来提供对外服务IP地址
 

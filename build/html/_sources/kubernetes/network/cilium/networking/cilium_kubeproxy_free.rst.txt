@@ -13,9 +13,11 @@ Cilium提供了完全取代 ``kube-proxy`` 的运行模式。比较简单的方�
 快速起步
 =========
 
-- 在 ``kubeadm`` 初始化集群时候就可以跳过安装 ``kube-proxy`` ::
+- 在 ``kubeadm`` 初始化集群时候就可以跳过安装 ``kube-proxy`` :
 
-   kubeadm init --skip-phases=addon/kube-proxy
+.. literalinclude:: cilium_kubeproxy_free/kubedam_init_skip_kube-proxy
+   :language: bash
+   :caption: kubeadm初始化集群时跳过安装kube-proxy
 
 已经安装 ``kube-proxy`` 的替换方法
 ========================================
@@ -68,9 +70,11 @@ Cilium提供了完全取代 ``kube-proxy`` 的运行模式。比较简单的方�
 
 另外一种解决方法可以参考 `Cannot re-use a name that is still in use <https://docs.microfocus.com/doc/Containerized_Operations_Bridge/2020.08/TShelmCannotreusename>`_ ，即先使用 ``helm uninstall`` 卸载组件，然后再进行 ``helm install`` (未尝试)。
 
-- 现在我们可以检查cilium是否在每个节点正常工作::
+- 现在我们可以检查cilium是否在每个节点正常工作:
 
-   kubectl -n kube-system get pods -l k8s-app=cilium -o wide
+.. literalinclude:: cilium_kubeproxy_free/kubectl_get_cilium_pods
+   :language: bash
+   :caption: kubectl检查cilium的pods是否在各个节点正常运行
 
 输出显示::
 

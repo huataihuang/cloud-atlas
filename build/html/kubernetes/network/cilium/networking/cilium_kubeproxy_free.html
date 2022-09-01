@@ -194,19 +194,21 @@
 </div>
 <section id="id1">
 <h2>快速起步<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
-<ul>
-<li><p>在 <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 初始化集群时候就可以跳过安装 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">init</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">phases</span><span class="o">=</span><span class="n">addon</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">proxy</span>
+<ul class="simple">
+<li><p>在 <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 初始化集群时候就可以跳过安装 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">kubeadm初始化集群时跳过安装kube-proxy</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubeadm init --skip-phases<span class="o">=</span>addon/kube-proxy
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 </section>
 <section id="kube-proxy">
 <h2>已经安装 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 的替换方法<a class="headerlink" href="#kube-proxy" title="Permalink to this heading">¶</a></h2>
 <p>对于已经安装了 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 作为 DaemonSet 的Kubernetes集群，则通过以下命令移除 <code class="docutils literal notranslate"><span class="pre">kube-proxy</span></code> 。 <code class="docutils literal notranslate"><span class="pre">注意:</span> <span class="pre">删除kube-proxy会导致现有服务中断链接，并且停止流量，直到Cilium替换完全安装好才能恢复</span></code></p>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">移除Kubernetes集群Kube-proxy DaemonSet</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">移除Kubernetes集群Kube-proxy DaemonSet</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system delete ds kube-proxy
 <span class="c1"># Delete the configmap as well to avoid kube-proxy being reinstalled during a Kubeadm upgrade (works only for K8s 1.19 and newer)</span>
 kubectl -n kube-system delete cm kube-proxy
@@ -218,8 +220,8 @@ iptables-save <span class="p">|</span> grep -v KUBE <span class="p">|</span> ipt
 <ul class="simple">
 <li><p>设置Helm仓库:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">设置cilium Helm仓库</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">设置cilium Helm仓库</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm repo add cilium https://helm.cilium.io/
 </pre></div>
 </div>
@@ -227,8 +229,8 @@ iptables-save <span class="p">|</span> grep -v KUBE <span class="p">|</span> ipt
 <ul class="simple">
 <li><p>执行以下命令进行安装:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#API_SERVER_IP=192.168.6.101</span>
 <span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
 <span class="c1"># Kubeadm default is 6443</span>
@@ -247,8 +249,8 @@ helm install cilium cilium/cilium --version <span class="m">1</span>.11.7 <span 
 </div>
 <p>原因官方文档是以第一次初始安装cilium为准，也就是直接删除掉kube-proxy之后，立即进行cilium安装。而我的操作步骤是，安装了cilium之后，再删除掉kube-proxy并重新安装cilium，所以就会出现冲突报错。这个问题参考 <a class="reference external" href="https://stackoverflow.com/questions/70464815/cannot-install-kubernetes-helm-chart-error-cannot-re-use-a-name-that-is-still-i">Cannot install kubernetes helm chart Error: cannot re-use a name that is still in use</a> ，也就是采用 <a class="reference internal" href="../../../deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 提供的
 <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> 命令代替 <code class="docutils literal notranslate"><span class="pre">install</span></code> 命令，就可以重新安装:</p>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">Cilium替换kube-proxy</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#API_SERVER_IP=192.168.6.101</span>
 <span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
 <span class="c1"># Kubeadm default is 6443</span>
@@ -279,13 +281,15 @@ For any further help, visit https://docs.cilium.io/en/v1.11/gettinghelp
 </pre></div>
 </div>
 <p>另外一种解决方法可以参考 <a class="reference external" href="https://docs.microfocus.com/doc/Containerized_Operations_Bridge/2020.08/TShelmCannotreusename">Cannot re-use a name that is still in use</a> ，即先使用 <code class="docutils literal notranslate"><span class="pre">helm</span> <span class="pre">uninstall</span></code> 卸载组件，然后再进行 <code class="docutils literal notranslate"><span class="pre">helm</span> <span class="pre">install</span></code> (未尝试)。</p>
-<ul>
-<li><p>现在我们可以检查cilium是否在每个节点正常工作:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">l</span> <span class="n">k8s</span><span class="o">-</span><span class="n">app</span><span class="o">=</span><span class="n">cilium</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
+<ul class="simple">
+<li><p>现在我们可以检查cilium是否在每个节点正常工作:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">kubectl检查cilium的pods是否在各个节点正常运行</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system get pods -l k8s-app<span class="o">=</span>cilium -o wide
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 <p>输出显示:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>           <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>              <span class="n">NODE</span>        <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
 <span class="n">cilium</span><span class="o">-</span><span class="mi">2</span><span class="n">qcdd</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">16</span><span class="n">m</span>   <span class="mf">192.168.6.113</span>   <span class="n">z</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">3</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
@@ -323,8 +327,8 @@ For any further help, visit https://docs.cilium.io/en/v1.11/gettinghelp
 <ul class="simple">
 <li><p>准备 <code class="docutils literal notranslate"><span class="pre">my-nginx.yaml</span></code> :</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">部署Nginx my-nginx.yaml</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">部署Nginx my-nginx.yaml</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -420,15 +424,15 @@ For any further help, visit https://docs.cilium.io/en/v1.11/gettinghelp
 <ul class="simple">
 <li><p>现在我们可以通过 <code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">service</span> <span class="pre">list</span></code> 命令来验证 Cilium eBPF kube-proxy 替换所创建的新的 NodePort 服务:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system <span class="nb">exec</span> ds/cilium -- cilium service list
 </pre></div>
 </div>
 </div>
 <p>输出显示:</p>
-<div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表输出信息</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">检查cilium DaemonSet的服务列表输出信息</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ID   Frontend              Service Type   Backend
 <span class="m">1</span>    <span class="m">10</span>.104.129.196:443    ClusterIP      <span class="nv">1</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.114:4244
                                           <span class="nv">2</span> <span class="o">=</span>&gt; <span class="m">192</span>.168.6.102:4244
@@ -522,8 +526,8 @@ Commercial support is available at
 <p class="admonition-title">警告</p>
 <p>我这里配置错误了，折腾了一下才解决，请参考下文的排查和纠正。最后我给出一个正确的简化配置(不修订默认值)。Cilium有很多强大的网络功能配置需要联动，并且和底层云计算underlay网络(vxlan等)有关，所以调整要非常小心。</p>
 </div>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(存在错误，无法启动cilium)</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(存在错误，无法启动cilium)</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
 <span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
 helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span class="se">\</span>
@@ -558,8 +562,8 @@ cilium-vk624                        0/1     CrashLoopBackOff   4 (74s ago)   3m4
 </pre></div>
 </div>
 <p>显示容器健康检查失败:</p>
-<div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">激活 socketLB.hostNamespaceOnly 出现pods不断crash</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">激活 socketLB.hostNamespaceOnly 出现pods不断crash</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Events:
   Type     Reason     Age                    From               Message
   ----     ------     ----                   ----               -------
@@ -608,8 +612,8 @@ cilium-vk624                        0/1     CrashLoopBackOff   4 (74s ago)   3m4
 </pre></div>
 </div>
 <p>发现错误是参数错误:</p>
-<div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">激活 socketLB.hostNamespaceOnly 后crash pod日志</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">激活 socketLB.hostNamespaceOnly 后crash pod日志</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Defaulted container <span class="s2">&quot;cilium-agent&quot;</span> out of: cilium-agent, mount-cgroup <span class="o">(</span>init<span class="o">)</span>, apply-sysctl-overwrites <span class="o">(</span>init<span class="o">)</span>, mount-bpf-fs <span class="o">(</span>init<span class="o">)</span>, clean-cilium-state <span class="o">(</span>init<span class="o">)</span>
 <span class="nv">level</span><span class="o">=</span>info <span class="nv">msg</span><span class="o">=</span><span class="s2">&quot;Started gops server&quot;</span> <span class="nv">address</span><span class="o">=</span><span class="s2">&quot;127.0.0.1:9890&quot;</span> <span class="nv">subsys</span><span class="o">=</span>daemon
 <span class="hll"><span class="nv">level</span><span class="o">=</span>warning <span class="nv">msg</span><span class="o">=</span><span class="s2">&quot;If auto-direct-node-routes is enabled, then you are recommended to also configure ipv4-native-routing-cidr. If ipv4-native-routing-cidr is not configured, this may lead to pod to pod traffic being masqueraded, which can cause problems with performance, observability and policy&quot;</span> <span class="nv">subsys</span><span class="o">=</span>config
@@ -951,8 +955,8 @@ cilium-vk624                        0/1     CrashLoopBackOff   4 (74s ago)   3m4
 <p>一旦关闭 <code class="docutils literal notranslate"><span class="pre">tunnel</span></code> ，则必须同时配置 <code class="docutils literal notranslate"><span class="pre">ipv4-native-routing-cidr:</span> <span class="pre">x.x.x.x/y</span></code> 表示不执行封包的路由 参考 <a class="reference external" href="https://docs.cilium.io/en/v1.12/concepts/networking/routing/#native-routing">Cilium Concepts &gt;&gt; Networking &gt;&gt; Routing &gt;&gt; Native-Routing</a></p>
 <p>cilium 默认就启用了 <code class="docutils literal notranslate"><span class="pre">Encapsulation</span></code> (封包)，不需要配置，这样就可以和 underlying 网络架构配合无需更多配置。此时所有集群节点之间采用 <code class="docutils literal notranslate"><span class="pre">mesh</span> <span class="pre">of</span> <span class="pre">tunnels</span></code> 的UDP封包协议，如VXLAN或Geneve。所有Cilium node的流量都是封包的。</p>
 <p>所以，我现在修订为:</p>
-<div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">重新更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio，部分配置恢复默认</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">重新更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio，部分配置恢复默认</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
 <span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
 helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span class="se">\</span>
@@ -970,8 +974,8 @@ helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span 
 </div>
 </div>
 <p>综上所述，实际上我走了弯路，应该保持默认配置情况下有限修订，简化配置如下(以此为准):</p>
-<div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">简化且正确配置方法: 更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(不修改默认配置)</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">简化且正确配置方法: 更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(不修改默认配置)</span><a class="headerlink" href="#id17" title="永久链接至代码">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
 <span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
 helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span class="se">\</span>

@@ -109,7 +109,11 @@
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_kubeadm.html">Kubernetes集群(z-k8s)kubeadm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s.html">Kubernetes集群(z-k8s)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_kubeproxy_free.html">Kubernetes集群(z-k8s)配置Cilium完全取代kube-proxy</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)配置Cilium结合Istio</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)配置Cilium结合Istio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ciliumistio">设置Cilium集成Istio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cilium-istioctl">安装cilium-istioctl</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_metallb.html">Kubernetes集群(z-k8s)配置Cilium集成MetalLB</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_nerdctl.html">Kubernetes集群(z-k8s)使用nerdctl</a></li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_cilium_ingress.html">Kubernetes集群(z-k8s)部署Cilium Ingress</a></li>
@@ -163,8 +167,66 @@
              
   <section id="kubernetes-z-k8s-ciliumistio">
 <span id="z-k8s-cilium-istio"></span><h1>Kubernetes集群(z-k8s)配置Cilium结合Istio<a class="headerlink" href="#kubernetes-z-k8s-ciliumistio" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="../../kubernetes/network/cilium/istio/cilium_istio_startup.html#cilium-istio-startup"><span class="std std-ref">Cilium Istio集成起步</span></a> 可以快速完成Cilium集成 <a class="reference internal" href="../../kubernetes/istio/index.html#istio"><span class="std std-ref">Istio服务网格</span></a> ，使得 Cilium 获得更为强大的7层网络控制。</p>
-<p>待整理…</p>
+<p><a class="reference internal" href="../../kubernetes/network/cilium/istio/cilium_istio_startup.html#cilium-istio-startup"><span class="std std-ref">Cilium Istio集成起步</span></a> 可以快速完成Cilium集成 <a class="reference internal" href="../../kubernetes/istio/index.html#istio"><span class="std std-ref">Istio服务网格</span></a> ，使得 Cilium 获得更为强大的7层网络控制: 通过Istio sidecar代理实现的具有mTLS加密流量的HTTP L7网络策略。</p>
+<section id="ciliumistio">
+<h2>设置Cilium集成Istio<a class="headerlink" href="#ciliumistio" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>当采用 <a class="reference internal" href="../../kubernetes/network/cilium/networking/cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 架构 ( <a class="reference internal" href="z-k8s_cilium_kubeproxy_free.html#z-k8s-cilium-kubeproxy-free"><span class="std std-ref">Kubernetes集群(z-k8s)配置Cilium完全取代kube-proxy</span></a> )，就需要在 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> CLI 传递 <code class="docutils literal notranslate"><span class="pre">--config</span> <span class="pre">bpf-lb-sock-hostns-only=true</span></code> 或者 在 <a class="reference internal" href="../../kubernetes/deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 选项中使用 <code class="docutils literal notranslate"><span class="pre">socketLB.hostNamespaceOnly</span></code> 。如果没有这个选项，当Cilium通过socket负载均衡提供服务解析(service resolution)时，会bypass掉Istio sidecar，这就导致Istio的加密(encryption)和遥测(telemetry)功能无效。</p>
+</div>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../kubernetes/deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> Cilium配置，激活 <code class="docutils literal notranslate"><span class="pre">socketLB.hostNamespaceOnly</span></code> 集成 <a class="reference internal" href="../../kubernetes/istio/index.html#istio"><span class="std std-ref">Istio服务网格</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">简化且正确配置方法: 更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(不修改默认配置)</span><a class="headerlink" href="#id1" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
+<span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
+helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span class="se">\</span>
+   --namespace kube-system <span class="se">\</span>
+   --reuse-values <span class="se">\</span>
+   --set <span class="nv">kubeProxyReplacement</span><span class="o">=</span>strict <span class="se">\</span>
+   --set socketLB.hostNamespaceOnly<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+   --set <span class="nv">k8sServiceHost</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_IP</span><span class="si">}</span> <span class="se">\</span>
+   --set <span class="nv">k8sServicePort</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_PORT</span><span class="si">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="cilium-istioctl">
+<h2>安装cilium-istioctl<a class="headerlink" href="#cilium-istioctl" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>检查确认cilium已经运行在集群中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cilium</span> <span class="n">status</span>
+</pre></div>
+</div>
+</li>
+<li><p>下载 <code class="docutils literal notranslate"><span class="pre">cilium</span> <span class="pre">enhanced</span> <span class="pre">istioctl</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">下载cilium增强istioctl</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -L https://github.com/cilium/istio/releases/download/1.10.6-1/cilium-istioctl-1.10.6-1-linux-amd64.tar.gz <span class="p">|</span> tar xz
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>部署默认istio配置到Kubernetes:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">安装cilium增强istioctl</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./cilium-istioctl install -y
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>添加一个namespace标签让Istio能够在部署应用时自动注入 <a class="reference internal" href="../../kubernetes/istio/envoy/index.html#envoy"><span class="std std-ref">Envoy负载均衡/反向代理</span></a> sidecar 代理:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">为namespace添加标签，以便istio能够自动注入sidecar proxy</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl label namespace default istio-injection<span class="o">=</span>enabled
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 
 
