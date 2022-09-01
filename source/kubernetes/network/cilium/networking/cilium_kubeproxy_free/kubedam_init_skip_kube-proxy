@@ -1,0 +1,1 @@
+kubeadm init --skip-phases=addon/kube-proxy
