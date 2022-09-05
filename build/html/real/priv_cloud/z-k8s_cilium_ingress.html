@@ -114,6 +114,9 @@
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_nerdctl.html">Kubernetes集群(z-k8s)使用nerdctl</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes集群(z-k8s)部署Cilium Ingress</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">说明</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cilium-ingress-controller">安装Cilium Ingress Controller</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ingress">部署ingress</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="z-k8s_docker_registry.html">Kubernetes集群(z-k8s)部署镜像Redgistry</a></li>
@@ -175,8 +178,116 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>在部署 <a class="reference internal" href="../../kubernetes/network/cilium/service_mesh/cilium_k8s_ingress.html#cilium-k8s-ingress"><span class="std std-ref">Cilium Kubernetes Ingress</span></a> 并启用之前，需要先部署 :ref:</p>
+<p>在部署 <a class="reference internal" href="../../kubernetes/network/cilium/service_mesh/cilium_k8s_ingress.html#cilium-k8s-ingress"><span class="std std-ref">Cilium Kubernetes Ingress</span></a> 并启用之前，需要先部署 <a class="reference internal" href="z-k8s_cilium_metallb.html#z-k8s-cilium-metallb"><span class="std std-ref">Kubernetes集群(z-k8s)配置Cilium集成MetalLB</span></a> 才能确保SVC能够获得 <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code></p>
+<p>本文案例是将 <a class="reference internal" href="z-k8s_nerdctl.html#z-k8s-nerdctl"><span class="std std-ref">Kubernetes集群(z-k8s)使用nerdctl</span></a> 部署的开发所用的 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 输出服务端口 <code class="docutils literal notranslate"><span class="pre">22</span> <span class="pre">80</span> <span class="pre">443</span></code> 方便后续开发测试</p>
 </div>
+</section>
+<section id="cilium-ingress-controller">
+<h2>安装Cilium Ingress Controller<a class="headerlink" href="#cilium-ingress-controller" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>使用 <a class="reference internal" href="../../kubernetes/deployment/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 的参数 <code class="docutils literal notranslate"><span class="pre">ingressController.enabled</span></code> 激活 Cilium Ingress Controller:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">helm upgrade cilium激活ingress controller</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span class="se">\</span>
+    --namespace kube-system <span class="se">\</span>
+    --reuse-values <span class="se">\</span>
+    --set ingressController.enabled<span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>滚动重启 <code class="docutils literal notranslate"><span class="pre">cilium-operator</span></code> 和每个节点上的 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> <a class="reference internal" href="../../kubernetes/concepts/workloads/controllers/daemonset.html#daemonset"><span class="std std-ref">DaemonSet</span></a> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">cilium激活ingress controller后重启cilium-operator和cilium ds</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl -n kube-system rollout restart deployment/cilium-operator
+kubectl -n kube-system rollout restart ds/cilium
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>然后检查Cilium agent和operato状态:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cilium</span> <span class="n">status</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="ingress">
+<h2>部署ingress<a class="headerlink" href="#ingress" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>前置工作已经在 <a class="reference internal" href="z-k8s_nerdctl.html#z-k8s-nerdctl"><span class="std std-ref">Kubernetes集群(z-k8s)使用nerdctl</span></a> 部署容器 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code></p></li>
+<li><p>定义 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 的SVC: <code class="docutils literal notranslate"><span class="pre">z-dev-svc.yaml</span></code></p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">定义z-dev对外服务</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">z-dev-service</span><span class="w"></span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">z-dev</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh</span><span class="w"></span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span><span class="w"></span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span><span class="w"></span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>这里采用了简化的 TCP 端口，对外输出 <code class="docutils literal notranslate"><span class="pre">22</span> <span class="pre">80</span> <span class="pre">443</span></code> 方便开发测试，但是实际上 <a class="reference internal" href="../../kubernetes/concepts/services_networking/ingress.html#ingress"><span class="std std-ref">Ingress</span></a> 是对外提供HTTP服务，负载均衡和SSL卸载，也就是传统的 <a class="reference internal" href="../../web/nginx/index.html#nginx"><span class="std std-ref">Nginx</span></a> 演化出来，是7层服务的虚拟机主机，直接输出TCP端口是一种简化模式。实际生产环境，应该使用 <code class="docutils literal notranslate"><span class="pre">HTTP</span></code> 协议</p>
+</div>
+<ul>
+<li><p>创建服务:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">z</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">svc</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+</li>
+<li><p>准备 <code class="docutils literal notranslate"><span class="pre">z-dev-ingress.yaml</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">定义z-dev对外ingress</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">z-dev-ingress</span><span class="w"></span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">z-dev</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium</span><span class="w"></span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">z-dev</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh</span><span class="w"></span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span><span class="w"></span>
+<span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
+<span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span><span class="w"></span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
+<span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://serverfault.com/questions/1013402/is-it-possible-to-expose-2-ports-in-kubernetes-pod">Is it possible to expose 2 ports in Kubernetes pod?</a></p></li>
+</ul>
 </section>
 </section>
 

@@ -11,6 +11,7 @@ Linux系统管理
    cron.rst
    os_fork_resource_unavailable.rst
    linux_backlight.rst
+   process/index
 
 .. only::  subproject and html
 

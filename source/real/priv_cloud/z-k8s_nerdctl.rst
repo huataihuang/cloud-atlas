@@ -67,9 +67,20 @@ buildkit安装和准备
 
 - 执行 ``kubectl apply`` 命令在Kubernetes集群 :ref:`z-k8s` 中构建运行pod: 
 
-.. literalinclude:: z-k8s_nerdctl/kubectl_apply_run_pod
+- 准备 ``z-dev`` 部署配置 ``z-dev-depolyment.yaml`` :
+
+.. literalinclude:: z-k8s_nerdctl/z-dev-depolyment.yaml
    :language: bash
-   :caption: kubectl apply运行pod(yaml)
+   :caption: z-dev部署配置z-dev-depolyment.yaml，定义了pod输出的3个服务端口 22,80,443
+
+.. note::
+
+   这里我改进了 :ref:`nerdctl` 中的实践，将 ``pod`` 改为 :ref:`workload_resources` 也就是 ``Deployment``
+
+- 执行部署::
+
+   kubectl create namespace z-dev
+   kubectl apply -f z-dev-depolyment.yaml
 
 .. note::
 
@@ -77,7 +88,7 @@ buildkit安装和准备
 
 - 检查当前调度 ``z-dev`` 的节点::
 
-   kubectl get pods -o wide
+   kubectl -n z-dev get pods -o wide
 
 可以看到::
 
@@ -102,7 +113,7 @@ buildkit安装和准备
 
 - 完成 ``z-k8s-n-4`` 镜像导入后，该节点就能正常运行 ``fedora-systemd`` 镜像的pod，此时::
 
-   kubectl get pods -o wide
+   kubectl -n z-dev get pods -o wide
 
 就可以看到容器正常运行::
 
@@ -116,3 +127,9 @@ buildkit安装和准备
       kubectl exec -it z-dev -- /bin/bash
 
    登陆到 ``z-dev`` 系统内部，但是毕竟不如直接ssh方便，而这个容器已经是 :ref:`docker_systemd` 运行了 :ref:`ssh` 。所以，此时我们需要完成 :ref:`z-k8s_cilium_ingress` 才能通过外部网络访问 ``z-dev``
+
+参考
+=======
+
+- `Ingress Nginx SSH access and forwarding to Workspace container/pod <https://discuss.kubernetes.io/t/ingress-nginx-ssh-access-and-forwarding-to-workspace-container-pod/14219>`_
+- `Exposing two ports in Google Container Engine <https://stackoverflow.com/questions/34502022/exposing-two-ports-in-google-container-engine>`_
