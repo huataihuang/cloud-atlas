@@ -1,17 +1,14 @@
-.. _linux_admin:
+.. _linux_process:
 
 =================================
-Linux系统管理
+Linux进程管理
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   locale_env.rst
-   cron.rst
-   os_fork_resource_unavailable.rst
-   linux_backlight.rst
-   process/index
+   linux_process_statuses.rst   
+
 
 .. only::  subproject and html
 
