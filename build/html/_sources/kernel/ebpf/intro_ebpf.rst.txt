@@ -4,8 +4,46 @@
 eBPF简介
 ===============================
 
+eBPF源自 BPF ( `Berkeley Packet Filter <https://en.wikipedia.org/wiki/Berkeley_Packet_Filter>`_ 伯克利数据包过滤器  ) ，本质上是内核中一个高效灵活等虚拟类虚拟机组件，可以以一个安全方式在内核挂钩点(kernel hook points)执行字节码。
+
+.. note::
+
+   BPF ( `Berkeley Packet Filter <https://en.wikipedia.org/wiki/Berkeley_Packet_Filter>`_ 伯克利数据包过滤器 )是计算机操作系统中用于分析网络流量的程序技术。BPF为数据链路层提供了一个原始接口，允许发送和接收原始数据链路层数据包。
+
+   BPF 支持过滤数据包，允许用户空间进程提供一个过滤程序来指定它想要接收的数据包。例如，tcpdump 进程可能只想接收启动 TCP 连接的数据包。 BPF 只返回通过进程提供的过滤器的数据包。这避免了将不需要的数据包从操作系统内核复制到进程中，从而大大提高了性能。过滤程序采用虚拟机指令的形式，通过即时（JIT）机制解释或编译成机器代码并在内核中执行。
+
+BPF最初为了高效的网络数据过滤，但是eBPF经过重新设计，不再局限于网络堆栈，而是成为内核的顶级子系统，演变成一个通用的执行引擎(general-purpose execution engine)。开发人员可以基于eBPF开发性能分析工具(performance analysis tools / ref:`performance` )，软件定义网络(SDN)，安全等诸多场合。
+
+技术背景
+=========
+
+1992 年，Steven McCanne 和 Van Jacobson 写了一篇题为 `BSD Packet Filter: A New Architecture for User-level Packet Capture <http://www.tcpdump.org/papers/bpf-usenix93.pdf>`_  的论文。在论文中，作者描述了他们如何在 Unix 内核中实现网络包过滤，这是一种比当时最先进的包过滤技术快 20 倍的新技术。
+
+.. figure:: ../../_static/kernel/ebpf/bpf.png
+   :scale: 40
+
+BPF在包过滤方面引入了两大创新:
+
+- 新型的虚拟机 (VM) 设计，可在基于寄存器的架构的 CPU 上高效运行。
+- 应用程序使用缓存仅复制与过滤数据包相关的数据，而不是所有数据包的信息，这最大限度地减少了 BPF 处理的数据量。
+
+由于这些巨大的改进，所有的 Unix 系统都选择使用 BPF 作为网络包过滤技术，直到今天，许多 Unix 内核（包括 Linux 内核）的衍生产品仍然使用这种实现。
+
+2014 年初，Alexei Starovoitov 实现了eBPF(扩展伯克利包过滤器)。经过重新设计，eBPF 演变成一个通用的执行引擎，可以在其上开发性能分析工具、软件定义网络(SDN)和许多其他场景。 eBPF 最早出现在 3.18 内核中，从那时起最初的 BPF 就被称为经典 BPF（cBPF）。 cBPF 现在在很大程度上已被弃用。现在，Linux 内核只运行 eBPF，内核在执行之前透明地将加载的 cBPF 字节码转换为 eBPF。
+
+eBPF的新设计针对现代硬件做了优化，因此eBPF生成的志林集比旧有的BPF解释器生成的机器码执行得更快。eBPF还增加了虚拟机中的寄存器数量，将原先的2个32位寄存器增加到10个64位寄存器。由于寄存器的数量和宽度增加，开发人员可以更加自由地交换更多信息，并且使用函数参数编写更为复杂的程序。总之，这些改进使得eBPF比原始的BPF快了4倍。
+
+2014年6月，eBPF被扩展到用户空间，这是eBPF技术的转折点。这使得eBPF不再局限于网络栈，而成为了内核的顶层子系统。
+
+与直接修改内核和编写内核模块相比，eBPF 提供了一个新的内核可编程选项:
+
+- eBPF 程序架构强调安全性和稳定性，看起来更像是一个内核模块
+- 但是与内核模块不同的是，eBPF 程序不需要重新编译
+- 正因为eBPF不是内核模块，所以eBPF程序不会导致系统崩溃
+
 参考
 ========
 
+- `Introduction and practice of eBPF <https://www.sobyte.net/post/2022-04/ebpf/>`_
 - `Linux Extended BPF (eBPF) Tracing Tools <http://www.brendangregg.com/ebpf.html>`_
 - `eBPF Documentation: What is eBPF? <https://ebpf.io/what-is-ebpf/>`_

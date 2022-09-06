@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="使用ebpf取代iptables" href="replace_iptables_with_ebpf.html" />
+    <link rel="next" title="eBPF架构" href="ebpf_arch.html" />
     <link rel="prev" title="eBPF" href="index.html" /> 
 </head>
 
@@ -82,9 +82,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../filesystem/index.html">内核文件系统</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">eBPF</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">eBPF简介</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">技术背景</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="ebpf_arch.html">eBPF架构</a></li>
 <li class="toctree-l3"><a class="reference internal" href="replace_iptables_with_ebpf.html">使用ebpf取代iptables</a></li>
 </ul>
 </li>
@@ -150,9 +152,39 @@
              
   <section id="ebpf">
 <span id="intro-ebpf"></span><h1>eBPF简介<a class="headerlink" href="#ebpf" title="Permalink to this heading">¶</a></h1>
-<section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>eBPF源自 BPF ( <a class="reference external" href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">Berkeley Packet Filter</a> 伯克利数据包过滤器  ) ，本质上是内核中一个高效灵活等虚拟类虚拟机组件，可以以一个安全方式在内核挂钩点(kernel hook points)执行字节码。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>BPF ( <a class="reference external" href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">Berkeley Packet Filter</a> 伯克利数据包过滤器 )是计算机操作系统中用于分析网络流量的程序技术。BPF为数据链路层提供了一个原始接口，允许发送和接收原始数据链路层数据包。</p>
+<p>BPF 支持过滤数据包，允许用户空间进程提供一个过滤程序来指定它想要接收的数据包。例如，tcpdump 进程可能只想接收启动 TCP 连接的数据包。 BPF 只返回通过进程提供的过滤器的数据包。这避免了将不需要的数据包从操作系统内核复制到进程中，从而大大提高了性能。过滤程序采用虚拟机指令的形式，通过即时（JIT）机制解释或编译成机器代码并在内核中执行。</p>
+</div>
+<p>BPF最初为了高效的网络数据过滤，但是eBPF经过重新设计，不再局限于网络堆栈，而是成为内核的顶级子系统，演变成一个通用的执行引擎(general-purpose execution engine)。开发人员可以基于eBPF开发性能分析工具(performance analysis tools / ref:<cite>performance</cite> )，软件定义网络(SDN)，安全等诸多场合。</p>
+<section id="id2">
+<h2>技术背景<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>1992 年，Steven McCanne 和 Van Jacobson 写了一篇题为 <a class="reference external" href="http://www.tcpdump.org/papers/bpf-usenix93.pdf">BSD Packet Filter: A New Architecture for User-level Packet Capture</a>  的论文。在论文中，作者描述了他们如何在 Unix 内核中实现网络包过滤，这是一种比当时最先进的包过滤技术快 20 倍的新技术。</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/bpf.png"><img alt="../../_images/bpf.png" src="../../_images/bpf.png" style="width: 622.0px; height: 461.6px;" /></a>
+</figure>
+<p>BPF在包过滤方面引入了两大创新:</p>
 <ul class="simple">
+<li><p>新型的虚拟机 (VM) 设计，可在基于寄存器的架构的 CPU 上高效运行。</p></li>
+<li><p>应用程序使用缓存仅复制与过滤数据包相关的数据，而不是所有数据包的信息，这最大限度地减少了 BPF 处理的数据量。</p></li>
+</ul>
+<p>由于这些巨大的改进，所有的 Unix 系统都选择使用 BPF 作为网络包过滤技术，直到今天，许多 Unix 内核（包括 Linux 内核）的衍生产品仍然使用这种实现。</p>
+<p>2014 年初，Alexei Starovoitov 实现了eBPF(扩展伯克利包过滤器)。经过重新设计，eBPF 演变成一个通用的执行引擎，可以在其上开发性能分析工具、软件定义网络(SDN)和许多其他场景。 eBPF 最早出现在 3.18 内核中，从那时起最初的 BPF 就被称为经典 BPF（cBPF）。 cBPF 现在在很大程度上已被弃用。现在，Linux 内核只运行 eBPF，内核在执行之前透明地将加载的 cBPF 字节码转换为 eBPF。</p>
+<p>eBPF的新设计针对现代硬件做了优化，因此eBPF生成的志林集比旧有的BPF解释器生成的机器码执行得更快。eBPF还增加了虚拟机中的寄存器数量，将原先的2个32位寄存器增加到10个64位寄存器。由于寄存器的数量和宽度增加，开发人员可以更加自由地交换更多信息，并且使用函数参数编写更为复杂的程序。总之，这些改进使得eBPF比原始的BPF快了4倍。</p>
+<p>2014年6月，eBPF被扩展到用户空间，这是eBPF技术的转折点。这使得eBPF不再局限于网络栈，而成为了内核的顶层子系统。</p>
+<p>与直接修改内核和编写内核模块相比，eBPF 提供了一个新的内核可编程选项:</p>
+<ul class="simple">
+<li><p>eBPF 程序架构强调安全性和稳定性，看起来更像是一个内核模块</p></li>
+<li><p>但是与内核模块不同的是，eBPF 程序不需要重新编译</p></li>
+<li><p>正因为eBPF不是内核模块，所以eBPF程序不会导致系统崩溃</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.sobyte.net/post/2022-04/ebpf/">Introduction and practice of eBPF</a></p></li>
 <li><p><a class="reference external" href="http://www.brendangregg.com/ebpf.html">Linux Extended BPF (eBPF) Tracing Tools</a></p></li>
 <li><p><a class="reference external" href="https://ebpf.io/what-is-ebpf/">eBPF Documentation: What is eBPF?</a></p></li>
 </ul>
@@ -164,7 +196,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="eBPF" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="replace_iptables_with_ebpf.html" class="btn btn-neutral float-right" title="使用ebpf取代iptables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ebpf_arch.html" class="btn btn-neutral float-right" title="eBPF架构" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
