@@ -46,9 +46,9 @@ eBPF限制
 - eBPF字节码大小最初限制为 4096 条指令，但从内核 Linux 5.8 开始，现在已经放宽到 100 万条指令（ ``BPF_COMPLEXITY_LIMIT_INSNS`` ）详细参考 ``include/linux/bpf.h``
 
   - 4096 条指令限制（ ``BPF_MAXINSNS`` ）仍然是 保留给非特权 BPF 程序
-  - 新版本的eBPF还支持级联调用多个eBPF程序，可以组合起来实现更多强大功能
+  - 新版本的eBPF还支持级联调用多个eBPF程序(不过传递信息方面存在一定限制)，可以组合起来实现更多强大功能
 
 参考
 =======
 
-- `Introduction and practice of eBPF <https://www.sobyte.net/post/2022-04/ebpf/>`_
+- `Introduction to eBPF <https://houmin.cc/posts/2c811c2c/>`_ !  **向原著者致敬** 并学习

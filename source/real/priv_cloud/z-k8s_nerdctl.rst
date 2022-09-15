@@ -70,7 +70,7 @@ buildkit安装和准备
 - 准备 ``z-dev`` 部署配置 ``z-dev-depolyment.yaml`` :
 
 .. literalinclude:: z-k8s_nerdctl/z-dev-depolyment.yaml
-   :language: bash
+   :language: yaml
    :caption: z-dev部署配置z-dev-depolyment.yaml，定义了pod输出的3个服务端口 22,80,443
 
 .. note::
