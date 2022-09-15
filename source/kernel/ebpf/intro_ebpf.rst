@@ -44,6 +44,11 @@ eBPF的新设计针对现代硬件做了优化，因此eBPF生成的志林集比
 参考
 ========
 
-- `Introduction and practice of eBPF <https://www.sobyte.net/post/2022-04/ebpf/>`_
+- `Introduction to eBPF <https://houmin.cc/posts/2c811c2c/>`_ !  **向原著者致敬** 我最初google到的文章是 `Introduction and practice of eBPF <https://www.sobyte.net/post/2022-04/ebpf/>`_ 非常详尽，我最初以为是英文原著，花费了很多时间翻译。但随着深入阅读，我发现该文作者使用了腾讯云虚拟机并且代码中夹杂中文，所以这篇文章应该是国人著作被翻译成英文。经过了文档蛛丝马迹的搜索(中文互联网copy&paste抹去了太多原著者的痕迹)，终于找到原文(如果没有搞错): `Introduction to eBPF <https://houmin.cc/posts/2c811c2c/>`_ !  **向原著者致敬** 
+
+  - 这篇原文作者 Houmin 写于 2021-03-27 ，我最近才发现原来 2022年 该文被多个网站转载(但没有注明出处)，如 CSDN运维之美(无出处) `万字干货，eBPF 中文入门指南 <https://blog.csdn.net/easylife206/article/details/124054193>`_ 和 云原生实验室(比较厚道,保留了Houmin作者名) `eBPF 完全入门指南.pdf（万字长文） <https://mp.weixin.qq.com/s/zCjk5WmnwLD0J3J9gC4e0Q>`_
+
+我准备进一步从eBPF官网获取原生技术资料，期待能更进一步掌握和深入eBPF技术
+
 - `Linux Extended BPF (eBPF) Tracing Tools <http://www.brendangregg.com/ebpf.html>`_
 - `eBPF Documentation: What is eBPF? <https://ebpf.io/what-is-ebpf/>`_

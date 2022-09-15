@@ -42,6 +42,12 @@ Homebrew
 - :ref:`curl_proxy`
 - :ref:`git_proxy`
 
+我还采用了一种方法是借助 :ref:`vpn_hotspot` ，通过手机VPN共享给局域网使用，使得自己的桌面电脑能够翻墙直接访问Homebrew的软件仓库，才能顺利完成Homebrew安装。
+
+我在完成 Homebrew 安装完成后，立即安装 :ref:`openconnect_vpn` 客户单 ``openconnect`` ，这样可以方便 :ref:`macos` 翻墙，实现很多必要的软件安装::
+
+   brew install openconnect
+
 使用brew
 =========
 

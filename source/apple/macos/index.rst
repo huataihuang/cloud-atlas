@@ -11,6 +11,7 @@ macOS
 
    introduce_macos_studio.rst
    mbp15_late_2013.rst
+   macos_big_sur_gts_root_certificate.rst
    macbook_nvme.rst
    apple_silicon_m1_pro.rst
    macos_install_drive.rst

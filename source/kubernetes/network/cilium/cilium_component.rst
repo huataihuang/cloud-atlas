@@ -45,7 +45,7 @@ Hubble
 Server
 --------
 
-Huber server运行在每个node节点，负责采集Cilium的 :ref:`ebpf` 可视化数据。Huber Server是嵌入在Cilium agent中的，这样能够达到高性能和低资源消耗。并且Huber Server还提供一个gRPC服务用于流量检索和 :ref:`prometheus` metrics
+Hubble server运行在每个node节点，负责采集Cilium的 :ref:`ebpf` 可视化数据。Huber Server是嵌入在Cilium agent中的，这样能够达到高性能和低资源消耗。并且Huber Server还提供一个gRPC服务用于流量检索和 :ref:`prometheus` metrics
 
 Relay
 -------

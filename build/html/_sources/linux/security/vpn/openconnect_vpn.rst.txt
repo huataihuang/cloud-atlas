@@ -165,6 +165,20 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
 连接建立以后，就可以正常使用apt安装Google软件仓库中的软件。
 
+OpenConnect VPN Client使用技巧
+--------------------------------
+
+我在使用 ``openconnect`` 遇到以下几个问题需要解决:
+
+- 需要手工输入用户名和密码
+- 服务器证书过期后每次都要手工接受服务器证书 (早期版本可以使用 ``--no-cert-check`` 参数绕过，但是现在不行，必须明确接受服务器证书)
+
+``openconnect`` 提供了 ``-u`` 参数传递账号名，但是使用 ``-p`` 参数传递密码失败，所以改成 ``--passwd-on-stdin`` 从管道获取密码::
+
+   echo mypassword | sudo openconnect -u <myusernae> --passwd-on-stdin <vpnserver>:<vpn_port>
+
+上述命令可以无需用户干预，只用一条命令就完成VPN服务器连接
+
 Cisco AnyConnect VPN Client
 =============================
 
@@ -201,3 +215,4 @@ Cisco AnyConnect VPN Client
 
 - `Set up OpenConnect VPN Server (ocserv) on Ubuntu 16.04/18.04 with Let’s Encrypt <https://www.linuxbabe.com/ubuntu/openconnect-vpn-server-ocserv-ubuntu-16-04-17-10-lets-encrypt>`_
 - `How to Set up an OpenConnect VPN Server <https://www.alibabacloud.com/blog/how-to-set-up-an-openconnect-vpn-server_595185>`_
+- `How to run openconnect with username and password in a line in the terminal? <https://askubuntu.com/questions/1043024/how-to-run-openconnect-with-username-and-password-in-a-line-in-the-terminal>`_

@@ -84,7 +84,8 @@
 <li class="toctree-l3"><a class="reference internal" href="intro_ebpf.html">eBPF简介</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ebpf_arch.html">eBPF架构</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ebpf实践</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">准备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="replace_iptables_with_ebpf.html">使用ebpf取代iptables</a></li>
@@ -152,10 +153,65 @@
              
   <section id="ebpf">
 <span id="ebpf-in-action"></span><h1>ebpf实践<a class="headerlink" href="#ebpf" title="Permalink to this heading">¶</a></h1>
-<section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>在了解了 <a class="reference internal" href="ebpf_arch.html#ebpf-arch"><span class="std std-ref">eBPF架构</span></a> 之后，可以做一些实践来获得感性认识，进一步了解eBPF的强大能力。</p>
+<p>随着 eBPF 生态系统的发展，现在用于开发 eBPF 程序的工具链也越来越多，通常可以采用:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://www.sobyte.net/post/2022-04/ebpf/">Introduction and practice of eBPF</a></p></li>
+<li><p>基于 bcc 的开发: bcc 提供了 eBPF 的开发，前端使用 Python API，后端 eBPF 程序的 C 实现。 它简单易用，但性能较差。</p></li>
+<li><p>基于libebpf-bootstrap开发: libebpf-bootstrap提供方便的脚手架</p></li>
+<li><p>基于内核源码开发: 内核源码开发门槛较高，也与底层eBPF原理相关性较高(本文案例)</p></li>
+</ul>
+<section id="id1">
+<h2>准备<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>操作系统环境采用 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，内核版本 5.4.0 ，我采用 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 环境的KVM虚拟机 <code class="docutils literal notranslate"><span class="pre">z-udev</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ uname -a
+Linux z-udev 5.4.0-125-generic #141-Ubuntu SMP Wed Aug 10 13:42:03 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
+</pre></div>
+</div>
+</li>
+<li><p>安装必要的依赖:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">安装开发eBPF的软件工具链</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install -y bison build-essential cmake flex git libedit-dev pkg-config libmnl-dev <span class="se">\</span>
+   python zlib1g-dev libssl-dev libelf-dev libcap-dev libfl-dev llvm clang pkg-config <span class="se">\</span>
+   gcc-multilib luajit libluajit-5.1-dev libncurses5-dev libclang-dev clang-tools
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>在Ubuntu Linux环境安装内核源代码， <a class="reference internal" href="../../linux/ubuntu_linux/admin/apt.html#apt"><span class="std std-ref">APT包管理</span></a> 安装非常方便:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Ubuntu Linux安装内核源代码</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 搜索当前源代码包名</span>
+apt-cache search linux-source
+
+<span class="c1"># 安装最新内核源代码</span>
+sudo apt install linux-source-5.4.0
+</pre></div>
+</div>
+</div>
+<p>源代码被安装到 <code class="docutils literal notranslate"><span class="pre">/usr/src</span></code> 目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>huatai@z-udev:/usr/src$ ls -lh
+total 24K
+drwxr-xr-x 24 root root 4.0K Apr  1 07:13 linux-headers-5.4.0-107
+drwxr-xr-x  7 root root 4.0K Apr  1 07:13 linux-headers-5.4.0-107-generic
+drwxr-xr-x 24 root root 4.0K May 21 23:13 linux-headers-5.4.0-110
+drwxr-xr-x  7 root root 4.0K May 21 23:13 linux-headers-5.4.0-110-generic
+drwxr-xr-x 24 root root 4.0K Sep  7 08:21 linux-headers-5.4.0-125
+drwxr-xr-x  7 root root 4.0K Sep  7 08:21 linux-headers-5.4.0-125-generic
+drwxr-xr-x  4 root root   75 Sep  7 08:32 linux-source-5.4.0
+lrwxrwxrwx  1 root root   45 Aug 10 16:17 linux-source-5.4.0.tar.bz2 -&gt; linux-source-5.4.0/linux-source-5.4.0.tar.bz2
+huatai@z-udev:/usr/src$ sudo tar -jxvf linux-source-5.4.0.tar.bz2
+huatai@z-udev:/usr/src$ cd linux-source-5.4.0
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://houmin.cc/posts/2c811c2c/">Introduction to eBPF</a> !  <strong>向原著者致敬</strong></p></li>
 </ul>
 </section>
 </section>
