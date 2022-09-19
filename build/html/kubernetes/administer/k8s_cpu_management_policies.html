@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kubernetes节点CPU管理策略 &mdash; Cloud Atlas 0.1 文档</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="copyright" title="版权所有" href="../../copyright.html" />
+    <link rel="next" title="使用kubeadm管理Kubernetes" href="kubeadm_administer/index.html" />
+    <link rel="prev" title="获取指定节点上的pods" href="get_pods_on_node.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../studio/index.html">Studio Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure/index.html">Infrastructure Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devops/index.html">DevOps Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kvm/index.html">KVM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph/index.html">Ceph Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gluster/index.html">Gluster Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ovirt/index.html">oVirt Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openstack/index.html">OpenStack Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker/index.html">Docker Atlas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Kubernetes Atlas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../kubernetes_overview.html">Kubernetes概览</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../startup_prepare/index.html">Kubernetes起步准备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../startup/index.html">Kubernetes快速起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/index.html">Kubernetes概念辨析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deployment/index.html">Kubernetes部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../deploy_app/index.html">Kubernetes部署应用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../manage_object/index.html">Kubernetes管理对象</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Kubernetes管理</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="kubernetes_dashboard.html">Kubernetes仪表盘</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_pods_and_containers.html">配置pod和容器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="delete_cluster.html">删除Kubernetes集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cordon_node.html">暂停节点调度(cordon)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="drain_node.html">安全地清空一个Kubernetes节点</a></li>
+<li class="toctree-l3"><a class="reference internal" href="remove_node.html">从Kubernetes集群删除节点</a></li>
+<li class="toctree-l3"><a class="reference internal" href="set_k8s_worker_internal_ip.html">指定Kubernetes工作节点内网IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="port_forward_access_k8s_app.html">使用端口转发来访问Kubernetes集群应用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="get_pods_on_node.html">获取指定节点上的pods</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kubernetes节点CPU管理策略</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cpu">CPU管理策略</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="kubeadm_administer/index.html">使用kubeadm管理Kubernetes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="etcd/index.html">etcd - 分布式kv存储</a></li>
+<li class="toctree-l3"><a class="reference internal" href="coredns/index.html">CoreDNS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="federation/index.html">Kubernetes Federation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../access_application/index.html">Kubernetes访问应用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../container_runtimes/index.html">Kubernetes 容器运行时(Container Runtimes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../configure/index.html">Kubernetes 配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network/index.html">Kubernetes网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../in_action/index.html">Kubernetes实践</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numa/index.html">Kubernetes NUMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../backup/index.html">Kubernetes备份与恢复</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">Kubernetes存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../production/index.html">Kubernetes生产环境</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../service_mesh/index.html">Service Mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../istio/index.html">Istio服务网格</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../serverless/index.html">Kubernetes Severless</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ci_cd/index.html">Kubernetes持续集成和持续部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../monitor/index.html">Kubernetes监控</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../self_healing/index.html">Kubernetes 自愈</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../debug/index.html">Kubernetes排查</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../knative/index.html">Knative - Serverless计算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cloud/index.html">Kubernetes云厂商</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../develop/index.html">Kubernetes开发</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../kubernetes_from_scratch/index.html">Kubernetes From Scratch (KFS) Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rancher/index.html">Rancher Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../openshift/index.html">OpenShift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sql/index.html">SQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_service/index.html">Infra-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infra_search/index.html">Search Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../info_service/index.html">Info-Service Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../web/index.html">Web Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../big_data/index.html">Big Data Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_learning/index.html">Machine Learning Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel/index.html">Kernel Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance/index.html">Performance Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributed_system/index.html">Distributed System Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apple/index.html">Apple Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../windows/index.html">Windows Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../real/index.html">Real Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../management/index.html">Management Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../life/index.html">Life Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../aboutme.html">关于作者</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../donate.html">捐赠</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thanks.html">感谢</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appendix/index.html">附录</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Cloud Atlas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Kubernetes Atlas</a> &raquo;</li>
+          <li><a href="index.html">Kubernetes管理</a> &raquo;</li>
+      <li>Kubernetes节点CPU管理策略</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/kubernetes/administer/k8s_cpu_management_policies.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="kubernetescpu">
+<span id="k8s-cpu-management-policies"></span><h1>Kubernetes节点CPU管理策略<a class="headerlink" href="#kubernetescpu" title="Permalink to this heading">¶</a></h1>
+<p>Kubernetes的设计思路是对用户屏蔽pod的底层细节。但是，为了能够调优性能(例如用户对延迟或性能有强要求)，则Kubernetes也提供了方法来实现复杂的节点CPU管理策略(但同时保持抽象简化)。</p>
+<section id="cpu">
+<h2>CPU管理策略<a class="headerlink" href="#cpu" title="Permalink to this heading">¶</a></h2>
+<p>默认情况下， Kubelet 采用 <a class="reference internal" href="../../kernel/scheduler/linux_cfs_bandwidth_control.html#linux-cfs-bandwidth-control"><span class="std std-ref">Linux CFS带宽控制(CFS Bandwidth Control)</span></a> 来执行Pod的CPU约束。当节点运行了很多CPU密集型Pod时，工作负载可能会迁移到不同的CPU核心。这取决于调度时Pod是否被限制 ( <code class="docutils literal notranslate"><span class="pre">throttled</span></code> )以及在调度时是否有可用的CPU核心。很多工作负载对于这种CPU迁移并不敏感，因此可以无需干预就可正常工作。但是，也有一些工作负载对于CPU缓存亲和性(CPU cache affinity)和调度延迟敏感。这种情况下Kubelet允许替换CPU管理策略来获得更好的业务特性。</p>
+<p>更改Kubelet策略不会对现有Pod起作用，所以正确的修改节点CPU管理策略需要:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="drain_node.html#drain-node"><span class="std std-ref">安全地清空一个Kubernetes节点</span></a></p></li>
+<li><p>停止Kubelet</p></li>
+<li><p>删除旧的CPU管理器状态文件，默认为 <code class="docutils literal notranslate"><span class="pre">/var/lib/kubelet/cpu_manager_state</span></code> ，这将清楚CPUManager维护的状态，以便新策略设置的 <code class="docutils literal notranslate"><span class="pre">cpu-sets</span></code> 不会与之冲突</p></li>
+<li><p>编辑 Kubelet 配置将CPU挂你策略更改为所需值</p></li>
+<li><p>启动Kubelet</p></li>
+</ul>
+<section id="none">
+<h3>none策略<a class="headerlink" href="#none" title="Permalink to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">none</span></code> 策略就是显式地启用现有的默认CPU亲和方案，不提供操作系统调度器默认行为之外的亲和性策略，也就是使用CFS配额</p>
+</section>
+<section id="static">
+<h3>static策略<a class="headerlink" href="#static" title="Permalink to this heading">¶</a></h3>
+<p>static 策略针对具有整数型 CPU requests 的 Guaranteed Pod， 它允许该类 Pod 中的容器访问节点上的独占 CPU 资源。这种独占性是使用 cpuset cgroup 控制器来实现的。</p>
+<ul class="simple">
+<li><p>当 Guaranteed Pod 调度到节点上时，如果其容器符合静态分配要求， 相应的 CPU 会被从共享池中移除，并放置到容器的 cpuset 中。</p></li>
+<li><p>这种静态分配增强了 CPU 亲和性，减少了 CPU 密集的工作负载在节流时引起的上下文切换。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>待实践</p>
+</div>
+</section>
+</section>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/cpu-management-policies/">控制节点上的 CPU 管理策略</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="get_pods_on_node.html" class="btn btn-neutral float-left" title="获取指定节点上的pods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="kubeadm_administer/index.html" class="btn btn-neutral float-right" title="使用kubeadm管理Kubernetes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+    <!-- your html code here -->
+    <br>
+    <p><a href="https://github.com/huataihuang/cloud-atlas/issues">留言和讨论</a>|<a href="https://github.com/huataihuang/cloud-atlas/blob/master/source/donate.rst">请我喝一杯咖啡</a></p>
+     
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

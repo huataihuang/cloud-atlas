@@ -11,6 +11,7 @@ Kernel Atlas
 
    startup/index
    cpu/index
+   scheduler/index
    cgroup/index
    process/index
    flame_graph.rst

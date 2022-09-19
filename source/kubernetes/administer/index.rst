@@ -20,6 +20,7 @@ Kubernetes管理
    set_k8s_worker_internal_ip.rst
    port_forward_access_k8s_app.rst
    get_pods_on_node.rst
+   k8s_cpu_management_policies.rst
    kubeadm_administer/index
    etcd/index
    coredns/index
