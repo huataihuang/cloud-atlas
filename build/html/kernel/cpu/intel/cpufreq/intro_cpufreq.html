@@ -87,6 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../amd/index.html">AMD CPU架构</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../scheduler/index.html">Linux调度器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../cgroup/index.html">Kernel Cgroup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../process/index.html">内核进程管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../flame_graph.html">火焰图</a></li>
@@ -159,12 +160,49 @@
   <section id="cpu">
 <span id="intro-cpufreq"></span><h1>CPU性能伸缩技术概述<a class="headerlink" href="#cpu" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference external" href="https://docs.kernel.org/admin-guide/pm/cpufreq.html">CPU performance scaling</a> 能够让操作系统按需调整CPU 频率来节约电能或者提高性能。CPU频率伸缩性可以按照系统负载自动响应，针对ACPI 事件调整，或者使用用户空间程序手工调整。</p>
+<section id="cpu-frequency-sysfs">
+<h2>CPU Frequency的推荐接口: <code class="docutils literal notranslate"><span class="pre">sysfs</span></code><a class="headerlink" href="#cpu-frequency-sysfs" title="Permalink to this heading">¶</a></h2>
+<p>在Linux系统中，建议和CPU Frequency交互的接口使用 <code class="docutils literal notranslate"><span class="pre">sysfs</span></code> 系统。在挂载的 <code class="docutils literal notranslate"><span class="pre">/sys</span></code> 文件系统中， 位于cpu设备目录下的 <code class="docutils literal notranslate"><span class="pre">cpufreq</span></code> 子目录就是内核交互接口。这个接口是按照cpu核心来分布目录结构的，例如 <code class="docutils literal notranslate"><span class="pre">/sys/devices/system/cpu/cpu0/cpufreq/</span></code> 就是第一个CPU，目录下有以下访问接口:</p>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">cpufreq 访问接口文件</span><a class="headerlink" href="#id2" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>sysfs cpufreq接口</p></th>
+<th class="head"><p>说明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cpuinfo_min_freq</p></td>
+<td><p>处理器能够运行的最低操作频率(Hz)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cpuinfo_max_freq</p></td>
+<td><p>处理器能够运行的最高操作频率(Hz)</p></td>
+</tr>
+<tr class="row-even"><td><p>scaling_driver</p></td>
+<td><p>用于设置该CPU频率的cpufreq驱动(例如intel_pstate)</p></td>
+</tr>
+<tr class="row-odd"><td><p>scaling_available_governors</p></td>
+<td><p>当前内核可以使用的CPUfreq调机器: 通过cat该文件内容可以看到所支持的调节器 如performance 或 powersave</p></td>
+</tr>
+<tr class="row-even"><td><p>scaling_min_freq和scaling_max_freq</p></td>
+<td><p>当前cpufreq调机器的策略限制主频范围，通过echo值到这两个文件中能够修订策略限制的范围。注意需要先修改scaling_max_freq再修改scaling_min_freq</p></td>
+</tr>
+<tr class="row-odd"><td><p>scaling_setspeed</p></td>
+<td><p>通过 echo 值到该文件能够调节CPU速率，但是调节值必须位于scaling_min_freq和scaling_max_freq范围内</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.kernel.org/doc/html/v4.14/admin-guide/pm/cpufreq.html">The Linux kernel user’s and administrator’s guide » Power Management » Working-State Power Management » CPU Performance Scaling</a></p></li>
 <li><p><a class="reference external" href="https://wiki.debian.org/CpuFrequencyScaling">Debian wiki: CpuFrequencyScaling</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/CPU_frequency_scaling">arch linux: CPU frequency scaling</a></p></li>
+<li><p><a class="reference external" href="https://wiki.analog.com/resources/tools-software/linuxdsp/docs/linux-kernel-and-drivers/cpufreq/cpufreq">CPU Frequency utility</a></p></li>
 </ul>
 </section>
 </section>

@@ -22,6 +22,7 @@ Open your mind
 .. toctree::
    :maxdepth: 1
 
+   learn_english.rst
    english_news.rst
 
 .. only::  subproject and html
