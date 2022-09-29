@@ -47,6 +47,14 @@ ncdu
 
 这是因为我们希望能够直接找出是哪个目录包含了最多空间占用的文件，而不是一个目录包含了所有子目录的空间统计。这样会非常方便真正找到可以清理空间的最大占用目录。
 
+此外，如果在根目录上执行上述命令，往往会把多个磁盘挂载都统计在内。而有时候我们已经知道某些磁盘挂载目录不必统计，该如何剔除呢？
+
+``du`` 提供了一个 ``--exclude=`` 参数，并且可以多次使用，可以将多个挂载目录排除在统计范围之外，举例::
+
+   du -Sh --exclude=./var/lib/docker | sort -rh | head -5
+
+这里 ``/var/lib/docker`` 是我单独挂载的 :ref:`btrfs` 磁盘目录，无需统计。另外需要注意，一定要在在前面加一个 ``.`` 表示当前目录(这点虽然有点奇怪)，即使用 ``--exclude=./var/lib/docker`` 而不是 ``--exclude=/var/lib/docker`` ，否则还会统计进去。
+
 删除文件不释放空间
 ===================
 
@@ -99,3 +107,4 @@ ncdu
 
 - `Tracking down where disk space has gone on Linux? <https://unix.stackexchange.com/questions/125429/tracking-down-where-disk-space-has-gone-on-linux>`_
 - `Why is space not being freed from disk after deleting a file in Red Hat Enterprise Linux? <https://access.redhat.com/solutions/2316>`_
+- `Using --exclude with the du command <https://unix.stackexchange.com/questions/23692/using-exclude-with-the-du-command>`_

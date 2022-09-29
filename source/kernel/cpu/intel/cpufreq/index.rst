@@ -13,6 +13,7 @@ CPU频率 性能伸缩(Performance Scaling)
    acpi_cpufreq.rst
    cpu_p-state.rst
    cpu_p-state_linux.rst
+   intel_turbo_boost_pstate.rst
    cpu_c-state.rst
    cpuidle.rst
 

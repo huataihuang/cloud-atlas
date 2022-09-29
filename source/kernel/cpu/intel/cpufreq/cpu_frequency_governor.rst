@@ -117,9 +117,12 @@ Linux内核支持的cpufreq调节器
 
 可以看到即使系统压力不大，所有运行程序的处理器核心频率都在 ``2.3GHz ~ 2.6GHz`` 之间，基本上就是最高主频了
 
-.. note::
+冲击最高主频
+=================
 
-   但是还没有能够压到极限频率 3.1G Hz ，待探索
+你会看到不管是 ``Performance`` 和 ``Powersave`` 的cpufreq governor，都没有出现在运行压力的情况下出现 ``hardware limits`` 的极限主频 ``3.1 GHz`` ，而只达到 ``2.6 GHz`` 。这似乎没有达到预期...
+
+此时需要结合 :ref:`intel_turbo_boost_pstate`
 
 参考
 ======
