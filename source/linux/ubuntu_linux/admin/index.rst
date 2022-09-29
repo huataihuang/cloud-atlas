@@ -15,6 +15,7 @@ Ubuntu系统管理
    tar_multi_boot_ubuntu.rst
    recover_system_by_tar.rst
    ubuntu_unattended_upgrade.rst
+   upgrade_ubuntu_20.04_to_22.04.rst
    ubuntu_grub.rst
    run_centos_in_chroot_under_ubuntu.rst
 
