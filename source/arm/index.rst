@@ -18,6 +18,7 @@ ARM Atlas
    power_manage/index
    blackberry/index
    raspberry_pi/index
+   nanopi/index
    pine64/index
    openwrt/index
    build/index

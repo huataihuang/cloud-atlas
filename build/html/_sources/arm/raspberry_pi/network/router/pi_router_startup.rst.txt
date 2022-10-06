@@ -47,10 +47,7 @@
 
 - 缺乏多网口规格硬件: 在淘宝上能够找到 4~8 网口的基于Intel低端CPU的x86主板或一体机，价格非常低廉，可以用来构建开源交换机或路由器
 - 只有 :ref:`pi_cm4` 可以通过扩展主板支持 PCIe 存储，但是加上扩展主板成本相对较高，接近于Intel多网口一体机
-- ``NanoPi R4S`` 作为针对路由功能定制的双网口ARM主机，非常小巧且功能完备，比叠加主板的 :ref:`pi_cm4` 更为经济
-
-.. figure:: ../../../../_static/arm/raspberry_pi/network/router/nanopi_r4s.png
-   :scale: 40
+- :ref:`nanopi` 作为针对路由功能定制的多网口ARM主机，非常小巧且功能完备(R5S支持 :ref:`nvme` )，比叠加主板的 :ref:`pi_cm4` 更为经济
 
 .. note::
 

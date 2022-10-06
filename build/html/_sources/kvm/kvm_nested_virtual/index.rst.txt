@@ -8,6 +8,7 @@ KVM嵌套虚拟化
    :maxdepth: 1
 
    intel_vmcs.rst
+   arm_neve.rst
    kvm_nested_virtual_startup.rst
 
 .. only::  subproject and html
