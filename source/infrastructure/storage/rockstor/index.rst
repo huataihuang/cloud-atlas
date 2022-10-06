@@ -8,6 +8,7 @@ Rockstor存储
    :maxdepth: 1
 
    introduce_rockstor.rst
+   ten64.rst
 
 .. only::  subproject and html
 

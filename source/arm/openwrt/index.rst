@@ -7,7 +7,11 @@ OpenWrt
 .. toctree::
    :maxdepth: 1
 
-   introduce_openwrt.rst
+   intro_openwrt.rst
+   openwrt_hardware.rst
+   goflex_home/index
+   muvirt/index
+   k3s/index
 
 .. only::  subproject and html
 

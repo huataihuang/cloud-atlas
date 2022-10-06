@@ -1,15 +1,13 @@
-.. _kvm_nested_virtual:
+.. _nanopi:
 
 =================================
-KVM嵌套虚拟化
+NanoPi
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intel_vmcs.rst
-   arm_neve.rst
-   kvm_nested_virtual_startup.rst
+   nanopi_hardware.rst
 
 .. only::  subproject and html
 

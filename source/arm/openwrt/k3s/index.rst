@@ -1,15 +1,13 @@
-.. _kvm_nested_virtual:
+.. _openwrt_k3s:
 
 =================================
-KVM嵌套虚拟化
+OpenWrt平台上k3s
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intel_vmcs.rst
-   arm_neve.rst
-   kvm_nested_virtual_startup.rst
+   openwrt_k3s_arch.rst
 
 .. only::  subproject and html
 

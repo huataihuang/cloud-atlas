@@ -1,15 +1,14 @@
-.. _kvm_nested_virtual:
+.. _goflex_home:
 
 =================================
-KVM嵌套虚拟化
+希捷GoFlex Home存储
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intel_vmcs.rst
-   arm_neve.rst
-   kvm_nested_virtual_startup.rst
+   intro_goflex_home.rst
+   goflex_home_serial_console.rst
 
 .. only::  subproject and html
 

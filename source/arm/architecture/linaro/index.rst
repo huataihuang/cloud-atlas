@@ -1,15 +1,13 @@
-.. _kvm_nested_virtual:
+.. _linaro:
 
 =================================
-KVM嵌套虚拟化
+Linaro ARM生态
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intel_vmcs.rst
-   arm_neve.rst
-   kvm_nested_virtual_startup.rst
+   intro_linaro.rst
 
 .. only::  subproject and html
 

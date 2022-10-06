@@ -1,15 +1,13 @@
-.. _kvm_nested_virtual:
+.. _muvirt:
 
 =================================
-KVM嵌套虚拟化
+μVirt(muVirt)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intel_vmcs.rst
-   arm_neve.rst
-   kvm_nested_virtual_startup.rst
+   intro_muvirt.rst
 
 .. only::  subproject and html
 

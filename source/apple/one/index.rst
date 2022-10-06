@@ -9,6 +9,7 @@ Apple One 使用经验汇总
 .. toctree::
    :maxdepth: 1
 
+   applecare.rst
    apple_news_in_cn.rst
    transfer_icloud_photos.rst 
 
