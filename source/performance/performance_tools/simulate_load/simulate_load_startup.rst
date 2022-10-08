@@ -1,38 +1,15 @@
-.. _simulate_load:
+.. _simulate_load_startup:
 
 ====================
-模拟负载的方法
+模拟负载的方法起步
 ====================
 
 在验证一些系统稳定性的时候，我们可能并不是关注 :ref:`unixbench` 或 :ref:`sysbench` 对系统的性能评估，而是希望通过持续的压力来模拟一些生产环境问题，借此测试稳定性。这时，我们需要一些简单的脚本或者命令来实现。这里汇总一些我使用过、验证过有效且方便的方法。
 
-.. _stress:
+:ref:`stress`
+================
 
-stress
-==========
-
-``stress`` 是非常常用的压力工具，安装和使用都非常简便，发行版一般都提供了这个工具::
-
-   # centos/fedora
-   sudo yum install stress
-   # debian/ubuntu
-   sudo apt install stress
-
-- 最简单的cpu测试(按照cpu数量)::
-
-   stress --cpu 4
-
-- 更为完善的测试::
-
-   stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s
-
-以上为常用参数:
-
-  - ``--cpu 8`` 并发8个CPU核心压力,不断 ``sqrt()`` 平方根计算
-  - ``--io 4`` 并发4个不断 ``sync()``
-  - ``--vm 2`` 并发2个不断 ``malloc()/free()``
-  - ``--vm-bytes 128M`` 每个内存分配申请大小
-  - ``--timeout 10s`` 运行10秒钟
+``stress`` 是非常常用的压力工具，安装和使用都非常简便，发行版一般都提供了这个工具 - 请参考 :ref:`stress`
 
 脚本死循环
 ==============

@@ -1,18 +1,14 @@
-.. _performance_tools:
+.. _simulate_load:
 
 =================================
-性能工具集
+压力模拟工具
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   simulate_load/index
-   sysbench.rst
-   unixbench.rst
-   hdparm.rst
-   phoronix_test_suite/index
-   fio/index
+   simulate_load_startup.rst
+   stress.rst
 
 .. only::  subproject and html
 

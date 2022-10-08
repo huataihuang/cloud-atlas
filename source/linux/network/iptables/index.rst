@@ -12,6 +12,7 @@ iptables
    iptables_port_forwarding.rst
    iptables_open_ports.rst
    iptables_persistent.rst
+   iptables_masquerade.rst
 
 .. only::  subproject and html
 
