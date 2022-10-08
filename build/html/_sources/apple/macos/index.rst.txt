@@ -15,6 +15,7 @@ macOS
    macbook_nvme.rst
    apple_silicon_m1_pro.rst
    macos_install_drive.rst
+   create_boot_usb_from_iso_in_mac.rst
    macos_studio_startup.rst
    macos_share_file.rst
    homebrew.rst

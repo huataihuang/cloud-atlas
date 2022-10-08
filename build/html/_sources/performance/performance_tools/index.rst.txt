@@ -7,7 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
-   simulate_load.rst
+   simulate_load/index
    sysbench.rst
    unixbench.rst
    hdparm.rst
