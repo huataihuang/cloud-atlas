@@ -39,9 +39,9 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 
 重新启动MacBook Pro设备，启动时按住 ``alt/option`` 键，这样就能选择启动磁盘。选择FreeBSD安装启动U盘启动，进行安装。
 
-- 之前我是使用macOS划分了一个磁盘分区给FreeBSD，但是macOS划分的磁盘默认格式化成APFS，也就是说虽然分区有了，但是只是我知道有，而FreeBSD Installer看来整个磁盘没有任何空闲。此时FreeBSD Installer的ZFS root选择 ``nvd0`` (NVMe磁盘)会提示报错 ``gpart: geom 'nvd0': File existes``
+- 之前我是使用macOS划分了一个磁盘分区给FreeBSD，但是macOS划分的磁盘默认格式化成APFS，也就是说虽然分区有了，但是只是我知道有，而FreeBSD Installer看来整个磁盘没有任何空闲。此时FreeBSD Installer的 ``Guided Root-on-ZFS`` 选择 ``nvd0`` (NVMe磁盘)会提示报错 ``gpart: geom 'nvd0': File existes``
 
-- 我发现我不熟悉FreeBSD默认的 ``gpart`` 工具，所以改为用 :ref:`arch_linux` 的启动U盘，借助Linux的 ``fdisk`` 工具删除掉macOS上空出的分区(即完全使得一部分磁盘空白)。此时再次从FreeBSD安装U盘启动，就可以正常运行Installer的ZFS root设置。但是很不幸，Installer的ZFS root设置会整个将磁盘数据抹去(也就是Installer首先确认磁盘有空间，有空间就可以运行ZFS root设置，然而ZFS root设置是占据整个磁盘)
+- 我发现我不熟悉FreeBSD默认的 ``gpart`` 工具，所以改为用 :ref:`arch_linux` 的启动U盘，借助Linux的 ``fdisk`` 工具删除掉macOS上空出的分区(即完全使得一部分磁盘空白)。此时再次从FreeBSD安装U盘启动，就可以正常运行Installer的 ``Guided Root-on-ZFS`` 设置。但是很不幸，Installer的 ``Guided Root-on-ZFS`` 设置会整个将磁盘数据抹去(也就是Installer首先确认磁盘有空间，有空间就可以运行 ``Guided Root-on-ZFS`` 设置，然而 ``Root-on-ZFS`` 设置是占据整个磁盘)
 
 - 安装过程没有什么特别，就是最小化安装，然后重启。重启以后可以看到 :ref:`mbp15_late_2013` 上的WiFi是无法识别的，这是因为Broadcom无线驱动私有化，不能包含在FreeBSD安装中。需要 :ref:`freebsd_wifi` 设置，在没有设置无线网络之前，可以使用一个USB以太网卡连接一台Linux主机，并执行 :ref:`iptables_masquerade` 来提供互联网访问，以便进一步设置FreeBSD(配置 :ref:`freebsd_static_ip` )
 
@@ -54,3 +54,4 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 - `FreeBSD on a MacBook Pro <https://gist.github.com/mpasternacki/974e29d1e3865e940c53>`_
 - `BSD and Linux on an Intel Mac <https://acadix.biz/freebsd-intel-mac.php>`_
 - `FREEBSD, MAC MINI AND ZFS <https://www.codeimmersives.com/tech-talk/freebsd-mac-mini-and-zfs/>`_
+- `Install FreeBSD with XFCE and NVIDIA Drivers [2021] <https://nudesystems.com/install-freebsd-with-xfce-and-nvidia-drivers/>`_ 提供了完整的安装步骤截图，并且介绍 :ref:`linuxulator` 

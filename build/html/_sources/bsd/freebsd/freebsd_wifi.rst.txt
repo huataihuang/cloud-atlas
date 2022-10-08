@@ -17,7 +17,7 @@ FreeBSD无线网络
 
 
 参考
-======c
+======
 
 - `FreeBSD Broadcom Wi-Fi Improvements <https://landonf.org/code/freebsd/Broadcom_WiFi_Improvements.20180122.html>`_
 - `FreeBSD cannot use WiFi with BCM4360 on MacBook Air <https://unix.stackexchange.com/questions/367591/freebsd-cannot-use-wifi-with-bcm4360-on-macbook-air>`_
