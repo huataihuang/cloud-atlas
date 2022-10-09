@@ -26,11 +26,11 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 
 - 制作启动U盘，采用 :ref:`create_boot_usb_from_iso_in_mac` 制作方法:
 
-.. literalinclude:: ../../apple/macos/create_boot_usb_from_iso_in_mac/hdiutil_convert_iso
+.. literalinclude:: ../../../apple/macos/create_boot_usb_from_iso_in_mac/hdiutil_convert_iso
    :language: bash
    :caption: 使用hdiutil转换iso文件到镜像文件dmg
 
-.. literalinclude:: ../../apple/macos/create_boot_usb_from_iso_in_mac/dd_img
+.. literalinclude:: ../../../apple/macos/create_boot_usb_from_iso_in_mac/dd_img
    :language: bash
    :caption: 使用dd命令将img文件写入U盘
 
