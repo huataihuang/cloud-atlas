@@ -1,19 +1,14 @@
-.. _freebsd:
+.. _freebsd_startup:
 
 =================================
-FreeBSD
+FreeBSD起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_freebsd.rst
-   startup/index
-   admin/index
-   desktop/index
-   network/index
-   virtual/index
-
+   freebsd_on_intel_mac.rst
+   freebsd_static_ip.rst   
 
 .. only::  subproject and html
 

@@ -1,19 +1,14 @@
-.. _freebsd:
+.. _freebsd_network:
 
 =================================
-FreeBSD
+FreeBSD网络
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_freebsd.rst
-   startup/index
-   admin/index
-   desktop/index
-   network/index
-   virtual/index
-
+   freebsd_wifi.rst
+   freebsd_proxy.rst
 
 .. only::  subproject and html
 
