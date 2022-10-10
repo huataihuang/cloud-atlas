@@ -1,14 +1,14 @@
-.. _freebsd_virtual:
+.. _wine:
 
 =================================
-FreeBSD虚拟化
+WINE
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   wine/index
-   linuxulator.rst
+   intro_wine.rst
+   freebsd_wine.rst
 
 .. only::  subproject and html
 
