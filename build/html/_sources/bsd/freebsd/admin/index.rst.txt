@@ -10,6 +10,7 @@ FreeBSD管理
    freebsd_ports.rst
    freebsd_update.rst
    freebsd_check.rst
+   add_lib32_after_install_freebsd.rst
 
 .. only::  subproject and html
 

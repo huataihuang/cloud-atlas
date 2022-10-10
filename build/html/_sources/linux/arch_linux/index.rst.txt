@@ -23,7 +23,7 @@ Arch Linux
    xmodmap.rst
    dropbox.rst
    cross_compile.rst
-   wine.rst
+   archlinux_wine.rst
 
 .. only::  subproject and html
 
