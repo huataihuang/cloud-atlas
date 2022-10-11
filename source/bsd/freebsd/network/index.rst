@@ -9,6 +9,7 @@ FreeBSD网络
 
    freebsd_wifi.rst
    freebsd_proxy.rst
+   pfsense/index
 
 .. only::  subproject and html
 

@@ -1,15 +1,13 @@
-.. _freebsd_startup:
+.. _pfsense:
 
 =================================
-FreeBSD起步
+pfsense防火墙
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   freebsd_on_intel_mac.rst
-   freebsd_shutdown.rst
-   freebsd_static_ip.rst   
+   intro_pfsense.rst
 
 .. only::  subproject and html
 

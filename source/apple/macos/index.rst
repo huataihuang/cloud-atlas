@@ -27,6 +27,7 @@ macOS
    macos_nfs.rst
    restore_launchpad.rst
    macos_ftdi_serial.rst
+   macos_vnc.rst
 
 .. only::  subproject and html
 

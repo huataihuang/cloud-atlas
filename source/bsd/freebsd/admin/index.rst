@@ -11,6 +11,7 @@ FreeBSD管理
    freebsd_update.rst
    freebsd_check.rst
    add_lib32_after_install_freebsd.rst
+   freebsd_kernel_source.rst
 
 .. only::  subproject and html
 

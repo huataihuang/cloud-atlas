@@ -19,6 +19,10 @@
 
     - 后续开发通用型交互界面可以考虑采用 ``material-ui`` 提供Google Material Disign风格的框架
 
+- 通用框架:
+
+  - `Semantic UI <https://semantic-ui.com>`_ 在GitHub上有5w+的Star数量
+
 .. note::
 
    如果使用 :ref:`rust` 开发WEB，可以尝试 `Yew Rust开发WEB框架 <https://yew.rs>`_ (GitHub 2.3w star) 。 `A Rusty frontend: Patternfly & Yew <https://dentrassi.de/2021/01/08/rusty-frontend-patternfly-yew/>`_ 介绍了如何结合PatterFly和Yew，我觉得后续可以尝试这个开发模式。
@@ -35,5 +39,14 @@
 **后来我想了一下，其实选择UX框架并不重要** 因为实际底层还是 ``Augular`` 和 ``React`` ，再底层其实还是 :ref:`javascript` 。真正技术核心还是以 ``Augular`` 和 ``React`` 为主，所以只要能够掌握 ``Augular`` 或者 ``React`` ，那么切换UX框架也是比较容易的。这样我也就不再纠结Design System的选择了，选择符合自己工作需求为主。目前我选择 ``PatternFly`` 主要原因是:
 
 - 目前开源软件巨头Red Hat主要采用自己开的 ``PatternFly`` ，例如 :ref:`openshift` 和 :ref:`ovirt` 等。所以熟悉这个UX框架，也方便比较深入学习Red Hat系列的软件
+- 如 `Hacker News: PatternFly – a web UI framework by RedHat (patternfly.org) <https://news.ycombinator.com/item?id=17161536>`_ 中有一位使用了两年PatternFly的用户说道: 使用PatternFly框架主要是该框架针对企业应用的快速构建，虽然有很多限制但是对于利基市场(狭小)有一定竞争力，特别是对于后端开发人员不太关注前端的开发，使用较为便利。该用户现在也转向其他UX框架( `Semantic UI <https://semantic-ui.com>`_ )
 - ``PattenFly`` 底层使用了 TypeScript ，并且基于 ``React`` ，这两个技术都是目前非常主流的 :ref:`javascript` 开发框架
 - 后端可以采用 :ref:`golang` 或者 :ref:`rust` 来实现，方便开发基础软件
+
+因为我主要在做后端运维和开发，所以前端无法投入太多精力，就选择PatternFly作为辅助开发框架。
+
+参考
+======
+
+- `Hacker News: PatternFly – a web UI framework by RedHat (patternfly.org) <https://news.ycombinator.com/item?id=17161536>`_ 这是一个著名的(出圈)有关PatternFly的讨论，RedHat内部员工吐槽PatternFly引发不同观点碰撞，国内有中文IT资讯网站评述过这个事件
+- `通过PatternFly超越Bootstrap <https://blog.csdn.net/cumj63710/article/details/107422547>`_
