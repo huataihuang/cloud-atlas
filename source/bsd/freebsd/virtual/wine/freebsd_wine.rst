@@ -4,6 +4,14 @@
 在FreeBSD上运行WINE
 ==========================
 
+.. note::
+
+   由于我暂时没有时间精力继续探索(只实现了简单运行，网络联通存在问题，未解决钉钉的运行问题)，我暂时放弃在FreeBSD上使用WINE。
+
+   原因也是个人需求较为薄弱: 我采用WINE主要是因为公司的企业软件只能在Windows或macOS上运行，但是我实际上有公司配置的笔记本，所以FreeBSD上运行企业软件不是强需求。
+
+   我改为另一种方式: 在公司配备的MacBook上运行 :ref:`macos` ，然后通过 :ref:`synergy` 和 MacBook上的FreeBSD互操作，实现曲线协作: :ref:`freebsd_synergy`
+
 准备工作
 ==========
 
@@ -211,7 +219,12 @@ Firefox
 
 果然能够解决32位运行环境问题
 
-不过，现在遇到的问题是，虽然安装时能运行firefox上网，但是安装之后再运行却不行了，页面无法打开。待继续
+不过，现在遇到的问题是，虽然安装时能运行firefox上网，但是安装之后再运行却不行了，页面无法打开。 `No internet in WINE 1.6.2 under Ubuntu 15.10 <https://askubuntu.com/questions/732436/no-internet-in-wine-1-6-2-under-ubuntu-15-10>`_ 提到需要安装 ``winhttp.dll`` ，我尝试通过以下命令安装::
+
+   winetricks winhttp
+
+显示下载安装了 ``W2KSP4_EN.EXE`` ，但是看上去并没有解决网路问题
+
 
 参考
 ======

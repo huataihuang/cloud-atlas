@@ -13,6 +13,8 @@ FreeBSD桌面
    freebsd_hikari.rst
    freebsd_chinese.rst
    tuning_freebsd_for_mbp.rst
+   freebsd_vnc.rst
+   freebsd_synergy.rst
 
 .. only::  subproject and html
 

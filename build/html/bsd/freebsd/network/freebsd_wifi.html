@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="FreeBSD虚拟化" href="../virtual/index.html" />
+    <link rel="next" title="FreeBSD代理配置" href="freebsd_proxy.html" />
     <link rel="prev" title="FreeBSD网络" href="index.html" /> 
 </head>
 
@@ -93,6 +93,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../desktop/index.html">FreeBSD桌面</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">FreeBSD网络</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">FreeBSD无线网络</a></li>
+<li class="toctree-l4"><a class="reference internal" href="freebsd_proxy.html">FreeBSD代理配置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pfsense/index.html">pfsense防火墙</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../virtual/index.html">FreeBSD虚拟化</a></li>
@@ -149,6 +151,136 @@
 <p class="admonition-title">备注</p>
 <p>本文实践在 <a class="reference internal" href="../../../apple/macos/mbp15_late_2013.html#mbp15-late-2013"><span class="std std-ref">MacBook Pro 15” Late 2013</span></a> 完成，使用的无线网卡芯片是 Broadcom</p>
 </div>
+<section id="id1">
+<h2>检查硬件<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">pciconf</span></code> 命令检查硬件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pciconf</span> <span class="o">-</span><span class="n">lv</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>显示:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>none1@pci0:3:0:0:    class=0x028000 rev=0x03 hdr=0x00 vendor=0x14e4 device=0x43a0 subvendor=0x106b subdevice=0x0134
+    vendor     = &#39;Broadcom Inc. and subsidiaries&#39;
+    device     = &#39;BCM4360 802.11ac Wireless Network Adapter&#39;
+    class      = network
+</pre></div>
+</div>
+</section>
+<section id="bwn">
+<h2><code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动<a class="headerlink" href="#bwn" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bwn</span></code> 无线网络驱动支持Broadcom BCM43xx ，并且支持 <code class="docutils literal notranslate"><span class="pre">station</span></code> 和 <code class="docutils literal notranslate"><span class="pre">monitor</span></code> 模式操作。这个 <code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动要求在其工作前首先加载firmware。所以需要先编译安装 <code class="docutils literal notranslate"><span class="pre">ports/net/bwn-firmware-kmod</span></code> 这个port。</p>
+<p><code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动支持的 Broadcom BCM43xx 无线设备包括:</p>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">bwn支持的Broadcom BCM43xx 无线设备列表</span><a class="headerlink" href="#id4" title="永久链接至表格">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 30%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>网卡</p></th>
+<th class="head"><p>芯片</p></th>
+<th class="head"><p>总线</p></th>
+<th class="head"><p>无线标准</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Apple Airport Extreme</p></td>
+<td><p>BCM4318</p></td>
+<td><p>PCI</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-odd"><td><p>ASUS WL-138g</p></td>
+<td><p>BCM4318</p></td>
+<td><p>PCI</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-even"><td><p>Buffalo WLI-CB-G54S</p></td>
+<td><p>BCM4318</p></td>
+<td><p>CardBus</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-odd"><td><p>Dell Wireless 1390</p></td>
+<td><p>BCM4311</p></td>
+<td><p>Mini PCI</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-even"><td><p>Dell Wireless 1470</p></td>
+<td><p>BCM4318</p></td>
+<td><p>Mini PCI</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-odd"><td><p>Dell Truemobile 1400</p></td>
+<td><p>BCM4309</p></td>
+<td><p>Mini PCI</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-even"><td><p>HP Compaq 6715b</p></td>
+<td><p>BCM4312</p></td>
+<td><p>PCI</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-odd"><td><p>HP nx6125</p></td>
+<td><p>BCM4319</p></td>
+<td><p>PCI</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-even"><td><p>Linksys WPC54G Ver 3</p></td>
+<td><p>BCM4318</p></td>
+<td><p>CardBus</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linksys WPC54GS Ver 2</p></td>
+<td><p>BCM4318</p></td>
+<td><p>CardBus</p></td>
+<td><p>b/g</p></td>
+</tr>
+<tr class="row-even"><td><p>US Robotics 5411</p></td>
+<td><p>BCM4318</p></td>
+<td><p>CardBus</p></td>
+<td><p>b/g</p></td>
+</tr>
+</tbody>
+</table>
+<p>要将这个 <code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动编译进你和，则要在内核配置文件中加入以下行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">device</span> <span class="n">bwn</span>
+<span class="n">device</span> <span class="n">bhnd</span>
+<span class="n">device</span> <span class="n">bhndb</span>
+<span class="n">device</span> <span class="n">bhndb_pci</span>
+<span class="n">device</span> <span class="n">bcma</span>
+<span class="n">device</span> <span class="n">siba</span>
+<span class="n">device</span> <span class="n">gpio</span>
+<span class="n">device</span> <span class="n">wlan</span>
+<span class="n">device</span> <span class="n">wlan_amrr</span>
+<span class="n">device</span> <span class="n">firmware</span>
+</pre></div>
+</div>
+<p>要在启动时加载 <code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动模块，则在 <code class="docutils literal notranslate"><span class="pre">loader.conf</span></code> 中添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">if_bwn_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+</pre></div>
+</div>
+<section id="bwn-firmware">
+<h3>编译安装bwn firmware<a class="headerlink" href="#bwn-firmware" title="Permalink to this heading">¶</a></h3>
+<ul>
+<li><p>执行 <a class="reference internal" href="../admin/freebsd_ports.html#freebsd-ports"><span class="std std-ref">FreeBSD应用程序安装:包和Ports</span></a> 方式编译安装firmware:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">ports</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">bwn</span><span class="o">-</span><span class="n">firmware</span><span class="o">-</span><span class="n">kmod</span>
+<span class="n">make</span>
+<span class="n">make</span> <span class="n">install</span> <span class="n">clean</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>这里如果系统没有安装 <a class="reference internal" href="../admin/freebsd_kernel_source.html#freebsd-kernel-source"><span class="std std-ref">FreeBSD内核源代码</span></a> 就会出现以下报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="s2">&quot;/usr/share/mk/bsd.sysdir.mk&quot;</span> <span class="n">line</span> <span class="mi">15</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">locate</span> <span class="n">the</span> <span class="n">kernel</span> <span class="n">source</span> <span class="n">tree</span><span class="o">.</span> <span class="n">Set</span> <span class="n">SYSDIR</span> <span class="n">to</span> <span class="n">override</span><span class="o">.</span>
+
+<span class="n">make</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">stopped</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">ports</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">bwn</span><span class="o">-</span><span class="n">firmware</span><span class="o">-</span><span class="n">kmod</span><span class="o">/</span><span class="n">work</span><span class="o">/</span><span class="n">bwn</span><span class="o">-</span><span class="n">firmware</span><span class="o">-</span><span class="n">kmod</span><span class="o">-</span><span class="mf">0.1.2</span><span class="o">/</span><span class="n">bg</span><span class="o">/</span><span class="n">v4</span>
+<span class="o">***</span> <span class="n">Error</span> <span class="n">code</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>则先安装 <a class="reference internal" href="../admin/freebsd_kernel_source.html#freebsd-kernel-source"><span class="std std-ref">FreeBSD内核源代码</span></a> 然后再次执行 <code class="docutils literal notranslate"><span class="pre">make</span></code></p>
 <ul>
 <li><p>加载内核模块:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">kldload</span> <span class="n">if_bwn</span>
@@ -157,12 +289,53 @@
 </pre></div>
 </div>
 </li>
+<li><p>在加载内核模块完成后，就可以通过以下命令创建无线网卡设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ifconfig</span> <span class="n">wlan0</span> <span class="n">up</span> <span class="c1"># Laptop WiFi LED light should turn on</span>
+<span class="n">sudo</span> <span class="n">ifconfig</span> <span class="n">wlan0</span> <span class="n">scan</span> <span class="c1"># You should see your wireless router SSID</span>
+<span class="n">sudo</span> <span class="n">wpa_supplicant</span> <span class="o">-</span><span class="n">B</span> <span class="o">-</span><span class="n">i</span> <span class="n">wlan0</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">sudo</span> <span class="n">ifconfig</span> <span class="n">wlan0</span> <span class="nb">list</span> <span class="n">sta</span>
+<span class="n">sudo</span> <span class="n">dhclient</span> <span class="n">wlan0</span>
+</pre></div>
+</div>
+</li>
 </ul>
-<section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>我这里失败，加载驱动以及firmware之后并没有看到网卡设备</p>
+<p>我仔细核对 <a class="reference external" href="https://landonf.org/code/freebsd/Broadcom_WiFi_Improvements.20180122.html">FreeBSD Broadcom Wi-Fi Improvements</a> <code class="docutils literal notranslate"><span class="pre">bwn</span></code> 说明，原来支持的 <code class="docutils literal notranslate"><span class="pre">BCM43xx</span></code> 并没有包括我的 MacBook Pro 的无线网卡芯片 <code class="docutils literal notranslate"><span class="pre">BCM4360</span></code> 。实际上，应该使用 <code class="docutils literal notranslate"><span class="pre">bhnd</span></code> 驱动…</p>
+<p>重新来过</p>
+</div>
+</section>
+</section>
+<section id="bhnd">
+<h2><code class="docutils literal notranslate"><span class="pre">bhnd</span></code> 驱动安装<a class="headerlink" href="#bhnd" title="Permalink to this heading">¶</a></h2>
+<p>要加载驱动模块，在 <code class="docutils literal notranslate"><span class="pre">/boot/loader.conf</span></code> 中添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bhnd_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+</pre></div>
+</div>
+<p>我参考 <a class="reference external" href="https://forums.freebsd.org/threads/bcm4331-802-11n-seems-tantalisingly-close-on-mid-2011-mac-mini-using-bhnd-and-if_bwn_pci-ko-on-freebsd-11-2-beta1.65927/">BCM4331 802.11n seems tantalisingly close on mid-2011 Mac mini, using bhnd and if_bwn_pci.ko on FreeBSD 11.2-BETA1</a> ，配置 <code class="docutils literal notranslate"><span class="pre">/boot/loader.conf</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bhnd_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="n">bwn_v4_ucode</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="n">bwn_v4_n_ucode</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="c1">#if_bwn_pci_load=&quot;YES&quot;</span>
+<span class="n">if_bwn_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="n">wlan_wep_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="n">wlan_ccmp_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="n">wlan_tkip_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+</pre></div>
+</div>
+<p>但是，似乎模块都加载了也看不到设备</p>
+<p>待续…</p>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference external" href="https://streof.github.io/freebsd-wifi-mac/">First FreeBSD experience: something with Wi-Fi and Apple hardware</a></p></li>
+<li><p><a class="reference external" href="https://www.freebsd.org/cgi/man.cgi?bwn(4)">FreeBSD Kernel Interfaces Manual: BWN(4)</a></p></li>
 <li><p><a class="reference external" href="https://landonf.org/code/freebsd/Broadcom_WiFi_Improvements.20180122.html">FreeBSD Broadcom Wi-Fi Improvements</a></p></li>
 <li><p><a class="reference external" href="https://unix.stackexchange.com/questions/367591/freebsd-cannot-use-wifi-with-bcm4360-on-macbook-air">FreeBSD cannot use WiFi with BCM4360 on MacBook Air</a></p></li>
+<li><p><a class="reference external" href="https://wiki.freebsd.org/WiFi/FAQ">I just want my WiFi working!</a></p></li>
+<li><p><a class="reference external" href="https://wiki.freebsd.org/dev/bhnd%284%29">bhnd(4) - Broadcom Home Networking Division interconnect bus driver</a></p></li>
 </ul>
 </section>
 </section>
@@ -172,7 +345,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="FreeBSD网络" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../virtual/index.html" class="btn btn-neutral float-right" title="FreeBSD虚拟化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="freebsd_proxy.html" class="btn btn-neutral float-right" title="FreeBSD代理配置" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
