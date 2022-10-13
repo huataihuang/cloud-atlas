@@ -1,21 +1,13 @@
-.. _nodejs:
+.. _pytorch:
 
 =================================
-Node.js Atlas
+Pytorch
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_nodejs.rst
-   startup/index
-   express/index
-   electron/index
-   koa/index
-   egg/index
-   ghost_cms/index
-   deploy/index
-
+   pytorch_startup.rst
 
 .. only::  subproject and html
 
