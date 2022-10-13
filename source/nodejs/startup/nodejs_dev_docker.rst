@@ -58,7 +58,93 @@
 
 - 打开 ``Dockerfile`` 文件
 
-- 在服务镜像中添加 ``ENV`` 变量，例如 ``ENV VAR1`` (待续)
+- 在服务镜像中添加 ``ENV`` 变量，例如 ``ENV VAR1=1`` (现在没有什么意义，后面再根据实际需要传递的环境变量配置，例如配置数据库连接账号等等)
+
+- 保存 ``Dockerfile`` 文件
+
+在本地运行服务
+================
+
+- 在 :ref:`vscode` 中打开一个终端
+
+- 执行 ``npm run start`` 命令
+
+- 使用浏览器访问 http://localhost:3000 就能够看到一个简单Express欢迎页面
+
+.. figure:: ../../_static/nodejs/startup/node-run-browser.png
+   :scale: 70
+
+验证成功后，在终端中按下 ``ctrl-c`` 终止node.js服务，此时在浏览器中已经无法访问页面
+
+构建服务镜像
+===============
+
+- 在 :ref:`vscode` 中打开命令行面板( ``⇧⌘P`` )，然后选择 ``Docker Images: Build Image...`` 命令，此时 :ref:`vscode` 就会根据前面的 ``Dockerfile`` 构建镜像
+- 在 :ref:`vscode` 左方的 ``Docker Explorer`` 中(点击那个著名的 ``鲸鱼背负集装箱`` 图标)，验证是否正确生成镜像:
+
+.. figure:: ../../_static/nodejs/startup/vscode_docker_image.png
+   :scale: 90
+
+运行服务镜像
+============
+
+- 右击build好的镜像，然后选择 ``Run`` (也可以选择 ``Run Interactive`` ) 此时可以看到终端运行命令::
+
+   docker run --rm -d  -p 3000:3000/tcp demo:latest
+
+- 现在再次打开浏览器访问 http://localhost:3000 又可以看到Express欢迎页面了，只不过这次不是在主机本地运行的node.js服务，而是在容器内部运行的服务
+
+- 验证成功后，在vscode的Container导航树中，右击正在运行的容器 ``demo`` ，点击 ``Stop`` 停止容器
+
+.. figure:: ../../_static/nodejs/startup/vscode_docker_stop_container.png
+   :scale: 90
+
+在服务容器中Debug
+====================
+
+当Docker扩展向应用程序添加文件时，会同时在 ``.vscode/launch.json`` 添加一个VS Code调试器配置，用于在容器内运行时调试服务。扩展检测服务使用的协议和端口，并将浏览器指向服务:
+
+.. literalinclude:: nodejs_dev_docker/launch.json
+   :language: json
+   :emphasize-lines: 7
+
+- 在Express应用 ``routes/index.js`` 文件中找到 处理 ``'/''`` 的 ``get()`` ，在这行代码行号左方点一下，增加一个断点 (breakpoint)
+
+.. figure:: ../../_static/nodejs/startup/vscode_breakpoint.png
+   :scale: 80
+
+- 确保 ``launch.json`` 中已经配置了 ``debug`` ，见上文::
+
+   ...
+               "preLaunchTask": "docker-run: debug",
+   ...
+
+- 按下 ``F5`` 开始debugging
+
+此时在 ``Terminal`` 终端会看到运行了如下 ``Docker`` 命令::
+
+   docker run -dt -P --name "demo-dev" -e "DEBUG=*" -e "NODE_ENV=development" --label "com.microsoft.created-by=visual-studio-code" -p "9229:9229" "demo:latest" node --inspect=0.0.0.0:9229 ./bin/www
+
+整个过程分为如下几步:
+
+  - 服务构建了Docker镜像
+  - Docker容器中运行服务
+  - 浏览器打开了映射到服务容器的(随机的)端口
+  - debugger停止在 ``index.js`` 的断点位置
+
+.. note::
+
+   由于debugger是在应用启动以后附加上去的，这个断点有可能错过了首次运行，可能需要刷新浏览器才能在第二次重试中看到调试器中断。
+
+观察应用日志
+==============
+
+在 :ref:`vscode` 中可以使用容器的 ``View Logs`` 命令观察日志:
+
+- 在 ``Docker Explorer`` 中，选中正在运行的debugging容器，右击选择菜单 ``View Logs`` ，就能在 ``TERMINAL`` 中看到容器输入日志(其实就是 ``docker attach`` 到容器控制台观察日志)
+
+.. figure:: ../../_static/nodejs/startup/vscode_nodejs_debug_logs.png
+   :scale: 80
 
 参考
 =======
