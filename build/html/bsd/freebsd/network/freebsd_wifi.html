@@ -149,7 +149,7 @@
 <span id="freebsd-wifi"></span><h1>FreeBSD无线网络<a class="headerlink" href="#freebsd" title="Permalink to this heading">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>本文实践在 <a class="reference internal" href="../../../apple/macos/mbp15_late_2013.html#mbp15-late-2013"><span class="std std-ref">MacBook Pro 15” Late 2013</span></a> 完成，使用的无线网卡芯片是 Broadcom</p>
+<p>本文实践在 <a class="reference internal" href="../../../apple/macos/mbp15_late_2013.html#mbp15-late-2013"><span class="std std-ref">MacBook Pro 15” Late 2013</span></a> 进行，使用的无线网卡芯片是 Broadcom BCM4360 。这个无线芯片可以在Linux上工作，但是FreeBSD目前无法支持。我做了花了一个晚上时间折腾没有解决，由于改为使用 <a class="reference internal" href="../../../apple/macos/apple_silicon_m1_pro.html#apple-silicon-m1-pro"><span class="std std-ref">Apple ARM架构芯片M1 Pro</span></a> (公司配备)，所以暂缓探索。</p>
 </div>
 <section id="id1">
 <h2>检查硬件<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
@@ -172,8 +172,8 @@
 <h2><code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动<a class="headerlink" href="#bwn" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">bwn</span></code> 无线网络驱动支持Broadcom BCM43xx ，并且支持 <code class="docutils literal notranslate"><span class="pre">station</span></code> 和 <code class="docutils literal notranslate"><span class="pre">monitor</span></code> 模式操作。这个 <code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动要求在其工作前首先加载firmware。所以需要先编译安装 <code class="docutils literal notranslate"><span class="pre">ports/net/bwn-firmware-kmod</span></code> 这个port。</p>
 <p><code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动支持的 Broadcom BCM43xx 无线设备包括:</p>
-<table class="docutils align-default" id="id4">
-<caption><span class="caption-text">bwn支持的Broadcom BCM43xx 无线设备列表</span><a class="headerlink" href="#id4" title="永久链接至表格">¶</a></caption>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">bwn支持的Broadcom BCM43xx 无线设备列表</span><a class="headerlink" href="#id5" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 30%" />
@@ -289,7 +289,32 @@
 </pre></div>
 </div>
 </li>
+</ul>
+<p>对于要在系统启动时自动加载上述内核模块，则编辑 <code class="docutils literal notranslate"><span class="pre">/boot/bootloader.conf</span></code> 添加:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">if_bwn_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="n">bwn_v4_ucode_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="n">bwn_v4_lp_ucode_load</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+</pre></div>
+</div>
+<ul>
 <li><p>在加载内核模块完成后，就可以通过以下命令创建无线网卡设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ifconfig</span> <span class="n">wlan0</span> <span class="n">create</span> <span class="n">wlandev</span> <span class="n">bwn0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ifconfig</span><span class="p">:</span> <span class="n">SIOCIFCREATE2</span><span class="p">:</span> <span class="n">Device</span> <span class="ow">not</span> <span class="n">configured</span>
+</pre></div>
+</div>
+<p>原因是前面加载无线驱动和firmware并没有检测到 <code class="docutils literal notranslate"><span class="pre">/dev/bwn0</span></code> 设备。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>很不幸，FreeBSD今天还是没有支持 BCM4360 ，从 <a class="reference external" href="https://forums.freebsd.org/threads/macbook-air-2017-need-help-with-proprietary-firmware-driver.81605/">Macbook Air 2017 : Need Help With Proprietary Firmware/Driver</a> 可以看到实际上并没有解决驱动MacBook Air 2017内置的BCM4360设备。这个讨论最后建议使用USB接口的外接无线网卡，或者使用类似 <a class="reference external" href="https://www.amazon.co.uk/PQI-Air-Express-Wireless-Router/dp/B00BNAST1I">PQI Air Pen Express Wireless Router</a> 这样的设备。</p>
+<p>不过，也提出了一个思路: 使用手机的USB Tethering功能，将手机的无线网卡模拟成以太网卡，只要将手机USB连接以后，激活 <code class="docutils literal notranslate"><span class="pre">USB</span> <span class="pre">tethring</span></code> ，此时在FreeBSD中就会看到一个USB无线网卡设备，就能够直接使用没有任何障碍: <span class="xref std std-ref">freebsd_usb_tethering_wifi</span></p>
+<p>参考 <a class="reference external" href="https://streof.github.io/freebsd-wifi-mac/">First FreeBSD experience: something with Wi-Fi and Apple hardware</a> 详细说明了如何编译安装firmware，步骤和我上文相似，但是最终也没有解决BCM43602设备驱动</p>
+</div>
+<p>以下命令没有执行，原因是上文 <code class="docutils literal notranslate"><span class="pre">bwn</span></code> 驱动并不支持 <code class="docutils literal notranslate"><span class="pre">BCM4360</span></code> ，不过记录备用:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ifconfig</span> <span class="n">wlan0</span> <span class="n">up</span> <span class="c1"># Laptop WiFi LED light should turn on</span>
 <span class="n">sudo</span> <span class="n">ifconfig</span> <span class="n">wlan0</span> <span class="n">scan</span> <span class="c1"># You should see your wireless router SSID</span>
 <span class="n">sudo</span> <span class="n">wpa_supplicant</span> <span class="o">-</span><span class="n">B</span> <span class="o">-</span><span class="n">i</span> <span class="n">wlan0</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">wpa_supplicant</span><span class="o">.</span><span class="n">conf</span>
@@ -297,8 +322,6 @@
 <span class="n">sudo</span> <span class="n">dhclient</span> <span class="n">wlan0</span>
 </pre></div>
 </div>
-</li>
-</ul>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>我这里失败，加载驱动以及firmware之后并没有看到网卡设备</p>
@@ -325,7 +348,10 @@
 </pre></div>
 </div>
 <p>但是，似乎模块都加载了也看不到设备</p>
-<p>待续…</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>由于拿到了公司配备的 <a class="reference internal" href="../../../apple/macos/apple_silicon_m1_pro.html#apple-silicon-m1-pro"><span class="std std-ref">Apple ARM架构芯片M1 Pro</span></a> ，暂时没有使用FreeBSD作为全功能桌面的个人需求，所以暂缓实践。后续有时间和机会再来尝试。</p>
+</div>
 </section>
 <section id="id2">
 <h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>

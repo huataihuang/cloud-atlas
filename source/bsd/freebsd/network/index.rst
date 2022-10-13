@@ -8,6 +8,7 @@ FreeBSD网络
    :maxdepth: 1
 
    freebsd_wifi.rst
+   freebsd_usb_tethering_wifi.rst
    freebsd_proxy.rst
    pfsense/index
 

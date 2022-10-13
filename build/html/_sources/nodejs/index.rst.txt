@@ -9,6 +9,7 @@ Node.js Atlas
 
    introduce_nodejs.rst
    startup/index
+   express/index
    electron/index
    koa/index
    egg/index

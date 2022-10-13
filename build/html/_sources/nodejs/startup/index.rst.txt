@@ -8,6 +8,7 @@ Node.js起步
    :maxdepth: 1
 
    nodejs_dev_env.rst
+   nodejs_dev_docker.rst
    npm_proxy.rst
    run_nodejs.rst
 

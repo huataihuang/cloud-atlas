@@ -4,6 +4,10 @@
 macOS安装Docker
 ===================
 
+.. note::
+
+   现在已经全面使用 Docker Desktop ，当前在 :ref:`apple_silicon_m1_pro` MacBook Pro笔记本上的 macOS 运行Docker Desktop实际上是在一个 :ref:`kvm_qemu` 虚拟机中 ``qemu-system-aarch64``
+
 Docker Desktop on Mac vs. Docker Toolbox
 =========================================
 

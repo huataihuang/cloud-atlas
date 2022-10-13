@@ -6,7 +6,7 @@ FreeBSD无线网络
 
 .. note::
 
-   本文实践在 :ref:`mbp15_late_2013` 完成，使用的无线网卡芯片是 Broadcom
+   本文实践在 :ref:`mbp15_late_2013` 进行，使用的无线网卡芯片是 Broadcom BCM4360 。这个无线芯片可以在Linux上工作，但是FreeBSD目前无法支持。我做了花了一个晚上时间折腾没有解决，由于改为使用 :ref:`apple_silicon_m1_pro` (公司配备)，所以暂缓探索。
 
 检查硬件
 =========
@@ -75,7 +75,31 @@ FreeBSD无线网络
    sudo kldload bwn_v4_ucode 
    sudo kldload bwn_v4_lp_ucode
 
+对于要在系统启动时自动加载上述内核模块，则编辑 ``/boot/bootloader.conf`` 添加::
+
+   if_bwn_load="YES"
+   bwn_v4_ucode_load="YES"
+   bwn_v4_lp_ucode_load="YES"
+
 - 在加载内核模块完成后，就可以通过以下命令创建无线网卡设备::
+
+   ifconfig wlan0 create wlandev bwn0
+
+报错::
+
+   ifconfig: SIOCIFCREATE2: Device not configured
+
+原因是前面加载无线驱动和firmware并没有检测到 ``/dev/bwn0`` 设备。
+
+.. warning::
+
+   很不幸，FreeBSD今天还是没有支持 BCM4360 ，从 `Macbook Air 2017 : Need Help With Proprietary Firmware/Driver <https://forums.freebsd.org/threads/macbook-air-2017-need-help-with-proprietary-firmware-driver.81605/>`_ 可以看到实际上并没有解决驱动MacBook Air 2017内置的BCM4360设备。这个讨论最后建议使用USB接口的外接无线网卡，或者使用类似 `PQI Air Pen Express Wireless Router <https://www.amazon.co.uk/PQI-Air-Express-Wireless-Router/dp/B00BNAST1I>`_ 这样的设备。
+
+   不过，也提出了一个思路: 使用手机的USB Tethering功能，将手机的无线网卡模拟成以太网卡，只要将手机USB连接以后，激活 ``USB tethring`` ，此时在FreeBSD中就会看到一个USB无线网卡设备，就能够直接使用没有任何障碍: :ref:`freebsd_usb_tethering_wifi`
+
+   参考 `First FreeBSD experience: something with Wi-Fi and Apple hardware <https://streof.github.io/freebsd-wifi-mac/>`_ 详细说明了如何编译安装firmware，步骤和我上文相似，但是最终也没有解决BCM43602设备驱动
+
+以下命令没有执行，原因是上文 ``bwn`` 驱动并不支持 ``BCM4360`` ，不过记录备用::
 
    sudo ifconfig wlan0 up # Laptop WiFi LED light should turn on
    sudo ifconfig wlan0 scan # You should see your wireless router SSID
@@ -111,7 +135,9 @@ FreeBSD无线网络
 
 但是，似乎模块都加载了也看不到设备
 
-待续...
+.. note::
+
+   由于拿到了公司配备的 :ref:`apple_silicon_m1_pro` ，暂时没有使用FreeBSD作为全功能桌面的个人需求，所以暂缓实践。后续有时间和机会再来尝试。
 
 参考
 ======
