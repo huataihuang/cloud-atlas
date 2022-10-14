@@ -8,6 +8,7 @@ Asahi Linux
    :maxdepth: 1
 
    intro_asahi_linux.rst
+   install_asahi_linux.rst
 
 .. only::  subproject and html
 

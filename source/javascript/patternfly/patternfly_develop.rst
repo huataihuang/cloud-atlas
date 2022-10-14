@@ -11,8 +11,8 @@ PatternFly开发
 
 - 安装 ``npm`` :ref:`fedora_dev_nodejs`
 
-安装Yarn
------------
+安装Yarn(可选)
+------------------
 
 - 使用发行版安装 ``yarn`` ::
 
@@ -22,8 +22,22 @@ PatternFly开发
 
    npm install --global yarn
 
+.. note::
+
+   我参考 `Patternfly React Seed 项目 <https://github.com/patternfly/patternfly-react-seed>`_ 文档，采用 ``npm`` 管理包(使用yarn虽然也可以，但是会提示和仓库中其他包管理冲突，看来官方是使用npm，并且文档案例也是如此)
+
 起步
 ==========
+
+.. warning::
+
+   原文
+
+   - 使用React seed起步
+   - :strike:`安装和配置PatternFly React`
+
+   但是实际上文档没有及时更新，目前应该按照 `Patternfly React Seed 项目 <https://github.com/patternfly/patternfly-react-seed>`_ 使用一个 ``使用React seed`` 起步就可以，如果再叠加 ``安装和配置PatternFly React`` 会导致文件冲突破坏
+
 
 使用React seed起步
 ----------------------
@@ -33,9 +47,13 @@ PatternFly开发
 - 安装项目::
 
    git clone https://github.com/patternfly/patternfly-react-seed
-   cd patternfly-react-seed
-   # npm install && npm run start:dev
-   yarn install && yarn build && yarn start dev
+   mv patternfly-react-seed dashboard
+   cd dashboard
+   npm install && npm run start:dev
+
+.. note::
+
+   `Patternfly React Seed 项目 <https://github.com/patternfly/patternfly-react-seed>`_ 默认分支是 TypeScript，如果要使用JavaScript，则Fork和clone出 `JavaScript branch of the PatternFly React Seed project <https://github.com/patternfly/patternfly-react-seed/tree/javascript>`_
 
 .. note::
 
@@ -49,10 +67,6 @@ PatternFly开发
 
    ``npm run start:dev`` 输出信息提示 ``Project is running at http://localhost:9000/`` ，所以通过 :ref:`ssh_tunneling` 方式建立访问服务器通道(我的程序运行在远端 ``z-dev`` 虚拟机中，如果你只是本地电脑开发，可忽略这步)
 
-.. note::
-
-   如果要快速启动项目，可以使用 `patternfly-quickstarts 项目 <https://github.com/patternfly/patternfly-quickstarts>`_ 作为起步基础
-
 npm和yarn启动监听端口不同::
 
   - npm 使用浏览器访问 http://localhost:9000/ 
@@ -63,29 +77,44 @@ npm和yarn启动监听端口不同::
 .. figure:: ../../_static/javascript/patternfly/patternfly_init_start.png
    :scale: 50
 
-安装和配置PatternFly React
-=============================
+`Patternfly React Seed 项目 <https://github.com/patternfly/patternfly-react-seed>`_ 提供了一些 `Patternfly Seed Development scripts <https://github.com/patternfly/patternfly-react-seed#development-scripts>`_ 案例，可以作为参考命令
 
-- (我没有)使用 ``npm`` 方式安装::
-  
-   npm install @patternfly/react-core --save
+安装和配置PatternFly React(废弃)
+---------------------------------
 
-- (我实际)使用 ``yarn`` 方式安装::
-
-   yarn add @patternfly/react-core
+原文这个步骤应该不再需要，我的实践最终参考 `Patternfly React Seed 项目 <https://github.com/patternfly/patternfly-react-seed>`_
 
 HTML/CSS
 ===========
 
+.. note::
+
+   安装了 `Patternfly React Seed 项目 <https://github.com/patternfly/patternfly-react-seed>`_ 后执行本步骤
+
 HTML/CSS库提供了一系列代码案例，可以使用统一的PatternFly markup和styling来构建接口。
 
-- (我没有)使用 ``npm`` 方式安装::
+- 使用 ``npm`` 方式安装::
 
    npm install @patternfly/patternfly --save
 
-- (我实际)使用 ``yarn`` 方式安装::
+这里会有一点提示::
 
-   yarn add @patternfly/patternfly
+   added 1 package, and audited 2872 packages in 35s
+   
+   229 packages are looking for funding
+     run `npm fund` for details
+   
+   47 vulnerabilities (1 low, 6 moderate, 37 high, 3 critical)
+   
+   To address issues that do not require attention, run:
+     npm audit fix
+   
+   To address all issues (including breaking changes), run:
+     npm audit fix --force
+   
+   Run `npm audit` for details.
+
+这个命令执行会在 ``./node_modules/@patternfly`` 目录下再增加一个 ``patternfly`` 子目录，包含了一系列组件，后续可以进行定制
 
 完成了HTML/CSS安装之后，包含了:
 
