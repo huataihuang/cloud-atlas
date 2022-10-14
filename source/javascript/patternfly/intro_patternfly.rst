@@ -6,7 +6,7 @@ PatternFly简介
 
 PatternFly是一个开源设计系统，以统一和有效访问一系列应用程序和用户案例。PatternFly提供了清晰的标准，指导和工具帮助设计师和开发者一起更高效工作并创建更好的用户体验。
 
-Red Hat Developer 网站提供了 `Developing with PatternFly React教程 <https://developers.redhat.com/courses/patternfly-react>`_ ，可以作为起步学习资料。
+Red Hat Developer 网站提供了 `Developing with PatternFly React教程 <https://developers.redhat.com/courses/patternfly-react>`_ ，并且在持续更新。由于PatternFly非常小众，实际参考资料极少，所以这个网站是比较值得参考的资料。
 
 .. note::
 
