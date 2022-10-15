@@ -36,9 +36,11 @@ sway窗口管理器使用fcitx5
       exec hash dbus-update-activation-environment 2>/dev/null && \
               dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
 
-- 在个人配置定制文件 ``~/.config/sway/config`` 中添加一行::
+- 在个人配置定制文件 ``~/.config/sway/config`` 中添加一行:
 
-   exec_always fcitx5 -d --replace
+.. literalinclude:: fcitx_sway/config_add
+   :language: bash
+   :caption: 在 ~/.config/sway/config 中添加运行 fcitx5 的配置
 
 - 重启系统，这样环境变量和sway配置都生效，登陆到 ``sway`` 系统中，就会看到右上角有一个 ``fcitx`` 运行图标
 
