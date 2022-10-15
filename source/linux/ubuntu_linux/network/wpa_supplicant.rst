@@ -142,6 +142,14 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
 启动时自动运行
 ================
 
+.. warning::
+
+   这段配置 ``systemd`` 方法虽然可行，但是现在已经没有必要直接修改 ``wpa_supplicant.service`` 配置文件了。标准的方法是通过激活 ``wpa_supplicant@interfice.service`` 来让服务读取对应的 ``/etc/wpa_supplicant/wpa_supplicant-interface.conf`` 。例如，对于 ``wlan0`` ，应该执行::
+
+      systemctl enable wpa_supplicant@wlan0.service
+
+   详见 :ref:`archlinux_wpa_supplicant`
+
 为了能在操作系统启动时自动连接无线网络，我们需要编辑 ``wpa_supplicant.service`` 配置::
 
    sudo cp /lib/systemd/system/wpa_supplicant.service /etc/systemd/system/wpa_supplicant.service

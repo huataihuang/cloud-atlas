@@ -1,0 +1,76 @@
+.. _archlinux_sway:
+
+======================
+archlinux Sway图形桌面
+======================
+
+我在 :ref:`mobile_cloud_infra` 采用的 :ref:`asahi_linux` 底层是arch linux，为了能够轻量级运行，采用 :ref:`wayland` 核心的 :ref:`sway` 图形桌面。
+
+安装
+========
+
+- 建议同时安装::
+
+   pacman -S sway swaylock swayidle swaydg 
+
+- 安装 dmenu (本来想安装 wofi 但是发现依赖安装太多软件了)::
+
+   pacman -S dmenu
+
+- 安装alacritty作为终端(参考 :ref:`freebsd_sway` )::
+
+   pacman -S alacritty
+
+启动
+=======
+
+Sway启动前需要访问硬件设备，例如键盘，鼠标和图形卡，这个硬件信息搜集称为一个 ``seat`` (类似 :ref:`freebsd_sway`)，所以需要安装::
+
+   pacman -S seatd
+
+如果系统同时安装了 ``polkit`` ，那么 Sway 可以自动访问seat。另一种方式是，如果没有安装 ``polkit`` ，则将自己加入 ``seat`` 用户组，然后激活和启动 ``seatd.service`` (我采用这种方法)::
+
+   systemctl enable seatd.service
+   systemctl start seatd.service
+
+- 启动::
+
+   sway
+
+配置
+========
+
+- 将sway系统配置复制过来修改::
+
+   cp /etc/sway/config ~/.config/sway/config
+
+- 修改menu配置::
+
+   set $term alacritty
+
+   set $menu dmenu_path | dmenu | xargs swaymsg exec --
+
+还是没有解决dmenu唤起问题
+
+- 安装chrome和 :ref:`vscode`
+
+输入设备
+==========
+
+支持配置touchpad: ``~/.config/sway/config`` :
+
+.. literalinclude:: archlinux_sway/config_touchpad
+   :language: bash
+   :caption: sway配置touchpad
+
+高分辨率屏幕
+=================
+
+可以安装图形程序 ``wdisplays`` ( :ref:`archlinux_aur` 安装 )或者终端程序 ``wlr-randr`` ( :ref:`archlinux_aur` 安装 )来修改分辨率，旋转和排列显示器。
+
+但是我尝试了 ``wdispalys`` ，虽然能够将屏幕显示分辨率放大，但是可能不能契合苹果高分屏，显示字体很难看。我感觉还是采用体征终端字体以及配置chrome的页面放大到 150% 较稳合适。
+   
+参考
+======
+
+- `Complete the Sway experience: Swaybg, Swayidle, Swaylock, Alacritty, Waybar, Brigtnessctl #1296 <https://github.com/clearlinux/distribution/issues/1296>`_ 非常好的参考，引述了多个必要组件

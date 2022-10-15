@@ -7,11 +7,14 @@ Arch Linux
 .. toctree::
    :maxdepth: 1
 
+   best_archlinux.rst
    archlinux_on_mbp.rst
    archlinux_on_thinkpad_x220.rst
    archlinux_on_thinkpad_x220_u_disk.rst
    archlinux_config_ip.rst
-   best_archlinux.rst
+   archlinux_wpa_supplicant.rst
+   archlinux_sway.rst
+   archlinux_chinese.rst
    archlinux_ms_fonts.rst
    pacman.rst
    archlinux_aur.rst

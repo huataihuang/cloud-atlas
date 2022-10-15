@@ -8,3 +8,4 @@
    :maxdepth: 1
 
    mobile_cloud_infra.rst
+   mobile_cloud_asahi.rst

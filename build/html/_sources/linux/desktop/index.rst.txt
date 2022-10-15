@@ -22,6 +22,7 @@ Linux桌面
    i3.rst
    oh_my_zsh.rst
    tmux.rst
+   alacritty.rst
    read_ebook_in_linux.rst
    remote_linux_desktop.rst
    light_browser.rst
