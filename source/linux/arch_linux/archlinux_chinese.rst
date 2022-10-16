@@ -61,6 +61,10 @@ arch linux中文环境
 
    pacman -S fcitx5-configtool 
 
+.. note::
+
+   非必须，我觉得只要做好依次配置调整，将配置文件保存备用就可以了。配置文件是 ``.config/fcitx5`` 目录下文件
+
 配置
 =======
 
@@ -74,19 +78,49 @@ arch linux中文环境
 使用
 =======
 
-- alacritty 虽然非常轻量级并且速度很快，但是fcitx5中文输入时无法显示选词，只能盲打输入中文 - 中文显示和输入是支持的，就是无法选词非常懊恼。或许fcitx还有什么配置?
+- 使用 ``qterminal`` 较为方便，fcitx5对于QT5输入支持很完美，所以在sway环境使用qterminal输入中文还是很顺利的
+
+- chromium依然没有解决中文输入，所以还是如 :ref:`run_sway` 一样使用firefox来支持中文输入。 :strike:`但是这次遇到奇怪问题，就是fcitx5的候选字不显示`
+- 需要安装 ``fcitx5-gtk`` 才能在firefox中使用fcitx5输入法时候显示"候选字符"，否则看不到候选字词就只能盲打输入中文
+
+alacritty
+----------------
+
+alacritty 虽然非常轻量级并且速度很快，但是fcitx5中文输入时无法显示选词，只能盲打输入中文 - 中文显示和输入是支持的，就是无法选词非常懊恼。
 
 .. note::
 
-   `alacritty无法使用输入法问题 <https://openwares.net/2020/01/14/alacritty-use-im/>`_ 提供了解决思路，就是将alacritty执行命令修订成::
+   `Fcitx5 and Terminal <https://www.reddit.com/r/swaywm/comments/wirg48/fcitx5_and_terminal/>`_ 讨论了终端支持的配置，其中提到 ``sway`` 不支持选词框(除非程序在Xwayland中显示选词框)。QT应用不支持Wayland text-input-v3协议，所以需要使用DBus(设置 ``QT_IM_MODULE=fcitx5`` )。类似chromium也不使用text-input-v3。
 
-      env WINIT_UNIX_BACKEND=x11 alacritty
+参考 `alacritty无法使用输入法问题 <https://openwares.net/2020/01/14/alacritty-use-im/>`_ 提供了解决思路，就是将alacritty执行命令修订成::
 
-   这样渲染后端改为x11就行切换出中文输入法。不过这样需要运行 xwayland ，需要另外安装
+   env WINIT_UNIX_BACKEND=x11 alacritty
 
-- 使用 ``qterminal`` 较为方便，fcitx5对于QT5输入支持很完美，所以在sway环境使用qterminal输入中文还是很顺利的
+这样渲染后端改为x11就行切换出中文输入法
 
-- chromium依然没有解决中文输入，所以还是如 :ref:`run_sway` 一样使用firefox来支持中文输入。但是这次遇到奇怪问题，就是fcitx5的候选字不显示，有点类似 alacritty
+此时提示::
+
+   thread 'main' panicked at 'Failed to initialize X11 backend: XOpenDisplayFailed', /build/.cargo/registry/src/github.com-1ecc6299db9ec823/winit-0.27.4/src/platform_impl/linux/mod.rs:684:26
+   note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+我没有近一步实践，而是改为使用 ``qterminal``
+
+chrome
+--------
+
+我一直没有解决chrome中文输入问题，不过参考 `Fcitx Wayland(Sway) Support #292 <https://github.com/fcitx/fcitx5/issues/292>`_ 说明:
+
+- chrome在sway(wayland)不能输入中文的bug和fcitx5无关，是由于chrome在ozone wayland平台不支持gtk im模块导致的: `Issue 1183262: Add support for gtk im module on ozone wayland platform <https://bugs.chromium.org/p/chromium/issues/detail?id=1183262>`_
+
+- 参考 `无法在Chrome(Wayland)中使用fcitx5 #263 <https://github.com/fcitx/fcitx5/issues/263>`_ 提供的workroudn方法:
+
+  - 系统安装 ``gtk4`` ，然后运行 chrome/chromium 时使用参数 ``--gtk-version=4`` ::
+
+     chromium -enable-features=UseOzonePlatform --ozone-platform=wayland --gtk-version=4
+
+  - **不过我尝试没有成功** 由于可以使用firefox作为主力浏览器，需求不高，我暂时放弃尝试
+
+  - 有提示chrome安装kimpanel扩展，然后就能够在Gnome环境输入(感觉这个可能可以，但未尝试)
 
 参考
 =====

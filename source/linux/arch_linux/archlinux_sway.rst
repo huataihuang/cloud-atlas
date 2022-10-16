@@ -68,9 +68,19 @@ Sway启动前需要访问硬件设备，例如键盘，鼠标和图形卡，这�
 
 可以安装图形程序 ``wdisplays`` ( :ref:`archlinux_aur` 安装 )或者终端程序 ``wlr-randr`` ( :ref:`archlinux_aur` 安装 )来修改分辨率，旋转和排列显示器。
 
-但是我尝试了 ``wdispalys`` ，虽然能够将屏幕显示分辨率放大，但是可能不能契合苹果高分屏，显示字体很难看。我感觉还是采用体征终端字体以及配置chrome的页面放大到 150% 较稳合适。
+但是我尝试了 ``wdispalys`` ，虽然能够将屏幕显示分辨率放大，但是可能不能契合苹果高分屏，显示字体很难看。我感觉还是采用体征终端字体以及配置浏览器的页面放大到 150% 较稳合适。
+
+锁屏
+======
+
+锁屏使用 ``swaylock`` ，并且可以参考 `Script output over a random image in swaylock <https://forum.archlabslinux.com/t/script-output-over-a-random-image-in-swaylock/5944>`_ 切换锁屏图片 (尚未实践)
+
+``swaylock`` 结合 ``swaylock-effects`` 可以输出一些信息，如时间::
+
+   swaylock --clock --indicator --screenshots --effect-scale 0.4 --effect-vignette 0.2:0.5 --effect-blur 4x2 --datestr "%a %e.%m.%Y" --timestr "%k:%M"
    
 参考
 ======
 
 - `Complete the Sway experience: Swaybg, Swayidle, Swaylock, Alacritty, Waybar, Brigtnessctl #1296 <https://github.com/clearlinux/distribution/issues/1296>`_ 非常好的参考，引述了多个必要组件
+- `Lock screen config in sway <https://code.krister.ee/lock-screen-in-sway/>`_
