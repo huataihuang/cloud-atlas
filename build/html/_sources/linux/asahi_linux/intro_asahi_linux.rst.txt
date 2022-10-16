@@ -29,6 +29,22 @@ Asahi Linux 于2022年3月发布了首个Alpha版本，对Apple Silicon Macs提�
 
 我个人在 :ref:`raspberry_pi` 上投入了很多精力来构建 :ref:`kubernetes` 集群，并且我个人非常喜欢MacBook硬件( :ref:`macos` 也非常美观，只是无法像Linux一样更具有可玩性 )。随着Asahi Linux将Linux移植到最新的ARM架构Apple Silicon Macs，使得我有可能同时兼顾ARM架构体验以及探索在超级性能的硬件上实现 :ref:`mobile_cloud` 。我的实践是在 :ref:`apple_silicon_m1_pro` MacBook Pro笔记上进行。
 
+不足和期待
+============
+
+根据 `The first Asahi Linux Alpha Release is here! <https://asahilinux.org/2022/03/asahi-linux-alpha-release/>`_ 目前Asahi Linux还有一些关键硬件无法工作，也是非常期待的特性:
+
+- GPU加速: 目前图形界面还是framebuffer方式驱动，也就是没有发挥出 :ref:`apple_silicon_m1_pro` 强大的GPU性能
+- 视频解码加速: 虽然看YouTube视频没有问题，但是显然硬解码会更优
+- Neural Engine: 现在还不能在Linux平台玩 :ref:`machine_learning`
+- 显示输出: 还不能外接显示器
+- 蓝牙
+- 摄像头
+- CPU深度idle和睡眠模式
+
+这里最值得关注的是GPU加速和Neural Engine，毕竟 :ref:`apple_silicon_m1_pro` 号称买GPU送CPU，没能发挥出优势硬将性能还是比较遗憾的。这部继续关注社区进展。
+
+
 参考
 =======
 

@@ -13,9 +13,9 @@
 安装
 ========
 
-- :ref:`install_docker_macos` ，如果是在 :ref:`linux` 中安装 :ref:`docker` ，需要配置 :ref:`run_docker_without_sudo` 
+- :ref:`install_docker_macos` ，如果是在 :ref:`linux` 中安装 :ref:`docker` ，例如，我在 :ref:`mobile_cloud_infra` 中采用 :ref:`archlinux_docker` 需要配置 :ref:`run_docker_without_sudo` 
 - 安装 :ref:`vscode` 扩展: 按下 ``⇧⌘X`` 搜索 ``docker`` 并安装由微软开发的Docker extension:
-
+ 
 .. figure:: ../../_static/nodejs/startup/vscode_docker_extension.png
 
 - (推荐)按下 ``⇧⌘X`` 搜索 ``python`` / ``go`` / ``rust-analyzer`` / ``c/c++`` 扩展，获得 ``IntelliSense`` 能力( 可以从 `Extensions for Visual Studio Code <https://marketplace.visualstudio.com/vscode>`_ 查找)
