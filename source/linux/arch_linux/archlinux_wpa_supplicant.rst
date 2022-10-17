@@ -6,6 +6,9 @@ arch linux使用wpa_supplicant连接无线网络
 
 启动 :ref:`asahi_linux` 之后，可以看到已经识别了 :ref:`apple_silicon_m1_pro` MacBook Pro内置的无线网卡 ``wlan0`` 
 
+wpa_supplicant基础配置
+========================
+
 - 创建 ``wpa_supplicant`` 的配置文件:
 
 .. literalinclude:: archlinux_wpa_supplicant/wpa_passphrase
@@ -28,6 +31,9 @@ arch linux使用wpa_supplicant连接无线网络
 
 .. literalinclude:: archlinux_wpa_supplicant/systemctl_start_wpa_passphrase_dhcpcd
    :language: bash
+
+企业级wpa_supplicant
+=======================
 
 参考
 =======

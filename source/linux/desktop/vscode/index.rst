@@ -8,6 +8,7 @@ VS Code
    :maxdepth: 1
 
    vscode_linux.rst
+   vscode_archlinux.rst
    vscode_lsp.rst
    vscode_extensions.rst
    vscode_debugging.rst
