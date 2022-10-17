@@ -11,6 +11,7 @@ wayland显示服务器协议
    build_wayland_on_pi.rst
    wayland_qt.rst
    dumb_buffer_permission_denied.rst
+   wayland_vnc.rst
 
 .. only::  subproject and html
 

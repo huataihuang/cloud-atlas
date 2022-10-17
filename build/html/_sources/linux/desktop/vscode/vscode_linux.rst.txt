@@ -78,4 +78,4 @@ ARM版本VS Code
 参考
 =========
 
-- `How to Install Visual Studio Code on Ubuntu 20.04 <https://linuxize.com/post/how-to-install-visual-studio-code-on-ubuntu-20-04/>`_`
+- `How to Install Visual Studio Code on Ubuntu 20.04 <https://linuxize.com/post/how-to-install-visual-studio-code-on-ubuntu-20-04/>`_

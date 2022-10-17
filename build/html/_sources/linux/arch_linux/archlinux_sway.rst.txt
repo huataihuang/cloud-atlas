@@ -63,6 +63,18 @@ Sway启动前需要访问硬件设备，例如键盘，鼠标和图形卡，这�
    :language: bash
    :caption: sway配置touchpad
 
+.. note::
+
+   - ``dwt`` 表示 ``disable touchpad while typing`` ，这个功能非常有用，激活以后可以避免在sway中输入时候出现聚焦点漂移的问题。不过，我实践下来发现还是需要微调，对于Macbook Pro的touchpad过于灵敏
+
+     - DWT 可能对外接touchpad无效 `DWT not working on Sway with Apple BT Trackpad + wireless keyboard <https://gitlab.freedesktop.org/libinput/libinput/-/issues/524>`_
+
+       - 我参考 `Disable Touchpad while typing not working <https://forum.manjaro.org/t/disable-touchpad-while-typing-not-working/12674>`_ 增加一个选项::
+
+          pointer_accel 0.6 # set mouse sensitivity (between -1 and 1)
+
+   - 如果要彻底关闭touchpad，参考 `sway:  Disabling Touchpad #1277 <https://github.com/swaywm/sway/issues/1277>`_
+
 高分辨率屏幕
 =================
 
