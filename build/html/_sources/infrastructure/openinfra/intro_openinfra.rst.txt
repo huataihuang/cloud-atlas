@@ -11,8 +11,12 @@ OpenInfra介绍
 - AI/机器学习 ( :ref:`machine_learning` )
 - CI/CD ( :ref:`devops` )
 - 容器基础架构 ( :ref:`kubernetes` )
-- 边缘计算 ( :ref:`edge_cloud` )
+- 边缘计算 :ref:`linaro` (基于ARM的 :ref:`edge_cloud` )
 - 公有,私有和混合 云计算
+
+.. note::
+
+   除了基于ARM的边缘计算 :ref:`linaro` ，另外一个边缘计算架构是 :ref:`akraino` (Linux基金会)。两者的架构可以相互印证，通过实践和学习了解世界先进的开源技术。
 
 
 参考
