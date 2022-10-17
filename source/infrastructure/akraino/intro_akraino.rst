@@ -6,7 +6,7 @@ Akraino边缘计算架构简介
 
 Akraino是 `Linux基金会 <https://linuxfoundation.org>`_ 创建的 `LF Edge开源国际组织 <https://www.lfedge.org>`_ 旗下 `Akraino Edge Stack <https://www.lfedge.org/projects/akraino/>`_ 项目。
 
-Akraino实际上是面向边缘计算，包含广泛的使用场景，例如5G, AI, 边缘IaaS/PaaS, IoT，提供给供应商和启用边缘淋雨的开放架构和应用 ``蓝图`` 。Akraino社区创建的这些蓝图聚焦于不同形式的边缘环境，这些蓝图的单元被社区所测试并接受，或者作为定制新的边缘计算的蓝图的基础。
+Akraino实际上是面向边缘计算，包含广泛的使用场景，例如5G, AI, 边缘IaaS/PaaS, IoT，提供给供应商和启用边缘云的开放架构和应用 ``蓝图`` 。Akraino社区创建的这些蓝图聚焦于不同形式的边缘环境，这些蓝图的单元被社区所测试并接受，或者作为定制新的边缘计算的蓝图的基础。
 
 Akraino设计原则
 ===================
