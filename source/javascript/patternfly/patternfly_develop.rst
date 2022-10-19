@@ -132,7 +132,25 @@ HTML/CSS库提供了一系列代码案例，可以使用统一的PatternFly mark
 配置项目
 ============
 
+.. note::
 
+   提交到git仓库时，在 ``dashboard`` 目录下有一个 ``.gitignore`` 控制忽略以下文件提交:
+
+   .. literalinclude:: patternfly_develop/gitignore
+      :language: bash
+      :caption: 不包含在patternfly中提交的文件，通过npm install获取
+      :emphasize-lines: 1
+
+   所以把自己的项目从git仓库中再次clone下来之后，需要恢复 ``dashboard`` 目录下这个 ``.gitignore`` 文件，并执行以下命令恢复运行环境::
+
+      npm install && npm start run:dev
+
+默认 ``npm start run:dev`` 只监听本地回环地址，所以如果要提供给外部查看，需要绑定所有网络接口: 参考 `How to make the webpack dev server run on port 80 and on 0.0.0.0 to make it publicly accessible? <https://stackoverflow.com/questions/33272967/how-to-make-the-webpack-dev-server-run-on-port-80-and-on-0-0-0-0-to-make-it-publ>`_ 修改 ``webpack.dev.js`` :
+
+.. literalinclude:: patternfly_develop/webpack.dev.js
+   :language: javascript
+   :caption: webpack.dev.js 配置绑定主机所有网络接口
+   :emphasize-lines: 2,9,10
 
 参考
 ========

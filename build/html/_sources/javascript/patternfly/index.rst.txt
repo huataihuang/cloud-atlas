@@ -11,6 +11,7 @@ PatternFly
    intro_patternfly.rst
    patternfly_design.rst
    patternfly_develop.rst
+   basics/index
 
 .. only::  subproject and html
 
