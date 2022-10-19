@@ -140,6 +140,14 @@ tmux的 ``前导键`` 是 ``ctrl-b`` ，也就是按下 ``ctrl-b`` 就进入发�
 tmux-config
 ================
 
+色彩配置
+---------
+
+为了能够区分出远程和本地的tmux，可以在状态条上采用不同的色彩
+
+案例
+------
+
 `samoshkin/tmux-config <https://github.com/samoshkin/tmux-config>`_ 提供了一个超级强大的tmux配置:
 
 .. figure:: ../../_static/linux/desktop/tmux.gif
@@ -157,9 +165,11 @@ tmux-config
 
 - `tmux vs. screen <https://superuser.com/questions/236158/tmux-vs-screen>`_
 - `Tmux vs. Screen tool comparison <https://linuxhint.com/tmux_vs_screen/>`_
+- `Comprehensive Tmux Tutorial for Beginners with a Cheat Sheet <https://protechnotes.com/comprehensive-tmux-tutorial-for-beginners-with-a-cheat-sheet/>`_ 这篇文档写得非常生动
 - `How to Use tmux on Linux (and Why It’s Better Than Screen) <https://www.howtogeek.com/671422/how-to-use-tmux-on-linux-and-why-its-better-than-screen/>`_
 - `Excellent Utilities: tmux – terminal multiplexer software <https://www.linuxlinks.com/excellent-utilities-tmux-terminal-multiplexer-software/>`_
 - `Tips for using tmux <https://www.redhat.com/sysadmin/tips-using-tmux>`_
 - `In tmux can I resize a pane to an absolute value <https://stackoverflow.com/questions/16145078/in-tmux-can-i-resize-a-pane-to-an-absolute-value>`_
 - `Adjusting screen split pane sizes in tmux <https://superuser.com/questions/863295/adjusting-screen-split-pane-sizes-in-tmux>`_
 - `Tmux 使用教程 <https://www.ruanyifeng.com/blog/2019/10/tmux.html>`_
+- `tmux bottom status bar color change <https://unix.stackexchange.com/questions/60968/tmux-bottom-status-bar-color-change>`_
