@@ -21,6 +21,33 @@ VNC客户端
 
 Wayland的VNC客户端可以采用 `wlvncc <https://github.com/any1/wlvncc>`_ 。WayVNC 0.5支持使用OpenH268 RFB协议扩展的H.264编码。
 
+- 编译依赖::
+
+   GCC/clang
+   meson
+   ninja
+   pkg-config
+   wayland-protocols
+
+- 编译和运行::
+
+   git clone https://github.com/any1/aml.git
+   git clone https://github.com/any1/wlvncc.git
+
+   mkdir wlvncc/subprojects
+   cd wlvncc/subprojects
+   ln -s ../../aml .
+   cd ..  #在wlvncc目录
+
+   meson build
+   ninja -C build
+
+   ./build/wlvncc <address>
+
+.. note::
+
+   使用体验: 能够访问和连接 :ref:`macos` 共享的桌面，但是中文输入法切换存在问题，即使我避开了Win键，看起来能够输入中文，但是用空格键确认会卡住。后续我再尝试一下RDP方式访问桌面程序看看能否解决。
+
 .. note::
 
    `waypipe <https://gitlab.freedesktop.org/mstoeckl/waypipe>`_ 实现了类似 ``ssh -X`` 的远程服务Wayland应用本地显示功能，有机会要实践一下，应该非常有用。

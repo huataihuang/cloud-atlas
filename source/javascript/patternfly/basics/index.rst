@@ -1,16 +1,13 @@
-.. _asahi_linux:
+.. _patternfly_basics:
 
 =================================
-Asahi Linux
+PatternFly基础
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_asahi_linux.rst
-   install_asahi_linux.rst
-   asahi_linux_wifi.rst
-   resize_asahi_linux_rootfs.rst
+   patternfly_card.rst
 
 .. only::  subproject and html
 

@@ -31,12 +31,10 @@
 备份
 =====
 
-- 执行以下命令进行系统完整备份::
+- 执行以下命令进行系统完整备份:
 
-   cd /
-   tar -cvpzf backup.tar.gz --exclude=/backup.tar.gz --exclude=/home/huatai/Dropbox \
-     --exclude=/var/cache --exclude=/home/huatai/.cache \
-     --one-file-system /
+.. literalinclude:: recover_system_by_tar/tar_backup
+   :language: bash
 
 参数解释：
 
