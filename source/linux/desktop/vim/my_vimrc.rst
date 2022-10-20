@@ -81,6 +81,10 @@ relative行号
    :language: bash
    :caption: ~/.vim_runtime/my_configs.vim
 
+.. note::
+
+   :ref:`vim_auto_indent`
+
 插件安装
 ==========
 

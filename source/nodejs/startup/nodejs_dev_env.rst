@@ -17,9 +17,11 @@ Node.js开发环境
 安装nvm
 ==========
 
-- 执行安装脚本::
+- 执行安装脚本:
 
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+.. literalinclude:: nodejs_dev_env/install_nvm
+   :language: bash
+   :caption: 安装nvm
 
 上述命令脚本将clone一个nvm代码仓库到 ``~/.nvm`` ，并尝试在profile环境中加入一下内容(我手工加到 ``~/.zshrc`` )::
 
@@ -27,16 +29,18 @@ Node.js开发环境
    [ -s "$NVM_DIR/nvm.sh"  ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
    [ -s "$NVM_DIR/bash_completion"  ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-- 然后执行命令 ``nvm`` 可以看到输出就是正常完成了安装
+- 然后执行命令 ``nvm`` 可以看到输出就是正常完成了安装(注意，使用 ``which nvm`` 是看不到该命令的)
 
 .. _nvm_install_nodejs:
 
 安装node.js
 ==============
 
-- 安装最新版本node::
+- 安装最新版本node:
 
-   nvm install node
+.. literalinclude:: nodejs_dev_env/nvm_install_nodejs
+   :language: bash
+   :caption: nvm安装node.js
 
 默认安装的版本就是current最新版本，输出类似::
 

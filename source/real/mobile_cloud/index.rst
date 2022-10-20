@@ -10,3 +10,4 @@
    mobile_cloud_infra.rst
    mobile_cloud_asahi.rst
    mobile_cloud_zfs.rst
+   mobile_dev.rst
