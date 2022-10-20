@@ -8,6 +8,7 @@ PatternFly基础
    :maxdepth: 1
 
    patternfly_card.rst
+   patternfly_customize.rst
 
 .. only::  subproject and html
 

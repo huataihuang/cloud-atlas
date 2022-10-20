@@ -12,6 +12,8 @@ Vim
    install_vim.rst
    install_vim_centos6.rst
    my_vimrc.rst
+   vim_auto_indent.rst
+   vim_fold.rst
    vim-go.rst
    light_vim.rst
    vim_native_package_loading.rst
