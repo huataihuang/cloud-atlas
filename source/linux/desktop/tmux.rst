@@ -145,6 +145,18 @@ tmux-config
 
 为了能够区分出远程和本地的tmux，可以在状态条上采用不同的色彩
 
+修订 ``~/.tmux.conf`` 配置:
+
+.. literalinclude:: tmux/tmux.conf
+   :language: bash
+   :caption: ~/.tmux.conf配置状态条配色
+
+此外，通过以下命令可以获取所有终端支持的色彩配置:
+
+.. literalinclude:: tmux/color.sh
+   :language: bash
+   :caption: color.sh脚本获取终端支持的色彩
+
 案例
 ------
 
@@ -163,9 +175,9 @@ tmux-config
 参考
 =======
 
+- `Comprehensive Tmux Tutorial for Beginners with a Cheat Sheet <https://protechnotes.com/comprehensive-tmux-tutorial-for-beginners-with-a-cheat-sheet/>`_ 这篇文档写得非常生动，对于学习可以参考该文档
 - `tmux vs. screen <https://superuser.com/questions/236158/tmux-vs-screen>`_
 - `Tmux vs. Screen tool comparison <https://linuxhint.com/tmux_vs_screen/>`_
-- `Comprehensive Tmux Tutorial for Beginners with a Cheat Sheet <https://protechnotes.com/comprehensive-tmux-tutorial-for-beginners-with-a-cheat-sheet/>`_ 这篇文档写得非常生动
 - `How to Use tmux on Linux (and Why It’s Better Than Screen) <https://www.howtogeek.com/671422/how-to-use-tmux-on-linux-and-why-its-better-than-screen/>`_
 - `Excellent Utilities: tmux – terminal multiplexer software <https://www.linuxlinks.com/excellent-utilities-tmux-terminal-multiplexer-software/>`_
 - `Tips for using tmux <https://www.redhat.com/sysadmin/tips-using-tmux>`_
