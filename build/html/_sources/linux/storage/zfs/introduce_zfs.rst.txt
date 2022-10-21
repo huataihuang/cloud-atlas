@@ -57,6 +57,8 @@ ZFS是 128 位文件系统，这个设计如此超前，以至于理论极限可
 
 我在桌面上实践ZFS，并计划在后续 :ref:`priv_cloud_infra` / :ref:`mobile_cloud_infra` 作为主要的存储架构来部署，不断增加实践经验。
 
+- 2022年10月，我逐步在 :ref:`apple_silicon_m1_pro` 的MacBook Pro上构建 :ref:`mobile_cloud_infra` ，在物理主机(MacBook Pro)上采用ZFS来管理 :ref:`docker` 和 :ref:`libvirt` 存储
+
 参考
 =======
 
