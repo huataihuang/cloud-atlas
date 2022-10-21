@@ -8,6 +8,7 @@ Linux内核管理
    :maxdepth: 1
 
    device_mapper.rst
+   dkms.rst
 
 .. only::  subproject and html
 
