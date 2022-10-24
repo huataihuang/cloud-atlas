@@ -39,3 +39,4 @@ Chromecast with Google TV
 =======
 
 - `Google Strore Chromecast specs <https://store.google.com/us/product/chromecast_specs?hl=en-US>`_
+- `How to Use Chromecast Without WiFi in 2022: Keep Casting When Your Connection Drops <https://www.cloudwards.net/how-to-use-chromecast-without-wifi/>`_ 需要单独开坑

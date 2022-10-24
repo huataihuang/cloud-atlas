@@ -29,11 +29,49 @@ VNC服务器
 .. literalinclude:: wayland_vnc/wayvnc_headless_server
    :caption: 无头模式(headless)启动sway的VNC服务器
 
-这里我遇到一个报错::
+这里我遇到一个报错(以普通用户huatai启动)::
 
+   libEGL warning: MESA-LOADER: failed to open vgem: /usr/lib/dri/vgem_dri.so: cannot open shared object file: No such file or directory (search paths /usr/lib/dri, suffix _dri)
+
+   00:00:00.003 [wlr] [EGL] command: eglInitialize, error: EGL_NOT_INITIALIZED (0x3001), message: "DRI2: failed to load driver"
+   libEGL warning: NEEDS EXTENSION: falling back to kms_swrast
+   MESA-LOADER: failed to open vgem: /usr/lib/dri/vgem_dri.so: cannot open shared object file: No such file or directory (search paths /usr/lib/dri, suffix _dri)
+   failed to load driver: vgem
    KMS: DRM_IOCTL_MODE_CREATE_DUMB failed: Permission denied
    00:00:04.558 [wlr] [render/allocator/gbm.c:114] gbm_bo_create failed
    00:00:04.558 [wlr] [render/swapchain.c:109] Failed to allocate buffer
+
+上述报错参考 `arch linux: OpenGL Switching between drivers Mesa <https://wiki.archlinux.org/title/OpenGL#Mesa>`_ 以及 `The Mesa 3D Graphics Library: Enviroment Variables <https://docs.mesa3d.org/envvars.html>`_ :
+
+Mesa可以通过环境变量修改使用不同的驱动，默认Mesa在 ``/lib/dri`` 目录下搜索驱动，驱动名类似 ``driver_dri.so`` ，如果Mesa找不到特定驱动，会fall back到 ``llvmpipe`` 。 可以在环境变量中配置OpenGL software rasterizer::
+
+   LIBGL_ALWAYS_SOFTWARE=true
+   GALLIUM_DRIVER=driver
+
+这里 ``driver`` 可以是 ``softpipe`` , ``llvmpipe`` 或者 ``swr`` 。大多数情况下 ``llvmpipe`` 和 ``swr`` 比 ``softpipe`` 要快。
+
+我查看 ``/usr/lib/dri`` 目录下有 ``etnaviv`` 和 ``zink`` 驱动，所以参考 `The Mesa 3D Graphics Library: Enviroment Variables <https://docs.mesa3d.org/envvars.html>`_ 尝试::
+
+   export MESA_LOADER_DRIVER_OVERRIDE=zink
+
+然后再次执行:
+
+.. literalinclude:: wayland_vnc/wayvnc_headless_server
+   :caption: 无头模式(headless)启动sway的VNC服务器
+
+.. note::
+
+   很不幸，我还没有找到适合 Apple Silicon M1Pro处理器图形卡的驱动方法，虽然上述MESA的环境变量设置驱动思路看起来可行，但是选择了zink等几个驱动都提示驱动不兼容。之前在 :ref:`asahi_linux` 发布文档看显卡驱动尚未就绪。后续再做尝试
+
+.. note::
+
+   其实简单的服务器端启动方法就是::
+
+      wayvnc 0.0.0.0
+
+- 如果服务器端启动正常，可以在客户端使用::
+
+   ssh -FL 9901:localhost:5900 <user>@<SERVER_IP> sleep 5; vncviewer localhost:9901
 
 在sway内部启动wayvnc
 ~~~~~~~~~~~~~~~~~~~~~~

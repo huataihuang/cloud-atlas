@@ -11,7 +11,7 @@ Linux内存管理
    huge_memory_pages/index
    numa/index
    valgrind/index
-   oomd.rst
+   oom/index
 
 .. only::  subproject and html
 

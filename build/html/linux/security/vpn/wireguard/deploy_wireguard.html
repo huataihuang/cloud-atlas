@@ -167,7 +167,14 @@
              
   <section id="wireguard-vpn">
 <span id="deploy-wireguard"></span><h1>部署WireGuard VPN<a class="headerlink" href="#wireguard-vpn" title="Permalink to this heading">¶</a></h1>
-<p>WireGuard的配置力求精简</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><a class="reference external" href="https://www.nixops.me/articles/wireguard-howtos.html">体验Wireguard的简单之美</a> 提到了WireGuard的优缺点。其中缺点(我未能验证，但至少目前我使用WG上网正常):</p>
+<ul class="simple">
+<li><p>Wireguard专注实现简单可靠的加密，不关注流量混淆，容易被DPI检测到，同时由于特征明显，流量有可能被中继或在握手阶段阻断</p></li>
+<li><p>wireguard配置简单且安全高效，适合服务器之间互联。由于国内udp限速及特征明显，不适合个人当梯子用。</p></li>
+</ul>
+</div>
 <section id="id1">
 <h2>安装<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <ul>
@@ -179,51 +186,209 @@
 </ul>
 </section>
 <section id="id2">
-<h2>生成密钥<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
-<p>每个加密通讯的双方都需要创建一个私钥和公钥的密钥对</p>
+<h2>对等加密隧道建立<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>对等加密隧道连接给我们一个比较简单清晰的概览，不过我实际没有完整操作。我主要是通过后文的服务器、客户端配置来实现翻墙，所以本段仅整理记录。</p>
+</div>
+<ul class="simple">
+<li><p>每个加密通讯的双方都需要创建一个私钥和公钥的密钥对</p></li>
+<li><p>实际上WireGuard的双方是完全互等的，输入命令可以完全相似，差别仅是将对端的公钥加入到连接，并指定对方IP地址为对端: 这样就能建立起加密通道</p></li>
+</ul>
+<section id="id3">
+<h3>演示案例<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<p>物理主机IP:</p>
+<ul class="simple">
+<li><p>peerA: 192.168.1.1</p></li>
+<li><p>peerB: 192.168.1.2</p></li>
+</ul>
+<p>建立的加密隧道 wg0 设备IP:</p>
+<ul class="simple">
+<li><p>peerA: 10.0.0.1</p></li>
+<li><p>peerB: 10.0.0.2</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3>两边服务器执行密钥创建(完全一样的命令)<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>以下命令在 <code class="docutils literal notranslate"><span class="pre">peerA</span></code> 和 <code class="docutils literal notranslate"><span class="pre">peerB</span></code> 上执行，生成各自服务器的密钥对，命令完全一样:</p>
 <ul>
 <li><p>创建一个私钥:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">umask</span> <span class="mi">0077</span><span class="p">;</span> <span class="n">wg</span> <span class="n">genkey</span> <span class="o">&gt;</span> <span class="n">peer_A</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">umask</span> <span class="mi">0077</span><span class="p">;</span> <span class="n">wg</span> <span class="n">genkey</span> <span class="o">&gt;</span> <span class="n">private</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>建议只允许owner读写访问私钥，所以这里使用了 <code class="docutils literal notranslate"><span class="pre">umask</span> <span class="pre">0077</span></code> 确保只有owner可以访问</p>
+<p>建议只允许owner读写访问私钥，所以这里使用了 <code class="docutils literal notranslate"><span class="pre">umask</span> <span class="pre">0077</span></code> 确保只有owner可以访问。不设置也行，就是提示一条信息:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span><span class="p">:</span> <span class="n">writing</span> <span class="n">to</span> <span class="n">world</span> <span class="n">accessible</span> <span class="n">file</span><span class="o">.</span>
+<span class="n">Consider</span> <span class="n">setting</span> <span class="n">the</span> <span class="n">umask</span> <span class="n">to</span> <span class="mi">077</span> <span class="ow">and</span> <span class="n">trying</span> <span class="n">again</span><span class="o">.</span>
+</pre></div>
+</div>
 </div>
 <ul>
 <li><p>创建公钥:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span> <span class="n">pubkey</span> <span class="o">&lt;</span> <span class="n">peer_A</span><span class="o">.</span><span class="n">key</span> <span class="o">&gt;</span> <span class="n">peer_A</span><span class="o">.</span><span class="n">pub</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span> <span class="n">pubkey</span> <span class="o">&lt;</span> <span class="n">private</span> <span class="o">&gt;</span> <span class="n">public</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>以上两条命令也和可以合并成:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span> <span class="n">genkey</span> <span class="o">|</span> <span class="p">(</span><span class="n">umask</span> <span class="mi">0077</span> <span class="o">&amp;&amp;</span> <span class="n">tee</span> <span class="n">peer_A</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="o">|</span> <span class="n">wg</span> <span class="n">pubkey</span> <span class="o">&gt;</span> <span class="n">peer_A</span><span class="o">.</span><span class="n">pub</span>
-</pre></div>
-</div>
-<p>对于每个连接对(peer pair)，如A,B和C，应该创建3个独立的预共享密钥，每个peer pair使用一个:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span> <span class="n">genpsk</span> <span class="o">&gt;</span> <span class="n">peer_A</span><span class="o">-</span><span class="n">peer_B</span><span class="o">.</span><span class="n">psk</span>
-<span class="n">wg</span> <span class="n">genpsk</span> <span class="o">&gt;</span> <span class="n">peer_A</span><span class="o">-</span><span class="n">peer_C</span><span class="o">.</span><span class="n">psk</span>
-<span class="n">wg</span> <span class="n">genpsk</span> <span class="o">&gt;</span> <span class="n">peer_B</span><span class="o">-</span><span class="n">peer_C</span><span class="o">.</span><span class="n">psk</span>
-</pre></div>
-</div>
 </section>
-<section id="vanity-keys">
-<h2>修饰密钥(Vanity Keys)<a class="headerlink" href="#vanity-keys" title="Permalink to this heading">¶</a></h2>
-<p>目前WireGuard不支持注释或者将易于记忆的名称附加到key上面，这使得识别密钥的所有者变得困难。一种解决方法是生成一个包含易于理解名字的公钥(例如包含所有人姓名或者主机名)。对于企业用户，通常每个员工会分配一个企业邮箱，这是唯一标识的名字，所以可以用来作为公钥名字的一部分。</p>
-<p>Wireguard VPN 使用 Curve25519 密钥对，并在状态显示中显示 Base64 编码的公钥。</p>
-<p><a class="reference external" href="https://github.com/warner/wireguard-vanity-address">wireguard-vanity-address</a> 提供搜索公钥字符串的便利，可以快速在大量公钥找定位找到匹配的公钥</p>
 </section>
 <section id="peer">
-<h2>Peer配置<a class="headerlink" href="#peer" title="Permalink to this heading">¶</a></h2>
+<h2>Peer建立连接<a class="headerlink" href="#peer" title="Permalink to this heading">¶</a></h2>
+<p>点对点配置，双方将对方公钥加入</p>
+<section id="wg0">
+<h3>双方服务器启动wg0<a class="headerlink" href="#wg0" title="Permalink to this heading">¶</a></h3>
+<p>注意，双方服务器的 <code class="docutils literal notranslate"><span class="pre">WG_IP</span></code> 不同，命令的其他部分完全一致</p>
+<ul>
+<li><p>在服务器端执行以下命令启动 <code class="docutils literal notranslate"><span class="pre">wg0</span></code> 设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># peerA的 wg_ip 是 10.0.0.1 ，peerB的 wg_ip 是 10.0.0.2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>在 peerA上执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>wg_ip=10.0.0.1
+ip link add wg0 type wireguard
+ip addr add ${wg_ip}/24 dev wg0
+wg set wg0 private-key ./private
+ip link set wg0 up
+</pre></div>
+</div>
+<p>在 peerB上执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>wg_ip=10.0.0.2
+ip link add wg0 type wireguard
+ip addr add ${wg_ip}/24 dev wg0
+wg set wg0 private-key ./private
+ip link set wg0 up
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>启动连接，注意这个的公钥、 <code class="docutils literal notranslate"><span class="pre">allowed-ips</span></code> 和  <code class="docutils literal notranslate"><span class="pre">endpoint</span></code> 都是指对端的参数</p></li>
+</ul>
+<p>在 peerA 上执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span> <span class="nb">set</span> <span class="n">wg0</span> <span class="n">peer</span> <span class="o">&lt;</span><span class="n">peerB的公钥</span><span class="o">&gt;</span> <span class="n">allowed</span><span class="o">-</span><span class="n">ips</span> <span class="mf">10.0.0.2</span><span class="o">/</span><span class="mi">32</span> <span class="n">endpoint</span> <span class="mf">192.168.1.2</span><span class="p">:</span><span class="mi">51820</span>
+</pre></div>
+</div>
+<p>在 peerB 上执行:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wg</span> <span class="nb">set</span> <span class="n">wg0</span> <span class="n">peer</span> <span class="o">&lt;</span><span class="n">peerA的公钥</span><span class="o">&gt;</span> <span class="n">allowed</span><span class="o">-</span><span class="n">ips</span> <span class="mf">10.0.0.1</span><span class="o">/</span><span class="mi">32</span> <span class="n">endpoint</span> <span class="mf">192.168.1.1</span><span class="p">:</span><span class="mi">51820</span>
+</pre></div>
+</div>
+<p>此时加密网络就已经建立起来了，可以在各自服务器上ping对端的wg地址，中间的通讯都是加密的</p>
 </section>
-<section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="id5">
+<h2>服务器配置(强烈推荐)<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<p>前面我们建立了一个完全堆成配置的加密通讯，也就是我们需要知道对方的网络IP地址(公网地址)，才能配置 endpoint</p>
+<p>现在我们部署一个internet上对外的服务器，等待客户端来连接(不知道客户端的公网IP)</p>
+<p>在服务器上执行:</p>
+<ul>
+<li><p>创建密钥对:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">umask</span> <span class="mi">0077</span><span class="p">;</span> <span class="n">wg</span> <span class="n">genkey</span> <span class="o">&gt;</span> <span class="n">private</span><span class="p">)</span>
+<span class="n">wg</span> <span class="n">pubkey</span> <span class="o">&lt;</span> <span class="n">private</span> <span class="o">&gt;</span> <span class="n">public</span>
+</pre></div>
+</div>
+</li>
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/wireguard/wg0.conf</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">服务端/etc/wireguard/wg0.conf</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>Interface<span class="o">]</span>
+<span class="nv">Address</span> <span class="o">=</span> <span class="m">10</span>.10.0.1/24
+<span class="nv">Address</span> <span class="o">=</span> fd86:ea04:1111::1/64
+<span class="nv">SaveConfig</span> <span class="o">=</span> <span class="nb">true</span>
+<span class="nv">PostUp</span> <span class="o">=</span> iptables -A FORWARD -i wg0 -j ACCEPT<span class="p">;</span> iptables -t nat -A POSTROUTING -o ens3 -j MASQUERADE<span class="p">;</span> ip6tables -A FORWARD -i wg0 -j ACCEPT<span class="p">;</span> ip6tables -t nat -A POSTROUTING -o ens3 -j MASQUERADE
+<span class="nv">PostDown</span> <span class="o">=</span> iptables -D FORWARD -i wg0 -j ACCEPT<span class="p">;</span> iptables -t nat -D POSTROUTING -o ens3 -j MASQUERADE<span class="p">;</span> ip6tables -D FORWARD -i wg0 -j ACCEPT<span class="p">;</span> ip6tables -t nat -D POSTROUTING -o ens3 -j MASQUERADE
+<span class="nv">ListenPort</span> <span class="o">=</span> <span class="m">51820</span>
+<span class="nv">PrivateKey</span> <span class="o">=</span> &lt;your server private key here&gt;
+
+<span class="o">[</span>Peer<span class="o">]</span>
+<span class="nv">PublicKey</span> <span class="o">=</span> &lt;your client public key here&gt;
+<span class="nv">AllowedIPs</span> <span class="o">=</span> <span class="m">10</span>.10.0.2/32
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>建议修订配置中端口，著名端口可能被屏蔽</p>
+</div>
+<ul>
+<li><p>启动服务端接口:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">wg</span><span class="o">-</span><span class="n">quick</span> <span class="n">up</span> <span class="n">wg0</span>
+</pre></div>
+</div>
+</li>
+<li><p>添加NAT流量:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo bash -c <span class="s1">&#39;cat &lt;&lt; EOF &gt;&gt; /etc/sysctl.conf</span>
+<span class="s1">net.ipv4.ip_forward=1</span>
+<span class="s1">net.ipv6.conf.all.forwarding=1</span>
+<span class="s1">EOF&#39;</span>
+sudo sysctl -p
+</pre></div>
+</div>
+<section id="id6">
+<h3>客户端<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>客户端也配置一个 <code class="docutils literal notranslate"><span class="pre">/etc/wireguard/wg0.conf</span></code></p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">客户端/etc/wireguard/wg0.conf</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>Interface<span class="o">]</span>
+<span class="nv">Address</span> <span class="o">=</span> <span class="m">10</span>.10.0.2/32
+<span class="nv">Address</span> <span class="o">=</span> fd86:ea04:1111::2/128
+<span class="nv">SaveConfig</span> <span class="o">=</span> <span class="nb">true</span>
+<span class="nv">PrivateKey</span> <span class="o">=</span> &lt;your client private key here&gt;
+<span class="nv">DNS</span> <span class="o">=</span> <span class="m">8</span>.8.8.8
+
+<span class="o">[</span>Peer<span class="o">]</span>
+<span class="nv">PublicKey</span> <span class="o">=</span> &lt;your server public key here&gt;
+<span class="nv">Endpoint</span> <span class="o">=</span> &lt;your server public ip&gt;:51820
+<span class="nv">AllowedIPs</span> <span class="o">=</span> <span class="m">0</span>.0.0.0/0, ::/0
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>启动:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">wg</span><span class="o">-</span><span class="n">quick</span> <span class="n">up</span> <span class="n">wg0</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>此时在服务器上检查:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">wg</span>
+</pre></div>
+</div>
+<p>可以看到类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span><span class="p">:</span> <span class="n">wg0</span>
+  <span class="n">public</span> <span class="n">key</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">server</span> <span class="n">public</span> <span class="n">key</span><span class="o">&gt;</span>
+  <span class="n">private</span> <span class="n">key</span><span class="p">:</span> <span class="p">(</span><span class="n">hidden</span><span class="p">)</span>
+  <span class="n">listening</span> <span class="n">port</span><span class="p">:</span> <span class="mi">46980</span>
+
+<span class="n">peer</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">client</span> <span class="n">public</span> <span class="n">key</span><span class="o">&gt;</span>
+  <span class="n">endpoint</span><span class="p">:</span> <span class="mf">183.192.17.131</span><span class="p">:</span><span class="mi">9912</span>
+  <span class="n">allowed</span> <span class="n">ips</span><span class="p">:</span> <span class="mf">10.10.0.2</span><span class="o">/</span><span class="mi">32</span>
+  <span class="n">latest</span> <span class="n">handshake</span><span class="p">:</span> <span class="mi">23</span> <span class="n">minutes</span><span class="p">,</span> <span class="mi">12</span> <span class="n">seconds</span> <span class="n">ago</span>
+  <span class="n">transfer</span><span class="p">:</span> <span class="mf">23.13</span> <span class="n">KiB</span> <span class="n">received</span><span class="p">,</span> <span class="mf">12.62</span> <span class="n">KiB</span> <span class="n">sent</span>
+</pre></div>
+</div>
+<p>并且，贼服务器上可以ping通客户端的IP地址 <code class="docutils literal notranslate"><span class="pre">10.10.0.2</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>注意，客户端要配置DNS，否则即使网络通如果没有解析则无法访问internet</p>
+</div>
+</section>
+</section>
+<section id="id7">
+<h2>参考<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.wireguard.com/quickstart/">WireGuard Quick Start</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/WireGuard">arch linux: WireGuard</a> arch文档作为印证补充，但是该文档似乎没有按照WireGuard官网及时更新</p></li>
+<li><p><a class="reference external" href="https://y2k38.github.io/posts/how-to-setup-wireguard-vpn-server/">如何配置wireguard服务端及客户端</a> 非常好的配置说明，实践通过。官方qucickstart英文文档写得实在是不清晰，我还是参考这篇文档完成的</p></li>
+<li><p><a class="reference external" href="https://www.nixops.me/articles/wireguard-howtos.html">体验Wireguard的简单之美</a></p></li>
+<li><p><a class="reference external" href="https://icloudnative.io/posts/wireguard-docs-practice/">WireGuard 教程：WireGuard 的搭建使用与配置详解</a></p></li>
+<li><p><a class="reference external" href="https://www.myfreax.com/how-to-set-up-wireguard-vpn-on-ubuntu-20-04/">如何在Ubuntu 20.04安装WireGuard VPN</a></p></li>
 </ul>
 </section>
 </section>

@@ -103,4 +103,6 @@ Systemd的rc.local配置
 =======
 
 - `How to Enable /etc/rc.local with Systemd <https://www.linuxbabe.com/linux-server/how-to-enable-etcrc-local-with-systemd>`_
+- `Replacing rc.local in systemd Linux systems <https://www.redhat.com/sysadmin/replacing-rclocal-systemd>`_
+- `How to run script with systemd right before shutdown in Linux <https://www.golinuxcloud.com/run-script-with-systemd-before-shutdown-linux/>`_
 - `User:Herodotus/Rc-Local-Systemd <https://wiki.archlinux.org/index.php/User:Herodotus/Rc-Local-Systemd>`_
