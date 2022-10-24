@@ -11,11 +11,8 @@ Linux VPN
 .. toctree::
    :maxdepth: 1
 
-   openconnect_vpn.rst
-   acme.rst
-   cron_certbot_renew.rst
-   ocserv_timeout.rst
-   vpnc.rst
+   ocserv/index
+   wireguard/index
    polipo_proxy_yum.rst
 
 .. only::  subproject and html

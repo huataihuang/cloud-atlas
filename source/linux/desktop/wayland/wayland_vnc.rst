@@ -9,12 +9,39 @@ VNC服务器
 
 ``wayvnc`` 是 ``wlroots-based`` Wayland compositors 的VNC server，通过附加到一个运行的Wayland会话，创建虚拟输入设备，以及通过RFB协议输出一个单一显示，来实现VNC。不过， ``wayvnc`` 不支持 Gnome 和 KDE 。好在我目前主要使用 :ref:`sway` ，所以使用 ``wayvnc`` 正好。
 
-实践
------
+安装wayvnc
+---------------
 
-我在 :ref:`asahi_linux` 上使用 :ref:`sway` ，安装方法和 :ref:`arch_linux` 相同::
+- 我在 :ref:`asahi_linux` 上使用 :ref:`sway` ，安装方法和 :ref:`arch_linux` 相同::
 
    pacman -S wayvnc
+
+启动
+--------
+
+有2种方式启动wayvnc服务器:
+
+无头模式(headless)
+~~~~~~~~~~~~~~~~~~~~
+
+- 无头模式(headless): 在终端启动:
+
+.. literalinclude:: wayland_vnc/wayvnc_headless_server
+   :caption: 无头模式(headless)启动sway的VNC服务器
+
+这里我遇到一个报错::
+
+   KMS: DRM_IOCTL_MODE_CREATE_DUMB failed: Permission denied
+   00:00:04.558 [wlr] [render/allocator/gbm.c:114] gbm_bo_create failed
+   00:00:04.558 [wlr] [render/swapchain.c:109] Failed to allocate buffer
+
+在sway内部启动wayvnc
+~~~~~~~~~~~~~~~~~~~~~~
+
+- 在 :ref:`sway` 内部启动wayvnc:
+
+.. literalinclude:: wayland_vnc/wayvnc_inside_sway
+   :caption: 在sway内部启动wayvnc
 
 VNC客户端
 ==========
@@ -56,4 +83,5 @@ Wayland的VNC客户端可以采用 `wlvncc <https://github.com/any1/wlvncc>`_ �
 =======
 
 - `GitHub: wayvnc <https://github.com/any1/wayvnc>`_
+- `Wayvnc server <https://n.ethz.ch/~dbernhard/wayvnc-server.html>`_
 - `WayVNC 0.5 VNC Server For wlroots-Based Wayland Compositors Released <https://www.phoronix.com/news/WayVNC-0.5-Released>`_
