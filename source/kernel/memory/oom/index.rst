@@ -1,17 +1,14 @@
-.. _linux_memory_management:
+.. _linux_oom:
 
 =================================
-Linux内存管理
+Linux Out Of Memory
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   linux_mmu.rst
-   huge_memory_pages/index
-   numa/index
-   valgrind/index
-   oom/index
+   intro_linux_oom.rst
+   oomd.rst
 
 .. only::  subproject and html
 

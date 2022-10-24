@@ -91,6 +91,20 @@ pacman简明使用
 
 - 再次修订 ``/etc/pacman.conf`` 将 ``community-testing`` 仓库注释掉，避免其他软件版本升级到测试版本。
 
+国内仓库配置
+---------------
+
+- 在 ``/etc/pacman.conf`` 最后添加两行::
+
+   [archlinuxcn]
+   Server = https://mirrirs.tuna.tsinghua.edu.cn/archlinuxcn/$arch
+
+- 使用 ``paman -Sy`` 同步源
+
+- 然后导入GPG key::
+
+   pacman -S archlinuxcn-keyring
+
 break dependency
 =================
 
