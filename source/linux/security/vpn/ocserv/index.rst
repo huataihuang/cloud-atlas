@@ -1,7 +1,7 @@
-.. _linux_vpn:
+.. _ocserv:
 
 =================================
-Linux VPN
+ocserv VPN
 =================================
 
 在Internet上，安全加密通讯是非常重要基础设置，无论是企业还是个人，都需要使用VPN来保护自由的通讯。
@@ -11,9 +11,11 @@ Linux VPN
 .. toctree::
    :maxdepth: 1
 
-   ocserv/index
-   wireguard/index
-   polipo_proxy_yum.rst
+   openconnect_vpn.rst
+   acme.rst
+   cron_certbot_renew.rst
+   ocserv_timeout.rst
+   vpnc.rst
 
 .. only::  subproject and html
 
