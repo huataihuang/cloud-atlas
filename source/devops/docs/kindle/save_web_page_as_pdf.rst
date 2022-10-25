@@ -38,7 +38,13 @@
 今天，偶然发现，其实有一个比较巧妙的方法可以解决，分享如下:
 
 - Safari浏览器支持 ``Reader View`` 方式阅读WEB页面，也就是摈弃掉所有不需要WEB元素，生成一个非常干净的阅读页面，这个页面是可以直接打印保存为 ``pdf`` 文件的
-- 在保存pdf时候，一定要训责打印页面格式: 原来pdf打印是根据目标页面来排版的，实际上选择更适合手机屏幕的纸张格式就可以。经过尝试，我发现 macOS 内置的 ``Envelope DL 4.33 by 8.67 inches`` 就非常适合手机这种屏幕宽度有限的移动设备(应该也适合Kindle)
+- 在保存pdf时候，一定要选择合适的打印页面格式: 原来pdf打印是根据目标页面来排版的，实际上选择更适合手机屏幕的纸张格式就可以。经过尝试，我发现 macOS 内置的 ``Envelope DL 4.33 by 8.67 inches`` 就非常适合手机这种屏幕宽度有限的移动设备(应该也适合Kindle)
+
+.. figure:: ../../../_static/devops/docs/kindle/envelope_print_size.png
+   :scale: 70
+
+   选择Envelope DL纸张格式
+
 - 保存的pdf文件可以使用 :ref:`macos` 操作系统中的 ``Books`` 软件打开，这样就会自动同步到iCloud，所有注册到当前icloud账号的设备会同步接收到这个文件，就可以在所有移动设备上阅读
 - 如果在 iOS 平台的App Store中购买过 ``GoodReader`` pdf专业阅读软件，就可以在 ``Books`` 软件中 ``share`` 给 ``GoodReader`` 软件来阅读: ``GoodReader`` 提供了一个内置的 ``Crop`` 功能，可以把pdf文件所有页面都按照一定的规格进行 **裁边** ，这样就更适合手机阅读了
 
