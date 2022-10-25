@@ -13,6 +13,7 @@ Kindle在，书未老
    kindle_book_format.rst
    convert_doc_to_kindle.rst
    reset_restart_kindle.rst
+   save_web_page_as_pdf.rst
 
 
 .. only::  subproject and html

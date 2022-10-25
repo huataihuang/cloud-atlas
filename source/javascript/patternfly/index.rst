@@ -12,6 +12,7 @@ PatternFly
    patternfly_design.rst
    patternfly_develop.rst
    basics/index
+   patternfly_table.rst
 
 .. only::  subproject and html
 
