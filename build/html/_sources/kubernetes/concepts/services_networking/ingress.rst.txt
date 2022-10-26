@@ -6,11 +6,11 @@ Ingress
 
 Ingress是Kubernetes的API对象，用于管理外部访问集群中的某个服务，通常是HTTP服务。Ingress可以提供负载均衡，SSL卸载以及基于名字解析的虚拟主机。
 
-Ingress将集群内部的 :ref:`kubernetes_services` 输出到外部的HTTP和HTTPS路由。流量路由是在Ingress资源所定义的规则来控制的。
+Ingress将集群内部的 :ref:`k8s_services` 输出到外部的HTTP和HTTPS路由。流量路由是在Ingress资源所定义的规则来控制的。
 
 Ingress可以将给定的服务配置成外部可以访问的URLs，负载均衡流量，卸载SSL/TLS，以及提供基于名字的虚拟主机。而一个 :ref:`ingress_controller` 则负责管理Ingress，结合负载均衡，就可以通过Ingress Controller配置边界路由器或者增加前端来帮助处理流量。
 
-Ingress不会输出随机端口或协议。对于需要输出HTTP和HTTPS以外的服务则通常使用 ``Service.Type=NodePort`` 或者 ``Service.Type=LoadBalancer`` (参考 :ref:`kubernetes_services` )。
+Ingress不会输出随机端口或协议。对于需要输出HTTP和HTTPS以外的服务则通常使用 ``Service.Type=NodePort`` 或者 ``Service.Type=LoadBalancer`` (参考 :ref:`k8s_services` )。
 
 .. note::
 

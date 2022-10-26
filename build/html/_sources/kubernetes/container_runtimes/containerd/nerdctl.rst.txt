@@ -390,7 +390,7 @@ nerdctl结合Kubernetes
    NAME              READY   STATUS    RESTARTS   AGE    IP           NODE        NOMINATED NODE   READINESS GATES
    centos-stream-8   1/1     Running   0          2d2h   10.0.4.224   z-k8s-n-2   <none>           <none>
 
-- 为实例创建NodePort :ref:`kubernetes_services` ::
+- 为实例创建NodePort :ref:`k8s_services` ::
 
    kubectl expose pods centos-stream-8 --type=NodePort --port=22
 

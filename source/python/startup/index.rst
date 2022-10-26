@@ -8,6 +8,7 @@ Python起步
    :maxdepth: 1
 
    virtualenv.rst
+   upgrade_all_python_packages_with_pip.rst
    python_in_rhel8.rst
    python_in_kali.rst
    install_python3_centos6.rst

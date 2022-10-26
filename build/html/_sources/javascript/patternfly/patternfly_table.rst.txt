@@ -22,6 +22,38 @@ ICell 是 TypeScript 接口的名称，表示 <Table> 的一个单元格。 列�
    :language: javascript
    :caption: ICell对象数组定义的列
 
+代码案例
+==========
+
+.. note::
+
+   你可以按照 `Develop a table component with PatternFly React <https://developers.redhat.com/learning/learn:patternfly-react/resource/resources:develop-table-component-patternfly-react>`_ 完整走一遍案例，可以帮助你加深理解。完成后会形成本文下面的两个代码:
+
+   - App.js 页面渲染，采用React的 Table 和 Pagination(分页)
+   - data.js 提供数据
+
+创建以下两个js:
+
+- App.js 页面渲染，采用React的 Table 和 Pagination(分页)
+- data.js 提供数据
+
+代码:
+
+.. literalinclude:: patternfly_table/app.js
+   :language: bash
+   :caption: app.js
+
+代码:
+
+.. literalinclude:: patternfly_table/data.js
+   :language: javascript
+   :caption: data.js
+
+完成效果:
+
+.. figure:: ../../_static/javascript/patternfly/patternfly_table.png
+   :scale: 60
+
 参考
 ======
 

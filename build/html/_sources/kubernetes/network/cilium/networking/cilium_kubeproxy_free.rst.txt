@@ -157,7 +157,7 @@ Cilium提供了完全取代 ``kube-proxy`` 的运行模式。比较简单的方�
    my-nginx-df7bbf6f5-457mh   1/1     Running   0          12h   10.0.6.22    z-k8s-n-5   <none>           <none>
    my-nginx-df7bbf6f5-6gndk   1/1     Running   0          12h   10.0.3.160   z-k8s-n-1   <none>           <none>
 
-- 为两个实例创建 NodePort :ref:`kubernetes_services` ::
+- 为两个实例创建 NodePort :ref:`k8s_services` ::
 
    kubectl expose deployment my-nginx --type=NodePort --port=80
 
