@@ -75,7 +75,7 @@ Cilium Kubernetes Ingress HTTP配置案例
 
 参考 `Kubernetes service external ip pending <https://stackoverflow.com/questions/44110876/kubernetes-service-external-ip-pending>`_ ``Damith Udayanga`` 的回答:
 
-在 Kubernetes 中，输出一组Pods上运行的应用程序到外部称为 :ref:`kubernetes_services` 。在Kuberntes中有4种服务：
+在 Kubernetes 中，输出一组Pods上运行的应用程序到外部称为 :ref:`k8s_services` 。在Kuberntes中有4种服务：
 
   - ClusterIP 服务仅在集群内部可以访问
   - NodePort 通过 ``NodeIP:NodePort`` 向集群外提供服务通讯。默认的node port范围是 ``30000-32767`` ，这个端口范围可以通过集群创建时 ``--service-node-port-range`` 修改
