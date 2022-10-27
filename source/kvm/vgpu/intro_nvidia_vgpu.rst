@@ -1,4 +1,4 @@
-.. _introduce_nvidia_vgpu:
+.. _intro_nvidia_vgpu:
 
 =======================
 Nvidia vGPU技术简介
@@ -70,6 +70,7 @@ vGPU软件
 =======
 
 - `Wikipedia GPU virtualization <https://en.wikipedia.org/wiki/GPU_virtualization>`_
+- `NVIDIA Virtual GPU Software User Guide <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html>`_ ( `Virtual GPU Software User Guide (pdf ) <https://docs.nvidia.com/grid/latest/pdf/grid-vgpu-user-guide.pdf>`_ )
 - `Nvidia vGPU RESOURCES <https://www.nvidia.com/en-us/data-center/virtualization/resources/>`_ NVIDIA官方网站汇总vGPU技术资源
 - `Virtual GPU Software User Guide <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html>`_ NVIDIA官方用户手册，主要参考
 - `NVIDIA vGPU Tech Tips <https://www.youtube.com/playlist?list=PL5B692fm6--vfyGFgx9ZVrCG-lTpqENPZ>`_ YouTube上NVIDIA Developer频道提供的vGPU技术介绍视频，可以作为入门了解

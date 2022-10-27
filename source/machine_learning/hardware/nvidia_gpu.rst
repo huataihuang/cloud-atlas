@@ -24,6 +24,8 @@ NVIDIA GPU微架构：
 
 更详细的产品，计算能力参见 `NVIDIA官网-推荐开发者使用的 GPU <https://developer.nvidia.com/zh-cn/cuda-gpus>`_
 
+2012年，NVIDIA推出了NVIDIA Virtual GPU ( :ref:`vgpu` ) 可以让多个虚拟机(VMs)同时直接访问一块单一的物理GPU
+
 参考
 ======
 
