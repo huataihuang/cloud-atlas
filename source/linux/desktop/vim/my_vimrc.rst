@@ -83,7 +83,8 @@ relative行号
 
 .. note::
 
-   :ref:`vim_auto_indent`
+   - :ref:`vim_auto_indent`
+   - :ref:`vim_fold`
 
 插件安装
 ==========

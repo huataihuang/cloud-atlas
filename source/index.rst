@@ -16,6 +16,8 @@ I have a dream!
 
 名字来源于一部关于自由的电影 「 `云图 <http://movie.douban.com/subject/3530403/>`_ 」
 
+.. figure:: _static/cloud_atlas.jpg
+
 Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/subject/2070580/>`_ 」，译名为「列国图志」，我希望我的 Cloud Atlas 也能够简洁生动，为大家带来如同「图志」一般的展现云计算开源技术。
 
 阅读

@@ -1,14 +1,14 @@
 .. _vgpu:
 
 =================================
-NVIDIA vGPU
+NVIDIA Virtual GPU (vGPU)
 =================================
 
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_nvidia_vgpu.rst
+   intro_nvidia_vgpu.rst
    vgpu_unlock.rst
    vgpu_startup.rst
 

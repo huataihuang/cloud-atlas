@@ -52,7 +52,7 @@ ICell 是 TypeScript 接口的名称，表示 <Table> 的一个单元格。 列�
 完成效果:
 
 .. figure:: ../../_static/javascript/patternfly/patternfly_table.png
-   :scale: 60
+   :scale: 25
 
 参考
 ======
