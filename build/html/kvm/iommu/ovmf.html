@@ -79,7 +79,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA Virtual GPU (vGPU)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual/index.html">KVM嵌套虚拟化</a></li>
@@ -321,7 +321,7 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span></code> 是直通给虚拟机的最小物理设备集合。举例，上述 <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span> <span class="pre">32</span></code> 这组设备只能完整分配给一个虚拟机，这个虚拟机将同时获得 <code class="docutils literal notranslate"><span class="pre">ISA</span> <span class="pre">bridge</span> <span class="pre">[0601]</span></code> <code class="docutils literal notranslate"><span class="pre">SATA</span> <span class="pre">controller</span> <span class="pre">[0106]</span></code> 和 <code class="docutils literal notranslate"><span class="pre">SMBus</span> <span class="pre">[0c05]</span></code> ；同理， <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span> <span class="pre">34</span></code> 包含了4个Broadcom 以太网接口(实际上就是主板集成4网口)也只能同时分配给一个虚拟机；而独立添加的Intel 4网口千兆网卡则是完全独立的4个 <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span></code> ，意味着可以独立分配个4个虚拟机</p></li>
 <li><p>我在 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上通过 <a class="reference internal" href="../../linux/server/hardware/hpe/pcie_bifurcation.html#pcie-bifurcation"><span class="std std-ref">PCIe bifurcation</span></a> 将PCIe 3.0 Slot 1(x16)划分成2个独立的x8通道，安装了2块 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> ，加上在 Slot 2(x8) 上安装的第3块 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> ，所以服务器上一共有3块 NVMe 存储。在这里可以看到有3个 <code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span></code> 分别是 <code class="docutils literal notranslate"><span class="pre">39-40</span></code> 对应了3个NVMe控制器，可以分别分配给3个虚拟机</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span> <span class="pre">79</span></code> 是安装在PCIe 3.0 Slot 3(x16)上的 <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> ，可以直接透传给一个虚拟机。我仅做技术实践，最终我希望采用 <a class="reference internal" href="../vgpu/index.html#vgpu"><span class="std std-ref">NVIDIA vGPU</span></a> 划分为更多GPU设备分配给虚拟化集群，来模拟大规模云计算</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IOMMU</span> <span class="pre">Group</span> <span class="pre">79</span></code> 是安装在PCIe 3.0 Slot 3(x16)上的 <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> ，可以直接透传给一个虚拟机。我仅做技术实践，最终我希望采用 <a class="reference internal" href="../vgpu/index.html#vgpu"><span class="std std-ref">NVIDIA Virtual GPU (vGPU)</span></a> 划分为更多GPU设备分配给虚拟化集群，来模拟大规模云计算</p></li>
 </ul>
 </section>
 </section>
@@ -330,8 +330,8 @@
 <p>要实现将一个设备指定给虚拟机，这个设备以及所有在相同IOMMU组的设备必须将它们的驱动替换成 <code class="docutils literal notranslate"><span class="pre">stub</span></code> 驱动 或者 <code class="docutils literal notranslate"><span class="pre">VFIO</span></code> 驱动，这样才能避免物理主机访问设备。并且需要注意，大多数设备需要在VM启动前完成这个替换。</p>
 <p>但是，GPU驱动往往不倾向于支持动态绑定，所以可能难以实现一些用于物理主机的GPU被透明直通给虚拟机，因为这样的两种驱动相互冲突。通常建议手工绑定这些驱动，然后再启动虚拟机。</p>
 <p>从Linux内核4.1开始，内核包含了 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> ，这个VFIO驱动可以完全替代 <code class="docutils literal notranslate"><span class="pre">pci-stub</span></code> 而且提供了控制设备的扩展，例如在不使用设备时将设备切换到 <code class="docutils literal notranslate"><span class="pre">D3</span></code> 状态。</p>
-<section id="id-vfio-pci">
-<h3>通过设备ID来绑定 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code><a class="headerlink" href="#id-vfio-pci" title="Permalink to this heading">¶</a></h3>
+<section id="vfio-pci-ids">
+<span id="id-vfio-pci"></span><h3>通过设备ID来绑定 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code><a class="headerlink" href="#vfio-pci-ids" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 通常使用ID来找寻PCI设备，也就是只需要指定passthrough的设备ID。举例，前面显示的我的服务器上设备:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IOMMU</span> <span class="n">Group</span> <span class="mi">39</span><span class="p">:</span>
         <span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
@@ -539,6 +539,19 @@
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>后续我实践 <a class="reference internal" href="../sr-iov/config_sr-iov_network.html#config-sr-iov-network"><span class="std std-ref">配置SR-IOV网络虚拟化</span></a> ，还增加一个 <code class="docutils literal notranslate"><span class="pre">iommu=pt</span></code> 参数，以提高 SR-IOV pass-through 性能。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>如果要在物理主机上 <a class="reference internal" href="../../machine_learning/hardware/install_nvidia_linux_driver.html#install-nvidia-linux-driver"><span class="std std-ref">安装NVIDIA Linux驱动</span></a> ，则必须重新修订上述 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids</span></code> 参数，去除掉 <code class="docutils literal notranslate"><span class="pre">10de:1b39</span></code> ，也就是修改为:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a&quot;</span>
+</pre></div>
+</div>
+<p>否则会出现非常奇怪的报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NVRM</span><span class="p">:</span> <span class="n">The</span> <span class="n">NVIDIA</span> <span class="n">probe</span> <span class="n">routine</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">called</span> <span class="k">for</span> <span class="mi">1</span> <span class="n">device</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span>
+<span class="o">...</span>
+<span class="n">NVRM</span><span class="p">:</span> <span class="n">No</span> <span class="n">NVIDIA</span> <span class="n">devices</span> <span class="n">probed</span><span class="o">.</span>
+</pre></div>
+</div>
 </div>
 <p>然后重新生成grub:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>

@@ -119,6 +119,8 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 从Linux内核4.1开始，内核包含了 ``vfio-pci`` ，这个VFIO驱动可以完全替代 ``pci-stub`` 而且提供了控制设备的扩展，例如在不使用设备时将设备切换到 ``D3`` 状态。
 
+.. _vfio-pci.ids:
+
 通过设备ID来绑定 ``vfio-pci``
 --------------------------------
 
@@ -305,6 +307,18 @@ dracut的早期加载机制是通过内核参数。
 .. note::
 
    后续我实践 :ref:`config_sr-iov_network` ，还增加一个 ``iommu=pt`` 参数，以提高 SR-IOV pass-through 性能。
+
+.. warning::
+
+   如果要在物理主机上 :ref:`install_nvidia_linux_driver` ，则必须重新修订上述 ``vfio-pci.ids`` 参数，去除掉 ``10de:1b39`` ，也就是修改为::
+
+      GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a"
+
+   否则会出现非常奇怪的报错::
+
+      NVRM: The NVIDIA probe routine was not called for 1 device(s).
+      ...
+      NVRM: No NVIDIA devices probed.
 
 然后重新生成grub::
 

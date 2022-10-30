@@ -15,8 +15,10 @@
 说明
 ======
 
-安装准备
-=========
+.. _install_cuda_prepare:
+
+安装CUDA准备
+=============
 
 - 验证硬件是否支持 CUDA ::
 
@@ -62,18 +64,67 @@ CUDA驱动需要内核头文件以及开发工具包来完成内核相关的驱�
 
 这步跳过，后续在 :ref:`nvidia_gpudirect_storage` 实践
 
+安装CUDA
+===========
+
 - 有两种安装方式:
 
   - 发行版无关run文件包( `NVIDIA官方提供的 P40 驱动 <https://www.nvidia.com/download/index.aspx#>`_ )
   - 采用官方提供针对不同发行版的软件仓库方式(见下文实践)
+
+.. _cuda_repo:
+
+CUDA软件仓库
+--------------
 
 从NVIDIA官方提供 `NVIDIA CUDA Toolkit repo 下载 <https://developer.nvidia.com/cuda-downloads>`_ ，针对我 :ref:`upgrade_ubuntu_20.04_to_22.04` 的 :ref:`priv_cloud_infra` 底层物理主机操作系统(Ubuntu 22.04)，我采用官方仓库网络安装模式(参考下图选择自己对应的发行版，并选择网络安装):
 
 .. figure:: ../../_static/machine_learning/hardware/cuda_toolkit_ubuntu_repo_install.png
    :scale: 80
 
+.. literalinclude:: install_nvidia_cuda/cuda_toolkit_ubuntu_repo
+   :language: bash
+   :caption: 在Ubuntu 22.04操作系统添加NVIDIA官方软件仓库配置
+
+安装CUDA(通过软件仓库)
+-----------------------
+
 .. literalinclude:: install_nvidia_cuda/cuda_toolkit_ubuntu_repo_install
    :language: bash
+   :caption: 使用NVIDIA官方软件仓库安装CUDA
+
+.. _cuda_install_post_actions:
+
+安装CUDA完成后操作
+===================
+
+强制性操作
+-------------
+
+在安装完CUDA Toolkit 和 Driver之后，必须完成以下操作:
+
+环境变量设置
+~~~~~~~~~~~~~
+
+- 安装了 CUDA Toolkit 则设置环境变量 ``/etc/profile`` 添加::
+
+   export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
+   # 使用runfile安装方式需要添加 LD_LIBRARY_PATH 
+   export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64\
+                            ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+有关POWER9设置是适配IBM服务器的，个人恐怕不会接触到，忽略
+
+建议操作
+--------
+
+- 安装持久化服务(NVIDIA Persistence Daemon)
+
+- 安装Writable Samples: CUDA Samples 位于 https://github.com/nvidia/cuda-samples ，然后编译和运行一些sample程序来验证CUDA安装是否成功
+
+- 验证驱动版本::
+
+   cat /proc/driver/nvidia/version
 
 
 参考

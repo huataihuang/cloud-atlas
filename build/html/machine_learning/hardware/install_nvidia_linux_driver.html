@@ -77,9 +77,12 @@
 <li class="toctree-l3"><a class="reference internal" href="gtx_1050_ti.html">Nvidia GeForce GTX 1050/1060/1070/1080</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tesla_p10.html">Nvidia Tesla P10 GPU运算卡</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">安装NVIDIA Linux驱动</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cuda">CUDA软件堆栈(不同层次)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#run">手工下载本地run安装(和发行版无关)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#nvdia-tesla">NVDIA Tesla驱动安装</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nvdia-cuda">NVDIA CUDA驱动安装</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">CUDA驱动安装后操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">异常排查</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="nvidia_gpudirect_storage/index.html">NVIDIA GPUDirect Storage技术</a></li>
@@ -148,11 +151,31 @@
   <section id="nvidia-linux">
 <span id="install-nvidia-linux-driver"></span><h1>安装NVIDIA Linux驱动<a class="headerlink" href="#nvidia-linux" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> 的GPU核心是Tesla，属于 <code class="docutils literal notranslate"><span class="pre">Pascal</span></code> 微架构</p>
+<section id="cuda">
+<span id="cuda-softstack"></span><h2>CUDA软件堆栈(不同层次)<a class="headerlink" href="#cuda" title="Permalink to this heading">¶</a></h2>
+<p>NVIDIA将GPU驱动和开发组件(Toolkits)分别组合成 <code class="docutils literal notranslate"><span class="pre">cuda-drivers</span></code> 和 <code class="docutils literal notranslate"><span class="pre">cuda</span></code> ，其中 <code class="docutils literal notranslate"><span class="pre">cuda-drivers</span></code> 是 <code class="docutils literal notranslate"><span class="pre">cuda</span></code> 的子集。由于虚拟化和容器化技术的发展，我们可以在不同的层次分别安装:</p>
+<ul class="simple">
+<li><p>物理主机: <code class="docutils literal notranslate"><span class="pre">cuda-drivers</span></code></p></li>
+<li><p>虚拟机:</p>
+<ul>
+<li><p>直接在虚拟机内运行应用及开发: <code class="docutils literal notranslate"><span class="pre">cuda</span></code></p></li>
+<li><p>虚拟机内通过容器运行应用及开发:</p>
+<ul>
+<li><p>虚拟机: <code class="docutils literal notranslate"><span class="pre">cuda-drivers</span></code></p></li>
+<li><p>容器: <code class="docutils literal notranslate"><span class="pre">cuda</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>(裸金属)容器: <code class="docutils literal notranslate"><span class="pre">cuda</span></code></p></li>
+</ul>
+<p>简而言之，只有实际运行应用及开发的 <code class="docutils literal notranslate"><span class="pre">主机/虚拟化/容器</span></code> 层才需要完整安装 <code class="docutils literal notranslate"><span class="pre">cuda</span></code> ，其他作为支持层的层只需要安装 <code class="docutils literal notranslate"><span class="pre">cuda-dirvers</span></code> ，通过这种模式，可以构建 <a class="reference internal" href="../../kubernetes/gpu/index.html#gpu-k8s"><span class="std std-ref">GPU Kubernetes</span></a></p>
+</section>
 <section id="run">
 <h2>手工下载本地run安装(和发行版无关)<a class="headerlink" href="#run" title="Permalink to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>我虽然下载了 <code class="docutils literal notranslate"><span class="pre">.run</span></code> 安装包，不过NVIDIA对主流发行版(RedHat/CentOS/Ubuntu/Debian/SUSE/OpenSUSE)都提供了软件仓库方式安装。所以，我最终实践还是直接在Ubuntu 22.04上采用官方软件仓库，见下文。</p>
+<p>我虽然下载了 <code class="docutils literal notranslate"><span class="pre">.run</span></code> 安装包，不过NVIDIA对主流发行版(RedHat/CentOS/Ubuntu/Debian/SUSE/OpenSUSE)都提供了软件仓库方式安装。并且经过验证，可以看到软件仓库提供了更新的安装包，而官方网站提供的下载驱动版本略微滞后。所以，我最终实践还是直接在Ubuntu 22.04上采用官方软件仓库，见下文。</p>
 </div>
 <ul class="simple">
 <li><p>根据 <a class="reference internal" href="tesla_p10.html#tesla-p10-spec"><span class="std std-ref">技术规格</span></a> ，Tesla P10 / P40 以及 GeForce GTX 1080 Ti 硬件完全一致，只是在GPU主频和内存大小(及主频)上有细微差异，所以完全可以采用 <a class="reference external" href="https://www.nvidia.com/download/index.aspx#">NVIDIA官方提供的 P40 驱动</a> :</p></li>
@@ -161,8 +184,8 @@
 <a class="reference internal image-reference" href="../../_images/tesla_p10_driver.png"><img alt="../../_images/tesla_p10_driver.png" src="../../_images/tesla_p10_driver.png" style="width: 512.0px; height: 239.20000000000002px;" /></a>
 </figure>
 <p>驱动版本</p>
-<table class="docutils align-default" id="id2">
-<caption><span class="caption-text">Tesla P10驱动</span><a class="headerlink" href="#id2" title="永久链接至表格">¶</a></caption>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text">Tesla P10驱动</span><a class="headerlink" href="#id6" title="永久链接至表格">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 60%" />
@@ -190,11 +213,238 @@
 <p>本文在 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 的底层物理主机安装GPU的Linux驱动</p>
 </div>
 </section>
-<section id="nvdia-tesla">
-<h2>NVDIA Tesla驱动安装<a class="headerlink" href="#nvdia-tesla" title="Permalink to this heading">¶</a></h2>
+<section id="nvdia-cuda">
+<h2>NVDIA CUDA驱动安装<a class="headerlink" href="#nvdia-cuda" title="Permalink to this heading">¶</a></h2>
+<p>安装NVIDIA Linux驱动的方法实际上和 <a class="reference internal" href="../cuda/install_nvidia_cuda.html#install-nvidia-cuda"><span class="std std-ref">安装NVIDIA CUDA</span></a> 完全一样，除了最后的安装命令差异:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../cuda/install_nvidia_cuda.html#install-cuda-prepare"><span class="std std-ref">安装CUDA准备</span></a></p></li>
+<li><p>根据不同发行版在 <a class="reference external" href="https://developer.nvidia.com/cuda-downloads">NVIDIA CUDA Toolkit repo 下载</a> 选择对应的 <a class="reference internal" href="../cuda/install_nvidia_cuda.html#cuda-repo"><span class="std std-ref">CUDA软件仓库</span></a> ，例如我的 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 采用了 Ubuntu 22.04 LTS，所以执行如下步骤在系统中添加仓库:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">在Ubuntu 22.04操作系统添加NVIDIA官方软件仓库配置</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb
+sudo dpkg -i cuda-keyring_1.0-1_all.deb
+sudo apt-get update
+sudo apt-get -y install cuda
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>安装 NVIDIA CUDA 驱动:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">使用NVIDIA官方软件仓库安装CUDA驱动</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get -y install cuda-drivers
+</pre></div>
+</div>
+</div>
+<p>安装过程会爱用 <a class="reference internal" href="../../kernel/admin/dkms.html#dkms"><span class="std std-ref">动态内核模块支持(DKMS)</span></a> 编译NVIDIA内核模块，并且会提示添加了 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/nvidia-graphics-drivers.conf</span></code> 来 <code class="docutils literal notranslate"><span class="pre">blacklist</span></code> 阻止加载冲突的 <code class="docutils literal notranslate"><span class="pre">Nouveau</span></code> 开源驱动，并且提示需要重启操作系统来完成驱动验证加载。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我只实践了 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 安装CUDA drivers，其他发行版主要差异是软件包(仓库)管理差异，详情请参考 <a class="reference external" href="https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html">NVIDIA Driver Installation Quickstart Guide</a></p>
+</div>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>CUDA驱动安装后操作<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<p>CUDA驱动安装完成后，需要按照 <a class="reference internal" href="../cuda/install_nvidia_cuda.html#install-nvidia-cuda"><span class="std std-ref">安装NVIDIA CUDA</span></a> 的 <a class="reference internal" href="../cuda/install_nvidia_cuda.html#cuda-install-post-actions"><span class="std std-ref">安装CUDA完成后操作</span></a> 步骤，一样做一遍环境变量设置、NVIDIA持久化daemon以及验证驱动是否正确安装。不过，我检查文档发现似乎在CUDA驱动安装上没有太大关系，暂时忽略。</p>
+<ul>
+<li><p>重启操作系统，检查驱动安装:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nvidia</span><span class="o">-</span><span class="n">smi</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>输出显示:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">安装完NVIDIA驱动后，检查 nvidia-smi 输出</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Sun Oct <span class="m">30</span> <span class="m">22</span>:23:29 <span class="m">2022</span>
++-----------------------------------------------------------------------------+
+<span class="p">|</span> NVIDIA-SMI <span class="m">520</span>.61.05    Driver Version: <span class="m">520</span>.61.05    CUDA Version: <span class="m">11</span>.8     <span class="p">|</span>
+<span class="p">|</span>-------------------------------+----------------------+----------------------+
+<span class="p">|</span> GPU  Name        Persistence-M<span class="p">|</span> Bus-Id        Disp.A <span class="p">|</span> Volatile Uncorr. ECC <span class="p">|</span>
+<span class="p">|</span> Fan  Temp  Perf  Pwr:Usage/Cap<span class="p">|</span>         Memory-Usage <span class="p">|</span> GPU-Util  Compute M. <span class="p">|</span>
+<span class="p">|</span>                               <span class="p">|</span>                      <span class="p">|</span>               MIG M. <span class="p">|</span>
+<span class="p">|</span><span class="o">===============================</span>+<span class="o">======================</span>+<span class="o">======================</span><span class="p">|</span>
+<span class="p">|</span>   <span class="m">0</span>  NVIDIA Graphics...  On   <span class="p">|</span> <span class="m">00000000</span>:82:00.0 Off <span class="p">|</span>                    <span class="m">0</span> <span class="p">|</span>
+<span class="p">|</span> N/A   30C    P8     9W / 150W <span class="p">|</span>      0MiB / 23040MiB <span class="p">|</span>      <span class="m">0</span>%      Default <span class="p">|</span>
+<span class="p">|</span>                               <span class="p">|</span>                      <span class="p">|</span>                  N/A <span class="p">|</span>
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+<span class="p">|</span> Processes:                                                                  <span class="p">|</span>
+<span class="p">|</span>  GPU   GI   CI        PID   Type   Process name                  GPU Memory <span class="p">|</span>
+<span class="p">|</span>        ID   ID                                                   Usage      <span class="p">|</span>
+<span class="p">|</span><span class="o">=============================================================================</span><span class="p">|</span>
+<span class="p">|</span>  No running processes found                                                 <span class="p">|</span>
++-----------------------------------------------------------------------------+
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>我在安装NVIDIA CUDA驱动时搞了一个乌龙，我忘记之前在 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 配置了GPU的内核隔离 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=...,10de:1b39</span></code> 导致NVIDIA设备被passthrough给虚拟机 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code> 。所以物理主机加载 <code class="docutils literal notranslate"><span class="pre">nvidia-nvlink</span></code> 就出现冲突错误。详见下文 <strong>异常排查</strong></p>
+</div>
+</section>
+<section id="id2">
+<h2>异常排查<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>我安装完 <code class="docutils literal notranslate"><span class="pre">NVIDIA</span> <span class="pre">CUDA</span> <span class="pre">drivers</span></code> 之后重启系统，发现控制台不断打印错误(大约每秒重复1~2次):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NVRM</span><span class="p">:</span>  <span class="n">The</span> <span class="n">NVIDIA</span> <span class="n">probe</span> <span class="n">routine</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">called</span> <span class="k">for</span> <span class="mi">1</span> <span class="n">device</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>并且按照CUDA安装检查 <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/proc/driver/nvidia/version</span></code> 也没有看到该文件，说明驱动没有正常安装</p>
+<p>参考 <a class="reference external" href="https://www.reddit.com/r/archlinux/comments/v0x3c4/psa_if_you_run_kernel_518_with_nvidia_pass_ibtoff/">PSA. If you run kernel 5.18 with NVIDIA, pass ‘ibt=off’ to your kernel cmd line if your NVIDIA driver refuses to load.</a> 。但是这个方法似乎无效(IBT是Intel的控制流完整性保护control flow integrity protection)，按照 <a class="reference external" href="https://wiki.archlinux.org/title/NVIDIA">arch linux: NVIDIA</a> 确实提到在内核5.18或更高，需要配置 <code class="docutils literal notranslate"><span class="pre">ibt=off</span></code></p>
+<p>我检查了 <code class="docutils literal notranslate"><span class="pre">dmesg</span> <span class="pre">-T</span></code> 输出发现:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Sat</span> <span class="n">Oct</span> <span class="mi">29</span> <span class="mi">20</span><span class="p">:</span><span class="mi">58</span><span class="p">:</span><span class="mi">55</span> <span class="mi">2022</span><span class="p">]</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">nvlink</span><span class="p">:</span> <span class="n">Nvlink</span> <span class="n">Core</span> <span class="ow">is</span> <span class="n">being</span> <span class="n">initialized</span><span class="p">,</span> <span class="n">major</span> <span class="n">device</span> <span class="n">number</span> <span class="mi">508</span>
+<span class="p">[</span><span class="n">Sat</span> <span class="n">Oct</span> <span class="mi">29</span> <span class="mi">20</span><span class="p">:</span><span class="mi">58</span><span class="p">:</span><span class="mi">55</span> <span class="mi">2022</span><span class="p">]</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">The</span> <span class="n">NVIDIA</span> <span class="n">probe</span> <span class="n">routine</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">called</span> <span class="k">for</span> <span class="mi">1</span> <span class="n">device</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span>
+<span class="p">[</span><span class="n">Sat</span> <span class="n">Oct</span> <span class="mi">29</span> <span class="mi">20</span><span class="p">:</span><span class="mi">58</span><span class="p">:</span><span class="mi">55</span> <span class="mi">2022</span><span class="p">]</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">This</span> <span class="n">can</span> <span class="n">occur</span> <span class="n">when</span> <span class="n">a</span> <span class="n">driver</span> <span class="n">such</span> <span class="k">as</span><span class="p">:</span>
+                           <span class="n">NVRM</span><span class="p">:</span> <span class="n">nouveau</span><span class="p">,</span> <span class="n">rivafb</span><span class="p">,</span> <span class="n">nvidiafb</span> <span class="ow">or</span> <span class="n">rivatv</span>
+                           <span class="n">NVRM</span><span class="p">:</span> <span class="n">was</span> <span class="n">loaded</span> <span class="ow">and</span> <span class="n">obtained</span> <span class="n">ownership</span> <span class="n">of</span> <span class="n">the</span> <span class="n">NVIDIA</span> <span class="n">device</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span>
+<span class="p">[</span><span class="n">Sat</span> <span class="n">Oct</span> <span class="mi">29</span> <span class="mi">20</span><span class="p">:</span><span class="mi">58</span><span class="p">:</span><span class="mi">55</span> <span class="mi">2022</span><span class="p">]</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">Try</span> <span class="n">unloading</span> <span class="n">the</span> <span class="n">conflicting</span> <span class="n">kernel</span> <span class="n">module</span> <span class="p">(</span><span class="ow">and</span><span class="o">/</span><span class="ow">or</span>
+                           <span class="n">NVRM</span><span class="p">:</span> <span class="n">reconfigure</span> <span class="n">your</span> <span class="n">kernel</span> <span class="n">without</span> <span class="n">the</span> <span class="n">conflicting</span>
+                           <span class="n">NVRM</span><span class="p">:</span> <span class="n">driver</span><span class="p">(</span><span class="n">s</span><span class="p">)),</span> <span class="n">then</span> <span class="k">try</span> <span class="n">loading</span> <span class="n">the</span> <span class="n">NVIDIA</span> <span class="n">kernel</span> <span class="n">module</span>
+                           <span class="n">NVRM</span><span class="p">:</span> <span class="n">again</span><span class="o">.</span>
+<span class="p">[</span><span class="n">Sat</span> <span class="n">Oct</span> <span class="mi">29</span> <span class="mi">20</span><span class="p">:</span><span class="mi">58</span><span class="p">:</span><span class="mi">55</span> <span class="mi">2022</span><span class="p">]</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">No</span> <span class="n">NVIDIA</span> <span class="n">devices</span> <span class="n">probed</span><span class="o">.</span>
+<span class="p">[</span><span class="n">Sat</span> <span class="n">Oct</span> <span class="mi">29</span> <span class="mi">20</span><span class="p">:</span><span class="mi">58</span><span class="p">:</span><span class="mi">55</span> <span class="mi">2022</span><span class="p">]</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">nvlink</span><span class="p">:</span> <span class="n">Unregistered</span> <span class="n">Nvlink</span> <span class="n">Core</span><span class="p">,</span> <span class="n">major</span> <span class="n">device</span> <span class="n">number</span> <span class="mi">508</span>
+</pre></div>
+</div>
+<p>这说明系统加载了和NVIDIA驱动冲突的内核模块，例如 <code class="docutils literal notranslate"><span class="pre">nouveau,</span> <span class="pre">rivafb,</span> <span class="pre">nvidiafb</span> <span class="pre">or</span> <span class="pre">rivatv</span></code></p>
+<p>不过，比较奇怪，我使用 <code class="docutils literal notranslate"><span class="pre">lsmod</span></code> 是看不到上述4个驱动模块的，有可能是编译在内核中了？</p>
+<p>检查当前内核加载模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lsmod</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">nv</span>
+</pre></div>
+</div>
+<p>看起来加载了不少 <code class="docutils literal notranslate"><span class="pre">nvidia</span></code>  相关内核模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nvidia</span>              <span class="mi">55201792</span>  <span class="mi">1</span>
+<span class="n">nvme_fabrics</span>           <span class="mi">24576</span>  <span class="mi">0</span>
+<span class="n">nvme</span>                   <span class="mi">49152</span>  <span class="mi">0</span>
+<span class="n">drm</span>                   <span class="mi">622592</span>  <span class="mi">4</span> <span class="n">drm_kms_helper</span><span class="p">,</span><span class="n">nvidia</span><span class="p">,</span><span class="n">mgag200</span>
+<span class="n">nvme_core</span>             <span class="mi">135168</span>  <span class="mi">2</span> <span class="n">nvme</span><span class="p">,</span><span class="n">nvme_fabrics</span>
+</pre></div>
+</div>
+<p>我怀疑是没有按照前文提示添加 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/nvidia-graphics-drivers.conf</span></code> 导致启动时不断自动加载开源，所以产生了冲突？</p>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">mlocate</span></code> 软件包的 <code class="docutils literal notranslate"><span class="pre">updatedb</span></code> + <code class="docutils literal notranslate"><span class="pre">locate</span> <span class="pre">nvidia-graphics-drivers.conf</span></code> 找到位于 <code class="docutils literal notranslate"><span class="pre">/usr/lib/modprobe.d/nvidia-graphics-drivers.conf</span></code> 复制到 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/</span></code> 目录:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">modprobe</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">nvidia</span><span class="o">-</span><span class="n">graphics</span><span class="o">-</span><span class="n">drivers</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">modprobe</span><span class="o">.</span><span class="n">d</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>这个 <code class="docutils literal notranslate"><span class="pre">nvidia-graphics-drivers.conf</span></code> 内容如下:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">/etc/modprobe.d/nvidia-graphics-drivers.conf</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>blacklist nouveau
+blacklist lbm-nouveau
+blacklist nvidiafb
+<span class="nb">alias</span> nouveau off
+<span class="nb">alias</span> lbm-nouveau off
+</pre></div>
+</div>
+</div>
+<p>汗，虽然理论上配置正确，但是还是没有解决上述报错</p>
+<p>仔细观察发现，有两个 <code class="docutils literal notranslate"><span class="pre">modprobe</span></code> 进程一直卡住 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">modprobe</span></code> 可以看到:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>root        4619 98.0  0.0  72868  2320 ?        D    22:20   0:00 modprobe nvidia
+root        4622  0.0  0.0  72868  2416 ?        R    22:20   0:00 /sbin/modprobe nvidia-drm
+</pre></div>
+</div>
+<p>并且进程号不断变化，显示不断在重复执行</p>
+<p>当前 <code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">-i</span> <span class="pre">nvidia</span></code> 看到硬件输出:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">82</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">GP102GL</span> <span class="p">[</span><span class="n">Tesla</span> <span class="n">P10</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://forums.linuxmint.com/viewtopic.php?t=365573&amp;start=20">How to check if the NVIDIA drivers/modules are installed?</a> ，对于正常安装的 NVIDIA 驱动，执行 <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> 需要看到驱动信息</p>
+<ul>
+<li><p>检查启动日志:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">--</span><span class="n">grep</span><span class="o">=</span><span class="s2">&quot;nvidia&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>我发现在加载最初还有一行日志报错，之前没有注意:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span> <span class="n">Boot</span> <span class="n">dec22114bd1f42a9b8128b527ddee1c9</span> <span class="o">--</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">nvidia</span><span class="p">:</span> <span class="n">loading</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">tree</span> <span class="n">module</span> <span class="n">taints</span> <span class="n">kernel</span><span class="o">.</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">nvidia</span><span class="p">:</span> <span class="n">module</span> <span class="n">license</span> <span class="s1">&#39;NVIDIA&#39;</span> <span class="n">taints</span> <span class="n">kernel</span><span class="o">.</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">nvidia</span><span class="p">:</span> <span class="n">module</span> <span class="n">verification</span> <span class="n">failed</span><span class="p">:</span> <span class="n">signature</span> <span class="ow">and</span><span class="o">/</span><span class="ow">or</span> <span class="n">required</span> <span class="n">key</span> <span class="n">missing</span> <span class="o">-</span> <span class="n">tainting</span> <span class="n">kernel</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">nvlink</span><span class="p">:</span> <span class="n">Nvlink</span> <span class="n">Core</span> <span class="ow">is</span> <span class="n">being</span> <span class="n">initialized</span><span class="p">,</span> <span class="n">major</span> <span class="n">device</span> <span class="n">number</span> <span class="mi">510</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">The</span> <span class="n">NVIDIA</span> <span class="n">probe</span> <span class="n">routine</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">called</span> <span class="k">for</span> <span class="mi">1</span> <span class="n">device</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">This</span> <span class="n">can</span> <span class="n">occur</span> <span class="n">when</span> <span class="n">a</span> <span class="n">driver</span> <span class="n">such</span> <span class="k">as</span><span class="p">:</span>
+                               <span class="n">NVRM</span><span class="p">:</span> <span class="n">nouveau</span><span class="p">,</span> <span class="n">rivafb</span><span class="p">,</span> <span class="n">nvidiafb</span> <span class="ow">or</span> <span class="n">rivatv</span>
+                               <span class="n">NVRM</span><span class="p">:</span> <span class="n">was</span> <span class="n">loaded</span> <span class="ow">and</span> <span class="n">obtained</span> <span class="n">ownership</span> <span class="n">of</span> <span class="n">the</span> <span class="n">NVIDIA</span> <span class="n">device</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">Try</span> <span class="n">unloading</span> <span class="n">the</span> <span class="n">conflicting</span> <span class="n">kernel</span> <span class="n">module</span> <span class="p">(</span><span class="ow">and</span><span class="o">/</span><span class="ow">or</span>
+                               <span class="n">NVRM</span><span class="p">:</span> <span class="n">reconfigure</span> <span class="n">your</span> <span class="n">kernel</span> <span class="n">without</span> <span class="n">the</span> <span class="n">conflicting</span>
+                               <span class="n">NVRM</span><span class="p">:</span> <span class="n">driver</span><span class="p">(</span><span class="n">s</span><span class="p">)),</span> <span class="n">then</span> <span class="k">try</span> <span class="n">loading</span> <span class="n">the</span> <span class="n">NVIDIA</span> <span class="n">kernel</span> <span class="n">module</span>
+                               <span class="n">NVRM</span><span class="p">:</span> <span class="n">again</span><span class="o">.</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">NVRM</span><span class="p">:</span> <span class="n">No</span> <span class="n">NVIDIA</span> <span class="n">devices</span> <span class="n">probed</span><span class="o">.</span>
+<span class="n">Oct</span> <span class="mi">29</span> <span class="mi">12</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">nvlink</span><span class="p">:</span> <span class="n">Unregistered</span> <span class="n">Nvlink</span> <span class="n">Core</span><span class="p">,</span> <span class="n">major</span> <span class="n">device</span> <span class="n">number</span> <span class="mi">510</span>
+</pre></div>
+</div>
+<p>不过出现 <code class="docutils literal notranslate"><span class="pre">nvidia:</span> <span class="pre">module</span> <span class="pre">verification</span> <span class="pre">failed:</span> <span class="pre">signature</span> <span class="pre">and/or</span> <span class="pre">required</span> <span class="pre">key</span> <span class="pre">missing</span> <span class="pre">-</span> <span class="pre">tainting</span> <span class="pre">kernel</span></code> 并不影响，只是表示NVIDIA并没有签名驱动，Linux内核会检查内核模块签名，即使 <code class="docutils literal notranslate"><span class="pre">secure</span> <span class="pre">boot</span></code> 被禁用。使用 <code class="docutils literal notranslate"><span class="pre">journalctl</span> <span class="pre">--grep=&quot;secure&quot;</span></code> 可以看到内核启动确实禁用了Secure boot:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sep</span> <span class="mi">27</span> <span class="mi">11</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">19</span> <span class="n">zcloud</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">secureboot</span><span class="p">:</span> <span class="n">Secure</span> <span class="n">boot</span> <span class="n">disabled</span>
+</pre></div>
+</div>
+<p>参考 <a class="reference external" href="https://forums.developer.nvidia.com/t/nvidia-issue/177273">Nvidia issue</a> (讨论驱动加载)， 在添加了 noveau 模块屏蔽之后，还要更新 initramfs</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>update-initramfs -u -k $(uname -r)
+</pre></div>
+</div>
+<p>但是，我甚至还添加了:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">blacklist</span> <span class="n">rivafb</span>
+<span class="n">blacklist</span> <span class="n">nvidiafb</span>
+<span class="n">blacklist</span> <span class="n">rivatv</span>
+</pre></div>
+</div>
+<p>但是依然没有解决</p>
+<p>参考 <a class="reference external" href="https://github.com/probonopd/system/issues/1">The NVIDIA probe routine was not called for 1 device(s) #1</a> 在内核参数添加 <code class="docutils literal notranslate"><span class="pre">rdblaclist=nouveau</span></code> ，然后执行 <code class="docutils literal notranslate"><span class="pre">update-grub</span></code> 。可惜，还是不行</p>
+<ul>
+<li><p>执行 <code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">-vvv</span></code> 可以看到显卡设备:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">82</span><span class="p">:</span><span class="mf">00.0</span> <span class="mi">3</span><span class="n">D</span> <span class="n">controller</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">GP102GL</span> <span class="p">[</span><span class="n">Tesla</span> <span class="n">P10</span><span class="p">]</span> <span class="p">(</span><span class="n">rev</span> <span class="n">a1</span><span class="p">)</span>
+     <span class="n">Subsystem</span><span class="p">:</span> <span class="n">NVIDIA</span> <span class="n">Corporation</span> <span class="n">GP102GL</span> <span class="p">[</span><span class="n">Tesla</span> <span class="n">P10</span><span class="p">]</span>
+     <span class="n">Physical</span> <span class="n">Slot</span><span class="p">:</span> <span class="mi">3</span>
+<span class="o">...</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvidiafb</span><span class="p">,</span> <span class="n">nouveau</span><span class="p">,</span> <span class="n">nvidia_drm</span><span class="p">,</span> <span class="n">nvidia</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>为何还是加载了 <code class="docutils literal notranslate"><span class="pre">nvidiafb</span></code> 和 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> ?</p>
+<p>在华为的FusionServer Pro Server GPU Card Operation Guide 05 <a class="reference external" href="https://support.huawei.com/enterprise/en/doc/EDOC1100165479/93fe5683/how-to-disable-the-nouveau-driver-for-different-linux-systems">How to Disable the Nouveau Driver for Different Linux Systems</a> 说明了不同操作系统屏蔽nouveu驱动方法，其中 Ubuntu 采用:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">blacklist</span> <span class="n">nouveau</span>
+<span class="n">options</span> <span class="n">nouveau</span> <span class="n">modeset</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>这个方法和 <a class="reference external" href="https://askubuntu.com/questions/841876/how-to-disable-nouveau-kernel-driver">How to disable Nouveau kernel driver</a> 一致，所以我修订 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/nvidia-graphics-drivers.conf</span></code> 增加一行 <code class="docutils literal notranslate"><span class="pre">options</span> <span class="pre">nouveau</span> <span class="pre">modeset=0</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">blacklist</span> <span class="n">nouveau</span>
+<span class="n">blacklist</span> <span class="n">lbm</span><span class="o">-</span><span class="n">nouveau</span>
+<span class="n">options</span> <span class="n">nouveau</span> <span class="n">modeset</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">alias</span> <span class="n">nouveau</span> <span class="n">off</span>
+<span class="n">alias</span> <span class="n">lbm</span><span class="o">-</span><span class="n">nouveau</span> <span class="n">off</span>
+</pre></div>
+</div>
+<p>但是重启后使用 <code class="docutils literal notranslate"><span class="pre">lspci</span> <span class="pre">-vvv</span></code> 看到依然在NVIDIA段落:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+     <span class="n">Kernel</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span> <span class="n">vfio</span><span class="o">-</span><span class="n">pci</span>
+     <span class="n">Kernel</span> <span class="n">modules</span><span class="p">:</span> <span class="n">nvidiafb</span><span class="p">,</span> <span class="n">nouveau</span><span class="p">,</span> <span class="n">nvidia_drm</span><span class="p">,</span> <span class="n">nvidia</span>
+</pre></div>
+</div>
+<p>奔溃…</p>
+<p>我改为手工删除掉内核模块:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mkdir ~/`uname -r`
+mv /usr/lib/modules/`uname -r`/kernel/drivers/video/fbdev/nvidia/nvidiafb.ko ~/`uname -r`/
+mv /usr/lib/modules/`uname -r`/kernel/drivers/gpu/drm/nouveau/nouveau.ko ~/`uname -r`/
+mv /usr/lib/modules/`uname -r`/kernel/drivers/video/fbdev/riva/rivafb.ko ~/`uname -r`/
+# 没有找到 rivatv.ko
+</pre></div>
+</div>
+<p>再次奔溃…重启后报错依旧(执行过 <code class="docutils literal notranslate"><span class="pre">update-initramfs</span> <span class="pre">-u</span></code> 之后也一样)</p>
+<p>我还尝试在 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 中为内核参数添加了 <code class="docutils literal notranslate"><span class="pre">rd.driver.blacklist=nouveau,rivafb,nvidiafb,rivatv</span></code> ，但是启动之后依然出现上述报错</p>
+<section id="id3">
+<h3>严重失误<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<p><strong>我逐渐感觉并不是内核加载了和nvidia模块冲突的nouveau等模块</strong> 而是可能是因为内核启用了 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 导致的: 我翻了一下我之前的笔记，确实在 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 实践时，将 GPU 卡直接passthrough给了虚拟机 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code> 做测试。</p>
+<p>仔细看了 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 记录，在 <a class="reference internal" href="../../kvm/iommu/ovmf.html#vfio-pci-ids"><span class="std std-ref">通过设备ID来绑定 vfio-pci</span></a> 配置了将GPU设备 <code class="docutils literal notranslate"><span class="pre">10de:1b39</span></code> 屏蔽了(提供给kvm虚拟机passthrough），所以就会出现上述的报错。真是非常乌龙…</p>
+<ul class="simple">
+<li><p>所以修订方法也很简单，就是去除掉 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 中 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a,10de:1b39</span></code> 改为 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a</span></code> 就不会隔离掉GPU，物理主机就可以使用该设备</p></li>
+</ul>
+</section>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html">NVIDIA Driver Installation Quickstart Guide</a></p></li>
 </ul>
