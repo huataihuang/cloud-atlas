@@ -17,6 +17,7 @@ RHEL(Red Hat Enterprise Linux)官方手册提供了系统的内核管理、监�
    kdump_guide/index
    grubby.rst
    zram.rst
+   kernel_modules_blacklist.rst
 
 .. only::  subproject and html
 

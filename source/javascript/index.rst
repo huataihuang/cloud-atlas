@@ -12,6 +12,8 @@ JavaScript注释方法有2种:
 .. toctree::
    :maxdepth: 1
 
+   intro_js.rst
+   first_js.rst
    js_var_const.rst
    react/index
    typescript/index

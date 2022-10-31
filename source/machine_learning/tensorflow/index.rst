@@ -9,6 +9,8 @@ Tensorflow
 
    tensorflow_quickstart.rst
    build_tensorflow.rst
+   tensorflow_nvidia.rst
+   mixed_precision_training.rst
 
 .. only::  subproject and html
 
