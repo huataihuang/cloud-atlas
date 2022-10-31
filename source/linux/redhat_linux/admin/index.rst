@@ -7,6 +7,7 @@ RedHat Linux 系统管理
 .. toctree::
    :maxdepth: 1
 
+   check_linux_version.rst
    init_centos.rst
    rpm.rst
    dnf.rst

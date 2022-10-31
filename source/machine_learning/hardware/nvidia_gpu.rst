@@ -31,3 +31,4 @@ NVIDIA GPU微架构：
 
 - `NVidia产品和微架构 <http://juniorprincewang.github.io/2018/01/13/NVidia%E4%BA%A7%E5%93%81%E5%92%8C%E5%BE%AE%E6%9E%B6%E6%9E%84/>`_
 - `NVIDIA官网-推荐开发者使用的 GPU <https://developer.nvidia.com/zh-cn/cuda-gpus>`_
+- `NVIDIA GPU的一些解析（一） <https://zhuanlan.zhihu.com/p/258196004>`_

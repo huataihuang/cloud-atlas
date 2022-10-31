@@ -1,16 +1,13 @@
-.. _tensorflow:
+.. _stable_diffusion:
 
 =================================
-Tensorflow
+Stable Diffusion模型方法
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   tensorflow_quickstart.rst
-   build_tensorflow.rst
-   tensorflow_nvidia.rst
-   mixed_precision_training.rst
+   intro_stable_diffusion.rst
 
 .. only::  subproject and html
 

@@ -13,6 +13,7 @@
    tesla_p10.rst
    install_nvidia_linux_driver.rst
    nvidia_gpudirect_storage/index
+   benchmark_gpu.rst
 
 .. only::  subproject and html
 

@@ -19,6 +19,7 @@ Machine Learning Atlas
    cuda/index
    pytorch/index
    tensorflow/index
+   stable_diffusion/index
 
 .. only::  subproject and html
 
