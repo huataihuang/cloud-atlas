@@ -115,6 +115,50 @@ arch linux的镜像网站定义在 ``/etc/pacman.d/mirrorlist`` 。在这个定�
 
    pacstrap /mnt base linux linux-firmware
 
+安装20221101
+--------------
+
+2022年11月1日，我再次在MacBook Pro上安装arch linux，有以下这些区别:
+
+- 内置硬盘替换为NVME磁盘，所以磁盘命名不同
+- 没有再为macOS保留分区，我准备全程使用Linux系统
+
+- 使用 :ref:`parted` 对磁盘分区(重建)::
+
+   # 初始化磁盘分区表(擦除原先的所有数据)
+   parted /dev/nvme0n1 mklabel gpt
+
+   # 创建第一个 分区，用于EFI启动
+   parted -a optimal /dev/nvme0n1 mkpart ESP fat32 0% 256MB
+   parted /dev/nvme0n1 set 1 esp on
+
+   # 创建第二个 分区，用于操作系统部署(剩余空间使用 :ref:`zfs` 卷) 
+   parted -a optimal /dev/nvme0n1 mkpart primary xfs 256MB 64GB
+
+   # 格式化文件系统
+   mkdosfs -F 32 /dev/nvme0n1p1
+   mkfs.xfs /dev/nvme0n1p2
+
+- 挂载文件系统::
+
+   mount /dev/nvme0n1p2 /mnt
+   mkdir /mnt/boot
+   mount /dev/nvme0n1p1 /mnt/boot
+
+- 选择镜像网站并安装基本软件包::
+
+   pacstrap -K /mnt base linux linux-firmware
+
+.. note::
+
+   这次我选择了XFS作为根文件系统，但是安装过程似乎没有包含xfsprogs，导致有fsck报错::
+
+      ==> ERROR: file not found: `fsck.xfs'
+      ==> ERROR: file not found: `xfs_repair'
+      ==> WARNING: No fsck helpers found. fsck will not be run on boot.
+
+   暂时忽略，等后续系统运行起来再补安装
+
 配制
 ======
 
@@ -184,7 +228,9 @@ arch linux的镜像网站定义在 ``/etc/pacman.d/mirrorlist`` 。在这个定�
 
 - 使用pacman安装必要软件包::
 
-   pacman -S vim which
+   pacman -S vim which mlocate oepnssh
+
+- :ref:`archlinux_config_ip` : 配置USB网卡，先确保能够通过有闲网络连接互联网，之后可以再安装无线
 
 UEFI启动
 =============
@@ -197,11 +243,19 @@ UEFI启动
 
 参考 `EFISTUB - Using UEFI directly <https://wiki.archlinux.org/index.php/EFISTUB#Using_UEFI_directly>`_ 执行如下命令::
 
-   efibootmgr --disk /dev/sda --part 1 --create --label "Arch Linux" --loader /vmlinuz-linux --unicode 'root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX rw initrd=\initramfs-linux.img' --verbose
+   efibootmgr --disk /dev/DISK --part Y --create --label "Arch Linux" --loader /vmlinuz-linux --unicode 'root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX rw initrd=\initramfs-linux.img' --verbose
 
 .. note::
 
-   ``PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX`` 设置PARTUUID参数请检查 ``ls -lh /dev/disk/by-partuuid/`` 目录下设备文件的软链接，可以找到对应磁盘 ``/dev/sda1`` 的 PARTUUID。请注意，PARTUUID和磁盘UUID不同，在 ``/etc/fstab`` 中使用的是UUID。
+   - 这里 ``--disk /dev/DISK`` 是指整个磁盘
+   - ``--part Y`` 是指ESP所在分区
+   - ``PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX`` 设置PARTUUID参数请检查 ``ls -lh /dev/disk/by-partuuid/`` 目录下设备文件的软链接，可以找到对应 ``根文件系统`` 的 PARTUUID。请注意，PARTUUID和磁盘UUID不同，在 ``/etc/fstab`` 中使用的是UUID。
+
+.. note::
+
+   对于2022年11月1日重新在NVME设备上安装，执行 ``efibootmgr`` 如下::
+
+      efibootmgr --disk /dev/nvme0n1 --part 1 --create --label "Arch Linux" --loader /vmlinuz-linux --unicode 'root=PARTUUID=5c7afe7a-b41f-415b-9f12-129c3014293a rw initrd=\initramfs-linux.img' --verbose
 
 .. warning::
 
@@ -212,6 +266,10 @@ UEFI启动
     efibootmgr --bootorder XXXX,XXXX --verbose
 
 这里 ``xxxx,xxxx`` 是刚才 ``efibootmgr --verbose`` 输出的每个启动项的编号。
+
+.. note::
+
+   这里不设置启动顺序也行，默认就是先启动刚才安装的Arch Linux
 
 .. note::
 
@@ -242,11 +300,15 @@ Nvidia显卡
 
 当前是开源驱动 ``nouveau`` ，性能较差。
 
-对于 GeForce 600-900 以及 Quadro/Tesla/Tegra K系列显卡，或者更新的显卡(2010-2019年)，安装 ``nvidia`` 或 ``nvidia-lts`` 驱动包::
+- (旧方法，2022年已废弃)对于 GeForce 600-900 以及 Quadro/Tesla/Tegra K系列显卡，或者更新的显卡(2010-2019年)，安装 ``nvidia`` 或 ``nvidia-lts`` 驱动包::
 
    sudo pacman -S nvidia
 
 安装完成后需要重启系统，因为 ``nvidia`` 软件包包含屏蔽 ``nouveau`` 模块配置，所以需要重启。
+
+.. note::
+
+   由于NVIDIA已经不再最新的驱动中支持 ``GeForce GT 750M`` ，所以默认 ``pacman -S nvidia`` 安装的NVIDIA驱动v520版本过高会无法使用。所以根据启动提示，需要使用 :ref:`archlinux_aur` 安装 ``nvidia-4700xx-dkms`` 软件包
 
 屏幕亮度
 ========

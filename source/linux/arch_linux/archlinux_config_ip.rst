@@ -58,8 +58,8 @@ arch linux配置IP(静态或动态)
    sudo systemctl stop dhcpcd
    sudo systemctl disable dhcpcd
 
-:ref:`systemd_networkd` 方法
--------------------------------
+:ref:`systemd_networkd` 方法(推荐)
+------------------------------------
 
 使用 :ref:`systemd` 的 :ref:`systemd_networkd` 配置静态IP地址的方法更为通用
 
@@ -76,10 +76,11 @@ arch linux配置IP(静态或动态)
    sudo systemctl stop dhcpcd
    sudo systemctl disable dhcpcd
 
-- 启动并激活 ``systemd-networkd`` ::
+- 启动并激活 :ref:`systemd_networkd` 和 :ref:`systemd_resolved` (需要这个服务来解析DNS):
 
-   sudo systemctl enable systemd-networkd
-   sudo systemctl start systemd-networkd
+.. literalinclude:: archlinux_config_ip/systemd-networkd-resolved
+   :language: ini
+   :caption: 激活 systemd-networkd 和 systemd-resolved
 
 :ref:`wpa_supplicant`
 ==========================
