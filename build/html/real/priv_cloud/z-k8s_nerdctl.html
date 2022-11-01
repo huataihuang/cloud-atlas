@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kubernetes集群(z-k8s)使用nerdctl &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -168,10 +168,10 @@
            <div itemprop="articleBody">
              
   <section id="kubernetes-z-k8s-nerdctl">
-<span id="z-k8s-nerdctl"></span><h1>Kubernetes集群(z-k8s)使用nerdctl<a class="headerlink" href="#kubernetes-z-k8s-nerdctl" title="Permalink to this heading">¶</a></h1>
+<span id="z-k8s-nerdctl"></span><h1>Kubernetes集群(z-k8s)使用nerdctl<a class="headerlink" href="#kubernetes-z-k8s-nerdctl" title="此标题的永久链接">¶</a></h1>
 <p>在完成 <a class="reference internal" href="z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 之后，我们需要使用 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 来完成镜像制作和管理，已经推送镜像到 <a class="reference internal" href="z-k8s_docker_registry.html#z-k8s-docker-registry"><span class="std std-ref">Kubernetes集群(z-k8s)部署镜像Redgistry</span></a> 以实现应用部署</p>
 <section id="buildkit">
-<h2>buildkit安装和准备<a class="headerlink" href="#buildkit" title="Permalink to this heading">¶</a></h2>
+<h2>buildkit安装和准备<a class="headerlink" href="#buildkit" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>安装 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> (minimal版本，即只安装 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> ):</p></li>
 </ul>
@@ -197,7 +197,7 @@ sudo mv * /usr/bin/
 <li><p>运行(需要先安装和运行 OCI(runc) 和 containerd):</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">使用root身份运行buildkitd，启动后工作在前台等待客户端连接</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">使用root身份运行buildkitd，启动后工作在前台等待客户端连接</span><a class="headerlink" href="#id2" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo buildkitd
 </pre></div>
 </div>
@@ -206,7 +206,7 @@ sudo mv * /usr/bin/
 <li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/buildkit/buildkitd.toml</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">配置 /etc/buildkit/buildkitd.toml</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">配置 /etc/buildkit/buildkitd.toml</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>worker.oci<span class="o">]</span>
   <span class="nv">enabled</span> <span class="o">=</span> <span class="nb">false</span>
 
@@ -220,12 +220,12 @@ sudo mv * /usr/bin/
 <p>然后就可以使用 <a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 工具执行 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">build</span></code> 指令来构建镜像。</p>
 </section>
 <section id="nerdctl">
-<h2>使用nerdctl构建镜像<a class="headerlink" href="#nerdctl" title="Permalink to this heading">¶</a></h2>
+<h2>使用nerdctl构建镜像<a class="headerlink" href="#nerdctl" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>在目录下编辑一个 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 内容如下(另外还要准备一个公钥文件 <code class="docutils literal notranslate"><span class="pre">authorized_keys</span></code> 用于镜像中眠密码登陆):</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，注释中包含启动方法</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，注释中包含启动方法</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># 使用 DOCKER</span>
 <span class="c"># docker build --rm -t local/fedora-systemd .</span>
 <span class="c"># docker run -itd --privileged=true -p 1122:22 --hostname fedora --name fedora local:fedora-systemd</span>
@@ -284,7 +284,7 @@ sudo mv * /usr/bin/
 <li><p>执行以下命令构建镜像:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">nerdctl build构建支持systemd的Fedora镜像</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">nerdctl build构建支持systemd的Fedora镜像</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nerdctl build -t fedora-systemd .
 </pre></div>
 </div>
@@ -293,14 +293,14 @@ sudo mv * /usr/bin/
 <li><p>完成后检查镜像:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">nerdctl images命令检查刚才生成的支持systemd的Fedora镜像</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">nerdctl images命令检查刚才生成的支持systemd的Fedora镜像</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl images
 </pre></div>
 </div>
 </div>
 <p>可以看到刚才生成的镜像:</p>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">nerdctl images命令显示刚才生成的镜像</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">nerdctl images命令显示刚才生成的镜像</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>REPOSITORY                 TAG       IMAGE ID        CREATED         PLATFORM       SIZE         BLOB SIZE
 fedora-systemd             latest    c910cbc325a4    <span class="m">31</span> hours ago    linux/amd64    <span class="m">717</span>.0 MiB    <span class="m">389</span>.2 MiB
 </pre></div>
@@ -308,14 +308,14 @@ fedora-systemd             latest    c910cbc325a4    <span class="m">31</span> h
 </div>
 </section>
 <section id="nerdctlkubernetespod">
-<h2>使用nerdctl在Kubernetes上运行pod容器<a class="headerlink" href="#nerdctlkubernetespod" title="Permalink to this heading">¶</a></h2>
+<h2>使用nerdctl在Kubernetes上运行pod容器<a class="headerlink" href="#nerdctlkubernetespod" title="此标题的永久链接">¶</a></h2>
 <p><a class="reference internal" href="../../kubernetes/container_runtimes/containerd/nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 可以直接将镜像推送到 <a class="reference internal" href="z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 集群中作为pod运行:</p>
 <ul class="simple">
 <li><p>执行 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">apply</span></code> 命令在Kubernetes集群 <a class="reference internal" href="z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 中构建运行pod:</p></li>
 <li><p>准备 <code class="docutils literal notranslate"><span class="pre">z-dev</span></code> 部署配置 <code class="docutils literal notranslate"><span class="pre">z-dev-depolyment.yaml</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">z-dev部署配置z-dev-depolyment.yaml，定义了pod输出的3个服务端口 22,80,443</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">z-dev部署配置z-dev-depolyment.yaml，定义了pod输出的3个服务端口 22,80,443</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -384,7 +384,7 @@ fedora-systemd             latest    c910cbc325a4    <span class="m">31</span> h
 <li><p>需要将镜像导出复制到 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-4</span></code> 来运行容器:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">nerdcrl save保存导出fedora_systemd镜像</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">nerdcrl save保存导出fedora_systemd镜像</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl save fedora-systemd &gt; fedora-systemd.tar
 </pre></div>
 </div>
@@ -398,7 +398,7 @@ fedora-systemd             latest    c910cbc325a4    <span class="m">31</span> h
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">z-k8s-n-4</span></code> 服务器上执行以下命令导入镜像:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">nerdcrl load加载fedora_systemd镜像</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">nerdcrl load加载fedora_systemd镜像</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nerdctl -n k8s.io load &lt; fedora-systemd.tar
 </pre></div>
 </div>
@@ -425,7 +425,7 @@ fedora-systemd             latest    c910cbc325a4    <span class="m">31</span> h
 </div>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://discuss.kubernetes.io/t/ingress-nginx-ssh-access-and-forwarding-to-workspace-container-pod/14219">Ingress Nginx SSH access and forwarding to Workspace container/pod</a></p></li>
 <li><p><a class="reference external" href="https://stackoverflow.com/questions/34502022/exposing-two-ports-in-google-container-engine">Exposing two ports in Google Container Engine</a></p></li>

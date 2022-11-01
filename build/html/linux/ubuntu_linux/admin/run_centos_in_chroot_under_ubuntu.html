@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在Ubuntu中构建chroot环境运行CentOS &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -180,7 +180,7 @@
            <div itemprop="articleBody">
              
   <section id="ubuntuchrootcentos">
-<span id="run-centos-in-chroot-under-ubuntu"></span><h1>在Ubuntu中构建chroot环境运行CentOS<a class="headerlink" href="#ubuntuchrootcentos" title="Permalink to this heading">¶</a></h1>
+<span id="run-centos-in-chroot-under-ubuntu"></span><h1>在Ubuntu中构建chroot环境运行CentOS<a class="headerlink" href="#ubuntuchrootcentos" title="此标题的永久链接">¶</a></h1>
 <p>我在 <a class="reference internal" href="../../server/hardware/hpe/dl360_bios_upgrade.html#dl360-bios-upgrade"><span class="std std-ref">HPE DL360 BIOS升级</span></a> 时发现，在企业级Linux市场，果然 <a class="reference internal" href="../../redhat_linux/index.html#redhat-linux"><span class="std std-ref">RedHat Linux</span></a> 占据了主导地位: HP官方网站只提供Windows安装包和RPM安装包。但这也带来了一点困扰:</p>
 <ul class="simple">
 <li><p>虽然可以通过 <a class="reference internal" href="alien.html#alien"><span class="std std-ref">alien软件包转换工具</span></a> 将RPM包转换成DEB包，但是我发现一个非常尴尬的事情: HP官网提供了大量的软件包，但是没有明确软件包如何对应于硬件，而服务器硬件组合实在太繁多，很难确定我现有的 <a class="reference internal" href="../../server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 硬件配置是否需要安装更新包</p></li>
@@ -194,7 +194,7 @@
 <p>说到 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> ，你肯定就想起了 <a class="reference internal" href="../../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> : 是的，Docker的底层关键技术就是 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> ，也就是能够在一个底层操作系统上切换到不同Linux系统运行的关键。不过，Docker容器环境对容器做了诸多安全限制，并不适合我们这种需要对底层物理服务器更新firmware/bios的场景。</p>
 </div>
 <section id="rinse-booststap">
-<h2>使用 <code class="docutils literal notranslate"><span class="pre">rinse</span></code> 初始化 booststap<a class="headerlink" href="#rinse-booststap" title="Permalink to this heading">¶</a></h2>
+<h2>使用 <code class="docutils literal notranslate"><span class="pre">rinse</span></code> 初始化 booststap<a class="headerlink" href="#rinse-booststap" title="此标题的永久链接">¶</a></h2>
 <p>Debian提供了 <code class="docutils literal notranslate"><span class="pre">rinse</span></code> 脚本来创建很多基于RPM系统的最小化安装:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">rinse</span>
 </pre></div>
@@ -257,7 +257,7 @@ my $cmd =
 </div>
 </section>
 <section id="dev">
-<h2>创建最小化 <code class="docutils literal notranslate"><span class="pre">/dev</span></code> 项目<a class="headerlink" href="#dev" title="Permalink to this heading">¶</a></h2>
+<h2>创建最小化 <code class="docutils literal notranslate"><span class="pre">/dev</span></code> 项目<a class="headerlink" href="#dev" title="此标题的永久链接">¶</a></h2>
 <p>CentOS 7已经不再提供 <code class="docutils literal notranslate"><span class="pre">MAKEDEV</span></code> 脚本，所以需要在 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> 内部执行以下命令创建需要的设备:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mknod</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">null</span> <span class="n">c</span> <span class="mi">1</span> <span class="mi">3</span>
 <span class="n">chmod</span> <span class="mi">666</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">null</span>
@@ -268,7 +268,7 @@ my $cmd =
 </div>
 </section>
 <section id="chroot">
-<h2>在物理主机和chroot之间共享用户<a class="headerlink" href="#chroot" title="Permalink to this heading">¶</a></h2>
+<h2>在物理主机和chroot之间共享用户<a class="headerlink" href="#chroot" title="此标题的永久链接">¶</a></h2>
 <p>可以方便地在主机系统和chroot中重用相同用户。对于单一用户，非常方便在 <code class="docutils literal notranslate"><span class="pre">chroot</span></code> 目录下创建系统用户:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>chroot /srv/chroot/centos-7 adduser --no-create-home \
   --uid $USER_ID $USER_NAME
@@ -282,7 +282,7 @@ my $cmd =
 <p>后面我们会用 bind mount 方式将物理主机目录映射到chroot中</p>
 </section>
 <section id="id1">
-<h2>(参考)挂载chroot文件系统<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>(参考)挂载chroot文件系统<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>简单来说，至少要挂载 <code class="docutils literal notranslate"><span class="pre">/proc</span></code> 伪文件系统，很多工具还需要创建伪终端才能工作。通常执行以下命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">proc</span> <span class="n">proc</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">chroot</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="mi">7</span><span class="o">/</span><span class="n">proc</span>
 <span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">devpts</span> <span class="n">devpts</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">chroot</span><span class="o">/</span><span class="n">centos</span><span class="o">-</span><span class="mi">7</span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">pts</span>
@@ -303,7 +303,7 @@ my $cmd =
 </div>
 </section>
 <section id="id2">
-<h2>改进的实际挂载chroot文件系统<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>改进的实际挂载chroot文件系统<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>我感觉上述步骤太繁琐，所以参考gentoo linux的安装手册完成上述步骤:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>chroot_dir=/srv/chroot/centos-7
 mount -t proc proc ${chroot_dir}/proc
@@ -345,7 +345,7 @@ export PS1=&quot;(chroot) $PS1&quot;
 </div>
 </section>
 <section id="id3">
-<h2>验证(通过升级系统)<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>验证(通过升级系统)<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>在chroot的CentOS系统中执行一次升级就可以验证:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">update</span>
@@ -357,7 +357,7 @@ export PS1=&quot;(chroot) $PS1&quot;
 <p>现在就可以在这个基础上完成 <a class="reference internal" href="../../server/hardware/hpe/dl360_bios_upgrade.html#dl360-bios-upgrade"><span class="std std-ref">HPE DL360 BIOS升级</span></a> ，即通过HP官方提供的 SPP 光盘，一条脚本命令进行升级</p>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.tt-solutions.com/en/articles/install_centos_in_debian_chroot">Installing CentOS in a chroot under Debian</a></p></li>
 </ul>

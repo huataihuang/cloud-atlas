@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Android 12对后台运行termux的限制 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -164,12 +164,12 @@
            <div itemprop="articleBody">
              
   <section id="android-12termux">
-<span id="android-12-background-limit-termux"></span><h1>Android 12对后台运行termux的限制<a class="headerlink" href="#android-12termux" title="Permalink to this heading">¶</a></h1>
+<span id="android-12-background-limit-termux"></span><h1>Android 12对后台运行termux的限制<a class="headerlink" href="#android-12termux" title="此标题的永久链接">¶</a></h1>
 <p>Termux确实是Android系统中非常强大的终端工具，可以通过集成大量开源工具，将一台Android设备转换成移动的服务器，方便我们实现 <a class="reference internal" href="../../real/mobile_work/mobile_pixel_dev.html#mobile-pixel-dev"><span class="std std-ref">移动开发:Pixel手机(Android)开发环境构建</span></a> 。我在使用一段时间发现，当Termux在后台时，非常容易因为启动很多应用而导致后台 <code class="docutils literal notranslate"><span class="pre">termux</span></code> 进程被杀死。这对我连续使用Android作为移动开发平台不便，我尝试采用 <a class="reference internal" href="termux_background_running.html#termux-background-running"><span class="std std-ref">保持Termux后台运行</span></a> ，通过配置 <code class="docutils literal notranslate"><span class="pre">termux</span></code> 电源管理 <code class="docutils literal notranslate"><span class="pre">Unrestricted</span></code> (不限制电能)，果然可以保持 <code class="docutils literal notranslate"><span class="pre">termux</span></code>
 不被系统在后台杀死。</p>
 <p>不过，我在之前以为 <a class="reference internal" href="termux_zsh.html#termux-zsh"><span class="std std-ref">Termux ZSH</span></a> 启用了 <a class="reference internal" href="../../linux/desktop/oh_my_zsh.html#oh-my-zsh"><span class="std std-ref">Oh My Zsh</span></a> 导致相应缓慢。但是偶然发现，只要将termux切换到前台，立即就恢复了快速响应。这说明虽然配置电源管理 <code class="docutils literal notranslate"><span class="pre">Unrestricted</span></code> ，但是Android依然降低了后台运行的 <code class="docutils literal notranslate"><span class="pre">termux</span></code> 时间片，导致其响应迟钝，不符合我作为移动服务器的响应要求。</p>
 <section id="android-12-phantom-process-killer">
-<h2>Android 12 Phantom Process Killer<a class="headerlink" href="#android-12-phantom-process-killer" title="Permalink to this heading">¶</a></h2>
+<h2>Android 12 Phantom Process Killer<a class="headerlink" href="#android-12-phantom-process-killer" title="此标题的永久链接">¶</a></h2>
 <p>原来，Android 12引入了新的监控进程forked子进程的机制:</p>
 <ul class="simple">
 <li><p>父进程最多只能启动32个子进程，大大限制了一个应用在后台能够操作的动作数量</p></li>
@@ -189,7 +189,7 @@
 </ul>
 </section>
 <section id="id1">
-<h2>如何触发Android 12 Phantom Process Killer<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>如何触发Android 12 Phantom Process Killer<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>检查 32 个子进程限制配置:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">shell</span> <span class="s2">&quot;/system/bin/dumpsys activity settings&quot;</span>
@@ -215,11 +215,11 @@
 </ul>
 </section>
 <section id="id2">
-<h2>临时解决方案<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>临时解决方案<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>如果使用 Android 11 则没有这个  <code class="docutils literal notranslate"><span class="pre">PhantomProcessKiller</span></code> 的限制，但是目前在 Android 12上无法关闭这个特性。虽然能够关闭掉电源优化功能，即 <a class="reference internal" href="termux_background_running.html#termux-background-running"><span class="std std-ref">保持Termux后台运行</span></a> 采用的电源设置，但是依然无法禁止 <code class="docutils literal notranslate"><span class="pre">PhantomProcessKiller</span></code> 。</p>
 <p>目前我临时解决方案是始终把 <code class="docutils literal notranslate"><span class="pre">termux</span></code> 放在前台运行，特别是我需要长时间编辑和开发时。如果出现息屏时响应缓慢，则可以尝试开发选项中，连接电源保持屏幕常亮来克服。</p>
 <section id="max-phantom-processes">
-<h3>修订 <code class="docutils literal notranslate"><span class="pre">max_phantom_processes</span></code><a class="headerlink" href="#max-phantom-processes" title="Permalink to this heading">¶</a></h3>
+<h3>修订 <code class="docutils literal notranslate"><span class="pre">max_phantom_processes</span></code><a class="headerlink" href="#max-phantom-processes" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>使用以下adb命令可以修订:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adb</span> <span class="n">shell</span> <span class="n">device_config</span> <span class="n">put</span> <span class="n">activity_manager</span> <span class="n">max_phantom_processes</span> <span class="mi">1024</span>
@@ -238,7 +238,7 @@
 <p>其他详细情况可以参考 <a class="reference external" href="https://issuetracker.google.com/issues/205156966?pli=1">Phantom Process Killing In Android 12 Is Breaking Apps</a></p>
 </section>
 <section id="android">
-<h3>设置进程运行在Android手机大核<a class="headerlink" href="#android" title="Permalink to this heading">¶</a></h3>
+<h3>设置进程运行在Android手机大核<a class="headerlink" href="#android" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>执行以下命令找出 <code class="docutils literal notranslate"><span class="pre">termux</span></code> 进程号:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">termux</span>
@@ -320,7 +320,7 @@ taskset --pid --all-tasks <span class="m">4</span>,5,6,7 <span class="nv">$termu
 </section>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.xda-developers.com/android-12-background-app-limitations-major-headache/">Android 12’s new background app limitations could be a major headache for power users</a></p></li>
 <li><p><a class="reference external" href="https://issuetracker.google.com/issues/205156966?pli=1">Phantom Process Killing In Android 12 Is Breaking Apps</a></p></li>

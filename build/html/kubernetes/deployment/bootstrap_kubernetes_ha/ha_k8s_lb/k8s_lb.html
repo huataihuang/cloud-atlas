@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kubernetes的Master负载均衡 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
         <script src="../../../../_static/translations.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../../genindex.html" />
@@ -110,6 +110,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -190,7 +191,7 @@
            <div itemprop="articleBody">
              
   <section id="kubernetesmaster">
-<span id="k8s-lb"></span><h1>Kubernetes的Master负载均衡<a class="headerlink" href="#kubernetesmaster" title="Permalink to this heading">¶</a></h1>
+<span id="k8s-lb"></span><h1>Kubernetes的Master负载均衡<a class="headerlink" href="#kubernetesmaster" title="此标题的永久链接">¶</a></h1>
 <p>正如 <a class="reference internal" href="../ha_k8s.html#ha-k8s"><span class="std std-ref">高可用(HA)Kubernetes集群</span></a> 所述，构建Kubernetes高可用集群，以etcd是否独立部署来划分两种不同对HA部署架构：</p>
 <ul class="simple">
 <li><p>堆叠部署etcd</p></li>
@@ -198,7 +199,7 @@
 </ul>
 <p>在部署扩展多Master节点高可用集群之前，我们先要为apiserver准备好负载均衡。即完成本章节准备工作之后，我们才能继续 <a class="reference internal" href="../create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 。</p>
 <section id="id1">
-<h2>负载均衡<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>负载均衡<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>不管采用哪种HA部署方式，都需要使负载均衡来分发worker节点对请求和连接给后端的多个apiserver。在 <a class="reference internal" href="../create_ha_k8s.html#create-ha-k8s"><span class="std std-ref">使用kubeadm创建高可用集群</span></a> 中，我们扩展了Kubenetes Master服务器，使得对外同时具备了多个Kube-apiserver服务，现在我们需要在apiserver之前构建负载均衡，使得worker节点可以通过负载均衡的VIP来访问后端实际服务器。</p>
 <p>kube-apiserver负载均衡：</p>
 <ul class="simple">
@@ -229,9 +230,9 @@
 </div>
 </section>
 <section id="apihaproxykeeplived">
-<h2>API高可用HAProxy和Keeplived<a class="headerlink" href="#apihaproxykeeplived" title="Permalink to this heading">¶</a></h2>
+<h2>API高可用HAProxy和Keeplived<a class="headerlink" href="#apihaproxykeeplived" title="此标题的永久链接">¶</a></h2>
 <section id="id2">
-<h3>准备工作<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>准备工作<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">haproxy-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">haproxy-2</span></code> 需要关闭SELinux，否则启动haproxy服务无法绑定端口(详细见下文 <code class="docutils literal notranslate"><span class="pre">问题排查</span></code> ):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setenforce</span> <span class="mi">0</span>
@@ -242,7 +243,7 @@
 </ul>
 </section>
 <section id="keepalived">
-<h3>Keepalived<a class="headerlink" href="#keepalived" title="Permalink to this heading">¶</a></h3>
+<h3>Keepalived<a class="headerlink" href="#keepalived" title="此标题的永久链接">¶</a></h3>
 <p>Keepalived提供Kubernetes集群Master VIP 192.168.122.10 ( <a class="reference internal" href="../../../../studio/studio_ip.html#studio-ip"><span class="std std-ref">Studio测试环境IP分配</span></a> )，即浮动在HAProxy的健康节点之一，提供对外服务的访问IP，并在节点故障时自动切换到其他健康节点。Kubernetes API将始终通过HAProxy提供对外访问。</p>
 <ul>
 <li><p>安装 keepalived</p>
@@ -360,7 +361,7 @@
 </div>
 </section>
 <section id="haproxy">
-<h3>HAProxy<a class="headerlink" href="#haproxy" title="Permalink to this heading">¶</a></h3>
+<h3>HAProxy<a class="headerlink" href="#haproxy" title="此标题的永久链接">¶</a></h3>
 <p>HAProxy将检查后端 <code class="docutils literal notranslate"><span class="pre">kubemaster-X</span></code> 服务器上的 <code class="docutils literal notranslate"><span class="pre">kube-apiserver</span></code> 端口健康状态，并且负载均衡请求到集群的健康实例上，并且也将对局域网提供Kubernetes web UI(Dashboard)服务，对外提供服务的虚拟VIP即Keepalived的浮动IP地址 <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 。</p>
 <ul>
 <li><p>安装HAProxy:</p>
@@ -385,7 +386,7 @@
 </ul>
 <blockquote>
 <div><div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">haproxy.cfg</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">haproxy.cfg</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>global
 <span class="linenos"> 2</span>  log /dev/log  local0
 <span class="linenos"> 3</span>  log /dev/log  local1 notice
@@ -476,9 +477,9 @@
 </section>
 </section>
 <section id="keepalived-haproxy">
-<h2>keepalived+haproxy验证<a class="headerlink" href="#keepalived-haproxy" title="Permalink to this heading">¶</a></h2>
+<h2>keepalived+haproxy验证<a class="headerlink" href="#keepalived-haproxy" title="此标题的永久链接">¶</a></h2>
 <section id="apiserver-vip">
-<h3>测试apiserver VIP<a class="headerlink" href="#apiserver-vip" title="Permalink to this heading">¶</a></h3>
+<h3>测试apiserver VIP<a class="headerlink" href="#apiserver-vip" title="此标题的永久链接">¶</a></h3>
 <p>现在 VIP <code class="docutils literal notranslate"><span class="pre">192.168.122.10</span></code> 浮动在 <code class="docutils literal notranslate"><span class="pre">proxy-1</span></code> 虚拟机上，所以我们可以通过以下命令验证是否可以访问集群。</p>
 <ul>
 <li><p>首先验证端口:</p>
@@ -505,9 +506,9 @@
 </section>
 </section>
 <section id="id4">
-<h2>问题排查<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>问题排查<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <section id="haproxysocket">
-<h3>HAProxy无法绑定socket<a class="headerlink" href="#haproxysocket" title="Permalink to this heading">¶</a></h3>
+<h3>HAProxy无法绑定socket<a class="headerlink" href="#haproxysocket" title="此标题的永久链接">¶</a></h3>
 <p>启动遇到报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">haproxy</span><span class="o">-</span><span class="n">systemd</span><span class="o">-</span><span class="n">wrapper</span><span class="p">[</span><span class="mi">20624</span><span class="p">]:</span> <span class="p">[</span><span class="n">ALERT</span><span class="p">]</span> <span class="mi">229</span><span class="o">/</span><span class="mi">120654</span> <span class="p">(</span><span class="mi">20625</span><span class="p">)</span> <span class="p">:</span> <span class="n">Starting</span> <span class="n">frontend</span> <span class="n">GLOBAL</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">bind</span> <span class="n">UNIX</span> <span class="n">socket</span> <span class="p">[</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">haproxy</span><span class="o">/</span><span class="n">admin</span><span class="o">.</span><span class="n">sock</span><span class="p">]</span>
 </pre></div>
@@ -538,7 +539,7 @@
 </section>
 </section>
 <section id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://icicimov.github.io/blog/kubernetes/Kubernetes-cluster-step-by-step-Part5/">Kubernetes cluster step-by-step: Kube-apiserver with Keepalived and HAProxy for HA</a></p></li>
 <li><p><a class="reference external" href="https://www.unixmen.com/configure-high-available-load-balancer-haproxy-keepalived/">How To Configure A High Available Load-balancer With HAProxy And Keepalived</a></p></li>

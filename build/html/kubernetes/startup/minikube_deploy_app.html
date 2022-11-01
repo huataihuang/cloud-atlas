@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>使用Minikube集群部署应用 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -175,14 +176,14 @@
            <div itemprop="articleBody">
              
   <section id="minikube">
-<span id="minikube-deploy-app"></span><h1>使用Minikube集群部署应用<a class="headerlink" href="#minikube" title="Permalink to this heading">¶</a></h1>
+<span id="minikube-deploy-app"></span><h1>使用Minikube集群部署应用<a class="headerlink" href="#minikube" title="此标题的永久链接">¶</a></h1>
 <p>Kubernetes将计算机的高可用集群作为一个整体来运行，允许你部署容器化应用到集群中而不需要指定明确到主机。这种情况下，应用程序需要被打包成和与主机无关的容器化部署模式。Kubernetes会在集群内高效地自动化分发和调度应用程序容器。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>在 <a class="reference internal" href="../startup_prepare/install_run_minikube.html#install-run-minikube"><span class="std std-ref">安装和运行minikube</span></a> 中，我们构建的单节点minikube即是一个最小的集群，真实环境的Kubernetes集群部署要远复杂得多。这里我们开始使用这个集群来部署应用测试。</p>
 </div>
 <section id="id1">
-<h2>集群概念<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>集群概念<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <figure class="align-default">
 <img alt="../../_images/kubernetes_cluster.svg" src="../../_images/kubernetes_cluster.svg" /></figure>
 <ul class="simple">
@@ -206,7 +207,7 @@
 </div>
 </section>
 <section id="id2">
-<h2>创建集群<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>创建集群<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>检查集群版本:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">version</span>
@@ -243,11 +244,11 @@
 <p>可以看到只有一个节点，状态是 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 表示可以接受应用程序部署。</p>
 </section>
 <section id="id3">
-<h2>创建部署<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>创建部署<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <p>在Kubernetes部署应用，即创建一个Kubernetes <code class="docutils literal notranslate"><span class="pre">Deployment</span></code> 配置。Deployment将指令Kubernetes如何创建和更新应用的实例。一旦创建了一个部署，Kubernetes master将调度指定的应用实例到集群的独立节点。</p>
 <p>Kubernetes是采用最终一致性方式来维护系统的。一旦应用实例创建，Kubernetes Deployment Controller就持续监控这些实例。如果运行实例的主机宕机或者被删除，Deployment Controller就用集群中其他节点上的实例来替代故障的实例。这种机制提供了处理服务器故障或维护态情况下的自愈机制。</p>
 <section id="kubernetes">
-<h3>部署Kubernetes的应用<a class="headerlink" href="#kubernetes" title="Permalink to this heading">¶</a></h3>
+<h3>部署Kubernetes的应用<a class="headerlink" href="#kubernetes" title="此标题的永久链接">¶</a></h3>
 <figure class="align-default">
 <img alt="../../_images/deployment_application.svg" src="../../_images/deployment_application.svg" /></figure>
 <p>当创建一个Deployment时，需要指定应用程序使用的容器镜像，以及需要运行的副本数量。此外，可以在部署之后update你的deployment，随时可以修改配置信息。</p>
@@ -423,7 +424,7 @@ echo $POD_NAME
 </section>
 </section>
 <section id="id4">
-<h2>自定义镜像<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>自定义镜像<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>请注意，我的案例和 <a class="reference external" href="https://kubernetes.io/docs/tutorials/">Google提供的在线教程</a> 不同，我采用了从 <a class="reference external" href="https://hub.docker.com/_/ubuntu">Ubuntu Docker 官方镜像</a> 从头开始定制镜像内容，所以初始的 <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 容器已经做了一定的内容修改（ 相当于自己做了一个和Google案例相同的容器），这样就需要把容器转换（存储）成自定义镜像，然后通过自定义镜像来重新部署应用。</p>
@@ -431,7 +432,7 @@ echo $POD_NAME
 <p>上述自己定制的Pod <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 需要制作成镜像，以便能够继续下一步试验。比较简单的方式是把自定义镜像推送到Docker Hub公共镜像服务器上（需要Docker Hub账号），但是更好的方法是</p>
 </section>
 <section id="id6">
-<h2>参考<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/">Using kubectl to Create a Deployment</a></p></li>
 </ul>

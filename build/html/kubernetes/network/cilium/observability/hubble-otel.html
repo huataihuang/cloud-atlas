@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hubble集成OpenTelemetry &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
         <script src="../../../../_static/translations.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../../genindex.html" />
@@ -107,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -187,9 +188,9 @@
            <div itemprop="articleBody">
              
   <section id="hubbleopentelemetry">
-<span id="hubble-otel"></span><h1>Hubble集成OpenTelemetry<a class="headerlink" href="#hubbleopentelemetry" title="Permalink to this heading">¶</a></h1>
+<span id="hubble-otel"></span><h1>Hubble集成OpenTelemetry<a class="headerlink" href="#hubbleopentelemetry" title="此标题的永久链接">¶</a></h1>
 <section id="id1">
-<h2>前置条件<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>前置条件<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>部署 <a class="reference internal" href="../../../../real/priv_cloud/z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> (你也可以 <a class="reference internal" href="../../../startup_prepare/install_run_minikube.html#install-run-minikube"><span class="std std-ref">安装和运行minikube</span></a> )</p></li>
 <li><p><a class="reference internal" href="../installation/cilium_install_with_external_etcd.html#cilium-install-with-external-etcd"><span class="std std-ref">在扩展etcd环境安装cilium</span></a> (也可以简化为 <a class="reference internal" href="../cilium_startup.html#cilium-startup"><span class="std std-ref">cilium快速起步</span></a> )</p></li>
@@ -197,7 +198,7 @@
 </ul>
 </section>
 <section id="id2">
-<h2>部署说明<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>部署说明<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>本文实践在 Cilium 网络环境部署 <a class="reference internal" href="../../../monitor/opentelemetry/index.html#opentelemetry"><span class="std std-ref">OpenTelemetry</span></a> 以及采用 <a class="reference internal" href="../../../monitor/jaeger/index.html#jaeger"><span class="std std-ref">Jaeger分布式跟踪系统</span></a> 和 <a class="reference internal" href="../../../security/cert-manager/index.html#cert-manager"><span class="std std-ref">cert-manager: X.509证书管理</span></a> ，同时采用 <code class="docutils literal notranslate"><span class="pre">CiliumNetworkPolicy</span></code> 和 <code class="docutils literal notranslate"><span class="pre">CiliumClusterwideNetworkPolicy</span></code> 来激活DNS和HTTP可视化的部署简单demo:</p>
 <ul class="simple">
 <li><p>第一个 <code class="docutils literal notranslate"><span class="pre">OpenTelemetryCollector</span></code> 配置会部署Hubble adaptor和配置Hubble receiver来访问每个节点的L7流数据，然后将跟踪数据写入到 <a class="reference internal" href="../../../monitor/jaeger/index.html#jaeger"><span class="std std-ref">Jaeger分布式跟踪系统</span></a></p></li>
@@ -205,12 +206,12 @@
 </ul>
 </section>
 <section id="id3">
-<h2>基本设置<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>基本设置<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>安装 <a class="reference internal" href="../../../security/cert-manager/index.html#cert-manager"><span class="std std-ref">cert-manager: X.509证书管理</span></a> (OpenTelemetry operator依赖):</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装cert-manager</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装cert-manager</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl apply -k github.com/cilium/kustomize-bases/cert-manager
 </pre></div>
 </div>
@@ -219,7 +220,7 @@
 <li><p>执行以下命令确保 cert-manager 完全就绪:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">等待cert-manager就绪</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">等待cert-manager就绪</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>
   <span class="nb">set</span> -e
   kubectl <span class="nb">wait</span> deployment --namespace<span class="o">=</span><span class="s2">&quot;cert-manager&quot;</span> --for<span class="o">=</span><span class="s2">&quot;condition=Available&quot;</span> cert-manager-webhook cert-manager-cainjector cert-manager --timeout<span class="o">=</span>3m
@@ -232,7 +233,7 @@
 </div>
 <p>输出显示:</p>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">cert-manager就绪</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">cert-manager就绪</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deployment.apps/cert-manager-webhook condition met
 deployment.apps/cert-manager-cainjector condition met
 deployment.apps/cert-manager condition met
@@ -250,14 +251,14 @@ cert-manager-webhook-ca   Opaque   <span class="m">3</span>      115s
 <li><p>部署 <a class="reference internal" href="../../../monitor/jaeger/index.html#jaeger"><span class="std std-ref">Jaeger分布式跟踪系统</span></a> operator:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装Jaeger operator</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装Jaeger operator</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl apply -k github.com/cilium/kustomize-bases/jaeger
 </pre></div>
 </div>
 </div>
 <p>输出显示:</p>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装Jaeger operator输出信息</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装Jaeger operator输出信息</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>namespace/jaeger created
 customresourcedefinition.apiextensions.k8s.io/jaegers.jaegertracing.io created
 serviceaccount/jaeger-operator created
@@ -273,7 +274,7 @@ deployment.apps/jaeger-operator created
 <li><p>配置一个内存后端的 <a class="reference internal" href="../../../monitor/jaeger/index.html#jaeger"><span class="std std-ref">Jaeger分布式跟踪系统</span></a> 实例:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">配置一个内存后端的 jaeger 实例</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">配置一个内存后端的 jaeger 实例</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat &gt; jaeger.yaml <span class="s">&lt;&lt; EOF</span>
 <span class="s">apiVersion: jaegertracing.io/v1</span>
 <span class="s">kind: Jaeger</span>
@@ -300,7 +301,7 @@ kubectl apply -f jaeger.yaml
 <li><p>部署 <a class="reference internal" href="../../../monitor/opentelemetry/index.html#opentelemetry"><span class="std std-ref">OpenTelemetry</span></a> operator:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装OpenTelemetry operator</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中安装OpenTelemetry operator</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl apply -k github.com/cilium/kustomize-bases/opentelemetry
 </pre></div>
 </div>
@@ -309,7 +310,7 @@ kubectl apply -f jaeger.yaml
 <li><p>配置Hubble receiver 和 Jaeger exporter:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中配置Hubble receiver 和 Jaeger exporter</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中配置Hubble receiver 和 Jaeger exporter</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat &gt; otelcol.yaml <span class="s">&lt;&lt; EOF</span>
 <span class="s">apiVersion: opentelemetry.io/v1alpha1</span>
 <span class="s">kind: OpenTelemetryCollector</span>
@@ -405,14 +406,14 @@ kubectl apply -f otelcol.yaml
 </div>
 <p>然后检查collector作为 <a class="reference internal" href="../../../concepts/workloads/controllers/daemonset.html#daemonset"><span class="std std-ref">DaemonSet</span></a> 正确运行:</p>
 <div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中检查otelcol-hubble-collector是否正常运行</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中检查otelcol-hubble-collector是否正常运行</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl get pod -n kube-system -l app.kubernetes.io/name<span class="o">=</span>otelcol-hubble-collector
 </pre></div>
 </div>
 </div>
 <p>如果正常，会看到每个worker节点正常运行了如下:</p>
 <div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中检查otelcol-hubble-collector输出信息</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中检查otelcol-hubble-collector输出信息</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>NAME                             READY   STATUS    RESTARTS   AGE
 otelcol-hubble-collector-2g82m   <span class="m">1</span>/1     Running   <span class="m">0</span>          5m15s
 otelcol-hubble-collector-46gtj   <span class="m">1</span>/1     Running   <span class="m">0</span>          5m15s
@@ -426,7 +427,7 @@ otelcol-hubble-collector-xt7xl   <span class="m">1</span>/1     Running   <span 
 <li><p>现在可以检查日志:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中检查otelcol-hubble-collector日志</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在Cilium的K8s集群中检查otelcol-hubble-collector日志</span><a class="headerlink" href="#id15" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl logs -n kube-system -l app.kubernetes.io/name<span class="o">=</span>otelcol-hubble-collector
 </pre></div>
 </div>
@@ -435,14 +436,14 @@ otelcol-hubble-collector-xt7xl   <span class="m">1</span>/1     Running   <span 
 <li><p>现在就可以访问 <a class="reference internal" href="../../../monitor/jaeger/index.html#jaeger"><span class="std std-ref">Jaeger分布式跟踪系统</span></a> 管理界面:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id16">
-<div class="code-block-caption"><span class="caption-text">通过kubectl port-forward访问jaeger的管理界面</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">通过kubectl port-forward访问jaeger的管理界面</span><a class="headerlink" href="#id16" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl port-forward svc/jaeger-default-query -n jaeger <span class="m">16686</span>
 </pre></div>
 </div>
 </div>
 </section>
 <section id="podinfo-demon">
-<h2>部署podinfo demon应用<a class="headerlink" href="#podinfo-demon" title="Permalink to this heading">¶</a></h2>
+<h2>部署podinfo demon应用<a class="headerlink" href="#podinfo-demon" title="此标题的永久链接">¶</a></h2>
 <p>以下部署案例是为了验证前面部署的trace系统，提供一个DNS和HTTP跟踪演示</p>
 <ul>
 <li><p>创建一个 demo 应用的名字空间:</p>
@@ -453,7 +454,7 @@ otelcol-hubble-collector-xt7xl   <span class="m">1</span>/1     Running   <span 
 <li><p>激活 podinfo 应用的HTTP可视化以及所有DNS流量:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id17">
-<div class="code-block-caption"><span class="caption-text">配置cilium可视化策略</span><a class="headerlink" href="#id17" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">配置cilium可视化策略</span><a class="headerlink" href="#id17" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat &gt; visibility-policies.yaml <span class="s">&lt;&lt; EOF</span>
 <span class="s">---</span>
 <span class="s">apiVersion: cilium.io/v2</span>
@@ -524,7 +525,7 @@ kubectl apply -f visibility-policies.yaml
 <li><p>podinfo应用是OpenTelemetry SDK检测，导出跟踪的一种方法是使用collector sidecar: 添加sidecar配置</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id18">
-<div class="code-block-caption"><span class="caption-text">配置OpenTelemetry sidecar</span><a class="headerlink" href="#id18" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">配置OpenTelemetry sidecar</span><a class="headerlink" href="#id18" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat &gt; otelcol-podinfo.yaml <span class="s">&lt;&lt; EOF</span>
 <span class="s">apiVersion: opentelemetry.io/v1alpha1</span>
 <span class="s">kind: OpenTelemetryCollector</span>
@@ -564,7 +565,7 @@ kubectl apply -f otelcol-podinfo.yaml
 <li><p>现在部署podinfo应用:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id19">
-<div class="code-block-caption"><span class="caption-text">部署podinfo示例应用</span><a class="headerlink" href="#id19" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">部署podinfo示例应用</span><a class="headerlink" href="#id19" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl apply -k github.com/cilium/kustomize-bases/podinfo
 </pre></div>
 </div>
@@ -573,14 +574,14 @@ kubectl apply -f otelcol-podinfo.yaml
 <li><p>检查部署和服务:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id20">
-<div class="code-block-caption"><span class="caption-text">部署podinfo的部署和服务检查</span><a class="headerlink" href="#id20" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">部署podinfo的部署和服务检查</span><a class="headerlink" href="#id20" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl get -n podinfo deployments,services
 </pre></div>
 </div>
 </div>
 <p>输出显示:</p>
 <div class="literal-block-wrapper docutils container" id="id21">
-<div class="code-block-caption"><span class="caption-text">部署podinfo的部署和服务检查的信息</span><a class="headerlink" href="#id21" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">部署podinfo的部署和服务检查的信息</span><a class="headerlink" href="#id21" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/podinfo-backend    <span class="m">2</span>/2     <span class="m">2</span>            <span class="m">2</span>           81s
 deployment.apps/podinfo-client     <span class="m">1</span>/2     <span class="m">2</span>            <span class="m">1</span>           81s
@@ -610,7 +611,7 @@ service/podinfo-frontend   ClusterIP   <span class="m">10</span>.99.183.236   &l
 </figure>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/cilium/hubble-otel">Hubble adaptor for OpenTelemetry</a></p></li>
 </ul>

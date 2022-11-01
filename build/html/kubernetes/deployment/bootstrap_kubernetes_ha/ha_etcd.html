@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>高可用etcd集群部署 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -110,6 +110,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -189,10 +190,10 @@
            <div itemprop="articleBody">
              
   <section id="etcd">
-<span id="ha-etcd"></span><h1>高可用etcd集群部署<a class="headerlink" href="#etcd" title="Permalink to this heading">¶</a></h1>
+<span id="ha-etcd"></span><h1>高可用etcd集群部署<a class="headerlink" href="#etcd" title="此标题的永久链接">¶</a></h1>
 <p>在部署 <a class="reference internal" href="ha_k8s_external.html#ha-k8s-external"><span class="std std-ref">扩展etcd节点高可用集群</span></a> 之前，首先需要搭建一套具有高可用冗灾的 <a class="reference internal" href="../../administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> 集群。构建环境采用 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 中 <code class="docutils literal notranslate"><span class="pre">z-b-data-X</span></code> 3台通过 pass-through <a class="reference internal" href="../../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 技术将 <a class="reference internal" href="../../../linux/storage/nvme/nvme.html#nvme"><span class="std std-ref">NVMe存储</span></a> 存储作为磁盘，单独划分出 <a class="reference internal" href="../../../linux/storage/lvm/index.html#linux-lvm"><span class="std std-ref">Linux LVM逻辑卷管理</span></a> 卷给 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 存储数据。</p>
 <section id="id1">
-<h2>实践步骤<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>实践步骤<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>通过 <a class="reference internal" href="../../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机pass-through读写部署3台 <code class="docutils literal notranslate"><span class="pre">z-b-data-X</span></code> 虚拟机</p></li>
 <li><p>采用 <a class="reference internal" href="../../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 模式在上述3台 <code class="docutils literal notranslate"><span class="pre">z-b-data-X</span></code> 虚拟机中运行 <a class="reference internal" href="../../administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> ，详细步骤见 <a class="reference internal" href="../etcd/priv_etcd_tls.html#priv-etcd-tls"><span class="std std-ref">私有云etcd集群TLS设置</span></a> 和 <a class="reference internal" href="../etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a></p>
@@ -205,7 +206,7 @@
 <p>既然已经在 <a class="reference internal" href="../etcd/priv_deploy_etcd_cluster_with_tls_auth.html#priv-deploy-etcd-cluster-with-tls-auth"><span class="std std-ref">私有云部署TLS认证的etcd集群</span></a> 记录了部署过程，本文不再重复，进入下一节 <a class="reference internal" href="ha_k8s_dnsrr/index.html#ha-k8s-dnsrr"><span class="std std-ref">基于DNSRR的高可用Kubernetes集群</span></a></p>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://thenewstack.io/tutorial-set-up-a-secure-and-highly-available-etcd-cluster/">Tutorial: Set up a Secure and Highly Available etcd Cluster</a></p></li>
 <li><p><a class="reference external" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/">Set up a High Availability etcd cluster with kubeadm</a> Kubernetes官方文档，通过 <a class="reference internal" href="../bootstrap_kubernetes_single/kubeadm.html#kubeadm"><span class="std std-ref">kubeadm</span></a> 来部署安装，由于通过 <code class="docutils literal notranslate"><span class="pre">kubeadm</span></code> 包装，所以不如直接运行etcd指令简洁清晰，本文没有采用kubeadm，而采用直接运行</p></li>

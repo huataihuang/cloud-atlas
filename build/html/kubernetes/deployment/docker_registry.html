@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在Kubernetes中部署私有Docker镜像仓库 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -115,6 +115,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -193,7 +194,7 @@
            <div itemprop="articleBody">
              
   <section id="kubernetesdocker">
-<span id="docker-registry"></span><h1>在Kubernetes中部署私有Docker镜像仓库<a class="headerlink" href="#kubernetesdocker" title="Permalink to this heading">¶</a></h1>
+<span id="docker-registry"></span><h1>在Kubernetes中部署私有Docker镜像仓库<a class="headerlink" href="#kubernetesdocker" title="此标题的永久链接">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>本文是早期在minikube中的一个模拟部署，现在看来还是很多地方没有解析清楚。我在完成 <a class="reference internal" href="bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr.html#k8s-dnsrr"><span class="std std-ref">基于DNS轮询构建高可用Kubernetes</span></a> 之后再次 <a class="reference internal" href="../deploy_app/registry/index.html#k8s-deploy-registry"><span class="std std-ref">Kubernetes部署registry仓库</span></a> (以此为准)</p>
@@ -204,19 +205,19 @@
 <li><p>加速本地镜像的分发和容器部署</p></li>
 </ul>
 <section id="id1">
-<h2>私有镜像仓库架构<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>私有镜像仓库架构<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../_images/docker-registry-in-k8s.png"><img alt="../../_images/docker-registry-in-k8s.png" src="../../_images/docker-registry-in-k8s.png" style="width: 592.8000000000001px; height: 432.8px;" /></a>
 </figure>
 </section>
 <section id="id2">
-<h2>准备工作<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>准备工作<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>部署需要使用Helm包管理器，分为两部分: 本地客户端安装Helm，远程Kubernetes集群安装Tiller。详细请参考 <a class="reference internal" href="helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 。</p>
 </div>
 <section id="helmtiller">
-<h3>安装Helm和Tiller<a class="headerlink" href="#helmtiller" title="Permalink to this heading">¶</a></h3>
+<h3>安装Helm和Tiller<a class="headerlink" href="#helmtiller" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>本地安装helm工具（linux版本）</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">get</span><span class="o">.</span><span class="n">helm</span><span class="o">.</span><span class="n">sh</span><span class="o">/</span><span class="n">helm</span><span class="o">-</span><span class="n">v2</span><span class="mf">.14.1</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
@@ -236,7 +237,7 @@
 </ul>
 </section>
 <section id="nginx-ingress-controller">
-<h3>激活Nginx ingress controller<a class="headerlink" href="#nginx-ingress-controller" title="Permalink to this heading">¶</a></h3>
+<h3>激活Nginx ingress controller<a class="headerlink" href="#nginx-ingress-controller" title="此标题的永久链接">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>本次部署采用的是 <a class="reference internal" href="nginx_ingress.html#nginx-ingress"><span class="std std-ref">部署Nginx Ingress Controller</span></a> ，所以激活Nginx ingress controller非常简单。</p>
@@ -269,7 +270,7 @@
 </section>
 </section>
 <section id="dns-provider">
-<h2>在DNS provider中创建域名<a class="headerlink" href="#dns-provider" title="Permalink to this heading">¶</a></h2>
+<h2>在DNS provider中创建域名<a class="headerlink" href="#dns-provider" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>首先需要创建一个域名解析记录指向Kubernetes Cluste，这个IP地址是 <code class="docutils literal notranslate"><span class="pre">nginx-ingress-controller</span></code> 服务的 <code class="docutils literal notranslate"><span class="pre">EXTERNAL-IP</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">svc</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
@@ -284,7 +285,7 @@
 </div>
 </section>
 <section id="cert-manager-addon">
-<h2>安装 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> addon<a class="headerlink" href="#cert-manager-addon" title="Permalink to this heading">¶</a></h2>
+<h2>安装 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> addon<a class="headerlink" href="#cert-manager-addon" title="此标题的永久链接">¶</a></h2>
 <p>构建Docker Registry需要具备一个TLS证书。这个工作可以结合Let’s Encrypt和 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> Kubernetes addon来完成。这个addon自动管理和发布TLS证书，确保证书周期更新。并且会在证书过期之前尝试renew。</p>
 <ul>
 <li><p>安装 <code class="docutils literal notranslate"><span class="pre">cert-manager</span></code> CRDs，这个步骤必须在Helm chart安装cert-manager之前完成:</p>
@@ -323,7 +324,7 @@
 </div>
 </section>
 <section id="tls">
-<h2>获取TLS证书<a class="headerlink" href="#tls" title="Permalink to this heading">¶</a></h2>
+<h2>获取TLS证书<a class="headerlink" href="#tls" title="此标题的永久链接">¶</a></h2>
 <p>通过 cert-manager 我们可以创建证书，创建以下文件 <code class="docutils literal notranslate"><span class="pre">acme-issuer.yaml</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">certmanager</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="p">:</span> <span class="n">Issuer</span>
@@ -442,7 +443,7 @@
 </div>
 </section>
 <section id="htpasswd">
-<h2>设置htpasswd用于基本认证<a class="headerlink" href="#htpasswd" title="Permalink to this heading">¶</a></h2>
+<h2>设置htpasswd用于基本认证<a class="headerlink" href="#htpasswd" title="此标题的永久链接">¶</a></h2>
 <p>对于Docker Registry基本认证，可以创建一个 htpasswd ，可以使用 apache-tuils 提供的 htpasswd 或者 docker registry contrainer。这里假设使用 admin 密码 admin123</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">entrypoint</span> <span class="n">htpasswd</span> <span class="o">--</span><span class="n">rm</span> <span class="n">registry</span><span class="p">:</span><span class="mi">2</span> <span class="o">-</span><span class="n">Bbn</span> <span class="n">admin</span> <span class="n">admin123</span> <span class="o">|</span> <span class="n">base64</span>
 </pre></div>
@@ -485,7 +486,7 @@
 </ul>
 </section>
 <section id="id3">
-<h2>配置Docker Registry<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>配置Docker Registry<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <p>配置文件 <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> 定义如何挂载 安全文件到我们的Pod:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="p">:</span> <span class="n">ConfigMap</span>
@@ -538,7 +539,7 @@
 </div>
 </section>
 <section id="docker-registry-pod">
-<h2>Docker Registry Pod定义<a class="headerlink" href="#docker-registry-pod" title="Permalink to this heading">¶</a></h2>
+<h2>Docker Registry Pod定义<a class="headerlink" href="#docker-registry-pod" title="此标题的永久链接">¶</a></h2>
 <p>定义Docker Registry Pod如下 <code class="docutils literal notranslate"><span class="pre">docker-registry.yaml</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
 <span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
@@ -603,7 +604,7 @@
 <p>注意configMap类型卷中 <code class="docutils literal notranslate"><span class="pre">mountPath</span></code> 是从容器外映射到容器内的目录，而 <code class="docutils literal notranslate"><span class="pre">configMap</span></code> 则是该目录下的子目录映射。详细参考 <a class="reference internal" href="../concepts/storage/k8s_volumes.html#k8s-volumes"><span class="std std-ref">Kubernetes卷</span></a></p>
 </div>
 <section id="id4">
-<h3>异常排查<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3>异常排查<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">describe</span> <span class="pre">pod</span> <span class="pre">docker-registry</span></code> 显示Pod状态 <code class="docutils literal notranslate"><span class="pre">CrashLoopBackOff</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">registry</span>             <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="n">CrashLoopBackOff</span>   <span class="mi">6</span>          <span class="mi">6</span><span class="n">m19s</span>
@@ -645,7 +646,7 @@
 </section>
 </section>
 <section id="id5">
-<h2>输出Docker Registry<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<h2>输出Docker Registry<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>创建一个服务以及相应的端口绑定 <code class="docutils literal notranslate"><span class="pre">docker-registry-service.yaml</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
@@ -673,7 +674,7 @@
 </ul>
 </section>
 <section id="ingress">
-<h2>创建Ingress<a class="headerlink" href="#ingress" title="Permalink to this heading">¶</a></h2>
+<h2>创建Ingress<a class="headerlink" href="#ingress" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>最后（终于到了最后一步），创建 Ingress 配置 <code class="docutils literal notranslate"><span class="pre">docker-registry-ingress.yaml</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">extensions</span><span class="o">/</span><span class="n">v1beta1</span>
@@ -707,7 +708,7 @@
 </ul>
 </section>
 <section id="id6">
-<h2>验证<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<h2>验证<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>测试访问:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">u</span> <span class="n">admin</span><span class="p">:</span><span class="n">admin123</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">registry</span><span class="o">.</span><span class="n">xcloud</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="o">/</span><span class="n">v2</span><span class="o">/</span><span class="n">_catalog</span>
@@ -764,11 +765,11 @@ Error response from daemon: Get https://registry.xcloud.huatai.me/v2/: x509: cer
 </ul>
 </section>
 <section id="web-ui">
-<h2>WEB UI<a class="headerlink" href="#web-ui" title="Permalink to this heading">¶</a></h2>
+<h2>WEB UI<a class="headerlink" href="#web-ui" title="此标题的永久链接">¶</a></h2>
 <p><a class="reference external" href="https://www.slant.co/topics/2436/~best-docker-image-private-registries">What are the best docker image private registries?</a> 提供了多种docker镜像仓库管理平台的对比，可以选择进行部署。待实践…</p>
 </section>
 <section id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.nearform.com/blog/how-to-run-a-public-docker-registry-in-kubernetes/">How to run a Public Docker Registry in Kubernetes</a></p></li>
 <li><p><a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-top-of-digitalocean-spaces-and-use-it-with-digitalocean-kubernetes">How To Set Up a Private Docker Registry on Top of DigitalOcean Spaces and Use It with DigitalOcean Kubernetes</a></p></li>

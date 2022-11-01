@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jetson Nano无线AP &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../cuda/index.html">NVIDIA CUDA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../pytorch/index.html">Pytorch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../tensorflow/index.html">Tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../stable_diffusion/index.html">Stable Diffusion模型方法</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../linux/index.html">Linux Atlas</a></li>
@@ -156,11 +157,11 @@
            <div itemprop="articleBody">
              
   <section id="jetson-nanoap">
-<span id="jetson-soft-ap"></span><h1>Jetson Nano无线AP<a class="headerlink" href="#jetson-nanoap" title="Permalink to this heading">¶</a></h1>
+<span id="jetson-soft-ap"></span><h1>Jetson Nano无线AP<a class="headerlink" href="#jetson-nanoap" title="此标题的永久链接">¶</a></h1>
 <p>Jetson Nano安装了外接的Intel无线模块以后，非常类似一个无线路由器，所以我考虑利用这个现有硬件结合 <a class="reference internal" href="../../../linux/network/hostapd/create_ap.html#create-ap"><span class="std std-ref">使用create_ap工具创建软AP</span></a> 实现一个个人使用的无线路由器，方便我测试基于 <a class="reference internal" href="../../../arm/raspberry_pi/index.html#raspberry-pi"><span class="std std-ref">Raspberry Pi</span></a> 的 <a class="reference internal" href="../../../kubernetes/arm/index.html#kubernetes-arm"><span class="std std-ref">ARM架构Kubernetes</span></a> 。</p>
 <p>由于这是在ARM架构上实现无线AP，所以可以作为通用的低功耗路由器的实践基础，为后续实现无线路由交换设备做一个参考。</p>
 <section id="id1">
-<h2>硬件准备<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>硬件准备<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>无线网卡必须是 <code class="docutils literal notranslate"><span class="pre">nl80211</span></code> 兼容无线设备，以便支持 AP operating mode。执行 <code class="docutils literal notranslate"><span class="pre">iw</span> <span class="pre">list</span></code> 命令 <code class="docutils literal notranslate"><span class="pre">interface</span> <span class="pre">modes</span></code> 列表中包含 <code class="docutils literal notranslate"><span class="pre">AP</span></code> 支持:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Supported</span> <span class="n">interface</span> <span class="n">modes</span><span class="p">:</span>
@@ -185,7 +186,7 @@
 </ul>
 </section>
 <section id="id2">
-<h2>软件准备<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>软件准备<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>Oblique开发了 <a class="reference external" href="https://github.com/oblique/create_ap">Oblique – GitHub</a> ，是一个配置WiFi AP的脚本，不过现在已经不再维护。这个create_ap的优点是简洁，仅需要bash和相关基础工具支持。</p>
@@ -210,7 +211,7 @@
 </ul>
 </section>
 <section id="ap">
-<h2>配置AP<a class="headerlink" href="#ap" title="Permalink to this heading">¶</a></h2>
+<h2>配置AP<a class="headerlink" href="#ap" title="此标题的永久链接">¶</a></h2>
 <p>依然可以使用 <code class="docutils literal notranslate"><span class="pre">create_ap</span></code> 工具快速完成快速完成无线AP配置，并且支持bridge和NAT模式，能够自动结合 hostapd, dnsmasq 和 iptables 完成AP设置。最简单的命令如下:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">create_ap</span> <span class="n">wlp3s0</span> <span class="n">enp0s25</span> <span class="n">MyAccessPoint</span> <span class="n">MyPassPhrase</span>
 </pre></div>
@@ -265,7 +266,7 @@
 </pre></div>
 </div>
 <section id="wlan0">
-<h3>尝试使用wlan0接口<a class="headerlink" href="#wlan0" title="Permalink to this heading">¶</a></h3>
+<h3>尝试使用wlan0接口<a class="headerlink" href="#wlan0" title="此标题的永久链接">¶</a></h3>
 <p>不过，我发现，实际上 <code class="docutils literal notranslate"><span class="pre">create_ap</span></code> 会自动创建虚拟接口 <code class="docutils literal notranslate"><span class="pre">ap0</span></code> ，看上去实际上没有使用 <code class="docutils literal notranslate"><span class="pre">wlan0_ap</span></code> 和 <code class="docutils literal notranslate"><span class="pre">wlan_sta</span></code> 接口(这两个接口还是DOWN状态)，但是如果删除了这2个虚拟接口( <code class="docutils literal notranslate"><span class="pre">iw</span> <span class="pre">dev</span> <span class="pre">wlan0_sta</span> <span class="pre">del;</span> <span class="pre">iw</span> <span class="pre">dev</span> <span class="pre">wlan0_ap</span> <span class="pre">del</span></code> ) 再使用类似命令 <code class="docutils literal notranslate"><span class="pre">create_ap</span> <span class="pre">--hidden</span> <span class="pre">wlan0</span> <span class="pre">wlan0</span> <span class="pre">MyAccessPoint</span> <span class="pre">MyPassPhrase</span></code> 会出现报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Config</span> <span class="nb">dir</span><span class="p">:</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">create_ap</span><span class="o">.</span><span class="n">wlan0</span><span class="o">.</span><span class="n">conf</span><span class="mf">.9</span><span class="n">DjnL09H</span>
 <span class="n">PID</span><span class="p">:</span> <span class="mi">22113</span>
@@ -296,7 +297,7 @@
 </section>
 </section>
 <section id="id3">
-<h2>脚本<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>脚本<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <p>为了简化方法，我目前还是没有使用daemon方式，并不是十分优雅。采用了一个手工启动脚本 <code class="docutils literal notranslate"><span class="pre">hotspot</span></code></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>sudo iw dev wlan0 interface add wlan0_sta  <span class="nb">type</span> managed addr <span class="m">02</span>:68:b3:29:da:99
 <span class="linenos">2</span>sudo iw dev wlan0 interface add wlan0_ap  <span class="nb">type</span> managed addr <span class="m">02</span>:68:b3:29:da:98
@@ -305,7 +306,7 @@
 </div>
 </section>
 <section id="thinkpad-x86create-ap">
-<h2>Thinkpad x86环境create_ap<a class="headerlink" href="#thinkpad-x86create-ap" title="Permalink to this heading">¶</a></h2>
+<h2>Thinkpad x86环境create_ap<a class="headerlink" href="#thinkpad-x86create-ap" title="此标题的永久链接">¶</a></h2>
 <p>在zcloud主机(Thinkpad X220笔记本运行Arch Linux)上执行遇到问题:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">iw</span> <span class="n">dev</span> <span class="n">wlp3s0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlp3s0_sta</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">99</span>
 <span class="n">sudo</span> <span class="n">iw</span> <span class="n">dev</span> <span class="n">wlp3s0</span> <span class="n">interface</span> <span class="n">add</span> <span class="n">wlp3s0_ap</span>  <span class="nb">type</span> <span class="n">managed</span> <span class="n">addr</span> <span class="mi">02</span><span class="p">:</span><span class="mi">68</span><span class="p">:</span><span class="n">b3</span><span class="p">:</span><span class="mi">29</span><span class="p">:</span><span class="n">da</span><span class="p">:</span><span class="mi">98</span>
@@ -359,7 +360,7 @@ Interface initialization failed
 </div>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://theubuntuguide.wordpress.com/2016/08/03/creating-wifi-on-ubuntu/">Creating Wifi On Ubuntu</a></p></li>
 <li><p><a class="reference external" href="https://github.com/lakinduakash/linux-wifi-hotspot">linux-wifi-hotspot</a></p></li>

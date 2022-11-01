@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kubernetes节点CPU管理策略 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -102,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -180,10 +181,10 @@
            <div itemprop="articleBody">
              
   <section id="kubernetescpu">
-<span id="k8s-cpu-management-policies"></span><h1>Kubernetes节点CPU管理策略<a class="headerlink" href="#kubernetescpu" title="Permalink to this heading">¶</a></h1>
+<span id="k8s-cpu-management-policies"></span><h1>Kubernetes节点CPU管理策略<a class="headerlink" href="#kubernetescpu" title="此标题的永久链接">¶</a></h1>
 <p>Kubernetes的设计思路是对用户屏蔽pod的底层细节。但是，为了能够调优性能(例如用户对延迟或性能有强要求)，则Kubernetes也提供了方法来实现复杂的节点CPU管理策略(但同时保持抽象简化)。</p>
 <section id="cpu">
-<h2>CPU管理策略<a class="headerlink" href="#cpu" title="Permalink to this heading">¶</a></h2>
+<h2>CPU管理策略<a class="headerlink" href="#cpu" title="此标题的永久链接">¶</a></h2>
 <p>默认情况下， Kubelet 采用 <a class="reference internal" href="../../kernel/scheduler/linux_cfs_bandwidth_control.html#linux-cfs-bandwidth-control"><span class="std std-ref">Linux CFS带宽控制(CFS Bandwidth Control)</span></a> 来执行Pod的CPU约束。当节点运行了很多CPU密集型Pod时，工作负载可能会迁移到不同的CPU核心。这取决于调度时Pod是否被限制 ( <code class="docutils literal notranslate"><span class="pre">throttled</span></code> )以及在调度时是否有可用的CPU核心。很多工作负载对于这种CPU迁移并不敏感，因此可以无需干预就可正常工作。但是，也有一些工作负载对于CPU缓存亲和性(CPU cache affinity)和调度延迟敏感。这种情况下Kubelet允许替换CPU管理策略来获得更好的业务特性。</p>
 <p>更改Kubelet策略不会对现有Pod起作用，所以正确的修改节点CPU管理策略需要:</p>
 <ul class="simple">
@@ -194,11 +195,11 @@
 <li><p>启动Kubelet</p></li>
 </ul>
 <section id="none">
-<h3>none策略<a class="headerlink" href="#none" title="Permalink to this heading">¶</a></h3>
+<h3>none策略<a class="headerlink" href="#none" title="此标题的永久链接">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">none</span></code> 策略就是显式地启用现有的默认CPU亲和方案，不提供操作系统调度器默认行为之外的亲和性策略，也就是使用CFS配额</p>
 </section>
 <section id="static">
-<h3>static策略<a class="headerlink" href="#static" title="Permalink to this heading">¶</a></h3>
+<h3>static策略<a class="headerlink" href="#static" title="此标题的永久链接">¶</a></h3>
 <p>static 策略针对具有整数型 CPU requests 的 Guaranteed Pod， 它允许该类 Pod 中的容器访问节点上的独占 CPU 资源。这种独占性是使用 cpuset cgroup 控制器来实现的。</p>
 <ul class="simple">
 <li><p>当 Guaranteed Pod 调度到节点上时，如果其容器符合静态分配要求， 相应的 CPU 会被从共享池中移除，并放置到容器的 cpuset 中。</p></li>
@@ -211,7 +212,7 @@
 </section>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/cpu-management-policies/">控制节点上的 CPU 管理策略</a></p></li>
 </ul>

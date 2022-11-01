@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在Cilium网络部署MetalLB &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -96,6 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -175,23 +176,23 @@
            <div itemprop="articleBody">
              
   <section id="ciliummetallb">
-<span id="metallb-with-cilium"></span><h1>在Cilium网络部署MetalLB<a class="headerlink" href="#ciliummetallb" title="Permalink to this heading">¶</a></h1>
+<span id="metallb-with-cilium"></span><h1>在Cilium网络部署MetalLB<a class="headerlink" href="#ciliummetallb" title="此标题的永久链接">¶</a></h1>
 <p>我在 <a class="reference internal" href="../cilium/service_mesh/cilium_k8s_ingress_http.html#cilium-k8s-ingress-http"><span class="std std-ref">Cilium Kubernetes Ingress HTTP配置案例</span></a> 配置 ingress 输出 http服务时，遇到一个问题: 默认配置 LoadBalancer 类型服务，但是由于是裸机部署，并没有云厂商提供的负载均衡。所以Ingress一直没有分配到IP地址，也没有对应的 External-IP。</p>
 <p>解决方法是部署 metallb 来提供对外服务IP地址</p>
 <section id="id1">
-<h2>安装<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>安装<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>在集群安装MetalLB:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">kubectl apply 安装 MantalLB</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">kubectl apply 安装 MantalLB</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.4/config/manifests/metallb-native.yaml
 </pre></div>
 </div>
 </div>
 <p>输出显示:</p>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">kubectl apply 安装 MantalLB 输出显示</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">kubectl apply 安装 MantalLB 输出显示</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>namespace/metallb-system created
 customresourcedefinition.apiextensions.k8s.io/addresspools.metallb.io created
 customresourcedefinition.apiextensions.k8s.io/bfdprofiles.metallb.io created
@@ -227,12 +228,12 @@ validatingwebhookconfiguration.admissionregistration.k8s.io/metallb-webhook-conf
 </div>
 </section>
 <section id="id2">
-<h2>配置<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>配置<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>创建 <code class="docutils literal notranslate"><span class="pre">z-k8s-ip-pool.yaml</span></code></p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">为负载均衡定义IPAddressPool CR</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">为负载均衡定义IPAddressPool CR</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metallb.io/v1beta1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IPAddressPool</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -248,21 +249,21 @@ validatingwebhookconfiguration.admissionregistration.k8s.io/metallb-webhook-conf
 <li><p>创建IP池:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">负载均衡创建IPAddressPool</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">负载均衡创建IPAddressPool</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl create -f z-k8s-ip-pool.yaml
 </pre></div>
 </div>
 </div>
 <p>完成后检查 <code class="docutils literal notranslate"><span class="pre">svc</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ingress</span></code> 会立即看到IP池中的IP被分配给了LoadBalancer EXTERNAL-IP:</p>
 <div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">检查SVC cilium-ingress-basic-ingress</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">检查SVC cilium-ingress-basic-ingress</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl get svc cilium-ingress-basic-ingress
 </pre></div>
 </div>
 </div>
 <p>输出显示IP池的第一个IP地址被分配给LoadBalancer的EXTERNAL-IP:</p>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">检查SVC cilium-ingress-basic-ingress 输出显示EXTERNAL-IP分配成功</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">检查SVC cilium-ingress-basic-ingress 输出显示EXTERNAL-IP分配成功</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>NAME                           TYPE           CLUSTER-IP      EXTERNAL-IP     PORT<span class="o">(</span>S<span class="o">)</span>        AGE
 cilium-ingress-basic-ingress   LoadBalancer   <span class="m">10</span>.100.187.26   <span class="m">192</span>.168.6.151   <span class="m">80</span>:32598/TCP   25h
 </pre></div>
@@ -270,14 +271,14 @@ cilium-ingress-basic-ingress   LoadBalancer   <span class="m">10</span>.100.187.
 </div>
 <p>再检查 ingress 也看到ADDRESS分配了同样的IP地址:</p>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">检查ingress</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">检查ingress</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl get ingress basic-ingress
 </pre></div>
 </div>
 </div>
 <p>输出信息:</p>
 <div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">检查ingress可以看到分配了相同的IP</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">检查ingress可以看到分配了相同的IP</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>NAME            CLASS    HOSTS   ADDRESS         PORTS   AGE
 basic-ingress   cilium   *       <span class="m">192</span>.168.6.151   <span class="m">80</span>      25h
 </pre></div>
@@ -288,7 +289,7 @@ basic-ingress   cilium   *       <span class="m">192</span>.168.6.151   <span cl
 <li><p>配置 <code class="docutils literal notranslate"><span class="pre">z-k8s-ip-pool_announce.yaml</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">申明IP地址池的ARP公告</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">申明IP地址池的ARP公告</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metallb.io/v1beta1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L2Advertisement</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -304,7 +305,7 @@ basic-ingress   cilium   *       <span class="m">192</span>.168.6.151   <span cl
 <li><p>执行IP地址池ARP声明:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">申明IP地址池的ARP公告</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">申明IP地址池的ARP公告</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">kubectl create -f z-k8s-ip-pool_announce.yaml</span><span class="w"></span>
 </pre></div>
 </div>
@@ -313,7 +314,7 @@ basic-ingress   cilium   *       <span class="m">192</span>.168.6.151   <span cl
 <p>现在使用浏览器访问 <a class="reference external" href="http://192.168.6.151">http://192.168.6.151</a> 就可以看到在 <a class="reference internal" href="../cilium/service_mesh/cilium_k8s_ingress_http.html#cilium-k8s-ingress-http"><span class="std std-ref">Cilium Kubernetes Ingress HTTP配置案例</span></a> 搭建的案例WEB网站了，说明服务输出正确了</p>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://stackoverflow.com/questions/44110876/kubernetes-service-external-ip-pending">Kubernetes service external ip pending</a></p></li>
 <li><p><a class="reference external" href="https://metallb.universe.tf/configuration/">metallb Configuration</a></p></li>

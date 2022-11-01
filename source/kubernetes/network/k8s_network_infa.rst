@@ -26,4 +26,4 @@ Kubernetes网络架构
 参考
 =======
 
-- `The Ultimate Guide To Using Calico, Flannel, Weave and Cilium <https://platform9.com/blog/the-ultimate-guide-to-using-calico-flannel-weave-and-cilium/>`_
+- `The Ultimate Guide To Using Calico, Flannel, Weave and Cilium <https://platform9.com/blog/the-ultimate-guide-to-using-calico-flannel-weave-and-cilium/>`_ 这篇文档简述了Kubernetes的CNI以及不同网络的差异

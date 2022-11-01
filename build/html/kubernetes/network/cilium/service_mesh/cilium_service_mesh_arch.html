@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cilium Service Mesh架构 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
         <script src="../../../../_static/translations.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../../genindex.html" />
@@ -107,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -187,14 +188,14 @@
            <div itemprop="articleBody">
              
   <section id="cilium-service-mesh">
-<span id="cilium-service-mesh-arch"></span><h1>Cilium Service Mesh架构<a class="headerlink" href="#cilium-service-mesh" title="Permalink to this heading">¶</a></h1>
+<span id="cilium-service-mesh-arch"></span><h1>Cilium Service Mesh架构<a class="headerlink" href="#cilium-service-mesh" title="此标题的永久链接">¶</a></h1>
 <p>Cilium 1.12 于2022年7月20日发布，在 Service Mesh 上有很多增强，特别是提供了全新的 <code class="docutils literal notranslate"><span class="pre">eBPF</span> <span class="pre">native</span> <span class="pre">+</span> <span class="pre">envoy</span> <span class="pre">sidecar-free</span></code> 架构支持多种控制平面选项。Cilium 1.12对现有基于sidecar模式 <a class="reference internal" href="../../../istio/index.html#istio"><span class="std std-ref">Istio服务网格</span></a> 做出了补充，也深度集成到Cilium架构。</p>
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../../_images/cilium_new_service_mesh.png"><img alt="../../../../_images/cilium_new_service_mesh.png" src="../../../../_images/cilium_new_service_mesh.png" style="width: 511.0px; height: 378.0px;" /></a>
 </figure>
 <p>Cilium现在能够降低复杂性，并且在service mesh层允许用户基于需求来选择使用sidecar或者deamonset(sidecar-free)方式运行一个service mesh。</p>
 <section id="service-mesh">
-<h2>企业级Service Mesh<a class="headerlink" href="#service-mesh" title="Permalink to this heading">¶</a></h2>
+<h2>企业级Service Mesh<a class="headerlink" href="#service-mesh" title="此标题的永久链接">¶</a></h2>
 <p>随着企业级Service Mesh兴起，企业级网络需要服务网格(service mesh)不仅是WEB扩展应用，而是要求将Kubernetes网络/CNI层和Service Mesh层紧密结合，并且创造出新的结合两者的层次:</p>
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../../_images/enterprise_grade_service_mesh.png"><img alt="../../../../_images/enterprise_grade_service_mesh.png" src="../../../../_images/enterprise_grade_service_mesh.png" style="width: 684.0px; height: 482.0px;" /></a>
@@ -206,7 +207,7 @@
 </ul>
 </section>
 <section id="id1">
-<h2>Service Mesh定义<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>Service Mesh定义<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>随着分布式应用程序的引入，额外的可见性，连接性和安全性要求已经浮出水面:</p>
 <ul class="simple">
 <li><p>应用程序组件通过不受信任的网络跨云和场所边界(premises boundaries)，负载均衡需要理解应用程序协议，弹性(resiliency)变得至关重要(crucial)</p></li>
@@ -231,7 +232,7 @@
 </ul>
 </section>
 <section id="id2">
-<h2>Cilium Service Mesh<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>Cilium Service Mesh<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>Cilium Service Mesh的特点就是: 高效性和功能性的平衡。</p>
 <p>简单来说就是:</p>
 <ul class="simple">
@@ -242,16 +243,16 @@
 </ul>
 </section>
 <section id="sidecar-sidecar-free">
-<h2>Sidecar 和 Sidecar-free 的选择<a class="headerlink" href="#sidecar-sidecar-free" title="Permalink to this heading">¶</a></h2>
+<h2>Sidecar 和 Sidecar-free 的选择<a class="headerlink" href="#sidecar-sidecar-free" title="此标题的永久链接">¶</a></h2>
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../../_images/cilium_service_mesh.png"><img alt="../../../../_images/cilium_service_mesh.png" src="../../../../_images/cilium_service_mesh.png" style="width: 705.6px; height: 369.59999999999997px;" /></a>
 </figure>
 <section id="sidecar">
-<h3>Sidecar的性能影响<a class="headerlink" href="#sidecar" title="Permalink to this heading">¶</a></h3>
+<h3>Sidecar的性能影响<a class="headerlink" href="#sidecar" title="此标题的永久链接">¶</a></h3>
 </section>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://isovalent.com/blog/post/cilium-service-mesh/">Cilium Service Mesh – Everything You Need to Know</a></p></li>
 <li><p><a class="reference external" href="https://isovalent.com/blog/post/cilium-release-112/">Cilium 1.12 – Ingress, Multi-Cluster, Service Mesh, External Workloads, and much more</a></p></li>

@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Linux固态驱动器(SSD) &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -180,14 +180,14 @@
            <div itemprop="articleBody">
              
   <section id="linux-ssd">
-<span id="id1"></span><h1>Linux固态驱动器(SSD)<a class="headerlink" href="#linux-ssd" title="Permalink to this heading">¶</a></h1>
+<span id="id1"></span><h1>Linux固态驱动器(SSD)<a class="headerlink" href="#linux-ssd" title="此标题的永久链接">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>固态硬盘带来了系统磁盘性能的极大提升，但是SSD的特性也带来了很多使用性能、寿命的挑战，需要仔细学习和实践。我将在 <a class="reference internal" href="../../server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 的NVMe设备中详细实践相关技术</p>
 <p>在 <a class="reference internal" href="../../../ceph/arm/optimize_ceph_arm.html#optimize-ceph-arm"><span class="std std-ref">ARM架构Ceph优化</span></a> 结合SSD优化 <a class="reference internal" href="../../../ceph/index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 性能，涉及到SSD的写入放大问题，将在本文实践中解析</p>
 </div>
 <section id="trim">
-<h2>TRIM<a class="headerlink" href="#trim" title="Permalink to this heading">¶</a></h2>
+<h2>TRIM<a class="headerlink" href="#trim" title="此标题的永久链接">¶</a></h2>
 <p>大多数SSD都支持 <code class="docutils literal notranslate"><span class="pre">ATA_TRIM</span></code> 指令来长时间性能和可用水平。 <a class="reference external" href="https://www.techspot.com/review/737-ocz-vector-150-ssd/page9.html">TechSport - Benchmarks: TRIM &amp; Full Drive Performance</a> 提供了SSD磁盘在空白和填满数据时候的benchmark性能差异(性能相差10%~22%，通过TRIM可以几乎保持原有性能)。</p>
 <p>从Linux内核 3.8开始，在不同的文件系统中不断加入支持TRIM，现在大多数文件系统都支持周期性TRIM和持续TRIM。</p>
 <ul>
@@ -236,12 +236,12 @@ sdd           0        0B       0B         0
 </div>
 </section>
 <section id="trim-periodic-trim">
-<h2>周期性TRIM(Periodic TRIM)<a class="headerlink" href="#trim-periodic-trim" title="Permalink to this heading">¶</a></h2>
+<h2>周期性TRIM(Periodic TRIM)<a class="headerlink" href="#trim-periodic-trim" title="此标题的永久链接">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">util-linux</span></code> 软件包提供了 <code class="docutils literal notranslate"><span class="pre">fstrim.service</span></code> 和 <code class="docutils literal notranslate"><span class="pre">fstrim.timer</span></code> 的 <a class="reference internal" href="../../redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 单元文件。激活这个 timer 将每周运行服务，这个服务会在所有激活 <code class="docutils literal notranslate"><span class="pre">discard</span></code> 选项的挂载文件系统上执行 <code class="docutils literal notranslate"><span class="pre">fstrim</span></code> 。这个timer依赖 <code class="docutils literal notranslate"><span class="pre">/var/lib/systemd/timers/stamp-fstrim.timer</span></code> 中的时间戳，以确定自从它最后一次运行时间是否已经一周，这样就不需要担心过滤频繁调用。</p>
 <p>详细实践请参考 <a class="reference internal" href="../filesystem/fstrim.html#fstrim"><span class="std std-ref">fstrim服务及周期TRIM</span></a></p>
 </section>
 <section id="id2">
-<h2>持续TRIM<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>持续TRIM<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>如果已经周期性运行 <code class="docutils literal notranslate"><span class="pre">fstrim</span></code> 就不需要激活持续TRIM。也就是如果需要TRIM，请选择周期性TRIM或持续性TRIM。</p>
@@ -271,7 +271,7 @@ sdd           0        0B       0B         0
 <p>上述方法特被适合那种移动外接设备，就不需要在 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 中配置参数。</p>
 </section>
 <section id="id3">
-<h2>TRIM整个设备(警告:数据丢失)<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>TRIM整个设备(警告:数据丢失)<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <p>如果你要出售你的SSD磁盘，或者初次安装，想要一次性TRIM真个SSD设备，可以使用 <code class="docutils literal notranslate"><span class="pre">blkdiscard</span></code> 命令，这个命令会 <code class="docutils literal notranslate"><span class="pre">完全抹去设备的所有块数据</span></code></p>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
@@ -282,7 +282,7 @@ sdd           0        0B       0B         0
 </div>
 </section>
 <section id="lvm">
-<h2>LVM<a class="headerlink" href="#lvm" title="Permalink to this heading">¶</a></h2>
+<h2>LVM<a class="headerlink" href="#lvm" title="此标题的永久链接">¶</a></h2>
 <p>TRIM请求是从文件系统直接穿透逻辑卷自动传递给物理卷的，所以不需要任何附加配置。</p>
 <p>默认没有 LVM 操作 (lvremove,lvreduce以及所有其他)会影响TRIM请求发送给物理卷。使用 <code class="docutils literal notranslate"><span class="pre">vgcfgrestore</span></code> 可以恢复之前的卷组配置，在 <code class="docutils literal notranslate"><span class="pre">/etc/lvm/lvm.conf</span></code> 配置中的 <code class="docutils literal notranslate"><span class="pre">issue_discards</span></code> 会控制当逻辑卷不在使用物理卷的空间时，是否发送 discards 给一个逻辑卷底层的物理卷。</p>
 <div class="admonition note">
@@ -295,11 +295,11 @@ sdd           0        0B       0B         0
 </div>
 </section>
 <section id="maximizing-performance">
-<h2>Maximizing performance<a class="headerlink" href="#maximizing-performance" title="Permalink to this heading">¶</a></h2>
+<h2>Maximizing performance<a class="headerlink" href="#maximizing-performance" title="此标题的永久链接">¶</a></h2>
 <p>待续…</p>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/Solid_state_drive">arch linux wiki: Solid state drive</a></p></li>
 <li><p><a class="reference external" href="https://opensource.com/article/20/2/trim-solid-state-storage-linux">Extend the life of your SSD drive with fstrim</a></p></li>

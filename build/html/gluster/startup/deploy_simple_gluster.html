@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>部署简单GlusterFS集群 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -149,23 +149,23 @@
            <div itemprop="articleBody">
              
   <section id="glusterfs">
-<span id="deploy-simple-gluster"></span><h1>部署简单GlusterFS集群<a class="headerlink" href="#glusterfs" title="Permalink to this heading">¶</a></h1>
+<span id="deploy-simple-gluster"></span><h1>部署简单GlusterFS集群<a class="headerlink" href="#glusterfs" title="此标题的永久链接">¶</a></h1>
 <p>正如 <a class="reference internal" href="../gluster_vs_ceph.html#gluster-vs-ceph"><span class="std std-ref">Gluster和Ceph对比</span></a> 辨析，GlusterFS是在文件系统之上构建的分布式文件系统，所以 <a class="reference internal" href="../../linux/storage/filesystem/index.html#linux-filesystem"><span class="std std-ref">Linux文件系统</span></a> 的构建会给GlusterFS带来更多的特性和功能。例如，结合卷管理可以实现快照。本文实践是快速部署一个简化版本的GlusterFS集群，在文件系统存储层采用直接基于磁盘设备创建XFS文件系统。这种简洁的文件系统虽然灵活性受到限制，但是架构简洁也使得出现错误的可能性降低。</p>
 <section id="id1">
-<h2>服务器准备<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>服务器准备<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>至少需要3台服务器组建稳定的GlusterFS集群(2台虽然也能构建，但是缺乏quotum容易导致脑裂)，在我的这个演示案例中，我采用6个KVM虚拟机(最初我以为奇数服务器可以构建更为稳定，但是参考 <a class="reference internal" href="../admin/gluster_split_brain_deal.html#gluster-split-brain-deal"><span class="std std-ref">GlusterFS脑裂和解决方案</span></a> 修正了方案)，目的是构建分布式多副本集群</p></li>
 <li><p>每个虚拟机使用一个附加的 <cite>/dev/vdb</cite> 设备(见下文磁盘分区和文件系统构建)</p></li>
 </ul>
 <section id="id2">
-<h3>环境准备<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>环境准备<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>所有服务器节点的时间必须同步，所以，请安装并运行ntp客户端，当前主流推荐采用 chrony - <a class="reference external" href="https://www.thegeekdiary.com/centos-rhel-7-chrony-vs-ntp-differences-between-ntpd-and-chronyd/">CentOS / RHEL 7 : Chrony V/s NTP (Differences Between ntpd and chronyd)</a></p></li>
 <li><p>所有服务器需要彼此能够DNS解析，所以建议采用统一的DNS服务器进行维护主机名解析，比较简化的方法是所有服务器采用一致的 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 提供静态主机名解析。</p></li>
 </ul>
 </section>
 <section id="id3">
-<h3>磁盘分区<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3>磁盘分区<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>使用 <code class="docutils literal notranslate"><span class="pre">parted</span></code> 对磁盘进行分区，分区vdb1占用250G(没有使用这个vdb是因为我还准备用vdb构建复杂的 <a class="reference internal" href="../../linux/storage/stratis/index.html#stratis"><span class="std std-ref">Stratis - Linux存储系统</span></a> ):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vdb</span>
@@ -224,7 +224,7 @@ vdb    253:16   0   500G  0 disk
 </div>
 </section>
 <section id="xfs">
-<h3>XFS文件系统<a class="headerlink" href="#xfs" title="Permalink to this heading">¶</a></h3>
+<h3>XFS文件系统<a class="headerlink" href="#xfs" title="此标题的永久链接">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>GlusterFS底层的XFS’文件系统根据不同的硬件(RAID条带化)或者存储的内容不同，可以采用不同的优化策略。我准备在 <a class="reference internal" href="../../linux/storage/stratis/xfs_performance.html#xfs-performance"><span class="std std-ref">XFS性能</span></a> 做详细的测试和对比。这里仅做简化的配置，采用比较通用的参数。</p>
@@ -254,7 +254,7 @@ vdb    253:16   0   500G  0 disk
 </div>
 </section>
 <section id="id4">
-<h3>批量创建文件系统脚本<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3>批量创建文件系统脚本<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h3>
 <p>服务器有多块nvme磁盘，从 <code class="docutils literal notranslate"><span class="pre">/dev/nvme0n1</span></code> 到 <code class="docutils literal notranslate"><span class="pre">/dev/nvme11n1</span></code> 共计12块磁盘，则采用如下脚本快速完成格式化挂载:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for i in {0..11};do
     if [ ! -d /data/brick${i} ];then mkdir -p /data/brick${i};fi
@@ -287,7 +287,7 @@ done
 </section>
 </section>
 <section id="id5">
-<h2>安装GlusterFS<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<h2>安装GlusterFS<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>以前安装GlusterFS的方法是先下载repo仓库配置文件，例如 <a class="reference external" href="https://download.gluster.org/pub/gluster/glusterfs/LATEST/CentOS/glusterfs-rhel8.repo">glusterfs-rhel8.repo</a></p>
@@ -334,7 +334,7 @@ done
 </li>
 </ul>
 <section id="centos-7glusterfs">
-<h3>在CentOS 7上安装GlusterFS<a class="headerlink" href="#centos-7glusterfs" title="Permalink to this heading">¶</a></h3>
+<h3>在CentOS 7上安装GlusterFS<a class="headerlink" href="#centos-7glusterfs" title="此标题的永久链接">¶</a></h3>
 <p>如果在标准的CentOS 7上，当前也是可以直接使用 SIG Yum Repos进行安装的:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">centos</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">gluster</span>
 </pre></div>
@@ -380,12 +380,12 @@ done
 </div>
 </section>
 <section id="centos-6glusterfs">
-<h3>在CentOS 6上安装GlusterFS<a class="headerlink" href="#centos-6glusterfs" title="Permalink to this heading">¶</a></h3>
+<h3>在CentOS 6上安装GlusterFS<a class="headerlink" href="#centos-6glusterfs" title="此标题的永久链接">¶</a></h3>
 <p>生产环境也有非常古老的CentOS 6系统，安装GlusterFS旧版本客户端，测试和GlusterFS 7的兼容性。首先通过 <code class="docutils literal notranslate"><span class="pre">yum</span> <span class="pre">search</span> <span class="pre">centos-release-gluster</span></code> 检查可用版本，然后安装对应的GlusterFS。</p>
 </section>
 </section>
 <section id="id6">
-<h2>配置GlusterFS<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<h2>配置GlusterFS<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>确保服务器打开正确通讯端口:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># firewall-cmd --zone=public --add-port=24007-24008/tcp --permanent</span>
@@ -433,7 +433,7 @@ done
 </pre></div>
 </div>
 <section id="id7">
-<h3>设置GlusterFS卷<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<h3>设置GlusterFS卷<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>在 <strong>所有服务器</strong> 上执行以下命令创建一个GlusterFS卷:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">brick1</span><span class="o">/</span><span class="n">gv0</span>
@@ -629,17 +629,17 @@ done
 </section>
 </section>
 <section id="id8">
-<h2>使用GlusterFS卷<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
+<h2>使用GlusterFS卷<a class="headerlink" href="#id8" title="此标题的永久链接">¶</a></h2>
 <p>通常为了结构清晰和便于维护，GlusterFS客户端和服务器是采用分离部署的。这里我们把刚才剔除掉的 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> 作为客户端来测试刚才构建的数据卷。当然，客户端和服务器端部署在相同服务器上也是可以的，但是需要确保GlusterFS服务端比客户端先启动并就绪，否则可能会导致客户端异常。</p>
 <section id="id9">
-<h3>客户端GlusterFS软件安装<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<h3>客户端GlusterFS软件安装<a class="headerlink" href="#id9" title="此标题的永久链接">¶</a></h3>
 <p>在客户端不需要安装完整的glusterfs软件包，只需要安装 <code class="docutils literal notranslate"><span class="pre">gluster-fuse</span></code> 软件包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">fuse</span>
 </pre></div>
 </div>
 </section>
 <section id="id10">
-<h3>客户端挂载GlusterFS卷<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<h3>客户端挂载GlusterFS卷<a class="headerlink" href="#id10" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">worker7</span></code> 上创建挂载目录:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">gv0</span>
@@ -688,7 +688,7 @@ done
 <p>我估算了一下，12秒钟复制了 27MB*100 = 2.7GB 数据，大约写入速度是 245MB/s (连续大文件写入)</p>
 </section>
 <section id="id11">
-<h3>GlusterFS文件分布<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<h3>GlusterFS文件分布<a class="headerlink" href="#id11" title="此标题的永久链接">¶</a></h3>
 <p>上述6个brick，按照顺序排列，可以在 <code class="docutils literal notranslate"><span class="pre">worker1</span></code> 节点 <code class="docutils literal notranslate"><span class="pre">/data/brick1/gv0</span></code> 目录下看到文件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">copy</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">001</span>
 <span class="n">copy</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">004</span>
@@ -746,7 +746,7 @@ done
 </section>
 </section>
 <section id="id12">
-<h2>参考<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id12" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.gluster.org/en/latest/Quick-Start-Guide/Quickstart/">Getting started with GlusterFS - Quick Start Guide</a></p></li>
 <li><p><a class="reference external" href="https://linuxhint.com/creating-and-resizing-xfs-partitions/">Creating and Resizing XFS Partitions</a></p></li>

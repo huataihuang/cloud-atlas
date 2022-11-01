@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>部署TLS认证的etcd集群 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -109,6 +109,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -188,13 +189,13 @@
            <div itemprop="articleBody">
              
   <section id="tlsetcd">
-<span id="deploy-etcd-cluster-with-tls-auth"></span><h1>部署TLS认证的etcd集群<a class="headerlink" href="#tlsetcd" title="Permalink to this heading">¶</a></h1>
+<span id="deploy-etcd-cluster-with-tls-auth"></span><h1>部署TLS认证的etcd集群<a class="headerlink" href="#tlsetcd" title="此标题的永久链接">¶</a></h1>
 <p>分布式高可用的etcd集群，在生产环境上需要启用TLS认证来加强安全性。在完成 <a class="reference internal" href="deploy_etcd_cluster.html#deploy-etcd-cluster"><span class="std std-ref">部署etcd集群</span></a> 之后，我在部署 <a class="reference internal" href="../../k3s/index.html#k3s"><span class="std std-ref">K3s - 轻量级Kubernetes</span></a> 中，采用 <a class="reference internal" href="../../k3s/k3s_ha_etcd.html#k3s-ha-etcd"><span class="std std-ref">K3s高可用etcd</span></a> 实现。</p>
 <section id="id1">
-<h2>实践环境<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>实践环境<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>在 <a class="reference internal" href="../../../arm/raspberry_pi/pi_cluster/pi_stack.html#pi-stack"><span class="std std-ref">树莓派堆叠</span></a> 环境采用3台 <a class="reference internal" href="../../../arm/raspberry_pi/hardware/pi_3.html#pi-3"><span class="std std-ref">树莓派Raspberry Pi 3</span></a> 硬件部署3节点 <a class="reference internal" href="../../administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> 集群:</p>
-<table class="docutils align-default" id="id8">
-<caption><span class="caption-text">树莓派k3s管控服务器</span><a class="headerlink" href="#id8" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id8">
+<caption><span class="caption-text">树莓派k3s管控服务器</span><a class="headerlink" href="#id8" title="此表格的永久链接">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 60%" />
@@ -218,7 +219,7 @@
 </table>
 </section>
 <section id="tls">
-<h2>TLS证书<a class="headerlink" href="#tls" title="Permalink to this heading">¶</a></h2>
+<h2>TLS证书<a class="headerlink" href="#tls" title="此标题的永久链接">¶</a></h2>
 <p>TLS证书采用 <code class="docutils literal notranslate"><span class="pre">cfssl</span></code> 工具构建，完整步骤见 <a class="reference internal" href="etcd_tls.html#etcd-tls"><span class="std std-ref">etcd集群TLS设置</span></a> 。分别获得:</p>
 <ul>
 <li><p>CA:</p>
@@ -260,14 +261,14 @@
 </ul>
 </section>
 <section id="id2">
-<h2>证书分发<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>证书分发<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>为方便使用ssh/scp进行管理，首先采用 <a class="reference internal" href="../../../infra_service/ssh/ssh_key.html#ssh-key"><span class="std std-ref">ssh密钥</span></a> 的 <a class="reference internal" href="../../../infra_service/ssh/ssh_key.html#ssh-agent-profile"><span class="std std-ref">shell环境解决ssh-agent对会话的要求</span></a> 结合 <a class="reference internal" href="../../../infra_service/ssh/ssh_multiplexing.html#ssh-multiplexing"><span class="std std-ref">ssh多路传输multiplexing加速</span></a> ，这样可以不必输入密码就可以ssh/scp到集群服务器</p></li>
 <li><p>配置好 <a class="reference internal" href="../../../real/edge_cloud/edge_cloud_infra.html#edge-cloud-infra"><span class="std std-ref">边缘云计算架构</span></a> 的 <a class="reference internal" href="../../../infra_service/dns/dnsmasq/dnsmasq_domains_for_subnets.html#dnsmasq-domains-for-subnets"><span class="std std-ref">配置DNSmasq对不同子网提供不同域名扩展(expand-hosts)</span></a> ，提供正确的域名解析，这样后面配置 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 可以正确获得主机名解析</p></li>
 <li><p>使用 <a class="reference internal" href="etcd_tls.html#etcd-tls"><span class="std std-ref">etcd集群TLS设置</span></a> 方法完成上述证书生成后，使用以下脚本进行分发:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">分发证书脚本 deploy_etcd_certificates.sh</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">分发证书脚本 deploy_etcd_certificates.sh</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; etcd_hosts</span>
 <span class="s">x-k3s-m-1</span>
 <span class="s">x-k3s-m-2</span>
@@ -312,7 +313,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd.sh</span>
 </div>
 <p>这样在 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 主机上分别有对应主机的配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/etcd</span></code> 目录下有(以下案例是 <code class="docutils literal notranslate"><span class="pre">x-k3s-m-1</span></code> ):</p>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">x-k3s-m-1 主机证书案例</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">x-k3s-m-1 主机证书案例</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ca.pem
 server-key.pem
 server.pem
@@ -323,13 +324,13 @@ x-k3s-m-1.pem
 </div>
 </section>
 <section id="id3">
-<h2>配置启动服务脚本<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>配置启动服务脚本<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <section id="systemd-etcd">
-<h3><a class="reference internal" href="../../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 启动etcd脚本<a class="headerlink" href="#systemd-etcd" title="Permalink to this heading">¶</a></h3>
+<h3><a class="reference internal" href="../../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 启动etcd脚本<a class="headerlink" href="#systemd-etcd" title="此标题的永久链接">¶</a></h3>
 <p>… 待完善</p>
 </section>
 <section id="openrc-etcd">
-<h3><a class="reference internal" href="../../../linux/alpine_linux/openrc/index.html#openrc"><span class="std std-ref">OpenRC</span></a> 启动etcd脚本<a class="headerlink" href="#openrc-etcd" title="Permalink to this heading">¶</a></h3>
+<h3><a class="reference internal" href="../../../linux/alpine_linux/openrc/index.html#openrc"><span class="std std-ref">OpenRC</span></a> 启动etcd脚本<a class="headerlink" href="#openrc-etcd" title="此标题的永久链接">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>参考alpine linux软件仓库 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 和 <code class="docutils literal notranslate"><span class="pre">etcd-openrc</span></code> 软件包配置方法，我在 <a class="reference internal" href="../../../linux/alpine_linux/openrc/index.html#openrc"><span class="std std-ref">OpenRC</span></a> 配置etcd时，采用 <code class="docutils literal notranslate"><span class="pre">/etc/etcd/conf.yml</span></code> 配置文件来配置etcd。</p>
@@ -352,7 +353,7 @@ x-k3s-m-1.pem
 <li><p>准备配置文件 <code class="docutils literal notranslate"><span class="pre">conf.yml</span></code> (这个配置文件是 <a class="reference external" href="https://pkgs.alpinelinux.org/package/edge/testing/aarch64/etcd">edge/testing仓库etcd</a> 的etcd 配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/etcd/conf.yml</span></code> 基础上修订，增加了配置占位符方便后续通过脚本修订):</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">etcd配置文件 /etc/etcd/conf.yml</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">etcd配置文件 /etc/etcd/conf.yml</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is the configuration file for the etcd server.</span><span class="w"></span>
 
 <span class="c1"># Human-readable name for this member.</span><span class="w"></span>
@@ -500,7 +501,7 @@ x-k3s-m-1.pem
 <li><p>准备一个为每个管控服务器修订etcd配置的脚本 <code class="docutils literal notranslate"><span class="pre">config_etcd.sh</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">修订etcd配置的脚本 config_etcd.sh</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">修订etcd配置的脚本 config_etcd.sh</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">NODENAME</span><span class="o">=</span><span class="sb">`</span>hostname -s<span class="sb">`</span>
 <span class="nv">NODEIP</span><span class="o">=</span><span class="sb">`</span>ip addr show eth0 <span class="p">|</span> grep <span class="s2">&quot;inet\b&quot;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> cut -d/ -f1<span class="sb">`</span>
 <span class="nv">NODE1</span><span class="o">=</span><span class="s2">&quot;x-k3s-m-1&quot;</span>
@@ -539,7 +540,7 @@ sed -i <span class="s2">&quot;s/DOMAIN/</span><span class="nv">$DOMAIN</span><sp
 <li><p>执行以下 <code class="docutils literal notranslate"><span class="pre">deploy_etcd_config.sh</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">执行etcd修订脚本 deploy_etcd_config.sh</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">执行etcd修订脚本 deploy_etcd_config.sh</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; etcd_hosts</span>
 <span class="s">x-k3s-m-1</span>
 <span class="s">x-k3s-m-2</span>
@@ -595,14 +596,14 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_config.sh</span>
 <li><p>准备配置文件 <code class="docutils literal notranslate"><span class="pre">conf.d-etcd</span></code> 和 <code class="docutils literal notranslate"><span class="pre">init.d-etcd</span></code> (从alpine linux软件仓库 <code class="docutils literal notranslate"><span class="pre">etcd-openrc</span></code> 软件包提取)</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">openrc的etcd配置文件 /etc/conf.d/etcd</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">openrc的etcd配置文件 /etc/conf.d/etcd</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">LOGPATH</span><span class="o">=</span>/var/log/<span class="si">${</span><span class="nv">RC_SVCNAME</span><span class="si">}</span>
 <span class="nv">ETCD_CONFIG_FILE</span><span class="o">=</span>/etc/etcd/conf.yml
 </pre></div>
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">openrc的etcd服务配置文件 /etc/init.d/etcd</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">openrc的etcd服务配置文件 /etc/init.d/etcd</span><a class="headerlink" href="#id15" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/sbin/openrc-run</span>
 <span class="c1"># Copyright 2016 Alpine Linux</span>
 <span class="c1"># Distributed under the terms of the GNU General Public License v2</span>
@@ -638,7 +639,7 @@ start_pre<span class="o">()</span> <span class="o">{</span>
 <li><p>然后执行以下 <code class="docutils literal notranslate"><span class="pre">deploy_etcd_service.sh</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id16">
-<div class="code-block-caption"><span class="caption-text">分发openrc的etcd服务脚本 deploy_etcd_service.sh</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">分发openrc的etcd服务脚本 deploy_etcd_service.sh</span><a class="headerlink" href="#id16" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; etcd_hosts</span>
 <span class="s">x-k3s-m-1</span>
 <span class="s">x-k3s-m-2</span>
@@ -682,7 +683,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </section>
 </section>
 <section id="id5">
-<h2>检查<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<h2>检查<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>启动 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 之后，检查服务进程:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">aux</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">etcd</span>
@@ -703,7 +704,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </li>
 </ul>
 <section id="id6">
-<h3>证书错误排查<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<h3>证书错误排查<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h3>
 <p>我在启动 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 服务之后，检查 <code class="docutils literal notranslate"><span class="pre">etcd.log</span></code> 发现有如下报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="p">:</span> <span class="mi">2022</span><span class="o">/</span><span class="mi">04</span><span class="o">/</span><span class="mi">11</span> <span class="mi">23</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">00</span> <span class="p">[</span><span class="n">core</span><span class="p">]</span> <span class="n">grpc</span><span class="p">:</span> <span class="n">addrConn</span><span class="o">.</span><span class="n">createTransport</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="p">{</span><span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">2379</span> <span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">2379</span> <span class="o">&lt;</span><span class="n">nil</span><span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&lt;</span><span class="n">nil</span><span class="o">&gt;</span><span class="p">}</span><span class="o">.</span> <span class="n">Err</span><span class="p">:</span> <span class="n">connection</span> <span class="n">error</span><span class="p">:</span> <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;transport: authentication handshake failed: remote error: tls: bad certificate&quot;</span><span class="o">.</span> <span class="n">Reconnecting</span><span class="o">...</span>
 <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span><span class="s2">&quot;warn&quot;</span><span class="p">,</span><span class="s2">&quot;ts&quot;</span><span class="p">:</span><span class="s2">&quot;2022-04-11T23:59:13.567+0800&quot;</span><span class="p">,</span><span class="s2">&quot;caller&quot;</span><span class="p">:</span><span class="s2">&quot;embed/config_logging.go:169&quot;</span><span class="p">,</span><span class="s2">&quot;msg&quot;</span><span class="p">:</span><span class="s2">&quot;rejected connection&quot;</span><span class="p">,</span><span class="s2">&quot;remote-addr&quot;</span><span class="p">:</span><span class="s2">&quot;192.168.7.11:53050&quot;</span><span class="p">,</span><span class="s2">&quot;server-name&quot;</span><span class="p">:</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;error&quot;</span><span class="p">:</span><span class="s2">&quot;tls: failed to verify client certificate: x509: certificate specifies an incompatible key usage&quot;</span><span class="p">}</span>
@@ -743,7 +744,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </section>
 </section>
 <section id="etcd">
-<h2>验证etcd集群<a class="headerlink" href="#etcd" title="Permalink to this heading">¶</a></h2>
+<h2>验证etcd集群<a class="headerlink" href="#etcd" title="此标题的永久链接">¶</a></h2>
 <p>现在 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 集群已经启动，我们使用以下命令检查集群是否正常工作:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">--</span><span class="n">cacert</span> <span class="n">ca</span><span class="o">.</span><span class="n">pem</span> <span class="o">--</span><span class="n">cert</span> <span class="n">client</span><span class="o">.</span><span class="n">pem</span> <span class="o">--</span><span class="n">key</span> <span class="n">client</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="n">pem</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">etcd</span><span class="o">.</span><span class="n">edge</span><span class="o">.</span><span class="n">huatai</span><span class="o">.</span><span class="n">me</span><span class="p">:</span><span class="mi">2379</span><span class="o">/</span><span class="n">health</span>
 </pre></div>
@@ -754,7 +755,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </div>
 <p>注意，这里访问的域名是 <code class="docutils literal notranslate"><span class="pre">etcd.edge.huatai.me</span></code> ，原因是 <a class="reference internal" href="etcd_tls.html#etcd-tls"><span class="std std-ref">etcd集群TLS设置</span></a> 配置 <code class="docutils literal notranslate"><span class="pre">server.json</span></code> 时在证书中指定访问域名是 <code class="docutils literal notranslate"><span class="pre">etcd.edge.huatai.me</span></code> (或IP)</p>
 <div class="literal-block-wrapper docutils container" id="id17">
-<div class="code-block-caption"><span class="caption-text">server.json 配置 hosts 部分指定服务器访问域名是 etcd.edge.huatai.me</span><a class="headerlink" href="#id17" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">server.json 配置 hosts 部分指定服务器访问域名是 etcd.edge.huatai.me</span><a class="headerlink" href="#id17" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;edge k3s etcd&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;hosts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -785,7 +786,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 <li><p>为方便维护，配置 <code class="docutils literal notranslate"><span class="pre">etcdctl</span></code> 环境变量，添加到用户自己的 profile中:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id18">
-<div class="code-block-caption"><span class="caption-text">etcdctl 使用的环境变量</span><a class="headerlink" href="#id18" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">etcdctl 使用的环境变量</span><a class="headerlink" href="#id18" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">ETCDCTL_API</span><span class="o">=</span><span class="m">3</span>
 <span class="nb">export</span> <span class="nv">ETCDCTL_ENDPOINTS</span><span class="o">=</span><span class="s1">&#39;https://etcd.edge.huatai.me:2379&#39;</span>
 <span class="nb">export</span> <span class="nv">ETCDCTL_CACERT</span><span class="o">=</span>/etc/etcd/ca.pem
@@ -796,7 +797,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </div>
 <p>然后可以检查:</p>
 <div class="literal-block-wrapper docutils container" id="id19">
-<div class="code-block-caption"><span class="caption-text">etcdctl 检查集群成员列表(member list)</span><a class="headerlink" href="#id19" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">etcdctl 检查集群成员列表(member list)</span><a class="headerlink" href="#id19" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>etcdctl member list
 </pre></div>
 </div>
@@ -809,7 +810,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </div>
 <p>为方便观察，可以使用表格输出模式:</p>
 <div class="literal-block-wrapper docutils container" id="id20">
-<div class="code-block-caption"><span class="caption-text">etcdctl 检查endpoint状态(表格形式输出)</span><a class="headerlink" href="#id20" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">etcdctl 检查endpoint状态(表格形式输出)</span><a class="headerlink" href="#id20" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>etcdctl --write-out<span class="o">=</span>table endpoint status
 </pre></div>
 </div>
@@ -826,7 +827,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </div>
 <p>检查健康状况:</p>
 <div class="literal-block-wrapper docutils container" id="id21">
-<div class="code-block-caption"><span class="caption-text">etcdctl 检查endpoint健康状态(查看节点响应情况)</span><a class="headerlink" href="#id21" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">etcdctl 检查endpoint健康状态(查看节点响应情况)</span><a class="headerlink" href="#id21" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>etcdctl endpoint health
 </pre></div>
 </div>
@@ -839,7 +840,7 @@ cat <span class="s">&lt;&lt; EOF &gt; prepare_etcd_service.sh</span>
 </div>
 </section>
 <section id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://etcd.io/docs/v3.4.0/op-guide/clustering/">etcd Clustering Guide</a></p></li>
 <li><p><a class="reference external" href="https://medium.com/nirman-tech-blog/setting-up-etcd-cluster-with-tls-authentication-enabled-49c44e4151bb">Setting up Etcd Cluster with TLS Authentication Enabled</a> 这篇文档非常详细指导了如何使用cfssl工具来生成etcd服务器证书，以及签名客户端证书</p></li>

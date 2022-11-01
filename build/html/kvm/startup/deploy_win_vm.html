@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>部署Windows KVM虚拟机 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -72,7 +72,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../iommu/index.html">IOMMU</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA Virtual GPU (vGPU)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual/index.html">KVM嵌套虚拟化</a></li>
@@ -168,11 +168,11 @@
            <div itemprop="articleBody">
              
   <section id="windows-kvm">
-<span id="deploy-win-vm"></span><h1>部署Windows KVM虚拟机<a class="headerlink" href="#windows-kvm" title="Permalink to this heading">¶</a></h1>
+<span id="deploy-win-vm"></span><h1>部署Windows KVM虚拟机<a class="headerlink" href="#windows-kvm" title="此标题的永久链接">¶</a></h1>
 <p>在 <a class="reference internal" href="../../studio/kvm_docker_in_studio.html#kvm-docker-in-studio"><span class="std std-ref">Studio环境KVM和Docker</span></a> 部署了KVM运行环境之后，就可以 <a class="reference internal" href="create_vm.html#create-vm"><span class="std std-ref">创建KVM虚拟机</span></a> ，在一台物理服务器上模拟规模化部署的集群。不过，和Linux Guest不同，Windows虚拟机由于闭源以及驱动上的缺陷，运行比较困难，消耗资源也较多。</p>
 <p>本文记录部署Windows虚拟机的，以及一些特殊的配制调整。我计划在后续学习和实践性能优化。</p>
 <section id="windows">
-<h2>创建Windows虚拟机<a class="headerlink" href="#windows" title="Permalink to this heading">¶</a></h2>
+<h2>创建Windows虚拟机<a class="headerlink" href="#windows" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>安装 <code class="docutils literal notranslate"><span class="pre">virt-viewer</span></code> 工具可以提供spice或vnc方式连接安装的虚拟机图形界面，程序名称是 <code class="docutils literal notranslate"><span class="pre">remote</span> <span class="pre">viewer</span></code></p></li>
 </ul>
@@ -305,7 +305,7 @@
 </div>
 </section>
 <section id="windowsmemballoon">
-<h2>关闭Windows虚拟机memballoon<a class="headerlink" href="#windowsmemballoon" title="Permalink to this heading">¶</a></h2>
+<h2>关闭Windows虚拟机memballoon<a class="headerlink" href="#windowsmemballoon" title="此标题的永久链接">¶</a></h2>
 <p>在实践中发现，Windows虚拟机内部CPU非常容易飙升到100%，即使做简单的Windows升级或者打开Windows虚拟机中浏览器(仅仅查看一个网页)，也会导致物理主机所有CPU都出现极高的SYS使用率。然后出现物理主机Load远超CPU核数，系统相应缓慢hang死。</p>
 <p>最初我以为是我启用了 <a class="reference internal" href="../../linux/storage/btrfs/btrfs_in_studio.html#btrfs-in-studio"><span class="std std-ref">Studio环境的Btrfs存储</span></a> 的 <code class="docutils literal notranslate"><span class="pre">zstd</span></code> 压缩导致的虚拟机运行问题（具体实践见 <a class="reference internal" href="../../appendix/using_btrfs_in_studio.html#using-btrfs-in-studio"><span class="std std-ref">在Studio中使用btrfs文件系统</span></a> )，但是，我切换到 <a class="reference internal" href="../../linux/storage/filesystem/xfs/lvm_xfs_in_studio.html#lvm-xfs-in-studio"><span class="std std-ref">Studio环境的LVM+XFS存储</span></a> 依然不断发生hang机异常。</p>
 <p>实际上，我在部署 <a class="reference internal" href="../../real/priv_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 也是采用了完全相同的部署方式，除了虚拟机全部是Linux外，配制方法没有任何区别。但是，我想到之前工作经验，生产环境并没有启用Balloon功能，应该是有一定原因的。由于memballon需要Guest虚拟机内部驱动配合，所以我怀疑Windows Guest virtio memballoon驱动可能存在缺陷。</p>

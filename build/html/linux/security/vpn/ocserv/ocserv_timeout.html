@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OpenConnect服务连接超时排查 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
         <script src="../../../../_static/translations.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../../genindex.html" />
@@ -166,7 +166,7 @@
            <div itemprop="articleBody">
              
   <section id="openconnect">
-<span id="ocserv-timeout"></span><h1>OpenConnect服务连接超时排查<a class="headerlink" href="#openconnect" title="Permalink to this heading">¶</a></h1>
+<span id="ocserv-timeout"></span><h1>OpenConnect服务连接超时排查<a class="headerlink" href="#openconnect" title="此标题的永久链接">¶</a></h1>
 <p>最近(二十大前)原先部署的 <a class="reference internal" href="openconnect_vpn.html#openconnect-vpn"><span class="std std-ref">OpenConnect VPN</span></a> 虽然运行看上去正常，但是Cisco Any Connect客户端连接总是超时。</p>
 <p>检查了服务器端口，我配置的 <code class="docutils literal notranslate"><span class="pre">404</span></code> 端口通过 <code class="docutils literal notranslate"><span class="pre">telnet</span></code> 检查是打开的，并且远程客户端电脑上使用 <code class="docutils literal notranslate"><span class="pre">telnet</span> <span class="pre">vpn.huatai.me</span> <span class="pre">404</span></code> 端口检查时，可以在服务器上执行连接检查:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="o">|</span> <span class="n">grep</span> <span class="mi">404</span>
@@ -191,7 +191,7 @@
 </div>
 </div>
 <section id="id1">
-<h2>推测和验证<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>推测和验证<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>不过，我发现如果将 <a class="reference internal" href="openconnect_vpn.html#change-ocserv-port"><span class="std std-ref">修改ocserv端口</span></a> 可以短暂(也许有半小时或更长)正常使用VPN。然后，新调整的VPN端口再次被封。</p>
 <ul class="simple">
 <li><p>如果GFW改进了特征探测，能够根据TCP包头部判断是否是VPN加密流量，并进行包丢弃 - 为何 <a class="reference internal" href="openconnect_vpn.html#change-ocserv-port"><span class="std std-ref">修改ocserv端口</span></a> 能够短暂使用:</p>
@@ -199,7 +199,7 @@
 <li><p>可能GFW匹配计算量巨大，深度包侦测(轮到小虾米)有一段延迟时间</p></li>
 </ul>
 </li>
-<li><p>已经验证无效: GFW确实已经升级能够深度探测Cisco VPN  <span class="sphinxnotes-strike">如果GFW并没有提升侦测计算能力，仅仅是将所有非常规https端口粗暴屏蔽(出于经济利益不可能闭关锁国)</span></p>
+<li><p>已经验证无效: GFW确实已经升级能够深度探测Cisco VPN  <span class="sphinxnotes-strike" style="text-decoration: line-through;">如果GFW并没有提升侦测计算能力，仅仅是将所有非常规https端口粗暴屏蔽(出于经济利益不可能闭关锁国)</span></p>
 <ul>
 <li><p>将VPN端口恢复到 443 进行对比验证 ，如果长时间不被屏蔽则说明GFW确实只是简单屏蔽非常用https端口，如果还是被反复阻塞，则说明GFW确实提升了VPN特征检测能力( <strong>已经验证，调整端口到443也会被屏蔽</strong> )</p></li>
 </ul>
@@ -211,7 +211,7 @@
 </div>
 </section>
 <section id="id2">
-<h2>解决方法<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>解决方法<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>GFW并没有阻塞 <a class="reference internal" href="../../../../infra_service/ssh/index.html#ssh"><span class="std std-ref">ssh服务</span></a> ，乐观来说 SSL 加密技术目前可能还是比较安全的，悲观来说也可能仅仅是还没有到”闭关锁国”的阶段。所以，如果是桌面电脑，比较容易通过 <a class="reference internal" href="../../../../infra_service/ssh/ssh_tunneling_dynamic_port_forwarding.html#ssh-tunneling-dynamic-port-forwarding"><span class="std std-ref">SSH Tunneling: 动态端口转发</span></a> 结合浏览器的 socks5 代理配置翻墙。</p>
 <p>但是，对于手机设备，特别是 这样封闭的移动系统，需要采用标准的VPN方式来解决:</p>
 <ul class="simple">

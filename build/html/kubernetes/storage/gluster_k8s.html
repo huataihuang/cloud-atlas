@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在Kubernetes中部署GlusterFS &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -175,7 +176,7 @@
            <div itemprop="articleBody">
              
   <section id="kubernetesglusterfs">
-<span id="gluster-k8s"></span><h1>在Kubernetes中部署GlusterFS<a class="headerlink" href="#kubernetesglusterfs" title="Permalink to this heading">¶</a></h1>
+<span id="gluster-k8s"></span><h1>在Kubernetes中部署GlusterFS<a class="headerlink" href="#kubernetesglusterfs" title="此标题的永久链接">¶</a></h1>
 <p>我在 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 后，需要为Kubernetes提供基于GlusterFS的持久化存储。</p>
 <p>有两种方式在Kubernetes中提供GlusterFS存储卷服务：</p>
 <ul class="simple">
@@ -188,13 +189,13 @@
 </div>
 <p>本文采用手工部署GlusterFS服务，并配置 PV/PVC 提供给Kubernetes使用存储卷。后续在 <a class="reference internal" href="heketi/index.html#heketi"><span class="std std-ref">Heketi - 云原生GlusterFS管理框架</span></a> 实践中介绍如何云原生管理GlusterFS分布式存储。</p>
 <section id="glusterfs">
-<h2>安装GlusterFS服务器软件<a class="headerlink" href="#glusterfs" title="Permalink to this heading">¶</a></h2>
+<h2>安装GlusterFS服务器软件<a class="headerlink" href="#glusterfs" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>本文实践是在树莓派上运行的Ubuntu操作系统上部署GlusterFS集群。Ubuntu Server for Raspberry Pi已经在软件仓库提供了GlusterFS，所以可以跳过添加GlusterFS仓库配置部分。也可以直接添加GlusterFS官方仓库安装最新版本。</p>
 </div>
 <section id="debian-glusterfs">
-<h3>Debian:添加GlusterFS仓库配置<a class="headerlink" href="#debian-glusterfs" title="Permalink to this heading">¶</a></h3>
+<h3>Debian:添加GlusterFS仓库配置<a class="headerlink" href="#debian-glusterfs" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>添加apt GPG key:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="o">-</span><span class="n">O</span> <span class="o">-</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">gluster</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pub</span><span class="o">/</span><span class="n">gluster</span><span class="o">/</span><span class="n">glusterfs</span><span class="o">/</span><span class="n">LATEST</span><span class="o">/</span><span class="n">rsa</span><span class="o">.</span><span class="n">pub</span> <span class="o">|</span> <span class="n">apt</span><span class="o">-</span><span class="n">key</span> <span class="n">add</span> <span class="o">-</span>
@@ -217,7 +218,7 @@ echo deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/${DEBI
 </ul>
 </section>
 <section id="ubuntu">
-<h3>Ubuntu添加软件仓库<a class="headerlink" href="#ubuntu" title="Permalink to this heading">¶</a></h3>
+<h3>Ubuntu添加软件仓库<a class="headerlink" href="#ubuntu" title="此标题的永久链接">¶</a></h3>
 <p>对于Ubuntu系统，请参考 <a class="reference external" href="https://launchpad.net/~gluster">launchpad.net “Gluster” team</a> ，提供了最新的GlusterFS 8 / 9 系列。我这里为了简化部署，直接使用了Ubuntu for Raspberry Pi内建提供的GlusterFS 7。</p>
 <p>你可以通过上述仓库安装最新版本，例如:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">software</span><span class="o">-</span><span class="n">properties</span><span class="o">-</span><span class="n">common</span>
@@ -227,7 +228,7 @@ echo deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/${DEBI
 </div>
 </section>
 <section id="id1">
-<h3>安装GlusterFS软件<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3>安装GlusterFS软件<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>安装软件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">glusterfs</span><span class="o">-</span><span class="n">server</span>
@@ -238,7 +239,7 @@ echo deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/${DEBI
 </section>
 </section>
 <section id="id2">
-<h2>配置GlusterFS服务器<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>配置GlusterFS服务器<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>这里仅做演示，本文暂时采用简单的双节点部署双副本复制卷，提供简单数据冗余。不过双节点服务器容易出现脑裂，实际生产环境建议采用3个节点或跟多节点部署复制卷，或者分布式复制卷。</p>
@@ -366,9 +367,9 @@ Do you still want to continue?
 </div>
 </section>
 <section id="id3">
-<h2>Kubernetes使用GlusterFS卷<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>Kubernetes使用GlusterFS卷<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <section id="gluserfs-client">
-<h3>gluserfs-client<a class="headerlink" href="#gluserfs-client" title="Permalink to this heading">¶</a></h3>
+<h3>gluserfs-client<a class="headerlink" href="#gluserfs-client" title="此标题的永久链接">¶</a></h3>
 <p>为了能够在Kubernetes集群使用GlusterFS卷，首先需要在Kubernetes的管控节点上安装 <code class="docutils literal notranslate"><span class="pre">gluster-client</span></code> 软件包，因为Kubernetes scheduler需要用来创建gluster卷。</p>
 <ul>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code> 服务器(管控)上执行以下命令安装:</p>
@@ -383,12 +384,12 @@ Do you still want to continue?
 </div>
 </section>
 <section id="id4">
-<h3>持久化卷<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3>持久化卷<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>创建Service和Endpoints</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-endpoints_kube-verify.yaml</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-endpoints_kube-verify.yaml</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nn">---</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
@@ -446,7 +447,7 @@ Do you still want to continue?
 <li><p>创建一个持久化卷(presistence volume, pv)</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pv_kube-verify.yaml</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pv_kube-verify.yaml</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolume</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -495,7 +496,7 @@ Do you still want to continue?
 <li><p>创建持久化卷声明(persistent volume claim, PVC): 所谓PVC就是指定访问模式和存储容量，这里PVC绑定到前面创建的PV。一旦PV被绑定到一个PVC，这个PV就被绑定到了这个PVC所属项目，也就不能被绑到其他PVC上。这就是 <code class="docutils literal notranslate"><span class="pre">一对一</span></code> 映射PVs和PVCs，不过，在相同项目中的多个Pods可以使用相同PVC。</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pvc_kube-verify.yaml</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pvc_kube-verify.yaml</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -543,7 +544,7 @@ Do you still want to continue?
 <p>可以看到PVC已经和PV绑定起来了</p>
 </section>
 <section id="gluster">
-<h3>使用Gluster存储<a class="headerlink" href="#gluster" title="Permalink to this heading">¶</a></h3>
+<h3>使用Gluster存储<a class="headerlink" href="#gluster" title="此标题的永久链接">¶</a></h3>
 <p>我在 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 中部署了3个测试容器 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
 </pre></div>
@@ -557,7 +558,7 @@ Do you still want to continue?
 </div>
 <p>对应的 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 的deployment:</p>
 <div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">../../kubernetes/arm/arm_k8s_deploy/kube_verify_deployment.yaml</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">../../kubernetes/arm/arm_k8s_deploy/kube_verify_deployment.yaml</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -585,7 +586,7 @@ Do you still want to continue?
 </div>
 <p>修订上述deployment，添加卷挂载:</p>
 <div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml</span><a class="headerlink" href="#id15" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -726,19 +727,19 @@ Do you still want to continue?
 </section>
 </section>
 <section id="id5">
-<h2>Kubernetes使用GlusterFS卷(探索记录)<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<h2>Kubernetes使用GlusterFS卷(探索记录)<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>以下步骤是我探索GlusterFS卷的步骤，所以有一个渐进的排查过程，如果你一步步按照我的步骤来做，会有一点点挫折。不过这个挫折会让你能够排查和找出为什么会出错以及解决方法，所以我完整保留了这个步骤。</p>
 <p>如果你只想快速完成部署，避免走弯路，请参考上文 <code class="docutils literal notranslate"><span class="pre">Kubernetes使用GlusterFS卷</span></code> 段落，我一次性提供正确配置步骤，并且做了配置注释。</p>
 </div>
 <section id="id6">
-<h3>持久化卷<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<h3>持久化卷<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>创建Service和Endpoints</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id16">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-endpoints.yaml</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-endpoints.yaml</span><a class="headerlink" href="#id16" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nn">---</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
@@ -804,7 +805,7 @@ Do you still want to continue?
 <li><p>创建一个持久化卷(presistence volume, pv)</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id17">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pv.yaml</span><a class="headerlink" href="#id17" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pv.yaml</span><a class="headerlink" href="#id17" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolume</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -847,7 +848,7 @@ Do you still want to continue?
 <li><p>创建持久化卷声明(persistent volume claim, PVC): 所谓PVC就是指定访问模式和存储容量，这里PVC绑定到前面创建的PV。一旦PV被绑定到一个PVC，这个PV就被绑定到了这个PVC所属项目，也就不能被绑到其他PVC上。这就是 <code class="docutils literal notranslate"><span class="pre">一对一</span></code> 映射PVs和PVCs，不过，在相同项目中的多个Pods可以使用相同PVC。</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id18">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pvc.yaml</span><a class="headerlink" href="#id18" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pvc.yaml</span><a class="headerlink" href="#id18" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -894,7 +895,7 @@ Do you still want to continue?
 </section>
 </section>
 <section id="id7">
-<h2>使用Gluster存储<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<h2>使用Gluster存储<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
 <p>我在 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 中部署了3个测试容器 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
 </pre></div>
@@ -908,7 +909,7 @@ Do you still want to continue?
 </div>
 <p>对应的 <code class="docutils literal notranslate"><span class="pre">kube-verify</span></code> 的deployment:</p>
 <div class="literal-block-wrapper docutils container" id="id19">
-<div class="code-block-caption"><span class="caption-text">../../kubernetes/arm/arm_k8s_deploy/kube_verify_deployment.yaml</span><a class="headerlink" href="#id19" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">../../kubernetes/arm/arm_k8s_deploy/kube_verify_deployment.yaml</span><a class="headerlink" href="#id19" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -936,7 +937,7 @@ Do you still want to continue?
 </div>
 <p>修订上述deployment，添加卷挂载:</p>
 <div class="literal-block-wrapper docutils container" id="id20">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/kube_verify_gluster_deployment.yaml</span><a class="headerlink" href="#id20" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/kube_verify_gluster_deployment.yaml</span><a class="headerlink" href="#id20" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -976,9 +977,9 @@ Do you still want to continue?
 </div>
 </section>
 <section id="id8">
-<h2>问题排查<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
+<h2>问题排查<a class="headerlink" href="#id8" title="此标题的永久链接">¶</a></h2>
 <section id="pvc">
-<h3>找不到PVC<a class="headerlink" href="#pvc" title="Permalink to this heading">¶</a></h3>
+<h3>找不到PVC<a class="headerlink" href="#pvc" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>检查使用glusterfs的pod:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">get</span> <span class="n">pods</span>
@@ -1030,7 +1031,7 @@ Do you still want to continue?
 <p>原来，默认pod是使用自己相同的namespace的PVC，难怪，我创建 <code class="docutils literal notranslate"><span class="pre">gluster-claim</span></code> 时候没有指定 namespace ，创建在默认namespace，就和pod不在同一个namespace中。</p>
 <p>重新修订 service, endpoint, PV 和 PVC (原先在 default namespace 的 service,endpoint,pv,pvc 需要删除) ，添加上 <code class="docutils literal notranslate"><span class="pre">namespace:</span> <span class="pre">kube-verify</span></code></p>
 <div class="literal-block-wrapper docutils container" id="id21">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-endpoints_kube-verify.yaml</span><a class="headerlink" href="#id21" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-endpoints_kube-verify.yaml</span><a class="headerlink" href="#id21" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nn">---</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
@@ -1059,7 +1060,7 @@ Do you still want to continue?
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id22">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pv_kube-verify.yaml</span><a class="headerlink" href="#id22" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pv_kube-verify.yaml</span><a class="headerlink" href="#id22" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolume</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -1089,7 +1090,7 @@ Do you still want to continue?
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id23">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pvc_kube-verify.yaml</span><a class="headerlink" href="#id23" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/gluster-pvc_kube-verify.yaml</span><a class="headerlink" href="#id23" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -1113,7 +1114,7 @@ Do you still want to continue?
 </div>
 </section>
 <section id="id9">
-<h3>GlusterFS卷权限<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<h3>GlusterFS卷权限<a class="headerlink" href="#id9" title="此标题的永久链接">¶</a></h3>
 <p>通过以下命令登陆到容器内部:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">kube</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="mi">69</span><span class="n">bddb4868</span><span class="o">-</span><span class="mi">7</span><span class="n">lfw4</span> <span class="o">--</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
 </pre></div>
@@ -1163,7 +1164,7 @@ uid=1001 gid=0(root) groups=0(root)
 <p>这里假设 GlusterFS 卷挂载后的目录 <code class="docutils literal notranslate"><span class="pre">uid/gid</span></code> 分别是 <code class="docutils literal notranslate"><span class="pre">592/590</span></code> (在创建brick目录时，就在GlusterFS服务器上配置好目录属主) ，这样只要配置了pod的运行pid/gid，就可以实现写入</p>
 <p>所以修订 Pod 配置如下:</p>
 <div class="literal-block-wrapper docutils container" id="id24">
-<div class="code-block-caption"><span class="caption-text">gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml</span><a class="headerlink" href="#id24" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml</span><a class="headerlink" href="#id24" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -1228,7 +1229,7 @@ uid=592 gid=0(root) groups=0(root),590
 </section>
 </section>
 <section id="id10">
-<h2>参考<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id10" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.howtoforge.com/tutorial/high-availability-storage-with-glusterfs-on-ubuntu-1804">High-Availability Storage with GlusterFS on Ubuntu 18.04 LTS</a></p></li>
 <li><p><a class="reference external" href="https://gluster.readthedocs.io/en/latest/Install-Guide/Install/">Gluster Docs: Installing Gluster</a></p></li>

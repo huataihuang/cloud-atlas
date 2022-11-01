@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ubuntu部署KVM &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -67,7 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../iommu/index.html">IOMMU</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA Virtual GPU (vGPU)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual/index.html">KVM嵌套虚拟化</a></li>
@@ -163,9 +163,9 @@
            <div itemprop="articleBody">
              
   <section id="ubuntukvm">
-<span id="ubuntu-deploy-kvm"></span><h1>Ubuntu部署KVM<a class="headerlink" href="#ubuntukvm" title="Permalink to this heading">¶</a></h1>
+<span id="ubuntu-deploy-kvm"></span><h1>Ubuntu部署KVM<a class="headerlink" href="#ubuntukvm" title="此标题的永久链接">¶</a></h1>
 <section id="id1">
-<h2>准备工作<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>准备工作<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>运行KVM前，需要确定处理器是否支持硬件虚拟化，Intel或AMD处理器分别称其为 <code class="docutils literal notranslate"><span class="pre">VT-x</span></code> 和 <code class="docutils literal notranslate"><span class="pre">AMD-V</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">egrep</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;(vmx|svm)&#39;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cpuinfo</span>
 </pre></div>
@@ -198,7 +198,7 @@
 </div>
 <p>则依然可以运行虚拟机，但是没有KVM扩展支持则运行缓慢。</p>
 <section id="id2">
-<h3>使用64位内核<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>使用64位内核<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
 <p>由于32位操作系统会限制VM只能使用2G内存，并且在32位操作系统中无法运行64位虚拟机，所以强烈建议物理主机安装64位操作系统。</p>
 <ul>
 <li><p>要检查处理器是否是64位，可以使用如下方法:</p>
@@ -223,9 +223,9 @@
 </section>
 </section>
 <section id="kvm">
-<h2>安装KVM<a class="headerlink" href="#kvm" title="Permalink to this heading">¶</a></h2>
+<h2>安装KVM<a class="headerlink" href="#kvm" title="此标题的永久链接">¶</a></h2>
 <section id="id3">
-<h3>安装必要软件包<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3>安装必要软件包<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>Ubuntu 18.10及以上版本:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">qemu</span><span class="o">-</span><span class="n">kvm</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">daemon</span><span class="o">-</span><span class="n">system</span> <span class="n">libvirt</span><span class="o">-</span><span class="n">clients</span> <span class="n">bridge</span><span class="o">-</span><span class="n">utils</span> <span class="n">virtinst</span>
@@ -266,7 +266,7 @@
 </div></blockquote>
 </section>
 <section id="id4">
-<h3>添加用户到用户组<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3>添加用户到用户组<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>Karmic(9.10)及以后版本（但不包括14.04 LTS）需要确保用户已经添加到组 <code class="docutils literal notranslate"><span class="pre">libvirt</span></code> 中:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo adduser `id -un` libvirt
@@ -312,7 +312,7 @@ crw-rw---- 1 root kvm 10, 232 Oct 12 04:05 /dev/kvm
 </section>
 </section>
 <section id="id5">
-<h2>参考<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://help.ubuntu.com/community/KVM/Installation">KVM/Installation</a></p></li>
 </ul>

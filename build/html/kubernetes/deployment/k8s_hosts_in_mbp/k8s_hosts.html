@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kubernetes部署服务器 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -103,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -182,7 +183,7 @@
            <div itemprop="articleBody">
              
   <section id="kubernetes">
-<span id="k8s-hosts"></span><h1>Kubernetes部署服务器<a class="headerlink" href="#kubernetes" title="Permalink to this heading">¶</a></h1>
+<span id="k8s-hosts"></span><h1>Kubernetes部署服务器<a class="headerlink" href="#kubernetes" title="此标题的永久链接">¶</a></h1>
 <p>在部署模拟Kubernetes集群的环境中，我采用如下虚拟机部署:</p>
 <ul class="simple">
 <li><p>3台 Kubernetes Mster</p></li>
@@ -191,7 +192,7 @@
 <li><p>3台 etcd</p></li>
 </ul>
 <section id="clone-k8s">
-<h2>clone k8s虚拟机<a class="headerlink" href="#clone-k8s" title="Permalink to this heading">¶</a></h2>
+<h2>clone k8s虚拟机<a class="headerlink" href="#clone-k8s" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>本案例在单台物理主机上部署多个KVM虚拟机，这些虚拟机是在该物理主机的NAT网络中，所以外部不能直接访问（需要端口映射）。</p>
@@ -234,10 +235,10 @@ done
 </div>
 </section>
 <section id="id1">
-<h2>主机名解析<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>主机名解析<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>在运行KVM的物理主机上 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 配置模拟集群的hosts域名解析</p>
 <section id="libvirt-dnsmasq">
-<h3>libvirt dnsmasq<a class="headerlink" href="#libvirt-dnsmasq" title="Permalink to this heading">¶</a></h3>
+<h3>libvirt dnsmasq<a class="headerlink" href="#libvirt-dnsmasq" title="此标题的永久链接">¶</a></h3>
 <p>但是，在KVM虚拟机集群中，如何能够使得所有虚拟机都获得统一的DNS解析呢？显然，在集群中运行一个DNS服务器是一个解决方案。但是，请注意，在KVM libvirt的运行环境中，默认就在libvirt中运行了一个dnsmasq，实际上为 <code class="docutils literal notranslate"><span class="pre">virtbr0</span></code> 网络接口上连接的所有虚拟机提供了DNS解析服务。通过在物理服务器上检查 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">dnsmasq</span></code> 可以看到:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>nobody    13280  0.0  0.0  53884  1116 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
 root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dhcp-script=/usr/libexec/libvirt_leaseshelper
@@ -266,7 +267,7 @@ root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsm
 </ul>
 <p>参考 <a class="reference external" href="https://fabianlee.org/2018/10/22/kvm-using-dnsmasq-for-libvirt-dns-resolution/">KVM: Using dnsmasq for libvirt DNS resolution</a> ，执行 <code class="docutils literal notranslate"><span class="pre">virsh</span> <span class="pre">net-edit</span> <span class="pre">default</span></code> 编辑 libvirt 网络，添加 <code class="docutils literal notranslate"><span class="pre">&lt;dns&gt;&lt;/dns&gt;</span></code> 段落:</p>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">virsh net-edit default</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">virsh net-edit default</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">&lt;network&gt;</span>
 <span class="linenos"> 2</span>  <span class="nt">&lt;name&gt;</span>default<span class="nt">&lt;/name&gt;</span>
 <span class="linenos"> 3</span>  <span class="nt">&lt;uuid&gt;</span>7cbc12d6-1899-4808-8d76-cdda780e3cc9<span class="nt">&lt;/uuid&gt;</span>
@@ -371,10 +372,10 @@ root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsm
 </section>
 </section>
 <section id="pssh">
-<h2>pssh配置<a class="headerlink" href="#pssh" title="Permalink to this heading">¶</a></h2>
+<h2>pssh配置<a class="headerlink" href="#pssh" title="此标题的永久链接">¶</a></h2>
 <p>为了方便在集群多台服务器上同时安装软件包和进行基础配置，采用pssh方式执行命令，所以准备按照虚拟机用途进行分组如下：</p>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">kube</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">kube</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="m">192</span>.168.122.11
 <span class="linenos">2</span><span class="m">192</span>.168.122.12
 <span class="linenos">3</span><span class="m">192</span>.168.122.13
@@ -388,7 +389,7 @@ root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsm
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">kubemaster</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">kubemaster</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="m">192</span>.168.122.11
 <span class="linenos">2</span><span class="m">192</span>.168.122.12
 <span class="linenos">3</span><span class="m">192</span>.168.122.13
@@ -397,7 +398,7 @@ root      13281  0.0  0.0  53856   380 ?        S    22:15   0:00 /usr/sbin/dnsm
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">kubenode</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">kubenode</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="m">192</span>.168.122.15
 <span class="linenos">2</span><span class="m">192</span>.168.122.16
 <span class="linenos">3</span><span class="m">192</span>.168.122.17

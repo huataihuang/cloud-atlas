@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Minikube的应用部署伸缩 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -95,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -173,29 +174,29 @@
            <div itemprop="articleBody">
              
   <section id="minikube">
-<span id="minikube-scale-app"></span><h1>Minikube的应用部署伸缩<a class="headerlink" href="#minikube" title="Permalink to this heading">¶</a></h1>
+<span id="minikube-scale-app"></span><h1>Minikube的应用部署伸缩<a class="headerlink" href="#minikube" title="此标题的永久链接">¶</a></h1>
 <p>虽然在 <a class="reference internal" href="minikube_deploy_app.html#minikube-deploy-app"><span class="std std-ref">使用Minikube集群部署应用</span></a> 后通过 <a class="reference internal" href="minikube_expose_app.html#minikube-expose-app"><span class="std std-ref">Minikube对外输出应用</span></a> 能够让外部访问到应用服务，但是可以发现，这样的部署只有一个Pod在运行应用程序。当系统负载流量增加时，单个Pod是无法支持业务的，这就需要使用Kubernetes的横向扩展能力。</p>
 <p><strong>Scaling</strong> 是通过修改Deployment的部署副本replicas来实现的。</p>
 <section id="scaling">
-<h2>伸缩(Scaling)概览<a class="headerlink" href="#scaling" title="Permalink to this heading">¶</a></h2>
+<h2>伸缩(Scaling)概览<a class="headerlink" href="#scaling" title="此标题的永久链接">¶</a></h2>
 <figure class="align-default">
 <img alt="../../_images/kubernetes_scaling.svg" src="../../_images/kubernetes_scaling.svg" /></figure>
 <p>部署的伸缩是通过在可用资源上调度,创建新的Pod或删除运行的Pod来实现的，Kubernetes将按指定Pod数量增加或缩减Pod以提供恰当的负载能力。当具有多个应用程序运行实例(Pods)时，不仅具有更大的负载能力，也能够实现滚动升级而不影响系统。</p>
 </section>
 <section id="id1">
-<h2>伸缩应用<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>伸缩应用<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>我们在 <a class="reference internal" href="minikube_deploy_app.html#minikube-deploy-app"><span class="std std-ref">使用Minikube集群部署应用</span></a> 中部署了Pod，名为 <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> ，现在我们来扩展这个应用。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>请注意，我的案例和 <a class="reference external" href="https://kubernetes.io/docs/tutorials/">Google提供的在线教程</a> 不同，我采用了从 <a class="reference external" href="https://hub.docker.com/_/ubuntu">Ubuntu Docker官方镜像</a> 从头开始定制镜像内容，所以初始的 <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 容器已经做了一定的内容修改（相当于自己做了一个和Google案例相同的容器），这样就需要把容器转换（存储）成自定义镜像，然后通过自定义镜像来重新部署应用。</p>
 </div>
 <section id="id2">
-<h3>部署私有镜像仓库<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>部署私有镜像仓库<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
 <p>请参考 <a class="reference internal" href="../deployment/docker_registry.html#docker-registry"><span class="std std-ref">在Kubernetes中部署私有Docker镜像仓库</span></a> 部署私有镜像仓库，通过私有镜像仓库，我们可以把前期自定义容器转换成镜像，并用自定义镜像创建我们需要的容器集群。</p>
 </section>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/docs/tutorials/kubernetes-basics/scale/scale-intro/">Scale Your App</a></p></li>
 <li></li>

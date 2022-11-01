@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>添加Ceph OSDs (LVM卷) &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -163,7 +163,7 @@
            <div itemprop="articleBody">
              
   <section id="ceph-osds-lvm">
-<span id="add-ceph-osds-lvm"></span><h1>添加Ceph OSDs (LVM卷)<a class="headerlink" href="#ceph-osds-lvm" title="Permalink to this heading">¶</a></h1>
+<span id="add-ceph-osds-lvm"></span><h1>添加Ceph OSDs (LVM卷)<a class="headerlink" href="#ceph-osds-lvm" title="此标题的永久链接">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>我在 <a class="reference internal" href="add_ceph_osds_raw.html#add-ceph-osds-raw"><span class="std std-ref">添加Ceph OSDs (RAW磁盘)</span></a> 遇到了重启后无法正确挂载 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/osd/ceph-0</span></code> 问题，暂时无法解决。所以回归最标准的采用 <a class="reference internal" href="../../../linux/storage/lvm/index.html#linux-lvm"><span class="std std-ref">Linux LVM逻辑卷管理</span></a> 卷作为底层的方法，重试尽快部署完Ceph，进入下阶段测试。后续再做方案完善…`</p>
@@ -180,12 +180,12 @@
 <p>我这里的测试环境，采用简化的 <code class="docutils literal notranslate"><span class="pre">磁盘分区</span></code> 来提供Ceph <a class="reference internal" href="../../arch/bluestore.html#bluestore"><span class="std std-ref">Ceph后端存储引擎BlueStore</span></a> 存储，原因是我需要简化配置，同时我的测试服务器也没有硬件进行后续扩容。</p>
 </div>
 <section id="bluestore">
-<h2>bluestore<a class="headerlink" href="#bluestore" title="Permalink to this heading">¶</a></h2>
+<h2>bluestore<a class="headerlink" href="#bluestore" title="此标题的永久链接">¶</a></h2>
 <p><a class="reference internal" href="../../arch/bluestore.html#bluestore"><span class="std std-ref">Ceph后端存储引擎BlueStore</span></a> 是最新的Ceph采用的默认高性能存储引擎，底层不再使用OS的文件系统，可以直接管理磁盘硬件。</p>
 <p>需要部署OSD的服务器首先准备存储，通常采用LVM卷作为底层存储块设备，这样可以通过LVM逻辑卷灵活调整块设备大小(有可能随着数据存储增长需要调整设备)。</p>
 <p>作为我的实践环境 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 每个 <a class="reference internal" href="../../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机仅有一个pass-through PCIe NVMe存储，所以我没有划分不同存储设备来分别存放 <code class="docutils literal notranslate"><span class="pre">block</span></code> / <code class="docutils literal notranslate"><span class="pre">block.db</span></code> 和 <code class="docutils literal notranslate"><span class="pre">block.wal</span></code> 。采用LVM可以不断扩容底层存储，所以即使开始时候磁盘空间划分较小也没有关系。我这次实践采用划分500GB作为初始分区，后续我将实践在线扩容。</p>
 <section id="lvmbluestore">
-<h3>使用LVM作为bluestore底层<a class="headerlink" href="#lvmbluestore" title="Permalink to this heading">¶</a></h3>
+<h3>使用LVM作为bluestore底层<a class="headerlink" href="#lvmbluestore" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>执行 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">--help</span></code> 可以看到支持3种底层存储:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvm</span>                      <span class="n">Use</span> <span class="n">LVM</span> <span class="ow">and</span> <span class="n">LVM</span><span class="o">-</span><span class="n">based</span> <span class="n">technologies</span> <span class="n">to</span> <span class="n">deploy</span> <span class="n">OSDs</span>
@@ -260,7 +260,7 @@
 <p>提示信息:</p>
 <blockquote>
 <div><div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">ceph-volume lvm create 输出</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">ceph-volume lvm create 输出</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>Running command: /usr/bin/ceph-authtool --gen-print-key
 <span class="linenos"> 2</span>Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring -i - osd new 33b7d928-8075-4531-9177-9253a71dec84
 <span class="linenos"> 3</span>Running command: /usr/sbin/vgcreate --force --yes ceph-b7d91a2a-72ca-488b-948f-c42613698cca /dev/nvme0n1p1
@@ -385,7 +385,7 @@
 </section>
 </section>
 <section id="id1">
-<h2>重启操作系统验证<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>重启操作系统验证<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>重启操作系统 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">shutdown</span> <span class="pre">-r</span> <span class="pre">now</span></code></p>
 <ul>
 <li><p>启动后检查:</p>
@@ -424,7 +424,7 @@
 </div>
 </section>
 <section id="osd">
-<h2>添加OSD<a class="headerlink" href="#osd" title="Permalink to this heading">¶</a></h2>
+<h2>添加OSD<a class="headerlink" href="#osd" title="此标题的永久链接">¶</a></h2>
 <p>需要满足3副本要求，我们需要在服务器本地或者其他服务器上添加OSD。为了能够冗余，我采用集群3个服务器上每个服务器都启动 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ceph-osd</span></code> ，所以下面我们来完成:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="add_ceph_mons.html#add-ceph-mons"><span class="std std-ref">Ceph集群添加ceph-mon</span></a></p></li>
@@ -435,7 +435,7 @@
 </ul>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://docs.ceph.com/docs/master/install/">Ceph document - Installation (Manual)</a></p></li>
 <li><p><a class="reference external" href="https://tracker.ceph.com/issues/48783">raw osd’s are not started on boot after upgrade from 14.2.11 to 14.2.16 ; ceph-volume raw activate claim systemd support not yet implemented</a></p></li>

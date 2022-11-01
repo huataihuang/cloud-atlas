@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>比较IOMMU NVMe和原生NVMe存储性能 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -75,7 +75,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vgpu/index.html">NVIDIA Virtual GPU (vGPU)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual/index.html">KVM嵌套虚拟化</a></li>
@@ -171,7 +171,7 @@
            <div itemprop="articleBody">
              
   <section id="iommu-nvmenvme">
-<span id="compare-iommu-native-nvme"></span><h1>比较IOMMU NVMe和原生NVMe存储性能<a class="headerlink" href="#iommu-nvmenvme" title="Permalink to this heading">¶</a></h1>
+<span id="compare-iommu-native-nvme"></span><h1>比较IOMMU NVMe和原生NVMe存储性能<a class="headerlink" href="#iommu-nvmenvme" title="此标题的永久链接">¶</a></h1>
 <p>我通过 <a class="reference internal" href="ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 将 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> assign到kvm虚拟机，这种 pass-through 技术可以极大提升虚拟机的存储性能。本文将采用 <a class="reference internal" href="../../performance/performance_tools/fio/index.html#fio"><span class="std std-ref">fio 存储性能测试</span></a> 对比存储性能，观察能否满足性能要求，后续还会进行 <a class="reference internal" href="tunning/index.html#iommu-tunning"><span class="std std-ref">IOMMU性能优化</span></a></p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
@@ -179,16 +179,16 @@
 <p>由于我已经完成NVMe assign 给虚拟机 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code> ，所以我先在虚拟机内部完成fio测试，然后关闭虚拟机，去除内核屏蔽nvme设备。然后重启服务器，让物理主机能够访问NVMe设备，再进行对比测试。</p>
 </div>
 <section id="id1">
-<h2>磁盘性能测试<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>磁盘性能测试<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <section id="id2">
-<h3>虚拟机配置<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>虚拟机配置<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>测试虚拟机的 <code class="docutils literal notranslate"><span class="pre">vcpu</span></code> 需要匹配 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 的 <code class="docutils literal notranslate"><span class="pre">numjobs</span></code> 数量，按照我下文测试命令采用 <code class="docutils literal notranslate"><span class="pre">-numjobs=4</span></code> 所以配置虚拟机 <code class="docutils literal notranslate"><span class="pre">vcpu=4</span></code></p></li>
 <li><p>虚拟机分配内存 16GB (可选)</p></li>
 </ul>
 </section>
 <section id="iops">
-<h3>随机写IOPS<a class="headerlink" href="#iops" title="Permalink to this heading">¶</a></h3>
+<h3>随机写IOPS<a class="headerlink" href="#iops" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randwrite</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
@@ -198,7 +198,7 @@
 <li><p>虚拟机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机写IOPS</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机写IOPS</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting <span class="m">4</span> processes
 <span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>w<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>1669MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span>427k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -236,7 +236,7 @@
 <li><p>物理主机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">物理主机 随机写IOPS</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">物理主机 随机写IOPS</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting <span class="m">4</span> processes
 <span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>w<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>1605MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span>411k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -273,7 +273,7 @@
 </div>
 </section>
 <section id="id3">
-<h3>随机读IOPS<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3>随机读IOPS<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">32</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">randread</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">4</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">4</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
@@ -283,7 +283,7 @@
 <li><p>虚拟机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机读IOPS</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 随机读IOPS</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting <span class="m">4</span> processes
 <span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>r<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>2824MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span>723k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -322,7 +322,7 @@
 <li><p>物理主机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">物理主机 随机读IOPS</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">物理主机 随机读IOPS</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting <span class="m">4</span> processes
 <span class="linenos"> 3</span>Jobs: <span class="m">4</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">4</span><span class="o">)</span>: <span class="o">[</span>r<span class="o">(</span><span class="m">4</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>3358MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span>860k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -359,7 +359,7 @@
 </div>
 </section>
 <section id="id4">
-<h3>顺序写吞吐量<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3>顺序写吞吐量<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">128</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">write</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">128</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
@@ -369,7 +369,7 @@
 <li><p>虚拟机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序写吞吐量</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序写吞吐量</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting <span class="m">1</span> process
 <span class="linenos"> 3</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>W<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>1672MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">13</span>.4k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -406,7 +406,7 @@
 <li><p>物理主机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">物理主机 顺序写吞吐量</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">物理主机 顺序写吞吐量</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting <span class="m">1</span> process
 <span class="linenos"> 3</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>W<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">w</span><span class="o">=</span>1703MiB/s<span class="o">][</span><span class="nv">w</span><span class="o">=</span><span class="m">13</span>.6k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -441,7 +441,7 @@
 </div>
 </section>
 <section id="id5">
-<h3>顺序读吞吐量<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3>顺序读吞吐量<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fio</span> <span class="o">-</span><span class="n">direct</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">iodepth</span><span class="o">=</span><span class="mi">128</span> <span class="o">-</span><span class="n">rw</span><span class="o">=</span><span class="n">read</span> <span class="o">-</span><span class="n">ioengine</span><span class="o">=</span><span class="n">libaio</span> <span class="o">-</span><span class="n">bs</span><span class="o">=</span><span class="mi">128</span><span class="n">k</span> <span class="o">-</span><span class="n">numjobs</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">time_based</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">-</span><span class="n">group_reporting</span> <span class="o">-</span><span class="n">filename</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">test</span>
@@ -451,7 +451,7 @@
 <li><p>虚拟机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序读吞吐量</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机 顺序读吞吐量</span><a class="headerlink" href="#id15" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>test: <span class="o">(</span><span class="nv">g</span><span class="o">=</span><span class="m">0</span><span class="o">)</span>: <span class="nv">rw</span><span class="o">=</span>read, <span class="nv">bs</span><span class="o">=(</span>R<span class="o">)</span> 128KiB-128KiB, <span class="o">(</span>W<span class="o">)</span> 128KiB-128KiB, <span class="o">(</span>T<span class="o">)</span> 128KiB-128KiB, <span class="nv">ioengine</span><span class="o">=</span>libaio, <span class="nv">iodepth</span><span class="o">=</span><span class="m">128</span>
 <span class="linenos"> 2</span>fio-3.16
 <span class="linenos"> 3</span>Starting <span class="m">1</span> process
@@ -489,7 +489,7 @@
 <li><p>物理主机测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id16">
-<div class="code-block-caption"><span class="caption-text">物理主机 顺序读吞吐量</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">物理主机 顺序读吞吐量</span><a class="headerlink" href="#id16" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting <span class="m">1</span> process
 <span class="linenos"> 3</span>Jobs: <span class="m">1</span> <span class="o">(</span><span class="nv">f</span><span class="o">=</span><span class="m">1</span><span class="o">)</span>: <span class="o">[</span>R<span class="o">(</span><span class="m">1</span><span class="o">)][</span><span class="m">100</span>.0%<span class="o">][</span><span class="nv">r</span><span class="o">=</span>3444MiB/s<span class="o">][</span><span class="nv">r</span><span class="o">=</span><span class="m">27</span>.5k IOPS<span class="o">][</span>eta 00m:00s<span class="o">]</span>
@@ -525,14 +525,14 @@
 </section>
 </section>
 <section id="id6">
-<h2>测试结果<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<h2>测试结果<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>我第一次测试 <a class="reference internal" href="ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机，设置了 <code class="docutils literal notranslate"><span class="pre">1c2g</span></code> 规格。实际上上述随机读写测试采用了4个job，我观察了实际上会把4个CPU核心打满。对于 <code class="docutils literal notranslate"><span class="pre">1c2g</span></code> 虚拟机由于只有1个cpu，会导致性能无法满足并发4个读写进程对要求: 测试结果读写性能只有物理主机的 1/4 不到</p>
 <p>第二次测试我分配了4cpu的虚拟机，并发果然跑满4个vcpu之后，虚拟机存储性能基本上接近物理主机存储性能</p>
 </div>
-<table class="docutils align-default" id="id17">
-<caption><span class="caption-text">IOMMU虚拟机和物理机 NVMe性能对比</span><a class="headerlink" href="#id17" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id17">
+<caption><span class="caption-text">IOMMU虚拟机和物理机 NVMe性能对比</span><a class="headerlink" href="#id17" title="此表格的永久链接">¶</a></caption>
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 15%" />
@@ -603,7 +603,7 @@
 </ul>
 </section>
 <section id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://help.aliyun.com/document_detail/147897.html">阿里云帮助文档: 测试块存储性能</a></p></li>
 </ul>

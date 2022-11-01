@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kubernetes重启pod &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -172,15 +173,15 @@
            <div itemprop="articleBody">
              
   <section id="kubernetespod">
-<span id="k8s-restart-pod"></span><h1>Kubernetes重启pod<a class="headerlink" href="#kubernetespod" title="Permalink to this heading">¶</a></h1>
+<span id="k8s-restart-pod"></span><h1>Kubernetes重启pod<a class="headerlink" href="#kubernetespod" title="此标题的永久链接">¶</a></h1>
 <p>有以下集中方式重启(重建)pod</p>
 <section id="replicaspod">
-<h2>采用replicas重启pod<a class="headerlink" href="#replicaspod" title="Permalink to this heading">¶</a></h2>
+<h2>采用replicas重启pod<a class="headerlink" href="#replicaspod" title="此标题的永久链接">¶</a></h2>
 <p>在 <a class="reference internal" href="../concepts/workloads/controllers/replicaset.html#replicaset"><span class="std std-ref">ReplicaSet</span></a> 中控制 <a class="reference internal" href="../concepts/workloads/pods/pod_lifecycle.html#pod-lifecycle"><span class="std std-ref">Pod生命周期</span></a> ，实现原理是执行 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">scale</span> <span class="pre">--replicas=0</span></code> 然后恢复 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">scale</span> <span class="pre">--replicas=N</span></code> ，这个过程会重启容器</p>
 <p>对于指定pod重启，可以通过保持 <code class="docutils literal notranslate"><span class="pre">replicas</span></code> 值不变情况下，直接 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">delete</span> <span class="pre">pod</span> <span class="pre">XXX</span></code> 删除pod，然后 <code class="docutils literal notranslate"><span class="pre">replicaset</span></code> 会自动恢复pod，实现pod重启</p>
 </section>
 <section id="rollout-restart-pods">
-<h2>采用 <code class="docutils literal notranslate"><span class="pre">rollout</span> <span class="pre">restart</span></code> 命令重启 pods<a class="headerlink" href="#rollout-restart-pods" title="Permalink to this heading">¶</a></h2>
+<h2>采用 <code class="docutils literal notranslate"><span class="pre">rollout</span> <span class="pre">restart</span></code> 命令重启 pods<a class="headerlink" href="#rollout-restart-pods" title="此标题的永久链接">¶</a></h2>
 <p>采用 <code class="docutils literal notranslate"><span class="pre">replicas</span></code> 伸缩的问题是，有一段时间应用不可访问(因为所有pod都被缩容)。解决方法之一是上文通过手工方式一一删除pod，通过 <code class="docutils literal notranslate"><span class="pre">replicaset</span></code> 自动恢复重建。这种方式是手工控制重启进度。</p>
 <p>另一种比较 <strong>优雅</strong> 的方式是使用 <code class="docutils literal notranslate"><span class="pre">rollout</span> <span class="pre">restart</span></code> 命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">rollout</span> <span class="n">restart</span> <span class="n">deployment</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span>
@@ -189,7 +190,7 @@
 <p>上述命令会滚动重启 <code class="docutils literal notranslate"><span class="pre">nginx-deployment</span></code> 的所有pods</p>
 </section>
 <section id="deploymentpods">
-<h2>修改deployment环境变量重启pods<a class="headerlink" href="#deploymentpods" title="Permalink to this heading">¶</a></h2>
+<h2>修改deployment环境变量重启pods<a class="headerlink" href="#deploymentpods" title="此标题的永久链接">¶</a></h2>
 <p>当修改pods的环境变量，pod会自动重启。也就是使用 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">set</span> <span class="pre">env</span></code> 命令修改变量，则pods重启(因为pod的配置修改默认就是重建):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>kubectl set env deployment nginx-deployment DATE=$()
 </pre></div>
@@ -209,7 +210,7 @@
 </div>
 </section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://adamtheautomator.com/restart-pod-kubernetes/">How to Restart Pods in Kubernetes [Step-by-Step]</a></p></li>
 </ul>

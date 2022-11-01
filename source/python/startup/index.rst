@@ -8,6 +8,7 @@ Python起步
    :maxdepth: 1
 
    virtualenv.rst
+   rebuild_virtualenv.rst
    upgrade_all_python_packages_with_pip.rst
    python_in_rhel8.rst
    python_in_kali.rst

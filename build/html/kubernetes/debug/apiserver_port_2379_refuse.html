@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>apiserver服务器无法连接端口2379 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -106,6 +106,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -184,7 +185,7 @@
            <div itemprop="articleBody">
              
   <section id="apiserver2379">
-<span id="apiserver-port-2379-refuse"></span><h1>apiserver服务器无法连接端口2379<a class="headerlink" href="#apiserver2379" title="Permalink to this heading">¶</a></h1>
+<span id="apiserver-port-2379-refuse"></span><h1>apiserver服务器无法连接端口2379<a class="headerlink" href="#apiserver2379" title="此标题的永久链接">¶</a></h1>
 <p>在升级了 <a class="reference internal" href="../arm/arm_k8s.html#arm-k8s"><span class="std std-ref">ARM部署Kubernetes</span></a> 管控服务器，意外发现 apiserver 运行异常:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">namespaces</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span>
 </pre></div>
@@ -203,7 +204,7 @@
 </div>
 <p>不过管控服务器 <code class="docutils literal notranslate"><span class="pre">pi-master1</span></code> 上其他服务运行正常。</p>
 <section id="id1">
-<h2>排查<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>排查<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>检查 apiserver 日志:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">logs</span> <span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
@@ -265,7 +266,7 @@
 <p>上述命令都能够正常工作，并且我在回复 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 的Jetson节点时候，完全顺利实现了 <a class="reference internal" href="../administer/remove_node.html#remove-node"><span class="std std-ref">从Kubernetes集群删除节点</span></a> 并重新加回 Jetson 节点。</p>
 </section>
 <section id="etcd">
-<h2>etcd错误<a class="headerlink" href="#etcd" title="Permalink to this heading">¶</a></h2>
+<h2>etcd错误<a class="headerlink" href="#etcd" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>检查 <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">apiserver</span></code> 就可以看到，访问端口 <code class="docutils literal notranslate"><span class="pre">2379</span></code> 其实就是访问 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 服务:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span> <span class="o">--</span><span class="n">advertise</span><span class="o">-</span><span class="n">address</span><span class="o">=</span><span class="mf">192.168.6.11</span> <span class="o">...</span> <span class="o">--</span><span class="n">etcd</span><span class="o">-</span><span class="n">servers</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">2379</span> <span class="o">....</span>
@@ -293,7 +294,7 @@
 </ul>
 </section>
 <section id="kubelet">
-<h2>kubelet错误<a class="headerlink" href="#kubelet" title="Permalink to this heading">¶</a></h2>
+<h2>kubelet错误<a class="headerlink" href="#kubelet" title="此标题的永久链接">¶</a></h2>
 <p><a class="reference external" href="https://github.com/kubernetes/kubernetes/issues/74262">kubenetes #74262</a> 提到可以检查kubelet日志:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">journalctl</span> <span class="o">-</span><span class="n">xeu</span> <span class="n">kubelet</span>
 </pre></div>
@@ -352,7 +353,7 @@
 </ul>
 </section>
 <section id="id2">
-<h2>推测<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>推测<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>我注意到kubernetes升级，下一个 kubernetes apiserver 容器命名是后缀是依次递增的，这点可以从 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span> <span class="pre">--all</span></code> 看到:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">k8s_kube</span><span class="o">-</span><span class="n">apiserver_kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1_kube</span><span class="o">-</span><span class="n">system_1403dda53affdfee1130475a6d9609da_23</span>
 <span class="n">k8s_kube</span><span class="o">-</span><span class="n">apiserver_kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">pi</span><span class="o">-</span><span class="n">master1_kube</span><span class="o">-</span><span class="n">system_1403dda53affdfee1130475a6d9609da_24</span>
@@ -362,7 +363,7 @@
 <p>看来连接 <code class="docutils literal notranslate"><span class="pre">etcd</span></code> 端口失败仅仅是表象，实际排查故障还是需要从 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 日志着手。</p>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/kubernetes/kubernetes/issues/74262">kubenetes #74262</a></p></li>
 </ul>

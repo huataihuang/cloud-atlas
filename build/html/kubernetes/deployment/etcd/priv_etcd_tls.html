@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>私有云etcd集群TLS设置 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -109,6 +109,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -188,12 +189,12 @@
            <div itemprop="articleBody">
              
   <section id="etcdtls">
-<span id="priv-etcd-tls"></span><h1>私有云etcd集群TLS设置<a class="headerlink" href="#etcdtls" title="Permalink to this heading">¶</a></h1>
+<span id="priv-etcd-tls"></span><h1>私有云etcd集群TLS设置<a class="headerlink" href="#etcdtls" title="此标题的永久链接">¶</a></h1>
 <p>在部署 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 体系中，需要构建 <a class="reference internal" href="../../../real/priv_cloud/priv_etcd.html#priv-etcd"><span class="std std-ref">私有云etcd服务</span></a> 为私有k8s集群提供基础服务。部署参考并基于 <a class="reference internal" href="etcd_tls.html#etcd-tls"><span class="std std-ref">etcd集群TLS设置</span></a> 改进。</p>
 <p>etcd支持通过TLS协议进行加密通讯，要使用自签名证书启动一个集群，集群的每个成员需要有有一个唯一密钥对( <code class="docutils literal notranslate"><span class="pre">member.crt</span></code> 和 <code class="docutils literal notranslate"><span class="pre">member.key</span></code> )被一个共享的集群CA证书( <code class="docutils literal notranslate"><span class="pre">ca.crt</span></code> )签名过，这个密钥对用于彼此通讯和客户端连接。</p>
 <p>通过 <a class="reference internal" href="../../../real/priv_cloud/priv_kvm.html#priv-kvm"><span class="std std-ref">私有云KVM环境</span></a> 构建3台虚拟机:</p>
-<table class="docutils align-default" id="id4">
-<caption><span class="caption-text">私有云KVM虚拟机</span><a class="headerlink" href="#id4" title="永久链接至表格">¶</a></caption>
+<table class="colwidths-given docutils align-default" id="id4">
+<caption><span class="caption-text">私有云KVM虚拟机</span><a class="headerlink" href="#id4" title="此表格的永久链接">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 60%" />
@@ -216,12 +217,12 @@
 </tbody>
 </table>
 <section id="etcd">
-<h2>etcd集群证书生成<a class="headerlink" href="#etcd" title="Permalink to this heading">¶</a></h2>
+<h2>etcd集群证书生成<a class="headerlink" href="#etcd" title="此标题的永久链接">¶</a></h2>
 <section id="cfssl">
-<h3>发行版安装cfssl<a class="headerlink" href="#cfssl" title="Permalink to this heading">¶</a></h3>
+<h3>发行版安装cfssl<a class="headerlink" href="#cfssl" title="此标题的永久链接">¶</a></h3>
 <p>在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 所使用的数据层3台虚拟机都是使用 <a class="reference internal" href="../../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> ，ubuntu发行版提供了 <code class="docutils literal notranslate"><span class="pre">golang-cfssl</span></code> 软件包，直接提供了 Cloudflare 的 <code class="docutils literal notranslate"><span class="pre">cfssl</span></code> 工具，所以直接安装非常方便:</p>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">ubuntu发行版提供Cloudflare的cfssl工具</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">ubuntu发行版提供Cloudflare的cfssl工具</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install golang-cfssl -y
 </pre></div>
 </div>
@@ -229,7 +230,7 @@
 </section>
 </section>
 <section id="id1">
-<h2>证书生成<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>证书生成<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>在设置etcd集群时需要使用3种证书：</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Client</span> <span class="pre">certificate</span></code> 是服务器用于认证客户端的证书，例如， etcdctl, etcd proxy 或者 docker客户端都需要使用</p></li>
@@ -237,12 +238,12 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">Peer</span> <span class="pre">certificate</span></code> 是etcd服务器成员彼此通讯的证书。</p></li>
 </ul>
 <section id="id2">
-<h3>初始化证书认证<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>初始化证书认证<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>之前在 <a class="reference internal" href="etcd_tls.html#etcd-tls"><span class="std std-ref">etcd集群TLS设置</span></a> 实践中是产生默认 <code class="docutils literal notranslate"><span class="pre">cfssl</span></code> 选项，然后在此基础上修订。不过，我们既然有基础了，就直接配置 <code class="docutils literal notranslate"><span class="pre">ca-config.json</span></code> (有效期限10年):</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">修订证书有效期10年 ca-config.json</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">修订证书有效期10年 ca-config.json</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;signing&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -289,7 +290,7 @@
 <li><p>配置CSR(Certificate Signing Request)配置文件 <code class="docutils literal notranslate"><span class="pre">ca-csr.json</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">修订CSR ca-csr.json</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">修订CSR ca-csr.json</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;priv k8s etcd&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -313,7 +314,7 @@
 <li><p>使用上述配置定义生成CA:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">生成CA</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">生成CA</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cfssl gencert -initca ca-csr.json <span class="p">|</span> cfssljson -bare ca -
 </pre></div>
 </div>
@@ -332,7 +333,7 @@
 <li><p>生成服务器证书: 直接编辑 <code class="docutils literal notranslate"><span class="pre">server.json</span></code> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">修订 server.json</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">修订 server.json</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;priv k8s etcd&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;hosts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -361,7 +362,7 @@
 <li><p>现在可以生成服务器证书和私钥:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">生成服务器证书和私钥</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">生成服务器证书和私钥</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cfssl gencert -ca<span class="o">=</span>ca.pem -ca-key<span class="o">=</span>ca-key.pem -config<span class="o">=</span>ca-config.json -profile<span class="o">=</span>server server.json <span class="p">|</span> cfssljson -bare server
 </pre></div>
 </div>
@@ -376,7 +377,7 @@
 <li><p>peer certificate (每个服务器一个，按对应主机名):</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">服务器 z-b-data-1.staging.huatai.me 点对点证书</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">服务器 z-b-data-1.staging.huatai.me 点对点证书</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;z-b-data-1&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;hosts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -401,7 +402,7 @@
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">服务器 z-b-data-2.staging.huatai.me 点对点证书</span><a class="headerlink" href="#id12" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">服务器 z-b-data-2.staging.huatai.me 点对点证书</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;z-b-data-2&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;hosts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -426,7 +427,7 @@
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">服务器 z-b-data-3.staging.huatai.me 点对点证书</span><a class="headerlink" href="#id13" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">服务器 z-b-data-3.staging.huatai.me 点对点证书</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;z-b-data-3&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;hosts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -452,7 +453,7 @@
 </div>
 <p>对应生成3个主机的服务器证书:</p>
 <div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">生成3个主机的点对点证书</span><a class="headerlink" href="#id14" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">生成3个主机的点对点证书</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> sn <span class="k">in</span> <span class="sb">`</span>seq <span class="m">3</span><span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
     cfssl gencert -ca<span class="o">=</span>ca.pem -ca-key<span class="o">=</span>ca-key.pem -config<span class="o">=</span>ca-config.json -profile<span class="o">=</span>peer z-b-data-<span class="si">${</span><span class="nv">sn</span><span class="si">}</span>.json <span class="p">|</span> cfssljson -bare z-b-data-<span class="si">${</span><span class="nv">sn</span><span class="si">}</span>
 <span class="k">done</span>
@@ -470,7 +471,7 @@
 <li><p>客户端证书 <code class="docutils literal notranslate"><span class="pre">client.json</span></code> (主要是主机列表保持空):</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">修订 client.json</span><a class="headerlink" href="#id15" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">修订 client.json</span><a class="headerlink" href="#id15" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;CN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;private k8s etcd client&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;hosts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span><span class="w"></span>
@@ -493,7 +494,7 @@
 <li><p>现在可以生成客户端证书:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id16">
-<div class="code-block-caption"><span class="caption-text">生成客户端证书</span><a class="headerlink" href="#id16" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">生成客户端证书</span><a class="headerlink" href="#id16" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cfssl gencert -ca<span class="o">=</span>ca.pem -ca-key<span class="o">=</span>ca-key.pem -config<span class="o">=</span>ca-config.json -profile<span class="o">=</span>client client.json <span class="p">|</span> cfssljson -bare client
 </pre></div>
 </div>
@@ -507,7 +508,7 @@
 </section>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/etcd-io/etcd/tree/master/hack/tls-setup">etcd/hack/tls-setup</a></p></li>
 <li><p><a class="reference external" href="https://etcd.io/docs/v3.4.0/op-guide/clustering/">etcd Clustering Guide</a></p></li>

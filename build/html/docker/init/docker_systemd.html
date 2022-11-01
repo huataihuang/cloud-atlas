@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Docker systemd进程管理器 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -159,7 +159,7 @@
            <div itemprop="articleBody">
              
   <section id="docker-systemd">
-<span id="id1"></span><h1>Docker systemd进程管理器<a class="headerlink" href="#docker-systemd" title="Permalink to this heading">¶</a></h1>
+<span id="id1"></span><h1>Docker systemd进程管理器<a class="headerlink" href="#docker-systemd" title="此标题的永久链接">¶</a></h1>
 <p>在容器环境中，最佳的实践方式是采用完全轻量级的只运行应用进程的每个容器一个应用进程的模式。但是，很多情况下，我们依然会需要采用 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 来实现以下功能:</p>
 <ul class="simple">
 <li><p>多服务容器</p></li>
@@ -175,7 +175,7 @@
 <p>systemd提供了处理服务器进程的重启和起停等管理功能，比任何其他进程管理器更为稳定和经过实践验证</p>
 <p>不过，systemd也因为其设计架构原因，会沿用其 systemd/journald 来控制容器的输出，而这个容器的输出对于 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> 和 <a class="reference internal" href="../../openshift/index.html#openshift"><span class="std std-ref">OpenShift Atlas</span></a> 设计架构是需要直接将日志输出到标准输出stdout和stderr。所以，如果你希望通过Kubernetes和OpenShift这样的调度系统来管理容器，在需要谨慎使用基于systemd的容器。并且，Docker和 <a class="reference internal" href="../moby/index.html#docker-moby"><span class="std std-ref">Docker Moby</span></a> 社区都不建议在容器中运行systemd。</p>
 <section id="dockersystemd">
-<h2>Docker容器中的systemd<a class="headerlink" href="#dockersystemd" title="Permalink to this heading">¶</a></h2>
+<h2>Docker容器中的systemd<a class="headerlink" href="#dockersystemd" title="此标题的永久链接">¶</a></h2>
 <p>由于docker容器通常只运行一个进程，当需要多个服务进程时，可以使用 <a class="reference internal" href="../startup/docker_compose.html#docker-compose"><span class="std std-ref">Docker Compose</span></a> 来配置启动多个容器服务器来实现。所以，默认情况下docker并不需要 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 来监视多个服务，这样默认关闭 systemd 不仅简化了部署也增强了安全性(不同容器可以隔离服务)。</p>
 <p>配置要点:</p>
 <ul class="simple">
@@ -206,7 +206,7 @@
 <li><p>如果要在容器内运行基于 <code class="docutils literal notranslate"><span class="pre">fuse</span></code> 到软件，需要bind mount <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code></p></li>
 </ul>
 <section id="fedora-34-systemd-in-docker-container">
-<span id="fedora-systemd-in-docker"></span><h3>Fedora 34 systemd in Docker Container<a class="headerlink" href="#fedora-34-systemd-in-docker-container" title="Permalink to this heading">¶</a></h3>
+<span id="fedora-systemd-in-docker"></span><h3>Fedora 34 systemd in Docker Container<a class="headerlink" href="#fedora-34-systemd-in-docker-container" title="此标题的永久链接">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>在2021年10月时候，我发现Fedora 34官方已经去除了镜像中的systemd软件包( 只安装了 <code class="docutils literal notranslate"><span class="pre">systemd-libs</span></code> )，如果Dockerfile中没有加上 <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">-y</span> <span class="pre">install</span> <span class="pre">systemd</span></code> 则运行容器出现报错:</p>
@@ -233,7 +233,7 @@ lrwxrwxrwx 1 root root 20 Sep  7 18:37 /usr/sbin/init -&gt; /lib/systemd/systemd
 </div>
 <p>Fedora 34官方镜像没有包含 <a class="reference internal" href="../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> ，所以需要Dockerfile增加安装步骤</p>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，但是此时启动失败</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，但是此时启动失败</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">fedora:34</span>
 <span class="k">MAINTAINER</span><span class="w"> </span><span class="s">huatai</span>
 
@@ -303,7 +303,7 @@ Exiting PID 1...
 <p>为了能够更轻松运行systemd，我还是需要探索如何把 <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">mount</span></code> 明确在Dockerfile中配置的方法。见下文 <code class="docutils literal notranslate"><span class="pre">buildkit的Dockerfile</span></code></p>
 </div>
 <section id="buildkitdockerfile">
-<h4>buildkit的Dockerfile<a class="headerlink" href="#buildkitdockerfile" title="Permalink to this heading">¶</a></h4>
+<h4>buildkit的Dockerfile<a class="headerlink" href="#buildkitdockerfile" title="此标题的永久链接">¶</a></h4>
 <p>上述通过显式传递 <code class="docutils literal notranslate"><span class="pre">--mount</span> <span class="pre">type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup</span></code> 参数运行 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 命令虽然能够解决systemd运行问题，但是命令参数过于复杂，使用不便。所以，需要转换成 Dockerfile 配置才能方便运行。不过，对于挂载不同类型的卷，需要使用 <a class="reference internal" href="../moby/buildkit/index.html#buildkit"><span class="std std-ref">Buildkit</span></a> 来实现，参考 <a class="reference external" href="https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md">Dockerfile frontend syntaxes</a> 改造Dockerfile</p>
 <ul>
 <li><p>首先，对于Docker v18.09或更高版本，在环境变量设置:</p>
@@ -317,7 +317,7 @@ Exiting PID 1...
 <li><p>然后修订Dockerfile:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">fedora-systemd_buildkit.dockerfile</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">fedora-systemd_buildkit.dockerfile</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c"># syntax = docker/dockerfile:1.3</span>
 <span class="linenos"> 2</span><span class="k">FROM</span><span class="w"> </span><span class="s">fedora:34</span>
 <span class="linenos"> 3</span><span class="k">MAINTAINER</span><span class="w"> </span><span class="s">huatai</span>
@@ -434,7 +434,7 @@ Exiting PID 1...
 </section>
 </section>
 <section id="systemd">
-<h3>systemd运行总结<a class="headerlink" href="#systemd" title="Permalink to this heading">¶</a></h3>
+<h3>systemd运行总结<a class="headerlink" href="#systemd" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>Docker需要传递环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code> 给容器内部才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 知道自己运行在容器中</p></li>
 <li><p>必须明确挂载 <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> (从物理主机 bind mount <code class="docutils literal notranslate"><span class="pre">/sys/fs/cgroup</span></code> 文件系统) 才能使得 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 运行</p>
@@ -449,7 +449,7 @@ Exiting PID 1...
 </ul>
 <p>我的最终修订版本Dockerfile for fedora with systemd:</p>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，注释中包含启动方法</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">fedora官方镜像增加systemd，注释中包含启动方法</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># 使用 DOCKER</span>
 <span class="c"># docker build --rm -t local/fedora-systemd .</span>
 <span class="c"># docker run -itd --privileged=true -p 1122:22 --hostname fedora --name fedora local:fedora-systemd</span>
@@ -507,13 +507,13 @@ Exiting PID 1...
 </section>
 </section>
 <section id="id2">
-<h2>Docker容器运行systemd实践<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>Docker容器运行systemd实践<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>以下部分是去年(2020)的探索，当时的解决方法就是通过 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> 时明确传递 <code class="docutils literal notranslate"><span class="pre">--mount</span> <span class="pre">type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup</span></code> 才正确运行起 systemd 。不过，当时并没有探索 Buildkit ，现在(2021)补全了上面的Dockerfile方法。</p>
 </div>
 <section id="cap-sys-admin-cgroupfs">
-<h3>CAP_SYS_ADMIN 和 cgroupfs<a class="headerlink" href="#cap-sys-admin-cgroupfs" title="Permalink to this heading">¶</a></h3>
+<h3>CAP_SYS_ADMIN 和 cgroupfs<a class="headerlink" href="#cap-sys-admin-cgroupfs" title="此标题的永久链接">¶</a></h3>
 <p>我们在 <a class="reference internal" href="../admin/dockerfile.html#dockerfile"><span class="std std-ref">从Dockerfile构建Docker镜像</span></a> 中介绍了如何 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">build</span></code> 一个CentOS或Ubuntu系统，当时我的实践是在容器中运行 <code class="docutils literal notranslate"><span class="pre">sshd</span></code> ，现在我们则构建一个运行systemd的容器。</p>
 <ul class="simple">
 <li><p>首先我们用以下 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 构建一个CentOS 8系统</p></li>
@@ -573,7 +573,7 @@ Exiting PID 1...
 <p>然后检查发现 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 并没有启动，这是为何呢？</p>
 </section>
 <section id="systemd-container-interface">
-<h3>systemd container interface<a class="headerlink" href="#systemd-container-interface" title="Permalink to this heading">¶</a></h3>
+<h3>systemd container interface<a class="headerlink" href="#systemd-container-interface" title="此标题的永久链接">¶</a></h3>
 <p>要允许systemd(以及系列程序)能够感知到自己运行在一个容器中，需要在容器运行的PID 1进程上设置 <code class="docutils literal notranslate"><span class="pre">$container</span></code> 环境变量，这样systemd unit配置文件中的 <code class="docutils literal notranslate"><span class="pre">ConditionVirtualization=</span></code> 设置才能工作。例如设置环境 <code class="docutils literal notranslate"><span class="pre">container=lxc-libvirt</span></code> 。</p>
 <p>所以我们需要删除掉上述错误的容器 <code class="docutils literal notranslate"><span class="pre">centos8-systemd</span></code> ，然后重建一次，这次我们带上环境变量 <code class="docutils literal notranslate"><span class="pre">container=docker</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">stop</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span>
@@ -586,7 +586,7 @@ Exiting PID 1...
 <p>不过上述方式依然不能正确启动 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> ，我们再进行下一步优化</p>
 </section>
 <section id="tmpfs-fuse-sysinit-target">
-<h3>tmpfs / fuse / sysinit.target<a class="headerlink" href="#tmpfs-fuse-sysinit-target" title="Permalink to this heading">¶</a></h3>
+<h3>tmpfs / fuse / sysinit.target<a class="headerlink" href="#tmpfs-fuse-sysinit-target" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>综合各个要点，我们按照以下方式重新启动:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">stop</span> <span class="n">centos8</span><span class="o">-</span><span class="n">systemd</span>
@@ -650,7 +650,7 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </section>
 </section>
 <section id="ssh">
-<h2>安装ssh服务和制作镜像<a class="headerlink" href="#ssh" title="Permalink to this heading">¶</a></h2>
+<h2>安装ssh服务和制作镜像<a class="headerlink" href="#ssh" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>既然我们已经实现了将systemd作为进程管理器，显然我们可以像传统的VM一样，在容器中部署多个服务，例如，之前我实践过 <a class="reference internal" href="../admin/docker_ssh.html#docker-ssh"><span class="std std-ref">Docker容器中运行ssh服务</span></a> 是借助了Docker执行 <code class="docutils literal notranslate"><span class="pre">/</span>&#160;&#160;&#160; <span class="pre">bin/bash</span> <span class="pre">-c</span> <span class="pre">&quot;/usr/sbin/sshd</span> <span class="pre">&amp;&amp;</span> <span class="pre">/bin/bash&quot;</span></code> 方法，显然原先的方法不优雅。现在我们有了完整的systemd进程管理器，就可以部署sshd服务了。</p>
 <ul>
@@ -694,9 +694,9 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </div>
 </section>
 <section id="dockerfilesystemd-sshd">
-<h2>Dockerfile构建systemd+sshd<a class="headerlink" href="#dockerfilesystemd-sshd" title="Permalink to this heading">¶</a></h2>
+<h2>Dockerfile构建systemd+sshd<a class="headerlink" href="#dockerfilesystemd-sshd" title="此标题的永久链接">¶</a></h2>
 <section id="dockerfile">
-<h3>dockerfile构建<a class="headerlink" href="#dockerfile" title="Permalink to this heading">¶</a></h3>
+<h3>dockerfile构建<a class="headerlink" href="#dockerfile" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>在工作目录下创建以下 <code class="docutils literal notranslate"><span class="pre">centos8-systemd-sshd</span></code> 作为Dockerfile ，并在目录下存放一个用于 admin 用户的公钥文件 <code class="docutils literal notranslate"><span class="pre">authorized_keys</span></code></p></li>
 </ul>
@@ -776,7 +776,7 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </div>
 </section>
 <section id="buildkit">
-<h3>buildkit构建<a class="headerlink" href="#buildkit" title="Permalink to this heading">¶</a></h3>
+<h3>buildkit构建<a class="headerlink" href="#buildkit" title="此标题的永久链接">¶</a></h3>
 <ul class="simple">
 <li><p>如果你安装使用 <a class="reference internal" href="../moby/buildkit/index.html#buildkit"><span class="std std-ref">Buildkit</span></a> ，则可以使用以下 Dockerfile</p></li>
 </ul>
@@ -860,11 +860,11 @@ root          25  1.6  0.3  27136  6528 ?        Ss   11:36   0:00 /usr/lib/syst
 </section>
 </section>
 <section id="podman">
-<h2>podman<a class="headerlink" href="#podman" title="Permalink to this heading">¶</a></h2>
+<h2>podman<a class="headerlink" href="#podman" title="此标题的永久链接">¶</a></h2>
 <p>Red Hat公司开发了另外一个符合OCI规范的容器和pods管理工具 <a class="reference internal" href="../podman/index.html#podman"><span class="std std-ref">podman</span></a> ( <a class="reference external" href="https://github.com/containers/podman">GitHub podman</a> )。这个工具也直接支持在容器中运行systemd ( <a class="reference external" href="https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/">How to run systemd in a container</a> )</p>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://serverfault.com/questions/607769/running-systemd-inside-a-docker-container-arch-linux">Running systemd inside a docker container (arch linux)</a> - 当前2020年，这篇解决方案最准确，并且2021年更新还介绍 <a class="reference external" href="https://developers.redhat.com/blog/author/rhatdan/">David Walsh &#64; REDHAT blog</a> 提供了很多有用的信息，特别是挂载 cgroup 的方法</p></li>
 <li><p><a class="reference external" href="https://medium.com/swlh/docker-and-systemd-381dfd7e4628">Docker and systemd</a></p></li>

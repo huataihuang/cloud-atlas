@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>/tmp临时目录定期清理机制 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,13 +17,14 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="udev" href="../udev/index.html" />
-    <link rel="prev" title="journalctl" href="journalctl.html" /> 
+    <link rel="prev" title="hostnamectl" href="hostnamectl.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -91,6 +91,7 @@
 <li class="toctree-l4"><a class="reference internal" href="systemctl.html">systemctl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="networkctl.html">networkctl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="journalctl.html">journalctl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hostnamectl.html">hostnamectl</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">/tmp临时目录定期清理机制</a></li>
 </ul>
 </li>
@@ -180,7 +181,7 @@
            <div itemprop="articleBody">
              
   <section id="tmp">
-<span id="tmp-directory-cleanup-periodically"></span><h1>/tmp临时目录定期清理机制<a class="headerlink" href="#tmp" title="Permalink to this heading">¶</a></h1>
+<span id="tmp-directory-cleanup-periodically"></span><h1>/tmp临时目录定期清理机制<a class="headerlink" href="#tmp" title="此标题的永久链接">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>众所周知，Linux系统会定时清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 临时目录下的不使用(访问)文件。但是，可能不太关注清理周期和清理配置。</p>
@@ -191,10 +192,10 @@
 <p>如果系统根目录被打爆，则会影响很多系统服务运行。如果一时找不到那些文件占用了系统磁盘，则可以首先尝试 <a class="reference internal" href="journalctl.html#journalctl"><span class="std std-ref">journalctl</span></a> 快速缩小系统日志占用空间，然后尝试用 <a class="reference internal" href="../../../shell/utils/ncdu.html#ncdu"><span class="std std-ref">ncdu磁盘使用排查工具</span></a> 定位占用磁盘空间的目录和文件再进行清理。本文就是使用这个流程找到 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 大量占用空间，然后采用本文自动清理机制完成系统根目录清理和保持。</p>
 </div>
 <section id="centos-rhel-7-8-tmp">
-<h2>CentOS/RHEL 7/8 清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 机制<a class="headerlink" href="#centos-rhel-7-8-tmp" title="Permalink to this heading">¶</a></h2>
+<h2>CentOS/RHEL 7/8 清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 机制<a class="headerlink" href="#centos-rhel-7-8-tmp" title="此标题的永久链接">¶</a></h2>
 <p>从 CentOS/RHEL 7开始，采用 <code class="docutils literal notranslate"><span class="pre">systemd-tmpfile</span></code> 服务来周期性清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 目录。配置文件是 <code class="docutils literal notranslate"><span class="pre">/usr/lib/tmpfiles.d/tmp.conf</span></code> ，针对上文 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 目录被临时文件堵塞问题，如果确实不需要保留长时间(10天)临时文件，可以采用将 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 目录保留文件配置修订成 2 天:</p>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">systemd-tmpfile服务配置定时清理临时文件</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">systemd-tmpfile服务配置定时清理临时文件</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#  This file is part of systemd.</span>
 <span class="c1">#</span>
 <span class="c1">#  systemd is free software; you can redistribute it and/or modify it</span>
@@ -242,7 +243,7 @@ R! /var/tmp/systemd-private-*
 </ul>
 </section>
 <section id="centos-rhel-6-tmp">
-<h2>CentOS/RHEL 6 清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 机制<a class="headerlink" href="#centos-rhel-6-tmp" title="Permalink to this heading">¶</a></h2>
+<h2>CentOS/RHEL 6 清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 机制<a class="headerlink" href="#centos-rhel-6-tmp" title="此标题的永久链接">¶</a></h2>
 <p>CentOS/RHEL 6需要安装一个名为 <code class="docutils literal notranslate"><span class="pre">tmpwatch</span></code> 的工具来自动处理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 目录下的过期文件。这个工具包通常会安装，但是如果你的系统是最小化安装，则可能没有这个工具。</p>
 <ul>
 <li><p>安装 <code class="docutils literal notranslate"><span class="pre">tmpwatch</span></code></p>
@@ -253,7 +254,7 @@ R! /var/tmp/systemd-private-*
 </ul>
 <p>安装了这个 <code class="docutils literal notranslate"><span class="pre">tmpwatch</span></code> 工具包之后。cronjob的配置目录中会增加一个 <code class="docutils literal notranslate"><span class="pre">/etc/cron.daily/tmpwatch</span></code> 定时任务配置文件，内容如下:</p>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">tmpwatch工具脚本，可修订脚本缩短清理周期</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">tmpwatch工具脚本，可修订脚本缩短清理周期</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#! /bin/sh</span>
 <span class="nv">flags</span><span class="o">=</span>-umc
 /usr/sbin/tmpwatch <span class="s2">&quot;</span><span class="nv">$flags</span><span class="s2">&quot;</span> -x /tmp/.X11-unix -x /tmp/.XIM-unix <span class="se">\</span>
@@ -272,7 +273,7 @@ R! /var/tmp/systemd-private-*
 </div>
 </section>
 <section id="id1">
-<h2>不同发行版的 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 清理配置<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>不同发行版的 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 清理配置<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>根据不同发行版，提供了不同的清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 配置方法:</p>
 <ul class="simple">
 <li><p>Ubuntu 14: 通过 <code class="docutils literal notranslate"><span class="pre">/etc/cron.daily</span></code> 定时调用 <code class="docutils literal notranslate"><span class="pre">tmpreaper</span></code> 清理 <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> 谬，配置位于 <code class="docutils literal notranslate"><span class="pre">/etc/default/rcS</span></code> 和 <code class="docutils literal notranslate"><span class="pre">/etc/tmpreaper.conf</span></code></p></li>
@@ -283,7 +284,7 @@ R! /var/tmp/systemd-private-*
 </ul>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.thegeekdiary.com/centos-rhel-67-why-the-files-in-tmp-directory-gets-deleted-periodically/">CentOS / RHEL 6,7 : Why the files in /tmp directory gets deleted periodically</a></p></li>
 <li><p><a class="reference external" href="https://serverfault.com/questions/377348/when-does-tmp-get-cleared">When does /tmp get cleared?</a></p></li>
@@ -295,7 +296,7 @@ R! /var/tmp/systemd-private-*
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="journalctl.html" class="btn btn-neutral float-left" title="journalctl" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hostnamectl.html" class="btn btn-neutral float-left" title="hostnamectl" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../udev/index.html" class="btn btn-neutral float-right" title="udev" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ssh多路传输multiplexing加速 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -156,9 +156,9 @@
            <div itemprop="articleBody">
              
   <section id="sshmultiplexing">
-<span id="ssh-multiplexing"></span><h1>ssh多路传输multiplexing加速<a class="headerlink" href="#sshmultiplexing" title="Permalink to this heading">¶</a></h1>
+<span id="ssh-multiplexing"></span><h1>ssh多路传输multiplexing加速<a class="headerlink" href="#sshmultiplexing" title="此标题的永久链接">¶</a></h1>
 <section id="multiplexing">
-<h2>Multiplexing的优点<a class="headerlink" href="#multiplexing" title="Permalink to this heading">¶</a></h2>
+<h2>Multiplexing的优点<a class="headerlink" href="#multiplexing" title="此标题的永久链接">¶</a></h2>
 <p>SSH multiplexing 的一个优点是克服了创建一个新的TCP连接的消耗。对于一个主机可以接受的连接数量是有限的，并且对于一些主机限制更为明显，这和主机的负载有关，并且开启一个新的连接会有明显的延迟。当使用multiplexing的时候，重用一个已经开启的连接可以明显加速。</p>
 <p>multiplexing和独立会话的区别是，在服务器和客户端，都只看到一个进程（即使多次连接会话）。并且，在服务器和客户机上，可以看到只打开了一个TCP连接；只不过，在客户端，后建立的会话都是通过 <code class="docutils literal notranslate"><span class="pre">stream</span></code> 的本地套接字来访问的。OpenSSH使用现有的TCP连接来实现多个SSH会话，这种方式降低了新建TCP连接的负载。</p>
 <p><code class="docutils literal notranslate"><span class="pre">Multiplexing</span></code> 的创建过程：</p>
@@ -224,7 +224,7 @@ root     34640  0.0  0.0 140788  4988 ?        Ss   15:03   0:00 sshd: root@pts/
 <p>从上述观察来看，启用了 <code class="docutils literal notranslate"><span class="pre">Multiplexing</span></code> 之后，客户机和服务器只需要建立一个SSH连接，就能够满足客户端大量的并发连接</p>
 </section>
 <section id="id1">
-<h2>设置Multiplexing<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>设置Multiplexing<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>OpenSSH通过 <code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> ， <code class="docutils literal notranslate"><span class="pre">ControlPath</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ControlPersist</span></code> 配置来实现multiplexing:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 决定ssh是否监听控制连接并且如何处理</p></li>
@@ -262,7 +262,7 @@ root     34640  0.0  0.0 140788  4988 ?        Ss   15:03   0:00 sshd: root@pts/
 </div>
 <p>也可以配置成通用配置(对所有服务器生效):</p>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">配置所有主机登陆激活ssh multiplexing,压缩以及不检查服务器SSH key(注意风险控制)</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">配置所有主机登陆激活ssh multiplexing,压缩以及不检查服务器SSH key(注意风险控制)</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Host *
   ServerAliveInterval <span class="m">60</span>
   ControlMaster auto
@@ -278,7 +278,7 @@ root     34640  0.0  0.0 140788  4988 ?        Ss   15:03   0:00 sshd: root@pts/
 <p>这里还添加了压缩以及不检查服务器SSH key(有安全风险，但是对于有安全控制对测试环境，不断重建服务器并使用相同IP，可能需要这个参数)</p>
 </div>
 <section id="id2">
-<h3>管理连接套接字<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3>管理连接套接字<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>选项 <code class="docutils literal notranslate"><span class="pre">-O</span></code> 用来管理连接:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">O</span> <span class="n">check</span> <span class="n">machine1</span>
@@ -294,7 +294,7 @@ root     34640  0.0  0.0 140788  4988 ?        Ss   15:03   0:00 sshd: root@pts/
 </section>
 </section>
 <section id="multiplex">
-<h2>手工建立multiplex连接<a class="headerlink" href="#multiplex" title="Permalink to this heading">¶</a></h2>
+<h2>手工建立multiplex连接<a class="headerlink" href="#multiplex" title="此标题的永久链接">¶</a></h2>
 <p>使用参数 <code class="docutils literal notranslate"><span class="pre">-M</span></code> 和 <code class="docutils literal notranslate"><span class="pre">-S</span></code> 对应的就是 <code class="docutils literal notranslate"><span class="pre">ControlMaster</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ControlPath</span></code> ，所以可以使用如下命令创建多路传输:</p>
 <blockquote>
 <div><p>ssh -M -S <a class="reference external" href="mailto:/home/fred/&#46;ssh/controlmasters/fred&#37;&#52;&#48;server&#46;example&#46;org">/home/fred/<span>&#46;</span>ssh/controlmasters/fred<span>&#64;</span>server<span>&#46;</span>example<span>&#46;</span>org</a>:22 server.example.org</p>
@@ -305,14 +305,14 @@ root     34640  0.0  0.0 140788  4988 ?        Ss   15:03   0:00 sshd: root@pts/
 </div>
 </section>
 <section id="id3">
-<h2>结束multiplex连接<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>结束multiplex连接<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">O</span> <span class="n">stop</span> <span class="n">server1</span>
 <span class="n">ssh</span> <span class="o">-</span><span class="n">O</span> <span class="n">stop</span> <span class="o">-</span><span class="n">S</span> <span class="o">~/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">controlmasters</span><span class="o">/</span><span class="n">fred</span><span class="nd">@server1</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span><span class="p">:</span><span class="mi">22</span> <span class="n">server1</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">org</span>
 </pre></div>
 </div>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Multiplexing">OpenSSH/Cookbook/Multiplexing</a></p></li>
 <li><p><a class="reference external" href="https://blog.flameeyes.eu/2011/01/mostly-unknown-openssh-tricks">Mostly unknown OpenSSH tricks</a></p></li>

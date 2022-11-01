@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IOMMU调优: CPU pinning &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -74,7 +74,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../sr-iov/index.html">SR-IOV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../vgpu/index.html">NVIDIA vGPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vgpu/index.html">NVIDIA Virtual GPU (vGPU)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../kvm_nested_virtual/index.html">KVM嵌套虚拟化</a></li>
@@ -171,22 +171,22 @@
            <div itemprop="articleBody">
              
   <section id="iommu-cpu-pinning">
-<span id="id1"></span><h1>IOMMU调优: CPU pinning<a class="headerlink" href="#iommu-cpu-pinning" title="Permalink to this heading">¶</a></h1>
+<span id="id1"></span><h1>IOMMU调优: CPU pinning<a class="headerlink" href="#iommu-cpu-pinning" title="此标题的永久链接">¶</a></h1>
 <p>为了使得PCI passthroughs 更为稳定和高性能，通过 <code class="docutils literal notranslate"><span class="pre">CPU</span> <span class="pre">pinning</span></code> 可以实现 <a class="reference internal" href="../../../kernel/memory/numa/index.html#numa"><span class="std std-ref">NUMA架构</span></a> 让处理器访问近端 PCIe 设备提高性能，同时也可以避免 <code class="docutils literal notranslate"><span class="pre">缓存踩踏</span></code> 导致性能下降。</p>
 <section id="id2">
-<h2>原理<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>原理<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>KVM guest默认是运行在和虚拟机相同县城数量，这些县城由Linux调度器按照优先级和等级队列调度到任何可用的CPU核心。这种方式下，如果线程被调度到不同的物理CPU就会导致本地CPU缓存(L1/L2/L3)失效，此时会明显影响虚拟机性能。CPU pinning就是针对这种虚拟CPU分配到物理CPU上运行的问题，设置两者的映射关系，尽可能减少缓存失效。此外，现代CPU通常使用一种共享的L3缓存，精心配置虚拟CPU和物理CPU的映射，可以使得L3缓存近端访问，降低缓存失效。</p>
 <p>在完成 <a class="reference internal" href="../ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机设置添加NVMe pass-through 之后，从物理连接角度， <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 的 PCIe 3.0 Slot 1 和 Slot 2 是和CPU 0(第一块CPU)直连的，所以最佳配置是将虚拟机的vcpu绑定到物理主机的 <code class="docutils literal notranslate"><span class="pre">CPU</span> <span class="pre">0</span></code> 下的cpu core。</p>
 </section>
 <section id="cpu">
-<h2>CPU拓扑<a class="headerlink" href="#cpu" title="Permalink to this heading">¶</a></h2>
+<h2>CPU拓扑<a class="headerlink" href="#cpu" title="此标题的永久链接">¶</a></h2>
 <p>现代CPU处理器硬件都是多任务的，在Intel CPU称为超线程 <code class="docutils literal notranslate"><span class="pre">hyper-threading</span></code> ， AMD处理器称为 <code class="docutils literal notranslate"><span class="pre">SMT</span></code> 。检查CPU拓扑，采用以下命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lscpu</span> <span class="o">-</span><span class="n">e</span>
 </pre></div>
 </div>
 <p>在 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上 <code class="docutils literal notranslate"><span class="pre">E5-2670</span> <span class="pre">v3</span></code> 处理器拓扑如下</p>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">XEON E5-2670 v3处理器拓扑</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">XEON E5-2670 v3处理器拓扑</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>CPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE    MAXMHZ    MINMHZ
 <span class="linenos"> 2</span>  <span class="m">0</span>    <span class="m">0</span>      <span class="m">0</span>    <span class="m">0</span> <span class="m">0</span>:0:0:0          yes <span class="m">3100</span>.0000 <span class="m">1200</span>.0000
 <span class="linenos"> 3</span>  <span class="m">1</span>    <span class="m">0</span>      <span class="m">0</span>    <span class="m">1</span> <span class="m">1</span>:1:1:0          yes <span class="m">3100</span>.0000 <span class="m">1200</span>.0000
@@ -245,7 +245,7 @@
 </div>
 <p>在 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 上 <code class="docutils literal notranslate"><span class="pre">E5-2670</span> <span class="pre">v3</span></code> 处理器NUMA结构如下</p>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">XEON E5-2670 v3处理器NUMA</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">XEON E5-2670 v3处理器NUMA</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>available: <span class="m">2</span> nodes <span class="o">(</span><span class="m">0</span>-1<span class="o">)</span>
 <span class="linenos"> 2</span>node <span class="m">0</span> cpus: <span class="m">0</span> <span class="m">1</span> <span class="m">2</span> <span class="m">3</span> <span class="m">4</span> <span class="m">5</span> <span class="m">6</span> <span class="m">7</span> <span class="m">8</span> <span class="m">9</span> <span class="m">10</span> <span class="m">11</span> <span class="m">24</span> <span class="m">25</span> <span class="m">26</span> <span class="m">27</span> <span class="m">28</span> <span class="m">29</span> <span class="m">30</span> <span class="m">31</span> <span class="m">32</span> <span class="m">33</span> <span class="m">34</span> <span class="m">35</span>
 <span class="linenos"> 3</span>node <span class="m">0</span> size: <span class="m">32093</span> MB
@@ -274,7 +274,7 @@
 </ul>
 </section>
 <section id="cpu-pinning">
-<h2>配置cpu pinning<a class="headerlink" href="#cpu-pinning" title="Permalink to this heading">¶</a></h2>
+<h2>配置cpu pinning<a class="headerlink" href="#cpu-pinning" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>修订 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> (举例)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">virsh</span> <span class="n">edit</span> <span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
@@ -302,7 +302,7 @@
 </ul>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF">arch linux: PCI passthrough via OVMF</a></p></li>
 </ul>

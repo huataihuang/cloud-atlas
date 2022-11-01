@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>containerd存储xfs文件系统 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -177,15 +178,15 @@
            <div itemprop="articleBody">
              
   <section id="containerdxfs">
-<span id="containerd-xfs"></span><h1>containerd存储xfs文件系统<a class="headerlink" href="#containerdxfs" title="Permalink to this heading">¶</a></h1>
+<span id="containerd-xfs"></span><h1>containerd存储xfs文件系统<a class="headerlink" href="#containerdxfs" title="此标题的永久链接">¶</a></h1>
 <p>在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 部署 <a class="reference internal" href="../../../real/priv_cloud/z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 最初选择 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 作为运行时，并且采用了 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 。但是，随着Kubernetes版本升级，从 1.24 开始已经不再建议采用Docker，而是采用 <code class="docutils literal notranslate"><span class="pre">containerd</span></code> 运行时。不过，由于 <a class="reference internal" href="containerd_btrfs.html#containerd-btrfs"><span class="std std-ref">containerd的btrfs</span></a> 还存在稳定性疑问，所以我在卸载了 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 改为 <a class="reference internal" href="install_containerd_official_binaries.html#install-containerd-official-binaries"><span class="std std-ref">安装containerd官方执行程序</span></a> ，然后把之前 <a class="reference internal" href="../../../linux/storage/btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> 存储卷删除，替换为 <a class="reference internal" href="../../../linux/storage/filesystem/xfs/index.html#xfs"><span class="std std-ref">XFS文件系统</span></a> 。</p>
 <section id="docker-btrfs-driver">
-<h2>卸载和清理 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a><a class="headerlink" href="#docker-btrfs-driver" title="Permalink to this heading">¶</a></h2>
+<h2>卸载和清理 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a><a class="headerlink" href="#docker-btrfs-driver" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>当前在 <a class="reference internal" href="../../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 上安装的 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 清理:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">卸载docker.io</span><a class="headerlink" href="#id1" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">卸载docker.io</span><a class="headerlink" href="#id1" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl stop docker
 sudo systemctl stop docker.socket
 sudo apt purge docker.io
@@ -197,7 +198,7 @@ sudo apt autoremove
 <li><p>卸载 <a class="reference internal" href="../../../docker/storage/docker_btrfs_driver.html#docker-btrfs-driver"><span class="std std-ref">Docker btrfs 存储驱动</span></a> 挂载的 <a class="reference internal" href="../../../linux/storage/btrfs/index.html#btrfs"><span class="std std-ref">Btrfs - Linux存储系统</span></a> 并将磁盘重新格式化成 <a class="reference internal" href="../../../linux/storage/filesystem/xfs/index.html#xfs"><span class="std std-ref">XFS文件系统</span></a> :</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">将btrfs磁盘转换成xfs</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">将btrfs磁盘转换成xfs</span><a class="headerlink" href="#id2" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo umount /var/lib/docker
 sudo sed -i <span class="s1">&#39;s/^\/dev\/vdb1/#\/dev\/vdb1/g&#39;</span> /etc/fstab
 sudo mkfs.xfs -f -n <span class="nv">ftype</span><span class="o">=</span><span class="m">1</span> /dev/vdb1

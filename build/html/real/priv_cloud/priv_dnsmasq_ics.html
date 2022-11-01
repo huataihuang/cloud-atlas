@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>私有云DNS服务(dnsmasq)和共享因特网(ICS) &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -168,12 +168,12 @@
            <div itemprop="articleBody">
              
   <section id="dns-dnsmasq-ics">
-<span id="priv-dnsmasq-ics"></span><h1>私有云DNS服务(dnsmasq)和共享因特网(ICS)<a class="headerlink" href="#dns-dnsmasq-ics" title="Permalink to this heading">¶</a></h1>
+<span id="priv-dnsmasq-ics"></span><h1>私有云DNS服务(dnsmasq)和共享因特网(ICS)<a class="headerlink" href="#dns-dnsmasq-ics" title="此标题的永久链接">¶</a></h1>
 <p>在少量部署的虚拟机环境中，通过简单维护各个主机 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> 一致，就能够实现主机解析。但是，一旦开始大规模通过 <a class="reference internal" href="../../ceph/rbd/clone_vm_rbd.html#clone-vm-rbd"><span class="std std-ref">Clone使用Ceph RBD的虚拟机</span></a> <a class="reference internal" href="zdata_ceph_rbd_libvirt.html#zdata-ceph-rbd-libvirt"><span class="std std-ref">私有云基于 ZData Ceph 运行虚拟机</span></a> ，就很难实时更新每个虚拟机的 <code class="docutils literal notranslate"><span class="pre">hosts</span></code> 配置文件。更何况后续还会 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 构建 <a class="reference internal" href="../../kvm/kvm_nested_virtual/index.html#kvm-nested-virtual"><span class="std std-ref">KVM嵌套虚拟化</span></a> ，构建数以百计的虚拟机。所以，我们需要构建一个因特网非常基础的 <a class="reference internal" href="../../infra_service/dns/index.html#dns"><span class="std std-ref">DNS服务</span></a> ，来提供整个基础架构的域名解析。</p>
 <p>当然，大规模基础架构，我们会选择久经考验坚如磐石的 <a class="reference internal" href="../../infra_service/dns/bind/index.html#bind"><span class="std std-ref">BIND</span></a> (然而非常复杂)，但是为了快速搭建 <code class="docutils literal notranslate"><span class="pre">staging</span></code> 环境，我首先选择 <a class="reference internal" href="../../infra_service/dns/dnsmasq/index.html#dnsmasq"><span class="std std-ref">DNSmasq</span></a> 来完成原型，待后续不断优化后再升级到 Bind 构建真正的因特网基础设施。</p>
 <p>dnsmasq是小型网络的轻量级DNS/TFTP和DHCP服务器，特别适合小型网络的快速构建，以及宽带共享路由器的局域网基础服务。</p>
 <section id="id1">
-<h2>安装<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>安装<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>ubuntu安装:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">dnsmasq</span>
@@ -183,12 +183,12 @@
 </ul>
 </section>
 <section id="dnsmasq">
-<h2>配置dnsmasq<a class="headerlink" href="#dnsmasq" title="Permalink to this heading">¶</a></h2>
+<h2>配置dnsmasq<a class="headerlink" href="#dnsmasq" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">/etc/dnsmasq.conf</span></code> 配置:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">dnsmasq简易配置</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">dnsmasq简易配置</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 本地默认域名</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="na">local</span><span class="o">=</span><span class="s">/staging.huatai.me/</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="c1"># 转发上游域名解析服务器，请求DNS解析</span><span class="w"></span>
@@ -222,7 +222,7 @@
 <li><p>执行一个简单的脚本，生成 <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> ，这个配置将被 <code class="docutils literal notranslate"><span class="pre">dnsmasq</span></code> 加载作为域名解析配置:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">hosts配置提供dnsmasq域名解析配置</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">hosts配置提供dnsmasq域名解析配置</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/bin/env bash</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span>. /etc/profile
@@ -255,7 +255,7 @@
 <li><p>注意，系统使用了 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_resolved.html#systemd-resolved"><span class="std std-ref">systemd-resolved</span></a> 和 <a class="reference internal" href="../../linux/ubuntu_linux/network/netplan.html#netplan"><span class="std std-ref">netplan网络配置</span></a> ，在系统安装时候通过 <code class="docutils literal notranslate"><span class="pre">netplan</span></code> 已经配置了 802.1x 网络动态获取IP地址:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">netplan 802.1x配置</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">netplan 802.1x配置</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="w">  </span><span class="nt">renderer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networkd</span><span class="w"></span>
@@ -297,10 +297,10 @@
 <p>但是， <code class="docutils literal notranslate"><span class="pre">dig</span></code> 命令查询是正常的， <code class="docutils literal notranslate"><span class="pre">resolv.conf</span></code> 配置的 <code class="docutils literal notranslate"><span class="pre">nameserver</span></code> 是始终访问第一个 <code class="docutils literal notranslate"><span class="pre">nameserver</span> <span class="pre">127.0.0.1</span></code> ，所以没有报错。(这和我很久以前学习 《DNS和Bind》 的记忆有差别，我记得是轮询所有 <code class="docutils literal notranslate"><span class="pre">nameserver</span></code> 的)</p>
 </section>
 <section id="dns">
-<h2>配置DNS客户端<a class="headerlink" href="#dns" title="Permalink to this heading">¶</a></h2>
+<h2>配置DNS客户端<a class="headerlink" href="#dns" title="此标题的永久链接">¶</a></h2>
 <p>所有VM都需要配置 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_resolved.html#systemd-resolved"><span class="std std-ref">systemd-resolved</span></a> 采用 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 上部署的DNS服务器(dnsmasq)</p>
 <section id="ubuntu">
-<h3>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this heading">¶</a></h3>
+<h3>Ubuntu<a class="headerlink" href="#ubuntu" title="此标题的永久链接">¶</a></h3>
 <p>修订VM以及模版VM <code class="docutils literal notranslate"><span class="pre">/etc/netplan/01-netcfg.yaml</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
    <span class="n">nameservers</span><span class="p">:</span>
@@ -316,7 +316,7 @@
 <p>完成DNS解析器配置，采用 <code class="docutils literal notranslate"><span class="pre">192.168.6.200</span></code> （zcloud) 的DNS进行域名解析。</p>
 </section>
 <section id="fedora">
-<h3>Fedora<a class="headerlink" href="#fedora" title="Permalink to this heading">¶</a></h3>
+<h3>Fedora<a class="headerlink" href="#fedora" title="此标题的永久链接">¶</a></h3>
 <p>Fedora使用 <a class="reference internal" href="../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 管理网络，使用以下命令修订DNS:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># nmcli可以直接修订配置</span>
 <span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="n">enp1s0</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dns</span> <span class="s2">&quot;192.168.6.200&quot;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dns</span><span class="o">-</span><span class="n">search</span> <span class="s2">&quot;staging.huatai.me&quot;</span>
@@ -328,13 +328,13 @@
 </section>
 </section>
 <section id="id2">
-<h2>因特网共享连接<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>因特网共享连接<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>DNSmasq不仅提供了DNS解析，也同时为内部局域网提供了DHCP服务，以便 <a class="reference internal" href="../../apple/airport/airport_express_with_dnsmasq_ics.html#airport-express-with-dnsmasq-ics"><span class="std std-ref">结合DNSmasq+iptables使用AirPort Express实现无线访问因特网</span></a> 客户端能够访问Internet</p>
 <ul class="simple">
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 上执行 <code class="docutils literal notranslate"><span class="pre">ics.sh</span></code> 脚本为局域网内部主机提供共享因特网:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">共享Internet</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">共享Internet</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># squid transparent proxy</span>
 <span class="linenos"> 2</span>sudo iptables -t nat -A PREROUTING -i br0 -p tcp --dport <span class="m">80</span> -j DNAT --to <span class="m">192</span>.168.6.200:3128
 <span class="linenos"> 3</span>sudo iptables -t nat -A PREROUTING -i br0:1 -p tcp --dport <span class="m">80</span> -j DNAT --to <span class="m">192</span>.168.6.200:3128

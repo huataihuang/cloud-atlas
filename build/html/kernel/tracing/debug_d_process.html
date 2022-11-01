@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>排查Linux D住进程原因 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -160,9 +160,9 @@
            <div itemprop="articleBody">
              
   <section id="linux-d">
-<span id="debug-d-process"></span><h1>排查Linux D住进程原因<a class="headerlink" href="#linux-d" title="Permalink to this heading">¶</a></h1>
+<span id="debug-d-process"></span><h1>排查Linux D住进程原因<a class="headerlink" href="#linux-d" title="此标题的永久链接">¶</a></h1>
 <section id="d">
-<h2>查询僵尸和D进程<a class="headerlink" href="#d" title="Permalink to this heading">¶</a></h2>
+<h2>查询僵尸和D进程<a class="headerlink" href="#d" title="此标题的永久链接">¶</a></h2>
 <p>僵尸进程 <code class="docutils literal notranslate"><span class="pre">zombie</span></code> 是虽然不占用资源，但是表明系统有不正常的资源回收问题。</p>
 <p>根据经验，我们知道Linux中有一种状态为 <code class="docutils literal notranslate"><span class="pre">D</span></code> 的进程，会阻塞CPU使用(因为CPU需要等待设备返回，例如等待磁盘)，所以我们检查一下系统是否存在 <code class="docutils literal notranslate"><span class="pre">D</span></code> 进程:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="n">r</span> <span class="o">-</span><span class="n">A</span>
@@ -182,7 +182,7 @@
 <li><p>检查 <code class="docutils literal notranslate"><span class="pre">D</span></code> 住进程的堆栈:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">d_process_stack</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">d_process_stack</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">#cat /proc/932/stack </span>
 <span class="linenos"> 2</span><span class="o">[</span>&lt;<span class="m">0</span>&gt;<span class="o">]</span> load_calc_func+0x57/0x130
 <span class="linenos"> 3</span><span class="o">[</span>&lt;<span class="m">0</span>&gt;<span class="o">]</span> kthread+0xf5/0x130
@@ -220,7 +220,7 @@
 </ul>
 </section>
 <section id="id1">
-<h2>进程信息排查<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>进程信息排查<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p><a class="reference internal" href="sysrq.html#sysrq"><span class="std std-ref">Linux “魔力” 系统请求组合键 SysRq</span></a> 的提供了 <code class="docutils literal notranslate"><span class="pre">t</span></code> 指令dump出当前任务的信息，所以我在服务器上执行以下命令，打开进程信息:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sysrq</span><span class="o">-</span><span class="n">trigger</span>
 </pre></div>
@@ -230,7 +230,7 @@
 </ul>
 <p>可以看到 <a class="reference internal" href="bad_rip_value.html#bad-rip-value"><span class="std std-ref">“Bad RIP value”含义</span></a> 同样集中在系统调用 <code class="docutils literal notranslate"><span class="pre">entry_SYSCALL_64_after_hwframe+0x44/0xa9</span></code> ，也就是阻塞进程的调用。</p>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">dump_tasks_info</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">dump_tasks_info</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="o">[</span>Tue Aug <span class="m">10</span> <span class="m">17</span>:16:00 <span class="m">2021</span><span class="o">]</span> Call Trace:
 <span class="linenos"> 2</span><span class="o">[</span>Tue Aug <span class="m">10</span> <span class="m">17</span>:16:00 <span class="m">2021</span><span class="o">]</span>  ? __schedule+0x3cf/0x660
 <span class="linenos"> 3</span><span class="o">[</span>Tue Aug <span class="m">10</span> <span class="m">17</span>:16:00 <span class="m">2021</span><span class="o">]</span>  schedule+0x33/0xc0
@@ -277,7 +277,7 @@
 </div>
 </section>
 <section id="load-calc-d">
-<h2>再次出现 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 系统进程D<a class="headerlink" href="#load-calc-d" title="Permalink to this heading">¶</a></h2>
+<h2>再次出现 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 系统进程D<a class="headerlink" href="#load-calc-d" title="此标题的永久链接">¶</a></h2>
 <p>我在 <a class="reference internal" href="../cpu/amd/amd_cpu_c-state.html#amd-cpu-c-state"><span class="std std-ref">AMD CPU c-state</span></a> ，调整了内核参数( <code class="docutils literal notranslate"><span class="pre">processor.max_cstate=1</span> <span class="pre">intel_idle.max_cstate=0</span></code> )关闭海光CPU的电源管理，禁止进入idle状态( <a class="reference internal" href="../cpu/intel/cpufreq/cpu_c-state.html#cpu-c-state"><span class="std std-ref">CPU c-state</span></a> )。但是，服务器重启，再次出现 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 进程D。检查进程堆栈，也和上文相同。</p>
 <ul>
 <li><p>我尝试上文方法 <a class="reference internal" href="sysrq.html#sysrq"><span class="std std-ref">Linux “魔力” 系统请求组合键 SysRq</span></a> 的提供了 <code class="docutils literal notranslate"><span class="pre">t</span></code> 指令dump出当前任务的信息:</p>
@@ -303,7 +303,7 @@
 </div>
 <p>重复出现如下调用 :</p>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">重复出现大量 entry_SYSCALL_64_after_hwframe D住</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">重复出现大量 entry_SYSCALL_64_after_hwframe D住</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> RIP: <span class="m">0033</span>:0x460193
 <span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> Code: <span class="m">63</span> d5 <span class="m">48</span> 8b <span class="m">34</span> d0 e8 1c ae fb ff <span class="m">83</span> c5 <span class="m">01</span> <span class="m">48</span> <span class="m">89</span> d8 <span class="m">89</span> 2d a8 <span class="m">87</span> <span class="m">28</span> <span class="m">00</span> <span class="m">48</span> <span class="m">83</span> c4 <span class="m">08</span> 5b 5d c3 <span class="m">66</span> 0f 1f <span class="m">84</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> b3 <span class="m">01</span> c7 &lt;<span class="m">05</span>&gt; a4 <span class="m">87</span> <span class="m">28</span> <span class="m">00</span> <span class="m">01</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> b2 <span class="m">01</span> <span class="m">48</span> <span class="m">01</span> eb <span class="m">80</span> 3b 7b 0f <span class="m">85</span> cc fe ff
 <span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:47 <span class="m">2022</span><span class="o">]</span> RSP: 002b:000000c0009a1df8 EFLAGS: <span class="m">00000286</span> ORIG_RAX: 00000000000000ca
@@ -328,7 +328,7 @@
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">退出用户态也卡住</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">退出用户态也卡住</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> RIP: <span class="m">0033</span>:0x40a821
 <span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> Code: <span class="m">00</span> <span class="m">17</span> 4b <span class="m">00</span> <span class="m">00</span> <span class="m">11</span> <span class="m">00</span> <span class="m">19</span> <span class="m">00</span> f0 a5 6e <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">08</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> bf 7e <span class="m">00</span> <span class="m">00</span> <span class="m">12</span> <span class="m">00</span> 0d <span class="m">00</span> <span class="m">40</span> <span class="m">15</span> <span class="m">44</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">72</span> &lt;<span class="m">05</span>&gt; <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> a5 1f <span class="m">00</span> <span class="m">00</span> <span class="m">12</span> <span class="m">00</span> 0d <span class="m">00</span> b0 <span class="m">51</span> <span class="m">45</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
 <span class="o">[</span>Thu Jul <span class="m">21</span> <span class="m">22</span>:46:49 <span class="m">2022</span><span class="o">]</span> RSP: 002b:000000c0016d3ed8 EFLAGS: <span class="m">00000206</span> ORIG_RAX: ffffffffffffff13
@@ -389,7 +389,7 @@
 <p>重启后 <code class="docutils literal notranslate"><span class="pre">[load_calc]</span></code> 系统进程依然 <code class="docutils literal notranslate"><span class="pre">D</span></code> 但是看不出其他异常，系统运行应用完全正常。这个问题后续再想办法排查…</p>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://newspaint.wordpress.com/2013/07/24/how-to-diagnose-high-sys-cpu-on-linux/">How To Diagnose High Sys CPU On Linux</a></p></li>
 <li><p><a class="reference external" href="https://www.pythian.com/blog/debugging-high-cpu-usage-using-perf-tool-and-vmcore-analysis/">Debugging High CPU Usage Using Perf Tool and vmcore Analysis</a></p></li>

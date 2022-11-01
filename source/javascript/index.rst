@@ -13,8 +13,7 @@ JavaScript注释方法有2种:
    :maxdepth: 1
 
    intro_js.rst
-   first_js.rst
-   js_var_const.rst
+   startup/index
    react/index
    typescript/index
    patternfly/index

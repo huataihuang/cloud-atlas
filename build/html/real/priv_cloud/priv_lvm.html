@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>私有云数据层LVM卷管理 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -166,7 +166,7 @@
            <div itemprop="articleBody">
              
   <section id="lvm">
-<span id="priv-lvm"></span><h1>私有云数据层LVM卷管理<a class="headerlink" href="#lvm" title="Permalink to this heading">¶</a></h1>
+<span id="priv-lvm"></span><h1>私有云数据层LVM卷管理<a class="headerlink" href="#lvm" title="此标题的永久链接">¶</a></h1>
 <p>在 <a class="reference internal" href="priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划了 <code class="docutils literal notranslate"><span class="pre">数据存储层(data)</span></code> ，其中采用了三个 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机pass-through读写 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 。这样，这三个虚拟机内部都会有一块完整NVMe磁盘，规划:</p>
 <ul class="simple">
 <li><p>500GB: <a class="reference internal" href="zdata_ceph.html#zdata-ceph"><span class="std std-ref">私有云数据层 ZData Ceph</span></a> 用于虚拟机存储</p></li>
@@ -182,7 +182,7 @@
 <li><p>首先将分区2准备如下:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">parted创建nvme分区2作为LVM卷</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">parted创建nvme分区2作为LVM卷</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo parted -a optimal /dev/nvme0n1 mkpart primary 500GB 800GB
 sudo parted /dev/nvme0n1 name <span class="m">2</span> lvm-data
 sudo parted /dev/nvme0n1 <span class="nb">set</span> <span class="m">2</span> lvm on
@@ -193,7 +193,7 @@ sudo parted /dev/nvme0n1 <span class="nb">set</span> <span class="m">2</span> lv
 <li><p>完成后分区如下:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">nvme分区</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">nvme分区</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Model: SAMSUNG MZVL21T0HCLR-00B00 <span class="o">(</span>nvme<span class="o">)</span>
 Disk /dev/nvme0n1: 1024GB
 Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512B/512B
@@ -207,12 +207,12 @@ Number  Start   End    Size   File system  Name      Flags
 </div>
 </div>
 <section id="id1">
-<h2>LVM洛基卷创建<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>LVM洛基卷创建<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>在分区2上创建LVM物理卷PV:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">pvcreate创建PV</span><a class="headerlink" href="#id5" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">pvcreate创建PV</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pvcreate /dev/nvme0n1p2
 </pre></div>
 </div>
@@ -221,7 +221,7 @@ Number  Start   End    Size   File system  Name      Flags
 <li><p>在分区2上创建LVM的卷组VG:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">vgcreate创建VG</span><a class="headerlink" href="#id6" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">vgcreate创建VG</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo vgcreate vg-data /dev/nvme0n1p2
 </pre></div>
 </div>
@@ -230,7 +230,7 @@ Number  Start   End    Size   File system  Name      Flags
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">vg-data</span></code> 卷组上创建名为 <code class="docutils literal notranslate"><span class="pre">lv-etcd</span></code> 的LVM卷，大小 8G ，用于 <a class="reference internal" href="../../kubernetes/administer/etcd/index.html#etcd"><span class="std std-ref">etcd - 分布式kv存储</span></a> 部署:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">lvcreate创建LVM卷</span><a class="headerlink" href="#id7" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">lvcreate创建LVM卷</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo lvcreate -n lv-etcd -L 8G vg-data
 </pre></div>
 </div>
@@ -244,7 +244,7 @@ Number  Start   End    Size   File system  Name      Flags
 </ul>
 <p>可以看到部署的LVM卷:</p>
 <div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">lvdisplay检查LVM</span><a class="headerlink" href="#id8" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">lvdisplay检查LVM</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>  --- Logical volume ---
   LV Path                /dev/vg-data/lv-etcd
   LV Name                lv-etcd
@@ -266,19 +266,19 @@ Number  Start   End    Size   File system  Name      Flags
 </div>
 </section>
 <section id="id2">
-<h2>文件系统<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>文件系统<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p>LVM卷上创建文件系统:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">LVM卷上创建文件系统</span><a class="headerlink" href="#id9" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">LVM卷上创建文件系统</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo mkfs.xfs /dev/vg-data/lv-etcd
 </pre></div>
 </div>
 </div>
 <p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 挂载条目:</p>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">在 /etc/fstab 中增加挂载LVM卷配置</span><a class="headerlink" href="#id10" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">在 /etc/fstab 中增加挂载LVM卷配置</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;/dev/vg-data/lv-etcd    /var/lib/etcd    xfs    defaults    0 0&quot;</span> <span class="p">|</span> sudo tee -a /etc/fstab
 </pre></div>
 </div>
@@ -287,7 +287,7 @@ Number  Start   End    Size   File system  Name      Flags
 <li><p>然后创建挂载目录并挂载:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">挂载LVM卷</span><a class="headerlink" href="#id11" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">挂载LVM卷</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /var/lib/etcd
 mount /var/lib/etcd
 </pre></div>

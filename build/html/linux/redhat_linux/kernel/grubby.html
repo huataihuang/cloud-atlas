@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>grubby修改内核参数 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -84,6 +84,7 @@
 <li class="toctree-l4"><a class="reference internal" href="kdump_guide/index.html">内核kdump指南</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">grubby修改内核参数</a></li>
 <li class="toctree-l4"><a class="reference internal" href="zram.html">zram - 基于内存的压缩块存储设备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kernel_modules_blacklist.html">禁止自动加载内核模块</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../performance/index.html">RHEL(Red Hat Enterprise Linux)性能优化</a></li>
@@ -168,11 +169,11 @@
            <div itemprop="articleBody">
              
   <section id="grubby">
-<span id="id1"></span><h1>grubby修改内核参数<a class="headerlink" href="#grubby" title="Permalink to this heading">¶</a></h1>
+<span id="id1"></span><h1>grubby修改内核参数<a class="headerlink" href="#grubby" title="此标题的永久链接">¶</a></h1>
 <p>在做 <a class="reference internal" href="../../../kernel/index.html#kernel"><span class="std std-ref">Kernel Atlas</span></a> 内核参数配置时，例如 <a class="reference internal" href="../../ubuntu_linux/admin/ubuntu_grub.html#ubuntu-grub"><span class="std std-ref">Ubuntu修订Grub内核启动参数</span></a> 采用修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置文件，然后通过 <code class="docutils literal notranslate"><span class="pre">update-grub</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">grub2-mkconfig</span> <span class="pre">-o</span> <span class="pre">/boot/grub2/grub.cfg</span></code> 完成内核参数修订 (包括 <a class="reference internal" href="../index.html#redhat-linux"><span class="std std-ref">RedHat Linux</span></a> 也支持这种方式)。</p>
 <p>不过，这种修订方式需要编辑配置文件，不适合通过脚本自动化完成海量服务器修订。(自己编写 <code class="docutils literal notranslate"><span class="pre">sed</span></code> 脚本虽然也能批量处理，但是通用性较差且容易误处理)所以， <code class="docutils literal notranslate"><span class="pre">grubby</span></code> 工具提供了读取Grub信息以及持久化修订 <code class="docutils literal notranslate"><span class="pre">grub.cfg</span></code> 的能力，可以完成批量处理 GRUB 2 配置文件，适合对生产环境海量服务器修订。</p>
 <section id="id2">
-<h2>查看内核信息<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>查看内核信息<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>要找出系统默认启动内核执行:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="n">default</span><span class="o">-</span><span class="n">kernel</span>
@@ -254,9 +255,9 @@
 </div>
 </section>
 <section id="id3">
-<h2>修订内核参数<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>修订内核参数<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <section id="id4">
-<h3>修订不同的启动内核<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3>修订不同的启动内核<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>如果需要回滚内核，例如将默认启动内核从 <code class="docutils literal notranslate"><span class="pre">0</span></code> 改为 <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grubby</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">default</span><span class="o">-</span><span class="n">index</span> <span class="mi">1</span>
@@ -270,7 +271,7 @@
 </div>
 </section>
 <section id="id5">
-<h3>修改内核参数<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3>修改内核参数<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">grubby</span></code> 提供了参数 <code class="docutils literal notranslate"><span class="pre">--update-kernel</span></code> 可以对指定内核或者所有内核的参数进行修改:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--update-kernel=ALL</span></code> 同时对所有内核的参数进行修订</p></li>
@@ -296,7 +297,7 @@
 </section>
 </section>
 <section id="id6">
-<h2>增加内核项<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<h2>增加内核项<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
 <p>有时候我们需要验证同一个内核的不同内核参数，我们可以采用添加入口项方式。</p>
 <ul>
 <li><p>例如，手工编译了一个新的 <code class="docutils literal notranslate"><span class="pre">testing</span></code> 内核，需要测试:</p>
@@ -326,7 +327,7 @@
 </ul>
 </section>
 <section id="id7">
-<h2>参考<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.golinuxcloud.com/grubby-command-examples/">12 practical grubby command examples (cheat sheet)</a></p></li>
 <li><p><a class="reference external" href="https://dba010.com/2022/03/22/change-default-kernel-using-grubby-tool/">Change default kernel using grubby Tool</a></p></li>

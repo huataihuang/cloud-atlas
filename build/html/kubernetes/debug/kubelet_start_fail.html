@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kubelet启动异常排查 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -103,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -181,10 +182,10 @@
            <div itemprop="articleBody">
              
   <section id="kubelet">
-<span id="kubelet-start-fail"></span><h1>Kubelet启动异常排查<a class="headerlink" href="#kubelet" title="Permalink to this heading">¶</a></h1>
+<span id="kubelet-start-fail"></span><h1>Kubelet启动异常排查<a class="headerlink" href="#kubelet" title="此标题的永久链接">¶</a></h1>
 <p>我在 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 的一个 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> 工作节点，升级重启以后遇到 <a class="reference internal" href="../../linux/redhat_linux/systemd/systemd_service_mask.html#systemd-service-mask"><span class="std std-ref">Systemd Service Mask</span></a> 导致 <a class="reference internal" href="../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 无法管理网络接口。虽然 <code class="docutils literal notranslate"><span class="pre">unmask</span></code> 之后并且恢复了NetworkManager管理网络接口。但是系统重启后， <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 服务没有正常启动。</p>
 <section id="id1">
-<h2>服务器启动异常排查的方法<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>服务器启动异常排查的方法<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>这种kubelet启动失败的排查方法和所有systemd管理的服务排查方法相同，从检查服务状态和日志开始：</p>
 <ul>
 <li><p>检查 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 服务状态:</p>
@@ -244,7 +245,7 @@
 <p>原因是 <code class="docutils literal notranslate"><span class="pre">kubelet</span></code> 默认不支持 <code class="docutils literal notranslate"><span class="pre">swap</span></code> ，所以需要关闭swap，或者在 kubelet 启动时传递 <code class="docutils literal notranslate"><span class="pre">--fail-swap-on</span></code> 参数。</p>
 </section>
 <section id="kubeletswap">
-<h2>kubelet默认不支持swap<a class="headerlink" href="#kubeletswap" title="Permalink to this heading">¶</a></h2>
+<h2>kubelet默认不支持swap<a class="headerlink" href="#kubeletswap" title="此标题的永久链接">¶</a></h2>
 <p>这里我使用的是 <a class="reference internal" href="../../machine_learning/jetson/jetson_nano.html#jetson-nano"><span class="std std-ref">Jetson Nano</span></a> ， <a class="reference internal" href="../../machine_learning/jetson/studio/jetson_swap.html#jetson-swap"><span class="std std-ref">Jetson Nano的swap</span></a> 默认用，并且由于NVIDIA定制了操作系统采用的是 zram ，是在内存中划分出部分作为swap，并且采用压缩方式存储的内存型swap。</p>
 <p>需要注意，我之前实际上部署 <a class="reference internal" href="../arm/arm_k8s_deploy.html#arm-k8s-deploy"><span class="std std-ref">部署ARM架构Kubernetes</span></a> 已经关闭过swap，但是如果升级操作系统，可能会无意中重新开启了swap。</p>
 <ul>

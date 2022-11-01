@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>源代码编译安装TensorFlow &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,12 +17,13 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="Linux Atlas" href="../../linux/index.html" />
+    <link rel="next" title="NVIDIA GPU加速TensorFlow" href="tensorflow_nvidia.html" />
     <link rel="prev" title="TensorFlow快速起步" href="tensorflow_quickstart.html" /> 
 </head>
 
@@ -91,8 +91,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#tensorflowgpu">验证TensorFlow的GPU加速</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tensorflow_nvidia.html">NVIDIA GPU加速TensorFlow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mixed_precision_training.html">混合精度训练(Mixed Precision Training)</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../stable_diffusion/index.html">Stable Diffusion模型方法</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../linux/index.html">Linux Atlas</a></li>
@@ -150,9 +153,9 @@
            <div itemprop="articleBody">
              
   <section id="tensorflow">
-<span id="build-tensorflow"></span><h1>源代码编译安装TensorFlow<a class="headerlink" href="#tensorflow" title="Permalink to this heading">¶</a></h1>
+<span id="build-tensorflow"></span><h1>源代码编译安装TensorFlow<a class="headerlink" href="#tensorflow" title="此标题的永久链接">¶</a></h1>
 <section id="tensorflowcuda">
-<h2>TensorFlow发行版对CUDA要求<a class="headerlink" href="#tensorflowcuda" title="Permalink to this heading">¶</a></h2>
+<h2>TensorFlow发行版对CUDA要求<a class="headerlink" href="#tensorflowcuda" title="此标题的永久链接">¶</a></h2>
 <p>在 <a class="reference internal" href="../../docker/gpu/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> 测试中，我使用的MacBook Pro 2015 later显卡是Nvidia GeForce GT 750M，虽然也 <a class="reference external" href="https://developer.nvidia.com/cuda-gpus">支持CUDA</a> ，但是只能支持CUDA 3.0。而当前最新版本的TensorFlow二进制发行版至少需要CUDA 3.5。</p>
 <p>在 <a class="reference internal" href="../../docker/gpu/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> 运行时报错:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2019</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">26</span> <span class="mi">08</span><span class="p">:</span><span class="mi">55</span><span class="p">:</span><span class="mf">33.614949</span><span class="p">:</span> <span class="n">I</span> <span class="n">tensorflow</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="n">platform</span><span class="o">/</span><span class="n">cpu_feature_guard</span><span class="o">.</span><span class="n">cc</span><span class="p">:</span><span class="mi">141</span><span class="p">]</span> <span class="n">Your</span> <span class="n">CPU</span> <span class="n">supports</span> <span class="n">instructions</span> <span class="n">that</span> <span class="n">this</span> <span class="n">TensorFlow</span> <span class="n">binary</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">compiled</span> <span class="n">to</span> <span class="n">use</span><span class="p">:</span> <span class="n">AVX2</span> <span class="n">FMA</span>
@@ -177,7 +180,7 @@
 </div>
 </section>
 <section id="docker">
-<h2>Docker准备<a class="headerlink" href="#docker" title="Permalink to this heading">¶</a></h2>
+<h2>Docker准备<a class="headerlink" href="#docker" title="此标题的永久链接">¶</a></h2>
 <p>参考 <a class="reference internal" href="../../docker/gpu/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> 在MacBook Pro上安装好 <code class="docutils literal notranslate"><span class="pre">docker-ce</span></code> 以及 <code class="docutils literal notranslate"><span class="pre">nvidia-docker2</span></code> ，然后创建一个支持GPU的容器:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">data</span>
 <span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">memory</span><span class="o">=</span><span class="mi">4096</span><span class="n">M</span> <span class="o">--</span><span class="n">cpus</span><span class="o">=</span><span class="mi">2</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">tfstack</span> <span class="o">--</span><span class="n">name</span> <span class="n">tfstack</span> \
@@ -206,7 +209,7 @@
 </div>
 </section>
 <section id="linux">
-<h2>Linux操作系统准备<a class="headerlink" href="#linux" title="Permalink to this heading">¶</a></h2>
+<h2>Linux操作系统准备<a class="headerlink" href="#linux" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>安装python:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">dev</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span>
@@ -262,7 +265,7 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 </div>
 </section>
 <section id="gpu">
-<h2>安装GPU支持<a class="headerlink" href="#gpu" title="Permalink to this heading">¶</a></h2>
+<h2>安装GPU支持<a class="headerlink" href="#gpu" title="此标题的永久链接">¶</a></h2>
 <p>macOS不支持GPU，只在Linux平台需要执行 <a class="reference external" href="https://www.tensorflow.org/install/gpu">GPU 支持</a> 的安装步骤。</p>
 <ul class="simple">
 <li><p>安装GPU驱动</p></li>
@@ -308,7 +311,7 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 </div>
 </section>
 <section id="id4">
-<h2>下载TensorFlow源代码<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>下载TensorFlow源代码<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>使用git获取 <a class="reference external" href="https://github.com/tensorflow/tensorflow">TensorFlow 仓库</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">.</span><span class="n">git</span>
@@ -331,7 +334,7 @@ Please downgrade your bazel installation to version 0.21.0 or lower to build Ten
 </div>
 </section>
 <section id="configure">
-<h2>配置configure<a class="headerlink" href="#configure" title="Permalink to this heading">¶</a></h2>
+<h2>配置configure<a class="headerlink" href="#configure" title="此标题的永久链接">¶</a></h2>
 <p>通过运行以下脚本通过交互方式设置编译参数:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TF_UNOFFICIAL_SETTING</span><span class="o">=</span><span class="mi">1</span> <span class="o">./</span><span class="n">configure</span>
 </pre></div>
@@ -443,7 +446,7 @@ Configuration finished
 </div>
 </section>
 <section id="bazel-build">
-<h2>Bazel build<a class="headerlink" href="#bazel-build" title="Permalink to this heading">¶</a></h2>
+<h2>Bazel build<a class="headerlink" href="#bazel-build" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>CPU-only:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bazel</span> <span class="n">build</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="n">opt</span> <span class="o">//</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">pip_package</span><span class="p">:</span><span class="n">build_pip_package</span>
@@ -462,9 +465,9 @@ Configuration finished
 <p><a class="reference external" href="https://www.tensorflow.org/install/pip">官方TensorFlow软件包</a> 是使用GCC 4并使用较老的ABI编译的。对于使用GCC 5或更新版本，如果要使用较老的ABI确保兼容性，则使用 <code class="docutils literal notranslate"><span class="pre">--cxxopt=&quot;-D_GLIBCXX_USE_CXX11_ABI=0&quot;</span></code> 编译参数。</p>
 </div>
 <section id="build">
-<h3>Build 报错处理<a class="headerlink" href="#build" title="Permalink to this heading">¶</a></h3>
+<h3>Build 报错处理<a class="headerlink" href="#build" title="此标题的永久链接">¶</a></h3>
 <section id="python">
-<h4>找不到python<a class="headerlink" href="#python" title="Permalink to this heading">¶</a></h4>
+<h4>找不到python<a class="headerlink" href="#python" title="此标题的永久链接">¶</a></h4>
 <ul>
 <li><p><cite>/usr/bin/env: ‘python’: No such file or directory</cite></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">bazel</span><span class="o">/</span><span class="n">_bazel_huatai</span><span class="o">/</span><span class="n">ae02d937542a5be4e761c5ab20415f3c</span><span class="o">/</span><span class="n">external</span><span class="o">/</span><span class="n">protobuf_archive</span><span class="o">/</span><span class="n">BUILD</span><span class="p">:</span><span class="mi">259</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span> <span class="n">C</span><span class="o">++</span> <span class="n">compilation</span> <span class="n">of</span> <span class="n">rule</span> <span class="s1">&#39;@protobuf_archive//:protoc_lib&#39;</span> <span class="n">failed</span> <span class="p">(</span><span class="n">Exit</span> <span class="mi">127</span><span class="p">)</span>
@@ -481,7 +484,7 @@ Configuration finished
 </div>
 </section>
 <section id="gcc">
-<h4>编译过程中gcc进程被杀<a class="headerlink" href="#gcc" title="Permalink to this heading">¶</a></h4>
+<h4>编译过程中gcc进程被杀<a class="headerlink" href="#gcc" title="此标题的永久链接">¶</a></h4>
 <ul>
 <li><p><cite>gcc: internal compiler error: Killed (program cc1plus)</cite>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">huatai</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="n">kernels</span><span class="o">/</span><span class="n">BUILD</span><span class="p">:</span><span class="mi">762</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span> <span class="n">C</span><span class="o">++</span> <span class="n">compilation</span> <span class="n">of</span> <span class="n">rule</span> <span class="s1">&#39;//tensorflow/core/kernels:broadcast_to_op&#39;</span> <span class="n">failed</span> <span class="p">(</span><span class="n">Exit</span> <span class="mi">4</span><span class="p">)</span>
@@ -504,7 +507,7 @@ Configuration finished
 </section>
 </section>
 <section id="id8">
-<h2>Build软件包<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
+<h2>Build软件包<a class="headerlink" href="#id8" title="此标题的永久链接">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">bazel</span> <span class="pre">build</span></code> 命令创建名为 <code class="docutils literal notranslate"><span class="pre">build_pip_package</span></code> 的可执行程序，这个程序用于构建 <code class="docutils literal notranslate"><span class="pre">pip</span></code> 包。请执行以下命令在 <code class="docutils literal notranslate"><span class="pre">/tmp/tensolflow_pkg</span></code> 目录下创建一个 <code class="docutils literal notranslate"><span class="pre">.whl</span></code> 包。</p>
 <ul>
 <li><p>从release分支build:</p>
@@ -524,7 +527,7 @@ Configuration finished
 </div>
 </section>
 <section id="id9">
-<h2>安装软件包<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h2>
+<h2>安装软件包<a class="headerlink" href="#id9" title="此标题的永久链接">¶</a></h2>
 <p>现在在软件包目录下有一个带有TensoorFlow版本和平台信息的 <code class="docutils literal notranslate"><span class="pre">.whl</span></code> 文件，现在使用 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> 命令来安装这个软件包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">tensorflow_pkg</span><span class="o">/</span><span class="n">tensorflow</span><span class="o">-</span><span class="mf">1.13.1</span><span class="o">-</span><span class="n">cp36</span><span class="o">-</span><span class="n">cp36m</span><span class="o">-</span><span class="n">linux_x86_64</span><span class="o">.</span><span class="n">whl</span>
 </pre></div>
@@ -539,14 +542,14 @@ Configuration finished
 </div>
 </section>
 <section id="docker-linux-builds">
-<h2>Docker Linux builds<a class="headerlink" href="#docker-linux-builds" title="Permalink to this heading">¶</a></h2>
+<h2>Docker Linux builds<a class="headerlink" href="#docker-linux-builds" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>以下内容摘自 <a class="reference external" href="https://www.tensorflow.org/install/source#docker_linux_builds">TensorFlow官方安装文档 Build from source - Docker Linux builds</a> 。不过，我目前没有实际操作，因为前述Build from source操作已经完成了在 <a class="reference internal" href="../../docker/gpu/nvidia-docker.html#nvidia-docker"><span class="std std-ref">Docker运行NVIDIA容器</span></a> 构建支持CUDA 3.0的TensorFlow环境，能够满足我个人的实践操作需求，所以本段 <code class="docutils literal notranslate"><span class="pre">Docker</span> <span class="pre">Linux</span> <span class="pre">builds</span></code> 我没有实践。</p>
 </div>
 <p>TensorFlow的Docker开发者镜像提供了从源代码编译Linux包的方便的环境（例如，你想为Debian/Ubuntu或RHEL/CentOS发布TensorFlow安装软件包）。这些镜像已经包含了构建TensorFlow的源代码和编译依赖。请参考TensorFlow <a class="reference external" href="https://www.tensorflow.org/install/docker">Docker guide</a> 进行操作。Docker镜像请参考docker hub中官方 <a class="reference external" href="https://hub.docker.com/r/tensorflow/tensorflow">tensorflow Office Docker images</a> 。</p>
 <section id="cpu-only">
-<h3>CPU-only<a class="headerlink" href="#cpu-only" title="Permalink to this heading">¶</a></h3>
+<h3>CPU-only<a class="headerlink" href="#cpu-only" title="此标题的永久链接">¶</a></h3>
 <p>以下案例使用 <code class="docutils literal notranslate"><span class="pre">:nightly-devel</span></code> 镜像构建CPU-only Python2软件包。请参考 <a class="reference external" href="https://www.tensorflow.org/install/docker">Docker guide</a> 的 <code class="docutils literal notranslate"><span class="pre">-devel</span></code> 标签的TensorFlow。</p>
 <p>下载最新的开发镜像并启动Docker容器:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docker pull tensorflow/tensorflow:nightly-devel
@@ -583,7 +586,7 @@ chown $HOST_PERMS /mnt/tensorflow-version-tags.whl
 </div>
 </section>
 <section id="gpu-support">
-<h3>GPU support<a class="headerlink" href="#gpu-support" title="Permalink to this heading">¶</a></h3>
+<h3>GPU support<a class="headerlink" href="#gpu-support" title="此标题的永久链接">¶</a></h3>
 <p>Host主机上只需要安装 <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker/wiki/Frequently-Asked-Questions#how-do-i-install-the-nvidia-driver">NVIDIA driver驱动</a> (Host主机不需要安装NVIDIA CUDA Toolkit) 就可以在Docker容器中编译具有GPU支持的TensorFlow。请参考 <a class="reference external" href="https://www.tensorflow.org/install/gpu">GPU support guide</a> 以及 <a class="reference external" href="https://www.tensorflow.org/install/docker">TensorFlow Docker guide</a> 来设置 <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a> (Linux only) 。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
@@ -613,7 +616,7 @@ chown $HOST_PERMS /mnt/tensorflow-version-tags.whl
 </section>
 </section>
 <section id="tensorflowgpu">
-<h2>验证TensorFlow的GPU加速<a class="headerlink" href="#tensorflowgpu" title="Permalink to this heading">¶</a></h2>
+<h2>验证TensorFlow的GPU加速<a class="headerlink" href="#tensorflowgpu" title="此标题的永久链接">¶</a></h2>
 <p><a class="reference internal" href="../../docker/gpu/nvidia-docker.html#compare-gpu-cpu-in-tensorflow"><span class="std std-ref">对比GPU和CPU运行TensorFlow案例</span></a> 中有一个由 <a class="reference external" href="https://learningtensorflow.com/lesson10/">learningtensorflow.com</a> 提供的 <cite>benchmark.py</cite> 脚本可以用来对比GPU和CPU运算效率。</p>
 <p>当然，在使用bencmark脚本测试之前，我们先把花费了我们很多时间精力构建的支持CUDA 3.0的自定义镜像制作出来:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">commit</span> <span class="n">tfstack</span> <span class="n">local</span><span class="p">:</span><span class="n">tensorflow</span><span class="o">-</span><span class="n">cuda3</span><span class="mf">.0</span>
@@ -685,7 +688,7 @@ chown $HOST_PERMS /mnt/tensorflow-version-tags.whl
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="tensorflow_quickstart.html" class="btn btn-neutral float-left" title="TensorFlow快速起步" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../linux/index.html" class="btn btn-neutral float-right" title="Linux Atlas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tensorflow_nvidia.html" class="btn btn-neutral float-right" title="NVIDIA GPU加速TensorFlow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

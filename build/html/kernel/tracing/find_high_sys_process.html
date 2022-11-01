@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>找出消耗CPU的sys的进程 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -157,14 +157,14 @@
            <div itemprop="articleBody">
              
   <section id="cpusys">
-<span id="find-high-sys-process"></span><h1>找出消耗CPU的sys的进程<a class="headerlink" href="#cpusys" title="Permalink to this heading">¶</a></h1>
+<span id="find-high-sys-process"></span><h1>找出消耗CPU的sys的进程<a class="headerlink" href="#cpusys" title="此标题的永久链接">¶</a></h1>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>本文介绍一种找出大量消耗CPU的sys的进程的思路，适合采用cgroup隔离进程的生产系统问题排查。在找出大量消耗sys的进程后，我们可以采用 <a class="reference internal" href="debug_high_sys_process.html#debug-high-sys-process"><span class="std std-ref">debug占用很高system的进程</span></a> 来进一步分析进程，找出代码问题。</p>
 <p>如果没有使用cgroup，则稍微有些麻烦(话说应该没有不使用cgroup的系统了吧)，就是通过 <code class="docutils literal notranslate"><span class="pre">cpuset</span></code> 命令手工将进程指定到某个CPU上，观察CPU负载变化来排查。</p>
 </div>
 <section id="sys">
-<h2>大量消耗sys的场景<a class="headerlink" href="#sys" title="Permalink to this heading">¶</a></h2>
+<h2>大量消耗sys的场景<a class="headerlink" href="#sys" title="此标题的永久链接">¶</a></h2>
 <p>在生产环境中，会采用 <a class="reference internal" href="../cgroup/index.html#cgroup"><span class="std std-ref">Kernel Cgroup</span></a> 进行资源隔离不同类型的进程，例如，会把监控服务(大量的数据采集脚本)都加入到 <code class="docutils literal notranslate"><span class="pre">agent</span></code> 的cgroup控制组，并绑定使用 <code class="docutils literal notranslate"><span class="pre">cpu</span> <span class="pre">24</span></code> 。这种方式可以闭麦呢辅助程序和应用系统争抢CPU资源。</p>
 <p>但是，发现数十个辅助程序绑定到 <code class="docutils literal notranslate"><span class="pre">cpu</span> <span class="pre">24</span></code> 之后，这个CPU出现了非常严重的 <code class="docutils literal notranslate"><span class="pre">sys</span></code> 使用率，从 <a class="reference internal" href="../process/utils/top.html#top"><span class="std std-ref">性能观察工具top</span></a> 来看，系统 <code class="docutils literal notranslate"><span class="pre">load</span> <span class="pre">average</span></code> 负载非常高，但是实际上除了少数 <code class="docutils literal notranslate"><span class="pre">cpu</span></code> 确实计算较为繁忙，大多数cpu都是空闲的:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">-</span> <span class="mi">22</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">20</span> <span class="n">up</span> <span class="mi">50</span> <span class="n">days</span><span class="p">,</span>  <span class="mi">8</span><span class="p">:</span><span class="mi">33</span><span class="p">,</span>  <span class="mi">2</span> <span class="n">users</span><span class="p">,</span>  <span class="n">load</span> <span class="n">average</span><span class="p">:</span> <span class="mf">40.91</span><span class="p">,</span> <span class="mf">41.86</span><span class="p">,</span> <span class="mf">42.51</span>

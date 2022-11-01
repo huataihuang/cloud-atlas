@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Containerd环境CentOS容器运行systemd &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -177,14 +178,14 @@
            <div itemprop="articleBody">
              
   <section id="containerdcentossystemd">
-<span id="containerd-centos-systemd"></span><h1>Containerd环境CentOS容器运行systemd<a class="headerlink" href="#containerdcentossystemd" title="Permalink to this heading">¶</a></h1>
+<span id="containerd-centos-systemd"></span><h1>Containerd环境CentOS容器运行systemd<a class="headerlink" href="#containerdcentossystemd" title="此标题的永久链接">¶</a></h1>
 <p>在 <a class="reference internal" href="../../../docker/init/docker_systemd.html#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 实践中，可以实现容器中以 <a class="reference internal" href="../../../linux/redhat_linux/systemd/index.html#systemd"><span class="std std-ref">Systemd进程管理器</span></a> 为init。不过， <a class="reference external" href="https://hub.docker.com/_/centos">CentOS DockerHUB官方镜像</a> 提供了启用 <code class="docutils literal notranslate"><span class="pre">systemd</span></code> 的Dockerfile。在官方 <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 基础上，还需要解决 <a class="reference internal" href="nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 实践时遇到的无法更新yum仓库的问题(CentOS 8已经于2021年底终止更新，需要切换到CentOS Stream分支)。</p>
 <p>本文实践采用 <a class="reference internal" href="nerdctl.html#nerdctl"><span class="std std-ref">nerdctl</span></a> 完成，原因是部署 <a class="reference internal" href="../../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr.html#k8s-dnsrr"><span class="std std-ref">基于DNS轮询构建高可用Kubernetes</span></a> 最新Kubernetes已经完全切换到 <a class="reference internal" href="index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> ，摈弃了复杂的 <a class="reference internal" href="../../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 。</p>
 <ul class="simple">
 <li><p>在本地目录下创建 <code class="docutils literal notranslate"><span class="pre">DockerFile</span></code> 和 用于ssh的 <code class="docutils literal notranslate"><span class="pre">authorized_keys</span></code> 文件: <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> 内容如下:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">CentOS Stream 8 启用systemd(失败)</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">CentOS Stream 8 启用systemd(失败)</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># USE DOCKER</span>
 <span class="c"># docker build --rm -t centos-stream-8-systemd .</span>
 <span class="c"># docker run -itd -p 1122:22 --hostname myserver --name myserver local:centos-stream-8-systemd</span>
@@ -368,7 +369,7 @@ Freezing execution.
 </pre></div>
 </div>
 <section id="id1">
-<h2>解决<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>解决<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>我万万没有想到，或者说我忘记了 <code class="docutils literal notranslate"><span class="pre">nerdctl</span></code> 实际上 <strong>部分</strong> clone 了 <code class="docutils literal notranslate"><span class="pre">docker</span></code> 命令:</p>
 <p>在 <code class="docutils literal notranslate"><span class="pre">nerdctl</span> <span class="pre">run</span> <span class="pre">--help</span></code> 有如下提示:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">privileged</span>                  <span class="n">Give</span> <span class="n">extended</span> <span class="n">privileges</span> <span class="n">to</span> <span class="n">this</span> <span class="n">container</span>
@@ -404,7 +405,7 @@ Freezing execution.
 </div>
 <p>折腾了我一天时间，终于还是回到 <a class="reference internal" href="../../../docker/init/docker_systemd.html#docker-systemd"><span class="std std-ref">Docker systemd进程管理器</span></a> 最初的方式才解决。以下是修正后正确配置:</p>
 <div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">CentOS Stream 8 启用systemd(正确)</span><a class="headerlink" href="#id4" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">CentOS Stream 8 启用systemd(正确)</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># USE DOCKER</span>
 <span class="c"># docker build --rm -t local/centos-stream-8-systemd .</span>
 <span class="c"># docker run -itd --privileged=true -p 1122:22 --hostname myserver --name myserver local:centos-stream-8-systemd</span>
@@ -474,7 +475,7 @@ rm -f /lib/systemd/system/anaconda.target.wants/*<span class="p">;</span>
 </div>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://programmerah.com/solved-docker-error-failed-to-connect-to-bus-host-is-down-34967/">[Solved] Docker Error: Failed to connect to bus: Host is down</a></p></li>
 </ul>

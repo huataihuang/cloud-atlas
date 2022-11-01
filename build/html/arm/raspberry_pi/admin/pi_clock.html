@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>树莓派时钟 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -160,7 +160,7 @@
            <div itemprop="articleBody">
              
   <section id="pi-clock">
-<span id="id1"></span><h1>树莓派时钟<a class="headerlink" href="#pi-clock" title="Permalink to this heading">¶</a></h1>
+<span id="id1"></span><h1>树莓派时钟<a class="headerlink" href="#pi-clock" title="此标题的永久链接">¶</a></h1>
 <p>我在 <a class="reference internal" href="../../../linux/alpine_linux/alpine_install_pi.html#alpine-install-pi"><span class="std std-ref">树莓派环境安装Alpine Linux</span></a> 遇到 <a class="reference internal" href="../../../linux/alpine_linux/alpine_pi_clock_skew.html#alpine-pi-clock-skew"><span class="std std-ref">Alpine Linux在树莓派启动”clock skew”报错</span></a> 困扰，导致重启系统后无法挂载文件系统。</p>
 <p>树莓派物理硬件上采用了非常小的成本，省略了常规计算机中使用的硬件时钟( <code class="docutils literal notranslate"><span class="pre">hardware</span> <span class="pre">clock</span></code> , RTC, Real Time Clock, CMOS clock, BIOS clock )。硬件时钟是主板上通过电池维持的时钟，即使主机关闭也能够保证时间。在操作系统中，有一个系统时间( <code class="docutils literal notranslate"><span class="pre">system</span> <span class="pre">clock</span></code> )
 ，这个时钟在操作系统启动时通过硬件时钟来设置，操作系统启动以后就用系统时钟来跟踪时间。当操作系统关闭时，会使用系统时间来设置硬件时钟，以便记录重启之间的时间。Linux使用 <code class="docutils literal notranslate"><span class="pre">clocksource</span></code> 来维护时间，大多数情况下都以来硬件。</p>
@@ -169,11 +169,11 @@
 <a class="reference internal image-reference" href="../../../_images/ds3231-rtc-module-for-raspberry-pi.jpg"><img alt="../../../_images/ds3231-rtc-module-for-raspberry-pi.jpg" src="../../../_images/ds3231-rtc-module-for-raspberry-pi.jpg" style="width: 400.0px; height: 400.0px;" /></a>
 </figure>
 <section id="id2">
-<h2>时钟精度<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>时钟精度<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <p>时钟精度是使用 <code class="docutils literal notranslate"><span class="pre">ppm</span></code> (parts per million)，表示每百万偏差，例如 3ppm 表示 每100万 有3个偏差，所以: <code class="docutils literal notranslate"><span class="pre">3/10e6</span> <span class="pre">x</span> <span class="pre">24</span> <span class="pre">x</span> <span class="pre">60</span> <span class="pre">x</span> <span class="pre">60</span> <span class="pre">=</span> <span class="pre">0.2592</span> <span class="pre">sec/day</span></code> 表示每天有 <code class="docutils literal notranslate"><span class="pre">0.2592秒</span></code> 偏差，累积下来一年最大约 <code class="docutils literal notranslate"><span class="pre">95秒</span></code> 偏差。对于原子钟精度可以达到 <code class="docutils literal notranslate"><span class="pre">0.0000001</span> <span class="pre">ppm</span></code></p>
 </section>
 <section id="linux">
-<h2>Linux时钟<a class="headerlink" href="#linux" title="Permalink to this heading">¶</a></h2>
+<h2>Linux时钟<a class="headerlink" href="#linux" title="此标题的永久链接">¶</a></h2>
 <p>由于硬件时钟只在系统启动时使用，所以操作系统运行时不使用硬件时钟来维护时间。内核维护使用 <code class="docutils literal notranslate"><span class="pre">clocksource</span></code> 有多种硬件来源。在x86硬件环境，最常用都时钟源是 <code class="docutils literal notranslate"><span class="pre">TSC</span></code> (Time Stamp Counter), <code class="docutils literal notranslate"><span class="pre">acpi_pm</span></code> 和 <code class="docutils literal notranslate"><span class="pre">HPET</span></code> (High Precision Event Timer):</p>
 <ul>
 <li><p>检查当前时钟源:</p>
@@ -199,7 +199,7 @@
 </div>
 </section>
 <section id="id3">
-<h2>树莓派时钟源<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>树莓派时钟源<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <p>树莓派没有集成 <code class="docutils literal notranslate"><span class="pre">TSC</span></code> 或 <code class="docutils literal notranslate"><span class="pre">HPET</span> <span class="pre">counter</span></code> ，而是依赖 <code class="docutils literal notranslate"><span class="pre">STC</span></code> 作为时钟源，所谓 <code class="docutils literal notranslate"><span class="pre">STC</span></code> 是一个按照 <code class="docutils literal notranslate"><span class="pre">1MHz</span></code> 频率运行的计数器，也就是每毫米为单位增量。</p>
 <p>我对比了 <a class="reference internal" href="../startup/ubuntu64bit_pi.html#ubuntu64bit-pi"><span class="std std-ref">树莓派4b运行64位Ubuntu</span></a> 以及初始安装的 Alipine Linux for Raspberry Pi(无盘模式，能够启动)，发现都是使用 <code class="docutils literal notranslate"><span class="pre">arch_sys_counter</span></code> 作为时钟源:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">devices</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">clocksource</span><span class="o">/</span><span class="n">clocksource0</span><span class="o">/</span><span class="n">current_clocksource</span>
@@ -221,7 +221,7 @@
 </div>
 </section>
 <section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://blog.remibergsma.com/2013/05/12/how-accurately-can-the-raspberry-pi-keep-time/">How accurately can the Raspberry Pi keep time?</a></p></li>
 </ul>

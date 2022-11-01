@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kubeernetes服务(services) &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -179,7 +180,7 @@
            <div itemprop="articleBody">
              
   <section id="kubeernetes-services">
-<span id="k8s-services"></span><h1>Kubeernetes服务(services)<a class="headerlink" href="#kubeernetes-services" title="Permalink to this heading">¶</a></h1>
+<span id="k8s-services"></span><h1>Kubeernetes服务(services)<a class="headerlink" href="#kubeernetes-services" title="此标题的永久链接">¶</a></h1>
 <p>在 <a class="reference internal" href="../../network/cilium/service_mesh/cilium_k8s_ingress_http.html#cilium-k8s-ingress-http"><span class="std std-ref">Cilium Kubernetes Ingress HTTP配置案例</span></a> 我困扰于如何给Ingress配置External-IP，这需要理解Kubernetes对 <code class="docutils literal notranslate"><span class="pre">公开为网络服务的抽象方法</span></code> :</p>
 <ul class="simple">
 <li><p>在 Kubernetes 中，通常使用 <code class="docutils literal notranslate"><span class="pre">deployment</span></code> 来部署应用，此时会使用 <code class="docutils literal notranslate"><span class="pre">pod</span></code> 。但是需要注意 <code class="docutils literal notranslate"><span class="pre">pod</span></code> 是一个有生命周期的非永久性资源，会被动态创建和销毁</p></li>
@@ -193,7 +194,7 @@
 </ul>
 <p>例如，我在 <a class="reference internal" href="../../../real/priv_cloud/z-k8s_nerdctl.html#z-k8s-nerdctl"><span class="std std-ref">Kubernetes集群(z-k8s)使用nerdctl</span></a> 定义了 <code class="docutils literal notranslate"><span class="pre">deployment</span></code> :</p>
 <div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">z-dev部署配置z-dev-depolyment.yaml，定义了pod输出的3个服务端口 22,80,443</span><a class="headerlink" href="#id2" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">z-dev部署配置z-dev-depolyment.yaml，定义了pod输出的3个服务端口 22,80,443</span><a class="headerlink" href="#id2" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -236,7 +237,7 @@
 </div>
 <p>然后，我又可以针对上述 <code class="docutils literal notranslate"><span class="pre">worklod</span></code> ( <code class="docutils literal notranslate"><span class="pre">deployment</span></code> ) 来定义 <code class="docutils literal notranslate"><span class="pre">service</span></code> :</p>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">定义z-dev对外服务</span><a class="headerlink" href="#id3" title="永久链接至代码">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">定义z-dev对外服务</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -266,7 +267,7 @@
 <p>定义 <code class="docutils literal notranslate"><span class="pre">service</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">port</span></code> 可以映射到任意 <code class="docutils literal notranslate"><span class="pre">targetPort</span></code> ，而默认情况下， <code class="docutils literal notranslate"><span class="pre">targetPort</span></code> 设置成与 <code class="docutils literal notranslate"><span class="pre">port</span></code> 相同值</p>
 </div>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/docs/concepts/services-networking/service/">Kubernetes Concept - Service</a></p></li>
 <li><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/service">Kubernetes 文档/概念/服务、负载均衡和联网/服务(Service)</a></p></li>

@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展) &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../platform/index.html">Kubernetes之上的平台</a></li>
@@ -177,12 +178,12 @@
            <div itemprop="articleBody">
              
   <section id="lazy-pulling-estargz">
-<span id="estargz-lazy-pulling"></span><h1>用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展)<a class="headerlink" href="#lazy-pulling-estargz" title="Permalink to this heading">¶</a></h1>
+<span id="estargz-lazy-pulling"></span><h1>用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展)<a class="headerlink" href="#lazy-pulling-estargz" title="此标题的永久链接">¶</a></h1>
 <p>在 Kubernetes 运行中，镜像拉取始终是决定容器启动速度的重要因素。特别是很多应用运维不注重 <a class="reference internal" href="../../../docker/images/smaller_docker_images.html#smaller-docker-images"><span class="std std-ref">Docker镜像瘦身</span></a> ，会导致容器启动时出现大量并发拉取超大镜像，阻塞网络，触发系统故障。</p>
 <p>在 <a class="reference external" href="https://github.com/opencontainers/image-spec/">OCI镜像规范</a> 和 <a class="reference external" href="https://github.com/moby/moby/blob/master/image/spec/v1.2.md">Docker镜像规范</a> 的 <code class="docutils literal notranslate"><span class="pre">application/vnd.docker.image.rootfs.diff.tar.gzip</span></code> 提供了容器镜像的 <code class="docutils literal notranslate"><span class="pre">gzip</span></code> 层扩展用于延迟拉取( <code class="docutils literal notranslate"><span class="pre">lazy</span> <span class="pre">pulling</span></code> )，这个扩展被称为 <code class="docutils literal notranslate"><span class="pre">eStargz</span></code> 。</p>
 <p>eStargz是一个向后兼容的扩展，也就是说镜像可以被发不到无扩展感知的仓库，也可以被运行在无扩展感知能力的runtime上。 <code class="docutils literal notranslate"><span class="pre">eStargz</span></code> 扩展给予 <code class="docutils literal notranslate"><span class="pre">stargz</span></code> (可检索tar.gz标准， stands for seekable tar.gz)，最初由Google CRFS项目提出。 <code class="docutils literal notranslate"><span class="pre">eStargz</span></code> 扩展了stargz的检查层验证以及运行时性能优化。</p>
 <section id="estargz">
-<h2>eStargz概述<a class="headerlink" href="#estargz" title="Permalink to this heading">¶</a></h2>
+<h2>eStargz概述<a class="headerlink" href="#estargz" title="此标题的永久链接">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Lazy</span> <span class="pre">pulling</span></code> 是一种更快冷启动的镜像拉取技术。允许一个容器启动时不需要等待整个镜像层内容完全下载到本地。相反，只要数据层的必要文件(或者大型文件的数据块)被按需下载就可以运行容器。</p>
 <p>为了实现这一目标，runtime需要在一个无依赖层中拉取和展开美俄文件。然而，没有eStargz扩展的层不能实现这一目标，原因如下:</p>
 <ul class="simple">
@@ -194,13 +195,13 @@
 <p>eStargz扩展可以向后兼容，所以eStargz格式的镜像也能够推送到常规镜像仓库，并且能呕运行在不支持eStargz的运行时上。</p>
 </section>
 <section id="id1">
-<h2>eStargz结构<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>eStargz结构<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <figure class="align-default">
 <a class="reference internal image-reference" href="../../../_images/estargz-structure.png"><img alt="../../../_images/estargz-structure.png" src="../../../_images/estargz-structure.png" style="width: 788.0px; height: 263.5px;" /></a>
 </figure>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/containerd/stargz-snapshotter/blob/main/docs/estargz.md">eStargz: Standard-Compatible Extension to Container Image Layers for Lazy Pulling</a></p></li>
 </ul>

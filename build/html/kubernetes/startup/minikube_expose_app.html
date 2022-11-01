@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Minikube对外输出应用 &mdash; Cloud Atlas 0.1 文档</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sphinxnotes-strike.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../security/index.html">Kubernetes安全</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../virtual/index.html">Kubernetes结合虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gpu/index.html">GPU Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -175,7 +176,7 @@
            <div itemprop="articleBody">
              
   <section id="minikube">
-<span id="minikube-expose-app"></span><h1>Minikube对外输出应用<a class="headerlink" href="#minikube" title="Permalink to this heading">¶</a></h1>
+<span id="minikube-expose-app"></span><h1>Minikube对外输出应用<a class="headerlink" href="#minikube" title="此标题的永久链接">¶</a></h1>
 <p>Kubernetes中Pod是关键要素。Pod实际上有一个称为 <a class="reference internal" href="../concepts/workloads/pods/pod_lifecycle.html#pod-lifecycle"><span class="std std-ref">Pod生命周期</span></a> 的概念。当一个worker节点故障，则运行在这个节点当Pods也就随之丢失了。</p>
 <p><a class="reference internal" href="../concepts/workloads/controllers/replicaset.html#replicaset"><span class="std std-ref">ReplicaSet</span></a> 可以通过创建新的Pod来保持应用程序运行，这样就可以动态驱动集群恢复指定状态。举例，假设有一个图形处理后端运行了3个副本。这些副本是可替换的，前端系统不会知道后端副本出现某个Pod丢失然后重建，即在Kuberneetes集群中每个Pod有一个唯一的IP地址，甚至当这些Pod在相同节点也是这样，需要有一种方式自动保持Pod的最终一致性，这样应用程序就可以持续工作。</p>
 <p>在Kubernetes中，服务(Service)是一个抽象概念，服务定义了一个Pod的逻辑集合，以及如何访问这些Pod的策略。Service激活了在相关Pod之间的松散连接。Service使用YAML或JSON定义，类似所有的Kubernettes对象。通过Service定义的一组Pod通常使用 LabelSelector 来定位。</p>
@@ -195,7 +196,7 @@
 <p>一些服务的使用案例在spec中没有定义 <code class="docutils literal notranslate"><span class="pre">selector</span></code> ，这种没有具备 <code class="docutils literal notranslate"><span class="pre">selector</span></code> 的服务也就不会创建相应的Endpoints对象。这种方式允许用户手工映射一个服务到特定的endpoints。另一种不使用selector的可能是使用 <code class="docutils literal notranslate"><span class="pre">type:</span> <span class="pre">ExternalName</span></code> 。</p>
 </div>
 <section id="servicces-and-labels">
-<h2>服务和标签(Servicces and Labels)<a class="headerlink" href="#servicces-and-labels" title="Permalink to this heading">¶</a></h2>
+<h2>服务和标签(Servicces and Labels)<a class="headerlink" href="#servicces-and-labels" title="此标题的永久链接">¶</a></h2>
 <figure class="align-default">
 <img alt="../../_images/services_and_labels.svg" src="../../_images/services_and_labels.svg" /></figure>
 <ul class="simple">
@@ -218,7 +219,7 @@
 </div>
 </section>
 <section id="id1">
-<h2>输出服务<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2>输出服务<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <p>在 <a class="reference internal" href="minikube_deploy_app.html#minikube-deploy-app"><span class="std std-ref">使用Minikube集群部署应用</span></a> 中，我们已经部署了一个 <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 的Pod，并且我们手工在这个Pod中安装了Nginx服务。虽然此时我们只有通过 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">proxy</span></code> 连接到Kubernetes内部网络才能看到WEB页面。现在我们来实践上文介绍的几种输出service的方式，让这个Pod真正能够对外服务。</p>
 <ul>
 <li><p>检查deployment:</p>
@@ -290,7 +291,7 @@ echo NODE_PORT=$NODE_PORT
 </div>
 </section>
 <section id="label">
-<h2>使用标签(label)<a class="headerlink" href="#label" title="Permalink to this heading">¶</a></h2>
+<h2>使用标签(label)<a class="headerlink" href="#label" title="此标题的永久链接">¶</a></h2>
 <p>在 Deployment 部署时候会自动为Pod创建一个Label，例如，之前我们创建的 <code class="docutils literal notranslate"><span class="pre">my-dev</span></code> 这个pod，使用以下 <code class="docutils literal notranslate"><span class="pre">describe</span> <span class="pre">deployment</span></code> 可以查看Pod的详细信息:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">deployment</span>
 </pre></div>
@@ -403,7 +404,7 @@ echo Name of the Pod: $POD_NAME
 </div>
 </section>
 <section id="id2">
-<h2>删除服务<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<h2>删除服务<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>通过label我们可以查询到服务，所以我们也可以根据label来删除服务:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">service</span> <span class="o">-</span><span class="n">l</span> <span class="n">run</span><span class="o">=</span><span class="n">my</span><span class="o">-</span><span class="n">dev</span>
@@ -426,7 +427,7 @@ echo Name of the Pod: $POD_NAME
 </div>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-intro/">Using a Service to Expose Your App</a></p></li>
 </ul>
