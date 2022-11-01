@@ -50,7 +50,7 @@ NvMe硬盘升级MacBook Pro SSD
 
 - 使用 :ref:`osx_kvm` : 这样可以利用我现有的 :ref:`hpe_dl360_gen9` 二手服务器加上采用3块 :ref:`samsung_pm9a1` 构建运行在 :ref:`ovmf` 上的 :ref:`ceph` 存储，可以为macOS虚拟分配 512GB 存储
 - 通过挑战macOS虚拟机，实现一种虚拟化加速运行的远程macOS开发环境，为后续开发工作打基础
-- 验证 :ref:`iommu` 的性能以及 :ref:`nvidia_vgpu` 技术
+- 验证 :ref:`iommu` 的性能以及 :ref:`vgpu` 技术
 
 此外，探索在虚拟化环境中运行Windows虚拟机
 

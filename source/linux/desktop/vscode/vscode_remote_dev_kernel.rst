@@ -13,7 +13,7 @@ VS Code远程开发Linux Kernel
 
 我是在 :ref:`priv_cloud_infra` 构建虚拟机 ``z-dev`` ，然后通过 :ref:`priv_ssh` ( :ref:`ssh_proxycommand` ) 登陆到服务器上:
 
-- :ref:`kvm` 虚拟机提供了硬件伸缩性，并且可以通过 :ref:`priv_kvm_sr-iov` 实现PCIe设备加速，例如采用 :ref:`ovmf` 访问NVMe存储，采用 :ref:`nvidia_vgpu` 进行 :ref:`cuda` 开发
+- :ref:`kvm` 虚拟机提供了硬件伸缩性，并且可以通过 :ref:`priv_kvm_sr-iov` 实现PCIe设备加速，例如采用 :ref:`ovmf` 访问NVMe存储，采用 :ref:`vgpu` 进行 :ref:`cuda` 开发
 
 远程服务器
 ============

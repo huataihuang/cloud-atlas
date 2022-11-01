@@ -111,3 +111,4 @@
 - `Overclocking the Raspberry Pi 400 <https://www.raspberrypi-spy.co.uk/2020/11/overclocking-the-raspberry-pi-400/>`_
 - `The Raspberry Pi 400 can be overclocked to 2.2 GHz <https://www.jeffgeerling.com/blog/2020/raspberry-pi-400-can-be-overclocked-22-ghz>`_
 - `Maximum stable overclocking speed of a Pi 4 or 400 <https://forums.raspberrypi.com/viewtopic.php?t=313280>`_
+- `BASH Script to Monitor the CPU Frequency and Temperature on Raspberry PI <https://helloacm.com/bash-script-to-monitor-the-cpu-frequency-and-temperature-on-raspberry-pi/>`_ 简单的监控树莓派主频和温度

@@ -1,16 +1,14 @@
-.. _git:
+.. _js_startup:
 
 =================================
-git
+JavaScript 快速起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   git_startup.rst
-   git_merge_fix_conflicts.rst
-   git_config.rst
-   git_proxy.rst
+   first_js.rst
+   js_var_const.rst
 
 .. only::  subproject and html
 
