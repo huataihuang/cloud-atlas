@@ -79,14 +79,14 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">MacBook Pro上运行Arch Linux</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">安装</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#arch-linux">安装arch linux</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">配制</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">配制</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uefi">UEFI启动</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#nvidia">Nvidia显卡</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">屏幕亮度</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">屏幕亮度</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#suspend">Suspend</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">内核参数</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">屏幕分辨率相关设置</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">内核参数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">屏幕分辨率相关设置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="archlinux_on_thinkpad_x220.html">ThinkPad X220上运行Arch Linux</a></li>
@@ -304,9 +304,56 @@
 </div>
 </li>
 </ul>
-</section>
 <section id="id3">
-<h2>配制<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
+<h3>安装20221101<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
+<p>2022年11月1日，我再次在MacBook Pro上安装arch linux，有以下这些区别:</p>
+<ul>
+<li><p>内置硬盘替换为NVME磁盘，所以磁盘命名不同</p></li>
+<li><p>没有再为macOS保留分区，我准备全程使用Linux系统</p></li>
+<li><p>使用 <a class="reference internal" href="../storage/disk/parted.html#parted"><span class="std std-ref">parted分区工具</span></a> 对磁盘分区(重建):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 初始化磁盘分区表(擦除原先的所有数据)</span>
+<span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="n">mklabel</span> <span class="n">gpt</span>
+
+<span class="c1"># 创建第一个 分区，用于EFI启动</span>
+<span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="n">mkpart</span> <span class="n">ESP</span> <span class="n">fat32</span> <span class="mi">0</span><span class="o">%</span> <span class="mi">256</span><span class="n">MB</span>
+<span class="n">parted</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="nb">set</span> <span class="mi">1</span> <span class="n">esp</span> <span class="n">on</span>
+
+<span class="c1"># 创建第二个 分区，用于操作系统部署(剩余空间使用 :ref:`zfs` 卷)</span>
+<span class="n">parted</span> <span class="o">-</span><span class="n">a</span> <span class="n">optimal</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="n">mkpart</span> <span class="n">primary</span> <span class="n">xfs</span> <span class="mi">256</span><span class="n">MB</span> <span class="mi">64</span><span class="n">GB</span>
+
+<span class="c1"># 格式化文件系统</span>
+<span class="n">mkdosfs</span> <span class="o">-</span><span class="n">F</span> <span class="mi">32</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p1</span>
+<span class="n">mkfs</span><span class="o">.</span><span class="n">xfs</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p2</span>
+</pre></div>
+</div>
+</li>
+<li><p>挂载文件系统:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p2</span> <span class="o">/</span><span class="n">mnt</span>
+<span class="n">mkdir</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span>
+<span class="n">mount</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p1</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">boot</span>
+</pre></div>
+</div>
+</li>
+<li><p>选择镜像网站并安装基本软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacstrap</span> <span class="o">-</span><span class="n">K</span> <span class="o">/</span><span class="n">mnt</span> <span class="n">base</span> <span class="n">linux</span> <span class="n">linux</span><span class="o">-</span><span class="n">firmware</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>这次我选择了XFS作为根文件系统，但是安装过程似乎没有包含xfsprogs，导致有fsck报错:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>==&gt; ERROR: file not found: `fsck.xfs&#39;
+==&gt; ERROR: file not found: `xfs_repair&#39;
+==&gt; WARNING: No fsck helpers found. fsck will not be run on boot.
+</pre></div>
+</div>
+<p>暂时忽略，等后续系统运行起来再补安装</p>
+</div>
+</section>
+</section>
+<section id="id4">
+<h2>配制<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>fstab: 生成fstab文件(这里 <code class="docutils literal notranslate"><span class="pre">-U</span></code> 或 <code class="docutils literal notranslate"><span class="pre">-L</span></code> 定义UUID或labels):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">genfstab</span> <span class="o">-</span><span class="n">U</span> <span class="o">/</span><span class="n">mnt</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">fstab</span>
@@ -384,14 +431,15 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkinitcpio</span> <span class="o">-</span><span class="n">P</span>
 </pre></div>
 </div>
-<section id="id4">
-<h3>安装必要软件包<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h3>
+<section id="id5">
+<h3>安装必要软件包<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h3>
 <ul>
 <li><p>使用pacman安装必要软件包:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">vim</span> <span class="n">which</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">vim</span> <span class="n">which</span> <span class="n">mlocate</span> <span class="n">oepnssh</span>
 </pre></div>
 </div>
 </li>
+<li><p><a class="reference internal" href="archlinux_config_ip.html#archlinux-config-ip"><span class="std std-ref">arch linux配置IP(静态或动态)</span></a> : 配置USB网卡，先确保能够通过有闲网络连接互联网，之后可以再安装无线</p></li>
 </ul>
 </section>
 </section>
@@ -406,12 +454,23 @@
 </li>
 </ul>
 <p>参考 <a class="reference external" href="https://wiki.archlinux.org/index.php/EFISTUB#Using_UEFI_directly">EFISTUB - Using UEFI directly</a> 执行如下命令:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">efibootmgr</span> <span class="o">--</span><span class="n">disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="o">--</span><span class="n">part</span> <span class="mi">1</span> <span class="o">--</span><span class="n">create</span> <span class="o">--</span><span class="n">label</span> <span class="s2">&quot;Arch Linux&quot;</span> <span class="o">--</span><span class="n">loader</span> <span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="n">linux</span> <span class="o">--</span><span class="n">unicode</span> <span class="s1">&#39;root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX rw initrd=\initramfs-linux.img&#39;</span> <span class="o">--</span><span class="n">verbose</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">efibootmgr</span> <span class="o">--</span><span class="n">disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">DISK</span> <span class="o">--</span><span class="n">part</span> <span class="n">Y</span> <span class="o">--</span><span class="n">create</span> <span class="o">--</span><span class="n">label</span> <span class="s2">&quot;Arch Linux&quot;</span> <span class="o">--</span><span class="n">loader</span> <span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="n">linux</span> <span class="o">--</span><span class="n">unicode</span> <span class="s1">&#39;root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX rw initrd=\initramfs-linux.img&#39;</span> <span class="o">--</span><span class="n">verbose</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p><code class="docutils literal notranslate"><span class="pre">PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</span></code> 设置PARTUUID参数请检查 <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">-lh</span> <span class="pre">/dev/disk/by-partuuid/</span></code> 目录下设备文件的软链接，可以找到对应磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sda1</span></code> 的 PARTUUID。请注意，PARTUUID和磁盘UUID不同，在 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 中使用的是UUID。</p>
+<ul class="simple">
+<li><p>这里 <code class="docutils literal notranslate"><span class="pre">--disk</span> <span class="pre">/dev/DISK</span></code> 是指整个磁盘</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--part</span> <span class="pre">Y</span></code> 是指ESP所在分区</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</span></code> 设置PARTUUID参数请检查 <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">-lh</span> <span class="pre">/dev/disk/by-partuuid/</span></code> 目录下设备文件的软链接，可以找到对应 <code class="docutils literal notranslate"><span class="pre">根文件系统</span></code> 的 PARTUUID。请注意，PARTUUID和磁盘UUID不同，在 <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> 中使用的是UUID。</p></li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>对于2022年11月1日重新在NVME设备上安装，执行 <code class="docutils literal notranslate"><span class="pre">efibootmgr</span></code> 如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">efibootmgr</span> <span class="o">--</span><span class="n">disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1</span> <span class="o">--</span><span class="n">part</span> <span class="mi">1</span> <span class="o">--</span><span class="n">create</span> <span class="o">--</span><span class="n">label</span> <span class="s2">&quot;Arch Linux&quot;</span> <span class="o">--</span><span class="n">loader</span> <span class="o">/</span><span class="n">vmlinuz</span><span class="o">-</span><span class="n">linux</span> <span class="o">--</span><span class="n">unicode</span> <span class="s1">&#39;root=PARTUUID=5c7afe7a-b41f-415b-9f12-129c3014293a rw initrd=\initramfs-linux.img&#39;</span> <span class="o">--</span><span class="n">verbose</span>
+</pre></div>
+</div>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
@@ -425,6 +484,10 @@
 </li>
 </ul>
 <p>这里 <code class="docutils literal notranslate"><span class="pre">xxxx,xxxx</span></code> 是刚才 <code class="docutils literal notranslate"><span class="pre">efibootmgr</span> <span class="pre">--verbose</span></code> 输出的每个启动项的编号。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>这里不设置启动顺序也行，默认就是先启动刚才安装的Arch Linux</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>现在重启操作系统，则立即进入Arch Linux系统。那么如何启动macOS呢？</p>
@@ -454,14 +517,21 @@
 </pre></div>
 </div>
 <p>当前是开源驱动 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> ，性能较差。</p>
-<p>对于 GeForce 600-900 以及 Quadro/Tesla/Tegra K系列显卡，或者更新的显卡(2010-2019年)，安装 <code class="docutils literal notranslate"><span class="pre">nvidia</span></code> 或 <code class="docutils literal notranslate"><span class="pre">nvidia-lts</span></code> 驱动包:</p>
+<ul>
+<li><p>(旧方法，2022年已废弃)对于 GeForce 600-900 以及 Quadro/Tesla/Tegra K系列显卡，或者更新的显卡(2010-2019年)，安装 <code class="docutils literal notranslate"><span class="pre">nvidia</span></code> 或 <code class="docutils literal notranslate"><span class="pre">nvidia-lts</span></code> 驱动包:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pacman</span> <span class="o">-</span><span class="n">S</span> <span class="n">nvidia</span>
 </pre></div>
 </div>
+</li>
+</ul>
 <p>安装完成后需要重启系统，因为 <code class="docutils literal notranslate"><span class="pre">nvidia</span></code> 软件包包含屏蔽 <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> 模块配置，所以需要重启。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>由于NVIDIA已经不再最新的驱动中支持 <code class="docutils literal notranslate"><span class="pre">GeForce</span> <span class="pre">GT</span> <span class="pre">750M</span></code> ，所以默认 <code class="docutils literal notranslate"><span class="pre">pacman</span> <span class="pre">-S</span> <span class="pre">nvidia</span></code> 安装的NVIDIA驱动v520版本过高会无法使用。所以根据启动提示，需要使用 <a class="reference internal" href="archlinux_aur.html#archlinux-aur"><span class="std std-ref">Arch Linux AUR</span></a> 安装 <code class="docutils literal notranslate"><span class="pre">nvidia-4700xx-dkms</span></code> 软件包</p>
+</div>
 </section>
-<section id="id5">
-<h2>屏幕亮度<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
+<section id="id6">
+<h2>屏幕亮度<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
 <p>对于 <a class="reference internal" href="archlinux_on_thinkpad_x220.html#archlinux-on-thinkpad-x220"><span class="std std-ref">ThinkPad X220上运行Arch Linux</span></a> 是默认就可以通过屏幕亮度调节键直接调整亮度，这个屏幕亮度值是通过设置 <code class="docutils literal notranslate"><span class="pre">/sys/class/backlight/gmux_backlight/brightness</span></code> 来调整的。不过，对于Nvidia显卡，直接调整这个值不生效，需要以 <code class="docutils literal notranslate"><span class="pre">root</span></code> 身份执行以下命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setpci</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">H1</span> <span class="o">-</span><span class="n">s</span> <span class="mi">00</span><span class="p">:</span><span class="mf">01.00</span> <span class="n">BRIDGE_CONTROL</span><span class="o">=</span><span class="mi">0</span>
 </pre></div>
@@ -487,8 +557,8 @@
 <p>不过，依然需要关闭蓝牙鼠标连接，否则鼠标移动还是可能会唤醒系统。但至少不再无法suspend了。</p>
 </div>
 </section>
-<section id="id6">
-<h2>内核参数<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
+<section id="id7">
+<h2>内核参数<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
 <p>参考 <a class="reference external" href="https://wiki.archlinux.org/index.php/MacBookPro11,x#Kernel_parameters">Arch Linux社区文档 - MacBookPro11,x#Kernel parameters</a> ，实际上要设置 <a class="reference internal" href="archlinux_hibernates.html#archlinux-hibernates"><span class="std std-ref">Arch Linux Hibernates</span></a>  还需要传递参数 <code class="docutils literal notranslate"><span class="pre">acpi_osi=Darwin</span></code> 。这是因为从内核 4.17.2-1 开始，增加了 <code class="docutils literal notranslate"><span class="pre">acpi_osi</span></code> 参数空值会导致电池无法检测到。此外，添加了 <code class="docutils literal notranslate"><span class="pre">acpi_osi</span></code> 内核参数还可以增加电池寿命。</p>
 <p>由于需要传递 <code class="docutils literal notranslate"><span class="pre">acpi_mask_gpe=0x06</span></code> 内核参数避免有时候迅速增加的终端寄存器值导致某个CPU核心达到100%。</p>
 <div class="admonition note">
@@ -500,8 +570,8 @@
 </pre></div>
 </div>
 </section>
-<section id="id7">
-<h2>屏幕分辨率相关设置<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
+<section id="id8">
+<h2>屏幕分辨率相关设置<a class="headerlink" href="#id8" title="此标题的永久链接">¶</a></h2>
 <p>MacBook Pro的屏幕分辨率极高，默认情况下Linux运行时字体都显示过小，在xfce桌面上主要调整如下：</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Settings</span> <span class="pre">=&gt;</span> <span class="pre">Appearance</span> <span class="pre">=&gt;</span> <span class="pre">Fonts</span></code> (默认编辑区域文字)
@@ -519,8 +589,8 @@
 <p>解决方法是调整Firefox默认页面缩放比例，这个设置没有提供UI菜单，需要在地址栏输入 <code class="docutils literal notranslate"><span class="pre">about:config</span></code> 并回车，然后点击 <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">accept</span> <span class="pre">the</span> <span class="pre">risk!</span></code> 按钮进入配置。搜索 <code class="docutils literal notranslate"><span class="pre">layout.css.devPixelsPerPx</span></code> ，这个选项默认设置值是 <code class="docutils literal notranslate"><span class="pre">1.0</span></code> ，表示页面显示比例是 100% 。可以调整这个数值，例如 <code class="docutils literal notranslate"><span class="pre">1.5</span></code> 表示显示比例 150%
 ，以此类推。不过，这个页面显示比例是全局影响，也会导致Firefox的菜单和工具条同步放大，所以也不宜调整过大，我在MacBook Pro上设置 <code class="docutils literal notranslate"><span class="pre">1.5</span></code> 基本已经满足大多数页面浏览。少数页面字体实在过小，只能通过 <code class="docutils literal notranslate"><span class="pre">ctrl</span></code> 加 <code class="docutils literal notranslate"><span class="pre">+</span></code> 按钮临时调整。</p>
 </section>
-<section id="id8">
-<h2>参考<a class="headerlink" href="#id8" title="此标题的永久链接">¶</a></h2>
+<section id="id9">
+<h2>参考<a class="headerlink" href="#id9" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/MacBookPro11,x">Arch Linux社区文档 - MacBookPro11,x</a></p></li>
 <li><p><a class="reference external" href="https://wiki.archlinux.org/index.php/NVIDIA">Arch Linux社区文档 - NVIDIA</a></p></li>
