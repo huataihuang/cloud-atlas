@@ -15,7 +15,15 @@ arch linux使用wpa_supplicant连接无线网络
 安装 ``broadcom-wl-dkms``
 ---------------------------
 
-- 在arch linux上编译安装 :ref:`dkms` 内核模块都需要先安装操作系统内核对应头文件，否则会报错类似 ``ERROR: Missing sys kernel headers for module broadcom-wl...`` 
+在arch linux上编译安装 :ref:`dkms` 内核模块都需要先安装操作系统内核对应头文件，否则会报错类似 ``ERROR: Missing sys kernel headers for module broadcom-wl...`` 
+
+- 和 :ref:`install_nvidia_linux_driver` 的 :ref:`install_cuda_prepare` 工作相同，安装正确的内核头文件和开发工具包::
+
+   pacman -S linux-headers
+
+- 安装驱动::
+
+   pacman -S broadcom-wl-dkms
 
 wpa_supplicant基础配置
 ========================
@@ -42,9 +50,6 @@ wpa_supplicant基础配置
 
 .. literalinclude:: archlinux_wpa_supplicant/systemctl_start_wpa_passphrase_dhcpcd
    :language: bash
-
-企业级wpa_supplicant
-=======================
 
 参考
 =======

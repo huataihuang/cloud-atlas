@@ -306,9 +306,9 @@ Nvidia显卡
 
 安装完成后需要重启系统，因为 ``nvidia`` 软件包包含屏蔽 ``nouveau`` 模块配置，所以需要重启。
 
-.. note::
+- (新方法，2022年) 由于NVIDIA已经不再最新的驱动中支持 ``GeForce GT 750M`` ，所以默认 ``pacman -S nvidia`` 安装的NVIDIA驱动v520版本过高会无法使用。所以根据启动提示，需要使用 :ref:`archlinux_aur` 安装 ``nvidia-470xx-dkms`` 软件包::
 
-   由于NVIDIA已经不再最新的驱动中支持 ``GeForce GT 750M`` ，所以默认 ``pacman -S nvidia`` 安装的NVIDIA驱动v520版本过高会无法使用。所以根据启动提示，需要使用 :ref:`archlinux_aur` 安装 ``nvidia-4700xx-dkms`` 软件包
+   yay -S nvidia-470xx-dkms
 
 屏幕亮度
 ========
