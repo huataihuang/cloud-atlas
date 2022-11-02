@@ -14,6 +14,7 @@ Linux桌面
    sway/index
    suckless/index
    xfce/index
+   lxqt/index
    kde/index
    xpra/index
    vim/index
