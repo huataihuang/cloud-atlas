@@ -74,6 +74,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../self_signed_ssl_nginx.html">配置Nginx自签名SSL证书</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../nginx_root_alias.html">Nginx的root和alias指令</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../nginx_wpad.html">Nginx部署WPAD服务</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../change_nginx_user.html">修改NGINX运行进程user</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Nginx认证</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Nginx基本认证配置</a></li>
 </ul>
@@ -133,11 +134,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Web Atlas</a> &raquo;</li>
-          <li><a href="../index.html">Nginx</a> &raquo;</li>
-          <li><a href="index.html">Nginx认证</a> &raquo;</li>
-      <li>Nginx基本认证配置</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Web Atlas</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Nginx</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Nginx认证</a></li>
+      <li class="breadcrumb-item active">Nginx基本认证配置</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/web/nginx/auth/nginx_basic_auth.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -149,6 +150,52 @@
              
   <section id="nginx">
 <span id="nginx-basic-auth"></span><h1>Nginx基本认证配置<a class="headerlink" href="#nginx" title="此标题的永久链接">¶</a></h1>
+<p>NGINX支持基本身份认证(basic authentication)和身份验证子请求(authentication subrequests)。NGINX Plus专有模块使用可验证JSON Web Tokens(JWTs)可以支持身份验证标准OpenID连接的第三方身份验证程序集成。</p>
+<section id="http">
+<h2>HTTP 基本认证<a class="headerlink" href="#http" title="此标题的永久链接">¶</a></h2>
+<p>NGINX使用的基本认证密码和Apache是一样的，格式类似如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># comment</span>
+<span class="n">name1</span><span class="p">:</span><span class="n">password1</span>
+<span class="n">name2</span><span class="p">:</span><span class="n">password2</span><span class="p">:</span><span class="n">comment</span>
+<span class="n">name3</span><span class="p">:</span><span class="n">password3</span>
+</pre></div>
+</div>
+<p>每行配置有2个或3个字段，第3个字段是可选的注释；第2个字段的密码是使用C函数 <code class="docutils literal notranslate"><span class="pre">crypt()</span></code> 加密的密码，可以使用 <code class="docutils literal notranslate"><span class="pre">openssl</span> <span class="pre">passwd</span></code> 命令生成</p>
+<ul>
+<li><p>创建一个名为 <code class="docutils literal notranslate"><span class="pre">huatai</span></code> 的用户，密码使用 <code class="docutils literal notranslate"><span class="pre">openssl</span> <span class="pre">passwd</span> <span class="pre">-apr1</span> <span class="pre">&lt;密码&gt;</span></code> 生成，密码文件的配置可以位于 <code class="docutils literal notranslate"><span class="pre">/etc/nginx/.htpasswd</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">USER</span><span class="o">=</span><span class="n">huatai</span>
+<span class="n">PASSWORD</span><span class="o">=</span><span class="n">XXXXXXX</span>
+<span class="n">printf</span> <span class="s2">&quot;$</span><span class="si">{USER}</span><span class="s2">:$(openssl passwd -apr1 $</span><span class="si">{PASSWORD}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/.</span><span class="n">htpasswd</span>
+</pre></div>
+</div>
+</li>
+<li><p>修订 <code class="docutils literal notranslate"><span class="pre">/etc/nginx/nginx.conf</span></code> 在 配置中 对应段落添加:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">/etc/nginx/nginx.conf 添加 HTTP Basic Authentication</span><a class="headerlink" href="#id2" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>    location / <span class="o">{</span>                
+         auth_basic <span class="s2">&quot;Restricted Content&quot;</span><span class="p">;</span>        
+         auth_basic_user_file /etc/nginx/.htpasswd<span class="p">;</span>
+    <span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<ul>
+<li><p>重启nginx:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">systemctl</span> <span class="n">restart</span> <span class="n">nginx</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id1">
+<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.nginx.com/resources/library/complete-nginx-cookbook/">Complete NGINX Cookbook</a> Chapter 6. Authentication</p></li>
+<li><p><a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-nginx-on-ubuntu-22-04">How To Set Up Password Authentication with Nginx on Ubuntu 22.04</a></p></li>
+<li><p><a class="reference external" href="https://blog.skbali.com/2018/11/htpasswd-using-openssl/">htpasswd using openssl</a></p></li>
+</ul>
+</section>
 </section>
 
 

@@ -28,7 +28,7 @@
 
    cd ~
    python3 -m venv venv3
-   . ~/venv3/bin/activiate
+   . ~/venv3/bin/activate
 
 - 重新安装软件包::
 

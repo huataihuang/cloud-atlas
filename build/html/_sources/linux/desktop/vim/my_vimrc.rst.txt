@@ -20,6 +20,33 @@ Ultimate vimrc安装
 
 是的，安装步骤就是这么简单...
 
+jedi-vim
+-----------
+
+`Ultimate vimrc <https://github.com/amix/vimrc>`_ 使用了 `jedi-vim <https://github.com/davidhalter/jedi-vim>`_ 来实现vim的 Python autocompletion，依赖于 ``python-jedi`` 。在 :ref:`arch_linux` 上默认可能没有安装，此时使用 ``vim`` 编辑文件会提示错误::
+
+   Error detected while processing BufRead Autocommands for "*.rst"..FileType Autocommands for "*"..Syntax Autocommands for "*"..function <SNR>14_SynSet[25]..script /usr/share/vim/vim90/syntax/rst.vim[230]../h
+   ome/huatai/.vim_runtime/sources_non_forked/jedi-vim/after/syntax/python.vim[1]../home/huatai/.vim_runtime/sources_non_forked/jedi-vim/autoload/jedi.vim[260]..function jedi#init_python[13]..BufRead Autocomma
+   nds for "*.rst"..FileType Autocommands for "*"..Syntax Autocommands for "*"..function <SNR>14_SynSet[25]..script /usr/share/vim/vim90/syntax/rst.vim[230]../home/huatai/.vim_runtime/sources_non_forked/jedi-v
+   im/after/syntax/python.vim[1]../home/huatai/.vim_runtime/sources_non_forked/jedi-vim/autoload/jedi.vim[260]..function jedi#init_python[11]..<SNR>156_display_exception:
+   line   19:
+   Error: jedi-vim failed to initialize Python: jedi#setup_python_imports: ModuleNotFoundError: No module named 'jedi' (in BufRead Autocommands for "*.rst"..FileType Autocommands for "*"..Syntax Autocommands f
+   or "*"..function <SNR>14_SynSet[25]..script /usr/share/vim/vim90/syntax/rst.vim[230]../home/huatai/.vim_runtime/sources_non_forked/jedi-vim/after/syntax/python.vim[1]../home/huatai/.vim_runtime/sources_non_
+   forked/jedi-vim/autoload/jedi.vim[260]..function jedi#init_python[4]..<SNR>156_init_python[6]..jedi#setup_python_imports, line 20). See :messages and/or :JediDebugInfo for more information.
+
+验证可以在 ``python`` 中执行 ``import jedi`` 会提示错误::
+
+   >>> import jedi
+   Traceback (most recent call last):
+     File "<stdin>", line 1, in <module>
+   ModuleNotFoundError: No module named 'jedi'
+
+在 :ref:`arch_linux` 解决方法很简单，就是安装 ``python-jedi`` ::
+
+   pacman -S python-jedi
+
+然后就可以正常使用
+
 Ultimate vimrc配置
 ====================
 
