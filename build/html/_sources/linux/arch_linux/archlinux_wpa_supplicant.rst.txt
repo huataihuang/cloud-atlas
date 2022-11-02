@@ -4,7 +4,18 @@
 arch linux使用wpa_supplicant连接无线网络
 ==========================================
 
-启动 :ref:`asahi_linux` 之后，可以看到已经识别了 :ref:`apple_silicon_m1_pro` MacBook Pro内置的无线网卡 ``wlan0`` 
+无线网卡驱动
+==============
+
+我使用两种arch linux发行版:
+
+- :ref:`asahi_linux` : 内置了 :ref:`apple_silicon_m1_pro` MacBook Pro内置的无线网卡驱动，所以可以直接识别出 ``wlan0`` 
+- 标准版 arch linux : 在 MacBook Pro 2013 later 上，由于Broadcom的授权限制默认不提供Broadcom BCM4360 802.11ac无线网卡驱动，需要独立安装 ``broadcom-wl-dkms`` 软件包
+
+安装 ``broadcom-wl-dkms``
+---------------------------
+
+- 在arch linux上编译安装 :ref:`dkms` 内核模块都需要先安装操作系统内核对应头文件，否则会报错类似 ``ERROR: Missing sys kernel headers for module broadcom-wl...`` 
 
 wpa_supplicant基础配置
 ========================
@@ -39,3 +50,4 @@ wpa_supplicant基础配置
 =======
 
 - `archlinux: wpa_supplicant <https://wiki.archlinux.org/title/Wpa_supplicant>`_
+- `archlinux: Broadcom wireless <https://wiki.archlinux.org/title/broadcom_wireless>`_
