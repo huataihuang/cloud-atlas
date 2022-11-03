@@ -310,6 +310,11 @@ Nvidia显卡
 
    yay -S nvidia-470xx-dkms
 
+图形桌面
+===========
+
+2022年11月重新安装arch linux，选择 :ref:`lxqt` 作为轻量级桌面
+
 屏幕亮度
 ========
 

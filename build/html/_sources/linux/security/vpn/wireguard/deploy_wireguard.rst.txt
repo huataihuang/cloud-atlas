@@ -38,8 +38,8 @@
 
 建立的加密隧道 wg0 设备IP:
 
-- peerA: 10.0.0.1
-- peerB: 10.0.0.2
+- peerA: 10.10.0.1
+- peerB: 10.10.0.2
 
 两边服务器执行密钥创建(完全一样的命令)
 ------------------------------------------
@@ -73,11 +73,11 @@ Peer建立连接
 
 - 在服务器端执行以下命令启动 ``wg0`` 设备::
 
-   # peerA的 wg_ip 是 10.0.0.1 ，peerB的 wg_ip 是 10.0.0.2
+   # peerA的 wg_ip 是 10.10.0.1 ，peerB的 wg_ip 是 10.10.0.2
 
 在 peerA上执行::
 
-   wg_ip=10.0.0.1
+   wg_ip=10.10.0.1
    ip link add wg0 type wireguard
    ip addr add ${wg_ip}/24 dev wg0
    wg set wg0 private-key ./private
@@ -85,7 +85,7 @@ Peer建立连接
 
 在 peerB上执行::
 
-   wg_ip=10.0.0.2
+   wg_ip=10.10.0.2
    ip link add wg0 type wireguard
    ip addr add ${wg_ip}/24 dev wg0
    wg set wg0 private-key ./private
@@ -95,11 +95,11 @@ Peer建立连接
 
 在 peerA 上执行::
 
-   wg set wg0 peer <peerB的公钥> allowed-ips 10.0.0.2/32 endpoint 192.168.1.2:51820
+   wg set wg0 peer <peerB的公钥> allowed-ips 10.10.0.2/32 endpoint 192.168.1.2:51820
 
 在 peerB 上执行::
 
-   wg set wg0 peer <peerA的公钥> allowed-ips 10.0.0.1/32 endpoint 192.168.1.1:51820
+   wg set wg0 peer <peerA的公钥> allowed-ips 10.10.0.1/32 endpoint 192.168.1.1:51820
 
 此时加密网络就已经建立起来了，可以在各自服务器上ping对端的wg地址，中间的通讯都是加密的
 
@@ -112,11 +112,12 @@ Peer建立连接
 
 在服务器上执行:
 
-- 创建密钥对::
+- 创建密钥对:
 
-   (umask 0077; wg genkey > private)
-   wg pubkey < private > public
-   
+.. literalinclude:: deploy_wireguard/wg_genkey
+   :language: bash
+   :caption: 创建密钥对
+
 - 配置 ``/etc/wireguard/wg0.conf`` :
 
 .. literalinclude:: deploy_wireguard/wg0.conf
@@ -126,6 +127,10 @@ Peer建立连接
 .. note::
 
    建议修订配置中端口，著名端口可能被屏蔽
+
+.. note::
+
+   这里客户端部分，也就是 ``[Peer]`` 部分不用手工配置，后面通过命令行添加后，重启一次 ``wg0`` 会自动刷新
 
 - 启动服务端接口::
 
@@ -138,6 +143,21 @@ Peer建立连接
 
 客户端
 ---------
+
+- 客户端也要像服务器端一样创建一个密钥对:
+
+.. literalinclude:: deploy_wireguard/wg_genkey
+   :language: bash
+   :caption: 创建密钥对
+
+- 回到服务器端，将刚才生成的客户端公钥以及IP添加到允许列表 ``peer`` 中::
+
+   wg set wg0 peer <客户端的公钥> allowed-ips 10.10.0.2/32
+
+此时在服务器端执行一次 ``wg0`` 重启就会看到客户端公钥和对应IP地址被刷入配置文件 ``/etc/wireguard/wg0.conf`` 中::
+
+   wg-quick down wg0
+   wg-quick up wg0
 
 - 客户端也配置一个 ``/etc/wireguard/wg0.conf`` 
 
