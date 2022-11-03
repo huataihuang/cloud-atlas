@@ -52,6 +52,11 @@ LXQt精选了一系列轻量级的应用:
 
    exec startlxqt
 
+平铺窗口
+==============
+
+LXQt使用 Openbox 实现窗口管理(Window Manager, WM)，所以要实现窗口平铺(tiling, snapping windows)也要从Openbox着手: 使用Openbox utilities 或者直接编辑config文件: :ref:`tile_window_in_lxqt`
+
 参考
 =======
 

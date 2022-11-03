@@ -8,6 +8,7 @@ LXQt
    :maxdepth: 1
 
    lxqt_startup.rst
+   tile_window_in_lxqt.rst
 
 .. only::  subproject and html
 
