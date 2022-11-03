@@ -67,6 +67,21 @@ git提供了支持终端的色彩显示，用以下命令开启::
 回滚
 =======
 
+如果还没有git add缓存代码树
+-----------------------------
+
+有时候本地修改文件还没有执行过 ``git add`` 添加到缓存，此时只需要重新 ``checkout`` 代码仓储中指定文件回来覆盖掉本地文件就行::
+
+   git checkout -- filepathname
+
+注意，中间一定要有 ``--`` 否则就会checkout分支了
+
+如果要放弃掉所有没有加入缓存区( ``git add`` 命令 )修改::
+
+   git checkout .
+
+注意，刚新建的文件还没有加入git的管理系统，对于git是未知的，需要手工删除
+
 如果还没有提交到远程库的回滚
 ------------------------------
 
@@ -112,6 +127,10 @@ git提供了支持终端的色彩显示，用以下命令开启::
 
    git merge hoxfix
 
+.. note::
+
+   如果出现合并冲突，则采用 :ref:`git_merge_fix_conflicts`
+
 删除分支
 =========
 
@@ -147,3 +166,4 @@ git提供了支持终端的色彩显示，用以下命令开启::
 - `Git查看、删除、重命名远程分支和tag <https://blog.zengrong.net/post/1746.html>`_
 - `git branch <http://www.cnblogs.com/gbyukg/archive/2011/12/12/2285425.html>`_
 - `How to colorize output of git? <https://unix.stackexchange.com/questions/44266/how-to-colorize-output-of-git>`_
+- `Git 撤销本地修改 <https://www.cnblogs.com/xioawu-blog/p/14449862.html>`_

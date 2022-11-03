@@ -81,6 +81,11 @@ ibus中文输入设置
 
 我以为和以前经验一样，只需要在 ``~/.bashrc`` 或者 ``.xinitrc`` 中添加环境变量然后启动 ``ibus`` 服务即可，但是实际上需要先运行一次设置工具 ``Settings >> Input Method`` 激活 ``IBus`` 输入法。详见 :ref:`ibus`
 
+窗口平铺
+-------------
+
+KDE平台有一个Addon `Bismuth <https://github.com/Bismuth-Forge/bismuth>`_ 可以实现平铺窗口，安装后还会提供快捷键配置。
+
 KDE应用程序
 ------------------
 
