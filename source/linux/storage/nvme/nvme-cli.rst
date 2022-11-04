@@ -41,7 +41,7 @@ nvme-cli用户工具
 
 - Debian/Ubuntu安装::
 
-   sudo apt insall nvme-cli
+   sudo apt install nvme-cli
 
 使用
 =======
