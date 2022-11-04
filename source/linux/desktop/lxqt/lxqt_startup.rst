@@ -46,13 +46,14 @@ LXQt精选了一系列轻量级的应用:
 
 - 在 :ref:`arch_linux` 平台只需要安装 ``lxqt`` 就会一起安装必要桌面组件::
 
-   pacman -S lxqt xorg-server xorg-xinit xdg-utils xsecurelock breeze-icons wqy-microhei
+   pacman -S lxqt xorg-server xorg-xinit breeze-icons wqy-microhei
 
 .. note::
 
    - ``xorg-xinit`` 提供 startx
    - 至少需要安装一种Sans字体，否则会导致LXQt菜单完全是空白: 由于 :ref:`linux_chinese_view` 需要，所以我安装了 **文泉驿微米黑** ``wqy-microhei`` ，安装以后LXQt就能显示菜单文字
    - ``breeze-icons`` 提供美观的KDE风格图标(避免LXQt无法显示图标)
+   - 我本来还安装 ``xdg-utils`` 和 ``xsecurelock`` 想用来锁屏，但是后来阅读文档发现LXQt默认只通过 ``xdg-utils`` 来使用 ``XScreenSaver`` ，过于沉重。为了简单的锁屏功能有些浪费资源，所以我改为 :ref:`lxqt_slock` 方式。不过 ``xdg-utils`` 还是被 ``chromium`` ``qt5-base`` 依赖，所以不用单独安装。
 
 - 配置 ``~/.xinitrc`` 添加::
 
