@@ -9,6 +9,7 @@ Linux网络
 
    ring_buffer_dma_mmio.rst
    axel.rst
+   aria2.rst
    iproute2/index
    iptables/index
    socat.rst
