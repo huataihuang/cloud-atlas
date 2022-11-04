@@ -110,14 +110,91 @@ LXQt使用 Openbox 实现窗口管理(Window Manager, WM)，所以要实现窗�
 浏览器
 ========
 
-由于工作中有不少网站只兼容chrome，所以被迫安装 ``chromium`` ::
+由于工作中有不少网站只兼容chrome，所以安装 ``chromium`` ::
 
-   pacman -S chromium
+   pacman -S chromium firefox
 
 安装必要插件:
 
 - SwitchyOmega
 - Copytables
+
+.. note::
+
+   对比Firefox和Chromium，各有利弊:
+
+   - Firefox内建了pdf阅读功能，对于网站提供pdf文档直接阅读非常方便
+   - Firefox内置的sync功能，在不同主机间切换能够同步tab(虽然不是自动同步)
+   - Firefox内置的视频解码器可能和一些视频网站不完全兼容，这点不如Chromium通吃(太多的网站只考虑适配chrome)，例如我在观看低端影视网站的 `高堡奇人 <https://ddys.tv/the-man-in-the-high-castle/>`_ 就发现Firefox无法正确还原视频色彩并且有残影，而chromium则完全正常(Falkon也正常)
+
+     - Chromium内置的视频播放引擎显然最为先进，在全屏播放 `高堡奇人 <https://ddys.tv/the-man-in-the-high-castle/>`_ 对比可以看到 chromium 有2个不到40% CPU的进程就可以流畅播放，而Falkon则跑到 130% 以上CPU(导致明显卡顿)。chromium应该有GPU加速所以视频非常优秀。
+
+Falkon
+--------
+
+我尝试过很多 :ref:`linux_light_browser` ，其中 Falkon 是 `Fedora SPINS: LXQt Desktop <https://spins.fedoraproject.org/eu/lxqt/>`_ 选择作为轻量级浏览器:
+
+.. figure:: ../../../_static/linux/desktop/lxqt/falkon.png
+   :scale: 80
+
+- 基于Qt Webkit引擎，契合LXQt桌面，并且也是KDE项目
+- 纯Qt界面可以避免Firefox和Chromium基于GTK的资源消耗
+
+我发现在LXQt环境Falkon确实有轻量级的优势，所以日常文档阅读及浏览都会采用这个浏览器，而chromium则作为一些特定操作补充(视频/proxy切换)
+
+.. note::
+
+   从浏览器角度来说，chromium确实最为全能，无论性能还是功能完整性，确实超越了Firefox和Falkon。后续可能还是会回归使用单一chromium。
+
+截屏和标记
+===========
+
+由于我需要撰写技术文档，截图和简单标记是必要的需求。LXQt内置应用 LXImage-Qt 提供了图形浏览以及简单的标记功能，基本够用:
+
+.. figure:: ../../../_static/linux/desktop/lxqt/lximage-qt.png
+   :scale: 80
+
+音乐
+=========
+
+`Fedora SPINS: LXQt Desktop <https://spins.fedoraproject.org/eu/lxqt/>`_ 选择Yarock作为音乐播放器:
+
+- Qt5现代化交互界面，能够很好融入系统
+- 后端有两种但是差别不大，实际上最终都依赖于VLC:
+
+  - phonon-qt5-gstreamer
+  - phonon-qt5-vlc
+
+不过这个Yarock安装依赖极多，其中VLC需要占用114MB，其他相关依赖完整安装Yarock需要占用215~240MB空间。
+
+如果要轻松使用，可以采用这个Qt音乐播放器
+
+不过，我考虑到轻量级准备还是采用之前探索 :ref:`mpd` 字符界面结合客户端来实现音乐播放
+
+视频
+======
+
+可选安装VLC，不过现在大多数视频可以在线观看(Flakon已经非常完美)，暂时没有强需求。
+
+.. note::
+
+   我考虑自己构建音乐和视频服务器，然后全部通过浏览器来实现播放
+
+.. note::
+
+   实际上现代桌面操作系统的音乐和视频播放器的后端都是VLC，功能极其强大，但是也比较沉重。即使是KDE环境推荐的轻量级多媒体播放器 `Dragon Player <https://apps.kde.org/dragonplayer/>`_ 其后端依然是VLC。 
+
+下载
+======
+
+`arch linux: Transmission <https://wiki.archlinux.org/title/transmission>`_ 详细介绍了功能强大的下载工具Transmission，不仅有GUI操作，也有CLI甚至WEB界面。功能非常强大，并且安装也非常小巧。
+
+不过我考虑采用:
+
+- :ref:`axel` 大多数网站下载使用即可
+- :ref:`aria2` 实现远程下载
+
+``Falkon`` 浏览器可以使用外部下载管理器，或许可以结合 ``axel`` 或者 ``aria2`` 实现快速下载(我暂时没有找到解决方法)
 
 密码管理
 ============
@@ -126,8 +203,17 @@ LXQt使用 Openbox 实现窗口管理(Window Manager, WM)，所以要实现窗�
 
    pacman -S keepassxc
 
+Themes
+=========
+
+LXQt的风格非常简约，其实没有必要太多定制，不过我也比较喜欢:
+
+- Icons Theme: Breeze
+- LXQt Theme: Clearlooks
+- Openbox Theme: Bear2
 
 参考
 =======
 
 - `LXQt: About <https://lxqt-project.org/about/>`_
+- `How To Customize The LXQt Desktop <https://www.addictivetips.com/ubuntu-linux-tips/customize-the-lxqt-desktop>`_
