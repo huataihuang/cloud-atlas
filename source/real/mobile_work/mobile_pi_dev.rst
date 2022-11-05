@@ -112,19 +112,19 @@ Raspberry Pi OS
 
 - 基于 `Ultimate vimrc <https://github.com/amix/vimrc>`_ 定制
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/install_ultimate_vimrc.sh
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/install_ultimate_vimrc.sh
    :language: bash
    :caption: 安装Ultimate vimrc Awsome版本
 
 - 配置 ``~/.vim_runtime/my_configs.vim`` :
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/my_configs.vim
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/my_configs.vim
    :language: bash
    :caption: ~/.vim_runtime/my_configs.vim
 
 - :ref:`my_vimrc` 基础依赖安装:
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_ubuntu_dep_dev
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/vimrc_ubuntu_dep_dev
    :language: bash
    :caption: 编译YouCompleteMe依赖软件安装
 
@@ -136,7 +136,7 @@ Raspberry Pi OS
 
 - 安装 :ref:`golang` / :ref:`nodejs` :
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_ubuntu_go_nodejs
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/vimrc_ubuntu_go_nodejs
    :language: bash
    :caption: 安装Go和node.js
 
@@ -154,7 +154,7 @@ Raspberry Pi OS
 
 - 按需编译YouCompleteMe：
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/compile_youcompleteme.sh
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/compile_youcompleteme.sh
    :language: bash
    :caption: 按需编译YouCompleteMe
 
