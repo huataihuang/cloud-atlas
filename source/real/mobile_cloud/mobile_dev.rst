@@ -22,7 +22,7 @@ vim
 
 - 采用 :ref:`my_vimrc` 完成设置:
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/install_ultimate_vimrc.sh
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/install_ultimate_vimrc.sh
    :language: bash
    :caption: 安装Ultimate vimrc Awsome版本
 

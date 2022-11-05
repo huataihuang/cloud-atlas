@@ -180,7 +180,7 @@ YouCompleteMe插件
 
 - 安装 :ref:`rust` :
 
-.. literalinclude:: ../../../rust/rust_startup/install_rust.sh
+.. literalinclude:: ../../../../rust/rust_startup/install_rust.sh
    :language: bash
    :caption: Liinux平台安装Rust
 
@@ -202,19 +202,19 @@ YouCompleteMe插件
 
 由于 ``golang.org`` 网站被GFW屏蔽，所以会导致编译时无法获取go模块，需要 :ref:`go_proxy` :
 
-.. literalinclude:: ../../../golang/go_proxy/alias_go_proxy.sh
+.. literalinclude:: ../../../../golang/go_proxy/alias_go_proxy.sh
    :language: bash
    :caption: alias设置go代理
 
 由于 ``npm`` 需要访问 ``npmjs.com`` 已经被GFW屏蔽( ``npm.org`` 没有屏蔽，但是重定向到 ``npmjs.com`` )，所以也要 :ref:`npm_proxy` :
 
-.. literalinclude:: ../../../nodejs/startup/npm_proxy/alias_npm_proxy.sh
+.. literalinclude:: ../../../../nodejs/startup/npm_proxy/alias_npm_proxy.sh
    :language: bash
    :caption: alias设置npm代理
 
 配置 ``git`` 代理:
 
-.. literalinclude:: ../../../devops/git/git_proxy/git_config_http.proxy
+.. literalinclude:: ../../../../devops/git/git_proxy/git_config_http.proxy
    :language: bash
    :caption: 全局配置git使用HTTP/HTTPS代理
 

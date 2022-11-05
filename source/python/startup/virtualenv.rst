@@ -27,6 +27,13 @@ Ubuntu/Debian安装pip和venv
 
    在 :ref:`django_env` 同样也使用virtualenv来构建Django开发环境
 
+arch安装pip和venv
+--------------------
+
+- 默认python即是python3，安装 ``python-pip`` 软件包::
+
+   pacman -S python-pip
+
 Python 2 virtualenv
 ====================
 
@@ -114,7 +121,7 @@ CentOS 8通过dnf安装python 2virtualenv
 Python 3 venv
 ====================
 
-- :ref:`python_in_rhel8` 默认安装Python 3，或者在Ubuntu/Debian系统中按照上文方法完成 ``pip3`` 和 ``venv`` 安装，所以构建虚拟沙箱环境非常简单:
+- :ref:`python_in_rhel8` 默认安装Python 3，或者在Ubuntu/Debian系统中按照上文方法完成 ``pip3`` 和 ``venv`` 安装，或者 :ref:`arch_linux` 系统中已经完成 ``pip`` 安装，所以构建虚拟沙箱环境非常简单:
 
 .. literalinclude:: virtualenv/venv
    :language: bash

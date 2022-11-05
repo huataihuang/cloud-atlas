@@ -8,13 +8,13 @@
 
 - 基于 `Ultimate vimrc <https://github.com/amix/vimrc>`_ 定制
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/install_ultimate_vimrc.sh
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/install_ultimate_vimrc.sh
    :language: bash
    :caption: 安装Ultimate vimrc Awsome版本
 
 - 配置 ``~/.vim_runtime/my_configs.vim`` :
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/my_configs.vim
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/my_configs.vim
    :language: bash
    :caption: ~/.vim_runtime/my_configs.vim
 
@@ -26,7 +26,7 @@
 
 - 准备YCM目录:
 
-.. literalinclude:: ../../linux/desktop/vim/my_vimrc/vimrc_prepare_ycm
+.. literalinclude:: ../../linux/desktop/vim/vimrc/my_vimrc/vimrc_prepare_ycm
    :language: bash
    :caption: 准备YCM目录
 
