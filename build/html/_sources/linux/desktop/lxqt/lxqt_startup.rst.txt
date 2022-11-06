@@ -203,6 +203,25 @@ Falkon
 
    pacman -S keepassxc
 
+阅读
+=============
+
+主要技术文档是pdf和epub，考虑到轻量级 :ref:`read_ebook_in_linux` :
+
+- pdf文档采用 ``xpdf`` 最轻量级的专注pdf阅读器
+
+- epub文档采用 ``fbreader`` (早期版本已经够用，几乎不需要太多依赖；2015年之后FBReader 2已经不再开源，但免费)
+
+  - ``lector`` 和 ``yacreader`` 都是非常全面的电子书阅读器，但是需要安装很多依赖
+
+- 全面支持pdf和epub的轻量级阅读器则可以选择 ``mupdf`` (在LXQt我还是分别采用了 ``xpdf`` 和 ``fbreader`` )
+
+.. note::
+
+   为了能能够跨平台同步电子书，可以采用 :ref:`google_play_book` 实现: Google Play Book提供了WEB页面方式阅读电子书，对于Linux平台只要能够自由访问网络，这种方式还是非常适合多设备同步阅读书籍的。
+
+   不过，使用 :ref:`google_play` 可能会遇到国家区域限制...
+
 Themes
 =========
 
@@ -217,3 +236,4 @@ LXQt的风格非常简约，其实没有必要太多定制，不过我也比较�
 
 - `LXQt: About <https://lxqt-project.org/about/>`_
 - `How To Customize The LXQt Desktop <https://www.addictivetips.com/ubuntu-linux-tips/customize-the-lxqt-desktop>`_
+- `Manjaro: List of Qt Applications <https://wiki.manjaro.org/index.php?title=List_of_Qt_Applications>`_ 提供了Qt应用列表，可以选择合适的轻量级应用
