@@ -10,6 +10,7 @@ LXQt
    lxqt_startup.rst
    tile_window_in_lxqt.rst
    lxqt_slock.rst
+   openbox_keybind.rst
 
 .. only::  subproject and html
 

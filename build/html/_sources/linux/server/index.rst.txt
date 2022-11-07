@@ -14,6 +14,7 @@ Linux系统管理的通用性技术：实际上Linux各个发行版主要差异�
    ipmi/index
    cockpit/index
    collectd/index
+   osquery/index
 
 .. only::  subproject and html
 

@@ -9,5 +9,6 @@ Kubernetes之上的平台
 .. toctree::
    :maxdepth: 1
 
+   kubequery/index
    temporal/index
    qovery/index
