@@ -45,7 +45,7 @@ Lock on suspend
 Openbox组合键启用slock
 ========================
 
-其实我只需要一个简单的锁屏功能，既然 ``openbox`` 能够支持快捷键触发命令，所以修订 ``~/.config/openbox/rc.xml`` 添加一段 ``keybind`` :
+其实我只需要一个简单的锁屏功能，通过 :ref:`openbox_keybind` 触发命令，所以修订 ``~/.config/openbox/rc.xml`` 添加一段 ``keybind`` :
 
 .. literalinclude:: lxqt_slock/openbox_rc_slock.xml
    :language: xml

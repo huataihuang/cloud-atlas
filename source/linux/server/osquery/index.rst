@@ -1,16 +1,13 @@
-.. _lxqt:
+.. _osquery:
 
 =================================
-LXQt
+osquery
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   lxqt_startup.rst
-   tile_window_in_lxqt.rst
-   lxqt_slock.rst
-   openbox_keybind.rst
+   intro_osquery.rst
 
 .. only::  subproject and html
 
