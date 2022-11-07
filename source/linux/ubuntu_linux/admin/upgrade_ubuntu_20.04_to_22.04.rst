@@ -208,6 +208,64 @@ Linux版本检查::
 
    sudo apt autoremove --purge
 
+升级失败的处理
+===================
+
+我在 :ref:`ceph_os_upgrade_ubuntu_22.04` 没有在虚拟机根目录保留足够的空间，所以导致安装最后生成 ``initrd.img`` 失败::
+
+   Processing triggers for dbus (1.12.20-2ubuntu4.1) ...
+   Processing triggers for linux-image-5.15.0-52-generic (5.15.0-52.58) ...
+   ...
+   /etc/kernel/postinst.d/initramfs-tools:
+   update-initramfs: Generating /boot/initrd.img-5.15.0-52-generic
+   zstd: error 25 : Write error : No space left on device (cannot write compressed block)
+   E: mkinitramfs failure zstd -q -1 -T0 25
+   update-initramfs: failed for /boot/initrd.img-5.15.0-52-generic with 1.
+   run-parts: /etc/kernel/postinst.d/initramfs-tools exited with return code 1
+   dpkg: error processing package linux-image-5.15.0-52-generic (--configure):
+    installed linux-image-5.15.0-52-generic package post-installation script subprocess returned error exit status 1
+   Errors were encountered while processing:
+    linux-image-5.15.0-52-generic
+   Exception during pm.DoInstall():  E:Sub-process /usr/bin/dpkg returned an error code (1)
+   
+   Could not install the upgrades
+   
+   The upgrade has aborted. Your system could be in an unusable state. A
+   recovery will run now (dpkg --configure -a).
+   
+   Please report this bug in a browser at
+   http://bugs.launchpad.net/ubuntu/+source/ubuntu-release-upgrader/+filebug
+   and attach the files in /var/log/dist-upgrade/ to the bug report.
+   E:Sub-process /usr/bin/dpkg returned an error code (1)
+   
+   Setting up linux-image-5.15.0-52-generic (5.15.0-52.58) ...
+   Processing triggers for linux-image-5.15.0-52-generic (5.15.0-52.58) ...
+   /etc/kernel/postinst.d/initramfs-tools:
+   update-initramfs: Generating /boot/initrd.img-5.15.0-52-generic
+   zstd: error 25 : Write error : No space left on device (cannot write compressed block)
+   E: mkinitramfs failure zstd -q -1 -T0 25
+   update-initramfs: failed for /boot/initrd.img-5.15.0-52-generic with 1.
+   run-parts: /etc/kernel/postinst.d/initramfs-tools exited with return code 1
+   dpkg: error processing package linux-image-5.15.0-52-generic (--configure):
+    installed linux-image-5.15.0-52-generic package post-installation script subprocess returned error exit status 1
+   Errors were encountered while processing:
+    linux-image-5.15.0-52-generic
+   
+   Upgrade complete
+   
+   The upgrade has completed but there were errors during the upgrade
+   process.
+   
+   To continue please press [ENTER]
+   === Command detached from window (Mon Nov  7 18:02:31 2022) ===
+   === Command terminated with exit status 1 (Mon Nov  7 18:02:41 2022) ===
+
+可以看到出现问题时正在处理 ``linux-image-5.15.0-52-generic`` 失败，所以此时不能重启系统，而是立即采用 :ref:`libvirt_lvm_pool_resize_vm_disk` ，再重新安装一遍出错的软件包::
+
+   apt --reinstall install linux-image-5.15.0-52-generic
+
+确保安装成功后，再做重启
+
 参考
 ======
 

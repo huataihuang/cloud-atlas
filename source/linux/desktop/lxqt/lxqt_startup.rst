@@ -236,4 +236,5 @@ LXQt的风格非常简约，其实没有必要太多定制，不过我也比较�
 
 - `LXQt: About <https://lxqt-project.org/about/>`_
 - `How To Customize The LXQt Desktop <https://www.addictivetips.com/ubuntu-linux-tips/customize-the-lxqt-desktop>`_
-- `Manjaro: List of Qt Applications <https://wiki.manjaro.org/index.php?title=List_of_Qt_Applications>`_ 提供了Qt应用列表，可以选择合适的轻量级应用
+- `Manjaro: List of Qt Applications <https://wiki.manjaro.org/index.php?title=List_of_Qt_Applications>`_ Manjro相当于arch linux，Qt应用列表，可以选择合适的轻量级应用
+- `Qt Desktop applications <https://wiki.gentoo.org/wiki/Qt_Desktop_applications>`_ Gentoo的Qt应用列表

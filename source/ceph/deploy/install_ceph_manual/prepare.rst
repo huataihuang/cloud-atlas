@@ -21,6 +21,10 @@
 
 - 采用 :ref:`priv_kvm` 中 ``clone虚拟机`` 和 ``添加pass-through NVMe存储`` 的方法完成3台虚拟机的准备工作
 
+.. note::
+
+   2022年11月，为了能够充分发挥软硬件性能，我在完成 :ref:`priv_cloud_infra` 底层物理服务器操作系统 :ref:`upgrade_ubuntu_20.04_to_22.04` ，然后通过滚动升级方式完成 :ref:`ceph_os_upgrade_ubuntu_22.04`
+
 获取Ceph软件
 =============
 

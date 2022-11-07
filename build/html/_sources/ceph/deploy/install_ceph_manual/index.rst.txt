@@ -12,6 +12,7 @@
    :maxdepth: 1
 
    prepare.rst
+   ceph_os_upgrade_ubuntu_22.04.rst
    install_ceph_mon.rst
    install_ceph_mgr.rst
    add_ceph_osds_raw.rst
