@@ -78,7 +78,7 @@ XFS存储目录切换
 
 - 执行以下脚本配置 sysctl :
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/prepare_z-k8s/k8s_iptables
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/prepare_z-k8s/k8s_iptables
    :language: bash
    :caption: 配置k8s节点iptables
 

@@ -4,7 +4,7 @@
 删除kubeadm构建的Kubernetes集群
 =================================
 
-所有通过 :ref:`kubeadm` 工具构建的Kubernetes集群以及节点，都可以通过 ``kubeadm`` 工具反向卸载(删除)，这是一个非常方便的操作。我的实践是因为在开发测试环境， :ref:`upgrade_kubeadm_cluster` 失败，为了快速开始下一阶段测试工作，所以准备重建Kubernetes集群。
+所有通过 :ref:`kubeadm` 工具构建的Kubernetes集群以及节点，都可以通过 ``kubeadm`` 工具反向卸载(删除)，这是一个非常方便的操作。我的实践是因为在开发测试环境， :ref:`kubeadm_upgrade_k8s_fail_record` ，为了快速开始下一阶段测试工作，所以准备重建Kubernetes集群。
 
 - ``kubeadm reset`` 命令执行会提示::
 

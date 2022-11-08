@@ -1,4 +1,4 @@
-.. _kubernetes_deployment:
+.. _k8s_deploy:
 
 ======================
 Kubernetes部署

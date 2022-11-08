@@ -1,8 +1,22 @@
-.. _upgrade_kubeadm_cluster:
+.. _kubeadm_upgrade_k8s_fail_record:
 
-==========================
-升级kubeadm集群
-==========================
+===============================
+一次失败的kubernetes升级
+===============================
+
+事后分析
+=========
+
+.. warning::
+
+   本文是一次失败的kubernetes升级实践记录，很多步骤没有经过仔细梳理，正常情况下不应该出现这些混乱的步骤。我记录仅作为后续自己参考和复盘，我会在其他文章中总结正确的升级步骤。
+
+现在回想起来，我升级集群失败的原因就是我在以往的部署中遗漏了一步 :ref:`apt_hold` 导致日常操作系统升级时升级了整个集群的Kubernetes软件，但是没有做过规范的 :ref:`kubeadm` 升级操作，导致系统中某些数据损坏。
+
+当时我经验不足，发现新安装的节点 ``kubeadmin`` 软件版本较新无法加入旧版本Kubernetes集群，就贸然采用升级Kubernetes集群的方法，但是调研和准备不足，加上前期的操作系统滚动升级破坏，最终导致集群异常。虽然是自己的测试集群，推到重建也很快，但是这个经验教训还是提醒我对于Kubernetes的维护，需要注意手册中的细节，并尽可能了解技术细节的根因，否则后续运维工作容易出现重大故障。
+
+起因
+======
 
 在 :ref:`arm_k8s_deploy` ，想要将最新安装的 :ref:`jetson_nano` 系统加入到ARM Kubernetes集群，结果发现，之前构建的Kubernetes集群版本还停留在 v1.19.4 上，最新的kubeadm已不支持加入低版本集群::
 
@@ -177,7 +191,7 @@ kubeadm upgrade
 
 显示输出:
 
-.. literalinclude:: upgrade_kubeadm_cluster/kubeadm_upgrade_plan.output
+.. literalinclude:: kubeadm_upgrade_k8s_fail_record/kubeadm_upgrade_plan.output
    :linenos:
 
 上述命令检查集群可以升级的版本，例如上面案例显示输出支持升级到2个版本::
@@ -224,7 +238,7 @@ kubeadm upgrade
 
 - 重新执行，并添加 ``--v=5`` 参数观察详细日志:
 
-.. literalinclude:: upgrade_kubeadm_cluster/kubeadm_upgrade_apply.output_err
+.. literalinclude:: kubeadm_upgrade_k8s_fail_record/kubeadm_upgrade_apply.output_err
    :linenos:
 
 报错依旧，我推测是跨版本升级可能不能从较低的 ``1.19.x`` 升级到较高到 ``1.20.x`` ，所以转为先升级到 ``1.19.13`` ，然后再尝试升级到 ``1.20.9`` 。
@@ -399,7 +413,7 @@ etcd配置了从内建的grpc gateway尝试按照客户端在和etcd交互时候
 
 - 编辑配置文件 ``ca-config.json``
 
-.. literalinclude:: upgrade_kubeadm_cluster/ca-config.json
+.. literalinclude:: kubeadm_upgrade_k8s_fail_record/ca-config.json
    :linenos:
 
 - 执行::

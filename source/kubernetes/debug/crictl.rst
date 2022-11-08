@@ -55,7 +55,7 @@ crictl命令案例
 
 输出显示类似:
 
-.. literalinclude:: ../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_pods
+.. literalinclude:: ../deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_pods
    :language: bash
    :caption: crictl pods 列出主机上的pod
 
@@ -69,7 +69,7 @@ crictl命令案例
 
 显示类似:
 
-.. literalinclude:: ../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_images
+.. literalinclude:: ../deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_images
    :language: bash
    :caption: crictl pods 列出主机上的镜像
 
@@ -81,7 +81,7 @@ crictl命令案例
 
 显示输出:
 
-.. literalinclude:: ../deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_containers
+.. literalinclude:: ../deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/crictl_containers
    :language: bash
    :caption: crictl pods 列出主机上的容器
 

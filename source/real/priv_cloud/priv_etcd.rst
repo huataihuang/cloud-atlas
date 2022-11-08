@@ -18,7 +18,7 @@
 通过 :ref:`priv_kvm` 构建3台虚拟机，并且部署 :ref:`priv_lvm` 后，就可以在独立划分的存储 ``/var/lib/etcd`` 目录之上构建etcd，这样可以为 :ref:`etcd` 提供高性能虚拟化存储。
 
 .. csv-table:: 私有云KVM虚拟机
-   :file: ../../kubernetes/deployment/etcd/priv_etcd_tls/hosts.csv
+   :file: ../../kubernetes/deploy/etcd/priv_etcd_tls/hosts.csv
    :widths: 40, 60
    :header-rows: 1
 
@@ -30,7 +30,7 @@ etcd集群证书生成
 
 - 安装Cloudflare 的 ``cfssl`` 工具:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/apt_install_cfssl
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/apt_install_cfssl
    :language: bash
    :caption: ubuntu发行版提供Cloudflare的cfssl工具
 
@@ -39,7 +39,7 @@ etcd集群证书生成
 
 - 准备 ``ca-config.json`` (有效期限10年):
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/ca-config.json
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/ca-config.json
    :language: json
    :caption: 修订证书有效期10年 ca-config.json
    :emphasize-lines: 13
@@ -50,13 +50,13 @@ etcd集群证书生成
 
 - 配置CSR(Certificate Signing Request)配置文件 ``ca-csr.json`` :
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/ca-csr.json
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/ca-csr.json
    :language: json
    :caption: 修订CSR ca-csr.json
 
 - 使用上述配置定义生成CA:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/generate_ca.cmd
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/generate_ca.cmd
    :language: bash
    :caption: 生成CA
 
@@ -72,13 +72,13 @@ etcd集群证书生成
 
 - 生成服务器证书: 直接编辑 ``server.json`` :
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/server.json
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/server.json
    :language: json
    :caption: 修订 server.json
 
 - 生成服务器证书和私钥:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/generate_server_certifacate_private_key.cmd
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/generate_server_certifacate_private_key.cmd
    :language: bash
    :caption: 生成服务器证书和私钥
 
@@ -90,21 +90,21 @@ etcd集群证书生成
 
 - peer certificate (每个服务器一个，按对应主机名):
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/z-b-data-1.json
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/z-b-data-1.json
    :language: json
    :caption: 服务器 z-b-data-1.staging.huatai.me 点对点证书
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/z-b-data-2.json
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/z-b-data-2.json
    :language: json
    :caption: 服务器 z-b-data-2.staging.huatai.me 点对点证书
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/z-b-data-3.json
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/z-b-data-3.json
    :language: json
    :caption: 服务器 z-b-data-3.staging.huatai.me 点对点证书
 
 对应生成3个主机的服务器证书:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/generate_peer_certificate_private_key.sh
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/generate_peer_certificate_private_key.sh
    :language: bash
    :caption: 生成3个主机的点对点证书
 
@@ -117,13 +117,13 @@ etcd集群证书生成
 
 - 客户端证书 ``client.json`` (主要是主机列表保持空):
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/client.json
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/client.json
    :language: json
    :caption: 修订 client.json
 
 - 现在可以生成客户端证书:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_etcd_tls/generate_client_certifacate.cmd
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_etcd_tls/generate_client_certifacate.cmd
    :language: bash
    :caption: 生成客户端证书
 
@@ -138,13 +138,13 @@ etcd集群证书生成
 
 - 采用 :ref:`install_run_local_etcd` 中安装脚本下载最新安装软件包(当前版本 ``3.5.4`` )
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/install_run_local_etcd/install_etcd.sh
+.. literalinclude:: ../../kubernetes/deploy/etcd/install_run_local_etcd/install_etcd.sh
    :language: bash
    :caption: 下载etcd的linux版本脚本 install_etcd.sh
 
 - - 在安装节点创建 etcd 目录以及用户和用户组(如果使用了 :ref:`priv_lvm` 中构建的 ``lv-etcd`` 卷，则忽略目录创建):
 
-.. literalinclude::  ../../kubernetes/deployment/etcd/deploy_etcd_cluster/useradd_etcd
+.. literalinclude::  ../../kubernetes/deploy/etcd/deploy_etcd_cluster/useradd_etcd
    :language: bash
    :caption: useradd添加etcd用户账号
 
@@ -155,7 +155,7 @@ etcd集群证书生成
 
 - 使用以下脚本进行分发:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_deploy_etcd_cluster_with_tls_auth/deploy_etcd_certificates.sh
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_deploy_etcd_cluster_with_tls_auth/deploy_etcd_certificates.sh
    :language: bash
    :caption: 分发证书脚本 deploy_etcd_certificates.sh
 
@@ -170,7 +170,7 @@ etcd集群证书生成
 
 - 执行脚本 ``generate_etcd_service`` 生成 ``/etc/etcd/conf.yml`` 配置文件和 :ref:`systemd` 启动 ``etcd`` 配置文件  ``/lib/systemd/system/etcd.service`` :
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_deploy_etcd_cluster_with_tls_auth/generate_etc_config_systemd
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_deploy_etcd_cluster_with_tls_auth/generate_etc_config_systemd
    :language: bash
    :caption: 创建etcd启动的配置conf.yml 和 systemd脚本
 
@@ -198,7 +198,7 @@ etcd集群证书生成
 
 - 为方便维护，配置 ``etcdctl`` 环境变量，添加到用户自己的 profile中:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_env
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_env
    :language: bash
    :caption: ETCDCTL_ENDPOINTS 环境变量
    :emphasize-lines: 2,3
@@ -207,13 +207,13 @@ etcd集群证书生成
 
 - 检查节点状态:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_status
+.. literalinclude:: ../../kubernetes/deploy/etcd/deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_status
    :language: bash
    :caption: etcdctl 检查endpoint状态(表格形式输出)
 
 - 检查节点健康状况:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_health
+.. literalinclude:: ../../kubernetes/deploy/etcd/deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_health
    :language: bash
    :caption: etcdctl 检查endpoint健康状态(查看节点响应情况)
 

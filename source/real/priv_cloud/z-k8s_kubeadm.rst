@@ -32,24 +32,24 @@ Kubernetes集群(z-k8s)kubeadm
 
 - 安装Kubernetes软件仓库需要的 ``apt`` 包:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/apt_install_k8s_need
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/apt_install_k8s_need
    :language: bash
    :caption: apt安装k8s仓库所需软件包
 
 - 下载Google云公钥:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/install_google_key
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/install_google_key
    :language: bash
    :caption: 安装Google云公钥
 
 - 添加Kubernetes ``apt`` 仓库:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/add_k8s_repository
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/add_k8s_repository
    :language: bash
    :caption: apt添加k8s仓库
 
 - ``apt`` 更新并安装 ``kubelet`` , ``kubeadm`` , ``kubectl`` ，然后将版本锁定:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/apt_install_k8s_soft
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/ha_k8s_kubeadm/apt_install_k8s_soft
    :language: bash
    :caption: apt安装kubelet/kubeadm/kubectl

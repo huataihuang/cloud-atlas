@@ -13,7 +13,7 @@ Kubernetes集群(z-k8s)
 
 - 在管控服务器 ``z-k8s-m-1`` / ``z-k8s-m-2`` / ``z-k8s-m-3`` 上创建 ``etcd`` 访问证书目录，并将 :ref:`priv_etcd` 准备好的证书复制过来:
 
-.. literalinclude:: ../../kubernetes/deployment/etcd/priv_deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_env
+.. literalinclude:: ../../kubernetes/deploy/etcd/priv_deploy_etcd_cluster_with_tls_auth/etcdctl_endpoint_env
       :language: bash
       :caption: etcd客户端配置:使用证书
       :emphasize-lines: 4-6
@@ -21,13 +21,13 @@ Kubernetes集群(z-k8s)
 将上述 ``etcdctl`` 客户端配置文件和Kubernetes访问etcd配置文件一一对应如下:
 
 .. csv-table:: kubernetes apiserver访问etcd证书对应关系
-      :file: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/etcd_key.csv
+      :file: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/etcd_key.csv
       :widths: 40, 60
       :header-rows: 1
 
 - 分发kubernetes的apiserver使用的etcd证书:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/deploy_k8s_apiserver_key
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/deploy_k8s_apiserver_key
    :language: bash
    :caption: 分发kubernetes的apiserver使用的etcd证书
 
@@ -40,7 +40,7 @@ Kubernetes集群(z-k8s)
 
 - 创建 ``create_kubeadm-config.sh`` 脚本 :
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/create_kubeadm-config
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/create_kubeadm-config
    :language: bash
    :caption: 创建第一个管控节点配置 kubeadm-config.yaml
 
@@ -48,13 +48,13 @@ Kubernetes集群(z-k8s)
 
 - 创建第一个管控节点:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubeadm_init
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubeadm_init
    :language: bash
    :caption: 初始化第一个管控节点 kubeadm init
 
 - 根据提示，执行以下命令为自己的账户准备好管理配置
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kube_config
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kube_config
    :language: bash
    :caption: 配置个人账户的管理k8s环境
 
@@ -76,7 +76,7 @@ Kubernetes集群(z-k8s)
 
 输出:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubectl_get_pods_before_net
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubectl_get_pods_before_net
    :language: bash
    :caption: 没有安装网络前无法启动coredns，此时 kubectl get pods 输出
 
@@ -97,7 +97,7 @@ Kubernetes集群(z-k8s)
 
 - 首先在节点安装 :ref:`helm` :
 
-.. literalinclude:: ../../kubernetes/deployment/helm/linux_helm_install
+.. literalinclude:: ../../kubernetes/deploy/helm/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 
@@ -140,7 +140,7 @@ Kubernetes集群(z-k8s)
 
 - 按照 ``kubeadm init`` 输出信息，在第二个管控节点 ``z-k8s-m-2`` 上执行节点添加:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubeadm_join_control-plane
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubeadm_join_control-plane
    :language: bash
    :caption: kubeadm join添加control-plane节点
 
@@ -149,7 +149,7 @@ Kubernetes集群(z-k8s)
 
 - 按照 ``kubeadm init`` 输出信息，在工作节点 ``z-k8s-n-1`` 等上执行:
 
-.. literalinclude:: ../../kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubeadm_join_worker
+.. literalinclude:: ../../kubernetes/deploy/bootstrap_kubernetes_ha/ha_k8s_dnsrr/k8s_dnsrr/kubeadm_join_worker
    :language: bash
    :caption: kubeadm join添加worker节点
 
