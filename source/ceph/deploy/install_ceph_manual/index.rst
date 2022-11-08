@@ -12,7 +12,6 @@
    :maxdepth: 1
 
    prepare.rst
-   ceph_os_upgrade_ubuntu_22.04.rst
    install_ceph_mon.rst
    install_ceph_mgr.rst
    add_ceph_osds_raw.rst
@@ -22,6 +21,7 @@
    add_ceph_osds_more.rst
    add_ceph_mds.rst
    ceph_var_disk.rst
+   ceph_os_upgrade_ubuntu_22.04.rst
 
 
 .. only::  subproject and html
