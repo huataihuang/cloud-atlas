@@ -9,7 +9,7 @@ Ceph底层Ubuntu操作系统升级到22.04
 升级方式
 ==========
 
-理想的ceph升级方式应该采用 Ceph 官方文档 `UPGRADING CEPH <https://docs.ceph.com/en/quincy/cephadm/upgrade/>`_ 将整个升级过程控制在Ceph集群软件，而不是以来操作系统发行版进行升级。
+理想的ceph升级方式建议采用 Ceph 官方文档 `UPGRADING CEPH <https://docs.ceph.com/en/quincy/cephadm/upgrade/>`_ 将整个升级过程控制在Ceph集群软件，而不是以操作系统发行版进行升级。
 
 .. warning::
 
@@ -21,7 +21,15 @@ Ceph底层Ubuntu操作系统升级到22.04
 
   - 如果遇到不可测宕机，则销毁虚拟机重建故障节点
 
-- 升级过程前后观察 ``ceph status`` 以及监控，并在使用ceph作为存储的 
+- 升级过程前后观察 ``ceph status`` 以及监控，并在 :ref:`ceph_rbd_libvirt` 虚拟机内部发起操作系统升级(并发10+虚拟机)，作为Ceph存储压力验证
+
+.. note::
+
+   经过验证，Ubuntu发行版提供的 ``20.04 LTS`` 升级到 ``22.04 LTS`` 可以完美完成Ceph的大版本升级15.2.16到17.2.0，整个过程无需停止Ceph客户端存储读写，未发现数据丢失和错误。
+
+   至少以我个人小规模数据验证，Ubuntu LTS跨版本升级是成功的，对Ceph的跨版本兼容有保障。
+
+   以下仅供参考
 
 升级OS
 ==========
@@ -31,19 +39,17 @@ Ceph底层Ubuntu操作系统升级到22.04
 
 升级前需要确保操作系统根目录有足够空间，我的第一次升级OS版本就因为根目录打爆导致部分(内核)软件包安装失败。通过 :ref:`libvirt_lvm_pool_resize_vm_disk` 解决VM磁盘空间才最终完成升级。以下以 ``z-b-data-3`` 虚拟机根磁盘扩容为例:
 
-- 在物理主机 ``zcloud`` 上完成以下操作扩容libvirt的对应虚拟机LVM卷::
+- 在物理主机 ``zcloud`` 上完成以下操作扩容libvirt的对应虚拟机LVM卷:
 
-   lvresize -L 16G /dev/vg-libvirt/z-b-data-3
-   virsh blockresize z-b-data-3 --path /dev/vg-libvirt/z-b-data-3 --size 16G
+.. literalinclude:: ceph_os_upgrade_ubuntu_22.04/libvirt_resize_lvm
+   :language: bash
+   :caption: 在物理主机上对libvirt对应虚拟机LVM卷扩容
 
-- 登录 ``z-b-data-3`` 虚拟机内部::
+- 登录 ``z-b-data-3`` 虚拟机内部:
 
-   #安装growpart
-   apt install cloud-guest-utils
-   #扩展分区2
-   growpart /dev/vda 2
-   #扩展XFS根分区
-   xfs_growfs /
+.. literalinclude:: ceph_os_upgrade_ubuntu_22.04/vm_growpart_xfs_growfs
+   :language: bash
+   :caption: 在虚拟机内部使用growpart和xfs_growfs扩展根目录文件系统
 
 升级操作
 -----------
@@ -53,7 +59,11 @@ Ceph底层Ubuntu操作系统升级到22.04
    # ceph version
    ceph version 15.2.16 (d46a73d6d0a67a79558054a3a5a72cb561724974) octopus (stable)
 
-- 采用 :ref:`upgrade_ubuntu_20.04_to_22.04` 相同方法升级操作系统
+- 采用 :ref:`upgrade_ubuntu_20.04_to_22.04` 相同方法升级操作系统:
+
+.. literalinclude:: ceph_os_upgrade_ubuntu_22.04/ubuntu_release_upgrade
+   :language: bash
+   :caption: 执行ubuntu release upgrade
 
 .. note::
 
