@@ -12,6 +12,7 @@ Ceph Block Device(RBD)
    compare_local_ssd_ceph_rbd.rst
    down_1_of_3_ceph_vm_rbd.rst
    clone_vm_rbd.rst
+   ceph_extend_rbd_drive_with_libvirt_xfs.rst
 
 .. only::  subproject and html
 
