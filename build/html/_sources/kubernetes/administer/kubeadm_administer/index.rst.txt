@@ -9,5 +9,5 @@
 .. toctree::
    :maxdepth: 1
 
-   upgrade_kubeadm_cluster.rst
+   kubeadm_upgrade_k8s/index
    delete_kubeadm_cluster.rst

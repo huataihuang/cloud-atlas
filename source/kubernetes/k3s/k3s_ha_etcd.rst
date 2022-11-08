@@ -28,7 +28,7 @@ K3s高可用etcd
 
 - `etcd-io / etcd Releases <https://github.com/etcd-io/etcd/releases/>`_ 提供了最新版本，当前 ``3.5.2`` :
 
-.. literalinclude:: ../deployment/etcd/install_run_local_etcd/install_etcd.sh
+.. literalinclude:: ../deploy/etcd/install_run_local_etcd/install_etcd.sh
    :language: bash
    :caption: 下载并安装etcd脚本 install_etcd.sh
 
@@ -60,57 +60,57 @@ K3s高可用etcd
 
 - 创建 ``cfssl`` 选项配置:
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/cfssl_options.sh
+.. literalinclude:: ../deploy/etcd/etcd_tls/cfssl_options.sh
    :language: bash
    :caption: 保存默认cfssl选项脚本 cfssl_options.sh
 
 - 修改 ``ca-config.json`` 将过期时间延长到10年:
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/ca-config.json
+.. literalinclude:: ../deploy/etcd/etcd_tls/ca-config.json
    :language: json
    :caption: 修订证书有效期10年 ca-config.json
 
 - 配置CSR(Certificate Signing Request)配置文件 ``ca-csr.json`` :
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/ca-csr.json
+.. literalinclude:: ../deploy/etcd/etcd_tls/ca-csr.json
    :language: json
    :caption: 修订CSR ca-csr.json
 
 - 使用上述配置定义生成CA:
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/generate_ca.cmd
+.. literalinclude:: ../deploy/etcd/etcd_tls/generate_ca.cmd
    :language: bash
    :caption: 生成CA
 
 - 准备3个服务器 peer certificate 配置:
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/x-k3s-m-1.json
+.. literalinclude:: ../deploy/etcd/etcd_tls/x-k3s-m-1.json
    :language: json
    :caption: 服务器 x-k3s-m-1.edge.huatai.me 点对点证书
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/x-k3s-m-2.json
+.. literalinclude:: ../deploy/etcd/etcd_tls/x-k3s-m-2.json
    :language: json
    :caption: 服务器 x-k3s-m-2.edge.huatai.me 点对点证书
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/x-k3s-m-3.json
+.. literalinclude:: ../deploy/etcd/etcd_tls/x-k3s-m-3.json
    :language: json
    :caption: 服务器 x-k3s-m-3.edge.huatai.me 点对点证书
 
 - 对应生成3个主机的服务器证书:
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/generate_peer_certificate_private_key.sh
+.. literalinclude:: ../deploy/etcd/etcd_tls/generate_peer_certificate_private_key.sh
    :language: bash
    :caption: 生成3个主机的点对点证书
 
 - 准备 ``client.json`` :
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/client.json
+.. literalinclude:: ../deploy/etcd/etcd_tls/client.json
    :language: json
    :caption: client.json
 
 - 生成客户端证书:
 
-.. literalinclude:: ../deployment/etcd/etcd_tls/generate_client_certifacate.cmd
+.. literalinclude:: ../deploy/etcd/etcd_tls/generate_client_certifacate.cmd
    :language: bash
    :caption: 生成客户端证书
 
@@ -119,7 +119,7 @@ K3s高可用etcd
 
 - 脚本进行分发:
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_certificates.sh
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_certificates.sh
    :language: bash
    :caption: 分发证书脚本 deploy_etcd_certificates.sh
 
@@ -129,7 +129,7 @@ K3s高可用etcd
 
 这样在 ``etcd`` 主机上分别有对应主机的配置文件 ``/etc/etcd`` 目录下有(以下案例是 ``x-k3s-m-1`` ):
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/etcd_certificates_list
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/etcd_certificates_list
    :language: bash
    :caption: x-k3s-m-1 主机证书案例
 
@@ -140,19 +140,19 @@ K3s高可用etcd
 
 - 准备配置文件 ``conf.yml`` (这个配置文件是 `edge/testing仓库etcd <https://pkgs.alpinelinux.org/package/edge/testing/aarch64/etcd>`_ 的etcd 配置文件 ``/etc/etcd/conf.yml`` 基础上修订，增加配置占位符方便后续通过脚本修订):
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/conf.yml
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/conf.yml
    :language: yaml
    :caption: etcd配置文件 /etc/etcd/conf.yml
 
 - 修订etcd配置的脚本 ``config_etcd.sh`` :
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/config_etcd.sh
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/config_etcd.sh
    :language: bash
    :caption: 修订etcd配置的脚本 config_etcd.sh
 
 - 执行以下部署脚本 ``deploy_etcd_config.sh`` :
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_config.sh
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_config.sh
    :language: bash
    :caption: 执行etcd修订脚本 deploy_etcd_config.sh
 
@@ -164,17 +164,17 @@ K3s高可用etcd
 
 - 准备配置文件 ``conf.d-etcd`` 和 ``init.d-etcd`` (从alpine linux软件仓库 ``etcd-openrc`` 软件包提取)
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/conf.d-etcd
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/conf.d-etcd
    :language: bash
    :caption: openrc的etcd配置文件 /etc/conf.d/etcd
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/init.d-etcd
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/init.d-etcd
    :language: bash
    :caption: openrc的etcd服务配置文件 /etc/init.d/etcd
 
 - 然后执行以下 ``deploy_etcd_service.sh`` :
 
-.. literalinclude:: ../deployment/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_service.sh
+.. literalinclude:: ../deploy/etcd/deploy_etcd_cluster_with_tls_auth/deploy_etcd_service.sh
    :language: bash
    :caption: 分发openrc的etcd服务脚本 deploy_etcd_service.sh
 

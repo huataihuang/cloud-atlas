@@ -29,7 +29,7 @@ kubernetes管理了容器规模，从边缘计算的微小集群到数据中心�
    startup_prepare/index
    startup/index
    concepts/index
-   deployment/index
+   deploy/index
    deploy_app/index
    manage_object/index
    administer/index

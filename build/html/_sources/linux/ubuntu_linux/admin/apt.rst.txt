@@ -14,7 +14,6 @@ contrib/non-free软件包
    deb http://deb.debian.org/debian buster main contrib non-free
    deb-src http://deb.debian.org/debian buster main contrib non-free
 
-
 APT代理
 ========
 
@@ -117,9 +116,31 @@ proxy.conf
 
    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A507B2BBA7803E3B
 
+.. _apt_hold:
+
+apt hold保持包不更新
+========================
+
+我在 :ref:`kubeadm_upgrade_k8s_fail_record` 之后才发现在 :ref:`k8s_deploy` 步骤中有一个不起眼的操作 ``apt hold`` 是非常重要的: 确保操作系统升级时不自动升级 :ref:`kubernetes` 相关软件包。这是因为Kubernetes升级版本需要遵循一定的规则和顺序，直接升级有可能导致数据错乱。
+
+使用 ``apt-mark`` 工具可以保持软件包不被系统自动升级，也可以使用这个工具来检查 ``hold`` 住的软件包:
+
+- 完成 :ref:`k8s_deploy` 之后，锁定 :ref:`kubernetes` 相关软件不升级::
+
+   apt-mark hold kubelet kubeadm kubectl
+
+- 检查当前 ``hold`` 住的软件包::
+
+   apt-mark showhold
+
+- 解锁 ``hold`` 住的软件包::
+
+   apt-mark unhold kubelet kubeadm kubectl
+
 参考
 ========
 
 - `Configure proxy for APT? <https://askubuntu.com/questions/257290/configure-proxy-for-apt>`_
 - `How do I find the package that provides a file? <https://askubuntu.com/questions/481/how-do-i-find-the-package-that-provides-a-file>`_
 - `How to Fix 'add-apt-repository command not found' on Ubuntu & Debian <https://phoenixnap.com/kb/add-apt-repository-command-not-found-ubuntu>`_
+- `apt-get hold back packages on Ubuntu / Debian Linux <https://www.cyberciti.biz/faq/apt-get-hold-back-packages-command/>`_ 有多种hold软件包的方法，不过常用的 ``apt-mark`` 已经足够

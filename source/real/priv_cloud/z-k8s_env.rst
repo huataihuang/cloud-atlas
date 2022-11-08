@@ -20,7 +20,7 @@
   - ``z-k8s-n-5`` 常规节点
 
 .. csv-table:: z-k8s高可用Kubernetes集群服务器列表
-   :file: ../../kubernetes/deployment/bootstrap_kubernetes_ha/prepare_z-k8s/z-k8s_hosts.csv
+   :file: ../../kubernetes/deploy/bootstrap_kubernetes_ha/prepare_z-k8s/z-k8s_hosts.csv
    :widths: 20, 20, 60
    :header-rows: 1
 
