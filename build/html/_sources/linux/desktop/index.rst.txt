@@ -20,6 +20,7 @@ Linux桌面
    vim/index
    vscode/index
    audio/index
+   xorg_dpi_fix.rst
    i3.rst
    oh_my_zsh.rst
    tmux.rst

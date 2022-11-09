@@ -275,6 +275,24 @@
    :language: bash
    :caption: 恢复工作节点调度并上线
 
+所有节点升级完成后，使用 ``kubectl get nodes -o wide`` 检查，可以看到所有节点都统一升级到 ``1.24.7`` 版本::
+
+   NAME        STATUS   ROLES           AGE    VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+   z-k8s-m-1   Ready    control-plane   115d   v1.24.7   192.168.6.101   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-m-2   Ready    control-plane   113d   v1.24.7   192.168.6.102   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-m-3   Ready    control-plane   113d   v1.24.7   192.168.6.103   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-1   Ready    <none>          113d   v1.24.7   192.168.6.111   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-2   Ready    <none>          113d   v1.24.7   192.168.6.112   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-3   Ready    <none>          113d   v1.24.7   192.168.6.113   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-4   Ready    <none>          113d   v1.24.7   192.168.6.114   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-5   Ready    <none>          113d   v1.24.7   192.168.6.115   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+
+升级K8S集群(1.24.7)至最新release版本(1.25.3)
+================================================
+
+**在完成了上述 1.24.2 升级到最新补丁版本 1.24.7 之后，就具备了充分条件可以进一步升级大版本到最新release版本 1.25.3**
+
+升级方法步骤完全相同，只不过目标版本调整为 1.25.3 ，以下记录升级过程
 
 参考
 ======

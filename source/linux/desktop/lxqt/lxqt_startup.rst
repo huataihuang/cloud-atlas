@@ -16,7 +16,7 @@ LXQt快速起步
 但是，有获得也有失去 :ref:`sway` 所采用的 :ref:`wayland` 还没有得到广泛的支持，有很多必要的程序支持不佳(例如chrome，输入法)，并且也不能使用 :ref:`synergy` 。最近，我又需要同时操纵两台主机(以便充分利用显示屏幕，并且最重要的是能够操作 :ref:`macos` 上的商业软件)，所以准备选择一个基于传统 xorg 的轻量级桌面。想到xfce和KDE相近的体量，我想尝试一下很久以前体验过的类似 ``LXDE`` 的后继者 ``LXQt`` :
 
 - 能够使用 :ref:`synergy` 操作多台主机
-- 已经验证过 ``qterminal`` 可以很好支持中文输入，且非常轻量
+- 已经验证过 ``qterminal`` 可以很好支持中文输入，且非常轻量(但是 ``qterminal`` 不能选择中文字体，导致显示中文不美观)
 
 底层操作系统采用 :ref:`arch_linux` ，最小化安装，逐步递进部署桌面。
 
@@ -35,8 +35,8 @@ LXQt精选了一系列轻量级的应用:
 
 - PcManFm-qt - 这是从LXDE继承的轻量级文件管理器，已经Qt化
 - Lximage-qt - 也是从LXDE继承的图片观看程序
-- QTerminal - 终端模拟器，非常快速而且对中文输入支持良好
-- Qps - 进程场刊
+- QTerminal - 终端模拟器，非常快速而且对中文输入支持良好 (我改用 ``lxterminal`` ，也就是 ``LXDE`` 默认内置终端，基于GTK，优点是能够选择中文字体 ``文泉驿`` 所以编辑中文非常美观)
+- Qps - 进程查看
 - Screengrab - 截屏
 - LXQt-archiver - 压缩包管理
 - LXQt-runner - 应用程序加载器
@@ -112,25 +112,26 @@ LXQt使用 Openbox 实现窗口管理(Window Manager, WM)，所以要实现窗�
 
 由于工作中有不少网站只兼容chrome，所以安装 ``chromium`` ::
 
-   pacman -S chromium firefox
+   pacman -S chromium
 
 安装必要插件:
 
 - SwitchyOmega
 - Copytables
 
-.. note::
+Firefox(放弃)
+---------------
 
-   对比Firefox和Chromium，各有利弊:
+对比Firefox和Chromium，各有利弊:
 
-   - Firefox内建了pdf阅读功能，对于网站提供pdf文档直接阅读非常方便
-   - Firefox内置的sync功能，在不同主机间切换能够同步tab(虽然不是自动同步)
-   - Firefox内置的视频解码器可能和一些视频网站不完全兼容，这点不如Chromium通吃(太多的网站只考虑适配chrome)，例如我在观看低端影视网站的 `高堡奇人 <https://ddys.tv/the-man-in-the-high-castle/>`_ 就发现Firefox无法正确还原视频色彩并且有残影，而chromium则完全正常(Falkon也正常)
+- Firefox内建了pdf阅读功能，对于网站提供pdf文档直接阅读非常方便
+- Firefox内置的sync功能，在不同主机间切换能够同步tab(虽然不是自动同步)
+- Firefox内置的视频解码器可能和一些视频网站不完全兼容，这点不如Chromium通吃(太多的网站只考虑适配chrome)，例如我在观看低端影视网站的 `高堡奇人 <https://ddys.tv/the-man-in-the-high-castle/>`_ 就发现Firefox无法正确还原视频色彩并且有残影，而chromium则完全正常(Falkon也正常)
 
-     - Chromium内置的视频播放引擎显然最为先进，在全屏播放 `高堡奇人 <https://ddys.tv/the-man-in-the-high-castle/>`_ 对比可以看到 chromium 有2个不到40% CPU的进程就可以流畅播放，而Falkon则跑到 130% 以上CPU(导致明显卡顿)。chromium应该有GPU加速所以视频非常优秀。
+  - Chromium内置的视频播放引擎显然最为先进，在全屏播放 `高堡奇人 <https://ddys.tv/the-man-in-the-high-castle/>`_ 对比可以看到 chromium 有2个不到40% CPU的进程就可以流畅播放，而Falkon则跑到 130% 以上CPU(导致明显卡顿)。chromium应该有GPU加速所以视频非常优秀。
 
-Falkon
---------
+Falkon(放弃)
+-------------
 
 我尝试过很多 :ref:`linux_light_browser` ，其中 Falkon 是 `Fedora SPINS: LXQt Desktop <https://spins.fedoraproject.org/eu/lxqt/>`_ 选择作为轻量级浏览器:
 
