@@ -14,6 +14,7 @@ JavaScript注释方法有2种:
 
    intro_js.rst
    startup/index
+   functional_programming/index
    react/index
    typescript/index
    patternfly/index
