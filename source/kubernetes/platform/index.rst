@@ -12,3 +12,4 @@ Kubernetes之上的平台
    kubequery/index
    temporal/index
    qovery/index
+   dapr/index.rst
