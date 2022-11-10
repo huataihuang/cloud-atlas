@@ -416,6 +416,31 @@
    z-k8s-n-4   Ready    <none>          114d   v1.25.3   192.168.6.114   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
    z-k8s-n-5   Ready    <none>          114d   v1.25.3   192.168.6.115   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
 
+故障恢复
+==========
+
+.. note::
+
+   我参考官方文档从 1.24.2 升级到 1.25.3 ，没有遇到严重故障问题，所以本段落仅参考官方文档整理记录以备后用
+
+``kubeadm upgrade``
+----------------------
+
+- 如果 ``kubeadm upgrade`` 失败并且没有回滚，可以再次运行 ``kubeadm upgrade`` : 这个命令是幂等的，可以重复执行。
+- 可以运行 ``kubeadm upgrade apply --force``
+
+数据备份
+-------------
+
+升级时，如果时集群内置 :ref:`etcd` 则会在 ``/etc/kubernetes/tmp`` 目录下备份 ``etc`` 数据::
+
+   kubeadm-backup-etcd-<date>-<time>
+   kubeadm-backup-manifests-<date>-<time>
+
+- 如果 ``etcd`` 升级失败并且无法回滚，可以从上述 ``kubeadm-backup-etcd-<date>-<time>`` 文件夹内容复制到 ``/var/lib/etcd`` 进行手工恢复。 如果是外部 ``etcd`` 则上述目录为空。
+
+- ``kubeadm-backup-manifests-<date>-<time>`` 是当前控制面节点静态Pod清单文件备份版本，这个文件目录下内容可以复制到 ``/etc/kubernetes/manifests`` 目录下手工恢复。
+
 参考
 ======
 
