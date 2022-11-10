@@ -24,6 +24,9 @@ Qterminal中文字体
 
 原来在 ``qterminal`` 中使用 ``FreeMono`` 字体就能够完美混合展示中文和英文!!! (文泉驿字体的终端字体名字?)
 
+.. figure:: ../../../_static/linux/desktop/lxqt/qterminal_chinese_font.jpg
+   :scale: 30 
+
 终于能够兼顾 ``qterminal`` 的美观轻量以及中文字体兼容了，非常非常开心!!!
 
 参考
