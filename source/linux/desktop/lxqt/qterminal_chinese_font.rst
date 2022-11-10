@@ -22,7 +22,11 @@ Qterminal中文字体
 
 正在我准备放弃 ``qterminal`` 改用 ``lxtermianl`` ( ``lxterminal`` 对 :ref:`tile_window_in_lxqt` 支持不佳)，我偶然发现在MacBook Pro 2022使用 :ref:`asahi_linux` 却能够完美显示中文字体: Why?
 
-原来在 ``qterminal`` 中使用 ``FreeMono`` 字体就能够完美混合展示中文和英文!!! (文泉驿字体的终端字体名字?)
+原来在 ``qterminal`` 中使用 ``FreeMono`` 字体就能够完美混合展示中文和英文!!! 
+
+这个 ``FreeMono`` 字体由 ``gnu-free-fonts`` 软件包提供::
+
+   sudo pacman -S gnu-free-fonts
 
 .. figure:: ../../../_static/linux/desktop/lxqt/qterminal_chinese_font.jpg
    :scale: 30 
