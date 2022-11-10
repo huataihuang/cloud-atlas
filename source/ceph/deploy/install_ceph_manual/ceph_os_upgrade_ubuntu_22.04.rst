@@ -69,9 +69,11 @@ libvirt LVM卷扩容VM磁盘
    :language: bash
    :caption: 执行ubuntu release upgrade
 
-.. note::
 
-   我在升级Ceph集群的一个工作节点操作系统同时对运行在Ceph存储上的KVM虚拟机(大约10+ VM)同时升级操作系统，目测对Ceph集群的IO操作大约达到100MB/s流量，IOPS约上千，整个过程非常平滑，没有出现过hang机现象。
+我在升级Ceph集群的一个工作节点操作系统同时对运行在Ceph存储上的KVM虚拟机(大约10+ VM)同时升级操作系统，目测对Ceph集群的IO操作大约达到100MB/s流量，IOPS约上千，整个过程非常平滑，没有出现过hang机现象。
+
+.. figure:: ../../../_static/ceph/deploy/install_ceph_manual/ceph_upgrade_os.jpg
+   :scale: 30
 
 升级后检查
 --------------
