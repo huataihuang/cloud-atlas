@@ -107,6 +107,14 @@ LXQt使用 Openbox 实现窗口管理(Window Manager, WM)，所以要实现窗�
    :language: bash
    :caption: 启用fcitx5环境变量配置 /etc/environment
 
+终端
+============
+
+作为运维和Linux服务器端开发，主要的工作都是在terminal终端中完成，所以选择轻量级的终端非常重要。我个人比较倾向于无KDE和无GNOME依赖的纯GTK/Qt类型终端:
+
+- ``qterminal`` : 和 ``LXQt`` 最为契合，轻快且具有很多定制界面功能，对中文输入也友好(Qt5)，能够非常容易使用 :ref:`fcitx` 进行中文输入。但是这个程序能够使用的字体很少( 实际是因为强制过滤选择 ``monospace`` 所以无法选择中文字体: `How to use more fonts? #333 <https://github.com/lxqt/qterminal/issues/333>`_ )，导致无法选择文泉驿中文字体，在中文显示上会出现中文显示略大于英文无法对齐，正在输入的那一行中文头部显示不完整。
+- ``lxterminal`` : 原生 ``LXDE`` 终端(LXQt前身)，只使用GTK所以非常轻量级。对中文字体支持极佳，可以选择文泉驿中文字体所以撰写中文文档非常方便。不过在LXQt中运行，使用 :ref:`tile_window_in_lxqt` 时无法完全平铺满屏幕，总是露出一条空白让强迫症非常难受。
+
 浏览器
 ========
 
