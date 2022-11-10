@@ -153,7 +153,7 @@
 
 - 其他管控节点只需要执行 ``upgrade node`` 而不是 ``upgrade apply`` :
 
-.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_node_1.24.7
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_node
    :language: bash
    :caption: 升级节点Kubernetes套件到1.24.7(upgrade node)
 
@@ -193,9 +193,9 @@
 
 - 重启kubelet:
 
-.. literalinclude:: kubeadm_upgrade_k8s_1.25/systemctl_restart_kubelet_1.24.7
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/systemctl_restart_kubelet
    :language: bash
-   :caption: 重启管控平面节点kubelet(1.24.7)
+   :caption: 重启管控平面节点kubelet
 
 - 将完成升级的管控节点恢复调度并上线(以下案例是 ``z-k8s-m-1`` 其他管控节点类似):
 
@@ -229,7 +229,7 @@
 
 - 执行 ``kubeadm upgrade`` :
 
-.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_node_1.24.7
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_node
    :language: bash
    :caption: 升级节点Kubernetes套件到1.24.7(upgrade node)
 
@@ -265,7 +265,7 @@
 
 - 重启kubelet:
 
-.. literalinclude:: kubeadm_upgrade_k8s_1.25/systemctl_restart_kubelet_1.24.7
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/systemctl_restart_kubelet
    :language: bash
    :caption: 重启工作节点kubelet(1.24.7)
 
@@ -323,6 +323,98 @@
 .. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_apply_1.25.3
    :language: bash
    :caption: 升级第一个管控平面节点Kubernetes套件到1.25.3(最新release版本)
+
+**对其他管控面节点** ``z-k8s-m-2`` 和 ``z-k8s-m-3`` 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- 其他管控节点通过 ``kubeadm upgrade`` 升级:
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_node
+   :language: bash
+   :caption: 升级节点Kubernetes套件到1.25.3(upgrade node)
+
+腾空管控节点
+~~~~~~~~~~~~~
+
+- 将节点标记为不可调度并驱逐所有负载，准备节点的维护(以下案例是 ``z-k8s-m-1`` 其他管控节点类似)
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubectl_drain_control-plane_1
+   :language: bash
+   :caption: 管控平面节点腾空节点(不包含daemonset)
+
+升级管控节点kubelet和kubectl
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- 升级 kubelet 和 kubectl:
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/apt_upgrade_kubelet_kubectl_1.25.3
+   :language: bash
+   :caption: 升级管控平面节点kubelet和kubectl到1.25.3
+
+- 重启kubelet:
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/systemctl_restart_kubelet
+   :language: bash
+   :caption: 重启管控平面节点kubelet
+
+- 将完成升级的管控节点恢复调度并上线(以下案例是 ``z-k8s-m-1`` 其他管控节点类似):
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubectl_uncordon_control-plane_1
+   :language: bash
+   :caption: 恢复管控平面节点调度并上线
+
+**在其余管控节点上重复完成上述 "腾空管控节点" 和 "升级管控节点kubelet和kubectl"**
+
+升级工作节点
+-------------------------
+
+- 升级 ``kubeadm`` :
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/apt_update_kubeadm_1.25.3
+   :language: bash
+   :caption: 升级节点kubeadm到1.25.3
+
+- 执行 ``kubeadm upgrade`` :
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_node
+   :language: bash
+   :caption: 升级节点Kubernetes套件到1.25.3(upgrade node)
+
+- 将节点标记为不可调度并驱逐所有负载，准备节点的维护(以下案例是 ``z-k8s-n-1`` 工作节点)
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubectl_drain_node_1_delete-emptydir-data
+   :language: bash
+   :caption: 腾空工作节点(不包含daemonset)
+
+- 同样升级 kubelet 和 kubectl:
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/apt_upgrade_kubelet_kubectl_1.25.3
+   :language: bash
+   :caption: 升级工作节点kubelet和kubectl到1.25.3
+
+- 重启kubelet:
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/systemctl_restart_kubelet
+   :language: bash
+   :caption: 重启工作节点kubelet
+
+- 将完成升级的工作节点恢复调度并上线(以下案例是 ``z-k8s-n-1`` 其他工作节点类似):
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubectl_uncordon_node_1
+   :language: bash
+   :caption: 恢复工作节点调度并上线
+
+所有节点升级完成后，使用 ``kubectl get nodes -o wide`` 检查，可以看到所有节点都统一升级到 ``1.25.3`` 版本::
+
+   NAME        STATUS   ROLES           AGE    VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+   z-k8s-m-1   Ready    control-plane   115d   v1.25.3   192.168.6.101   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-m-2   Ready    control-plane   114d   v1.25.3   192.168.6.102   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-m-3   Ready    control-plane   114d   v1.25.3   192.168.6.103   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-1   Ready    <none>          114d   v1.25.3   192.168.6.111   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-2   Ready    <none>          114d   v1.25.3   192.168.6.112   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-3   Ready    <none>          114d   v1.25.3   192.168.6.113   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-4   Ready    <none>          114d   v1.25.3   192.168.6.114   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
+   z-k8s-n-5   Ready    <none>          114d   v1.25.3   192.168.6.115   <none>        Ubuntu 22.04.1 LTS   5.15.0-52-generic   containerd://1.6.6
 
 参考
 ======
