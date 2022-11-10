@@ -294,6 +294,36 @@
 
 升级方法步骤完全相同，只不过目标版本调整为 1.25.3 ，以下记录升级过程
 
+执行 ``kubeadm upgrade``
+-------------------------
+
+**对第一个管控面节点** ``z-k8s-m-1``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- 升级 ``kubeadm`` :
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/apt_update_kubeadm_1.25.3
+   :language: bash
+   :caption: 升级节点kubeadm到1.25.3(最新release版本)
+
+- 验证 ``kubeadm`` 版本::
+
+   kubeadm version
+
+- 验证升级计划:
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_plan
+   :language: bash
+   :caption: kubeadm验证升级计划
+
+没有特别报错，则可继续进行
+
+- 升级第一个管控节点，指定升级的目标版本 ``1.25.3`` :    
+
+.. literalinclude:: kubeadm_upgrade_k8s_1.25/kubeadm_upgrade_apply_1.25.3
+   :language: bash
+   :caption: 升级第一个管控平面节点Kubernetes套件到1.25.3(最新release版本)
+
 参考
 ======
 
