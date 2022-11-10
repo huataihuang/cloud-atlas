@@ -24,7 +24,7 @@ Qterminal中文字体
 
 原来在 ``qterminal`` 中使用 ``FreeMono`` 字体就能够完美混合展示中文和英文!!! 
 
-这个 ``FreeMono`` 字体由 ``gnu-free-fonts`` 软件包提供::
+``FreeMono`` 字体由 ``gnu-free-fonts`` 软件包提供::
 
    sudo pacman -S gnu-free-fonts
 
