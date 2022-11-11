@@ -12,6 +12,7 @@ The Ultimate vimrc
    omnicompletion.rst
    vim-snipmate.rst
    jedi-vim.rst
+   nerdtree.rst
 
 .. only::  subproject and html
 
