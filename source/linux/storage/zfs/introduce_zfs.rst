@@ -53,11 +53,12 @@ ZFS是 128 位文件系统，这个设计如此超前，以至于理论极限可
 
 我在很多年前就开始接触和使用ZFS，最早是在一家电子邮件服务商公司工作时，部署和维护 Solaris 系统，曾经学习和使用 ZFS ，对其超前的性能和功能有很深的印象(另一项Solaris杀手锏技术是zones，也就是后来大火的容器技术)。
 
-我现在将 :ref:`kubuntu` 作为自己的一台旧笔记本 :ref:`mbp15_late_2013` 运行系统，考虑到 :ref:`ubuntu_linux` 从 20.04 LTS开始试验性引入ZFS，后续更作为主要文件系统支持，发展前景可观。加上ZFS确实是目前最先进的本地文件系统，技术上值得再次探索。
+我在桌面上实践ZFS，并计划在后续 :ref:`priv_cloud_infra` / :ref:`mobile_cloud_infra` 作为主要的存储架构来部署，不断增加实践经验:
 
-我在桌面上实践ZFS，并计划在后续 :ref:`priv_cloud_infra` / :ref:`mobile_cloud_infra` 作为主要的存储架构来部署，不断增加实践经验。
+2022年10月:
 
-- 2022年10月，我逐步在 :ref:`apple_silicon_m1_pro` 的MacBook Pro上构建 :ref:`mobile_cloud_infra` ，在物理主机(MacBook Pro)上采用ZFS来管理 :ref:`docker` 和 :ref:`libvirt` 存储
+- 在公司配备的 :ref:`apple_silicon_m1_pro` 的MacBook Pro上构建 :ref:`mobile_cloud_infra` (底层操作系统是基于 :ref:`arch_linux` 的 :ref:`asahi_linux` ) 
+- 在我自己的旧MacBook Pro 2013上采用ZFS来管理 :ref:`docker` 和 :ref:`libvirt` 存储
 
 参考
 =======

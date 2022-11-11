@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
-    <link rel="next" title="在ZFS上部署Arch Linux根文件系统" href="archlinux_root_on_zfs.html" />
+    <link rel="next" title="使用archzfs软件仓库在arch linux上部署ZFS" href="archlinux_archzfs.html" />
     <link rel="prev" title="ZFS vs. Btrfs" href="zfs_vs_btrfs.html" /> 
 </head>
 
@@ -102,6 +102,8 @@
 <li class="toctree-l4"><a class="reference internal" href="introduce_zfs.html">ZFS简介</a></li>
 <li class="toctree-l4"><a class="reference internal" href="zfs_vs_btrfs.html">ZFS vs. Btrfs</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Arch Linux上运行ZFS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="archlinux_archzfs.html">使用archzfs软件仓库在arch linux上部署ZFS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="archlinux_zfs-dkms.html">使用zfs-dkms在arch linux编译安装ZFS</a></li>
 <li class="toctree-l4"><a class="reference internal" href="archlinux_root_on_zfs.html">在ZFS上部署Arch Linux根文件系统</a></li>
 <li class="toctree-l4"><a class="reference internal" href="archlinux_zfs_virtual_disks.html">使用虚拟磁盘模拟演练ZFS</a></li>
 </ul>
@@ -183,194 +185,19 @@
 </ul>
 <section id="id1">
 <h2>安装<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
-<p>在Arch Linux上安装有两种方式:</p>
+<p>在Arch Linux上安装有3种方式:</p>
 <ul class="simple">
-<li><p>使用 <a class="reference external" href="https://github.com/archzfs/archzfs">archzfs repo</a></p></li>
-<li><p>下载源代码编译安装</p></li>
+<li><p><a class="reference internal" href="archlinux_archzfs.html#archlinux-archzfs"><span class="std std-ref">使用archzfs软件仓库在arch linux上部署ZFS</span></a></p></li>
+<li><p><a class="reference internal" href="archlinux_zfs-dkms.html#archlinux-zfs-dkms"><span class="std std-ref">使用zfs-dkms在arch linux编译安装ZFS</span></a></p></li>
+<li><p>zfs-linux 针对不同内核进行安装</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>推荐采用 <a class="reference internal" href="../../../kernel/admin/dkms.html#dkms"><span class="std std-ref">动态内核模块支持(DKMS)</span></a> 方式，可以在每次内核升级变动时自动重新编译ZFS内核模块</p>
+</div>
+</section>
 <section id="id2">
-<h3>通过软件仓库二进制安装包<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
-<p>采用比较简单的方式，即直接使用 <a class="reference external" href="https://github.com/archzfs/archzfs">archzfs repo</a> 安装</p>
-<ul class="simple">
-<li><p>导入 archzfs 仓库key:</p></li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">导入 archzfs 软件仓库密钥</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -L https://archzfs.com/archzfs.gpg <span class="p">|</span>  pacman-key -a -
-pacman-key --lsign-key <span class="k">$(</span>curl -L https://git.io/JsfVS<span class="k">)</span>
-curl -L https://git.io/Jsfw2 &gt; /etc/pacman.d/mirrorlist-archzfs
-</pre></div>
-</div>
-</div>
-<ul class="simple">
-<li><p>添加 archzfs 软件仓库:</p></li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">添加 archzfs 软件仓库</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tee -a /etc/pacman.conf <span class="s">&lt;&lt;- &#39;EOF&#39;</span>
-
-<span class="s">#[archzfs-testing]</span>
-<span class="s">#Include = /etc/pacman.d/mirrorlist-archzfs</span>
-
-<span class="s">[archzfs]</span>
-<span class="s">Include = /etc/pacman.d/mirrorlist-archzfs</span>
-<span class="s">EOF</span>
-</pre></div>
-</div>
-</div>
-<ul>
-<li><p>更新pacman仓库:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span> <span class="o">-</span><span class="n">Sy</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>这里我遇到报错:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">archzfs</span><span class="o">.</span><span class="n">db</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">download</span>
-<span class="n">error</span><span class="p">:</span> <span class="n">failed</span> <span class="n">retrieving</span> <span class="n">file</span> <span class="s1">&#39;archzfs.db&#39;</span> <span class="kn">from</span> <span class="nn">archzfs.com</span> <span class="p">:</span> <span class="n">The</span> <span class="n">requested</span> <span class="n">URL</span> <span class="n">returned</span> <span class="n">error</span><span class="p">:</span> <span class="mi">404</span>
-<span class="n">error</span><span class="p">:</span> <span class="n">failed</span> <span class="n">retrieving</span> <span class="n">file</span> <span class="s1">&#39;archzfs.db&#39;</span> <span class="kn">from</span> <span class="nn">mirror.sum7.eu</span> <span class="p">:</span> <span class="n">The</span> <span class="n">requested</span> <span class="n">URL</span> <span class="n">returned</span> <span class="n">error</span><span class="p">:</span> <span class="mi">404</span>
-<span class="n">error</span><span class="p">:</span> <span class="n">failed</span> <span class="n">retrieving</span> <span class="n">file</span> <span class="s1">&#39;archzfs.db&#39;</span> <span class="kn">from</span> <span class="nn">mirror.biocrafting.net</span> <span class="p">:</span> <span class="n">The</span> <span class="n">requested</span> <span class="n">URL</span> <span class="n">returned</span> <span class="n">error</span><span class="p">:</span> <span class="mi">404</span>
-<span class="n">error</span><span class="p">:</span> <span class="n">failed</span> <span class="n">retrieving</span> <span class="n">file</span> <span class="s1">&#39;archzfs.db&#39;</span> <span class="kn">from</span> <span class="nn">mirror.in.themindsmaze.com</span> <span class="p">:</span> <span class="n">The</span> <span class="n">requested</span> <span class="n">URL</span> <span class="n">returned</span> <span class="n">error</span><span class="p">:</span> <span class="mi">404</span>
-<span class="n">error</span><span class="p">:</span> <span class="n">failed</span> <span class="n">retrieving</span> <span class="n">file</span> <span class="s1">&#39;archzfs.db&#39;</span> <span class="kn">from</span> <span class="nn">zxcvfdsa.com</span> <span class="p">:</span> <span class="n">The</span> <span class="n">requested</span> <span class="n">URL</span> <span class="n">returned</span> <span class="n">error</span><span class="p">:</span> <span class="mi">404</span>
-<span class="n">error</span><span class="p">:</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">synchronize</span> <span class="nb">all</span> <span class="n">databases</span> <span class="p">(</span><span class="n">failed</span> <span class="n">to</span> <span class="n">retrieve</span> <span class="n">some</span> <span class="n">files</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>难道是不能提供aarch64架构？</p>
-<p>果然，我检查了 <a class="reference external" href="https://mirror.sum7.eu/archlinux/archzfs/archzfs/">https://mirror.sum7.eu/archlinux/archzfs/archzfs/</a> 果然在目录下只有 <code class="docutils literal notranslate"><span class="pre">x86_64</span></code></p>
-</section>
-<section id="archlinux-aur">
-<h3>通过 <a class="reference internal" href="../../arch_linux/archlinux_aur.html#archlinux-aur"><span class="std std-ref">Arch Linux AUR</span></a> 编译安装<a class="headerlink" href="#archlinux-aur" title="此标题的永久链接">¶</a></h3>
-<p>通过 <a class="reference internal" href="../../arch_linux/archlinux_aur.html#archlinux-aur"><span class="std std-ref">Arch Linux AUR</span></a> 有多个软件发行包: <a class="reference external" href="https://wiki.archlinux.org/title/ZFS#General">arch linux: zfs General</a> 提供不同版本信息，以下几个版本可能值得关注尝试:</p>
-<ul>
-<li><p>zfs-linux 稳定版本</p></li>
-<li><p>zfs-linux-lts 针对LTS内核的稳定版本</p></li>
-<li><p>zfs-dkms 用于支持动态内核模块的版本</p></li>
-<li><p>安装(在 <a class="reference internal" href="../../asahi_linux/index.html#asahi-linux"><span class="std std-ref">Asahi Linux</span></a> 上不满足条件):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yay</span> <span class="o">-</span><span class="n">S</span> <span class="n">zfs</span><span class="o">-</span><span class="n">linux</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p>这里安装会检测内核版本，分别对应不同的 <code class="docutils literal notranslate"><span class="pre">zfs-linux</span></code> 软件包，例如:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">zfs-linux</span></code> 要求 linux=6.0.2</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">zfs-linux-lts</span></code> 要求 linux-lts=5.15.74-1</p></li>
-</ul>
-</div></blockquote>
-<p>比较尴尬，由于是Apple Silicon M1系列处理器，使用的是 <a class="reference internal" href="../../asahi_linux/index.html#asahi-linux"><span class="std std-ref">Asahi Linux</span></a> 发行版，当前采用的内核是 <code class="docutils literal notranslate"><span class="pre">5.19.0-asahi-5-1-ARCH</span></code></p>
-<section id="zfs-dkms">
-<h4>zfs-dkms<a class="headerlink" href="#zfs-dkms" title="此标题的永久链接">¶</a></h4>
-<p>需要自己按照内核来编译，也就是采用 <a class="reference internal" href="../../../kernel/admin/dkms.html#dkms"><span class="std std-ref">动态内核模块支持(DKMS)</span></a> 安装对应的 <code class="docutils literal notranslate"><span class="pre">zfs-dkms</span></code></p>
-<ul class="simple">
-<li><p>检查内核variant(变种):</p></li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">检查当前内核variant</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">INST_LINVAR</span><span class="o">=</span><span class="k">$(</span>sed <span class="s1">&#39;s|.*linux|linux|&#39;</span> /proc/cmdline <span class="p">|</span> sed <span class="s1">&#39;s|.img||g&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{ print $1 }&#39;</span><span class="k">)</span>
-</pre></div>
-</div>
-</div>
-<p>验证:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>echo $INST_LINVAR
-</pre></div>
-</div>
-<p>输出是:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">linux</span><span class="o">-</span><span class="n">asahi</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>检查内核版本:</p></li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">检查当前内核版本</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">INST_LINVER</span><span class="o">=</span><span class="k">$(</span>pacman -Qi <span class="si">${</span><span class="nv">INST_LINVAR</span><span class="si">}</span> <span class="p">|</span> grep Version <span class="p">|</span> awk <span class="s1">&#39;{ print $3 }&#39;</span><span class="k">)</span>
-</pre></div>
-</div>
-</div>
-<p>可以验证一下:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>echo $INST_LINVER
-</pre></div>
-</div>
-<p>输出是:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">5.19</span><span class="o">.</span><span class="n">asahi5</span><span class="o">-</span><span class="mi">1</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>安装内核头文件:</p></li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">安装当前内核版本对应头文件</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">INST_LINVER</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">=</span> <span class="se">\</span>
-<span class="s2">&quot;</span><span class="k">$(</span>pacman -Si <span class="si">${</span><span class="nv">INST_LINVAR</span><span class="si">}</span>-headers <span class="p">|</span> grep Version <span class="p">|</span> awk <span class="s1">&#39;{ print $3 }&#39;</span><span class="k">)</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
- pacman -S --noconfirm --needed <span class="si">${</span><span class="nv">INST_LINVAR</span><span class="si">}</span>-headers
-<span class="k">else</span>
- pacman -U --noconfirm --needed <span class="se">\</span>
- https://archive.archlinux.org/packages/l/<span class="si">${</span><span class="nv">INST_LINVAR</span><span class="si">}</span>-headers/<span class="si">${</span><span class="nv">INST_LINVAR</span><span class="si">}</span>-headers-<span class="si">${</span><span class="nv">INST_LINVER</span><span class="si">}</span>-x86_64.pkg.tar.zst
-<span class="k">fi</span>
-</pre></div>
-</div>
-</div>
-<p>可以看到对应安装的是:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">linux</span><span class="o">-</span><span class="n">asahi</span><span class="o">-</span><span class="n">headers</span><span class="o">-</span><span class="mf">5.19</span><span class="o">.</span><span class="n">asahi5</span><span class="o">-</span><span class="mi">1</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>安装zfs-dkms:</p></li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">安装zfs-dkms</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yay -S zfs-dkms
-</pre></div>
-</div>
-</div>
-<p>如果出现编译正常但是安装类似如下报错，则说明系统缺少内核对应头文件:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
-<span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="p">)</span> <span class="n">installing</span> <span class="n">zfs</span><span class="o">-</span><span class="n">dkms</span>                                                       <span class="p">[</span><span class="c1">#############################################] 100%</span>
-<span class="p">::</span> <span class="n">Running</span> <span class="n">post</span><span class="o">-</span><span class="n">transaction</span> <span class="n">hooks</span><span class="o">...</span>
-<span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="n">Arming</span> <span class="n">ConditionNeedsUpdate</span><span class="o">...</span>
-<span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="n">Install</span> <span class="n">DKMS</span> <span class="n">modules</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="nb">bin</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">proc</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">mnt</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">lib</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">boot</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">var</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">root</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">srv</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">usr</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">run</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">tmp</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">sbin</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">sys</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">dev</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">home</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">etc</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">lost</span><span class="o">+</span><span class="n">found</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-<span class="o">==&gt;</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Missing</span> <span class="n">opt</span> <span class="n">kernel</span> <span class="n">headers</span> <span class="k">for</span> <span class="n">module</span> <span class="n">zfs</span><span class="o">/</span><span class="mf">2.1.6</span><span class="o">.</span>
-</pre></div>
-</div>
-<p>这个报错是我疏忽了，没有遵照 <a class="reference external" href="https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/2-zfs-dkms.html">OpenZFS官方文档:Getting Started&gt;&gt;Arch Linux&gt;&gt;zfs-dkms</a> ，遗漏安装内核头文件导致的。我重新按照该文档完整走一遍(已经修订上文)</p>
-<ul>
-<li><p>(我没有执行)忽略内核包更新:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/#IgnorePkg/IgnorePkg/&#39;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="n">conf</span>
-<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s2">&quot;/^IgnorePkg/ s/$/ $</span><span class="si">{INST_LINVAR}</span><span class="s2"> $</span><span class="si">{INST_LINVAR}</span><span class="s2">-headers/&quot;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="n">conf</span>
-</pre></div>
-</div>
-</li>
-<li><p>加载内核模块:</p></li>
-</ul>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">加载zfs内核模块</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>modprobe zfs
-</pre></div>
-</div>
-</div>
-</section>
-</section>
-</section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/ZFS">arch linux: zfs</a></p></li>
 <li><p><a class="reference external" href="https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/index.html">OpenZFS Getting Started: Arch Linux</a></p></li>
@@ -384,7 +211,7 @@ curl -L https://git.io/Jsfw2 &gt; /etc/pacman.d/mirrorlist-archzfs
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="zfs_vs_btrfs.html" class="btn btn-neutral float-left" title="ZFS vs. Btrfs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="archlinux_root_on_zfs.html" class="btn btn-neutral float-right" title="在ZFS上部署Arch Linux根文件系统" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="archlinux_archzfs.html" class="btn btn-neutral float-right" title="使用archzfs软件仓库在arch linux上部署ZFS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
