@@ -26,6 +26,7 @@ Linux桌面
    tmux.rst
    alacritty.rst
    read_ebook_in_linux.rst
+   mupdf.rst
    remote_linux_desktop.rst
    light_browser.rst
    netsurf.rst 

@@ -17,7 +17,6 @@ Android 设备
    pixel.rst
    pixel_3.rst
    pixel_3_usb_audio.rst
-   chromecast.rst
 
 .. only::  subproject and html
 

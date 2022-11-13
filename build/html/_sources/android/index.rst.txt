@@ -28,6 +28,7 @@ Android核心是Linux操作系统，开源系统具有极大的可玩性。随�
    bliss/index
    develop/index
    apps/index
+   chromecast/index
    mobile_work/index
 
 .. only::  subproject and html
