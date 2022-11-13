@@ -20,7 +20,7 @@
 
 .. note::
 
-   我在 :ref:`asahi_linux` ( :ref:`arm` 架构 )上，采用 ``zfs-dkms`` 来安装部署ZFS
+   我在 :ref:`asahi_linux` ( :ref:`arm` 架构 )上，采用 ``zfs-dkms`` 来安装部署ZFS( :ref:`archlinux_archzfs` 没有提供ARM架构 )
 
 安装
 =======
@@ -108,6 +108,19 @@
    :language: bash
    :caption: 加载zfs内核模块
 
+检查zfs内核:
+
+.. literalinclude:: archlinux_zfs/archlinux_lsmod_zfs
+   :language: bash
+   :caption: 检查zfs内核模块
+
+此时可以看到zfs相关内核模块已经加载:
+
+.. literalinclude:: archlinux_zfs/archlinux_lsmod_zfs_output
+   :language: bash
+   :caption: 检查zfs内核模块输出显示模块加载
+
+下一步
 
 参考
 =======

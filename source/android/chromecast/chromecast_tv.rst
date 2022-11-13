@@ -1,8 +1,8 @@
-.. _chromecast:
+.. _chromecast_tv:
 
-====================
-Google Chromecast
-====================
+=============================
+Chromecast with Google TV
+=============================
 
 Google针对流媒体推出的 ``Chromecast`` 设备提供了两款:
 
@@ -22,18 +22,18 @@ Google针对流媒体推出的 ``Chromecast`` 设备提供了两款:
 Chromecast with Google TV
 ==============================
 
-.. figure:: ../../_static/android/device/chromecast_tv.png
+.. figure:: ../../_static/android/chromecast/chromecast_tv.png
    :scale: 50
 
 使用简便，仅仅插上HDMI显示接口以及电源，连上WiFi就可以使用(当然需要翻墙)
 
-.. figure:: ../../_static/android/device/chromecast_tv_using.png
+.. figure:: ../../_static/android/chromecast/chromecast_tv_using.png
    :scale: 50
 
-使用体验
-==========
+使用Chromecast
+==============
 
-
+- :ref:`chromecast_init`
 
 参考
 =======

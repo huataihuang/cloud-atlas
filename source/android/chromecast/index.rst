@@ -1,15 +1,17 @@
-.. _docker_debug:
+.. _chromecast:
 
 =================================
-Docker异常排查
+Google ChromeCast
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   docker_exit_code.rst
-   docker_debug_5way.rst
-   get_container_by_pid.rst
+   chromecast_tv.rst
+   chromecast_init.rst
+   chromecast_keyboard_mouse.rst
+   chromecast_work.rst
+   chromecast_linux.rst
 
 .. only::  subproject and html
 
