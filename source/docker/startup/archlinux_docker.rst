@@ -20,12 +20,14 @@ arch linux运行docker
    systemctl enable docker
    systemctl start docker
 
-遇到一个问题，启动 docker 服务感觉有点缓慢
-
 - 检查 ``/var/run/docker.sock`` 可以看到 ``docker`` 用户组可以读写，所以将自己的账号(huatai)添加到该用户分组，这样就可以无需sudo操作docker::
 
    sudo usermod -aG docker $USER
 
+下一步
+========
+
+我为 :ref:`kind` 构建底层docker采用 :ref:`docker_zfs_driver`
 
 参考
 ======

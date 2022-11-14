@@ -1,7 +1,7 @@
 .. _zfs:
 
 =================================
-ZFS - Linux存储系统
+ZFS
 =================================
 
 .. toctree::
@@ -14,6 +14,7 @@ ZFS - Linux存储系统
    archlinux_zfs-dkms.rst
    archlinux_root_on_zfs.rst
    archlinux_zfs_virtual_disks.rst
+   admin/index
 
 .. only::  subproject and html
 

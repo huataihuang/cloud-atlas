@@ -15,6 +15,7 @@ Docker存储
    docker_tmpfs_mount.rst
    docker_storage_driver.rst
    docker_btrfs_driver.rst
+   docker_zfs_driver.rst
    docker_overlay_driver.rst
    docker_devicemapper_driver.rst
    docker_unionfs.rst

@@ -4,6 +4,8 @@
 ZFS简介
 ==============
 
+.. _zfs_history:
+
 ZFS历史
 ===========
 
@@ -33,7 +35,9 @@ ZFS最初是Solaris平台的专有软件，虽然企业级性能非常强大，�
 
    `Don’t Use ZFS on Linux: Linus Torvalds <https://itsfoss.com/linus-torvalds-zfs/>`_ Linux社区灵魂Linus并不信任Oracle公司，以及拒绝将ZFS引入Linux内核，除非Oracle采用GPL协议fableZFS。
 
-ZFS特点
+.. _zfs_features:
+
+ZFS特性
 ==========
 
 ZFS是 128 位文件系统，这个设计如此超前，以至于理论极限可能在当前现实中永远无法遇到 (OMG，我只能赞叹) -- 项目领导Bonwick曾说："要填满一个128位的文件系统，将耗尽地球上所有存储设备。除非你拥有煮沸整个海洋的能量，不然你不可能将其填满。"
