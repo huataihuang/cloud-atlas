@@ -15,6 +15,7 @@ ZFS
    archlinux_root_on_zfs.rst
    archlinux_zfs_virtual_disks.rst
    admin/index
+   tunning/index
 
 .. only::  subproject and html
 
