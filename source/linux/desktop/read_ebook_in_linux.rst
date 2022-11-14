@@ -9,6 +9,13 @@
 - 轻量级电子书阅读器能够更匹配 :ref:`raspberry_pi` 有限的硬件
 - 能够阅读 pdf 和 epub
 
+.. note::
+
+   经过很多尝试和对比，实际上我现在在Linux平台已经不再安装任何电子书阅读器，而是采用浏览器内置插件来实现( :ref:`firefox` 和 :ref:`chrome` 都有完全相同的完美插件 )，例如:
+
+   - :ref:`read_pdf_in_chromium`
+   - :ref:`read_epub_in_chromium`
+
 okular
 ===============
 

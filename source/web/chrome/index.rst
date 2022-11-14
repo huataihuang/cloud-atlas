@@ -1,17 +1,14 @@
-.. _btrfs:
+.. _chrome:
 
 =================================
-Btrfs
+Chrome
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_btrfs.rst
-   btrfs_facebook.rst
-   btrfs_in_studio.rst
-   migrate_data_to_btrfs.rst
-   tune_btrfs.rst
+   read_pdf_in_chromium.rst
+   read_epub_in_chromium.rst
 
 .. only::  subproject and html
 
