@@ -1,15 +1,13 @@
-.. _chrome:
+.. _zfs_tunning:
 
 =================================
-Chrome
+ZFS优化
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   chrome_sync_extensions_themes.rst
-   read_pdf_in_chromium.rst
-   read_epub_in_chromium.rst
+   zfs_compression.rst
 
 .. only::  subproject and html
 
