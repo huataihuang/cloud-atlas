@@ -12,10 +12,17 @@ ZFS管理的主要手册可以参考:
 
 - `Oracle Solaris ZFS Administration Guide <http://docs.oracle.com/cd/E19253-01/819-5461/>`_
 
+- `illumos: ZFS Administration Guide <https://illumos.org/books/zfs-admin/>`_
+
 .. toctree::
    :maxdepth: 1
 
    zfs_admin_prepare.rst
+   zfs_create_destory_zpool.rst
+   zfs_compression.rst
+   zfs_snapshot.rst
+   zfs_clone.rst
+   zfs_nfs.rst
 
 .. only::  subproject and html
 

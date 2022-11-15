@@ -42,7 +42,8 @@ ZFS管理准备
 
 规划如下:
 
-  - 200GB用于 :ref:`libvirt_zfs_pool` 构建虚拟机集群
+  - 50GB 用于数据存储
+  - 150GB用于 :ref:`libvirt_zfs_pool` 构建虚拟机集群
   - 剩余空间(约114GB) 用于 :ref:`docker_zfs_driver` 构建 :ref:`kind`
 
 - 分区:
@@ -55,8 +56,8 @@ ZFS管理准备
 
 .. literalinclude:: zfs_admin_prepare/parted_nvme_libvirt_docker_output
    :language: bash
-   :caption: parted分区后状态(新增2个分区用于zpool)
-   :emphasize-lines: 13,14
+   :caption: parted分区后状态(新增3个分区用于zpool)
+   :emphasize-lines: 13-15
 
 :ref:`intel_core_i7_4850hq` 的MacBook Pro 2013
 -------------------------------------------------

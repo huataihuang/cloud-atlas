@@ -1,17 +1,17 @@
-.. _zfs:
+.. _zfs_install:
 
 =================================
-ZFS
+ZFS安装
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_zfs.rst
-   install/index
-   infra/index
-   admin/index
-   tunning/index
+   archlinux_zfs.rst
+   archlinux_archzfs.rst
+   archlinux_zfs-dkms.rst
+   archlinux_root_on_zfs.rst
+   archlinux_zfs_virtual_disks.rst
 
 .. only::  subproject and html
 

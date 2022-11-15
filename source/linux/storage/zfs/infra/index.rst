@@ -1,17 +1,14 @@
-.. _zfs:
+.. _zfs_infra:
 
 =================================
-ZFS
+ZFS架构
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_zfs.rst
-   install/index
-   infra/index
-   admin/index
-   tunning/index
+   zfs_vs_btrfs.rst
+   zfs_enterprise.rst
 
 .. only::  subproject and html
 
