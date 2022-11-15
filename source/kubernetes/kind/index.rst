@@ -12,6 +12,7 @@ kind(本地docker模拟k8s集群)
    kind_startup.rst
    kind_cluster.rst
    kind_multi_node.rst
+   debug_kind_create_fail.rst
    load_kind_image.rst
 
 .. only::  subproject and html
