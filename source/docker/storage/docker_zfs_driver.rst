@@ -74,8 +74,23 @@ Docker使用ZFS的先决条件
    :caption: docker info显示使用了ZFS存储(启用压缩)
    :emphasize-lines: 12-19
 
+维护
+====
 
+- 增加ZFS存储池容量(案例参考)::
 
+   sudo zpool add zpool-docker /dev/xvdh
+
+- 限制容器可写入存储quota(限制每个容器能够占用的写入层容量)，修订 ``/etc/docker/daemon.json`` 配置:
+
+.. literalinclude:: docker_zfs_driver/docker_daemon_zfs_quota.json
+   :language: json
+   :caption: /etc/docker/daemon.json 配置ZFS存储引擎允许容器写入层大小
+
+``zfs`` 存储驱动工作原理
+==============================
+
+待续...
 
 参考
 ======

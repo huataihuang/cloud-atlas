@@ -115,14 +115,14 @@ LXQt使用 Openbox 实现窗口管理(Window Manager, WM)，所以要实现窗�
 浏览器
 ========
 
-由于工作中有不少网站只兼容chrome，所以安装 ``chromium`` ::
+由于工作中有不少网站只兼容chrome，所以安装 chrome (取代 chromium) :
 
-   pacman -S chromium
+.. literalinclude:: ../../../web/chrome/chrome_sync_extensions_themes/pacman_install_chrome
+   :language: bash
+   :caption: 安装Google Chrome(替代chromium)
 
-安装必要插件:
+安装和配置 :ref:`chrome_sync_extensions_themes`
 
-- SwitchyOmega
-- Copytables
 
 Firefox(放弃)
 ---------------
