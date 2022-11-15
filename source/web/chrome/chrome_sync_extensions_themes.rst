@@ -12,7 +12,11 @@ Google Sync
 - 无法使用Google Sync功能，也就是无法和Google帐号同步，所以在Chrome的中的书签、插件、主题以及个人帐号密码等信息都无法在线同步(深度Google用户会非常难受)
 - Google的服务插件依赖帐号登录，例如 keep 扩展就依赖Google帐号登录同步
 
-如果需要依赖Google服务，建议直接安装 ``google-chrome`` 软件包取代开源的 ``chromium`` 。
+如果需要依赖Google服务，建议直接安装 ``google-chrome`` 软件包取代开源的 ``chromium`` ，以下为 :ref:`arch_linux` 通过 :ref:`archlinux_aur` 安装 ``google-chrome`` :
+
+.. literalinclude:: chrome_sync_extensions_themes/pacman_install_chrome
+   :language: bash
+   :caption: arch linux安装google-chrome
 
 chrome Extensions
 ==================

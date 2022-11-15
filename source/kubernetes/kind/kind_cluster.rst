@@ -1,10 +1,10 @@
 .. _kind_cluster:
 
 ============================
-kind集群(Docker in Docker)
+kind集群
 ============================
 
-使用 :ref:`docker_in_docker_kind` 部署了Kubernetes集群，可以使用 kubectl 与该集群交互。
+使用 :ref:`kind_startup` 部署了Kubernetes集群，可以使用 kubectl 与该集群交互。
 
 默认的集群访问配置存储在 ``${HOME}/.kube/config`` (如果没有设置 ``$KUBECONFIG`` 环境变量)。
 

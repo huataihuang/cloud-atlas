@@ -24,9 +24,9 @@ Docker in Docker背景
 
 .. note::
 
-   和 :ref:`minikube` 不同的是：minikube是一个单节点kubernetes，没有扩展性，只能做基本的命令操作。Docker in Docker提供了完整的在单个节点上运行多个Docker节点来实现多节点Kubernetes集群。除了没有物理服务器的冗灾，Docker in Docker可以模拟完整的Kubernetes集群，并且 :ref:`docker_in_docker_kind` 可以实现多集群模拟，以便能够测试不同的应用部署架构。
+   和 :ref:`minikube` 不同的是：minikube是一个单节点kubernetes，没有扩展性，只能做基本的命令操作。Docker in Docker提供了完整的在单个节点上运行多个Docker节点来实现多节点Kubernetes集群。除了没有物理服务器的冗灾，Docker in Docker可以模拟完整的Kubernetes集群，并且 :ref:`kind_startup` 可以实现多集群模拟，以便能够测试不同的应用部署架构。
 
-Docker in Docker 主要用于帮助Docker的开发，很多人用Docker in Docker来运行持续集成(CI，例如 Jenkins)。
+Docker in Docker 主要用于帮助Docker的开发，很多人用Docker in Docker来运行持续集成(CI，例如 :ref:`jenkins` )。
 
 参考
 =====
