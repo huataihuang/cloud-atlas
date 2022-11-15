@@ -88,6 +88,23 @@ systemd配置Docker服务器Proxy
 
    Environment=GOTRACEBACK=crash HTTP_PROXY=http://10.10.10.10:8080/ HTTPS_PROXY=http://10.10.10.10:8080/ NO_PROXY= hostname.example.com,172.10.10.10
 
+.. _docker_socks_proxy:
+
+配置docker使用sockes代理
+-------------------------
+
+其实更为简便的方法是使用 :ref:`ssh_tunneling` 方式的socks代理，可以和上文一样配置到 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` 中添加::
+
+   [Service]
+   Environment="ALL_PROXY=socks5h://localhost:1080"
+
+或者直接在重启 ``docker`` 服务之前先设置好环境变量，然后重启 ``docker`` 服务(这样可以临时生效)::
+
+   export ALL_PROXY=socks5h://localhost:1080
+   sudo systemctl restart docker
+
+这样就能够够快速实现翻越GFW完成镜像下载，避免安装过程异常
+
 Ubuntu配置Docker服务器Proxy
 -----------------------------
 

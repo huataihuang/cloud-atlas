@@ -14,3 +14,8 @@ kind集群简介
    :scale: 40
 
    Kind的Logo是一个非常形象化的漂流瓶里的Kubernetes/Docker集装箱船模型
+
+参考
+=======
+
+- `本地Kubernetes集群部署工具kind <https://kind.sigs.k8s.io>`_
