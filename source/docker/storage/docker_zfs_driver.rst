@@ -19,7 +19,7 @@ Docker使用ZFS的先决条件
 
    挂在磁盘参数不需要使用 ``MountFlags=slave`` ，原因是 ``dockerd`` 和 :ref:`containerd` 位于不同的挂载namespace。
 
-实践
+部署
 =======
 
 - 首先完成 :ref:`zfs_admin_prepare`
@@ -37,7 +37,7 @@ Docker使用ZFS的先决条件
    :language: bash
    :caption: 备份/var/lib/docker目录
 
-- 在 :ref:`zfs_admin_prepare` 好的分区 ``/dev/nvme0n1p8`` 上构建 ``zpool`` 并挂载到 ``/var/lib/docker/`` 目录:
+- 在 :ref:`zfs_admin_prepare` 好的分区 ``/dev/nvme0n1p8`` 上构建 ``zpool`` 并挂载到 ``/var/lib/docker/`` 目录(开启 :ref:`zfs_compression` ):
 
 .. literalinclude:: docker_zfs_driver/zpool_create_zpool-docker
    :language: bash
@@ -66,6 +66,15 @@ Docker使用ZFS的先决条件
 .. literalinclude:: docker_zfs_driver/start_docker_info
    :language: bash
    :caption: 启动Docker并检查 docker info
+
+``docker info`` 输出显示如下:
+
+.. literalinclude:: docker_zfs_driver/docker_info_output
+   :language: bash
+   :caption: docker info显示使用了ZFS存储(启用压缩)
+   :emphasize-lines: 12-19
+
+
 
 
 参考
