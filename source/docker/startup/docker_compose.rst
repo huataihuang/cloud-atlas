@@ -59,6 +59,10 @@ Linux平台下，需要从 `Compose repository release page on GitHub <https://g
    
    sudo chmod +x /usr/local/bin/docker-compose
 
+- :ref:`arch_linux` 通过 :ref:`pacman` 可以从仓库安装:
+
+   sudo pacman -S docker-compose
+
 升级Compose
 ------------
 

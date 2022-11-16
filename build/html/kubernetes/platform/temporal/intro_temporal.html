@@ -57,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../kubernetes_overview.html">Kubernetes概览</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../startup_prepare/index.html">Kubernetes起步准备</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../startup/index.html">Kubernetes快速起步</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../kind/index.html">kind(本地docker模拟k8s集群)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/index.html">Kubernetes概念辨析</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../deploy/index.html">Kubernetes部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../deploy_app/index.html">Kubernetes部署应用</a></li>
@@ -93,6 +94,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../qovery/index.html">Qovery: K8S应用自动部署平台</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dapr/index.html">Dapr微服务</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../cloud/index.html">Kubernetes云厂商</a></li>
@@ -173,9 +175,86 @@
   <section id="temporal">
 <span id="intro-temporal"></span><h1>Temporal工作流平台简介<a class="headerlink" href="#temporal" title="此标题的永久链接">¶</a></h1>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<h2>工作流平台的需求<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<p>在微软的 <code class="docutils literal notranslate"><span class="pre">Azure</span></code> 云计算产品中，有一个 <a class="reference external" href="https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview">Azure Durable Functions</a> 提供了serverless计算环境(通常可以对标Kubernetes)中编写有状态函数(stateful functions)。作为Azure云的函数计算扩展， <code class="docutils literal notranslate"><span class="pre">Durable</span> <span class="pre">Fuctions</span></code> 可以实现函数编程模式来定义有状态工作流:</p>
+<ul class="simple">
+<li><p>状态管理</p></li>
+<li><p>自动检测点(Automatic checkpointing)</p></li>
+<li><p>无人值守重启</p></li>
+</ul>
+<p>实际上云计算的这类持久化函数(Durable Fuctions)是一种有状态服务的工作流，已经是商业应用的常见功能。不过，各个云厂商的serverless都是深度绑定平台，无法灵活跨云或者用于开源的Kubernetes。</p>
+<p><a class="reference external" href="https://www.temporal.io/">temporal.io</a> 推出了开源的工作流平台 <a class="reference internal" href="index.html#temporal"><span class="std std-ref">Temporal工作流平台</span></a> ，能够面向程序员开发出解决三大场景应用:</p>
+<ul class="simple">
+<li><p>多重步骤: 多个相关动作朝向一个共同目标运行</p></li>
+<li><p>分布式: 跨多个服务器和服务的操作，在分布式系统中协作</p></li>
+<li><p>任意长度: 工作流的时间跨度可以秒级，也可以跨越数天或者数年</p></li>
+</ul>
+<p>在现实中，众多的操作有人为触发也有定时任务触发，分散在不同的体系和平台中，需要精确编排才能协作完成工作流，所以需要一个可靠的、一致性的、正确的工作流来及解决不同数据结构的业务串联。</p>
+<p><a class="reference internal" href="index.html#temporal"><span class="std std-ref">Temporal工作流平台</span></a> 作为开源工作流提供了通用编程SDK和负责状态管理、事件处理的后端服务。每个工作流都是一个内聚函数(cohesive function)，通过提供的构建块定义整个场景</p>
+</section>
+<section id="id2">
+<h2>定义<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
+<section id="id3">
+<h3>Temporal<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
+<p>按照 <a class="reference external" href="https://docs.temporal.io/temporal">Temporal官方定义</a> : Temporal 是一种可扩展、可信赖、可重入的流程运行时( <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">scalable</span> <span class="pre">and</span> <span class="pre">reliable</span> <span class="pre">runtime</span> <span class="pre">for</span> <span class="pre">Reentrant</span> <span class="pre">Processes</span></code> )，称为 <code class="docutils literal notranslate"><span class="pre">Temporal</span> <span class="pre">Workflow</span> <span class="pre">Executions</span></code> :</p>
+<figure class="align-default">
+<img alt="../../../_images/temporal_workflow_executions.png" src="../../../_images/temporal_workflow_executions.png" />
+</figure>
+</section>
+<section id="temporal-application">
+<h3>Temporal Application<a class="headerlink" href="#temporal-application" title="此标题的永久链接">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Temporal</span> <span class="pre">Application</span></code> 一组 <code class="docutils literal notranslate"><span class="pre">Temporal　Workflow</span> <span class="pre">Executions</span></code> ，每个 <code class="docutils literal notranslate"><span class="pre">Temporal</span> <span class="pre">Workflow</span> <span class="pre">Executions</span></code> 在本地状态独占访问，在分布式系统中所有 <code class="docutils literal notranslate"><span class="pre">Temporal　Workflow</span> <span class="pre">Executions</span></code> 并发执行，并通过消息传递(message passing)与其他 <code class="docutils literal notranslate"><span class="pre">Workflow</span> <span class="pre">Executions</span></code> 和环境进行通信。</p>
+<section id="reentrant-process">
+<h4>Reentrant Process<a class="headerlink" href="#reentrant-process" title="此标题的永久链接">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">Temporal</span> <span class="pre">Workflow</span> <span class="pre">Execution</span></code> 是一个可重入流程(Reentrant Process): 可继续(resumable),可恢复(recoverable),可反应(Reactive)</p>
+<ul class="simple">
+<li><p>可继续(resumable): 流程可以暂停执行直到可以运行时继续执行的能力</p></li>
+<li><p>可恢复(recoverable): 流程因1故障暂停执行可以在故障消除后继续执行的能力</p></li>
+<li><p>可反应(Reactive): 流程对外部事件做出相应反应的能力</p></li>
+</ul>
+<p>总之: <code class="docutils literal notranslate"><span class="pre">Temporal</span> <span class="pre">Workflow</span> <span class="pre">Execution</span></code> 定义了工作流函数， <strong>只需要执行一次</strong> ，无论代码执行数秒还是数年，也无论负载大小或是否存在故障。</p>
+</section>
+</section>
+<section id="temporal-sdk">
+<h3>Temporal SDK<a class="headerlink" href="#temporal-sdk" title="此标题的永久链接">¶</a></h3>
+<p>Temporal SDK是特定开发语言的API库，支持:</p>
+<ul class="simple">
+<li><p>Go SDK</p></li>
+<li><p>Java SDK</p></li>
+<li><p>PHP SDK</p></li>
+<li><p>Python SDK</p></li>
+<li><p>TypeScript SDK</p></li>
+</ul>
+<p>正在开发的SDK:</p>
+<ul class="simple">
+<li><p>.NET</p></li>
+<li><p>Rust</p></li>
+<li><p>Ruby</p></li>
+</ul>
+<p>第三方SDK:</p>
+<ul class="simple">
+<li><p>Clojure</p></li>
+<li><p>Scala</p></li>
+<li><p>Ruby</p></li>
+</ul>
+</section>
+<section id="temporal-client">
+<h3>Temporal Client<a class="headerlink" href="#temporal-client" title="此标题的永久链接">¶</a></h3>
+<p>Temporal客户端可以执行:</p>
+<ul class="simple">
+<li><p>获取工作流执行的结果</p></li>
+<li><p>列出工作流执行</p></li>
+<li><p>查询工作流执行</p></li>
+<li><p>发出工作流执行信号</p></li>
+<li><p>启动工作流执行</p></li>
+</ul>
+</section>
+</section>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.infoq.cn/article/rhm7korkk4fxcjdgfdvq">一种实用的 Temporal 架构方法</a></p></li>
+<li><p><a class="reference external" href="https://mikhail.io/2020/10/temporal-open-source-workflows-as-code/">Temporal: Open Source Workflows as Code</a></p></li>
 </ul>
 </section>
 </section>
