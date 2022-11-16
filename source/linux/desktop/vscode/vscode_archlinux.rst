@@ -8,7 +8,7 @@ Arch Linux平台VSCode
 
 - Code: MIT社区开源版本，使用Electron framework构建
 - Code-OSS: Arch Linux官方开源版本，采用 https://github.com/microsoft/vscode 构建
-- Visual Studio Code: 采用 https://code.visualstuio.com 版本构建，是唯一能够直接使用Microsoft's marketplace以及微软私有扩展的版本，素要使用 :ref:`archlinux_aur` 安装
+- Visual Studio Code: 采用 https://code.visualstuio.com 版本构建，是唯一能够直接使用Microsoft's marketplace以及微软私有扩展的版本，需要使用 :ref:`archlinux_aur` 安装
 - VSCodium: 社区驱动开源版本
 
 安装
