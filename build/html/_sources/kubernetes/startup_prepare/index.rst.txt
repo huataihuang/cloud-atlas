@@ -8,7 +8,7 @@ Kubernetes起步准备
 
 通过minikube不仅可以实践Kubernetes的运维管理，也是构建Kubernetes开发环境的基础。后续我们将在这个minikube环境中运行不同的容器环境，用于开发软件以及开发Kubernetes自身。
 
-如果你不满足于minikube只能部署standalone的单一服务器，想要模拟完整的Kubernetes集群，可以部署 :ref:`docker_in_docker` ，在一台物理服务器上部署完整的多节点Kubernetes集群。
+如果你不满足于minikube只能部署standalone的单一服务器，想要模拟完整的Kubernetes集群，可以部署 :ref:`kind` ，在一台物理服务器上部署完整的多节点Kubernetes集群。
 
 .. toctree::
    :maxdepth: 1

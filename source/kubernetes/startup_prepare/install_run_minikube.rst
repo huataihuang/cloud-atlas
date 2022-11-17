@@ -496,7 +496,7 @@ minikube btrfs安装排查
 Docker in Docker
 ==================
 
-在运行单节点的minikube确实能够体验和测试Kubernetes基本功能，但是你也可能不满足这种简单而单调的单节点部署。如果你想要实现一个完整Kubernetes集群，一种方式是采用多个KVM虚拟机实现 :ref:`k8s_hosts` ，另一种方式是采用 :ref:`docker_in_docker` 实现单一物理服务器部署Kubernetes集群。
+在运行单节点的minikube确实能够体验和测试Kubernetes基本功能，但是你也可能不满足这种简单而单调的单节点部署。如果你想要实现一个完整Kubernetes集群，一种方式是采用多个KVM虚拟机实现 :ref:`k8s_hosts` ，另一种方式是采用 :ref:`kind` 实现单一物理服务器部署Kubernetes集群。
 
 .. note::
 

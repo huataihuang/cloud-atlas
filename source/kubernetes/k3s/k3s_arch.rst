@@ -27,7 +27,7 @@ K3s为了实现轻量级的Kubernetes，对Kubernetes的大量可选组件做了
 - :ref:`cni`
 - 主机工具
 - 本地存储提供
-- :ref:`traefik` Ingress控制器
+- :ref:`ingress_traefik`
 - 内嵌服务负载均衡
 - 内嵌网络策略控制器
 
