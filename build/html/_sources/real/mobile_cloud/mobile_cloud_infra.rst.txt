@@ -12,3 +12,10 @@
 - 通过 :ref:`kvm` 来运行虚拟机，借鉴 :ref:`priv_cloud_infra` 部署一个full :ref:`kubernetes`
 - 启用域名 ``cloud-atlas.io`` 模拟构建 ``dev.cloud-atlas.io`` 开发和持续集成环境
 
+模拟集群
+===========
+
+- 采用 :ref:`kind` 构建本地容器化 :ref:`kubernetes` 集群
+- 采用 :ref:`arm_kvm` 构建本地运行的虚拟化服务器集群，进一步部署 :ref:`kubernetes` 和 :ref:`openshift`
+
+  - 探索 :ref:`arm_neve`

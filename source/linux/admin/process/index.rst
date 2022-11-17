@@ -8,6 +8,7 @@ Linux进程管理
    :maxdepth: 1
 
    linux_process_statuses.rst   
+   simulate_process_d.rst
 
 
 .. only::  subproject and html
