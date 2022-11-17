@@ -31,7 +31,7 @@ K3s简介
   - :ref:`coredns`
   - :ref:`cni`
   - 主机工具(例如 :ref:`iptables` 和 :ref:`socat` )
-  - Ingress控制器( :ref:`traefik` )
+  - Ingress控制器( :ref:`ingress_traefik` )
   - 内嵌服务负载均衡
   - 内嵌网络策略控制器
 
