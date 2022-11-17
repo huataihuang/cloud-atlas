@@ -1,9 +1,10 @@
-.. _ingress_traefik:
+.. _ingress_nginx:
 
 =================================
-Kubernetes Ingress控制器traefik
+Kubernetes Ingress控制器Nginx
 =================================
 
 .. toctree::
    :maxdepth: 1
 
+   intro_ingress_nginx.rst

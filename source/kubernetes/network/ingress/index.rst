@@ -8,3 +8,4 @@ Kubernetes Ingress控制器
    :maxdepth: 1
 
    traefik/index
+   nginx/index

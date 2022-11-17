@@ -9,6 +9,9 @@ kustomize
 安装
 ==========
 
+二进制安装
+------------
+
 - macOS平台，可以通过Hinebrew包管理器安装（我没有使用这个方法)::
 
    brew install kustomize
@@ -30,6 +33,35 @@ kustomize
 .. note::
 
    从 1.14 版本开始，kubectl已经支持使用kustomization文件来管理Kubernetes对象，所以不再需要单独安装kustomize，可以直接 :ref:`install_setup_kubectl` 来实现相同功能。
+
+源代码安装
+---------------
+
+不clone代码仓库方式从源代码安装kustomize
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   在 :ref:`asahi_linux` ( :ref:`arch_linux` )上验证
+
+- 对于(go版本>= 1.17)::
+
+   GOBIN=$(pwd)/ GO111MODULE=on go install sigs.k8s.io/kustomize/kustomize/v4@latest
+
+完成后，二进制执行文件 ``kustomize`` 位于当前目录下
+
+clone代码仓库方式从源代码安装kustomize
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   在 :ref:`fedora` 上验证
+
+- 执行以下编译安装步骤:
+
+.. literalinclude:: kustomize/install_kustomize_from_source_with_clone_repo
+   :language: bash
+   :caption: 源代码编译安装kustomize
 
 创建base
 =========
