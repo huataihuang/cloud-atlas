@@ -69,3 +69,4 @@ ZFS管理准备
 
 - :ref:`docker_zfs_driver`
 - :ref:`libvirt_zfs_pool`
+- :ref:`zfs_nfs`
