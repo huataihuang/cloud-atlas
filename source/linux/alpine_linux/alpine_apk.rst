@@ -94,6 +94,63 @@ apk添加软件包
 
 这里仓库名见上文repo配置。这里案例是 :ref:`alpine_cfssl`
 
+apk搜索软件包
+==============
+
+- 直接搜索软件包::
+
+   apk search htop
+
+- 搜素并显示描述::
+
+   apk search -v -d 'htop'
+
+- 列出所有软件包并且包含描述::
+
+   apk search -v
+
+- 搜索也可以使用匹配方法::
+
+   apk search -v 'php7*'
+
+固定软件版本不升级
+====================
+
+有时候需要保持某个软件包版本不随着系统升级而变化，可以使用类似::
+
+   apk add bash=5.0.0-r0
+
+也可以使用一个主板本来hold::
+
+   apk add bash=~5.0
+
+如果要解除版本锁定，则改为 ``>`` ::
+
+   apk add bash>5.0.0-r0
+
+安装本地下载的软件包
+========================
+
+- 可以安装本地软件包类似如下::
+
+   apk add --allow-untrusted /path/to/foo.apk
+   apk add --allow-untrusted pkg1.apk pkg2.apk
+
+删除软件包
+=============
+
+- 以下命令删除软件包::
+
+   apk del pkgName
+   apk del pkgName1 pkgName2
+
+查找某个文件属于哪个软件包
+=============================
+
+- 可以按照以下命令找出哪个软件包提供某个文件::
+
+   apk info --who-owns /sbin/apk
+
 基础软件安装
 ==================
 

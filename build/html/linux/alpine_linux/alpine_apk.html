@@ -109,8 +109,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#apk">apk软件仓库</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">更新系统</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#alpine-apk-add">apk添加软件包</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">基础软件安装</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">apk搜索软件包</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">固定软件版本不升级</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">安装本地下载的软件包</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">删除软件包</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">查找某个文件属于哪个软件包</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">基础软件安装</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="alpine_ssh_docker.html">Alpine Linux SSH服务以及Docker化</a></li>
@@ -197,8 +202,8 @@
 <p>检查 <code class="docutils literal notranslate"><span class="pre">/media/sdb1/apks</span></code> 目录可以看到有一个子目录 <code class="docutils literal notranslate"><span class="pre">x86_64</span></code> ，在这个子目录下，有当前ISO镜像包含的本地常用的 <code class="docutils literal notranslate"><span class="pre">.apk</span></code> 软件包，也就是，即使没有互联网，通过 <code class="docutils literal notranslate"><span class="pre">apk</span></code> 命令就可以直接从这些本地软件包进行安装。</p>
 <p>不过，如果要安装的软件包不在本地，需要通过因特网安装，则需要添加仓库配置。</p>
 <p>从 <a class="reference external" href="https://mirrors.alpinelinux.org/">https://mirrors.alpinelinux.org/</a> 可以获得官方Alpine Linux镜像网站，选择一个添加到配置 <code class="docutils literal notranslate"><span class="pre">/etc/apk/repositories</span></code> 中:</p>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">激活community仓库</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">激活community仓库</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">#/media/sda1/apks</span>
 <span class="linenos">2</span>http://dl-cdn.alpinelinux.org/alpine/v3.15/main
 <span class="hll"><span class="linenos">3</span>http://dl-cdn.alpinelinux.org/alpine/v3.15/community
@@ -290,7 +295,79 @@
 <p>这里仓库名见上文repo配置。这里案例是 <a class="reference internal" href="../../kubernetes/k3s/alpine_cfssl.html#alpine-cfssl"><span class="std std-ref">编译安装cfssl(Alpine Linux)</span></a></p>
 </section>
 <section id="id3">
-<h2>基础软件安装<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
+<h2>apk搜索软件包<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
+<ul>
+<li><p>直接搜索软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">search</span> <span class="n">htop</span>
+</pre></div>
+</div>
+</li>
+<li><p>搜素并显示描述:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">search</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">d</span> <span class="s1">&#39;htop&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p>列出所有软件包并且包含描述:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">search</span> <span class="o">-</span><span class="n">v</span>
+</pre></div>
+</div>
+</li>
+<li><p>搜索也可以使用匹配方法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">search</span> <span class="o">-</span><span class="n">v</span> <span class="s1">&#39;php7*&#39;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>固定软件版本不升级<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
+<p>有时候需要保持某个软件包版本不随着系统升级而变化，可以使用类似:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">add</span> <span class="n">bash</span><span class="o">=</span><span class="mf">5.0.0</span><span class="o">-</span><span class="n">r0</span>
+</pre></div>
+</div>
+<p>也可以使用一个主板本来hold:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">add</span> <span class="n">bash</span><span class="o">=~</span><span class="mf">5.0</span>
+</pre></div>
+</div>
+<p>如果要解除版本锁定，则改为 <code class="docutils literal notranslate"><span class="pre">&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">add</span> <span class="n">bash</span><span class="o">&gt;</span><span class="mf">5.0.0</span><span class="o">-</span><span class="n">r0</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>安装本地下载的软件包<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h2>
+<ul>
+<li><p>可以安装本地软件包类似如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">add</span> <span class="o">--</span><span class="n">allow</span><span class="o">-</span><span class="n">untrusted</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">foo</span><span class="o">.</span><span class="n">apk</span>
+<span class="n">apk</span> <span class="n">add</span> <span class="o">--</span><span class="n">allow</span><span class="o">-</span><span class="n">untrusted</span> <span class="n">pkg1</span><span class="o">.</span><span class="n">apk</span> <span class="n">pkg2</span><span class="o">.</span><span class="n">apk</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id6">
+<h2>删除软件包<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h2>
+<ul>
+<li><p>以下命令删除软件包:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="k">del</span> <span class="n">pkgName</span>
+<span class="n">apk</span> <span class="k">del</span> <span class="n">pkgName1</span> <span class="n">pkgName2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id7">
+<h2>查找某个文件属于哪个软件包<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
+<ul>
+<li><p>可以按照以下命令找出哪个软件包提供某个文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apk</span> <span class="n">info</span> <span class="o">--</span><span class="n">who</span><span class="o">-</span><span class="n">owns</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">apk</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id8">
+<h2>基础软件安装<a class="headerlink" href="#id8" title="此标题的永久链接">¶</a></h2>
 <ul>
 <li><p>默认最小化安装对于维护不是很方便，所以安装以下软件:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># NFS客户端和服务</span>
@@ -306,8 +383,8 @@
 </li>
 </ul>
 </section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
+<section id="id9">
+<h2>参考<a class="headerlink" href="#id9" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management">Alpine Linux package management</a></p></li>
 </ul>

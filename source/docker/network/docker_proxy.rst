@@ -4,12 +4,18 @@
 配置Docker使用代理
 ====================
 
-如果你也苦于GFW的阻塞，无法正常更新软件，并且在docker需要pull images时候发现无法下载Docker镜像，则可以部署 :ref:`squid` 的 :ref:`squid_socks_peer` 来实现代理翻墙。这里介绍如何配置docker客户端，以便能够通过代理加速镜像下载。
+如果你也苦于GFW的阻塞，无法正常更新软件，并且在docker需要pull images时候发现无法下载Docker镜像，则可以部署 :ref:`squid` 的 :ref:`squid_socks_peer` 来实现代理翻墙，或者采用非常简便的 :ref:`ssh_tunneling_dynamic_port_forwarding` 实现socks5代理 。这里介绍如何配置docker客户端，以便能够通过代理(HTTP或者socks)加速镜像下载。
 
 这个方法也使得容器内部能够不需要单独配置代理，直接通过代理服务器上网。
 
 Docker客户端的Proxy
 ======================
+
+.. note::
+
+   注意，Docker客户端配置是对创建的容器生效，也就是把代理环境变量配置注入到容器内部。
+
+   对于物理主机上的docker服务要实现镜像下载加速，需要配置 ``Docker服务器Proxy``
 
 Docker客户端支持使用代理服务器，主要有两种方式配置：
 
@@ -64,7 +70,11 @@ systemd配置Docker服务器Proxy
 
 .. warning::
 
-   配置Docker服务器使用Proxy是成功的，但是访问Docker Hub证书存在问题，见后文参考官方设置。
+   配置Docker服务器使用Proxy是成功的，但是访问Docker Hub证书存在问题，提示报错类似::
+
+      Get "https://registry-1.docker.io/v2/": proxyconnect tcp: tls: first record does not look like a TLS handshake
+
+   见后文参考官方设置。
 
 对于主机上的dockerd服务，在下载镜像等工作使用代理，则需要配置服务的环境变量。
 
@@ -88,7 +98,7 @@ systemd配置Docker服务器Proxy
 
    Environment=GOTRACEBACK=crash HTTP_PROXY=http://10.10.10.10:8080/ HTTPS_PROXY=http://10.10.10.10:8080/ NO_PROXY= hostname.example.com,172.10.10.10
 
-.. _docker_socks_proxy:
+.. _docker_server_socks_proxy:
 
 配置docker使用sockes代理
 -------------------------
@@ -108,10 +118,6 @@ systemd配置Docker服务器Proxy
 Ubuntu配置Docker服务器Proxy
 -----------------------------
 
-.. note::
-
-   暂时没有环境验证，本段落待实践。
-
 在Ubuntu上配置Docker服务器Proxy非常简单，只需要编辑 ``/etc/default/docker`` ::
 
    # If you need Docker to use an HTTP proxy, it can also be specified here.
@@ -123,6 +129,10 @@ Ubuntu配置Docker服务器Proxy
 
 Docker官方解决方案
 --------------------
+
+.. note::
+
+   本段落还没有时间尝试
 
 参考 Docker官方文档 `Running a Docker daemon behind an HTTPS_PROXY <https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy>`_ 配置局域网在https代理后使用docker服务:
 
