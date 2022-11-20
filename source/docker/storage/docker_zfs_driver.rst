@@ -74,6 +74,10 @@ Docker使用ZFS的先决条件
    :caption: docker info显示使用了ZFS存储(启用压缩)
    :emphasize-lines: 12-19
 
+.. note::
+
+   这里我遇到一个问题，主机断电后重启zfs没有恢复。解决方法: :ref:`config_zfs_auto_start`
+
 维护
 ====
 
