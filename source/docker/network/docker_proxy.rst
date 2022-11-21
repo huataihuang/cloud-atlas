@@ -100,8 +100,12 @@ systemd配置Docker服务器Proxy
 
 .. _docker_server_socks_proxy:
 
-配置docker使用sockes代理
+配置docker使用socks代理
 -------------------------
+
+.. note::
+
+   这步socks代理我实践没有成功，待后续排查
 
 其实更为简便的方法是使用 :ref:`ssh_tunneling` 方式的socks代理，可以和上文一样配置到 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` 中添加::
 
