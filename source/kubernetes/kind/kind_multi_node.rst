@@ -29,8 +29,6 @@ kind官方网站提供了 `kind-example-config <https://raw.githubusercontent.co
 
 .. note::
 
-   下载 ``kindest/node`` 镜像(824MB) 由于GFW干扰会非常缓慢，所以建议 :ref:`docker_socks_proxy` 加速镜像下载
-
    如果确实下载困难，可以参考 `kind User Guide: Working Offline <https://kind.sigs.k8s.io/docs/user/working-offline/>`_ 先下载镜像，打包后恢复镜像方法来部署。
 
 ARM构建kind集群fix方法
