@@ -24,6 +24,7 @@ ZFS管理的主要手册可以参考:
    zfs_snapshot.rst
    zfs_clone.rst
    zfs_nfs.rst
+   zfs_iscsi.rst
 
 .. only::  subproject and html
 
