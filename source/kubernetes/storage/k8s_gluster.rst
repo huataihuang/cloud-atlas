@@ -1,4 +1,4 @@
-.. _gluster_k8s:
+.. _k8s_gluster:
 
 =============================
 在Kubernetes中部署GlusterFS
@@ -194,7 +194,7 @@ gluserfs-client
 
 - 创建Service和Endpoints
 
-.. literalinclude:: gluster_k8s/gluster-endpoints_kube-verify.yaml
+.. literalinclude:: k8s_gluster/gluster-endpoints_kube-verify.yaml
    :language: yaml
    :emphasize-lines: 5,6,14,15,18,20,22,24
    :linenos:
@@ -226,7 +226,7 @@ gluserfs-client
 
 - 创建一个持久化卷(presistence volume, pv)
 
-.. literalinclude:: gluster_k8s/gluster-pv_kube-verify.yaml
+.. literalinclude:: k8s_gluster/gluster-pv_kube-verify.yaml
    :language: yaml
    :emphasize-lines: 5,6,10,16,18,20,23-25
    :linenos:
@@ -248,7 +248,7 @@ gluserfs-client
 
 - 创建持久化卷声明(persistent volume claim, PVC): 所谓PVC就是指定访问模式和存储容量，这里PVC绑定到前面创建的PV。一旦PV被绑定到一个PVC，这个PV就被绑定到了这个PVC所属项目，也就不能被绑到其他PVC上。这就是 ``一对一`` 映射PVs和PVCs，不过，在相同项目中的多个Pods可以使用相同PVC。
 
-.. literalinclude:: gluster_k8s/gluster-pvc_kube-verify.yaml
+.. literalinclude:: k8s_gluster/gluster-pvc_kube-verify.yaml
    :language: yaml
    :emphasize-lines: 4,5,8
    :linenos:
@@ -306,7 +306,7 @@ gluserfs-client
 
 修订上述deployment，添加卷挂载:
 
-.. literalinclude:: gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml
+.. literalinclude:: k8s_gluster/kube_verify_gluster-pvc_pid-gid_deployment.yaml
    :language: yaml
    :emphasize-lines: 23-33
    :linenos:
@@ -416,7 +416,7 @@ Kubernetes使用GlusterFS卷(探索记录)
 
 - 创建Service和Endpoints
 
-.. literalinclude:: gluster_k8s/gluster-endpoints.yaml
+.. literalinclude:: k8s_gluster/gluster-endpoints.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -457,7 +457,7 @@ Kubernetes使用GlusterFS卷(探索记录)
 
 - 创建一个持久化卷(presistence volume, pv)
 
-.. literalinclude:: gluster_k8s/gluster-pv.yaml
+.. literalinclude:: k8s_gluster/gluster-pv.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -476,7 +476,7 @@ Kubernetes使用GlusterFS卷(探索记录)
 
 - 创建持久化卷声明(persistent volume claim, PVC): 所谓PVC就是指定访问模式和存储容量，这里PVC绑定到前面创建的PV。一旦PV被绑定到一个PVC，这个PV就被绑定到了这个PVC所属项目，也就不能被绑到其他PVC上。这就是 ``一对一`` 映射PVs和PVCs，不过，在相同项目中的多个Pods可以使用相同PVC。
 
-.. literalinclude:: gluster_k8s/gluster-pvc.yaml
+.. literalinclude:: k8s_gluster/gluster-pvc.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -532,7 +532,7 @@ Kubernetes使用GlusterFS卷(探索记录)
 
 修订上述deployment，添加卷挂载:
 
-.. literalinclude:: gluster_k8s/kube_verify_gluster_deployment.yaml
+.. literalinclude:: k8s_gluster/kube_verify_gluster_deployment.yaml
    :language: yaml
    :emphasize-lines: 23-30
    :linenos:
@@ -594,17 +594,17 @@ Kubernetes使用GlusterFS卷(探索记录)
 
 重新修订 service, endpoint, PV 和 PVC (原先在 default namespace 的 service,endpoint,pv,pvc 需要删除) ，添加上 ``namespace: kube-verify`` 
 
-.. literalinclude:: gluster_k8s/gluster-endpoints_kube-verify.yaml
+.. literalinclude:: k8s_gluster/gluster-endpoints_kube-verify.yaml
    :language: yaml
    :linenos:
    :caption:
 
-.. literalinclude:: gluster_k8s/gluster-pv_kube-verify.yaml
+.. literalinclude:: k8s_gluster/gluster-pv_kube-verify.yaml
    :language: yaml
    :linenos:
    :caption:
 
-.. literalinclude:: gluster_k8s/gluster-pvc_kube-verify.yaml
+.. literalinclude:: k8s_gluster/gluster-pvc_kube-verify.yaml
    :language: yaml
    :linenos:
    :caption:
@@ -667,7 +667,7 @@ GlusterFS卷权限
 
 所以修订 Pod 配置如下:
 
-.. literalinclude:: gluster_k8s/kube_verify_gluster-pvc_pid-gid_deployment.yaml
+.. literalinclude:: k8s_gluster/kube_verify_gluster-pvc_pid-gid_deployment.yaml
    :language: yaml
    :linenos:
    :caption:

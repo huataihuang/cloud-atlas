@@ -93,6 +93,21 @@ NGINX服务 ``alpine-nginx``
    :language: dockerfile
    :caption: 提供nginx的alpine linux镜像Dockerfile
 
+.. note::
+
+   我尝试是用过 ``CMD ["nginx", "-g", "daemon off;"]`` 作为Dockerfile最后命令，但是实际运行的是 ``"/bin/sh -c ['ash'] …"`` 提示错误::
+
+      nginx: line 0: [ash]: not found
+
+   从 ``docker ps --all`` 可以看到::
+
+      CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS                        PORTS  NAMES
+      967e0e6a97ef   alpine-nginx  "/bin/sh -c ['ash'] …"   33 seconds ago   Exited (127) 32 seconds ago          cloud-atlas
+
+   修订为 ``ENTRYPOINT ["/usr/sbin/nginx", "-g", "daemon off;"]`` 则正常工作
+
+   详见 :ref:`dockerfile_entrypoint_vs_cmd`
+
 - 构建 ``alpine-nginx`` 镜像:
 
 .. literalinclude:: alpine_docker_image/alpine-nginx/build_alpine-nginx_image
@@ -110,6 +125,12 @@ NGINX服务 ``alpine-nginx``
 .. literalinclude:: alpine_docker_image/alpine-nginx/run_alpine-nginx_container
    :language: bash
    :caption: 简单地运行alpine-nginx验证镜像
+
+现在验证通过的NGINX镜像，我将部署到 :ref:`kind` 集群中来模拟 :ref:`kubernetes` 运行:
+
+  - :ref:`load_kind_image` 或者先部署 :ref:`kind_local_registry` 然后统一从Registry下载镜像构建Kubernetes运行的pod
+  - 使用 :ref:`zfs_nfs` 提供共享存储
+  - 配置 :ref:`k8s_nfs` 将共享卷中我的 ``cloud-atlas`` build好的html作为NGINX的目录(配置和上文Docker运行方式类似)
 
 SSH服务 ``alpine-ssh``
 =======================
