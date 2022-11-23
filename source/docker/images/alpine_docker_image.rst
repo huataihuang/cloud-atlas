@@ -77,6 +77,8 @@ Alpine DOI(Docker Official Image)是一个包含执行软件堆栈的Alpine Linu
    :language: dockerfile
    :caption: 运行提供bash的alpine linux容器
 
+.. _alipine-nginx:
+
 NGINX服务 ``alpine-nginx``
 ===========================
 

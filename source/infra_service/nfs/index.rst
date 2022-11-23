@@ -10,6 +10,7 @@ nfs服务
    intro_nfs.rst
    setup_nfs_centos7.rst
    setup_nfs_ubuntu20.rst
+   setup_nfs_arch_linux.rst
 
 .. only::  subproject and html
 
