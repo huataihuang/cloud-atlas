@@ -17,6 +17,7 @@ kind(本地docker模拟k8s集群)
    load_kind_image.rst
    kind_local_registry.rst
    kind_run_simple_container.rst
+   kind_container_nfs_volume.rst
    kind_ingress.rst
    kind_ingress_nginx.rst
    kind_loadbalancer.rst

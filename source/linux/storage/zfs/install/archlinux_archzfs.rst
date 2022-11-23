@@ -63,7 +63,7 @@
 - zfs-linux-lts 针对LTS内核的稳定版本
 - zfs-dkms 用于支持动态内核模块的版本
 
-- 安装(在 :ref:`asahi_linux` 上不满足条件)::
+- 安装(在 :ref:`asahi_linux` 上不满足条件，但可以在x86的 :ref:`arch_linux` 上实践)::
 
    yay -S zfs-linux
 
