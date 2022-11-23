@@ -41,6 +41,10 @@ iSCSI存储卷案例
 Libvirt支持存储类型
 ======================
 
+.. note::
+
+   libvirt也支持 :ref:`btrfs` ，但是根据资料，需要关闭 :ref:`btrfs` 的 COW 特性，不能使用checksum，这可能导致Btrfs的优势不再。所以，我可能会放弃在libvirt使用btrfs(具体资料待调研)
+
 Libvirt支持以下存储池类型:
 
 目录存储池

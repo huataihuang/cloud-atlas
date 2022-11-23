@@ -26,6 +26,13 @@ CentOS / Red Hat
 
    systemctl status stratisd
 
+arch linux
+-------------
+
+.. note::
+
+   arch linux X86_64架构发行版提供了 ``stratis`` 存储软件，我准备后续在 MacBook Pro 2013上采用 ``stratis`` 存储来运行 :ref:`kvm` ( :ref:`docker` 则采用 :ref:`zfs` )
+
 参考
 =======
 
