@@ -11,9 +11,9 @@ Studio环境的Btrfs存储
 
    Btrfs实践是在Ubuntu和Arch Linux完成，本文在涉及不同操作系统时会指出区别，并综合两者的文档。
 
-.. warning::
+.. note::
 
-   我在Arch Linux上实践 :ref:`using_btrfs_in_studio` 遇到运行Windows虚拟机间歇性hang的问题，推测和Btrfs开启了 ``zstd`` 压缩有关。因为之前在Ubuntu上部署btrfs使用了很长时间也没有遇到问题，但是这次系统报错::
+   2019年，我在Arch Linux上实践 :ref:`using_btrfs_in_studio` 遇到运行Windows虚拟机间歇性hang的问题，推测和Btrfs开启了 ``zstd`` 压缩有关。因为之前在Ubuntu上部署btrfs使用了很长时间也没有遇到问题，但是这次系统报错::
 
       [Tue Oct  1 23:44:37 2019] BTRFS warning (device sda4): csum failed root 257 ino 293 off 15661608960 csum 0x445ced74 expected csum 0x2f7d82ec mirror 1
       [Tue Oct  1 23:44:38 2019] BTRFS warning (device sda4): csum failed root 257 ino 293 off 15661608960 csum 0x445ced74 expected csum 0x2f7d82ec mirror 1
@@ -28,11 +28,16 @@ Studio环境的Btrfs存储
 
       ERROR    Couldn't create storage volume 'win10.qcow2': 'internal error: Child process (/usr/bin/qemu-img convert -f qcow2 -O qcow2 -o compat=1.1,lazy_refcounts /data-libvirt/images/win10.qcow2 /var/lib/libvirt/images/win10.qcow2) unexpected exit status 1: qemu-img: error while reading sector 13647872: Input/output error
 
-我在2019年10月1日的btrfs系统中发现了异常虚拟机hang以及btrfs读写错误，转眼已过去2年。2021年，我重新在 :ref:`hpe_dl360_gen9` 上部署了 :ref:`ubuntu_linux` 来运行虚拟化 :ref:`kvm` ，存储再次选择 Btrfs 。我期望能够验证和充分发挥系统性能
+   我当时以为是Btrfs的软件缺陷，但是我现在回顾 :ref:`btrfs_facebook` ，原文提到btrfs对系统负载较大，容易暴露CPU问题。对比之下，回想起来感觉当时是存储硬件故障的可能性比较大。
 
-.. note::
+   因为我在2022年初时候尝试将闲置许久的这台笔记本重装macOS，就发现macOS安装时存储SMART检测无法通过，macOS拒绝安装操作系统。这说明当初 ``btrfs`` 报错可能已经是MacBook笔记本存储逐渐出现硬件劣化的征兆了。所以上文对压缩算法的评估，我现在认为很可能是不准确的。
 
-   上文我提到2019年采用 ``btrfs`` 遭遇的 I/O 错误，现在回想起来感觉是存储硬件故障的可能性比较大。因为我在2022年时候尝试将闲置许久的这台笔记本重装macOS，就发现macOS安装时存储SMART检测无法通过，macOS拒绝安装操作系统。这说明当初 ``btrfs`` 报错可能已经是MacBook笔记本存储逐渐出现硬件劣化的征兆了。所以上文对压缩算法的评估，我现在认为很可能是不准确的。
+Btrfs的多次实践
+================
+
+我在2019年10月1日的btrfs系统中发现了异常虚拟机hang以及btrfs读写错误(推测是硬件隐患故障)，转眼已过去2年。2021年，我重新在 :ref:`hpe_dl360_gen9` 上部署了 :ref:`ubuntu_linux` 来运行虚拟化 :ref:`kvm` ，存储再次选择 Btrfs 。我期望能够验证和充分发挥系统性能
+
+2022年11月，我在 :ref:`mobile_cloud` 选择 :ref:`asahi_linux` ，:ref:`archlinux_zfs-dkms` 遇到内核版本和zfs不兼容问题，所以再次采用 :ref:`btrfs_mobile_cloud` 。
 
 初始安装操作系统的磁盘
 =========================

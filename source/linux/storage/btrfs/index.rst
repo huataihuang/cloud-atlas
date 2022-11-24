@@ -11,6 +11,7 @@ Btrfs
    btrfs_facebook.rst
    btrfs_in_studio.rst
    migrate_data_to_btrfs.rst
+   btrfs_mobile_cloud.rst
    tune_btrfs.rst
 
 .. only::  subproject and html
