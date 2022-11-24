@@ -12,6 +12,7 @@ Btrfs
    btrfs_in_studio.rst
    migrate_data_to_btrfs.rst
    btrfs_mobile_cloud.rst
+   btrfs_compression.rst
    tune_btrfs.rst
 
 .. only::  subproject and html
