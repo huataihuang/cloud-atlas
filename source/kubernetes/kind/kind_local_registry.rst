@@ -11,13 +11,23 @@ kind也提供了一种符合我们使用习惯的的本地Registry方式，即�
 创建Registry
 ===================
 
-`kind User Guide: Local Registry <https://kind.sigs.k8s.io/docs/user/local-registry/>`_ 提供了一个脚本来构建本地Registry并配置集群使用，我做了一些调整，以适配我在 :ref:`kind_multi_node` 部署的集群 ``dev`` :
-
-- ``kind-with-registry.sh`` 脚本:
+`kind User Guide: Local Registry <https://kind.sigs.k8s.io/docs/user/local-registry/>`_ 提供了一个脚本 ``kind-with-registry.sh`` 构建本地Registry并配置集群使用:
 
 .. literalinclude:: kind_local_registry/kind-with-registry.sh
    :language: bash
-   :caption: 运行Registry适配kind集群(dev)
+   :caption: kind官方提供kind-with-registry.sh，可创建具备本地Registry的kind集群
+
+我做了一些调整，以适配我在 :ref:`kind_multi_node` 部署的集群 ``dev`` :
+
+  - 指定节点采用ARM架构镜像: 采用 :ref:`debug_kind_create_fail` 指定ARM架构
+  - 采用 :ref:`kind_multi_node` 配置
+
+- ``kind-with-registry-arm.sh`` 脚本:
+
+.. literalinclude:: kind_local_registry/kind-with-registry-arm.sh
+   :language: bash
+   :caption: 运行Registry适配kind集群(dev)，ARM架构
+   :emphasize-lines: 7-10,25-35
 
 - 执行 ``./kind-with-registry.sh`` 创建集群 ``dev`` ，同时可以看到运行了一个 ``kind-registry`` 的容器提供服务
 

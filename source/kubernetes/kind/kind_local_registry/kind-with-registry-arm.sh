@@ -1,6 +1,16 @@
 #!/bin/sh
 set -o errexit
 
+# NOW kind node version(Kubernetes Version) is v1.25.3
+VER=v1.25.3
+
+cat << EOF > Dockerfile
+FROM --platform=arm64 kindest/node:${VER}
+RUN arch
+EOF
+
+docker build -t kindest/node:${VER}-arm64 .
+
 # create registry container unless it already exists
 reg_name='kind-registry'
 reg_port='5001'
@@ -11,9 +21,18 @@ if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true
 fi
 
 # create a cluster with the local registry enabled in containerd
-cat <<EOF | kind create cluster --config=-
+cat <<EOF | kind create cluster --name dev --image kindest/node:${VER}-arm64 --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+- role: control-plane
+- role: control-plane
+- role: worker
+- role: worker
+- role: worker
+- role: worker
+- role: worker
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
