@@ -9,6 +9,8 @@ ARM硬件环境KVM虚拟化
 
    arm_kvm_support.rst
    arm_kvm_startup.rst
+   archlinux_arm_kvm.rst
+   build_qemu_ovmf.rst
 
 
 .. only::  subproject and html
