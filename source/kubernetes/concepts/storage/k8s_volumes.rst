@@ -88,6 +88,8 @@ configMap卷
 
    似乎 ConfigMap 在容器内外是完全一一对应的？只要指定 ``mountPath`` ，则该目录下子目录如果设定 ``configMap`` 就会从容器外映射到容器内部。
 
+.. _k8s_hostpath_volumes:
+
 hostPath
 ----------
 

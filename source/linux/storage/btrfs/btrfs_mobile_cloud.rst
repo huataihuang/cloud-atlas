@@ -55,3 +55,4 @@ btrfs文件系统
 ==================
 
 - :ref:`docker_btrfs_driver`
+- :ref:`btrfs_nfs` 为 :ref:`kind` 构建共享存储
