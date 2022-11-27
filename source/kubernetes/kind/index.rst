@@ -16,6 +16,7 @@ kind(本地docker模拟k8s集群)
    debug_kind_restart_fail.rst
    load_kind_image.rst
    kind_local_registry.rst
+   kind_dev_infra.rst
    kind_run_simple_container.rst
    kind_container_nfs_volume.rst
    kind_ingress.rst

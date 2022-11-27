@@ -22,7 +22,10 @@ kind集群简介
 
 简而言之， ``kind`` 的目标是在本地集群测试，虽然不是所有的测试都能在没有 ``real`` 集群的情况下完成
 
-以下是 ``kind`` 的运行示意图:
+.. _kind_diagram:
+
+``kind`` 运行示意图
+---------------------
 
 
 .. figure:: ../../_static/kubernetes/kind/kind_diagram.png
