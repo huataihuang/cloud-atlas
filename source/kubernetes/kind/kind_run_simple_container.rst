@@ -70,8 +70,4 @@ pod创建问题排查
 
 为何启动容器失败?
 
-- 使用以下命令登录到 ``dev-worker2`` node节点中::
-
-   docker exec -it dev-worker2 /bin/bash
-
-
+需要注意到Kubernetes需要能够正确诊断容器启动状态 :ref:`k8s_health_check`
