@@ -37,7 +37,7 @@
    :caption: kubectl执行部署
 
 pod创建问题排查
-=================
+-----------------
 
 - 检查::
 
@@ -70,4 +70,27 @@ pod创建问题排查
 
 为何启动容器失败?
 
-需要注意到Kubernetes需要能够正确诊断容器启动状态 :ref:`k8s_health_check`
+需要注意到Kubernetes需要能够正确诊断容器启动状态 :ref:`k8s_health_check` ，这里检测 ``liveness`` 就是通过端口服务完成检测。
+
+但是，很不巧 :ref:`alipine-nginx` 所使用的 :ref:`alpine_linux` 发行版提供的 :ref:`nginx` 软件包，默认采用了一个禁止访问的 ``default.conf`` 配置。这个 ``404`` 返回页面会使得 :ref:`k8s_health_check` 失败。
+
+检查
+=======
+
+当 :ref:`alipine-nginx` 配置正确，能够在 :ref:`kind` 集群中运行简单的nginx服务之后，此时检查::
+
+   kubectl get pods
+
+就能看到::
+
+   NAME                                       READY   STATUS    RESTARTS   AGE
+   alpine-nginx-deployment-7cb557b55b-6jdj8   1/1     Running   0          32m
+   alpine-nginx-deployment-7cb557b55b-9zt6q   1/1     Running   0          32m
+
+下一步
+=======
+
+下面我们来构建:
+
+- 使用 :ref:`btrfs_nfs` 提供共享存储
+- 配置 :ref:`k8s_nfs` 将共享卷中我的 ``cloud-atlas`` build好的html作为NGINX的目录(配置和上文Docker运行方式类似)
