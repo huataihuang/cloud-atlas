@@ -17,7 +17,7 @@ Kubernetes目前支持插件(当前推荐):
 - hostPath - HostPath 卷 （仅供单节点测试使用；不适用于多节点集群；请尝试使用 local 卷作为替代）
 - iscsi - iSCSI (SCSI over IP) 存储: 可以采用 :ref:`zfs` 构建 :ref:`zfs_iscsi`
 - local - 节点上挂载的本地存储设备
-- nfs - 网络文件系统 (NFS) 存储: 可以采用 :ref:`zfs_nfs`
+- nfs - 网络文件系统 (NFS) 存储: 可以采用 :ref:`zfs_nfs` 或 :ref:`btrfs_nfs`
 - rbd - Rados 块设备 (RBD) 卷: :ref:`ceph_rbd`
 
 已经废弃的持久卷(当前可能支持，但未来发行版移除支持，不建议使用):
