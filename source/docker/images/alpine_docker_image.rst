@@ -94,21 +94,13 @@ NGINX服务 ``alpine-nginx``
 .. literalinclude:: alpine_docker_image/alpine-nginx/Dockerfile
    :language: dockerfile
    :caption: 提供nginx的alpine linux镜像Dockerfile
+   :emphasize-lines: 6
 
 .. note::
 
-   我尝试是用过 ``CMD ["nginx", "-g", "daemon off;"]`` 作为Dockerfile最后命令，但是实际运行的是 ``"/bin/sh -c ['ash'] …"`` 提示错误::
+   修订默认的 ``/etc/nginx/http.d/default.conf`` 是在 :ref:`kubernetes` 中运行自定义AlpineLinux NGINX的重要一步
 
-      nginx: line 0: [ash]: not found
-
-   从 ``docker ps --all`` 可以看到::
-
-      CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS                        PORTS  NAMES
-      967e0e6a97ef   alpine-nginx  "/bin/sh -c ['ash'] …"   33 seconds ago   Exited (127) 32 seconds ago          cloud-atlas
-
-   修订为 ``ENTRYPOINT ["/usr/sbin/nginx", "-g", "daemon off;"]`` 则正常工作
-
-   详见 :ref:`dockerfile_entrypoint_vs_cmd`
+   :ref:`dockerfile_entrypoint_vs_cmd`
 
 - 构建 ``alpine-nginx`` 镜像:
 
@@ -116,11 +108,13 @@ NGINX服务 ``alpine-nginx``
    :language: bash
    :caption: 构建提供nginx的alpine linux镜像
 
-- 简单的 ``default.conf`` :
+- 注意: 默认的 ``default.conf`` :
 
-.. literalinclude:: alpine_docker_image/alpine-nginx/default.conf
+.. literalinclude:: alpine_docker_image/alpine-nginx/default_origin.conf
    :language: bash
    :caption: 默认nginx的网站配置 /etc/nginx/http.d/default.conf
+
+必须被配置允许访问的 ``default.conf`` 替换，否则类似 :ref:`kind_run_simple_container` 无法启动(见下文)
 
 - 简单的运行 ``alpine-nginx`` 验证:
 
@@ -128,7 +122,26 @@ NGINX服务 ``alpine-nginx``
    :language: bash
    :caption: 简单地运行alpine-nginx验证镜像
 
-现在验证通过的NGINX镜像，我将部署到 :ref:`kind` 集群中来模拟 :ref:`kubernetes` 运行:
+现在验证通过的NGINX镜像，是否就可以用到 :ref:`kind_run_simple_container` 呢？
+
+
+不能在Kubernetes启动的 ``alpine-nginx``
+------------------------------------------
+
+实际 :ref:`alpine_linux` 出于安全考虑(这是一个注重安全的面向嵌入式平台的发行版)，将 ``default.conf`` 设置成禁止访问(直接返回 ``404`` )，而不是一般发行版默认允许访问 ``index.html`` 。
+
+这导致我在 :ref:`kind_run_simple_container` 遇到始终出现 :ref:`k8s_health_check` 失败的 :ref:`k8s_crashloopbackoff`
+
+解决的方法也很简单，就是准备好一个允许正常访问的 ``default.conf`` 在 BUILD 时候覆盖镜像中的配置文件，这个 ``default.conf`` 可以如下:
+
+.. literalinclude:: alpine_docker_image/alpine-nginx/default.conf
+   :language: bash
+   :caption: 修订后nginx的网站配置 /etc/nginx/http.d/default.conf，可以让nginx正常运行满足Kubernetes健康检查
+
+下一步
+--------
+
+我将部署到 :ref:`kind` 集群中来模拟 :ref:`kubernetes` 运行:
 
   - :ref:`load_kind_image` 或者先部署 :ref:`kind_local_registry` 然后统一从Registry下载镜像构建Kubernetes运行的pod
   - 使用 :ref:`zfs_nfs` 提供共享存储

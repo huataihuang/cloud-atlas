@@ -89,7 +89,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#crashloopbackoff">CrashLoopBackOff错误解析</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">排查方法</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">实践案例</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="apiserver_port_2379_refuse.html">apiserver服务器无法连接端口2379</a></li>
@@ -264,7 +264,7 @@ challenge-7b97fd8b7f-cdvh4   0/1     CrashLoopBackOff   2          60s
 </pre></div>
 </div>
 <p>为何会判断容器失败呢？</p>
-<p>参考 <a class="reference external" href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">配置存活、就绪和启动探测器</a> 添加侦测 <code class="docutils literal notranslate"><span class="pre">args</span></code> 部分:</p>
+<p>参考 <a class="reference external" href="https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes文档&gt;&gt;任务&gt;&gt;配置Pods和容器&gt;&gt;配置存活、就绪和启动探针</a> 添加 <a class="reference internal" href="../concepts/k8s_args.html#k8s-pods-cmd-args"><span class="std std-ref">Kubernetes Pods的命令和参数</span></a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span><span class="p">:</span>
   <span class="n">containers</span><span class="p">:</span>
   <span class="o">-</span> <span class="n">image</span><span class="p">:</span> <span class="n">onesre</span><span class="p">:</span><span class="mi">20210205</span><span class="o">-</span><span class="mi">1</span>
@@ -280,6 +280,14 @@ challenge-7b97fd8b7f-cdvh4   0/1     CrashLoopBackOff   2          60s
       <span class="n">initialDelaySeconds</span><span class="p">:</span> <span class="mi">5</span>
       <span class="n">periodSeconds</span><span class="p">:</span> <span class="mi">60</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><a class="reference internal" href="../concepts/k8s_args.html#k8s-pods-cmd-args"><span class="std std-ref">Kubernetes Pods的命令和参数</span></a> 实际上就是传递给Kubernetes的Docker镜像最后的 <code class="docutils literal notranslate"><span class="pre">ENTRYPOINT</span></code> 的参数:</p>
+<ul class="simple">
+<li><p>对于没有任何操作命令的镜像，就会替代执行一个命令(这里生成了 <code class="docutils literal notranslate"><span class="pre">/tmp/healthy</span></code> )并且脚本命令返回 <code class="docutils literal notranslate"><span class="pre">0</span></code> 表明容器正常启动 ( 也就会 <a class="reference internal" href="../concepts/k8s_health_check.html#k8s-health-check"><span class="std std-ref">Kubernetes健康检测</span></a> 的 <code class="docutils literal notranslate"><span class="pre">startup</span></code> 检测成功 )</p></li>
+<li><p>生成的 <code class="docutils literal notranslate"><span class="pre">/tmp/healthy</span></code> 又作为 <code class="docutils literal notranslate"><span class="pre">liveness</span></code> 的探针检测，确保Kubernetes的存活( <code class="docutils literal notranslate"><span class="pre">liveness</span></code> )检测通过</p></li>
+</ul>
 </div>
 <ul>
 <li><p>检查 <code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">pods</span></code></p>
@@ -319,11 +327,39 @@ challenge-7b97fd8b7f-cdvh4   0/1     CrashLoopBackOff   2          60s
 <span class="n">args</span><span class="p">:</span> <span class="p">[</span> <span class="n">date</span><span class="p">;</span> <span class="n">sleep</span> <span class="mi">10</span><span class="p">;</span> <span class="n">echo</span> <span class="s1">&#39;Hello from the Kubernetes cluster&#39;</span><span class="p">;</span> <span class="n">sleep</span> <span class="mi">1</span><span class="p">;</span> <span class="k">while</span> <span class="n">true</span><span class="p">;</span> <span class="n">do</span> <span class="n">sleep</span> <span class="mi">20</span><span class="p">;</span> <span class="n">done</span><span class="p">;]</span>
 </pre></div>
 </div>
+<p>也就是完整如下:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">image</span><span class="p">:</span> <span class="n">onesre</span><span class="p">:</span><span class="mi">20210205</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">command</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;/bin/bash&quot;</span><span class="p">,</span> <span class="s2">&quot;-ec&quot;</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">:</span> <span class="p">[</span> <span class="n">date</span><span class="p">;</span> <span class="n">sleep</span> <span class="mi">10</span><span class="p">;</span> <span class="n">echo</span> <span class="s1">&#39;Hello from the onesre&#39;</span><span class="p">;</span> <span class="n">touch</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">healthy</span><span class="p">;</span>  <span class="n">sleep</span> <span class="mi">1</span><span class="p">;</span> <span class="k">while</span> <span class="n">true</span><span class="p">;</span> <span class="n">do</span> <span class="n">sleep</span> <span class="mi">20</span><span class="p">;</span> <span class="n">done</span><span class="p">;]</span>
+    <span class="n">readinessProbe</span><span class="p">:</span>
+      <span class="n">exec</span><span class="p">:</span>
+        <span class="n">command</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">cat</span>
+        <span class="o">-</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">healthy</span>
+      <span class="n">initialDelaySeconds</span><span class="p">:</span> <span class="mi">5</span>
+    <span class="n">livenessProbe</span><span class="p">:</span>
+      <span class="n">exec</span><span class="p">:</span>
+        <span class="n">command</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">cat</span>
+        <span class="o">-</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">healthy</span>
+      <span class="n">initialDelaySeconds</span><span class="p">:</span> <span class="mi">5</span>
+      <span class="n">periodSeconds</span><span class="p">:</span> <span class="mi">60</span>
+</pre></div>
+</div>
+<p>上述包含了启动时:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>创建了 <code class="docutils literal notranslate"><span class="pre">/tmp/healthy</span></code> 提供 <code class="docutils literal notranslate"><span class="pre">readiness</span></code> 和 <code class="docutils literal notranslate"><span class="pre">liveness</span></code> 侦测</p></li>
+<li><p>终端循环执行bash脚本，保持不退出</p></li>
+</ul>
+</div></blockquote>
 <p>但是遇到问题，发现没有启动 tini</p>
 <p>实际上我的案例是因为没有在Kubernetes启动pod时运行任何主程序，所以导致无法判断容器状态。</p>
 </section>
-<section id="id4">
-<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://beanexpert.co.in/troubleshoot-pod-crashloopbackoff-error-kubernetes/">Troubleshoot pod CrashLoopBackOff error:: Kubernetes</a></p></li>
 </ul>

@@ -11,6 +11,7 @@ Kubernetes概念辨析
 
    kubernetes_components.rst
    k8s_health_check.rst
+   k8s_pods_cmd_args.rst
    containers/index
    objects/index
    workloads/index

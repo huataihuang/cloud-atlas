@@ -80,7 +80,7 @@ CrashLoopBackOff错误解析
 
 为何会判断容器失败呢？
 
-参考 `配置存活、就绪和启动探测器 <https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>`_ 添加侦测 ``args`` 部分::
+参考 `Kubernetes文档>>任务>>配置Pods和容器>>配置存活、就绪和启动探针 <https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>`_ 添加 :ref:`k8s_pods_cmd_args` ::
 
     spec:
       containers:
@@ -96,6 +96,13 @@ CrashLoopBackOff错误解析
             - /tmp/healthy
           initialDelaySeconds: 5
           periodSeconds: 60
+
+.. note::
+
+   :ref:`k8s_pods_cmd_args` 实际上就是传递给Kubernetes的Docker镜像最后的 ``ENTRYPOINT`` 的参数:
+
+   - 对于没有任何操作命令的镜像，就会替代执行一个命令(这里生成了 ``/tmp/healthy`` )并且脚本命令返回 ``0`` 表明容器正常启动 ( 也就会 :ref:`k8s_health_check` 的 ``startup`` 检测成功 ) 
+   - 生成的 ``/tmp/healthy`` 又作为 ``liveness`` 的探针检测，确保Kubernetes的存活( ``liveness`` )检测通过
 
 - 检查 ``get pods`` ::
 
@@ -132,6 +139,32 @@ CrashLoopBackOff错误解析
 
    command: [ "/bin/bash", "-ec"]
    args: [ date; sleep 10; echo 'Hello from the Kubernetes cluster'; sleep 1; while true; do sleep 20; done;]
+
+也就是完整如下::
+
+    spec:
+      containers:
+      - image: onesre:20210205-1
+        command: [ "/bin/bash", "-ec"]
+        args: [ date; sleep 10; echo 'Hello from the onesre'; touch /tmp/healthy;  sleep 1; while true; do sleep 20; done;]
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 60
+   
+上述包含了启动时:
+
+  - 创建了 ``/tmp/healthy`` 提供 ``readiness`` 和 ``liveness`` 侦测
+  - 终端循环执行bash脚本，保持不退出
 
 但是遇到问题，发现没有启动 tini
 
