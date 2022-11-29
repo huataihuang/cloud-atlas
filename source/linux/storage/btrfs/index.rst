@@ -15,6 +15,7 @@ Btrfs
    btrfs_mobile_cloud.rst
    btrfs_compression.rst
    btrfs_nfs.rst
+   btrfs_multiple_devices.rst
    tune_btrfs.rst
 
 .. only::  subproject and html

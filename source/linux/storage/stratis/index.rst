@@ -9,6 +9,7 @@ Stratis - Linux存储系统
 
    introduce_stratis.rst
    stratis_startup.rst
+   archlinux_stratis.rst
    xfs_performance.rst
 
 .. only::  subproject and html
