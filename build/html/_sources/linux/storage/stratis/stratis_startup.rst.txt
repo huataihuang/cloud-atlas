@@ -31,7 +31,13 @@ arch linux
 
 .. note::
 
-   arch linux X86_64架构发行版提供了 ``stratis`` 存储软件，我准备后续在 MacBook Pro 2013上采用 ``stratis`` 存储来运行 :ref:`kvm` ( :ref:`docker` 则采用 :ref:`zfs` )
+   arch linux X86_64架构发行版提供了 ``stratisd`` 存储软件，我准备后续在 MacBook Pro 2013上部署 :ref:`archlinux_stratis` 存储来运行 :ref:`kvm` ( :ref:`docker` 则采用 :ref:`zfs` )
+
+- 安装 ``statis-cli`` 和 ``statisd`` :
+
+.. literalinclude:: stratis_startup/archlinux_install_stratis
+   :language: bash
+   :caption: arch linux 安装starisd和CLI
 
 参考
 =======

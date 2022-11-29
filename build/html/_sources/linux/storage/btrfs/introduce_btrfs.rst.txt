@@ -32,6 +32,10 @@ Facebook使用Btrfs的快照和镜像来隔离容器，在 `Btrfs at Facebook(fa
 
 - :ref:`btrfs_facebook`
 
+.. note::
+
+   完整的 ``Btrfs`` 文档可以参考 `BTRFS documentation <https://btrfs.readthedocs.io/en/latest/index.html>`_
+
 发行版对Btrfs的使用
 =====================
 
@@ -66,7 +70,7 @@ Fedora/RHEL/CentOS
 
    参考 `rockstable libvirt文档 <https://wiki.rockstable.it/libvirt>`_ 以及 `archlinux - QEMU <https://wiki.archlinux.org/title/QEMU>`_ 如果将QEMU的虚拟磁盘镜像存储到Btrfs文件系统，需要事先关闭Btrfs目录的Copy-on-Write(CoW)功能，否则存储性能会受到影响。(这个关闭也会同时禁用了Btrfs的checksum功能，会导致Btrfs无法检测到腐败的 ``nodatacow`` 文件) 
 
-   实际上限制很多，所以我在 KVM 实践中，将转为采用 :ref:`stratis` 作为存储文件系统
+   实际上限制很多，所以我在 KVM 实践中，将转为采用 :ref:`stratis` 作为存储文件系统(对于非 :ref:`redhat_linux` 系，也有发行版提供软件包，如 :ref:`archlinux_stratis` )
 
 NAS方案
 ========

@@ -69,6 +69,10 @@ pacman简明使用
 
    pacmsn -Qo /usr/bin/netstat
 
+* 查询系统某个软件包包含的文件::
+
+   pacman -Ql package_name
+
 激活仓库,安装指定版本及锁定版本
 ================================
 
@@ -156,3 +160,4 @@ conflicting files
 
 - `archlinux - pacman <https://wiki.archlinux.org/index.php/Pacman>`_
 - `xorgproto issues.. <https://bbs.archlinux.org/viewtopic.php?id=251517>`_
+- `How do I list files installed by a package from the AUR? <https://superuser.com/questions/1265425/how-do-i-list-files-installed-by-a-package-from-the-aur>`_
