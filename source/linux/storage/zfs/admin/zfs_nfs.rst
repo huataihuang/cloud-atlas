@@ -48,9 +48,9 @@ ZFS内置NFS功能为企业级应用提供了方便的共享存储，在很多�
 ZFS共享NFS存储数据集
 ======================
 
-ZFS的NFS服务也是通过Linux :ref:`nfs` 来实现，所以也需要 :ref:`setup_nfs_arch_linux` 相同的软件包安装:
+ZFS的NFS服务也是通过Linux :ref:`nfs` 来实现，所以也需要 :ref:`setup_nfs_archlinux` 相同的软件包安装:
 
-.. literalinclude:: ../../../../infra_service/nfs/setup_nfs_arch_linux/pacman_install_nfs-utils
+.. literalinclude:: ../../../../infra_service/nfs/setup_nfs_archlinux/pacman_install_nfs-utils
    :language: bash
    :caption: 在arch linux上安装nfs-utils支持NFS
 

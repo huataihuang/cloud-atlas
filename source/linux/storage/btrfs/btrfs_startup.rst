@@ -36,19 +36,21 @@ Btrfs的一些提示
       :caption: parted分区输出
       :emphasize-lines: 14
 
-- 对磁盘(例如 ``/dev/sdb`` )或者磁盘分区(例如，我这里的实际案例 ``/dev/nvme0n1p7`` )::
+- 对磁盘(例如 ``/dev/sdb`` )或者磁盘分区(例如，我这里的实际案例 ``/dev/nvme0n1p7`` ):
 
-   sudo mkfs.btrfs -f -L data /dev/nvme0n1p7
+.. literalinclude:: btrfs_startup/mkfs.btrfs_data
+   :language: bash
+   :caption: 在NVMe磁盘第7分区创建btrfs文件系统格式化
 
 .. note::
 
    ``Btrfs`` 也支持类似 :ref:`zfs` 的内置RAID功能，目前支持 ``RAID 0, RAID 1, RAID 10, RAID 5 and RAID 6`` :ref:`btrfs_multiple_devices`
 
-- 磁盘挂载::
+- 磁盘挂载(磁盘UUID使用 ``blkid`` 工具查看):
 
-   echo "UUID=efd22ea6-9365-4bc3-a233-e61d1d159fcd  /data  btrfs  defaults,compress=lzo  0  1" >> /etc/fstab
-   kdir /data
-   mount /data
+.. literalinclude:: btrfs_startup/mount_btrfs_data
+   :language: bash
+   :caption: 挂载Btrfs文件系统到/data目录(root卷)
 
 - 完成后文件系统目录挂载如下( ``/data`` 目录挂载后我迁移了 ``docs`` 目录到btrfs的 ``/data`` 目录下 )::
 
@@ -75,8 +77,13 @@ Btrfs的一些提示
    # 先清理掉 build 目录下文件: make clean
    rm -rf /home/huatai/docs/github.com/cloud-atlas/build/*
 
-   # 在 ``/data`` 已挂载的btrfs目录下创建子卷 cloud-atlas_build
-   btrfs subvolume create /data/cloud-atlas_build
+在 ``/data`` 挂载卷下创建 ``cloud-atlas_build`` 子卷:
+
+.. literalinclude:: btrfs_startup/btrfs_subvolume_create
+   :language: bash
+   :caption: 在Btrfs文件/data挂载卷下创建子卷 cloud-atlas_build
+
+- 可以手工命令挂载子卷::
 
    # 挂载子卷 cloud-atlas_build
    mount -t btrfs -o subvol=cloud-atlas_build /dev/nvme0n1p7 /home/huatai/docs/github.com/cloud-atlas/build
@@ -94,18 +101,37 @@ Btrfs的一些提示
 
 为了能够启动时自动挂载，需要在在 ``/etc/fstab`` 中创建子卷的对应配置，但是怎么指定设备文件呢？
 
-请注意上文中 Btrfs 文件系统以及其下的子卷都是使用了相同的设备 ``/dev/nvme0n1p7`` ，所以在 ``/etc/fstab`` 中，子卷的设备文件其实和父卷是一样的，差别仅在挂载选项上::
+请注意上文中 Btrfs 文件系统以及其下的子卷都是使用了相同的设备 ``/dev/nvme0n1p7`` ，所以在 ``/etc/fstab`` 中，子卷的设备文件其实和父卷是一样的，差别仅在挂载选项上:
    
-   echo "UUID=efd22ea6-9365-4bc3-a233-e61d1d159fcd  /data/docs/github.com/cloud-atlas/build  btrfs  subvol=cloud-atlas_build  0  1" >> /etc/fstab
-
-然后就能够挂载::
-
-   systemctl daemon-reload
-   mount -a
+.. literalinclude:: btrfs_startup/btrfs_subvolume_mount
+   :language: bash
+   :caption: 通过配置 /etc/fstab btrfs的子卷 cloud-atlas_build 实现btrfs子卷挂载
 
 .. note::
 
    接下来就可以实践 :ref:`btrfs_nfs` 将上述 ``cloud-atlas_build`` 子卷通过NFS输出给 :ref:`kind` 集群使用构建一个简单的个人WEB网站
+
+快照
+========
+
+快照是为了避免数据被误删除的本地备份: 举例，上述 ``/data`` 数据卷，需要定时每天做一次快照::
+
+   btrfs subvolume snapshot /data /data/data_snapshot_`date +%Y_%m_%d_%H:%M:%S`
+
+提示信息::
+
+   Create a snapshot of '/data' in '/data/data_snapshot_2022_11_30_00:17:57'
+
+- 如果需要恢复数据::
+
+   mkdir -p /snapshot/data_snapshot_2022_11_30_00:17:57
+   mount -t btrfs -o subvol=data_snapshot_2022_11_30_00:17:57 /dev/nvme0n1p7 /snapshot/data_snapshot_2022_11_30_00:17:57
+
+此时就可以到快照目录下去找数据进行恢复(如果你不幸误删除了某些重要数据)
+
+.. note::
+
+   你可以写一个简单的每日快照脚本，只要在快照前记录下时间戳，并且快照名是按照时间戳来命名的，就很容易恢复到某个快照备份数据。
 
 参考
 ======
