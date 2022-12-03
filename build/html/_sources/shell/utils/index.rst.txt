@@ -11,6 +11,7 @@ Shell 实用工具
    screen.rst
    htop.rst
    ncdu.rst
+   tr.rst
 
 .. only::  subproject and html
 
