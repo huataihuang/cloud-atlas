@@ -46,6 +46,10 @@ ARM构建kind集群fix方法
    :language: bash
    :caption: 构建ARM架构的kind镜像
 
+.. note::
+
+   制作 :ref:`docker_images` 时，可以通过 :ref:`dockerfile_platform` 来实现
+
 - 此时执行 ``docker images`` 就会看到如下镜像:
 
 .. literalinclude:: kind_multi_node/docker_images_arm64

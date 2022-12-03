@@ -13,8 +13,8 @@ arch linux ARM KVM虚拟化
 
    `arch linux: QEMU <https://wiki.archlinux.org/title/QEMU>`_ 和 `arch linux: KVM <https://wiki.archlinux.org/title/KVM>`_ 的资料都是围绕 X86_64 架构的，需要整理和汇总ARM架构信息。
 
-安装
-=======
+安装(在 :ref:`asahi_linux` 上失败，放弃)
+=========================================
 
 - 使用 :ref:`pacman` 搜索QEMU软件工具::
 
@@ -65,9 +65,37 @@ arch linux ARM KVM虚拟化
 
    我的实践看来存在问题，我尝试 :ref:`build_qemu_ovmf`
 
+源代码编译安装qemu+ovmf
+==========================
+
+经过一番折腾，采用 :ref:`build_qemu_ovmf`
+
+安装libvirt
+===============
+
+- arch linux for arm软件仓库提供 :ref:`libvirt` 安装；除了 :ref:`libvirt` 和 :ref:`kvm_qemu` /KVM (Hypervisor) 之外，还需要一些网络相关的组件:
+
+.. literalinclude:: archlinux_arm_kvm/archlinux_install_libvirt_packages
+   :language: bash
+   :caption: 在arch linux上安装libvirt以及支持网络连接的软件包
+
+- 启动libvirt服务:
+
+.. literalinclude:: archlinux_arm_kvm/archlinux_start_libvirtd
+   :language: bash
+   :caption: 在arch linux上启动libvirtd
+
+.. note::
+
+   在 :ref:`arm_kvm_startup` 采用了基于Debian的 :ref:`raspberry_pi` 操作系统，可以无需 :ref:`build_qemu_ovmf` ，使用更为方便
+
+启动安装
+===========
+
 参考
 =======
 
 - `arch linux arm aarch64 + ovmf uefi + qemu <https://xnand.netlify.app/2019/10/03/armv8-qemu-efi-aarch64.html>`_ 这篇文章可能是最全信息
+- `How to make a better ARM virtual machine (armhf/aarch64) with UEFI <https://quantum5.ca/2022/03/19/how-to-make-better-arm-virtual-machine-armhf-aarch64-uefi/>`_
 - `FS#74773 - Cannot resolve "edk2-armvirt", a dependency of "qemu-system-aarch64" <https://bugs.archlinux.org/task/74773>`_
 - `Creating an Arch Linux ARM QEMU VM on a Mac M1 <https://www.reddit.com/r/archlinux/comments/vg8n8c/creating_an_arch_linux_arm_qemu_vm_on_a_mac_m1/>`_

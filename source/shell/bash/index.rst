@@ -11,6 +11,7 @@ Bash
    here_document.rst
    date_caculate.rst
    trace_disk_space_usage.rst
+   bash_multi_variable_assigment.rst
 
 .. only::  subproject and html
 

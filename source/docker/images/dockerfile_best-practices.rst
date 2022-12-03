@@ -31,6 +31,15 @@ Dockerfile使用JSON，应该用双引号
 
    ENTRYPOINT ["/bin/ash"]
 
+.. _dockerfile_platform:
+
+Dokerfile指定处理器架构
+==========================
+
+在 :ref:`kind_multi_node` 采用ARM架构，我通过向 Dockerfile 中指定 ``--platform`` 来构建特定平台镜像。可以规避 ``docker pull`` 多平台镜像时出现错乱。
+
+Docker镜像支持 :ref:`docker_multi-platform_images` ，可以在一个镜像中包含不同架构的变体，甚至可以针对不同操作系统(如Windows)的变体。在运行多平台支持的镜像时，docker会自动选择和操作系统以及体系结构向匹配的镜像。
+
 参考
 ======
 
