@@ -65,6 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="libvirt_custom_nat.html">libvirt 定制NAT型网络</a></li>
 <li class="toctree-l4"><a class="reference internal" href="libvirt_multiple_net.html">libvirt复合网络案例</a></li>
 <li class="toctree-l4"><a class="reference internal" href="libvirt_passthrough_net.html">Libvirt直通型网络</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mobile_cloud_libvirt_network.html">移动云计算libvirt网络</a></li>
 <li class="toctree-l4"><a class="reference internal" href="index.html#id1">参考</a></li>
 </ul>
 </li>
@@ -206,30 +207,34 @@
        <span class="n">valid_lft</span> <span class="n">forever</span> <span class="n">preferred_lft</span> <span class="n">forever</span>
 </pre></div>
 </div>
-<ul>
-<li><p><a class="reference external" href="https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0">ntefilter的bridge性能和安全原因</a> ，禁止bridge设备的netfilter，所以创建 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/bridge.conf</span></code> 以下设置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span><span class="o">=</span><span class="mi">0</span>
-<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span><span class="o">=</span><span class="mi">0</span>
-<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">arptables</span><span class="o">=</span><span class="mi">0</span>
+<ul class="simple">
+<li><p><a class="reference external" href="https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0">ntefilter的bridge性能和安全原因</a> ，禁止bridge设备的netfilter，所以创建 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/bridge.conf</span></code> 并通过 <code class="docutils literal notranslate"><span class="pre">sysctl</span></code> 刷新内核配置:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">/etc/sysctl.d/bridge.conf 禁止bridge设备的netfilter</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; /etc/sysctl.d/bridge.conf</span>
+<span class="s">net.bridge.bridge-nf-call-ip6tables=0</span>
+<span class="s">net.bridge.bridge-nf-call-iptables=0 </span>
+<span class="s">net.bridge.bridge-nf-call-arptables=0</span>
+<span class="s">EOF</span>
+
+sysctl -p /etc/sysctl.d/bridge.conf
 </pre></div>
 </div>
-</li>
-</ul>
-<p>生效:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sysctl</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">bridge</span><span class="o">.</span><span class="n">conf</span>
-</pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p><code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/</span></code> 目录下配置文件以 <code class="docutils literal notranslate"><span class="pre">.conf</span></code> 结尾都会在系统启动时执行，但是直接运行 <code class="docutils literal notranslate"><span class="pre">sysctl</span> <span class="pre">-p</span> <span class="pre">/etc/sysctl.conf</span></code> 现在已经不会刷新 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d</span></code> 目录下配置，所以需要指定配置文件刷新</p>
 </div>
-<ul>
-<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/udev/rules.d/99-bridge.rules</span></code> ，这个udev规则将在sysctl设置上述bridge模块时加载。注意，对于Kernel 3.18之前的版本， <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;br_netfilter&quot;</span></code> 需要修改成 <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;bridge&quot;</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ACTION</span><span class="o">==</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="n">SUBSYSTEM</span><span class="o">==</span><span class="s2">&quot;module&quot;</span><span class="p">,</span> <span class="n">KERNEL</span><span class="o">==</span><span class="s2">&quot;bridge&quot;</span><span class="p">,</span> <span class="n">RUN</span><span class="o">+=</span><span class="s2">&quot;/sbin/sysctl -p /etc/sysctl.d/bridge.conf&quot;</span>
+<ul class="simple">
+<li><p>创建 <code class="docutils literal notranslate"><span class="pre">/etc/udev/rules.d/99-bridge.rules</span></code> ，这个udev规则将在sysctl设置上述bridge模块时加载。注意，对于Kernel 3.18之前的版本， <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;br_netfilter&quot;</span></code> 需要修改成 <code class="docutils literal notranslate"><span class="pre">KERNEL==&quot;bridge&quot;</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">/etc/udev/rules.d/99-bridge.rules 配置bridge模块加载时执行sysctl禁用bridge的netfilter</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ACTION</span><span class="o">==</span><span class="s2">&quot;add&quot;</span>, <span class="nv">SUBSYSTEM</span><span class="o">==</span><span class="s2">&quot;module&quot;</span>, <span class="nv">KERNEL</span><span class="o">==</span><span class="s2">&quot;bridge&quot;</span>, <span class="nv">RUN</span><span class="o">+=</span><span class="s2">&quot;/sbin/sysctl -p /etc/sysctl.d/bridge.conf&quot;</span>
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>配置并执行 <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.d/bridge.conf</span></code> 非常重要，如果没有设置内核 <code class="docutils literal notranslate"><span class="pre">net.bridge.bridge-nf-call-iptables=0</span></code> 这3个参数，则连接在 <code class="docutils literal notranslate"><span class="pre">br0</span></code> 上的虚拟机之间网络不通，虽然这些虚拟机依然能够通过物理网卡连接外部世界。</p>
@@ -415,8 +420,8 @@
 </li>
 <li><p>然后修订配置如下</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="w">  </span><span class="nt">renderer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networkd</span><span class="w"></span>

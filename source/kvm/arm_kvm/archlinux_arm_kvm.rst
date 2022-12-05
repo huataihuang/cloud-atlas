@@ -89,13 +89,26 @@ arch linux ARM KVM虚拟化
 
    在 :ref:`arm_kvm_startup` 采用了基于Debian的 :ref:`raspberry_pi` 操作系统，可以无需 :ref:`build_qemu_ovmf` ，使用更为方便
 
+- 执行 :ref:`mobile_cloud_libvirt_lvm_pool` 为 :ref:`libvirt` 构建一个基于 :ref:`linux_lvm` 的存储池(详细步骤见 :ref:`mobile_cloud_libvirt_lvm_pool` )
+
 启动安装
 ===========
+
+按照 :ref:`mobile_cloud_infra` 规划进行磁盘的划分
+
+- 创建使用 :ref:`mobile_cloud_libvirt_lvm_pool` 的虚拟机磁盘(举例 ``a-b-data-1`` ):
+
+.. literalinclude:: archlinux_arm_kvm/virsh_create_vm_lvm_disk
+   :language: bash
+   :caption: virsh创建a-b-data-1虚拟机的LVM卷磁盘
+
+- 使用Ubuntu下载的ARM版本iso安装:
 
 参考
 =======
 
-- `arch linux arm aarch64 + ovmf uefi + qemu <https://xnand.netlify.app/2019/10/03/armv8-qemu-efi-aarch64.html>`_ 这篇文章可能是最全信息
+- `Spawn a Linux virtual machine on Arm using QEMU (KVM) <https://community.arm.com/oss-platforms/w/docs/510/spawn-a-linux-virtual-machine-on-arm-using-qemu-kvm>`_ arm社区wiki文档
+- `arch linux arm aarch64 + ovmf uefi + qemu <https://xnand.netlify.app/2019/10/03/armv8-qemu-efi-aarch64.html>`_ 
 - `How to make a better ARM virtual machine (armhf/aarch64) with UEFI <https://quantum5.ca/2022/03/19/how-to-make-better-arm-virtual-machine-armhf-aarch64-uefi/>`_
 - `FS#74773 - Cannot resolve "edk2-armvirt", a dependency of "qemu-system-aarch64" <https://bugs.archlinux.org/task/74773>`_
 - `Creating an Arch Linux ARM QEMU VM on a Mac M1 <https://www.reddit.com/r/archlinux/comments/vg8n8c/creating_an_arch_linux_arm_qemu_vm_on_a_mac_m1/>`_

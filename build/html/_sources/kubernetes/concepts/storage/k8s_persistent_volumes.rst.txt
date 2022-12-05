@@ -11,14 +11,14 @@ Kubernetes持久化存储卷
 
 Kubernetes目前支持插件(当前推荐):
 
-- cephfs - CephFS volume : :ref:`cephfs`
+- cephfs ( :ref:`k8s_cephfs` ) - CephFS volume : :ref:`cephfs`
 - csi - 容器存储接口 (CSI)
 - fc - Fibre Channel (FC) 存储
-- hostPath - HostPath 卷 （仅供单节点测试使用；不适用于多节点集群；请尝试使用 local 卷作为替代）
-- iscsi - iSCSI (SCSI over IP) 存储: 可以采用 :ref:`zfs` 构建 :ref:`zfs_iscsi`
-- local - 节点上挂载的本地存储设备
-- nfs - 网络文件系统 (NFS) 存储: 可以采用 :ref:`zfs_nfs` 或 :ref:`btrfs_nfs`
-- rbd - Rados 块设备 (RBD) 卷: :ref:`ceph_rbd`
+- hostPath ( :ref:`k8s_hostpath` )- HostPath 卷 （仅供单节点测试使用；不适用于多节点集群；请尝试使用 local 卷作为替代）
+- iscsi ( :ref:`k8s_iscsi` ) - iSCSI (SCSI over IP) 存储: 可以采用 :ref:`zfs` 构建 :ref:`zfs_iscsi`
+- local ( :ref:`k8s_local` ) - 节点上挂载的本地存储设备
+- nfs ( :ref:`k8s_nfs` ) - 网络文件系统 (NFS) 存储: 可以采用 :ref:`zfs_nfs` 或 :ref:`btrfs_nfs`
+- rbd ( :ref:`k8s_rbd` )- Rados 块设备 (RBD) 卷: :ref:`ceph_rbd`
 
 已经废弃的持久卷(当前可能支持，但未来发行版移除支持，不建议使用):
 
@@ -28,7 +28,7 @@ Kubernetes目前支持插件(当前推荐):
 - cinder - Cinder（OpenStack 块存储）（于 v1.18 弃用）
 - flexVolume - FlexVolume （于 v1.23 弃用）
 - gcePersistentDisk - GCE Persistent Disk （于 v1.17 弃用）
-- glusterfs - Glusterfs 卷 （于 v1.25 弃用）: 我之前有一个实践 :ref:`k8s_gluster`
+- glusterfs ( :ref:`k8s_gluster` )- Glusterfs 卷 （于 v1.25 弃用）
 - portworxVolume - Portworx 卷 （于 v1.25 弃用）
 - vsphereVolume - vSphere VMDK 卷 （于 v1.19 弃用）
 

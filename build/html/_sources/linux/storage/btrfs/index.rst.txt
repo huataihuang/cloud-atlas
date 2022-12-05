@@ -10,6 +10,8 @@ Btrfs
    introduce_btrfs.rst
    btrfs_facebook.rst
    btrfs_startup.rst
+   btrfs_subvolume.rst
+   btrfs_snapshot.rst
    btrfs_in_studio.rst
    migrate_data_to_btrfs.rst
    btrfs_mobile_cloud.rst

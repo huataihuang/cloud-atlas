@@ -37,23 +37,21 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
        inet6 fe80::d9ef:58a4:a664:6d7c/64 scope link noprefixroute 
           valid_lft forever preferred_lft forever   
 
-- `ntefilter的bridge性能和安全原因 <https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0>`_ ，禁止bridge设备的netfilter，所以创建 ``/etc/sysctl.d/bridge.conf`` 以下设置::
+- `ntefilter的bridge性能和安全原因 <https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0>`_ ，禁止bridge设备的netfilter，所以创建 ``/etc/sysctl.d/bridge.conf`` 并通过 ``sysctl`` 刷新内核配置:
 
-   net.bridge.bridge-nf-call-ip6tables=0
-   net.bridge.bridge-nf-call-iptables=0
-   net.bridge.bridge-nf-call-arptables=0
-
-生效::
-
-   sysctl -p /etc/sysctl.d/bridge.conf
+.. literalinclude:: libvirt_bridged_network/sysctl_bridge
+   :language: bash
+   :caption: /etc/sysctl.d/bridge.conf 禁止bridge设备的netfilter
 
 .. note::
 
    ``/etc/sysctl.d/`` 目录下配置文件以 ``.conf`` 结尾都会在系统启动时执行，但是直接运行 ``sysctl -p /etc/sysctl.conf`` 现在已经不会刷新 ``/etc/sysctl.d`` 目录下配置，所以需要指定配置文件刷新
 
-- 创建 ``/etc/udev/rules.d/99-bridge.rules`` ，这个udev规则将在sysctl设置上述bridge模块时加载。注意，对于Kernel 3.18之前的版本， ``KERNEL=="br_netfilter"`` 需要修改成 ``KERNEL=="bridge"`` ::
+- 创建 ``/etc/udev/rules.d/99-bridge.rules`` ，这个udev规则将在sysctl设置上述bridge模块时加载。注意，对于Kernel 3.18之前的版本， ``KERNEL=="br_netfilter"`` 需要修改成 ``KERNEL=="bridge"`` :
 
-   ACTION=="add", SUBSYSTEM=="module", KERNEL=="bridge", RUN+="/sbin/sysctl -p /etc/sysctl.d/bridge.conf"
+.. literalinclude:: libvirt_bridged_network/udev_99-bridge.rules
+   :language: bash
+   :caption: /etc/udev/rules.d/99-bridge.rules 配置bridge模块加载时执行sysctl禁用bridge的netfilter
 
 .. warning::
 

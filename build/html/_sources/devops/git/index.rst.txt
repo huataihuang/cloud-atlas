@@ -12,6 +12,7 @@ git
    git_config.rst
    git_proxy.rst
    reduce_git_repo_size.rst
+   git-flow.rst
 
 .. only::  subproject and html
 
