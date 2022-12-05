@@ -16,6 +16,7 @@ Libvirt网络
    libvirt_custom_nat.rst
    libvirt_multiple_net.rst
    libvirt_passthrough_net.rst
+   mobile_cloud_libvirt_network.rst
 
 .. only::  subproject and html
 

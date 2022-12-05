@@ -79,7 +79,7 @@ Btrfs的一些提示
 
 在 ``/data`` 挂载卷下创建 ``cloud-atlas_build`` 子卷:
 
-.. literalinclude:: btrfs_startup/btrfs_subvolume_create
+.. literalinclude:: btrfs_subvolume/btrfs_subvolume_create
    :language: bash
    :caption: 在Btrfs文件/data挂载卷下创建子卷 cloud-atlas_build
 
@@ -103,7 +103,7 @@ Btrfs的一些提示
 
 请注意上文中 Btrfs 文件系统以及其下的子卷都是使用了相同的设备 ``/dev/nvme0n1p7`` ，所以在 ``/etc/fstab`` 中，子卷的设备文件其实和父卷是一样的，差别仅在挂载选项上:
    
-.. literalinclude:: btrfs_startup/btrfs_subvolume_mount
+.. literalinclude:: btrfs_subvolume/btrfs_subvolume_mount
    :language: bash
    :caption: 通过配置 /etc/fstab btrfs的子卷 cloud-atlas_build 实现btrfs子卷挂载
 

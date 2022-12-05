@@ -70,13 +70,13 @@ NFS服务器需要一个 ``exports`` 列表来确定输出的文件系统，输�
 
 - 在 ``/data`` 挂载卷下创建 ``cloud-atlas_build`` 子卷:
 
-.. literalinclude:: ../../linux/storage/btrfs/btrfs_startup/btrfs_subvolume_create
+.. literalinclude:: ../../linux/storage/btrfs/btrfs_subvolume/btrfs_subvolume_create
    :language: bash
    :caption: 在Btrfs文件/data挂载卷下创建子卷 cloud-atlas_build
 
 - 在 ``/etc/fstab`` 配置 ``cloud-atlas_build`` 子卷的挂载项:
 
-.. literalinclude:: ../../linux/storage/btrfs/btrfs_startup/btrfs_subvolume_mount
+.. literalinclude:: ../../linux/storage/btrfs/btrfs_subvolume/btrfs_subvolume_mount
    :language: bash
    :caption: 通过配置 /etc/fstab btrfs的子卷 cloud-atlas_build 实现btrfs子卷挂载
 

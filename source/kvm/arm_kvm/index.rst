@@ -8,6 +8,8 @@ ARM硬件环境KVM虚拟化
    :maxdepth: 1
 
    arm_kvm_support.rst
+   armv8-a_virtualization.rst
+   arm_kvm_on_fvp.rst
    arm_kvm_startup.rst
    archlinux_arm_kvm.rst
    build_qemu_ovmf.rst

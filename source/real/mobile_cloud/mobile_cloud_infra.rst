@@ -19,3 +19,11 @@
 - 采用 :ref:`arm_kvm` 构建本地运行的虚拟化服务器集群，进一步部署 :ref:`kubernetes` 和 :ref:`openshift`
 
   - 探索 :ref:`arm_neve`
+
+虚拟服务器分布
+===================
+
+.. csv-table:: acloud服务器部署多层虚拟化虚拟机分配
+   :file: mobile_cloud_infra/hosts.csv
+   :widths: 10, 10, 10, 10, 10, 10, 30
+   :header-rows: 1
