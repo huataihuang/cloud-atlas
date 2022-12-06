@@ -1,19 +1,14 @@
-.. _shell_utils:
+.. _libvirt_graphics:
 
 =================================
-Shell 实用工具
+Libvirt图形
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   sudo.rst
-   screen.rst
-   htop.rst
-   ncdu.rst
-   tr.rst
-   find.rst
-   losetup.rst
+   virt-viewer.rst
 
 .. only::  subproject and html
 

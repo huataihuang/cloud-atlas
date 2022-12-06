@@ -41,6 +41,14 @@ pacman简明使用
 
    pacman -Sg gnome
 
+* 忽略依赖强制安装::
+
+   pacman -Sd package_name
+
+* Arch Linux的软件包是 ``tar.stz`` 格式，可以下载以后本地安装::
+
+   pacman -U --noconfirm edk2-armvirt-202208-3-any.pkg.tar.zst
+
 * 删除单一软件包，但是保留已经安装的这个软件包的依赖::
 
    pacman -R package_name
