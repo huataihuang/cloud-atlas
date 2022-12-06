@@ -209,6 +209,14 @@ x86 firmware build会创建3各不同镜像:
    cp QEMU_EFI-pflash.raw /usr/share/edk2/aarch64/QEMU_CODE.fd
    cp QEMU_VARS-pflash.raw /usr/share/edk2/aarch64/QEMU_VARS.fd
 
+不过，要让 ``libvirt`` 能够找到nvram文件，请修改 ``/etc/libvirt/qemu.conf`` :
+
+.. literalinclude:: build_qemu_ovmf/qemu.conf
+   :language: bash
+   :caption: /etc/libvirt/qemu.conf 配置 nvram 路径
+
+然后重启一次 libvirt
+
 参考
 ======
 

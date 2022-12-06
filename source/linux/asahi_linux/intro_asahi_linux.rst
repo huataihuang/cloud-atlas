@@ -24,6 +24,18 @@ Asahi Linux发布
 
 Asahi Linux 于2022年3月发布了首个Alpha版本，对Apple Silicon Macs提供了初步支持
 
+.. _asahi-fedora:
+
+Fedora集成Asahi Linux工具
+==========================
+
+参考 `Wow! Torvalds Modified Fedora Linux to Run on his Apple M2 Macbook <https://news.itsfoss.com/fedora-apple-torvalds/>`_ 可以看到:
+
+- 最新的 ``Fedora 37`` 已经采用了 Kernel 6.0
+- Fedora支持aarch64架构，并且提供了WEB安装(也就是可以直接使用  ``virt-instal`` 的 ``--location`` 参数)
+- Fedora集成 :ref:`asahi_linux` 工具，可以以通过 `asahi-fedora-builder <https://github.com/leifliddy/asahi-fedora-builder>`_ 构建安装
+- 作为 :ref:`redhat_linux` 体系的探索者，Fedora也可以支持大多数企业级软件，例如 :ref:`kubernetes` / :ref:`openshift` / :ref:`openstack`
+
 我的计划
 ==========
 
