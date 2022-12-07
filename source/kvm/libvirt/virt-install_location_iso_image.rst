@@ -78,7 +78,7 @@ Ubuntu的WEB下载网站只提供 amd64 和 i386 安装路径，也就是以往 
    RHEL5/CentOS5  /isolinux/vmlinuz             /isolinux/initrd.img
    openSUSE       /boot/i386/loader/linux       /boot/i386/loader/initrd
    Mandriva       /i586/isolinux/alt0/vmlinuz   /i586/isolinux/alt0/all.rdz
-   Ubuntu         /casper/vmlinuz               /casper/initrd.gz
+   Ubuntu(已验证) /casper/vmlinuz               /casper/initrd
    Debian         /install/vmlinuz              /isolinux/initrd.img
 
 所以将安装命令修订成:

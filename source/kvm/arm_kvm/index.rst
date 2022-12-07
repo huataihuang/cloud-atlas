@@ -13,6 +13,7 @@ ARM硬件环境KVM虚拟化
    arm_kvm_startup.rst
    build_qemu_ovmf.rst
    archlinux_arm_kvm.rst
+   debug_arm_vm_disk_fail.rst
 
 
 .. only::  subproject and html
