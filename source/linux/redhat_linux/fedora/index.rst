@@ -11,6 +11,7 @@ Fedora是面向Red Hat Enterprise Linux 和 CentOS 开发的理想平台，提�
 .. toctree::
    :maxdepth: 1
 
+   fedora37_installation.rst
    upgrade_fedora_lastest_version.rst
    fedora_autoupdates.rst
    fedora_os_images.rst

@@ -144,7 +144,7 @@ arch linux ARM KVM虚拟化
    :language: bash
    :caption: virsh创建虚拟机的LVM卷磁盘
 
-- 由于我采用 :ref:`virt-install_location_iso_image` 虽然能够解决终端模式， :strike:`但是看起来 Ubuntu LTS 22.04还不能在 Apple Silicon MacbookPro上工作` (误判)，所以权衡之后改为采用 :ref:`fedora` ( :ref:`asahi-fedora` ):
+- 由于我采用 :ref:`virt-install_location_iso_image` 能够解决终端模式， :strike:`但是看起来 Ubuntu LTS 22.04还不能在 Apple Silicon MacbookPro上工作` (误判)，权衡之后改为采用 :ref:`fedora` ( :ref:`asahi-fedora` ):
 
 .. literalinclude:: archlinux_arm_kvm/virsh_create_ovmf_vm
    :language: bash
@@ -156,7 +156,53 @@ arch linux ARM KVM虚拟化
 
    之前的折腾( :ref:`build_qemu_ovmf` )还是存在缺陷的，我原本以为是安装iso的问题，折腾了好久 :ref:`virt-install_location_iso_image` ，但最终还是采用上文 :ref:`arch_linux` ARM官方仓库的软件包为主(忽略依赖强制安装)，然后通过源代码编译补齐 ``libbpf`` 低版本依赖来解决。
 
-   看来iso镜像应该是没有问题的
+上述在线安装能够正常启动安装过程，但是出现一个报错::
+
+   [   11.180807 ] dracut-initqueue[1040]: Warning: can't find installer main image path in .treeinfo
+   [   11.216388 ] dracut-initqueue[1164]:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+   [   11.216749 ] dracut-initqueue[1164]:                                  Dload  Upload   Total   Spent    Left  Speed
+
+所以我改为从iso安装，方法借鉴 :ref:`virt-install_location_iso_image` :
+
+.. literalinclude:: debug_arm_vm_disk_fail/virsh_create_ovmf_vm_iso_io_threads
+   :language: bash
+   :caption: virt-install通过--location参数使用iso镜像安装ARM版本Fedora，必须使用io=threads
+   :emphasize-lines: 11,12
+
+.. note::
+
+   我这里遇到一个安装过程中磁盘无法写入异常，通过 :ref:`debug_arm_vm_disk_fail` 发现和虚拟机磁盘参数 ``io=native`` 相关，所以改为 ``io=threads`` 可以绕过这个问题。
+
+这里我采用 ``--graphics vnc`` 会提示错误::
+
+   ERROR    unsupported configuration: domain configuration does not support video model 'virtio'
+
+非常奇怪，我只在 ``--disk`` 指定了 ``virtio`` ；而且也不能使用 ``--graphics spice`` 。所以我最终取消掉图形指定才启动安装。 此时可以看到字符终端界面
+
+开始 ``Install Fedora 37`` 流程之后，会提示提供两种安装模式::
+
+   Starting installer, one moment...
+   anaconda 37.12.6-1.fc37 for Fedora 37 started.
+    * installation log files are stored in /tmp during the installation
+    * shell is available on TTY2 and in second TMUX pane (ctrl+b, then press 2)
+    * when reporting a bug add logs from /tmp as separate text/plain attachments
+   
+   X or window manager startup failed, falling back to text mode.
+   ================================================================================
+   ================================================================================
+   X was unable to start on your machine. Would you like to start VNC to connect to
+   this computer from another computer and perform a graphical installation or
+   continue with a text mode installation?
+   
+   1) Start VNC
+   2) Use text mode
+   
+   Please make a selection from the above ['c' to continue, 'h' to help, 'q' to
+   quit, 'r' to refresh]:
+
+为方便操作，采用VNC( ``pacman -S tigervnc`` )，使用 ``vncviewer`` 连接虚拟机的VNC地址 ``192.168.122.109:1`` ，终于能够看到久违的安装界面了: 交互安装过程 :ref:`fedora37_installation`
+
+
 
 参考
 =======
