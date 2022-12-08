@@ -16,6 +16,8 @@ systemd-networkd设置MAC地址欺骗
    :linenos:
    :caption:
 
+.. _systemd_networkd_static_ip:
+
 systemd配置静态IP地址
 ========================
 
@@ -23,18 +25,19 @@ systemd配置静态IP地址
 
 .. literalinclude:: systemd_networkd/10-eth0.network
    :language: bash
-   :linenos:
-   :caption:
+   :caption: /etc/systemd/network/10-eth0.network配置
 
-- 执行以下命令将默认NetworkManager切换成 ``systemd-networkd`` ::
+- 执行以下命令将默认NetworkManager切换成 ``systemd-networkd`` :
 
-   systemctl stop NetworkManager.service
-   systemctl start systemd-networkd.service
-   systemctl restart systemd-resolved.service
+.. literalinclude:: systemd_networkd/switch_systemd-networkd
+   :language: bash
+   :caption: NetworkManager切换到systemd-networkd使静态IP生效
 
-   systemctl disable NetworkManager.service
-   systemctl enable systemd-networkd.service
+我在 :ref:`mobile_cloud_vm` (在 :ref:`asahi_linux` ARM架构平台运行的 :ref:`fedora` Server ARM)遇到一个报错::
 
+   systemd-gpt-auto-generator: Failed to dissect: Permission denied
+
+但似乎可以忽略 ( ``systemd-gpt-auto-generator`` 是基于GPT分区类型GUID自动发现和挂载root、/home/、/srv/、/var/ 和 /var/tmp/ 分区，以及发现和启用交换分区的生成器 )
 
 systemd创建网桥
 =================

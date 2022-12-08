@@ -13,8 +13,10 @@ arch linux ARM KVM虚拟化
 
    `arch linux: QEMU <https://wiki.archlinux.org/title/QEMU>`_ 和 `arch linux: KVM <https://wiki.archlinux.org/title/KVM>`_ 的资料都是围绕 X86_64 架构的，需要整理和汇总ARM架构信息。
 
-安装(在 :ref:`asahi_linux` 上失败，放弃)
-=========================================
+.. _install_kvm_asahi_linux_fail:
+
+在 :ref:`asahi_linux`安装虚拟化(挫折)
+============================================
 
 - 使用 :ref:`pacman` 搜索QEMU软件工具::
 
@@ -74,8 +76,10 @@ arch linux ARM KVM虚拟化
 
 所以我改回到 "强制方式安装仓库提供的qemu"
 
-采用强制方式安装仓库提供的qemu
-================================
+.. _force_install_kvm_and_patch:
+
+强制方式安装仓库提供的qemu并补全依赖
+=========================================
 
 - `edk2-armvirt <https://archlinux.org/packages/extra/any/edk2-armvirt/>`_ 下载到本地安装::
 
@@ -167,7 +171,7 @@ arch linux ARM KVM虚拟化
 .. literalinclude:: debug_arm_vm_disk_fail/virsh_create_ovmf_vm_iso_io_threads
    :language: bash
    :caption: virt-install通过--location参数使用iso镜像安装ARM版本Fedora，必须使用io=threads
-   :emphasize-lines: 11,12
+   :emphasize-lines: 14,15
 
 .. note::
 
@@ -202,7 +206,16 @@ arch linux ARM KVM虚拟化
 
 为方便操作，采用VNC( ``pacman -S tigervnc`` )，使用 ``vncviewer`` 连接虚拟机的VNC地址 ``192.168.122.109:1`` ，终于能够看到久违的安装界面了: 交互安装过程 :ref:`fedora37_installation`
 
+磁盘无法写入的折腾
+===================
 
+原本松了一口气，但是没想到 :ref:`fedora37_installation` 配置完成开始安装，却发生虚拟机磁盘无法写入的异常，尝试多次都同样报错。
+
+:ref:`debug_arm_vm_disk_fail` :
+
+- 使用 :ref:`virt-builder` 构建本地Fedora37虚拟机镜像(最终实际采用官方虚拟机raw镜像)，采用简化配置方式能够正常运行KVM虚拟机
+- 对比官方镜像运行虚拟机的磁盘参数和我沿X86虚拟化的磁盘参数，反复验证定位出 ``io=native`` 参数导致磁盘无法写入
+- 修订 ``virt-install`` 参数，将磁盘参数改为 ``io=threads`` 解决磁盘写入问题(上文安装参数已修订正确)
 
 参考
 =======
