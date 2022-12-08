@@ -1,8 +1,8 @@
-.. _install_ceph_mon:
+.. _mobile_cloud_ceph_mon:
 
-=========================
-安装 ceph-mon
-=========================
+============================
+移动云计算Ceph部署ceph-mon
+============================
 
 监控引导(monitor bootstrapping)
 ==================================
@@ -20,16 +20,22 @@
 
 .. warning::
 
-   我在 :ref:`install_ceph_manual_zdata` 步骤 :ref:`add_ceph_osds_zdata` 没有解决自定义Ceph集群名的添加OSDs问题，所以目前只采用标准默认 ``ceph`` 作为集群名字，后续我将构建虚拟机环境来学习和实践部署多集群。 
+   之前的实践中， :ref:`install_ceph_manual_zdata` 步骤 :ref:`add_ceph_osds_zdata` 没有解决自定义Ceph集群名的添加OSDs问题。
+
+   :strike:`现在我重新部署Ceph再次探索自定义 Ceph 集群名，以便后续部署更多集群进行管理。`
+
+   这次还是采用了默认 ``ceph`` 作为集群名
 
 .. note::
 
-   Ceph默认部署集群名字就是 ``ceph`` ，需要注意，很多工具和配置文件都是以集群名字作为配置文件名，例如 ``/etc/ceph/zdata.conf`` 表示 ``zdata`` 集群，对应的集群访问证书是 ``/etc/ceph/zdata.client.admin.keyring`` 。在官方文档中，很多使用 ``name`` 来指代集群名字。
+   Ceph默认部署集群名字就是 ``ceph`` ，需要注意，很多工具和配置文件都是以集群名字作为配置文件名，例如 ``/etc/ceph/adata.conf`` 表示 ``adata`` 集群，对应的集群访问证书是 ``/etc/ceph/adata.client.admin.keyring`` 。在官方文档中，很多使用 ``name`` 来指代集群名字。
+
+   本次部署还是回归 ``ceph`` 常规命名集群名
 
 部署monitor
 ================
 
-- 登陆到monitor节点，这里案例我安装在 ``z-b-data-1`` 节点，所以 ``ssh z-b-data-1``
+- 登陆到monitor节点，这里案例我安装在 ``a-b-data-1`` 节点，所以 ``ssh a-b-data-1``
 
 - 由于我们已经安装了ceph软件，所以安装程序已经创建了 ``/etc/ceph`` 目录
 
@@ -43,22 +49,22 @@
 
 输出::
 
-   0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17
+   598dc69c-5b43-4a3b-91b8-f36fc403bcc5
 
 .. note::
 
    也可以使用 ``uuidgen`` 工具来生成uuid，这个工具包含在 ``util-linux`` 软件包中（ 参考 `uuidgen - create a new UUID value <http://manpages.ubuntu.com/manpages/xenial/man1/uuidgen.1.html>`_ ）
 
-- 创建Ceph配置文件 - 默认 Ceph 使用 ``ceph.conf`` 配置，这个配置文件的命名规则是 ``{cluster_name}.conf`` 这里我依然使用默认集群名字，所以配置文件是 ``ceph.conf`` ，对于指定集群名，将在 :ref:`install_ceph_manual_zdata` 中探索::
+- 创建Ceph配置文件 这里我部署 :ref:`mobile_cloud_infra` ``acloud`` 对应的基础集群 ``adata`` ，所以配置文件就是 ``adata.conf``  - 配置文件的命名规则是 ``{cluster_name}.conf`` 参考 :ref:`install_ceph_manual_zdata` 中探索::
 
-   sudo vim /etc/ceph/ceph.conf
+   sudo vim /etc/ceph/adata.conf
 
 配置案例:
 
-.. literalinclude:: install_ceph_mon/ceph.conf
+.. literalinclude:: mobile_cloud_ceph_mon/ceph.conf
    :language: bash
    :linenos:
-   :caption: /etc/ceph/ceph.conf
+   :caption: 创建Ceph集群(默认命名为ceph)的配置文件 /etc/ceph/ceph.conf
 
 解析:
 
@@ -76,6 +82,10 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
    sudo ceph-authtool --create-keyring /tmp/ceph.mon.keyring --gen-key -n mon. --cap mon 'allow *'
 
+.. note::
+
+   注意这里创建的 ``keyring`` 名字是 ``{cluster_name}.mon.keyring``
+
 提示::
 
    creating /tmp/ceph.mon.keyring
@@ -84,15 +94,19 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
    sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
 
+.. note::
+
+   注意这里创建的 ``keyring`` 名字是 ``{cluster_name}.client.admin.keyring
+
 提示::
 
    creating /etc/ceph/ceph.client.admin.keyring
 
 .. warning::
 
-   这里 ``/etc/ceph/ceph.client.admin.keyring`` 是和集群名 ``ceph`` 对应的，所以如果创建其他集群管理，例如对 ``zdata`` 集群管理，则这个keyring名字必须是 ``/etc/ceph/zdata.client.admin.keyring``
+   这里 ``/etc/ceph/adata.client.admin.keyring`` 是和集群名 ``ceph`` 对应的，所以如果创建其他集群管理，例如对 ``zdata`` 集群管理，则这个keyring名字必须是 ``/etc/ceph/zdata.client.admin.keyring``
 
-- 生成 ``bootstrap-osd`` keyring(命名应该也是和集群名相关，没有验证，感觉应该是 ``<cluseter>.keyring`` )，生成 ``client.bootstrap-osd`` 用户并添加用户到keyring::
+- 生成 ``bootstrap-osd`` keyring(命名应该也是和集群名相关，是 ``<cluseter>.keyring`` )，生成 ``client.bootstrap-osd`` 用户并添加用户到keyring::
 
    sudo ceph-authtool --create-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring --gen-key -n client.bootstrap-osd --cap mon 'profile bootstrap-osd' --cap mgr 'allow r'
 
@@ -120,12 +134,13 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 实际操作为::
 
-   monmaptool --create --add z-b-data-1 192.168.6.204 --fsid 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17 /tmp/monmap
+   monmaptool --create --add a-b-data-1 192.168.8.204 --fsid 598dc69c-5b43-4a3b-91b8-f36fc403bcc5 /tmp/monmap
 
 提示信息::
 
    monmaptool: monmap file /tmp/monmap
-   monmaptool: set fsid to 0e6c8b6f-0d32-4cdb-a45d-85f8c7997c17
+   setting min_mon_release = octopus
+   monmaptool: set fsid to 598dc69c-5b43-4a3b-91b8-f36fc403bcc5
    monmaptool: writing epoch 0 to /tmp/monmap (1 monitors)
 
 .. note::
@@ -136,9 +151,9 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
    sudo mkdir /var/lib/ceph/mon/{cluster-name}-{hostname}
 
-实际操作为-我的实验环境存储集群名设置为 ``ceph`` 主机名是 ``z-b-data-1`` ::
+实际操作为 -- 存储集群名设置为 ``ceph`` 主机名是 ``a-b-data-1`` ::
 
-   sudo -u ceph mkdir /var/lib/ceph/mon/zdata-z-b-data-1
+   sudo -u ceph mkdir /var/lib/ceph/mon/ceph-a-b-data-1
 
 - 发布监控服务的monitor的map和keyring::
 
@@ -146,73 +161,52 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 实际操作::
 
-   sudo -u ceph ceph-mon --cluster ceph --mkfs -i z-b-data-1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+   sudo -u ceph ceph-mon --cluster ceph --mkfs -i a-b-data-1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
 
 - ``如果使用自定义集群名，则非常重要`` : 配置 ``systemd`` 启动集群的环境变量，修订 ``/etc/default/ceph`` 添加::
 
-   CLUSTER=ceph
+   CLUSTER=adata
 
 .. warning::
 
    这个步骤非常重要，因为 ``ceph-mon@<hostname>`` 启动 ``ceph-mon`` 服务会读取 ``/etc/default/ceph`` 中环境变量，如果没有配置 ``CLUSTER`` 环境变量，就会尝试启动名字为 ``ceph`` 的集群。所以如果要配置一个非默认名字的集群，一定要配置 ``CLUSTER`` 环境变量，否则启动会失败。
 
-   这里我的环境还是使用默认名 ``ceph`` 则此步骤可以跳过
-
-   对于采用非默认Ceph集群名字命名，则会遇到很多困难，我在 :ref:`install_ceph_mon_zdata` 中有相关实践记录
+   不过，我这次尝试失败: :ref:`mobile_cloud_ceph_mon_adata_fail`
 
 - 启动monitor(s)
 
 通常发行版使用 ``systemctl`` 启动监控::
 
-   sudo systemctl start ceph-mon@z-b-data-1
+   sudo systemctl start ceph-mon@a-b-data-1
+   sudo systemctl enable ceph-mon@a-b-data-1
 
 - 验证monitor运行::
 
    sudo ceph -s
 
-消除ceph初始安装mon的HEALTH_WARN
----------------------------------
-
 如果正常，会看到如下输出::
 
    cluster:
-     id:     39392603-fe09-4441-acce-1eb22b1391e1
+     id:     598dc69c-5b43-4a3b-91b8-f36fc403bcc5
      health: HEALTH_WARN
              mon is allowing insecure global_id reclaim
              1 monitors have not enabled msgr2
+  
    services:
-      mon: 1 daemons, quorum z-b-data-1 (age 3m)
-      mgr: no daemons active
-      osd: 0 osds: 0 up, 0 in
+     mon: 1 daemons, quorum a-b-data-1 (age 30s)
+     mgr: no daemons active
+     osd: 0 osds: 0 up, 0 in
+  
    data:
-      pools:   0 pools, 0 pgs
-      objects: 0 objects, 0 B
-      usage:   0 B used, 0 B / 0 B avail
-      pgs:
+     pools:   0 pools, 0 pgs
+     objects: 0 objects, 0 B
+     usage:   0 B used, 0 B / 0 B avail
+     pgs:
 
-.. note::
+- 消除 ``HEALTH_WARN`` 参考 :ref:`solve_install_ceph_mon_health_warn` 执行以下命令::
 
-   参考 `Ceph HEALTH_WARN with 'mons are allowing insecure global_id reclaim' after install/upgrade to RHCS 4.2z2 (or newer) <https://access.redhat.com/articles/6136242>`_ (原因是新版本要求严格安全) 或者 `ceph: Mons are allowing insecure global_id reclaim #7746 <https://github.com/rook/rook/issues/7746>`_ ::
-
-      sudo ceph config set mon auth_allow_insecure_global_id_reclaim false
-
-   上述安全设置加严会禁止没有补丁过的不安全客户端连接并且超时以后需要重新生成认证ticket(默认72小时)
-
-   也可以关闭这个报错输出(我采用这种方法)::
-
-      sudo ceph config set mon mon_warn_on_insecure_global_id_reclaim_allowed false
-
-.. note::
-
-   参考 `MON_MSGR2_NOT_ENABLED <https://docs.ceph.com/en/latest/rados/operations/health-checks/#mon-msgr2-not-enabled>`_ :
-
-   ``ms_bind_msgr2`` 选项已经激活但是monitor没有配置成绑定到集群的monmap ``v2`` 端口。激活这个功能将使用 ``msgr2`` 协议，对于一些连接不可用。大多数情况可以通过以下命令修正::
-
-      ceph mon enable-msgr2
-
-   我执行以下命令修正::
-
-      sudo ceph mon enable-msgr2
+   sudo ceph config set mon auth_allow_insecure_global_id_reclaim false
+   sudo ceph mon enable-msgr2
 
 最终完成后，执行::
 
@@ -221,12 +215,14 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 输出以下信息::
 
    cluster:
-     id:     39392603-fe09-4441-acce-1eb22b1391e1
+     id:     598dc69c-5b43-4a3b-91b8-f36fc403bcc5
      health: HEALTH_OK
+  
    services:
-     mon: 1 daemons, quorum z-b-data-1 (age 5s)
+     mon: 1 daemons, quorum a-b-data-1 (age 14s)
      mgr: no daemons active
      osd: 0 osds: 0 up, 0 in
+  
    data:
      pools:   0 pools, 0 pgs
      objects: 0 objects, 0 B
@@ -236,9 +232,9 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 下一步
 ========
 
-- :ref:`install_ceph_mgr`
+- :ref:`mobile_cloud_ceph_mgr`
 
 参考
 ======
 
-- `Ceph document - Installation (Manual) <http://docs.ceph.com/docs/master/install/>`_
+- `Ceph document - MANUAL DEPLOYMENT <https://docs.ceph.com/en/latest/install/manual-deployment/>`_

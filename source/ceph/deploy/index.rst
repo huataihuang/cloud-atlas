@@ -11,6 +11,7 @@ Ceph 部署
    centos_sig_ceph.rst
    install_ceph_manual/index
    install_ceph_manual_zdata/index
+   install_mobile_cloud_ceph/index
 
 .. only::  subproject and html
 
