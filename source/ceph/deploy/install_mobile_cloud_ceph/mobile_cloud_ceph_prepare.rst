@@ -19,6 +19,7 @@
 ================
 
 - 采用 :ref:`mobile_cloud_kvm` 构建虚拟机
+- 虚拟机上部署 :ref:`ssh_key` 确保各个主机间无需密码SSH和SCP，方便部署
 
 获取Ceph软件
 =============
@@ -59,9 +60,6 @@ Ceph集群要求至少1个monitor，以及至少和对象存储的副本数量�
 ============
 
 依次完成以下安装过程:
-
-   mobile_cloud_ceph_mon.rst
-      mobile_cloud_ceph_mgr.rst
 
 - :ref:`mobile_cloud_ceph_mon`
 - :ref:`mobile_cloud_ceph_mgr`
