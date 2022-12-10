@@ -7,6 +7,7 @@ Bash
 .. toctree::
    :maxdepth: 1
 
+   bash_variable_name_rules.rst
    list_all_cron_jobs.rst
    here_document.rst
    date_caculate.rst

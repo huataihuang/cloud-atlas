@@ -15,8 +15,8 @@ Ceph集群添加ceph-mon
 
 - 登陆需要部署monitor的服务器，例如，我这里部署到 ``z-b-data-2`` 服务器上，执行以下命令创建mon默认目录::
 
-   mon-id="z-b-data-2"
-   sudo mkdir /var/lib/ceph/mon/ceph-${mon-id}
+   mon_id="z-b-data-2"
+   sudo mkdir /var/lib/ceph/mon/ceph-${mon_id}
 
 - 将 192.168.6.204 ( ``z-b-data-1`` ) 管理密钥复制到需要部署 ``ceph-mon`` 的配置目录下::
 

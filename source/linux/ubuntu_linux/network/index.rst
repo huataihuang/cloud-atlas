@@ -11,6 +11,7 @@ Ubuntu网络
    networkmanager.rst
    netplan.rst
    wpa_supplicant.rst
+   switch_wifi_connect.rst
    set_linux_system_proxy.rst
 
 .. only::  subproject and html
