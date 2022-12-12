@@ -170,6 +170,8 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
    sudo ceph -s
 
+.. _solve_install_ceph_mon_health_warn:
+
 消除ceph初始安装mon的HEALTH_WARN
 ---------------------------------
 

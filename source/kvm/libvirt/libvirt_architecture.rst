@@ -86,25 +86,49 @@ libvirt客户端是用户接口，用于管理和访问虚拟机：
 
 在系统级别的系统管理，libvirt最少需要设置认证和启动daemon。
 
-设置认证
----------
+设置认证(polkit)
+--------------------
 
 libvirt daemon允许系统管理员选择用于客户端每次网络socket链接的认证机制。这个控制是通过libvirt daemon的主配置文件 ``/etc/libvirt/libvirtd.conf`` 管理。每个libvirt socket可以配置独立的认证机制。当前可以选择的认证机制有: ``none`` ， ``polkit`` 和 ``sasl`` 。
 
-由于libvirt安装过程安装了polkit作为以来，所以默认在 ``unix_sock_auth`` 参数配置的是 ``polkit`` 。而基于文件的授权则没有提供。
+由于libvirt安装过程安装了polkit作为依赖，所以默认在 ``unix_sock_auth`` 参数配置的是 ``polkit`` 。而基于文件的授权则没有提供。
+
+- 检查libvirt默认安装配置的 ``/etc/libvirt/libvirtd.conf`` 中::
+
+   #auth_unix_ro = "polkit"
+   #auth_unix_rw = "polkit"
+
+- TCP链接认证默认是sasl::
+
+   #auth_tcp = "sasl"
+
+默认所有位于 ``wheel`` 组的用户都是系统管理员，这个配置位于 ``/usr/share/polkit-1/rules.d/50-default.rules`` ::
+
+   polkit.addAdminRule(function(action, subject) {
+       return ["unix-group:wheel"];
+   });
+
+所以不需要添加新组和规则文件，只需要将用户加入 ``wheel`` 组，然后再配置允许 ``wheel`` 组连接 ``RW`` socket。
+
+.. literalinclude:: libvirt_architecture/50-libvirt.rules
+   :language: js
+   :caption: /etc/polkit-1/rules.d/50-libvirt.rules 配置 mykvm 用户组能够访问libvirt的RW socket
+
+如果你需要配置一个新的组，授权访问libvirt的RW socket，例如 ``mykvm`` 组，而修改上面的 ``/etc/polkit-1/rules.d/50-libvirt.rules`` 将 ``wheel`` 组换成 ``mykvm`` 组即可。
+
+配置认证(基于文件)
+---------------------
+
+另外一种简化的方式配置 ``/etc/libvirt/libvirtf.conf`` :
+
+.. literalinclude:: libvirt_architecture/libvirtd.conf
+   :language: bash
+   :caption: 配置按照libirt组用户允许直接使用libvirt
 
 .. note::
 
-   检查libvirt默认安装配置的 ``/etc/libvirt/libvirtd.conf`` 中实际上允许任何人链接socket，即没有限制::
+   我这次在 :ref:`asahi_linux` 上使用上述两种方法没有成功，奇怪。之前在 :ref:`arch_linux` X86平台是可行的
 
-      #auth_unix_ro = "none"
-      #auth_unix_rw = "none"      
-
-   TCP链接认证默认是sasl::
-
-      #auth_tcp = "sasl"
-
-待续
 
 参考
 =========

@@ -64,7 +64,11 @@
 <li class="toctree-l3"><a class="reference internal" href="network/index.html">Libvirt网络</a></li>
 <li class="toctree-l3"><a class="reference internal" href="storage/index.html">Libvirt存储</a></li>
 <li class="toctree-l3"><a class="reference internal" href="agent/index.html">虚拟机Agent增强</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphics/index.html">Libvirt图形</a></li>
 <li class="toctree-l3"><a class="reference internal" href="virsh_dompmsuspend.html">virsh dompmsuspend 挂起运行虚拟机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="libvirt_non-root.html">非root用户使用libvirt配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt-install_location_iso_image.html">iso镜像使用location参数进行virt-install安装虚拟机</a></li>
+<li class="toctree-l3"><a class="reference internal" href="virt-builder.html">virt-builder快速构建VM工具</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
@@ -237,23 +241,62 @@
 <section id="id4">
 <h2>配置libvirt<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <p>在系统级别的系统管理，libvirt最少需要设置认证和启动daemon。</p>
-<section id="id5">
-<h3>设置认证<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h3>
+<section id="polkit">
+<h3>设置认证(polkit)<a class="headerlink" href="#polkit" title="此标题的永久链接">¶</a></h3>
 <p>libvirt daemon允许系统管理员选择用于客户端每次网络socket链接的认证机制。这个控制是通过libvirt daemon的主配置文件 <code class="docutils literal notranslate"><span class="pre">/etc/libvirt/libvirtd.conf</span></code> 管理。每个libvirt socket可以配置独立的认证机制。当前可以选择的认证机制有: <code class="docutils literal notranslate"><span class="pre">none</span></code> ， <code class="docutils literal notranslate"><span class="pre">polkit</span></code> 和 <code class="docutils literal notranslate"><span class="pre">sasl</span></code> 。</p>
-<p>由于libvirt安装过程安装了polkit作为以来，所以默认在 <code class="docutils literal notranslate"><span class="pre">unix_sock_auth</span></code> 参数配置的是 <code class="docutils literal notranslate"><span class="pre">polkit</span></code> 。而基于文件的授权则没有提供。</p>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>检查libvirt默认安装配置的 <code class="docutils literal notranslate"><span class="pre">/etc/libvirt/libvirtd.conf</span></code> 中实际上允许任何人链接socket，即没有限制:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#auth_unix_ro = &quot;none&quot;</span>
-<span class="c1">#auth_unix_rw = &quot;none&quot;</span>
+<p>由于libvirt安装过程安装了polkit作为依赖，所以默认在 <code class="docutils literal notranslate"><span class="pre">unix_sock_auth</span></code> 参数配置的是 <code class="docutils literal notranslate"><span class="pre">polkit</span></code> 。而基于文件的授权则没有提供。</p>
+<ul>
+<li><p>检查libvirt默认安装配置的 <code class="docutils literal notranslate"><span class="pre">/etc/libvirt/libvirtd.conf</span></code> 中:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#auth_unix_ro = &quot;polkit&quot;</span>
+<span class="c1">#auth_unix_rw = &quot;polkit&quot;</span>
 </pre></div>
 </div>
-<p>TCP链接认证默认是sasl:</p>
+</li>
+<li><p>TCP链接认证默认是sasl:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#auth_tcp = &quot;sasl&quot;</span>
 </pre></div>
 </div>
+</li>
+</ul>
+<p>默认所有位于 <code class="docutils literal notranslate"><span class="pre">wheel</span></code> 组的用户都是系统管理员，这个配置位于 <code class="docutils literal notranslate"><span class="pre">/usr/share/polkit-1/rules.d/50-default.rules</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">polkit</span><span class="o">.</span><span class="n">addAdminRule</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">subject</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;unix-group:wheel&quot;</span><span class="p">];</span>
+<span class="p">});</span>
+</pre></div>
 </div>
-<p>待续</p>
+<p>所以不需要添加新组和规则文件，只需要将用户加入 <code class="docutils literal notranslate"><span class="pre">wheel</span></code> 组，然后再配置允许 <code class="docutils literal notranslate"><span class="pre">wheel</span></code> 组连接 <code class="docutils literal notranslate"><span class="pre">RW</span></code> socket。</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">/etc/polkit-1/rules.d/50-libvirt.rules 配置 mykvm 用户组能够访问libvirt的RW socket</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Allow users in mykvm group to manage the libvirt</span>
+<span class="cm">daemon without authentication */</span><span class="w"></span>
+<span class="nx">polkit</span><span class="p">.</span><span class="nx">addRule</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">action</span><span class="p">,</span><span class="w"> </span><span class="nx">subject</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">id</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;org.libvirt.unix.manage&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"></span>
+<span class="w">        </span><span class="nx">subject</span><span class="p">.</span><span class="nx">isInGroup</span><span class="p">(</span><span class="s2">&quot;wheel&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">polkit</span><span class="p">.</span><span class="nx">Result</span><span class="p">.</span><span class="nx">YES</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">});</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<p>如果你需要配置一个新的组，授权访问libvirt的RW socket，例如 <code class="docutils literal notranslate"><span class="pre">mykvm</span></code> 组，而修改上面的 <code class="docutils literal notranslate"><span class="pre">/etc/polkit-1/rules.d/50-libvirt.rules</span></code> 将 <code class="docutils literal notranslate"><span class="pre">wheel</span></code> 组换成 <code class="docutils literal notranslate"><span class="pre">mykvm</span></code> 组即可。</p>
+</section>
+<section id="id5">
+<h3>配置认证(基于文件)<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h3>
+<p>另外一种简化的方式配置 <code class="docutils literal notranslate"><span class="pre">/etc/libvirt/libvirtf.conf</span></code> :</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">配置按照libirt组用户允许直接使用libvirt</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">unix_sock_group</span> <span class="o">=</span> <span class="s2">&quot;libvirt&quot;</span>
+<span class="nv">unix_sock_ro_perms</span> <span class="o">=</span> <span class="s2">&quot;0777&quot;</span>  <span class="c1"># set to 0770 to deny non-group libvirt users</span>
+<span class="nv">unix_sock_rw_perms</span> <span class="o">=</span> <span class="s2">&quot;0770&quot;</span>
+<span class="nv">auth_unix_ro</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+<span class="nv">auth_unix_rw</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我这次在 <a class="reference internal" href="../../linux/asahi_linux/index.html#asahi-linux"><span class="std std-ref">Asahi Linux</span></a> 上使用上述两种方法没有成功，奇怪。之前在 <a class="reference internal" href="../../linux/arch_linux/index.html#arch-linux"><span class="std std-ref">Arch Linux</span></a> X86平台是可行的</p>
+</div>
 </section>
 </section>
 <section id="id6">

@@ -32,10 +32,16 @@
 
    本次部署还是回归 ``ceph`` 常规命名集群名
 
+- 在每个服务器节点上准备环境变量:
+
+.. literalinclude:: ceph_env
+   :language: bash
+   :caption: 在每个服务器节点上准备环境变量
+
 部署monitor
 ================
 
-- 登陆到monitor节点，这里案例我安装在 ``a-b-data-1`` 节点，所以 ``ssh a-b-data-1``
+- 登陆到monitor节点，初始工作在 ``$HOST_1`` ( ``a-b-data-1`` )节点，所以 ``ssh a-b-data-1``
 
 - 由于我们已经安装了ceph软件，所以安装程序已经创建了 ``/etc/ceph`` 目录
 
@@ -53,18 +59,19 @@
 
 .. note::
 
+   上述 ``uuid`` 用于 ``fsid`` ，也就是前文环境变量 ``FSID``
+
+.. note::
+
    也可以使用 ``uuidgen`` 工具来生成uuid，这个工具包含在 ``util-linux`` 软件包中（ 参考 `uuidgen - create a new UUID value <http://manpages.ubuntu.com/manpages/xenial/man1/uuidgen.1.html>`_ ）
 
-- 创建Ceph配置文件 这里我部署 :ref:`mobile_cloud_infra` ``acloud`` 对应的基础集群 ``adata`` ，所以配置文件就是 ``adata.conf``  - 配置文件的命名规则是 ``{cluster_name}.conf`` 参考 :ref:`install_ceph_manual_zdata` 中探索::
+- 创建Ceph配置文件 这里我部署 :ref:`mobile_cloud_infra` 由于是采用默认集群名 ``ceph`` ，所以配置文件就是 ``/etc/ceph.conf``  - 配置文件的命名规则是 ``{cluster_name}.conf`` 参考 :ref:`install_ceph_manual_zdata` 中探索
 
-   sudo vim /etc/ceph/adata.conf
+- 执行以下脚本生成初始 ``/etc/ceph/ceph.conf`` 配置文件:
 
-配置案例:
-
-.. literalinclude:: mobile_cloud_ceph_mon/ceph.conf
+.. literalinclude:: mobile_cloud_ceph_mon/create_ceph_mon_bootstrap_config
    :language: bash
-   :linenos:
-   :caption: 创建Ceph集群(默认命名为ceph)的配置文件 /etc/ceph/ceph.conf
+   :caption: 生成Ceph集群起始ceph-mon配置文件 /etc/ceph/ceph.conf 的脚本: create_ceph_mon_bootstrap_config
 
 解析:
 
@@ -78,25 +85,25 @@ osd pool default size = {n}                      设置存储池中对象的副�
 osd pool default min size = {n}                  设置降级状态下对象的副本数
 ===============================================  ===========================
 
-- 创建集群的keyring和monitor密钥::
+- 创建集群的keyring和monitor密钥:
 
-   sudo ceph-authtool --create-keyring /tmp/ceph.mon.keyring --gen-key -n mon. --cap mon 'allow *'
+.. literalinclude:: mobile_cloud_ceph_mon/create_ceph_mon_keyring
+   :language: bash
+   :caption: 生成Ceph集群的 ${CLUSTER}.mon.keyring
 
 .. note::
 
-   注意这里创建的 ``keyring`` 名字是 ``{cluster_name}.mon.keyring``
+   注意这里创建的 ``keyring`` 名字是 ``{CLUSTER}.mon.keyring``
 
 提示::
 
    creating /tmp/ceph.mon.keyring
 
-- 生成管理员keyring，生成 ``client.admin`` 用户并添加用户到keyring::
+- 生成管理员keyring，生成 ``client.admin`` 用户并添加用户到keyring:
 
-   sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
-
-.. note::
-
-   注意这里创建的 ``keyring`` 名字是 ``{cluster_name}.client.admin.keyring
+.. literalinclude:: mobile_cloud_ceph_mon/create_ceph_client_admin_keyring
+   :language: bash
+   :caption: 生成Ceph集群的 ${CLUSTER}.client.admin.keyring
 
 提示::
 
@@ -104,37 +111,34 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 .. warning::
 
-   这里 ``/etc/ceph/adata.client.admin.keyring`` 是和集群名 ``ceph`` 对应的，所以如果创建其他集群管理，例如对 ``zdata`` 集群管理，则这个keyring名字必须是 ``/etc/ceph/zdata.client.admin.keyring``
+   这里 ``/etc/ceph/${CLUSTER}.client.admin.keyring`` 是和集群名 ``ceph`` 对应的，所以如果创建其他集群管理，例如对 ``zdata`` 集群管理，则这个keyring名字必须是 ``/etc/ceph/zdata.client.admin.keyring``
 
-- 生成 ``bootstrap-osd`` keyring(命名应该也是和集群名相关，是 ``<cluseter>.keyring`` )，生成 ``client.bootstrap-osd`` 用户并添加用户到keyring::
+- 生成 ``bootstrap-osd`` keyring(命名应该也是和集群名相关，是 ``${CLUSTER}.keyring`` )，生成 ``client.bootstrap-osd`` 用户并添加用户到keyring:
 
-   sudo ceph-authtool --create-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring --gen-key -n client.bootstrap-osd --cap mon 'profile bootstrap-osd' --cap mgr 'allow r'
+.. literalinclude:: mobile_cloud_ceph_mon/create_ceph_bootstrap_osd_keyring
+   :language: bash
+   :caption: 生成Ceph集群的bootstrap-osd keyring并将用户加入这个keyring
 
 提示::
 
    creating /var/lib/ceph/bootstrap-osd/ceph.keyring
 
-- 将生成的key添加到 ``ceph.mon.keyring`` ::
+- 将生成的key添加到 ``${CLUSTER}.mon.keyring`` ( ``ceph.mon.keyring`` )，并且修改这个keyring的owner为 ``ceph`` :
 
-   sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/ceph.client.admin.keyring
-   sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring
+.. literalinclude:: mobile_cloud_ceph_mon/add_key_to_mon_keyring
+   :language: bash
+   :caption: 将Ceph集群的admin keyring 和 bootstrap-osd keyring添加到 mon.keyring
 
 提示::
 
    importing contents of /etc/ceph/ceph.client.admin.keyring into /tmp/ceph.mon.keyring
    importing contents of /var/lib/ceph/bootstrap-osd/ceph.keyring into /tmp/ceph.mon.keyring
 
-- 更改 ``ceph.mon.keyring`` 的owner::
+- 使用主机名、主机IP和FSID生成一个监控映射，保存为 ``/tmp/monmap`` :
 
-   sudo chown ceph:ceph /tmp/ceph.mon.keyring
-
-- 使用主机名、主机IP和FSID生成一个监控映射，保存为 ``/tmp/monmap`` ::
-
-   monmaptool --create --add {hostname} {ip-address} --fsid {uuid} /tmp/monmap
-
-实际操作为::
-
-   monmaptool --create --add a-b-data-1 192.168.8.204 --fsid 598dc69c-5b43-4a3b-91b8-f36fc403bcc5 /tmp/monmap
+.. literalinclude:: mobile_cloud_ceph_mon/create_monmap
+   :language: bash
+   :caption: 将Ceph集群的主机名、主机IP和FSID生成一个监控映射 /tmp/monmap
 
 提示信息::
 
@@ -143,29 +147,23 @@ osd pool default min size = {n}                  设置降级状态下对象的�
    monmaptool: set fsid to 598dc69c-5b43-4a3b-91b8-f36fc403bcc5
    monmaptool: writing epoch 0 to /tmp/monmap (1 monitors)
 
-.. note::
+- 创建一个监控主机到默认数据目录:
 
-   这个步骤非常重要
+.. literalinclude:: mobile_cloud_ceph_mon/create_mon_dir
+   :language: bash
+   :caption: 将Ceph集群监控主机的默认数据目录
 
-- 创建一个监控主机到默认数据目录::
+- 发布监控服务的monitor的map和keyring:
 
-   sudo mkdir /var/lib/ceph/mon/{cluster-name}-{hostname}
+.. literalinclude:: mobile_cloud_ceph_mon/ceph_mon_mkfs
+   :language: bash
+   :caption: 发布监控服务monitor的map和keyring(创建数据目录下数据)
 
-实际操作为 -- 存储集群名设置为 ``ceph`` 主机名是 ``a-b-data-1`` ::
+- ``如果使用自定义集群名，则非常重要`` : 配置 ``systemd`` 启动集群的环境变量，修订 ``/etc/default/ceph`` 添加:
 
-   sudo -u ceph mkdir /var/lib/ceph/mon/ceph-a-b-data-1
-
-- 发布监控服务的monitor的map和keyring::
-
-   sudo -u ceph ceph-mon [--cluster {cluster-name}] --mkfs -i {hostname} --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
-
-实际操作::
-
-   sudo -u ceph ceph-mon --cluster ceph --mkfs -i a-b-data-1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
-
-- ``如果使用自定义集群名，则非常重要`` : 配置 ``systemd`` 启动集群的环境变量，修订 ``/etc/default/ceph`` 添加::
-
-   CLUSTER=adata
+.. literalinclude:: mobile_cloud_ceph_mon/default_ceph
+   :language: bash
+   :caption: 将Ceph集群名(特别是自定义名)写入到启动环境变量文件 /etc/default/ceph
 
 .. warning::
 
@@ -175,10 +173,11 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 
 - 启动monitor(s)
 
-通常发行版使用 ``systemctl`` 启动监控::
+通常发行版使用 ``systemctl`` 启动监控:
 
-   sudo systemctl start ceph-mon@a-b-data-1
-   sudo systemctl enable ceph-mon@a-b-data-1
+.. literalinclude:: mobile_cloud_ceph_mon/start_ceph
+   :language: bash
+   :caption: 启动ceph-mon服务
 
 - 验证monitor运行::
 
@@ -202,6 +201,13 @@ osd pool default min size = {n}                  设置降级状态下对象的�
      objects: 0 objects, 0 B
      usage:   0 B used, 0 B / 0 B avail
      pgs:
+
+消除 ``HEALTH_WARN`` (暂时跳过)
+==================================
+
+.. warning::
+
+   本步骤暂时跳过，原因见 :ref:`disable_insecure_global_id_reclaim` 出现的问题
 
 - 消除 ``HEALTH_WARN`` 参考 :ref:`solve_install_ceph_mon_health_warn` 执行以下命令::
 
@@ -229,6 +235,15 @@ osd pool default min size = {n}                  设置降级状态下对象的�
      usage:   0 B used, 0 B / 0 B avail
      pgs:
 
+整合脚本快速完成
+==================
+
+按照上述步骤一步步完成可以看到，整个步骤都在 ``$HOST_1`` ( ``a-b-data-1`` )上完成，实际上可以整合成一个脚本快速完成:
+
+.. literalinclude:: mobile_cloud_ceph_mon/host_1_ceph_mon.sh
+   :language: bash
+   :caption: 在节点1上完成ceph-mon部署脚本 host_1_ceph_mon.sh
+
 下一步
 ========
 
@@ -237,4 +252,4 @@ osd pool default min size = {n}                  设置降级状态下对象的�
 参考
 ======
 
-- `Ceph document - MANUAL DEPLOYMENT <https://docs.ceph.com/en/latest/install/manual-deployment/>`_
+- `Ceph document: Installation Ceph >> Installation(Manual) >> Manual Deployment #MONITOR BOOTSTRAPPING <https://docs.ceph.com/en/latest/install/manual-deployment/#monitor-bootstrapping>`_
