@@ -22,6 +22,7 @@ mobile_cloud_ceph_ceph_var_disk.rst
    mobile_cloud_ceph_add_ceph_osds_lvm.rst
    mobile_cloud_ceph_mon_clock_sync.rst
    mobile_cloud_ceph_add_ceph_mons.rst
+   remove_ceph.rst
 
 
 
