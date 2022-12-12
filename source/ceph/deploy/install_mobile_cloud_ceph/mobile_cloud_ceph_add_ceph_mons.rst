@@ -145,6 +145,20 @@
    :language: bash
    :caption: 在第三个ceph-mon服务器节点启动ceph-mon服务
 
+调整配置添加新增 ``ceph-mon`` 节点
+===================================
+
+``重要步骤``
+
+参考 `Ceph Monitor Config Reference#Minimum Configuration <https://docs.ceph.com/en/pacific/rados/configuration/mon-config-ref/#minimum-configuration>`_ 修订 ``/etc/ceph/${CLUSTER}.conf`` (这里是 ``/etc/ceph/ceph.conf`` ) 
+
+更新 ``mon initial members`` 和 ``mon host`` 行匹配现有状况:
+
+.. literalinclude:: mobile_cloud_ceph_mon/ceph.conf
+   :language: bash
+   :caption: /etc/ceph/ceph.conf
+   :emphasize-lines: 3-4
+
 异常排查
 ==============
 
@@ -154,17 +168,52 @@
    Dec 11 00:11:00 a-b-data-3.dev.cloud-atlas.io ceph-mon[885]: 2022-12-11T00:11:00.291+0800 ffff8eacb040 -1 WARNING: 'mon addr' config option v1:192.168.8.206:6789/0 does not match monmap file
    Dec 11 00:11:00 a-b-data-3.dev.cloud-atlas.io ceph-mon[885]:          continuing with monmap configuration
 
-此时执行 ``sudo ceph -s`` 都会卡住，待排查
+我发现遗漏上文中 "调整配置添加新增 ceph-mon 节点" ，所以修订每个服务器上的 ``/etc/ceph/ceph.conf`` 配置，然后重启 ``ceph-mon`` 服务。
 
-最小化配置 ``ceph-mon``
-==========================
+但是发现 ``ceph -s`` 依然卡住(没有改善)，并且
 
-参考 `Ceph Monitor Config Reference#Minimum Configuration <https://docs.ceph.com/en/pacific/rados/configuration/mon-config-ref/#minimum-configuration>`_ 修订 ``/etc/ceph/ceph.conf`` :
+在第一个节点 ``a-b-data-1`` 上执行 ``ceph -s`` 终端显示错误::
 
-.. literalinclude:: mobile_cloud_ceph_mon/ceph.conf
-   :language: bash
-   :caption: /etc/ceph/ceph.conf
-   :emphasize-lines: 16-18,20-22,24-26
+   2022-12-12T11:39:53.973+0800 ffffac0bf1a0  0 monclient(hunting): authenticate timed out after 300
+
+而在第二 ``a-b-data-2`` 和第三节点 ``a-b-data-3`` 执行 ``ceph -s`` 终端提示错误::
+
+   2022-12-12T11:40:04.309+0800 ffffa61ce1a0 -1 monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2]
+   2022-12-12T11:40:10.319+0800 ffffa61ce1a0 -1 monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2]
+
+参考 `Re: monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2] <https://lists.ceph.io/hyperkitty/list/ceph-users@ceph.io/thread/K7LDVS7Y5XQV7ILHC5WUWMXVJ5HX4HU3/>`_ 提到:
+
+ceph 升级到 14.2.20, 15.2.11 或者 16.2.1 版本，并且设置 ``auth_allow_insecure_global_id_reclaim`` 为 ``false`` 的时候，会出现上述报错。
+
+我检查了我当前版本 ``ceph -v`` 显示为 ``17.2.5`` ，之前在 :ref:`zdata_ceph` 使用的版本是 ``17.2.0`` ，之所以没有遇到这个问题，是因为当时我已经完成了所有节点的 ``ceph-mon`` 配置并运行，然后再执行 :ref:`disable_insecure_global_id_reclaim` 就没有影响。
+
+尝试解决步骤:
+
+- 我首先想暂时恢复 ``auth_allow_insecure_global_id_reclaim`` ，所以在节点1上执行::
+
+   sudo ceph config set mon auth_allow_insecure_global_id_reclaim true
+
+但是很不幸，由于已经将节点2和3加入了 ``ceph-mon`` 的monmap，无法更新，一直卡住。怎么办呢?
+
+参考 `After upgrade to 15.2.11 no access to cluster any more <https://lists.ceph.io/hyperkitty/list/ceph-users@ceph.io/thread/6OYOI7PCNBCC22OYLWUPLYRNCVP36MYC/>`_ 执行以下命令直接设置本机的ceph mon服务(需要在每个节点上分别执行)::
+
+   sudo ceph daemon mon.`hostname -s` config set auth_allow_insecure_global_id_reclaim true
+
+上述命令不会去连接集群的其他节点，所以能够正确执行，返回信息::
+
+   {   
+       "success": "auth_allow_insecure_global_id_reclaim = 'true' (not observed, change may require restart) "
+   }
+
+然后重启每个节点服务::
+
+   sudo systemctl restart ceph-mon@`hostname -s`
+
+.. note::
+
+   不过，我还是没有解决这个问题。我回顾了之前在X86平台部署记录 :ref:`install_ceph_mon` ，发现当时也是在完成第一个 ``ceph-mon`` 就直接设置了 ref:`disable_insecure_global_id_reclaim` 。但是区别可能是当时我一气呵成，完成了后续节点的部署添加。而这次部署第二和第三节点间隔了几天，可能是超出了72小时默认认证时间。
+
+   我暂时没有想出来如何解决，所以，我决定重新走一遍安装流程，但是会把 :ref:`disable_insecure_global_id_reclaim` 操作步骤放到所有 ``ceph-mon`` 节点部署完成后再启用。
 
 检查
 =======
