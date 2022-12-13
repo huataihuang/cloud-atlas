@@ -16,7 +16,6 @@ KVM提供了不需要修改Guest操作系统的虚拟化运行，也支持将mac
    :maxdepth: 1
 
    osx_kvm.rst
-   utm.rst
 
 .. only::  subproject and html
 

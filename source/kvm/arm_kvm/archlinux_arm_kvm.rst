@@ -15,7 +15,7 @@ arch linux ARM KVM虚拟化
 
 .. _install_kvm_asahi_linux_fail:
 
-在 :ref:`asahi_linux`安装虚拟化(挫折)
+在 :ref:`asahi_linux` 安装虚拟化(挫折)
 ============================================
 
 - 使用 :ref:`pacman` 搜索QEMU软件工具::
@@ -119,7 +119,7 @@ arch linux ARM KVM虚拟化
 安装libvirt
 ===============
 
-- arch linux for arm软件仓库提供 :ref:`libvirt` 安装；除了 :ref:`libvirt` 和 :ref:`kvm_qemu` /KVM (Hypervisor) 之外，还需要一些网络相关的组件:
+- arch linux for arm软件仓库提供 :ref:`libvirt` 安装；除了 :ref:`libvirt` 和 :ref:`qemu` /KVM (Hypervisor) 之外，还需要一些网络相关的组件:
 
 .. literalinclude:: archlinux_arm_kvm/archlinux_install_libvirt_packages
    :language: bash
@@ -226,3 +226,4 @@ arch linux ARM KVM虚拟化
 - `FS#74773 - Cannot resolve "edk2-armvirt", a dependency of "qemu-system-aarch64" <https://bugs.archlinux.org/task/74773>`_
 - `Creating an Arch Linux ARM QEMU VM on a Mac M1 <https://www.reddit.com/r/archlinux/comments/vg8n8c/creating_an_arch_linux_arm_qemu_vm_on_a_mac_m1/>`_
 - `Architectures/AArch64/Install with QEMU <https://fedoraproject.org/wiki/Architectures/AArch64/Install_with_QEMU>`_
+- `How to boot Arch Linux ARM in QEMU (patched for M1) <https://gist.github.com/thalamus/561d028ff5b66310fac1224f3d023c12>`_ 关于如何在ARM架构中QEMU启动Arch Linux ARM虚拟机镜像的方法，不过这个文档是使用qcow2和raw镜像，并且使用的是 :ref:`utm` (也就是针对 :ref:`macos` 移植的 :ref:`qemu` )

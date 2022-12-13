@@ -1,14 +1,11 @@
-.. _qemu:
+.. _ios:
 
 =================================
-QEMU
+macOS
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   qemu_images.rst
-   qemu_monitor.rst
 
 .. only::  subproject and html
 
