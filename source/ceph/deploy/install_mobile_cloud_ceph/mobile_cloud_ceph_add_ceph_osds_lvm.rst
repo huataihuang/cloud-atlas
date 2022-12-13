@@ -165,6 +165,15 @@ bluestore
 
 请注意，现在只有一个OSD运行，不满足配置中要求3个副本的要求，我们需要添加OSD节点
 
+整合脚本快速完成
+===================
+
+安装OSD非常简便，所以整合脚本也就更为简单:
+
+.. literalinclude:: mobile_cloud_ceph_add_ceph_osds_lvm/host_1_ceph_osd.sh
+   :language: bash
+   :caption: 在节点1上完成ceph-osd部署脚本 host_1_ceph_osd.sh
+
 重启操作系统验证
 ======================
 
@@ -174,32 +183,14 @@ bluestore
 
    sudo ceph -s
 
-可以看到 ``ceph-volume lvm`` 默认配置非常方便，重启后系统服务正常，OSD也能正常运行::
+可以看到 ``ceph-volume lvm`` 默认配置非常方便，重启后系统服务正常，OSD也能正常运行:
 
-   cluster:
-     id:     598dc69c-5b43-4a3b-91b8-f36fc403bcc5
-     health: HEALTH_WARN
-             2 mgr modules have recently crashed
-             OSD count 1 < osd_pool_default_size 3
-  
-   services:
-     mon: 1 daemons, quorum a-b-data-1 (age 31s)
-     mgr: a-b-data-1(active, since 17s)
-     osd: 1 osds: 1 up (since 27s), 1 in (since 37m)
-  
-   data:
-     pools:   0 pools, 0 pgs
-     objects: 0 objects, 0 B
-     usage:   5.2 MiB used, 47 GiB / 47 GiB avail
-     pgs:
+.. literalinclude:: mobile_cloud_ceph_add_ceph_osds_lvm/ceph_s_output
+   :language: bash
+   :caption: ceph -s输出显示3个服务都已经启动
+   :emphasize-lines: 9-11
 
-
-上述 ``HEALTH_WARN`` 暂时不用顾虑，原因是OSD数量尚未满足配置3副本要求，后续将会配置补上。根据目前输出信息，3个服务都已经启动::
-
-   services:
-     mon: 1 daemons, quorum a-b-data-1 (age 2m)
-     mgr: a-b-data-1(active, since 2m)
-     osd: 1 osds: 1 up (since 2m), 1 in (since 39m)
+上述 ``HEALTH_WARN`` 暂时不用顾虑，原因是OSD数量尚未满足配置3副本要求，后续将会配置补上。根据目前输出信息，3个服务都已经启动
 
 添加OSD
 =======================

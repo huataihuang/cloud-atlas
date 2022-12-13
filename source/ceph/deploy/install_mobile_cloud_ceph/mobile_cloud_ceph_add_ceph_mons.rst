@@ -33,7 +33,7 @@
 
 - 在 ``ceph-mon`` 的主机 ``$HOST_1`` ( ``a-b-data-1`` )上执行以下命令获取monitors的keyring(需要读取本机的 ``/etc/ceph/ceph.client.admin.keyring`` 认证来获取 ``ceph-mon`` 的keyring):
 
-.. literalinclude:: mobile_cloud_ceph_add_ceph_mons/get_ceph.mon.keyring
+.. literalinclude:: mobile_cloud_ceph_add_ceph_mons/get_ceph_mon_keyring
    :language: bash
    :caption: 在第一个ceph-mon服务器节点获取monitor的keyring保存到/tmp/ceph.mon.keyring
 
@@ -104,7 +104,7 @@
 
 - 准备monitor的数据目录，这里必须指定monitor map路径，这样才能够获取监控的quorum信息以及 ``fsid`` ，而且还需要提供 monitor keyring的路径，以及从第一个节点复制过来的 ``monmap`` 和 ``ceph.mon.keyring`` 文件:
 
-.. literalinclude:: mobile_cloud_ceph_add_ceph_mons/ceph-mon_mkfs
+.. literalinclude:: mobile_cloud_ceph_add_ceph_mons/ceph_mon_mkfs
    :language: bash
    :caption: 在第二个ceph-mon服务器节点为该节点创建monitor数据目录
 
@@ -135,7 +135,7 @@
 
 - 在  ``$HOST_3`` ( ``a-b-data-3`` ) 上执行以下命令获取 ``ceph-mon`` 的keyring/monmap，并创建mon目录:
 
-.. literalinclude:: mobile_cloud_ceph_add_ceph_mons/ceph-mon_mkfs
+.. literalinclude:: mobile_cloud_ceph_add_ceph_mons/ceph_mon_mkfs
    :language: bash
    :caption: 在第三个ceph-mon服务器节点为该节点创建monitor数据目录(需要准备集群的keyring和monmap文件)
 
@@ -209,11 +209,31 @@ ceph 升级到 14.2.20, 15.2.11 或者 16.2.1 版本，并且设置 ``auth_allow
 
    sudo systemctl restart ceph-mon@`hostname -s`
 
-.. note::
+重新部署并排查
+=====================
 
-   不过，我还是没有解决这个问题。我回顾了之前在X86平台部署记录 :ref:`install_ceph_mon` ，发现当时也是在完成第一个 ``ceph-mon`` 就直接设置了 ref:`disable_insecure_global_id_reclaim` 。但是区别可能是当时我一气呵成，完成了后续节点的部署添加。而这次部署第二和第三节点间隔了几天，可能是超出了72小时默认认证时间。
+我重新部署了一遍，步骤中去掉了 :ref:`disable_insecure_global_id_reclaim` 但是报错依旧
 
-   我暂时没有想出来如何解决，所以，我决定重新走一遍安装流程，但是会把 :ref:`disable_insecure_global_id_reclaim` 操作步骤放到所有 ``ceph-mon`` 节点部署完成后再启用。
+我发现存在一个蹊跷的地方::
+
+   monmaptool --print /tmp/monmap
+
+显示输出::
+
+   monmaptool: monmap file /tmp/monmap
+   epoch 1
+   fsid 598dc69c-5b43-4a3b-91b8-f36fc403bcc5
+   last_changed 2022-12-12T23:28:26.845735+0800
+   created 2022-12-12T23:28:26.845735+0800
+   min_mon_release 17 (quincy)
+   election_strategy: 1
+   0: v1:192.168.8.204:6789/0 mon.a-b-data-1
+   1: [v2:192.168.8.205:3300/0,v1:192.168.8.205:6789/0] mon.a-b-data-2
+   2: [v2:192.168.8.206:3300/0,v1:192.168.8.206:6789/0] mon.a-b-data-3
+
+奇怪，为何第一个部署节点使用的是 ``v1`` mon，而第二个节点和第三个节点既有 ``v1`` 又有 ``v2``
+
+
 
 检查
 =======

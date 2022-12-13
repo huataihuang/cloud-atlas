@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function ceph_env() {
+ceph_env() {
     CLUSTER=ceph
     # FSID=$(cat /proc/sys/kernel/random/uuid)
     FSID=598dc69c-5b43-4a3b-91b8-f36fc403bcc5
@@ -19,7 +19,7 @@ function ceph_env() {
     HOST_NET=192.168.8.0/24
 }
 
-function create_ceph_mon_bootstrap_config() {
+create_ceph_mon_bootstrap_config() {
 cat << EOF | sudo tee /etc/ceph/${CLUSTER}.conf
 [global]
 fsid = ${FSID}
@@ -38,17 +38,17 @@ osd crush chooseleaf type = 1
 EOF
 }
 
-function create_ceph_mon_keyring() {
+create_ceph_mon_keyring() {
     sudo ceph-authtool --create-keyring /tmp/${CLUSTER}.mon.keyring --gen-key -n mon. --cap mon 'allow *'
 }
 
-function create_ceph_client_admin_keyring() {
+create_ceph_client_admin_keyring() {
     sudo ceph-authtool --create-keyring /etc/ceph/${CLUSTER}.client.admin.keyring \
             --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' \
             --cap mds 'allow *' --cap mgr 'allow *'
 }
 
-function create_dir() {
+create_dir() {
     local dir="$1"
     if [ ! -d "$dir" ]; then
         sudo mkdir -p $dir
@@ -56,34 +56,34 @@ function create_dir() {
     fi
 }
 
-function create_ceph_bootstrap_osd_keyring() {
+create_ceph_bootstrap_osd_keyring() {
     create_dir /var/lib/ceph/bootstrap-osd
     sudo ceph-authtool --create-keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring \
         --gen-key -n client.bootstrap-osd \
         --cap mon 'profile bootstrap-osd' --cap mgr 'allow r'
 }
 
-function add_key_to_mon_keyring() {
+add_key_to_mon_keyring() {
     sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/${CLUSTER}.client.admin.keyring
     sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
     sudo chown ceph:ceph /tmp/ceph.mon.keyring
 }
 
-function create_monmap() {
+create_monmap() {
     sudo -u ceph monmaptool --create --add ${HOST} ${HOST_IP} --fsid ${FSID} /tmp/monmap
 }
 
-function ceph_mon_mkfs() {
+ceph_mon_mkfs() {
     create_dir /var/lib/ceph/mon/${CLUSTER}-${HOST}
     sudo -u ceph ceph-mon --cluster ${CLUSTER} --mkfs -i ${HOST} --monmap /tmp/monmap \
         --keyring /tmp/${CLUSTER}.mon.keyring
 }
 
-function default_ceph() {
+default_ceph() {
     echo $CLUSTER | sudo tee /etc/default/ceph
 }
 
-function start_ceph() {
+start_ceph() {
     sudo systemctl start ceph-mon@${HOST}
     sudo systemctl enable ceph-mon@${HOST}
 }
