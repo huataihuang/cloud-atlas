@@ -29,6 +29,17 @@
    sudo rm -f /etc/ceph/ceph.client.admin.keyring
    sudo mv /etc/ceph/ceph.conf /etc/ceph/ceph.conf.bak
 
+- 删除 ``osd`` 卷(这里命令是简单操作，没有考虑复杂的逻辑，例如只有本地一个osd卷)::
+
+   lv=`sudo lvdisplay | grep "LV Path" | awk '{print $3}'`
+   sudo lvremove $lv -y
+
+   vg=`sudo vgdisplay | grep "VG Name" | awk '{print $3}'`
+   sudo vgremove $vg -y
+
+   pv=`sudo pvdisplay | grep "PV Name" | awk '{print $3}'`
+   sudo pvremove $pv -y
+
 - 重启各个服务器节点
 
 参考

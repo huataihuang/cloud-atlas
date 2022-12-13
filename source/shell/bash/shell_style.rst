@@ -455,5 +455,6 @@ SHELL内建命令和外部命令
 参考
 =========
 
-- `Shell 风格指南 <https://zh-google-styleguide.readthedocs.io/en/latest/google-shell-styleguide/contents/>`_
+- `Shell 风格指南 <https://zh-google-styleguide.readthedocs.io/en/latest/google-shell-styleguide/contents/>`_ 中文版和最新的英文原版有一些差异，以英文原版为准
 - `Shell Style Guide <https://github.com/google/styleguide/blob/gh-pages/shellguide.md>`_
+- Google在 `Google Style Guide <https://google.github.io/styleguide/>`_ 提供了更为丰富的编程风格指南，如果你有对应语言开发可以直接阅读原文参考
