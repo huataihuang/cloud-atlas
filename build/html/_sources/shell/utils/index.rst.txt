@@ -7,6 +7,8 @@ Shell 实用工具
 .. toctree::
    :maxdepth: 1
 
+   sed.rst
+   awk.rst
    sudo.rst
    screen.rst
    htop.rst

@@ -43,6 +43,23 @@ pandoc 文档转换工具
    import pypandoc
    output = pypandoc.convert('somefile.md', 'rst')
 
+远程转换
+===========
+
+实际上 ``pandoc`` 是一个非常庞大的软件，如果在 :ref:`arch_linux` 上安装，就会看到依赖安装了大量的 ``haskell`` 软件包。对于我的 :ref:`mobile_cloud_infra` 来说，本地磁盘大多数被用于虚拟机环境，不愿意花费大量的磁盘空间来安装这个并不常用的软件。
+
+不过，我的服务器 ``zcloud`` 存储空间充足，性能强大，所以我通过以下脚本来完成转换:
+
+.. literalinclude:: pandoc/m2r
+   :language: bash
+   :caption: 通过SSH将本地Markdown文件上传服务器使用pandoc转换reStructuredText文件下载
+
+这样，可以简单转换(脚本待完善)::
+
+   m2r bash_shutcuts.md
+
+则在本地会有转换后的 ``bash_shutcuts.rst`` ，方便后续修改。
+
 参考
 ======
 

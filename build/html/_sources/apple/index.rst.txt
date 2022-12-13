@@ -20,6 +20,7 @@ iOS 是苹果公司开发的移动操作系统，目前已经演化成 iOS(iphon
    :maxdepth: 1
 
    macos/index
+   ios/index
    iphone/index
    watch/index
    ipad/index
