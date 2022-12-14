@@ -4,9 +4,21 @@
 firewalld防护墙服务
 =====================
 
-firewalld是Red Hat开发的firewall daemon，默认使用了nftables(取代iptables的netfilter实现)。firewalld提供了动态管理防火墙，支持网络/防火墙区域(zones)概念以便定义网络连接或网络接口的信任级别。firewalld支持IPv4, IPv6防火墙设置，以太网网桥以及IP sets。并且，firewalld提供了运行时配置和永久性配置的区分，也提供了面向服务或应用程序来添加防火墙规则的接口。
+firewalld概念
+===============
 
-- 安装
+- ``firewalld`` 是Red Hat开发的firewall daemon，默认使用了nftables(取代iptables的netfilter实现)。
+ 
+- ``firewalld`` 提供了动态管理的基于主机的防火墙，带有 D-Bus 接口，支持网络/防火墙区域(zones)概念以便定义网络连接或网络接口的信任级别。
+ 
+- ``firewalld`` 支持IPv4, IPv6防火墙设置，以太网网桥以及IP sets。
+ 
+- ``firewalld`` 提供了运行时配置和永久性配置的区分，也提供了面向服务或应用程序来添加防火墙规则的接口。
+
+- ``firewalld`` 阻止未明确设置为打开的端口上的所有流量。默认情况下，某些区域(例如受信任区域)允许所有流量。
+
+安装firewalld
+================
 
 arch linux::
 
@@ -16,7 +28,8 @@ rhel/CentOS::
 
    dnf install firewalld
 
-- 使用
+使用firewalld
+==================
 
 激活和启动firewalld.service::
 
@@ -130,7 +143,7 @@ zone信息
      destination:
      includes:
 
-在zone上添加或溢出服务
+在zone上添加或移除服务
 -----------------------
 
 - 将服务添加到zone，就可以一次设置好需要的所有端口::
@@ -168,9 +181,32 @@ firewalld还支持一种有时间限制的服务和端口添加，时间单位�
 
    firewall-cmd --runtime-to-permanent
 
+惨痛的教训
+=============
+
+我在 :ref:`debug_ceph_authenticate_time_out` 犯了一个低级错误，简单查看了 ``iptables -L`` 输出为空就以为主机没有启动防火墙。没想到 :ref:`fedora` 默认启用了 ``firewalld`` 服务。所以后来检查:
+
+.. literalinclude:: firewalld/firewall_cmd_list
+   :language: bash
+   :caption: 检查主机所有firewalld配置概要
+
+可以看到 ``firewalld`` 屏蔽了 :ref:`ceph` 服务访问:
+
+.. literalinclude:: ../../../ceph/deploy/install_mobile_cloud_ceph/debug_ceph_authenticate_time_out/firewall_cmd_list_output
+   :language: bash
+   :caption: 检查firewalld配置输出
+   :emphasize-lines: 6
+
+停止 ``firewalld`` :
+
+.. literalinclude:: firewalld/stop_firewalld
+   :language: bash
+   :caption: 停止firewalld服务
+
 参考
 =======
 
 - `Arch Linux 社区文档 - Firewalld <https://wiki.archlinux.org/index.php/Firewalld>`_
 - `Introduction to FirewallD on CentOS <https://www.linode.com/docs/security/firewalls/introduction-to-firewalld-on-centos/>`_
 - `How To Set Up a Firewall Using firewalld on CentOS 8 <https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-using-firewalld-on-centos-8>`_
+- `Fedora docs: Using firewalld <ttps://docs.fedoraproject.org/en-US/quick-docs/firewalld/>`_

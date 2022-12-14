@@ -95,6 +95,14 @@ systemd-resolved默认就可以和 :ref:`networkmanager` 协作管理 ``/etc/res
    DNS=192.168.35.1 fd7b:d0bd:7a6e::1
    Domains=~.
 
+另外可以配置 ``/etc/systemd/resolved.conf`` 也能起到同样作用::
+
+   #DNS=
+   DNS=192.168.6.200
+   #FallbackDNS=
+   #Domains=
+   Domains=dev.cloud-atlas.io
+
 Fallback
 ---------
 
