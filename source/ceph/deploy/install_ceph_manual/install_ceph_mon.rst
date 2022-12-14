@@ -192,18 +192,8 @@ osd pool default min size = {n}                  设置降级状态下对象的�
       usage:   0 B used, 0 B / 0 B avail
       pgs:
 
-.. _disable_insecure_global_id_reclaim:
-
-禁止不安全的golbal_id重用
----------------------------
-
-.. warning::
-
-   启用 ``auth_allow_insecure_global_id_reclaim false`` 可能需要在所有 ``ceph-mon`` 节点都部署完毕并启用之后再配置。否则，一旦启用，要添加后续的 ``ceph-mon`` 节点，必须要在72小时内完成，不然token失效会导致后续节点添加失败，但是 ``monmap`` 又被更新成新节点已经加入，这个冲突我没有解决。所以保险起见，还是等所有 ``ceph-mon`` 节点部署完成后再启用。
-
-   如果要做节点变化，先恢复 ``auth_allow_insecure_global_id_reclaim true`` ，完成 ``ceph-mon`` 节点变更后再恢复 ``false`` 安全设置。
-
-   **以上是我推测，待验证**
+禁止不安全的golbal_id重用并启用msgr2
+--------------------------------------
 
 .. note::
 
