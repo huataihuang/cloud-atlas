@@ -25,11 +25,19 @@
    :language: bash
    :caption: 添加 mon 默认目录
 
+.. _copy_admin_keyring_and_conf:
+
+复制Ceph管理密钥和配置
+------------------------
+
 - 将 ``$HOST_1`` 上 ( ``a-b-data-1`` ) 管理密钥复制到需要部署 ``ceph-mon`` 的配置目录下:
 
 .. literalinclude:: mobile_cloud_ceph_add_ceph_mons/copy_admin_keyring_and_conf
    :language: bash
    :caption: 复制admin.keyring和配置文件
+
+构建Ceph集群monmap
+--------------------
 
 - 在 ``ceph-mon`` 的主机 ``$HOST_1`` ( ``a-b-data-1`` )上执行以下命令获取monitors的keyring(需要读取本机的 ``/etc/ceph/ceph.client.admin.keyring`` 认证来获取 ``ceph-mon`` 的keyring):
 
@@ -162,76 +170,7 @@
 异常排查
 ==============
 
-这次部署我遇到问题是虽然能启动第二和第三节点上的 ``ceph-mon`` ，但是服务显示错误::
-
-   Dec 11 00:11:00 a-b-data-3.dev.cloud-atlas.io systemd[1]: Started ceph-mon@a-b-data-3.service - Ceph cluster monitor daemon.
-   Dec 11 00:11:00 a-b-data-3.dev.cloud-atlas.io ceph-mon[885]: 2022-12-11T00:11:00.291+0800 ffff8eacb040 -1 WARNING: 'mon addr' config option v1:192.168.8.206:6789/0 does not match monmap file
-   Dec 11 00:11:00 a-b-data-3.dev.cloud-atlas.io ceph-mon[885]:          continuing with monmap configuration
-
-我发现遗漏上文中 "调整配置添加新增 ceph-mon 节点" ，所以修订每个服务器上的 ``/etc/ceph/ceph.conf`` 配置，然后重启 ``ceph-mon`` 服务。
-
-但是发现 ``ceph -s`` 依然卡住(没有改善)，并且
-
-在第一个节点 ``a-b-data-1`` 上执行 ``ceph -s`` 终端显示错误::
-
-   2022-12-12T11:39:53.973+0800 ffffac0bf1a0  0 monclient(hunting): authenticate timed out after 300
-
-而在第二 ``a-b-data-2`` 和第三节点 ``a-b-data-3`` 执行 ``ceph -s`` 终端提示错误::
-
-   2022-12-12T11:40:04.309+0800 ffffa61ce1a0 -1 monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2]
-   2022-12-12T11:40:10.319+0800 ffffa61ce1a0 -1 monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2]
-
-参考 `Re: monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2] <https://lists.ceph.io/hyperkitty/list/ceph-users@ceph.io/thread/K7LDVS7Y5XQV7ILHC5WUWMXVJ5HX4HU3/>`_ 提到:
-
-ceph 升级到 14.2.20, 15.2.11 或者 16.2.1 版本，并且设置 ``auth_allow_insecure_global_id_reclaim`` 为 ``false`` 的时候，会出现上述报错。
-
-我检查了我当前版本 ``ceph -v`` 显示为 ``17.2.5`` ，之前在 :ref:`zdata_ceph` 使用的版本是 ``17.2.0`` ，之所以没有遇到这个问题，是因为当时我已经完成了所有节点的 ``ceph-mon`` 配置并运行，然后再执行 :ref:`disable_insecure_global_id_reclaim` 就没有影响。
-
-尝试解决步骤:
-
-- 我首先想暂时恢复 ``auth_allow_insecure_global_id_reclaim`` ，所以在节点1上执行::
-
-   sudo ceph config set mon auth_allow_insecure_global_id_reclaim true
-
-但是很不幸，由于已经将节点2和3加入了 ``ceph-mon`` 的monmap，无法更新，一直卡住。怎么办呢?
-
-参考 `After upgrade to 15.2.11 no access to cluster any more <https://lists.ceph.io/hyperkitty/list/ceph-users@ceph.io/thread/6OYOI7PCNBCC22OYLWUPLYRNCVP36MYC/>`_ 执行以下命令直接设置本机的ceph mon服务(需要在每个节点上分别执行)::
-
-   sudo ceph daemon mon.`hostname -s` config set auth_allow_insecure_global_id_reclaim true
-
-上述命令不会去连接集群的其他节点，所以能够正确执行，返回信息::
-
-   {   
-       "success": "auth_allow_insecure_global_id_reclaim = 'true' (not observed, change may require restart) "
-   }
-
-然后重启每个节点服务::
-
-   sudo systemctl restart ceph-mon@`hostname -s`
-
-重新部署并排查
-=====================
-
-我重新部署了一遍，步骤中去掉了 :ref:`disable_insecure_global_id_reclaim` 但是报错依旧
-
-我发现存在一个蹊跷的地方::
-
-   monmaptool --print /tmp/monmap
-
-显示输出::
-
-   monmaptool: monmap file /tmp/monmap
-   epoch 1
-   fsid 598dc69c-5b43-4a3b-91b8-f36fc403bcc5
-   last_changed 2022-12-12T23:28:26.845735+0800
-   created 2022-12-12T23:28:26.845735+0800
-   min_mon_release 17 (quincy)
-   election_strategy: 1
-   0: v1:192.168.8.204:6789/0 mon.a-b-data-1
-   1: [v2:192.168.8.205:3300/0,v1:192.168.8.205:6789/0] mon.a-b-data-2
-   2: [v2:192.168.8.206:3300/0,v1:192.168.8.206:6789/0] mon.a-b-data-3
-
-奇怪，为何第一个部署节点使用的是 ``v1`` mon，而第二个节点和第三个节点既有 ``v1`` 又有 ``v2``
+这次部署我遇到问题是虽然能启动第二和第三节点上的 ``ceph-mon`` ，但是 ``ceph -s`` 却无法正常工作(没有输出)，也无法执行调整命令。这个问题困扰了我好几天，一度以为操作步骤错误，不得已 :ref:`remove_ceph` 并重新部署Ceph。
 
 不过，最终解决这个问题，是一个低级错误: :ref:`debug_ceph_authenticate_time_out` ，哭笑不得...
 

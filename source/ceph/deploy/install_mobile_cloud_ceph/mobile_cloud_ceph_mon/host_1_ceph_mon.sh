@@ -88,6 +88,11 @@ start_ceph() {
     sudo systemctl enable ceph-mon@${HOST}
 }
 
+disable_insecure_global_id_enable_msgr2() {
+    sudo ceph config set mon auth_allow_insecure_global_id_reclaim false
+    sudo ceph mon enable-msgr2
+}
+
 ceph_env
 create_ceph_mon_bootstrap_config
 create_ceph_mon_keyring
@@ -98,3 +103,4 @@ create_monmap
 ceph_mon_mkfs
 default_ceph
 start_ceph
+disable_insecure_global_id_enable_msgr2

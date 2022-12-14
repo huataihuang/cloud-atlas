@@ -10,11 +10,17 @@
 :ref:`install_mobile_cloud_ceph` 我遇到问题是虽然能启动第二和第三节点上的 ``ceph-mon`` ，但是
 
 - 在 ``$HOST_1`` 完成 :ref:`mobile_cloud_ceph_mon` , :ref:`mobile_cloud_ceph_mgr` 和 :ref:`mobile_cloud_ceph_add_ceph_osds_lvm` 上执行 ``ceph -s`` 是正常的
+
 - 但是在 ``$HOST_2`` 和 ``$HOST_3`` 上完成 :ref:`mobile_cloud_ceph_add_ceph_mons` 就发现 ``$HOST_1`` 上执行 ``ceph -s`` 没有响应，过了很久终端上显示::
 
    2022-12-14T08:58:38.817+0800 ffffb4ede1a0  0 monclient(hunting): authenticate timed out after 300
    2022-12-14T09:03:38.826+0800 ffffb4ede1a0  0 monclient(hunting): authenticate timed out after 300
    ...
+
+而在 第二 ``a-b-data-2`` 和第三节点 ``a-b-data-3`` 执行 ``ceph -s`` 终端提示错误::
+
+   2022-12-12T11:40:04.309+0800 ffffa61ce1a0 -1 monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2]
+   2022-12-12T11:40:10.319+0800 ffffa61ce1a0 -1 monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2]
 
 - 执行 ``systemctl status ceph-mon@$(hostname -s)`` 
 
@@ -51,7 +57,7 @@
 
 ceph 升级到 14.2.20, 15.2.11 或者 16.2.1 版本，并且设置 ``auth_allow_insecure_global_id_reclaim`` 为 ``false`` 的时候，会出现上述报错。
 
-我检查了我当前版本 ``ceph -v`` 显示为 ``17.2.5`` ，之前在 :ref:`zdata_ceph` 使用的版本是 ``17.2.0`` ，之所以没有遇到这个问题，是因为当时我已经完成了所有节点的 ``ceph-mon`` 配置并运行，然后再执行 :ref:`disable_insecure_global_id_reclaim` 就没有影响。
+我检查了我当前版本 ``ceph -v`` 显示为 ``17.2.5`` ，之前在 :ref:`zdata_ceph` 使用的版本是 ``17.2.0`` 。似乎不是这个原因，但是我也怀疑是当时完全部署好3个 ``ceph-mon`` 之后再做的开关切换所以没影响(这个推测是错误的)
 
 尝试解决步骤:
 
@@ -80,12 +86,12 @@ ceph 升级到 14.2.20, 15.2.11 或者 16.2.1 版本，并且设置 ``auth_allow
 重新部署并排查
 =====================
 
-我重新部署了一遍，步骤中去掉了 :ref:`disable_insecure_global_id_reclaim` 但是报错依旧
+我重新部署了一遍，步骤中暂时去掉了 ``auth_allow_insecure_global_id_reclaim`` 配置调整，但是报错依旧。
 
 发现 ``monmap`` 不一致
 ----------------------------
 
-我发现存在一个蹊跷的地方::
+我发现存在一个蹊跷的地方(后来发现不是这个原因，这个只是因为没有启用 ``msgr2`` 导致)::
 
    sudo ceph mon getmap -o /tmp/monmap
    monmaptool --print /tmp/monmap

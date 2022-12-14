@@ -122,6 +122,8 @@ Ceph提供了一个非常有用的模块 ``dashboard`` 方便管理存储集群�
 
    脚本中我整合了 :ref:`ceph_dashboard` ，所以执行以后不仅启动了 ``ceph-mgr`` 也激活了 ``dashborad`` 模块
 
+   注意: :ref:`ceph_dashboard` 需要准备一个用户密码文件( 这里使用 ``pw.txt`` 文件 )，以便在 ``ceph dashboard ac-user-create`` 时候指定密码
+
 下一步
 =======
 

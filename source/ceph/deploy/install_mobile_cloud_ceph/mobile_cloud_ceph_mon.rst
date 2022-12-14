@@ -202,17 +202,22 @@ osd pool default min size = {n}                  设置降级状态下对象的�
      usage:   0 B used, 0 B / 0 B avail
      pgs:
 
-消除 ``HEALTH_WARN`` (暂时跳过)
+消除 ``HEALTH_WARN``
 ==================================
 
-.. warning::
+.. note::
 
-   本步骤暂时跳过，原因见 :ref:`disable_insecure_global_id_reclaim` 出现的问题
+   参考 `Ceph HEALTH_WARN with 'mons are allowing insecure global_id reclaim' after install/upgrade to RHCS 4.2z2 (or newer) <https://access.redhat.com/articles/6136242>`_ (原因是新版本要求严格安全) 或者 `ceph: Mons are allowing insecure global_id reclaim #7746 <https://github.com/rook/rook/issues/7746>`_
 
-- 消除 ``HEALTH_WARN`` 参考 :ref:`solve_install_ceph_mon_health_warn` 执行以下命令::
+   参考 `MON_MSGR2_NOT_ENABLED <https://docs.ceph.com/en/latest/rados/operations/health-checks/#mon-msgr2-not-enabled>`_ :
 
-   sudo ceph config set mon auth_allow_insecure_global_id_reclaim false
-   sudo ceph mon enable-msgr2
+   ``ms_bind_msgr2`` 选项已经激活但是monitor没有配置成绑定到集群的monmap ``v2`` 端口。激活这个功能将使用 ``msgr2`` 协议，对于一些连接不可用。
+
+- 消除 ``HEALTH_WARN`` 执行以下命令:
+
+.. literalinclude:: mobile_cloud_ceph_mon/disable_insecure_global_id_enable_msgr2
+   :language: bash
+   :caption: 禁止不安全的golbal_id重用并启用msgr2
 
 最终完成后，执行::
 

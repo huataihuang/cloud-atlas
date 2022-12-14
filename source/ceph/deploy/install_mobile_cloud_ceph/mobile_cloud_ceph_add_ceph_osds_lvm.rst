@@ -34,36 +34,41 @@ bluestore
 
 我这里构建实践采用 ``ceph-volume lvm`` ，这个命令会自动创建底层 :ref:`linux_lvm` 
 
+.. _prepare_vdb_parted:
+
+准备 ``vdb`` 虚拟磁盘分区
+---------------------------
+
 .. note::
 
    生产环境请使用LVM卷作为底层设备 - 参考 :ref:`bluestore_config`
 
    我的部署实践是在3台虚拟机 ``z-b-data-1`` / ``z-b-data-2`` / ``z-b-data-3`` 上完成，分区完全一致
 
-- 准备底层块设备( 虚拟机有2块磁盘，其中 ``/dev/vdb`` 用于Ceph数据 磁盘空间有限，分配50G)，这里划分 GPT 分区1 ::
+- 准备底层块设备( 虚拟机有2块磁盘，其中 ``/dev/vdb`` 用于Ceph数据 磁盘空间有限，分配50G)，这里划分 GPT 分区1 :
 
-   sudo parted /dev/vdb mklabel gpt
-   sudo parted -a optimal /dev/vdb mkpart primary 0% 50G
+.. literalinclude:: mobile_cloud_ceph_add_ceph_osds_lvm/parted_vdb
+   :language: bash
+   :caption: 划分/dev/vdb 50G
 
-完成后检查 ``fdisk -l`` 可以看到::
+完成后检查 ``fdisk -l`` 可以看到:
 
-   Disk /dev/vdb: 55 GiB, 59055800320 bytes, 115343360 sectors
-   Units: sectors of 1 * 512 = 512 bytes
-   Sector size (logical/physical): 512 bytes / 512 bytes
-   I/O size (minimum/optimal): 512 bytes / 512 bytes
-   Disklabel type: gpt
-   Disk identifier: A1497C37-CA99-431B-9AF4-DC99FBBDC2B9
-   
-   Device     Start      End  Sectors  Size Type
-   /dev/vdb1   2048 97656831 97654784 46.6G Linux filesystem
+.. literalinclude:: mobile_cloud_ceph_add_ceph_osds_lvm/fdisk_vdb
+   :language: bash
+   :caption: fdisk -l /dev/vdb 输出信息显示 /dev/vdb1
 
 .. note::
 
    以上分区操作在3台存储虚拟机上完成
 
-- 创建第一个OSD，注意我使用了统一的 ``data`` 存储来存放所有数据，包括 ``block.db`` 和 ``block.wal`` ::
+创建OSD使用的bluestore存储
+----------------------------
 
-   sudo ceph-volume lvm create --bluestore --data /dev/vdb1
+- 创建第一个OSD，注意我使用了统一的 ``data`` 存储来存放所有数据，包括 ``block.db`` 和 ``block.wal`` :
+
+.. literalinclude:: mobile_cloud_ceph_add_ceph_osds_lvm/ceph_volume_create_bluestore
+   :language: bash
+   :caption: 在/dev/vdb1上构建基于LVM的bluestore存储卷
 
 .. note::
 

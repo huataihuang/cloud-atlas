@@ -59,6 +59,9 @@ enable_ceph_mgr_dashboard() {
     sudo ceph dashboard set-ssl-certificate -i dashboard.crt -c /etc/ceph/${CLUSTER}.conf
     sudo ceph dashboard set-ssl-certificate-key -i dashboard.key -c /etc/ceph/${CLUSTER}.conf
 
+    # 创建登陆账号admin，密保保存在 pw.txt 文件中
+    sudo ceph dashboard ac-user-create admin -i pw.txt administrator
+
     echo "ceph dashboard URL:"
     sudo ceph mgr services -c /etc/ceph/${CLUSTER}.conf
 }
