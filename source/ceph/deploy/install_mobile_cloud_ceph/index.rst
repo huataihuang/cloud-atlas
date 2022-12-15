@@ -4,10 +4,6 @@
 移动云计算部署Ceph
 =================================
 
-mobile_cloud_ceph_add_ceph_osds_more.rst
-mobile_cloud_ceph_add_ceph_mds.rst
-mobile_cloud_ceph_ceph_var_disk.rst
-
 .. note::
 
    在 :ref:`mobile_cloud_infra` 底层3个虚拟机提供ceph分布式存储，为后续 :ref:`kubernetes` 虚拟机提供分布式存储
@@ -25,6 +21,7 @@ mobile_cloud_ceph_ceph_var_disk.rst
    remove_ceph.rst
    debug_ceph_authenticate_time_out.rst
    mobile_cloud_ceph_add_ceph_osds_more.rst
+   mobile_cloud_ceph_rbd_libvirt.rst
 
 
 

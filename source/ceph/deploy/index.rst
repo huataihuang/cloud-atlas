@@ -8,6 +8,7 @@ Ceph 部署
    :maxdepth: 1
 
    install_ceph.rst
+   build_ceph.rst
    centos_sig_ceph.rst
    install_ceph_manual/index
    install_ceph_manual_zdata/index

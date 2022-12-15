@@ -25,6 +25,8 @@ virsh管理虚拟机
   - ``--bypass-cache`` 这个参数结合 ``managedsave`` 使用
   - ``--force-boot`` 放弃任何 ``managedsave`` 选项并导致全新启动
 
+.. _vm_autostart:
+
 配置虚拟机自动启动
 ======================
 

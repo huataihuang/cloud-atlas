@@ -5,7 +5,7 @@
 ===============================
 
 
-2021年10月我购买了 :ref:`hpe_dl360_gen9` 构建 :ref:`priv_cloud_infra` ，底层数据存储层采用Ceph实现。为了完整控制部署并了解Ceph组件安装，采用本文手工部署Ceph方式安装。
+2022年11月公司配了 :ref:`apple_silicon_m1_pro` MacBook Pro ( :ref:`arm` 架构 )，这是我用过的性能最佳ARM主机，我构建 :ref:`mobile_cloud_infra` ，底层采用 :ref:`ceph` 分布式存储。
 
 部署采用3个 :ref:`ovmf` 虚拟机，采用 :ref:`mobile_cloud_libvirt_lvm_pool` 。也就是一共有3个 :ref:`kvm` 虚拟机来完成Ceph集群部署:
 
