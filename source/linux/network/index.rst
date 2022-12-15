@@ -8,6 +8,7 @@ Linux网络
    :maxdepth: 1
 
    ring_buffer_dma_mmio.rst
+   wget.rst
    axel.rst
    aria2.rst
    iproute2/index

@@ -18,6 +18,7 @@ Arch Linux
    archlinux_chinese.rst
    archlinux_ms_fonts.rst
    pacman.rst
+   pacman_proxy.rst
    archlinux_downgrade_package.rst
    archlinux_aur.rst
    archlinux_snap.rst

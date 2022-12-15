@@ -217,6 +217,15 @@ arch linux ARM KVM虚拟化
 - 对比官方镜像运行虚拟机的磁盘参数和我沿X86虚拟化的磁盘参数，反复验证定位出 ``io=native`` 参数导致磁盘无法写入
 - 修订 ``virt-install`` 参数，将磁盘参数改为 ``io=threads`` 解决磁盘写入问题(上文安装参数已修订正确)
 
+配置虚拟机自动启动
+======================
+
+由于 :ref:`install_mobile_cloud_ceph` 是所有上层KVM虚拟机的运行基础，所以 :ref:`vm_autostart` :
+
+.. literalinclude:: archlinux_arm_kvm/vm_autostart
+   :language: bash
+   :caption: 配置ceph的虚拟机自动启动
+
 参考
 =======
 

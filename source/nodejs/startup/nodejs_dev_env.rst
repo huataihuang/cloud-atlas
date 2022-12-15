@@ -29,6 +29,14 @@ Node.js开发环境
    [ -s "$NVM_DIR/nvm.sh"  ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
    [ -s "$NVM_DIR/bash_completion"  ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+.. note::
+
+   也可以下载脚本再进行安装(主要原因是nvm脚本仓库网站被GFW屏蔽了， :strike:`下载以后再安装就可以绕过这个问题` )::
+
+      curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh -o install_nvm.sh
+
+   不过，如果GFW阻塞了安装，还是要找一个能够正常访问internet的主机安装好 ``nvm`` 之后，把整个 ``~/.nvm`` 复制到目标运行主机上再执行 ``nvm install node --lts`` (nodejs官方网站没有被屏蔽，所以可以正常安装) 
+
 - 然后执行命令 ``nvm`` 可以看到输出就是正常完成了安装(注意，使用 ``which nvm`` 是看不到该命令的)
 
 .. _nvm_install_nodejs:
@@ -114,7 +122,28 @@ Node.js开发环境
    nvm alias default 14.15.4
 
 则默认切换到使用 ``v14.15.4`` 
-   
+
+版本兼容性
+==============
+
+2022年，Node.js官方提供的LTS版本都已经不再支持 :ref:`redhat_linux` 的CentOS 7系列了，原因是CentOS 7的glibc库停留在 2.17 版本，运行 ``node`` 命令会提示信息::
+
+   $ node --version
+   node: /lib64/libm.so.6: version `GLIBC_2.27' not found (required by node)
+   node: /lib64/libc.so.6: version `GLIBC_2.25' not found (required by node)
+   node: /lib64/libc.so.6: version `GLIBC_2.28' not found (required by node)
+   node: /lib64/libstdc++.so.6: version `CXXABI_1.3.9' not found (required by node)
+   node: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by node)
+   node: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by node)
+
+参考 `node: /lib64/libm.so.6: version 'GLIBC_2.27' not found (required by node) #2972 <https://github.com/nvm-sh/nvm/issues/2972>`_ ，只能安装 node.js 17.x 系列版本( < 18 ) 。根据 ``nvm ls-remote1`` 提示 ``v16.19.0   (Latest LTS: Gallium)`` ，安装 ``16.19.0`` ::
+
+   nvm install 16.19.0
+
+开发和部署
+============
+
+在 :ref:`patternfly` 开发，结合 :ref:`nginx` 部署: :ref:`nginx_reverse_proxy_nodejs`
 
 参考
 ========

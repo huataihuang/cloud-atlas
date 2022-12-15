@@ -15,6 +15,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    nginx_root_alias.rst
    nginx_wpad.rst
    change_nginx_user.rst
+   nginx_reverse_proxy_nodejs.rst
    auth/index
 
 .. only::  subproject and html
