@@ -22,6 +22,8 @@
    debug_ceph_authenticate_time_out.rst
    mobile_cloud_ceph_add_ceph_osds_more.rst
    mobile_cloud_ceph_rbd_libvirt.rst
+   mobile_cloud_ceph_iscsi_libvirt.rst
+   mobile_cloud_ceph_nfs.rst
 
 
 
