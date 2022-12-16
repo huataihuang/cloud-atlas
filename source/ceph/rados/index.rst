@@ -1,12 +1,14 @@
-.. _ceph_radosgw:
+.. _rados:
 
 =================================
-Ceph RADOS Gateway
+Ceph RADOS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
+   rados_infra.rst
+   ceph_nfs.rst
 
 .. only::  subproject and html
 

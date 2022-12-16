@@ -300,7 +300,17 @@ I installed fmt and it seem to start working right away and after a reboot too.
 
    这个错误应该和ARM对 ``dmidecode`` 支持有关，先忽略
 
-做到这里，还有问题没有解决!!!
+.. warning::
+
+   关于在 :ref:`apple_silicon_m1_pro` :ref:`arm` 架构的 :ref:`ceph_rbd_libvirt` 实践我暂时做到这里:
+
+   - 由于 :ref:`arch_linux` ARM软件仓库无法提供 ``libvirt-storage-ceph`` ，所以无法直接部署 ( 或许采用 :redf:`fedora` ARM版本可以比较容易实现，毕竟Fedora已经集成了 :ref:`asahi_linux` 工具，也已经可以在ARM架构的苹果Macbook上运行 )
+   - 我在X86架构的 MacBook Pro 2013 later笔记本上将重新构建Ceph虚拟化集群，预计可以比较方便实现 :ref:`ceph_rbd_libvirt`
+
+   以下文档部分请暂时忽略，还未作。目前我将调整方案，改为:
+
+   - :ref:`mobile_cloud_ceph_iscsi_libvirt`
+   - :ref:`mobile_cloud_ceph_nfs` 提供给 :ref:`k8s_nfs` 
 
 - 然后验证检查是否能够看到之前创建的RBD磁盘文件::
 
@@ -310,7 +320,7 @@ I installed fmt and it seem to start working right away and after a reboot too.
 
    Name                Path
    -----------------------------------------------------
-   new-libvirt-image   libvirt-pool/new-libvirt-image
+   libvirt-image   libvirt-pool/libvirt-image
 
 virsh存储池激活问题
 ---------------------
