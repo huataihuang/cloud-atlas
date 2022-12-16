@@ -152,6 +152,22 @@ HTML/CSS库提供了一系列代码案例，可以使用统一的PatternFly mark
    :caption: webpack.dev.js 配置绑定主机所有网络接口
    :emphasize-lines: 2,9,10
 
+对于代码中使用到的 react 模块，如果之前没有包含，则需要修订 ``package.json`` 添加。例如，运行报错::
+
+   ERROR in ./src/app/Count/Arm/ArmCount.tsx 3:0-72
+   Module not found: Error: Can't resolve '@patternfly/react-table' in '/home/admin/onesre/dashboard/src/app/Count/Arm'
+   resolve '@patternfly/react-table' in '/home/admin/onesre/dashboard/src/app/Count/Arm'
+
+则修订 ``package.json`` 添加:
+
+.. literalinclude:: patternfly_develop/package.json
+   :language: javascript
+   :caption: 添加新引入的组件依赖
+
+然后再次运行::
+
+   npm install && npm run start:dev
+
 参考
 ========
 
