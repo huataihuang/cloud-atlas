@@ -12,6 +12,7 @@ Python起步
    upgrade_all_python_packages_with_pip.rst
    python_in_rhel8.rst
    python_in_kali.rst
+   python_in_archlinux.rst
    install_python3_centos6.rst
    python_doc.rst
    pep_8.rst
