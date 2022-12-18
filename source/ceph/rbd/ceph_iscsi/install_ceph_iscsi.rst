@@ -18,7 +18,7 @@ iSCSI targets
 部署
 =======
 
-Ceph iSCSI网关即是iSCSI target(服务器)又是Ceph客户端: 你可以理解成Ceph :ref:`rbd` 接口和iSCSI标准的 "转换器" 。所以 Ceph iSCSI网关可以运行在一个独立节点，或者就和OSD部署在一起。
+Ceph iSCSI网关即是iSCSI target(服务器)又是Ceph客户端: 你可以理解成Ceph :ref:`ceph_rbd` 接口和iSCSI标准的 "转换器" 。所以 Ceph iSCSI网关可以运行在一个独立节点，或者就和OSD部署在一起。
 
 我在 :ref:`install_mobile_cloud_ceph` 的3节点Ceph集群，其中节点1已经部署了 :ref:`ceph_mgr` 所以考虑到高可用，规划在节点2和节点3各部署一个 ``ceph-iscsi`` 网关
 
@@ -56,12 +56,12 @@ Ceph iSCSI网关即是iSCSI target(服务器)又是Ceph客户端: 你可以理�
 - 将Ceph集群的 ``/etc/ceph/${CLUSTER}.conf`` 配置文件复制到 Ceph iSCSI网关节点(重要步骤)
 - 安装 ``Ceph命令行工具`` (我理解是需要安装 ``ceph`` 组件)
 - 关闭防火墙或者开启 ``3260`` 和 ``5000`` 端口( 我的惨痛教训 :ref:`debug_ceph_authenticate_time_out` )
-- 创建一个新的或者使用一个现有的 :ref:`rados` 块设备( :ref:`rbd` )
+- 创建一个新的或者使用一个现有的 :ref:`rados` 块设备( :ref:`ceph_rbd` )
 
 软件仓库安装
 ------------
 
-考虑到 ``ceph-iscsi`` 是和架构无关的纯 :ref:`pyhon` 软件，所以我在 :ref:`install_mobile_cloud_ceph` 采用的 :ref:`fedora` 理论上也应该可以采用。不过，参考 `Fedora and Red Hat Enterprise Linux <https://docs.fedoraproject.org/en-US/quick-docs/fedora-and-red-hat-enterprise-linux/`_ 可以看到 Red Hat Enterprise Linux 8 是2019年5月7日推出，相当于 Fedora 28，所以版本比我当前使用的 :ref:`fedora` 37要落后很多。
+考虑到 ``ceph-iscsi`` 是和架构无关的纯 :ref:`python` 软件，所以我在 :ref:`install_mobile_cloud_ceph` 采用的 :ref:`fedora` 理论上也应该可以采用。不过，参考 `Fedora and Red Hat Enterprise Linux <https://docs.fedoraproject.org/en-US/quick-docs/fedora-and-red-hat-enterprise-linux/>`_ 可以看到 Red Hat Enterprise Linux 8 是2019年5月7日推出，相当于 Fedora 28，所以版本比我当前使用的 :ref:`fedora` 37要落后很多。
 
 - 下载 ``ceph-iscsi`` 软件仓库配置并安装 ``ceph-iscsi`` ::
 
