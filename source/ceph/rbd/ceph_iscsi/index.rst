@@ -10,6 +10,7 @@ Ceph iSCSI
    intro_ceph_iscsi.rst
    prepare_ceph_iscsi.rst
    install_ceph_iscsi.rst
+   config_ceph_iscsi.rst
 
 .. only::  subproject and html
 
