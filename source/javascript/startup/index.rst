@@ -10,6 +10,7 @@ JavaScript 快速起步
    first_js.rst
    js_var_const.rst
    css.rst
+   debug_webpack.rst
 
 .. only::  subproject and html
 

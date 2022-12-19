@@ -81,7 +81,95 @@
 配置target
 ===============
 
-待续
+``gwcli`` 可以创建和配置 iSCSI target 以及 RBD images,并且提供了跨网关复制配置的能力。虽然底层的工具如 ``targetcli`` 和 ``rbd`` 也能完成相应工作，但是只能用于本地处理，所以不要直接使用底层工具，而应该采用上层的 ``gwcli`` 。
+
+- 在一个Ceph iSCSI网关节点，启动 Ceph iSCSI弯管命令，进行交互操作::
+
+   gwcli
+
+.. note::
+
+   此时会进入一个类似文件系统的层次结构，你可以简单执行 ``ls`` 命令，可以看到结合了底层 ``iSCSI target`` 和 ``rdb`` 的树状结构::
+
+      /> ls /
+      o- / ................................................................... [...]
+        o- cluster ................................................... [Clusters: 1]
+        | o- ceph ...................................................... [HEALTH_OK]
+        |   o- pools .................................................... [Pools: 3]
+        |   | o- .mgr ............ [(x3), Commit: 0.00Y/46368320K (0%), Used: 1356K]
+        |   | o- libvirt-pool ...... [(x3), Commit: 0.00Y/46368320K (0%), Used: 12K]
+        |   | o- rbd ............... [(x3), Commit: 0.00Y/46368320K (0%), Used: 12K]
+        |   o- topology .......................................... [OSDs: 3,MONs: 3]
+        o- disks ................................................. [0.00Y, Disks: 0]
+        o- iscsi-targets ......................... [DiscoveryAuth: None, Targets: 0]
+
+- 进入 ``iscsi-targets`` 创建一个名为 ``iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw`` :
+
+.. literalinclude:: config_ceph_iscsi/gwcli_create_iscai_target
+   :language: bash
+   :caption: 创建名为 iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw 的iSCSI target
+
+- 创建iSCSI网关，这里IP地址是用于读写命令的，可以和 ``trusted_ip_list`` 一致，不过建议使用独立IP:
+
+.. literalinclude:: config_ceph_iscsi/gwcli_create_iscai_gateways
+   :language: bash
+   :caption: 创建iSCSI网关
+
+.. note::
+
+   请注意我第一次执行添加命令 ``create a-b-data-2 192.168.8.205 skipchecks=true`` 提示错误::
+
+      The first gateway defined must be the local machine
+
+   参考 `Bug 1979449 - iSCSI: Getting the error "The first gateway defined must be the local machine" while adding gateways <https://bugzilla.redhat.com/show_bug.cgi?id=1979449>`_ 原因是 ``ceph-iscsi`` 使用FQDN来验证主机名是否匹配。所以我第二次改为完整域名就能够添加gateway。
+
+.. note::
+
+   对于非 RHEL/CentOS 操作系统或者使用上游开源ceph-iscsi代码或者使用ceph-iscsi-test内核，则需要使用 ``skipchecks=true`` 参数，这样可以避免校验Red Hat内核和检查rpm包。
+
+- 添加RBD镜像，位于 ``rbd`` ，大小就采用Ceph整个Bluestore磁盘大小(因为我磁盘空间有限，所以整个分配给虚拟机使用), 即名为 ``vm_images`` 大小 55G:
+
+.. literalinclude:: config_ceph_iscsi/gwcli_create_rbd_image
+   :language: bash
+   :caption: 创建RBD磁盘镜像
+
+.. note::
+
+   回过头看，之前文档中提到创建Ceph存储池命名为 ``rbd`` ，我感觉实际命名可以采用其他名字。考虑到我之前创建过 ``livirt-pool`` 存储池，所以我这里改为创建在存储池 ``libvirt-pool`` 下。
+
+   磁盘创建的规格可以超过实际物理磁盘容量，例如我的OSD磁盘只有46.6G(物理磁盘分区)，但是创建 ``rbd image`` 可以创建上百G甚至更多。实际使用时才会消耗磁盘空间，具体可以等逻辑磁盘写满就可以动态添加底层物理磁盘扩容。
+
+- 创建一个 initator 名为 ``iqn.1989-06.io.cloud-atlas:libvirt-client`` 客户端，并且配置intiator的CHAP名字和密码，然后再把创建的RBD镜像磁盘添加给用户:
+
+.. literalinclude:: config_ceph_iscsi/gwcli_create_initator_client
+   :language: bash
+   :caption: 创建名为 iqn.1989-06.io.cloud-atlas:libvirt-client 的iSCSI initator客户端命名
+
+.. note::
+
+   这里的CHAP username和password必须配置，否则target会拒绝任何登陆
+
+   username必须是8个字符或以上; password必须是12个字符或以上
+
+添加iSCSI网关到Ceph管理Dashboard
+=====================================
+
+配置好 Ceph iSCSI网关之后，在Dashboard上还是看不到新的网关，此时需要通过::
+
+   ceph dashboard iscsi-gateway-list
+   # Gateway URL format for a new gateway: <scheme>://<username>:<password>@<host>[:port]
+   ceph dashboard iscsi-gateway-add -i <file-containing-gateway-url> [<gateway_name>]
+   ceph dashboard iscsi-gateway-rm <gateway_name>
+
+举例，创建一个 ``iscsi-gw`` 配置文件内容就是(按照 /etc/ceph/iscsi-gateway.cfg )::
+
+   http://admin:mypassword@192.168.8.205:5001
+
+然后执行以下命令添加iSCSI网关管理配置到Dashboard::
+
+   ceph dashboard iscsi-gateway-add -i iscsi-gw iscsi-gw-1
+
+这里有一个问题，就是我错误配置了iSCSI GW的IP地址，但是我发现添加以后无法删除，因为删除时候会去访问错误的GW的IP地址，一直超时...暂时没有想出解决方法，似乎要清理垃圾数据(是flask后端提供的API服务，应该有什么地方记录数据，所以需要手工更新配置)
 
 参考
 =======

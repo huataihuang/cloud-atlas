@@ -34,8 +34,15 @@ ICell 是 TypeScript 接口的名称，表示 <Table> 的一个单元格。 列�
 
 创建以下两个js:
 
+- index.js
 - App.js 页面渲染，采用React的 Table 和 Pagination(分页)
 - data.js 提供数据
+
+代码:
+
+.. literalinclude:: patternfly_table/index.js
+   :language: bash
+   :caption: index.js
 
 代码:
 
