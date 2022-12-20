@@ -312,6 +312,10 @@ I installed fmt and it seem to start working right away and after a reboot too.
    - :ref:`mobile_cloud_ceph_iscsi_libvirt`
    - :ref:`mobile_cloud_ceph_nfs` 提供给 :ref:`k8s_nfs` 
 
+.. note::
+
+   以下部分未执行，仅保留参考，方案已转为 :ref:`mobile_cloud_ceph_iscsi_libvirt`
+
 - 然后验证检查是否能够看到之前创建的RBD磁盘文件::
 
    virsh vol-list images_rbd
