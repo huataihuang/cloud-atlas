@@ -50,11 +50,12 @@
 
 .. literalinclude:: config_ceph_iscsi/iscsi-gateway.cfg
    :language: bash
-   :caption: 创建 /etc/ceph/iscsi-gateway.cfg
+   :caption: 创建 /etc/ceph/iscsi-gateway.cfg ，注意配置API认证访问才能添加到dashboard
+   :emphasize-lines: 25-28
 
 .. note::
 
-   测试环境没有配置安全认证，后续有机会再搞。生产环境务必配置
+   配置了简单的API认证，必须同时启用 ``trusted_ip_list`` 否则无法管理
 
 .. note::
 
@@ -169,7 +170,60 @@
 
    ceph dashboard iscsi-gateway-add -i iscsi-gw iscsi-gw-1
 
-这里有一个问题，就是我错误配置了iSCSI GW的IP地址，但是我发现添加以后无法删除，因为删除时候会去访问错误的GW的IP地址，一直超时...暂时没有想出解决方法，似乎要清理垃圾数据(是flask后端提供的API服务，应该有什么地方记录数据，所以需要手工更新配置)
+这里有一个问题，就是我错误配置了iSCSI GW的IP地址，但是我发现添加以后无法删除，因为删除时候会去访问错误的GW的IP地址，一直超时...
+
+而且，这个错误配置iSCSI Gateway的问题还导致Dashboard首页面空白(应该是后台在等待iSCSI Gateway返回)，点击 ``Block >> iSCSI`` 菜单还出现500错误。
+
+不过，等待一段时间(具体未知)， ``ceph`` 终于感知到 ``iSCSI Gateways`` 有Down，Dashboard首页面就能够正常刷新出
+
+.. figure:: ../../../_static/ceph/rbd/ceph_iscsi/iscsi_gateway_down.png
+   :scale: 40
+
+此时再次执行删除::
+
+   ceph dashboard iscsi-gateway-rm iscsi-gw-1
+
+则可以成功。然后修正 ``iscsi-gw`` 配置文件，重新添加iSCSI网关::
+
+   ceph dashboard iscsi-gateway-add -i iscsi-gw iscsi-gw-1
+
+这次添加成功后发现，在 ``Gateways`` 中列出的 ``Name`` 不是 ``iscsi-gw-1`` ，而是Gateway的主机名，并且发现是down状态:
+
+.. figure:: ../../../_static/ceph/rbd/ceph_iscsi/iscsi_gateway_down_name.png
+   :scale: 40
+   
+   /etc/ceph/iscsi-gateway.cfg 中配置API认证账号必须同时配置 trusted_ip_list 允许 ceph-mgr 所在的IP地址，否则也显示down机状态
+
+此时删除不能使用 ``iscsi-gw-1`` 会提示不存在::
+
+   # ceph dashboard iscsi-gateway-rm iscsi-gw-1 
+   Error ENOENT: iSCSI gateway 'iscsi-gw-1' does not exist
+
+而是采用网关名 ``a-b-data-2.dev.cloud-atlas.io`` 做删除::
+
+   # ceph dashboard iscsi-gateway-rm a-b-data-2.dev.cloud-atlas.io
+   Success
+
+经过对比发现，原来 ``/etc/ceph/iscsi-gateway.cfg`` 配置API认证，但是没有配置 ``trusted_ip_list`` 也会导致 ``ceph-mgr`` 无法访问 ``rbd-target-api`` ，所以我调整 ``/etc/ceph/iscsi-gateway.cfg`` 添加允许访问IP列表后重启 ``rbd-target-gw`` 和 ``rbd-target-api`` ，然后重新添加网关，观察 iSCSI gateways 就可以看到节点 ``a-b-data-2.dev.cloud-atlas.io`` 状态恢复 UP:
+
+.. figure:: ../../../_static/ceph/rbd/ceph_iscsi/iscsi_gateway_up.png
+   :scale: 40
+   
+   /etc/ceph/iscsi-gateway.cfg 添加 trusted_ip_list 允许 ceph-mgr 所在的IP地址，恢复UP
+
+重复上述步骤，在 ``${HOST_2}`` 主机，即 ``a-b-data-3`` 上部署 iSCSI target网关，修改 ``iscsi-gw`` 配置成 ``a-b-data-3`` 主机IP,然后通过以下命令添加::
+
+   ceph dashboard iscsi-gateway-add -i iscsi-gw iscsi-gw-2
+
+最终完成后可以看到Ceph集群拥有了2个 iSCSI Gateway，并且都有 ``libvirt-pool`` 存储池的 ``vm_disk`` 镜像访问，如下:
+
+.. figure:: ../../../_static/ceph/rbd/ceph_iscsi/iscsi_gateway_up_2.png
+   :scale: 40
+   
+   配置2个iSCSI Gateway，提供镜像映射访问
+
+接下来 :ref:`ceph_iscsi_initator` 就可以访问存储
+
 
 参考
 =======
