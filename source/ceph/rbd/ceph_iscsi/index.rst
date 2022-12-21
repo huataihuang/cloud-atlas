@@ -12,6 +12,7 @@ Ceph iSCSI
    install_ceph_iscsi.rst
    config_ceph_iscsi.rst
    ceph_iscsi_initator.rst
+   remove_iscsi_session.rst
 
 .. only::  subproject and html
 

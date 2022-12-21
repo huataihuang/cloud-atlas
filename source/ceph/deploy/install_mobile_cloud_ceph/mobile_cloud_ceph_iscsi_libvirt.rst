@@ -125,12 +125,11 @@ libvirt配置iSCSI存储池(iSCSI pool)
    :language: xml
    :caption: 使用virsh pool-start启动images_iscsi存储池
 
-这里可能会提示错误::
+这里可能会提示错误:
 
-   error: Failed to start pool images_iscsi
-   error: internal error: Child process (/usr/bin/iscsiadm --mode node --portal a-b-data-2.dev.cloud-atlas.io:3260,1 --targetname iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw --login) unexpected exit status 15: iscsiadm: Could not login to [iface: default, target: iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw, portal: a-b-data-2.dev.cloud-atlas.io,3260].
-   iscsiadm: initiator reported error (15 - session exists)
-   iscsiadm: Could not log into all portals
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_pool_start_error
+   :language: bash
+   :caption: libvirt启动iSCSI pool报错，显示已经存在iSCSI会话
 
 原因是之前的会话没有退出，需要先退出。
 
@@ -150,7 +149,6 @@ libvirt配置iSCSI存储池(iSCSI pool)
 
 我考虑之前实践 :ref:`ceph_iscsi_initator` 配置了initator，本地似乎缓存，可能需要清理
 
-待续...
 
 libvirt配置iSCSI直接存储池(iSCSI direct pool)
 ================================================
