@@ -24,7 +24,61 @@
 
 但是报错依旧
 
+看起来清理之前存在的iSCSI session可能是解决方法
 
+清理iSCSI会话
+================
+
+- 如果iSCSI磁盘已经挂载，则需要先卸载，例如::
+
+   umount /clusterfs
+
+- 检查当前会话:
+
+.. literalinclude:: ceph_iscsi_initator/iscsiadm_session_show
+   :language: bash
+   :caption: iscsiadm检查当前会话
+
+此时可以看到::
+
+   tcp: [23] 192.168.8.205:3260,1 iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw (non-flash)
+
+- 从iSCSI target登出:
+
+.. literalinclude:: ceph_iscsi_initator/iscsiadm_logout
+   :language: bash
+   :caption: iscsiadm退出target登陆
+
+提示信息::
+
+   Logging out of session [sid: 23, target: iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw, portal: 192.168.8.205,3260]
+   Logout of [sid: 23, target: iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw, portal: 192.168.8.205,3260] successful.
+
+- 再次检查当前会话:
+
+.. literalinclude:: ceph_iscsi_initator/iscsiadm_session_show
+   :language: bash
+   :caption: iscsiadm检查当前会话
+
+此时就看到没有活跃会话了::
+
+   iscsiadm: No active sessions.
+
+- 删除删除节点:
+
+.. literalinclude:: ceph_iscsi_initator/iscsiadm_delete_node
+   :language: bash
+   :caption: iscsiadm删除节点(iqn)
+
+此时 ``/etc/iscsi/nodes`` 目录下对应节点目录会删除
+
+- 如果需要可以删除iSCSI discovery数据库的targets记录:
+
+.. literalinclude:: ceph_iscsi_initator/iscsiadm_delete_discoverydb_target
+   :language: bash
+   :caption: iscsiadm删除discovery数据的target记录
+
+然后可以重新尝试 :ref:`mobile_cloud_ceph_iscsi_libvirt`
 
 参考
 =======

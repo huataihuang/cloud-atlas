@@ -147,11 +147,48 @@ libvirt配置iSCSI存储池(iSCSI pool)
 
 但是再次启动 ``images_iscsi`` 存储池还是同样报错，而再次执行 ``iscsiadm`` logout，发现确实又出现了会话。这说明执行启动存储确实发起了iscsi登陆会话。
 
-我考虑之前实践 :ref:`ceph_iscsi_initator` 配置了initator，本地似乎缓存，可能需要清理
+我考虑之前实践 :ref:`ceph_iscsi_initator` 配置了initator，所以执行 :ref:`remove_iscsi_session` 然后再重复上述启动libvirt iSCSI pool操作，就可以看到成功启动:
 
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_pool_start
+   :language: xml
+   :caption: 使用virsh pool-start启动images_iscsi存储池
+
+输出显示::
+
+   Pool images_iscsi started
+
+- 设置 iSCSI pool 自动启动
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_pool_autostart
+   :language: xml
+   :caption: virsh设置iSCSI pool自动启动
+
+提示信息::
+
+   Pool images_iscsi marked as autostarted
+
+查询LUN信息
+--------------------
+
+在完成 libvirt 访问iSCSI target的存储池配置之后，就可以查询存储池中的LUN来获得那些而可用的虚拟磁盘。注意 ``libvirt iSCSI pool`` 不支持直接操作远程iSCSI target服务器上的磁盘创建(重大安全隐患)，所以必须在 :ref:`config_ceph_iscsi` 为libvirt客户端创建好磁盘并attach。
+
+显然，这个 ``libvirt iSCSI pool`` 的功能比较简陋，远比不上 :ref:`ceph_rbd_libvirt` 方便灵活。如果作为云计算，需要有辅助工具平台来串联整个流程
+
+- 查询远程iSCSI target提供的LUN磁盘:
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_vol_list_iscsi_pool
+   :language: xml
+   :caption: virsh查看iSCSI pool提供的LUN
+
+
+**以下段落仅记录参考，暂未实践**
 
 libvirt配置iSCSI直接存储池(iSCSI direct pool)
 ================================================
+
+.. warning::
+
+   ``iSCSI direct pool`` 我没有实践(暂时没有时间精力)
 
 libvirt通过 ``libiscsi`` 来构建iSCSI direct pool 访问iSCSI target，配置需要:
 
@@ -167,8 +204,12 @@ iSCSI direct pool的支持是libvirt v4.7.0开始支持的( iSCSI pool 则是早
    :language: xml
    :caption: 定义iSCSI direct pool
 
-multipath(未实践)
+multipath
 =====================
+
+.. warning::
+
+   ``multipath`` 我没有实践(暂时没有时间精力)
 
 .. note::
 

@@ -9,7 +9,7 @@
 创建 ``rbd`` 存储池
 ====================
 
-- ``gwcli`` 需要一个名为 ``rbd`` 的存储池，这样就能够用来存储有关 iSCSI 配置的元数据，首先检查是否存在这个存储池::
+- :strike:`gwcli需要一个名为rbd的存储池` 可以创建一个任意命名的 :ref:`ceph_rbd` 存储池，就能够用来存储有关 iSCSI 配置的元数据，首先检查是否存在这个存储池::
 
    ceph osd lspools
 
@@ -20,7 +20,7 @@
 
 其中 ``libvirt-pool`` 是我在实践 :ref:`mobile_cloud_ceph_rbd_libvirt` 创建用于libvirt的RBD存储池，但是实际没有使用(原因是 :ref:`arch_linux` ARM没有提供RBD驱动)。当时通过WEB管理界面创建的OSD存储池 ``libvirt-pool`` 已经验证并调整  ``pg_num = 32`` (ceph.conf)
 
-执行以下命令创建名为 ``rbd`` 的存储池:
+( **废弃** )执行以下命令创建名为rbd的存储池:
 
 .. literalinclude:: config_ceph_iscsi/create_rbd_pool_named_rbd
    :language: bash
@@ -39,12 +39,16 @@
 
    目前暂时采用WEB管理界面创建存储池，待后续排查
 
-完成后再次检查 ``ceph osd lspools`` 可以看到名为 ``rbd`` 的存储池:
+( **废弃** )完成后再次检查 ``ceph osd lspools`` 可以看到名为 rbd 的存储池:
 
 .. literalinclude:: config_ceph_iscsi/ceph_osd_lspools_output
    :language: bash
    :caption: 创建名为 rbd 的存储池
    :emphasize-lines: 3
+
+.. note::
+
+   经过实践，我发现原英文文档写得有些歧义，其实只要是 :ref:`ceph_rbd` 存储池即可用于iSCSI target Gateway，所以我后面的实践最终采用的是 ``libvirt-pool``
 
 - 在每个 iSCSI 网关节点(我的实践案例采用 ``a-b-data-2`` 和 ``a-b-data-3`` )，创建 ``/etc/ceph/iscsi-gateway.cfg`` 配置文件:
 
