@@ -1,0 +1,50 @@
+# gwcli
+> cd /iscsi-targets/
+/iscsi-targets> ls
+> cd /iscsi-targets/
+/iscsi-targets> ls
+o- iscsi-targets ................................................................... [DiscoveryAuth: None, Targets: 1]
+  o- iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw ......................................... [Auth: None, Gateways: 2]
+    o- disks .............................................................................................. [Disks: 1]
+    | o- libvirt-pool/vm_disk ......................................... [Owner: a-b-data-2.dev.cloud-atlas.io, Lun: 0]
+    o- gateways ................................................................................ [Up: 2/2, Portals: 2]
+    | o- a-b-data-2.dev.cloud-atlas.io .......................................................... [192.168.8.205 (UP)]
+    | o- a-b-data-3.dev.cloud-atlas.io .......................................................... [192.168.8.206 (UP)]
+    o- host-groups ...................................................................................... [Groups : 0]
+    o- hosts ........................................................................... [Auth: ACL_ENABLED, Hosts: 1]
+      o- iqn.1989-06.io.cloud-atlas:libvirt-client ............................ [LOGGED-IN, Auth: CHAP, Disks: 1(46G)]
+        o- lun 0 ................................... [libvirt-pool/vm_disk(46G), Owner: a-b-data-2.dev.cloud-atlas.io]
+
+# 这里删除映射会报错:
+/iscsi-target...csi-igw/disks> delete libvirt-pool/vm_disk
+Failed - Delete target LUN mapping failed - failed on a-b-data-3.dev.cloud-atlas.io. Failed to remove the LUN - Unable to delete libvirt-pool/vm_disk - allocated to iqn.1989-06.io.cloud-atlas:libvirt-client
+
+# 这是因为已经有 libvirt 客户端启动了iSCSI存储池，也就是已经登陆到iSCSI target并占用了磁盘。所以需要先退出客户端执行:
+# virsh pool-destroy images_iscsi (停止)
+
+# 此时再次 ls 可以看到已经没有 LOGGED-IN 标识了
+/iscsi-target...ibvirt-client> ls
+o- iqn.1989-06.io.cloud-atlas:libvirt-client ............................................. [Auth: CHAP, Disks: 1(46G)]
+  o- lun 0 ......................................... [libvirt-pool/vm_disk(46G), Owner: a-b-data-2.dev.cloud-atlas.io]
+
+# 此时就可以删除掉这个分配给 iqn.1989-06.io.cloud-atlas:libvirt-client 的磁盘 libvirt-pool/vm_disk
+/iscsi-target...ibvirt-client> disk remove libvirt-pool/vm_disk
+ok
+
+# 接下来是删除target的映射:
+/iscsi-target...ibvirt-client> cd /iscsi-targets/iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw/disks
+/iscsi-target...csi-igw/disks> ls
+o- disks .................................................................................................. [Disks: 1]
+  o- libvirt-pool/vm_disk ............................................. [Owner: a-b-data-2.dev.cloud-atlas.io, Lun: 0]
+/iscsi-target...csi-igw/disks> delete libvirt-pool/vm_disk
+ok
+
+# 最后才是实际删除RBD磁盘:
+/iscsi-target...csi-igw/disks> cd /disks
+/disks> ls
+o- disks ............................................................................................. [46G, Disks: 1]
+  o- libvirt-pool ............................................................................... [libvirt-pool (46G)]
+    o- vm_disk .................................................................. [libvirt-pool/vm_disk (Online, 46G)]
+/disks> delete libvirt-pool/vm_disk
+ok
+

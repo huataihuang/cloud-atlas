@@ -1,0 +1,52 @@
+# 创建RBD磁盘，共5个
+/disks> cd /disks
+/disks> ls
+o- disks ........................................................................................... [0.00Y, Disks: 0]
+/disks> create pool=libvirt-pool image=vm1_disk size=10G
+ok
+/disks> ls
+o- disks ............................................................................................. [10G, Disks: 1]
+  o- libvirt-pool ............................................................................... [libvirt-pool (10G)]
+    o- vm1_disk ............................................................... [libvirt-pool/vm1_disk (Unknown, 10G)]
+/disks> create pool=libvirt-pool image=vm2_disk size=9G
+ok
+/disks> create pool=libvirt-pool image=vm3_disk size=9G
+ok
+/disks> create pool=libvirt-pool image=vm4_disk size=9G
+ok
+/disks> create pool=libvirt-pool image=vm5_disk size=9G
+ok
+/disks> ls
+o- disks ............................................................................................. [46G, Disks: 5]
+  o- libvirt-pool ............................................................................... [libvirt-pool (46G)]
+    o- vm1_disk ............................................................... [libvirt-pool/vm1_disk (Unknown, 10G)]
+    o- vm2_disk ................................................................ [libvirt-pool/vm2_disk (Unknown, 9G)]
+    o- vm3_disk ................................................................ [libvirt-pool/vm3_disk (Unknown, 9G)]
+    o- vm4_disk ................................................................ [libvirt-pool/vm4_disk (Unknown, 9G)]
+    o- vm5_disk ................................................................ [libvirt-pool/vm5_disk (Unknown, 9G)]
+
+# 在iSCSI网关上添加客户端(该步骤之前做过，这里只是整理，不再重复命令
+/disks> cd /iscsi-targets/iqn.2022-12.io.cloud-atlas.iscsi-gw:iscsi-igw/hosts
+/iscsi-target...csi-igw/hosts> create iqn.1989-06.io.cloud-atlas:libvirt-client
+ok
+/iscsi-target...ibvirt-client> auth username=libvirtd password=mypassword12
+ok
+
+# 然后给客户端 libvirt-client 依次添加前面创建的5块磁盘，注意: lun 0 到 lun 4
+/iscsi-target...ibvirt-client> disk add libvirt-pool/vm1_disk
+ok
+/iscsi-target...ibvirt-client> disk add libvirt-pool/vm2_disk
+ok
+/iscsi-target...ibvirt-client> disk add libvirt-pool/vm3_disk
+ok
+/iscsi-target...ibvirt-client> disk add libvirt-pool/vm4_disk
+ok
+/iscsi-target...ibvirt-client> disk add libvirt-pool/vm5_disk
+ok
+/iscsi-target...ibvirt-client> ls
+o- iqn.1989-06.io.cloud-atlas:libvirt-client .................................................. [Auth: CHAP, Disks: 5(46G)]
+  o- lun 0 ............................................. [libvirt-pool/vm1_disk(10G), Owner: a-b-data-2.dev.cloud-atlas.io]
+  o- lun 1 .............................................. [libvirt-pool/vm2_disk(9G), Owner: a-b-data-3.dev.cloud-atlas.io]
+  o- lun 2 .............................................. [libvirt-pool/vm3_disk(9G), Owner: a-b-data-2.dev.cloud-atlas.io]
+  o- lun 3 .............................................. [libvirt-pool/vm4_disk(9G), Owner: a-b-data-3.dev.cloud-atlas.io]
+  o- lun 4 .............................................. [libvirt-pool/vm5_disk(9G), Owner: a-b-data-2.dev.cloud-atlas.io]
