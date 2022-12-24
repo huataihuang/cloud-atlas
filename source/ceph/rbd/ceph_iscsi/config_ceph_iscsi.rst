@@ -132,7 +132,9 @@
 
    对于非 RHEL/CentOS 操作系统或者使用上游开源ceph-iscsi代码或者使用ceph-iscsi-test内核，则需要使用 ``skipchecks=true`` 参数，这样可以避免校验Red Hat内核和检查rpm包。
 
-- 添加RBD镜像，位于 ``rbd`` ，大小就采用Ceph整个Bluestore磁盘大小(因为我磁盘空间有限，所以整个分配给虚拟机使用), 即名为 ``vm_images`` 大小 55G:
+(已改进采用 ``libvirt-pool`` 存储池) :strike:`添加RBD镜像，位于 rbd ，大小就采用Ceph整个Bluestore磁盘大小(因为我磁盘空间有限，所以整个分配给虚拟机使用), 即名为 vm_images 大小 55G`
+
+- 采用 ``libvirt-pool`` 作为RBD存储池:
 
 .. literalinclude:: config_ceph_iscsi/gwcli_create_rbd_image
    :language: bash
@@ -143,6 +145,15 @@
    回过头看，之前文档中提到创建Ceph存储池命名为 ``rbd`` ，我感觉实际命名可以采用其他名字。考虑到我之前创建过 ``livirt-pool`` 存储池，所以我这里改为创建在存储池 ``libvirt-pool`` 下。
 
    磁盘创建的规格可以超过实际物理磁盘容量，例如我的OSD磁盘只有46.6G(物理磁盘分区)，但是创建 ``rbd image`` 可以创建上百G甚至更多。实际使用时才会消耗磁盘空间，具体可以等逻辑磁盘写满就可以动态添加底层物理磁盘扩容。
+
+.. warning::
+
+   我仔细阅读了 `libvirt storage: iSCSI pool <https://libvirt.org/storage.html#iscsi-pool>`_ 文档，发现需要注意:
+
+   - :ref:`libvirt` 不支持直接操作 iSCSI target ，只能使用已经创建好的 iSCSI target LUNs
+   - 我这里直接创建一个巨大的 (汗，公司配备的 :ref:`apple_silicon_m1_pro` 硬盘实在太小了，双系统启动加上Ceph需要三副本，导致实际可用磁盘只有区区46.6GB)方法不合适，应该为每个虚拟机分别创建一个LUN磁盘，这样我可以部署 :ref:`kubernetes` (采用5台虚拟机)
+
+   我在下文将纠正这个配置错误，重建5个较小的LUNs用于构建虚拟机。
 
 - 创建一个 initator 名为 ``iqn.1989-06.io.cloud-atlas:libvirt-client`` 客户端，并且配置intiator的CHAP名字和密码，然后再把创建的RBD镜像磁盘添加给用户:
 
@@ -228,6 +239,41 @@
 
 接下来 :ref:`ceph_iscsi_initator` 就可以访问存储
 
+创建iSCSI target LUNs
+=======================
+
+如上文所述，需要在 iSCSI target 中为每个虚拟机单独构建一个LUN作为虚拟磁盘，所以我按照以下步骤操作
+
+- 已经完成了 :ref:`mobile_cloud_ceph_iscsi_libvirt` 配置，启动了 ``images_iscsi`` 存储池。此时 ``livirtd`` 已经登陆到iSCSI target，能够查询LUNs:
+
+.. literalinclude:: ../../deploy/install_mobile_cloud_ceph/mobile_cloud_ceph_iscsi_libvirt/virsh_vol_list_iscsi_pool
+   :language: xml
+   :caption: virsh查看iSCSI pool提供的LUN
+
+此时看到是一个错误创建过大的LUN:
+
+.. literalinclude:: config_ceph_iscsi/virsh_vol_list_iscsi_pool_large_lun
+   :language: xml
+   :caption: virsh查看iSCSI pool提供的LUN(单磁盘过大)
+
+- 在Ceph服务器iSCSI Gateway网关节点上执行以下命令，删除掉这个LUN(注意，需要先移除 ``iscsi-targets`` 节点上的磁盘映射):
+
+.. literalinclude:: config_ceph_iscsi/delete_rbd_disk
+   :language: xml
+   :caption: 使用gwcli删除iSCSI target映射磁盘以及对应RBD磁盘
+
+- 接下来开始创建5块RBD磁盘，并映射到iSCSI starget:
+
+.. literalinclude:: config_ceph_iscsi/gwcli_create_rbd_iscsi_target
+   :language: xml
+   :caption: 使用gwcli创建RBD磁盘并映射到iSCSI target
+
+- 现在，从 :ref:`ceph_dashboard` 上观察，可以看到 iSCSI Gateways 下管理着刚才创建的 ``libvirt-pool`` 的5块磁盘
+
+.. figure:: ../../../_static/ceph/rbd/ceph_iscsi/config_ceph_iscsi_5_vm_disk.png
+   :scale: 40
+
+   通过Ceph Dashboard可以观察到iSCSI target提供了5个映射的libvirt-pool的LUN虚拟磁盘
 
 参考
 =======
