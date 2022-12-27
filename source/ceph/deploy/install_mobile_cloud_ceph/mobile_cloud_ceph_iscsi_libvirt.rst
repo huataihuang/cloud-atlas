@@ -177,9 +177,57 @@ libvirt配置iSCSI存储池(iSCSI pool)
 - 查询远程iSCSI target提供的LUN磁盘:
 
 .. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_vol_list_iscsi_pool
-   :language: xml
+   :language: bash
    :caption: virsh查看iSCSI pool提供的LUN
 
+可以看到 :ref:`config_ceph_iscsi` 配置的5块磁盘:
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_vol_list_iscsi_pool_output
+   :language: bash
+   :caption: virsh查看iSCSI pool提供的LUN信息输出
+
+- 上述远程iSCSI target LUNs已经被映射到本地作为本地块设备，可以通过 ``virsh vol-info`` 命令检查，例如检查第一块磁盘:
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_vol_info_iscsi_lun
+   :language: bash
+   :caption: virsh vol-info查看iSCSI Target的LUN信息
+
+输出信息可以看到这个磁盘就如 :ref:`config_ceph_iscsi` 所配置的服务器端RBD设备情况:
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_vol_info_iscsi_lun_output
+   :language: bash
+   :caption: virsh vol-info查看iSCSI Target的LUN信息输出
+
+- 通过 ``virsh vol-dumpxml`` 命令可以获得LUN信息:
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_vol_dumpxml_iscsi_lun
+   :language: bash
+   :caption: virsh vol-dumpxml查看iSCSI Target的LUN信息
+
+输出信息如下:
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_vol_dumpxml_iscsi_lun_output
+   :language: bash
+   :caption: virsh vol-dumpxml查看iSCSI Target的LUN信息输出
+
+使用iSCSI LUN磁盘创建虚拟机
+============================
+
+既然iSCSI target KUN磁盘已经就绪，由于我的整个环境是在 :ref:`arm_kvm` ( :ref:`apple_silicon_m1_pro` Macbook Pro上 )，所以构建虚拟机方法也采用 :ref:`archlinux_arm_kvm` 方式相同(虚拟机OS选择 :ref:`fedora` ):
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_create_ovmf_vm_iso_iscsi
+   :language: bash
+   :caption: 采用iSCSI target LUN磁盘作为存储创建Fedora虚拟机(ovmf)
+   :emphasize-lines: 10
+
+详细安装步骤同 :ref:`archlinux_arm_kvm` 中 :ref:`fedora37_installation`
+
+重复上述步骤，完成5个虚拟机的部署，完成后虚拟机列表:
+
+.. literalinclude:: mobile_cloud_ceph_iscsi_libvirt/virsh_list_vms
+   :language: bash
+   :caption: 完成部署后虚拟机列表，其中有5台虚拟机是基于iSCSI存储(底层是Ceph分布式存储)
+   :emphasize-lines: 7-11
 
 **以下段落仅记录参考，暂未实践**
 

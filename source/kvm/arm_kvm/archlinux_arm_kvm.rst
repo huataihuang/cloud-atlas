@@ -81,15 +81,19 @@ arch linux ARM KVM虚拟化
 强制方式安装仓库提供的qemu并补全依赖
 =========================================
 
-- `edk2-armvirt <https://archlinux.org/packages/extra/any/edk2-armvirt/>`_ 下载到本地安装::
+- `edk2-armvirt <https://archlinux.org/packages/extra/any/edk2-armvirt/>`_ 下载到本地安装:
 
-   sudo pacman -U --noconfirm edk2-armvirt-202208-3-any.pkg.tar.zst
-   
-- 实际上系统已经安装了 ``libbpf-1.0.1-1``
+.. literalinclude:: archlinux_arm_kvm/archlinux_install_edk2_armvirt
+   :language: bash
+   :caption: 在arch linux上安装edk2-armvirt软件依赖包
 
-- 然后强制安装(忽略倚赖)::
+- 实际上系统已经安装了 ``libbpf-1.0.1-1`` 但是版本高于 ``qemu-system-aarch64`` 的依赖，所以下面还需要手工编译安装低版本 ``libbpf`` (见下文)
 
-   pacman -Sd qemu-system-aarch64 
+- 然后强制安装(忽略倚赖):
+
+.. literalinclude:: archlinux_arm_kvm/archlinux_install_qemu_aarch64
+   :language: bash
+   :caption: 强制安装qemu-system-aarch64忽略依赖(依赖需要手工修复)
 
 不过，实际上还是存在依赖问题，也就是 ``qemu-system-aarch64`` 的库依赖错误::
 
@@ -101,14 +105,11 @@ arch linux ARM KVM虚拟化
 
 这个 ``libbpf.so.0`` 是低版本 ``libbpf`` ，但是当前系统已经采用了 ``libbpf-1`` ，需要再安装一个低版本
 
-从 `libbpf release <https://github.com/libbpf/libbpf/releases>`_ 下载一个低版本 ``libbpf-0.6.1.tar.gz`` 进行编译安装::
+从 `libbpf release <https://github.com/libbpf/libbpf/releases>`_ 下载一个低版本 ``libbpf-0.6.1.tar.gz`` 进行编译安装:
 
-   tar xfz libbpf-0.6.1.tar.gz
-   cd libbpf-0.6.1
-   cd src
-   make
-   sudo cp libbpf.so.0.6.0 /usr/lib/
-   sudo ln -s /usr/lib/libbpf.so.0.6.0 /usr/lib/libbpf.so.0
+.. literalinclude:: archlinux_arm_kvm/archlinux_compile_libbpf
+   :language: bash
+   :caption: 编译安装低版本libbpf-0.6.1
 
 这样就能够正常运行 ``qemu-system-aarch64``
 

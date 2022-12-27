@@ -275,6 +275,19 @@
 
    通过Ceph Dashboard可以观察到iSCSI target提供了5个映射的libvirt-pool的LUN虚拟磁盘
 
+并且，在远程 :ref:`mobile_cloud_ceph_iscsi_libvirt` 配置完成后，可以使用 ``virsh`` 命令检查存储池中的卷:
+
+.. literalinclude:: ../../deploy/install_mobile_cloud_ceph/mobile_cloud_ceph_iscsi_libvirt/virsh_vol_list_iscsi_pool
+   :language: xml
+   :caption: virsh查看iSCSI pool提供的LUN
+
+可以看到上述配置的5个iSCSI target LUNs已经可以被libvirt客户端:
+
+.. literalinclude:: ../../deploy/install_mobile_cloud_ceph/mobile_cloud_ceph_iscsi_libvirt/virsh_vol_list_iscsi_pool_output
+   :language: bash
+   :caption: virsh查看iSCSI pool提供的LUN输出信息
+
+
 参考
 =======
 
