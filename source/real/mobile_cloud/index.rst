@@ -14,4 +14,6 @@
    mobile_cloud_libvirt.rst
    mobile_cloud_kvm.rst
    mobile_cloud_vm.rst
+   mobile_cloud_ceph.rst
+   mobile_cloud_k8s.rst
    mobile_dev.rst

@@ -4,7 +4,7 @@
 移动云Btrfs
 =========================
 
-在 :ref:`apple_silicon_m1_pro` 的MacBook Pro 2022笔记本上，安装 :ref:`asahi_linux` ，存储文件系统采用 :ref:`btrfs`
+在 :ref:`apple_silicon_m1_pro` 的MacBook Pro 2022笔记本上，安装 :ref:`asahi_linux` ，存储文件系统采用 :ref:`btrfs` (内核版本升级到6.1之后无法采用 :ref:`mobile_cloud_zfs` )
 
 前置工作 
 ==========
@@ -49,4 +49,8 @@ btrfs文件系统
    :language: bash
    :caption: 对分区 7/8 进行文件系统格式化，并挂载
 
-:
+存储使用
+==========
+
+- 后续为 :ref:`mobile_cloud_k8s` 提供 :ref:`btrfs_nfs` 实现容器间共享存储
+
