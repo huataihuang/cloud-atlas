@@ -6,7 +6,7 @@ wget
 
 wget是常用下载工具
 
--  wget下载文件到指定目录 ``-P prefix`` ::
+- wget下载文件到指定目录 ``-P prefix`` ::
 
    -P prefix
    --directory-prefix=prefix
@@ -19,7 +19,7 @@ wget是常用下载工具
 
    wget <file.ext> -P /path/to/folder
 
--  wget下载文件到指定目录下文件名 ``-O filename`` ::
+- wget下载文件到指定目录下文件名 ``-O filename`` ::
 
    -O file
    --output-document=file

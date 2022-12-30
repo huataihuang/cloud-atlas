@@ -53,7 +53,7 @@
    :language: bash
    :caption: 在/dev/vdb1上构建基于LVM的bluestore存储卷
 
-和 :ref:`mobile_cloud_add_ceph_osds_lvm` 一样，使用 ``LVM`` 卷方式管理是最方便的，自动添加了 ``systemd`` 服务 ``ceph-osd@.service`` 并且自动启动，也创建了该服务在操作系统启动时自动启动的 ``systemd`` 链接配置
+和 :ref:`mobile_cloud_ceph_add_ceph_osds_lvm` 一样，使用 ``LVM`` 卷方式管理是最方便的，自动添加了 ``systemd`` 服务 ``ceph-osd@.service`` 并且自动启动，也创建了该服务在操作系统启动时自动启动的 ``systemd`` 链接配置
 
 .. note::
 

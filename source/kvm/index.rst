@@ -18,10 +18,11 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    hypervisor.rst
    kvm_architecture.rst
    storage/index
-   numa/index
    libvirt/index
    remote_desktop/index
    performance/index
+   memory/index
+   numa/index
    iommu/index
    sr-iov/index
    vgpu/index
@@ -32,7 +33,6 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    kvm_live_migration.rst
    qemu/index
    kvm_libguestfs.rst
-   memballoon.rst
    gpu_passthrough_with_kvm.rst
    nvidia_cuda_gpu_in_kvm.rst
    amd_rocm_gpu_in_kvm.rst

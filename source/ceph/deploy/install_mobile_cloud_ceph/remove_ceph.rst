@@ -4,7 +4,7 @@
 删除Ceph集群
 ================
 
-我在 :ref:`mobile_cloud_ceph_add_ceph_mons` 时遇到无法正常部署 ``ceph-mon`` ，而且也没有办法回滚到最初 :ref:`mobile_cloud_ceph_mon` 正常的操作状态。推测是 :ref:`disable_insecure_global_id_reclaim` 过早导致，由于是测试环境，想快速恢复，所以采用删除Ceph集群，重新开始 :ref:`mobile_cloud_ceph_mon` 等安装步骤。
+我在 :ref:`mobile_cloud_ceph_add_ceph_mons` 时遇到无法正常部署 ``ceph-mon`` ，而且也没有办法回滚到最初 :ref:`mobile_cloud_ceph_mon` 正常的操作状态。由于是测试环境，想快速恢复，所以采用删除Ceph集群，重新开始 :ref:`mobile_cloud_ceph_mon` 等安装步骤。
 
 - 在每个节点上按需停止服务(已安装服务)::
 
