@@ -15,6 +15,7 @@ NetworkManager
 
    :ref:`jetson_nano` 上NVIDIA官方提供的是基于 :ref:`ubuntu_linux` 桌面版 18.04 LTS改造的L4T系统，默认使用的就是 NetworkManager管理网络，熟悉使用对桌面发行版Linux会有很大帮助。
 
+   :ref:`mobile_cloud_infra` 部署中，我采用了 :ref:`fedora_networkmanager` 来配置 :ref:`mobile_cloud_vm` 的静态IP地址
 
 nmcli简介
 ============
