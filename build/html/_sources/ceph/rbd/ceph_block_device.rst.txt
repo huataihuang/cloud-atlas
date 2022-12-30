@@ -14,7 +14,7 @@ Ceph块设备是一个精简配置(thin-provisioned)，可伸缩(resizable)以�
 
    内核模块使用Linux页缓存(Linux page caching)，而使用 ``librbd`` 的应用程序，则Ceph支持 RBD Caching
 
-Ceph块设备使用了内核模块提供了存储高性能，对于KVM (QEMU) 以及云计算系统如 :ref:`openstack` 和 ``CloudStack`` 则基于 :ref:`libvirt` 和QEMU集成Ceph块设备。此外，还可以同时使用 :ref:`ceph_radosgw` 和 :ref:`cephfs` 。
+Ceph块设备使用了内核模块提供了存储高性能，对于KVM (QEMU) 以及云计算系统如 :ref:`openstack` 和 ``CloudStack`` 则基于 :ref:`libvirt` 和QEMU集成Ceph块设备。此外，还可以同时使用 :ref:`ceph_iscsi` 和 :ref:`cephfs` 。
 
 参考
 =======
