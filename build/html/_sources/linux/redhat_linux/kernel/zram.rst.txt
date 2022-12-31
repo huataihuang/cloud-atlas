@@ -92,6 +92,8 @@ zram块设备初始化成基于RAM的压缩swap，只需要使用 ``mkswap`` 初
 
 ``util-linux`` 软件包提供了一个工具 ``zramctl`` 可以用来检查设备的真实压缩率以及其他信息，这些信息也可以通过 ``/sys/block/zram{devicenumber}/`` 目录下的文件提供。
 
+.. _zram_swap_script:
+
 使用zram作为swap的脚本
 =======================
 
@@ -161,8 +163,10 @@ zram工具
 
    zramctl --find --size 512M --algorithm zstd
 
+.. _zram_generator:
+
 zram-generator
----------------
+=================
 
 从Fedora 33+ 开始默认提供了一个 ``zram-generator`` 的工具 ，这个工具是 `systemd/zram-generator <https://github.com/systemd/zram-generator>`_
 
