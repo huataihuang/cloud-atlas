@@ -43,4 +43,4 @@ Memory Ballooning
 
 - `Overcommitting with KVM <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/virtualization_deployment_and_administration_guide/chap-overcommitting_with_kvm>`_
 - `Configuring Swap on ZRAM <https://docs.fedoraproject.org/en-US/fedora-coreos/sysconfig-configure-swaponzram/>`_
-
+- `Memory Overcommit technologies for kvm hosts <https://people.redhat.com/rfreire/kvm-overcommit/#/>`_
