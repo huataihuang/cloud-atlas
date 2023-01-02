@@ -15,6 +15,7 @@ Life Atlas
    open_your_mind/index
    sport/index
    skill/index
+   music/index
 
 .. only::  subproject and html
 
