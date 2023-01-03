@@ -51,7 +51,17 @@ vgpu_unlock支持的硬件和软件
   - Enterprise Linux distributions (RHEL, CentOS, Fedora)
   - Debian/Ubuntu (20.04 LTS)
   - Windows 10, 8.1, Server 2019 and 2016
- 
+
+.. note::
+
+   不建议在不受支持/未经认证的硬件上使用 vGPU，但是 ``vgpu_unlock`` 脚本依然可能会让某些N卡能够运行 ``vGPU`` 技术，不过采用开源技术需要自担风险。该 ``vgpu_unlock`` 项目是MIT授权，不提供任何保证。
+
+安装
+========
+
+- NVIDIA GRID vGPU驱动需要以 :ref:`dkms` 模块方式安装::
+
+   ./nvidia-installer --dkms
 
 参考
 ======
