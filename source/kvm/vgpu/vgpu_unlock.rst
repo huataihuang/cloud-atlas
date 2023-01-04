@@ -46,9 +46,9 @@ vgpu_unlock支持的硬件和软件
 
 对于 5.10-5.12 的内核，需要使用 `rupansh/vgpu_unlock_5.12 <https://github.com/rupansh/vgpu_unlock_5.12>`_ 补丁
 
-更新: 对于任何内核版本高于 5.10 都需要使用补丁。但是需要注意内核5.13不能工作，建议不要使用5.13
+更新: 对于任何内核版本高于 5.10 都需要使用补丁。但是需要注意内核5.13不能工作，建议不要使用5.13。对于内核版本较高的系统，可以自己使用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 提供的 ``Kernel module hooks: vgpu_unlock_hooks.c`` 做补丁，这样就能够解锁。(应该不需要降级内核版本，我准备尝试一下，毕竟降低内核版本实际上是非常大的损失)
 
-目前看需要将物理主机操作系统内核降低到5.12以能够完成补丁安装
+`Rust-based vgpu_unlock <https://github.com/mbilker/vgpu_unlock-rs>`_ 提供了一个 :ref:`rust` 开发的 vgpu_unlock ，可以和使用 python 开发的解锁互相参看(都是user space工具，核心没有区别)
 
 - Guest虚拟机:
 
@@ -59,6 +59,10 @@ vgpu_unlock支持的硬件和软件
 .. note::
 
    不建议在不受支持/未经认证的硬件上使用 vGPU，但是 ``vgpu_unlock`` 脚本依然可能会让某些N卡能够运行 ``vGPU`` 技术，不过采用开源技术需要自担风险。该 ``vgpu_unlock`` 项目是MIT授权，不提供任何保证。
+
+.. note::
+
+   总之，尽可能使用NVIDIA官方提供的最新版本 vGPU 驱动，实在不行再使用 `Virtual Machine with vGPU Unlock for single GPU desktop <https://github.com/tuh8888/libvirt_win10_vm>`_ 提供的2021年4月版本驱动 ( :ref:`vgpu_startup` )
 
 安装
 ========
