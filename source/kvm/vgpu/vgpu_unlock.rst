@@ -46,6 +46,10 @@ vgpu_unlock支持的硬件和软件
 
 对于 5.10-5.12 的内核，需要使用 `rupansh/vgpu_unlock_5.12 <https://github.com/rupansh/vgpu_unlock_5.12>`_ 补丁
 
+更新: 对于任何内核版本高于 5.10 都需要使用补丁。但是需要注意内核5.13不能工作，建议不要使用5.13
+
+目前看需要将物理主机操作系统内核降低到5.12以能够完成补丁安装
+
 - Guest虚拟机:
 
   - Enterprise Linux distributions (RHEL, CentOS, Fedora)
