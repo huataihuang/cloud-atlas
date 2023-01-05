@@ -4,6 +4,12 @@
 vgpu虚拟化快速起步
 ====================
 
+.. warning::
+
+   很不幸，我虽然有支持vGPU功能的 :ref:`tesla_p10` 数据中心运算卡，但是NVIDIA vGPU需要license才能工作。申请90天试用license非常麻烦(需要企业用户通过NVIDIA的销售审核)，所以我最终放弃尝试( :ref:`vgpu_unlock` 中记录了采用特定 vGPU 14.1版本在Windows虚拟机中绕过license的方法，但是这个方法只能用于Windows虚拟机，我实际没有实践 )。
+
+   vGPU的技术使用并不复杂，我仅做一些资料整理。最终我还是准备采用 GPU passthrough 方式将整个 :ref:`tesla_p10` 直通给一个虚拟机来构建 :ref:`kubernetes` GPU容器，和vGPU的差异应该仅仅是GPU切分的差异。这个功能我准备放弃，除非后续有商业的license环境尝试。从技术上，vGPU和GPU passthrough的差异不大，仅仅是一些license的配置，就不再研究了。
+
 要设置NVIDIA vGPU设备，需要:
 
 - 为GPU设备获取和安装对应的NVIDIA vGPU驱动
