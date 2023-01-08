@@ -9,6 +9,7 @@ Linux内存大页
 
    intro_huge_memory_pages.rst
    hugetlb_page.rst
+   transparent_huge_page.rst
 
 .. only::  subproject and html
 

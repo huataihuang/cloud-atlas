@@ -1,13 +1,13 @@
-.. _intel_gvt-g:
+.. _intel_gvt:
 
 =================================
-Intel GVT-g GPU虚拟化
+Intel GVT GPU虚拟化
 =================================
 
 .. toctree::
    :maxdepth: 1
    
-   introduce_intel_gvt-g.rst
+   intro_intel_gvt.rst
 
 .. only::  subproject and html
 
