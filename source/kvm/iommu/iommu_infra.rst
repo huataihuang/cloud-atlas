@@ -4,7 +4,7 @@
 IOMMU架构
 ======================
 
-Intel Virtualization Technology (Intel VT) for Directed I/O (Intel VT-d)技术，是使用Intel处理器和Intel平台特定核心逻辑芯片实现的I/O虚拟化技术
+:ref:`intel_vt` for Directed I/O (Intel VT-d)技术，是使用Intel处理器和Intel平台特定核心逻辑芯片实现的I/O虚拟化技术
 
 .. figure:: ../../_static/kvm/intel_vt-d/intel_vt-d_platform.png
    :scale: 80
@@ -12,7 +12,6 @@ Intel Virtualization Technology (Intel VT) for Directed I/O (Intel VT-d)技术�
 .. note::
 
    AMD对应Intel VT-d的技术称为 ``AMD-Vi`` ，原先的名字是 ``IOMMU``
-
 
 
 参考

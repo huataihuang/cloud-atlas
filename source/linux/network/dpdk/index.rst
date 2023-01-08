@@ -1,7 +1,7 @@
-.. _linux_dpdk:
+.. _dpdk:
 
 =================================
-Linux DPDK
+DPDK (Data Plane Development Kit)
 =================================
 
 .. toctree::
