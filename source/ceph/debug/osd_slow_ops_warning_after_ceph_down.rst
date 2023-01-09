@@ -34,3 +34,9 @@ Ceph硬关机重启后OSD出现"slow ops"报错
                 33 peering
 
 这显示OSD存在异常
+
+检查 ``dmesg -T`` 输出也有一个提示信息::
+
+   [Tue Jan 10 00:41:47 2023] systemd[1]: /lib/systemd/system/ceph-volume@.service:8: Unit configured to use KillMode=none. This is unsafe, as it disables systemd's process lifecycle management for the service. Please update your service to use a safer KillMode=, such as 'mixed' or 'control-group'. Support for KillMode=none is deprecated and will eventually be removed.
+
+看来ceph进程关闭需要改进?
