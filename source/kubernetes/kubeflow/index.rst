@@ -8,6 +8,7 @@ Kubeflow - Kubernetes机器学习工作流平台
    :maxdepth: 1
 
    intro_kubeflow.rst
+   install_kubeflow.rst
 
 .. only::  subproject and html
 
