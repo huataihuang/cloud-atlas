@@ -66,19 +66,18 @@ KVM中性能最好的磁盘IO是 ``pass-through`` ，即 ``IOMMU`` 技术。这�
 
 以下脚本 ``check_iommu.sh`` 脚本可以查看系统中不同的PCI设备被映射到IOMMU组，如果没有返回任何信息，则表明系统没有激活IOMMU支持或者硬件不支持IOMMU
 
-.. literalinclude:: intel_vt-d_startup/check_iommu.sh
+.. literalinclude:: ovmf_gpu_nvme/check_iommu.sh
    :language: bash
-   :linenos:
-   :caption:
+   :caption: 检查PCI设备映射到IOMMU组
 
 Host主机unbind设备
 ====================
 
-要将PCI设备直通给虚拟机，需要首先在Host物理主机上 ``unbind`` 这个PCI设备，也就是在物理主机上这个设备将 ``消失`` ，然后 ``asign`` 设备给迅即，这样这个设备就是虚拟机 ``独占`` 使用
+要将PCI设备直通给虚拟机，需要首先在Host物理主机上 ``unbind`` 这个PCI设备，也就是在物理主机上这个设备将 ``消失`` ，然后 ``asign`` 设备给虚拟机，这样这个设备就是虚拟机 ``独占`` 使用
 
 .. note::
 
-   由于我实践方案修改，所以 Intel VT-d 实践改为在 :ref:`ovmf` 完成，实际步骤是相同的
+   由于我实践方案修改，所以 Intel VT-d 实践改为在 :ref:`ovmf` 完成。后续等再次实践时补充完善本文
 
 
 

@@ -12,6 +12,7 @@ IOMMU
    intel_ddio.rst
    iommu_grub_config.rst
    ovmf.rst
+   ovmf_gpu_nvme.rst
    tainted_host-cpu.rst
    vfio.rst
    compare_iommu_native_nvme.rst

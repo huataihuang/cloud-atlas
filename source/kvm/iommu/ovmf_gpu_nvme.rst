@@ -1,14 +1,17 @@
-.. _ovmf:
+.. _ovmf_gpu_nvme:
 
 =====================================
-Open Virtual Machine Firmware(OMVF)
+采用OVMF实现passthrough GPU和NVMe存储
 =====================================
 
 .. note::
 
-   本文是我首次实践 IOMMU 的笔记，我在 :ref:`ovmf_gpu_nvme` 实践中将进一步完善和改进，如果你想获得如何实现GPU passthrough的完备参考，可以阅读 :ref:`ovmf_gpu_nvme` 一文。
+   本文实践在原先 :ref:`ovmf` 基础上完成，将去芜存菁完善操作步骤，详细整理如何将 :ref:`tesla_p10` passthrough给虚拟机（包括对参考文档的再次翻译整理），然后在虚拟机内部运行NVIDIA Container Runtime，以构建 :ref:`kubernetes` 的GPU节点。
 
-Open Virtual Machine Firmware(OMVF)是在虚拟机内部激活UEFI支持的开源项目，从Linux 3.9和最新QEMU开始，可以将图形卡直通给虚拟机，提供VM原生图形性能，对图形性能敏感对任务非常有用。
+   记录KVM虚拟化passthrough部分，其他容器相关技术实践另外撰文
+
+Open Virtual Machine Firmware(OMVF)是在虚拟机内部激活UEFI支持的开源项目，从Linux 3.9和最新QEMU开始，可以将图形卡直通给虚拟机，提供VM原生图形性能，对图形性能敏感对任务非常有用。通过将物理主机独立的GPU直接passthrough给虚拟机，可以使得虚拟机图形性能接近于原生物理主机。在YouTube上，你可以找到很多GPU
+passthrough方式在Linux上运行Windows虚拟机中的游戏，获得非常好的体验的介绍视频。
 
 准备工作
 ===========
@@ -24,13 +27,15 @@ Open Virtual Machine Firmware(OMVF)是在虚拟机内部激活UEFI支持的开�
 
   - 需要主板芯片和BIOS都支持IOMMU: 可以参考 `Wikipedia:List of IOMMU-supporting hardware <https://en.wikipedia.org/wiki/List_of_IOMMU-supporting_hardware>`_
 
-- Guest虚拟机GPU ROM必须支持 ``UEFI``
+- Guest虚拟机GPU ROM必须支持 ``UEFI`` (也就是本文 ``OVMF`` 虚拟机)
 
   - 可以从 `techpowerup Video BIOS Collection <https://www.techpowerup.com/vgabios/>`_ 查询特定GPU是否支持UEFI。不过，从2012年开始所有GPU应该都支持UEFI，因为微软将UEFI作为兼容Windows 8的必要条件。
 
 .. note::
 
-   你需要有其他通道来观察系统，例如其他显卡或者带外管理，因为passthrough GPU会导致该GPU在物理主机上不可使用。
+   你需要有其他通道来观察系统，例如其他显卡或者带外管理，因为passthrough GPU会导致该GPU在物理主机上不可使用:
+
+   - 需要一个备用显示器或支持连接到多个GPU的多输入端口的显示器:  **如果没有连接屏幕，GPU passthrough不会显示任何内容，并且使用VNC或Spice对于性能没有任何帮助**
 
 设置IOMMU
 ================
@@ -62,7 +67,7 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 .. literalinclude:: ovmf_gpu_nvme/dmesg_dmar_iommu.txt
    :language: bash
-   :caption: 激活IOMMU之后系统启动信息
+   :caption: 激活IOMMU之后系统启动信息 "DMAR: IOMMU enabled" 表明IOMMU已经激活
    :emphasize-lines: 5
 
 检查groups是否正确
@@ -72,6 +77,7 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 .. literalinclude:: ovmf_gpu_nvme/check_iommu.sh
    :language: bash
+   :caption: 检查PCI设备映射到IOMMU组
 
 执行输出:
 
@@ -84,19 +90,40 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 - ``IOMMU Group`` 是直通给虚拟机的最小物理设备集合。举例，上述 ``IOMMU Group 32`` 这组设备只能完整分配给一个虚拟机，这个虚拟机将同时获得 ``ISA bridge [0601]`` ``SATA controller [0106]`` 和 ``SMBus [0c05]`` ；同理， ``IOMMU Group 34`` 包含了4个Broadcom 以太网接口(实际上就是主板集成4网口)也只能同时分配给一个虚拟机；而独立添加的Intel 4网口千兆网卡则是完全独立的4个 ``IOMMU Group`` ，意味着可以独立分配个4个虚拟机
 - 我在 :ref:`hpe_dl360_gen9` 上通过 :ref:`pcie_bifurcation` 将PCIe 3.0 Slot 1(x16)划分成2个独立的x8通道，安装了2块 :ref:`samsung_pm9a1` ，加上在 Slot 2(x8) 上安装的第3块 :ref:`samsung_pm9a1` ，所以服务器上一共有3块 NVMe 存储。在这里可以看到有3个 ``IOMMU Group`` 分别是 ``39-40`` 对应了3个NVMe控制器，可以分别分配给3个虚拟机
-- ``IOMMU Group 79`` 是安装在PCIe 3.0 Slot 3(x16)上的 :ref:`tesla_p10` ，可以直接透传给一个虚拟机。我仅做技术实践，最终我希望采用 :ref:`vgpu` 划分为更多GPU设备分配给虚拟化集群，来模拟大规模云计算
+- ``IOMMU Group 79`` 是安装在PCIe 3.0 Slot 3(x16)上的 :ref:`tesla_p10` ，可以直接透传给一个虚拟机。 :strike:`最终我希望采用 vgpu 划分为更多GPU设备分配给虚拟化集群，来模拟大规模云计算` (由于 :ref:`vgpu` 需要license，放弃)
+
+.. warning::
+
+   并非所有PCI-E插槽都相同。大多数主办都有CPU和PCH提供的PCIe插槽。但是，基于CPU的PCIe插槽可能无法正确支持隔离，此时PCI插槽似乎与连接到它的设备组合在一起，类似::
+
+      OMMU Group 1:
+      	 00:01.0 PCI bridge: Intel Corporation Xeon E3-1200 v2/3rd Gen Core processor PCI Express Root Port (rev 09)
+      	 01:00.0 VGA compatible controller: NVIDIA Corporation GM107 [GeForce GTX 750] (rev a2)
+      	 01:00.1 Audio device: NVIDIA Corporation Device 0fbc (rev a1) 
+
+   此时会强迫直通多个设备给相同的虚拟机
+
+   解决的方法是尝试将GPU插入其他PCIe插槽，看看是否提供与其他插槽的隔离。或者安装SCS覆盖补丁(有缺点)
 
 隔离GPU
 =============
 
-要实现将一个设备指定给虚拟机，这个设备以及所有在相同IOMMU组的设备必须将它们的驱动替换成 ``stub`` 驱动 或者 ``VFIO`` 驱动，这样才能避免物理主机访问设备。并且需要注意，大多数设备需要在VM启动前完成这个替换。
+要实现将一个设备指定给虚拟机，这个设备以及所有在相同IOMMU组的设备必须将它们的驱动替换成 ``stub`` 驱动 或者 ``VFIO`` 驱动，这样才能避免物理主机访问设备。对于大多数设备，可以在虚拟机启动前动态配置。
 
-但是，GPU驱动往往不倾向于支持动态绑定，所以可能难以实现一些用于物理主机的GPU被透明直通给虚拟机，因为这样的两种驱动相互冲突。通常建议手工绑定这些驱动，然后再启动虚拟机。
+但是，GPU驱动往往不倾向于支持动态绑定(过于复杂)，所以可能难以实现一些用于物理主机的GPU透明直通给虚拟机，因为这样的两种驱动相互冲突。通常建议手工绑定这些驱动，然后再启动虚拟机。也就是说，应该在host物理主机引导过程中，尽早绑定这些占位符驱动程序，此时设备处于非活动状态，直到虚拟机声明设备或者设备驱动程序切回。这种首选方法比系统完全联机后切换驱动程序要好，可以避免问题。
+
+.. warning::
+
+   当配置了IOMMU并且隔离了GPU之后，这个被隔离的GPU将不能被物理主机使用。一定要确保物理主机有其他GPU可以使用，否则一旦隔离唯一的GPU会导致物理主机无显示输出。
+
+   通常采用的方式是只隔离插在PCIe插槽上的独立GPU卡，而保留服务器主板内置的板载显卡给物理主机使用。
 
 从Linux内核4.1开始，内核包含了 ``vfio-pci`` ，这个VFIO驱动可以完全替代 ``pci-stub`` 而且提供了控制设备的扩展，例如在不使用设备时将设备切换到 ``D3`` 状态。
 
+.. _vfio-pci.ids:
+
 通过设备ID来绑定 ``vfio-pci``
---------------------------------
+================================
 
 ``vfio-pci`` 通常使用ID来找寻PCI设备，也就是只需要指定passthrough的设备ID。举例，前面显示的我的服务器上设备::
 
@@ -105,7 +132,10 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
    IOMMU Group 79:
            82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
 
-只需要使用 ``144d:a80a`` 和 ``10de:1b39`` 这两个设备ID来绑定 ``vfio-pci``
+只需要使用 ``144d:a80a`` 和 ``10de:1b39`` 这两个设备ID来绑定 ``vfio-pci`` ，这样就能够将 :ref:`nvme` 设备和 :ref:`tesla_p10` 设备passthrough给不同的虚拟机来构建高性能存储和GPU:
+
+- 上述 :ref:`nvme` 设备passthrough给3个虚拟机来构建 :ref:`zdata_ceph`
+- 上述 :ref:`tesla_p10` 设备passthrough给虚拟机来构建基于GPU的容器实现 :ref:`machine_learning` 的 :ref:`kubernetes` 工作节点
 
 .. note::
 
@@ -123,7 +153,7 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 有两种方式将设备 remove 或者 break :
 
-- 使用启动内核参数::
+- 使用启动内核参数(我的实践即采用此方法，见下文)::
 
    vfio-pci.ids=144d:a80a,10de:1b39
 
@@ -131,8 +161,8 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
    options vfio-pci ids=144d:a80a,10de:1b39
 
-提前加载 ``vfio-pci``
-------------------------
+提前加载 ``vfio-pci`` (模块方式,未实践)
+===========================================
 
 需要分辨 ``vfio-pci`` 是作为内核直接编译的还是作为内核模块加载的:
 
@@ -165,10 +195,10 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
    ``dracut`` 是一个制作 提前加载需要访问根文件系统的块设备模块(例如IDE，SCSI，RAID等) 初始化镜像 ``initramfs`` 工具。 ``mkinitcpio`` 是相同功能的工具。目前，大多数发行版，如Fedora, RHEL, Gentoo, Debian都使用 ``dracut`` ，不过 :ref:`arch_linux` 默认使用 ``mkinitcpio`` 。
 
-   由于我的实践是在Ubuntu上完成， ``VFIO`` 相关支持都是直接静态编译进内核，所以并不需要执行以下内核模块加入 ``initiramfs`` 的需求，我并没有执行以下3个方法的任意一个。不过，对于arch linux需要执行。
+   由于我的实践是在Ubuntu上完成， ``VFIO`` 相关支持都是直接静态编译进内核，所以并不需要执行以下内核模块加入 ``initiramfs`` 的需求， **我并没有执行以下3个方法的任意一个** 。不过，对于arch linux需要执行。
 
 mkinitcpio(方法一)
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 由于操作系统使用 ``vfio-pci`` 内核模块，需要确保 ``vfio-pci`` 模块提前加载，这样才能避免图形驱动绑定到这个GPU卡上。要实现这点，需要使用 ``mkinitcpio`` 帮助把 ``vfio_cpi`` 等相关内核模块加入到 ``initramfs`` 中
 
@@ -185,7 +215,7 @@ mkinitcpio(方法一)
    mkinitcpio -P
 
 booster(方法二)
-~~~~~~~~~~~~~~~~~
+------------------
 
 - 编辑 ``/etc/booster.yaml`` ::
 
@@ -196,7 +226,7 @@ booster(方法二)
    /usr/lib/booster/regenerate_images
 
 dracut(方法三)
-~~~~~~~~~~~~~~~~~
+------------------
 
 dracut的早期加载机制是通过内核参数。
 
@@ -213,13 +243,13 @@ dracut的早期加载机制是通过内核参数。
    dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
 
 我的屏蔽host pcie实践
-------------------------
+========================
 
-这段是我实际操作实践:
+**这段是我实际操作实践**:
 
-- 实践是在 :ref:`ubuntu_linux` 20.04.3 LTS上完成，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` ::
+- ( **注意，这段配置是错误的，正确配置见下文 vfio-pci.ids** )实践是在 :ref:`ubuntu_linux` 20.04.3 LTS上完成，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` ::
 
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on pci-stub.ids=144d:a80a,10de:1b39 rdblacklist=nouveau" 
+   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on iommu=pt pci-stub.ids=144d:a80a,10de:1b39 rdblacklist=nouveau"
 
 - 然后执行::
 
@@ -274,9 +304,11 @@ dracut的早期加载机制是通过内核参数。
    	Kernel driver in use: nouveau
    	Kernel modules: nvidiafb, nouveau
 
-- 我发现错误了，内核配置应该是 ``vfio-pci.ids=144d:a80a,10de:1b39`` ，而不是以前旧格式配置 ``pci-stub.ids=144d:a80a,10de:1b39`` ，所以重新修订 ``/etc/default/grub`` ::
+- 我发现错误了，内核配置应该是 ``vfio-pci.ids=144d:a80a,10de:1b39`` ，而不是以前旧格式配置 ``pci-stub.ids=144d:a80a,10de:1b39`` (这是我最初的配置错误) ，所以重新修订 ``/etc/default/grub`` (正确版本):
 
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39"
+.. literalinclude:: ovmf_gpu_nvme/grub_vfio-pci.ids
+   :language: bash
+   :caption: 配置/etc/default/grub加载vfio-pci.ids来隔离PCI直通设备
 
 .. note::
 
