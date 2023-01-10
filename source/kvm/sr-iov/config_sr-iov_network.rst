@@ -6,7 +6,7 @@
 
 .. note::
 
-   对于高速 40Gbps Intel服务器网卡，需要在guest虚拟机使用 :ref:`linux_dpdk` 才能充分发挥性能!
+   对于高速 40Gbps Intel服务器网卡，需要在guest虚拟机使用 :ref:`dpdk` 才能充分发挥性能!
 
    请参考 `Frequently Asked Questions for SR-IOV on Intel Ethernet Server Adapters <https://www.intel.com/content/www/us/en/support/articles/000005722/ethernet-products.html>`_ 说明获得不同以太网卡对SR-IOV的支持功能
 

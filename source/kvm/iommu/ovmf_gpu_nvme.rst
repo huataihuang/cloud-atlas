@@ -245,24 +245,12 @@ dracut的早期加载机制是通过内核参数。
 我的屏蔽host pcie实践
 ========================
 
-**这段是我实际操作实践**:
+**这段是我实际操作实践**
 
-- ( **注意，这段配置是错误的，正确配置见下文 vfio-pci.ids** )实践是在 :ref:`ubuntu_linux` 20.04.3 LTS上完成，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` ::
-
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on iommu=pt pci-stub.ids=144d:a80a,10de:1b39 rdblacklist=nouveau"
-
-- 然后执行::
-
-   sudo update-grub
-
-- 重启操作系统，然后执行以下命令检查::
-
-   cat /proc/cmdline
-   
 验证是否实现提前加载 ``vfio-pci``
 -----------------------------------
 
-- 重启系统
+在没有配置 ``vfio-pci.ids`` 隔离之前，按照以下方法先检查系统
 
 - 检查 ``vfio-pci`` 是否正确加载，并且绑定到正确设备::
 
@@ -272,43 +260,47 @@ dracut的早期加载机制是通过内核参数。
 
    [    1.434041 ] VFIO - User Level meta-driver version: 0.3
 
-并没有看到设备
+此时看不到 ``vfio`` 相关设备
 
-- 在host主机上检查设备::
+- 在host主机上检查设备:
 
-   lspci -nnk -d 144d:a80a
+.. literalinclude:: ovmf_gpu_nvme/lspci_nvme
+   :language: bash
+   :caption: lspci检查nvme设备驱动
 
-很不幸，物理主机依然能够访问::
+可以看到当前 :ref:`nvme` 使用的驱动是设备驱动 ``nvme`` 而不是 ``vfio-pci`` ，也就是表明设备尚未从物理host主机隔离:
 
-   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: nvme
-   	Kernel modules: nvme
-   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: nvme
-   	Kernel modules: nvme
-   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: nvme
-   	Kernel modules: nvme
+.. literalinclude:: ovmf_gpu_nvme/lspci_nvme_without_isolate
+   :language: bash
+   :caption: lspci检查尚未隔离的nvme设备显示使用了nvme设备驱动
+   :emphasize-lines: 3,7,11
 
-检查GPU设备也是如此::
+检查GPU设备也是如此:
 
-   lspci -nnk -d 10de:1b39
+.. literalinclude:: ovmf_gpu_nvme/lspci_gpu
+   :language: bash
+   :caption: lspci检查NVIDIA GPU设备驱动
 
-输出::
+输出也显示NVIDIA GPU尚未隔离，即当前使用的是NVIDIA设备驱动 ``nouveau`` 而不是 ``vfio-pci`` :
 
-   82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
-   	Subsystem: NVIDIA Corporation Device [10de:1217]
-   	Kernel driver in use: nouveau
-   	Kernel modules: nvidiafb, nouveau
+.. literalinclude:: ovmf_gpu_nvme/lspci_gpu_without_isolate
+   :language: bash
+   :caption: lspci检查尚未隔离的NVIDIA GPU设备显示使用了NVIDIA开源设备驱动nouveau
+   :emphasize-lines: 3
 
-- 我发现错误了，内核配置应该是 ``vfio-pci.ids=144d:a80a,10de:1b39`` ，而不是以前旧格式配置 ``pci-stub.ids=144d:a80a,10de:1b39`` (这是我最初的配置错误) ，所以重新修订 ``/etc/default/grub`` (正确版本):
+- 修订 ``/etc/default/grub`` 添加 ``vfio-pci.ids`` 配置将设备从物理host主机隔离(准备用于虚拟机):
 
 .. literalinclude:: ovmf_gpu_nvme/grub_vfio-pci.ids
    :language: bash
    :caption: 配置/etc/default/grub加载vfio-pci.ids来隔离PCI直通设备
+
+我在早期 :ref:`ovmf` 实践中尝试过 ``pci-stub.ids`` ，配置 ``/etc/default/grub`` 如下(实践证明现在已经无效了):
+
+.. literalinclude:: ovmf_gpu_nvme/grub_vfio-stub.ids
+   :language: bash
+   :caption: 配置/etc/default/grub加载vfio-stub.ids来隔离PCI直通设备，该方法已废弃
+
+实践发现现在 ``pci-stub.ids`` 不能隔离PCI设备，这个配置重启后可以看到Host主机依然能够发现设备并加载了设备驱动，而不是使用 ``vfio-pci`` 驱动(没有隔离)
 
 .. note::
 
@@ -326,51 +318,48 @@ dracut的早期加载机制是通过内核参数。
       ...
       NVRM: No NVIDIA devices probed.
 
-然后重新生成grub::
+- 重新生成grub::
 
    sudo update-grub
 
-然后再次重启系统，并检查 ``dmesg | grep -i vfio`` 输出，这次正常了，可以看到 ``vfio_pci`` 正确绑定了指定PCIe设备::
+- 重启系统，并检查 ``dmesg | grep -i vfio`` 输出，可以看到 ``vfio_pci`` 正确绑定了指定PCIe设备:
 
-   [    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
-   [    0.252622] Kernel command line: BOOT_IMAGE=/boot/vmlinuz-5.4.0-90-generic root=UUID=caa4193b-9222-49fe-a4b3-89f1cb417e6a ro intel_iommu=on vfio-pci.ids=144d:a80a,10de:1b39
-   [    1.457708] VFIO - User Level meta-driver version: 0.3
-   [    1.516284] vfio_pci: add [144d:a80a[ffffffff:ffffffff]] class 0x000000/00000000
-   [    1.536263] vfio_pci: add [10de:1b39[ffffffff:ffffffff]] class 0x000000/00000000
+.. literalinclude:: ovmf_gpu_nvme/dmesg_vfio-pci.ids
+   :language: bash
+   :caption: 通过内核参数vfio-pci.ids隔离设备之后，重启系统后dmesg显示vfio_pci设备就是被隔离的PCI设备
+   :emphasize-lines: 4,5
 
-- 此时根据设备ID检查PCIe设备，可以看到已经被 ``vfio-pci`` 驱动::
+- 此时根据设备ID检查PCIe设备，可以看到已经被 ``vfio-pci`` 驱动:
 
-   lspci -nnk -d 144d:a80a
+.. literalinclude:: ovmf_gpu_nvme/lspci_nvme
+   :language: bash
+   :caption: lspci检查nvme设备驱动
 
-显示::
+显示:
 
-   05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: vfio-pci
-   	Kernel modules: nvme
-   08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: vfio-pci
-   	Kernel modules: nvme
-   0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
-   	Kernel driver in use: vfio-pci
-   	Kernel modules: nvme
+.. literalinclude:: ovmf_gpu_nvme/lspci_nvme_with_isolate
+   :language: bash
+   :caption: lspci检查已经隔离的nvme设备，可以看到当前驱动是vfio-pci，表明NVMe设备已经正确分离
+   :emphasize-lines: 3,7,11
 
 .. note::
 
    请注意， ``vfio-pci.ids=144d:a80a`` 是对同一种类设备进行屏蔽，所有在这个服务器上安装的 :ref:`samsung_pm9a1` 都是相同的设备ID，也就是会同时被屏蔽掉。目前看，不能单独只屏蔽一块NVMe存储，因为都是相同的三星NVMe，会一起被 ``vfio-pci`` 接管。可以看到上面 ``lspci -nnk -d 144d:a80a`` 显示3块三星NVMe。
 
-检查GPU::
+检查GPU:
 
-   lspci -nnk -d 10de:1b39
+.. literalinclude:: ovmf_gpu_nvme/lspci_gpu
+   :language: bash
+   :caption: lspci检查NVIDIA GPU设备驱动
 
-显示::
+同样显示NVIDIA GPU也已经正确分离，当前使用的驱动已经是 ``vfio-pci`` :
 
-   82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
-   	Subsystem: NVIDIA Corporation Device [10de:1217]
-   	Kernel driver in use: vfio-pci
-   	Kernel modules: nvidiafb, nouveau
+.. literalinclude:: ovmf_gpu_nvme/lspci_gpu_with_isolate
+   :language: bash
+   :caption: lspci检查隔离成功的NVIDIA GPU设备，可以看到当前驱动是vfio-pci
+   :emphasize-lines: 3
+
+**现在已经完成了NVMe和GPU的物理主机隔离，意味着已经可以将这些PCI设备passthrough给虚拟机使用**
 
 设置OVMF guest VM
 ====================
@@ -389,23 +378,14 @@ OVMF是开源UEFI firmware，用于QEMU虚拟机。
 virt-install
 --------------
 
-- 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷::
+- 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷，然后使用LVM卷作为存储创建ovmf虚拟机:
 
-   virsh vol-create-as images_lvm z-fedora35 6G
+Fedora35虚拟机
+~~~~~~~~~~~~~~~
 
-- 创建虚拟机::
-
-   virt-install \
-     --network bridge:virbr0 \
-     --name z-fedora35 \
-     --ram=2048 \
-     --vcpus=1 \
-     --os-type=Linux --os-variant=fedora31 \
-     --boot uefi --cpu host-passthrough \
-     --disk path=/dev/vg-libvirt/fedora35,sparse=false,format=raw,bus=virtio,cache=none,io=native \
-     --graphics none \
-     --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
-     --extra-args="console=tty0 console=ttyS0,115200"
+.. literalinclude:: ovmf_gpu_nvme/create_ovmf_fedora35_vm_on_libvirt_lvm_pool
+   :language: bash
+   :caption: 在Libvirt的LVM存储上创建Fedora 35 ovmf虚拟机(iommu)
 
 Fedora Workstation版本只能从iso安装
 
@@ -433,6 +413,34 @@ Fedora Workstation版本只能从iso安装
    nmcli general hostname z-iommu
    nmcli connection modify "enp1s0" ipv4.method manual ipv4.address 192.168.6.242/24 ipv4.gateway 192.168.6.200 ipv4.dns "192.168.6.200,192.168.6.11"
 
+Ubuntu 20.04虚拟机
+~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ovmf_gpu_nvme/create_ovmf_ubuntu20_vm_on_libvirt_lvm_pool
+   :language: bash
+   :caption: 在Libvirt的LVM存储上创建Ubuntu 20.04 ovmf虚拟机(iommu)
+
+.. note::
+
+   这里直接使用了 :ref:`libvirt_bridged_network` 中配置的 ``br0`` ，是因为Ubuntu在安装过程中可以设置代理服务器，而我已经采用 :ref:`apt_proxy_arch` 部署了 :ref:`squid` 作为代理
+
+.. note::
+
+   一定要使用 ``--boot uefi --cpu host-passthrough`` 参数激活 :ref:`ovmf` ，否则虽然能够 ``pass-through`` PCIe设备给虚拟机，但是虚拟机无法使用完整的物理主机CPU特性，而是使用虚拟出来的CPU，性能会损失。
+
+正确实现 ``--boot uefi --cpu host-passthrough`` 后，在虚拟机内部有以下2个特征:
+
+  - CPU显示和物理服务器一致::
+
+     cat /proc/cpuinfo
+
+可以看到::
+
+   ...
+   model name: Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz
+
+  - ``/boot/efi`` 目录独立分区，且存储了 ``EFI`` 相关配置和数据
+
 虚拟机添加设备
 ---------------------
 
@@ -448,116 +456,28 @@ Fedora Workstation版本只能从iso安装
 
 并通过内核启动参数 ``vfio-pci.ids=144d:a80a,10de:1b39`` 屏蔽了HOST物理主机使用这两个设备，现在我们可以将这两个设备attach到虚拟机。
 
-.. note::
+- 使用 ``lspci`` 命令可以检查设备的16进制完整id:
 
-   我被Red Hat的文档绕糊涂了，实际上只需要执行 ``virsh nodedev-list --cap pci`` 没有必要执行 ``virsh nodedev-dumpxml`` :
+.. literalinclude:: ovmf_gpu_nvme/lspci_get_nvme_gpu_id
+   :language: bash
+   :caption: lspci过滤获得三星nvme和NVIDIA GPU的设备id
 
-   - ``lspci | grep -i Samsung`` 和 ``lspci | grep -i nvidia`` 实际上已经获得了16进制设备的完整id了::
+获得nvme和gpu的设备显示如下:
 
-      05:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
-      08:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
-      0b:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
+.. literalinclude:: ovmf_gpu_nvme/lspci_get_nvme_gpu_id_output
+   :language: bash
+   :caption: lspci过滤获得三星nvme和NVIDIA GPU的设备id(第一列)
 
-      82:00.0 3D controller: NVIDIA Corporation Device 1b39 (rev a1)
+- 第一列就是设备十六进制的ID，可以直接用来配置设备的 ``.xml`` 文件，3个数字字段分别对应了 ``bus= slot= function=`` 举例第三个NVMe设备 ``0b:00.0`` 对应配置 ``samsung_pm9a1_1.xml`` :
 
-   第一列就是设备十六进制的ID，可以直接用来配置设备的 ``.xml`` 文件，3个数字字段分别对应了 ``bus= slot= function=`` 举例第三个NVMe设备 ``0b:00.0`` ::
-
-      <hostdev mode='subsystem' type='pci' managed='yes'>
-        <source>
-           <address domain='0x0' bus='0xb' slot='0x0' function='0x0'/>
-        </source>
-      </hostdev>
-
-   后面我写的这段实践可以省略
-
-- 使用 ``lspci`` 命令检查::
-
-   # lspci | grep -i Samsung
-   05:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd Device a80a
-   # lspci | grep -i nvidia
-   82:00.0 3D controller: NVIDIA Corporation Device 1b39 (rev a1)
-
-- 使用 ``virsh nodedev-list`` 命令检查 ``pci`` 类型设备::
-
-   virsh nodedev-list --cap pci
-
-此时设备显示会将 ``lspci`` 输出的分隔符号 ``:`` 和 ``.`` 替换成 ``_`` ，所以列出设备是::
-
-   pci_0000_05_00_0
-   pci_0000_82_00_0
-
-- 再次检查设备信息
-
-NVMe设备::
-
-   virsh nodedev-dumpxml pci_0000_05_00_0
-
-输出显示:
-
-.. literalinclude:: ovmf/pci_0000_05_00_0.xml
+.. literalinclude:: ovmf_gpu_nvme/samsung_pm9a1_1.xml
    :language: xml
-   :linenos:
-   :emphasize-lines: 11-13
-   :caption: Samsung PM9A1
-
-GPU设备::
-
-   virsh nodedev-dumpxml pci_0000_82_00_0
-
-输出显示:
-
-.. literalinclude:: ovmf/pci_0000_82_00_0.xml
-   :language: xml
-   :linenos:
-   :emphasize-lines: 11-13
-   :caption: NVIDIA Tesla P10
-
-- 转换设备配置参数:
-
-在上述 ``nodedev-dumpxml`` 中高亮的3行参数配置是10进制，需要转换成16进制配置到设备添加xml配置中
-
-NVMe设备::
-
-    <bus>5</bus>
-    <slot>0</slot>
-    <function>0</function>
-
-执行以下命令得到对应16进制值::
-
-   $ printf %x 5
-   5
-   $ printf %x 0
-   0
-   $ printf %x 0
-   0
-
-则对应配置 ``samsung_pm9a1_1.xml`` :
-
-.. literalinclude:: ovmf/samsung_pm9a1_1.xml
-   :language: xml
-   :linenos:
    :caption: Samsung PM9A1 #1
 
-GPU设备::
+- 而GPU设备则对应配置 ``tesla_p10.xml`` :
 
-    <bus>130</bus>
-    <slot>0</slot>
-    <function>0</function>
-
-执行以下命令得到对应16进制值::
-
-   $ printf %x 130
-   82
-   $ printf %x 0
-   0
-   $ printf %x 0
-   0
-
-则对应配置 ``tesla_p10.xml`` :
-
-.. literalinclude:: ovmf/tesla_p10.xml
+.. literalinclude:: ovmf_gpu_nvme/tesla_p10.xml
    :language: xml
-   :linenos:
    :caption: NVIDIA Tesla P10
 
 添加NVMe设备

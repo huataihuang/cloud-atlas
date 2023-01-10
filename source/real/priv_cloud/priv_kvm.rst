@@ -227,21 +227,11 @@ LVM卷作为libvirt存储
 Fedora35虚拟机模板
 --------------------
 
-- 创建模板虚拟机 Fedora 35 (详见 :ref:`ovmf` )::
+- 创建模板虚拟机 Fedora 35 (详见 :ref:`ovmf_gpu_nvme` ):
 
-   virsh vol-create-as images_lvm z-fedora35 6G
-
-   virt-install \
-     --network bridge:virbr0 \
-     --name z-fedora35 \
-     --ram=2048 \
-     --vcpus=1 \
-     --os-type=Linux --os-variant=fedora31 \
-     --boot uefi --cpu host-passthrough \
-     --disk path=/dev/vg-libvirt/z-fedora35,sparse=false,format=raw,bus=virtio,cache=none,io=native \
-     --graphics none \
-     --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
-     --extra-args="console=tty0 console=ttyS0,115200"
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/create_ovmf_fedora35_vm_on_libvirt_lvm_pool
+   :language: bash
+   :caption: 在Libvirt的LVM存储上创建Fedora 35 ovmf虚拟机(iommu)
 
 - Fedora使用 :ref:`networkmanager` 管理网络，所以登录虚拟机配置静态IP地址和主机名::
 
@@ -277,42 +267,11 @@ Fedora35虚拟机模板
 Ubuntu20虚拟机模板
 ------------------------
 
-- 创建模板虚拟机 Ubuntu 20.04.3 (详见 :ref:`ovmf` )::
+- 创建模板虚拟机 Ubuntu 20.04.3 (详见 :ref:`ovmf_gpu_nvme` ):
 
-   virsh vol-create-as images_lvm z-ubuntu20 6G
-
-   virt-install \
-     --network bridge:br0 \
-     --name z-ubuntu20 \
-     --ram=2048 \
-     --vcpus=1 \
-     --os-type=ubuntu20.04 \
-     --boot uefi --cpu host-passthrough \
-     --disk path=/dev/vg-libvirt/z-ubuntu20,sparse=false,format=raw,bus=virtio,cache=none,io=native \
-     --graphics none \
-     --location=http://mirrors.163.com/ubuntu/dists/focal/main/installer-amd64/ \
-     --extra-args="console=tty0 console=ttyS0,115200"
-
-.. note::
-
-   这里直接使用了 :ref:`libvirt_bridged_network` 中配置的 ``br0`` ，是因为Ubuntu在安装过程中可以设置代理服务器，而我已经采用 :ref:`apt_proxy_arch` 部署了 :ref:`squid` 作为代理
-
-.. note::
-
-   一定要使用 ``--boot uefi --cpu host-passthrough`` 参数激活 :ref:`ovmf` ，否则虽然能够 ``pass-through`` PCIe设备给虚拟机，但是虚拟机无法使用完整的物理主机CPU特性，而是使用虚拟出来的CPU，性能会损失。
-
-正确实现 ``--boot uefi --cpu host-passthrough`` 后，在虚拟机内部有以下2个特征:
-
-  - CPU显示和物理服务器一致::
-
-     cat /proc/cpuinfo
-
-可以看到::
-
-   ...
-   model name: Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz    
-   
-  - ``/boot/efi`` 目录独立分区，且存储了 ``EFI`` 相关配置和数据
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/create_ovmf_ubuntu20_vm_on_libvirt_lvm_pool
+   :language: bash
+   :caption: 在Libvirt的LVM存储上创建Ubuntu 20.04 ovmf虚拟机(iommu)
 
 - :ref:`ubuntu_vm_console` 默认不输出，所以安装完成(配置了ssh服务)，通过ssh登录到虚拟机修订 ``/etc/default/grub`` 配置::
 
@@ -479,17 +438,17 @@ clone虚拟机
 
 - 创建3个PCIe设备配置XML文件分别对应上述设备:
 
-.. literalinclude:: ../../kvm/iommu/ovmf/samsung_pm9a1_1.xml
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/samsung_pm9a1_1.xml
    :language: xml
    :linenos:
    :caption: Samsung PM9A1 #1
 
-.. literalinclude:: ../../kvm/iommu/ovmf/samsung_pm9a1_2.xml
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/samsung_pm9a1_2.xml
    :language: xml
    :linenos:
    :caption: Samsung PM9A1 #2
 
-.. literalinclude:: ../../kvm/iommu/ovmf/samsung_pm9a1_3.xml
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/samsung_pm9a1_3.xml
    :language: xml
    :linenos:
    :caption: Samsung PM9A1 #3

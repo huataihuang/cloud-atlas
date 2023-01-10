@@ -212,14 +212,18 @@ dracut的早期加载机制是通过内核参数。
 
    dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
 
-我的屏蔽host pcie实践
-------------------------
+.. _pci-stub.ids:
+
+采用 ``pci-stub.ids`` 屏蔽PCI设备
+------------------------------------
 
 这段是我实际操作实践:
 
-- 实践是在 :ref:`ubuntu_linux` 20.04.3 LTS上完成，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` ::
+- (本方法废弃) :ref:`ubuntu_linux` 20.04.3 LTS上，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` :
 
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on pci-stub.ids=144d:a80a,10de:1b39 rdblacklist=nouveau" 
+.. literalinclude:: ovmf_gpu_nvme/grub_vfio-stub.ids
+   :language: bash
+   :caption: 配置/etc/default/grub加载vfio-stub.ids来隔离PCI直通设备，该方法已废弃
 
 - 然后执行::
 
@@ -357,23 +361,11 @@ OVMF是开源UEFI firmware，用于QEMU虚拟机。
 virt-install
 --------------
 
-- 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷::
+- 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷:
 
-   virsh vol-create-as images_lvm z-fedora35 6G
-
-- 创建虚拟机::
-
-   virt-install \
-     --network bridge:virbr0 \
-     --name z-fedora35 \
-     --ram=2048 \
-     --vcpus=1 \
-     --os-type=Linux --os-variant=fedora31 \
-     --boot uefi --cpu host-passthrough \
-     --disk path=/dev/vg-libvirt/fedora35,sparse=false,format=raw,bus=virtio,cache=none,io=native \
-     --graphics none \
-     --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
-     --extra-args="console=tty0 console=ttyS0,115200"
+.. literalinclude:: ovmf_gpu_nvme/create_ovmf_fedora35_vm_on_libvirt_lvm_pool
+   :language: bash
+   :caption: 在Libvirt的LVM存储上创建Fedora35 ovmf虚拟机(iommu)
 
 Fedora Workstation版本只能从iso安装
 
@@ -464,7 +456,6 @@ NVMe设备::
 
 .. literalinclude:: ovmf/pci_0000_05_00_0.xml
    :language: xml
-   :linenos:
    :emphasize-lines: 11-13
    :caption: Samsung PM9A1
 
@@ -476,7 +467,6 @@ GPU设备::
 
 .. literalinclude:: ovmf/pci_0000_82_00_0.xml
    :language: xml
-   :linenos:
    :emphasize-lines: 11-13
    :caption: NVIDIA Tesla P10
 
@@ -501,9 +491,8 @@ NVMe设备::
 
 则对应配置 ``samsung_pm9a1_1.xml`` :
 
-.. literalinclude:: ovmf/samsung_pm9a1_1.xml
+.. literalinclude:: ovmf_gpu_nvme/samsung_pm9a1_1.xml
    :language: xml
-   :linenos:
    :caption: Samsung PM9A1 #1
 
 GPU设备::
@@ -523,9 +512,8 @@ GPU设备::
 
 则对应配置 ``tesla_p10.xml`` :
 
-.. literalinclude:: ovmf/tesla_p10.xml
+.. literalinclude:: ovmf_gpu_nvme/tesla_p10.xml
    :language: xml
-   :linenos:
    :caption: NVIDIA Tesla P10
 
 添加NVMe设备
