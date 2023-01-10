@@ -12,22 +12,25 @@
 
 - 物理服务器: :ref:`hpe_dl360_gen9`
 
-- 物理主机内核启用 :ref:`iommu` 并采用 :ref:`ovmf` 方式将NVMe设备( :ref:`samsung_pm9a1` 对应ID是 ``144d:a80a`` )绑定到 ``vfio-pci`` 内核模块: 修改 ``/etc/default/grub`` ::
+- 物理主机内核启用 :ref:`iommu` 并采用 :ref:`ovmf_gpu_nvme` 方式将NVMe设备( :ref:`samsung_pm9a1` 对应ID是 ``144d:a80a`` ) 和 NVIDIA :ref:`tesla_p10` 绑定到 ``vfio-pci`` 内核模块，修改 ``/etc/default/grub`` :
 
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on vfio-pci.ids=144d:a80a"
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/grub_vfio-pci.ids
+   :language: bash
+   :caption: 配置/etc/default/grub加载vfio-pci.ids来隔离PCI直通设备
 
-.. note::
+这里 :ref:`samsung_pm9a1` 和 :ref:`tesla_p10` 的ID通过命令:
 
-   这里 :ref:`samsung_pm9a1` 的ID通过命令::
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/lspci_get_nvme_gpu_id
+   :language: bash
+   :caption: lspci过滤获得三星nvme和NVIDIA GPU的设备id
 
-      lspci -nn | grep -i samsung
+可以获得:
 
-   可以获得::
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/lspci_get_nvme_gpu_id_output
+   :language: bash
+   :caption: lspci过滤获得三星nvme和NVIDIA GPU的设备id
 
-      05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-      ...
-
-   所有相同型号NVMe都共用一个设备ID ``144d:a80a``
+所有相同型号NVMe都共用一个设备ID ``144d:a80a``
 
 然后修正grub并重启::
 
