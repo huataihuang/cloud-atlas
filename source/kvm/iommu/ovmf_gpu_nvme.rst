@@ -94,7 +94,7 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 .. warning::
 
-   并非所有PCI-E插槽都相同。大多数主办都有CPU和PCH提供的PCIe插槽。但是，基于CPU的PCIe插槽可能无法正确支持隔离，此时PCI插槽似乎与连接到它的设备组合在一起，类似::
+   并非所有PCI-E插槽都相同。大多数主板都有CPU和PCH提供的PCIe插槽。但是，基于CPU的PCIe插槽可能无法正确支持隔离，此时PCI插槽似乎与连接到它的设备组合在一起，类似::
 
       OMMU Group 1:
       	 00:01.0 PCI bridge: Intel Corporation Xeon E3-1200 v2/3rd Gen Core processor PCI Express Root Port (rev 09)
@@ -305,6 +305,8 @@ dracut的早期加载机制是通过内核参数。
 .. note::
 
    后续我实践 :ref:`config_sr-iov_network` ，还增加一个 ``iommu=pt`` 参数，以提高 SR-IOV pass-through 性能。
+
+   :ref:`nvidia_pci_passthrough_via_ovmf_pci_realloc` 否则虚拟机内部无法初始化设备
 
 .. warning::
 
@@ -523,40 +525,36 @@ Ubuntu 20.04虚拟机
 添加GPU设备
 ~~~~~~~~~~~~~
 
-- 执行以下命令将NVIDIA Tesla P10 GPU运算卡 添加到虚拟机 ``z-iommu`` 上::
+.. note::
 
-   virsh attach-device z-iommu tesla_p10.xml
+   在 :ref:`priv_cloud_infra` 构建的 :ref:`z-k8s` ，将GPU passthrough到第一个虚拟机中，以备作为后续GPU节点运行
 
-这里出现一个报错::
+- 执行以下命令将NVIDIA Tesla P10 GPU运算卡 添加到虚拟机 ``z-k8s-n-1`` 上:
+
+.. literalinclude:: ovmf_gpu_nvme/virsh_attach_gpu
+   :language: bash
+   :caption: virsh attach-device 添加GPU(vm停机状态)，然后启动虚拟机
+
+如果没有使用 ``--config`` 参数可能会出现如下报错::
 
    error: Failed to attach device from tesla_p10.xml
    error: internal error: No more available PCI slots
 
-这个问题在 `libvirtd: No more available PCI slots <https://unix.stackexchange.com/questions/570166/libvirtd-no-more-available-pci-slots>`_ 提到了解决方法: 添加一个 ``--config`` 参数，让libvirt来自动添加需要的 ``pcie-root-port`` 配置。然后就需要shutdown虚拟机，并再次启动虚拟机。这个设备就会正确添加。
+这个问题在 `libvirtd: No more available PCI slots <https://unix.stackexchange.com/questions/570166/libvirtd-no-more-available-pci-slots>`_ 提到了解决方法: 添加一个 ``--config`` 参数，让libvirt来自动添加需要的 ``pcie-root-port`` 配置。注意， ``--config`` 参数需要虚拟机在关闭状态才能执行
 
-所以改为执行::
+- 重启完虚拟机，登录虚拟机中执行:
 
-   virsh attach-device z-iommu tesla_p10.xml --config
+.. literalinclude:: ovmf_gpu_nvme/lspci_gpu_in_vm
+   :language: bash
+   :caption: 在虚拟机内部执行lspci查看nvidia gpu
 
-   virsh destory z-iommu
-   virsh start z-iommu
+可以看到GPU设备:
 
-- 重启完虚拟机，登录虚拟机中执行::
+.. literalinclude:: ovmf_gpu_nvme/lspci_gpu_in_vm_output
+   :language: bash
+   :caption: 在虚拟机内部执行lspci查看nvidia gpu，可以看到Tesla P10设备已passthrough进虚拟机
 
-   lspci
-
-可以看到GPU设备::
-   
-   07:00.0 3D controller: NVIDIA Corporation GP102GL [Tesla P10] (rev a1)
-
-但是没有找到前面live方式添加的NVMe设备，所以使用 ``--config`` 参数再重新添加一次NVMe设备::
-
-   virsh attach-device z-iommu samsung_pm9a1_1.xml --config
-
-重启以后再次检查可以看到添加的2个pci设备::
-
-   07:00.0 3D controller: NVIDIA Corporation GP102GL [Tesla P10] (rev a1)
-   08:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller PM9A1/PM9A3/980PRO
+- 部署 :ref:`gpu_k8s_arch` 实现GPU加速的 :ref:`machine_learning`
 
 Windows OVMF虚拟机安装
 =========================

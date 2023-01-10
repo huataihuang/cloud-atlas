@@ -16,7 +16,7 @@
 - ``z-k8s-n-1`` ~ ``z-k8s-n-5`` 5台工作节点服务器
 
   - ``z-k8s-n-1`` / ``z-k8s-n-2`` 注入 :ref:`sr-iov` VF网卡，测试网络性能优化
-  - ``z-k8s-n-3`` / ``z-k8s-n-4`` 注入 :ref:`tesla_p10` 的 :ref:`vgpu` 为Kubernetes提供GPU运算能力，构建 :ref:`machine_learning` 运行环境
+  - 由于 :ref:`vgpu` 需要license，对个人非常麻烦，所以放弃采用 :ref:`vgpu` 改为采用 :ref: `ovmf_gpu_nvme` : passthrough :ref:`tesla_p10` 到 ``z-k8s-n-1`` 提供GPU运算能力，构建 :ref:`machine_learning` 运行环境
   - ``z-k8s-n-5`` 常规节点
 
 .. csv-table:: z-k8s高可用Kubernetes集群服务器列表
@@ -45,3 +45,18 @@
    14   z-k8s-n-3    running
    15   z-k8s-n-4    running
    16   z-k8s-n-5    running
+
+:ref:`tesla_p10` passthrough
+===============================
+
+- 准备 GPU设备则对应配置 ``tesla_p10.xml`` :
+
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/tesla_p10.xml
+   :language: xml
+   :caption: NVIDIA Tesla P10
+
+- 执行以下命令将NVIDIA Tesla P10 GPU运算卡 添加到虚拟机 ``z-k8s-n-1`` 上:
+
+.. literalinclude:: ../../kvm/iommu/ovmf_gpu_nvme/virsh_attach_gpu
+   :language: bash
+   :caption: virsh attach-device 添加GPU(vm停机状态)，然后启动虚拟机
