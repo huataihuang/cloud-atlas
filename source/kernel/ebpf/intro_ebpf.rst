@@ -50,5 +50,9 @@ eBPF的新设计针对现代硬件做了优化，因此eBPF生成的志林集比
 
 我准备进一步从eBPF官网获取原生技术资料，期待能更进一步掌握和深入eBPF技术
 
+- `CFC4N的博客 <https://www.cnxct.com>`_ 美团信息安全研发，对ebpf有很多翻译和研究的博客，非常赞
+
+- `aya-rs/aya <https://github.com/aya-rs/aya>`_ 是针对 Rust 开发的eBPF库，有详细的开发参考文档 `Aya Book <https://aya-rs.dev/book/>`_ 可以作为学习 :ref:`rust` 和 :ref:`ebpf` 的参考
+
 - `Linux Extended BPF (eBPF) Tracing Tools <http://www.brendangregg.com/ebpf.html>`_
 - `eBPF Documentation: What is eBPF? <https://ebpf.io/what-is-ebpf/>`_

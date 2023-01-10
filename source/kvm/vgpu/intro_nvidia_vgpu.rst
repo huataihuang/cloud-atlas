@@ -11,7 +11,7 @@ Mediated pass-through(协调pass-through)是直通GPU技术的演进，提供了
 
 - VMware使用 Nvidia vGPU 或 AMD MxGPU 实现的虚拟化共享直通图形加速(Virtual Shared Pass-Through Graphics Acceleration)
 - Citrix XenServer使用 Nvidia vGPU 或 AMD MxGPU实现的shared GPU
-- Xen 和 KVM 使用 :ref:`intel_gvt-g` 实现
+- Xen 和 KVM 使用 :ref:`intel_gvt` 实现
 - Thincast Workstation - Virtual 3D功能(Direct X 12 & Vulkan 3D API)
 
 mediated pass-through需要特定的硬件支持:
