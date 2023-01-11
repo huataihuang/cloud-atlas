@@ -13,6 +13,7 @@ IOMMU
    iommu_grub_config.rst
    ovmf.rst
    ovmf_gpu_nvme.rst
+   install_nvidia_linux_driver_in_ovmf_vm.rst
    tainted_host-cpu.rst
    vfio.rst
    compare_iommu_native_nvme.rst

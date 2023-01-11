@@ -7,131 +7,111 @@
 准备工作
 ===========
 
-- :ref:`install_nvidia_linux_driver` :
+在部署NVIDIA Container Toolkit之前
 
-在部署NVIDIA Container Toolkit之前，首先要为Host主机/VM :ref:`install_nvidia_linux_driver` ，并且要求 NVIDIA Linux drivers 版本 >= 418.81.07
+- 首先 :ref:`install_nvidia_linux_driver_in_ovmf_vm` (比较波折，请参考我的实践记录)
 
-- 内核要求 > 3.10
+- 检查系统确保满足:
 
-- Docker >= 19.03
+  - NVIDIA Linux drivers 版本 >= 418.81.07
+  - 内核要求 > 3.10
+  - Docker >= 19.03
+  - NVIDIA GPU架构 >= Kepler
 
-- NVIDIA GPU架构 >= Kepler
+:ref:`containerd`
+===================
 
-.. note::
-
-   由于我之前已经在物理主机安装(演练)过一遍 :ref:`install_nvidia_linux_driver` ，所以采用相同方法在 :ref:`ovmf_gpu_nvme` 的虚拟机 ``z-k8s-n-1`` 安装 NVIDIA CUDA 驱动
-
-:ref:`install_nvidia_linux_driver`
-------------------------------------
-
-- 根据不同发行版在 `NVIDIA CUDA Toolkit repo 下载 <https://developer.nvidia.com/cuda-downloads>`_ 选择对应的 :ref:`cuda_repo` ，例如我的 :ref:`priv_cloud_infra` 采用了 Ubuntu 22.04 LTS，所以执行如下步骤在系统中添加仓库:
-
-.. literalinclude:: ../../machine_learning/cuda/install_nvidia_cuda/cuda_toolkit_ubuntu_repo
-   :language: bash
-   :caption: 在Ubuntu 22.04操作系统添加NVIDIA官方软件仓库配置
-
-- 安装 NVIDIA CUDA 驱动:
-
-.. literalinclude:: ../../machine_learning/hardware/install_nvidia_linux_driver/cuda_driver_ubuntu_repo_install
-   :language: bash
-   :caption: 使用NVIDIA官方软件仓库安装CUDA驱动
-
-这里安装过程提示不能支持 Secure Boot::
-
-   Building initial module for 5.15.0-57-generic
-   Can't load /var/lib/shim-signed/mok/.rnd into RNG
-   40A7F3E73E7F0000:error:12000079:random number generator:RAND_load_file:Cannot open file:../crypto/rand/randfile.c:106:Filename=/var/lib/shim-signed/mok/.rnd
-   ...
-   Secure Boot not enabled on this system.
-   Done.
-
-- 重启操作系统，检查驱动安装::
-
-   nvidia-smi
-
-.. _nvidia_pci_passthrough_via_ovmf_pci_realloc:
-
-NVIDIA passthrough via ovmf需要Host主机内核参数 ``pci=realloc``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-在虚拟机内部 :ref:`install_nvidia_linux_driver` 遇到异常，设备没有初始化成功，从 ``dmesg -T`` 看到:
-
-.. literalinclude:: install_nvidia_container_toolkit_for_containerd/dmesg_nvidia_pci_io_region_invalid
-   :language: bash
-   :caption: 虚拟机NVIDIA设备初始化失败，显示PCI I/O region错误
-   :emphasize-lines: 5,6
-
-这个问题在 `PCI passthrough via OVMF/Examples <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF/Examples>`_ 找到案例，案例中建议物理主机内核参数需要增加 ``pci=realloc`` ，否则就会导致类似错误::
-
-   NVRM: This PCI I/O region assigned to your NVIDIA device is invalid: NVRM: BAR1 is 0M @ 0x0 (PCI:0000:0a:00.0)
-
-所以修订 :ref:`ovmf_gpu_nvme` 物理主机内核参数添加 ``pci=realloc`` 并重启物理主机
-
-不过，我在物理主机内核参数配置了 ``pci=realloc`` 依然没有解决这个问题，虚拟机内部依然同样错误。
-
-在NVIDIA论坛中 `NVRM: This PCI I/O region assigned to your NVIDIA device is invalid #229899 <https://forums.developer.nvidia.com/t/nvrm-this-pci-i-o-region-assigned-to-your-nvidia-device-is-invalid/229899>`_ 提到如果 ``pci=realloc`` 不生效可以尝试 ``pci=realloc=off`` 。
-
-正在迷惘的时候，参考 `NVRM: This PCI I/O region assigned to your NVIDIA device is invalid #81645 <https://forums.developer.nvidia.com/t/nvrm-this-pci-i-o-region-assigned-to-your-nvidia-device-is-invalid/81645>`_ ，原来这个问题就是我在 :ref:`dl360_gen9_large_bar_memory` 曾经解决过的，当时发现BIOS自检报错:
-
-.. literalinclude:: ../../linux/server/hardware/hpe/dl360_gen9_large_bar_memory/bios_option_ard_config_err
-   :caption: NVIDIA Tesla P10计算卡安装后启动BIOS自检报错信息
-
-通过 :ref:`hpe_server_pcie_64bit_bar_support` 解决，所以在物理服务器上 :ref:`install_nvidia_linux_driver` 就没有遇到 ``PCI I/O region assigned to your NVIDIA device is invalid`` 这样的错误。
-
-这个 ``PCI I/O region`` 资源分配问题是常见的，表示pci设备所需的内存窗口大小和区域(BAR)最初是由BIOS分配，但是有时候不正确或不兼容，参数 ``pci=realloc`` 使内核能够更改区域。
-
-结合 `Nvidia drivers for Tesla V100 PCIe 32Gb failing to load <https://forum.proxmox.com/threads/nvidia-drivers-for-tesla-v100-pcie-32gb-failing-to-load.118292/>`_ 和上文的几个参考文档，我逐渐想清楚了:
-
-- 对于NVIDIA GPU，物理主机的BIOS需要激活 :ref:`hpe_server_pcie_64bit_bar_support` 来支持正确的pci设备所需的内存窗口大小和区域(BAR)
-- 如果BIOS比较古老不支持上述 ``64-Bit Addressing`` 或者 ``Large BAR`` 配置，则可以通过物理服务器的Linux操作系统内核参数 ``pci=realloc`` 来由内核更改PCI设备内存窗口和区域(BAR)
-- 实际上我已经在 :ref:`hpe_dl360_gen9` 完成了 :ref:`dl360_bios_upgrade` ，并通过 激活 :ref:`hpe_server_pcie_64bit_bar_support` 支持，所以没有必要配置物理主机内核参数 ``pci=realloc`` (两者目的是相同的)。这也是为何在物理主机上添加了内核参数 ``pci=realloc`` 前后效果相同的原因。
-
-需要注意的是，上述配置都是在物理服务器上完成，但是这样依然不能使得虚拟机正确
+按照 `containerd官方介绍文档 <https://containerd.io/docs/getting-started/>`_ 完成 :ref:`containerd` 安装，例如，我采用 :ref:`install_containerd_official_binaries`
 
 .. note::
 
-   **虚拟机配置** : 反复尝试后我发现 ``其实需要同时满足2个条件`` （见下文)   
+   `NVIDIA Cloud Native Documentation: Installation Guide >> containerd <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#containerd>`_ 提供了Ubuntu系统安装containerd的步骤介绍，可参考。
 
-- 虚拟机qemu通过传递 ``-global q35-pcihost.pci-hole64-size=2048G`` 可以分配更大的PCI内存窗口( `HGX A100 VM passthrough issues on Ubuntu 20.04 <https://forums.developer.nvidia.com/t/hgx-a100-vm-passthrough-issues-on-ubuntu-20-04/183099>`_ )，对于libvirt配置方法，我参考 `qemuxml2xmlout-pcihole64-gib.xml <https://github.com/snabbco/libvirt/blob/master/tests/qemuxml2xmloutdata/qemuxml2xmlout-pcihole64-gib.xml>`_ 
+- 在 :ref:`install_containerd_official_binaries` 有一步是生成默认配置文件(我当时仅修改了一个参数 ``SystemdCgroup = true`` )，按照NVIDIA手册，先执行生成默认配置，然后再执行patch修订:
 
-执行 ``virsh edit z-k8s-n-1`` 
+.. literalinclude:: ../container_runtimes/containerd/install_containerd_official_binaries/generate_containerd_config_k8s
+   :language: bash
+   :caption: 生成Kuberntes自举所需的默认containerd网络配置
 
-找到::
+- 要确保结合 :ref:`containerd` 使用NVIDIA Container Runtime，需要做以下附加配置: 将 ``nvidia`` 作为runtime添加到配置中，并且使用 ``systemd`` 作为cgroup driver
 
-   <controller type='pci' index='0' model='pcie-root'/>
+执行以下命令创建 ``containerd-config.path`` 文件:
 
-修改成::
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/containerd-config.patch.sh
+   :language: bash
+   :caption: 创建 containerd-config.patch 补丁文件
 
-   <controller type='pci' index='0' model='pcie-root'>
-       <pcihole64 unit='KiB'>2147483648</pcihole64>
-   </controller> 
+.. note::
 
-然后启动虚拟机后检查 ``qemu`` 参数就可以看到 ``-global q35-pcihost.pci-hole64-size=2147483648K``
+   NVIDIA提供的patch文件实际上 :ref:`install_containerd_official_binaries` 生成的默认 ``config.toml`` 不兼容，所以我实际是手工修改
 
-不过，此时虚拟机内部依然报错 (还需要下面一步)
+   .. literalinclude:: install_nvidia_container_toolkit_for_containerd/config.toml
+      :language: bash
+      :caption: 修订 /etc/containerd/config.toml
+      :emphasize-lines: 13-21
 
-- 虚拟机内核还是要添加 ``pci=realloc`` 才能彻底解决NVIDIA的 ``PCI I/O region`` 错误问题
+- 重启 ``containerd`` :
 
-  - 单纯在虚拟机内核上配置 ``pci=realloc`` 是不够的(目前我的物理主机还开启着 ``pci=realloc`` ，等有时间我关闭物理主机内核 ``pci=realloc`` 验证一下我的猜想)
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/restart_containerd
+   :language: bash
+   :caption: 重启 containerd
 
-在虚拟机内部修改 ``/etc/default/grub`` 将::
+- 通过Docker ``helo-world`` 容器测试:
 
-   GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/test_containerd_nvidia-container-runtime
+   :language: bash
+   :caption: 重启 containerd
 
-修改成::
+.. note::
 
-   GRUB_CMDLINE_LINUX_DEFAULT="pci=realloc quiet splash"
+   注意，此时还没有安装 NVIDIA Container Toolkit ，所以实际上还没有 ``/usr/bin/nvidia-container-runtime`` ，插件尚未工作。上述验证只是表明 ``containerd`` 能工作
 
-然后执行::
+安装 NVIDIA Container Toolkit
+================================
 
-   update-grub
+.. note::
 
-再重启一次虚拟机
+   我只在 :ref:`ubuntu_linux` 22.04 虚拟机上安装实践，其他操作系统，例如 :ref:`redhat_linux` 系列请参考官方 `NVIDIA Cloud Native Documentation: Installation Guide >> containerd <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#containerd>`_
 
-WOW，终于虚拟机内部不再出现NVIDIA相关报错，并且执行 ``nvidia-smi`` 可以正确看到
+- 在 :ref:`ubuntu_linux` 22.04 虚拟机 中添加NVIDIA仓库配置和GPG密钥:
 
-.. literalinclude:: install_nvidia_container_toolkit_for_containerd/ovmf_passthrough_nvidia-smi_output
-   :caption: 虚拟机正确配置NVIDIA后执行nvidia-smi输出信息
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/add_nvidia_repo_gpg_key
+   :language: bash
+   :caption: 在Ubuntu环境添加NVIDIA官方仓库配置和GPG密钥
+
+需要注意，实际上添加到 ``/etc/apt/sources.list.d/nvidia-container-toolkit.list`` 仓库配置内容是::
+
+   deb https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH) /
+
+- 执行安装:
+
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/install_nvidia_container_toolkit
+   :language: bash
+   :caption: 在Ubuntu环境安装NVIDIA Container Toolkit(使用官方软件仓库)
+
+- 检查安装的软件包:
+
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/check_nvidia_container_toolkit_install
+   :language: bash
+   :caption: 在Ubuntu环境检查已经安装的NVIDIA软件包
+
+测试安装
+===========
+
+- 测试GPU容器:
+
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/test_nvidia_gpu_container
+   :language: bash
+   :caption: 测试GPU容器运行
+
+如果没有异常，则验证容器输出信息类似如下:
+
+.. literalinclude:: install_nvidia_container_toolkit_for_containerd/test_nvidia_gpu_container_output
+   :language: bash
+   :caption: 测试GPU容器运行输出信息显示NVIDIA Container Toolkit安装成功
+
+
+
 
 参考
 ========

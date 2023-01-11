@@ -554,6 +554,11 @@ Ubuntu 20.04虚拟机
    :language: bash
    :caption: 在虚拟机内部执行lspci查看nvidia gpu，可以看到Tesla P10设备已passthrough进虚拟机
 
+.. note::
+
+   注意，上述步骤仅完成了GPU passthrough到VM内部，实际上要完成 :ref:`install_nvidia_linux_driver_in_ovmf_vm` 才能真正在虚拟机内使用NVIDIA GPU
+
+- :ref:`install_nvidia_linux_driver_in_ovmf_vm`
 - 部署 :ref:`gpu_k8s_arch` 实现GPU加速的 :ref:`machine_learning`
 
 Windows OVMF虚拟机安装
