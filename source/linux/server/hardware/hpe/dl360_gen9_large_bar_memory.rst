@@ -12,11 +12,8 @@ GPU卡请求内存映射I/O超过限制
 .. figure:: ../../../../_static/linux/server/hardware/hpe/gpu_mem_map_err.png
    :scale: 85
 
-::
-
-   276 Option Card Configuration Error. An option card is requesting more memory
-   mapped I/O than is available.
-   Action: Remove the option card to allow the system to boot.
+.. literalinclude:: dl360_gen9_large_bar_memory/bios_option_ard_config_err
+   :caption: NVIDIA Tesla P10计算卡安装后启动BIOS自检报错信息
 
 原因
 =======
@@ -55,8 +52,10 @@ VMware ESX配置建议
 
 - 虚拟机内存最小值建议为分配的所有GPU显存总大小的1.5倍
 
-HP DL360 Gen9 BIOS设置
-========================
+.. _hpe_server_pcie_64bit_bar_support:
+
+HP DL360 Gen9 BIOS设置``PCI Express 64-Bit BAR Support``
+=========================================================
 
 虽然VMware文档提示::
 
