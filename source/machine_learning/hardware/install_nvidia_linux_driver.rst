@@ -6,6 +6,12 @@
 
 :ref:`tesla_p10` 的GPU核心是Tesla，属于 ``Pascal`` 微架构
 
+BIOS设置
+===========
+
+- 物理服务器安装NVIDIA驱动，需要确保 :ref:`hpe_server_pcie_64bit_bar_support`
+- 虚拟机安装NVIDIA驱动，去要确保 :ref:`nvidia_pci_passthrough_via_ovmf_pci_realloc`
+
 .. _cuda_softstack:
 
 CUDA软件堆栈(不同层次)
