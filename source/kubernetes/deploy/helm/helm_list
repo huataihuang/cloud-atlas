@@ -1,0 +1,1 @@
+helm list -A

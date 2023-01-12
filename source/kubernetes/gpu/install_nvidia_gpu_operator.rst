@@ -21,60 +21,6 @@
 - 每个Kubernetes worker节点能够访问私有仓库
 - 需要使用 Git 和 Docker/Podman 来构建vGPU 驱动镜像(从源代码仓库)并推送到私有仓库
 
-安装NVIDIA Device Plugin
-==========================
-
-.. note::
-
-   这里我搞错了，不需要单独安装 NVIDIA Device Plugin 。如果直接安装 ``NVIDIA GPU Operator`` 会自动安装 plugins
-
-要在Kubernetes中使用GPU，需要安装 ``NVIDIA Device Plugins`` 。这个NVIDIA Device Plugin是一个daemonset，可以自动列出集群每个节点的GPU数量并允许在GPU上运行pod。
-
-- 使用 :ref:`helm` 来部署 ``NVIDIA Device Plugins`` ，所以需要首先部署 helm (之前我在部署 :ref:`cilium` 时完成 :ref:`cilium_install_with_external_etcd` 已在集群安装过helm ):
-
-.. literalinclude:: ../deploy/helm/linux_helm_install
-   :language: bash
-   :caption: 在Linux平台安装helm
-
-- 添加 ``nvidia-device-plugin`` ``helm`` 仓库:
-
-.. literalinclude:: install_nvidia_gpu_operator/helm_add_nvdp_repo
-   :language: bash
-   :caption: 添加nvidia-device-plugin helm仓库
-
-- 部署 ``NVIDIA Device Plugins`` :
-
-.. literalinclude:: install_nvidia_gpu_operator/helm_install_nvidia-device-plugin
-   :language: bash
-   :caption: 使用helm安装nvidia-device-plugin
-
-安装后检查:
-
-.. literalinclude:: install_nvidia_gpu_operator/kubectl_get_pods_nvidia-device-plugin
-   :language: bash
-   :caption: 检查nvidia-device-plugin安装
-
-排查NVIDIA Device Plugin启动失败
-----------------------------------
-
-在安装完 ``NVIDIA Device Plugins`` 我发现容器启动失败:
-
-.. literalinclude:: install_nvidia_gpu_operator/kubectl_get_pods_nvidia-device-plugin_fail
-   :language: bash
-   :caption: 检查nvidia-device-plugin容器，启动失败
-
-参考 `CrashLoopBackOff when running nvidia-device-plugin-daemonset <https://github.com/NVIDIA/k8s-device-plugin/issues/105>`_ 可以采用以下方法来搜集信息:
-
-.. literalinclude:: install_nvidia_gpu_operator/nvidia-container-cli_info
-   :language: bash
-   :caption: 使用 nvidia-container-cli 从控制台搜集NVDIA容器运行失败原因
-
-可以看到有很多运行依赖缺失:
-
-.. literalinclude:: install_nvidia_gpu_operator/nvidia-container-cli_info_fail_output
-   :language: bash
-   :caption: 使用 nvidia-container-cli 从控制台搜集NVDIA容器运行失败信息，显示有很多依赖缺失
-
 安装NVIDIA GPU Operator
 ===========================
 
@@ -90,11 +36,70 @@
    :language: bash
    :caption: 添加NVIDIA仓库
 
-- 安装operator:
+Operands(操作数)
+-------------------
 
-.. literalinclude:: install_nvidia_gpu_operator/helm_install_gnu-operator
+默认情况下，GPU Operator operands会部署到集群中所有GPU工作节点。GPU工作节点的标签由 ``feature.node.kubernetes.io/pci-10de.present=true`` 标记，这里的 ``0x10de`` 是PCI vender ID，是分配给 NVIDIA 的供应商ID
+
+- 首先给集群中安装了NVIDIA GPU的节点打上标签:
+
+.. literalinclude:: install_nvidia_gpu_operator/label_nvidia_gpu_node
    :language: bash
-   :caption: helm 安装GNU Operator
+   :caption: 为Kubernetes集群的NVIDIA GPU工作节点打上标签
+
+-  要禁止在一个GPU工作节点部署operands，则对该节点标签 ``nvidia.com/gpu.deploy.operands=false`` :
+
+.. literalinclude:: install_nvidia_gpu_operator/label_gpu_deploy_operands_false
+   :language: bash
+   :caption: 为Kubernetes集群GPU工作节点打上标签禁止部署operands
+
+部署GNU Operator
+--------------------
+
+有多重安装场景，以下是常见场景，请选择合适的方法
+
+- 在Ubuntu的Bare-metal/Passthrough上使用默认配置(很好，正是我需要的场景，因为我只有一个绩点有 passthrough 的 :ref:`tesla_p10` )
+
+.. literalinclude:: install_nvidia_gpu_operator/helm_install_gnu-operator_baremetal_passthrough
+   :language: bash
+   :caption: Ubuntu上Barmetal/Passthrough默认配置，helm 安装GNU Operator
+
+- 完成后见检查:
+
+.. literalinclude:: install_nvidia_gpu_operator/get_gnu-operator_pods
+   :language: bash
+   :caption: 安装完GNU Operator之后，检查集群中nvidia gnu-operators相关pods
+
+可以看到运行了如下pods:
+
+.. literalinclude:: install_nvidia_gpu_operator/get_gnu-operator_pods_output
+   :language: bash
+   :caption: 安装完GNU Operator之后，检查集群中nvidia gnu-operators相关pods
+
+运行案例GPU应用
+=================
+
+CUDA VectorAdd
+-----------------
+
+- 首先可以运行NVIDIA提供了一个简单的CUDA示例，将两个向量相加:
+
+.. literalinclude:: install_nvidia_gpu_operator/simple_cuda_sample_1
+   :language: bash
+   :caption: 运行一个简单的CUDA示例，两个向量相加
+
+提示信息::
+
+   pod/cuda-vectoradd created
+
+- 通过检查日志来了解计算结果
+
+下一步
+===========
+
+有什么好玩的呢？
+
+玩一下 :ref:`stable_diffusion_on_k8s` ，体验在GPU加速下的 ``文本倒置(Textual Inversion)`` 图像生成
 
 参考
 ==========
