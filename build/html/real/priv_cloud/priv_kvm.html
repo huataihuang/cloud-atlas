@@ -175,27 +175,34 @@
 <h2>环境准备<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <section id="id2">
 <h3>内核和KVM虚拟化<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h3>
-<ul>
+<ul class="simple">
 <li><p>物理服务器: <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a></p></li>
-<li><p>物理主机内核启用 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 并采用 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 方式将NVMe设备( <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 对应ID是 <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> )绑定到 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 内核模块: 修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on vfio-pci.ids=144d:a80a&quot;</span>
+<li><p>物理主机内核启用 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 并采用 <a class="reference internal" href="../../kvm/iommu/ovmf_gpu_nvme.html#ovmf-gpu-nvme"><span class="std std-ref">采用OVMF实现passthrough GPU和NVMe存储</span></a> 方式将NVMe设备( <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 对应ID是 <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code> ) 和 NVIDIA <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> 绑定到 <code class="docutils literal notranslate"><span class="pre">vfio-pci</span></code> 内核模块，修改 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">配置/etc/default/grub加载vfio-pci.ids来隔离PCI直通设备</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="o">=</span><span class="s2">&quot;intel_iommu=on iommu=pt pci=realloc vfio-pci.ids=144d:a80a,10de:1b39 rd.driver.blacklist=nouveau,rivafb,nvidiafb,rivatv&quot;</span>
 </pre></div>
 </div>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>这里 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 的ID通过命令:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lspci</span> <span class="o">-</span><span class="n">nn</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="n">samsung</span>
+</div>
+<p>这里 <a class="reference internal" href="../../linux/storage/nvme/samsung_pm9a1.html#samsung-pm9a1"><span class="std std-ref">三星PM9A1 NVMe存储</span></a> 和 <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> 的ID通过命令:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">lspci过滤获得三星nvme和NVIDIA GPU的设备id</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>lspci <span class="p">|</span> grep -E -i <span class="s1">&#39;samsung|nvidia&#39;</span>
 </pre></div>
+</div>
 </div>
 <p>可以获得:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span><span class="p">:</span><span class="mf">00.0</span> <span class="n">Non</span><span class="o">-</span><span class="n">Volatile</span> <span class="n">memory</span> <span class="n">controller</span> <span class="p">[</span><span class="mi">0108</span><span class="p">]:</span> <span class="n">Samsung</span> <span class="n">Electronics</span> <span class="n">Co</span> <span class="n">Ltd</span> <span class="n">Device</span> <span class="p">[</span><span class="mi">144</span><span class="n">d</span><span class="p">:</span><span class="n">a80a</span><span class="p">]</span>
-<span class="o">...</span>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">lspci过滤获得三星nvme和NVIDIA GPU的设备id</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">05</span>:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller PM9A1/PM9A3/980PRO
+<span class="m">08</span>:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller PM9A1/PM9A3/980PRO
+0b:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller PM9A1/PM9A3/980PRO
+<span class="m">82</span>:00.0 3D controller: NVIDIA Corporation GP102GL <span class="o">[</span>Tesla P10<span class="o">]</span> <span class="o">(</span>rev a1<span class="o">)</span>
 </pre></div>
 </div>
-<p>所有相同型号NVMe都共用一个设备ID <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code></p>
 </div>
+<p>所有相同型号NVMe都共用一个设备ID <code class="docutils literal notranslate"><span class="pre">144d:a80a</span></code></p>
 <p>然后修正grub并重启:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">update</span><span class="o">-</span><span class="n">grub</span>
 <span class="n">shutdown</span> <span class="o">-</span><span class="n">r</span> <span class="n">now</span>
@@ -381,8 +388,8 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/netplan/00-cloud-init.yaml</span></code></p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">/etc/netplan/00-cloud-init.yaml</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">network</span><span class="p">:</span><span class="w"></span>
 <span class="linenos"> 2</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
 <span class="linenos"> 3</span><span class="w">  </span><span class="nt">renderer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networkd</span><span class="w"></span>
@@ -452,24 +459,28 @@ sudo adduser `id -un` kvm
 </div>
 <section id="fedora35">
 <h3>Fedora35虚拟机模板<a class="headerlink" href="#fedora35" title="此标题的永久链接">¶</a></h3>
-<ul>
-<li><p>创建模板虚拟机 Fedora 35 (详见 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> <span class="mi">6</span><span class="n">G</span>
+<ul class="simple">
+<li><p>创建模板虚拟机 Fedora 35 (详见 <a class="reference internal" href="../../kvm/iommu/ovmf_gpu_nvme.html#ovmf-gpu-nvme"><span class="std std-ref">采用OVMF实现passthrough GPU和NVMe存储</span></a> ):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">在Libvirt的LVM存储上创建Fedora 35 ovmf虚拟机(iommu)</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>virsh vol-create-as images_lvm z-fedora35 6G
 
-<span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
-  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">virbr0</span> \
-  <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span> \
-  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
-  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
-  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">Linux</span> <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="o">=</span><span class="n">fedora31</span> \
-  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
-  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">fedora35</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
-  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
-  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">fedora</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="mi">35</span><span class="o">/</span><span class="n">Server</span><span class="o">/</span><span class="n">x86_64</span><span class="o">/</span><span class="n">os</span><span class="o">/</span> \
-  <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
+virt-install <span class="se">\</span>
+  --network bridge:virbr0 <span class="se">\</span>
+  --name z-fedora35 <span class="se">\</span>
+  --ram<span class="o">=</span><span class="m">2048</span> <span class="se">\</span>
+  --vcpus<span class="o">=</span><span class="m">1</span> <span class="se">\</span>
+  --os-type<span class="o">=</span>Linux --os-variant<span class="o">=</span>fedora31 <span class="se">\</span>
+  --boot uefi --cpu host-passthrough <span class="se">\</span>
+  --disk <span class="nv">path</span><span class="o">=</span>/dev/vg-libvirt/fedora35,sparse<span class="o">=</span>false,format<span class="o">=</span>raw,bus<span class="o">=</span>virtio,cache<span class="o">=</span>none,io<span class="o">=</span>native <span class="se">\</span>
+  --graphics none <span class="se">\</span>
+  --location<span class="o">=</span>http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ <span class="se">\</span>
+  --extra-args<span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
 </pre></div>
 </div>
-</li>
+</div>
+<ul>
 <li><p>Fedora使用 <a class="reference internal" href="../../linux/ubuntu_linux/network/networkmanager.html#networkmanager"><span class="std std-ref">NetworkManager</span></a> 管理网络，所以登录虚拟机配置静态IP地址和主机名:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmcli</span> <span class="n">general</span> <span class="n">hostname</span> <span class="n">z</span><span class="o">-</span><span class="n">fedora35</span>
 <span class="n">nmcli</span> <span class="n">connection</span> <span class="n">modify</span> <span class="s2">&quot;enp1s0&quot;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">method</span> <span class="n">manual</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">address</span> <span class="mf">192.168.6.244</span><span class="o">/</span><span class="mi">24</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">gateway</span> <span class="mf">192.168.6.200</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dns</span> <span class="s2">&quot;192.168.6.200,192.168.6.11&quot;</span>
@@ -510,49 +521,26 @@ sudo adduser `id -un` kvm
 </section>
 <section id="ubuntu20">
 <h3>Ubuntu20虚拟机模板<a class="headerlink" href="#ubuntu20" title="此标题的永久链接">¶</a></h3>
-<ul>
-<li><p>创建模板虚拟机 Ubuntu 20.04.3 (详见 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">virsh</span> <span class="n">vol</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="k">as</span> <span class="n">images_lvm</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> <span class="mi">6</span><span class="n">G</span>
-
-<span class="n">virt</span><span class="o">-</span><span class="n">install</span> \
-  <span class="o">--</span><span class="n">network</span> <span class="n">bridge</span><span class="p">:</span><span class="n">br0</span> \
-  <span class="o">--</span><span class="n">name</span> <span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span> \
-  <span class="o">--</span><span class="n">ram</span><span class="o">=</span><span class="mi">2048</span> \
-  <span class="o">--</span><span class="n">vcpus</span><span class="o">=</span><span class="mi">1</span> \
-  <span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">ubuntu20</span><span class="mf">.04</span> \
-  <span class="o">--</span><span class="n">boot</span> <span class="n">uefi</span> <span class="o">--</span><span class="n">cpu</span> <span class="n">host</span><span class="o">-</span><span class="n">passthrough</span> \
-  <span class="o">--</span><span class="n">disk</span> <span class="n">path</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">libvirt</span><span class="o">/</span><span class="n">z</span><span class="o">-</span><span class="n">ubuntu20</span><span class="p">,</span><span class="n">sparse</span><span class="o">=</span><span class="n">false</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span><span class="n">bus</span><span class="o">=</span><span class="n">virtio</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">none</span><span class="p">,</span><span class="n">io</span><span class="o">=</span><span class="n">native</span> \
-  <span class="o">--</span><span class="n">graphics</span> <span class="n">none</span> \
-  <span class="o">--</span><span class="n">location</span><span class="o">=</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirrors</span><span class="mf">.163</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="n">dists</span><span class="o">/</span><span class="n">focal</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">installer</span><span class="o">-</span><span class="n">amd64</span><span class="o">/</span> \
-  <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">args</span><span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
-</pre></div>
-</div>
-</li>
+<ul class="simple">
+<li><p>创建模板虚拟机 Ubuntu 20.04.3 (详见 <a class="reference internal" href="../../kvm/iommu/ovmf_gpu_nvme.html#ovmf-gpu-nvme"><span class="std std-ref">采用OVMF实现passthrough GPU和NVMe存储</span></a> ):</p></li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>这里直接使用了 <a class="reference internal" href="../../kvm/libvirt/network/libvirt_bridged_network.html#libvirt-bridged-network"><span class="std std-ref">libvirt 网桥型网络</span></a> 中配置的 <code class="docutils literal notranslate"><span class="pre">br0</span></code> ，是因为Ubuntu在安装过程中可以设置代理服务器，而我已经采用 <a class="reference internal" href="../network/proxy/apt_proxy_arch.html#apt-proxy-arch"><span class="std std-ref">APT无阻碍代理架构</span></a> 部署了 <a class="reference internal" href="../../web/proxy/squid/index.html#squid"><span class="std std-ref">Squid代理服务</span></a> 作为代理</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>一定要使用 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span> <span class="pre">--cpu</span> <span class="pre">host-passthrough</span></code> 参数激活 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> ，否则虽然能够 <code class="docutils literal notranslate"><span class="pre">pass-through</span></code> PCIe设备给虚拟机，但是虚拟机无法使用完整的物理主机CPU特性，而是使用虚拟出来的CPU，性能会损失。</p>
-</div>
-<p>正确实现 <code class="docutils literal notranslate"><span class="pre">--boot</span> <span class="pre">uefi</span> <span class="pre">--cpu</span> <span class="pre">host-passthrough</span></code> 后，在虚拟机内部有以下2个特征:</p>
-<blockquote>
-<div><ul>
-<li><p>CPU显示和物理服务器一致:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">cpuinfo</span>
-</pre></div>
-</div>
-</li>
-</ul>
-</div></blockquote>
-<p>可以看到:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> ...
- model name: Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">在Libvirt的LVM存储上创建Ubuntu 20.04 ovmf虚拟机(iommu)</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>virsh vol-create-as images_lvm z-ubuntu20 6G
 
-- ``/boot/efi`` 目录独立分区，且存储了 ``EFI`` 相关配置和数据
+virt-install <span class="se">\</span>
+  --network bridge:br0 <span class="se">\</span>
+  --name z-ubuntu20 <span class="se">\</span>
+  --ram<span class="o">=</span><span class="m">2048</span> <span class="se">\</span>
+  --vcpus<span class="o">=</span><span class="m">1</span> <span class="se">\</span>
+  --os-type<span class="o">=</span>ubuntu20.04 <span class="se">\</span>
+  --boot uefi --cpu host-passthrough <span class="se">\</span>
+  --disk <span class="nv">path</span><span class="o">=</span>/dev/vg-libvirt/z-ubuntu20,sparse<span class="o">=</span>false,format<span class="o">=</span>raw,bus<span class="o">=</span>virtio,cache<span class="o">=</span>none,io<span class="o">=</span>native <span class="se">\</span>
+  --graphics none <span class="se">\</span>
+  --location<span class="o">=</span>http://mirrors.163.com/ubuntu/dists/focal/main/installer-amd64/ <span class="se">\</span>
+  --extra-args<span class="o">=</span><span class="s2">&quot;console=tty0 console=ttyS0,115200&quot;</span>
 </pre></div>
+</div>
 </div>
 <ul>
 <li><p><a class="reference internal" href="../../kvm/startup/ubuntu_vm_console.html#ubuntu-vm-console"><span class="std std-ref">Ubuntu虚拟机控制台</span></a> 默认不输出，所以安装完成(配置了ssh服务)，通过ssh登录到虚拟机修订 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 配置:</p>
@@ -622,14 +610,14 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>物理主机上(虚拟机外)执行以下命令将虚拟机磁盘LVM卷扩容到32G</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">修订z-dev虚拟机的LVM卷到32G容量</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">修订z-dev虚拟机的LVM卷到32G容量</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo lvresize -L 32G /dev/vg-libvirt/z-dev
 </pre></div>
 </div>
 </div>
-<div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">virsh blocksize命令刷新z-dev虚拟机libvirt卷容量</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">virsh blocksize命令刷新z-dev虚拟机libvirt卷容量</span><a class="headerlink" href="#id15" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo virsh blockresize z-dev --path /dev/vg-libvirt/z-dev --size 32G
 </pre></div>
 </div>
@@ -640,15 +628,15 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>安装 <code class="docutils literal notranslate"><span class="pre">cloud-utils-growpart</span></code> (提供 <code class="docutils literal notranslate"><span class="pre">growpart</span></code> 工具):</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">RedHat系虚拟机内部通过dnf安装cloud-utils-growpart</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">RedHat系虚拟机内部通过dnf安装cloud-utils-growpart</span><a class="headerlink" href="#id16" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo dnf install cloud-utils-growpart
 </pre></div>
 </div>
 </div>
 <p>如果使用 debian/ubuntu ，则安装 <code class="docutils literal notranslate"><span class="pre">cloud-guest-utils</span></code> 来获得 <code class="docutils literal notranslate"><span class="pre">growpart</span></code> :</p>
-<div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">Debian/Ubuntu系虚拟机内部通过apt安装cloud-guest-utils</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">Debian/Ubuntu系虚拟机内部通过apt安装cloud-guest-utils</span><a class="headerlink" href="#id17" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install cloud-guest-utils
 </pre></div>
 </div>
@@ -656,8 +644,8 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>扩展分区:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">在虚拟机内部通过growpart命令扩展分区2</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id18">
+<div class="code-block-caption"><span class="caption-text">在虚拟机内部通过growpart命令扩展分区2</span><a class="headerlink" href="#id18" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>growpart /dev/vda <span class="m">2</span>
 </pre></div>
 </div>
@@ -665,8 +653,8 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>使用 <a class="reference internal" href="../../linux/storage/filesystem/xfs/xfs_growfs.html#xfs-growfs"><span class="std std-ref">xfs_growfs动态调整XFS文件系统</span></a> 在线扩展XFS文件系统:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">在虚拟机内部通过XFS的维护命令xfs_growfs将根目录分区扩展</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id19">
+<div class="code-block-caption"><span class="caption-text">在虚拟机内部通过XFS的维护命令xfs_growfs将根目录分区扩展</span><a class="headerlink" href="#id19" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>xfs_growfs /
 </pre></div>
 </div>
@@ -752,8 +740,8 @@ sudo adduser `id -un` kvm
 <ul class="simple">
 <li><p>创建3个PCIe设备配置XML文件分别对应上述设备:</p></li>
 </ul>
-<div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #1</span><a class="headerlink" href="#id15" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id20">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #1</span><a class="headerlink" href="#id20" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
 <span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
 <span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x5&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
@@ -762,8 +750,8 @@ sudo adduser `id -un` kvm
 </pre></div>
 </div>
 </div>
-<div class="literal-block-wrapper docutils container" id="id16">
-<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #2</span><a class="headerlink" href="#id16" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id21">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #2</span><a class="headerlink" href="#id21" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
 <span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
 <span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0x8&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>
@@ -772,8 +760,8 @@ sudo adduser `id -un` kvm
 </pre></div>
 </div>
 </div>
-<div class="literal-block-wrapper docutils container" id="id17">
-<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #3</span><a class="headerlink" href="#id17" title="此代码块的永久链接">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id22">
+<div class="code-block-caption"><span class="caption-text">Samsung PM9A1 #3</span><a class="headerlink" href="#id22" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">&lt;hostdev</span> <span class="na">mode=</span><span class="s">&#39;subsystem&#39;</span> <span class="na">type=</span><span class="s">&#39;pci&#39;</span> <span class="na">managed=</span><span class="s">&#39;yes&#39;</span><span class="nt">&gt;</span>
 <span class="linenos">2</span>  <span class="nt">&lt;source&gt;</span>
 <span class="linenos">3</span>     <span class="nt">&lt;address</span> <span class="na">domain=</span><span class="s">&#39;0x0&#39;</span> <span class="na">bus=</span><span class="s">&#39;0xb&#39;</span> <span class="na">slot=</span><span class="s">&#39;0x0&#39;</span> <span class="na">function=</span><span class="s">&#39;0x0&#39;</span><span class="nt">/&gt;</span>

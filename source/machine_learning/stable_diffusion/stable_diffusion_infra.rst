@@ -1,7 +1,7 @@
-.. _intro_stable_diffusion:
+.. _stable_diffusion_infra:
 
 =============================
-Stable Diffusion简介
+Stable Diffusion 架构
 =============================
 
 .. note::
@@ -16,7 +16,7 @@ Stable Diffusion是一种潜在的扩散模型，由LMU Munich 的 CompVis 小�
 
    简而言之，Stable Diffusion给予个人能够在有限GPU硬件条件下实现文本引导的图像生成，具有很大的可玩性。
 
-Stable Diffusion架构
+Stable Diffusion 组成
 =======================
 
 Stable Diffusion(稳定扩散)使用一种扩撒模型(diffusion model, DM)的变体，称为 ``潜在扩散模型`` (latent diffusion model, LDM)。扩善模型是2015年推出的，起训练目标是消除消除高斯噪声在训练图像上的连续应用，可以将其稍微一系列去噪自动编码器。

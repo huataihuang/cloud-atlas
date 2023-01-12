@@ -186,7 +186,7 @@ Peer建立连接
      latest handshake: 23 minutes, 12 seconds ago
      transfer: 23.13 KiB received, 12.62 KiB sent
 
-并且，贼服务器上可以ping通客户端的IP地址 ``10.10.0.2``
+并且，服务器上可以ping通客户端的IP地址 ``10.10.0.2``
 
 .. note::
 

@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="Intel GVT-g GPU虚拟化" href="../intel_gvt-g/index.html" />
+    <link rel="next" title="硬件虚拟化" href="../hardware_virtual.html" />
     <link rel="prev" title="vgpu_unlock" href="vgpu_unlock.html" /> 
 </head>
 
@@ -53,29 +53,31 @@
 <li class="toctree-l2"><a class="reference internal" href="../hypervisor.html">hypervisor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_architecture.html">KVM虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../storage/index.html">KVM 存储</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numa/index.html">KVM NUMA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../libvirt/index.html">Libvirt虚拟机管理器</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../remote_desktop/index.html">远程桌面</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">KVM 性能优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../memory/index.html">KVM内存管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numa/index.html">KVM NUMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_vt/index.html">Intel VT(Virtualization Technology)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../iommu/index.html">IOMMU</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">SR-IOV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sr-iov/index.html">Sigle Root I/O Virtualization(SR-IOV)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../intel_gvt/index.html">Intel GVT GPU虚拟化</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">NVIDIA Virtual GPU (vGPU)</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="intro_nvidia_vgpu.html">Nvidia vGPU技术简介</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vgpu_unlock.html">vgpu_unlock</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">vgpu虚拟化快速起步</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hostnvidia-vgpu">在host主机设置NVIDIA vGPU设备</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../intel_gvt-g/index.html">Intel GVT-g GPU虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../hardware_virtual.html">硬件虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_nested_virtual/index.html">KVM嵌套虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_vdisk_live.html">KVM虚拟机动态添加、调整磁盘</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_live_migration.html">KVM热迁移</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../qemu/index.html">QEMU</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../kvm_libguestfs.html">使用libguestfs修订KVM镜像</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../memballoon.html">虚拟机内存balloon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../gpu_passthrough_with_kvm.html">KVM的GPU直通虚拟化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../nvidia_cuda_gpu_in_kvm.html">在KVM中使用NVIDIA CUDA GPU</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../amd_rocm_gpu_in_kvm.html">在KVM中使用AMD ROCm GPU</a></li>
@@ -165,10 +167,51 @@
              
   <section id="vgpu">
 <span id="vgpu-startup"></span><h1>vgpu虚拟化快速起步<a class="headerlink" href="#vgpu" title="此标题的永久链接">¶</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>很不幸，我虽然有支持vGPU功能的 <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> 数据中心运算卡，但是NVIDIA vGPU需要license才能工作。申请90天试用license非常麻烦(需要企业用户通过NVIDIA的销售审核)，所以我最终放弃尝试( <a class="reference internal" href="vgpu_unlock.html#vgpu-unlock"><span class="std std-ref">vgpu_unlock</span></a> 中记录了采用特定 vGPU 14.1版本在Windows虚拟机中绕过license的方法，但是这个方法只能用于Windows虚拟机，我实际没有实践 )。</p>
+<p>vGPU的技术使用并不复杂，我仅做一些资料整理。最终我还是准备采用 GPU passthrough 方式将整个 <a class="reference internal" href="../../machine_learning/hardware/tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> 直通给一个虚拟机来构建 <a class="reference internal" href="../../kubernetes/index.html#kubernetes"><span class="std std-ref">Kubernetes Atlas</span></a> GPU容器，和vGPU的差异应该仅仅是GPU切分的差异。这个功能我准备放弃，除非后续有商业的license环境尝试。从技术上，vGPU和GPU passthrough的差异不大，仅仅是一些license的配置，就不再研究了。</p>
+</div>
+<p>要设置NVIDIA vGPU设备，需要:</p>
+<ul class="simple">
+<li><p>为GPU设备获取和安装对应的NVIDIA vGPU驱动</p></li>
+<li><p>创建 mediated (协调) 设备</p></li>
+<li><p>将mediated设备分配给虚拟机</p></li>
+<li><p>在虚拟机中安装guest驱动</p></li>
+</ul>
+<section id="hostnvidia-vgpu">
+<h2>在host主机设置NVIDIA vGPU设备<a class="headerlink" href="#hostnvidia-vgpu" title="此标题的永久链接">¶</a></h2>
+<ul class="simple">
+<li><p>从NVIDIA官方 <a class="reference external" href="https://www.nvidia.com/en-us/drivers/vgpu-software-driver/">NVIDIA vGPU Software (Quadro vDWS, GRID vPC, GRID vApps)</a>  页面提供注册入口，可以注册一个试用账号获得90天试用licence(需要使用企业邮箱，注册以后大约24小时~48小时发送licence到邮箱?)</p></li>
+<li><p>从 <a class="reference external" href="https://www.nvidia.com/Download/index.aspx?lang=en-us">NVIDIA Driver Downloads</a> 下载驱动，需要注意 <code class="docutils literal notranslate"><span class="pre">vGPU驱动</span></code> 下载需要使用上述注册的试用账号登陆才能下载</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><a class="reference external" href="https://docs.nvidia.com/grid/index.html">NVIDIA® Virtual GPU (vGPU) Software Documentation</a>  提供了NVIDIA发布的vGPU版本对照表:</p>
+<ul class="simple">
+<li><p>NVIDIA每个vGPU软件系列都有配套的软件版本:</p>
+<ul>
+<li><p>vGPU Manger</p></li>
+<li><p>Linux Driver</p></li>
+<li><p>Windows Driver</p></li>
+</ul>
+</li>
+</ul>
+<p>例如vGPU软件12.2版本于2021年4月发布，包含(对应于 <a class="reference external" href="https://github.com/tuh8888/libvirt_win10_vm">Virtual Machine with vGPU Unlock for single GPU desktop</a> 提供的 NVIDIA-Linux-x86_64-460.73.01-grid-vgpu-kvm-v5.run ):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>vGPU Manager 460.73.02</p></li>
+<li><p>Linux Driver 460.73.01</p></li>
+<li><p>Windows Driver 462.31</p></li>
+</ul>
+</div></blockquote>
+</div>
+</section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.4/html/setting_up_an_nvidia_gpu_for_a_virtual_machine_in_red_hat_virtualization/index">SETTING UP AN NVIDIA GPU FOR A VIRTUAL MACHINE IN RED HAT VIRTUALIZATION</a> 配置GPU的直通和vgpu，本文参考后半部分</p></li>
+<li><p><a class="reference external" href="https://github.com/tuh8888/libvirt_win10_vm">Virtual Machine with vGPU Unlock for single GPU desktop</a> 提供了配置指南的参考，以及Kernel 5.12的</p></li>
 </ul>
 </section>
 </section>
@@ -178,7 +221,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="vgpu_unlock.html" class="btn btn-neutral float-left" title="vgpu_unlock" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../intel_gvt-g/index.html" class="btn btn-neutral float-right" title="Intel GVT-g GPU虚拟化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../hardware_virtual.html" class="btn btn-neutral float-right" title="硬件虚拟化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

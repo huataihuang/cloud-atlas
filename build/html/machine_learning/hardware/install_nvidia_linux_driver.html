@@ -77,6 +77,7 @@
 <li class="toctree-l3"><a class="reference internal" href="gtx_1050_ti.html">Nvidia GeForce GTX 1050/1060/1070/1080</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tesla_p10.html">Nvidia Tesla P10 GPU运算卡</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">安装NVIDIA Linux驱动</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bios">BIOS设置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cuda">CUDA软件堆栈(不同层次)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#run">手工下载本地run安装(和发行版无关)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#nvdia-cuda">NVDIA CUDA驱动安装</a></li>
@@ -153,6 +154,13 @@
   <section id="nvidia-linux">
 <span id="install-nvidia-linux-driver"></span><h1>安装NVIDIA Linux驱动<a class="headerlink" href="#nvidia-linux" title="此标题的永久链接">¶</a></h1>
 <p><a class="reference internal" href="tesla_p10.html#tesla-p10"><span class="std std-ref">Nvidia Tesla P10 GPU运算卡</span></a> 的GPU核心是Tesla，属于 <code class="docutils literal notranslate"><span class="pre">Pascal</span></code> 微架构</p>
+<section id="bios">
+<h2>BIOS设置<a class="headerlink" href="#bios" title="此标题的永久链接">¶</a></h2>
+<ul class="simple">
+<li><p>物理服务器安装NVIDIA驱动，需要确保 <a class="reference internal" href="../../linux/server/hardware/hpe/dl360_gen9_large_bar_memory.html#hpe-server-pcie-64bit-bar-support"><span class="std std-ref">HP DL360 Gen9 BIOS设置``PCI Express 64-Bit BAR Support``</span></a></p></li>
+<li><p>虚拟机安装NVIDIA驱动，去要确保 <a class="reference internal" href="../../kubernetes/gpu/install_nvidia_container_toolkit_for_containerd.html#nvidia-pci-passthrough-via-ovmf-pci-realloc"><span class="std std-ref">NVIDIA passthrough via ovmf需要Host主机内核参数 pci=realloc</span></a></p></li>
+</ul>
+</section>
 <section id="cuda">
 <span id="cuda-softstack"></span><h2>CUDA软件堆栈(不同层次)<a class="headerlink" href="#cuda" title="此标题的永久链接">¶</a></h2>
 <p>NVIDIA将GPU驱动和开发组件(Toolkits)分别组合成 <code class="docutils literal notranslate"><span class="pre">cuda-drivers</span></code> 和 <code class="docutils literal notranslate"><span class="pre">cuda</span></code> ，其中 <code class="docutils literal notranslate"><span class="pre">cuda-drivers</span></code> 是 <code class="docutils literal notranslate"><span class="pre">cuda</span></code> 的子集。由于虚拟化和容器化技术的发展，我们可以在不同的层次分别安装:</p>
@@ -227,7 +235,6 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb
 sudo dpkg -i cuda-keyring_1.0-1_all.deb
 sudo apt-get update
-sudo apt-get -y install cuda
 </pre></div>
 </div>
 </div>
@@ -439,7 +446,7 @@ mv /usr/lib/modules/`uname -r`/kernel/drivers/video/fbdev/riva/rivafb.ko ~/`unam
 <section id="id3">
 <h3>严重失误<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
 <p><strong>我逐渐感觉并不是内核加载了和nvidia模块冲突的nouveau等模块</strong> 而是可能是因为内核启用了 <a class="reference internal" href="../../kvm/iommu/index.html#iommu"><span class="std std-ref">IOMMU</span></a> 导致的: 我翻了一下我之前的笔记，确实在 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 实践时，将 GPU 卡直接passthrough给了虚拟机 <code class="docutils literal notranslate"><span class="pre">z-iommu</span></code> 做测试。</p>
-<p>仔细看了 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 记录，在 <a class="reference internal" href="../../kvm/iommu/ovmf.html#vfio-pci-ids"><span class="std std-ref">通过设备ID来绑定 vfio-pci</span></a> 配置了将GPU设备 <code class="docutils literal notranslate"><span class="pre">10de:1b39</span></code> 屏蔽了(提供给kvm虚拟机passthrough），所以就会出现上述的报错。真是非常乌龙…</p>
+<p>仔细看了 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 记录，在 <a class="reference internal" href="../../kvm/iommu/ovmf_gpu_nvme.html#vfio-pci-ids"><span class="std std-ref">通过设备ID来绑定 vfio-pci</span></a> 配置了将GPU设备 <code class="docutils literal notranslate"><span class="pre">10de:1b39</span></code> 屏蔽了(提供给kvm虚拟机passthrough），所以就会出现上述的报错。真是非常乌龙…</p>
 <ul class="simple">
 <li><p>所以修订方法也很简单，就是去除掉 <code class="docutils literal notranslate"><span class="pre">/etc/default/grub</span></code> 中 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a,10de:1b39</span></code> 改为 <code class="docutils literal notranslate"><span class="pre">vfio-pci.ids=144d:a80a</span></code> 就不会隔离掉GPU，物理主机就可以使用该设备</p></li>
 </ul>

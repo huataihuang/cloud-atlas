@@ -4,6 +4,10 @@
 Open Virtual Machine Firmware(OMVF)
 =====================================
 
+.. note::
+
+   本文是我首次实践 IOMMU 的笔记，我在 :ref:`ovmf_gpu_nvme` 实践中将进一步完善和改进，如果你想获得如何实现GPU passthrough的完备参考，可以阅读 :ref:`ovmf_gpu_nvme` 一文。
+
 Open Virtual Machine Firmware(OMVF)是在虚拟机内部激活UEFI支持的开源项目，从Linux 3.9和最新QEMU开始，可以将图形卡直通给虚拟机，提供VM原生图形性能，对图形性能敏感对任务非常有用。
 
 准备工作
@@ -48,61 +52,33 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 - Intel CPU( ``VT-d`` )配置 ``intel_iommu=on``
 - AMD CPU( ``AMD-Vi`` )通常内核检测到BIOS支持  ``IOMMU HW`` 就会激活，为确定激活可配置 ``iommu=pt iommu=1``
 
-重启主机，然后检查 ``dmesg`` 确保IOMMU正确设置::
+重启主机，然后检查 ``dmesg`` 确保IOMMU正确设置:
 
-   dmesg | grep -i -e DMAR -e IOMMU
+.. literalinclude:: ovmf_gpu_nvme/check_iommu_dmesg
+   :language: bash
+   :caption: 通过dmesg检查IOMMU是否激活
 
 输出类似:
 
-.. literalinclude:: ovmf/dmesg_dmar_iommu.txt
+.. literalinclude:: ovmf_gpu_nvme/dmesg_dmar_iommu.txt
    :language: bash
-   :linenos:
-   :caption:
+   :caption: 激活IOMMU之后系统启动信息
+   :emphasize-lines: 5
 
 检查groups是否正确
 ----------------------
 
 以下脚本 ``check_iommu.sh`` 脚本可以查看系统中不同的PCI设备被映射到IOMMU组，如果没有返回任何信息，则表明系统没有激活IOMMU支持或者硬件不支持IOMMU
 
-.. literalinclude:: intel_vt-d_startup/check_iommu.sh
+.. literalinclude:: ovmf_gpu_nvme/check_iommu.sh
    :language: bash
-   :linenos:
-   :caption:
 
-执行输出::
+执行输出:
 
-   ...
-   IOMMU Group 32:
-           00:1f.0 ISA bridge [0601]: Intel Corporation C610/X99 series chipset LPC Controller [8086:8d44] (rev 05)
-           00:1f.2 SATA controller [0106]: Intel Corporation C610/X99 series chipset 6-Port SATA Controller [AHCI mode] [8086:8d02] (rev 05)
-           00:1f.3 SMBus [0c05]: Intel Corporation C610/X99 series chipset SMBus Controller [8086:8d22] (rev 05)
-   IOMMU Group 33:
-           01:00.0 System peripheral [0880]: Hewlett-Packard Company Integrated Lights-Out Standard Slave Instrumentation & System Support [103c:3306] (rev 06)
-           01:00.1 VGA compatible controller [0300]: Matrox Electronics Systems Ltd. MGA G200EH [102b:0533] (rev 01)
-           01:00.2 System peripheral [0880]: Hewlett-Packard Company Integrated Lights-Out Standard Management Processor Support and Messaging [103c:3307] (rev 06)
-           01:00.4 USB controller [0c03]: Hewlett-Packard Company Integrated Lights-Out Standard Virtual USB Controller [103c:3300] (rev 03)
-   IOMMU Group 34:
-           02:00.0 Ethernet controller [0200]: Broadcom Inc. and subsidiaries NetXtreme BCM5719 Gigabit Ethernet PCIe [14e4:1657] (rev 01)
-           02:00.1 Ethernet controller [0200]: Broadcom Inc. and subsidiaries NetXtreme BCM5719 Gigabit Ethernet PCIe [14e4:1657] (rev 01)
-           02:00.2 Ethernet controller [0200]: Broadcom Inc. and subsidiaries NetXtreme BCM5719 Gigabit Ethernet PCIe [14e4:1657] (rev 01)
-           02:00.3 Ethernet controller [0200]: Broadcom Inc. and subsidiaries NetXtreme BCM5719 Gigabit Ethernet PCIe [14e4:1657] (rev 01)
-   IOMMU Group 35:
-           04:00.0 Ethernet controller [0200]: Intel Corporation I350 Gigabit Network Connection [8086:1521] (rev 01)
-   IOMMU Group 36:
-           04:00.1 Ethernet controller [0200]: Intel Corporation I350 Gigabit Network Connection [8086:1521] (rev 01)
-   IOMMU Group 37:
-           04:00.2 Ethernet controller [0200]: Intel Corporation I350 Gigabit Network Connection [8086:1521] (rev 01)
-   IOMMU Group 38:
-           04:00.3 Ethernet controller [0200]: Intel Corporation I350 Gigabit Network Connection [8086:1521] (rev 01)
-   IOMMU Group 39:
-           05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   IOMMU Group 40:
-           08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   IOMMU Group 41:
-           0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-   ...
-   IOMMU Group 79:
-           82:00.0 3D controller [0302]: NVIDIA Corporation Device [10de:1b39] (rev a1)
+.. literalinclude:: ovmf_gpu_nvme/check_iommu_output
+   :language: bash
+   :caption: 检查PCI设备映射到IOMMU组的输出信息,可以看到GPU信息
+   :emphasize-lines: 31-32
 
 上述输出中有不同的 ``IOMMU Group`` ，这个意义是:
 
@@ -118,8 +94,6 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 但是，GPU驱动往往不倾向于支持动态绑定，所以可能难以实现一些用于物理主机的GPU被透明直通给虚拟机，因为这样的两种驱动相互冲突。通常建议手工绑定这些驱动，然后再启动虚拟机。
 
 从Linux内核4.1开始，内核包含了 ``vfio-pci`` ，这个VFIO驱动可以完全替代 ``pci-stub`` 而且提供了控制设备的扩展，例如在不使用设备时将设备切换到 ``D3`` 状态。
-
-.. _vfio-pci.ids:
 
 通过设备ID来绑定 ``vfio-pci``
 --------------------------------
@@ -238,14 +212,18 @@ dracut的早期加载机制是通过内核参数。
 
    dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
 
-我的屏蔽host pcie实践
-------------------------
+.. _pci-stub.ids:
+
+采用 ``pci-stub.ids`` 屏蔽PCI设备
+------------------------------------
 
 这段是我实际操作实践:
 
-- 实践是在 :ref:`ubuntu_linux` 20.04.3 LTS上完成，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` ::
+- (本方法废弃) :ref:`ubuntu_linux` 20.04.3 LTS上，配置 :ref:`ubuntu_grub` - 修改 ``/etc/default/grub`` :
 
-   GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on pci-stub.ids=144d:a80a,10de:1b39 rdblacklist=nouveau" 
+.. literalinclude:: ovmf_gpu_nvme/grub_vfio-stub.ids
+   :language: bash
+   :caption: 配置/etc/default/grub加载vfio-stub.ids来隔离PCI直通设备，该方法已废弃
 
 - 然后执行::
 
@@ -383,23 +361,11 @@ OVMF是开源UEFI firmware，用于QEMU虚拟机。
 virt-install
 --------------
 
-- 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷::
+- 在 ``virt-install`` 命令添加 ``--boot uefi`` 和 ``--cpu host-passthrough`` 参数安装操作系统。注意，虚拟机系统磁盘采用 :ref:`libvirt_lvm_pool` ，所以首先创建LVM卷:
 
-   virsh vol-create-as images_lvm z-fedora35 6G
-
-- 创建虚拟机::
-
-   virt-install \
-     --network bridge:virbr0 \
-     --name z-fedora35 \
-     --ram=2048 \
-     --vcpus=1 \
-     --os-type=Linux --os-variant=fedora31 \
-     --boot uefi --cpu host-passthrough \
-     --disk path=/dev/vg-libvirt/fedora35,sparse=false,format=raw,bus=virtio,cache=none,io=native \
-     --graphics none \
-     --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
-     --extra-args="console=tty0 console=ttyS0,115200"
+.. literalinclude:: ovmf_gpu_nvme/create_ovmf_fedora35_vm_on_libvirt_lvm_pool
+   :language: bash
+   :caption: 在Libvirt的LVM存储上创建Fedora35 ovmf虚拟机(iommu)
 
 Fedora Workstation版本只能从iso安装
 
@@ -490,7 +456,6 @@ NVMe设备::
 
 .. literalinclude:: ovmf/pci_0000_05_00_0.xml
    :language: xml
-   :linenos:
    :emphasize-lines: 11-13
    :caption: Samsung PM9A1
 
@@ -502,7 +467,6 @@ GPU设备::
 
 .. literalinclude:: ovmf/pci_0000_82_00_0.xml
    :language: xml
-   :linenos:
    :emphasize-lines: 11-13
    :caption: NVIDIA Tesla P10
 
@@ -527,9 +491,8 @@ NVMe设备::
 
 则对应配置 ``samsung_pm9a1_1.xml`` :
 
-.. literalinclude:: ovmf/samsung_pm9a1_1.xml
+.. literalinclude:: ovmf_gpu_nvme/samsung_pm9a1_1.xml
    :language: xml
-   :linenos:
    :caption: Samsung PM9A1 #1
 
 GPU设备::
@@ -549,9 +512,8 @@ GPU设备::
 
 则对应配置 ``tesla_p10.xml`` :
 
-.. literalinclude:: ovmf/tesla_p10.xml
+.. literalinclude:: ovmf_gpu_nvme/tesla_p10.xml
    :language: xml
-   :linenos:
    :caption: NVIDIA Tesla P10
 
 添加NVMe设备

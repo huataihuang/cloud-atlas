@@ -66,6 +66,8 @@ ML工作流简介
   - 为在线预测或批处理模式运行的模型提供服务
   - 监控模型的性能，并将结果输入流程以调整或重新训练模型
 
+.. _kubeflow_components:
+
 ML工作流中的Kubeflow组件
 -------------------------
 
@@ -87,7 +89,7 @@ ML工作流中的Kubeflow组件
 
    在机器学习工作流的不同阶段加入Kubeflow的案例
 
-Kubeflow核型组件
+Kubeflow核心组件
 -----------------
 
 .. figure:: ../../_static/kubernetes/kubeflow/kubeflow_components.jpg

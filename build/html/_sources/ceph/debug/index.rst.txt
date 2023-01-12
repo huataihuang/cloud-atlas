@@ -9,6 +9,8 @@ Red Hat提供了Ceph存储的故障排查手册 `Red Hat Ceph Storage Troublesho
 .. toctree::
    :maxdepth: 1
 
+   osd_slow_ops_warning_after_ceph_down.rst
+
 .. only::  subproject and html
 
    Indices

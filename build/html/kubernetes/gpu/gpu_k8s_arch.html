@@ -23,7 +23,7 @@
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
     <link rel="copyright" title="版权所有" href="../../copyright.html" />
-    <link rel="next" title="Kubernetes运行Android" href="../k8s_android/index.html" />
+    <link rel="next" title="为containerd安装NVIDIA Container Toolkit" href="install_nvidia_container_toolkit_for_containerd.html" />
     <link rel="prev" title="GPU Kubernetes" href="index.html" /> 
 </head>
 
@@ -85,11 +85,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../arm/index.html">ARM架构Kubernetes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">GPU Kubernetes</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">GPU Kubernetes架构</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nvidia">NVIDIA容器运行时</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="install_nvidia_container_toolkit_for_containerd.html">为containerd安装NVIDIA Container Toolkit</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../kubeflow/index.html">Kubeflow - Kubernetes机器学习工作流平台</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../argo/index.html">Argo - 基于Kubernetes的持续集成和工作流</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k8s_android/index.html">Kubernetes运行Android</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../k3s/index.html">K3s - 轻量级Kubernetes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../platform/index.html">Kubernetes之上的平台</a></li>
@@ -171,7 +175,7 @@
 <span id="gpu-k8s-arch"></span><h1>GPU Kubernetes架构<a class="headerlink" href="#gpu-kubernetes" title="此标题的永久链接">¶</a></h1>
 <p>NVIDIA Container Tookit</p>
 <figure class="align-default">
-<img alt="../../_images/nvidia_gpu_container.png" src="../../_images/nvidia_gpu_container.png" />
+<a class="reference internal image-reference" href="../../_images/nvidia_gpu_container.png"><img alt="../../_images/nvidia_gpu_container.png" src="../../_images/nvidia_gpu_container.png" style="width: 417.6px; height: 295.2px;" /></a>
 </figure>
 <p>结合 Kubernetes技术，实现大规模CPU计算集群:</p>
 <figure class="align-default">
@@ -181,10 +185,50 @@
 <li><p>轻量级运行环境，减少底层(虚拟化)消耗</p></li>
 <li><p>快速调度、大规模部署</p></li>
 </ul>
+<section id="nvidia">
+<h2>NVIDIA容器运行时<a class="headerlink" href="#nvidia" title="此标题的永久链接">¶</a></h2>
+<p>NVIDIA容器运行时(Container Runtime)是一种GPU aware容器运行时，与 <a class="reference internal" href="../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> , <a class="reference internal" href="../container_runtimes/cri-o.html#cri-o"><span class="std std-ref">cri-o容器运行时</span></a> 以及其他流行的容器技术使用的开放容器倡议(Open Containers Initiative, OCI)规范兼容。NVIDIA Container Runtime简化了构建容器化GPU加速应用程序，并且方便部署到桌面、云或数据中心。</p>
+<p>NVIDIA容器堆栈(Container Stack)架构目标是支持容器生态系统中的任何容器运行时，堆栈组件包括:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">nvidia-docker</span></code> 包装器(wrapper)</p></li>
+<li><p>NVIDIA容器运行时( <code class="docutils literal notranslate"><span class="pre">nvidia-container-runtime</span></code> )</p></li>
+<li><p>NVIDIA容器运行时Hook( <code class="docutils literal notranslate"><span class="pre">nvidia-container-toolkit</span></code> / <code class="docutils literal notranslate"><span class="pre">nvidia-container-runtime-hook</span></code> )</p></li>
+<li><p>NVIDIA容器库和CLI( <code class="docutils literal notranslate"><span class="pre">libnvidia-container1</span></code> , <code class="docutils literal notranslate"><span class="pre">nvidia-container-cli</span></code> )</p></li>
+</ul>
+<p>除了 <code class="docutils literal notranslate"><span class="pre">nvidia-docker</span></code> 包装器之外，NVIDIA容器堆栈的组件都打包为 NVIDIA Container Toolkit。</p>
+<ul class="simple">
+<li><p>对于 <a class="reference internal" href="../../docker/index.html#docker"><span class="std std-ref">Docker Atlas</span></a> 使用 <code class="docutils literal notranslate"><span class="pre">nvidia-docker</span></code> wrapper ，组件流程图如下:</p></li>
+</ul>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../../_images/nvidia-docker-arch-new.png"><img alt="../../_images/nvidia-docker-arch-new.png" src="../../_images/nvidia-docker-arch-new.png" style="width: 628.0px; height: 296.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">nvidia-docker wrapper组件流程图</span><a class="headerlink" href="#id2" title="此图像的永久链接">¶</a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p>对于 <a class="reference internal" href="../container_runtimes/containerd/index.html#containerd"><span class="std std-ref">containerd运行时(runtime)</span></a> ，组件流程图如下:</p></li>
+</ul>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../../_images/nvidia-containerd-arch.png"><img alt="../../_images/nvidia-containerd-arch.png" src="../../_images/nvidia-containerd-arch.png" style="width: 627.0px; height: 279.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">containerd组件流程图</span><a class="headerlink" href="#id3" title="此图像的永久链接">¶</a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p>对于 <a class="reference internal" href="../container_runtimes/cri-o.html#cri-o"><span class="std std-ref">cri-o容器运行时</span></a> 和 LXC 组件流程图如下:</p></li>
+</ul>
+<figure class="align-default" id="id4">
+<a class="reference internal image-reference" href="../../_images/nvidia-crio-lxc-arch.png"><img alt="../../_images/nvidia-crio-lxc-arch.png" src="../../_images/nvidia-crio-lxc-arch.png" style="width: 630.0px; height: 213.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">cri-o和LXC组件流程图</span><a class="headerlink" href="#id4" title="此图像的永久链接">¶</a></p>
+</figcaption>
+</figure>
+</section>
 <section id="id1">
 <h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.nvidia.com/datacenter/cloud-native/contents.html">NVIDIA Cloud Native Documentation</a></p></li>
+<li><p><a class="reference external" href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/arch-overview.html">NVIDIA Cloud Native Documentation: Architecture Overview</a></p></li>
 <li><p><a class="reference external" href="https://developer.nvidia.com/kubernetes-gpu">Kubernetes on NVIDIA GPUs</a></p></li>
 </ul>
 </section>
@@ -195,7 +239,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="GPU Kubernetes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../k8s_android/index.html" class="btn btn-neutral float-right" title="Kubernetes运行Android" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="install_nvidia_container_toolkit_for_containerd.html" class="btn btn-neutral float-right" title="为containerd安装NVIDIA Container Toolkit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
