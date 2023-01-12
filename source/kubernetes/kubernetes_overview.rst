@@ -86,7 +86,9 @@ worker节点是运行容器化应用程序的服务器。负责运行、监控�
 
 * kube-proxy (Kubernetes Service Proxy) 负责在不同的应用组件负载均衡网络流量
 
-Vanilla Kubernetes vs Managed Kubernetes
+.. _vanilla_k8s:
+
+Vanilla Kubernetes
 =========================================
 
 Vanilla(香草) Kubernetes也称为开源Kubernetes，这是指最基本的Kubernetes，只包含最基本的Kubernetes组件:
