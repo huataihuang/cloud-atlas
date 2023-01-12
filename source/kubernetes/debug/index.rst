@@ -22,3 +22,4 @@ Kubernetes排查
    k8s_stuck_in_podinit.rst
    pod_stuck_terminating.rst
    get_pods_special_node.rst
+   fix_pod_has_unbound_immediate_persistentvolumeclaims.rst

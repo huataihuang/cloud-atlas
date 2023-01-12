@@ -92,9 +92,39 @@ Tiller是 ``helm`` 命令的集群端组件，用于接收 ``helm`` 的命令并
    ...
    tiller-deploy-9bf6fb76d-lj2dx          1/1     Running   0          2m1s
 
-.. note::
+helm使用
+==============
 
-   使用helm的实践待续...
+- 安装软件举例( :ref:`install_nvidia_device_plugin` ):
+
+.. literalinclude:: helm/helm_list
+   :language: bash
+   :caption: 检查通过helm已经安装的软件release(删除时候必须指定release)
+
+显示输出举例:
+
+.. literalinclude:: helm/helm_list_output
+   :language: bash
+   :caption: 检查通过helm已经安装的软件release输出信息
+
+- 删除helm chart(uninstall release):
+
+.. literalinclude:: helm/helm_uninstall
+   :language: bash
+   :caption: 使用helm uninstall删除指定release，注意必须指定namespace(如果不是默认namespace)
+
+提示信息::
+
+   release "nvidia-device-plugin-1673515385" uninstalled
+
+对于非默认namespace的helm chart，如果没有指定namespace，则会报错。例如上文的 ``nvidia-device-plugin`` 如果执行::
+
+   helm uninstall nvidia-device-plugin-1673515385
+
+会报错::
+
+   Error: uninstall: Release not loaded: nvidia-device-plugin-1673515385: release: not found
+
 
 参考
 =======
