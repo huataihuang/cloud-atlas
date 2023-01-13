@@ -54,6 +54,10 @@ nerdctl 是 ``containerd`` 子项目，提供Docker兼容的CLI命令:
 
    sudo nerdctl ps
 
+.. note::
+
+   :ref:`containerd_proxy`
+
 可以看到本地运行了容器(类似docker)::
 
    CONTAINER ID    IMAGE                             COMMAND                   CREATED               STATUS    PORTS                 NAMES
