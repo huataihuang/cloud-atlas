@@ -84,11 +84,20 @@ values.yaml
    :caption: stable-diffusion pod 调度失败信息
    :emphasize-lines: 9
 
-显示调度失败是因为没有 ``PersistentVolumeClaims`` 持久化卷申明，也就是说集群需要先部署一个卷
+- 检查配备了GPU的节点 ``z-k8s-n-1`` 标签，是存在 ``nvidia.com/gpu.present=true``
+
+- 显示调度失败是因为没有 ``PersistentVolumeClaims`` 持久化卷申明，也就是说集群需要先部署一个卷
 
 这里 ``Node-Selectors:              nvidia.com/gpu.present=true`` ，可以通过 ``kubectl get nodes --show-labels`` 看到，安装了NVIDIA GPU的 ``z-k8s-n-1`` 是具备该标签的
 
-这个报错 :ref:`fix_pod_has_unbound_immediate_persistentvolumeclaims` 经过排查是卷容量不足，原因是我部署节点都只分配了 ``9.5G`` 磁盘作为 :ref:`containerd` 存储目录，实际上多次安装以后磁盘空间只剩下 1.x GB，而这个 ``stable-diffusion`` 自身镜像就需要下载8G，同时卷申明也需要空间
+这个报错 :ref:`fix_pod_has_unbound_immediate_persistentvolumeclaims` 感觉原因是我部署节点都只分配了 ``9.5G`` 磁盘作为 :ref:`containerd` 存储目录，实际上多次安装以后磁盘空间只剩下 1.x GB:
+
+.. literalinclude:: stable_diffusion_on_k8s/df_vdb1
+   :language: bash
+   :caption: /dev/vdb1空间不足
+   :emphasize-lines: 7
+
+而这个 ``stable-diffusion`` 自身镜像就需要下载8G，同时卷申明也需要空间
 
 检查::
 
@@ -96,7 +105,136 @@ values.yaml
    NAME                                                                    STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
    stable-diffusion-1673539037-model-store-stable-diffusion-1673539037-0   Pending                                                     16m
 
+   $ kubectl get pv
+   No resources found
 
+- :ref:`ceph_extend_rbd_drive_with_libvirt_xfs_vdb1` 将虚拟机 ``z-k8s-n-1`` 的 ``/var/lib/containerd`` 扩展成50G
+
+- 不过还是存在同样的调度问题，仔细 :ref:`gpu_node_schedule_err_debug` 发现这是因为 passthrough GPU设备只能分配给一个pod使用，而在 :ref:`install_nvidia_gpu_operator` 的示例pod没有删除，导致GPU设备占用。删除掉占用GPU的测试pod之后...怎么，还是没有调度成功...
+
+- 仔细检查 ``vpc`` ::
+
+   $ kubectl get pvc
+   NAME                                                                    STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+   stable-diffusion-1673539037-model-store-stable-diffusion-1673539037-0   Pending                                                     13h
+
+   $ kubectl describe pvc stable-diffusion-1673539037-model-store-stable-diffusion-1673539037-0
+   Name:          stable-diffusion-1673539037-model-store-stable-diffusion-1673539037-0
+   Namespace:     default
+   StorageClass:
+   Status:        Pending
+   Volume:
+   Labels:        app.kubernetes.io/instance=stable-diffusion-1673539037
+                  app.kubernetes.io/name=stable-diffusion
+   Annotations:   <none>
+   Finalizers:    [kubernetes.io/pvc-protection]
+   Capacity:
+   Access Modes:
+   VolumeMode:    Filesystem
+   Used By:       stable-diffusion-1673539037-0
+   Events:
+     Type    Reason         Age                     From                         Message
+     ----    ------         ----                    ----                         -------
+     Normal  FailedBinding  4m19s (x3262 over 13h)  persistentvolume-controller  no persistent volumes available for this claim and no storage class is set
+
+可以看到 ``describe pod`` 有如下存储定义:
+
+     stable-diffusion-1673589055-model-store:
+       Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+       ClaimName:  stable-diffusion-1673589055-model-store-stable-diffusion-1673589055-0
+       ReadOnly:   false
+
+在 `Stable Diffusion on Kubernetes with Helm <https://github.com/amithkk/stable-diffusion-k8s>`_ 项目的issue中有一个 `Issues with "storageClassName" #1 <https://github.com/amithkk/stable-diffusion-k8s/issues/1>`_ 提到 ``storageClassName`` 定义持久化存储，有一个代码合并提示文档::
+
+   persistence:
+     annotations: {}
+     ## If defined, storageClass: <storageClass>
+     ## If set to "-", storageClass: "", which disables dynamic provisioning
+     ## If undefined (the default) or set to null, no storageClass spec is
+     ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+     ##   GKE, AWS & OpenStack)
+     ##
+     accessMode: ReadWriteOnce
+     size: 8Gi
+
+为了简化，先暂时关闭持久化存储::
+
+   persistence:
+     annotations: {}
+     ## If defined, storageClass: <storageClass>
+     ## If set to "-", storageClass: "", which disables dynamic provisioning
+     ## If undefined (the default) or set to null, no storageClass spec is
+     ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+     ##   GKE, AWS & OpenStack)
+     ##
+     storageClass: "-"
+     accessMode: ReadWriteOnce
+     size: 8Gi
+
+- 然后尝试debug方式安装::
+
+   $ helm install --debug --generate-name amithkk-sd/stable-diffusion -f values.yaml
+
+发现安装失败原因是无法下载:
+
+.. literalinclude:: stable_diffusion_on_k8s/helm_install_debug_stable-diffusion
+   :language: bash
+   :caption: 使用helm install --debug 安装stable-diffusion显示无法下载
+   :emphasize-lines: 9
+
+启动代理翻墙，可以看到 ``helm`` 正常工作如下:
+
+.. literalinclude:: stable_diffusion_on_k8s/helm_install_debug_stable-diffusion_success
+   :language: bash
+   :caption: 启用代理翻墙，helm install --debug 安装stable-diffusion
+   :emphasize-lines: 9
+
+但是奇怪，这次没有看到 ``kubectl get pods`` 输出有 ``stable-diffusion`` 的pod
+
+回退掉 ``storageClass: "-"`` ，尝试验证::
+
+   $ helm install --debug --dry-run --generate-name amithkk-sd/stable-diffusion -f values.yaml
+
+PVC和PV
+---------
+
+- 检查 ``stable-diffusion`` 所要求的pvc::
+
+   kubectl get pvc stable-diffusion-1673591786-model-store-stable-diffusion-1673591786-0 -o yaml
+
+可以看到:
+
+.. literalinclude:: stable_diffusion_on_k8s/stable-diffusion_pvc
+   :language: yaml
+   :caption: stable-diffusion的PVC
+
+参考 `Configure a Pod to Use a PersistentVolume for Storage <https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/>`_ 有一句非常关键的话:
+
+**If the control plane finds a suitable PersistentVolume with the same StorageClass, it binds the claim to the volume.**
+
+明白了:
+
+- ``stable-diffusion`` 声明了一个PVC，需要有对应的PV，这个PVC和PV对应绑定关系是通过 ``storageClassName`` 指定的关联
+- 在 `Stable Diffusion on Kubernetes with Helm <https://github.com/amithkk/stable-diffusion-k8s>`_ 项目的issue中有一个 `Issues with "storageClassName" #1 <https://github.com/amithkk/stable-diffusion-k8s/issues/1>`_ 提到 ``storageClassName`` 定义持久化存储
+
+  - 默认没有配置，如果是自己部署，需要定义一个PV和PVC关联的 ``storageClass``
+  - 可以使用本地存储(例如我现在就搞一个)
+
+- 在 ``stable-diffusion-pv.ymal`` :
+
+.. literalinclude:: stable_diffusion_on_k8s/stable-diffusion-pv.yaml
+   :language: yaml
+   :caption: 创建定义本地存储 stable-diffusion-pv.yaml
+   :emphasize-line: 8
+
+注意：这里定义了存储类型命名是 ``manual`` ，所以需要对应修改 ``values.yaml`` 在其中添加了一行:
+
+.. literalinclude:: stable_diffusion_on_k8s/values_part.yaml
+   :language: yaml
+   :caption: 在values.yaml中添加一行 storageClass: manual
+   :emphasize-line: 9
+
+- 此时再次执行 ``helm install ... -f values.yaml`` 就可以看到能够正确调度到 ``z-k8s-n-1``
 
 参考
 ======
