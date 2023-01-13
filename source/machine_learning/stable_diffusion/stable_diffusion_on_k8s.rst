@@ -68,8 +68,8 @@ values.yaml
 问题排查
 =============
 
-调度到GPU节点
----------------
+stable diffusion pod调度排查
+-------------------------------
 
 - 发现pod调度没有成功，始终pending:
 
@@ -195,8 +195,8 @@ values.yaml
 
    $ helm install --debug --dry-run --generate-name amithkk-sd/stable-diffusion -f values.yaml
 
-PVC和PV
----------
+PVC和PV配置解决调度问题
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - 检查 ``stable-diffusion`` 所要求的pvc::
 
@@ -225,16 +225,49 @@ PVC和PV
 .. literalinclude:: stable_diffusion_on_k8s/stable-diffusion-pv.yaml
    :language: yaml
    :caption: 创建定义本地存储 stable-diffusion-pv.yaml
-   :emphasize-line: 8
+   :emphasize-lines: 8
 
 注意：这里定义了存储类型命名是 ``manual`` ，所以需要对应修改 ``values.yaml`` 在其中添加了一行:
 
 .. literalinclude:: stable_diffusion_on_k8s/values_part.yaml
    :language: yaml
    :caption: 在values.yaml中添加一行 storageClass: manual
-   :emphasize-line: 9
+   :emphasize-lines: 9
 
-- 此时再次执行 ``helm install ... -f values.yaml`` 就可以看到能够正确调度到 ``z-k8s-n-1``
+- 此时再次执行 ``helm install ... -f values.yaml`` 就可以看到能够正确调度到 ``z-k8s-n-1`` ::
+
+   $ kubectl get pods -o wide
+   NAME                              READY   STATUS      RESTARTS        AGE     IP           NODE        NOMINATED NODE   READINESS GATES
+   ,..
+   stable-diffusion-1673593163-0     0/2     Init:1/3    36 (16m ago)    169m    10.0.3.164   z-k8s-n-1   <none>           <none>
+
+stable-diffusion容器启动失败排查
+----------------------------------
+
+调度虽然解决了，但是观察pod始终停留在初始化状态 ``Init:1/3`` 
+
+- 检查pod::
+
+   kubectl describe pods stable-diffusion-1673593163-0
+
+可以看到是容器启动问题::
+
+   Events:
+     Type     Reason   Age                   From     Message
+     ----     ------   ----                  ----     -------
+     Warning  BackOff  15m (x628 over 170m)  kubelet  Back-off restarting failed container
+
+- 检查日志::
+
+   kubectl logs stable-diffusion-1673593163-0
+
+可以看到::
+
+   Error from server (BadRequest): container "stable-diffusion-stable-diffusion" in pod "stable-diffusion-1673593163-0" is waiting to start: PodInitializing
+
+之前发现容器镜像下载因为GFW原因出现TLS连接超时，怀疑是镜像下载问题导致。
+
+
 
 参考
 ======
