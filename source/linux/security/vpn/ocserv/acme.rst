@@ -4,6 +4,10 @@
 acme.sh维护Let's Encrypt证书
 ==============================
 
+.. note::
+
+   现在改成 :ref:`cron_certbot_renew`
+
 我在部署 :ref:`openconnect_vpn` 时，采用Let's Encrypt提供的 Let's Encrypt客户端（Certbot）创建证书。不过，证书只有3个月有效期，并且只是单域名证书，维护起来非常麻烦。
 
 需要实践本文 ``acme.sh`` 来完善证书维护工作，待实践...
