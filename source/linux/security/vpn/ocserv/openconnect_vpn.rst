@@ -43,58 +43,40 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
    sudo apt update
    sudo apt install certbot
 
-- 从Let's Encrypt获取一个TLS证书::
+.. warning::
 
-   sudo certbot certonly --standalone --preferred-challenges http --agree-tos --email your-email-address -d vpn.example.com
+   本文使用了 ``example.com`` 作为案例域名，实际操作时，请使用你自己的正确域名
+
+- 确保80端口nginx服务暂停，然后从Let's Encrypt获取一个TLS证书:
+
+.. literalinclude:: openconnect_vpn/certboot_get_cert
+   :language: bash
+   :caption: 使用certbot获取letsencrypt证书
+
+.. note::
+
+   在执行上述 ``certbot`` 命令获取证书前，需要暂停80端口的nginx服务，否则会报错:
+
+   .. literalinclude:: openconnect_vpn/certboot_get_cert_err_output
+      :language: bash
+      :caption: 暂停80端口nginx，否则使用certbot获取letsencrypt证书时报错
+
+一切正常的话，会收到如下正确获得并存储证书的信息:
+
+.. literalinclude:: openconnect_vpn/certboot_get_cert_output
+   :language: bash
+   :caption: 使用certbot获取letsencrypt证书正确完成时输出信息
 
 .. warning::
 
    Let's Encrypt提供的证书有效期3个月，所以每3个月需要使用上述命令重新生成一次证书。建议 :ref:`cron_certbot_renew`
 
-- 修改ocserv配置文件 ``/etc/ocserv/ocserv.conf`` ::
+- 修改ocserv配置文件 ``/etc/ocserv/ocserv.conf`` :
 
-   # 以下行注释关闭使用系统账号登陆
-   # auth = "pam[gid-min=1000]"
-   
-   # 添加以下行表示独立密码文件认证
-   auth = "plain[passwd=/etc/ocserv/ocpasswd]"
-   
-   # 只开启TCP端口，关闭UDP端口，以便使用BBR加速
-   tcp-port = 443
-   # udp-port = 443
-   
-   # 修改证书，注释前两行，添加后两行，表示使用Let's Encrypt服务器证书
-   # server-cert = /etc/ssl/certs/ssl-cert-snakeoil.pem
-   # server-key = /etc/ssl/private/ssl-cert-snakeoil.key
-   server-cert = /etc/letsencrypt/live/vpn.example.com/fullchain.pem
-   server-key = /etc/letsencrypt/live/vpn.example.com/privkey.pem
-   
-   # 设置客户端最大连接数量，默认是16
-   max-clients = 16
-   # 每个用户并发设备数量
-   max-same-clients = 2
-   
-   # 启用MTU discovery以提高性能
-   #try-mtu-discovery = false
-   try-mtu-discovery = true
-   
-   # 设置默认域名为vpn.example.com
-   default-domain = vpn.example.com
-   
-   # 修改IPv4网段配置，注意不要和本地的IP网段重合
-   ipv4-network = 10.10.10.0
-   
-   # 将所有DNS查询都通过VPN（防止受到DNS污染）
-   tunnel-all-dns = true
-   
-   # 设置使用Google的公共DNS
-   dns = 8.8.8.8
-   
-   # 注释掉所有路由参数
-   # route = 10.10.10.0/255.255.255.0
-   # route = 192.168.0.0/255.255.0.0
-   # route = fef4:db8:1000:1001::/64
-   # no-route = 192.168.5.0/255.255.255.0
+.. literalinclude:: openconnect_vpn/ocserv.conf
+   :language: bash
+   :caption: 配置 /etc/ocserv/ocserv.conf 添加Let’s Encrypt证书
+   :emphasize-lines: 13,14
 
 - 重启ocserv::
 

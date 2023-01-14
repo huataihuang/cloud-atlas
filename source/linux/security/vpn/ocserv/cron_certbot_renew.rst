@@ -17,3 +17,16 @@
       "certbot renew"
 
 根据提示可知，需要每3个月重新执行一次 ``certbot renew`` 命令来更新证书，所以最简单方式是是使用 :ref:`cron` 定时执行脚本
+
+- 编辑 ``root`` 用户的crontab文件::
+
+   sudo crontab -e
+
+- 添加以下配置，每天定时检查证书是否过期，如果过期则更新::
+
+   @daily certbot renew --quiet && systemctl reload ocserv
+
+参考
+========
+
+- `Set Up OpenConnect VPN Server (ocserv) on Ubuntu 20.04 with Let’s Encrypt <https://www.linuxbabe.com/ubuntu/openconnect-vpn-server-ocserv-ubuntu-20-04-lets-encrypt>`_
