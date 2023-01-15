@@ -55,7 +55,9 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
 .. note::
 
-   在执行上述 ``certbot`` 命令获取证书前，需要暂停80端口的nginx服务，否则会报错:
+   在执行上述 ``certbot`` 命令获取证书前，需要暂停80端口的nginx服务，因为 ``certbot`` 会监听该端口来迎接Let's Encrypt验证域名 ``vpn.example.com`` (也就是你执行生成证书的服务器): ``--preferred-challenges http ... -d vpn.exapmle.com``
+ 
+   否则会报错:
 
    .. literalinclude:: openconnect_vpn/certboot_get_cert_err_output
       :language: bash
@@ -64,7 +66,6 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 一切正常的话，会收到如下正确获得并存储证书的信息:
 
 .. literalinclude:: openconnect_vpn/certboot_get_cert_output
-   :language: bash
    :caption: 使用certbot获取letsencrypt证书正确完成时输出信息
 
 .. warning::

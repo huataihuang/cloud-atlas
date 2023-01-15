@@ -166,6 +166,13 @@ OpenConnect VPN服务器(ocserv)证书认证客户端配置
 
    sudo systemctl restart ocserv
 
+openconect客户端证书使用方法
+===============================
+
+- 使用上述客户端证书 ``client.p12`` 连接服务器::
+
+   sudo openconnect -c client.p12 https://vpn.example.com/
+
 iOS设备证书认证设置方法
 ============================
 
@@ -176,28 +183,28 @@ iOS用户可以使用Cisco AnyConnect应用程序(现在已经改名为Cisco Sec
 可以通过邮件附件方式，在iOS的邮件客户端，打开包含 ``ios-client.p12`` 客户端文件，然后点一下 ``共享`` 按钮(右上角)
 
 .. figure:: ../../../../_static/linux/security/vpn/ocserv/IMG_1111.PNG
-   :scale: 80
+   :scale: 60
 
    iOS中通过邮件客户端附件共享方式导入客户端证书
 
 将该文件共享给 Cisco Secure Client
 
 .. figure:: ../../../../_static/linux/security/vpn/ocserv/IMG_1112.PNG
-   :scale: 80
+   :scale: 60
 
    iOS Cisco Secure Client导入证书
 
 此时输入PIN(也就是证书的保护密码)就可以导入证书文件。
 
 .. figure:: ../../../../_static/linux/security/vpn/ocserv/IMG_1113.PNG
-   :scale: 80
+   :scale: 60
 
    iOS Cisco Secure Client导入证书需要输入证书的PIN码
 
 导入证书之后，编辑Cisco Secure Client中的VPN连接配置，选择 ``Advanced -> Certificate`` 然后选择导入的客户端证书，
 
 .. figure:: ../../../../_static/linux/security/vpn/ocserv/IMG_1114.PNG
-   :scale: 80
+   :scale: 60
 
    iOS Cisco Secure Client修改VPN连接，选择刚才导入的证书，这样后续VPN连接就不需要密码
 

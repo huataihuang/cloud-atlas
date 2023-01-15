@@ -1,13 +1,13 @@
-.. _message_queue:
+.. _kafka:
 
 =================================
-消息队列
+Kafka消息队列系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   rabbitmq/index
+   kafka_flink_stream_arch.rst
 
 .. only::  subproject and html
 

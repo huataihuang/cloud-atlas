@@ -9,6 +9,8 @@ Kubernetes部署应用
 .. toctree::
    :maxdepth: 1
 
+   config_pod_container/index
+   app_inject_data/index
    ceph/index
    registry/index
    django/index

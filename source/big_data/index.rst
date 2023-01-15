@@ -23,6 +23,7 @@ Big Data Atlas
    hadoop/index
    maxcompute/index.rst
    spark/index
+   kafka/index
    flink/index
    presto/index
    elasticsearch/index
