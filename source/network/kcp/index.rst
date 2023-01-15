@@ -1,11 +1,13 @@
-.. _kafka:
+.. _kcp:
 
 =================================
-Kafka消息队列系统
+KCP低延迟网络堆栈
 =================================
 
 .. toctree::
    :maxdepth: 1
+
+   intro_kcp.rst
 
 .. only::  subproject and html
 

@@ -19,6 +19,7 @@ Infrastructure Atlas
    openinfra/index
    storage/index
    cloud_gaming/index
+   live_streaming/index
    akraino/index
    starlingx/index
 
