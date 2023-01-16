@@ -33,12 +33,21 @@ Express.js是Node.js开发的传统Web框架，提供了 web 开发所需的路�
 - Express是ECMAScript 5 向 ECMAScript 6(2015)过渡时期的产物，处理异步比较繁琐
 - Express原作者基于 ECMAScript 8 (2017) 标准推出了 Koa 2，用 async + await 语法让中间件代码更加简洁、清爽，形成了经典的洋葱模型。
 
+.. note::
+
+   ``洋葱圈模型`` : 指Koa的每个中间件都采用一个类似"洋葱圈"的调用方式，每个请求进入时，每个中间件都会被执行两次:
+
+   .. figure:: ../_static/nodejs/koa_onion.png
+      :scale: 60
+      
+      洋葱圈模型: 每个中间件调用都会执行两次
+
 Koa目标和Express一致，但几个显著变化：
 
 - 中间层使用洋葱模型，让中间件代码根据next方法分隔有两次执行时机
 - 几乎不再内置任何中间件，把控制权和复杂度交给开发者
 
-  - 由于web应用离不开sesson，试图模版，路由和文件上传，日志管理，这些在Koa都不提供，需要从官方的Middleware寻找，这带来了非常繁杂的搭配
+  - 由于web应用离不开sesson，视图模版，路由和文件上传，日志管理，这些在Koa都不提供，需要从官方的Middleware寻找，这带来了非常繁杂的搭配
 
 - Koa 1通过generator、Koa 2通过async/await愈发，让web中高频出现的异步调用编写简洁
 
@@ -100,3 +109,4 @@ Node版本
 - `Node.js发展史 <http://www.ayqy.net/blog/node-js发展史/>`_ 这是Node.js编年史，非常详尽且有很多互联网文档索引链接，对于Node.js历史详情和发展趋势感兴趣可以阅读
 - `koa.js,egg.js,express.js三者有什么区别？ <https://www.zhihu.com/question/391604647>`_
 - 「Node.js实战(第2版)」
+- `一篇文章了解洋葱圈模型——看了就忘不掉的那种 <https://segmentfault.com/a/1190000022930165>`_
