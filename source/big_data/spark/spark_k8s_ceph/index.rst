@@ -1,14 +1,13 @@
-.. _typescript:
+.. _spark_k8s_ceph:
 
 =================================
-TypeScript
+基于Kubernetes和Ceph运行Spark
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   typescript_startup.rst
-
+   spark_k8s_ceph_arch.rst
 
 .. only::  subproject and html
 
