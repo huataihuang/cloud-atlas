@@ -6,7 +6,7 @@
 
 为避免 :ref:`mon_clock_sync` 曾经出现过的虚拟机时钟不同步问题，在开始第二个节点部署之前，先完成所有虚拟机的时钟同步部署:
 
-- 在物理主机 ``acloud`` 上面向整个 :ref:`mobile_cloud_kvm` 集群 :ref:`deploy_ntp`
+- 在物理主机 ``acloud`` 上面向整个 :ref:`mobile_cloud_arm_kvm` 集群 :ref:`deploy_ntp`
 - 所有虚拟机都启用 :ref:`systemd_timesyncd` 同步时钟
 
 部署 chrony 服务器

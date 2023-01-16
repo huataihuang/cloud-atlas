@@ -1,7 +1,7 @@
-.. _mobile_cloud_vm:
+.. _mobile_cloud_arm_vm:
 
 =============================
-移动云的虚拟机部署
+ARM移动云的虚拟机部署
 =============================
 
 从架构上来说，和 :ref:`priv_cloud_infra` 相似，我在Apple Silicon硬件上采用分工不同的两组虚拟化：
@@ -32,25 +32,25 @@
 
 - 使用 :ref:`hostnamectl` 配置主机名:
 
-.. literalinclude:: mobile_cloud_vm/hostnamectl
+.. literalinclude:: mobile_cloud_arm_vm/hostnamectl
    :language: bash
    :caption: 设置mobile cloud的虚拟机主机名
 
 - 使用 :ref:`systemd_networkd_static_ip` :
 
-.. literalinclude:: mobile_cloud_vm/systemd_networkd_mobile_cloud_vm_ip
+.. literalinclude:: mobile_cloud_arm_vm/systemd_networkd_mobile_cloud_vm_ip
    :language: bash
    :caption: 使用systemd-networkd配置mobile cloud的虚拟机IP
 
 并切换到 ``systemd-networkd`` 使得静态IP地址生效:
 
-.. literalinclude:: ../../linux/redhat_linux/systemd/systemd_networkd/switch_systemd-networkd
+.. literalinclude:: ../../../linux/redhat_linux/systemd/systemd_networkd/switch_systemd-networkd
    :language: bash
    :caption: NetworkManager切换到systemd-networkd使静态IP生效
 
 .. note::
 
-   :ref:`fedora` 默认使用 :ref:`networkmanager` 管理网络，我最初想简化为采用 :ref:`systemd_networkd` 来管理网络(毕竟操作系统都采用了 :ref:`systemd` )，但是我发现 Fedora Server 启用的 :ref:`cockpit` 网络是采用 :ref:`networkmanager` ，切换后反而引发不能通过cockpit管理网络的问题，所以我在后续的 :ref:`mobile_cloud_k8s` 中使用的虚拟机操作系统，就保留默认 :ref:`networkmanager` 管理网络。
+   :ref:`fedora` 默认使用 :ref:`networkmanager` 管理网络，我最初想简化为采用 :ref:`systemd_networkd` 来管理网络(毕竟操作系统都采用了 :ref:`systemd` )，但是我发现 Fedora Server 启用的 :ref:`cockpit` 网络是采用 :ref:`networkmanager` ，切换后反而引发不能通过cockpit管理网络的问题，所以我在后续的 :ref:`mobile_cloud_arm_k8s` 中使用的虚拟机操作系统，就保留默认 :ref:`networkmanager` 管理网络。
 
 上层虚拟机
 ================
@@ -71,7 +71,7 @@
 
 - 使用 :ref:`networkmanager` 命令行 ``nmcli`` 完成静态IP配置:
 
-.. literalinclude:: ../../linux/redhat_linux/fedora/fedora_networkmanager/nmcli_con_static_ip
+.. literalinclude:: ../../../linux/redhat_linux/fedora/fedora_networkmanager/nmcli_con_static_ip
    :language: bash
    :caption: nmcli con mod (connection modify) 修改网络配置(静态IP)
 
@@ -80,7 +80,7 @@
 
 - 配置 ``huatai`` 用户的 sudo 权限:
 
-.. literalinclude:: mobile_cloud_vm/sudo
+.. literalinclude:: mobile_cloud_arm_vm/sudo
    :language: bash
    :caption: 配置sudo无密码
 

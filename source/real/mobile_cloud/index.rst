@@ -8,13 +8,6 @@
    :maxdepth: 1
 
    mobile_cloud_infra.rst
-   mobile_cloud_asahi.rst
-   mobile_cloud_zfs.rst
-   mobile_cloud_btrfs.rst
-   mobile_cloud_libvirt.rst
-   mobile_cloud_dns_ntp.rst
-   mobile_cloud_kvm.rst
-   mobile_cloud_vm.rst
-   mobile_cloud_ceph.rst
-   mobile_cloud_k8s.rst
+   mobile_cloud_arm/index
+   mobile_cloud_x86/index
    mobile_dev.rst

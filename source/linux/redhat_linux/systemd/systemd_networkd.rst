@@ -33,7 +33,7 @@ systemd配置静态IP地址
    :language: bash
    :caption: NetworkManager切换到systemd-networkd使静态IP生效
 
-我在 :ref:`mobile_cloud_vm` (在 :ref:`asahi_linux` ARM架构平台运行的 :ref:`fedora` Server ARM)遇到一个报错::
+我在 :ref:`mobile_cloud_arm_vm` (在 :ref:`asahi_linux` ARM架构平台运行的 :ref:`fedora` Server ARM)遇到一个报错::
 
    systemd-gpt-auto-generator: Failed to dissect: Permission denied
 
