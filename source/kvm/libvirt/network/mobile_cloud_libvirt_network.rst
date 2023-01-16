@@ -91,7 +91,7 @@ NAT网络也就是 ``default virtual network`` ，首先检查 ``libvirt`` 网�
 
 .. note::
 
-   :ref:`mobile_cloud_vm` 采用静态IP地址
+   :ref:`mobile_cloud_arm_vm` 采用静态IP地址
 
 参考
 ======
