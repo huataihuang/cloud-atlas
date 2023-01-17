@@ -17,6 +17,7 @@ Shell 实用工具
    find.rst
    losetup.rst
    jq.rst
+   parallel.rst
 
 .. only::  subproject and html
 
