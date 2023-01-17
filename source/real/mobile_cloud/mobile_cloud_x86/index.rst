@@ -8,3 +8,4 @@ X86移动云计算构建
    :maxdepth: 1
 
    mobile_cloud_x86_zfs.rst
+   mobile_cloud_x86_docker.rst

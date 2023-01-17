@@ -25,6 +25,10 @@ Docker使用ZFS的先决条件
 - 首先完成 :ref:`zfs_admin_prepare`
 - 并完成 :ref:`archlinux_docker`
 
+.. note::
+
+   :ref:`mobile_cloud_x86_zfs` 是我在X86_64 的 Macbook Pro 2013笔记本上部署，分区和挂载略有差异
+
 - 停止Docker:
 
 .. literalinclude:: docker_zfs_driver/systemctl_stop_docker
