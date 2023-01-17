@@ -11,18 +11,15 @@ arch linux运行docker
 安装Docker
 ===========
 
-- 在Arch Linux上主要有稳定版本 ``docker`` 和开发版本 ``docker-git`` (通过 :ref:`archlinux_aur` 安装) ，通常安装稳定版本即可::
+- 在Arch Linux上主要有稳定版本 ``docker`` 和开发版本 ``docker-git`` (通过 :ref:`archlinux_aur` 安装) ，通常安装稳定版本即可，步骤包括:
 
-   pacman -S docker
+  - :ref:`pacman` 安装docker
+  - 并启动和激活docker
+  - 将 自己的账号(huatai)添加到该用户分组，这样就可以无需sudo操作docker
 
-- 激活和启动docker::
-
-   systemctl enable docker
-   systemctl start docker
-
-- 检查 ``/var/run/docker.sock`` 可以看到 ``docker`` 用户组可以读写，所以将自己的账号(huatai)添加到该用户分组，这样就可以无需sudo操作docker::
-
-   sudo usermod -aG docker $USER
+.. literalinclude:: archlinux_docker/archlinux_install_docker
+   :language: bash
+   :caption: 在arch linux上安装稳定版本docker
 
 下一步
 ========

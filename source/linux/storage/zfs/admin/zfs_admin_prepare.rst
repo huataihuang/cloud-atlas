@@ -62,7 +62,36 @@ ZFS管理准备
 :ref:`intel_core_i7_4850hq` 的MacBook Pro 2013
 -------------------------------------------------
 
-:ref:`intel_core_i7_4850hq` 的MacBook Pro 2013存储 1TB
+:ref:`intel_core_i7_4850hq` 的MacBook Pro 2013存储 1TB ，使用 ``parted`` 检查:
+
+.. literalinclude:: zfs_admin_prepare/mobile_cloud_x86_parted_nvme_print
+   :language: bash
+   :caption: X86移动云ZFS磁盘准备: 使用parted检查NVMe磁盘分区
+
+输出显示空闲空间:
+
+.. literalinclude:: zfs_admin_prepare/mobile_cloud_x86_parted_nvme_print_output
+   :language: bash
+   :caption: X86移动云ZFS磁盘准备: 使用parted检查NVMe磁盘分区空闲是 64.0GB~1024GB
+
+可以看到空间是 ``64.0GB~1024GB`` ，规划如下:
+
+  - 创建分区3，完整分配 ``64.0GB~1024GB`` ，这个分区构建 ``zpool-data`` 但是挂载到 ``/var/lib/docker`` ，因为 :ref:`docker_zfs_driver` 是采用完整的 zfs pool来构建的
+  - 在 ``zpool-data`` 存储池下构建存储 ``docs`` 卷，用于存储个人数据
+  - 在 ``zpool-data`` 存储池构建用于 :ref:`kind` 需要的 :ref:`k8s_nfs` / :ref:`k8s_iscsi` / :ref:`k8s_hostpath` 等，来模拟 :ref:`k8s_persistent_volumes`
+
+- 分区:
+
+.. literalinclude:: zfs_admin_prepare/mobile_cloud_x86_parted_nvme_libvirt_docker
+   :language: bash
+   :caption: X86移动云ZFS磁盘parted划分分区: 所有剩余磁盘空间全部作为 zpool-data 分区
+
+完成后检查 ``parted /dev/nvme0n1 print`` 可以看到新增加的第3个分区:
+
+.. literalinclude:: zfs_admin_prepare/mobile_cloud_x86_parted_nvme_libvirt_docker_output
+   :language: bash
+   :caption: X86移动云ZFS磁盘parted划分分区: 新建的第3个分区作为zpool
+   :emphasize-lines: 10
 
 接下来操作
 ==============
