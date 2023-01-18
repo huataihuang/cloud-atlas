@@ -104,6 +104,20 @@
     ERROR: failed to create cluster: failed to pull image "kindest/node:latest": command "docker pull kindest/node:latest" failed with error: exit status 1
     Command Output: Error response from daemon: manifest for kindest/node:latest not found: manifest unknown: manifest unknown
 
-- 改为参考 :ref:`debug_kind_create_fail` 相似方法，从默认下载的镜像基础上通过  :ref:`dockerfile` 增加添加 ``zfs`` 工具制作出自定义镜像。
+- 由于kind的github仓库已经修复这个问题，所以下载最新的Dockerfile来构建本地镜像，注意，这个构建需要激活 :ref:`buildkit` ，也就是修订 ``/etc/docker/dameon.json`` :
 
-待续
+.. literalinclude:: debug_mobile_cloud_x86_kind_create_fail/daemon.json
+   :language: json
+   :caption: 修改 /etc/docker/daemon.json 添加 buildkit 配置
+   :emphasize-lines: 3-5
+
+重启 ``docker`` 服务后，再执行下面的脚本获得最新的Dockerfile，并构建镜像
+
+.. literalinclude:: debug_mobile_cloud_x86_kind_create_fail/build_node_image_by_lastest_dockerfile.sh
+   :language: dockerfile
+   :caption: 构建包含zfs工具的node镜像
+
+.. note::
+
+   构建镜像时启动的容器内部需要访问 github 下载containerd，但是会被GFW阻断，需要解决容器内部proxy配置
+
