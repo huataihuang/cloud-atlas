@@ -18,6 +18,8 @@ X86移动云Kind(本地docker模拟k8s集群)
 部署kind集群
 ===============
 
+采用 :ref:`kind_multi_node` 方法部署kind集群
+
 - 配置3个管控节点，5个工作节点的集群配置文件如下：
 
 .. literalinclude:: ../../../kubernetes/kind/kind_multi_node/kind-config.yaml
@@ -29,3 +31,7 @@ X86移动云Kind(本地docker模拟k8s集群)
 .. literalinclude:: ../../../kubernetes/kind/kind_multi_node/kind_create_cluster
    :language: bash
    :caption: kind构建3个管控节点，5个工作节点集群配置
+
+.. note;:
+
+   这里遇到启动管控节点失败超时问题，见 :ref:`debug_mobile_cloud_x86_kind_create_fail`
