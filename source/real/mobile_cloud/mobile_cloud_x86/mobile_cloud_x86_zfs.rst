@@ -72,10 +72,81 @@ Docker准备
    :language: bash
    :caption: 备份/var/lib/docker目录
 
+安装ZFS
+==========
+
+受限于ZFS的CDDL license，需要额外的工作来完成 :ref:`zfs_install` 。之前在 :ref:`mobile_cloud_arm` 中我采用 :ref:`archlinux_zfs-dkms` ；而现在在 :ref:`mobile_cloud_x86` 系统中，由于 `archzfs repo <https://github.com/archzfs/archzfs>`_ 提供 ``x86_64`` 安装包，所以参考 `OpenZFS Getting Started: Arch Linux <https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/index.html>`_ 使用软件仓库安装。
+
+使用 `archzfs repo <https://github.com/archzfs/archzfs>`_ 安装
+
+- 导入 archzfs 仓库key:
+
+.. literalinclude:: ../../../linux/storage/zfs/install/archlinux_zfs/import_archzfs_key
+   :language: bash
+   :caption: 导入 archzfs 软件仓库密钥
+
+- 添加 archzfs 软件仓库，并更新 :ref:`pacman` 仓库:
+
+.. literalinclude:: ../../../linux/storage/zfs/install/archlinux_zfs/add_archzfs_repo
+   :language: bash
+   :caption: 添加 archzfs 软件仓库
+
+- archzfs 软件仓库提供了多种安装包组合，执行安装:
+
+.. literalinclude:: ../../../linux/storage/zfs/install/archlinux_zfs/archzfs_install
+   :language: bash
+   :caption: 安装 archzfs 提供多种安装包组合，选择 ``zfs-linux`` 是面向Arch Linux默认内核和最新OpenZFS稳定版本
+   :emphasize-lines: 8,12
+
+我选择 5 ( ``zfs-linux`` )安装
+
+配置ZFS
+============
+
 - 在分区 ``/dev/nvme0n1p`` 构建 ``zpool`` ( 名为 ``zpool-data`` )并挂载到 ``/var/lib/docker/`` 目录(开启 :ref:`zfs_compression` ):
 
 .. literalinclude:: mobile_cloud_x86_zfs/zpool_create_zpool-data
    :language: bash
    :caption: zpool create创建名为zpool-data存储池，挂载到/var/lib/docker
 
-待续...
+- 此时检查zfs存储可以看到上述名为 ``zpool-data`` 的存储池:
+
+.. literalinclude:: ../../../docker/storage/docker_zfs_driver/zfs_list
+   :language: bash
+   :caption: zfs list检查存储
+
+输出显示如下:
+
+.. literalinclude:: mobile_cloud_x86_zfs/zfs_list_output
+   :language: bash
+   :caption: zfs list检查存储显示zpool-data
+
+此时zfs卷已经挂载，使用 ``df -h`` 可以看到::
+
+   Filesystem      Size  Used Avail Use% Mounted on
+   ...
+   zpool-data      861G  128K  861G   1% /var/lib/docker
+
+- 修改 ``/etc/docker/daemon.json`` 添加zfs配置项(如果该配置文件不存在则创建并添加如下内容):
+
+.. literalinclude:: ../../../docker/storage/docker_zfs_driver/docker_daemon_zfs.json
+   :language: json
+   :caption: /etc/docker/daemon.json 添加ZFS存储引擎配置
+
+- 启动Docker并检查Docker配置:
+
+.. literalinclude:: ../../../docker/storage/docker_zfs_driver/start_docker_info
+   :language: bash
+   :caption: 启动Docker并检查 docker info 
+
+``docker info`` 输出显示如下:
+
+.. literalinclude:: mobile_cloud_x86_zfs/docker_info_output
+   :language: bash
+   :caption: docker info显示使用了ZFS存储(启用压缩)
+   :emphasize-lines: 12-19
+
+下一步
+========
+
+- :ref:`mobile_cloud_x86_kind`

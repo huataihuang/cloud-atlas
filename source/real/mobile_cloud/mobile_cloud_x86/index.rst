@@ -9,3 +9,4 @@ X86移动云计算构建
 
    mobile_cloud_x86_zfs.rst
    mobile_cloud_x86_docker.rst
+   mobile_cloud_x86_kind.rst

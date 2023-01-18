@@ -4,7 +4,7 @@
 使用archzfs软件仓库在arch linux上部署ZFS
 ===========================================
 
-由于ZFS代码的CDDL license和Linux内核GPL不兼容，所以ZFS开发不能被内核支持。
+由于ZFS代码的CDDL license和Linux内核GPL不兼容，所以ZFS开发不能被Linux内核支持。
 
 这导致以下情况:
 
@@ -30,13 +30,25 @@
    :language: bash
    :caption: 导入 archzfs 软件仓库密钥
 
-- 添加 archzfs 软件仓库:
+- 添加 archzfs 软件仓库，并更新 :ref:`pacman` 仓库:
 
 .. literalinclude:: archlinux_zfs/add_archzfs_repo
    :language: bash
    :caption: 添加 archzfs 软件仓库
 
-- 更新pacman仓库::
+- archzfs 软件仓库提供了多种安装包组合，执行安装:
+
+.. literalinclude:: archlinux_zfs/archzfs_install
+   :language: bash
+   :caption: 安装 archzfs 提供多种安装包组合，选择 ``zfs-linux`` 是面向Arch Linux默认内核和最新OpenZFS稳定版本
+   :emphasize-lines: 8,12
+
+我选择 5 ( ``zfs-linux`` )安装
+
+ARM架构下无法使用archzfs
+-------------------------
+
+- 我在 :ref:`asahi_linux` 平台(ARM架构的 :ref:`apple_silicon_m1_pro` MacBook Pro 16")更新pacman仓库遇到以下报错::
 
    pacman -Sy
 
@@ -52,7 +64,7 @@
 
 难道是不能提供aarch64架构？
 
-果然，我检查了 https://mirror.sum7.eu/archlinux/archzfs/archzfs/ 果然在目录下只有 ``x86_64``
+果然，我检查了 https://mirror.sum7.eu/archlinux/archzfs/archzfs/ 果然在目录下只有 ``x86_64`` ，放弃...
 
 通过 :ref:`archlinux_aur` 编译安装
 -------------------------------------

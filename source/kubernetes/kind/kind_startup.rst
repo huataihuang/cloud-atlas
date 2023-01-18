@@ -20,9 +20,19 @@ Kind快速起步
    :language: bash
    :caption: 使用go install命令安装kind
 
-安装目录位于 ``~/go/bin/kind`` ，可以在 ``~/.bashrc`` 中添加::
+.. note::
 
-   export PATH=$HOME/go/bin:$PATH
+   其实也不是 ``最方便`` ，因为有万恶的GFW存在，通过 ``go install`` 会遇到网络超时，请采用以下方法之一规避:
+
+   - 部署 :ref:`openconnect_vpn` 或者 :ref:`deploy_wireguard`
+   - :ref:`go_proxy` (socks代理) 结合 :ref:`ssh_tunneling_dynamic_port_forwarding`
+   - :ref:`go_proxy` (http代理) 结合 :ref:`squid_socks_peer` (两级代理本质也是采用 ssh tunneling，但是提供了本地代理缓存，适合大规模网络)
+
+安装目录位于 ``~/go/bin/kind`` ，可以在 ``~/.bashrc`` 中添加 golang 环境变量:
+
+.. literalinclude:: kind_startup/go_env
+   :language: bash
+   :caption: 配置go环境变量以便能够使用 kind
 
 .. note::
 
