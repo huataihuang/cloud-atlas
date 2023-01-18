@@ -140,6 +140,21 @@ Node.js开发环境
 
    nvm install 16.19.0
 
+验证安装
+==========
+
+- 简单的 ``hello.js`` ::
+
+   console.log("hello from Node");
+
+- 执行::
+
+   node hello.js
+
+输出显示::
+
+   hello from Node
+
 开发和部署
 ============
 

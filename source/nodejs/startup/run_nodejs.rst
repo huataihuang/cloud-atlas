@@ -129,30 +129,27 @@ Node有一些独有库。事件模块是一个处理事件的小型库，Node的
 网络
 ------
 
-- 创建或修订 ``hello.js`` 如下::
+- 创建或修订 ``hello.js`` 如下:
 
-   const http = require('http');
-   const port = 8080
-   
-   const server = http.createServer((req, res) => {
-       res.end('Hello, world.');
-   });
-   
-   server.listen(port, () => {
-       console.log('Server listening on: http://localhost:%s', port);
-   });
+.. literalinclude:: run_nodejs/hello.js
+   :language: javascript
+   :caption: 在WEB运行的hello.js
+
+.. note::
+
+   这里采用 Node.js 官方文档 `在安装了 Node.js 之后，我怎么开始呢？ <https://nodejs.org/zh-cn/docs/guides/getting-started-guide/>`_
 
 - 执行命令::
 
    node hello.js
 
-则会看到终端输出信息就是 ``console.log('Server listening on: http://localhost:%s', port);`` ::
+则会看到终端输出信息就是 ``console.log(`Server running at http://${hostname}:${port}/`);`` ::
 
-   Server listening on: http://localhost:8080
+   Server running at http://127.0.0.1:3000/
 
-此时用浏览器访问 ``http://localhost:8080`` 就会看到浏览器中显示内容::
+此时用浏览器访问 ``http://localhost:3000`` 就会看到浏览器中显示内容::
 
-   Hello, world.
+   Hello World
 
 调试器
 =========
