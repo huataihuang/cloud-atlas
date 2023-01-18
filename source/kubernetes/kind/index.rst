@@ -13,6 +13,7 @@ kind(本地docker模拟k8s集群)
    kind_cluster.rst
    kind_multi_node.rst
    debug_kind_create_fail.rst
+   debug_mobile_cloud_x86_kind_create_fail.rst
    debug_kind_restart_fail.rst
    load_kind_image.rst
    kind_local_registry.rst
