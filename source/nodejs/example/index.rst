@@ -1,17 +1,13 @@
-.. _nodejs_startup:
+.. _nodejs_example:
 
 =================================
-Node.js起步
+Node.js 代码示例
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   nodejs_dev_env.rst
-   nodejs_dev_docker.rst
-   npm_proxy.rst
-   run_nodejs.rst
-   nodejs_basic.rst
+   intro_nodejs_example.rst
 
 .. only::  subproject and html
 
