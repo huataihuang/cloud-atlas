@@ -146,6 +146,40 @@ Docker准备
    :caption: docker info显示使用了ZFS存储(启用压缩)
    :emphasize-lines: 12-19
 
+配置ZFS自动启动
+------------------
+
+对于 :ref:`docker_zfs_driver` 需要通过 :ref:`config_zfs_auto_start` 确保操作系统启动时自动import zpool。并且由于 ``/var/lib/docker`` 是 ``/var`` 子目录，还必须采用 ``zfs-import-cache`` + ``zfs-mount-generator`` :
+
+- 针对 ``zpool-data`` zpool存储池，采用 ``zfs-mount-generator`` 自动启动ZFS:
+
+.. literalinclude:: mobile_cloud_x86_zfs/zfs-mount-generator_auto_start_zfs_zpool-data
+   :language: bash
+   :caption: 使用zfs-mount-generator自动启动ZFS: zpool-data 存储池
+
+/home迁移到ZFS
+==================
+
+采用 :ref:`zfs_startup` 构建存储目录并将/home迁移到ZFS
+
+- 以 ``root`` 身份登陆，并确保 ``/home`` 目录没有用户访问，将 ``/home`` 目录重命名:
+
+.. literalinclude:: ../../../linux/storage/zfs/admin/zfs_startup/rename_home
+   :language: bash
+   :caption: 将/home目录重命名(备份)
+
+- 由于 ``zpool-data`` 存储池已构建，所以直接创建卷 ``home`` ，并且创建 ``home`` 卷下面的子(用户目录):
+
+.. literalinclude:: ../../../linux/storage/zfs/admin/zfs_startup/zfs_create_volume
+   :language: bash
+   :caption: 创建 zpool-data 存储池的 home 卷
+
+- 恢复 ``/home/huatai`` 目录数据:
+
+.. literalinclude:: ../../../linux/storage/zfs/admin/zfs_startup/restore_home_huatai
+   :language: bash
+   :caption: 恢复/home/huatai目录数据
+
 下一步
 ========
 

@@ -18,7 +18,7 @@ SSH Tunneling: 远程服务端口转发
 
    ssh -R [REMOTE:]REMOTE_PORT:DESTINATION:DESTINATION_PORT [USER@]SSH_SERVER
 
-例如，我使用 :ref:`sphinx_doc` 撰写 `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/lastest/index.html>`_ ，但是每次都要推送到 github 上次啊能刷新到readthedocs平台，显然比较繁琐。假如互联网上有人想要阅读我最新撰写的文档，那最快捷的方式就是使用互联网上的一个VPS做远程服务端口转发。
+例如，我使用 :ref:`sphinx_doc` 撰写 `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/lastest/index.html>`_ ，但是每次都要推送到 github 上才能刷新到readthedocs平台，显然比较繁琐。假如互联网上有人想要阅读我最新撰写的文档，那最快捷的方式就是使用互联网上的一个VPS做远程服务端口转发。
 
 - 在我撰写的 ``Cloud Atlas`` 的html目录下启动Python3 的 ``http.server`` 模块服务::
 

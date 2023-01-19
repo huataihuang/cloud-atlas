@@ -68,6 +68,30 @@ SSH命令行端口转发
        LocalForward 33062 db2:3306
        LocalForward 33063 db3:3306
 
+.. _ssh_tunneling_remove_squid:
+
+远程服务器squid提供给本地局域网
+===============================
+
+在翻越GFW的时候，例如 :ref:`docker_proxy` 为docker容器提供代理服务，但是docker只支持http代理，不支持socks代理，就不能使用方便快捷的 :ref:`ssh_tunneling_dynamic_port_forwarding` 。虽然也可以在本地局域网搭建一个 :ref:`squid` ，在墙外服务器上再搭建一个squid，然后通过 :ref:`ssh_tunneling` 连接两端的squid服务器 ( :ref:`squid_socks_peer`
+)，但是这种方式比较适合大型局域网(本地局域网代理缓存可以大大节约下载带宽)，对于偶尔使用的快速构建系统有点过于沉重了。
+
+既然 :ref:`ssh_tunneling` 能够把本地端口直接转发到远程服务器，那么也就意味着，可以直接使用远程服务器上的 :ref:`squid` : 好处是只需要搭建一次服务器端代理服务器，后续就不用再本地安装了。我在解决 :ref:`debug_mobile_cloud_x86_kind_create_fail` 结合 :ref:`docker_client_proxy` 就是这么处理的。
+
+- 修订 ``~/.ssh/config`` 添加:
+
+.. literalinclude:: ssh_tunneling/ssh_config_parent-squid
+   :language: bash
+   :caption: 在 ~/.ssh/config 添加本地端口(真实网卡借口)转发墙外服务器squid端口(loop接口)
+
+- 然后执行ssh命令打通端口转发:
+
+.. literalinclude:: ssh_tunneling/ssh_parent-squid
+   :language: bash
+   :caption: 执行ssh命令打通端口转发
+
+这里 ``192.168.7.152`` 是我本地局域网主机的IP地址，提供将 ``3128`` 端口转发到 ``<SERVER_IP>`` 服务器的 ``127.0.0.1`` 接口的 ``3128`` 端口(该端口上有squid提供服务)
+
 进阶
 =======
 
