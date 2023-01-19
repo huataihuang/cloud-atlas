@@ -32,25 +32,8 @@ X86移动云Kind(本地docker模拟k8s集群)
 
 由于ZFS作为物理主机 :ref:`docker_zfs_driver` ，需要采用自定义镜像(当前 ``kind`` 的修复只在官方github仓库，尚未release，后续新版本release可无需本步骤):
 
-- 修订 ``/etc/docker/dameon.json`` 激活 :ref:`buildkit` :
-
-.. literalinclude:: ../../../kubernetes/kind/debug_mobile_cloud_x86_kind_create_fail/daemon.json
-   :language: json
-   :caption: 修改 /etc/docker/daemon.json 添加 buildkit 配置
-   :emphasize-lines: 3-5
-
-重启 ``docker`` 服务后，再执行下面的脚本获得最新的Dockerfile，并构建镜像:
-
-.. literalinclude::  ../../../kubernetes/kind/debug_mobile_cloud_x86_kind_create_fail/build_node_image_by_lastest_dockerfile.sh
-   :language: dockerfile
-   :caption: 构建包含zfs工具的node镜像
-
 .. note::
 
-   需要翻越GFW: 容器内部proxy设置 :ref:`docker_client_proxy`
+   :ref:`debug_mobile_cloud_x86_kind_create_fail` 暂时没有解决ZFS文件系统上运行kind，官方git仓库中已经修复，但是尚未release。自己build太折腾，暂时放弃，等下一个版本 ``v0.8`` 应该就能解决
 
-- 执行创建集群，集群命名为 ``dev`` :
-
-.. literalinclude:: mobile_cloud_x86_kind/kind_create_cluster
-   :language: bash
-   :caption: kind构建3个管控节点，5个工作节点集群配置，指定自定义镜像(包括zfs工具)
+待续...
