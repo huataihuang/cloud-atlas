@@ -18,6 +18,7 @@ Linux磁盘
    mount_img.rst
    intel_ssd_dc_series.rst
    using_apple_superdrive_on_linux.rst
+   sandisk_cloudspeed_eco_gen_ii_sata_ssd.rst
 
 .. only::  subproject and html
 

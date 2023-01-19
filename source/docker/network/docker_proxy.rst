@@ -8,6 +8,8 @@
 
 这个方法也使得容器内部能够不需要单独配置代理，直接通过代理服务器上网。
 
+.. _docker_client_proxy:
+
 Docker客户端的Proxy
 ======================
 
@@ -19,27 +21,23 @@ Docker客户端的Proxy
 
 Docker客户端支持使用代理服务器，主要有两种方式配置：
 
-- 从Docker 17.07和更高版本，可以配置 Docker可短自动传递代理信息给容器
+- 从Docker 17.07和更高版本，可以配置 Docker 端自动传递代理信息给容器
 - Docker 17.06或低版本，则需要在容器中设置相应的环境变量
 
 配置Docker客户端
 -------------------
 
-- 在Docker客户端，创建或配置 ``~/.docker/config.json`` 设置以下json格式配置::
+- 在Docker客户端，创建或配置 ``~/.docker/config.json`` 设置以下json格式配置:
 
-   {
-    "proxies":
-    {
-      "default":
-      {
-        "httpProxy": "http://127.0.0.1:3001",
-        "httpsProxy": "http://127.0.0.1:3001",
-        "noProxy": "*.test.example.com,.example2.com"
-      }
-    }
-   }
+.. literalinclude:: docker_proxy/config.json
+   :language: json
+   :caption: 配置Docker客户端 ~/.docker/config.json 可以为容器内部注入代理配置
 
 - 然后创建的新容器，在容器中的环境变量会自动设置代理
+
+.. note::
+
+   可以结合 :ref:`ssh_tunneling_remove_squid` 配置Docker客户端，这样只需要远程服务器安装部署过一次 :ref:`squid` ，本地局域网Docker就可以简单实现翻墙代理，方便完成很多安装部署工作。
 
 Docker客户端环境变量
 --------------------
@@ -61,6 +59,8 @@ Docker客户端环境变量
 .. note::
 
    需要注意Docker配置环境变量 ``HTTP_PROXY`` 是全大写字母，我测试发现全小写字母 ``http_proxy`` 不生效
+
+.. _docker_server_proxy:
 
 Docker服务器Proxy
 ===================

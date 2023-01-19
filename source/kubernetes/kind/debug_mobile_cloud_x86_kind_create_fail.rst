@@ -91,7 +91,7 @@
 
 我检查了正在运行的 ``dev-control-plane`` 节点内部，确实没有安装 ``zfs`` 工具，这说明需要采用最新的 ``kind`` 版本
 
-修复
+修复zfs
 =========
 
 - 我尝试添加镜像参数，指定最新镜像::
@@ -117,7 +117,45 @@
    :language: dockerfile
    :caption: 构建包含zfs工具的node镜像
 
+- 重新执行创建集群:
+
+.. literalinclude:: ../../real/mobile_cloud/mobile_cloud_x86/mobile_cloud_x86_kind/kind_create_cluster
+   :language: bash
+   :caption: kind构建3个管控节点，5个工作节点集群配置，指定自定义镜像(包括zfs工具)
+
 .. note::
 
-   构建镜像时启动的容器内部需要访问 github 下载containerd，但是会被GFW阻断，需要解决容器内部proxy配置
+   构建镜像时启动的容器内部需要访问 github 下载containerd，但是会被GFW阻断，需要解决容器内部proxy设置 :ref:`docker_client_proxy` :
 
+   - 在墙外服务器上 :ref:`squid_startup` 部署squid
+
+   - 修订 ``~/.ssh/config`` 添加:
+
+   .. literalinclude:: ../../infra_service/ssh/ssh_tunneling/ssh_config_parent-squid
+      :language: bash
+      :caption: 在 ~/.ssh/config 添加本地端口(真实网卡借口)转发墙外服务器squid端口(loop接口)
+
+   - 然后执行ssh命令打通端口转发:
+
+   .. literalinclude:: ../../infra_service/ssh/ssh_tunneling/ssh_parent-squid
+      :language: bash
+      :caption: 执行ssh命令打通端口转发
+
+   - 在Docker客户端，创建或配置 ``~/.docker/config.json`` 设置以下json格式配置:
+
+   .. literalinclude:: ../../docker/network/docker_proxy/config.json
+      :language: json
+      :caption: 配置Docker客户端 ~/.docker/config.json 可以为容器内部注入代理配置
+
+   接下来创建的新容器，容器内部会自动注入代理配置，也就加速下载
+
+新问题: 创建集群不能找到日志行
+===============================
+
+上述自定义包含zfs工具的镜像执行创建 ``dev`` 集群又遇到新问题:
+
+.. literalinclude:: debug_mobile_cloud_x86_kind_create_fail/create_kind_not_find_log_line
+   :language: bash
+   :caption: 使用自定义zfs工具镜像创建dev集群，出现不能找到匹配的log行
+
+这个问题在 `could not find a line that matches "Reached target .*Multi-User System.*" #2460 <https://github.com/kubernetes-sigs/kind/issues/2460>`_ 有人遇到过
