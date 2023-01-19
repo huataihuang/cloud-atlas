@@ -111,17 +111,33 @@
    :caption: 修改 /etc/docker/daemon.json 添加 buildkit 配置
    :emphasize-lines: 3-5
 
-重启 ``docker`` 服务后，再执行下面的脚本获得最新的Dockerfile，并构建镜像
+重启 ``docker`` 服务
+
+- (错误，我以为只需要build base镜像即可，实际上应该是完整build一个kubernetes镜像，见下文) :strike:`执行下面的脚本获得最新的Dockerfile，并构建镜像`
 
 .. literalinclude:: debug_mobile_cloud_x86_kind_create_fail/build_node_image_by_lastest_dockerfile.sh
    :language: dockerfile
-   :caption: 构建包含zfs工具的node镜像
+   :caption: 构建包含zfs工具的node镜像(这个方法不正确，请忽略)
+
+- 执行 :ref:`build_kind_cluster_k8s_source` :
+
+通过以下方式安装 ``buildx`` 插件(必须，否则build报错):
+
+.. literalinclude:: build_kind_cluster_k8s_source/install_docker_buildx_plugin
+   :language: bash
+   :caption: 为docker安装buildx插件
+
+下载Kubernetes源代码 ``$(go env GOPATH)/src/k8s.io/kubernetes`` ，然后构建镜像:
+
+.. literalinclude:: build_kind_cluster_k8s_source/kind_build_node-image
+   :language: bash
+   :caption: 下载Kubernetes源代码并构建kind的node镜像
 
 - 重新执行创建集群:
 
-.. literalinclude:: ../../real/mobile_cloud/mobile_cloud_x86/mobile_cloud_x86_kind/kind_create_cluster
+.. literalinclude:: debug_mobile_cloud_x86_kind_create_fail/kind_create_cluster
    :language: bash
-   :caption: kind构建3个管控节点，5个工作节点集群配置，指定自定义镜像(包括zfs工具)
+   :caption: kind构建3个管控节点，5个工作节点集群配置，采用自编译最新镜像
 
 .. note::
 
