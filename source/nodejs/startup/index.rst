@@ -12,6 +12,7 @@ Node.js起步
    npm_proxy.rst
    run_nodejs.rst
    nodejs_basic.rst
+   run_nodejs_web.rst
 
 .. only::  subproject and html
 
