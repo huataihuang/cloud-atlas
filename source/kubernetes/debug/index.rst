@@ -9,7 +9,7 @@ Kubernetes排查
 
    crictl.rst
    get_container_shell.rst
-   get_container_logs.rst
+   get_k8s_pod_logs.rst
    kubelet_cert_expire.rst
    kubelet_start_fail.rst
    apiserver_cert_expire.rst

@@ -43,7 +43,7 @@
 .. literalinclude:: stable_diffusion_on_k8s/values.yaml
    :language: yaml
    :caption: 定制values.yaml
-   :emphasize-lines: 24,65,66
+   :emphasize-lines: 24,34,66,67
 
 values.yaml
 -------------
@@ -267,7 +267,32 @@ stable-diffusion容器启动失败排查
 
 之前发现容器镜像下载因为GFW原因出现TLS连接超时，怀疑是镜像下载问题导致。
 
+尝试解决方法: :ref:`containerd_proxy` (类似 :ref:`docker_proxy`) 或者 :ref:`ocserv`
 
+.. note::
+
+   我实际采用了在 ``z-k8s-n-1`` 节点上启动了 :ref:`ocserv` 翻墙，但是这只解决了物理主机能够正常pull下镜像。非常麻烦的是，stable diffussion on k8s需要在容器内部下载很多安装包，这些安装包分布在 ``www.googleapis.com`` 和 ``github.com`` ，容器启动后下载持续报错最终导致初始化失败::
+
+      kubectl logs stable-diffusion-1674186897-0 --all-containers=true
+
+   显示报错::
+
+      Connecting to www.googleapis.com (172.217.160.74:443)
+      wget: note: TLS certificate validation not implemented
+      wget: server returned error: HTTP/1.1 401 Unauthorized
+      Connecting to github.com (20.205.243.166:443)
+      wget: note: TLS certificate validation not implemented
+      Error from server (BadRequest): container "istio-init" in pod "stable-diffusion-1674186897-0" is waiting to start: PodInitializing
+
+   :strike:`这个问题暂时没有解决，我后续如果想出解决方法再来尝试`
+
+解决思路
+----------
+
+- 在墙外租一个虚拟机，部署 :ref:`kind` 集群来完成 ``Stable Diffusion on Kubernetes`` 部署，完成后输出镜像，拿到墙内部署
+- (暂定这个方案)既然 :ref:`containerd_proxy` 没有找到容器内代理配置方法，那么部署一个KVM节点使用Docker，通过 :ref:`docker_proxy` 来实现部署
+
+待续...
 
 参考
 ======
