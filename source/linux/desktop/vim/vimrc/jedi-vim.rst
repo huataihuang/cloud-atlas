@@ -11,4 +11,4 @@ jedi-vim 是绑定了Jedi库的vim插件，提供了Python开发的自动完成�
 参考
 ======
 
-- `github: jedi-vim <https://github.com/davidhalter/jedi-vim>`_
+- `jedi-vim - awesome Python autocompletion with VIM <https://github.com/davidhalter/jedi-vim>`_

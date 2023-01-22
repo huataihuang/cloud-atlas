@@ -40,7 +40,6 @@ TypeScript和JavaScript关系
 - 在目录下创建一个 ``tsconfig.json`` 文件:
 
 .. literalinclude:: typescript_startup/tsc_init_tsconfig.json
-   :language: json
    :caption: 使用  ./node_modules/.bin/tsc --init 命令生成初始的 tsconfig.json
 
 在默认的配置文件中增加配置 ``outDir`` 指定TypeScript编译输出的 :ref:`javascript` 文件存放到独立的 ``dist`` 子目录，这样可以和源代码 ``src`` 目录区分开(如果没有这个配置默认ts和js在同一个目录并且只有文件名后缀区别):
@@ -55,7 +54,6 @@ TypeScript和JavaScript关系
 - 在目录下创建 ``tslint.json`` 文件:
 
 .. literalinclude:: typescript_startup/tslint_init_tslint.json
-   :language: json
    :caption: 使用  ./node_modules/.bin/tslint --init 命令生成初始的 tslint.json
 
 默认生成内容:

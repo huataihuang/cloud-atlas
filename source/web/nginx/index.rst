@@ -10,6 +10,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    :maxdepth: 1
 
    ubuntu_install_nginx.rst
+   macos_homebrew_nginx.rst
    nginx_virtual_host.rst
    self_signed_ssl_nginx.rst
    nginx_root_alias.rst

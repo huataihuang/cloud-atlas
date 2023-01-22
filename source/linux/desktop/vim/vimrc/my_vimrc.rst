@@ -20,10 +20,10 @@ Ultimate vimrc安装
 
 是的，安装步骤就是这么简单...
 
-jedi-vim
------------
+:ref:`jedi-vim`
+-----------------
 
-`Ultimate vimrc <https://github.com/amix/vimrc>`_ 使用了 `jedi-vim <https://github.com/davidhalter/jedi-vim>`_ 来实现vim的 Python autocompletion，依赖于 ``python-jedi`` 。在 :ref:`arch_linux` 上默认可能没有安装，此时使用 ``vim`` 编辑文件会提示错误::
+`Ultimate vimrc <https://github.com/amix/vimrc>`_ 使用了 `GitHub:jedi-vim <https://github.com/davidhalter/jedi-vim>`_ 来实现vim的 Python autocompletion，依赖于 ``python-jedi`` 。在 :ref:`arch_linux` 和 `strike`:`macOS` ( :ref:`macos` 系统自带vim不支持python也会报这个错误，但是 ``pip install jedi`` 不能解决这个问题，需要使用 :ref:`homebrew` 安装内置支持Python3的vim ) 上默认可能没有安装，此时使用 ``vim`` 编辑文件会提示错误::
 
    Error detected while processing BufRead Autocommands for "*.rst"..FileType Autocommands for "*"..Syntax Autocommands for "*"..function <SNR>14_SynSet[25]..script /usr/share/vim/vim90/syntax/rst.vim[230]../h
    ome/huatai/.vim_runtime/sources_non_forked/jedi-vim/after/syntax/python.vim[1]../home/huatai/.vim_runtime/sources_non_forked/jedi-vim/autoload/jedi.vim[260]..function jedi#init_python[13]..BufRead Autocomma
@@ -44,6 +44,10 @@ jedi-vim
 在 :ref:`arch_linux` 解决方法很简单，就是安装 ``python-jedi`` ::
 
    pacman -S python-jedi
+
+也可以通过 ``pip`` 安装，例如在 :ref:`macos` 上，现在默认是python3/pip3，则执行以下命令安装::
+
+   sudo pip3 install jedi
 
 然后就可以正常使用
 
