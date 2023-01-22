@@ -53,3 +53,30 @@ macOS工作室
 .. literalinclude:: ../../devops/docs/write_doc/install_sphinx_doc
    :language: bash
    :caption: 通过virtualenv的Python环境安装sphinx doc
+
+:ref:`kubernetes` 模拟
+===========================
+
+- 通过 :ref:`homebrew` :ref:`install_docker_macos` :
+
+.. literalinclude:: ../../docker/startup/install_docker_macos/brew_install_docker
+   :language: bash
+   :caption: 通过Homebrew安装Docker Desktop for macOS
+
+- 安装 :ref:`kind` :
+
+.. literalinclude:: ../../kubernetes/kind/kind_startup/brew_install_kind
+   :language: bash
+   :caption: 在macOS平台上安装kind
+
+- 配置3个管控节点，5个工作节点的集群配置文件如下：
+
+.. literalinclude:: ../../kubernetes/kind/kind_multi_node/kind-config.yaml
+   :language: yaml
+   :caption: kind构建3个管控节点，5个工作节点集群配置
+
+- 执行创建集群，集群命名为 ``dev`` :
+
+.. literalinclude:: ../../kubernetes/kind/kind_multi_node/kind_create_cluster
+   :language: bash
+   :caption: kind构建3个管控节点，5个工作节点集群配置

@@ -103,6 +103,18 @@ Homebrew Cask
 
 `Homebrew Cask <https://github.com/Homebrew/homebrew-cask>`_ 扩展了Homebrew并且将它提升到优雅、简洁、安装迅速，同时提供了管理macOS GUI程序的功能，例如可以安装Atom和Google Chrome。
 
+.. note::
+
+   Homebrew Cask提供了安装图形软件的功能，也就是说，如果要使用 ``brew install`` 安装一个macOS上的图形软件，通常就是使用 ``brew install --cask XXX``
+
+   例如，安装 :ref:`install_docker_macos` 中安装Docker Desktop on Mac，应该使用:
+
+   .. literalinclude:: ../../docker/startup/install_docker_macos/brew_install_docker
+      :language: bash
+      :caption: 通过Homebrew安装Docker Desktop for macOS
+
+   如果使用 ``brew install docker`` 则只安装docker命令行
+
 - 不需要单独安装homebrew cask，你只需要使用，例如你想安装 atom 编辑器，则执行::
 
    brew cask install atom
@@ -124,7 +136,7 @@ Homebrew Cask
 
    这省却了我很多查找下载软件的时间，例如，最常用的开发IDE Visual Studio Code就可以直接安装::
 
-      brew cask install visual-studio-code
+      brew install --cask visual-studio-code
 
 升级
 ========
