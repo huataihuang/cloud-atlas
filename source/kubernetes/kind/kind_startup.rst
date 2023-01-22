@@ -40,6 +40,35 @@ Kind快速起步
 
 完成安装后，可以直接部署 :ref:`kind_cluster` (下文的 "创建集群" 段落只是一个快速demo)
 
+在 :ref:`macos` 上使用 :ref:`homebrew` 安装
+---------------------------------------------
+
+- 首先完成 :ref:`install_docker_macos` ，(使用 :ref:`homebrew` )提供一个 :ref:`docker` 运行环境
+
+- 在构建 :ref:`macos_studio` 中部署 ``kind`` 采用了统一的 :ref:`homebrew` 进行部署:
+
+.. literalinclude:: kind_startup/brew_install_kind
+   :language: bash
+   :caption: 在macOS上通过Homebrew安装kind
+
+- 采用 :ref:`kind_multi_node` 配置3个管控节点，5个工作节点的集群配置文件如下：
+
+.. literalinclude:: kind_multi_node/kind-config.yaml
+   :language: yaml
+   :caption: kind构建3个管控节点，5个工作节点集群配置
+
+- 执行创建集群，集群命名为 ``dev`` :
+
+.. literalinclude:: kind_multi_node/kind_create_cluster
+   :language: bash
+   :caption: kind构建3个管控节点，5个工作节点集群配置
+
+- 完成后检查 ``kubectl get nodes -o wide`` 输出:
+
+.. literalinclude:: kind_startup/brew_kind_docker_get_nodes_output
+   :language: bash
+   :caption: 通过brew安装部署3个管控节点，5个工作节点kind集群，可以看到运行集群节点
+
 二进制安装kind(记录未实践)
 ---------------------------
 
