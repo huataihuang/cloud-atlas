@@ -16,8 +16,7 @@
    - `When after restart docker, kind cluster could't connect #1685 <https://github.com/kubernetes-sigs/kind/issues/1685>`_
    - `Fix multi-node cluster not working after restarting docker #2671 <https://github.com/kubernetes-sigs/kind/pull/2671>`_
 
-   我考虑如果kind版本如果不能解决，可以考虑从docker方向着手，分配给节点固定IP地址
-
+   如果kind版本如果不能解决，可以考虑从docker方向着手，分配给节点固定IP地址: **已经有人使用脚本方法让docker分配固定IP地址来解决这个问题** :  `seguidor777/kind_static_ips.sh <https://gist.github.com/seguidor777/5cda274ea9e1083bfb9b989d17c241e8>`_ 针对 `multi-node: Kubernetes cluster does not start after Docker re-assigns node's IP addresses after (Docker) restart #2045 <https://github.com/kubernetes-sigs/kind/issues/2045>`_ ，也提到 kind 0.15.0 将解决多管控节点重启后无法访问的问题
    这也促使我考虑如何确保测试集群的备份和恢复，以及快速重建。虽然目前是刚刚搭建集群，没有任何数据，但是随着业务的推进，即使是测试集群也需要确保稳定性和数据可靠性。
 
 我在 :ref:`mobile_cloud` 架构下，也就是采用 :ref:`asahi_linux` 运行 ``kind`` 模拟集群，但是，重启了笔记本操作系统之后，发现 ``kind`` 没有正常运行:

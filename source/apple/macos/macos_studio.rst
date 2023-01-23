@@ -69,14 +69,14 @@ macOS工作室
    :language: bash
    :caption: 在macOS平台上安装kind
 
-- 配置3个管控节点，5个工作节点的集群配置文件如下：
+- 3个管控节点，5个工作节点的集群，并且结合本地registry，采用 :ref:`kind_local_registry` 方法 ``kind-with-registry-macos.sh`` 脚本:
 
-.. literalinclude:: ../../kubernetes/kind/kind_multi_node/kind-config.yaml
-   :language: yaml
-   :caption: kind构建3个管控节点，5个工作节点集群配置
-
-- 执行创建集群，集群命名为 ``dev`` :
-
-.. literalinclude:: ../../kubernetes/kind/kind_multi_node/kind_create_cluster
+.. literalinclude:: ../../kubernetes/kind/kind_local_registry/kind-with-registry-macos.sh
    :language: bash
-   :caption: kind构建3个管控节点，5个工作节点集群配置
+   :caption: 运行Registry适配kind集群(dev)，macOS环境的Docker Desktop for macOS
+
+- 需要 :ref:`fix_kind_restart_fail` ，所以再执行:
+
+.. literalinclude:: ../../kubernetes/kind/fix_kind_restart_fail/kind_static_ips.sh
+   :language: bash
+   :caption: 通过 kind_static_ips.sh 脚本设置kind集群每个node静态IP
