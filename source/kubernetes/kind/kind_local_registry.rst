@@ -17,7 +17,10 @@ kind也提供了一种符合我们使用习惯的的本地Registry方式，即�
    :language: bash
    :caption: kind官方提供kind-with-registry.sh，可创建具备本地Registry的kind集群
 
-我做了一些调整，以适配我在 :ref:`kind_multi_node` 部署的集群 ``dev`` :
+ARM架构Linux环境部署
+----------------------
+
+我做了一些调整，以适配我在 :ref:`mobile_cloud_arm` 采用 :ref:`kind_multi_node` 部署的集群 ``dev`` :
 
   - 指定节点采用ARM架构镜像: 采用 :ref:`debug_kind_create_fail` 指定ARM架构
   - 采用 :ref:`kind_multi_node` 配置
@@ -30,6 +33,18 @@ kind也提供了一种符合我们使用习惯的的本地Registry方式，即�
    :emphasize-lines: 7-10,25-35
 
 - 执行 ``./kind-with-registry.sh`` 创建集群 ``dev`` ，同时可以看到运行了一个 ``kind-registry`` 的容器提供服务
+
+:ref:`macos` 环境部署
+----------------------
+
+在ARM架构的 :ref:`macos_studio` 部署没有遇到ARM架构Linux环境的问题，所以
+
+- ``kind-with-registry-macos`` 脚本:
+
+.. literalinclude:: kind_local_registry/kind-with-registry-macos.sh
+   :language: bash
+   :caption: 运行Registry适配kind集群(dev)，macOS环境的Docker Desktop for macOS
+
 
 使用Registry
 ================

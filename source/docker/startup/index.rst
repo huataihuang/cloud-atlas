@@ -12,6 +12,7 @@ Docker 起步
    archlinux_docker.rst
    install_docker_centos8.rst
    install_docker_macos.rst
+   docker_macos_vm.rst
    post_install/index
    docker_macos_file_share.rst
    docker_run.rst
