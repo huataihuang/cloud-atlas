@@ -9,6 +9,7 @@ Docker 环境运行应用程序案例
 
    docker_compose_django.rst
    docker_django.rst
+   docker_squid.rst
 
 .. only::  subproject and html
 

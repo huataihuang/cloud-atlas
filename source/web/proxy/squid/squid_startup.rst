@@ -44,6 +44,12 @@ Squid快速起步
 
 你可以再增加自己定义的网段段。
 
+完整的初始配置可以参考如下(采用 :ref:`fedora` 发行版安装squid后默认初始 ``/etc/squid/squid.conf`` ):
+
+.. literalinclude:: squid_startup/squid.conf
+   :language: bash
+   :caption: fedora默认初始squid配置: /etc/squid/squid.conf
+
 - 重启服务::
 
    systemctl restart squid

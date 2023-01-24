@@ -70,8 +70,10 @@ Cilium Kubernetes Ingress HTTP配置案例
 
 完整输出ingress服务配置方法见 :ref:`metallb_with_cilium` ，可以实现为裸服务器配置负载均衡实现ingress的服务输出
 
-一些思考
----------
+.. _k8s_service_think:
+
+kubernetes service思考
+------------------------
 
 参考 `Kubernetes service external ip pending <https://stackoverflow.com/questions/44110876/kubernetes-service-external-ip-pending>`_ ``Damith Udayanga`` 的回答:
 

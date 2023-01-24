@@ -1,17 +1,13 @@
-.. _proxy:
+.. _trafficserver:
 
 =================================
-Proxy代理服务
+Traffic Server代理服务
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   pac.rst
-   squid/index
-   varnish/index
-   trafficserver/index
-   privoxy/index
+
 
 .. only::  subproject and html
 

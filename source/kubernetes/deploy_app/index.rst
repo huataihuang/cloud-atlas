@@ -11,6 +11,7 @@ Kubernetes部署应用
 
    config_pod_container/index
    app_inject_data/index
-   ceph/index
    registry/index
+   ceph/index
+   squid/index
    django/index

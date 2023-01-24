@@ -1,7 +1,7 @@
-.. _wikipedia_base:
+.. _wikipedia_early_infra:
 
 ====================
-Wikipedia基础架构
+Wikipedia早期架构
 ====================
 
 .. note::
@@ -24,5 +24,3 @@ Wikipedia是世界上访问量最大的网站之一，作为非盈利组织，Wi
 
 - `A Look Inside Wikipedia's Infrastructure <https://www.datacenterknowledge.com/archives/2008/06/24/a-look-inside-wikipedias-infrastructure>`_
 - `Wikimedia news Category: Technology <https://wikimediafoundation.org/news/category/technology/>`_
-- 
-
