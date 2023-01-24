@@ -1,17 +1,15 @@
-.. _proxy:
+.. _wikipedia_infra:
 
 =================================
-Proxy代理服务
+WikiPedia架构
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   pac.rst
-   squid/index
-   varnish/index
-   trafficserver/index
-   privoxy/index
+   wikipedia_early_infra.rst
+   wikimedia_cdn_infra.rst
+
 
 .. only::  subproject and html
 

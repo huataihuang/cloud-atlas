@@ -24,6 +24,7 @@ Docker存储
    docker_container_nfs.rst
    docker_images_on_nfs.rst
    docker_local_remove_storage_perf.rst
+   docker_macos_file_sharing.rst
 
 .. only::  subproject and html
 

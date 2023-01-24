@@ -8,7 +8,7 @@ Squid是一个用于Web的缓存代理服务器，支持HTTP, HTTPS, FTP等协�
 
 .. note::
 
-   使用Squid的著名用户可能是Wiki百科，从 :ref:`wikipedia_base` 可以了解到Wikimedia采用了大量的Squid服务器结合memcached和LVS来构建支持全球最大网站。
+   使用Squid的著名用户可能是Wiki百科，从 :ref:`wikipedia_early_infra` 可以了解到Wikimedia采用了大量的Squid服务器结合memcached和LVS来构建支持全球最大网站。
 
 .. figure:: ../../../_static/web/proxy/squid/squid_log.jpg
    :scale: 75
