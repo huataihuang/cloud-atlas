@@ -13,19 +13,10 @@ Linux "魔力" 系统请求组合键 SysRq
 
 其次，在内核 ``CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE`` 配置符号，默认设置是 ``1`` 
 
-============ ======== ==================================
-SysRq配置值   16进制    说明
-0            0x0      关闭所有sysrq功能
-1            0x1      激活所有sysrq功能
-2            0x2      激活控制台日志级别控制
-4            0x4      激活键盘控制(SAK, unraw)
-8            0x8      激活进程的debug dump
-16           0x10     激活sync命令
-32           0x20     激活remount read-only
-64           0x40     激活进程信号(term, kill, oom-kill)
-128          0x80     允许重启/关机
-256          0x100    允许所有实时任务配置nice
-============ ======== ==================================
+.. csv-table:: 激活SysRq功能: 内核配置 ``CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE`` 或者 ``echo <SysRq配置值> > /proc/sys/kernel/sysrq``
+   :file: sysrq/sysrq.csv
+   :widths: 30,20,50
+   :header-rows: 1
 
 - 执行启用sysrq所有功能::
 
@@ -35,9 +26,33 @@ SysRq配置值   16进制    说明
 
    echo 0 > /proc/sys/kernel/sysrq
 
+.. note::
+
+   这里的发送给 ``/proc/sys/kernel/sysrq`` 数字可以写成十进制或者带 ``0x`` 的十六进制，但是在内核配置 ``CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE`` 必须始终以十六进制编写。
+
+   ``/proc/sys/kernel/sysrq`` 的值仅影响通过键盘的调用，而在 ``/proc/sysrq-trigger`` 入口调用是始终允许的(需要系统管理员权限)
+
 使用SysRq
 ===========
 
+在不同的硬件平台有着不同的组合键出发 ``SysRq`` :
+
+.. note::
+
+   一些键盘没有标记为 ``SysRq`` 的按键，而 ``SysRq`` 键也称为 ``Print Screen`` 键。此外，一些键盘可能无法同时按下 ``SysRq`` 组合键，可以尝试按住 ``Alt`` 键不放，然后顺序按下 ``SysRq`` ，释放 ``SysRq`` 键，再按下 ``<命令键>`` ，然后释放所有键来完成触发。
+
+.. csv-table:: SysRq组合键
+   :file: sysrq/sysrq_combo.csv
+   :widths: 20,80
+   :header-rows: 1
+
+SysRq ``<命令键>``
+=====================
+
+.. csv-table:: SysRq命令键
+   :file: sysrq/sysrq_cmd.csv
+   :widths: 20,80
+   :header-rows: 1
 
 
 参考
