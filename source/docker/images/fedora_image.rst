@@ -44,11 +44,23 @@ Fedora镜像
 最终执行
 -----------
 
-我调整了 :ref:`docker_squid` 将 ``kind`` 网络绑定摘除，恢复构建到Docker default网络的 ``squid`` 容器，然后修改 ``~/.docker/config.json`` :
+- 我调整了 :ref:`docker_squid` 将 ``kind`` 网络绑定摘除，恢复构建到Docker default网络的 ``squid`` 容器，然后修改 ``~/.docker/config.json`` :
 
 .. literalinclude:: fedora_image/config.json
    :language: json
    :caption: 采用默认docker网络 bridge 上部署的 :ref:`docker_squid` 代理
+
+- 还有一个问题需要解决: 默认 :ref:`dnf` 会使用 ``mirrors.fedoraproject.org`` 来侦测最快的镜像网站，但是实际上每次选择可能都是不同网站，这导致代理服务缓存效果很差。解决的思路是注释掉 ``metalink=`` 行，启用固定的 ``baseurl=`` 行 ( `How to disable some mirrors for use by dnf in Fedora [closed] <https://unix.stackexchange.com/questions/533543/how-to-disable-some-mirrors-for-use-by-dnf-in-fedora>`_ 提及原先 ``yum-plugin-fastestmirror`` 被移植到dnf时没有移植参数调整功能 )
+
+我采用 :ref:`sed` 修订 ``/etc/yum.repos.d`` 目录下配置:
+
+.. literalinclude:: fedora_image/disable_dnf_mirrors
+   :language: bash
+   :caption: 关闭dnf镜像列表功能，指定固定软件仓库以便优化使用proxy代理缓存
+
+这里有一个 ``fedora-cisco-openh264.repo`` 配置文件没有提供 ``baseurl=`` ，实际这个只有一个下载地址，所以跳过替换
+
+下文我将脚本融入 :ref:`dockerfile` 中执行
 
 基础运行 ``fedora-base``
 ===============================
@@ -101,4 +113,29 @@ systemd运行ssh ``fedora-ssh``
 .. literalinclude:: fedora_image/ssh/run_fedora-ssh_container
    :language: bash
    :caption: 运行包含systemd和ssh的Fedora容器
+
+开发环境 ``fedora-dev``
+==========================
+
+在 ``fedora-ssh`` 基础上，增加开发工具包安装:
+
+- ``fedora-dev`` 包含了安装常用工具和开发环境，并编译和安装必要的vim环境:
+
+.. literalinclude:: fedora_image/dev/Dockerfile
+   :language: dockerfile
+   :caption: 包含常用工具和开发环境的Fedora镜像Dockerfile
+
+- 构建 ``fedora-dev`` 镜像:
+
+.. literalinclude:: fedora_image/dev/build_fedora-dev_image
+   :language: bash
+   :caption: 构建包含开发环境的Fedora镜像
+
+- 运行 ``fedora-dev`` :
+
+.. literalinclude:: fedora_image/dev/run_fedora-dev_container
+   :language: bash
+   :caption: 运行包含开发环境的Fedora容器
+
+
 
