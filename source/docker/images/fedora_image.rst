@@ -15,12 +15,10 @@ Fedora镜像
 
 由于Docker镜像制作需要反复测试，容器内部OS更新和软件安装会不断重复，所以为了加快进度和节约带宽，采用 :ref:`docker_client_proxy` 配置来加速
 
-我最初想采用 ``kind`` 网路部署 :ref:`docker_squid` 代理加速
+最初尝试
+----------
 
-.. literalinclude:: fedora_image/docker.json
-   :language: json
-   :caption: 配置docker容器内部都采用 "kind" 网络运行的 :ref:`docker_squid` 代理加速
-   :emphasize-lines: 3-11
+我最初想采用 ``kind`` 网路部署 :ref:`docker_squid` 代理加速
 
 需要注意，所有 ``docker run`` 需要加上 ``--network kind`` 以便能够不使用默认的 ``default`` 网络，而改为使用 ``kind`` bridge网络
 
@@ -43,7 +41,14 @@ Fedora镜像
   - 一种方式是采用 :ref:`docker_squid` 中思考的方案，在一个容器中插入多个网段网卡，同时为多个网络提供代理；docker注入代理环境变量时采用域名而不是IP，以便bind进容器的 ``/etc/hosts`` 能够提供不同的解析
   - 另一种方式是简化docker配置，只部署默认网络的 :ref:`docker_squid` ， ``kind`` 网络的代理留给 :ref:`k8s_deploy_squid_startup` 来解决(目前我采用这个方法加快部署)
 
-所以，我调整了 :ref:`docker_squid` 将 ``kind`` 网络绑定摘除，恢复构建到Docker default网络的 ``squid`` 容器，然后修改
+最终执行
+-----------
+
+我调整了 :ref:`docker_squid` 将 ``kind`` 网络绑定摘除，恢复构建到Docker default网络的 ``squid`` 容器，然后修改 ``~/.docker/config.json`` :
+
+.. literalinclude:: fedora_image/config.json
+   :language: json
+   :caption: 采用默认docker网络 bridge 上部署的 :ref:`docker_squid` 代理
 
 基础运行 ``fedora-base``
 ===============================
@@ -65,10 +70,6 @@ Fedora镜像
 .. literalinclude:: fedora_image/base/run_fedora-base_container
    :language: bash
    :caption: 运行fedora-base容器
-
-.. note::
-
-   这里配置容器运行网络是 "kind" ，以便能够和 :ref:`docker_squid` 以及 :ref:`macos_studio` 部署的 :ref:`kind` ``dev`` 运行在同一个bridge网络，方便实现代理
 
 - 连接到 ``fedora`` 容器内:
 
@@ -95,4 +96,9 @@ systemd运行ssh ``fedora-ssh``
    :language: bash
    :caption: 构建包含systemd和ssh的Fedora镜像
 
+- 运行 ``fedora-ssh`` :
+
+.. literalinclude:: fedora_image/ssh/run_fedora-ssh_container
+   :language: bash
+   :caption: 运行包含systemd和ssh的Fedora容器
 
