@@ -23,11 +23,24 @@ RUN --mount=type=bind,target=/sys/fs/cgroup \
     --mount=type=tmpfs,target=/run \
     --mount=type=tmpfs,target=/run/lock
 
+# set china repo: mirros.163.com
+RUN cp -R /etc/yum.repos.d /root/yum.repos.d
+RUN rm /etc/yum.repos.d/fedora-cisco-openh264.repo
+RUN sed -i 's/metalink=/#metalink=/g' /etc/yum.repos.d/*
+RUN sed -i 's/#baseurl=/baseurl=/g' /etc/yum.repos.d/*
+RUN sed -i 's/download.example\/pub\/fedora\/linux/mirrors.163.com\/fedora/g' /etc/yum.repos.d/*
+RUN cp /root/yum.repos.d/fedora-cisco-openh264.repo /etc/yum.repos.d/
+
 RUN dnf clean all
 RUN dnf -y update
 
 # Fedora docker image not include systemd,install systemd by initscripts
-RUN dnf -y install which sudo passwd openssh-clients openssh-server sssd-client initscripts
+RUN dnf -y install which sudo passwd openssh-clients openssh-server sssd-client initscripts \
+    vim iproute net-tools bind-utils bzip2 tmux sysstat nfs-utils lsof \
+    tree file mlocate rsync cronie cronie-anacron \
+    git gdb openssl-devel \
+    nodejs 
+
 RUN systemctl enable sshd
 
 # add account "admin" and give sudo privilege
