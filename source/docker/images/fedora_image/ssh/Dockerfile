@@ -1,13 +1,16 @@
-# 使用 DOCKER
-# docker build --rm -t local/fedora-systemd .
-# docker run -itd --privileged=true -p 1122:22 --hostname fedora --name fedora local:fedora-systemd
+# USE DOCKER BUILD
+# docker build --rm -t fedora-ssh .
+# USE DOCKER RUN
+# docker run -itd --privileged=true -p 1122:22 --hostname fedora-ssh --name fedora-ssh fedora-ssh
 
-# 使用 nerdctl (containerd)
-# nerdctl build -t fedora-systemd .
-# 交互方式运行
-# nerdctl run -it --privileged=true -p 1122:22 --hostname fedora --name fedora fedora-systemd:latest
-# 后台运行
-# nerdctl run -d --privileged=true -p 1122:22 --hostname fedora --name fedora fedora-systemd:latest
+# USE nerdctl (containerd) BUILD
+# nerdctl build -t fedora-ssh .
+
+# INTERACT RUN
+# nerdctl run -it --privileged=true -p 1122:22 --hostname fedora-ssh --name fedora-ssh fedora-ssh:latest
+
+# BACKGROUND RUN
+# nerdctl run -d --privileged=true -p 1122:22 --hostname fedora-ssh --name fedora-ssh fedora-ssh:latest
 
 FROM fedora:latest
 MAINTAINER vincent huatai <vincent@huatai.me>
@@ -23,7 +26,7 @@ RUN --mount=type=bind,target=/sys/fs/cgroup \
 RUN dnf clean all
 RUN dnf -y update
 
-# Fedora docker官方镜像默认未包含systemd,通过initscripts安装
+# Fedora docker image not include systemd,install systemd by initscripts
 RUN dnf -y install which sudo openssh-clients openssh-server initscripts
 RUN systemctl enable sshd
 

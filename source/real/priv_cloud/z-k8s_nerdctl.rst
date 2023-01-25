@@ -38,7 +38,7 @@ buildkit安装和准备
 
 - 在目录下编辑一个 ``Dockerfile`` 内容如下(另外还要准备一个公钥文件 ``authorized_keys`` 用于镜像中眠密码登陆):
 
-.. literalinclude:: ../../docker/init/docker_systemd/fedora-systemd.dockerfile
+.. literalinclude:: ../../docker/images/fedora_image/ssh/Dockerfile
    :language: dockerfile
    :caption: fedora官方镜像增加systemd，注释中包含启动方法
 
