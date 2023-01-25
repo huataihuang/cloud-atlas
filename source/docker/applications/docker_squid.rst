@@ -28,8 +28,7 @@ Ubuntu的母公司Canonical在dockerhub官方维护了一个基于 Ubuntu LTS �
 
 .. literalinclude:: docker_squid/docker_run_squid
    :language: bash
-   :caption: docker run运行squid容器，注意我配置了绑定 "kind" 虚拟交换机以便给集群代理服务
-   :emphasize-lines: 2
+   :caption: docker run运行squid容器，注意取消了 ``--network kind`` 参数(见上文)，采用默认网络
 
 .. csv-table:: ubuntu/squid镜像参数
    :file: docker_squid/docker_squid_parameter.csv
@@ -60,11 +59,18 @@ Ubuntu的母公司Canonical在dockerhub官方维护了一个基于 Ubuntu LTS �
    :language: bash
    :caption: 获取docker容器的IP地址
 
-- 执行以下命令将 ``squid`` 容器的IP地址固定为当前动态分配的IP地址::
+- 我尝试以下命令将 ``squid`` 容器的IP地址固定为当前动态分配的IP地址::
 
    docker stop squid
-   docker network connect --ip 172.22.0.12 "kind" "squid"
-   docker start squid
+   docker network connect --ip 172.17.0.3 "bridge" "squid"
+
+但是这里会报错::
+
+   Error response from daemon: user specified IP address is supported on user defined networks only
+
+但是考虑到这个容器 ``squid``` 绑定了 ``0.0.0.0:3128`` ，是否可以作为通用的访问代理呢？类似在 :ref:`kind_local_registry` 通过 ``localhost:5001`` 访问本地的 ``registry`` ，是否可以在容器中通过访问 ``localhost:3128`` 访问代理服务器呢？
+
+**验证不行**
 
 检查
 ========
