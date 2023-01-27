@@ -34,6 +34,8 @@ Docker容器分配静态IP
    docker run --net ceph-net --ip 172.18.0.11 -it -d \
      --hostname ceph-node1 --name ceph-node1 -v data:/data ubuntu:latest /bin/bash
 
+我发现我很久以后忘记了自己曾经做过Docker静态IP地址的实践，在 :ref:`fix_kind_restart_fail` 还折腾了很久， :ref:`kind` 也需要固定IP地址才能在不断重启中保持运行。
+
 .. note::
 
    `docker network connect <https://docs.docker.com/engine/reference/commandline/network_connect/>`_ 文档说明了链接容器到网络的方法::
@@ -41,6 +43,10 @@ Docker容器分配静态IP
       docker network cnnnect [OPTIONS] NETWORK CONTAINER
 
     以上命令 ``[OPTIONS]`` 可以是类似 ``--ip 172.17.0.11`` ，当链接容器到一个网络，就可以和连接到同一个网络到其他容器通讯。并且启动时也能指定连接的网络和IP地址，即使用 ``docker run`` 指令，类似如上。
+
+.. note::
+
+   Docker只允许在自创建的docker网络上设置静态IP地址，默认的3个内置docker网络不允许使用 ``--ip`` 参数
 
 参考
 ==========

@@ -8,7 +8,7 @@ Fedora镜像
 
 .. note::
 
-   由于使用 :ref:`dockerfile` 重复构建镜像时，需要重复在容器内部执行各种软件包安装下载，非常消耗时间。为了能够节约部署时间(特别是局域网内部)，我采用在 :ref:`k8s_deploy_squid` 在我的 :ref:`kind` ( :ref:`macos_studio` ) ，这样不断重复相同操作系统的安装升级可以节约时间和带宽。
+   由于使用 :ref:`dockerfile` 重复构建镜像时，需要重复在容器内部执行各种软件包安装下载，非常消耗时间。为了能够节约部署时间(特别是局域网内部)，我采用在 :ref:`docker_squid` ，这样不断重复相同操作系统的安装升级可以节约时间和带宽。
 
 准备工作
 ================
@@ -125,6 +125,11 @@ systemd运行ssh ``fedora-ssh``
    :language: dockerfile
    :caption: 包含常用工具和开发环境的Fedora镜像Dockerfile
 
+.. csv-table:: ``fedora-dev`` 镜像说明
+   :file: fedora_image/fedora-dev.csv
+   :widths: 20,80
+   :header-rows: 1
+
 - 构建 ``fedora-dev`` 镜像:
 
 .. literalinclude:: fedora_image/dev/build_fedora-dev_image
@@ -137,5 +142,5 @@ systemd运行ssh ``fedora-ssh``
    :language: bash
    :caption: 运行包含开发环境的Fedora容器
 
-
+- :ref:`kind_deploy_fedora-dev`
 

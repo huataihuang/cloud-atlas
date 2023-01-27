@@ -98,7 +98,9 @@ Ubuntu的母公司Canonical在dockerhub官方维护了一个基于 Ubuntu LTS �
 ========
 
 - :ref:`fedora_image` 使用本文部署的 squid Docker 容器进行缓存加速
+- 结合 :ref:`squid_ssl_bumping` 改进squid部署
 - :ref:`k8s_deploy_squid_startup`
+- :ref:`k8s_deploy_gitlab` (准备从 :ref:`deploy_gitlab_from_source` 学习，再迁移到 :ref:`k8s_deploy_gitlab` )
 
 参考
 ========

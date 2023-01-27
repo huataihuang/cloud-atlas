@@ -22,6 +22,8 @@ kind(本地docker模拟k8s集群)
    kind_local_registry.rst
    kind_dev_infra.rst
    kind_run_simple_container.rst
+   kind_deploy_fedora-dev.rst
+   kind_deploy_fedora-dev-tini.rst
    kind_container_nfs_volume.rst
    kind_ingress.rst
    kind_ingress_nginx.rst
