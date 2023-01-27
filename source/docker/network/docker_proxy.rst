@@ -136,7 +136,9 @@ Docker官方解决方案
 
 .. note::
 
-   本段落还没有时间尝试
+   如果没有配置 :ref:`squid_ssl_bumping` ，那么虽然 :ref:`docker_client_proxy` 正常，但是 :ref:`docker_server_proxy` 会遇到异常: HTTP下载正常，HTTPS则出现握手错误
+
+   我在部署 :ref:`stable_diffusion_on_k8s` 就遇到GFW阻塞导致需要构建 :ref:`squid_socks_peer` ，此时需要同时解决 :ref:`docker_client_proxy` 和 :ref:`docker_server_proxy` ，这迫使我改进 :ref:`squid` 部署，实践 :ref:`squid_ssl_bumping`
 
 参考 Docker官方文档 `Running a Docker daemon behind an HTTPS_PROXY <https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy>`_ 配置局域网在https代理后使用docker服务:
 

@@ -14,4 +14,5 @@ Kubernetes部署应用
    registry/index
    ceph/index
    squid/index
+   gitlab/index
    django/index

@@ -306,6 +306,8 @@ CAP_SYS_ADMIN 和 cgroupfs
 
 然后检查发现 ``systemd`` 并没有启动，这是为何呢？
 
+.. _systemd_container_interface:
+
 systemd container interface
 ------------------------------
 
@@ -468,6 +470,8 @@ podman
 ========
 
 Red Hat公司开发了另外一个符合OCI规范的容器和pods管理工具 :ref:`podman` ( `GitHub podman <https://github.com/containers/podman>`_ )。这个工具也直接支持在容器中运行systemd ( `How to run systemd in a container <https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/>`_ )
+
+我在 :ref:`kind_deploy_fedora-dev` 尝试Kubernetes的pod容器中使用 :ref:`systemd` ，但是发现似乎非常困难(即使 :ref:`fedora_image` 已经验证了Docker容器中运行 :ref:`systemd` )。似乎采用 :ref:`docker_tini` 才是解决之道。
 
 参考
 ======

@@ -10,6 +10,7 @@ DevOps Atlas
    thought/index
    sre/index
    git/index
+   gitlab/index
    jenkins/index
    gitea/index
    terraform/index

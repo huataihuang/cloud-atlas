@@ -10,6 +10,7 @@ Docker 镜像
    :maxdepth: 1
 
    fedora_image.rst
+   fedora_tini_image.rst
    alpine_docker_image.rst
    archlinux_docker_image.rst
    smaller_docker_images.rst

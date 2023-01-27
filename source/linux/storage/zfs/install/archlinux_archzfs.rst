@@ -45,8 +45,20 @@
 
 我选择 5 ( ``zfs-linux`` )安装
 
+archzfs的限制
+----------------
+
+- archzfs 安装的zfs和内核严密绑定，所以如果 archzfs 提供对应内核版本之前， :ref:`arch_linux` 无法升级内核，会提示类似如下错误:
+
+.. literalinclude:: archlinux_archzfs/archzfs_kernel_break
+   :language: bash
+   :caption: 由于archzfs和内核紧密关联，需要同时升级archzfs和kernel
+   :emphasize-lines: 10
+
+如果要紧跟内核升级，那么需要采用 :ref:`archlinux_zfs-dkms`
+
 ARM架构下无法使用archzfs
--------------------------
+=========================
 
 - 我在 :ref:`asahi_linux` 平台(ARM架构的 :ref:`apple_silicon_m1_pro` MacBook Pro 16")更新pacman仓库遇到以下报错::
 

@@ -37,6 +37,19 @@ RSA密钥
 
    在创建密钥对的时候，会要求输入密钥的保护密码。虽然可以连续输入两次回车去除密码保护，但是降低了安全性。默认情况下会在用户目录下的 ``.ssh`` 目录下生成私有密钥 ``id_rsa`` 和公用密钥 ``id_rsa.pub`` 。
 
+我最近遇到一个问题( :ref:`fedora_image` 为镜像添加密钥 )，现代的 :ref:`fedora` 操作系统对安全密钥有较高要求，如果早期生成的密钥可能不符合服务器安全要求，此时在服务器上 ``sshd`` 日志显示::
+
+   Jan 26 22:42:10 fedora-dev sshd[79]: refusing RSA key: Invalid key length [preauth]
+   Jan 26 22:42:10 fedora-dev sshd[79]: Connection closed by authenticating user admin 172.17.0.1 port 46420 [preauth]
+
+解决方法是重新生成密钥(指定名)，然后将密钥复制到客户端独立保存，登陆时指定密钥(例如，起名为 ``id_rsa_fedora-dev`` )
+
+然后客户端配置 ``~/.ssh/config`` 添加:
+
+.. literalinclude:: ssh_key/config_spec_key
+   :language: bash
+   :caption: 指定key，ssh服务器配置
+
 RSA公用密钥安装
 ---------------
 
