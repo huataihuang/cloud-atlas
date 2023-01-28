@@ -55,7 +55,11 @@ archzfs的限制
    :caption: 由于archzfs和内核紧密关联，需要同时升级archzfs和kernel
    :emphasize-lines: 10
 
-如果要紧跟内核升级，那么需要采用 :ref:`archlinux_zfs-dkms`
+如果要紧跟内核升级，那么需要采用 :ref:`archlinux_zfs-dkms` ；但是如果已经采用了 ``archzfs`` ，这样的阻塞导致整个系统无法更新升级也不是办法，所以可以在 :ref:`pacman` 的配置文件 ``/etc/pacman.conf`` 中配置::
+
+   IgnorePkg   = linux linux-headers
+
+这样升级会保持当前内核版本不升级，而如果 ``archzfs`` 有版本升级，则会提示依赖内核版本冲突，到时候再去除这个配置进行 ``archzfs`` 和内核同步升级即可。
 
 ARM架构下无法使用archzfs
 =========================

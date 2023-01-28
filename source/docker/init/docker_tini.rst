@@ -128,11 +128,14 @@ WHY?
 
 .. literalinclude:: docker_tini/entrypoint_ssh_cron_bash
    :language: bash
-   :linenos:
-   :caption:
+   :caption: entrypoint_ssh_cron_bash 脚本
+
+.. warning::
+
+   这里的 ``entrypoint_ssh_cron_bash`` 脚本实际上有一个缺陷，只能在Docker中正常工作，应用到Kubernetes上会出现pod不断Crash。原因在 :ref:`kind_deploy_fedora-dev-tini` 有详细分析以及对应的改进
 
 - 修订 Dockerfile 如下，将这个脚本复制到镜像内部并作为entrypoint
 
 .. literalinclude:: docker_tini/Dockerfile.ssh_cron_bash
    :language: bash
-   :linenos:
+   :caption: 将 entrypoint_ssh_cron_bash 脚本复制到容器内部作为 tini 调用的 /entrypoint.sh 脚本来启动多个服务

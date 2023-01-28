@@ -111,4 +111,11 @@ tini运行ssh ``fedora-ssh-tini``
    :language: bash
    :caption: 运行包含开发环境的Fedora容器
 
-- :ref:`kind_deploy_fedora-dev-tini`
+``修正`` : 真正能够用于Kubernetes的Dockerfile
+=================================================
+
+.. warning::
+
+   在 :ref:`kind_deploy_fedora-dev-tini` 实践中发现，上述 ``fedora-dev-tini`` 和 ``fedora-ssh-tini`` 都会 ``Crash`` ，原因是 ``/entrypoint.sh`` 脚本直接运行结束，会被 Kubernetes 判断为程序 Crash 。所以，实际 ``/entrypoint.sh`` 需要改写成最后执行的 ``bash`` 命令永不结束！！！
+
+

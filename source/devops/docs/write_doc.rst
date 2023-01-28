@@ -72,7 +72,7 @@ macOS安装
 
 现在最新的 :ref:`macos` 内置的开源软件已经接近追平Linux，内置了 python3.9.6 ，同时提供了 ``pip3`` ，所以构建 :ref:`virtualenv` 非常容易。
 
-.. noge::
+.. note::
 
    不过我为了统一环境，还是采用 :ref:`homebrew` 完成安装
 
