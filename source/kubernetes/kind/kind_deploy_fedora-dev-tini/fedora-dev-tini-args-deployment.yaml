@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: fedora-dev-service
   labels:
-    app: fedora-dev-tini
+    app: fedora-dev-tini-args
 spec:
   #type: LoadBalancer
   ports:
@@ -21,26 +21,37 @@ spec:
       port: 443
       targetPort: 443
   selector:
-    app: fedora-dev-tini
+    app: fedora-dev-tini-args
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fedora-dev-tini
+  name: fedora-dev-tini-args
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fedora-dev-tini
+      app: fedora-dev-tini-args
   template:
     metadata:
       labels:
-        app: fedora-dev-tini
+        app: fedora-dev-tini-args
     spec:
       containers:
-      - name: fedora-dev-tini
+      - name: fedora-dev-tini-args
         image: localhost:5001/fedora-dev-tini:latest
         ports:
           - containerPort: 22
             name: ssh
             protocol: TCP
+        args:
+          - /bin/sh
+          - -c
+          - touch /tmp/healthy; sleep 10; echo 'Hello from fedora-dev-tini'; date; while true; do (sleep 120; echo 'Hello from fedora-dev-tini'; date); done
+        livenessProbe:
+          exec:
+            command:
+              - cat
+              - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5

@@ -16,7 +16,10 @@ kubelet使用 ``startup`` 侦测来获知一个容器应用是否已经启动。
 
 .. note::
 
-   本文案例可以采用 :ref:`install_run_minikube` 来验证。
+   本文案例可以采用以下测试平台验证:
+
+   - :ref:`install_run_minikube`
+   - :ref:`kind`
 
 定义liveness命令
 =================

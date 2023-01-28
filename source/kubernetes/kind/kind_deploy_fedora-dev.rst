@@ -90,3 +90,5 @@ kind部署 ``fedora-dev``
 之前在探索 :ref:`docker_systemd` 时发现 `How to run systemd in a container <https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/>`_ 使用 ``Podman`` 在容器中运行 systemd ，我Google了很久也没有找到 :ref:`systemd` 作为 Kubernetes pods 的 ``init`` 方法。似乎只有 ``Podman`` 才建议使用 :ref:`systemd` ，而 :ref:`docker` 默认则采用 :ref:`docker_tini` 作为init。
 
 我暂时改为 :ref:`docker_tini` 来重新构建 :ref:`fedora_tini_image` ，有关 :ref:`systemd` 作为init的Kubernets pod，我后续再探索...
+
+动

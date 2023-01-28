@@ -1,0 +1,52 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fedora-dev-service
+  labels:
+    app: fedora-dev-tini-1port-livefile-readyfile
+spec:
+  #type: LoadBalancer
+  ports:
+    - name: ssh
+      protocol: TCP
+      port: 22
+      targetPort: 22
+  selector:
+    app: fedora-dev-tini-1port-livefile-readyfile
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fedora-dev-tini-1port-livefile-readyfile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fedora-dev-tini-1port-livefile-readyfile
+  template:
+    metadata:
+      labels:
+        app: fedora-dev-tini-1port-livefile-readyfile
+    spec:
+      containers:
+      - name: fedora-dev-tini-1port-livefile-readyfile
+        image: localhost:5001/fedora-dev-tini:latest
+        ports:
+          - containerPort: 22
+            name: ssh
+            protocol: TCP
+        livenessProbe:
+          exec:
+            command:
+            - cat
+            - /etc/hosts
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /etc/hosts
+          initialDelaySeconds: 5
+          periodSeconds: 5
