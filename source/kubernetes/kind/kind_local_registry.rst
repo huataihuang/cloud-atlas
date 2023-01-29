@@ -17,6 +17,10 @@ kind也提供了一种符合我们使用习惯的的本地Registry方式，即�
    :language: bash
    :caption: kind官方提供kind-with-registry.sh，可创建具备本地Registry的kind集群
 
+.. note::
+
+   推荐采用 ``本方法`` 替代 :ref:`kind_multi_node`
+
 ARM架构Linux环境部署
 ----------------------
 

@@ -29,7 +29,7 @@ kind官方网站提供了 `kind-example-config <https://raw.githubusercontent.co
 
 .. note::
 
-   为方便使用，可以采用 :ref:`kind_local_registry` 中脚本方法(配置文件相同，但增加了创建本地Registry步骤)。
+   为方便使用， **建议** 采用 :ref:`kind_local_registry` 中脚本方法(配置文件相同，但增加了创建本地Registry步骤)。
 
 .. note::
 

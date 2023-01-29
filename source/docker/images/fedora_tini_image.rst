@@ -63,6 +63,10 @@ Fedora镜像(采用tini替代systemd)
 tini运行ssh ``fedora-ssh-tini``
 ====================================
 
+.. note::
+
+   `How to enable SSH connections into a Kubernetes pod <https://blog.lapw.at/how-to-enable-ssh-into-a-kubernetes-pod/>`_ 提供了一个更好的部署SSH key的 :ref:`config_pod_by_configmap` 方法，适合对不同用户在部署pods时候注入SSH key和构建用户HOME目录，后续借鉴实践。
+
 按照 :ref:`docker_tini` 经验总结，采用以下方法实现Docker容器内通过 :ref:`systemd` 运行ssh，实现一个初始完备的远程可登录 :ref:`fedora` 系统:
 
 - ``fedora-ssh-tini`` 包含了安装 :ref:`docker_tini` 以及 :ref:`ssh` 服务，并构建基于认证的SSH登陆环境:

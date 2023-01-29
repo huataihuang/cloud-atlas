@@ -33,7 +33,7 @@ kind部署 ``fedora-dev-tini`` (tini替代systmed)
    :language: bash
    :caption: 将 ``fedora-dev-tini`` 部署到kind集群
 
-- 如果一切正常(显然不会这么简单，见下文我的折腾)，此时会看到::
+- (我已经修正 :ref:`fedora_tini_image` ``fedora-dev-tini`` 镜像)如果一切正常(显然不会这么简单，见下文我的折腾)，此时会看到::
 
    % kubectl get pods
    NAME                                READY   STATUS    RESTARTS     AGE
@@ -60,9 +60,10 @@ kind部署 ``fedora-dev-tini`` (tini替代systmed)
 
    我在实践中，按照上文部署 ``fedora-dev-tini`` 遇到很多波折，原因是我最初构建 :ref:`fedora_tini_image` 时使用的 ``/entrypoint.sh`` 脚本采用的是 :ref:`docker_tini` 的 ``entrypoint_ssh_cron_bash`` :
 
-   .. literalinclude::  ../../docker/images/fedora_tini_image/ssh/entrypoint_ssh_cron_bash
+   .. literalinclude::  ../../docker/init/docker_tini/entrypoint_ssh_cron_bash
       :language: bash
       :caption: 采用 :ref:`docker_tini` 的 ``entrypoint_ssh_cron_bash`` 存在缺陷，Kubernetes会判断命令运行结束，导致pod不断Crash
+      :emphasize-lines: 15,16
 
    排查和修正方法见下文，实际通过改进 ``/entrypoint.sh`` 脚本来解决(见最后)
 
