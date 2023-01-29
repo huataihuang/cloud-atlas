@@ -22,6 +22,13 @@ Kubernetes Ingress比较
    :widths: 20,20,30,30
    :header-rows: 1
 
+我个人计划分别实践以下Ingress:
+
+.. csv-table:: 计划实践Ingress列表
+   :file: compare_k8s_ingress/k8s_ingress_in_action.csv
+   :widths: 20,80
+   :header-rows: 1
+
 参考
 ======
 
