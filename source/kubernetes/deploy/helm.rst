@@ -28,6 +28,12 @@ Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和�
    tar -zxvf helm-v2.14.1-darwin-amd64.tar.gz
    sudo mv darwin-amd64/helm /usr/local/bin/helm
 
+推荐采用 :ref:`homebrew` 安装和维护:
+
+.. literalinclude:: helm/homebrew_helm_install
+   :language: bash
+   :caption: 在 :ref:`macos` 平台通过 :ref:`homebrew` 安装Helm
+
 - 在 Linux 安装:
 
 .. literalinclude:: helm/linux_helm_install
@@ -37,6 +43,10 @@ Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和�
 .. note::
 
    其他操作系统二进制版本安装方法类似
+
+.. note::
+
+   在 :ref:`macos` 平台推荐采用 :ref:`homebrew` 安装，便于升级维护；在Linux上建议采用发行版仓库安装
 
 脚本安装
 ---------
@@ -51,32 +61,47 @@ https://git.io/get_helm.sh 提供了安装脚本::
 
 需要注意的是，上述网站访问可能需要翻墙。
 
-安装Tiller
-=============
+安装Tiller(废弃)
+===========================
+
+.. warning::
+
+   `Helm v3 Beta 1 Released <https://helm.sh/blog/helm-v3-beta/>`_ :
+
+   - 从Helm v3开始，已经移除了 ``Tiller`` ，不再需要集群的 ``admin`` 权限，也不需要在任何namespace安装Tiller了
+   - 对应 ``helm init`` 命令也不存在了，所以本段落安装步骤 **只适合 Helm v2** ，你可以看到我现在很多实践helm安装已经没有 ``Tiller`` 步骤(例如 :ref:`install_ingress_nginx` )
 
 Tiller是 ``helm`` 命令的集群端组件，用于接收 ``helm`` 的命令并直接和Kubernetes API通讯以实际执行创建或删除资源的工作。大多数云平台激活了称为基于角色的访问控制(Role-Based Access Control, RBAC)功能。这种环境下，为了能够给予 Tiller 足够权限，可以使用 Kubernetes ``serviceaccount`` 资源。
 
 最简单的在集群上安装 ``tiller`` 是使用 ``helm init`` 命令，该命令会校验 ``helm`` 的本地环境以便正确设置。然后会连接到 ``kubectl`` 默认连接的集群( 通过 ``kubectl config view`` 可以看到当前默认配置连接的集群 )，一旦正确连接到集群，就会在  ``kube-system`` 名字空间中安装 ``tiller`` 。
 
-- 检查本地 ``kubectl`` 连接的默认集群::
+- 检查本地 ``kubectl`` 连接的默认集群:
 
-   kubectl config view
+.. literalinclude:: helm/check_k8s_config
+   :language: bash
+   :caption: 检查当前连接的Kubernetes集群
 
 .. note::
 
-   请检查当前连接集群 ``current-context`` 是否正确，如果是多个集群，需要使用 ``kubectl config set current-context my-context`` 切换。
+   请检查当前连接集群 ``current-context`` 是否正确，如果是多个集群，需要使用: ``kubectl config set current-context my-context`` 切换。
 
-- 在 ``kube-system`` 名字空间创建 ``tiller`` 的 ``serviceaccount`` ::
+- 在 ``kube-system`` 名字空间创建 ``tiller`` 的 ``serviceaccount`` :
 
-   kubectl -n kube-system create serviceaccount tiller
+.. literalinclude:: helm/create_tiller_serviceaccount
+   :language: bash
+   :caption: 创建tiller的serviceaccount
 
-- 将 ``tiller`` 这个 ``serviceaccount`` 绑定到 ``cluster-admin`` 角色::
+- 将 ``tiller`` 这个 ``serviceaccount`` 绑定到 ``cluster-admin`` 角色:
 
-   kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+.. literalinclude:: helm/clusterrolebinding_tiller
+   :language: bash
+   :caption: tiller的serviceaccount绑定到cluster-admin角色
 
-- 执行 ``helm init`` 则将 ``tiller`` 安装到集群中::
+- 执行 ``helm init`` 则将 ``tiller`` 安装到集群中:
 
-   helm init --service-account tiller
+.. literalinclude:: helm/helm_init
+   :language: bash
+   :caption: helm init安装tiller
 
 .. note::
 
