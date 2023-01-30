@@ -33,15 +33,16 @@ kind部署 ``fedora-dev-tini`` (tini替代systmed)
    :language: bash
    :caption: 将 ``fedora-dev-tini`` 部署到kind集群
 
-- (我已经修正 :ref:`fedora_tini_image` ``fedora-dev-tini`` 镜像)如果一切正常(显然不会这么简单，见下文我的折腾)，此时会看到::
+- (我已经修正 :ref:`fedora_tini_image` ``fedora-dev-tini`` 镜像)如果一切正常(显然不会这么简单，见下文我的折腾)，此时会看到:
 
-   % kubectl get pods
-   NAME                                READY   STATUS    RESTARTS     AGE
-   fedora-dev-tini-6d6d88c84f-864s7    1/1     Running   0            25s
+.. literalinclude:: kind_deploy_fedora-dev-tini/get_pods
+   :language: bash
+   :caption: 部署 ``fedora-dev-tini`` 后检查 ``kubectl get pods``
 
-   % kubectl get services
-   NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                 AGE
-   fedora-dev-service   ClusterIP   10.96.175.32    <none>        22/TCP,80/TCP,443/TCP   47h
+.. literalinclude:: kind_deploy_fedora-dev-tini/get_services
+   :language: bash
+   :caption: 部署 ``fedora-dev-tini`` 后检查 ``kubectl get services``
+   :emphasize-lines: 3
 
 .. note::
 
@@ -51,7 +52,7 @@ kind部署 ``fedora-dev-tini`` (tini替代systmed)
 
 .. note::
 
-   部署成功也仅是第一步，因为还需要配置 :ref:`kind_ingress` 和 :ref:`kind_loadbalancer` 才能对外提供服务
+   部署成功也仅是第一步，因为还需要配置 :ref:`kind_ingress` 和 :ref:`metallb_with_kind` 才能对外提供服务
 
 异常排查
 ============
