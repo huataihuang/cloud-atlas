@@ -64,6 +64,12 @@
    :language: bash
    :caption: 分配一段IP地址保留给MetalLB用于对外VIP实例
 
+.. note::
+
+   这里同时定义了 ``dev-ip-pool`` 地址池( ``kind: IPAddressPool`` )，并且声明了ARP公告( ``kind: L2Advertisement`` ) 这样外部才能访问到
+
+   奇怪，我这里在 ARP公告( ``kind: L2Advertisement``  ) 没有像  :ref:`metallb_with_cilium` 那样设置spec，似乎也能访问
+
 - 应用地址:
 
 .. literalinclude:: metallb_with_kind/apply_metallb-config
