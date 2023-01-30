@@ -32,6 +32,15 @@ Ingress不会输出随机端口或协议。对于需要输出HTTP和HTTPS以外�
    
    流量发送给服务的简单Ingress示例
 
+Ingress可以配置为 :ref:`k8s_services` 提供外部可访问的(externally-reachable) URLs，负载均衡流量，终结 SSL/TLS ，以及提供基于名字的虚拟主机(name-based virtual hosting)(这些都是传统的WEB服务器 :ref:`nginx` 的功能)。 :ref:`ingress_controller` 负责实现Ingress(fulfilling the Ingress，我理解就是负责控制类似 :ref:`nginx` 这样的ingress resources配置)，通常是通过负载均衡来实现Ingress(也就是类似NGIX内置的反向代理功能，转发流量给后端实际应用服务器)。不过
+:ref:`ingress_controller` 也能够配置边缘路由器或者其他前端来帮助处理流量(这里 ``Ingress Controller`` 的功能边界有点模糊，可能有些厂商也增加了通过 ``Ingress Controller`` 来控制一些特定厂商的路由器)。
+
+Ingress 一般仅负责 HTTP 和 HTTPS 服务的对外公开，其他端口和协议通常使用 :ref:`k8s_services_nodeport` 或 :ref:`k8s_services_loadbalancer` 来做对外公开。
+
+.. note::
+
+   不过， :ref:`ingress_nginx` 也支持 UCP/TCP 反向代理，所以实际上也可以用 :ref:`ingress_nginx` 来完成对外 :ref:`ssh` 输出(标准方法是使用 :ref:`k8s_services_loadbalancer` )
+
 参考
 ======
 
