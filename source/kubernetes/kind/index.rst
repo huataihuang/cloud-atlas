@@ -27,7 +27,8 @@ kind(本地docker模拟k8s集群)
    kind_container_nfs_volume.rst
    kind_ingress.rst
    kind_ingress_nginx.rst
-   kind_loadbalancer.rst
+   ../network/metallb/metallb_with_kind.rst
+   docker_macos_kind_port_forwarding.rst
 
 .. only::  subproject and html
 
