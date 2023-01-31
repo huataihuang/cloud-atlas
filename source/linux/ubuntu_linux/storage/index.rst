@@ -7,7 +7,7 @@ Ubuntu存储管理
 .. toctree::
    :maxdepth: 1
 
-   ubunut_nfs.rst
+   ubuntu_nfs.rst
 
 .. only::  subproject and html
 

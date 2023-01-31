@@ -122,3 +122,4 @@ Docker Desktop for mac 端口转发(port forwarding)
 ========
 
 - `Installing iptables in docker container based on alpinelinux <https://stackoverflow.com/questions/41706983/installing-iptables-in-docker-container-based-on-alpinelinux>`_ 
+- `Running (and debugging) iptables inside a Docker container <https://hangarau.space/running-and-debugging-iptables-inside-a-docker-container/>`_
