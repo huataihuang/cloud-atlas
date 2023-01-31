@@ -1,8 +1,8 @@
-.. _kind_container_nfs_volume:
+.. _docker_macos_kind_nfs_sharing:
 
-=============================
-kind容器使用共享NFS卷
-=============================
+=================================================
+Docker Desktop for mac部署kind容器使用共享NFS卷
+=================================================
 
 在 :ref:`kind_run_simple_container` 访问共享的NFS可以部署一种共享数据的发布模式:
 

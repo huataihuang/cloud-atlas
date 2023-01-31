@@ -13,7 +13,7 @@ File sharing
 
 - 你可以添加自己指定的共享目录，如下:
 
-.. figure:: ../../_static/docker/startup/docker_file_sharing.png
+.. figure:: ../../_static/docker/desktop/docker_file_sharing.png
    :scale: 80
 
 然后点击右下角的 ``Apply & Restart`` 按钮生效。
@@ -70,7 +70,7 @@ File sharing
   - ``Clean/Purge data`` : A disk image reset destroys all Docker containers and images local to the machine, preserving all settings.
   - ``Reset Docker Desktop to factory defaults`` : A factory reset destroys all Docker containers and images local to the machine, and restores the application to its original state, as when it was first installed.
 
-.. figure:: ../../_static/docker/startup/docker_troubleshoot.png
+.. figure:: ../../_static/docker/desktop/docker_troubleshoot.png
    :scale: 75
 
 我首先尝试 ``Clean/Purge data`` 这个过程实际上就是移除所有镜像和容器，完成以后，需要重新走以便镜像创建和容器创建，即再次执行::

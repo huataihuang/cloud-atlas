@@ -109,7 +109,7 @@ Homebrew Cask
 
    例如，安装 :ref:`install_docker_macos` 中安装Docker Desktop on Mac，应该使用:
 
-   .. literalinclude:: ../../docker/startup/install_docker_macos/brew_install_docker
+   .. literalinclude:: ../../docker/desktop/install_docker_macos/brew_install_docker
       :language: bash
       :caption: 通过Homebrew安装Docker Desktop for macOS
 

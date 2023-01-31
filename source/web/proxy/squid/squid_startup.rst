@@ -49,6 +49,11 @@ Squid快速起步
 .. literalinclude:: squid_startup/squid.conf
    :language: bash
    :caption: fedora默认初始squid配置: /etc/squid/squid.conf
+   :emphasize-lines: 36
+
+.. note::
+
+   :ref:`fedora` 发行版安装squid默认没有启用本地缓存目录，修改了上述一行 ``cache_dir`` 配置
 
 - 重启服务::
 
