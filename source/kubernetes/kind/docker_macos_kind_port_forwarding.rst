@@ -100,6 +100,17 @@ Docker Desktop for mac 端口转发(port forwarding)
 
 此时就完成了所有端口转发的配置，从Host主机访问本机(所有网络接口)的端口 ``10001`` 都会被 :ref:`docker_desktop` 映射到 ``dev-gw`` 虚拟机，然后又被 ``dev-gw`` 端口转发给目标 :ref:`metallb_with_kind` 对外提供的 ``fedora-dev`` 虚拟机的 ``fedora-dev-service`` 服务上(对外提供了多个服务端口)。整个过程虽然繁复，但是能够真正实现访问 :ref:`kind` 集群提供的Kubernetes服务，和生产环境没有差别。
 
+改进
+=======
+
+- 为了方便快捷完成端口转发，修订运行 ``dev-gw`` 容器的命令，将 ``iptables_port_forwarding`` 脚本直接 ``bind`` 到容器内部，这样随时可以在物理主机上修改好脚本，只要重新创建一次容器就可以运行了:
+
+.. literalinclude:: docker_macos_kind_port_forwarding/run_dev-gw_container_bind_mounts
+   :language: bash
+   :caption:  ``dev-gw`` 容器运行时bind mount进端口转发脚本，方便自动执行
+   :emphasize-lines: 3
+
+
 下一步
 ========
 
