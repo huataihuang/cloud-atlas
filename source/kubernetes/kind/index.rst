@@ -24,11 +24,11 @@ kind(本地docker模拟k8s集群)
    kind_run_simple_container.rst
    kind_deploy_fedora-dev.rst
    kind_deploy_fedora-dev-tini.rst
-   kind_container_nfs_volume.rst
    kind_ingress.rst
    kind_ingress_nginx.rst
    ../network/metallb/metallb_with_kind.rst
    docker_macos_kind_port_forwarding.rst
+   docker_macos_kind_nfs_sharing.rst
 
 .. only::  subproject and html
 

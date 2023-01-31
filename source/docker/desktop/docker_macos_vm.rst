@@ -6,7 +6,7 @@ Docker Desktop on Mac 虚拟机
 
 :ref:`install_docker_macos` 后，底层原理是在 :ref:`macos` 的 :ref:`xhyve` Hypervisor上运行了一个KVM虚拟机( :ref:`alpine_linux` ):
 
-.. figure:: ../../_static/docker/startup/docker-for-mac-install.png
+.. figure:: ../../_static/docker/desktop/docker-for-mac-install.png
    :scale: 50
 
 这个虚拟机是 :ref:`macos` 上运行的一个全功能虚拟机，实际上可以实现很多有趣的功能:

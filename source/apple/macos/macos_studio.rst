@@ -59,7 +59,7 @@ macOS工作室
 
 - 通过 :ref:`homebrew` :ref:`install_docker_macos` :
 
-.. literalinclude:: ../../docker/startup/install_docker_macos/brew_install_docker
+.. literalinclude:: ../../docker/desktop/install_docker_macos/brew_install_docker
    :language: bash
    :caption: 通过Homebrew安装Docker Desktop for macOS
 
