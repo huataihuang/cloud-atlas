@@ -40,8 +40,11 @@ ENTRYPOINT ["/tini", "--"]
 COPY entrypoint_ssh_cron_bash /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Fedora docker image not include systemd,install systemd by initscripts
-RUN dnf -y install which sudo passwd openssh-clients openssh-server
+# not need systemd(initscripts)
+RUN dnf -y install which sudo passwd openssh-clients openssh-server \
+    iproute net-tools bind-utils bzip2 tmux sysstat nfs-utils lsof \
+    procps tree file mlocate rsync cronie cronie-anacron \
+    iptables-services
 
 # add account "admin" and give sudo privilege
 RUN groupadd -g 505 admin
