@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# 需要在host主机(也就是Docker 虚拟机)内部执行以下这行命令激活内核IP转发
+#echo 1 > /proc/sys/net/ipv4/ip_forward
+
+iptables -F
+iptables -t nat -F
+iptables -X
+
+dev_gw="172.22.0.12"
+
+fedora_dev="172.22.255.201"
+fedora_dev_ssh="10001"
+
+iptables -t nat -A PREROUTING -p tcp --dport ${fedora_dev_ssh} -j DNAT --to-destination ${fedora_dev}:22
+iptables -t nat -A POSTROUTING -p tcp -d ${fedora_dev} --dport 22 -j SNAT --to-source ${dev_gw}

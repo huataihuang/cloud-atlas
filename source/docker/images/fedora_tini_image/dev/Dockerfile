@@ -40,7 +40,7 @@ ENTRYPOINT ["/tini", "--"]
 COPY entrypoint_ssh_cron_bash /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Fedora docker image not include systemd,install systemd by initscripts
+# not need systemd(initscripts)
 RUN dnf -y install which sudo passwd openssh-clients openssh-server \
     vim iproute net-tools bind-utils bzip2 tmux sysstat nfs-utils lsof \
     procps tree file mlocate rsync cronie cronie-anacron \
