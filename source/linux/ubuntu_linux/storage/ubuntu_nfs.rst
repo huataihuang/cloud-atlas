@@ -1,4 +1,4 @@
-.. _ubunut_nfs:
+.. _ubuntu_nfs:
 
 ==================
 Ubuntu NFS部署
