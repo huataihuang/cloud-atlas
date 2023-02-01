@@ -4,7 +4,7 @@
 Docker Desktop for mac 端口转发(port forwarding)
 ==================================================
 
-在完成 :ref:`metallb_with_kind` 之后，也就已经实现了标准Kubernets集群应用部署的输出了。但是对于 :ref:`docker_desktop_network` 限制，实际上整个Kubernets都是在一个Linux虚拟机中运行，从物理足迹 :ref:`macos` 上不能直接访问这个输出地址，还需要做一个端口转发(port forwarding)来访问。
+在完成 :ref:`metallb_with_kind` 之后，也就已经实现了标准Kubernets集群应用部署的输出了。但是对于 :ref:`docker_desktop_network` 限制，实际上整个Kubernets都是在一个Linux虚拟机中运行，从物理主机 :ref:`macos` 上不能直接访问这个输出地址，还需要做一个端口转发(port forwarding)来访问。
 
 .. note::
 

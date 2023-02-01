@@ -11,49 +11,28 @@ macOS系统NFS服务
 通过NFS输出macOS上目录
 =======================
 
-- 首先在macOS主机上启动NFS服务::
+- 首先在macOS主机上启动NFS服务:
 
-   sudo nfsd enable
+.. literalinclude:: macos_nfs/macos_enable_nfs
+   :language: bash
+   :caption: macOS主机上启动NFS服
 
 如果系统已经启用过nfsd，则可能提示::
 
    The nfsd service is already enabled.
+   Can't open /etc/exports, No such file or directory
 
-- 可以检查nfs服务::
+- 检查nfs服务(portmapper):
 
-   sudo rpcinfo -p
+.. literalinclude:: macos_nfs/rpcinfo
+   :language: bash
+   :caption: 使用rpcinfo检查本机的portmapper
 
-输出显示::
+输出显示:
 
-      program vers proto   port
-       100000    2   udp    111  rpcbind
-       100000    3   udp    111  rpcbind
-       100000    4   udp    111  rpcbind
-       100000    2   tcp    111  rpcbind
-       100000    3   tcp    111  rpcbind
-       100000    4   tcp    111  rpcbind
-       100024    1   udp    877  status
-       100021    0   udp    788  nlockmgr
-       100024    1   tcp    901  status
-       100021    1   udp    788  nlockmgr
-       100021    3   udp    788  nlockmgr
-       100021    4   udp    788  nlockmgr
-       100021    0   tcp    897  nlockmgr
-       100021    1   tcp    897  nlockmgr
-       100021    3   tcp    897  nlockmgr
-       100021    4   tcp    897  nlockmgr
-       100003    2   udp   2049  nfs
-       100003    3   udp   2049  nfs
-       100003    2   tcp   2049  nfs
-       100003    3   tcp   2049  nfs
-       100011    1   udp    714  rquotad
-       100011    2   udp    714  rquotad
-       100011    1   tcp    852  rquotad
-       100005    1   udp    928  mountd
-       100011    2   tcp    852  rquotad
-       100005    3   udp    928  mountd
-       100005    1   tcp    858  mountd
-       100005    3   tcp    858  mountd
+.. literalinclude:: macos_nfs/rpcinfo_output
+   :language: bash
+   :caption: 使用rpcinfo检查本机的portmapper的输出信息
 
 如果 ``rpcinfo -p`` 输出显示超时::
 
@@ -90,18 +69,22 @@ macOS系统NFS服务
 
    nfsd checkexports
 
-- 重启一次服务::
+- 重启一次nfs服务:
 
-   nfsd restart
+.. literalinclude:: macos_nfs/restart_nfs
+   :language: bash
+   :caption: 重启 :ref:`macos` 的nfs服务
 
-- 最后检查输出的共享是否正确::
+- 最后检查输出的共享是否正确:
 
-   showmount -a
+.. literalinclude:: macos_nfs/showmount
+   :language: bash
+   :caption: 检查服务器端输出挂载(已经在Linux挂载NFS)
 
 显示::
 
-   Exports list on localhost:
-   /System/Volumes/Data/Users/dev      192.168.6.0
+   All mounts on localhost:
+   192.168.6.200:/System/Volumes/Data/Users/dev
 
 NFS客户端访问
 ================
