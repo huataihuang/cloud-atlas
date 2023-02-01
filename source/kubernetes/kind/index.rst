@@ -29,6 +29,7 @@ kind(本地docker模拟k8s集群)
    ../network/metallb/metallb_with_kind.rst
    docker_macos_kind_port_forwarding.rst
    docker_macos_kind_nfs_sharing.rst
+   docker_macos_kind_nfs_sharing_nfs_ssh_tunnel.rst
 
 .. only::  subproject and html
 
