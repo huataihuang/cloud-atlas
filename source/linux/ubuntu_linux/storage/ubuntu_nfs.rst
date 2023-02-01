@@ -60,9 +60,11 @@ NFS服务器配置
 NFS客户端安装
 =============
 
-- 安装NFS客户端::
+- 安装NFS客户端:
 
-   sudo apt install nfs-common
+.. literalinclude:: ubuntu_nfs/instatll_nfs_client
+   :language: bash
+   :caption: Ubuntu安装NFS客户端
 
 NFS客户端配置
 ==============
