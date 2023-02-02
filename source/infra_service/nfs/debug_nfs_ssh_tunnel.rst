@@ -1,112 +1,23 @@
-.. _docker_macos_kind_nfs_sharing_nfs_ssh_tunnel:
+.. _debug_nfs_ssh_tunnel:
 
 ===============================================================================
-(正在探索)Docker Desktop for mac部署kind容器通过 ``SSH Tunnel`` 使用共享NFS卷
+排查通过 ``SSH Tunnel`` 使用共享NFS卷
 ===============================================================================
 
-我在 :ref:`docker_macos_kind_nfs_sharing` 折腾了很久也没有成功，原因是 :ref:`docker_desktop` for mac使用了Linux VM来运行Docker容器，导致和物理主机macOS隔离， :ref:`docker_bind_mount` 到容器内部后无法作为文件系统NFS输出。
+在 :ref:`docker_macos_kind_nfs_sharing_nfs_ssh_tunnel` 采用 :ref:`ssh_tunneling` 来打通 :ref:`docker_desktop` 中容器访问 :ref:`docker_macos_vm` 之外的物理主机( :ref:`macos` )的NFS共享。存在的技术难点其实和 :ref:`run_nfs_behind_firewall` 是一样的。
 
-:ref:`docker_macos_kind_port_forwarding` 实现了在物理主机 :ref:`macos` 直接SSH登陆到 :ref:`kind` 运行的pod中的容器，那么，带来一种可能:
+排查和折腾过程记录在此，也算经验积累:
 
-- 使用 :ref:`ssh_tunneling_remote_port_forwarding` 让 :ref:`kind` 运行的pod中的容器反过来直接通过 SSH Tunnel 访问到物理主机的NFS服务
+实践环境
+==========
 
-  - ``dev-gw`` 已经实现了SSH登陆，和 :ref:`kind` 集群的节点连接在同一个 ``kind`` 自定义bridge上
-  - :ref:`ssh_tunneling_remote_port_forwarding` 将必要的NFS访问端口都映射到 ``dev-gw`` 上，相当于在 ``dev-gw`` 提供了NFS服务
-  - 所有 :ref:`kind` 集群的 pod 就可以通过 NFS 方式访问 :ref:`macos` 物理主机目录，实现数据持久化(也方便在物理主机上维护数据)
+首先完成:
 
-准备工作
-=============
+- :ref:`docker_macos_kind_port_forwarding` 在容器和 :ref:`macos` 之间部署了一台中间桥接容器 ``dev-gw``
+- :ref:`macos_nfs_sharing` 物理主机的一个目录
+- :ref:`nfs_ssh_tunnel` 
 
-- :ref:`docker_macos_kind_port_forwarding` 部署好中间容器 ``dev-gw``
-
-.. _macos_nfs_sharing:
-
-部署 :ref:`macos_nfs` 共享
----------------------------
-
-采用 :ref:`macos_nfs` 部署一个共享的 NFS 输出 ``docs`` :
-
-- 在 :ref:`macos` 物理主机上启动NFS服务:
-
-.. literalinclude:: ../../apple/macos/macos_nfs/macos_enable_nfs
-   :language: bash
-   :caption: macOS主机上启动NFS服
-
-- 检查nfs服务:
-
-.. literalinclude:: ../../apple/macos/macos_nfs/rpcinfo
-   :language: bash
-   :caption: 使用rpcinfo检查本机的portmapper
-
-输出信息:
-
-.. literalinclude:: ../../apple/macos/macos_nfs/rpcinfo_output
-   :language: bash
-   :caption: 使用rpcinfo检查本机的portmapper的输出信息
-
-- 配置 ``/etc/exports`` :
-
-.. literalinclude:: docker_macos_kind_nfs_sharing_nfs_ssh_tunnel/exports
-   :language: bash
-   :caption: 配置物理主机 :ref:`macos` 的 ``/etc/exports`` 设置NFS输出目录
-
-.. note::
-
-   ``-maproot=501:20`` 将远程root用户映射到本地用户 ``uid=501,gid=20`` ，这样才能读写目录
-
-- 重启nfs服务:
-
-.. literalinclude:: ../../apple/macos/macos_nfs/restart_nfs
-   :language: bash
-   :caption: 重启 :ref:`macos` 的nfs服务
-
-- 在网络中一台Linux主机上尝试挂载一次NFS卷验证::
-
-   sudo mkdir /studio
-   sudo mount -t nfs <macos_nfs_server_ip>:/Users/huataihuang/docs/studio /studio
-
-如果没有异常挂载成功，则在 :ref:`macos` 服务端检查共享:
-
-.. literalinclude:: ../../apple/macos/macos_nfs/showmount
-   :language: bash
-   :caption: 检查服务器端输出挂载(已经在Linux挂载NFS)
-
-输出可以看到远程的NFS客户端IP地址以及挂载本机的卷信息::
-
-   All mounts on localhost:
-   192.168.6.200:/Users/huataihuang/docs/studio
-
-准备就绪，接下来就可以结合 :ref:`ssh_tunneling_remote_port_forwarding` 将NFS输出给 :ref:`docker_desktop` for mac 虚拟机中运行的 :ref:`kind` 容器挂载NFS了
-
-.. _nfs_ssh_tunnel:
-
-:ref:`ssh_tunneling_remote_port_forwarding` 打通访问NFS
-=============================================================
-
-- 根据上文部署 :ref:`macos_nfs` 中 ``rpcinfo -p`` 可以获得NFS访问的端口，并且参考 `Running NFS Behind a Firewall <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/storage_administration_guide/s2-nfs-nfs-firewall-config>`_ 也可以了解到NFS访问的端口列表:
-
-.. csv-table:: macOS NFS端口列表
-   :file: ../../infra_service/nfs/run_macos_nfs_behind_firewall/macos_nfs_ports.csv
-   :widths: 20,20,60
-   :header-rows: 1
-
-- 在 :ref:`macos` 物理主机上，修改 ``~/.ssh/config`` 配置添加以下内容( :ref:`ssh_key` 认证 + :ref:`ssh_multiplexing` )，实现 :ref:`ssh_tunneling_remote_port_forwarding` : 在 ``kind`` 网桥上连接的所有pod容器将能够通过 NFS 挂载 ``dev-gw`` 实际挂载 :ref:`macos` 物理主机上 NFS 输出:
-
-.. literalinclude:: docker_macos_kind_nfs_sharing_nfs_ssh_tunnel/ssh_config
-   :language: bash
-   :caption: 配置macOS物理主机用户目录 ``~/.ssh/config`` 添加 ``dev-gw`` 远程服务器端口转发配置
-
-.. note::
-
-   中间转发服务器 ``dev-gw`` 的 ``/etc/ssh/sshd_config`` 必须配置::
-
-      GatewayPorts yes
-
-   否则 :ref:`ssh_tunneling_remote_port_forwarding` 时，该服务器转发端口只监听回环地址 ``127.0.0.1`` ，就会导致远程NFS客户端无法访问
-
-- 上述SSH配置完成后，只需要执行一条简单的ssh命令就完成 :ref:`ssh_tunneling_remote_port_forwarding` ，并且SSH通道始终打开，方便NFS访问::
-
-   ssh dev-gw
+此时的实践环境已经具备，通过 :ref:`ssh_tunneling` 建立起NFS clinet 和 server之间的网络同路就类似于 :ref:`run_nfs_behind_firewall`
 
 测试
 ========
@@ -142,7 +53,7 @@
 
 - 重新启动一个 ``fedora-dev-tini`` 容器，在 :ref:`fedora_tini_image` 运行 ``fedora-dev-tini`` 容器的命令基础上加上 ``--cap-add sys_amdin`` 参数:
 
-.. literalinclude:: docker_macos_kind_nfs_sharing_nfs_ssh_tunnel/run_fedora-dev-tini_container_sys_admin
+.. literalinclude:: ../../kubernetes/kind/docker_macos_kind_nfs_sharing_nfs_ssh_tunnel/run_fedora-dev-tini_container_sys_admin
    :language: bash
    :caption: 运行 ``fedora-dev-tini`` 容器命令添加 ``--cap-add sys_admin`` 实现容器内NFS挂载权限
    :emphasize-lines: 2
@@ -216,37 +127,22 @@
 
    mount.nfs: Protocol not supported
 
-排查方法参考 `mount.nfs: requested NFS version or transport protocol is not supported <https://thelinuxcluster.com/2020/08/24/mount-nfs-requested-nfs-version-or-transport-protocol-is-not-supported/>`_ 添加 ``-vvvv`` 参数可以详细输出信息 ::
+排查方法参考 `mount.nfs: requested NFS version or transport protocol is not supported <https://thelinuxcluster.com/2020/08/24/mount-nfs-requested-nfs-version-or-transport-protocol-is-not-supported/>`_ 添加 ``-v`` 参数可以详细输出信息 :
 
-   # mount -t nfs -vvvv 172.22.0.12:/Users/huataihuang/docs/studio /studio
-   mount.nfs: timeout set for Thu Feb  2 00:01:08 2023
-   mount.nfs: trying text-based options 'vers=4.2,addr=172.22.0.12,clientaddr=172.22.0.13'
-   mount.nfs: mount(2): Protocol not supported
-   mount.nfs: trying text-based options 'vers=4,minorversion=1,addr=172.22.0.12,clientaddr=172.22.0.13'
-   mount.nfs: mount(2): Protocol not supported
-   mount.nfs: trying text-based options 'vers=4,addr=172.22.0.12,clientaddr=172.22.0.13'
-   mount.nfs: mount(2): Protocol not supported
-   mount.nfs: trying text-based options 'addr=172.22.0.12'
-   mount.nfs: prog 100003, trying vers=3, prot=6
-   mount.nfs: trying 172.22.0.12 prog 100003 vers 3 prot TCP port 2049
-   mount.nfs: prog 100005, trying vers=3, prot=17
-   mount.nfs: portmap query retrying: RPC: Unable to receive - Connection refused
-   mount.nfs: prog 100005, trying vers=3, prot=6
-   mount.nfs: trying 172.22.0.12 prog 100005 vers 3 prot TCP port 975
-   mount.nfs: portmap query failed: RPC: Remote system error - Connection refused
-   mount.nfs: Protocol not supported
+.. literalinclude:: debug_nfs_ssh_tunnel/mount_nfs_ssh_tunnel
+   :language: bash
+   :caption: ``mount -t nfs`` 使用 ``-v`` 参数，但不指定NFS版本
 
-通过 ``-vvvv`` 可以看到，客户端 ``portmap`` 会尝试 RPC ，失败::
+此时会看到NFS客户端先尝试 NFS v4 系列，然后再尝试 NFS v3 系列，但是在RPC调用时失败(连接拒绝):
 
-   mount.nfs: portmap query retrying: RPC: Unable to receive - Connection refused
+.. literalinclude:: debug_nfs_ssh_tunnel/mount_nfs_ssh_tunnel_output
+   :language: bash
+   :caption: ``mount -t nfs`` 使用 ``-v`` 参数，但不指定NFS版本的输出信息
+   :emphasize-lines: 12,15
 
-然后尝试TCP端口 975 也失败(之前漏配置SSH)::
+通过 ``-v`` 可以看到，客户端 ``portmap`` 会尝试 RPC ，失败
 
-   mount.nfs: trying 172.22.0.12 prog 100005 vers 3 prot TCP port 975
-   mount.nfs: portmap query failed: RPC: Remote system error - Connection refused
-
-
-例如，我改为 ``-o vers=3,tcp`` 就看到客户端会连接服务器端口::
+改为 ``-o vers=3,tcp`` 就看到客户端会连接服务器端口::
 
    mount.nfs: timeout set for Thu Feb  2 00:05:18 2023
    mount.nfs: trying text-based options 'vers=3,tcp,addr=172.22.0.12'
@@ -275,19 +171,25 @@
 
 之前Linux物理服务器客户端测试，客户端IP地址和服务器端在同一个网段，似乎没有问题。但是这次是Docker容器，网段是 ``172.22.0.0/16`` 似乎就不行
 
-修改 ``/etc/exports`` ::
+修改 ``/etc/exports`` :
 
-   /Users/huataihuang/docs/studio -maproot=501:20 -network 172.22.0.0 -mask 255.255.0.0
+.. literalinclude:: ../../kubernetes/kind/docker_macos_kind_nfs_sharing_nfs_ssh_tunnel/exports
+   :language: bash
+   :caption: macOS NFS服务器配置 /etc/exports 增加NFS客户端IP地址范围
+   :emphasize-lines: 9
 
-再次挂载NFS，就不报告 ``access denied`` 了，改为::
 
-   # mount -t nfs -vvvv -o vers=3,tcp 172.22.0.12:/Users/huataihuang/docs/studio /studio
-   mount.nfs: timeout set for Thu Feb  2 00:26:01 2023
-   mount.nfs: trying text-based options 'vers=3,tcp,addr=172.22.0.12'
-   mount.nfs: prog 100003, trying vers=3, prot=6
-   mount.nfs: trying 172.22.0.12 prog 100003 vers 3 prot TCP port 2049
-   mount.nfs: portmap query failed: RPC: Unable to receive - Connection reset by peer
-   mount.nfs: Connection reset by peer
+再次挂载NFS(指定NFS v3):
+
+.. literalinclude:: debug_nfs_ssh_tunnel/mount_nfs_v3_ssh_tunnel
+   :language: bash
+   :caption: 使用NFS v3, tcp 挂载macOS共享的NFS目录
+
+输出显示 ``portmap query failed: RPC: Unable to receive - Connection reset by peer`` :
+
+.. literalinclude:: debug_nfs_ssh_tunnel/mount_nfs_v3_ssh_tunnel_output
+   :language: bash
+   :caption: 使用NFS v3, tcp 挂载macOS共享的NFS目录的输出信息显示RPC失败
 
 ``portmap query failed: RPC: Unable to receive - Connection reset by peer`` 是什么意思呢？
 
