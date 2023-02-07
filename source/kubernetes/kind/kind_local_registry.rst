@@ -107,7 +107,7 @@ ARM架构Linux环境部署
 这只是第一步验证，实际上要访问部署在pod的服务，还需要一些步骤:
 
   - :ref:`kind_ingress`
-  - :ref:`kind_loadbalancer`
+  - :ref:`metallb_with_kind`
 
 参考
 =======

@@ -26,7 +26,7 @@ Kind Ingress Patch方式安装集群
 
    这段仅记录
 
-- 对于仅采用 :ref:`ingress` 部署Kind集群(删减掉 :ref:`kind_loadbalancer` )，需要结合 ``extraPortMappings`` 和 ``node-labels`` 部署集群:
+- 对于仅采用 :ref:`ingress` 部署Kind集群(删减掉 :ref:`metallb_with_kind` )，需要结合 ``extraPortMappings`` 和 ``node-labels`` 部署集群:
 
   - ``extraPortMappings`` 允许本地主机在端口80和443向 :ref:`ingress` controller发起请求
   - ``node-labels`` 只允许 :ref:`ingress` controller 运行在符合标签选择(label selector)的特定节点
