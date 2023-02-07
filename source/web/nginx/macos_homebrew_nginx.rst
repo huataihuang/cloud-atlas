@@ -14,3 +14,9 @@ macOS中使用Homebrew部署nginx
    :language: bash
    :caption: 简单修订 /opt/homebrew/etc/nginx/nginx.conf 启用 Sphinx doc 访问
    :emphasize-lines: 13,16
+
+.. note::
+
+   我安装部署 :ref:`mobile_cloud_arm` ( :ref:`apple_silicon_m1_pro` MacBook Pro ) 和 在Intel的 MacBook Pro笔记本上部署 :ref:`macos_studio` ，发现homebrew安装目录不同，并且对应的NGINX的配置文件目录以及具体配置也有差异。
+
+   所以要获取NGINX默认配置，请使用 :ref:`get_nginx_default_config` 方法

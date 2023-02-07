@@ -31,13 +31,13 @@ Docker容器使用NFS
 NFS服务器
 -------------
 
-我的测试NFS服务部署在运行Docker服务的物理主机上，该物理服务器是 :ref:`ubuntu_linux` ，已完成 :ref:`ubunut_nfs` ，共享目录设置如下:
+我的测试NFS服务部署在运行Docker服务的物理主机上，该物理服务器是 :ref:`ubuntu_linux` ，已完成 :ref:`ubuntu_nfs` ，共享目录设置如下:
 
 - `/etc/exportfs` ::
 
    /data   *(rw,sync,no_root_squash,no_subtree_check)
 
-详细部署方法和解释见 :ref:`ubunut_nfs`
+详细部署方法和解释见 :ref:`ubuntu_nfs`
 
 NFS客户端
 -------------

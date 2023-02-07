@@ -8,7 +8,7 @@ macOS工作室起步
 
 .. note::
 
-   商业公司对Linux使用往往仅限于服务器端投入，对于Linux桌面客户端则完全是放弃，因为无利可图。这导致技术工作者想要完全使用Linux工作需要限制自己的应用番位。类似阿里这样的企业，其日常工作沟通完全基于钉钉，这就使得使用Linux工作极其困难。
+   商业公司对Linux使用往往仅限于服务器端投入，对于Linux桌面客户端则完全是放弃，因为无利可图。这导致技术工作者想要完全使用Linux工作需要限制自己的应用范围。类似阿里这样的企业，其日常工作沟通完全基于钉钉，这就使得使用Linux工作极其困难。
 
    不过，我有一个思路是采用 :ref:`chromium_os` 工作，我相信通过一定的技术努力，可以通过Android应用方式打通Linux和商业平台的连接。
 
@@ -36,6 +36,12 @@ macOS软件安装和设置
 
 由于HyperKit源代码安装比较繁琐，所以采用先安装Docker for macOS Desktop软件包来获得HyperKit，也就为后续安装Multipass打下基础。
 
+.. note::
+
+   如果不进行Linux内核开发，而专注于 :ref:`kubernetes` 以及应用软件开发，则可以完全采用 :ref:`docker_desktop` for mac 加上 :ref:`kind` 来构建自己的开发工作环境，实现快速的应用部署
+
+   不过 :ref:`docker_desktop` for mac使用Linux的虚拟机来运行docker，带来和物理主机 :ref:`macos` 共享数据卷非常困难，不如直接使用Linux作为物理主机构建 :ref:`mobile_cloud_x86`
+   
 * :ref:`vmware_fusion`
 
 安装了Docker之后，紧接着安装VMware Fusion虚拟化软件，以便能够借助 :ref:`vmware_nested_virtual` 构建一个 :ref:`openstack` 集群，并在openstack集群之上构建Kubernetes集群或者其他分布式系统。

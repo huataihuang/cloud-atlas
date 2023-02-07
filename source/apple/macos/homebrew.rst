@@ -44,6 +44,12 @@ Homebrew
 - :ref:`curl_proxy`
 - :ref:`git_proxy`
 
+此外，参考 `How to install an homebrew package behind a proxy? <https://apple.stackexchange.com/questions/228865/how-to-install-an-homebrew-package-behind-a-proxy>`_ 有一个简单设置方法:
+
+.. literalinclude:: homebrew/homebrew_proxy
+   :language: bash
+   :caption: 配置brew使用代理服务器 192.168.6.200 端口 3128 (案例采用局域网部署的 :ref:`squid` )
+
 我还采用了一种方法是借助 :ref:`vpn_hotspot` ，通过手机VPN共享给局域网使用，使得自己的桌面电脑能够翻墙直接访问Homebrew的软件仓库，才能顺利完成Homebrew安装。
 
 我在完成 Homebrew 安装完成后，立即安装 :ref:`openconnect_vpn` 客户单 ``openconnect`` ，这样可以方便 :ref:`macos` 翻墙，实现很多必要的软件安装::
