@@ -90,6 +90,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    golang/index
    swift/index
    rust/index
+   ruby/index
    arm/index
    android/index
    bsd/index

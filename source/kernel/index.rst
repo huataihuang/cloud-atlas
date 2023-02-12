@@ -18,6 +18,7 @@ Kernel Atlas
    kms.rst
    accounting/index
    filesystem/index
+   lsm/index
    ebpf/index
    perf/index
    admin/index

@@ -1,13 +1,13 @@
-.. _webdav:
+.. _ruby_startup:
 
 =================================
-WebDAV
+Ruby起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_webdav.rst
+   ruby_quickstart.rst
 
 .. only::  subproject and html
 

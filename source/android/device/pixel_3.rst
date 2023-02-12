@@ -4,7 +4,15 @@
 Pixel 3
 ==============
 
-在使用了2年Pixel之后，2021年中，入手了二手的Pixel 3，以便能够体验最新的Android操作系统。本文是我使用一周的体验和经验总结。
+在使用了2年Pixel之后，2021年中，入手了二手的Pixel 3，以便能够体验最新的Android操作系统。
+
+.. note::
+
+   参考 `Pixel 3 update Android 13 until <https://support.google.com/pixelphone/thread/172131987/pixel-3-update-android-13-until?hl=en>`_ / `Google could have updated the Pixel 3 until Android 13, it just didn't want to <https://www.reddit.com/r/GooglePixel/comments/sx2djm/google_could_have_updated_the_pixel_3_until/>`_ :
+
+   - Pixel 3 使用高通Snapdragon芯片，从高通渠道只能获得2年支持(目前扩展到3年)，所以Pixel 5及之前产品都只有较短的软件生命周期(2年OS更新+1年安全更细)
+   - 从Pixel 6开始(2021年)Google使用了自己研发的SoC，可以提供和 :ref:`apple` 一样的支持周期，长达5年的软件生命周期(4年OS更新+1年安全更新)
+   - 如果经费充足，可以考虑从Pixel 6/7入手，以获得 ``Google Silicon`` 独特的TPU加速，寻求更为炫酷的科技体验
 
 为什么是Pixel 3
 =================

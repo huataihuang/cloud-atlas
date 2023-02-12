@@ -17,6 +17,12 @@ macOS中使用Homebrew部署nginx
 
 .. note::
 
-   我安装部署 :ref:`mobile_cloud_arm` ( :ref:`apple_silicon_m1_pro` MacBook Pro ) 和 在Intel的 MacBook Pro笔记本上部署 :ref:`macos_studio` ，发现homebrew安装目录不同，并且对应的NGINX的配置文件目录以及具体配置也有差异。
+   我安装部署 :ref:`mobile_cloud_arm` ( :ref:`apple_silicon_m1_pro` MacBook Pro ) 和 在Intel的 MacBook Pro笔记本上部署 :ref:`macos_studio` ，发现homebrew安装目录不同( 基础目录是 ``/usr/local`` ，所以得到的 ``nginx.conf`` 是 ``/usr/local/etc/ngnix/ngnix.conf`` )，并且对应的NGINX的配置文件目录以及具体配置也有差异。
 
    所以要获取NGINX默认配置，请使用 :ref:`get_nginx_default_config` 方法
+
+- :ref:`homebrew` 提供了惯例服务启动的功能，所以可以通过以下命令重启 NGINX :
+
+.. literalinclude:: macos_homebrew_nginx/brew_restart_nginx
+   :language: bash
+   :caption: 使用brew重启nginx

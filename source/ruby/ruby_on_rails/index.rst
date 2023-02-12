@@ -1,13 +1,11 @@
-.. _webdav:
+.. _ruby_on_rails:
 
 =================================
-WebDAV
+Ruby on Rails
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   intro_webdav.rst
 
 .. only::  subproject and html
 
