@@ -20,7 +20,7 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 
 .. note::
 
-   `BSD and Linux on an Intel Mac <https://acadix.biz/freebsd-intel-mac.php>`_ 使用 rEFIt 来作为启动管理器，这个工具我之前在 `install_gentoo_on_mbp` 实践过。rEFIt是一种可选的启动管理器，可以免除启动时按 ``alt/option`` 选择启动分区的麻烦。不过，实际上不安装启动器采用 ``alt/option`` 选择启动分区也行，所以我实际跳过这步。
+   `BSD and Linux on an Intel Mac <https://acadix.biz/freebsd-intel-mac.php>`_ 使用 rEFIt 来作为启动管理器，这个工具我之前在 :ref:`install_gentoo_on_mbp` 实践过。rEFIt是一种可选的启动管理器，可以免除启动时按 ``alt/option`` 选择启动分区的麻烦。不过，实际上不安装启动器采用 ``alt/option`` 选择启动分区也行，所以我实际跳过这步。
 
    `BSD and Linux on an Intel Mac <https://acadix.biz/freebsd-intel-mac.php>`_ 也提到了和我相同的经历:现在 ``bootcamp`` 确实不再支持只划分分区，而是必须实际插入Windows安装光盘，否则 ``bootcamp`` 不允许对地盘分区。原文建议当Windows开始安装时，直接强制终止安装(保留新划分出的分区)。
 

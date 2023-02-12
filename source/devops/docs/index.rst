@@ -13,10 +13,10 @@ DevOps 文档
 
    think_write_doc.rst
    write_doc.rst
-   joplin.rst
    obsidian.rst
    sphinx_doc/index
    mkdocs/index
+   joplin/index
    hugo/index
    kindle/index
    pandoc.rst

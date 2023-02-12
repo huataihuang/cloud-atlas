@@ -1,8 +1,11 @@
-.. _joplin:
+.. _intro_joplin:
 
 ============================
-Joplin - 开源Markdown编辑器
+Joplin简介
 ============================
+
+需求
+======
 
 虽然Evernote提供了非常完善的知识管理功能(收集、整理、复习)，但是Evernote并不开源，并且使用私有文档格式，不支持开源文档常用的MarkDown格式。所以，我一直以来想找一个更好的个人知识管理工具:
 
@@ -12,12 +15,18 @@ Joplin - 开源Markdown编辑器
 - 文档管理简便：著名的Notion实在功能太复杂了，并且绑定平台服务
 - 最好支持WEB抓取便于搜集资料
 
-最近，我找到一个开源的Markdown实现 `Joplin笔记应用 <https://joplinapp.org>`_ :
+Joplin带给我们什么
+=====================
+
+开源的Markdown实现 `Joplin笔记应用 <https://joplinapp.org>`_ :
 
 - 开源
+- 提供Note和to-do记录，可以处理大量的笔记，并且可以搜索、复制、标签，也支持采用独立应用编辑
 - 支持不同的服务端进行多设备同步，例如可以使用开源的 NextCloud ，也可以自建 :ref:`webdav` 服务器进行同步
-- 跨平台客户端：提供了iOS版本客户端，也就是你可以在电脑上编辑，在手机上阅读
-- 有开发了基于浏览器的插件可以实现网页抓取
+- 支持 :ref:`evenote_export_joplin_import` 并且导入时保留完整元数据(位置，创建时间和更新时间等等)；微软的OneNote可以先导出导入到Evernote再导入Joplin
+- 跨平台客户端: Windows, Linux, macOS, Android, iOs 都有客户端
+- 通过 `Jopline Cloud <https://joplinapp.org/plans/>`_ (位于法国的云计算厂商收费服务)可以实现多设备同步记事本同步以及企业团队协作；也支持其他云同步，如 Nextcloud, Dropbox, OneDrive
+- 基于浏览器(chome和firefox)的插件可以实现网页抓取
 
 .. note::
 
@@ -29,4 +38,6 @@ Joplin - 开源Markdown编辑器
 
 .. note::
 
-   目前我还没有时间仔细研究，但是这个开源软件的发展方向让我比较中意，我准备自建 :ref:`webdav` 进行多设备同步。
+   我准备自建 :ref:`webdav` 进行多设备同步。
+
+

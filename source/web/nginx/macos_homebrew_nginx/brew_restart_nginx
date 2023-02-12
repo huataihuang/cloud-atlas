@@ -1,0 +1,1 @@
+brew services restart nginx

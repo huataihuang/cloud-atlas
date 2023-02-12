@@ -19,6 +19,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    change_nginx_user.rst
    nginx_reverse_proxy_nodejs.rst
    nginx_redirect_url.rst
+   nginx_webdav.rst
    auth/index
 
 .. only::  subproject and html

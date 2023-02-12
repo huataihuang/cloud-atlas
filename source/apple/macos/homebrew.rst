@@ -104,6 +104,12 @@ Homebrew
 
    brew unpin packagename
 
+- ``brew`` 提供了重启服务的功能，例如重启 :ref:`macos_homebrew_nginx` :
+
+.. literalinclude:: ../../web/nginx/macos_homebrew_nginx/brew_restart_nginx
+   :language: bash
+   :caption: 使用brew重启nginx
+
 Homebrew Cask
 ===============
 

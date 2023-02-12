@@ -22,8 +22,8 @@ Google开发了一个基于Chrome的runtime来运行Android程序 :ref:`archon` 
 
 不过，在Arc Welder和Chrome中运行Android apps很困难，需要下载APK。建议从 `apkmirror.com <https://www.apkmirror.com/>`_ 搜索和下载应用。
 
-Shashlik
-----------
+:strike:`Shashlik`
+----------------------
 
 `Shashlik <http://www.shashlik.io>`_ (shashlik意思是烤肉串) 提供了一个Android模拟层来运行Android Apps:
 
@@ -36,8 +36,15 @@ Shashlik
 
 不过，从 `Shashlik GitHub项目 <http://github.com/shashlik>`_ 来看，开发工作停留在2016年，所以仅参考，不做尝试。
 
+Android Studio
+-----------------
+
+对于应用开发，Android Studio是比较合适的模拟器
+
 :ref:`android-x86`
 ======================
+
+
 
 参考
 =====
