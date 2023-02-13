@@ -18,11 +18,11 @@ NGINX使用的基本认证密码和Apache是一样的，格式类似如下::
 
 每行配置有2个或3个字段，第3个字段是可选的注释；第2个字段的密码是使用C函数 ``crypt()`` 加密的密码，可以使用 ``openssl passwd`` 命令生成
 
-- 创建一个名为 ``huatai`` 的用户，密码使用 ``openssl passwd -apr1 <密码>`` 生成，密码文件的配置可以位于 ``/etc/nginx/.htpasswd`` ::
+- 创建一个名为 ``huatai`` 的用户，密码使用 ``openssl passwd -apr1 <密码>`` 生成，密码文件的配置可以位于 ``/etc/nginx/.htpasswd`` :
 
-   USER=huatai
-   PASSWORD=XXXXXXX
-   printf "${USER}:$(openssl passwd -apr1 ${PASSWORD})\n" >> /etc/nginx/.htpasswd
+.. literalinclude:: nginx_basic_auth/create_htpasswd
+   :language: bash
+   :caption: 创建HTTP认证文件
 
 - 修订 ``/etc/nginx/nginx.conf`` 在 配置中 对应段落添加:
 
