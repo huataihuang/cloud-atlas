@@ -10,6 +10,7 @@ Joplin - 开源Markdown记事本
    intro_joplin.rst
    terminal_joplin.rst
    joplin_import_evernote.rst
+   joplin_clipper.rst
 
 .. only::  subproject and html
 
