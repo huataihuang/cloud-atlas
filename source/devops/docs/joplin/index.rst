@@ -11,6 +11,7 @@ Joplin - 开源Markdown记事本
    terminal_joplin.rst
    joplin_import_evernote.rst
    joplin_clipper.rst
+   joplin_sync_webdav.rst
 
 .. only::  subproject and html
 
