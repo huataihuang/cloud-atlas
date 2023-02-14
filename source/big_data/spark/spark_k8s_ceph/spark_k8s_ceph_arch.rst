@@ -45,7 +45,6 @@ Spark架构
 -----------
 
 .. figure:: ../../../_static/big_data/spark/spark_k8s_ceph/spark_arch.webp
-   :scale: 60
 
    Spark架构
 
@@ -53,7 +52,6 @@ kubernetes作为集群管理器时Spark架构
 ------------------------------------
 
 .. figure:: ../../../_static/big_data/spark/spark_k8s_ceph/spark_on_k8s_arch.webp
-   :scale: 60
 
    Spark工作在Kubernetes集群的架构
 

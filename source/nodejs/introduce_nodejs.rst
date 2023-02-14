@@ -87,7 +87,6 @@ Node和JavaScript的优势之一是它们的单线程编程模型(在浏览器�
 - 异步API
 
 .. figure:: ../_static/nodejs/nodejs_async_io.webp
-   :scale: 70
 
    Node应用异步非阻塞
 
