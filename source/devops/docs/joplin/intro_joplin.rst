@@ -23,7 +23,7 @@ Joplin带给我们什么
 - 开源
 - 提供Note和to-do记录，可以处理大量的笔记，并且可以搜索、复制、标签，也支持采用独立应用编辑
 - 支持不同的服务端进行多设备同步，例如可以使用开源的 NextCloud ，也可以自建 :ref:`webdav` 服务器进行同步
-- 支持 :ref:`evenote_export_joplin_import` 并且导入时保留完整元数据(位置，创建时间和更新时间等等)；微软的OneNote可以先导出导入到Evernote再导入Joplin
+- 支持 :ref:`joplin_import_evernote` 并且导入时保留完整元数据(位置，创建时间和更新时间等等)；微软的OneNote可以先导出导入到Evernote再导入Joplin
 - 跨平台客户端: Windows, Linux, macOS, Android, iOs 都有客户端
 - 通过 `Jopline Cloud <https://joplinapp.org/plans/>`_ (位于法国的云计算厂商收费服务)可以实现多设备同步记事本同步以及企业团队协作；也支持其他云同步，如 Nextcloud, Dropbox, OneDrive
 - 基于浏览器(chome和firefox)的插件可以实现网页抓取
