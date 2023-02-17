@@ -25,14 +25,10 @@ NGINX WebDAV服务器
 :ref:`macos`
 ----------------
 
-- macOS中使用 :ref:`homebrew` 安装NGINX默认已经支持 webDAV ，以下是 :ref:`macos_studio` 安装工具软件命令:
+:ref:`homebrew` NGINX不支持完整WebDAV
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../../apple/macos/homebrew/brew_install
-   :language: bash
-   :caption: 在macOS新系统必装的brew软件
-   :emphasize-lines: 2
-
-不过，默认 :ref:`homebrew` 安装的NGINX只提供了 ``--with-http_dav_module`` 支持，但是没有 ``http_ext_module`` 支持，这会导致 ``nginx.conf`` 配置中::
+macOS中使用 :ref:`homebrew` 安装NGINX默认已经启用了 ( ``ngx_http_dav_module`` )，以下是 :ref:`macos_studio` 安装工具软件命令。但是，默认 :ref:`homebrew` 安装的NGINX只提供了 ``--with-http_dav_module`` 支持，但是没有 ``http_ext_module`` 支持，这会导致 ``nginx.conf`` 配置中::
 
    dav_ext_methods PROPFIND OPTIONS;
 
@@ -41,6 +37,11 @@ NGINX WebDAV服务器
    2023/02/13 16:31:56 [emerg] 29049#0: unknown directive "dav_ext_methods" in /usr/local/etc/nginx/nginx.conf:52
 
 这个问题必须解决，否则在 :ref:`joplin_sync_webdav` ，WebDAV客户端执行 ``MKCOL`` / ``PROPFIND`` 会报错返回 ``405`` 返回码
+
+通过编译NGINX支持完整WebDAV功能
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+要能够支持 :ref:`joplin_sync_webdav` ，需要自己 :ref:`build_nginx_macos` 支持第三方模块 ``ngx_http_dav_module`` ，就能够进行下面的配置
 
 配置WebDAV
 ===============
@@ -64,8 +65,8 @@ NGINX WebDAV服务器
 
 .. literalinclude:: nginx_webdav/brew_nginx.conf
    :language: bash
-   :caption: 配置NGINX支持WebDAV( :ref:`homebrew` 提供的NGINX没有支持第三方 `nginx-dav-ext-module <https://github.com/arut/nginx-dav-ext-module>`_ 所以不能启用 ``dav_ext_methods`` 指令，实践发现无法支持joplin同步)
-   :emphasize-lines: 17,20,22-24,31-32
+   :caption: 配置NGINX( :ref:`build_nginx_macos` )支持WebDAV
+   :emphasize-lines: 10,11,52,53,55-60,66-68
 
 - 重启 NGINX 服务::
 
@@ -103,7 +104,7 @@ NGINX WebDAV服务器
 然后就可以测试 :ref:`joplin_sync_webdav`
 
 异常排查
----------
+===========
 
 - 启动同步后， ``Joplin`` 同步提示错误:
 
@@ -138,7 +139,9 @@ NGINX WebDAV服务器
 
    标准的 `ngx_http_dav_module <http://nginx.org/en/docs/http/ngx_http_dav_module.html>`_ 只提供部分WebDAV实现，只支持 ``GET,HEAD,PUT,DELETE,MKCOL,COPY,MOVE`` 方法；而 `nginx-dav-ext-module <https://github.com/arut/nginx-dav-ext-module>`_ 扩展支持了完整的WebDAV方法。
 
-待续...
+- 采用 ref:`build_nginx_macos` 方法完成NGINX安装
+
+- 配置文件采用上文
 
 参考
 =======
