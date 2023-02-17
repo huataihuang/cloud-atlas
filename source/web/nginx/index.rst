@@ -11,6 +11,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
 
    ubuntu_install_nginx.rst
    macos_homebrew_nginx.rst
+   build_nginx_macos.rst
    get_nginx_default_config.rst
    nginx_virtual_host.rst
    self_signed_ssl_nginx.rst
