@@ -8,6 +8,7 @@ Apache
    :maxdepth: 1
 
    apache_vs_nginx.rst
+   apache_webdav.rst
 
 .. only::  subproject and html
 

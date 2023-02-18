@@ -8,6 +8,7 @@ Ruby起步
    :maxdepth: 1
 
    ruby_quickstart.rst
+   macos_install_ruby.rst
 
 .. only::  subproject and html
 
