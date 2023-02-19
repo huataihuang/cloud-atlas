@@ -48,13 +48,13 @@ Ruby快速起步
 
     Ruby在调用方法时候可以省略 ``()`` ，所以::
 
-       print ("Hello, Ruby.\n")
+       print("Hello, Ruby.\n")
 
     和::
 
        print "Hello, ruby.\n"
 
-    是一样的
+    是一样的(类似 :ref:`shell` )
 
 单双引号区别
 ===============
