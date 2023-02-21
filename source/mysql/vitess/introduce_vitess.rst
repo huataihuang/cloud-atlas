@@ -14,6 +14,8 @@ Vitess 提供了兼容JDBC和Go数据库驱动，支持原生查询协议。
 
 Vitess从2011年开始用于YouTube数据库，目前已经被很多企业用于生产。并且目前已经成为 `Cloud Native Computing Foundation <https://www.cncf.io>`_ (云原生计算基金会)孵化项目，并且和Kubernetes良好结合（可以扩展部署到数万个节点）。
 
+GitHub使用 :ref:`ruby_on_rails` 开发网站，主要数据库存储在MySQL，2019年开始逐步将数据库表迁移到Vitess，并于2021年9月介绍了GitHub的Vitess的部署和迁移Vitess经验 `Partitioning GitHub’s relational databases to handle scale <https://github.blog/2021-09-27-partitioning-githubs-relational-databases-scale/>`_ 。
+
 .. note::
 
    在互联网公司，海量的用户数据使得单台x86服务器无法承受全量的用户数据读写，即使采用MySQL的主从数据库模式，使用一写多读的部署也无法实现主服务器承担全量数据的写入。由于纵向扩展（升级单台服务器硬件配置）无法满足业务增长，就需要采用分库分表方式来把全量用户切分成不同的。
@@ -92,3 +94,4 @@ vtgate
 - `VITESS 学习（1）理解VITESS <https://www.cnblogs.com/zhangwushang/p/8523015.html>`_ - 是 `What is Vitess <https://vitess.io/docs/overview/whatisvitess/>`_ 的翻译文档，可作为参考
 - `深入理解开源数据库中间件 Vitess：核心特性以及如何进行数据存储的堆叠 <https://blog.csdn.net/defonds/article/details/47813071>`_ - 是 `Vitess Overview <http://vitess.io/overview/>`_ 的翻译文档，可作为参考
 - `Kubernetes助力CNCF Vitess实现MySQL扩展 <http://dockone.io/article/3653>`_
+- `GitHub 关系型数据库垂直分库实践 <https://www.infoq.cn/article/L1oIV0GORfNfuysaHfL4>`_ 根据 `Partitioning GitHub’s relational databases to handle scale <https://github.blog/2021-09-27-partitioning-githubs-relational-databases-scale/>`_ 翻译，介绍了GitHub使用Vitess实现数据库分片的改造工作，应对GitHub大规模数据增长

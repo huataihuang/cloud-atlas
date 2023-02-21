@@ -10,7 +10,6 @@ Kubernetes监控
    :maxdepth: 1
 
    cadvisor.rst
-   fluentd/index
    prometheus/index
    m3/index
    grafana/index

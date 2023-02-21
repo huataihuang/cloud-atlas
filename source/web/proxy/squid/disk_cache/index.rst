@@ -1,17 +1,14 @@
-.. _ruby_startup:
+.. _squid_disk_cache:
 
 =================================
-Ruby起步
+Squid磁盘缓存
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   macos_install_ruby.rst
-   ruby_quickstart.rst
-   ruby_object.rst
-   ruby_number.rst
-   ruby_control.rst
+   intro_squid_disk_cache.rst
+   squid_cache_dir.rst
 
 .. only::  subproject and html
 
