@@ -28,6 +28,7 @@ Big Data Atlas
    presto/index
    elasticsearch/index
    log_analysis.rst
+   fluentd/index
    tsdb.rst
    influxdb.rst
    telegraf.rst

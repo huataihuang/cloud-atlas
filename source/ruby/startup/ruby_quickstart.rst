@@ -61,6 +61,16 @@ Ruby快速起步
 
 和 :ref:`shell` 类似， ``''`` 会忽略字符串中 \\ 转义符号， ``""`` 则能够处理类似 ``\n`` 这样的特殊转义符号
 
+注释
+=========
+
+- 单行注释，使用 ``#`` 开头
+- 多行注释: ``=begin`` 和 ``=emd`` 之间的所有行
+
+.. literalinclude:: ruby_quickstart/ruby_comment.rb
+   :language: ruby
+   :caption: ruby注释
+
 参考
 ========
 
