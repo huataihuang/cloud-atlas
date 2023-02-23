@@ -15,6 +15,7 @@ Gluster Atlas
    admin/index
    performance/index
    geo-replication/index
+   monitor/index
    debug/index
    tendrl/index
    minio/index

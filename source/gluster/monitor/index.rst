@@ -1,13 +1,13 @@
-.. _tendrl:
+.. _gluster_monitor:
 
 =================================
-Tendrl 软件定义存储(SDS)
+GlusterFS监控
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_tendrl.rst
+   gluster_monitor_overview.rst
 
 .. only::  subproject and html
 

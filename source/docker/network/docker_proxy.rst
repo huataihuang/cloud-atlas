@@ -142,7 +142,11 @@ Docker官方解决方案
 
 参考 Docker官方文档 `Running a Docker daemon behind an HTTPS_PROXY <https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy>`_ 配置局域网在https代理后使用docker服务:
 
-- 安装 ``ca-certificates`` 软件包
+- 安装 ``ca-certificates`` 软件包::
+
+   sudo apt install ca-certificates
+
+- 完成 :ref:`squid_ssl_bumping` 配置
 
 - 在 ``/etc/pki/tls/certs/ca-bundle.crt`` 中添加代理服务器证书
 
