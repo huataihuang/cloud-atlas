@@ -11,7 +11,8 @@ Ceph Atlas
 .. toctree::
    :maxdepth: 1
 
-   introduce_ceph.rst
+   intro_ceph.rst
+   ../gluster/gluster_vs_ceph.rst
    ceph_recommend.rst
    rdma.rst
    ceph_docker_in_studio.rst

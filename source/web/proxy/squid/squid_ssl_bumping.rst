@@ -4,6 +4,14 @@
 Squid SSL拦截
 =====================
 
+.. warning::
+
+   HTTPS拦截需要注意道德和法律问题!!!
+
+   在 `Intercept HTTPS CONNECT messages with SSL-Bump <https://wiki.squid-cache.org/ConfigExamples/Intercept/SslBumpExplicit>`_ Squid官方文档开头提供了警告和建议... 对于一些国家
+
+HTTPS拦截是Squid-3.5开始提供的功能，需要注意 TLS 是一种安全协议
+
 企业级应用
 ===========
 
@@ -20,5 +28,7 @@ Squid SSL拦截
 =======
 
 - `Intercept HTTPS CONNECT messages with SSL-Bump <https://wiki.squid-cache.org/ConfigExamples/Intercept/SslBumpExplicit>`_ Squid官方文档，非常详尽的配置
+- `SSL-Bump using an intermediate CA <https://wiki.squid-cache.org/ConfigExamples/Intercept/SslBumpWithIntermediateCA>`_ Squid官方wiki，精简说明
+- `Using Squid to Proxy SSL Sites <https://elatov.github.io/2019/01/using-squid-to-proxy-ssl-sites/>`_
 - `Squid使用SSLBump正向代理 <https://www.jianshu.com/p/71c43aa7438f>`_ 提供了一个解决访问https网站证书修正的思路，原文参考了 `Squid (v3.5+) proxy with SSL Bump <https://www.smoothnet.org/squid-v3-5-proxy-with-ssl-bump/>`_ 提供了不少借鉴思路
 - `Kaspersky Web Traffic Security帮助: 在 Squid 服务中配置 SSL Bumping <https://support.kaspersky.com/KWTS/6.1/zh-Hans/166244.htm>`_

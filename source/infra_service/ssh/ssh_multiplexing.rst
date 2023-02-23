@@ -140,6 +140,25 @@ OpenSSH通过 ``ControlMaster`` ， ``ControlPath`` 和 ``ControlPersist`` 配�
    ssh -O stop server1
    ssh -O stop -S ~/.ssh/controlmasters/fred@server1.example.org:22 server1.example.org
 
+``mux_client_request_session: read from master failed: Broken pipe``
+========================================================================
+
+有时候执行SSH的时候会遇到长时间无响应，最后出现报错::
+
+   mux_client_request_session: read from master failed: Broken pipe
+
+这是因为在 ``~/.ssh/config`` 中配置了 ``ControlPersist yes`` :
+
+- 当 ``ControlPersist yes`` 结合 ``ControlMaster`` 一起使用的时候，指定主连接应在初始客户端连接关闭后在后台保持打开状态（等待将来的客户端连接）。
+- 如果设置为 ``no`` （默认值），则主连接不会置于后台，并会在初始客户端连接关闭后立即关闭。如果设置为 ``yes`` 或 ``0`` ，则主连接将无限期地保留在后台（直到通过诸如 ``ssh -O exit`` 之类的机制被杀死或关闭）。
+- 如果设置为以秒为单位的时间，或 sshd_config(5) 中记录的任何格式的时间，则后台主连接将在保持空闲（没有客户端连接）指定时间后自动终止。
+
+这个设置带来一个问题，就是在网络不稳定情况下(如wifi或网络连接出现问题，或者ISP问题导致互联网断开超过15分钟)，此时持久连接会由于网络问题而终端。在这种网络问题出现后，如果再次运行 ``ssh`` 访问服务器，会尝试使用使用之前的socket连接，并在超时后打开一个新的连接。此时就会收到 ``mux_client_request_session: read from master failed: Broken pipe`` 报错。
+
+没有什么好的解决方法，要么移除 ``ControlPersist yes`` ，要么忽略网络错误(不在可控范围内)。
+
+使用 ``ssh -v`` 或者 ``ssh -vv`` 可以看到详细的ssh连接排查信息，可以帮助发现上述问题
+
 参考
 =========
 
@@ -148,3 +167,4 @@ OpenSSH通过 ``ControlMaster`` ， ``ControlPath`` 和 ``ControlPersist`` 配�
 - `Speeding up SSH Session Creation <https://developer.rackspace.com/blog/speeding-up-ssh-session-creation/>`_
 - `OpenSSH Multiplexer To Speed Up OpenSSH Connections <http://www.cyberciti.biz/faq/linux-unix-osx-bsd-ssh-multiplexing-to-speed-up-ssh-connections/>`_
 - `Close ssh session that has ControlPersist and is kept alive in the background <http://unix.stackexchange.com/questions/49912/close-ssh-session-that-has-controlpersist-and-is-kept-alive-in-the-background>`_
+- `Mux_client_request_session: read from master failed: Broken pipe ssh error and what does it mean? <https://www.nixcraft.com/t/mux-client-request-session-read-from-master-failed-broken-pipe-ssh-error-and-what-does-it-mean/3900>`_
