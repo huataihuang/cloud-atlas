@@ -11,8 +11,9 @@ Kubernetes监控
 
    cadvisor.rst
    prometheus/index
-   m3/index
    grafana/index
+   mixins/index
+   m3/index
    opentelemetry/index
    jaeger/index
    node_health/index

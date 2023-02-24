@@ -1,14 +1,12 @@
-.. _performance:
+.. _Jekyll:
 
 =================================
-Performance Atlas
+Jekyll静态网站
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   performance_tools/index
-   debug_java.rst
 
 .. only::  subproject and html
 
