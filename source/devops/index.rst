@@ -15,6 +15,7 @@ DevOps Atlas
    gitea/index
    terraform/index
    ansible/index
+   jsonnet/index
    utils/index
    docs/index
 

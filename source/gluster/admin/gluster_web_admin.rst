@@ -13,6 +13,9 @@ Gluster目前开源WEB管理平台(监控)有:
 - 简单管理功能采用集成到 :ref:`cockpit` (插件)
 - 采用 :ref:`prometheus` 实现告警
 
+  - `gluster / gluster-prometheus <https://github.com/gluster/gluster-prometheus>`_ gluster官方的 :ref:`prometheus` exporter
+  - :ref:`mixins` 的 `mixins/gluster <https://monitoring.mixins.dev/gluster/>`_ 集成 :ref:`grafana` 和 :ref:`prometheus`
+
 参考
 =====
 
