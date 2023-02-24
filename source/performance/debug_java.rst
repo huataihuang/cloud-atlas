@@ -17,6 +17,17 @@ Java使用线程来执行每个内部和外部操作。Java的垃圾搜集进程
 
 在Java程序的生命周期中，线程会经历多种状态。每个线程都有一个跟踪当前操作的执行堆栈。此外，JVM还存储了之前调用成功的所有方法。因此，分析完整的堆栈可以帮助我们研究出现问题时应用程序发生了什么。
 
+.. figure:: ../_static/performance/Life_cycle_of_a_Thread_in_Java.jpg
+   :scale: 70
+   
+   Java线程生命周期
+
+.. csv-table:: Java线程生命周期
+   :file: debug_java/java_thread_lifecycle.csv
+   :widths: 20, 80
+   :header-rows: 1
+
+
 获取Java程序线程dump
 =====================
 
@@ -100,8 +111,40 @@ Java使用线程来执行每个内部和外部操作。Java的垃圾搜集进程
 
 - 对于异常高的CPU使用率，通常我们只需要查看 ``RUNNABLE`` 线程
 
+  - 除了 ``jstack`` 获取线程dump，还有一个常用命令是 ``top -H -p PID`` ，可以显示哪些线程正在消耗特定进程中的操作系统资源
+  - 此外建议查看 ``jstack`` 输出中内部JVM线程，例如 ``GC``
+
+- 当Java程序处理性能 **异常低** 时，应该检查 ``BLOCKED`` 线程
+
+- 一些间歇性的性能问题，需要间隔很近的多次 ``jstack`` 获取线程堆栈，以便进行对比
+
+  - 推荐的最佳做法是 **至少进行3次 jstack dump** ，每 ``10秒`` 一次
+
+- 建议在Java代码中对创建新线程使用命名以便在排查时能够定位源代码
+
+- 忽略内部JVM处理(例如GC)
+
+- 当出现异常的CPU或内存使用情况，应该关注长时间运行或阻塞的线程
+
+- 使用 ``top -H -p PID`` 来检查线程堆栈和CPU处理的关系
+
+在线分析工具
+=============
+
+- `FastThread <https://fastthread.io/>`_
+- `JStack Review <https://jstack.review/>`_ 本地浏览器内运行，推荐
+- `Spotify Online Java Thread Dump Analyser <http://spotify.github.io/threaddump-analyzer/>`_ 开源的使用JavaScript编写的分析工具
+
+分析工具
+=========
+
+- `JProfiler <https://www.ej-technologies.com/products/jprofiler/overview.html>`_ 最强大的Java分析工具，提供10天试用license
+- `IBM TMDA <https://www.ibm.com/support/pages/ibm-thread-and-monitor-dump-analyzer-java-tmda>`_
+- `Irockel TDA <https://github.com/irockel/tda>`_ 开源的Thread Dump Analyser(TDA)
+
 参考
 =======
 
 - `How to Troubleshoot Java High CPU Usage Issues in Linux? <https://middlewareworld.org/2020/09/12/how-to-troubleshoot-java-cpu-usage-issues-in-linux/>`_
 - `How to Analyze Java Thread Dumps <https://www.baeldung.com/java-analyze-thread-dumps>`_
+- `Life Cycle of a Thread in Java <https://www.baeldung.com/java-thread-lifecycle>`_
