@@ -4,6 +4,12 @@
 在MacBook Pro上安装Gentoo Linux
 =================================
 
+.. note::
+
+   Gentoo Linux安装是一个纯手工一步步完成，需要非常小心谨慎，也非常占用时间。不过，只要安装成功，后续就可以不断滚动升级，并且能够获得很多系统运维的深刻知识，特别是自定义编译内核以及USE优化精简，都能够充分发挥硬件性能。所以还是值得投入时间精力进行实践的。
+
+   我大约话费了2~3个晚上来完成初步部署，后续会定制一个精简的 :ref:`mobile_cloud_infra` 来实现开发
+
 制作Gentoo Linux安装U盘
 =======================
 
@@ -170,6 +176,19 @@ Chrooting
    :language: bash
    :caption: 在make.conf配置中添加最佳镜像网站配置
 
+.. note::
+
+   当使用 ``emerge`` 进行软件安装(源代码编译)，下载源代码包的配置就是由 ``make.conf`` 指定的。非常不幸，由于GFW阻塞，现在(2023)几乎无法访问Gentoo官网以及默认下载网站，并且 ``mirrorselect`` 也无法运行(因为首先需要从官网拉取 ``mirrorlist`` 就是失败的)。参考 `make.conf.example <https://github.com/gentoo/portage/blob/master/cnf/make.conf.example>`_ ，实际上 ``mirrorselect`` 在 ``make.conf`` 配置中添加了如下类似内容::
+
+      # 建议最后保留默认配置
+      GENTOO_MIRRORS="<your_mirror_here> http://distfiles.gentoo.org http://www.ibiblio.org/pub/Linux/distributions/gentoo"
+
+   在国内可以参考Gentoo官方文档 `Gentoo source mirrors <https://www.gentoo.org/downloads/mirrors/>`_ 选择国内镜像网站，例如阿里云提供的镜像网站:
+
+   .. literalinclude:: install_gentoo_on_mbp/gentoo_mirrors
+      :language: bash
+      :caption: 在make.conf配置中添加阿里云国内镜像网
+
 - 配置 ``/etc/portage/repos.conf/gentoo.conf`` Gentoo ebuild存储库:
 
 .. literalinclude:: install_gentoo_on_mbp/gentoo.conf
@@ -179,6 +198,10 @@ Chrooting
 .. note::
 
    可以参考 `Gentoo rsync mirrors <https://www.gentoo.org/support/rsync-mirrors/>`_ 配置 ``gentoo.conf`` ，例如选择中国的rsync镜像网站
+
+   .. literalinclude:: install_gentoo_on_mbp/sync-url
+      :language: bash
+      :caption: /etc/portage/repos.conf/gentoo.conf 配置国内sync-url
 
 复制DNS信息
 ==============
@@ -227,8 +250,6 @@ Chrooting
 
    emerge --sync
 
-**做到这里**
-
 选择正确profile
 ================
 
@@ -266,6 +287,10 @@ Chrooting
    :language: bash
    :caption: 设置 ``profile``
 
+.. note::
+
+   我准备采用 :ref:`sway` 最小化窗口管理器，所以选择 ``default/linux/amd64/17.1/desktop`` ( ``5`` )
+
 更新 @world set
 ================
 
@@ -283,6 +308,412 @@ Chrooting
 
    例如,  ``default/linux/amd64/17.1`` 只需要更新很少的包；而 ``default/linux/amd64/17.1/desktop/gnome/systemd`` 就会更新很多包，因为 ``init`` 系统从 OpenRC 切换到 :ref:`systemd` 并且会安装GNOME桌面环境框架。
 
+配置USE变量
+===========
+
+``USE`` 是Gentoo为用户 提供的最强大的变量之一，可以配置支持或不支持某些选项来编译多个程序。例如有些程序可以支持 ``GTK+`` 或 ``Qt`` 情况下编译，或者支持 ``SSL`` ，有些程序甚至可以使用帧缓冲( ``svgalib`` )而不是X11支持来完成编译。
+
+大多数Linux发行版为了能够尽可能多支持不同环境(软件和硬件)，采用了最大化的编译参数，这导致增加了程序大小以及启动时间，而且会导致大量的依赖。使用Gentoo的用户可以通过定义编译选项来精简系统，使得硬件发挥更大功效。
+
+默认的 ``USE`` 设置使用Gentoo配置文件 ``make.defaults`` 。Gentoo使用了一个(复杂的)继承系统。检查当前的USE配置最简单的方法是:
+
+.. literalinclude:: install_gentoo_on_mbp/emerge_info
+   :language: bash
+   :caption: 使用 ``emerge --info`` 获取USE配置
+
+完整的 ``USE`` flags 可以在 ``/var/db/repos/gentoo/profiles/use.desc`` 查看
+
+``CPU_FLAGS_*``
+================
+
+某些架构(包括 AMD64/X86, ARM, PPC)有一个名为 ``CPU_FLAGS_ARCH`` 的 ``USE_EXPAND`` 变量(视情况用相应的架构替换 ``ARCH`` )。这个变量将构建配置为特定的汇编代码或者其他内部函数中的编译，通常是 ``硬编码`` (hand-written) 或者其他扩展，并且与要求编译器为特定CPU功能(例如 ``march=`` )输出的优化代码不同。
+
+除了根据需要配置其 ``COMMON_FLAGS`` 之外，用户还应设置此变量。
+
+- 安装工具包:
+
+.. literalinclude:: install_gentoo_on_mbp/install_cpuid2cpuflags
+   :language: bash
+   :caption: 安装 ``cpuid2cpuflags`` 工具包
+
+- 执行:
+
+.. literalinclude:: install_gentoo_on_mbp/cpuid2cpuflags
+   :language: bash
+   :caption: 运行 ``cpuid2cpuflags``
+
+在我的 MacBook 2013上输出:
+
+.. literalinclude:: install_gentoo_on_mbp/cpuid2cpuflags_output
+   :language: bash
+   :caption: 运行 ``cpuid2cpuflags`` 输出
+
+- 将输出结果添加到 ``package.use`` :
+
+.. literalinclude:: install_gentoo_on_mbp/cpuid2cpuflags_output_package.use
+   :language: bash
+   :caption: 运行 ``cpuid2cpuflags`` 输出添加到 ``package.use``
+
+.. note::
+
+   我记得大约20年前，我在使用Gentoo Linux在我的一台联想笔记本上编译Gentoo Linux。那时候还没有 ``cpuid2cpuflags`` ，是手工查CPU型号然后猜测哪些CPU相关的 Flags 需要配置，为 ``make.conf`` 添加类似 ``mmx sse2`` 这样的优化参数。现在都有工具可以代劳了...
+
+(可选)配置 ``ACCEPT_LICENSE`` 变量
+===================================
+
+Gentoo包的licenses存储在ebuild的 ``LICENCE`` 变量中。系统接受的特定licenses可以在以下文件定义:
+
+- /etc/portage/make.conf 文件中的系统范围。
+- /etc/portage/package.license 文件中的每个包。
+- /etc/portage/package.license/ 文件目录中的每个包。
+
+Portage 在 ``ACCEPT_LICENSE`` 中查找允许安装的包::
+
+   portageq envvar ACCEPT_LICENSE
+
+默认输出是::
+
+   @FREE
+
+.. note::
+
+   需要修订Licenses，添加 ``@BINARY-REDISTRIBUTABLE`` ，否则无法安装下文的 ``sys-kernel/linux-firmware``
+
+- 简单的方法是修改 ``/etc/portage/make.conf`` 添加可以接受的licenses::
+
+   ACCEPT_LICENSE="-* @FREE @BINARY-REDISTRIBUTABLE"
+
+- 另外一种方法是为每个软件包配置licenses，也就是创建 ``/etc/portage/package.license`` 目录，然后创建一个为每个软件包配置licences的文件，如 ``/etc/portage/package.license/kernel`` 内容案例如下::
+
+   app-arch/unrar unRAR
+   sys-kernel/linux-firmware @BINARY-REDISTRIBUTABLE
+   sys-firmware/intel-microcode intel-ucode
+
+配置时区
+===========
+
+所有的时区信息可以从 ``/usr/share/zoneinfo/`` 目录下查找，我使用 ``Asia/Shanghai``
+
+对于使用默认的 OpenRC ，配置时区写在 ``/etc/timezone`` 文件:
+
+.. literalinclude:: install_gentoo_on_mbp/timezone
+   :language: bash
+   :caption: 配置OpenRC的timezone配置
+
+然后重新配置 ``sys-libs/timezone-data`` 软件包，这个软件包会更新 ``/etc/localtime`` :
+
+.. literalinclude:: install_gentoo_on_mbp/timezone-data
+   :language: bash
+   :caption: 重新配置 sys-libs/timezone-data
+
+.. note::
+
+   ``sys-libs/timezone-data`` 是将 ``/usr/share/zoneinfo/Asia/Shanghai`` 复制为 ``/etc/localtime`` 。这和我之前在 :ref:`deploy_ntp` 采用软连接方法不同
+
+配置本地化(语言支持)
+=======================
+
+- 修订 ``/etc/locale.gen`` (我这里直接添加，原配置文件是一些注释案例):
+
+.. literalinclude:: install_gentoo_on_mbp/locale.gen
+   :language: bash
+   :caption: 在 /etc/locale.gen 中添加 UTF-8 支持
+
+- 根据 ``/etc/locale.gen`` 生成所有本地化支持:
+
+.. literalinclude:: install_gentoo_on_mbp/locale-gen
+   :language: bash
+   :caption: 运行 ``locale-gen`` 命令，根据 /etc/locale.gen 生成本地化支持
+
+可以看到实际生成了2个本地化支持:
+
+.. literalinclude:: install_gentoo_on_mbp/locale-gen_output
+   :language: bash
+   :caption: 运行 ``locale-gen`` 命令输出，显示支持2个本地化字符集
+
+选择本地化
+============
+
+- 显示可支持的 ``lcoale`` :
+
+.. literalinclude:: install_gentoo_on_mbp/eselect_locale_list
+   :language: bash
+   :caption: 查看当前locale
+
+输出信息如下:
+
+.. literalinclude:: install_gentoo_on_mbp/eselect_locale_list_output
+   :language: bash
+   :caption: 查看当前locale输出
+
+当前是 ``C.UTF8`` 
+
+- 可以修订，例如 ``en_US.utf8`` :
+
+.. literalinclude:: install_gentoo_on_mbp/eselect_locale_set
+   :language: bash
+   :caption: 设置locale
+
+- 重新加载环境:
+
+.. literalinclude:: install_gentoo_on_mbp/env-update
+   :language: bash
+   :caption: 更新加载环境
+
+配置内核准备
+===============
+
+(可选)安装firmware 和/或 microcode
+-------------------------------------
+
+Firmware
+~~~~~~~~~~
+
+在开始配置内核并重启系统前，建议安装  ``sys-kernel/linux-firmware`` !!!
+
+原因是现代很多无限网卡需要Firmware才能正常工作，而AMD/Nvidia/Intel的GPU通常也需要Firmware才能发挥全部功能:
+
+- 安装Fireware:
+
+.. literalinclude:: install_gentoo_on_mbp/install_firmware
+   :language: bash
+   :caption: 安装 ``sys-kernel/linux-firmware``
+
+Microcode
+~~~~~~~~~~
+
+CPU处理器也需要固件更新:
+
+- AMD处理器: ``sys-kernel/linux-firmware``
+- Intel处理器: ``sys-firmware/intel-microcode``
+
+- 安装intel microcode:
+
+.. literalinclude:: install_gentoo_on_mbp/install_intel-microcode
+   :language: bash
+   :caption: 安装 ``sys-kernel/intel-microcode``
+
+.. note::
+
+   CPU microcode后续再具体学习实践
+
+内核配置和编译
+=====================
+
+**终于来到了最核心的部分**
+
+Gentoo提供了三种内核管理方法，并且安装以后任何时候都可以切换到其他新方法: 以下是最简单到最复杂的方法
+
+- 全自动方法: 分发内核
+
+分发内核用于配置、自动构建和安装 Linux 内核、其相关模块和（可选，但默认启用）initramfs 文件。 未来的内核更新是完全自动化的，因为它们是通过包管理器处理的，就像任何其他系统包一样。 如果需要自定义，可以提供自定义内核配置文件。 这是最少涉及的过程，并且非常适合新的 Gentoo 用户，因为它开箱即用，并且系统管理员的参与最少。
+
+- 混合方法：Genkernel
+
+新内核源代码通过系统包管理器安装。 系统管理员使用 Gentoo 的 ``genkernel`` 工具来一般配置、自动构建和安装 Linux 内核、其相关模块和（可选，但默认情况下未启用）initramfs 文件。 如果需要自定义，可以提供自定义内核配置文件。 未来的内核配置、编译和安装需要系统管理员以运行 eselect kernel、genkernel 和可能的其他命令的形式参与每次更新。
+
+- 全手动方式:
+
+新内核源代码通过系统包管理器安装。 内核是使用 eselect 内核和一系列 make 命令手动配置、构建和安装的。 未来的内核更新会重复配置、构建和安装内核文件的手动过程。 这是最复杂的过程，但提供了对内核更新过程的最大控制。
+
+.. note::
+
+   初次安装我采用 ``分发内核`` (Distribution kernels) ，以便尽快运行。等系统稳定后，在切换到 ``全手动方式``
+
+分发内核
+---------
+
+分发内核是涵盖解包、配置、编译和安装内核的完整过程的 ``ebuild`` 。 这种方法的主要优点是作为 ``@world`` 升级的一部分，包管理器将内核更新到新版本。 这不需要比运行 emerge 命令更多的参与。 分发内核默认为支持大多数硬件的配置，但是提供了两种自定义机制： ``savedconfig`` 和 ``config snippets`` 。
+
+- 在使用分发内核之前，先确保系统安装了正确的 ``installkernel`` 包 (一种是 ``systemd-boot`` 一种是 ``gentoo`` ，我使用后者，默认已经在 stage3 安装好了，所以不用重复)::
+
+   emerge --ask sys-kernel/installkernel-gentoo
+
+- 安装分发内核，有两种方式:
+
+一种是从源代码编译一个Gentoo patches的内核(我采用这个方法):
+
+.. literalinclude:: install_gentoo_on_mbp/install_gentoo-kernel
+   :language: bash
+   :caption: 从源代码编译安装Gentoo patches的内核
+
+另一种是直接安装预先编译好的内核::
+
+   emerge --ask sys-kernel/gentoo-kernel-bin
+
+.. note::
+
+   安装内核后，包管理器会自动将其更新到更新的版本。 以前的版本将被保留，直到包管理器被要求清理陈旧的包
+
+   如果要清理旧包::
+
+      emerge --depclean
+
+   或者指定清理旧内核版本::
+
+      emerge --prune sys-kernel/gentoo-kernel sys-kernel/gentoo-kernel-bin
+
+- (无需操作)分发内核安装完成后，能够自动重建由其他软件包安装的内核模块:
+
+  - ``linux-mod.eclass`` 提供 ``dist-kernel`` USE 标志，它控制对 ``virtual/dist-kernel`` 的 subslot 依赖性
+  - ``sys-fs/zfs`` 和 ``sys-fs/zfs-kmod`` 等包上使用了 ``dist-kernel`` USE 标志，所以能够根据更新的内核自动重建，相应地生成 ``initramfs``
+
+- (一般无需操作)如果需要，也可以在内核升级完成后手工触发 ``initramfs`` 重建::
+
+   emerge --ask @module-rebuild
+
+- 如果需要一些内核模块在早期启动时加载(例如ZFS)，则应该通过以下命令重建 ``initramfs`` ::
+
+   emerge --config sys-kernel/gentoo-kernel
+   emerge --config sys-kernel/gentoo-kernel-bin
+
+.. note::
+
+   安装内核源代码和手工编译(或者 ``Genkernel`` )，我准备后续独立搞( :ref:`gentoo_kernel` )，这里先忽略 
+
+配置系统
+============
+
+文件系统
+-----------
+
+``/etc/fstab`` 提供了文件系统挂载配置(挂载点和选项)。文件系统标签和UUID可以通过 ``blkid`` 命令查看，对于多磁盘，由于启动系统时识别磁盘可能顺序随机(导致设备识别名变化)，所以建议使用UUID来识别设备进行挂载。但是，需要注意，当分区被擦除，则文件系统label和UUID值将会变化或移除。
+
+.. warning::
+
+   LVM的卷和LVM的snapshot使用相同的UUID，所以如果挂载LVM卷不要使用UUID。
+
+- 使用 ``blkid`` 检查磁盘，当前显示主机内部的NVMe设备分区如下:
+
+.. literalinclude:: install_gentoo_on_mbp/blkid_output
+   :language: bash
+   :caption: blkid显示输出内置NVMe设备分区(label和UUID)
+   :emphasize-lines: 1,2
+
+其中 分区3 是安装Gentoo Linux的分区，将被挂载到根分区 ``/`` ; 分区1是原先 :ref:`macos` 安装时已经构建的 ``vfat32`` 文件系统分区，用于存储EFI启动信息，这个分区也是和 Gentoo Linux 共用的，将被挂载到 ``/boot`` 目录
+
+- 检查 ``ls -lh /dev/disk/by-uuid`` 可以看到上述分区信息，这个设备路径可以用于配置 ``/etc/fstab`` :
+
+.. literalinclude:: install_gentoo_on_mbp/disk_by_uuid
+   :language: bash
+   :caption: /dev/disk/by-uuid 目录下文件软连接显示UUID对应设备
+   :emphasize-lines: 1,2
+
+- 配置 ``/etc/fstab`` 如下:
+
+.. literalinclude:: install_gentoo_on_mbp/fstab
+   :language: bash
+   :caption: 使用UUID配置 /etc/fstab
+
+网络配置
+==========
+
+主机名
+--------
+
+- 主机名配置 ``xcloud`` :
+
+.. literalinclude:: install_gentoo_on_mbp/set_hostname
+   :language: bash
+   :caption: 设置主机名
+
+网络
+-------
+
+- 对于动态获取IP地址，可以采用 ``dhcpcd`` :
+
+.. literalinclude:: install_gentoo_on_mbp/dhcpcd
+   :language: bash
+   :caption: 使用dhcpcd动态分配IP
+
+.. note::
+
+   如果使用有线网络，则上述使用dhcpcd就已经足够，甚至无需配置网络。Gentoo使用了自己独特的 ``netifrc`` 框架来配置和管理网络接口。这个 ``net-misc/netifrc`` 默认已经安装
+
+hosts文件
+-----------
+
+``/etc/hosts`` 文件帮助解析不能通过DNS服务器解析的服务器，通常要设置本机 ``hostname`` 对应解析:
+
+.. literalinclude:: install_gentoo_on_mbp/hosts
+   :language: bash
+   :caption: /etc/hosts 配置主机解析
+
+系统信息
+==========
+
+- 配置root用户密码::
+
+   passwd
+
+Init和启动配置
+================
+
+OpenRC
+-------
+
+OpenRC使用 ``/etc/rc.conf`` 来配置服务的启动和关闭，这个配置文件中有大量的注释来帮助设置. (待实践)
+
+安装工具
+==========
+
+系统日志服务
+---------------
+
+对于使用OpenRC，当前Gentoo的Stage3压缩包缺少一些工具，原因是有多个软件提供相同功能，所以Gentoo让用户自行选择。而 :ref:`systemd` 是集成了日志服务，所以不需要这个安装配置。以下是OpenRC的配置日志服务 ``sysklogd`` (一个开箱即用的传统系统日志服务，没有采用重量级的 ``rsyslog`` 或 ``syslog-ng`` ):
+
+.. literalinclude:: install_gentoo_on_mbp/sysklogd
+   :language: bash
+   :caption: 安装sysklogd作为日志服务
+
+(可选)工具集合
+----------------
+
+安装cron服务/文件索引/ssh服务启用/dos文件系统工具:
+
+.. literalinclude:: install_gentoo_on_mbp/option_tools
+   :language: bash
+   :caption: 可选工具配置
+
+配置bootloader
+================
+
+Gentoo 官方文档 `Configuring the bootloader <https://wiki.gentoo.org/wiki/Handbook:AMD64/Installation/Bootloader>`_ 提供了多种bootloader设置方法。对于UEFI系统，例如我的MacBook Pro，我采用之前 :ref:`archlinux_on_mbp` 相同的方法: 采用 ``efibootmgr`` 来管理UEFI启动顺序，这也是Gentoo官方bootloader文档中介绍的可选方法之一
+
+- 安装:
+
+.. literalinclude:: install_gentoo_on_mbp/install_efibootmgr
+   :language: bash
+   :caption: 安装 efibootmgr
+
+- 配置启动Gentoo:
+
+.. literalinclude:: install_gentoo_on_mbp/efibootmgr_set
+   :language: bash
+   :caption: 设置efibootmgr
+
+.. note::
+
+   - ``--disk /dev/nvme0n1`` 是指整个磁盘设备
+   - ``--part 1`` 是指ESP分区，这个分区是Apple和Gentoo共享的
+   - ``root=PARTUUID=fbf163f3-a42e-411a-be61-f2ae7b398e61`` 这个参数是 ``PARTUUID`` ，是通过 ``ls -lh /dev/disk/by-partuuid/`` 查询得到。注意，不是磁盘UUID(在 ``/etc/fstab`` 中使用磁盘UUID)
+
+收尾工作
+==========
+
+- 添加用户账号(huatai)，并且添加到sudo中:
+
+.. literalinclude:: install_gentoo_on_mbp/add_user
+   :language: bash
+   :caption: 添加用户账号
+
+- 重启系统::
+
+   exit
+   cd
+   umount -l /mnt/gentoo/dev{/shm,/pts,}
+   umount /mnt/gentoo{/boot,/sys,/proc,}
+   reboot 
 
 参考
 =======
