@@ -76,14 +76,17 @@ systemd配置Docker服务器Proxy
 
    见后文参考官方设置。
 
+.. note::
+
+   解决https代理的方法可以采用 :ref:`squid_ssl_bumping` ，但是官方文档语焉不详，所以采用 work around 方法，将 ``HTTPS_PROXY=`` 也配置成采用 ``http://`` ，见下文
+
 对于主机上的dockerd服务，在下载镜像等工作使用代理，则需要配置服务的环境变量。
 
-- 创建 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` 配置文件::
+- 创建 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` 配置文件:
 
-   [Service]
-   Environment="HTTP_PROXY=http://user01:password@10.10.10.10:8080/"
-   Environment="HTTPS_PROXY=https://user01:password@10.10.10.10:8080/"
-   Environment="NO_PROXY= hostname.example.com,172.10.10.10"
+.. literalinclude:: docker_proxy/http-proxy.conf
+   :language: bash
+   :caption: 配置 /etc/systemd/system/docker.service.d/http-proxy.conf 代理
 
 - 然后重新加载配置并重启服务::
 
@@ -96,7 +99,7 @@ systemd配置Docker服务器Proxy
 
 可以看到输出::
 
-   Environment=GOTRACEBACK=crash HTTP_PROXY=http://10.10.10.10:8080/ HTTPS_PROXY=http://10.10.10.10:8080/ NO_PROXY= hostname.example.com,172.10.10.10
+   Environment=HTTP_PROXY=http://192.168.6.200:3128/ HTTPS_PROXY=http://192.168.6.200:3128/
 
 .. _docker_server_socks_proxy:
 

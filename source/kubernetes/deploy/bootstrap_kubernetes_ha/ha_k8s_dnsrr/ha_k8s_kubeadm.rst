@@ -114,6 +114,16 @@
    :language: bash
    :caption: 安装Google云公钥
 
+.. note::
+
+   在运行一段时间K8s之后，有可能在更新软件包时候遇到报错::
+
+      ...
+      Err:3 https://packages.cloud.google.com/apt kubernetes-xenial InRelease
+        The following signatures couldn't be verified because the public key is not available: NO_PUBKEY B53DC80D13EDEF05
+
+   原因是Google Cloud公钥过期失效，此时需要再次运行上述命令重新下载Google云公钥
+
 - 添加Kubernetes ``apt`` 仓库:
 
 .. literalinclude:: ha_k8s_kubeadm/add_k8s_repository
