@@ -9,6 +9,7 @@ Gentoo Linux
 
    intro_gentoo.rst
    install_gentoo_on_mbp.rst
+   gentoo_mbp_wifi.rst
    gentoo_kernel.rst
    pentoo/index
 
