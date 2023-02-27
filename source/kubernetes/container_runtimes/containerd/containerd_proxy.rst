@@ -15,7 +15,13 @@ containerd客户端代理
 
 .. note::
 
-   我还没有找到如何在 containerd 客户端(容器内部)注入代理的方法... 这方面还是 :ref:`docker_proxy` 更为成熟
+   :strike:`我还没有找到如何在 containerd 客户端(容器内部)注入代理的方法...` 这方面还是 :ref:`docker_proxy` 更为成熟
+
+   对于containerd客户端，也就是容器内部，由于都是配置Kubernetes使用，所以可以直接使用Kubernetes的环境变量注入来实现( `How to Make the Most of Kubernetes Environment Variables <https://release.com/blog/kubernetes-environment-variables>`_ ):
+
+   - ``env:`` 设置
+   - secret
+   - :ref:`config_pod_by_configmap`
 
 containerd服务端代理
 =======================
@@ -50,6 +56,6 @@ containerd服务端代理
 参考
 ======
 
-- `Can containerd set a http proxy to download image? #1990 <https://github.com/containerd/containerd/issues/1990>`_
+- `Can containerd set a http proxy to download image? #1991 <https://github.com/containerd/containerd/issues/1990>`_
 - `Dragonfly Http Proxy mode <https://d7y.io/docs/setup/runtime/containerd/proxy/>`_
 - `Containerd is not working behind a proxy #688 <https://github.com/kubernetes-sigs/kind/issues/688>`_

@@ -4,6 +4,11 @@
 在Ubuntu安装NVIDIA CUDA
 ==========================
 
+我的实践有两次:
+
+- :ref:`install_nvidia_linux_driver` 物理主机安装CUDA driver
+- :ref:`install_nvidia_linux_driver_in_ovmf_vm` 虚拟机内部安装CUDA driver
+
 参考
 =====
 
