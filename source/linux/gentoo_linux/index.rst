@@ -11,6 +11,7 @@ Gentoo Linux
    install_gentoo_on_mbp.rst
    gentoo_mbp_wifi.rst
    gentoo_kernel.rst
+   cross-platform_file_system.rst
    pentoo/index
 
 .. only::  subproject and html

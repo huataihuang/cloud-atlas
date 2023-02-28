@@ -55,6 +55,15 @@ SysRq ``<命令键>``
    :header-rows: 1
 
 
+使用 ``SysRq t`` 排查 :ref:`debug_high_sys_process` 是一个很好的方法( :ref:`bad_rip_value` )，能够快速找出导致系统死锁的进程(在系统日志中会看到大量的 ``Call Trace`` )，通过 ``Call Trace`` 可以定位到大量系统调用以及锁信息。例如，我在排查 :ref:`kubernetes` 管控服务器的 ``sys`` 高(CPU的 ``us`` 极低)就采用这个方法，定位到 ``prog-extension`` 进程出现 ``futex_wait`` (用户空间锁等待):
+
+.. literalinclude:: sysrq/futex_wait
+   :caption: 使用 ``echo t > /proc/sysrq-trigger`` 找出系统死锁进程
+
+.. warning::
+
+   ``SysRq t`` 会触发控制台大量输出，大量控制台输出会导致服务器hang，需要注意
+
 参考
 =====
 

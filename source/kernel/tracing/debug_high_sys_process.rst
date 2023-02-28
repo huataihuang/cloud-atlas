@@ -37,3 +37,14 @@ debug占用很高system的进程
 
    04:55:10 PM     all     42.26      0.01     18.18      0.00      0.00     39.54
    Average:        all     41.30      0.09     17.40      0.01      0.00     41.20
+
+这种CPU ``us`` 极低，但是 ``sys`` 极高情况，通常意味着系统出现了死锁(锁等待)，可以通过 :ref:`sysrq` 的组合键 ``t`` 将当前进程的任务信息dump到控制台检查::
+
+   echo t > /proc/sysrq-trigger
+
+在这个案例中，出现 :ref:`bad_rip_value` 
+
+参考
+=======
+
+- `High system cpu load (%sys), system locks <https://serverfault.com/questions/327468/high-system-cpu-load-sys-system-locks>`_
