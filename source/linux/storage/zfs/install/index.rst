@@ -11,7 +11,7 @@ ZFS安装
    archlinux_archzfs.rst
    archlinux_zfs-dkms.rst
    archlinux_root_on_zfs.rst
-   archlinux_zfs_virtual_disks.rst
+   fedora_zfs.rst
 
 .. only::  subproject and html
 

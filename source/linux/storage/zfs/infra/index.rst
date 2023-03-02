@@ -8,6 +8,7 @@ ZFS架构
    :maxdepth: 1
 
    zfs_vs_btrfs.rst
+   zfs_virtual_disks.rst
    zfs_enterprise.rst
 
 .. only::  subproject and html
