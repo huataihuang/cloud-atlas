@@ -105,6 +105,10 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
 
    ``libvirt`` 访问Ceph是使用ID ``libvirt`` 而不是 Ceph名字 ``client.libvirt``
 
+.. note::
+
+   请注意，对于 ``admin``  用户来说，采用了 :ref:`sudo` 会自动读取 ``/etc/ceph/ceph.client.<username>.keyring`` ( 实际就是 ``/etc/ceph/ceph.client.admin.keyring`` )来访问默认名为 ``ceph`` 的Ceph集群
+
 客户端(使用Ceph)
 ===================
 
