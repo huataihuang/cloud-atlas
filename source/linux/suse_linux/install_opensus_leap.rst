@@ -21,6 +21,15 @@
 
       - 采用类似 :ref:`zfs_virtual_disks` 方案，在虚拟机内部构建12块虚拟磁盘
 
+操作步骤
+----------
+
+- 在 :ref:`priv_cloud_infra` 环境存储池 ``images_rbd`` 创建虚拟机磁盘:
+
+.. literalinclude:: install_opensus_leap/create_rbd_image
+   :language: bash
+   :caption: virsh创建 ``z-opensuse-leap-15`` RBD镜像
+
 参考
 ======
 

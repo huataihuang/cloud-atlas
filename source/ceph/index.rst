@@ -29,6 +29,7 @@ Ceph Atlas
    arm/index
    arch/index
    tunning/index
+   ../kubernetes/storage/rook/index
 
 .. only::  subproject and html
 
