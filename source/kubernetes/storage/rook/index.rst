@@ -11,7 +11,9 @@ Rook是一个开源的云原生存储调度器，提供平台，框架以及支�
 .. toctree::
    :maxdepth: 1
 
-   
+   intro_rook.rst
+   rook_quickstart.rst
+   rook_cephnfs.rst
 
 .. only::  subproject and html
 

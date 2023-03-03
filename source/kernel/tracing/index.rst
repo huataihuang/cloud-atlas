@@ -19,6 +19,7 @@ Linux内核追踪
    debug_system_crash.rst
    strace.rst
    debug_lscpu_slow.rst
+   illegal_instruction_core_dumped.rst
    kdump/index
 
 .. only::  subproject and html
