@@ -1,0 +1,41 @@
+
+# cat /proc/meminfo | grep 'MemTotal\|SwapTotal'
+MemTotal:       197928076 kB
+SwapTotal:             0 kB
+# cat /proc/sys/vm/overcommit_memory
+0
+
+调整为禁止overcommit策略
+# echo 2 > /proc/sys/vm/overcommit_memory
+# sysctl vm.overcommit_memory
+vm.overcommit_memory = 2
+此时 overcommit_ratio 参数生效: 50%
+# sysctl vm.overcommit_ratio
+vm.overcommit_ratio = 50
+# cat /proc/meminfo | grep 'CommmitLimit\|Committed_AS'
+Committed_AS:   52758336 kB
+# cat /proc/meminfo | grep 'CommitLimit\|Committed_AS'
+CommitLimit:    98964036 kB
+Committed_AS:   52758336 kB
+
+调整 overcommit_ratio 参数到 200%，可以看到 CommitLimit 一下子从 98964036 kB 改变到 395856152 kB
+# sysctl vm.overcommit_ratio=200
+vm.overcommit_ratio = 200
+# sysctl vm.overcommit_ratio
+vm.overcommit_ratio = 200
+# cat /proc/meminfo | grep 'CommitLimit\|Committed_AS'
+CommitLimit:    395856152 kB
+Committed_AS:   52758336 kB
+
+恢复默认的 "启发型overcommit模式"
+# echo 0 > /proc/sys/vm/overcommit_memory
+# cat /proc/meminfo | grep 'CommitLimit\|Committed_AS'
+CommitLimit:    395856152 kB
+Committed_AS:   52758336 kB
+
+在启发式overcommit模式，之前在禁止overcommit模式下配置的 overcommit_ratio 还是200，此时不会自动收缩 CommitLimit
+# sysctl vm.overcommit_ratio=50
+vm.overcommit_ratio = 50
+# cat /proc/meminfo | grep 'CommitLimit\|Committed_AS'
+CommitLimit:    98964036 kB
+Committed_AS:   52758336 kB
