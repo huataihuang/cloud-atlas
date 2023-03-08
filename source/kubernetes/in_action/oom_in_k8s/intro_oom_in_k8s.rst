@@ -18,20 +18,7 @@ OOM的困扰
 
 内存overcommit是非常常见常见的操作系统技术，这意味着操作系统为进程分配了超过实际能够分配的内存量。这是因为几乎没有程序会同时使用所有分配给它的内存，类似于银行，除非出现 ``挤兑`` 否则内存overcommit完全不会影响应用程序运行，而且使得内存能够更为有效利用。
 
-- 检查Linux系统内存分配:
-
-.. literalinclude:: intro_oom_in_k8s/meminfo
-   :language: bash
-   :caption: 检查 /proc/meminfo
-
-输出信息:
-
-.. literalinclude:: intro_oom_in_k8s/meminfo_output
-   :language: bash
-   :caption: cat /proc/meminfo 输出信息
-   :emphasize-lines: 1,33
-
-可以看到 ``MemTotal`` 表示主机实际安装内存大小（192G）；而 ``VmallocTotal`` 则是overcommit的内存大小（大约有32T）
+Linux内核通过 :ref:`overcommit-accounting` 实现内存过量使用，默认是 **启发式** ``overcommit`` ( ``heuristic overcommit`` )
 
 
 参考

@@ -8,6 +8,7 @@ Linux Out Of Memory
    :maxdepth: 1
 
    intro_linux_oom.rst
+   overcommit-accounting.rst
    oomd.rst
 
 .. only::  subproject and html
