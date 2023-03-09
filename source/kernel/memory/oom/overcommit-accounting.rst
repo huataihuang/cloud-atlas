@@ -92,9 +92,6 @@ Linux内核支持以下 ``overcommit`` 处理模式:
    :language: bash
    :caption: 调整 ``vm.overcommit_memory``
 
-
-
-
 参考
 ========
 
