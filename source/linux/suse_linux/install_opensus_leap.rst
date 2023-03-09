@@ -30,6 +30,10 @@
    :language: bash
    :caption: virsh创建 ``z-opensuse-leap-15`` RBD镜像
 
+.. note::
+
+   我这里遇到一个由于 :ref:`ubuntu_linux` 升级导致的 :ref:`missing_backend_for_pool_type_9_rbd` (解决方法)
+
 参考
 ======
 

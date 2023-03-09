@@ -50,7 +50,7 @@ libvirt的RBD存储池报错"missing backend for pool type 9 (rbd)"
 
 Google了一下，原来 Debian 将一些可选的存储后端选项支持采用了独立的软件包，以便在大多数情况下不必下载太多非必要包。例如， :ref:`zfs` 作为 :ref:`libvirt` 存储后端就采用 ``libvirt-daemon-driver-storage-zfs`` 。
 
-我检查了::
+- 我检查了::
 
    apt list | grep libvirt-daemon-driver-storage
 
@@ -67,13 +67,27 @@ Google了一下，原来 Debian 将一些可选的存储后端选项支持采用
    :language: bash
    :caption: Ubuntu 安装 ``libvirt-daemon-driver-storage-rbd``
 
-然后重启 ``libvirtd`` 再次执行 ``virtsh pool-list --all`` 就能观察到 :ref:`ceph_rbd` 存储池状态:
+- 然后重启 ``libvirtd`` 再次执行 ``virtsh pool-list --all`` 就能观察到 :ref:`ceph_rbd` 存储池状态:
 
 .. literalinclude:: missing_backend_for_pool_type_9_rbd/pool-list_rbd
    :language: bash
    :caption: 安装 ``libvirt-daemon-driver-storage-rbd`` 后检查可以看到RBD存储池状态 ``inactive``
+   :emphasize-lines: 8
+
+- 激活存储池 ``images_rbd`` 并设置为自动启动:
+
+.. literalinclude:: missing_backend_for_pool_type_9_rbd/active_rbd_pool
+   :language: bash
+   :caption: 激活 ``images_rbd`` 存储池并设置其自动启动
+
+此时 ``virsh pool-list`` 检查就可以看到存储池 ``images_rbd`` 恢复正常状态，且操作系统重启时会自动启动:
+
+.. literalinclude:: missing_backend_for_pool_type_9_rbd/active_rbd_pool_status
+   :language: bash
+   :caption: ``images_rbd`` 恢复正常状态，且操作系统重启时会自动启动
    :emphasize-lines: 7
 
+接下来就可以继续完成 :ref:`install_opensus_leap` (使用了 :ref:`ceph_rbd_libvirt` 作为存储的 :ref:`priv_cloud_infra` )
 
 参考
 =======
