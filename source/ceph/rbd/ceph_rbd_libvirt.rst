@@ -219,6 +219,14 @@ RBD镜像
    virsh pool-start images_rbd
    virsh pool-autostart images_rbd
 
+.. note::
+
+   由于Debian/Ubuntu将libvirt的存储后端支持独立打包，可能会遇到 :ref:`missing_backend_for_pool_type_9_rbd` 会出现 ``image_rbd`` 存储池状态始终是 ``unknown`` (或无法创建)，此时需要:
+
+   .. literalinclude:: ../debug/missing_backend_for_pool_type_9_rbd/ubuntu_install_libvirt_rbd
+      :language: bash
+      :caption: Ubuntu 安装 ``libvirt-daemon-driver-storage-rbd``
+
 - 然后验证检查是否能够看到之前创建的RBD磁盘文件::
 
    virsh vol-list images_rbd
