@@ -9,6 +9,7 @@ Kubernetes监控
 .. toctree::
    :maxdepth: 1
 
+   metrics/index
    cadvisor.rst
    prometheus/index
    grafana/index

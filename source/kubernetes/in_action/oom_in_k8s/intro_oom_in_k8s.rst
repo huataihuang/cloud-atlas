@@ -20,6 +20,10 @@ OOM的困扰
 
 Linux内核通过 :ref:`overcommit-accounting` 实现内存过量使用，默认是 **启发式** ``overcommit`` ( ``heuristic overcommit`` )
 
+.. note::
+
+   Kubernetes默认的overcommit策略是 ``接受任何分配请求`` 而不检查提交限制
+
 oom-killer
 ==============
 
@@ -65,8 +69,38 @@ OOM killer是内核组件，所以并不是Kubernetes决定调用OOM killer，�
 
 OOM killer支持 soft limits ，不过Kubernetes尚未使用它
 
-待续...
+OOM相关的运行时( ``runtime`` )影响
+===================================
 
+对于使用 .NET 或 Java程序，是使用运行时的编程语言，除了操作系统的内存分配限制以及cgroup内存分配限制，程序运行时也会对应用内存进行限制。运行时相当于应用程序和操作系统之间的中间人，运行时runtime负责跟踪使用了哪些对象，以及对象周围的内存在不使用时可以被GC(回收)。
+
+运行时runtime有设置选项来限制应用程序可以分配的最大内存，所以在排查应用程序无法分配内存时，我们还需要检查runtime限制。此外需要关注runtime的默认限制，也就是即使你不配置runtime限制参数，但是实际上应用程序运行还是会受到runtime限制。
+
+.NET运行时内存限制:
+
+- .NET GC使用容器内存(已分配但不一定使用的内存)限制的 75% 作为默认分配限制
+- .NET 运行时 ``System.GC.HeapHardLimitPercent`` (75%) 机制只在容器设置限制时生效
+
+Go语言没有实际运行时，而是将GC功能放到运行时库(runtime library)中。Go 当前缺少（截至 2021 年 12 月）用于指定堆最大限制的设置。
+
+Kubernetes资源请求和限制
+=========================
+
+在Kubernetes中 :ref:`resource_management_for_pods_containers` 对资源请求和限制提供支持：
+
+- 当为一个Pod中的容器指定资源请求时， ``kube-scheduler`` 使用这个信息来决定将pod调度到哪个节点
+- 当为一个容器指定资源限制时， ``kubelet`` 会强制执行这些限制，以便确保运行的容器使用资源不超过设置的限制
+
+pod的QoS:
+
+- 决定了当节点上内存变得稀缺时pod被驱逐的顺序
+- 决定了Linux上根内存cgroup ``/sys/fs/cgroup/memory/`` 层级结构中的位置: node将放置pod以及container的cgroup( 当前版本默认配置了 ``--cgroups-per-qos=true`` 标志给 ``kubelet`` )
+
+Pod的QoS不是手工配置的，而是Kubernetes根据分配给pod中的容器的请求(request)和限制(limit)来决定的。本质上，Kubernetes通过算法查看pod中容器上的设置和限制，并最终为pod分配相应的QoS:
+
+- ``Guaranteed`` 保证Pod一定有指定资源提供(CPU和内存)
+- ``Burstable`` 则指Pod中至少有一个容器有CPU和内存的request，但是不能确保(guaranteed)
+- ``BestEffort`` 指没有一个容器指定至少一个CPU或内存限制以及请求
 
 参考
 ======
