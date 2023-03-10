@@ -1,7 +1,7 @@
-.. _install_waydroid:
+.. _install_waydroid_raspberry_pi:
 
 ====================
-安装Waydroid
+树莓派安装Waydroid
 ====================
 
 .. note::
@@ -43,7 +43,7 @@ Waydroid需要以下软件环境:
 
 - 添加WayDroid仓库:
 
-.. literalinclude:: install_waydroid/add_waydroid_repo
+.. literalinclude:: install_waydroid_raspberry_pi/add_waydroid_repo
    :language: bash
    :caption: 添加WayDroid仓库
 
