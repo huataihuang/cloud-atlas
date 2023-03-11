@@ -42,13 +42,13 @@ Waydroid需要使用一种包含了 ``binder`` 模块以及可选的 ``ashmem`` 
    modprobe ashmem_linux
    modprobe binder_linux
 
-- 自己编译内核
-
 .. note::
 
    很不幸，安装 ``anbox-modules-dkms-git`` 显示需要 ``5.19.0-asahi-5-1-ARCH`` 内核头文件...然而 :ref:`asahi_linux` 需要使用Kernel 6.1内核...
 
-   暂时放弃尝试 :ref:`dkms` 内核模块方式，或许需自己编译内核(我准备在 :ref:`gentoo_linux` 内核编译时再尝试)
+   暂时放弃尝试 :ref:`dkms` 内核模块方式，改为 :ref:`asahi_linux_build_kernel`
+
+- 自己编译内核: :ref:`asahi_linux_build_kernel`
 
 
 
