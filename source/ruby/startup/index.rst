@@ -12,6 +12,7 @@ Ruby起步
    ruby_object.rst
    ruby_number.rst
    ruby_control.rst
+   ruby_array_hash.rst
 
 .. only::  subproject and html
 
