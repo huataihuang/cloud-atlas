@@ -4,7 +4,7 @@
 在WayDroid中安装和运行Android应用
 ===================================
 
-在完成了 :ref:`install_waydroid` 之后，可以安装和运行Anroid应用。以下我的实践是安装和运行DingTalk
+在完成了 :ref:`install_waydroid_raspberry_pi` 之后，可以安装和运行Anroid应用。以下我的实践是安装和运行DingTalk
 
 - 首先检查waydroid状态::
 
