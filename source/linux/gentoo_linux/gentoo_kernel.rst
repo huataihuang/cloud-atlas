@@ -78,6 +78,13 @@ Gentoo 提供了以下几种支持的内核软件包:
    :language: bash
    :caption: 安装 ``gentoo-sources`` 源代码包
 
+- 配置内核:
+
+.. literalinclude:: gentoo_kernel/menuconfig
+   :language: bash
+   :caption: 配置内核源代码编译选项
+
+
 参考
 ======
 
