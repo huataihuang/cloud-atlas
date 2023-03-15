@@ -41,7 +41,6 @@ release = '0.1'
 # ones.
 extensions = [
         'sphinx.ext.graphviz',
-#        'sphinxnotes.strike',
         'sphinxnotes.strike'
 ]
 
