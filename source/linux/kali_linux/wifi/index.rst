@@ -1,18 +1,13 @@
-.. _kali_linux:
+.. _kali_wifi:
 
 =================================
-Kali Linux
+Kali WiFi安全
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_kali_linux.rst
-   kali_fulltime.rst
-   startup/index
-   wifi/index
-   admin/index
-   arm/index
+   aircrack-ng.rst
 
 .. only::  subproject and html
 
