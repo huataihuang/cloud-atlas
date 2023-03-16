@@ -13,6 +13,8 @@ Gentoo Linux
    gentoo_nvidia.rst
    gentoo_mbp_wifi.rst
    gentoo_kernel.rst
+   gentoo_initramfs.rst
+   gentoo_docker.rst
    cross-platform_file_system.rst
    pentoo/index
 

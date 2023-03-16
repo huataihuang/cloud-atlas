@@ -80,13 +80,80 @@ Gentoo 提供了以下几种支持的内核软件包:
 
 - 配置内核:
 
+  - :ref:`gentoo_mbp_wifi`
+  - :ref:`gentoo_nvidia`
+
 .. literalinclude:: gentoo_kernel/menuconfig
    :language: bash
    :caption: 配置内核源代码编译选项
 
+- 编译内核和安装内核(和模块):
+
+.. literalinclude:: gentoo_kernel/kernel_make_install
+   :language: bash
+   :caption: 编译内核并安装
+
+更新boot loader
+=================
+
+如果使用GRUB，则执行以下命令::
+
+   grub-mkconfig -o /boot/grub/grub.cfg
+
+由于我在 :ref:`install_gentoo_on_mbp` 采用了 :ref:`archlinux_on_mbp` 相同的 ``efibootmgr`` 管理UEFI启动顺序，所以执行以下命令配置EFI启动:
+
+.. literalinclude:: install_gentoo_on_mbp/efibootmgr_set_xcloud
+   :language: bash
+   :caption: 设置efibootmgr启动定制xcloud内核
+
+.. note::
+
+   这里没有使用 :ref:`gentoo_initramfs` ( :ref:`ramfs` 的特例 ) ，如果有需要在内核启动时预先加载的内核模块，例如 :ref:`linux_lvm` 或 :ref:`zfs` 作为根卷，或者需要使用特定的文件系统，都需要采用 :ref:`ramfs` 预先加载内核模块或者维护工具。
+
+.. warning::
+
+   建议将关键文件系统直接编译进内核：例如我使用XFS作为根文件系统，但是默认内核配置 ``xfs`` 是作为模块编译的，这导致要么使用 :ref:`gentoo_initramfs` 要么就必须直接编译进内核，否则重启系统无法工作。
+
+修复和挽救
+===========
+
+实际上，内核裁剪和构建总是会遇到各种问题，导致系统无法启动。此时，我们需要采用 :ref:`install_gentoo_on_mbp` 的挂载并 ``chroot`` 步骤，重新进入系统进行排障:
+
+- 通过Gentoo 安装U盘再次启动启动，然后启动sshd服务并且设置好root密码:
+
+.. literalinclude:: install_gentoo_on_mbp/gentoo_livecd_sshd
+   :language: bash
+   :caption: 启动Gentoo Linux安装的sshd服务
+
+- 挂载 root 分区文件系统:
+
+.. literalinclude:: install_gentoo_on_mbp/mount_gentoo_fs
+   :language: bash
+   :caption: 挂载文件系统
+
+- 挂载文件系统:
+
+.. literalinclude:: install_gentoo_on_mbp/mount_fs
+   :language: bash
+   :caption: 挂载文件系统
+
+- 进入Gentoo新环境:
+
+.. literalinclude:: install_gentoo_on_mbp/chroot
+   :language: bash
+   :caption: 进入Gentoo新环境
+
+- 挂载boot分区(这个分区是MacBook的macos和gentoo公用的):
+
+.. literalinclude:: install_gentoo_on_mbp/mount_boot
+   :language: bash
+   :caption: 挂载 /boot
+
+现在所有环境恢复磁盘上Gentoo Linux的运行状态，除了内核采用了LiveCD提供内核，整个文件系统都是磁盘上文件系统。就可以从新开始内核配置和编译了，可以尝试重新开始内核构建。
 
 参考
 ======
 
 - `Kernel/Gentoo Kernel Configuration Guide <https://wiki.gentoo.org/wiki/Kernel/Gentoo_Kernel_Configuration_Guide>`_
 - `Kernel/Overview <https://wiki.gentoo.org/wiki/Kernel/Overview>`_
+- `Kernel/Rebuild <https://wiki.gentoo.org/wiki/Kernel/Rebuild>`_
