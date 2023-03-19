@@ -43,7 +43,7 @@ MacBook Pro 15" Late 2013
 
 - 显卡
 
-  - 独立显卡: NVIDIA GeForce GT 750M, 2GB显存(GDDR5)
+  - 独立显卡: NVIDIA GeForce GT 750M, 2GB显存(GDDR5) `NVIDIA GeForce GT 750M Mac Edition Specs <https://www.techpowerup.com/gpu-specs/geforce-gt-750m-mac-edition.c2527.>`_ 资料显示只有1G显存
   - 集成显卡: Intel Iris 5200 Pro, 128MB Crystalwell
 
 - 屏幕

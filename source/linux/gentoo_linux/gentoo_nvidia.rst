@@ -22,6 +22,10 @@ Gentoo NVIDIA驱动
 安装
 ======
 
+::
+
+   emerge --ask x11-drivers/nvidia-drivers
+
 内核
 ~~~~~~
 
@@ -32,7 +36,27 @@ NVIDIA内核驱动需要针对当前内核进行模块编译，所以内核必�
 .. literalinclude:: gentoo_nvidia/kernel_nvidia
    :caption: 内核支持NVIDIA配置
 
+.. note::
 
+   如果没有定制 :ref:`gentoo_kernel` ，则直接安装 ``x11-drivers/nvidia-drivers`` 会出现冲突错误而失败
+
+安装 ``nvidia-drivers``
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning::
+
+   The "Mark VGA/VBE/EFI FB as generic system framebuffer" option moved in kernel 5.15 with a new symbol name for all arches. This may cause a black screen or no progress shown after the loader on boot if changes are not made.
+
+   在内核中必须激活 simgple framebuffer ，否则重启系统会出现黑屏无法显示启动进度，也不能显示终端界面。注意，内核 5.15 之前和之后的simple framebuffer配置选项采用了不同的符号名，配置方法略有不同。
+
+   目前Gentoo 6.1.12 内核，默认 ``Simple framebuffer driver`` 是模块化编译。
+
+   我遇到一个问题就是编译后内核能够正常启动主机(ssh可以登陆)，但是屏幕完全黑屏无输出，而且安装了 ``nvidia-drivers`` 之后也是一样( ``lsmod | grep nvidia`` 证明已经正确加载内核模块 )
+
+- 安装 ``nvidia-drivers`` 私有驱动:
+
+.. literalinclude:: gentoo_nvidia/install_nvidia
+   :caption: 安装NVIDIA驱动
 
 参考
 ==========
