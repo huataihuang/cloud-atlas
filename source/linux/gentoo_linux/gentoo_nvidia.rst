@@ -27,7 +27,7 @@ Gentoo NVIDIA驱动
    emerge --ask x11-drivers/nvidia-drivers
 
 内核
-~~~~~~
+-----
 
 NVIDIA内核驱动需要针对当前内核进行模块编译，所以内核必须支持内核模块加载功能，而且还需要完成特定的 :ref:`gentoo_kernel` 支持，否则会在安装NVIDIA驱动时提示报错。
 
@@ -41,22 +41,62 @@ NVIDIA内核驱动需要针对当前内核进行模块编译，所以内核必�
    如果没有定制 :ref:`gentoo_kernel` ，则直接安装 ``x11-drivers/nvidia-drivers`` 会出现冲突错误而失败
 
 安装 ``nvidia-drivers``
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-
-   The "Mark VGA/VBE/EFI FB as generic system framebuffer" option moved in kernel 5.15 with a new symbol name for all arches. This may cause a black screen or no progress shown after the loader on boot if changes are not made.
-
-   在内核中必须激活 simgple framebuffer ，否则重启系统会出现黑屏无法显示启动进度，也不能显示终端界面。注意，内核 5.15 之前和之后的simple framebuffer配置选项采用了不同的符号名，配置方法略有不同。
-
-   目前Gentoo 6.1.12 内核，默认 ``Simple framebuffer driver`` 是模块化编译。
-
-   我遇到一个问题就是编译后内核能够正常启动主机(ssh可以登陆)，但是屏幕完全黑屏无输出，而且安装了 ``nvidia-drivers`` 之后也是一样( ``lsmod | grep nvidia`` 证明已经正确加载内核模块 )
+--------------------------
 
 - 安装 ``nvidia-drivers`` 私有驱动:
 
 .. literalinclude:: gentoo_nvidia/install_nvidia
    :caption: 安装NVIDIA驱动
+
+.. note::
+
+   每次内核重新编译，则需要重新做一次 ``nvidia-drivers`` 私有驱动安装
+
+安装完成后重启，执行 ``lsmod | grep nvidia`` 显示::
+
+   nvidia_drm             61440  0
+   nvidia_modeset       1150976  1 nvidia_drm
+   nvidia              34840576  1 nvidia_modeset
+   video                  61440  1 nvidia_modeset
+
+问题排查
+=========
+
+重启后字符终端黑屏
+----------------------
+
+:ref:`gentoo_mbp_kernel` 我遇到一个奇怪的问题，就是重启系统后完全黑屏，没有任何输出。但是 :ref:`mbp15_late_2013` 的Gentoo Linux 正常启动的，能够ssh远程登陆。并且 ``lsmod | grep nvidia`` 证明已经正确加载内核模块，说明 ``nvidia-drivers`` 安装正确。
+
+参考 `Gentoo: NVIDIA/nvidia-drivers <https://wiki.gentoo.org/wiki/NVIDIA/nvidia-drivers>`_ 提示:
+
+The "Mark VGA/VBE/EFI FB as generic system framebuffer" option moved in kernel 5.15 with a new symbol name for all arches. This may cause a black screen or no progress shown after the loader on boot if changes are not made.
+
+也就是说在内核中必须激活 simgple framebuffer ，否则重启系统会出现黑屏无法显示启动进度，也不能显示终端界面。注意，内核 5.15 之前和之后的simple framebuffer配置选项采用了不同的符号名，配置方法略有不同。
+
+我检查了我的 ``make menuconfig``  配置，对于目前Gentoo 6.1.12 内核，默认 ``Simple framebuffer driver`` 是模块化编译。
+
+我推测这个功能 ``Simple framebuffer driver`` 需要直接bulid-in，毕竟我目前没有使用 ``initram`` 所以模块都是后加载的。修订:
+
+.. literalinclude:: gentoo_nvidia/kernel_simple_framebuffer
+   :caption: 配置 ``Simple framebuffer driver`` 为build-in
+
+需要注意，要配置 ``Simple framebuffer driver`` build-in，其依赖的模块 ``DRI`` 也需要配置为build-in
+
+字符终端花屏
+------------------
+
+我在上文中将 ``Simple framebuffer driver`` build-in，重启确实有屏幕输出，但是字符终端开始正常显示到登陆界面，但是输入交互时候就发现不对劲: 反馈的文字全部花屏
+
+想到刚才遇到的安装提示::
+
+   * Detected potential configuration issues with used kernel:
+   *   CONFIG_DRM_SIMPLEDRM: is builtin (=y), and may conflict with NVIDIA
+   *     (i.e. blanks when X/wayland starts, and tty loses display).
+   *     For prebuilt kernels, unfortunately no known good workarounds.
+   *   CONFIG_SYSFB_SIMPLEFB: is set, this may prevent FB_EFI or FB_VESA
+   *     from providing a working tty console display (ignore if unused).
+
+待重新编译...
 
 参考
 ==========
