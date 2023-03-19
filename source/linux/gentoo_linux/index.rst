@@ -14,7 +14,6 @@ Gentoo Linux
    gentoo_mbp_wifi.rst
    gentoo_kernel.rst
    gentoo_mbp_kernel.rst
-   gentoo_mbp_kernel_blackscreen.rst
    gentoo_initramfs.rst
    gentoo_docker.rst
    cross-platform_file_system.rst
