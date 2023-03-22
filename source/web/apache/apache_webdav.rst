@@ -10,7 +10,18 @@ Apache WebDAV服务器
 
    后续我准备将 :ref:`joplin_sync_webdav` 从 :ref:`nginx_webdav` 改为Apache WebDAV，主要考虑方便配置，同时学习Apache的配置管理。
 
-   待续
+激活 :ref:`webdav` Apache模块
+=================================
+
+- Apache web服务器提供了很多模块，通过 ``a2enmod`` 工具可以激活或关闭，使用以下命令激活:
+
+.. literalinclude:: apache_webdav/apache_enable_webdav
+   :caption: Apache web server激活 :ref:`webdav` 模块
+
+- 重启apache:
+
+.. literalinclude:: apache_webdav/apache_restart
+   :caption: 重启Apache web server
 
 参考
 =====

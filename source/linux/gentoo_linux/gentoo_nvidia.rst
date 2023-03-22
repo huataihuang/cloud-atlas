@@ -40,6 +40,10 @@ NVIDIA内核驱动需要针对当前内核进行模块编译，所以内核必�
 
    如果没有定制 :ref:`gentoo_kernel` ，则直接安装 ``x11-drivers/nvidia-drivers`` 会出现冲突错误而失败
 
+这里执行 ``make modules_install`` 有一个提示::
+
+   depmod: WARNING: /lib/modules/6.1.12-gentoo-xcloud/video/nvidia-modeset.ko needs unknown symbol acpi_video_backlight_use_native
+
 安装 ``nvidia-drivers``
 --------------------------
 
@@ -52,12 +56,14 @@ NVIDIA内核驱动需要针对当前内核进行模块编译，所以内核必�
 
    每次内核重新编译，则需要重新做一次 ``nvidia-drivers`` 私有驱动安装
 
-安装完成后重启，执行 ``lsmod | grep nvidia`` 显示::
+检查::
 
+   # lsmod | grep nvidia
    nvidia_drm             61440  0
    nvidia_modeset       1150976  1 nvidia_drm
    nvidia              34840576  1 nvidia_modeset
-   video                  61440  1 nvidia_modeset
+   drm_kms_helper        159744  1 nvidia_drm
+   drm                   499712  4 drm_kms_helper,nvidia,nvidia_drm
 
 问题排查
 =========
@@ -73,14 +79,9 @@ The "Mark VGA/VBE/EFI FB as generic system framebuffer" option moved in kernel 5
 
 也就是说在内核中必须激活 simgple framebuffer ，否则重启系统会出现黑屏无法显示启动进度，也不能显示终端界面。注意，内核 5.15 之前和之后的simple framebuffer配置选项采用了不同的符号名，配置方法略有不同。
 
-我检查了我的 ``make menuconfig``  配置，对于目前Gentoo 6.1.12 内核，默认 ``Simple framebuffer driver`` 是模块化编译。
+我检查了我的 ``make menuconfig``  配置，对于目前Gentoo 6.1.12 内核，默认 ``Simple framebuffer driver`` 是模块化编译。但是，我尝试将 ``Simple framebuffer driver`` 编译进内核，启动以后确实可以显示，但是却带来的花屏，见下文。
 
-我推测这个功能 ``Simple framebuffer driver`` 需要直接bulid-in，毕竟我目前没有使用 ``initram`` 所以模块都是后加载的。修订:
-
-.. literalinclude:: gentoo_nvidia/kernel_simple_framebuffer
-   :caption: 配置 ``Simple framebuffer driver`` 为build-in
-
-需要注意，要配置 ``Simple framebuffer driver`` build-in，其依赖的模块 ``DRI`` 也需要配置为build-in
+后来在处理 "字符终端花屏" 的NVIDIA提示，感觉是之前误激活了 ``CONFIG_DRM_SIMPLEDRM`` 导致的，还有一种可能就是没有配置任何framebuffer，但是同时又没有安装 ``nvidia-drivers`` (提供了framebuffer驱动模块)
 
 字符终端花屏
 ------------------
@@ -96,7 +97,10 @@ The "Mark VGA/VBE/EFI FB as generic system framebuffer" option moved in kernel 5
    *   CONFIG_SYSFB_SIMPLEFB: is set, this may prevent FB_EFI or FB_VESA
    *     from providing a working tty console display (ignore if unused).
 
-待重新编译...
+.. literalinclude:: gentoo_nvidia/kernel_nvidia_simple_framebuffer_error_config
+   :caption: ``错误激活`` simple framebuffer ，NVIDIA驱动安装后会提示冲突
+
+去除上述冲突选项之后，编译安装 ``nvidia-drivers`` 确实不再提示冲突，但是花屏问题还没有解决。
 
 参考
 ==========
