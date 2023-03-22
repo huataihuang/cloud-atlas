@@ -6,6 +6,10 @@ Prometheus Node Exporter
 
 Prometheus Node Exporter提供了一系列硬件和内核相关metric
 
+.. note::
+
+   要输出 :ref:`nvidia_gpu` ，需要使用 `prometheus-dcgm <https://github.com/NVIDIA/dcgm-exporter>`_
+
 安装
 ========
 
