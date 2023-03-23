@@ -13,6 +13,10 @@ macOS 环境Go
 
 我怀疑可能和 :ref:`using_modules_and_packages_in_go` 中提到的从 Go 1.16 开始，使用了 ``go mod`` 管理依赖，所以采用 :ref:`go_vendor` 配置没有生效。不过，既然可以使用 :ref:`homebrew` 安装Golang，那么尝试回滚到旧版本试试。
 
+.. warning::
+
+   根据 `kardianos/govendor <https://github.com/kardianos/govendor>`_ 官方说明 **Please don't use this tool anymore.** ，从 go1.14 开始就应该使用 :ref:`go_modules`
+
 - 搜索可用的Go版本::
 
    brew search go

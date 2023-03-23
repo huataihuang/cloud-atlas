@@ -10,17 +10,28 @@
 采用 :ref:`macos_nginx_webdav_joplin` :
 
 - 对于 :ref:`macos` 平台，需要 :ref:`build_nginx_macos`
-- 完成 :ref:`nginx_webdav` 配置
+- 完成 :ref:`nginx_webdav` 或 :ref:`apache_webdav` 配置
 
 .. note::
 
    需要 `nginx-dav-ext-module <https://github.com/arut/nginx-dav-ext-module>`_ 模块的NGINX才能支持完整的WebDAV功能，所以请参考 :ref:`macos_nginx_webdav_joplin` 解决方案
+
+本地数据备份
+---------------
+
+.. warning::
+
+   通过 :ref:`webdav` 同步其实有一个比较大的风险: 多个设备不一致，相互覆盖。所以在同步之前，务必先把本地数据进行备份。
+
+Joplin的本地用户目录是 ``~/.config/joplin`` ，在同步数据前务必先备份此目录，避免数据丢失
 
 同步
 =======
 
 .. note::
 
-   我最初以为Joplin的数据同步采用覆盖模式，所以一直纠结我的几个已经安装了Joplin的电脑和手机(已经各自积累了不少数据)是否会相互覆盖导致数据丢失。所以我对每个设备都先实施了数据导出。
+   桌面版本Joplin提供了 ``用本地数据覆盖远程数据`` / ``用远程数据覆盖本地数据`` 的两个选项，但是移动端(iOS版本)没有提供这个选择。我遇到过一次同步直接把本地数据抹除了(因为我错误关闭了 ``Fail-safe`` 开关，见下文)。所以还是存在风险的。
 
-   不过实践证明，Joplin的数据同步采用了类似 :ref:`git` 的Merge功能，也就是只要不冲突，尽可能保证所有数据存储同步，非常完美。
+   建议在桌面上对本地数据目录经常进行备份。
+
+Joplin提供了一个 ``Fail-safe`` 配置开关，这个 **开关务必开启** : 当Joplin发现远程目录是空的时候，不会自动同步(即反向清除掉本地数据)，避免误操作。

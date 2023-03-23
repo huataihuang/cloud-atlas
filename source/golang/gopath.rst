@@ -14,6 +14,11 @@ $GOPATH 配置
 - ``$GOPATH/pkg`` - Go内部使用的运行自身的包
 - ``$GOPATH/bin`` - 包含执行程序
 
+.. _go_modules:
+
+Go Modules
+============
+
 从 Go 1.11之后，Go Modules可以在 ``$GOPATH`` 之外创建项目，并且导入包管理
 
 在没有Go Modules之前的缺点:

@@ -9,9 +9,11 @@ VS Code
 
    vscode_linux.rst
    vscode_archlinux.rst
+   vscode_macos.rst
    vscode_lsp.rst
    vscode_extensions.rst
    vscode_themes.rst
+   vscode_git.rst
    vscode_debugging.rst
    vscode_remote_dev.rst
    vscode_remote_dev_ssh.rst

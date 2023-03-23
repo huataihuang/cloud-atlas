@@ -149,6 +149,14 @@ git提供了支持终端的色彩显示，用以下命令开启::
 
    git diff branch1 branch2
 
+- 比较两个分支的指定文件差异::
+
+   git diff mybranch master -- myfile.cs
+
+也可以使用::
+
+   git diff mybranch..master -- myfile.cs
+
 - 比较两个分支的文件::
 
    git diff <branchA>:<fileA> <branchB>:<fileB>
@@ -167,3 +175,4 @@ git提供了支持终端的色彩显示，用以下命令开启::
 - `git branch <http://www.cnblogs.com/gbyukg/archive/2011/12/12/2285425.html>`_
 - `How to colorize output of git? <https://unix.stackexchange.com/questions/44266/how-to-colorize-output-of-git>`_
 - `Git 撤销本地修改 <https://www.cnblogs.com/xioawu-blog/p/14449862.html>`_
+- `How to compare files from two different branches <https://stackoverflow.com/questions/4099742/how-to-compare-files-from-two-different-branches>`_

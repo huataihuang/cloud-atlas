@@ -4,6 +4,15 @@
 Go Vendor包管理器
 ===================
 
+.. warning::
+
+   根据 `kardianos/govendor <https://github.com/kardianos/govendor>`_ 官方说明，从go1.14开始 Go modules已经达到产品级别(可以以用于1.13和1.12)，除非你的go版本极低，否则应该使用 :ref:`go_modules` 。Go Vendor官方已经不建议使用自身这个工具(官方2016年9月以后不在发布新版)
+
+   我在实践中折腾了很久，原因就是我使用了最新的 go1.20 ，但是旧项目中使用 Go Vendor管理依赖，无法正常自动安装依赖包。解决方法有两种:
+
+   - 回退旧版本: :ref:`go_on_macos` (尝试 :ref:`homebrew` 安装多个Go版本，可能需要手工安装)，这样先通过 ``vendor`` 实现依赖安装和管理，然后再升级Go版本就可以正常工作
+   - :ref:`migrate_go_modules` : 通过 ``go mod init`` 将 ``vendor/vendor.json`` 转换成 ``go.mod`` ，之后由 :ref:`go_modules` 接管依赖管理
+
 在 :ref:`gopath` 中介绍了Go语言最新的Go Modules管理 ``$GOPATH`` 的方法。不过，在Go Modules出现之前，还有一个常用且现在依然在使用的 ``vendor`` 管理方式。
 
 基于vendor机制下，在执行 ``go build`` 或 ``go run`` 命令时，会按照以下顺序去查找包：

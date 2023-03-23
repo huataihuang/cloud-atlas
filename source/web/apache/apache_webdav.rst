@@ -23,6 +23,36 @@ Apache WebDAV服务器
 .. literalinclude:: apache_webdav/apache_restart
    :caption: 重启Apache web server
 
+配置 :ref:`webdav`
+===================
+
+- 创建 :ref:`joplin` 存储目录::
+
+   mkdir /home/huatai/docs/joplin
+
+- :ref:`webdav` 需要存储一个数据库文件来管理 :ref:`webdav` 用户存取文件的所，这个锁文件必须被Apache能够读写，但是不能被web网站访问到以免泄露安全信息。创建目录::
+
+   mkdir /home/huatai/docs/var
+
+上述目录在Apache配置中存放 ``DavLock`` 锁文件
+
+采用 :ref:`apache_basic_auth` 方法，结合 :ref:`webdav` :
+
+.. literalinclude:: apache_webdav/000-default.conf
+   :caption: webdav结合 :ref:`apache_basic_auth`
+   :emphasize-lines: 1,16-18,20-24
+
+.. note::
+
+   你会注意到，我在 ``/`` 和 ``/joplin`` 两次配置了 :ref:`apache_basic_auth` ::
+
+      AuthType Basic
+      AuthName "Restricted Content"
+      AuthUserFile /etc/apache2/.htpasswd
+      Require valid-user
+
+   我最初以为 ``/joplin`` 会集成上一级的目录配置，但是实际上并不是，需要为每个目录配置认证，否则会类似 :ref:`apache_simple_config` 那样由于默认安全限制无法访问 ``/joplin`` 
+
 参考
 =====
 

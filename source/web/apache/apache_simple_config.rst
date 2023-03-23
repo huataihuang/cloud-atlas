@@ -51,19 +51,11 @@ Apache 简单配置
 
 接下来的问题就是，修改 ``DocumentRoot`` 为何会导致无法访问?
 
-修订过 ``DocumentRoot`` 之后，在Apache2中，需要为目录配置允许覆盖默认目录配置拒绝(改为允许)，所以需要改为::
+修订过 ``DocumentRoot`` 之后，在Apache2中，需要为目录配置允许覆盖默认目录配置拒绝(改为允许)，所以需要改为:
 
-   <VirtualHost *:80>
-   ...
-       DocumentRoot /home/huatai/docs/github.com/huataihuang/cloud-atlas/build/html
-       <Directory "/home/huatai/docs/github.com/huataihuang/cloud-atlas/build/html">
-           Options Indexes FollowSymLinks
-           AllowOverride All
-           Order allow,deny
-           Allow from all
-           Require all granted
-       </Directory>
-   ...
+.. literalinclude:: apache_simple_config/000-default.conf
+   :caption: 简单的启用目录访问WEB /etc/apache2/sites-enabled/000-default.conf
+   :emphasize-lines: 4-11
 
 参考
 =====
