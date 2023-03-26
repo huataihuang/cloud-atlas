@@ -1,7 +1,7 @@
-.. _docker_registry:
+.. _minikube_deploy_docker_registry:
 
 ========================================
-在Kubernetes中部署私有Docker镜像仓库
+在minikube中部署私有Docker镜像仓库
 ========================================
 
 .. note::

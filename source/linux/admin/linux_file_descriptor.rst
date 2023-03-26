@@ -29,25 +29,25 @@ Linux文件描述符(文件句柄)表示进程打开的文件:
 
 当进程占用文件句柄过多，甚至达到了limits上限时，会导致应用程序无法正常工作，此时需要找出系统中占用文件句柄最多的进程:
 
-.. literinclude:: linux_file_descriptor/get_hogging_fd_process.sh
+.. literalinclude:: linux_file_descriptor/get_hogging_fd_process.sh
    :language: bash
    :caption: 列出系统中每个进程占用的文件句柄且按照打开FD数量排序
 
 不过，我遇到过陈旧的操作系统 ``lsof`` 整个系统非常卡的情况，所以也可以改写如下脚本:
 
-.. literinclude:: linux_file_descriptor/get_hogging_fd_process_script.sh
+.. literalinclude:: linux_file_descriptor/get_hogging_fd_process_script.sh
    :language: bash
    :caption: 采用脚本列出系统中每个进程占用的文件句柄
 
 获取指定PID的对应进程名:
 
-.. literinclude:: linux_file_descriptor/get_process_name_by_pid.sh
+.. literalinclude:: linux_file_descriptor/get_process_name_by_pid.sh
    :language: bash
    :caption: 列出指定进程ID对应的进程名
 
 对于每个进程，可以独立检查其打开的文件:
 
-.. literinclude:: linux_file_descriptor/get_process_fd_list.sh
+.. literalinclude:: linux_file_descriptor/get_process_fd_list.sh
    :language: bash
    :caption: 列出指定进程打开的文件(句柄)
 

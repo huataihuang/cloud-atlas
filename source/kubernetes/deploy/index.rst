@@ -24,7 +24,7 @@ Kubernetes部署
    nginx_ingress.rst
    haproxy_ingress.rst
    istio_ingress.rst
-   docker_registry.rst
+   minikube_deploy_docker_registry.rst
    helm.rst
    draft.rst
    kustomize.rst
