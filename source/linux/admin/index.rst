@@ -12,6 +12,7 @@ Linux系统管理
    os_fork_resource_unavailable.rst
    linux_backlight.rst
    linux_system_time.rst
+   linux_file_descriptor.rst
    process/index
 
 .. only::  subproject and html
