@@ -75,6 +75,12 @@ tini运行ssh ``fedora-ssh-tini``
    :language: dockerfile
    :caption: 包含tini和ssh的Fedora镜像Dockerfile
 
+其中，使用的 ``entrypoint.sh`` 脚本是 :ref:`kind_deploy_fedora-dev-tini` 实践中改进过的脚本:
+
+.. literalinclude:: fedora_tini_image/ssh/entrypoint_ssh_cron_bash
+   :language: bash
+   :caption: ``/entrypoint.sh`` 脚本的 ``main()`` 确保持续运行(循环)
+
 - 构建 ``fedora-ssh-tini`` 镜像:
 
 .. literalinclude:: fedora_tini_image/ssh/build_fedora-ssh-tini_image

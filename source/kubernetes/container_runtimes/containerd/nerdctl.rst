@@ -228,8 +228,10 @@ CentOS 8转换CentOS Stream
 
    sudo nerdctl run -d -p 1122:22 --hostname centos-stream-8 --name centos-stream-8 local:centos-stream-8-ssh
 
-nerdctl结合Kubernetes
-=========================
+.. _nerdctl_load_images_k8s:
+
+nerdctl加载镜像到Kubernetes
+=============================
 
 ``nerdctl`` 可以直接为本地Kubernetes构建镜像而无需registry:
 
@@ -279,7 +281,7 @@ nerdctl结合Kubernetes
    NAME              READY   STATUS              RESTARTS   AGE
    centos-stream-8   0/1     ErrImageNeverPull   0          3m7s
 
-这是因为没有使用  :ref:`docker_registry` ，需要将镜像导入到每个调度到的节点上才能启动。
+这是因为没有使用  :ref:`k8s_deploy_registry` ，需要将镜像导入到每个调度到的节点上才能启动。
 
 - 检查新创建的pod调度到哪个节点::
 

@@ -12,7 +12,7 @@ CodeReady Containers(CRC)提供了:
 
 - OpenShift Container Platform(OCP)的本地版本
 - 增强型启动进程和集成服务mesh，serverless以及通过OpenShift Connector连接 :ref:`vscode`
-- 在一个单节点集群提供大量模板有以及一个本地 :ref:`docker_registry`
+- 在一个单节点集群提供大量模板有以及一个本地 :ref:`minikube_deploy_docker_registry`
 
 参考
 ======

@@ -24,6 +24,7 @@ Sphinx文档
    sphinx_table.rst
    sphinx_image.rst
    sphinx_strike.rst
+   sphinx_rss_feed.rst
 
 .. only::  subproject and html
 

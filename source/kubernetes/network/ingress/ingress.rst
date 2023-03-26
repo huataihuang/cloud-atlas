@@ -21,7 +21,7 @@ Ingress不会输出随机端口或协议。对于需要输出HTTP和HTTPS以外�
 
    有多种 :ref:`ingress_controller` 可以选择，即有多种负载均衡可以作为容器实例运行在边界，例如 NGINX, HAProxy, Istio, Gloo 等等。例如opensource.com上文章 `Try this Kubernetes HTTP router and reverse proxy <https://opensource.com/article/20/4/http-kubernetes-skipper>`_ 介绍了采用 `zalando开发的skipper <https://opensource.zalando.com/skipper/>`_ 实现Ingress(我准备后续实践)。
 
-   为了有感性认识，请参考 :ref:`docker_registry` ，其中采用了 NGINX Ingress 来实现。
+   为了有感性认识，请参考 :ref:`k8s_deploy_registry` ，其中采用了 NGINX Ingress 来实现。
 
 .. note::
 
