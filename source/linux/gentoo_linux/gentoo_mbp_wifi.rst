@@ -41,6 +41,10 @@ IEEE 802.11
 
    由于需要加载firmware，所以 wireless configuration API (CONFIG_CFG80211) 需要配置成模块方式而不是直接buildin
 
+.. note::
+
+   对于私有驱动， **似乎** 需要关闭 ``mac80211`` (CONFIG_MAC80211)
+
 WEXT
 -------
 
@@ -64,6 +68,15 @@ WEXT
 .. note::
 
    ``b43`` 可以在内核源码中激活模块方式编译，但是Broadcom4360需要私有驱动 `net-wireless/broadcom-sta <https://packages.gentoo.org/packages/net-wireless/broadcom-sta>`_ 没有编译选项
+
+   对于安装私有驱动，上述设备驱动我全关闭了
+
+   但是参考 `Closed source Broadcom driver <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina_(early_2013)#Closed_source_Broadcom_driver>`_ 采用激活Intel PRO/Wireless 2100网卡驱动来输出内核的 LIB80211 ::
+
+      Device Drivers
+         -> Network device support
+            -> Wireless LAN
+               -> <*>   Intel PRO/Wireless 2100 Network Connection
 
 LED支持
 ---------
@@ -97,9 +110,33 @@ Broadcom BCM4360驱动和Firmware
 
    ``net-wireless/broadcom-sta`` 同时包含了驱动和firmware
 
+``broadcom-sta`` 编译时会检查当前内核编译配置，如果有冲突选项会提示，按提示调整内核编译配置，例如我遇到以下内核配置需要关闭::
+
+   X86_INTEL_LPSS  #位于 "Processor type and features ==> Intel Low Power Subsystem Support"
+   PREEMPT_RCU 不能设置为 Preemptible Kernel 的 Preemption Model  #位于General setup ==> RCU Subsystem
+
+``PREEMPT_RCU`` 冲突
+=====================
+
+我在最新的 6.1.12 内核安装 ``broadcom-sta`` 遇到报错::
+
+   PREEMPT_RCU: Please do not set the Preemption Model to "Preemptible Kernel"; choose something else. 
+
+这个问题在 `emerge broadcom-sta fails (6.1.12 kernel) due to PREEMPT_RCU <https://forums.gentoo.org/viewtopic-p-8780772.html?sid=5cc5e86da1895dbc2b210c1d15a2d113>`_ 有解决建议:
+
+- ``PREEMPT_RCU`` 不能直接修改(确实，我在配置选项中没有找到)
+- 在 ``General setup`` 中 当选择以下 ``preemption models`` 时 ``PREEMPT_RCU`` 会自动选择:
+
+  - Preemptible Kernel (Low-Latency Desktop) # 位于 General setup => Preemption Model
+  - Fully Preemptible Kernel (Real-Time) (this might not be available on all CPU architectures)
+
+- 在 ``General setup`` 中如果激活 ``PREEMPT_DYNAMIC`` 就会自动选择
+
+果然，原来我选择激活了 ``Gneeral setup => Preemption behaviour defined on boot`` ，这个选项就是 ``PREEMPT_DYNAMIC=y`` ，就是这个选项导致。真是这个选项激活导致了 ``PREEMPT_RCU`` 出现，我取消这个配置就可以了
 
 参考
 =====
 
 - `Apple Macbook Pro Retina - Closed source Broadcom driver <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina#Closed_source_Broadcom_driver>`_
 - `gentoo linux wiki: WiFi <https://wiki.gentoo.org/wiki/Wifi>`_
+- `emerge broadcom-sta fails (6.1.12 kernel) due to PREEMPT_RCU <https://forums.gentoo.org/viewtopic-p-8780772.html?sid=5cc5e86da1895dbc2b210c1d15a2d113>`_
