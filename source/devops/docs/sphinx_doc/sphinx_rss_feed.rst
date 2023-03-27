@@ -39,7 +39,24 @@ Google了一下，我觉得思路是采用 Sphinx 的插件来实现 RSS feed �
 - `lsaffre/sphinxfeed <https://github.com/lsaffre/sphinxfeed>`_ ( 从已停止开发的 `junkafarian/sphinxfeed <https://github.com/junkafarian/sphinxfeed>`_ Fork出来) 目前仍在活跃维护，是比较有希望的解决方案
 - `sphinxcontrib-newsfeed <https://pypi.org/project/sphinxcontrib-newsfeed/>`_  从2013年开始支持Python 3，虽然2015年之后不再更新，但是由于Sphinx的API非常稳定，所以依然可以使用
 
+``sphinxcontrib-newsfeed``
+==============================
 
+- 在 :ref:`virtualenv` 中通过 ``pip`` 安装::
+
+   pip install sphinxcontrib-newsfeed
+
+- 修改 ``conf.py`` ::
+
+   extensions.append('sphinxcontrib.newsfeed')
+
+我的实际配置::
+
+   extensions = [
+           'sphinx.ext.graphviz',
+           'sphinxnotes.strike',
+           'sphinxcontrib.newsfeed'
+   ]
 
 参考
 =======

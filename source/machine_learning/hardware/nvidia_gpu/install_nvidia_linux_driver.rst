@@ -41,7 +41,7 @@ NVIDIA将GPU驱动和开发组件(Toolkits)分别组合成 ``cuda-drivers`` 和 
 
 - 根据 :ref:`tesla_p10_spec` ，Tesla P10 / P40 以及 GeForce GTX 1080 Ti 硬件完全一致，只是在GPU主频和内存大小(及主频)上有细微差异，所以完全可以采用 `NVIDIA官方提供的 P40 驱动 <https://www.nvidia.com/download/index.aspx#>`_ :
 
-.. figure:: ../../_static/machine_learning/hardware/tesla_p10_driver.png
+.. figure:: ../../../_static/machine_learning/hardware/nvidia_gpu/tesla_p10_driver.png
    :scale: 80
 
 驱动版本
@@ -65,7 +65,7 @@ NVDIA CUDA驱动安装
 - :ref:`install_cuda_prepare`
 - 根据不同发行版在 `NVIDIA CUDA Toolkit repo 下载 <https://developer.nvidia.com/cuda-downloads>`_ 选择对应的 :ref:`cuda_repo` ，例如我的 :ref:`priv_cloud_infra` 采用了 Ubuntu 22.04 LTS，所以执行如下步骤在系统中添加仓库:
 
-.. literalinclude:: ../cuda/install_nvidia_cuda/cuda_toolkit_ubuntu_repo
+.. literalinclude:: ../../cuda/install_nvidia_cuda/cuda_toolkit_ubuntu_repo
    :language: bash
    :caption: 在Ubuntu 22.04操作系统添加NVIDIA官方软件仓库配置
 

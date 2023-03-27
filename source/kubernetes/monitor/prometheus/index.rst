@@ -12,6 +12,7 @@ Prometheus监控
    introduce_prometheus.rst
    prometheus_startup.rst
    run_prometheus_in_k8s.rst
+   run_prometheus_in_k8s_arm.rst
    k8s_kube_state_metircs.rst
    helm3_prometheus_grafana.rst
    prometheus_node_exporter.rst
