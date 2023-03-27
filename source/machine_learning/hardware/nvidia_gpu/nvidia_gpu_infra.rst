@@ -1,7 +1,7 @@
-.. _nvidia_gpu:
+.. _nvidia_gpu_infra:
 
 ===============
-NVIDIA GPU
+NVIDIA GPU架构
 ===============
 
 NVIDIA的GPU产品：

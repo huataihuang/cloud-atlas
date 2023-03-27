@@ -1,14 +1,14 @@
-.. _run_prometheus_in_k8s:
+.. _run_prometheus_in_k8s_arm:
 
 ========================================
-在Kubernetes中安装运行Prometheus
+在Kubernetes(ARM)中安装运行Prometheus
 ========================================
 
 .. note::
 
     本文通过手工配置步骤，一步步在Kubernetes集群运行Prometheus进行集群监控，配合 :ref:`run_grafana_in_k8s` 可以实现Kubernetes集群常规监控和故障分析。后续再通过 :ref:`helm3_prometheus_grafana` 实现自动化部署整套监控系统。
 
-    之前还做过 :ref:`run_prometheus_in_k8s_arm` ，本文实践在此基础上，重新在 :ref:`priv_cloud_infra` 的 :ref:`z-k8s` 部署
+    本文实践在 ARM 架构进行，另外在 :ref:`priv_cloud_infra` 的 :ref:`z-k8s` 见 :ref:`run_prometheus_in_k8s`
 
 Prometheus提供了官方docker hub的 `Prometheus docker image <https://hub.docker.com/r/prom/prometheus/>`_ ，可以用来安装。
 
@@ -30,7 +30,7 @@ Prometheus使用Kubernetes API来获取节点、Pods、Deployments等的所有�
 
 - 创建一个 ``clusterRole.yaml`` :
 
-.. literalinclude:: run_prometheus_in_k8s/clusterRole.yaml
+.. literalinclude:: run_prometheus_in_k8s_arm/clusterRole.yaml
     :language: bash
     :linenos:
     :caption:
@@ -58,7 +58,7 @@ Prometheus使用Kubernetes API来获取节点、Pods、Deployments等的所有�
 
 在 ``config-map.yaml`` 配置中包含了上述两个配置文件:
 
-.. literalinclude:: run_prometheus_in_k8s/config-map.yaml
+.. literalinclude:: run_prometheus_in_k8s_arm/config-map.yaml
     :language: bash
     :linenos:
     :caption:
@@ -82,7 +82,7 @@ Prometheus使用Kubernetes API来获取节点、Pods、Deployments等的所有�
 
 - 创建 ``prometheus-deployment.yaml`` :
 
-.. literalinclude:: run_prometheus_in_k8s/prometheus-deployment.yaml
+.. literalinclude:: run_prometheus_in_k8s_arm/prometheus-deployment.yaml
     :language: bash
     :linenos:
     :caption:

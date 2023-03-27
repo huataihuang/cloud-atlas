@@ -79,7 +79,7 @@ CUDA软件仓库
 
 从NVIDIA官方提供 `NVIDIA CUDA Toolkit repo 下载 <https://developer.nvidia.com/cuda-downloads>`_ ，针对我 :ref:`upgrade_ubuntu_20.04_to_22.04` 的 :ref:`priv_cloud_infra` 底层物理主机操作系统(Ubuntu 22.04)，我采用官方仓库网络安装模式(参考下图选择自己对应的发行版，并选择网络安装):
 
-.. figure:: ../../_static/machine_learning/hardware/cuda_toolkit_ubuntu_repo_install.png
+.. figure:: ../../_static/machine_learning/hardware/nvidia_gpu/cuda_toolkit_ubuntu_repo_install.png
    :scale: 80
 
 .. literalinclude:: install_nvidia_cuda/cuda_toolkit_ubuntu_repo
