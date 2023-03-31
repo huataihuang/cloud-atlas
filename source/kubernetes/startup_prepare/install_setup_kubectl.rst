@@ -6,6 +6,8 @@
 
 在安装并运行了minikube之后，我们需要在主机上安装kubectl，以便能够管理kubernetes集群（这里即为minikube单机）。
 
+.. _kubectl:
+
 安装kubectl
 ===============
 

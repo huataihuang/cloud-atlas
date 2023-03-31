@@ -24,7 +24,7 @@
 
 .. note::
 
-   因主机硬件故障，这个实践我稍后完善补充
+   已验证: ``docker`` 的 ``save`` 和 ``load`` 和 :ref:`nerdctl_load_images_k8s` 完全兼容，可以相互转换
 
 参考
 ======

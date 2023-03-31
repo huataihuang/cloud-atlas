@@ -17,6 +17,8 @@ NVIDIA Container Tookit
 - 轻量级运行环境，减少底层(虚拟化)消耗
 - 快速调度、大规模部署
 
+.. _nvidia_container_runtimes:
+
 NVIDIA容器运行时
 =================
 

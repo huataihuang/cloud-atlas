@@ -1,4 +1,4 @@
-.. _kubernetes_dashboard:
+.. _k8s_dashboard:
 
 ========================
 Kubernetes仪表盘

@@ -21,6 +21,8 @@ Kubernetes部署
    stateless_application/index
    operator/index
    deploy_pod/index
+   kubespray/index
+   kops/index
    nginx_ingress.rst
    haproxy_ingress.rst
    istio_ingress.rst

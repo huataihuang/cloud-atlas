@@ -297,6 +297,14 @@ nerdctl加载镜像到Kubernetes
 
    sudo nerdctl -n k8s.io load < centos-stream-8-systemd.tar
 
+.. note::
+
+   ``nerdctl`` 的 ``save`` 和 ``load`` 完全和 ``docker`` 的 :ref:`transfer_docker_image_without_registry` 兼容，相互之间可以转换传输。此外，命令格式其实也一样，例如可以使用和 ``docker`` 一样的参数保存镜像和导入镜像:
+
+   .. literalinclude:: nerdctl/nerdctl_save_load_image
+      :language: bash
+      :caption: nerdctl保存和加载镜像命令
+
 完成后再次检查集群::
 
    kubectl get pods -o wide

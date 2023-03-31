@@ -31,11 +31,23 @@ ARM环境安装
 
    prometheus --version
 
-.. note::
+macOS环境安装
+==============
 
-   Prometheus甚至可以通过 :ref:`homebrew` 安装::
+- 在 :ref:`macos` 环境下，Prometheus可以通过 :ref:`homebrew` 安装::
 
-      brew install prometheus
+   brew install prometheus
+
+安装后提示信息::
+
+   When run from `brew services`, `prometheus` is run from
+   `prometheus_brew_services` and uses the flags in:
+      /opt/homebrew/etc/prometheus.args
+   
+   To restart prometheus after an upgrade:
+     brew services restart prometheus
+   Or, if you don't want/need a background service you can just run:
+     /opt/homebrew/opt/prometheus/bin/prometheus_brew_services 
 
 zcloud安装
 ===============

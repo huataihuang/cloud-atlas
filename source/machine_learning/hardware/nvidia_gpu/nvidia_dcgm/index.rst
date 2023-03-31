@@ -8,6 +8,7 @@ NVIDIA DCGM (Data Center GPU Manager)
    :maxdepth: 1
 
    nvidia_dcgm_infra.rst
+   install_dcgm.rst
 
 .. only::  subproject and html
 
