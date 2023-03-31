@@ -9,6 +9,7 @@ GPU Kubernetes
 
    gpu_k8s_arch.rst
    install_nvidia_container_toolkit_for_containerd.rst
+   install_nvidia_container_toolkit_for_docker.rst
    nvidia_gpu_operator.rst
    install_nvidia_gpu_operator.rst
    install_nvidia_device_plugin.rst

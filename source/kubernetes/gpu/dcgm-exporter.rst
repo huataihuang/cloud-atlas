@@ -4,7 +4,7 @@
 DCGM-Exporter
 =================
 
-``DCGM-Exporter`` 是基于 :ref:`nvidia_dcgm` 的Go API开发的工具，允许用户采集GPU etrics以及了解工作负载或者架空集群中的GPU。 ``dcgm-exporter`` 采用Go语言开发，并且在一个HTTP endpoint( ``/metrics`` )输出GPU指标，用于 :ref:`prometheus` 等监控解决方案。
+``DCGM-Exporter`` 是基于 :ref:`nvidia_dcgm` 的Go API开发的工具，允许用户采集GPU metrics以及了解工作负载或者监控集群中的GPU。 ``dcgm-exporter`` 采用Go语言开发，并且在一个HTTP endpoint( ``/metrics`` )输出GPU指标，用于 :ref:`prometheus` 等监控解决方案。
 
 ``dcgm-exporter`` 运行在Kubernetes集群的GPU节点上作为daemonset来运行，也可以直接使用 :ref:`docker` 容器化运行。
 

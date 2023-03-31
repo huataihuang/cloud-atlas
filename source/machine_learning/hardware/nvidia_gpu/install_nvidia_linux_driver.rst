@@ -9,8 +9,10 @@
 BIOS设置
 ===========
 
+以下是两种安装方式(互斥，选择其中之一即可):
+
 - 物理服务器安装NVIDIA驱动，需要确保 :ref:`hpe_server_pcie_64bit_bar_support`
-- 虚拟机安装NVIDIA驱动，去要确保 :ref:`nvidia_pci_passthrough_via_ovmf_pci_realloc`
+- 虚拟机(PassThrough GPU)安装NVIDIA驱动，确保 :ref:`nvidia_pci_passthrough_via_ovmf_pci_realloc`
 
 .. _cuda_softstack:
 
@@ -20,7 +22,7 @@ CUDA软件堆栈(不同层次)
 NVIDIA将GPU驱动和开发组件(Toolkits)分别组合成 ``cuda-drivers`` 和 ``cuda`` ，其中 ``cuda-drivers`` 是 ``cuda`` 的子集。由于虚拟化和容器化技术的发展，我们可以在不同的层次分别安装:
 
 - 物理主机: ``cuda-drivers``
-- 虚拟机:
+- 虚拟机(PassThrough GPU):
 
   - 直接在虚拟机内运行应用及开发: ``cuda``
   - 虚拟机内通过容器运行应用及开发:
@@ -57,13 +59,28 @@ NVIDIA将GPU驱动和开发组件(Toolkits)分别组合成 ``cuda-drivers`` 和 
 
    本文在 :ref:`priv_cloud_infra` 的底层物理主机安装GPU的Linux驱动
 
-NVDIA CUDA驱动安装
-====================
+.. _install_nvidia_linux_driver_by_repo:
+
+通过Linux发行版软件仓库方式安装NVDIA CUDA驱动
+===============================================
+
+.. note::
+
+   建议采用发行版软件仓库方式安装，方便后续维护升级
+
+   详情请参考 `NVIDIA Driver Installation Quickstart Guide <https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html>`_
 
 安装NVIDIA Linux驱动的方法实际上和 :ref:`install_nvidia_cuda` 完全一样，除了最后的安装命令差异:
 
 - :ref:`install_cuda_prepare`
-- 根据不同发行版在 `NVIDIA CUDA Toolkit repo 下载 <https://developer.nvidia.com/cuda-downloads>`_ 选择对应的 :ref:`cuda_repo` ，例如我的 :ref:`priv_cloud_infra` 采用了 Ubuntu 22.04 LTS，所以执行如下步骤在系统中添加仓库:
+- 根据不同发行版在 `NVIDIA CUDA Toolkit repo 下载 <https://developer.nvidia.com/cuda-downloads>`_ 选择对应的 :ref:`cuda_repo` 
+
+Ubuntu软件仓库方式安装NVDIA CUDA驱动
+---------------------------------------
+
+我的 :ref:`priv_cloud_infra` 采用了 Ubuntu 22.04 LTS
+
+- 执行Ubuntu添加仓库:
 
 .. literalinclude:: ../../cuda/install_nvidia_cuda/cuda_toolkit_ubuntu_repo
    :language: bash
@@ -73,13 +90,29 @@ NVDIA CUDA驱动安装
 
 .. literalinclude:: install_nvidia_linux_driver/cuda_driver_ubuntu_repo_install
    :language: bash
-   :caption: 使用NVIDIA官方软件仓库安装CUDA驱动
+   :caption: Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
 
 安装过程会爱用 :ref:`dkms` 编译NVIDIA内核模块，并且会提示添加了 ``/etc/modprobe.d/nvidia-graphics-drivers.conf`` 来 ``blacklist`` 阻止加载冲突的 ``Nouveau`` 开源驱动，并且提示需要重启操作系统来完成驱动验证加载。
 
-.. note::
+RHEL/CentOS 7 软件仓库方式安装NVDIA CUDA驱动
+-----------------------------------------------
 
-   我只实践了 :ref:`ubuntu_linux` 安装CUDA drivers，其他发行版主要差异是软件包(仓库)管理差异，详情请参考 `NVIDIA Driver Installation Quickstart Guide <https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html>`_
+CentOS 7安装NVIDIA驱动步骤:
+
+- 执行RHEL/CentOS 7仓库添加:
+
+.. literalinclude:: ../../cuda/install_nvidia_cuda/cuda_toolkit_rhel7_repo
+   :language: bash
+   :caption: 在RHEL/CentOS 7操作系统添加NVIDIA官方软件仓库配置
+
+- 安装 NVIDIA CUDA 驱动:
+
+.. literalinclude:: install_nvidia_linux_driver/cuda_driver_rhel7_repo_install
+   :language: bash
+   :caption: RHEL/CentOS 7使用NVIDIA官方软件仓库安装CUDA驱动
+
+
+
 
 CUDA驱动安装后操作
 ====================

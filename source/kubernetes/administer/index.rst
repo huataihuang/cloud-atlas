@@ -11,7 +11,7 @@ Kubernetes管理
 .. toctree::
    :maxdepth: 1
 
-   kubernetes_dashboard.rst
+   k8s_dashboard.rst
    configure_pods_and_containers.rst
    delete_cluster.rst
    cordon_node.rst

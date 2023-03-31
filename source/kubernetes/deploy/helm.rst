@@ -51,11 +51,11 @@ Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和�
 脚本安装
 ---------
 
-https://git.io/get_helm.sh 提供了安装脚本::
+https://git.io/get_helm.sh 提供了安装脚本:
 
-   curl -LO https://git.io/get_helm.sh
-   chmod 700 get_helm.sh
-   ./get_helm.sh
+.. literalinclude:: helm/helm_install_by_script
+   :language: bash
+   :caption: 使用官方脚本安装 helm
 
 当然，你也可以直接运行命令 ``curl -L https://git.io/get_helm.sh | bash`` 。
 
@@ -150,6 +150,23 @@ helm使用
 
    Error: uninstall: Release not loaded: nvidia-device-plugin-1673515385: release: not found
 
+指定 ``$KUBECONFIG``
+-----------------------
+
+对于需要维护多个集群的环境， ``helm`` 也可以和 :ref:`kubectl` 一样指定 ``$KUBECONFIG`` 变量::
+
+   export KUBECONFIG=/path_to_your_kubeconfig_file
+   helm version
+   helm list
+
+.. note::
+
+   ``helm`` 默认使用 ``~/.kube/config``  (同 :ref:`kubectl` )
+
+helm代理
+==========
+
+在墙内使用 ``helm`` 最大的困扰是很多仓库位于google，在墙内访问几乎是 `不可能完成的任务 <https://movie.douban.com/subject/1292484/>`_ 。解决的方法是采用代理，例如 :ref:`squid_socks_peer` ，此时只需要配置 ``proxy`` 环境变量(其实就是Linux操作系统通用的代理配置) :ref:`linux_proxy_env`
 
 参考
 =======
@@ -158,3 +175,4 @@ helm使用
 - `Helm Documentation <https://helm.sh/docs/>`_
 - `Helm User Guide - Helm 用户指南 <https://whmzsu.github.io/helm-doc-zh-cn/>`_ - 官方 `Helm Documentation <https://helm.sh/docs/>`_ 的中文翻译，方便快速学习
 - `使用Helm管理kubernetes原生应用 <https://jimmysong.io/posts/manage-kubernetes-native-app-with-helm/>`_
+- `Helm command with kubeconfig inline <https://stackoverflow.com/questions/42849148/helm-command-with-kubeconfig-inline>`_

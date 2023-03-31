@@ -28,6 +28,73 @@ GPU现在已经成为Kubernetes环境重要资源，我们需要能够通过类�
 NVIDIA驱动
 =============
 
+在物理主机或者虚拟机(GPU PassThrough)中，需要安装 NVIDIA Drivers(驱动) ，采用 :ref:`install_nvidia_linux_driver_by_repo`
+
+.. note::
+
+   根据操作系统版本不同，主要分为 :ref:`redhat_linux` 和 :ref:`ubuntu_linux` 系，采用不同的包管理方式
+
+Ubuntu安装NVIDIA驱动
+-----------------------
+
+- 执行Ubuntu添加仓库:
+
+.. literalinclude:: ../../machine_learning/cuda/install_nvidia_cuda/cuda_toolkit_ubuntu_repo
+   :language: bash
+   :caption: 在Ubuntu 22.04操作系统添加NVIDIA官方软件仓库配置
+
+- 安装 NVIDIA CUDA 驱动:
+
+.. literalinclude:: ../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver/cuda_driver_ubuntu_repo_install
+   :language: bash
+   :caption: Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
+
+RHEL/CentOS 7安装NVIDIA驱动
+-----------------------------
+
+- 执行RHEL/CentOS 7仓库添加:
+
+.. literalinclude:: ../../machine_learning/cuda/install_nvidia_cuda/cuda_toolkit_rhel7_repo
+   :language: bash
+   :caption: 在RHEL/CentOS 7操作系统添加NVIDIA官方软件仓库配置
+
+- 安装 NVIDIA CUDA 驱动:
+
+.. literalinclude:: ../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver/cuda_driver_rhel7_repo_install
+   :language: bash
+   :caption: RHEL/CentOS 7使用NVIDIA官方软件仓库安装CUDA驱动
+
+安装 :ref:`container_runtimes`
+=================================
+
+.. note::
+
+   NVIDIA提供了多种 :ref:`nvidia_container_runtimes` 支持，这里举例安装 :ref:`docker` ，实际上你可以选择 :ref:`docker` , :ref:`containerd` , :ref:`cri-o` 任意一种 :ref:`container_runtimes`
+
+完成 :ref:`install_docker_linux` ，这样工作节点就具备了Docker :ref:`container_runtimes` :
+
+.. literalinclude:: ../../docker/startup/install_docker_linux/install_docker_ce_by_script
+   :language: bash
+   :caption: 使用Docker官方安装脚本安装Docker-CE
+
+安装NVIDIA Container Toolkit
+=============================
+
+NVIDIA提供了多种 :ref:`nvidia_container_runtimes` 支持，例如 :ref:`docker` , :ref:`containerd` , :ref:`cri-o` ，请按照你的Kubernetes集群实际 :ref:`container_runtimes` 对应安装 NVIDIA Container Toolkit:
+
+- :ref:`install_nvidia_container_toolkit_for_containerd` (已实践)
+- :ref:`install_nvidia_container_toolkit_for_docker` (待实践)
+
+安装Kubernetes
+=================
+
+部署 :ref:`vanilla_k8s` :
+
+- :ref:`bootstrap_kubernetes_ha`
+
+安装 NVIDIA Device Plugin
+============================
+
 
 
 参考

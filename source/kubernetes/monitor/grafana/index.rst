@@ -10,8 +10,9 @@ Grafana通用可视分析平台
    :maxdepth: 1
 
    install_grafana.rst
-   config_grafana.rst
+   grafana_config_startup.rst
    run_grafana_in_k8s.rst
+   grafana_behind_reverse_proxy.rst
 
 推荐阅读:
 
