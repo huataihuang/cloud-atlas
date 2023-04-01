@@ -168,6 +168,37 @@ helm代理
 
 在墙内使用 ``helm`` 最大的困扰是很多仓库位于google，在墙内访问几乎是 `不可能完成的任务 <https://movie.douban.com/subject/1292484/>`_ 。解决的方法是采用代理，例如 :ref:`squid_socks_peer` ，此时只需要配置 ``proxy`` 环境变量(其实就是Linux操作系统通用的代理配置) :ref:`linux_proxy_env`
 
+.. _helm_install_specific_chart_version:
+
+helm安装特定版本chart
+=======================
+
+我在 :ref:`intergrate_gpu_telemetry_into_k8s` 遇到一个问题: ``dcgm-exporter`` 要求 Kubernetes >= 1.19.0-0:
+
+.. literalinclude:: helm/dcgm-exporter_version_err
+   :caption: 安装 :ref:`dcgm-exporter` 遇到Kubernetes版本不满足要求(需要安装低版本 ``dcgm-exporter`` )
+
+解决方法是先检查仓库提供了哪些chart版本:
+
+.. literalinclude:: helm/helm_search_repo_dcgm-exporter
+   :caption: 搜索helm仓库获取软件的不同版本列表
+
+输出显示版本列表，依次尝试后可知 ``2.6.10`` 满足当前 Kubernetes 版本要求: 
+
+.. literalinclude:: helm/helm_search_repo_dcgm-exporter_output
+   :caption: 搜索helm仓库获取软件的不同版本列表
+   :emphasize-lines: 5
+
+安装指定 ``2.6.10`` 版本 ``dcgm-exporter`` chart:
+
+.. literalinclude:: helm/helm_install_dcgm-exporter_specific_chart_version
+   :caption: 安装指定版本helm chart
+
+安装成功的输出信息:
+
+.. literalinclude:: helm/helm_install_dcgm-exporter_specific_chart_version_output
+   :caption: 安装指定版本helm chart成功的输出信息
+
 参考
 =======
 
@@ -176,3 +207,4 @@ helm代理
 - `Helm User Guide - Helm 用户指南 <https://whmzsu.github.io/helm-doc-zh-cn/>`_ - 官方 `Helm Documentation <https://helm.sh/docs/>`_ 的中文翻译，方便快速学习
 - `使用Helm管理kubernetes原生应用 <https://jimmysong.io/posts/manage-kubernetes-native-app-with-helm/>`_
 - `Helm command with kubeconfig inline <https://stackoverflow.com/questions/42849148/helm-command-with-kubeconfig-inline>`_
+- `How to install a specific Chart version <https://stackoverflow.com/questions/51200917/how-to-install-a-specific-chart-version>`_

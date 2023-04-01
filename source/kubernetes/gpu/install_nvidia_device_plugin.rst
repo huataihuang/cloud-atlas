@@ -1,14 +1,18 @@
 .. _install_nvidia_device_plugin:
 
 =========================================
-安装NVIDIA Device Plugin(无需执行,存档)
+安装NVIDIA Device Plugin
 =========================================
 
 .. note::
 
-   这里我搞错了，不需要单独安装 NVIDIA Device Plugin 。如果直接安装 ``NVIDIA GPU Operator`` 会自动安装 plugins
+   通常情况下不需要单独安装 NVIDIA Device Plugin 。如果直接安装 ``NVIDIA GPU Operator`` 会自动安装 plugins!!!
 
-   本文仅存档
+   不过，在实际生产环境中，也有只安装 ``NVIDIA Device Plugin`` 的部署方案，一般是结合现有公司已经部署的监控平台开发定制插件来采集监控数据。这种方式对大型公司现有监控体系是一种补充，但是我觉得实际开发维护成本极高，且难以充分借助NVIDIA公司的技术架构以及开源社区的力量。我不是很推荐这种方式。
+
+.. note::
+
+   在 :ref:`intergrate_gpu_telemetry_into_k8s` 方案中，采用了分步骤集成方式，没有采用 :ref:`install_nvidia_gpu_operator` ，而是采用了本文步骤作为完整步骤中的一环。
 
 要在Kubernetes中使用GPU，需要安装 ``NVIDIA Device Plugins`` 。这个NVIDIA Device Plugin是一个daemonset，可以自动列出集群每个节点的GPU数量并允许在GPU上运行pod。
 

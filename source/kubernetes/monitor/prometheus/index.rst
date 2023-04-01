@@ -11,14 +11,17 @@ Prometheus监控
 
    introduce_prometheus.rst
    prometheus_startup.rst
+   alertmanager.rst
+   node_exporter.rst
    run_prometheus_in_k8s.rst
    run_prometheus_in_k8s_arm.rst
    k8s_kube_state_metircs.rst
    helm3_prometheus_grafana.rst
+   update_prometheus_config_k8s.rst
    prometheus_metrics_connect_refuse.rst
    prometheus_metrics_context_deadline_exceeded.rst
-   prometheus_node_exporter.rst
-   thanos.rst
+   prometheus_monitor_kubelet.rst
+   using_prometheus.rst
 
 推荐阅读:
 

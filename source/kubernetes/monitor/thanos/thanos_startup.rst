@@ -1,4 +1,4 @@
-.. _thanos:
+.. _thanos_startup:
 
 ==========================
 Thanos - Prometheus高可用
