@@ -13,6 +13,7 @@ Kubernetes监控
    cadvisor.rst
    prometheus/index
    grafana/index
+   thanos/index
    mixins/index
    m3/index
    opentelemetry/index

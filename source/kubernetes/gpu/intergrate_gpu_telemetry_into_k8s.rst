@@ -67,15 +67,13 @@ RHEL/CentOS 7安装NVIDIA驱动
 安装 :ref:`container_runtimes`
 =================================
 
-.. note::
+NVIDIA提供了多种 :ref:`nvidia_container_runtimes` 支持，可以选择:
 
-   NVIDIA提供了多种 :ref:`nvidia_container_runtimes` 支持，这里举例安装 :ref:`docker` ，实际上你可以选择 :ref:`docker` , :ref:`containerd` , :ref:`cri-o` 任意一种 :ref:`container_runtimes`
+- :ref:`docker`
+- :ref:`containerd`
+- :ref:`cri-o` 
 
-完成 :ref:`install_docker_linux` ，这样工作节点就具备了Docker :ref:`container_runtimes` :
-
-.. literalinclude:: ../../docker/startup/install_docker_linux/install_docker_ce_by_script
-   :language: bash
-   :caption: 使用Docker官方安装脚本安装Docker-CE
+上述任意一种 :ref:`container_runtimes` 都支持，选择安装了runtime之后，就需要安装对应的NVIDIA Container Toolkit
 
 安装NVIDIA Container Toolkit
 =============================
@@ -90,14 +88,200 @@ NVIDIA提供了多种 :ref:`nvidia_container_runtimes` 支持，例如 :ref:`doc
 
 部署 :ref:`vanilla_k8s` :
 
-- :ref:`bootstrap_kubernetes_ha`
+- :ref:`bootstrap_kubernetes_ha` (以及相关实践)
 
 安装 NVIDIA Device Plugin
 ============================
 
+:ref:`install_nvidia_device_plugin` (独立安装 ``nvida-device-plugin`` )
 
+- 部署 helm:
+
+.. literalinclude:: ../deploy/helm/linux_helm_install
+   :language: bash
+   :caption: 在Linux平台安装helm
+
+- 添加 ``nvidia-device-plugin`` ``helm`` 仓库:
+
+.. literalinclude:: install_nvidia_gpu_operator/helm_add_nvdp_repo
+   :language: bash
+   :caption: 添加nvidia-device-plugin helm仓库
+
+- 部署 ``NVIDIA Device Plugins`` :
+
+.. literalinclude:: install_nvidia_gpu_operator/helm_install_nvidia-device-plugin
+   :language: bash
+   :caption: 使用helm安装nvidia-device-plugin
+
+**正式开始**
+
+GPU可观测性
+=============
+
+NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的完整数据采集，时序数据库存储metrics，并通过 :ref:`grafana` 实现可视化。此外， :ref:`prometheus` 包含了 :ref:`alertmanager` 提供了告警创建和管理。Prometheus 通过 :ref:`kube-state-metrics` 和 :ref:`node_exporter` 分别为Kubernetes API对象输出集群级别的 :ref:`metrics` 和节点级别的 :ref:`metrics` (例如CPU使用率)。
+
+.. figure:: ../../_static/kubernetes/monitor/prometheus/prometheus_architecture.png
+   :scale: 50
+
+   Prometheus 架构
+
+要从Kubernetes采集GPU可观测性数据，建议使用 :ref:`dcgm-exporter` : 基于 :ref:`nvidia_dcgm` 的 :ref:`dcgm-exporter` 为 :ref:`prometheus` 输出了GPU :ref:`metrics` 并且能够被 :ref:`grafana` 可视化。 :ref:`dcgm-exporter` 架构充分发挥了 ``KubeletPodResources`` API 并且采用 ``Prometheus`` 能够抓取的格式输出 GPU metrics。此外，还包括了一个 ``ServiceMonitor`` 的公开endpoints。
+
+部署Prometheus
+------------------
+
+实际上NVIDIA官方文档中介绍的 ``GPU可观测性`` 方案所采用的 ``Prometheus`` 部署方式就是采用社区提供的 :ref:`helm3_prometheus_grafana` 。NVIDIA做了一些微调:
+
+- 安装 :ref:`helm` :
+
+.. literalinclude:: ../deploy/helm/helm_install_by_script
+   :language: bash
+   :caption: 使用官方脚本安装 helm
+
+- 添加 Prometheus 社区helm chart:
+
+.. literalinclude:: ../monitor/prometheus/helm3_prometheus_grafana/helm_repo_add_prometheus
+   :language: bash
+   :caption: 添加 Prometheus 社区helm chart
+
+- NVIDIA对社区方案参数做一些调整(见下文)，所以先导出 chart 使用的变量(以便修订):
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/helm_inspect_values_prometheus-stack
+   :language: bash
+   :caption: ``helm inspect values`` 输出Prometheus Stack的chart变量值
+
+- 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/change_prometheus_nodeport_30090
+   :language: bash
+   :caption: 修订输出端口30090
+
+- 修改了 ``prometheusSpec.serviceMonitorSelectorNilUsesHelmValues`` 设置为 ``false``
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/change_value
+   :language: bash
+   :caption: 修改 ``prometheusSpec.serviceMonitorSelectorNilUsesHelmValues`` 设置为 ``false``
+
+- 在 ``configMap`` 配置 ``additionalScrapeConfigs`` 添加 ``gpu-metrics`` :
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/add_gpu-metrics_config
+   :language: bash
+   :caption: 在 ``configMap`` 配置 ``additionalScrapeConfigs`` 添加 ``gpu-metrics``
+
+- 最后执行部署，部署中采用自己定制的values:
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/deploy_prometheus-stack
+   :language: bash
+   :caption: 使用定制helm chart values来安装部署 ``kube-prometheus-stack``
+
+.. note::
+
+   上述手工编辑替换的方法比较繁琐，实际上 :ref:`helm` 支持命令行直接替换变量参数:
+
+   .. literalinclude:: intergrate_gpu_telemetry_into_k8s/deploy_prometheus-stack_override
+      :language: bash
+      :caption: 使用参数覆盖方式定制变量来安装部署 ``kube-prometheus-stack``
+
+.. note::
+
+   实际上我已经完成了 :ref:`helm3_prometheus_grafana` ，而且我也是将 :ref:`prometheus` 的服务端口映射为 ``NodePort`` (安装后手动修订部署)，所以不再需要执行官方文档安装
+
+(可选方法)独立安装 :ref:`nvidia_dcgm` 和 :ref:`dcgm-exporter`
+--------------------------------------------------------------
+
+`Prometheus + Grafana 监控 NVIDIA GPU <https://www.yaoge123.com/blog/archives/2709>`_ 采用了另外一种直接在物理主机部署 :ref:`nvidia_dcgm` 和 :ref:`dcgm-exporter` 的方法，也就是直接采用 :ref:`systemd` 来运行这两个程序。
+
+:ref:`dcgm-exporter` 在GitHub官方介绍了通过 :ref:`docker` 来运行 ``dcgm-exporter`` 的方法。
+
+.. note::
+
+   对比之下，我感觉采用NVIDIA官方的手册更符合最新的部署模式，所以我在NVIDIA官方部署方式上进行一些调整
+
+部署DCGM
+-----------
+
+.. note::
+
+   似乎只需要部署 ``dcgm-exporter`` 就可以，物理主机上无需再安装 :ref:`nvidia_dcgm`
+
+   我在 ``dcgm-exporter`` 容器内部检查，容器内部已经安装了 ``nvidia-dcgm`` ，只不过似乎没有以服务方式运行。参考 `Monitor Your Computing System with Prometheus, Grafana, Alertmanager, and Nvidia DCGM <https://ajaesteves.medium.com/monitor-your-computing-system-with-prometheus-grafana-alertmanager-and-nvidia-dcgm-ea9f142d2e21>`_ ::
+
+      # nv-hostengine
+      Started host engine version 2.4.6 using port number: 5555
+
+      # dcgmi discovery -l
+      1 GPU found.
+      +--------+----------------------------------------------------------------------+
+      | GPU ID | Device Information                                                   |
+      +--------+----------------------------------------------------------------------+
+      | 0      | Name: NVIDIA Graphics Device                                         |
+      |        | PCI Bus ID: 00000000:09:00.0                                         |
+      |        | Device UUID: GPU-794d1de5-b8c7-9b49-6fe3-f96f8fd98a19                |
+      +--------+----------------------------------------------------------------------+
+      0 NvSwitches found.
+      +-----------+
+      | Switch ID |
+      +-----------+
+      +-----------+
+
+   注意，容器内部必须先启动 ``nv-hostengine`` 才能运行 ``dcgmi discovery -l`` 检查主机的GPU卡
+
+   在容器内部可以执行 ``curl localhost:9400/metrics`` 获得GPU的 metrics数据
+
+- 添加 ``dcgm-exporter`` :ref:`helm` repo:
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/helm_repo_add_dcgm-exporter
+   :language: bash
+   :caption: 添加 ``dcgm-exporter`` :ref:`helm` repo
+
+- 安装 ``dcgm-exporter`` chart:
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/helm_install_dcgm-exporter
+   :language: bash
+   :caption: :ref:`helm` 安装 ``dcgm-exporter``
+
+这里可能会遇到报错，原因是 ``dcgm-exporter`` 要求 Kubernetes >= 1.19.0-0 :
+
+.. literalinclude:: ../deploy/helm/dcgm-exporter_version_err
+   :caption: 安装 :ref:`dcgm-exporter` 遇到Kubernetes版本不满足要求(需要安装低版本 ``dcgm-exporter`` )
+
+则采用 :ref:`helm_install_specific_chart_version` 方法完成低版本安装:
+
+安装指定 ``2.6.10`` 版本 ``dcgm-exporter`` chart:
+
+.. literalinclude:: ../deploy/helm/helm_install_dcgm-exporter_specific_chart_version
+   :caption: 安装指定版本helm chart
+
+安装成功的输出信息:
+
+.. literalinclude:: ../deploy/helm/helm_install_dcgm-exporter_specific_chart_version_output
+   :caption: 安装指定版本helm chart成功的信息
+
+配置 Grafana
+----------------
+
+`共享Grafana dashboards <https://grafana.com/dashboards>`_ 中有NVIDIA公司提供的一个专用dashboard `NVIDIA DCGM Exporter Dashboard <https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/>`_ ，将该面板的JSON文件对应 URL ``https://grafana.com/grafana/dashboards/12239`` 添加:
+
+- 选择菜单 ``Dashboards >> Import``
+
+- (没有成功)将 ``https://grafana.com/grafana/dashboards/12239`` 直接填写到 ``Import via grafana.com`` 栏，然后点击 ``Load`` 
+
+- 或者(我实际采用此方法)先从 `共享Grafana dashboards <https://grafana.com/dashboards>`_ 下载 ``https://grafana.com/grafana/dashboards/12239`` 对应的JSON文件，然后点击 ``Load`` ，此时会提示信息如下
+
+.. figure:: ../../_static/kubernetes/gpu/import_dcgm-exporter_dashboard.png
+   :scale: 60
+
+配置prometheus
+-----------------
+
+此时虽然配置了Grafana，但是还拿不到 ``dcgm-exporter`` 数据，原因是 ``prometheus`` 尚未配置抓取数据(针对 ``9400`` 端口)
+
+在 ``prometheus`` 的配置文件中添加 ``scrape_config`` 配置(具体参考 `prometheus_configuration_scrape_config <https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config>`_ )，采用 :ref:`update_prometheus_config_k8s` :
+
+:ref:`helm` 支持 ``upgrade`` 指令，可以更新原先的 helm chart，也就说，可以在后面重新更新一些配置来添加Prometheus部署后的更新配置(比直接修订 prometheus.yml 方便)
 
 参考
 =====
 
 - `Integrating GPU Telemetry into Kubernetes <https://docs.nvidia.com/datacenter/cloud-native/gpu-telemetry/dcgm-exporter.html#integrating-gpu-telemetry-into-kubernetes>`_
+- `Prometheus + Grafana 监控 NVIDIA GPU <https://www.yaoge123.com/blog/archives/2709>`_ yaoge123 在 `共享Grafana dashboards <https://grafana.com/dashboards>`_ 提供了一个基于 :ref:`dcgm-exporter` 数据采集的Grafana面板 `GPU Nodes v2 <https://grafana.com/grafana/dashboards/11752-hpc-gpu-nodes-v2/>`_ ，比NVIDIA官方提供的面板 `NVIDIA DCGM Exporter Dashboard <https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/>`_ 输出信息更为丰富，非常赞。

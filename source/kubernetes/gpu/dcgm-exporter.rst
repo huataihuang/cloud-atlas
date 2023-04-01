@@ -8,6 +8,10 @@ DCGM-Exporter
 
 ``dcgm-exporter`` 运行在Kubernetes集群的GPU节点上作为daemonset来运行，也可以直接使用 :ref:`docker` 容器化运行。
 
+.. note::
+
+   物理主机需要安装 :ref:`nvidia_dcgm`
+
 运行 ``dcgm-exporter``
 ========================
 

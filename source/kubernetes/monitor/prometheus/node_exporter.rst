@@ -1,7 +1,7 @@
-.. _prometheus_node_exporter:
+.. _node_exporter:
 
 ==========================
-Prometheus Node Exporter
+Node Exporter
 ==========================
 
 Prometheus Node Exporter提供了一系列硬件和内核相关metric
@@ -12,6 +12,10 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 
 安装
 ========
+
+.. note::
+
+   采用 Prometheus 社区helm chart 完成的 :ref:`helm3_prometheus_grafana` 会自动为每个Node节点安装 Node Exporter。强烈推荐采用!!!
 
 - 下载安装执行程序::
 
@@ -62,8 +66,8 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 
 :ref:`ceph_dashboard_prometheus` 采用的架构:
 
-- 在每个 ceph 节点安装 :ref:`prometheus_node_exporter` ，然后 :ref:`prometheus_startup` 安装配置成从各个Ceph抓取数据
-- :ref:`config_grafana` 从 Prometheus 获取数据结合到 :ref:`ceph_dashboard_prometheus` 监控
+- 在每个 ceph 节点安装 :ref:`node_exporter` ，然后 :ref:`prometheus_startup` 安装配置成从各个Ceph抓取数据
+- :ref:`grafana` 从 Prometheus 获取数据结合到 :ref:`ceph_dashboard_prometheus` 监控
 
 以下为Ceph监控部署
 
@@ -92,3 +96,4 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 =========
 
 - `MONITORING LINUX HOST METRICS WITH THE NODE EXPORTER <https://prometheus.io/docs/guides/node-exporter/>`_
+- `How to Setup Prometheus Node Exporter on Kubernetes <https://devopscube.com/node-exporter-kubernetes/>`_
