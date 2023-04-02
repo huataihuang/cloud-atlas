@@ -1,4 +1,4 @@
-.. _ kube-state-metrics:
+.. _kube-state-metrics:
 
 ===========================
 kube-state-metrics (KSM)

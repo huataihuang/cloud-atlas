@@ -278,10 +278,15 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
 在 ``prometheus`` 的配置文件中添加 ``scrape_config`` 配置(具体参考 `prometheus_configuration_scrape_config <https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config>`_ )，采用 :ref:`update_prometheus_config_k8s` :
 
-:ref:`helm` 支持 ``upgrade`` 指令，可以更新原先的 helm chart，也就说，可以在后面重新更新一些配置来添加Prometheus部署后的更新配置(比直接修订 prometheus.yml 方便)
+:ref:`helm` 支持 ``upgrade`` 指令，可以更新原先的 helm chart，也就说，可以在后面重新更新一些配置来添加Prometheus部署后的更新配置(比直接修订 ``prometheus.yml`` 方便)
+
+.. note::
+
+   我最终采用 :ref:`update_prometheus_config_k8s` 方式，将NVIDIA官方文档的 ``configMap`` 配置 ``additionalScrapeConfigs`` 添加 ``gpu-metrics`` 整合成功。这样就能够初步显示出GPU的监控
 
 参考
 =====
 
 - `Integrating GPU Telemetry into Kubernetes <https://docs.nvidia.com/datacenter/cloud-native/gpu-telemetry/dcgm-exporter.html#integrating-gpu-telemetry-into-kubernetes>`_
-- `Prometheus + Grafana 监控 NVIDIA GPU <https://www.yaoge123.com/blog/archives/2709>`_ yaoge123 在 `共享Grafana dashboards <https://grafana.com/dashboards>`_ 提供了一个基于 :ref:`dcgm-exporter` 数据采集的Grafana面板 `GPU Nodes v2 <https://grafana.com/grafana/dashboards/11752-hpc-gpu-nodes-v2/>`_ ，比NVIDIA官方提供的面板 `NVIDIA DCGM Exporter Dashboard <https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/>`_ 输出信息更为丰富，非常赞。
+- `Prometheus + Grafana 监控 NVIDIA GPU <https://www.yaoge123.com/blog/archives/2709>`_ yaoge123 在 `共享Grafana dashboards <https://grafana.com/dashboards>`_ 提供了一个基于 :ref:`dcgm-exporter` 数据采集的Grafana面板 `GPU Nodes v2 <https://grafana.com/grafana/dashboards/11752-hpc-gpu-nodes-v2/>`_ ，比NVIDIA官方提供的面板 `NVIDIA DCGM Exporter Dashboard <https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/>`_
+  更多信息，不过我结合本文实践没有实现数据展示，需要再仔细研究研究。

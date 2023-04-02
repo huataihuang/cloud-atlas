@@ -4,6 +4,8 @@
 使用Helm 3在Kubernetes集群部署Prometheus和Grafana
 ====================================================
 
+Prometheus 社区提供了 `kube-prometheus-stack <https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack>`_ :ref:`helm` chart，一个完整的Kubernetes manifests，包含 :ref:`grafana` dashboard，以及结合了文档和脚本的 :ref:`prometheus_rules` 以方便通过 :ref:`prometheus_operator`
+
 helm3
 =======
 
@@ -21,6 +23,15 @@ helm3
 .. literalinclude:: helm3_prometheus_grafana/helm_repo_add_prometheus
    :language: bash
    :caption: 添加 Prometheus 社区helm chart
+
+.. note::
+
+   参考 :ref:`intergrate_gpu_telemetry_into_k8s` 可以看到NVIDIA文档中对 :ref:`helm` 部署社区 ``prometheus-community/kube-prometheus-stack`` 做了一些定制修改，方法值得参考。后续我部署会做一些改进，例如:
+
+   - 传递 ``--namespace prometheus`` 指定部署到 ``prometheus`` 名字空间
+   - 通过 ``--values /tmp/kube-prometheus-stack.values`` 添加定制的 ``additionalScrapeConfigs``
+
+   不过，即使已经部署好的集群，也可以通过 :ref:`update_prometheus_config_k8s` 修订
 
 - 安装:
 
