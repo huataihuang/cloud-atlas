@@ -18,6 +18,9 @@ Prometheus监控
    k8s_kube_state_metircs.rst
    helm3_prometheus_grafana.rst
    update_prometheus_config_k8s.rst
+   prometheus_service_discovery.rst
+   prometheus_rules.rst
+   prometheus_operator.rst
    prometheus_metrics_connect_refuse.rst
    prometheus_metrics_context_deadline_exceeded.rst
    prometheus_monitor_kubelet.rst
