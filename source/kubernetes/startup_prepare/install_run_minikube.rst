@@ -447,7 +447,7 @@ minikube btrfs安装排查
 启动dashboard
 =================
 
-:ref:`kubernetes_dashboard` 可以帮助我们管理集群，在minikube上也可以启用方便管理。
+:ref:`k8s_dashboard` 可以帮助我们管理集群，在minikube上也可以启用方便管理。
 
 - 执行以下命令启用dashboard::
 

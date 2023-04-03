@@ -25,6 +25,8 @@ Sphinx文档
    sphinx_image.rst
    sphinx_strike.rst
    sphinx_rss_feed.rst
+   sphinx_embed_video.rst
+   sphinx_embed_youtube.rst
 
 .. only::  subproject and html
 
