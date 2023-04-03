@@ -298,7 +298,7 @@ kube-flannel pod无法启动排查
 
    IP ``192.168.101.81`` 是我在部署 Kubernetes 时启用了 :ref:`openconnect_vpn` 使用的 ``tun0`` 接口上IP地址，在关闭VPN之后，我通过 :ref:`change_master_ip` 重新初始化了Kubernetes集群，所以 ``/etc/kubernetes`` 配置目录中所有apiserver访问入口IP地址都修订为 ``192.168.122.11`` 。
 
-   ``10.96.0.1`` 地址是kubernetes的内部集群IP地(在Kubernetes集群内部有一个服务CIRD网络，子网网段是 ``10.96.0.0/12`` ，分配的第一个地址就是 ``10.96.0.1`` ，这个地址是集群的Master服务求第一个IP)。这里访问端口 ``443`` 是Kubernetes的 :ref:`kubernetes_dashboard` 服务的端口。这说明在Kubernetes集群中缺少了Dashboard pod运行。
+   ``10.96.0.1`` 地址是kubernetes的内部集群IP地(在Kubernetes集群内部有一个服务CIRD网络，子网网段是 ``10.96.0.0/12`` ，分配的第一个地址就是 ``10.96.0.1`` ，这个地址是集群的Master服务求第一个IP)。这里访问端口 ``443`` 是Kubernetes的 :ref:`k8s_dashboard` 服务的端口。这说明在Kubernetes集群中缺少了Dashboard pod运行。
 
 - 创建Dashboard::
 

@@ -15,8 +15,8 @@ Prometheus
 在我的 :ref:`priv_cloud_infra` 规划中，采用 :ref:`priv_cloud_infra_prometheus` 部署架构
 
 - ``z-b-mon-1`` 上 :ref:`prometheus_startup` 部署
-- Ceph集群的3个节点 ``z-b-data-1`` / ``z-b-data-2`` / ``z-b-data-3`` 安装并运行 :ref:`prometheus_node_exporter`
-- ``z-b-mon-1`` 上 :ref:`install_grafana` 并 :ref:`config_grafana`
+- Ceph集群的3个节点 ``z-b-data-1`` / ``z-b-data-2`` / ``z-b-data-3`` 安装并运行 :ref:`node_exporter`
+- ``z-b-mon-1`` 上 :ref:`install_grafana` 并 :ref:`grafana_config_startup`
 
 激活Prometheus输出
 ===================

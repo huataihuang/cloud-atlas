@@ -8,6 +8,7 @@ NVIDIA GPU
    :maxdepth: 1
 
    nvidia_gpu_infra.rst
+   cuda_cores_vs._tensor_cores.rst
    gtx_1050_ti.rst
    tesla_p10.rst
    install_nvidia_linux_driver.rst

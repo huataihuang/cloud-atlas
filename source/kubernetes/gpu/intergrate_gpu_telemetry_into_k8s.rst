@@ -284,6 +284,38 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
    我最终采用 :ref:`update_prometheus_config_k8s` 方式，将NVIDIA官方文档的 ``configMap`` 配置 ``additionalScrapeConfigs`` 添加 ``gpu-metrics`` 整合成功。这样就能够初步显示出GPU的监控
 
+- 输出 ``kube-prometheus-stack`` 参数配置:
+
+.. literalinclude:: intergrate_gpu_telemetry_into_k8s/helm_inspect_values_prometheus-stack
+   :language: bash
+   :caption: ``helm inspect values`` 输出Prometheus Stack的chart变量值
+
+
+- 修改 ``/tmp/kube-prometheus-stack.values`` 的 ``configMap`` 配置 ``additionalScrapeConfigs`` 添加 ``gpu-metrics`` :
+
+.. literalinclude:: ../monitor/prometheus/update_prometheus_config_k8s/add_gpu-metrics_config
+   :language: bash
+   :caption: 在 ``configMap`` 配置 ``additionalScrapeConfigs`` 添加 ``gpu-metrics`` (namespace由于部署原因设为default)
+   :emphasize-lines: 21
+
+- 更新:
+
+.. literalinclude:: ../monitor/prometheus/update_prometheus_config_k8s/helm_upgrade_gpu-metrics_config
+   :language: bash
+   :caption: 使用 ``helm upgrade`` prometheus-community/kube-prometheus-stack
+
+完成上述 ``helm upgrade`` 之后，就会在NVIDIA GPU Grafana Dashboard看到监控数据采集成功，显示类似如下:
+
+.. figure:: ../../_static/kubernetes/gpu/nvidia_dcgm-exporter_grafana_1.png
+   :scale: 60
+
+   通过 ``dcgm-exporter`` 采集NVIDIA GPU监控数据: 温度和功率
+
+.. figure:: ../../_static/kubernetes/gpu/nvidia_dcgm-exporter_grafana_2.png
+   :scale: 60
+
+   通过 ``dcgm-exporter`` 采集NVIDIA GPU监控数据: GPU时钟频率、GPU使用率、Tensor Core使用率、Framebuffer内存使用量
+
 参考
 =====
 

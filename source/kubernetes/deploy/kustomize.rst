@@ -309,7 +309,7 @@ production补丁
    kustomize build $OVERLAYS/production |\
        kubectl apply -f -
 
-- 通过 :ref:`kubernetes_dashboard` 我们观察部署可以看到针对不同环境
+- 通过 :ref:`k8s_dashboard` 我们观察部署可以看到针对不同环境
 
 .. figure:: ../../_static/kubernetes/kustomize_overlays.png
    :scale: 30%

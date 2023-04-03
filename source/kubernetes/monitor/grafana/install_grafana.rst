@@ -27,7 +27,7 @@ Grafana提供了企业版和开源版，通常使用社区版本已经能够满�
    sudo systemctl status grafana-server
    sudo systemctl enable grafana-server.service
 
-- grafana默认服务端口是3000，使用浏览器访问，请参考 :ref:`config_grafana` 
+- grafana默认服务端口是3000，使用浏览器访问，请参考 :ref:`grafana_config_startup` 
 
 参考
 =====

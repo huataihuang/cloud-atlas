@@ -42,7 +42,9 @@ release = '0.1'
 extensions = [
         'sphinx.ext.graphviz',
         'sphinxnotes.strike',
-        'sphinxcontrib.newsfeed'
+        'sphinxcontrib.newsfeed',
+        'sphinxcontrib.youtube',
+        'sphinxcontrib.video'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

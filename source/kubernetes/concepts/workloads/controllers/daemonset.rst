@@ -20,7 +20,7 @@ DaemonSet通常用于部署：
 
 - 在每个节点上运行集群存储DaemonSet，如 :ref:`glusterd` :ref:`ceph`
 - 在每个节点上运行日志采集DaemonSet，如 :ref:`fluentd` :ref:`logstash`
-- 在每个节点上运行监控DaemonSet，如 :ref:`prometheus_node_exporter` :ref:`collectd` 以及各种Agent
+- 在每个节点上运行监控DaemonSet，如 :ref:`node_exporter` :ref:`collectd` 以及各种Agent
 - 在每个节点上运行Kubernetes自己的DaemonSet，如 kube-proxy
 
 简单的部署方式是在所有节点上启动相同配置的DaemonSet，不区分硬件类型。较为复杂一些的配置是结合标签对不同硬件(例如GPU设备，SSD存储硬件)使用不同DaemonSet。
