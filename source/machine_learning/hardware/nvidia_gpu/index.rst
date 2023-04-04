@@ -8,12 +8,16 @@ NVIDIA GPU
    :maxdepth: 1
 
    nvidia_gpu_infra.rst
+   nvidia_mig/index
+   ../../../kvm/vgpu/index
+   nvidia_dcgm/index
+   nvidia_gpudirect_storage/index
    cuda_cores_vs._tensor_cores.rst
    gtx_1050_ti.rst
    tesla_p10.rst
+   nvidia_a100.rst
+   nvidia_sxm_socket.rst
    install_nvidia_linux_driver.rst
-   nvidia_dcgm/index
-   nvidia_gpudirect_storage/index
 
 .. only::  subproject and html
 

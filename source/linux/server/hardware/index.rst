@@ -10,6 +10,7 @@
    edac.rst
    lm_sensor.rst
    hwinfo.rst
+   lspci.rst
    check_server_temp.rst
    lackpack.rst
    dell/index
