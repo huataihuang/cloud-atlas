@@ -23,7 +23,7 @@ Prometheus监控
    prometheus_operator.rst
    prometheus_metrics_connect_refuse.rst
    prometheus_metrics_context_deadline_exceeded.rst
-   prometheus_monitor_kubelet.rst
+   prometheus_monitor_kubelet_controller-manager_scheduler.rst
    using_prometheus.rst
 
 推荐阅读:
