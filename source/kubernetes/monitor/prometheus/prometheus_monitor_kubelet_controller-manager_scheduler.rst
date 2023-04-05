@@ -67,10 +67,10 @@ Prometheus监控Kubelet, kube-controller-manager 和 kube-scheduler
 
 - ``/etc/kubernetes/manifest/kube-scheduler.yaml`` ::
 
-  ...
-  - --bind-address=0.0.0.0
-  ...
-  - --port=10251
+   ...
+   - --bind-address=0.0.0.0
+   ...
+   - --port=10251
 
 参考
 =======
