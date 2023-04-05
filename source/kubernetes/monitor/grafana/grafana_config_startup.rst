@@ -54,7 +54,7 @@ Grafana读取Prometheus发生插件错误
 
 社区提供的Grafana+Prometheus组合 :ref:`helm3_prometheus_grafana` 内置了很多针对Kubernetes的监控面板，完全是开箱即用的，其实无需配置。(我最初想多了，以为难以上手)
 
-只需要上文配置好 :ref:`prometheus` 的数据源(这个我倒是遇到一些安全限制导致的采集问题，例如 :ref:`prometheus_metrics_connect_refuse` / :ref:`prometheus_monitor_kubelet` )，然后直接在 ``General`` 搜索栏中选择内置的Kubernetes面板就可以了。以下是一些非常直观的Kubernetes监控面板:
+只需要上文配置好 :ref:`prometheus` 的数据源(这个我倒是遇到一些安全限制导致的采集问题，例如 :ref:`prometheus_metrics_connect_refuse` / :ref:`prometheus_monitor_kubelet_controller-manager_scheduler` )，然后直接在 ``General`` 搜索栏中选择内置的Kubernetes面板就可以了。以下是一些非常直观的Kubernetes监控面板:
 
 - Node Export / Nodes:
 

@@ -8,6 +8,8 @@ Python网络编程
    :maxdepth: 1
 
    paramiko.rst
+   youtube-dl.rst
+   yt-dlp.rst
 
 .. only::  subproject and html
 
