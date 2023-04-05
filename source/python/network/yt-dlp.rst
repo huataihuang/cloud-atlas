@@ -39,9 +39,9 @@ yt-dlp
    :caption: ``yt-dlp -F`` 列出下载视频的输出案例 **《杀死那个石家庄人》--万能青年旅店 影视混剪MV**
    :emphasize-lines: 29
 
-我来下载最小的一个视频mp4，编号 ``29`` ::
+我来下载最小的一个视频mp4，编号 ``18`` ::
 
-   yt-dlp -f 29 "https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3"
+   yt-dlp -f 18 "https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3"
 
 .. note::
 
@@ -56,7 +56,7 @@ yt-dlp
    [youtube] Extracting URL: https://www.youtube.com/watch?v=npHbCnf-Lpk
    [youtube] npHbCnf-Lpk: Downloading webpage
    [youtube] npHbCnf-Lpk: Downloading android player API JSON
-   [info] npHbCnf-Lpk: Downloading 1 format(s): 29
+   [info] npHbCnf-Lpk: Downloading 1 format(s): 18
    [dashsegments] Total fragments: 1
    [download] Destination: /Users/huataihuang/Movies/《杀死那个石家庄人》--万能青年旅店   影视混剪MV.mp4
    [download] 100% of    22MiB in 00:00:04 at 399.36KiB/s
@@ -65,7 +65,7 @@ yt-dlp
 
 结合 :ref:`sphinx_embed_video` 就可以在我的个人网站上嵌入一段演示视频: 墙裂推荐观看YouTube原高清视频 => `《杀死那个石家庄人》--万能青年旅店 影视混剪MV <https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3>`_
 
-.. video:: ../_static/devops/docs/sphinx_doc/ssngsjzr.mp4
+.. video:: ../../_static/devops/docs/sphinx_doc/ssngsjzr.mp4
 
 参考
 ======

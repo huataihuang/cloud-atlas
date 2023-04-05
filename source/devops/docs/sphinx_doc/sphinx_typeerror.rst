@@ -21,21 +21,19 @@ Sphinx Build Filed: TypeError: 'generator'...
 
 - 在项目目录下添加一个配置文件 ``.readthedocs.yaml`` :
 
-.. literalinclude:: ../../../../.readthedocs.yaml
+.. literalinclude:: sphinx_typeerror/readthedocs.yaml
    :language: yaml
-   :linenos:
 
 这个配置文件会指定项目需要的安装依赖包
 
 - 在源代码 ``sources`` 目录下添加 ``requirements.txt`` :
 
-.. literalinclude:: ../../../requirements.txt
+.. literalinclude:: sphinx_typeerror/requirements.txt
 
 - 在源代码 ``sources`` 目录下添加 ``environment.yaml`` 这个文件非常重要，会强制 ReadTheDocs(RTD) 安装和使用指定pip包，这样就能能够避免 ``docutils`` 版本冲突:
 
-.. literalinclude:: ../../../environment.yaml
+.. literalinclude:: sphinx_typeerror/environment.yaml
    :language: yaml
-   :linenos:
    :emphasize-lines: 9
 
 - 然后 ``make html`` 没有问题后， ``git push`` 到github，再观察 ReadTheDocs(RTD) 就会发现build成功了。

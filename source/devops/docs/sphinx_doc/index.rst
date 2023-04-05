@@ -19,7 +19,6 @@ Sphinx文档
    :maxdepth: 1
 
    sphinx_openstackdocstheme.rst
-   sphinx_typeerror.rst
    sphinx_show_code.rst
    sphinx_table.rst
    sphinx_image.rst
@@ -27,6 +26,8 @@ Sphinx文档
    sphinx_rss_feed.rst
    sphinx_embed_video.rst
    sphinx_embed_youtube.rst
+   sphinx_typeerror.rst
+   rtd_fail_import_extension.rst
 
 .. only::  subproject and html
 

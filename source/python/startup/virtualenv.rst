@@ -137,13 +137,12 @@ Python 3 venv
 
    我使用 :ref:`kali_linux` 作为开发环境，采用上述方式完成环境设置。
 
-升级Virtualenv环境
-====================
 
-一段时间之后，可能需要升级pip以及安装的所有软件包::
+- 一段时间之后，可能需要升级pip以及安装的所有软件包:
 
-   pip install --upgrade pip
-   pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U
+.. literalinclude:: virtualenv/pip_upgrade
+   :language: bash
+   :caption: 升级pip以及所有已安装软件包
 
 参考
 =====
