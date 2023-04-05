@@ -42,6 +42,16 @@ Read the Docs 类似问题在之前遇到过 :ref:`sphinx_typeerror` ，主要�
 
 现在似乎不再使用 ``environment.yaml`` ，我移除了这个配置文件
 
+build的新问题
+================
+
+完成上述配置修订后，推送到Read the docs的build输出果然不同，但是却出现了新的问题(显示安装依赖包出错):
+
+.. literalinclude:: sphinx_embed_video/readthedocs_build_install_fail_output
+   :caption: Read the Docs 平台Build失败显示安装包出错
+
+
+
 参考
 ========
 
