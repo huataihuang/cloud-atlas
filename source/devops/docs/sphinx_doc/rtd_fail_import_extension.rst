@@ -54,8 +54,16 @@ build的新问题
 
 奇怪，我配置了项目目录下 ``.readthedocs.yaml`` 指定了 ``python: "3.10.6"`` (我根据我本地 :ref:`ubuntu_linux` 22.04.2 LTS当前发行版Python版本)为何没有生效？
 
-看了Sphinx官方 ``.readthedocs.yaml`` 配置 `RTD reproducible Builds <https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html>`_ 采用 ``python: "3.11"``
+看了Sphinx官方 ``.readthedocs.yaml`` 配置 `RTD reproducible Builds <https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html>`_ 采用 ``python: "3.11"`` ，但是我依样画葫芦也不行，从build日志来看，RTD依然使用了 Python 3.7::
 
+   ...
+   python3.7 -mvirtualenv $READTHEDOCS_VIRTUALENV_PATH
+   ...
+
+在 `Add support for Python 3.9 to 7.x image #159 <https://github.com/readthedocs/readthedocs-docker-images/pull/159>`_ 提到了::
+
+   build:
+     image: testing
 
 参考
 ========
