@@ -11,14 +11,14 @@ CUDA Cores vs. Tensor Cores
 GPU
 =======
 
-徒刑处理但愿(Graphical Processing Units, GPUs)是用于沉浸式视频游戏(immersive video games)，电影和其他视觉媒体中用于呈现丰富2D/3D图形和动画的专用硬件。由于GPU能够超高效进行并行的浮点计算，已经成为海量数据处理和ML模型训练的最佳选择。NVIDIA开发了用于通用和专用处理的 :ref:`cuda` 和 Tesnor 核心GPU，成为ML领域主要的硬件供应商。
+图形处理单元(Graphical Processing Units, GPUs)是用于沉浸式视频游戏(immersive video games)，电影和其他视觉媒体中用于呈现丰富2D/3D图形和动画的专用硬件。由于GPU能够超高效进行并行的浮点计算，已经成为海量数据处理和ML模型训练的最佳选择。NVIDIA开发了用于通用和专用处理的 :ref:`cuda` 和 Tesnor 核心GPU，成为ML领域主要的硬件供应商。
 
 CUDA Cores
 -------------
 
 CUDA(Compute Unified Device Architecture,
 计算统一设备架构)是NVIDIA于2007年发布的专有、特殊设计的GPU核心，大致相当于CPU核心。虽然不如CPU核心通用和强大，但是CUDA的核心优势是数量巨大，并且能够同时并行地对不同数据集进行计算。由于高级GPU具备数百甚至数千CUDA核心，尽管每个CUDA核心和CPU一样只能在每个时钟周期执行一个操作，但是GPU的SIMD架构使得成百上千个CUDA核心能够同时处理一个数据集，从而在更短时间内完成数据处理。CUDA技术对数据分析、数据可视化以及AI/ML开发场景带来极大改进。CUDA代码支持多种语言开发:C, C++, Fortran, OpenCL 和 Direct
-Compute等语言，以支持CUDA的GPU进行通用计算和数据处理。CUDA指令集还提供对NVIDIA GPU的虚拟指令的直接访问软件和程序，CUDA core GPU还支持Direct 3D, OpenGL等徒刑API，以及OpenCL和OpenMP等编程框架。
+Compute等语言，以支持CUDA的GPU进行通用计算和数据处理。CUDA指令集还提供对NVIDIA GPU的虚拟指令的直接访问软件和程序，CUDA core GPU还支持Direct 3D, OpenGL等图形API，以及OpenCL和OpenMP等编程框架。
 
 CUDA Cores是实时计算、计算密集型3D图形、游戏开发、密码散列(cryptographic hashing)、物理引擎和数据科学计算的主要硬件，在机器学习和深度学习领域，以及TB级别数据训练上，GPU也是重要核心硬件。
 
