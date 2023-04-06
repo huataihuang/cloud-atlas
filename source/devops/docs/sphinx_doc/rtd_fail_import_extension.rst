@@ -60,10 +60,11 @@ build的新问题
    python3.7 -mvirtualenv $READTHEDOCS_VIRTUALENV_PATH
    ...
 
-在 `Add support for Python 3.9 to 7.x image #159 <https://github.com/readthedocs/readthedocs-docker-images/pull/159>`_ 提到了::
+.. figure:: ../../../_static/kubernetes/deployment/bootstrap_kubernetes_ha/ha_k8s_dnsrr/marmot.gif
 
-   build:
-     image: testing
+我发现我犯了一个 **愚蠢的低级错误** : 现在我为了避免每次 ``make html`` 之后不断生成的变化的html被同步到github仓库，我每次只 ``git add`` 子目录 ``source`` ，根本没有提交上一级项目根目录下的 ``.readthedocs.yaml`` ，难怪RTD根本没有按照预想的那样使用高版本Python...
+
+重新推送了 ``.readthedocs.yaml`` ，OK
 
 参考
 ========
