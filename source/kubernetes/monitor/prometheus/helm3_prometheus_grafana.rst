@@ -11,7 +11,7 @@ helm3
 
 - :ref:`helm` 提供方便部署:
 
-.. literalinclude:: ../../deploy/helm/helm_install_by_script
+.. literalinclude:: ../../deploy/helm/helm_startup/helm_install_by_script
    :language: bash
    :caption: 使用官方脚本安装 helm
 

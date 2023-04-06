@@ -176,13 +176,30 @@ Ubuntu, Debian
 ::
 
    apt-get update && apt-get install -y apt-transport-https curl
-   curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-   cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-   deb https://apt.kubernetes.io/ kubernetes-xenial main
-   EOF
+   sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+   echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
    apt-get update
    apt-get install -y kubelet kubeadm kubectl
    apt-mark hold kubelet kubeadm kubectl
+
+.. note::
+
+   由于Google Cloud的 ``apt-key.gpg`` 可能会过期或废除，如果在软件安装升级过程中遇到证书错误，类似::
+
+      Err:3 https://packages.cloud.google.com/apt kubernetes-xenial InRelease
+        The following signatures couldn't be verified because the public key is not available: NO_PUBKEY B53DC80D13EDEF05
+
+   这个证书问题我发现是现在 ``Google Cloud public signing key`` 安装方法改变了，早期是::
+
+      curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+      cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+      deb https://apt.kubernetes.io/ kubernetes-xenial main
+      EOF
+
+   现在(2023年4月)应该改成::
+
+      sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 CentOS, RHEL, Fedora
 ------------------------

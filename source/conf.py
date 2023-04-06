@@ -42,10 +42,12 @@ release = '0.1'
 extensions = [
         'sphinx.ext.graphviz',
         'sphinxnotes.strike',
-        'sphinxcontrib.newsfeed',
+#        'sphinxcontrib.newsfeed',
         'sphinxcontrib.youtube',
         'sphinxcontrib.video'
 ]
+
+#disqus_shortname = 'cloud-atlas'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

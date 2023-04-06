@@ -25,7 +25,7 @@ cilium使用外部KV存储(通常是 :ref:`etcd` )优点:
 
 Cilium需要在ConfigMap中配置扩展外部KV存储，这个配置是通过 :ref:`helm` 完成的，所以需要首先安装 ``helm3`` :
 
-.. literalinclude:: ../../../deploy/helm/linux_helm_install
+.. literalinclude:: ../../../deploy/helm/helm_startup/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 

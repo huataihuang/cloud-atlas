@@ -16,3 +16,4 @@ GPU Kubernetes
    gpu_k8s_deploy_fedora-dev-tini.rst
    dcgm-exporter.rst
    intergrate_gpu_telemetry_into_k8s.rst
+   dcgm-exporter_instance_node.rst

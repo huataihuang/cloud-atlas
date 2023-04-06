@@ -97,7 +97,7 @@ NVIDIA提供了多种 :ref:`nvidia_container_runtimes` 支持，例如 :ref:`doc
 
 - 部署 helm:
 
-.. literalinclude:: ../deploy/helm/linux_helm_install
+.. literalinclude:: ../deploy/helm/helm_startup/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 
@@ -134,7 +134,7 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
 - 安装 :ref:`helm` :
 
-.. literalinclude:: ../deploy/helm/helm_install_by_script
+.. literalinclude:: ../deploy/helm/helm_startup/helm_install_by_script
    :language: bash
    :caption: 使用官方脚本安装 helm
 
@@ -242,19 +242,19 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
 这里可能会遇到报错，原因是 ``dcgm-exporter`` 要求 Kubernetes >= 1.19.0-0 :
 
-.. literalinclude:: ../deploy/helm/dcgm-exporter_version_err
+.. literalinclude:: ../deploy/helm/helm_startup/dcgm-exporter_version_err
    :caption: 安装 :ref:`dcgm-exporter` 遇到Kubernetes版本不满足要求(需要安装低版本 ``dcgm-exporter`` )
 
 则采用 :ref:`helm_install_specific_chart_version` 方法完成低版本安装:
 
 安装指定 ``2.6.10`` 版本 ``dcgm-exporter`` chart:
 
-.. literalinclude:: ../deploy/helm/helm_install_dcgm-exporter_specific_chart_version
+.. literalinclude:: ../deploy/helm/helm_startup/helm_install_dcgm-exporter_specific_chart_version
    :caption: 安装指定版本helm chart
 
 安装成功的输出信息:
 
-.. literalinclude:: ../deploy/helm/helm_install_dcgm-exporter_specific_chart_version_output
+.. literalinclude:: ../deploy/helm/helm_startup/helm_install_dcgm-exporter_specific_chart_version_output
    :caption: 安装指定版本helm chart成功的信息
 
 配置 Grafana

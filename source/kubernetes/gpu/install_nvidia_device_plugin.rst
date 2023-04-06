@@ -18,7 +18,7 @@
 
 - 使用 :ref:`helm` 来部署 ``NVIDIA Device Plugins`` ，所以需要首先部署 helm (之前我在部署 :ref:`cilium` 时完成 :ref:`cilium_install_with_external_etcd` 已在集群安装过helm ):
 
-.. literalinclude:: ../deploy/helm/linux_helm_install
+.. literalinclude:: ../deploy/helm/helm_startup/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 
@@ -66,13 +66,13 @@
 
 - 使用 :ref:`helm` 检查release:
 
-.. literalinclude:: ../deploy/helm/helm_list
+.. literalinclude:: ../deploy/helm/helm_startup/helm_list
    :language: bash
    :caption: 检查通过helm已经安装的软件release(删除时候必须指定release)
 
 - 删除错误部署的NVIDIA Device Plugin:
 
-.. literalinclude:: ../deploy/helm/helm_uninstall
+.. literalinclude:: ../deploy/helm/helm_startup/helm_uninstall
    :language: bash
    :caption: 使用helm uninstall删除指定release，注意必须指定namespace(如果不是默认namespace)
 

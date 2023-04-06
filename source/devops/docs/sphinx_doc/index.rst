@@ -28,6 +28,7 @@ Sphinx文档
    sphinx_embed_youtube.rst
    sphinx_typeerror.rst
    rtd_fail_import_extension.rst
+   sphinx_disqus.rst
 
 .. only::  subproject and html
 

@@ -23,7 +23,7 @@
 
 - :ref:`macos` 安装本地 ``helm`` 客户端:
 
-.. literalinclude:: ../../../deploy/helm/homebrew_helm_install
+.. literalinclude:: ../../../deploy/helm/helm_startup/homebrew_helm_install
    :language: bash
    :caption: 在 :ref:`macos` 平台通过 :ref:`homebrew` 安装Helm
 
