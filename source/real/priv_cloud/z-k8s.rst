@@ -97,7 +97,7 @@ Kubernetes集群(z-k8s)
 
 - 首先在节点安装 :ref:`helm` :
 
-.. literalinclude:: ../../kubernetes/deploy/helm/linux_helm_install
+.. literalinclude:: ../../kubernetes/deploy/helm/helm_startup/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 

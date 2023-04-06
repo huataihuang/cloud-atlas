@@ -20,6 +20,7 @@ Kubernetes部署
    bootstrap_kubernetes_ha/index
    stateless_application/index
    operator/index
+   helm/index
    deploy_pod/index
    kubespray/index
    kops/index
@@ -27,7 +28,6 @@ Kubernetes部署
    haproxy_ingress.rst
    istio_ingress.rst
    minikube_deploy_docker_registry.rst
-   helm.rst
    draft.rst
    kustomize.rst
    kuberbuilder.rst

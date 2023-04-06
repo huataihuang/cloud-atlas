@@ -1,4 +1,4 @@
-.. _helm:
+.. _helm_startup:
 
 ===========================
 Helm - Kubernetes包管理器
@@ -30,13 +30,13 @@ Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和�
 
 推荐采用 :ref:`homebrew` 安装和维护:
 
-.. literalinclude:: helm/homebrew_helm_install
+.. literalinclude:: helm_startup/homebrew_helm_install
    :language: bash
    :caption: 在 :ref:`macos` 平台通过 :ref:`homebrew` 安装Helm
 
 - 在 Linux 安装:
 
-.. literalinclude:: helm/linux_helm_install
+.. literalinclude:: helm_startup/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 
@@ -53,7 +53,7 @@ Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和�
 
 https://git.io/get_helm.sh 提供了安装脚本:
 
-.. literalinclude:: helm/helm_install_by_script
+.. literalinclude:: helm_startup/helm_install_by_script
    :language: bash
    :caption: 使用官方脚本安装 helm
 
@@ -77,7 +77,7 @@ Tiller是 ``helm`` 命令的集群端组件，用于接收 ``helm`` 的命令并
 
 - 检查本地 ``kubectl`` 连接的默认集群:
 
-.. literalinclude:: helm/check_k8s_config
+.. literalinclude:: helm_startup/check_k8s_config
    :language: bash
    :caption: 检查当前连接的Kubernetes集群
 
@@ -87,19 +87,19 @@ Tiller是 ``helm`` 命令的集群端组件，用于接收 ``helm`` 的命令并
 
 - 在 ``kube-system`` 名字空间创建 ``tiller`` 的 ``serviceaccount`` :
 
-.. literalinclude:: helm/create_tiller_serviceaccount
+.. literalinclude:: helm_startup/create_tiller_serviceaccount
    :language: bash
    :caption: 创建tiller的serviceaccount
 
 - 将 ``tiller`` 这个 ``serviceaccount`` 绑定到 ``cluster-admin`` 角色:
 
-.. literalinclude:: helm/clusterrolebinding_tiller
+.. literalinclude:: helm_startup/clusterrolebinding_tiller
    :language: bash
    :caption: tiller的serviceaccount绑定到cluster-admin角色
 
 - 执行 ``helm init`` 则将 ``tiller`` 安装到集群中:
 
-.. literalinclude:: helm/helm_init
+.. literalinclude:: helm_startup/helm_init
    :language: bash
    :caption: helm init安装tiller
 
@@ -122,19 +122,19 @@ helm使用
 
 - 安装软件举例( :ref:`install_nvidia_device_plugin` ):
 
-.. literalinclude:: helm/helm_list
+.. literalinclude:: helm_startup/helm_list
    :language: bash
    :caption: 检查通过helm已经安装的软件release(删除时候必须指定release)
 
 显示输出举例:
 
-.. literalinclude:: helm/helm_list_output
+.. literalinclude:: helm_startup/helm_list_output
    :language: bash
    :caption: 检查通过helm已经安装的软件release输出信息
 
 - 删除helm chart(uninstall release):
 
-.. literalinclude:: helm/helm_uninstall
+.. literalinclude:: helm_startup/helm_uninstall
    :language: bash
    :caption: 使用helm uninstall删除指定release，注意必须指定namespace(如果不是默认namespace)
 
@@ -175,28 +175,28 @@ helm安装特定版本chart
 
 我在 :ref:`intergrate_gpu_telemetry_into_k8s` 遇到一个问题: ``dcgm-exporter`` 要求 Kubernetes >= 1.19.0-0:
 
-.. literalinclude:: helm/dcgm-exporter_version_err
+.. literalinclude:: helm_startup/dcgm-exporter_version_err
    :caption: 安装 :ref:`dcgm-exporter` 遇到Kubernetes版本不满足要求(需要安装低版本 ``dcgm-exporter`` )
 
 解决方法是先检查仓库提供了哪些chart版本:
 
-.. literalinclude:: helm/helm_search_repo_dcgm-exporter
+.. literalinclude:: helm_startup/helm_search_repo_dcgm-exporter
    :caption: 搜索helm仓库获取软件的不同版本列表
 
 输出显示版本列表，依次尝试后可知 ``2.6.10`` 满足当前 Kubernetes 版本要求: 
 
-.. literalinclude:: helm/helm_search_repo_dcgm-exporter_output
+.. literalinclude:: helm_startup/helm_search_repo_dcgm-exporter_output
    :caption: 搜索helm仓库获取软件的不同版本列表
    :emphasize-lines: 5
 
 安装指定 ``2.6.10`` 版本 ``dcgm-exporter`` chart:
 
-.. literalinclude:: helm/helm_install_dcgm-exporter_specific_chart_version
+.. literalinclude:: helm_startup/helm_install_dcgm-exporter_specific_chart_version
    :caption: 安装指定版本helm chart
 
 安装成功的输出信息:
 
-.. literalinclude:: helm/helm_install_dcgm-exporter_specific_chart_version_output
+.. literalinclude:: helm_startup/helm_install_dcgm-exporter_specific_chart_version_output
    :caption: 安装指定版本helm chart成功的输出信息
 
 参考

@@ -26,7 +26,7 @@
 
 - 安装 :ref:`helm` :
 
-.. literalinclude:: ../deploy/helm/linux_helm_install
+.. literalinclude:: ../deploy/helm/helm_startup/linux_helm_install
    :language: bash
    :caption: 在Linux平台安装helm
 
