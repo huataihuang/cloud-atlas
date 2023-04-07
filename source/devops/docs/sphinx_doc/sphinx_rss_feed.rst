@@ -8,7 +8,7 @@ Sphinx生成RSS feed
 
    经过一番尝试，我依然没有解决RSS feed的生成...
 
-   太花费时间了，然而现在时间和精力实在不够，只能暂时放弃这个想法了...
+   太花费时间了，然而现在时间和精力实在不够，准备过一段时间研读一下 `sphinxcontrib-newsfeed <https://pypi.org/project/sphinxcontrib-newsfeed/>`_ ，看看能否解决或者fork出来修改修改...
 
 问题
 =======
@@ -45,8 +45,8 @@ Google了一下，我觉得思路是采用 Sphinx 的插件来实现 RSS feed �
 - `lsaffre/sphinxfeed <https://github.com/lsaffre/sphinxfeed>`_ ( 从已停止开发的 `junkafarian/sphinxfeed <https://github.com/junkafarian/sphinxfeed>`_ Fork出来) 目前仍在活跃维护，是比较有希望的解决方案。不过，按照README安装并不成功
 - `sphinxcontrib-newsfeed <https://pypi.org/project/sphinxcontrib-newsfeed/>`_  从2013年开始支持Python 3，虽然2015年之后不再更新，但是由于Sphinx的API非常稳定，所以依然可以使用
 
-``sphinxcontrib-newsfeed`` (废弃)
-===================================
+``sphinxcontrib-newsfeed`` (暂未成功)
+=======================================
 
 .. note::
 
@@ -82,7 +82,7 @@ Google了一下，我觉得思路是采用 Sphinx 的插件来实现 RSS feed �
 .. literalinclude:: sphinx_rss_feed/sphinx_rss_feed
    :caption: 在需要输出 news feed 的文档下添加 ``feed-entry``
 
-... 没有验证成功，放弃了
+... 没有验证成功，待续
 
 参考
 =======
