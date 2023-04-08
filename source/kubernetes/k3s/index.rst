@@ -16,4 +16,5 @@ K3s - 轻量级Kubernetes
    k3s_install.rst
    k3s_squid/index
    longhorn/index
+   octopus/index
    the_most_smallest_cheapest_k8s/index

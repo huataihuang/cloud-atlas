@@ -49,8 +49,10 @@ macOS环境安装
    Or, if you don't want/need a background service you can just run:
      /opt/homebrew/opt/prometheus/bin/prometheus_brew_services 
 
-zcloud安装
-===============
+.. _zcloud_host_install_prometheus:
+
+zcloud物理主机安装Prometheus
+===============================
 
 我在 :ref:`priv_cloud_infra` 重新在一台二手服务器 :ref:`hpe_dl360_gen9` 部署大规模虚拟化集群。为了结合 :ref:`zdata_ceph` 的 :ref:`ceph_dashboard` 以及对整个基础架构进行监控，我重新部署 ``prometheus + grafana`` 到两台KVM虚拟机 ``z-b-mon-1`` 和 ``z-b-mon-2`` 。
 
@@ -88,7 +90,7 @@ zcloud安装
    sudo mv prometheus promtool /usr/local/bin/
 
 配置
-========
+------
 
 在解压缩的Prometheus软件包目录下有一个默认配置文件 ``prometheus.yml`` ，这个初始配置复制到 ``/etc/prometheus`` 目录下然后简单配置就可以启动::
 

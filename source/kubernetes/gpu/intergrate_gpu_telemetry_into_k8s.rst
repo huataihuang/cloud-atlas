@@ -150,7 +150,7 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
    :language: bash
    :caption: ``helm inspect values`` 输出Prometheus Stack的chart变量值
 
-- 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点
+- 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点(实际建议修订)
 
 .. literalinclude:: intergrate_gpu_telemetry_into_k8s/change_prometheus_nodeport_30090
    :language: bash
@@ -186,6 +186,8 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
    实际上我已经完成了 :ref:`helm3_prometheus_grafana` ，而且我也是将 :ref:`prometheus` 的服务端口映射为 ``NodePort`` (安装后手动修订部署)，所以不再需要执行官方文档安装
 
+   不过，我在 :ref:`z-k8s_gpu_prometheus_grafana` 采用了NVIDIA的部署方案，请参考那次实践。
+
 (可选方法)独立安装 :ref:`nvidia_dcgm` 和 :ref:`dcgm-exporter`
 --------------------------------------------------------------
 
@@ -202,7 +204,7 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
 .. note::
 
-   似乎只需要部署 ``dcgm-exporter`` 就可以，物理主机上无需再安装 :ref:`nvidia_dcgm`
+   需要部署 ``dcgm-exporter`` 就可以，物理主机上无需再安装 :ref:`nvidia_dcgm`
 
    我在 ``dcgm-exporter`` 容器内部检查，容器内部已经安装了 ``nvidia-dcgm`` ，只不过似乎没有以服务方式运行。参考 `Monitor Your Computing System with Prometheus, Grafana, Alertmanager, and Nvidia DCGM <https://ajaesteves.medium.com/monitor-your-computing-system-with-prometheus-grafana-alertmanager-and-nvidia-dcgm-ea9f142d2e21>`_ ::
 
@@ -256,6 +258,38 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
 .. literalinclude:: ../deploy/helm/helm_startup/helm_install_dcgm-exporter_specific_chart_version_output
    :caption: 安装指定版本helm chart成功的信息
+
+``third-party Profiling module`` 错误
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+我在生产环境的依次一次部署中，先部署了 :ref:`dcgm-exporter` (系统已经安装了 ``nvidia-device-plugin`` ，但是还没有部署 ``prometheus-stack`` )，非常奇怪， ``dcgm-exporter`` 的pod不断crash::
+
+   # kubectl -n nvidia-gpu get pods
+   NAME                             READY   STATUS             RESTARTS   AGE
+   dcgm-exporter-1680885308-2ttq6   0/1     CrashLoopBackOff   241        20h
+   dcgm-exporter-1680885308-5rzsf   0/1     CrashLoopBackOff   0          20h
+   dcgm-exporter-1680885308-5w29s   0/1     CrashLoopBackOff   241        20h
+   dcgm-exporter-1680885308-68sv7   0/1     CrashLoopBackOff   0          119m
+   ...
+
+检查 ``kubelet`` 日志显示仅显示容器不断 ``CrashLoopBackOff`` ::
+
+   ...
+   E0408 18:51:25.676318   41268 pod_workers.go:191] Error syncing pod 4c56555f-1b97-4d68-965b-af67cd99df48 ("dcgm-exporter-1680885308-68sv7_nvidia-gpu(4c56555f-1b97-4d68-965b-af67cd99df48)"), skipping: failed to "StartContainer" for "exporter" with CrashLoopBackOff: "back-off 1m20s restarting failed container=exporter pod=dcgm-exporter-1680885308-68sv7_nvidia-gpu(4c56555f-1b97-4d68-965b-af67cd99df48)"
+   ...
+
+此时检查pod日志，显示第三方profiling模块返回错误导致::
+
+   # kubectl logs dcgm-exporter-1680885308-68sv7 -n nvidia-gpu
+   time="2023-04-08T10:50:50Z" level=info msg="Starting dcgm-exporter"
+   time="2023-04-08T10:50:50Z" level=info msg="DCGM successfully initialized!"
+   time="2023-04-08T10:50:51Z" level=info msg="Collecting DCP Metrics"
+   time="2023-04-08T10:50:51Z" level=info msg="No configmap data specified, falling back to metric file /etc/dcgm-exporter/dcp-metrics-included.csv"
+   time="2023-04-08T10:50:53Z" level=fatal msg="Error watching fields: The third-party Profiling module returned an unrecoverable error"
+
+在一个韩文 `GPU Operator on CentOS <https://1week.tistory.com/45>`_ 提示解决方法是: GPU Operator v1.3.0 升级到 v1.4.0
+
+不过，同样操作系统和硬件( :ref:`nvidia_a100` ) 以及驱动 ( ``Driver Version: 470.103.01   CUDA Version: 11.4`` )，我之前部署的集群却没有问题。
 
 配置 Grafana
 ----------------
