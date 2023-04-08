@@ -150,6 +150,10 @@ helm使用
 
    Error: uninstall: Release not loaded: nvidia-device-plugin-1673515385: release: not found
 
+正确方式应该是同时指定 ``namespace`` ::
+
+   helm uninstall nvidia-device-plugin-1673515385 -n nvidia-gpu
+
 指定 ``$KUBECONFIG``
 -----------------------
 

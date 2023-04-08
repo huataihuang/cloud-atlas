@@ -18,7 +18,6 @@
    priv_lvm.rst
    zdata_ceph_rbd_libvirt.rst
    priv_kvm_sr-iov.rst
-   priv_cloud_infra_prometheus.rst
    z-k8s_env.rst
    priv_etcd.rst
    z-k8s_runtime.rst
@@ -30,6 +29,8 @@
    z-k8s_nerdctl.rst
    z-k8s_cilium_ingress.rst
    z-k8s_docker_registry.rst
+   z-k8s_nvidia_gpu_operator.rst
+   z-k8s_prometheus-stack.rst
    priv_docker.rst
    priv_k8s_docker_centos.rst
    real_unattended_upgrade.rst

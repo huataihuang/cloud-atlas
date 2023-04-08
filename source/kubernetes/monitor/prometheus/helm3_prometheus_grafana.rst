@@ -103,7 +103,7 @@ helm3
 
 .. literalinclude:: helm3_prometheus_grafana/edit_svc
    :language: bash
-   :caption: ``kubectl edit svc`` 将ClusterIP类型改为NodePort或LoadBalancer
+   :caption: ``kubectl edit svc`` 将ClusterIP类型改为NodePort或LoadBalancer(案例是 ``grafana`` )
 
 我在阿里云环境部署采用 ``LoadBalancer`` 似乎没有成功， ``kubectl get svc`` 一直显示外部IP ``pending`` ::
 

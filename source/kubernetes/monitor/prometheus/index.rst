@@ -25,6 +25,7 @@ Prometheus监控
    prometheus_metrics_context_deadline_exceeded.rst
    prometheus_monitor_kubelet_controller-manager_scheduler.rst
    using_prometheus.rst
+   z-k8s_gpu_prometheus_grafana.rst
 
 推荐阅读:
 
