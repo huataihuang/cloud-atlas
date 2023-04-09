@@ -100,6 +100,33 @@ helm3
 
 .. note::
 
+   在生产集群部署，遇到调度失败::
+
+      kubectl --namespace prometheus get pods kube-prometheus-stack-1680962838-prometheus-node-exporter-5kk5q -o yaml
+
+   ::
+
+      ...
+      status:
+        conditions:
+        - lastProbeTime: null
+          lastTransitionTime: "2023-04-08T14:07:36Z"
+          message: '0/12 nodes are available: 12 node(s) didn''t have free ports for the
+            requested pod ports.'
+          reason: Unschedulable 
+
+   原因是Kubernetes集群在阿里云平台部署，已经购买了阿里云的 ``Prometheus`` 监控，所以集群已经提前部署了 ``node-exporter`` ，导致端口中途。解决方法是修订上文自定义values文件 ``kube-prometheus-stack.values`` ::
+
+      ...
+      ## Deploy node exporter as a daemonset to all nodes
+      ##
+      nodeExporter:
+        enabled: false
+     
+   然后重新部署。(不过实践发现还是存在其他问题，遂放弃)
+
+.. note::
+
    如果已经部署好 ``prometheus-stack`` ，需要添加 :ref:`dcgm-exporter` 数据采集支持，则可以通过 :ref:`update_prometheus_config_k8s` 修订
 
 - 检查 ``prometheus`` namespace中部署的容器:
@@ -153,9 +180,67 @@ helm3
 
 不过，这样外部访问的端口是随机的，有点麻烦。临时性解决方法，我采用 :ref:`nginx_reverse_proxy` 将对外端口固定住，然后反向转发给 ``NodePort`` 的随机端口，至少能临时使用。
 
+端口转发
+============
+
 .. note::
 
-   我在采用 :ref:`nginx_reverse_proxy` 到Grafana时遇到 :ref:`grafana_behind_reverse_proxy` 问题，原因是Grafana新版本为了阻断跨站攻击，对客户端请求源和返回地址进行校验，所以必须对 :ref:`nginx` 设置代理头部
+   我在上次实践 :ref:`intergrate_gpu_telemetry_into_k8s` 采用 :ref:`nginx_reverse_proxy` 到Grafana，遇到过 :ref:`grafana_behind_reverse_proxy` 问题，原因是Grafana新版本为了阻断跨站攻击，对客户端请求源和返回地址进行校验，所以必须对 :ref:`nginx` 设置代理头部
+
+   另外可以采用 :ref:`apache_reverse_proxy` 来实现反向代理(因为我已经采用了 :ref:`apache_webdav` 实现 :ref:`joplin_sync_webdav` )
+
+在通过 ``NodePort`` 输出 Prometheus/Grafana/Altermanager 时，pod容器可以在集群的任何node节点运行。对于外部访问，比较好的方式是采用 :ref:`metallb` 结合 :ref:`ingress` 来实现完整的云计算网络。
+
+不过，出于快速构建，我当前采用简化的服务输出方式 ``NodePort`` ，所以再部署一个 :strike:`简单的WEB反向代理就能在外部访问` :ref:`iptables_port_forwarding` 实现访问。
+
+- 检查 ``prometheus-stack`` 输出的 ``NodePort`` :
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/get_svc_nodeport
+   :language: bash
+   :caption: 检查服务的 ``NodePort``
+
+输出显示:
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/get_svc_nodeport_output
+   :language: bash
+   :caption: 检查服务的 ``NodePort`` 输出
+
+- 检查 ``prometheus-stack`` 对应pods落在哪个 ``nodes`` 上:
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/get_pods_nodes
+   :language: bash
+   :caption: 检查prometheus的服务对应 ``pods`` 落在哪个 ``nodes`` 上
+
+输出显示
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/get_pods_nodes_output
+   :language: bash
+   :caption: 检查prometheus的服务对应 ``pods`` 落在哪个 ``nodes`` (对应3个NODE)
+   :emphasize-lines: 2,4,8
+
+- 检查 ``nodes`` 对应IP:
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/get_nodes_ip
+   :language: bash
+   :caption: 检查 ``nodes`` 对应 IP
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/get_nodes_ip_output
+   :language: bash
+   :caption: 检查 ``nodes`` 对应 IP
+   :emphasize-lines: 5-7
+
+整理对应关系:
+
+.. csv-table:: ``prometheus-stack`` 服务 ``NodePort`` 对应关系
+   :file: z-k8s_gpu_prometheus_grafana/prometheus-stack_nodeport.csv
+   :widths: 20,30,10,30,10
+   :header-rows: 1
+
+- 执行以下端口转发脚本:
+
+.. literalinclude:: ../../../linux/network/iptables/iptables_port_forwarding/iptables_port_forwarding_prometheus
+   :language: bash
+   :caption: 端口转发 ``prometheus-stack`` 服务端口
 
 访问使用
 ==========
@@ -163,6 +248,8 @@ helm3
 访问 Grafana 面板，初始账号 ``admin`` 密码是 ``prom-operator`` ，请立即修改
 
 然后我们可以开始 :ref:`grafana_config_startup`
+
+- :ref:`intergrate_gpu_telemetry_into_k8s` 采用 NVIDIA官方提供的面板 `NVIDIA DCGM Exporter Dashboard <https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/>`_ ，可以直接导入监控我的 :ref:`tesla_p10`
 
 参考
 =======
