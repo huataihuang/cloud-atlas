@@ -98,7 +98,12 @@ helm配置
 
 .. literalinclude:: z-k8s_gpu_prometheus_grafana/deploy_prometheus-stack
    :language: bash
-   :caption: 使用定制helm chart values来安装部署 ``kube-prometheus-stack`` 并传递持久化存储
+   :caption: 使用定制helm chart values来安装部署 ``kube-prometheus-stack`` 并传递持久化存储，但是实践没有持久化存储没有成功
+   :emphasize-lines: 5
+
+.. note::
+
+   持久化存储解决方案采用 :ref:`kube-prometheus-stack_persistent_volume`
 
 输出信息:
 
@@ -301,6 +306,28 @@ helm配置
    :language: bash
    :caption: 端口转发 ``prometheus-stack`` 服务端口
 
+配置修订
+=============
+
+对于需要后续调整的配置，采用 :ref:`update_prometheus_config_k8s` 方法:
+
+.. literalinclude:: update_prometheus_config_k8s/helm_upgrade_gpu-metrics_config
+   :language: bash
+   :caption: 使用 ``helm upgrade`` prometheus-community/kube-prometheus-stack
+
+例如更新 ``scrape`` 配置
+
+持久化存储
+============
+
+默认配置:
+
+.. literalinclude:: update_prometheus_config_k8s/prometheus_default_storage.yaml
+   :language: yaml
+   :caption: 默认 prometheus 存储在内存
+
+我最初按照上文 `Deploying kube-prometheus-stack with persistent storage on Kubernetes Cluster <https://blog.devops.dev/deploying-kube-prometheus-stack-with-persistent-storage-on-kubernetes-cluster-24473f4ea34f>`_ 构建了存储PV/PVC，但是采用了 ``helm install`` 参数 ``
+
 访问使用
 ==========
 
@@ -314,4 +341,4 @@ helm配置
 =======
 
 - `How to Install Prometheus and Grafana on Kubernetes using Helm 3 <https://www.fosstechnix.com/install-prometheus-and-grafana-on-kubernetes-using-helm/>`_
-- `Deploying kube-prometheus-stack with persistent storage on Kubernetes Cluster <https://blog.devops.dev/deploying-kube-prometheus-stack-with-persistent-storage-on-kubernetes-cluster-24473f4ea34f>`_
+- `Deploying kube-prometheus-stack with persistent storage on Kubernetes Cluster <https://blog.devops.dev/deploying-kube-prometheus-stack-with-persistent-storage-on-kubernetes-cluster-24473f4ea34f>`_ 这个持久化卷的配置方法不成功，但是持久化卷应用方法不通过。参考 `[kube-prometheus-stack] how to use persistent volumes instead of emptyDir <https://github.com/prometheus-community/helm-charts/issues/2816>`_
