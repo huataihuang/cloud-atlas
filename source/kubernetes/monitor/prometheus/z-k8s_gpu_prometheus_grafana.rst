@@ -28,6 +28,9 @@ helm3
 安装Prometheus 和 Grafana
 ===========================
 
+helm配置
+---------
+
 - 添加 Prometheus 社区helm chart:
 
 .. literalinclude:: helm3_prometheus_grafana/helm_repo_add_prometheus
@@ -63,11 +66,39 @@ helm3
    :language: bash
    :caption: 在 ``configMap`` 配置 ``additionalScrapeConfigs`` 添加 ``gpu-metrics``
 
+.. note::
+
+   :ref:`prometheus_configuration`
+
+准备存储
+---------
+
+- 创建 :ref:`k8s_hostpath` 持久化存储卷:
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/kube-prometheus-stack-pv.yaml
+   :language: yaml
+   :caption: ``kube-prometheus-stack-pv.yaml`` 创建 :ref:`k8s_hostpath` 持久化存储卷
+
+- 创建PVC:
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/kube-prometheus-stack-pvc.yaml
+   :language: yaml
+   :caption: ``kube-prometheus-stack-pv.yaml`` 创建 :ref:`k8s_hostpath` 持久化存储卷声明
+
+- 执行:
+
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/kube-prometheus-stack-pv_apply
+   :language: bash
+   :caption: 执行构建 ``kube-prometheus-stack-pv``
+
+部署
+------
+
 - 执行部署，部署中采用自己定制的values:
 
-.. literalinclude:: ../../gpu/intergrate_gpu_telemetry_into_k8s/deploy_prometheus-stack
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/deploy_prometheus-stack
    :language: bash
-   :caption: 使用定制helm chart values来安装部署 ``kube-prometheus-stack``
+   :caption: 使用定制helm chart values来安装部署 ``kube-prometheus-stack`` 并传递持久化存储
 
 输出信息:
 
@@ -128,6 +159,34 @@ helm3
 .. note::
 
    如果已经部署好 ``prometheus-stack`` ，需要添加 :ref:`dcgm-exporter` 数据采集支持，则可以通过 :ref:`update_prometheus_config_k8s` 修订
+
+.. note::
+
+   在墙内部署会遇到镜像下载问题，通过镜像导入目标节点::
+
+      #下载
+      docker pull registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6
+      docker pull registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.8.2
+
+      #导出
+      docker save -o kube-webhook-certgen.tar registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6
+      docker save -o kube-state-metrics.tar registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.8.2
+
+      #导入
+      nerdctl -n k8s.io load < /tmp/kube-webhook-certgen.tar
+      nerdctl -n k8s.io load < /tmp/kube-state-metrics.tar
+
+- 对于需要部署到指定监控服务器，可以采用 ``label`` 方法::
+
+   kubectl label nodes i-0jl8d8r83kkf3yt5lzh7 telemetry=prometheus
+
+依次修订 ``deployments`` ，例如 ``kubectl edit deployment stable-grafana`` ::
+
+       spec:
+         nodeSelector:
+           telemetry: prometheus
+         containers:
+         ...
 
 - 检查 ``prometheus`` namespace中部署的容器:
 
@@ -255,3 +314,4 @@ helm3
 =======
 
 - `How to Install Prometheus and Grafana on Kubernetes using Helm 3 <https://www.fosstechnix.com/install-prometheus-and-grafana-on-kubernetes-using-helm/>`_
+- `Deploying kube-prometheus-stack with persistent storage on Kubernetes Cluster <https://blog.devops.dev/deploying-kube-prometheus-stack-with-persistent-storage-on-kubernetes-cluster-24473f4ea34f>`_

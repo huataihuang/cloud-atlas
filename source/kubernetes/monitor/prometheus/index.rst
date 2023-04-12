@@ -18,6 +18,7 @@ Prometheus监控
    k8s_kube_state_metircs.rst
    helm3_prometheus_grafana.rst
    update_prometheus_config_k8s.rst
+   prometheus_configuration.rst
    prometheus_service_discovery.rst
    prometheus_rules.rst
    prometheus_operator.rst
@@ -26,6 +27,7 @@ Prometheus监控
    prometheus_monitor_kubelet_controller-manager_scheduler.rst
    using_prometheus.rst
    z-k8s_gpu_prometheus_grafana.rst
+   aliyun_prometheus.rst
 
 推荐阅读:
 
