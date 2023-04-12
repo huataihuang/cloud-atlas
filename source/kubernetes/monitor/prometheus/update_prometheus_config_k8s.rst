@@ -92,7 +92,21 @@
    Error: UPGRADE FAILED: cannot patch "stable-grafana" with kind Service: Service "stable-grafana" is invalid: spec.ports[0].nodePort: Forbidden: may not be used when `type` is 'ClusterIP' && cannot patch "stable-kube-prometheus-sta-alertmanager" with kind Service: Service "stable-kube-prometheus-sta-alertmanager" is invalid: spec.ports[0].nodePort: Forbidden: may not be used when `type` is 'ClusterIP' && cannot patch "stable-kube-prometheus-sta-prometheus" with kind Service:
    Service "stable-kube-prometheus-sta-prometheus" is invalid: spec.ports[0].nodePort: Forbidden: may not be used when `type` is 'ClusterIP'
 
-执行完成后，就可以在 :ref:`grafana` 面板看到GPU数据已经百采集
+.. note::
+
+   更新helm需要2个参数: ``[RELEASE] [CHART]`` ，否则会报错::
+
+      Error: "helm upgrade" requires 2 arguments
+
+      Usage:  helm upgrade [RELEASE] [CHART] [flags]
+
+   不过，比较反直觉，这里 ``[RELEASE]`` 需要使用 ``helm list`` 的 ``NAME`` ，而 ``[CHART]`` 则使用 ``repo_name/path_to_chart`` 格式，使用 ``prometheus-community/kube-prometheus-stack`` ，但不是 ``prometheus-community/kube-prometheus-stack-45.9.1``
+
+.. note::
+
+   ``helm upgrade`` 会再次拉取软件包，例如 ``Get "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-45.9.1/kube-prometheus-stack-45.9.1.tgz"`` ，所以这个方法很沉重。我后续会找更好的更新方法
+
+执行完成后，就可以在 :ref:`grafana` 面板看到GPU数据已经采集
 
 问题
 ------

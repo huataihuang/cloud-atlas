@@ -27,6 +27,8 @@ Prometheus监控
    prometheus_monitor_kubelet_controller-manager_scheduler.rst
    using_prometheus.rst
    z-k8s_gpu_prometheus_grafana.rst
+   kube-prometheus-stack_persistent_volume.rst
+   kube-prometheus-stack_persistent_nodeselector.rst
    aliyun_prometheus.rst
 
 推荐阅读:

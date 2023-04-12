@@ -10,6 +10,7 @@ Kubernetes部署应用
    :maxdepth: 1
 
    dashboard/index
+   statefulset/index
    config_pod_container/index
    app_inject_data/index
    registry/index

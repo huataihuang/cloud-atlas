@@ -6,6 +6,10 @@
 
 Prometheus 社区提供了 `kube-prometheus-stack <https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack>`_ :ref:`helm` chart，一个完整的Kubernetes manifests，包含 :ref:`grafana` dashboard，以及结合了文档和脚本的 :ref:`prometheus_rules` 以方便通过 :ref:`prometheus_operator`
 
+.. note::
+
+   `kube-prometheus runbooks <https://runbooks.prometheus-operator.dev/>`_ 是社区提供的排查运行手册，非常适合学习案例以及排查问题参考
+
 helm3
 =======
 
