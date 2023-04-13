@@ -79,11 +79,9 @@ helm配置
    :language: yaml
    :caption: ``kube-prometheus-stack-pv.yaml`` 创建 :ref:`k8s_hostpath` 持久化存储卷
 
-- 创建PVC:
+.. note::
 
-.. literalinclude:: z-k8s_gpu_prometheus_grafana/kube-prometheus-stack-pvc.yaml
-   :language: yaml
-   :caption: ``kube-prometheus-stack-pv.yaml`` 创建 :ref:`k8s_hostpath` 持久化存储卷声明
+   只需要创建 PV 就可以， ``kube-prometheus-stack`` values.yaml 中提供了 PVC 配置，会自动创建PVC
 
 - 执行:
 
@@ -98,12 +96,12 @@ helm配置
 
 .. literalinclude:: z-k8s_gpu_prometheus_grafana/deploy_prometheus-stack
    :language: bash
-   :caption: 使用定制helm chart values来安装部署 ``kube-prometheus-stack`` 并传递持久化存储，但是实践没有持久化存储没有成功
+   :caption: 使用定制helm chart values来安装部署 ``kube-prometheus-stack`` (传递定制存储参数没有成功，实际正确方法应该采用 :ref:`kube-prometheus-stack_persistent_volume` )
    :emphasize-lines: 5
 
 .. note::
 
-   持久化存储解决方案采用 :ref:`kube-prometheus-stack_persistent_volume`
+   持久化存储解决方案采用 :ref:`kube-prometheus-stack_persistent_volume` 验证通过
 
 输出信息:
 

@@ -29,6 +29,8 @@ Prometheus监控
    z-k8s_gpu_prometheus_grafana.rst
    kube-prometheus-stack_persistent_volume.rst
    kube-prometheus-stack_persistent_nodeselector.rst
+   kube-prometheus-stack_tsdb_retention.rst
+   kube-prometheus-stack_hostnetwork.rst
    aliyun_prometheus.rst
 
 推荐阅读:
