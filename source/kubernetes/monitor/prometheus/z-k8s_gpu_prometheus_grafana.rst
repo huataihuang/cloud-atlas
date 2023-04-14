@@ -68,7 +68,9 @@ helm配置
 
 .. note::
 
-   :ref:`prometheus_configuration`
+   - :ref:`prometheus_configuration`
+
+   - :ref:`prometheus_operator_`
 
 准备存储
 ---------

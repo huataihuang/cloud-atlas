@@ -1,4 +1,4 @@
-.. _kubernetes_network:
+.. _k8s_network:
 
 ======================
 Kubernetes网络

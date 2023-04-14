@@ -291,6 +291,14 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
 不过，同样操作系统和硬件( :ref:`nvidia_a100` ) 以及驱动 ( ``Driver Version: 470.103.01   CUDA Version: 11.4`` )，我之前部署的集群却没有问题。
 
+.. note::
+
+   这个错误故障后来解决: 原因是阿里云租用的服务器部署Kubernetes，已经购买使用了阿里云的基于 ``prometheus-stack`` 魔改的监控，所以系统中有了一个 :ref:`systemd` 模式运行的 :ref:`dcgm-exporter` 。但是阿里云把 ``dcgm-exporter`` 的运行名改成了 ``starship`` ，导致没有注意到物理主机上已经运行了相同的程序。由于 ``starship`` 和我部署的 ``dcgm-exporter`` :ref:`daemonset` 都是定时采集，很容易同时采集数据造成冲突。
+
+.. note::
+
+   Kubernetes官方有一篇和NVIDIA合作的技术文档 `Third Party Device Metrics Reaches GA <https://kubernetes.io/blog/2020/12/16/third-party-device-metrics-reaches-ga/>`_ 详细解析了NVIDIA GPU  metrics采集的方案，我后续在 :ref:`k8s_third_party_devices_metrics` 汇总研究 
+
 配置 Grafana
 ----------------
 
