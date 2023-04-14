@@ -55,6 +55,16 @@ Justin Cormack (Docker Maintainer)提供了一个镜像内置了nsenter直接nse
    :language: bash
    :caption: Justin Cormack (Docker Maintainer)提供通过nsenter进入运行容器的控制台镜像
 
+虚拟机镜像文件在哪里?
+=======================
+
+最近需要升级 :ref:`macos` ，由于我同时安装了 :ref:`asahi_linux` ，所以磁盘空间非常紧张，甚至连升级系统都需要清理磁盘。但是，这次大版本升级需要 26GB 以上空间，我实在无法腾挪出足够空间升级。考虑到已经将大量的虚拟化运行 :ref:`kubernetes` 迁移到服务器上，本地已经没有必要运行Docker和Kubernetes了，所以卸载了Docker Desktop。
+
+但是，Docker Desktop在本地磁盘有一个虚拟机镜像需要清理以释放空间。这个虚拟机镜像位于 ``~/Library/Containers/com.docker.docker`` 目录下。如果你没有删除掉Docker Desktop程序，可以直接通过 ``docker`` 命令来清理::
+
+   docker system prune -a
+
+如果已经卸载了Docker，则手工删除掉这个目录即可。
 
 参考
 =======

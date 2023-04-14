@@ -10,6 +10,10 @@ Prometheus 社区提供了 `kube-prometheus-stack <https://github.com/prometheus
 
    `kube-prometheus runbooks <https://runbooks.prometheus-operator.dev/>`_ 是社区提供的排查运行手册，非常适合学习案例以及排查问题参考
 
+.. note::
+
+   `SysEleven: Kube-Prometheus-Stack <https://docs.syseleven.de/metakube-accelerator/building-blocks/observability-monitoring/kube-prometheus-stack>`_ 提供了一个快速配置的精要手册，可以参考学习
+
 helm3
 =======
 
