@@ -167,6 +167,8 @@ helm使用
 
    ``helm`` 默认使用 ``~/.kube/config``  (同 :ref:`kubectl` )
 
+.. _helm_proxy:
+
 helm代理
 ==========
 

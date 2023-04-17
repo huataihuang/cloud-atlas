@@ -1,0 +1,1 @@
+kubeadm config images list
