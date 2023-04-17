@@ -15,6 +15,7 @@ Kubernetes部署
 .. toctree::
    :maxdepth: 1
 
+   k8s_fuck_gfw.rst
    bootstrap_kubernetes_single/index
    etcd/index
    bootstrap_kubernetes_ha/index

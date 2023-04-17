@@ -10,6 +10,7 @@ Kubernetes只支持基于Container Network Interface(CNI)的网络，需要通�
    :maxdepth: 1
 
    cni.rst
+   k8s_hostnetwork.rst
    k8s_network_infa.rst
    k8s_loadbalancer_ingress.rst
    dynamic_dns_loadbalancing_without_cloud_provider.rst

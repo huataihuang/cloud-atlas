@@ -203,7 +203,7 @@ why?
 
 .. note::
 
-   根据上文排查，无法正常启动 ``kubeadmin init`` 容器是因为Kubernetes 1.24，也就是我安装的最新K8s已经移除了CNI plugin，将这部分工作移交给容器运行时自带的CNI plugin来完成。这就要求配套使用最新版本(或满足版本要求)的 ``containerd`` 运行时。最新版本的 ``containerd`` 运行时默认启动 ``loopback`` 就提供了kubernetes管控平面pods运行的条件，这样从开始就可以拉起 Kubernetes 的管控pods，为下一步安装不同的 :ref:`kubernetes_network` 提供初始运行条件。当Kubernetes集群正常运行后，通过 :ref:`cilium_install_with_external_etcd` 就可以直接在运行起来的kubernetes集群上完成网络定制。
+   根据上文排查，无法正常启动 ``kubeadmin init`` 容器是因为Kubernetes 1.24，也就是我安装的最新K8s已经移除了CNI plugin，将这部分工作移交给容器运行时自带的CNI plugin来完成。这就要求配套使用最新版本(或满足版本要求)的 ``containerd`` 运行时。最新版本的 ``containerd`` 运行时默认启动 ``loopback`` 就提供了kubernetes管控平面pods运行的条件，这样从开始就可以拉起 Kubernetes 的管控pods，为下一步安装不同的 :ref:`k8s_network` 提供初始运行条件。当Kubernetes集群正常运行后，通过 :ref:`cilium_install_with_external_etcd` 就可以直接在运行起来的kubernetes集群上完成网络定制。
 
    `containerd versioning and release <https://containerd.io/releases/>`_ 提供了支持 Kubernetes 不同版本所对应当 ``containerd`` 版本，确实明确指出 Kubernetes 1.24 需要 ``containerd 1.64+，1.5.11+``
 

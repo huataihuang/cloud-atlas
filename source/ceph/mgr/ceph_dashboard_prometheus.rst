@@ -12,7 +12,7 @@ Ceph Dashboard使用了 :ref:`grafana` 面板来实现RBD监控，数据源是�
 Prometheus
 ------------
 
-在我的 :ref:`priv_cloud_infra` 规划中，采用 :ref:`priv_cloud_infra_prometheus` 部署架构
+在我的 :ref:`priv_cloud_infra` 规划中，最初想采用如下独立服务器部署Prometheus，不过最终我改为集成化 :ref:`z-k8s_prometheus-stack`
 
 - ``z-b-mon-1`` 上 :ref:`prometheus_startup` 部署
 - Ceph集群的3个节点 ``z-b-data-1`` / ``z-b-data-2`` / ``z-b-data-3`` 安装并运行 :ref:`node_exporter`

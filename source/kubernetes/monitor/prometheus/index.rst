@@ -31,6 +31,7 @@ Prometheus监控
    kube-prometheus-stack_persistent_nodeselector.rst
    kube-prometheus-stack_tsdb_retention.rst
    kube-prometheus-stack_hostnetwork.rst
+   kube-prometheus-stack_etcd.rst
    aliyun_prometheus.rst
 
 推荐阅读:

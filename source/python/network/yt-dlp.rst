@@ -27,11 +27,11 @@ yt-dlp
 举例
 =====
 
-我非常喜欢的 `《杀死那个石家庄人》--万能青年旅店 影视混剪MV <https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3>`_
+我非常喜欢的 `《杀死那个石家庄人》--万能青年旅店 影视混剪MV <https://www.youtube.com/watch?v=npHbCnf-Lpk>`_
 
 - 首先获取视频列表::
 
-   yt-dlp -F "https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3"
+   yt-dlp -F "https://www.youtube.com/watch?v=npHbCnf-Lpk"
 
 显示输出:
 
@@ -41,7 +41,7 @@ yt-dlp
 
 我来下载最小的一个视频mp4，编号 ``18`` ::
 
-   yt-dlp -f 18 "https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3"
+   yt-dlp -f 18 "https://www.youtube.com/watch?v=npHbCnf-Lpk"
 
 .. note::
 
@@ -49,7 +49,7 @@ yt-dlp
 
 显示输出::
 
-   [youtube:tab] Extracting URL: https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3
+   [youtube:tab] Extracting URL: https://www.youtube.com/watch?v=npHbCnf-Lpk
    [youtube:tab] Downloading playlist PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo - add --no-playlist to download just the video npHbCnf-Lpk
    [youtube:tab] PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo: Downloading webpage
    WARNING: [youtube:tab] Unable to recognize playlist. Downloading just video npHbCnf-Lpk
@@ -63,9 +63,18 @@ yt-dlp
 
 非常赞!!!
 
-结合 :ref:`sphinx_embed_video` 就可以在我的个人网站上嵌入一段演示视频: 墙裂推荐观看YouTube原高清视频 => `《杀死那个石家庄人》--万能青年旅店 影视混剪MV <https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3>`_
+结合 :ref:`sphinx_embed_video` 就可以在我的个人网站上嵌入一段演示视频: 墙裂推荐观看YouTube原高清视频 => `《杀死那个石家庄人》--万能青年旅店 影视混剪MV <https://www.youtube.com/watch?v=npHbCnf-Lpk>`_
 
 .. video:: ../../_static/devops/docs/sphinx_doc/ssngsjzr.mp4
+
+快速下载喜爱的音频文件
+========================
+
+经常听的的歌曲，建一个 ``playlist`` 列表，然后一次性从Youtube下载音频:
+
+.. literalinclude:: yt-dlp/yt-dlp_songs.sh
+   :language: bash
+   :caption: 下载自己喜欢的歌曲
 
 参考
 ======
