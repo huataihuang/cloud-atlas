@@ -43,7 +43,7 @@ helm配置
    :language: bash
    :caption: ``helm inspect values`` 输出Prometheus Stack的chart变量值
 
-- 修订一: 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点(实际只需要修改 ``type: ClusterIP`` 改为 ``type: NodePort`` 行，建议同时修改 ``stable-grafana`` (没有找到所以未修改，似乎是 Prometheus operator service, 30080), ``alertmanager`` (9093/30903) 和 ``prometheus`` (9090/30090) 对应的 ``svc`` ，这里案例仅演示 ``prometheus`` 段落修改):
+- 修订一: 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点(实际只需要修改 ``type: ClusterIP`` 改为 ``type: NodePort`` 行，建议同时修改 ``stable-grafana`` (不过执行 ``helm install`` 时支持传递参数 ``--set grafana.service.type=NodePort`` ), ``alertmanager`` (9093/30903) 和 ``prometheus`` (9090/30090) 对应的 ``svc`` ，这里案例仅演示 ``prometheus`` 段落修改):
 
 .. literalinclude:: ../../gpu/intergrate_gpu_telemetry_into_k8s/change_prometheus_nodeport_30090
    :language: bash

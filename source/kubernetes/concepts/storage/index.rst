@@ -9,6 +9,7 @@ Kubernetes存储概念
 
    k8s_volumes.rst
    k8s_persistent_volumes.rst
+   k8s_pvc_pv_bind.rst
 
 .. only::  subproject and html
 
