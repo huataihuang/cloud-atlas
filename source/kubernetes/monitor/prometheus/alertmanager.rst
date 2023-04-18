@@ -4,6 +4,10 @@
 Alertmanager
 ====================
 
+.. note::
+
+   :ref:`kube-prometheus-stack_alertmanager`
+
 参考
 =======
 

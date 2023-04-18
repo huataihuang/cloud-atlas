@@ -5,9 +5,8 @@ CoreDNS
 ===============================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-参考
-=======
+   k8s_dns-autoscaler.rst
+   k8s_node-local-dns.rst
 
-- `Kubernetes tutorials: CI/CD Pipeline <https://kubernetes.io/docs/tutorials/#ci-cd-pipeline>`_

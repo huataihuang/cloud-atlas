@@ -1,12 +1,12 @@
-.. _kube-prometheus-stack_persistent_volume:
+.. _kube-prometheus-stack_persistent_volume_alertmanager:
 
 ================================================
-``kube-prometheus-stack`` 持久化卷
+``kube-prometheus-stack`` 持久化卷(altermanager)
 ================================================
 
-:ref:`helm3_prometheus_grafana` 默认部署的监控采用了内存储存，我当时找到 `Deploying kube-prometheus-stack with persistent storage on Kubernetes Cluster <https://blog.devops.dev/deploying-kube-prometheus-stack-with-persistent-storage-on-kubernetes-cluster-24473f4ea34f>`_ 参考，想构建一个PV/PVC来用于Prometheus，但是没有成功。
+:ref:`helm3_prometheus_grafana` 默认部署的监控采用了内存储存，对于 ``prometheus`` 和 ``alertmanager`` 都采用了 ``emptyDir`` 类型内存储存。和 :ref:`kube-prometheus-stack_persistent_volume` 类似，也采用构建一个 ``pv`` ()
 
-手工编辑 :ref:`statefulset` prometheus，添加存储 PV/PVC 实际上不能成功，包括我想编辑 ``nodeSelector`` 来指定服务器，也完全无效。正在绝望的时候，找到 `[kube-prometheus-stack] [Help] Persistant Storage #186 <https://github.com/prometheus-community/helm-charts/issues/186>`_ 和 `[prometheus-kube-stack] Grafana is not persistent #436 <https://github.com/prometheus-community/helm-charts/issues/436>`_ ，原来 ``kube-prometheus-stack`` 使用了 `Prometheus Operator <https://github.com/prometheus-operator/prometheus-operator>`_ 来完成部署，实际上在最初生成 ``kube-prometheus-stack.values`` 这个文件中已经包含了大量的配置选项(包括存储)以及注释:
+``kube-prometheus-stack`` 使用了 `Prometheus Operator <https://github.com/prometheus-operator/prometheus-operator>`_ 来完成部署，实际上在最初生成 ``kube-prometheus-stack.values`` 这个文件中已经包含了大量的配置选项(包括存储)以及注释:
 
 .. literalinclude:: ../../gpu/intergrate_gpu_telemetry_into_k8s/helm_inspect_values_prometheus-stack
    :language: bash
@@ -16,17 +16,26 @@
 
 .. literalinclude:: kube-prometheus-stack_persistent_volume/kube-prometheus-stack.values
    :language: yaml
-   :caption: ``kube-prometheus-stack.values`` 包含的持久化存储配置模版，prometheus部分
-   :emphasize-lines: 15-28
+   :caption: ``kube-prometheus-stack.values`` 包含的持久化存储配置模版, alertmanager部分
+   :emphasize-lines: 2-13
 
 ``hostPath`` 存储卷
 =====================
 
-我实现简单的 :ref:`k8s_hostpath` :
+.. note::
+
+   请注意， ``alertmanager`` 和 ``prometheus`` 共用一个存储目录，但是需要注意 ``即使挂载同一个目录，也必须为每个 PV/PVC 完成配置，因为 PV/PVC 是一一对应的的`` (参考 `Can Multiple PVCs Bind to One PV in OpenShift? <https://access.redhat.com/solutions/3064941>`_ )
+
+我实现简单的 :ref:`k8s_hostpath` ，配置方法和 :ref:`kube-prometheus-stack_persistent_volume` 是一样的，指向同一个 ``prometheus-data`` storageClass:
 
 .. literalinclude:: kube-prometheus-stack_persistent_volume/kube-prometheus-stack.values_hostpath
    :language: yaml
    :caption: ``kube-prometheus-stack.values`` 配置简单的本地 ``hostPath`` 存储卷
+   :emphasize-lines: 4,7-13
+
+.. note::
+
+   这里配置 ``accessModes: ["ReadWriteOnce"]`` 表示只有一个节点(a single node)可以挂载卷。另外两种模式是 ``ReadOnlyMany`` (多个节点可以只读挂载) 和 ``ReadWriteMany`` (多个节点可以读写挂载) - `kubernetes persistent volume accessmode <https://stackoverflow.com/questions/37649541/kubernetes-persistent-volume-accessmode>`_
 
 - 然后准备一个 PV 配置, 创建 :ref:`k8s_hostpath` 持久化存储卷:
 

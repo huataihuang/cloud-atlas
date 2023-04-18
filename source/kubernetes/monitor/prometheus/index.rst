@@ -28,10 +28,15 @@ Prometheus监控
    using_prometheus.rst
    z-k8s_gpu_prometheus_grafana.rst
    kube-prometheus-stack_persistent_volume.rst
+   kube-prometheus-stack_persistent_volume_alertmanager.rst
    kube-prometheus-stack_persistent_nodeselector.rst
    kube-prometheus-stack_tsdb_retention.rst
    kube-prometheus-stack_hostnetwork.rst
    kube-prometheus-stack_etcd.rst
+   kube-prometheus-stack_etcd_http.rst
+   monitor_etcd_with_prometheus_operator.rst
+   kube-prometheus-stack_longhorn.rst
+   kube-prometheus-stack_alertmanager.rst
    aliyun_prometheus.rst
 
 推荐阅读:
