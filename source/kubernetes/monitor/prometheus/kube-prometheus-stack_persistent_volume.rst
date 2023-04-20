@@ -4,7 +4,7 @@
 ``kube-prometheus-stack`` 持久化卷
 ================================================
 
-:ref:`helm3_prometheus_grafana` 默认部署的监控采用了内存储存，我当时找到 `Deploying kube-prometheus-stack with persistent storage on Kubernetes Cluster <https://blog.devops.dev/deploying-kube-prometheus-stack-with-persistent-storage-on-kubernetes-cluster-24473f4ea34f>`_ 参考，想构建一个PV/PVC来用于Prometheus，但是没有成功。
+:ref:`helm3_prometheus_grafana` 默认部署的监控采用了内存储存( ``emptyDir`` 类型内存储存)，我当时找到 `Deploying kube-prometheus-stack with persistent storage on Kubernetes Cluster <https://blog.devops.dev/deploying-kube-prometheus-stack-with-persistent-storage-on-kubernetes-cluster-24473f4ea34f>`_ 参考，想构建一个PV/PVC来用于Prometheus，但是没有成功。
 
 手工编辑 :ref:`statefulset` prometheus，添加存储 PV/PVC 实际上不能成功，包括我想编辑 ``nodeSelector`` 来指定服务器，也完全无效。正在绝望的时候，找到 `[kube-prometheus-stack] [Help] Persistant Storage #186 <https://github.com/prometheus-community/helm-charts/issues/186>`_ 和 `[prometheus-kube-stack] Grafana is not persistent #436 <https://github.com/prometheus-community/helm-charts/issues/436>`_ ，原来 ``kube-prometheus-stack`` 使用了 `Prometheus Operator <https://github.com/prometheus-operator/prometheus-operator>`_ 来完成部署，实际上在最初生成 ``kube-prometheus-stack.values`` 这个文件中已经包含了大量的配置选项(包括存储)以及注释:
 
@@ -22,17 +22,26 @@
 ``hostPath`` 存储卷
 =====================
 
+.. note::
+
+   请注意， ``alertmanager`` 和 ``prometheus`` 共用一个存储目录，但是需要注意 ``即使挂载同一个目录，也必须为每个 PV/PVC 完成配置，因为 PV/PVC 是一一对应的的`` (参考 `Can Multiple PVCs Bind to One PV in OpenShift? <https://access.redhat.com/solutions/3064941>`_ )
+
 我实现简单的 :ref:`k8s_hostpath` :
 
 .. literalinclude:: kube-prometheus-stack_persistent_volume/kube-prometheus-stack.values_hostpath
    :language: yaml
-   :caption: ``kube-prometheus-stack.values`` 配置简单的本地 ``hostPath`` 存储卷
+   :caption: ``kube-prometheus-stack.values`` 配置简单的本地 ``hostPath`` 存储卷(案例包含了 prometheus/alertmanager/thanos/grafana)
+
+.. note::
+
+   这里配置 ``accessModes: ["ReadWriteOnce"]`` 表示只有一个节点(a single node)可以挂载卷。另外两种模式是 ``ReadOnlyMany`` (多个节点可以只读挂载) 和 ``ReadWriteMany`` (多个节点可以读写挂载) - `kubernetes persistent volume accessmode <https://stackoverflow.com/questions/37649541/kubernetes-persistent-volume-accessmode>`_
 
 - 然后准备一个 PV 配置, 创建 :ref:`k8s_hostpath` 持久化存储卷:
 
 .. literalinclude:: z-k8s_gpu_prometheus_grafana/kube-prometheus-stack-pv.yaml
    :language: yaml
-   :caption: ``kube-prometheus-stack-pv.yaml`` 创建 :ref:`k8s_hostpath` 持久化存储卷
+   :caption: ``kube-prometheus-stack-pv.yaml`` 创建 :ref:`k8s_hostpath` 持久化存储卷(案例包含了 prometheus/alertmanager/thanos/grafana)
+   :emphasize-lines: 1-15
 
 .. note::
 
@@ -50,6 +59,35 @@
    :language: bash
    :caption: 使用 ``helm upgrade`` prometheus-community/kube-prometheus-stack
 
+Grafana持久化存储
+-------------------
+
+我检查 ``kube-prometheus-stack-pv`` ，惊讶地发现，只有 ``prometheus`` , ``alertmanager`` 和 ``thanos`` 有对应的 ``storageSpec`` ，但是没有找到 ``grafana`` 的配置入口。
+
+参考 `[prometheus-kube-stack] Grafana is not persistent #436 <https://github.com/prometheus-community/helm-charts/issues/436>`_ 原来配置方式略有不同，不是使用类似 ``prometheus.prometheusSpec.storageSpec`` ，而是使用 ``grafana.persistence`` 。这是因为上游 :ref:`grafana` 的 :ref:`helm` chart 不同:
+
+.. literalinclude:: kube-prometheus-stack_persistent_volume/kube-prometheus-stack.values_grafana_persistence
+   :language: yaml
+   :caption: ``kube-prometheus-stack.values`` 配置Grafana持久化存储
+   :emphasize-lines: 7-15
+
+.. note::
+
+   Grafana持久化的卷目录结构和 prometheus/alertmanager 不同:
+
+   - ``prometheus/alertmanager`` 是在 ``PV`` 目录下又创建了一个子目录来存储数据，例如在 ``/prometheus/data`` 目录下创建一个 ``prometheus-db`` 和 ``alertmanager-db`` 子目录
+   - ``grafana`` 则直接在 ``PV`` 目录下存储数据，数据分散在多个子目录，所以看起来有点乱。为了能够和 ``prometheus/alertmanager`` 和谐共处，所以建议 ``grafana`` 的 ``PV`` 设置多一级子目录 ``grafana-db``
+
+.. warning::
+
+   :ref:`grafana` 的持久化卷目录和 ``prometheus`` 不同，一定要注意给 ``grafana`` 配置一个独立子目录或者其他目录，否则 ``grafana`` 持久化目录会和 ``prometheus`` 数据目录重合，并且由于 ``grafana`` 容器初始化时候自动修改目录属主，将会导致 ``prometheus`` 无法正常读写磁盘(数据采集终止)。 我不小心乌龙了 :ref:`kube-prometheus-stack_persistent_volume_grafana_debug` ，切切!!!
+
+异常排查
+============
+
+admissionWebhooks错误
+----------------------
+
 报错信息
 
 .. literalinclude:: kube-prometheus-stack_persistent_volume/helm_upgrade_gpu-metrics_config_err
@@ -57,6 +95,9 @@
    :caption: 使用 ``helm upgrade`` prometheus-community/kube-prometheus-stack 报错信息
 
 我参考 `[stable/prometheus-operator] pre-upgrade hooks failed with prometheus-operator-admission: dial tcp 172.20.0.1:443: i/o timeout on EKS cluster #20480 <https://github.com/helm/charts/issues/20480>`_ 将 ``admissionWebhooks`` 改成 ``false``
+
+调度失败错误
+---------------
 
 调度失败::
 
@@ -101,8 +142,8 @@
 
 解决方法很简单: ``pvc`` 和 ``pv`` 都要删除，然后重新如上文创建一个 ``pv`` 就可以了， ``kube-prometheus-stack`` 会自动生成 ``pvc`` 并且 bind 到指定 ``pv``
 
-pod启动失败
-============
+pod启动失败错误
+-----------------
 
 已经正确调度到目标节点 ``i-0jl8d8r83kkf3yt5lzh7`` ，并且可以看到 ``pvc`` 正确绑定了 ``pv`` 。在目标服务器上检查 ``/home/t4/prometheus/data`` 目录下自动创建了 ``prometheus-db`` 目录。
 

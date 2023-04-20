@@ -51,12 +51,11 @@
 
 感觉是之前部署的时候默认激活了 ``etcd`` 监控导致添加了 ``ep`` ，而且这个 ``ep`` 是自动刷新的。推测可以先关闭掉 ``etcd`` 监控，使得这个 ``kube-system`` namespace中 ``ep`` 消失，然后重新激活 ``etcd`` 监控配置:
 
-- 修订 ``kube-prometheus-stack.values`` ::
+- 修订 ``kube-prometheus-stack.values`` :
 
-   ## Component scraping etcd
-   ##
-   kubeEtcd:
-     enabled: false
+.. literalinclude:: kube-prometheus-stack_etcd/kube-prometheus-stack.values_disable_kubeetcd
+   :language: yaml
+   :caption: ``kube-prometheus-stack.values`` 配置暂时去除 ``etcd`` 监控
 
 - 然后再执行依次更新:
 
