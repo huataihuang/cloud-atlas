@@ -23,6 +23,7 @@ Kubernetes部署
    operator/index
    helm/index
    deploy_pod/index
+   daemonset/index
    kubespray/index
    kops/index
    nginx_ingress.rst

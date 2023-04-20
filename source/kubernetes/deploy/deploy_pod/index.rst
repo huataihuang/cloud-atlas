@@ -8,5 +8,6 @@ Kubernetes部署Pod
    :maxdepth: 1
 
    k8s_nodeselector.rst
+   k8s_nodeaffinity.rst
    k8s_django.rst
    k8s_privileged_pod.rst

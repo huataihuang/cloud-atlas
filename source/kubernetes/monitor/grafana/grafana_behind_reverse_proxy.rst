@@ -64,3 +64,19 @@
 - `New CSRF check broken with raw IPv6 Host #45115 <https://github.com/grafana/grafana/issues/45115>`_
 - `Unable to Create/Save Dashboard after v8.3.5 Update #45117 <https://github.com/grafana/grafana/issues/45117>`_
 - `Origin not allowed error when reverse proxying grafana #8067 <https://github.com/linkerd/linkerd2/issues/8067>`_
+- `Alternative solution for “401: Unauthorized” in Grafana iframe card <https://community.home-assistant.io/t/alternative-solution-for-401-unauthorized-in-grafana-iframe-card/336991>`_ 在iframe card嵌入Grafana时候的解决方法讨论，思路就是不要出现跨站拒绝，主要思路:
+
+   - ``GF_AUTH_ANONYMOUS_ENABLED`` 或者 ``GF_SECURITY_ALLOW_EMBEDDING`` 设置到Grafana配置中::
+
+      - name: GF_AUTH_ANONYMOUS_ENABLED
+        value: "true"
+      - name: GF_DASHBOARDS_MIN_REFRESH_INTERVAL
+        value: 30s
+      - name: GF_DATE_FORMATS_INTERVAL_HOUR
+        value: DD/MM HH:mm
+      - name: GF_DATE_FORMATS_INTERVAL_DAY
+        value: DD/MM
+ 
+   - 在NGINX反向代理中加上 ``proxy_hide_header X-Frame-Options;`` 丢弃掉
+
+- `unauthorized errors when using reverse proxy with sub-path method #11757 <https://github.com/grafana/grafana/issues/11757>`_ 有一些讨论
