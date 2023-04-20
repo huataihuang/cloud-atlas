@@ -30,11 +30,39 @@
    :language: yaml
    :caption: 简单开启 2381 端口 metrics采集，无需证书(http)   
 
+.. note::
+
+   如果之前已经部署过一次 :ref:`helm3_prometheus_grafana` ( 实践案例 :ref:`z-k8s_gpu_prometheus_grafana` ) ，则默认 ``kube-prometheus-stack.values`` 已经启用过 ``etcd`` 监控配置项::
+
+      kubeEtcd:
+        enabled: true
+
+   那么在 ``kube-system`` 会有一个 ``endporint`` 类似名为 ``kube-prometheus-stack-1681-kube-etcd`` ，但是实际 ``ENDPOINTS`` 内容是空的::
+
+      NAME                                      ENDPOINTS           AGE
+      kube-prometheus-stack-1681-kube-etcd      <none>              5h29m
+
+   那么直接执行 ``helm upgrade`` 会报错:
+
+   .. literalinclude:: kube-prometheus-stack_etcd/helm_upgrade_gpu-metrics_config_error
+      :language: bash
+      :caption: 使用 ``helm upgrade`` prometheus-community/kube-prometheus-stack提示etcd相关错误
+
+   所以先暂时去掉 ``etcd`` 监控:
+
+   .. literalinclude:: kube-prometheus-stack_etcd/kube-prometheus-stack.values_disable_kubeetcd
+      :language: yaml
+      :caption: ``kube-prometheus-stack.values`` 配置暂时去除 ``etcd`` 监控
+   
+   然后再执行上面的 配置 ``kube-prometheus-stack.values`` (简单开启 2381 端口 metrics采集，无需证书(http))，再执行下一步 **更新helm** ，就能正常开启etcd监控
+
 - 更新helm:
 
 .. literalinclude:: update_prometheus_config_k8s/helm_upgrade_gpu-metrics_config
    :language: bash
    :caption: 使用 ``helm upgrade`` prometheus-community/kube-prometheus-stack
+
+此时可以在 prometheus WEB界面看到 ``targets`` 中 ``etcd`` 采集成功
 
 参考
 =======
