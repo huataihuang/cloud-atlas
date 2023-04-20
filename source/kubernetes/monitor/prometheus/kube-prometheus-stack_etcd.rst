@@ -252,6 +252,12 @@
 
 - `Prometheus Operator not scraping colocated etcd metrics <https://stackoverflow.com/questions/70804368/prometheus-operator-not-scraping-colocated-etcd-metrics>`_ 基于 ``kube-prometheus-stack`` 的快速配置
 - `Prometheus Kube Etcd is showing down 0/1 <https://discuss.kubernetes.io/t/prometheus-kube-etcd-is-showing-down-0-1/21380>`_ 提示了 ``prometheus.prometheusSpec.secrets`` 添加 ``etcd-client-cert``
-- `Prometheus: Monitor External Etcd Cluster <https://confluence.infn.it/display/CLOUDCNAF/2%29+Monitor+External+Etcd+Cluster>`_
+- `Monitoring External Etcd Cluster With Prometheus Operator <https://jpweber.io/blog/monitoring-external-etcd-cluster-with-prometheus-operator/>`_ 手工配置证书，可能行
+- `Monitoring ETCD with Prometheus Operator <https://hemanth-penmetcha.medium.com/monitoring-etcd-with-prometheus-operator-b9cd8eaff719>`_
+- `Enabling ETCD metrics for Prometheus in DKP 2.X <https://support.d2iq.com/hc/en-us/articles/9279556667284-Enabling-ETCD-metrics-for-Prometheus-in-DKP-2-X>`_
+- `How to monitoring external etcd cluster with tls + alert prometheusRule <https://mayamirror1991.medium.com/how-to-monitoring-external-etcd-cluster-with-tls-alert-prometheusrule-2ad96444a329>`_
+- `How to monitor etcd <https://sysdig.com/blog/monitor-etcd/>`_
+- `[stable/prometheus] How to monitor etcd with ssl? #6921 <https://github.com/helm/charts/issues/6921>`_
+- `Prometheus: Monitor External Etcd Cluster <https://confluence.infn.it/display/CLOUDCNAF/2%29+Monitor+External+Etcd+Cluster>`_ 这个网站提供了很多资料可以参考
 - `Monitoring ETCD with Prometheus Operator <https://hemanth-penmetcha.medium.com/monitoring-etcd-with-prometheus-operator-b9cd8eaff719>`_
 - `Prometheus: installing kube-prometheus-stack on a kubeadm cluster <https://fabianlee.org/2022/07/08/prometheus-installing-kube-prometheus-stack-on-a-kubeadm-cluster/>`_
