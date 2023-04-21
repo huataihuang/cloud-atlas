@@ -11,7 +11,6 @@ Prometheus监控
 
    introduce_prometheus.rst
    prometheus_startup.rst
-   alertmanager.rst
    node_exporter.rst
    run_prometheus_in_k8s.rst
    run_prometheus_in_k8s_arm.rst
@@ -34,9 +33,9 @@ Prometheus监控
    kube-prometheus-stack_hostnetwork.rst
    kube-prometheus-stack_etcd.rst
    kube-prometheus-stack_etcd_http.rst
+   kube-prometheus-stack_extraargs.rst
    monitor_etcd_with_prometheus_operator.rst
    kube-prometheus-stack_longhorn.rst
-   kube-prometheus-stack_alertmanager.rst
    aliyun_prometheus.rst
    prometheus_backup_and_restore.rst
    grafana_backup_and_restore.rst
