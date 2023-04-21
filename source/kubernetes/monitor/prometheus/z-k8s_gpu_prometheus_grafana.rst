@@ -337,6 +337,11 @@ helm配置
 
 - :ref:`intergrate_gpu_telemetry_into_k8s` 采用 NVIDIA官方提供的面板 `NVIDIA DCGM Exporter Dashboard <https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/>`_ ，可以直接导入监控我的 :ref:`tesla_p10`
 
+:ref:`k8s_ingress` 改进
+========================
+
+我最初为了方便快速，采用了 ``NodePort`` 输出服务，但是在后续的 :ref:`grafana_behind_reverse_proxy` 遇到 ``"401 Unauthorized`` 报错，所以可能后续尝试改进成 :ref:`k8s_ingress` 模式
+
 参考
 =======
 
