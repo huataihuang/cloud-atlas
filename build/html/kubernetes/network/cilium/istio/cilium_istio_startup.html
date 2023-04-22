@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cilium Istio集成起步 &mdash; Cloud Atlas 0.1 文档</title>
@@ -13,9 +13,6 @@
   <![endif]-->
   
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
         <script src="../../../../_static/sphinx_highlight.js"></script>
         <script src="../../../../_static/translations.js"></script>
@@ -32,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../../index.html" class="icon icon-home"> Cloud Atlas
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Cloud Atlas
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,6 +69,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../configure/index.html">Kubernetes 配置</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Kubernetes网络</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../../cni.html">容器网络接口(CNI)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../k8s_hostnetwork.html">Kubernetes hostNetwork</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../k8s_network_infa.html">Kubernetes网络架构</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../k8s_loadbalancer_ingress.html">Kubernetes集群的Load Balancer和Ingress辨析</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dynamic_dns_loadbalancing_without_cloud_provider.html">没有云计算服务环境下动态DNS和负载均衡</a></li>
@@ -144,9 +146,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../clang/index.html">C Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../swift/index.html">Swift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ruby/index.html">Ruby Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../bsd/index.html">BSD Atlas</a></li>
@@ -176,7 +180,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../index.html">Kubernetes Atlas</a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Kubernetes网络</a></li>
           <li class="breadcrumb-item"><a href="../index.html">Cilium网络</a></li>
@@ -202,20 +206,20 @@
 <h2>设置Cilium<a class="headerlink" href="#cilium" title="此标题的永久链接">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>如果采用 <a class="reference internal" href="../networking/cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 架构(我部署 <a class="reference internal" href="../../../../real/priv_cloud/z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 采用该模式)，就需要在 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> CLI 传递 <code class="docutils literal notranslate"><span class="pre">--config</span> <span class="pre">bpf-lb-sock-hostns-only=true</span></code> 或者 在 <a class="reference internal" href="../../../deploy/helm.html#helm"><span class="std std-ref">Helm - Kubernetes包管理器</span></a> 选项中使用 <code class="docutils literal notranslate"><span class="pre">socketLB.hostNamespaceOnly</span></code> 。如果没有这个选项，当Cilium通过socket负载均衡提供服务解析(service resolution)时，会bypass掉Istio sidecar，这就导致Istio的加密(encryption)和遥测(telemetry)功能无效。</p>
+<p>如果采用 <a class="reference internal" href="../networking/cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 架构(我部署 <a class="reference internal" href="../../../../real/priv_cloud/z-k8s.html#z-k8s"><span class="std std-ref">Kubernetes集群(z-k8s)</span></a> 采用该模式)，就需要在 <code class="docutils literal notranslate"><span class="pre">cilium</span></code> CLI 传递 <code class="docutils literal notranslate"><span class="pre">--config</span> <span class="pre">bpf-lb-sock-hostns-only=true</span></code> 或者 在 <a class="reference internal" href="../../../deploy/helm/index.html#helm"><span class="std std-ref">helm</span></a> 选项中使用 <code class="docutils literal notranslate"><span class="pre">socketLB.hostNamespaceOnly</span></code> 。如果没有这个选项，当Cilium通过socket负载均衡提供服务解析(service resolution)时，会bypass掉Istio sidecar，这就导致Istio的加密(encryption)和遥测(telemetry)功能无效。</p>
 </div>
 <p>我在 <a class="reference internal" href="../networking/cilium_kubeproxy_free.html#cilium-kubeproxy-free"><span class="std std-ref">Cilium完全取代kube-proxy运行Kubernetes</span></a> 更新 <a class="reference internal" href="../networking/cilium_kubeproxy_free.html#cilium-hubproxy-free-socketlb-bypass"><span class="std std-ref">Socket LoadBalancer Bypass in Pod Namespace</span></a> :</p>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">简化且正确配置方法: 更新Cilium kube-proxy free配置，激活 socketLB.hostNamespaceOnly 以集成Istio(不修改默认配置)</span><a class="headerlink" href="#id3" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">API_SERVER_IP</span><span class="o">=</span>z-k8s-api.staging.huatai.me
 <span class="nv">API_SERVER_PORT</span><span class="o">=</span><span class="m">6443</span>
-helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span class="se">\</span>
-   --namespace kube-system <span class="se">\</span>
-   --reuse-values <span class="se">\</span>
-   --set <span class="nv">kubeProxyReplacement</span><span class="o">=</span>strict <span class="se">\</span>
-   --set socketLB.hostNamespaceOnly<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
-   --set <span class="nv">k8sServiceHost</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_IP</span><span class="si">}</span> <span class="se">\</span>
-   --set <span class="nv">k8sServicePort</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_PORT</span><span class="si">}</span>
+helm<span class="w"> </span>upgrade<span class="w"> </span>cilium<span class="w"> </span>cilium/cilium<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.12.1<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--namespace<span class="w"> </span>kube-system<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--reuse-values<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--set<span class="w"> </span><span class="nv">kubeProxyReplacement</span><span class="o">=</span>strict<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--set<span class="w"> </span>socketLB.hostNamespaceOnly<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--set<span class="w"> </span><span class="nv">k8sServiceHost</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_IP</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--set<span class="w"> </span><span class="nv">k8sServicePort</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_PORT</span><span class="si">}</span>
 </pre></div>
 </div>
 </div>
@@ -232,7 +236,7 @@ helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span 
 </ul>
 <div class="literal-block-wrapper docutils container" id="id4">
 <div class="code-block-caption"><span class="caption-text">下载cilium增强istioctl</span><a class="headerlink" href="#id4" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -L https://github.com/cilium/istio/releases/download/1.10.6-1/cilium-istioctl-1.10.6-1-linux-amd64.tar.gz <span class="p">|</span> tar xz
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-L<span class="w"> </span>https://github.com/cilium/istio/releases/download/1.10.6-1/cilium-istioctl-1.10.6-1-linux-amd64.tar.gz<span class="w"> </span><span class="p">|</span><span class="w"> </span>tar<span class="w"> </span>xz
 </pre></div>
 </div>
 </div>
@@ -241,7 +245,7 @@ helm upgrade cilium cilium/cilium --version <span class="m">1</span>.12.1 <span 
 </ul>
 <div class="literal-block-wrapper docutils container" id="id5">
 <div class="code-block-caption"><span class="caption-text">安装cilium增强istioctl</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./cilium-istioctl install -y
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./cilium-istioctl<span class="w"> </span>install<span class="w"> </span>-y
 </pre></div>
 </div>
 </div>
@@ -258,7 +262,7 @@ Thank you for installing Istio 1.10.  Please take a few minutes to tell us about
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
 <div class="code-block-caption"><span class="caption-text">为namespace添加标签，以便istio能够自动注入sidecar proxy</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl label namespace default istio-injection<span class="o">=</span>enabled
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>label<span class="w"> </span>namespace<span class="w"> </span>default<span class="w"> </span>istio-injection<span class="o">=</span>enabled
 </pre></div>
 </div>
 </div>

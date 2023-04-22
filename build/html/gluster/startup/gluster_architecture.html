@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GlusterFS架构 &mdash; Cloud Atlas 0.1 文档</title>
@@ -13,9 +13,6 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
@@ -32,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Cloud Atlas
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,7 +59,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#glusterfs-replicated-glusterfs-volume">GlusterFS复制卷(Replicated GlusterFS Volume)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#fuse">FUSE</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#translators">转换器(Translators)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dht-distributed-hash-table-translator">DHT(Distributed Hash Table) Translator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#afr-automatic-file-replication-translator">AFR(Automatic File Replication) Translator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geo-replication">Geo-Replication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="deploy_simple_gluster.html">部署简单GlusterFS集群</a></li>
@@ -69,6 +73,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/index.html">GlusterFS管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../performance/index.html">GlusterFS性能</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../geo-replication/index.html">GlusterFS Geo-replication (远程灾备)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../monitor/index.html">GlusterFS监控</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../debug/index.html">GlusterFS异常排查</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tendrl/index.html">Tendrl 软件定义存储(SDS)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../minio/index.html">MinIO存储</a></li>
@@ -103,9 +108,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../clang/index.html">C Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ruby/index.html">Ruby Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
@@ -135,7 +142,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Gluster Atlas</a></li>
           <li class="breadcrumb-item"><a href="index.html">GlusterFS起步</a></li>
       <li class="breadcrumb-item active">GlusterFS架构</li>
@@ -212,7 +219,7 @@
 </div>
 </li>
 </ul>
-<p>以下案例在2台存储服务器上创建一个replicated volume:</p>
+<p>以下案例在3台存储服务器上创建一个replicated volume:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gluster</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">test</span><span class="o">-</span><span class="n">volume</span> <span class="n">replica</span> <span class="mi">3</span> <span class="n">transport</span> <span class="n">tcp</span> \
       <span class="n">server1</span><span class="p">:</span><span class="o">/</span><span class="n">exp1</span> <span class="n">server2</span><span class="p">:</span><span class="o">/</span><span class="n">exp2</span> <span class="n">server3</span><span class="p">:</span><span class="o">/</span><span class="n">exp3</span>
 </pre></div>
@@ -270,6 +277,10 @@
 </div>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>采用 纠错卷(Dispersed GlusterFS Volume) 可以极大节约存储消耗，特别是 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 越多存储效率越高(因为只有 <code class="docutils literal notranslate"><span class="pre">Redundancy</span></code> 是校验数据 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 没有利用上)</p>
+</div>
 </section>
 </section>
 <section id="distributed-dispersed-volume">
@@ -312,9 +323,144 @@ Userspace)。长期依赖，实现一个用户空间文件系统是非常重要�
 </section>
 <section id="translators">
 <h2>转换器(Translators)<a class="headerlink" href="#translators" title="此标题的永久链接">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">translator</span></code> (转换器)负责将用户请求转换为存储请求</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">translator</span></code> (转换器)可以在请求经过时修改请求: 将一种请求类型转换为另一种请求，包括修改路径(path)、标记(flags)甚至是数据(例如 <code class="docutils literal notranslate"><span class="pre">加密</span></code> )</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">translator</span></code> 还可以实现拦截或阻断请求(例如，访问控制)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">translator</span></code> 也可以产生新的请求(例如，预取)</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>所谓 Gluster Translators ，你可以理解成类似 Linux VFS 这样的文件系统层，每一层 Translator 提供了一个独立功能，通过叠加 Translator 来实现复杂的功能组合。</p>
+</div>
+<section id="translator">
+<h3><code class="docutils literal notranslate"><span class="pre">Translator</span></code> 工作原理<a class="headerlink" href="#translator" title="此标题的永久链接">¶</a></h3>
+<ul class="simple">
+<li><p>共享对象</p></li>
+<li><p>根据 <code class="docutils literal notranslate"><span class="pre">volfile</span></code> 动态加载:  <code class="docutils literal notranslate"><span class="pre">dlopen</span></code> / <code class="docutils literal notranslate"><span class="pre">dlsync</span></code> 通过 <code class="docutils literal notranslate"><span class="pre">fops</span></code> 设置指向 <code class="docutils literal notranslate"><span class="pre">父</span></code> / <code class="docutils literal notranslate"><span class="pre">子</span></code> 指针 调用 <code class="docutils literal notranslate"><span class="pre">init</span></code> (构造函数) 调用 IO 功能</p></li>
+<li><p>验证/传递选项等约定</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">translator</span></code> 配置从GlusterFS 3.1开始采用 <code class="docutils literal notranslate"><span class="pre">gluster</span></code> 命令来进行管理</p></li>
+</ul>
 </section>
 <section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">Translator</span></code> 类型<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">Gluster Translator类型</span><a class="headerlink" href="#id5" title="此表格的永久链接">¶</a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Translator类型</p></th>
+<th class="head"><p>功能描述</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Storage</span></code></p></td>
+<td><p>最低层的转换器，存储和访问本地文件系统数据</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Debug</span></code></p></td>
+<td><p>提供错误和调试接口以及状态</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Cluster</span></code></p></td>
+<td><p>处理数据的分布和复制，也就是负责从 <code class="docutils literal notranslate"><span class="pre">bricks</span></code> 和 <code class="docutils literal notranslate"><span class="pre">nodes</span></code> 写入和读取数据</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Encryption</span></code></p></td>
+<td><p>对存储数据进行即时加密/揭秘的加密扩展转化器</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Protocol</span></code></p></td>
+<td><p>客户端/服务器之间通讯协议的协议扩展转换器</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Performance</span></code></p></td>
+<td><p>根据工作负载和I/O特性而调整的性能优化转换器</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Bindings</span></code></p></td>
+<td><p>添加扩展功能，例如Jeff Darcy编写的Python接口，用于扩展API与GlusterFS的交互</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">System</span></code></p></td>
+<td><p>系统访问转换器，例如文件系统访问控制接口</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Scheduler</span></code></p></td>
+<td><p>I/O调度器决定了如何在集群系统中分布新的写入操作</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Features</span></code></p></td>
+<td><p>附加功能，例如容量配额，过滤器，锁等等</p></td>
+</tr>
+</tbody>
+</table>
+<p>默认/通用 <code class="docutils literal notranslate"><span class="pre">vol</span></code> 文件的转换器层次结构:</p>
+<figure class="align-default" id="id6">
+<a class="reference internal image-reference" href="../../_images/gluster_translators_hierarchy.png"><img alt="../../_images/gluster_translators_hierarchy.png" src="../../_images/gluster_translators_hierarchy.png" style="width: 529.0px; height: 397.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">默认/通用 <code class="docutils literal notranslate"><span class="pre">vol</span></code> 文件的转换器层次结构</span><a class="headerlink" href="#id6" title="此图像的永久链接">¶</a></p>
+</figcaption>
+</figure>
+<p>在上述 <code class="docutils literal notranslate"><span class="pre">Translator</span></code> 中，最重要的两类是:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Cluster</span> <span class="pre">Translator</span></code> :</p>
+<ul>
+<li><p><strong>DHT</strong> ( <code class="docutils literal notranslate"><span class="pre">Distributed</span> <span class="pre">Hash</span> <span class="pre">Table</span></code> ): 分布式哈希表</p></li>
+<li><p><strong>AFR</strong> ( <code class="docutils literal notranslate"><span class="pre">Automatic</span> <span class="pre">File</span> <span class="pre">Replication</span></code> ): 自动文件复制</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Performance</span> <span class="pre">Translator</span></code> :</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">io-cache</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">io-threads</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">md-cache</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">O-B</span></code> (open behind)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">QR</span></code> (quick read)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r-a</span></code> (read-ahead)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">w-b</span></code> (write-behind)</p></li>
+</ul>
+</li>
+</ul>
+<p>其他Translator:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Feature</span> <span class="pre">Translator</span></code> :</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">changelog</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">locks</span></code> : 提供内部锁操作( <code class="docutils literal notranslate"><span class="pre">inodelk</span></code> , <code class="docutils literal notranslate"><span class="pre">entrylk</span></code> )，自动文件复制(Automatic File Replication, AFR)使用锁来实现对相互冲突的文件或目录的操作同步</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">marker</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quota</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Debug</span> <span class="pre">Translator</span></code> :</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace</span></code> : 跟踪Translator之间通讯过程中产生的错误日志</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">io-stats</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="dht-distributed-hash-table-translator">
+<h2>DHT(Distributed Hash Table) Translator<a class="headerlink" href="#dht-distributed-hash-table-translator" title="此标题的永久链接">¶</a></h2>
+<p><strong>重要且核心概念</strong></p>
+<p>DHT(分布式哈希表)是GlusterFS实现跨多个服务器聚合容量和性能的真正核心。DHT负责将每个文件正确存放到一个子卷上 - 不像 复制(将副本放在它的所有子卷上) 或 条带化(将文件切片放在它的所有子卷上)。DHT是一个路由功能，而不是拆分或者复制。</p>
+<p>DHT(分布式哈希表)使用的基本方法是 <code class="docutils literal notranslate"><span class="pre">一致性哈希表</span></code> ，每个子卷( <code class="docutils literal notranslate"><span class="pre">brick</span></code> )都被分配了一个32位哈希空间内的范围，覆盖了整个范围，没有缺漏或重叠。然后每个文件通过文件名的哈希来确定该空间的一个值，此时就会有一个 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 符合这个文件名哈希以后值所落在这个范围内，也就是表示这个文件要存储在对应的 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 上。</p>
+<p>不过，实际上会有很多复杂的情况，例如，当 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 集合在文件创建后发生变化，或者当一个 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 存储满的情况。DHT中大部分复杂性都和这些特殊情况有关。</p>
+<p>当使用 <code class="docutils literal notranslate"><span class="pre">open()</span></code> 打开一个文件，分布式 translator 将提供一个信息来查找文件。DHT通过将文件名转换成哈希以后的数字来定位文件存储位置。</p>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>有关一致性哈希算法后续补充</p>
+</div>
+</section>
+<section id="afr-automatic-file-replication-translator">
+<h2>AFR(Automatic File Replication) Translator<a class="headerlink" href="#afr-automatic-file-replication-translator" title="此标题的永久链接">¶</a></h2>
+<p>自动文件复制(Automatic File Replication) Translator是GlusterFS利用文件系统扩展属性来跟踪文件操作，负责跨 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 复制数据:</p>
+<ul class="simple">
+<li><p>保持复制一致性(即两个 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 上的数据应该相同: 只要副本集replica set的所有 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 都已启动，即使从多个应用程序/挂载点并行对同一个文件/目录进行操作的情况下)</p></li>
+<li><p>提供在发生故障时恢复数据的方法: 只要至少有一个 <code class="docutils literal notranslate"><span class="pre">brick</span></code> 具有正确的数据</p></li>
+<li><p>为 <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">/</span> <span class="pre">stat</span> <span class="pre">/</span> <span class="pre">readdir</span></code> 等提供新数据</p></li>
+</ul>
+</section>
+<section id="geo-replication">
+<h2>Geo-Replication<a class="headerlink" href="#geo-replication" title="此标题的永久链接">¶</a></h2>
+<p>待续…</p>
+</section>
+<section id="id4">
+<h2>参考<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.gluster.org/en/latest/Quick-Start-Guide/Architecture/">GlusterFS Architecture</a></p></li>
 <li><p><a class="reference external" href="https://cloud.tencent.com/developer/article/1536260">GlusterFS的数据分布(DHT)和文件副本(AFR)机制</a> 腾讯工程师邵靖撰写的架构解析，非常详尽</p></li>

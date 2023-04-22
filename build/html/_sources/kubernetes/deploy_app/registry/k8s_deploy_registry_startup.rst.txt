@@ -4,7 +4,10 @@
 Kubernetes部署registry仓库起步
 ===============================
 
-在完成 :ref:`z-k8s` 之后，Kubernetes集群采用了 :ref:`cilium` CNI，现在采用私有化registry来方便部署自己的各种定制镜像。
+在完成 :ref:`z-k8s` 之后，Kubernetes集群采用了 :ref:`cilium` CNI，现在采用私有化registry来方便部署自己的各种定制镜像。此外，在 :ref:`stable_diffusion_on_k8s` 遇到无法下载镜像以及软件的问题，我考虑通过以下方法改进:
+
+- 使用本文的方法部署本地 registry 仓库，采用本地镜像仓库加速部署
+- 采用 :ref:`app_inject_data` 向容器内部注入proxy环境变量，强制所有容器内部下载文件都通过 :ref:`squid` 代理(实现翻墙)
 
 .. note::
 

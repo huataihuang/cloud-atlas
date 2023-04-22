@@ -9,4 +9,5 @@ Pods
 
    pod_overview.rst
    pod_lifecycle.rst
+   static_pod.rst
    sidecar.rst

@@ -14,6 +14,7 @@ Management Atlas
    knowledge/index
    time/index
    remote_work/index
+   develop/index
 
 .. only::  subproject and html
 

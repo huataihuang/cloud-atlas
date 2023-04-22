@@ -8,6 +8,8 @@
 
 这个方法也使得容器内部能够不需要单独配置代理，直接通过代理服务器上网。
 
+.. _docker_client_proxy:
+
 Docker客户端的Proxy
 ======================
 
@@ -19,27 +21,23 @@ Docker客户端的Proxy
 
 Docker客户端支持使用代理服务器，主要有两种方式配置：
 
-- 从Docker 17.07和更高版本，可以配置 Docker可短自动传递代理信息给容器
+- 从Docker 17.07和更高版本，可以配置 Docker 端自动传递代理信息给容器
 - Docker 17.06或低版本，则需要在容器中设置相应的环境变量
 
 配置Docker客户端
 -------------------
 
-- 在Docker客户端，创建或配置 ``~/.docker/config.json`` 设置以下json格式配置::
+- 在Docker客户端，创建或配置 ``~/.docker/config.json`` 设置以下json格式配置:
 
-   {
-    "proxies":
-    {
-      "default":
-      {
-        "httpProxy": "http://127.0.0.1:3001",
-        "httpsProxy": "http://127.0.0.1:3001",
-        "noProxy": "*.test.example.com,.example2.com"
-      }
-    }
-   }
+.. literalinclude:: docker_proxy/config.json
+   :language: json
+   :caption: 配置Docker客户端 ~/.docker/config.json 可以为容器内部注入代理配置
 
 - 然后创建的新容器，在容器中的环境变量会自动设置代理
+
+.. note::
+
+   可以结合 :ref:`ssh_tunneling_remove_squid` 配置Docker客户端，这样只需要远程服务器安装部署过一次 :ref:`squid` ，本地局域网Docker就可以简单实现翻墙代理，方便完成很多安装部署工作。
 
 Docker客户端环境变量
 --------------------
@@ -62,6 +60,8 @@ Docker客户端环境变量
 
    需要注意Docker配置环境变量 ``HTTP_PROXY`` 是全大写字母，我测试发现全小写字母 ``http_proxy`` 不生效
 
+.. _docker_server_proxy:
+
 Docker服务器Proxy
 ===================
 
@@ -76,14 +76,17 @@ systemd配置Docker服务器Proxy
 
    见后文参考官方设置。
 
+.. note::
+
+   解决https代理的方法可以采用 :ref:`squid_ssl_bumping` ，但是官方文档语焉不详，所以采用 work around 方法，将 ``HTTPS_PROXY=`` 也配置成采用 ``http://`` ，见下文
+
 对于主机上的dockerd服务，在下载镜像等工作使用代理，则需要配置服务的环境变量。
 
-- 创建 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` 配置文件::
+- 创建 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` 配置文件:
 
-   [Service]
-   Environment="HTTP_PROXY=http://user01:password@10.10.10.10:8080/"
-   Environment="HTTPS_PROXY=https://user01:password@10.10.10.10:8080/"
-   Environment="NO_PROXY= hostname.example.com,172.10.10.10"
+.. literalinclude:: docker_proxy/http-proxy.conf
+   :language: bash
+   :caption: 配置 /etc/systemd/system/docker.service.d/http-proxy.conf 代理
 
 - 然后重新加载配置并重启服务::
 
@@ -96,7 +99,7 @@ systemd配置Docker服务器Proxy
 
 可以看到输出::
 
-   Environment=GOTRACEBACK=crash HTTP_PROXY=http://10.10.10.10:8080/ HTTPS_PROXY=http://10.10.10.10:8080/ NO_PROXY= hostname.example.com,172.10.10.10
+   Environment=HTTP_PROXY=http://192.168.6.200:3128/ HTTPS_PROXY=http://192.168.6.200:3128/
 
 .. _docker_server_socks_proxy:
 
@@ -136,11 +139,17 @@ Docker官方解决方案
 
 .. note::
 
-   本段落还没有时间尝试
+   如果没有配置 :ref:`squid_ssl_bumping` ，那么虽然 :ref:`docker_client_proxy` 正常，但是 :ref:`docker_server_proxy` 会遇到异常: HTTP下载正常，HTTPS则出现握手错误
+
+   我在部署 :ref:`stable_diffusion_on_k8s` 就遇到GFW阻塞导致需要构建 :ref:`squid_socks_peer` ，此时需要同时解决 :ref:`docker_client_proxy` 和 :ref:`docker_server_proxy` ，这迫使我改进 :ref:`squid` 部署，实践 :ref:`squid_ssl_bumping`
 
 参考 Docker官方文档 `Running a Docker daemon behind an HTTPS_PROXY <https://docs.docker.com/engine/reference/commandline/dockerd/#running-a-docker-daemon-behind-an-https_proxy>`_ 配置局域网在https代理后使用docker服务:
 
-- 安装 ``ca-certificates`` 软件包
+- 安装 ``ca-certificates`` 软件包::
+
+   sudo apt install ca-certificates
+
+- 完成 :ref:`squid_ssl_bumping` 配置
 
 - 在 ``/etc/pki/tls/certs/ca-bundle.crt`` 中添加代理服务器证书
 

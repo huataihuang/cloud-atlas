@@ -7,7 +7,7 @@
 Node的众所周知标签、申明、瑕疵
 ===============================
 
-虽然标签可以任意命名，只要能够正确选择即可。但是， `kubernetes保留了一些总所周知的标签(Labels),申明(Annotations)和瑕疵(Taints) <https://kubernetes.io/docs/reference/labels-annotations-taints/>`_ ，例如:
+虽然标签可以任意命名，只要能够正确选择即可。但是， `kubernetes保留了一些众所周知的标签(Labels),申明(Annotations)和瑕疵(Taints) <https://kubernetes.io/docs/reference/labels-annotations-taints/>`_ ，例如:
 
 - ``kubernetes.io/arch`` 这个参数在Go语言中定义为 ``runtime.GOARCH`` 可以用于混合arm和x86节点的集群
 - ``kubernetes.io/os`` 这个参数在Go语言中定义为 ``runtime.GOOS`` ，在混合不同操作系统(例如Linux和Windows节点)时使用
@@ -67,6 +67,12 @@ Node的众所周知标签、申明、瑕疵
      nodeSelector:
        disktype: ssd
 
+``nodeSelector`` 调度失败排查
+=================================
+
+``svc`` 需要配置 ``selector``
+-------------------------------
+
 - 注意，并不是只要设置 ``nodeSelector`` 就可以完成调度选择，如果没有在deployment中配置 ``svc`` 指定的pod ``selector`` 就会导致以下错误::
 
    error: error validating "deployment_arm.yaml": error validating data: ValidationError(Deployment.spec): missing required field "selector" in io.k8s.api.apps.v1.DeploymentSpec; if you choose to ignore these errors, turn validation off with --validate=false
@@ -97,9 +103,64 @@ Node的众所周知标签、申明、瑕疵
      selector:
          app.kubernetes.io/name: onesre-core
 
+节点 ``taint`` 会阻止 ``nodeSelector``
+-----------------------------------------
+
+在实际生产部署中，有可能遇到调度失败情况。例如，我在 :ref:`helm3_prometheus_grafana` 想通过配置 ``nodeSelector`` 来指定将监控相关服务调度到专用服务器:
+
+- 为监控专用服务器打标:
+
+.. literalinclude:: labels_and_selectors/label_node_prometheus
+   :language: bash
+   :caption: 为监控服务器label以便监控组件调度到专用服务器
+
+- 修订 ``deployment`` ，指定组件调度到上述标签节点 ``kubectl edit deployments stable-grafana`` ，配置内容如下:
+
+.. literalinclude:: labels_and_selectors/config_nodeselector
+   :language: bash
+   :caption: 配置 ``stable-grafana`` deployments，指定 ``nodeSelector`` 到 ``telemetry: prometheus`` 标签节点
+
+修订完成后检查::
+
+   kubectl get pods -o wide -A | grep grafa
+
+但是发现并没有迁移成功(依然运行在 ``old-mon-serv`` 服务器，并没有调度到我期望的 ``mon-serv`` )::
+
+   # kubectl get pods -o wide -A | grep grafa
+   default       stable-grafana-6449bcb69b-rqhwz                          3/3     Running             0          22h     10.233.125.1    old-mon-serv   <none>           <none>
+   default       stable-grafana-c4465d9cb-kgwp6                           0/3     Pending             0          2m28s   <none>          <none>                   <none>           <none>
+
+- 检查::
+
+   kubectl get pods stable-grafana-c4465d9cb-kgwp6 -o yaml
+
+可以看到调度失败原因是 ``taint`` ::
+
+   status:
+     conditions:
+     - lastProbeTime: null
+       lastTransitionTime: "2023-03-30T12:28:14Z"
+       message: '0/43 nodes are available: 1 node(s) had taint {node.k8s.xxx.com/initial:
+         }, that the pod didn''t tolerate, 42 node(s) didn''t match node selector.'
+       reason: Unschedulable
+       status: "False"
+       type: PodScheduled
+     phase: Pending
+     qosClass: BestEffort 
+
+- 检查 ``mon-serv`` 服务器 ``Tains`` 情况 ::
+
+   # kubectl describe node mon-serv | grep 'Taints'
+   Taints:             node.k8s.xxx.com/initial:NoSchedule   
+
+原因是新部署服务器为了避免验收未通过情况，默认先打标了 ``NoSchedule`` 的 ``Taints`` ，需要清理::
+
+   kubectl taint nodes mon-serv node.k8s.xxx.com/initial:NoSchedule-
+
 参考
 =======
 
 - `Labels and Selectors <https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/>`_
 - `ValidationError: missing required field “selector” in io.k8s.api.v1.DeploymentSpec <https://stackoverflow.com/questions/59480373/validationerror-missing-required-field-selector-in-io-k8s-api-v1-deploymentsp>`_
 - `How to delete a node label by command and api? <https://stackoverflow.com/questions/34067979/how-to-delete-a-node-label-by-command-and-api>`_ 
+- `How to Add or Remove Labels to Nodes in Kubernetes <https://linuxhandbook.com/kubectl-label-node/>`_

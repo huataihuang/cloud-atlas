@@ -14,9 +14,12 @@
 
 解决方法是重建 :ref:`virtualenv`
 
-- 之前已经为自己的项目 ``cloud-atlas`` 生成过软件包列表::
+- 之前已经为自己的项目 ``cloud-atlas`` 生成过软件包列表:
 
-   pip freeze > source/requirements.txt
+.. literalinclude:: rebuild_virtualenv/generate_requirements
+   :language: bash
+   :caption: 生成 :ref:`virtualenv` 所使用Python软件包依赖列表 ``requirements.txt``
+
 
 所以只要重建 :ref:`virtualenv` 然后依据这个 ``requirements.txt`` 就可以恢复
 

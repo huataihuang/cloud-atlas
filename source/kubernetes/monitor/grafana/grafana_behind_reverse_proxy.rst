@@ -95,13 +95,90 @@
 - 配置了 ``kube-prometheus-stack.values`` 同时手工修改 ``cm kube-prometheus-stack-1681228346-grafana`` 会导致IP和域名访问都失效
 - 去除 ``kube-prometheus-stack.values`` 配置(即不使用 ``kube-prometheus-stack`` 域名配置)，但是手工修改 ``cm kube-prometheus-stack-1681228346-grafana`` ，此时容器内部 ``/etc/grafana/grafana.ini`` 会注入 ``domain = 'grafana.example.com'`` ，但是域名访问不行，不过IP访问却是正常。目前先用IP访问，待查
 
+差异对比
+----------
+
 但是我线下测试环境验证是通过的，所以考虑生产和线下环境的差异:
 
 - 线上生产环境采用了 ``2次`` 反向代理，也就是在我的 :ref:`nginx_reverse_proxy` 前面还有一层 NGINX 做反向代理(不是我的管理范围，所以我无法检查具体配置)
 - 生产环境的第一层NGINX反向代理启用了 SSL ，也就是第一层反向代理到我的第二层NGINX反向代理，我的第二层NGINX反向代理是没有SSL加密的
 - 怀疑第一层反向代理的HTTP头部改写可能触发了Grafana的安全限制
 
-我准备再尝试修订NGINX的http头部改写配置，见参考部分
+验证思路:
+
+- 将二层反向代理改为 :ref:`iptables_port_forwarding` ，然后直接本地绑定 ``/etc/hosts`` 以域名方式访问，验证是否实现可以域名形式访问Grafana ``NodePort`` 模式(注意，没有配置Grafana的 ``grafana.ini`` 的 ``domain`` )
+- 将二层反向代理改为 :ref:`iptables_port_forwarding` ，这样看第一层反向代理是否可以实现域名方式访问 Grafana(其实现在就是 :ref:`iptables_port_forwarding` 访问 ``NodePort`` 模式，只是没有经过第一层反向代理的域名访问方式而是使用IP访问)
+- 本地通过 ``/etc/hosts`` 绑定域名解析，绕过第一层NGINX反向代理，直接访问第二层反向代理(第二层由 :ref:`iptables_port_forwarding` 改为 :ref:`nginx_reverse_proxy` )，看能否实现域名方式访问 Grafana (类似我在线下测试环境部署)
+- 在二层反向代理配置 ``proxy_hide_header X-Frame-Options;``
+- 通过 :ref:`curl_show_request_headers` 对比检查上述访问的差异
+
+验证一
+--------------
+
+在物理主机主机上采用 :ref:`iptables_port_forwarding` ，本地绑定 ``/etc/hosts`` 以域名方式访问:
+
+- 验证成功，可以直接使用域名访问 Grafana ``NodePort`` 模式(没有配置Grafana的 ``grafana.ini`` 的 ``domain`` )
+
+验证二
+-------------
+
+在物理主机上保持 :ref:`iptables_port_forwarding` ，然后去除本地绑定 ``/etc/hosts`` ，这样客户端访问就会通过域名直接访问第一层反向代理，通过反向代理访问 :ref:`iptables_port_forwarding` 来访问  Grafana ``NodePort`` :
+
+第一层反向代理采用了SSL卸载，也就是强制转跳https，然后反向代理到后端物理主机 :ref:`iptables_port_forwarding` **80** 端口，来访问 Grafana ``NodePort``
+
+果然，出问题在这里，此时再重现了 ``401 Unauthroized`` 报错
+
+- 检查 ``grafana`` 日志::
+
+   kubectl -n prometheus logs kube-prometheus-stack-1681228346-grafana-849b55868d-j62r9 -c grafana --follow
+
+可以看到::
+
+   logger=http.server t=2023-04-22T13:15:36.598575746Z level=info msg="Successful Login" User=admin@localhost
+   logger=context userId=1 orgId=1 uname=admin t=2023-04-22T13:15:37.039013543Z level=info msg="Request Completed" method=GET path=/api/live/ws status=-1 remote_addr=192.168.147.143 time_ms=0 duration=739.195µs size=0 referer= handler=/api/live/ws
+   logger=context userId=0 orgId=0 uname= t=2023-04-22T13:15:37.084924294Z level=info msg="Request Completed" method=GET path=/api/login/ping status=401 remote_addr=192.168.147.143 time_ms=0 duration=374.008µs size=26 referer=https://grafana.cloud-atlas.io/ handler=/api/login/ping
+   logger=context userId=0 orgId=0 uname= t=2023-04-22T13:15:37.182058314Z level=info msg="Request Completed" method=GET path=/ status=302 remote_addr=192.168.147.143 time_ms=0 duration=348.336µs size=29 referer=https://grafana.cloud-atlas.io/ handler=/
+
+注意到 ``grafana`` 记录了 ``admin@localhost`` 登陆成功，但是 https 域名是否会和 Grafana 自身的 **80** 端口不一致而导致异常呢？
+
+果然，在 `Grafana / HTTPS / Nginx Proxy <https://community.grafana.com/t/grafana-https-nginx-proxy/17016>`_ 帖子中提到了修订 ``grafana.ini`` 配置，在 ``grafana`` 端依然是 ``protocol = http`` ，但是要修改 ``root_url = https://my.domain.name/`` 告知域名通过反向代理访问
+
+- 对比 ``ConfigMap`` 配置::
+
+   kubectl -n prometheus edit cm kube-prometheus-stack-1681228346-grafana
+
+可以看到当前默认的 ``grafana`` 的 ``ConfigMap`` 是:
+
+.. literalinclude:: grafana_behind_reverse_proxy/default_grafana_configmap.yaml
+   :language: yaml
+   :caption: 默认grafana ConfigMap
+
+登陆到容器内部检查::
+
+   kubectl -n prometheus exec -it kube-prometheus-stack-1681228346-grafana-849b55868d-j62r9 -c grafana -- /bin/bash
+
+可以看到 ``/etc/grafana/grafana.ini`` 内容和 ``ConfigMap`` 对应:
+
+.. literalinclude:: grafana_behind_reverse_proxy/default_grafana.ini
+   :language: ini
+   :caption: 默认grafana.ini配置，和ConfigMap对应 
+
+- 修订 ``ConfigMap`` 配置:
+
+.. literalinclude:: grafana_behind_reverse_proxy/grafana_configmap.yaml
+   :language: yaml
+   :caption: 修订grafana ConfigMap
+   :emphasize-lines: 16-18
+
+.. note::
+
+   如果配置了 ``enforce_domain = true`` ，就会强制使用域名访问，即使你使用了IP地址访问，也会重定向到域名
+
+但是，我发现还是没有解决我的这个生产环境问题，依然报错账号密码错误
+
+.. note::
+
+   如果配置了 ``grafana`` 的 
 
 参考
 ======

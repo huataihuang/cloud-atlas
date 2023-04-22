@@ -33,7 +33,19 @@ Kubeernetes服务(services)
 
    定义 ``service`` 中的 ``port`` 可以映射到任意 ``targetPort`` ，而默认情况下， ``targetPort`` 设置成与 ``port`` 相同值
 
+.. _k8s_services_nodeport:
 
+**NodePort类型** Kubernetes服务
+---------------------------------
+
+``Service.Type=NodePort``
+
+.. _k8s_services_loadbalancer:
+
+**LoadBalancer类型** Kubernetes服务
+-------------------------------------
+
+``Service.Type=LoadBalancer``
 
 参考
 ======

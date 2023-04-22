@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>crictl &mdash; Cloud Atlas 0.1 文档</title>
@@ -13,9 +13,6 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/translations.js"></script>
@@ -32,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Cloud Atlas
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Cloud Atlas
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -89,7 +90,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="get_container_shell.html">获得容器shell</a></li>
-<li class="toctree-l3"><a class="reference internal" href="get_container_logs.html">获取容器日志</a></li>
+<li class="toctree-l3"><a class="reference internal" href="get_k8s_pod_logs.html">获取Kubernetes Pod日志</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kubelet_cert_expire.html">Kubelet证书过期</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kubelet_start_fail.html">Kubelet启动异常排查</a></li>
 <li class="toctree-l3"><a class="reference internal" href="apiserver_cert_expire.html">Apiserver证书过期</a></li>
@@ -102,6 +103,7 @@
 <li class="toctree-l3"><a class="reference internal" href="k8s_stuck_in_podinit.html">Kubernetes Pod停留在Init状态排查</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pod_stuck_terminating.html">停滞在”Terminiating”状态Pod</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_pods_special_node.html">获取特定节点的pods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fix_pod_has_unbound_immediate_persistentvolumeclaims.html">修复”Unbound Immediate PersistentVolumeClaims”错误</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../knative/index.html">Knative - Serverless计算</a></li>
@@ -143,9 +145,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../clang/index.html">C Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../swift/index.html">Swift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ruby/index.html">Ruby Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bsd/index.html">BSD Atlas</a></li>
@@ -175,7 +179,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Kubernetes Atlas</a></li>
           <li class="breadcrumb-item"><a href="index.html">Kubernetes排查</a></li>
       <li class="breadcrumb-item active">crictl</li>
@@ -227,11 +231,11 @@ rm -f critest-$VERSION-linux-amd64.tar.gz
 <p>当前配置为 <code class="docutils literal notranslate"><span class="pre">/etc/crictl.yaml</span></code> :</p>
 <div class="literal-block-wrapper docutils container" id="id7">
 <div class="code-block-caption"><span class="caption-text">crictl配置文件 /etc/crictl.yaml</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">runtime-endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unix:///var/run/containerd/containerd.sock</span><span class="w"></span>
-<span class="nt">image-endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unix:///var/run/containerd/containerd.sock</span><span class="w"></span>
-<span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="c1">#debug: true</span><span class="w"></span>
-<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">runtime-endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unix:///var/run/containerd/containerd.sock</span>
+<span class="nt">image-endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unix:///var/run/containerd/containerd.sock</span>
+<span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="c1">#debug: true</span>
+<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </pre></div>
 </div>
 </div>
@@ -252,11 +256,11 @@ rm -f critest-$VERSION-linux-amd64.tar.gz
 <p>输出显示类似:</p>
 <div class="literal-block-wrapper docutils container" id="id8">
 <div class="code-block-caption"><span class="caption-text">crictl pods 列出主机上的pod</span><a class="headerlink" href="#id8" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>POD ID              CREATED             STATE               NAME                                NAMESPACE           ATTEMPT             RUNTIME
-173ffdaeefab9       <span class="m">13</span> hours ago        Ready               kube-proxy-vwqsn                    kube-system         <span class="m">0</span>                   <span class="o">(</span>default<span class="o">)</span>
-0952e1399e340       <span class="m">13</span> hours ago        Ready               kube-scheduler-z-k8s-m-1            kube-system         <span class="m">0</span>                   <span class="o">(</span>default<span class="o">)</span>
-424cc7a5a9bfc       <span class="m">13</span> hours ago        Ready               kube-controller-manager-z-k8s-m-1   kube-system         <span class="m">0</span>                   <span class="o">(</span>default<span class="o">)</span>
-7249ac0122d31       <span class="m">13</span> hours ago        Ready               kube-apiserver-z-k8s-m-1            kube-system         <span class="m">0</span>                   <span class="o">(</span>default<span class="o">)</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>POD<span class="w"> </span>ID<span class="w">              </span>CREATED<span class="w">             </span>STATE<span class="w">               </span>NAME<span class="w">                                </span>NAMESPACE<span class="w">           </span>ATTEMPT<span class="w">             </span>RUNTIME
+173ffdaeefab9<span class="w">       </span><span class="m">13</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Ready<span class="w">               </span>kube-proxy-vwqsn<span class="w">                    </span>kube-system<span class="w">         </span><span class="m">0</span><span class="w">                   </span><span class="o">(</span>default<span class="o">)</span>
+0952e1399e340<span class="w">       </span><span class="m">13</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Ready<span class="w">               </span>kube-scheduler-z-k8s-m-1<span class="w">            </span>kube-system<span class="w">         </span><span class="m">0</span><span class="w">                   </span><span class="o">(</span>default<span class="o">)</span>
+424cc7a5a9bfc<span class="w">       </span><span class="m">13</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Ready<span class="w">               </span>kube-controller-manager-z-k8s-m-1<span class="w">   </span>kube-system<span class="w">         </span><span class="m">0</span><span class="w">                   </span><span class="o">(</span>default<span class="o">)</span>
+7249ac0122d31<span class="w">       </span><span class="m">13</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Ready<span class="w">               </span>kube-apiserver-z-k8s-m-1<span class="w">            </span>kube-system<span class="w">         </span><span class="m">0</span><span class="w">                   </span><span class="o">(</span>default<span class="o">)</span>
 </pre></div>
 </div>
 </div>
@@ -275,19 +279,19 @@ rm -f critest-$VERSION-linux-amd64.tar.gz
 <p>显示类似:</p>
 <div class="literal-block-wrapper docutils container" id="id9">
 <div class="code-block-caption"><span class="caption-text">crictl pods 列出主机上的镜像</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>IMAGE                                TAG                 IMAGE ID            SIZE
-k8s.gcr.io/coredns/coredns           v1.8.6              a4ca41631cc7a       <span class="m">13</span>.6MB
-k8s.gcr.io/kube-apiserver            v1.24.2             d3377ffb7177c       <span class="m">33</span>.8MB
-k8s.gcr.io/kube-apiserver            v1.24.3             d521dd763e2e3       <span class="m">33</span>.8MB
-k8s.gcr.io/kube-controller-manager   v1.24.2             34cdf99b1bb3b       31MB
-k8s.gcr.io/kube-controller-manager   v1.24.3             586c112956dfc       31MB
-k8s.gcr.io/kube-proxy                v1.24.2             a634548d10b03       <span class="m">39</span>.5MB
-k8s.gcr.io/kube-proxy                v1.24.3             2ae1ba6417cbc       <span class="m">39</span>.5MB
-k8s.gcr.io/kube-scheduler            v1.24.2             5d725196c1f47       <span class="m">15</span>.5MB
-k8s.gcr.io/kube-scheduler            v1.24.3             3a5aa3a515f5d       <span class="m">15</span>.5MB
-k8s.gcr.io/pause                     <span class="m">3</span>.5                 ed210e3e4a5ba       301kB
-k8s.gcr.io/pause                     <span class="m">3</span>.6                 6270bb605e12e       302kB
-k8s.gcr.io/pause                     <span class="m">3</span>.7                 221177c6082a8       311kB
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>IMAGE<span class="w">                                </span>TAG<span class="w">                 </span>IMAGE<span class="w"> </span>ID<span class="w">            </span>SIZE
+k8s.gcr.io/coredns/coredns<span class="w">           </span>v1.8.6<span class="w">              </span>a4ca41631cc7a<span class="w">       </span><span class="m">13</span>.6MB
+k8s.gcr.io/kube-apiserver<span class="w">            </span>v1.24.2<span class="w">             </span>d3377ffb7177c<span class="w">       </span><span class="m">33</span>.8MB
+k8s.gcr.io/kube-apiserver<span class="w">            </span>v1.24.3<span class="w">             </span>d521dd763e2e3<span class="w">       </span><span class="m">33</span>.8MB
+k8s.gcr.io/kube-controller-manager<span class="w">   </span>v1.24.2<span class="w">             </span>34cdf99b1bb3b<span class="w">       </span>31MB
+k8s.gcr.io/kube-controller-manager<span class="w">   </span>v1.24.3<span class="w">             </span>586c112956dfc<span class="w">       </span>31MB
+k8s.gcr.io/kube-proxy<span class="w">                </span>v1.24.2<span class="w">             </span>a634548d10b03<span class="w">       </span><span class="m">39</span>.5MB
+k8s.gcr.io/kube-proxy<span class="w">                </span>v1.24.3<span class="w">             </span>2ae1ba6417cbc<span class="w">       </span><span class="m">39</span>.5MB
+k8s.gcr.io/kube-scheduler<span class="w">            </span>v1.24.2<span class="w">             </span>5d725196c1f47<span class="w">       </span><span class="m">15</span>.5MB
+k8s.gcr.io/kube-scheduler<span class="w">            </span>v1.24.3<span class="w">             </span>3a5aa3a515f5d<span class="w">       </span><span class="m">15</span>.5MB
+k8s.gcr.io/pause<span class="w">                     </span><span class="m">3</span>.5<span class="w">                 </span>ed210e3e4a5ba<span class="w">       </span>301kB
+k8s.gcr.io/pause<span class="w">                     </span><span class="m">3</span>.6<span class="w">                 </span>6270bb605e12e<span class="w">       </span>302kB
+k8s.gcr.io/pause<span class="w">                     </span><span class="m">3</span>.7<span class="w">                 </span>221177c6082a8<span class="w">       </span>311kB
 </pre></div>
 </div>
 </div>
@@ -302,11 +306,11 @@ k8s.gcr.io/pause                     <span class="m">3</span>.7                 
 <p>显示输出:</p>
 <div class="literal-block-wrapper docutils container" id="id10">
 <div class="code-block-caption"><span class="caption-text">crictl pods 列出主机上的容器</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID              POD
-fd65e2a037600       2ae1ba6417cbc       <span class="m">16</span> hours ago        Running             kube-proxy                <span class="m">0</span>                   173ffdaeefab9       kube-proxy-vwqsn
-<span class="m">5922644848149</span>       3a5aa3a515f5d       <span class="m">16</span> hours ago        Running             kube-scheduler            <span class="m">0</span>                   0952e1399e340       kube-scheduler-z-k8s-m-1
-58e48e8bc6861       586c112956dfc       <span class="m">16</span> hours ago        Running             kube-controller-manager   <span class="m">0</span>                   424cc7a5a9bfc       kube-controller-manager-z-k8s-m-1
-901b1dc06eed1       d521dd763e2e3       <span class="m">16</span> hours ago        Running             kube-apiserver            <span class="m">0</span>                   7249ac0122d31       kube-apiserver-z-k8s-m-1
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CONTAINER<span class="w">           </span>IMAGE<span class="w">               </span>CREATED<span class="w">             </span>STATE<span class="w">               </span>NAME<span class="w">                      </span>ATTEMPT<span class="w">             </span>POD<span class="w"> </span>ID<span class="w">              </span>POD
+fd65e2a037600<span class="w">       </span>2ae1ba6417cbc<span class="w">       </span><span class="m">16</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Running<span class="w">             </span>kube-proxy<span class="w">                </span><span class="m">0</span><span class="w">                   </span>173ffdaeefab9<span class="w">       </span>kube-proxy-vwqsn
+<span class="m">5922644848149</span><span class="w">       </span>3a5aa3a515f5d<span class="w">       </span><span class="m">16</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Running<span class="w">             </span>kube-scheduler<span class="w">            </span><span class="m">0</span><span class="w">                   </span>0952e1399e340<span class="w">       </span>kube-scheduler-z-k8s-m-1
+58e48e8bc6861<span class="w">       </span>586c112956dfc<span class="w">       </span><span class="m">16</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Running<span class="w">             </span>kube-controller-manager<span class="w">   </span><span class="m">0</span><span class="w">                   </span>424cc7a5a9bfc<span class="w">       </span>kube-controller-manager-z-k8s-m-1
+901b1dc06eed1<span class="w">       </span>d521dd763e2e3<span class="w">       </span><span class="m">16</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">        </span>Running<span class="w">             </span>kube-apiserver<span class="w">            </span><span class="m">0</span><span class="w">                   </span>7249ac0122d31<span class="w">       </span>kube-apiserver-z-k8s-m-1
 </pre></div>
 </div>
 </div>
@@ -352,17 +356,17 @@ fd65e2a037600       2ae1ba6417cbc       <span class="m">16</span> hours ago     
 </ul>
 <div class="literal-block-wrapper docutils container" id="id11">
 <div class="code-block-caption"><span class="caption-text">pod-config.json</span><a class="headerlink" href="#id11" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx-sandbox&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;attempt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hdishd83djaidwnduwk28bcsb&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;log_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;linux&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx-sandbox&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attempt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hdishd83djaidwnduwk28bcsb&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;log_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;linux&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -469,15 +473,15 @@ fd65e2a037600       2ae1ba6417cbc       <span class="m">16</span> hours ago     
 <div class="literal-block-wrapper docutils container" id="id12">
 <div class="code-block-caption"><span class="caption-text">配置containerd的runc使用systemd cgroup驱动</span><a class="headerlink" href="#id12" title="此代码块的永久链接">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>plugins<span class="o">]</span>
-  <span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span><span class="o">]</span>
-    <span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd<span class="o">]</span>
-      <span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes<span class="o">]</span>
-        <span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc<span class="o">]</span>
-          ...
-          <span class="nv">runtime_type</span> <span class="o">=</span> <span class="s2">&quot;io.containerd.runc.v2&quot;</span>
-          <span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc.options<span class="o">]</span>
-            ...
-            <span class="nv">SystemdCgroup</span> <span class="o">=</span> <span class="nb">true</span>
+<span class="w">  </span><span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span><span class="o">]</span>
+<span class="w">    </span><span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd<span class="o">]</span>
+<span class="w">      </span><span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes<span class="o">]</span>
+<span class="w">        </span><span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc<span class="o">]</span>
+<span class="w">          </span>...
+<span class="w">          </span><span class="nv">runtime_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;io.containerd.runc.v2&quot;</span>
+<span class="w">          </span><span class="o">[</span>plugins.<span class="s2">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc.options<span class="o">]</span>
+<span class="w">            </span>...
+<span class="w">            </span><span class="nv">SystemdCgroup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span>
 </pre></div>
 </div>
 </div>
@@ -523,36 +527,36 @@ fd65e2a037600       2ae1ba6417cbc       <span class="m">16</span> hours ago     
 </ul>
 <div class="literal-block-wrapper docutils container" id="id13">
 <div class="code-block-caption"><span class="caption-text">pod-config.json</span><a class="headerlink" href="#id13" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx-sandbox&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;attempt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hdishd83djaidwnduwk28bcsb&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;log_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;linux&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx-sandbox&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attempt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hdishd83djaidwnduwk28bcsb&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;log_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;linux&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id14">
 <div class="code-block-caption"><span class="caption-text">container-config.json</span><a class="headerlink" href="#id14" title="此代码块的永久链接">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;busybox&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;image&quot;</span><span class="p">:{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;image&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;busybox&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="s2">&quot;top&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;log_path&quot;</span><span class="p">:</span><span class="s2">&quot;busybox.log&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;linux&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;busybox&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;image&quot;</span><span class="p">:{</span>
+<span class="w">    </span><span class="nt">&quot;image&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;busybox&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;top&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;log_path&quot;</span><span class="p">:</span><span class="s2">&quot;busybox.log&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;linux&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>

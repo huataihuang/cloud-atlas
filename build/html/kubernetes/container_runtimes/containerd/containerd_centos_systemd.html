@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Containerd环境CentOS容器运行systemd &mdash; Cloud Atlas 0.1 文档</title>
@@ -13,9 +13,6 @@
   <![endif]-->
   
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/translations.js"></script>
@@ -32,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Cloud Atlas
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cloud Atlas
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -74,7 +75,9 @@
 <li class="toctree-l4"><a class="reference internal" href="install_containerd_official_binaries.html">安装containerd官方执行程序</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Containerd环境CentOS容器运行systemd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="estargz_lazy_pulling.html">用于延迟拉取(Lazy Pulling)的eStargz(容器镜像层标准兼容扩展)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ctr.html">ctr</a></li>
 <li class="toctree-l4"><a class="reference internal" href="nerdctl.html">nerdctl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containerd_proxy.html">containerd代理</a></li>
 <li class="toctree-l4"><a class="reference internal" href="containerd_btrfs.html">containerd的btrfs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="containerd_xfs.html">containerd存储xfs文件系统</a></li>
 </ul>
@@ -134,9 +137,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../django/index.html">Django Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nodejs/index.html">Node.js Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../clang/index.html">C Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../golang/index.html">Go Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../swift/index.html">Swift Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rust/index.html">Rust Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ruby/index.html">Ruby Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../arm/index.html">ARM Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../android/index.html">Android Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bsd/index.html">BSD Atlas</a></li>
@@ -166,7 +171,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Kubernetes Atlas</a></li>
           <li class="breadcrumb-item"><a href="../index.html">Kubernetes 容器运行时(Container Runtimes)</a></li>
           <li class="breadcrumb-item"><a href="index.html">containerd运行时(runtime)</a></li>
@@ -200,42 +205,42 @@
 <span class="k">FROM</span><span class="w"> </span><span class="s">centos:latest</span>
 <span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
 
-<span class="k">ENV</span><span class="w"> </span>container docker
+<span class="k">ENV</span><span class="w"> </span>container<span class="w"> </span>docker
 
-<span class="k">RUN</span><span class="w"> </span><span class="o">(</span><span class="nb">cd</span> /lib/systemd/system/sysinit.target.wants/<span class="p">;</span> <span class="k">for</span> i <span class="k">in</span> *<span class="p">;</span> <span class="k">do</span> <span class="o">[</span> <span class="nv">$i</span> <span class="o">==</span> <span class="se">\</span>
-systemd-tmpfiles-setup.service <span class="o">]</span> <span class="o">||</span> rm -f <span class="nv">$i</span><span class="p">;</span> <span class="k">done</span><span class="o">)</span><span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/multi-user.target.wants/*<span class="p">;</span><span class="se">\</span>
-rm -f /etc/systemd/system/*.wants/*<span class="p">;</span><span class="se">\</span>
-rm -f /lib/systemd/system/local-fs.target.wants/*<span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/sockets.target.wants/*udev*<span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/sockets.target.wants/*initctl*<span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/basic.target.wants/*<span class="p">;</span><span class="se">\</span>
-rm -f /lib/systemd/system/anaconda.target.wants/*<span class="p">;</span>
+<span class="k">RUN</span><span class="w"> </span><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/lib/systemd/system/sysinit.target.wants/<span class="p">;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span>*<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="se">\</span>
+systemd-tmpfiles-setup.service<span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span><span class="nv">$i</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="o">)</span><span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/multi-user.target.wants/*<span class="p">;</span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/etc/systemd/system/*.wants/*<span class="p">;</span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/local-fs.target.wants/*<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/sockets.target.wants/*udev*<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/sockets.target.wants/*initctl*<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/basic.target.wants/*<span class="p">;</span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/anaconda.target.wants/*<span class="p">;</span>
 <span class="k">VOLUME</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;/sys/fs/cgroup&quot;</span><span class="w"> </span><span class="p">]</span>
 
-<span class="k">RUN</span><span class="w"> </span>dnf clean all
-<span class="k">RUN</span><span class="w"> </span>dnf --disablerepo <span class="s1">&#39;*&#39;</span> --enablerepo extras swap centos-linux-repos centos-stream-repos -y
-<span class="k">RUN</span><span class="w"> </span>dnf distro-sync -y
-<span class="k">RUN</span><span class="w"> </span>dnf -y update
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>clean<span class="w"> </span>all
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>--disablerepo<span class="w"> </span><span class="s1">&#39;*&#39;</span><span class="w"> </span>--enablerepo<span class="w"> </span>extras<span class="w"> </span>swap<span class="w"> </span>centos-linux-repos<span class="w"> </span>centos-stream-repos<span class="w"> </span>-y
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>distro-sync<span class="w"> </span>-y
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>-y<span class="w"> </span>update
 
-<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>which<span class="w"> </span>sudo<span class="w"> </span>openssh-clients<span class="w"> </span>openssh-server<span class="w"> </span>initscripts
 
 <span class="c"># Prepare sshd host key</span>
-<span class="k">RUN</span><span class="w"> </span>ssh-keygen -A
+<span class="k">RUN</span><span class="w"> </span>ssh-keygen<span class="w"> </span>-A
 
 <span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
-<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
-<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
-<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
-<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+<span class="k">RUN</span><span class="w"> </span>groupadd<span class="w"> </span>-g<span class="w"> </span><span class="m">505</span><span class="w"> </span>admin
+<span class="k">RUN</span><span class="w"> </span>useradd<span class="w"> </span>-g<span class="w"> </span><span class="m">505</span><span class="w"> </span>-u<span class="w"> </span><span class="m">505</span><span class="w"> </span>-d<span class="w"> </span>/home/admin<span class="w"> </span>-m<span class="w"> </span>admin
+<span class="k">RUN</span><span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>wheel<span class="w"> </span>admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>/etc/sudoers
 
 <span class="c"># Add ssh public key for login</span>
-<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
-<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
-<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
-<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
-<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
-<span class="k">RUN</span><span class="w"> </span>mv /var/run/nologin /var/run/nologin.bak
+<span class="k">RUN</span><span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys<span class="w"> </span>/home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>admin:admin<span class="w"> </span>/home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod<span class="w"> </span><span class="m">700</span><span class="w"> </span>/home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>mv<span class="w"> </span>/var/run/nologin<span class="w"> </span>/var/run/nologin.bak
 
 <span class="c"># run service when container started - sshd</span>
 <span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>
@@ -421,49 +426,49 @@ Freezing execution.
 <span class="k">FROM</span><span class="w"> </span><span class="s">centos:latest</span>
 <span class="k">MAINTAINER</span><span class="w"> </span><span class="s">vincent huatai &lt;vincent@huatai.me&gt;</span>
 
-<span class="k">ENV</span><span class="w"> </span>container docker
+<span class="k">ENV</span><span class="w"> </span>container<span class="w"> </span>docker
 
-<span class="k">RUN</span><span class="w"> </span><span class="o">(</span><span class="nb">cd</span> /lib/systemd/system/sysinit.target.wants/<span class="p">;</span> <span class="k">for</span> i <span class="k">in</span> *<span class="p">;</span> <span class="k">do</span> <span class="o">[</span> <span class="nv">$i</span> <span class="o">==</span> <span class="se">\</span>
-systemd-tmpfiles-setup.service <span class="o">]</span> <span class="o">||</span> rm -f <span class="nv">$i</span><span class="p">;</span> <span class="k">done</span><span class="o">)</span><span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/multi-user.target.wants/*<span class="p">;</span><span class="se">\</span>
-rm -f /etc/systemd/system/*.wants/*<span class="p">;</span><span class="se">\</span>
-rm -f /lib/systemd/system/local-fs.target.wants/*<span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/sockets.target.wants/*udev*<span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/sockets.target.wants/*initctl*<span class="p">;</span> <span class="se">\</span>
-rm -f /lib/systemd/system/basic.target.wants/*<span class="p">;</span><span class="se">\</span>
-rm -f /lib/systemd/system/anaconda.target.wants/*<span class="p">;</span>
+<span class="k">RUN</span><span class="w"> </span><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/lib/systemd/system/sysinit.target.wants/<span class="p">;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span>*<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="se">\</span>
+systemd-tmpfiles-setup.service<span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span><span class="nv">$i</span><span class="p">;</span><span class="w"> </span><span class="k">done</span><span class="o">)</span><span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/multi-user.target.wants/*<span class="p">;</span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/etc/systemd/system/*.wants/*<span class="p">;</span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/local-fs.target.wants/*<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/sockets.target.wants/*udev*<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/sockets.target.wants/*initctl*<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/basic.target.wants/*<span class="p">;</span><span class="se">\</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/lib/systemd/system/anaconda.target.wants/*<span class="p">;</span>
 
 <span class="c">#VOLUME [ &quot;/sys/fs/cgroup&quot; ]</span>
 
-<span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/cgroup <span class="se">\</span>
-    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/fuse <span class="se">\</span>
-    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/tmp <span class="se">\</span>
-    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run <span class="se">\</span>
-    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run/lock
+<span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/cgroup<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>bind,target<span class="o">=</span>/sys/fs/fuse<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/tmp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>tmpfs,target<span class="o">=</span>/run/lock
 
-<span class="k">RUN</span><span class="w"> </span>dnf clean all
-<span class="k">RUN</span><span class="w"> </span>dnf --disablerepo <span class="s1">&#39;*&#39;</span> --enablerepo extras swap centos-linux-repos centos-stream-repos -y
-<span class="k">RUN</span><span class="w"> </span>dnf distro-sync -y
-<span class="k">RUN</span><span class="w"> </span>dnf -y update
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>clean<span class="w"> </span>all
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>--disablerepo<span class="w"> </span><span class="s1">&#39;*&#39;</span><span class="w"> </span>--enablerepo<span class="w"> </span>extras<span class="w"> </span>swap<span class="w"> </span>centos-linux-repos<span class="w"> </span>centos-stream-repos<span class="w"> </span>-y
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>distro-sync<span class="w"> </span>-y
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>-y<span class="w"> </span>update
 
-<span class="k">RUN</span><span class="w"> </span>dnf -y install which sudo openssh-clients openssh-server initscripts
+<span class="k">RUN</span><span class="w"> </span>dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>which<span class="w"> </span>sudo<span class="w"> </span>openssh-clients<span class="w"> </span>openssh-server<span class="w"> </span>initscripts
 
 <span class="c"># Prepare sshd host key</span>
-<span class="k">RUN</span><span class="w"> </span>ssh-keygen -A
+<span class="k">RUN</span><span class="w"> </span>ssh-keygen<span class="w"> </span>-A
 
 <span class="c"># add account &quot;admin&quot; and give sudo privilege</span>
-<span class="k">RUN</span><span class="w"> </span>groupadd -g <span class="m">505</span> admin
-<span class="k">RUN</span><span class="w"> </span>useradd -g <span class="m">505</span> -u <span class="m">505</span> -d /home/admin -m admin
-<span class="k">RUN</span><span class="w"> </span>usermod -aG wheel admin
-<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span> &gt;&gt; /etc/sudoers
+<span class="k">RUN</span><span class="w"> </span>groupadd<span class="w"> </span>-g<span class="w"> </span><span class="m">505</span><span class="w"> </span>admin
+<span class="k">RUN</span><span class="w"> </span>useradd<span class="w"> </span>-g<span class="w"> </span><span class="m">505</span><span class="w"> </span>-u<span class="w"> </span><span class="m">505</span><span class="w"> </span>-d<span class="w"> </span>/home/admin<span class="w"> </span>-m<span class="w"> </span>admin
+<span class="k">RUN</span><span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>wheel<span class="w"> </span>admin
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;%wheel        ALL=(ALL)       NOPASSWD: ALL&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>/etc/sudoers
 
 <span class="c"># Add ssh public key for login</span>
-<span class="k">RUN</span><span class="w"> </span>mkdir -p /home/admin/.ssh
-<span class="k">COPY</span><span class="w"> </span>authorized_keys /home/admin/.ssh/authorized_keys
-<span class="k">RUN</span><span class="w"> </span>chown -R admin:admin /home/admin/.ssh
-<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">600</span> /home/admin/.ssh/authorized_keys
-<span class="k">RUN</span><span class="w"> </span>chmod <span class="m">700</span> /home/admin/.ssh
-<span class="k">RUN</span><span class="w"> </span>mv /var/run/nologin /var/run/nologin.bak
+<span class="k">RUN</span><span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/home/admin/.ssh
+<span class="k">COPY</span><span class="w"> </span>authorized_keys<span class="w"> </span>/home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>admin:admin<span class="w"> </span>/home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/home/admin/.ssh/authorized_keys
+<span class="k">RUN</span><span class="w"> </span>chmod<span class="w"> </span><span class="m">700</span><span class="w"> </span>/home/admin/.ssh
+<span class="k">RUN</span><span class="w"> </span>mv<span class="w"> </span>/var/run/nologin<span class="w"> </span>/var/run/nologin.bak
 
 <span class="c"># run service when container started - sshd</span>
 <span class="k">EXPOSE</span><span class="w"> </span><span class="s">22:1122</span>

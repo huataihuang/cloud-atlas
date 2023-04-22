@@ -4,8 +4,6 @@
 Grafana通用可视分析平台
 ===========================
 
-
-
 .. toctree::
    :maxdepth: 1
 
@@ -13,6 +11,7 @@ Grafana通用可视分析平台
    grafana_config_startup.rst
    run_grafana_in_k8s.rst
    grafana_behind_reverse_proxy.rst
+   grafana_reset_admin_password.rst
 
 推荐阅读:
 

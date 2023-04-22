@@ -10,6 +10,7 @@ Spark大数据处理
    :maxdepth: 1
 
    spark_startup.rst
+   spark_k8s_ceph/index
 
 .. only::  subproject and html
 

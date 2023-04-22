@@ -30,6 +30,7 @@ Arch Linux
    dropbox.rst
    cross_compile.rst
    archlinux_wine.rst
+   archlinux_build_kernel.rst
 
 .. only::  subproject and html
 

@@ -54,8 +54,8 @@ VMware ESX配置建议
 
 .. _hpe_server_pcie_64bit_bar_support:
 
-HP DL360 Gen9 BIOS设置``PCI Express 64-Bit BAR Support``
-=========================================================
+HP DL360 Gen9 BIOS设置 ``PCI Express 64-Bit BAR Support``
+===========================================================
 
 虽然VMware文档提示::
 

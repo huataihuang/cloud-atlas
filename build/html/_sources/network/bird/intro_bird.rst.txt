@@ -25,7 +25,7 @@ BIRD(BIRD Internet Routing Daemon)是比Quagga(Zebra)更为复杂和全面的路
 - Netflix(流媒体巨头)，Equinix(世界最大数据中心和基础架构服务上)，Amazon(Twitch游戏平台)，甚至思科也将BIRD作为可选解决方案提供给客户
 - 2012年Euro-IX调查显示，BIRD是欧洲互联网交换使用最多的路由服务器
 
-在 :ref:`kubernetes_network` 解决方案中，企业级的 :ref:`calico` 和 :ref:`cilium` 都选择BIRD作为路由解决基础架构。也就是说，如果需要实现超大规模多Kubernetes集群的容器网络路由，BIRD是生产级别的解决方案。
+在 :ref:`k8s_network` 解决方案中，企业级的 :ref:`calico` 和 :ref:`cilium` 都选择BIRD作为路由解决基础架构。也就是说，如果需要实现超大规模多Kubernetes集群的容器网络路由，BIRD是生产级别的解决方案。
 
 虽然BIRD功能丰富，但是其性能也非常卓越，在性能测试中，不论是小规模网络还是大规模复杂路由，其性能都不弱于 `FRRouting <https://frrouting.org/>`_ (从Quagga项目Fork出来的开源路由软件)。
 

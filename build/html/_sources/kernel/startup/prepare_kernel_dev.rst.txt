@@ -11,6 +11,10 @@
 
 我采用 CentOS 6.10 系统，然后安装 `kernel v2.6 <https://kernel.org/pub/linux/kernel/v2.6/>`_ 内核
 
+.. note::
+
+   目前(2023年)，除了学习目的采用早期稳定内核v2.6，其他体验最新技术可以选择v6.1: 2023年2月，Linux 6.1成为2022 LTS(长期支持)内核，计划维护到2026年12月，特定LTS(通常是主要行业参与者协调，如Android)可能会一直维护到2028年12月。 `Linux 6.1 被选为 LTS 长期支持内核 <https://www.solidot.org/story?sid=74088>`_
+
 开发环境准备
 ===============
 
