@@ -8,4 +8,4 @@ Kubernetes部署Daemonset
    :maxdepth: 1
 
    daemonset_nodeaffinity.rst
-
+   debug_daemonset.rst
