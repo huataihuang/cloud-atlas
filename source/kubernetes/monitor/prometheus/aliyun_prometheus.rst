@@ -102,6 +102,11 @@
 
 参考 `Correct way to update rules and configuration for a Prometheus installation on a Kubernetes cluster that was setup by prometheus-operator helm chart? <https://stackoverflow.com/questions/54766301/correct-way-to-update-rules-and-configuration-for-a-prometheus-installation-on-a>`_
 
+``starship`` Agent
+====================
+
+阿里云的GPU服务器也采用了 :ref:`dcgm-exporter` 来实现 :ref:`nvidia_gpu` 监控，不过阿里云做了定制打包成 ``starship`` Agent，作为物理主机上的 :ref:`systemd` 服务运行。这个服务和 :ref:`intergrate_gpu_telemetry_into_k8s` 方案中采用的 :ref:`daemonset` 模式运行有冲突，两者必须只取一种。我采用 :ref:`daemonset_nodeaffinity` 来实现对打标的节点安装 :ref:`dcgm-exporter` DS 以及采用同样的方法 ``nodeAntiAffinity`` 来避开 ``systemd`` 模式运行的 ``startship`` 节点。
+
 参考
 =====
 

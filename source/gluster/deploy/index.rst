@@ -9,6 +9,7 @@ GlusterFS部署实践，将不断完善和改进，所以最终方案会和最�
 .. toctree::
    :maxdepth: 1
 
+   gluster_releases.rst
    centos_sig_gluster.rst
    deploy_gluster6.rst
    suse/index
