@@ -176,9 +176,29 @@
 
 但是，我发现还是没有解决我的这个生产环境问题，依然报错账号密码错误
 
-.. note::
+- 对比了线上另外一个正常访问的grafana，在容器中 ``/etc/grafana/grafana.ini`` 有一项允许嵌入::
 
-   如果配置了 ``grafana`` 的 
+   [security]
+   allow_embedding = true
+
+我尝试添加也没有解决登陆(允许嵌入是不是降低了安全要求?)
+
+诡异的是，用户账号密码正确，而且也有一瞬间能够正常登陆，但是立即退出系统
+
+乌龙了
+--------
+
+我发现原来是一个业务流程申请错误导致的:
+
+- 我们在两个集群分别部署了 ``kube-prometheus-stack`` ，公司的负载均衡申请流程非常繁杂，完全是一个黑盒: 需要按照应用绑定，我现在回想起来，实际上就是按照 **应用名** 构建了 :ref:`nginx_reverse_proxy` 的 ``upstream`` 配置
+
+  - 但是公司的负载均衡将一个简单的 :ref:`nginx_reverse_proxy` 配置拆解成多个申请流程，没有任何原理说明，导致我将两个集群的 ``kube-prometheus-stack`` 申请为一个应用名，实际上反向带来会将 ``upstream`` 随机发给两个集群中的两套 ``grafana`` ，相互间数据踩踏
+
+我是怎么发现这个问题的呢:
+
+我发现有时候Grafana登陆时显示认证正确，直接登陆进去但是立即被系统推出(实际上是负载均衡恰好将认证发送到符合正确密码的那套 ``grafana`` ，但是认证后后续操作发送给错误的那套 ``grafana`` ，由于session不匹配直接被系统强制登出)，我突然想到会不会搞混了后端 ``grafana`` 系统，所以在登陆的时候同时打开了两个集群的 ``grafana`` pods日志观察，果然发现在登陆瞬间，两个不同集群的 ``grafana`` 都出现访问日志，而且从日志观察，错误接收数据的 ``grafana`` 系统出现了不应该出现的域名记录。
+
+**唉，真是一个惨痛的教训，折腾了好几天...**
 
 参考
 ======
@@ -188,7 +208,7 @@
 - `New CSRF check broken with raw IPv6 Host #45115 <https://github.com/grafana/grafana/issues/45115>`_
 - `Unable to Create/Save Dashboard after v8.3.5 Update #45117 <https://github.com/grafana/grafana/issues/45117>`_
 - `Origin not allowed error when reverse proxying grafana #8067 <https://github.com/linkerd/linkerd2/issues/8067>`_
-- `Alternative solution for “401: Unauthorized” in Grafana iframe card <https://community.home-assistant.io/t/alternative-solution-for-401-unauthorized-in-grafana-iframe-card/336991>`_ 在iframe card嵌入Grafana时候的解决方法讨论，思路就是不要出现跨站拒绝，主要思路:
+- `Alternative solution for “401: Unauthorized” in Grafana iframe card <https://community.home-assistant.io/t/alternative-solution-for-401-unauthorized-in-grafana-iframe-card/336991>`_ 在iframe card嵌入Grafana时候的解决方法讨论，思路就是不要出现跨站拒绝:
 
    - ``GF_AUTH_ANONYMOUS_ENABLED`` 或者 ``GF_SECURITY_ALLOW_EMBEDDING`` 设置到Grafana配置中::
 

@@ -19,7 +19,8 @@ Prometheus监控
    update_prometheus_config_k8s.rst
    prometheus_configuration.rst
    prometheus_service_discovery.rst
-   prometheus_query_basics.rst
+   kube-prometheus-stack_additionalScrapeConfigs.rst
+   promql/index
    prometheus_rules.rst
    prometheus_operator.rst
    prometheus_metrics_connect_refuse.rst
