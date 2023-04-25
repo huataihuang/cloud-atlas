@@ -1,7 +1,7 @@
-.. _prometheus_rules:
+.. _prometheus_recording_rules:
 
 ==========================
-Prometheus规则
+Prometheus 记录规则
 ==========================
 
 参考

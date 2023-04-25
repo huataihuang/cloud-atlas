@@ -53,6 +53,9 @@ PromQL查询案例
    sum(kube_node_status_condition{condition="NotReady",status="true"})
    sum(kube_node_spec_unschedulable) by (node)
 
+其他
+=====
+
 参考
 =======
 

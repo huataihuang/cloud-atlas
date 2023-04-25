@@ -16,6 +16,7 @@ Python Atlas
    network/index
    gui/index
    deploy/index
+   regular_exresssions.rst
 
 .. only::  subproject and html
 

@@ -97,6 +97,13 @@ suspend 和 resume 虚拟机
    virsh suspend z-dev
    virsh resume z-dev
 
+重命名虚拟机
+===============
+
+``virsh domrename`` 可以重命名虚拟机，例如我改变虚拟机用途，用于构建第二个 :ref:`kubernetes` 集群 :ref:`y-k8s` ::
+
+   virsh domrename z-k8s-n-6 y-k8s-m-1
+
 参考
 =======
 

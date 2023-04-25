@@ -17,3 +17,9 @@
 .. literalinclude:: kube-prometheus-stack_additionalScrapeConfigs/kube-prometheus-stack_values.yaml
    :language: yaml
    :caption: ``kube-prometheus-stack`` 添加 ``additionalScrapeConfigs``
+
+参考
+=====
+
+- `Prometheus: monitoring services using additional scrape config for Prometheus Operator <https://fabianlee.org/2022/07/08/prometheus-monitoring-services-using-additional-scrape-config-for-prometheus-operator/>`_
+- `prometheus-operator/Documentation/additional-scrape-config.md <https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/additional-scrape-config.md>`_
