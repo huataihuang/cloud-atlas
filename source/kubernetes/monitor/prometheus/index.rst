@@ -18,10 +18,10 @@ Prometheus监控
    helm3_prometheus_grafana.rst
    update_prometheus_config_k8s.rst
    prometheus_configuration.rst
+   promql/index
+   prometheus_rules/index
    prometheus_service_discovery.rst
    kube-prometheus-stack_additionalScrapeConfigs.rst
-   promql/index
-   prometheus_rules.rst
    prometheus_operator.rst
    prometheus_metrics_connect_refuse.rst
    prometheus_metrics_context_deadline_exceeded.rst
@@ -41,6 +41,7 @@ Prometheus监控
    aliyun_prometheus.rst
    prometheus_backup_and_restore.rst
    grafana_backup_and_restore.rst
+   prometheus_monitor_calico.rst
 
 
 推荐阅读:

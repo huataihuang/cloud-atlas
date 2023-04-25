@@ -9,6 +9,7 @@ curl
 
    curl_proxy.rst
    curl_show_request_headers.rst
+   curl_post_json.rst
 
 .. only::  subproject and html
 

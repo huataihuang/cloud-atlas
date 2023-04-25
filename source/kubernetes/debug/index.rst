@@ -23,3 +23,4 @@ Kubernetes排查
    pod_stuck_terminating.rst
    get_pods_special_node.rst
    fix_pod_has_unbound_immediate_persistentvolumeclaims.rst
+   fail_create_container_cannot_allocate_memory.rst
