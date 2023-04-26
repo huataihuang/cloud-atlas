@@ -10,4 +10,6 @@ Kubernetes集群(y-k8s)
 - 不同的 :ref:`cni` 例如 :ref:`calico`
 - 快速部署集群 :ref:`kubespray`
 
-我构建第二个 :ref:`kubernetes` 集群命名为 ``y-k8s`` 采用如下服务器配置
+我构建第二个 :ref:`kubernetes` 集群命名为 ``y-k8s`` 采用如下服务器配置:
+
+

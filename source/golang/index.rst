@@ -19,6 +19,7 @@ Go Atlas
    go_startup.rst
    go_startup_tips.rst
    go_package.rst
+   go_string_literals.rst
    go_template.rst
 
 .. only::  subproject and html

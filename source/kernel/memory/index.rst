@@ -8,6 +8,7 @@ Linux内存管理
    :maxdepth: 1
 
    linux_mmu.rst
+   slab_allocator.rst
    huge_memory_pages/index
    numa/index
    valgrind/index
