@@ -90,10 +90,14 @@ Red Hat官方解决方案
 - 对于RHEL7系统(RHEL 7.7及更高版本)，需要在内核命令行参数添加 ``cgroup.memory=nokmem`` 来禁止内核内存记账功能( **disable the kernel memory accounting** )
 - 目前RedHat内部私有bug修复补丁正在调研 `BZ#1925619 <https://bugzilla.redhat.com/show_bug.cgi?id=1925619>`_ (需要注意RHEL7已经进入Maintenance phase II, RedHat不保证这个bug一定修复)
 
+.. note::
+
+   :ref:`memcg_kmem` 解释内核内存扩展
+
 根因
 ~~~~~~~
 
-在分层记账(hierarchical accounting)的上下文(context)中，根据 ``mm/memcontrol.c`` 中的逻辑，只有在所有未决的内核内存记账(关联的slab对象)被删除以后，内存控制的cgroup才会被正确删除。即一旦页面被释放，并且相应的 ``kmem_cache`` (slab) 被笑会。此时，分配给每个内存控制的 cgroup ( ``memcg-ID`` )的唯一标识符在最后一次引用技术下乡时从 "私有IDR" (private IDR)中删除。所以，确实有可能在正常运行时消耗掉整个IDR。此时遇到 ``mkdir`` 返回 ``-ENOMEM`` (或无法分配内存)，即使同一层次结构中的
+在分层记账(hierarchical accounting)的上下文(context)中，根据 ``mm/memcontrol.c`` 中的逻辑，只有在所有未决的内核内存记账(关联的slab对象)被删除以后，内存控制的cgroup才会被正确删除。即一旦页面被释放，并且相应的 ``kmem_cache`` (slab) 被销毁。此时，分配给每个内存控制的 cgroup ( ``memcg-ID`` )的唯一标识符在最后一次引用计数下从 "私有IDR" (private IDR)中删除。所以，确实有可能在正常运行时消耗掉整个IDR。此时遇到 ``mkdir`` 返回 ``-ENOMEM`` (或无法分配内存)，即使同一层次结构中的
 ``cgroup`` 数量表明依然有可用空间(以创建额外的内存控制cgroup)。
 
 这个问题的已知/适当补丁解决方案是将 ``kmem`` 记账移动/重新设置为父内存cgroup(RHEL 8.1补丁)；但是RHEL7缺乏先决的几个补丁来修改内存记账基础架构，以便能够重新设置内存记账，所以这个补丁不太可能移植到RHEL 7。
