@@ -1,10 +1,10 @@
-.. _thanos:
+.. _cortex:
 
 ======================
-Thanos 分布式时序存储
+Cortex 分布式时序存储
 ======================
 
 .. toctree::
    :maxdepth: 1
 
-   thanos_startup.rst
+   cortex_startup.rst
