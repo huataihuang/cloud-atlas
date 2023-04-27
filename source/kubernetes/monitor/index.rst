@@ -14,10 +14,12 @@ Kubernetes监控
    prometheus/index
    grafana/index
    alertmanager/index
-   thanos/index
    mixins/index
-   m3/index
    opentelemetry/index
    jaeger/index
    node_health/index
    netdata.rst
+   thanos/index
+   cortex/index
+   m3/index
+   victoriametrics/index
