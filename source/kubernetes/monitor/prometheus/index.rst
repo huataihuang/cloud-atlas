@@ -44,8 +44,6 @@ Prometheus监控
    prometheus_monitor_calico.rst
    scalable/index
 
-
-
 推荐阅读:
 
 - `Prometheus操作指南 <https://github.com/yunlzheng/prometheus-book>`_ 这是阿里巴巴的yunlzheng撰写的Prometheus手册，非常完备，在github上有3k的star，特别是集成钉钉的webhook，可以解决国内用户的通知痛点
