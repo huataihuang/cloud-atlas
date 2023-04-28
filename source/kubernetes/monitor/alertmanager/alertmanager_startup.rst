@@ -40,6 +40,14 @@ Prometheus 通常与处理警报和警报路由的 AlertManager 结合使用:
 
    :ref:`curl_post_json` 是通用的 ``curl`` 方法，在 ``alertmanager`` 上可以用来测试数据路由
 
+配置 ``alertmanager.yml``
+===========================
+
+Alertmanager的配置主要包含两个部分:
+
+- 路由(route)
+- 接收器(receivers)
+
 参考
 =======
 

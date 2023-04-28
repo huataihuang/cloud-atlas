@@ -143,7 +143,6 @@ Manual forwarding
 
 .. literalinclude:: deploy_dnsmasq/dnsmasq.conf
    :language: ini
-   :linenos:
    :caption: dnsmasq简易配置
 
 上述域名就是我们用于DHCP和内部域名，这样我们在 ``/etc/hosts`` 中配置主机名解析时候就只需要配置短域名主机名就可以了，会自动扩展成FQDN完整域名。例如， ``/etc/hosts`` 配置::

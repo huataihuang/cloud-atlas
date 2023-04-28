@@ -13,10 +13,24 @@
 
 虽然在 ``prometheus`` 服务器pod中
 
-alertmanager.alertmanagerSpec.alertmanagerConfiguration``
+``alertmanager.config`` 定义
 ==============================================================
 
-``alertmanager.alertmanagerSpec.alertmanagerConfiguration`` 提供了指定 altermanager 的配置，这样就能够自己定制一些特定的 ``receivers`` ，不过可能更方便是直接 ``apply`` 
+``alertmanager.config`` 提供了指定 altermanager 的配置，这样就能够自己定制一些特定的 ``receivers`` ，不过可能更方便是直接 ``apply`` 
+
+.. literalinclude:: kube-prometheus-stack_alertmanager/kube-prometheus-stack.values
+   :language: yaml
+   :caption: 简单配置alertmanager的接收者就能够收到通知，这里采用 :ref:`prometheus-webhook-dingtalk`
+   :emphasize-lines: 39,41,45-47
+
+这里主要将默认配置修改如下:
+
+- 将 ``alertmanager.config`` 配置中 ``receiver`` 从 ``null`` 替换成需要接收的 :ref:`prometheus-webhook-dingtalk` 配置中的 ``target`` 名字，这里是 ``cloud_atlas_alert`` 
+- 添加 :ref:`prometheus-webhook-dingtalk` 的 ``webhook`` 配置，注意URL路径中包括了 ``target`` ( ``cloud_atlas_alert`` ) ，也就是 URL 必须是 ``http://<prometheus-webhook-dingtalk服务器IP>:8060/dingtalk/<target>/send``
+
+结合 :ref:`prometheus-webhook-dingtalk` 部署运行的服务器，就能立即收到钉钉通知(MarkDown格式)，并且能够 @ 指定用户(根据手机号码或者工号)，类似:
+
+.. figure:: ../../../_static/kubernetes/monitor/alertmanager/alert_dingtalk.png
 
 参考
 ======
@@ -25,3 +39,4 @@ alertmanager.alertmanagerSpec.alertmanagerConfiguration``
 - `Prometheus: Alerting <https://confluence.infn.it/display/CLOUDCNAF/3%29+Alerting>`_
 - `[kube-prometheus-stack] Alertmanager does not update secret with custom configuration options #1998 <https://github.com/prometheus-community/helm-charts/issues/1998>`_ 提供了一个CRD配置思路待验证
 - `How to overwrite alertmanager configuration in kube-prometheus-stack helm chart <https://stackoverflow.com/questions/71924744/how-to-overwrite-alertmanager-configuration-in-kube-prometheus-stack-helm-chart>`_
+- `[kube-prometheus-stack] Alertmanager does not update secret with custom configuration options #1998 <https://github.com/prometheus-community/helm-charts/issues/1998>`_ 这个issue的 ``values.yaml`` 可以参考

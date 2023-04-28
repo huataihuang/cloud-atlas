@@ -9,7 +9,9 @@ Prometheus有两种类型规则(two types of rules)需要配置:
 - 记录规则(recording rules)
 - 告警规则(alerting rules)
 
-要定制自己的Prometheus规则，需要创建一个包含规则的YAML文件，然后在 :ref:`prometheus_configuration` 中 ``rule_files`` 加载
+要定制自己的Prometheus规则，需要创建一个包含规则的YAML文件，然后在 :ref:`prometheus_configuration` 中 ``rule_files`` 加载。
+
+加载以后，在Prometheus的WEB界面 ``Rules`` 可以看到规则，切换到 ``Alerts`` 页面可以看到当前告警的活动状态
 
 规则语法检查
 ==============

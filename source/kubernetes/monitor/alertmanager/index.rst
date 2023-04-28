@@ -9,3 +9,5 @@ Alertmanager
 
    alertmanager_startup.rst
    kube-prometheus-stack_alertmanager.rst
+   notification/index
+   webhook_receiver/index

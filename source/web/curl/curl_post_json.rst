@@ -16,6 +16,22 @@ cURL提交json文件
    :language: bash
    :caption: 测试alertmanager
 
+钉钉支持提交json格式，并且可以传输 markdown 格式，这样可以嵌入图片以及链接:
+
+.. literalinclude:: curl_post_json/dingtalk_alert.json
+   :language: bash
+   :caption: 钉钉json告警文本
+
+这样就可以直接向钉钉群机器人提交通知:
+
+.. literalinclude:: curl_post_json/dingtalk_alert.sh
+   :language: bash
+   :caption: 钉钉json格式告警
+
+.. note::
+
+   MarkDown格式的通知中 @功能 我验证没有成功
+
 参考
 =======
 

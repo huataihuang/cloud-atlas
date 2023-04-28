@@ -41,6 +41,15 @@ Alerting rules可以根据Prometheus表达式定义条件，并将触发的报�
    
    Prometheus ``Alerts`` 页面可以看到当前活跃状态告警
 
+当配置了 ``Prometheus`` 的 ``Alert Rules`` 之后，只能在WEB界面看到，要真正发送到用户这里，需要配置 :ref:`alertmanager`
+
+告警通知中的 ``source`` URL地址
+=================================
+
+通过 :ref:`alertmanager` 发送出来的告警通知，默认是 Kubernetes 的 SVC 名称，实际上需要修改成用户能够访问的 Prometheus 的外部域名，类似 http://prometheus.cloud-atlas.io/graph 。这个修订是修改 ``prometheus`` 的命令行参数 ``--web.external-url`` : `关于模版中GeneratorURL的定义 #20 <https://github.com/timonwong/prometheus-webhook-dingtalk/issues/20>`_
+
+
+
 参考
 =====
 
