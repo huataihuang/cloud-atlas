@@ -17,6 +17,7 @@ Docker 镜像
    docker_multi-platform_images.rst
    dockerfile_best-practices.rst
    dockerfile_entrypoint_vs_cmd.rst
+   inspect_docker_image.rst
 
 .. only::  subproject and html
 

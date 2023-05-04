@@ -12,3 +12,4 @@ Alertmanager 通知(Webhook Receiver)
    :maxdepth: 1
 
    prometheus-webhook-dingtalk.rst
+   prometheus-webhook-dingtalk_template.rst
