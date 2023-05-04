@@ -39,16 +39,16 @@ helm配置
 
 - NVIDIA对社区方案参数做一些调整，所以先导出 chart 使用的变量(以便修订):
 
-.. literalinclude:: ../../gpu/intergrate_gpu_telemetry_into_k8s/helm_inspect_values_prometheus-stack
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/values.yaml
    :language: bash
    :caption: ``helm inspect values`` 输出Prometheus Stack的chart变量值
 
-- 修订一: 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点(实际只需要修改 ``type: ClusterIP`` 改为 ``type: NodePort`` 行，建议同时修改 ``stable-grafana`` ( ``helm install`` 时支持传递参数 ``--set grafana.service.type=NodePort`` ), ``alertmanager`` (9093/30903) 和 ``prometheus`` (9090/30090) 对应的 ``svc`` ，这里案例仅演示 ``prometheus`` 段落修改):
+- 修订一: 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点(实际只需要修改 ``type: ClusterIP`` 改为 ``type: NodePort`` 行，建议同时修改 ``stable-grafana`` ( ``helm install`` 时支持传递参数 ``--set grafana.service.type=NodePort`` ，通过增加 ``nodePort`` 指定 80/30080映射), ``alertmanager`` (9093/30903) 和 ``prometheus`` (9090/30090) 对应的 ``svc`` ):
 
-.. literalinclude:: ../../gpu/intergrate_gpu_telemetry_into_k8s/change_values_service_nodeport
+.. literalinclude:: z-k8s_gpu_prometheus_grafana/values.yaml
    :language: bash
    :caption: 修订服务类型NodePort
-   :emphasize-lines: 38,48,81
+   :emphasize-lines: 38,48,49,82
 
 .. note::
 
@@ -344,7 +344,7 @@ helm配置
 :ref:`k8s_ingress` 改进
 ========================
 
-我最初为了方便快速，采用了 ``NodePort`` 输出服务，但是在后续的 :ref:`grafana_behind_reverse_proxy` 遇到 ``"401 Unauthorized`` 报错，所以可能后续尝试改进成 :ref:`k8s_ingress` 模式
+我最初为了方便快速，采用了 ``NodePort`` 输出服务，所以简单部署了 :ref:`grafana_behind_reverse_proxy` ，后续尝试改进成 :ref:`k8s_ingress` 模式
 
 参考
 =======

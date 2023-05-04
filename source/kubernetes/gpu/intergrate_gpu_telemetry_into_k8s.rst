@@ -152,7 +152,7 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 
 - 将metrics端口 ``30090`` 作为 ``NodePort`` 输出在每个节点(实际建议修订)
 
-.. literalinclude:: intergrate_gpu_telemetry_into_k8s/change_values_service_nodeport
+.. literalinclude:: ../monitor/prometheus/z-k8s_gpu_prometheus_grafana/values.yaml
    :language: bash
    :caption: 修订输出端口30090
    :emphasize-lines: 38

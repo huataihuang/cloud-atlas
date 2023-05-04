@@ -76,6 +76,8 @@ Docker运行
 
 此时更新后的 ``alertmanager.yaml`` 之后，钉钉群机器人就会立即收到通知
 
+.. figure:: ../../../../_static/kubernetes/monitor/alertmanager/alert_dingtalk.png
+
 .. _prometheus_web.external-url:
 
 Prometheus的 ``web.external-url``
@@ -88,6 +90,16 @@ Prometheus的 ``web.external-url``
    :language: yaml
    :caption: 配置 ``kube-prometheus-stack`` 的 Prometheus外部访问URL
    :emphasize-lines: 13
+
+多个群通知
+===============
+
+参考 `如果是发送给多个群怎么配置？ #198 <https://github.com/timonwong/prometheus-webhook-dingtalk/issues/198>`_ 可以尝试将钉钉消息发给多个群::
+
+   - name: 'rx'
+     webhook_configs:
+     - url: 'http://monitor-alertmanager-webhook-dingtalk:8060/dingtalk/r1/send'
+     - url: http://monitor-alertmanager-webhook-dingtalk:8060/dingtalk/r2/send'
 
 访问设置页面
 =============
