@@ -7,7 +7,7 @@ Linux文件系统
 .. toctree::
    :maxdepth: 1
 
-   gpt.rst
+   gpt_partition.rst
    parted.rst
    choice_linux_filesystem.rst
    xfs/index

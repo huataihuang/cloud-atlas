@@ -76,6 +76,19 @@ Docker运行
 
 此时更新后的 ``alertmanager.yaml`` 之后，钉钉群机器人就会立即收到通知
 
+.. _prometheus_web.external-url:
+
+Prometheus的 ``web.external-url``
+===================================
+
+默认通知中 ``Graph`` 是使用 :ref:`prometheus` 的内部域名 ``http://kube-prometheus-stack-1680-prometheus.prometheus:9090/graph`` ，这个URL通常在外部无法访问(当然你也可以在公司内部增加这个域名解析)。比较好的解决方法是采用 ``--web.external-url`` 参数传递给 :ref:`prometheus` ( :ref:`alertmanager` 也有这样一个参数) 。对于 :ref:`z-k8s_gpu_prometheus_grafana` 所采用的 ``kube-prometheus-stack`` 修订配置: 参考 `f663fb6
+<https://github.com/prometheus-operator/kube-prometheus/commit/f663fb6062c1d345ee7719ad82ec36ed650a943e>`_ 修订位置应该是 ``prometheus.prometheusSpec.externalURL`` (是的，我想到了 :ref:`kube-prometheus-stack_tsdb_retention` 曾经设置过向 prometheus 传递运行参数 ``--storage.tsdb.retention.time=180d`` )
+
+.. literalinclude:: ../../prometheus/kube-prometheus-stack_tsdb_retention/vaules.yaml
+   :language: yaml
+   :caption: 配置 ``kube-prometheus-stack`` 的 Prometheus外部访问URL
+   :emphasize-lines: 13
+
 访问设置页面
 =============
 

@@ -13,6 +13,7 @@ Machine Learning Atlas
 .. toctree::
    :maxdepth: 1
 
+   gpt/index
    startup/index
    studio/index
    hardware/index

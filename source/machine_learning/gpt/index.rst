@@ -1,20 +1,13 @@
-.. _freebsd:
+.. _gpt:
 
 =================================
-FreeBSD
+GPT
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_freebsd.rst
-   startup/index
-   admin/index
-   build/index
-   desktop/index
-   network/index
-   virtual/index
-
+   think_gpt.rst
 
 .. only::  subproject and html
 
