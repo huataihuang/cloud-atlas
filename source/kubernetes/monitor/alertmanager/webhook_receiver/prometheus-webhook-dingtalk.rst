@@ -6,10 +6,32 @@ prometheus-webhook-dingtalk
 
 `timonwong / prometheus-webhook-dingtalk <https://github.com/timonwong/prometheus-webhook-dingtalk>`_ 是Prometheus官方推荐的第三方 ``Alertmanager Webhook Receiver`` ，用于支持通过钉钉 ``DingTalk`` 发送告警通知。
 
-安装
-=======
+``systemd`` 方式运行可执行程序
+====================================
 
-- 从 `timonwong / prometheus-webhook-dingtalk <https://github.com/timonwong/prometheus-webhook-dingtalk>`_ GitHub的Release可以下载到官方编译的执行程序
+.. note::
+
+   对于没有容器运行环境的系统，可以直接下载二进制可执行程序并结合 :ref:`systemd` 管理脚本来实现服务启动和停止，也非常方便
+
+- 从 `timonwong / prometheus-webhook-dingtalk <https://github.com/timonwong/prometheus-webhook-dingtalk>`_ GitHub的Release可以下载到官方编译的执行程序，例如AMD64版本 ``prometheus-webhook-dingtalk-2.1.0.linux-amd64.tar.gz`` (将程序复制到 ``/opt`` 目录，后续配置也以这个为准)::
+
+   tar xfz prometheus-webhook-dingtalk-2.1.0.linux-amd64.tar.gz
+   mv prometheus-webhook-dingtalk-2.1.0.linux-amd64 /opt/prometheus-webhook-dingtalk
+
+- 编辑 ``/etc/systemd/system/prometheus-webhook-dingtalk.service`` :
+
+.. literalinclude:: prometheus-webhook-dingtalk/prometheus-webhook-dingtalk.service
+   :language: bash
+   :caption: 编辑创建 ``/etc/systemd/system/prometheus-webhook-dingtalk.service``
+
+- 采用 :ref:`prometheus-webhook-dingtalk_template` 的配置文件 ``config.yml`` 和 ``template.tmpl`` ，将这两个文件复制到 ``/opt/prometheus-webhook-dingtalk`` 目录下(注意修订一下 ``config.yml`` 指定正确的 ``template.tmpl`` 位置)
+
+- 启动服务::
+
+   systemctl daemon-reload
+   systemctl start prometheus-webhook-dingtalk
+   systemctl enable prometheus-webhook-dingtalk
+   ss -tnl | grep 8060
 
 Docker运行
 ============
@@ -111,4 +133,4 @@ Prometheus的 ``web.external-url``
 
 - `timonwong / prometheus-webhook-dingtalk <https://github.com/timonwong/prometheus-webhook-dingtalk>`_
 - `将钉钉接入 Prometheus AlertManager WebHook <https://theo.im/blog/2017/10/16/release-prometheus-alertmanager-webhook-for-dingtalk/>`_ ``prometheus-webhook-dingtalk`` 原作者的blog
-
+- `二进制方式部署配置prometheus-webhook-dingtalk+alertmanager自动告警 <https://www.yoyoask.com/?p=4514>`_ 比较详细的操作文档
