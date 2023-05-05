@@ -27,6 +27,7 @@ Android Hack
    android_pac.rst
    android_monitor.rst
    android_otg.rst
+   project_soli.rst
 
 .. only::  subproject and html
 

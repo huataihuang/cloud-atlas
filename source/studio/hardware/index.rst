@@ -11,6 +11,7 @@ Studio硬件
 
    intel_core_i7_4850hq.rst
    thinkpad_x220.rst
+   thinkpad_x220_replace_fan.rst
    intel_core_i5_2410m.rst
 
 .. only::  subproject and html
