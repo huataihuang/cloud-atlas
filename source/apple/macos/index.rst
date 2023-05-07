@@ -31,6 +31,7 @@ macOS
    macos_ftdi_serial.rst
    macos_vnc.rst
    extfs.rst
+   vlc_play_bluray.rst
 
 .. only::  subproject and html
 
