@@ -9,6 +9,7 @@ Android Hack
 .. toctree::
    :maxdepth: 1
 
+   check_secondhand_phone.rst
    ab_seamless_update.rst
    magisk.rst
    magisk_root_ota.rst

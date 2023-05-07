@@ -16,6 +16,7 @@ Kubernetes管理
    delete_cluster.rst
    cordon_node.rst
    drain_node.rst
+   evict_pod.rst
    remove_node.rst
    set_k8s_worker_internal_ip.rst
    port_forward_access_k8s_app.rst
