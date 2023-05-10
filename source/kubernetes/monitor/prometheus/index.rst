@@ -22,6 +22,7 @@ Prometheus监控
    prometheus_rules/index
    prometheus_service_discovery.rst
    kube-prometheus-stack_additionalScrapeConfigs.rst
+   kube-prometheus-stack_scrape_node_metrics.rst
    prometheus_operator.rst
    prometheus_metrics_connect_refuse.rst
    prometheus_metrics_context_deadline_exceeded.rst

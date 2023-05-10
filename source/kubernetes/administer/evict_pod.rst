@@ -4,7 +4,7 @@
 驱逐(evicted) Pods
 ===================
 
-在 :ref:`drain_node` 可以看到Kubernetes是通过 
+在 :ref:`drain_node` 可以看到Kubernetes是通过 ``evict`` pods方式完成的。此外，当发生 :ref:`k8s_garbage_collecttion` ， ``kubelet`` 也会自动触发 驱逐(evicted) Pods
 
 参考
 ======

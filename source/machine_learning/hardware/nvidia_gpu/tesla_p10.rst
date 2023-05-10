@@ -86,3 +86,4 @@ Tesla P10 和 GeForce GTX 1080 Ti 采用了相同的GPU核心 GP102 ，也就是
 ======
 
 - `techpowerup GPU Database - NVIDIA Tesla P10 <https://www.techpowerup.com/gpu-specs/tesla-p10.c3750>`_
+- `Deep Learning Inference on P40 GPUs <https://dl.dell.com/manuals/all-products/esuprt_software/esuprt_it_ops_datcentr_mgmt/high-computing-solution-resources_white-papers13_en-us.pdf>`_
