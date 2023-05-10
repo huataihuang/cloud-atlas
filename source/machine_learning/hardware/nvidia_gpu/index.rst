@@ -16,6 +16,7 @@ NVIDIA GPU
    cuda_cores_vs._tensor_cores.rst
    gtx_1050_ti.rst
    tesla_p10.rst
+   tesla_p100.rst
    nvidia_a100.rst
    nvidia_sxm_socket.rst
    install_nvidia_linux_driver.rst

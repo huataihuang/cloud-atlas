@@ -67,3 +67,5 @@ Android系统内查询IMEI:
 - `大船靠岸，激动暂缓：以 Pixel 为例谈二手/水货 Android 手机验机 <https://sspai.com/prime/story/inspecting-imported-used-pixel>`_
 - `Water Resistance Tester – 手机气密性检测，根据气压计测试手机防水性[Android] <https://www.appinn.com/water-resistance-tester-for-android/>`_
 - `教你无需下水一招检测手机的防水性能是否失效 <https://www.toutiao.com/article/6464384149821063693/?source=seo_tt_juhe>`_
+- `can not check imei pixel 4a <https://www.reddit.com/r/GooglePixel/comments/vbq61k/can_not_check_imei_pixel_4a/>`_
+- `Find your IMEI and other Pixel phone ID numbers <https://support.google.com/pixelphone/answer/10402530?hl=en>`_ Google官方帮助

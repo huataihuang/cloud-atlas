@@ -1,7 +1,7 @@
 .. _k8s_volumes:
 
 ================
-Kubernetes卷
+Kubernetes存储卷
 ================
 
 在容器环境中，容器内部的数据层( 见 :ref:`docker_storage_driver` )存在以下限制(缺点):

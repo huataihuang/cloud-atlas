@@ -9,6 +9,7 @@ NVIDIA CUDA
 
    install_nvidia_cuda.rst
    install_cuda_ubuntu.rst
+   cuda_oom.rst
 
 .. only::  subproject and html
 

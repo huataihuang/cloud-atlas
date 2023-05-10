@@ -12,7 +12,7 @@ Pixel 4 (XL)是Google 2019年10月15日推出的旗舰(Google每年都推出作�
 - 相机: 方形摄像头模块，模块内有两个摄像头(1220万像素和1600万像素)、一个闪光灯和一个传感器，支持录制4K视频，但仅支持30帧录制
 - :ref:`project_soli` 雷达感应器: 支持Motion Sense功能(第一款且是唯一一款支持手机)
 - 支持Android 13(可能也会支持Android 14)
-- Pixel 4 适用于所有美国运营商并支持 LTE 频段 1/2/3/4/5/7/8/12/13/14/17/18/19/20/25/26/28/29/30/ 38/39/40/41/46/48/66/71 (据报导已默认支持全球所有运营商的VoLTE)
+- Pixel 4 适用于所有美国运营商并支持 LTE 频段 1/2/3/4/5/7/8/12/13/14/17/18/19/20/25/26/28/29/30/ 38/39/40/41/46/48/66/71 ( :strike:`据报导已默认支持全球所有运营商的VoLTE` `Google's June security update ensures recent Pixels will be able to make VoLTE calls <https://www.androidpolice.com/google-pixel-volte-roaming-update/>`_ 不过Google只激活了Pixel 6 和 7的VoLTE，依然需要想办法 :ref:`pixel_4_volte` )
 - 双频 Wi-Fi、蓝牙 5 和 NFC
 - 谷歌助手(Google Assistant): 只需说“Hey Google”，从显示屏底角向上滑动，或挤压手机的 Active Edge 侧边以启用
 
