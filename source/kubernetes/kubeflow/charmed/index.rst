@@ -1,15 +1,13 @@
-.. _kubeflow:
+.. _charmed_kubeflow:
 
 =========================================
-Kubeflow - Kubernetes机器学习工作流平台
+Charmed Kubeflow
 =========================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_kubeflow.rst
-   install_kubeflow.rst
-   charmed/index
+   intro_charmed_kubeflow.rst
 
 .. only::  subproject and html
 

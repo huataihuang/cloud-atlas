@@ -25,6 +25,19 @@ virsh管理虚拟机
   - ``--bypass-cache`` 这个参数结合 ``managedsave`` 使用
   - ``--force-boot`` 放弃任何 ``managedsave`` 选项并导致全新启动
 
+``console`` 连接虚拟机
+=========================
+
+- 连接到运行中的虚拟机::
+
+   virsh console z-k8s-m-0
+
+注意，如果之前有连接终端会话没有结束，则会出现报错::
+
+   error: operation failed: Active console session exists for this domain
+
+- 在终端连接会话中断开连接: 按下 ``ctrl+shift+]``
+
 .. _vm_autostart:
 
 配置虚拟机自动启动

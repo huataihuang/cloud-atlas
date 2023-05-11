@@ -51,9 +51,9 @@ Tesla P10是一块 ``隐形运算卡`` ，你在网上几乎找不到资料，�
 技术规格
 ------------
 
-.. csv-table:: Tesla P10 vs. GeForce GTX 1080 Ti
+.. csv-table:: Tesla P10 vs. P40 vs. P100 vs. GeForce GTX 1080 Ti
    :file: tesla_p10/tesla_spec.csv
-   :widths: 10, 30, 30, 30
+   :widths: 20, 20, 20, 20, 20
    :header-rows: 1
 
 Tesla P10 和 GeForce GTX 1080 Ti 采用了相同的GPU核心 GP102 ，也就是 Pascal 架构，工艺和技术参数几乎相同，主要差异:
