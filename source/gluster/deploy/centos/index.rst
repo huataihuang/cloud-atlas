@@ -1,15 +1,14 @@
-.. _kvm_performance:
+.. _gluster_deploy_centos:
 
 =================================
-KVM 性能优化
+CentOS平台GlusterFS部署
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   kvm_performace_tunnig.rst
-   kvm_native_write_msr.rst
-   kvm_disk_performance.rst
+   centos_gluster_init.rst
+   build_glusterfs_11_for_centos_7.rst
 
 .. only::  subproject and html
 

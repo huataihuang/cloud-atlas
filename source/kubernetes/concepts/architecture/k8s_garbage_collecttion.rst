@@ -8,6 +8,8 @@ Kubernetes垃圾回收
 
    我在测试 :ref:`kube-prometheus-stack_alert_config` 时，验证磁盘告警，向磁盘目录下填充数据，意外发现Kuberntes会自动将磁盘打爆(默认超过85%)的节点容器驱逐
 
+
+
 参考
 =======
 

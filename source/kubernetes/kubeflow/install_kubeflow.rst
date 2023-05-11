@@ -11,10 +11,21 @@ Kubeflow安装方式
 
 有两种安装和运行Kubeflow的方式:
 
-- 使用打包的kubeflow发行版，可以针对不同平台(如云计算厂商)
+- 使用打包的 ``kubeflow发行版`` ，可以针对不同平台(如云计算厂商)
 - 使用 `MNIST on Kubeflow on Vanilla k8s <https://github.com/kubeflow/examples/tree/master/mnist#vanilla>`_ 在 :ref:`vanilla_k8s` 上部署 `Kubeflow Manifests <https://github.com/kubeflow/manifests>`_ 
 
   - 对于个人部署的 :ref:`priv_cloud_infra` 采用 `Kubeflow Manifests Installation <https://github.com/kubeflow/manifests#installation>`_
+
+发行版kubeflow
+----------------
+
+- Canonical(也就是 :ref:`ubuntu_linux` 发行商)开发了 :ref:`charmed_kubeflow` ，可以在所有合适的Kubernetes上部署。目前我部署的 :ref:`z-k8s` 也是在 :ref:`ubuntu_linux` 上，所以这是目前我首先尝试的实践线路
+- :ref:`openshift` 是 :ref:`redhat_linux` 发行商红帽的产品，也是可以自建Kubeflow的方式，我计划在下一阶段实践
+
+Kubeflow Manifests
+----------------------
+
+``Kubeflow Manifests`` 是在纯粹的Kubernetes机群上通过 :ref:`kustomize` 和 :ref:`kubectl` 完成Kubeflow部署，是一种更为底层和复杂的部署技术，将在积累一定经验之后再实践
 
 参考
 =======

@@ -20,6 +20,90 @@ GPT的答复
 - 使用FP16数据类型。使用FP16数据类型可以减少GPU内存的占用。
 - 调整PyTorch的内存分配策略。可以通过设置max_split_size_mb参数来避免内存碎片，从而减少内存占用。
 
+参考方案(待验证)
+==================
+
+参考 `Solving the “RuntimeError: CUDA Out of memory” error <https://medium.com/@snk.nitin/how-to-solve-cuda-out-of-memory-error-850bb247cfb2>`_ 执行以下步骤
+
+- ``pip3`` 执行安装模块:
+
+.. literalinclude:: cuda_oom/pip_install_gputil_torch
+   :language: bash
+   :caption: pip安装gputil和torch
+
+- 检查内存使用:
+
+.. literalinclude:: cuda_oom/gpu_usage.py
+   :language: python
+   :caption: 获取GPU使用率
+
+输出显示:
+
+.. literalinclude:: cuda_oom/gpu_usage_output
+   :caption: 获取GPU使用率输出显示
+
+- 使用以下代码清理缓存:
+
+.. literalinclude:: cuda_oom/empty_cache.py
+   :language: python
+   :caption: 清理CUDA缓存
+
+.. literalinclude:: cuda_oom/empty_cache_1.py
+   :language: python
+   :caption: 清理CUDA缓存(另一种方法)
+
+.. literalinclude:: cuda_oom/empty_cache_2.py
+   :language: python
+   :caption: 清理CUDA缓存(另一种方法)
+
+完整的代码可以参考如下:
+
+.. literalinclude:: cuda_oom/empty_cache_full.py
+   :language: python
+   :caption: 清理CUDA缓存完整代码参考
+
+.. note::
+
+   缓存清理方法可能不能适应持续运行的任务，有些任务可能就是需要使用大量缓存，清理也可能带来效率下降或者依然会不断加载缓存
+
+降低batch大小
+=================
+
+另一种比较简单的方法是尝试降低 ``batch size`` ，也就是运行参数 ``--bs X --eval_bs Y``
+
+举例，将运行命令::
+
+   CUDA_VISIBLE_DEVICES=0 python main.py \
+       --model allenai/unifiedqa-t5-base \
+       --user_msg rationale --img_type detr \
+       --bs 8 --eval_bs 4 --eval_acc 10 --output_len 512 \
+       --final_eval --prompt_format QCM-LE
+
+参数 ``--bs 8 --eval_bs 4`` 可以尝试修改成更低的值   
+
+降低精度
+===================
+
+如果在使用 Pytorch-Lighting ，可以尝试将精度改为 ``float16`` 。这样可能会带来预期的双精度和Float tensor之间不匹配，但是这个设置能够提升内存效率并且性能上有非常小的折衷，所以是一种可行的选择。
+
+待实践...
+
+多GPU
+==========
+
+在多GPU系统中，可以使用 ``CUDA_VISIBLE_DEVICES`` 环境变量来选择使用的GPU:
+
+.. literalinclude:: cuda_oom/cuda_visible_env
+   :language: bash
+   :caption: 设置 ``CUDA_VISIBLE_DEVICES`` 环境变量可以决定使用的GPU设备
+
+也可以在 :ref:`python` 代码中设置:
+
+.. literalinclude:: cuda_oom/cuda_visible.py
+   :language: bash
+   :caption: Python代码中设置 ``CUDA_VISIBLE_DEVICES`` 环境变量可以决定使用的GPU设备
+
+
 参考
 =======
 
