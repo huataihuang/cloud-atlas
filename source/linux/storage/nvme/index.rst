@@ -8,6 +8,7 @@ Linux NVMe
    :maxdepth: 1
 
    nvme.rst
+   u2_m2.rst
    samsung_pm9a1.rst
    nvme-cli.rst
    nvme_ssd_management.rst

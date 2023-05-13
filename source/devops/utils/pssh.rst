@@ -20,21 +20,29 @@ pssh - 并行SSH
 Ubuntu安装pssh
 -----------------
 
-在Ubuntu上通过安装 ``pssh`` 软件包可以完成安装，但是直接执行 ``pssh`` 命令会提示无法找到指令。实际上Ubuntu安装 ``pssh`` 软件包后实际的执行程序是采用了 ``parallel-`` 开头的命令，例如 ``parallel-ssh`` 和 ``parallel-scp`` 等。所以，为了方便使用，可以建立软链接::
+在Ubuntu上通过安装 ``pssh`` 软件包可以完成安装，但是直接执行 ``pssh`` 命令会提示无法找到指令。实际上Ubuntu安装 ``pssh`` 软件包后实际的执行程序是采用了 ``parallel-`` 开头的命令，例如 ``parallel-ssh`` 和 ``parallel-scp`` 等。所以，为了方便使用，可以建立软链接:
 
-   cd /usr/bin
-   sudo ln -s parallel-ssh pssh
-   sudo ln -s parallel-scp pscp
-   sudo ln -s parallel-rsync prsync
-   sudo ln -s parallel-nuke pnuke
-   sudo ln -s parallel-slurp pslurp
+.. literalinclude:: pssh/ubuntu_instal_pssh
+   :language: bash
+   :caption: 在Ubuntu环境安装pssh
 
-CentOS安装mpssh
------------------
+CentOS 7安装pssh
+-------------------
 
-CentOS可以使用EPEL安装pssh，但是现在(CentOS 8)只提供MPSSH(Mass Parallel Secure Shell)来并发执行SSH::
+- CentOS 7需要首先安装EPEL:
 
-   dnf --enablerepo=epel -y install mpssh
+.. literalinclude:: ../../linux/redhat_linux/admin/dnf/yum_install_epel
+   :language: bash
+   :caption: yum命令安装EPEL仓库
+
+CentOS 8安装mpssh
+---------------------
+
+CentOS可以使用EPEL安装pssh，但是现在(CentOS 8)只提供MPSSH(Mass Parallel Secure Shell)来并发执行SSH:
+
+.. literalinclude:: pssh/centos8_instal_pssh
+   :language: bash
+   :caption: 在CentOS 8环境安装pssh
 
 使用方法和pssh类似，但是没有提供 ``-A`` 参数，所以只能使用密钥认证，无法使用密码认证。这个问题我主要通过复用ssh连接方式解决，即在 ``~/.ssh/config`` 中添加配置::
 
