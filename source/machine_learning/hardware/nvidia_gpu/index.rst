@@ -8,6 +8,7 @@ NVIDIA GPU
    :maxdepth: 1
 
    nvidia_gpu_infra.rst
+   nvlink/index
    nvidia-smi.rst
    nvidia_mig/index
    ../../../kvm/vgpu/index
