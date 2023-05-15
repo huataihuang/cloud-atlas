@@ -11,6 +11,8 @@ NVML
 
 `nvidia-ml-py <https://pypi.org/project/nvidia-ml-py/>`_ 提供了Python绑定的 `NVIDIA Management Library (NVML) <https://developer.nvidia.com/nvidia-management-library-nvml>`_ ，可以方便开发
 
+:ref:`nvidia-smi_nvlink` 可以提供 :ref:`nvidia_nvlink` 的运行状态以及功能、计数，方便构建自己的 :ref:`prometheus_nvlink`
+
 参考
 ======
 
