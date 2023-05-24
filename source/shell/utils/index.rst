@@ -17,8 +17,11 @@ Shell 实用工具
    find.rst
    losetup.rst
    jq.rst
+   split.rst
    parallel.rst
    rsync.rst
+   nohup.rst
+   nice.rst
 
 .. only::  subproject and html
 

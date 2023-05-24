@@ -10,3 +10,8 @@ CentOS目前依然是生产环境中常用的操作系统，虽然由于 :ref:`r
 =======
 
 - 根据 `Gluster Community Packages <https://docs.gluster.org/en/latest/Install-Guide/Community-Packages/>`_ 信息可以知道社区现在已经不再提供停止更新的CentOS 7系列的GlusterFS软件包，所以面对的第一个挑战就是自己 :ref:`build_glusterfs_11_for_centos_7`
+
+准备
+======
+
+- 安装 :ref:`pssh` 帮助批量执行命令:

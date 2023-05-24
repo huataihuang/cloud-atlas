@@ -57,9 +57,9 @@ NVMe双SSD扩展套件
 
 - :ref:`u2` 接口支持热插拔，并且U.2接口SSD磁盘几乎都是企业级，可靠性和耐久性远超民用级SSD磁盘
 - 需要对 :ref:`hpe_dl360_gen9` 做一些改造，拆除掉默认的 SATA/SAS 接口背板，直接将 ``SFF-8643转U.2 (SFF-8639) NVMe U2转接线`` 和 :ref:`u2` 接口SSD硬盘对接
-- 同样使用 slot 1 和 slot 3 :ref:`pcie_bifurcation` 硬件拆分卡拆分成 4个 x4(共计8个转接口)，连接8块 U.2接口SSD磁盘(保持高性能)
+- 同样使用 slot 1 或者 slot 3 :ref:`pcie_bifurcation` 硬件拆分卡拆分成 8个 x2，连接8块 U.2接口SSD磁盘(保持高性能)
 
-.. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_u2.jpg
+.. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_u2.png
 
 .. note::
 

@@ -23,4 +23,19 @@ screen窗口
 
 修改方法：激活窗口，按 ``Ctrl-a`` ，然后输入 ``:number x`` （ ``x`` 就是新窗口编号数字）
 
-- 
+
+.. _screen_dm:
+
+``screen`` 后台( ``detach`` )运行多个任务
+=============================================
+
+screen 的参数 ``-dm`` 非常时候 **脱机** 运行大量程序，我在使用 :ref:`awk` 转换 ``yaml`` 文件成为一行内容时遇到一个困难: 需要同时运行上百个转换脚本(处理上百个列表文件，每个列表文件中内容为1w行yaml文件名)。
+
+最初我使用 ``nohup`` 来运行上百个转换脚本(同一个脚本，但是传递不同的需要处理的列表文件)。我发现有一个奇怪的 **踩踏** 问题: 只有第一个nohup运行的转换是正常的，其他转换的换行符替换成 \n 都失败了。我怀疑是因为我在同一个shell中执行并发导致，同一个脚本调用nohup，全局变量可能对于每个启动 :ref:`nohup` 的脚本实际上是同一个变量:
+
+改为使用 ``screen -dm bash -c "script.sh xx"`` 来避免这个问题，果然并行启动100+个screen来运行程序都没有问题。
+
+参考
+======
+
+- `How to execute a command in screen and detach? <https://superuser.com/questions/454907/how-to-execute-a-command-in-screen-and-detach>`_
