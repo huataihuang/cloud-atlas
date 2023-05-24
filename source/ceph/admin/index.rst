@@ -10,6 +10,7 @@ Ceph 管理
    warn_mon_disk_low.rst
    ceph_compact_mon_store.rst
    ceph_disk_health_smart_mon.rst
+   ceph_status_crash.rst
 
 .. only::  subproject and html
 
