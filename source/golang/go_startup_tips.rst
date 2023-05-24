@@ -51,7 +51,7 @@ Go是静态类型语言，也就是编译时即确定变量类型，变量类型
 
 .. literalinclude:: go_startup_tips/for_range.go
    :language: go
-   :caption: ``for...range``获得map的键和值
+   :caption: ``for...range`` 获得map的键和值
 
 参考
 ==========

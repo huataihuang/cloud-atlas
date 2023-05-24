@@ -92,7 +92,7 @@ Misc
 
 .. note::
 
-Andorid系统默认不能连接隐藏的网络，需要在设置添加无线SSID时候选择 ``Advanced options >> Hidden network >> Yes`` 才能连接到Hidden(stealth) WiFi network。否则会始终提示WiFi status是 ``out of range`` (参考 `Android 10: Connect To A Hidden Network <https://supportcommunity.zebra.com/s/article/000020035?language=en_US>`_ )
+   Andorid系统默认不能连接隐藏的网络，需要在设置添加无线SSID时候选择 ``Advanced options >> Hidden network >> Yes`` 才能连接到Hidden(stealth) WiFi network。否则会始终提示WiFi status是 ``out of range`` (参考 `Android 10: Connect To A Hidden Network <https://supportcommunity.zebra.com/s/article/000020035?language=en_US>`_ )
 
 参考
 =====
