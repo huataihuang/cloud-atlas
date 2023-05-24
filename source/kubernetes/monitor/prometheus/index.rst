@@ -21,6 +21,7 @@ Prometheus监控
    promql/index
    prometheus_rules/index
    prometheus_service_discovery.rst
+   prometheus_service_discovery_file_based.rst
    kube-prometheus-stack_additionalScrapeConfigs.rst
    kube-prometheus-stack_scrape_node_metrics.rst
    prometheus_operator.rst

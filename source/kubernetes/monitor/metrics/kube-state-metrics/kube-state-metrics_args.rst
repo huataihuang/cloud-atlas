@@ -1,8 +1,8 @@
-.. _kube-state-metrics:
+.. _kube-state-metrics_args:
 
-===========================
-kube-state-metrics (KSM)
-===========================
+===================================
+kube-state-metrics (KSM) 运行参数
+===================================
 
 ``metric-labels-allowlist`` 运行参数
 ======================================
