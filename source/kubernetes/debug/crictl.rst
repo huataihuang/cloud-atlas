@@ -42,6 +42,15 @@ crictl
    :language: yaml
    :caption: crictl配置文件 /etc/crictl.yaml
 
+.. note::
+
+   如果没有配置 ``/etc/crictl.yaml`` 执行 ``crictl ps`` 会提示错误::
+
+      WARN[0000] runtime connect using default endpoints: [unix:///var/run/dockershim.sock unix:///run/containerd/containerd.sock unix:///run/crio/crio.sock unix:///var/run/cri-dockerd.sock]. As the default settings are now deprecated, you should set the endpoint instead.
+      WARN[0000] image connect using default endpoints: [unix:///var/run/dockershim.sock unix:///run/containerd/containerd.sock unix:///run/crio/crio.sock unix:///var/run/cri-dockerd.sock]. As the default settings are now deprecated, you should set the endpoint instead.
+      E0525 16:36:22.395915  241945 remote_runtime.go:390] "ListContainers with filter from runtime service failed" err="rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing dial unix /var/run/dockershim.sock: connect: no such file or directory\"" filter="&ContainerFilter{Id:,State:&ContainerStateValue{State:CONTAINER_RUNNING,},PodSandboxId:,LabelSelector:map[string]string{},}"
+      FATA[0000] listing containers: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial unix /var/run/dockershim.sock: connect: no such file or directory"
+
 crictl命令案例
 ==============
 
@@ -115,8 +124,10 @@ crictl命令案例
 
    crictl logs --tail=20 901b1dc06eed1
 
-运行pod sandbox
-==================
+.. _crictl_run_pod_sandbox:
+
+crictl运行pod sandbox
+========================
 
 使用 ``crictl`` 运行pod sandobx可以用来debug容器运行时。
 
@@ -246,7 +257,6 @@ crictl命令案例
               └─2346698 /usr/local/bin/containerd
 
    此外检查 ``systemd-cgls`` 输出，就可以看到容器都是位于 ``systemd`` 的 ``cgroups`` 之下，这就表明正确使用了 ``systemd cgroups``
-      
 
 创建容器
 ==========
@@ -275,10 +285,54 @@ crictl命令案例
 
 这里的字串是之前创建 sandbox返回的
 
-   
+``crictl inspectp`` 获取pods配置
+==================================
+
+- 执行 ``crictl ps`` 可以检查节点上 Kubernetes 运行的容器以及pods对应关系:
+
+.. literalinclude:: crictl/crictl_ps
+   :language: bash
+   :caption: ``crictl ps`` 可以检查节点上的容器以及对应的pods关系
+
+此时输出内容类似:
+
+.. literalinclude:: crictl/crictl_ps_output
+   :language: bash
+   :caption: ``crictl ps`` 可以检查节点上的容器以及对应的pods关系输出内容
+   :emphasize-lines: 4
+
+- 执行 ``crictl pods`` 可以获得pods列表以及详细的namespace等信息:
+
+.. literalinclude:: crictl/crictl_pods
+   :language: bash
+   :caption: ``crictl pods`` 可以检查节点上pods
+
+输出信息:
+
+.. literalinclude:: crictl/crictl_pods_output
+   :language: bash
+   :caption: ``crictl pods`` 可以检查节点上pods输出信息
+   :emphasize-lines: 3
+
+执行 ``crictl pods -q`` 则输出完整pod的ID，类似:
+
+.. literalinclude:: crictl/crictl_pods_q_output
+   :language: bash
+   :caption: ``crictl pods -q`` 可以检查节点上pods输出详细ID
+   :emphasize-lines: 2
+
+- 通过 ``crictl inspectp`` 可以检查pods配置:
+
+.. literalinclude:: crictl/crictl_inspectp
+   :language: bash
+   :caption: ``crictl inspectp`` 可以检查节点上pods详细配置
+
+
+
 
 参考
 ======
 
 - `Debugging Kubernetes nodes with crictl <https://kubernetes.io/docs/tasks/debug-application-cluster/crictl/>`_
 - `how to configure systemd cgroup with 1.3.X #4203 <https://github.com/containerd/containerd/issues/4203>`_ containerd新版支持systemd cgroup配置方法
+- `Troubleshooting CRI-O container runtime issues <https://docs.openshift.com/container-platform/4.8/support/troubleshooting/troubleshooting-crio-issues.html>`_ Red Hat :ref:`openshift` 异常排查使用 ``crictl`` 提供了一些案例

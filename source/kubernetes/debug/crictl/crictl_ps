@@ -1,0 +1,1 @@
+crictl ps

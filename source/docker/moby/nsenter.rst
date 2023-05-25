@@ -42,6 +42,12 @@ nsenter使用
 
 ``docker ps -lq`` 命令则是返回最新运行的容器的container ID
 
+.. note::
+
+   使用 ``nsenter`` 进入pods，依然要求容器内部有shell，否则也会报错::
+
+      nsenter: failed to execute /bin/bash: No such file or directory
+
 参考
 ======
 

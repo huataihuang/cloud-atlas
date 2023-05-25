@@ -19,8 +19,7 @@
 
 这样使用本地 ``remote viewer`` 访问 ``spice://127.0.0.1:5900`` 就可以看到Windows桌面，也就能够进行安装了。
 
-
-- 创建Windows虚拟机::
+- 创建 :ref:`win10` 虚拟机::
 
    virt-install \
      --network bridge=virbr0,model=virtio \
@@ -40,6 +39,31 @@
      WARNING  No console to launch for the guest, defaulting to --wait -1
 
 Windows系统没有包涵virtio驱动，所以在系统安装时候必须提供开源社区提供的 `virtio-win/kvm-guest-drivers-windows <https://github.com/virtio-win/kvm-guest-drivers-windows>`_ 提供了最新的release光盘镜像。
+
+- 创建 :ref:`win7` 虚拟机(失败):
+
+.. literalinclude:: deploy_win_vm/win7
+   :language: bash
+   :caption: 创建 :ref:`win7` 虚拟机，使用 :ref:`ceph_rbd_libvirt` 启动用UEFI(验证失败)
+
+不过，我遇到非常奇怪的问题，Win7启动安装失败，直接进入了 UEFI 操作界面，参考 `Windows 7 single gpu passthrough vm? <https://www.reddit.com/r/VFIO/comments/tweb7x/windows_7_single_gpu_passthrough_vm/>`_ 有一段解释:
+
+这是由于installer并没有为UEFI, NVME 或 USB3 构建，需要将Win 7替换成Win10才能支持。这样才能加载驱动。不过对于Windows 7纯净的UEFI(non-CSM booting)不能共奏，除非能够Flashboot绕过这个我问题
+
+比较简单的方法是暂时放弃UEFI，改为传统的BIOS模式。不过 参考 :ref:`ovmf_gpu_nvme` ，实际上Win7也可以启动用OVMF，待实践(步骤比较复杂)，当前先采用BIOS模式
+
+.. literalinclude:: deploy_win_vm/win7_bios
+   :language: bash
+   :caption: 创建 :ref:`win7` 虚拟机，使用 :ref:`ceph_rbd_libvirt` 启动用BIOS
+
+.. note::
+
+   这里我实际没有重新开始安装，而是修订 ``virsh edit`` 虚拟机配置，去除UEFI，然后重新启动进行安装
+
+   还是遇到一个问题，能够看到从cd-rom启动，但是停滞在 ``Booting from DVD/CD ...`` ，准备删除虚拟机重新开始看看
+
+:strike:`虽然 Win7 安装时不能选择uefi支持` ，但是应该可以在安装以后进行转换。参考 `QEMU/KVM Change Existing Win10 from BIOS to UEFI <https://www.reddit.com/r/VFIO/comments/xusob5/qemukvm_change_existing_win10_from_bios_to_uefi/>`_ ，毕竟微软官方文档说明Win 7是支持UEFI的。后续待实践
+
 
 在arch linux中，通过AUR可以安装 virtio-win 软件包::
 
