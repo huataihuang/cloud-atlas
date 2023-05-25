@@ -4,12 +4,59 @@
 Prometheus监控对象metrics显示"context deadline exceeded"
 =========================================================
 
+.. _coredns_context_deadline_exceeded:
+
+:ref:`coredns` "context deadline exceeded"
+=============================================
+
 我在排查 :ref:`prometheus_metrics_connect_refuse` 发现有的被监控对象并不是 ``connection refused`` ，而是显示错误 ``context deadline exceeded`` ，例如 :ref:`coredns` :
 
 .. figure:: ../../../_static/kubernetes/monitor/prometheus/prometheus_metrics_context_deadline_exceeded.png
    :scale: 50
 
 可以看到这2个 :ref:`coredns` 数据采集超过10秒导致报错
+
+- 检查 :ref:`coredns` 的pods::
+
+   # kubectl -n kube-system get pods -o wide | grep coredns
+   coredns-8f645447b-9c8x5                       1/1     Running                 0          59d     10.233.89.1     i-2ze6nk43mbc7xxpcb0as       <none>           <none>
+   coredns-8f645447b-f8slb                       1/1     Running                 0          59d     10.233.123.1    i-2ze6nk43mbc7xxpcb0af       <none>           <none>
+   coredns-8f645447b-p655f                       1/1     Running                 0          59d     10.233.72.176   control001                   <none>           <none>
+   coredns-8f645447b-t4wm5                       1/1     Running                 0          54d     10.233.78.8     control003                   <none>           <none>
+   coredns-8f645447b-vshsq                       1/1     Running                 0          59d     10.233.97.1     i-2ze6nk43mbc7xxpcb0ag       <none>           <none>
+
+- 进入异常pods检查metrics:
+
+.. note::
+
+   `How to get into CoreDNS pod kuberrnetes? <https://stackoverflow.com/questions/60666170/how-to-get-into-coredns-pod-kuberrnetes>`_ coredns 的容器没有提供 :ref:`shell` ，所以无法直接使用 ``kubectl exrc`` (实际上也无法使用 :ref:`nsenter` )
+
+   此外，对于 :ref:`containerd` 维护建议采用 :ref:`crictl` 完成，接近于 :ref:`docker` 操作命令以及功能支持
+
+一些探索见 :ref:`crictl` 和 :ref:`crictl_sidecar_debug_container` ，不过我的实践还么有成功。实际当前解决方法还是对比部署差异来解决(因为有一个节点coredns是正确获取了监控信息)
+
+参考 `[EKS] [request]: Add kube-dns service port for metrics #965 <https://github.com/aws/containers-roadmap/issues/965>`_ (AWS的kube-dns)，实际上在coredns中，决定能否被抓取的配置可以检查:
+
+.. literalinclude:: prometheus_metrics_context_deadline_exceeded/svc_coredns
+   :language: bash
+   :caption: 获取coredns的svc
+
+这里输出信息
+
+.. literalinclude:: prometheus_metrics_context_deadline_exceeded/svc_coredns_output
+   :language: bash
+   :caption: 获取coredns的svc输出信息
+
+可以看到端口有 ``9153/TCP`` ，对应着 Prometeheus 监控抓取配置(检查yaml):
+
+.. literalinclude:: prometheus_metrics_context_deadline_exceeded/svc_coredns_output_yaml
+   :language: bash
+   :caption: 获取coredns的svc输出信息yaml详情
+   :emphasize-lines: 7,8
+
+晕倒...似乎是 :ref:`coredns` 部署问题，由于不是我部署的系统，尚未摸清解决方法
+
+.. _dcgm-exporter_context_deadline_exceeded:
 
 :ref:`dcgm-exporter` "context deadline exceeded"
 ==================================================
@@ -90,6 +137,11 @@ Prometheus监控对象metrics显示"context deadline exceeded"
 
 .. figure:: ../../../_static/kubernetes/monitor/prometheus/prometheus_gpu_metrics_context_deadline_exceeded.png
    :scale: 50
+
+乌龙
+-------
+
+经过观察日志和对比排查，发现 :ref:`aliyun_starship` 实际上是包装了 :ref:`dcgm-exporter` 的综合性Agent，不能同时运行，否则就会出现上述 :ref:`dcgm-exporter` 不断crash的问题。
 
 参考
 ======

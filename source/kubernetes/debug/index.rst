@@ -8,6 +8,7 @@ Kubernetes排查
    :maxdepth: 1
 
    crictl.rst
+   crictl_sidecar_debug_container.rst
    get_container_shell.rst
    get_k8s_pod_logs.rst
    kubelet_cert_expire.rst

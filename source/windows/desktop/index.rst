@@ -8,6 +8,7 @@ Windows Desktop
    :maxdepth: 1
 
    win7.rst
+   win10.rst
    bing_wallpaper.rst
 
 .. only::  subproject and html
