@@ -14,6 +14,7 @@ GlusterFS部署实践，将不断完善和改进，所以最终方案会和最�
    deploy_gluster6.rst
    suse/index
    centos/index
+   ubuntu/index
 
 .. only::  subproject and html
 

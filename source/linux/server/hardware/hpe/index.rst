@@ -14,6 +14,7 @@ HPE服务器
    dl360_bios_upgrade.rst
    dl360_config_mem.rst
    pcie_bifurcation.rst
+   plx_8747_pcie_bifurcation.rst
    dl360_tesla_p10.rst
    hpe_dl360_gen9_hard_drive_kits.rst
    flexiblelom_bay_intel_i350.rst

@@ -11,6 +11,7 @@ Windows Desktop
    win10.rst
    delete_old_win_update_files.rst
    bing_wallpaper.rst
+   win7_firewall_open_port.rst
 
 .. only::  subproject and html
 
