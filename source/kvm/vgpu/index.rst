@@ -9,6 +9,7 @@ NVIDIA Virtual GPU (vGPU)
    :maxdepth: 1
 
    intro_nvidia_vgpu.rst
+   install_vgpu_license_server.rst
    vgpu_unlock.rst
    vgpu_startup.rst
 

@@ -137,9 +137,11 @@ Ceph块设备支持QEMU/KVM，通过 ``libvirt`` 可以使用Ceph块设备:
 
 .. note::
 
-   Ceph提供了一个避免每次输入参数的方法::
+   Ceph提供了一个避免每次输入参数的方法:
 
-      export CEPH_ARGS="--keyring /etc/ceph/client.libvirt.keyring --id libvirt -p libvirt-pool"
+   .. literalinclude:: ceph_rbd_libvirt/ceph_args
+      :language: bash
+      :caption: 用户环境变量设置 ``CEPH_ARGS`` 可以方便执行 ``rbd`` 命令
 
    设置了上述环境变量之后，就可以直接使用简化的操作::
 

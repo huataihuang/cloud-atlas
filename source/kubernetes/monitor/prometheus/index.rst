@@ -38,6 +38,7 @@ Prometheus监控
    kube-prometheus-stack_etcd.rst
    kube-prometheus-stack_etcd_http.rst
    kube-prometheus-stack_extraargs.rst
+   kube-prometheus-stack_coredns.rst
    monitor_etcd_with_prometheus_operator.rst
    kube-prometheus-stack_longhorn.rst
    aliyun_prometheus.rst
