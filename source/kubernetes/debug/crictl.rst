@@ -51,6 +51,19 @@ crictl
       E0525 16:36:22.395915  241945 remote_runtime.go:390] "ListContainers with filter from runtime service failed" err="rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing dial unix /var/run/dockershim.sock: connect: no such file or directory\"" filter="&ContainerFilter{Id:,State:&ContainerStateValue{State:CONTAINER_RUNNING,},PodSandboxId:,LabelSelector:map[string]string{},}"
       FATA[0000] listing containers: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial unix /var/run/dockershim.sock: connect: no such file or directory"
 
+在 :ref:`fedora` 中我配置了上述 ``/etc/crictl.yaml`` 后执行 ``crictl ps`` 依然遇到报错::
+
+   FATA[0000] validate service connection: CRI v1 runtime API is not implemented for endpoint "unix:///var/run/containerd/containerd.sock": rpc error: code = Unimplemented desc = unknown service runtime.v1.RuntimeService
+
+参考 `crictl rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService #356 <https://github.com/kubernetes-sigs/cri-tools/issues/356>`_ 这看起来是 :ref:`containerd` 和 :ref:`crictl` 版本不匹配导致的(建议采用相同版本)，例如我的环境::
+
+   # containerd --version
+   containerd containerd.io 1.6.20 2806fc1057397dbaeefbea0e4e17bddfbd388f38
+   # crictl --version
+   crictl version v1.26.0
+
+
+
 crictl命令案例
 ==============
 
@@ -336,3 +349,4 @@ crictl运行pod sandbox
 - `Debugging Kubernetes nodes with crictl <https://kubernetes.io/docs/tasks/debug-application-cluster/crictl/>`_
 - `how to configure systemd cgroup with 1.3.X #4203 <https://github.com/containerd/containerd/issues/4203>`_ containerd新版支持systemd cgroup配置方法
 - `Troubleshooting CRI-O container runtime issues <https://docs.openshift.com/container-platform/4.8/support/troubleshooting/troubleshooting-crio-issues.html>`_ Red Hat :ref:`openshift` 异常排查使用 ``crictl`` 提供了一些案例
+- `containerd 1.4.9 Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService <https://serverfault.com/questions/1074008/containerd-1-4-9-unimplemented-desc-unknown-service-runtime-v1alpha2-runtimese>`_

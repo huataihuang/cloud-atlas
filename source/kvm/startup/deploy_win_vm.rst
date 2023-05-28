@@ -40,6 +40,10 @@
 
 Windows系统没有包涵virtio驱动，所以在系统安装时候必须提供开源社区提供的 `virtio-win/kvm-guest-drivers-windows <https://github.com/virtio-win/kvm-guest-drivers-windows>`_ 提供了最新的release光盘镜像。
 
+.. note::
+
+   实践验证 :ref:`macos` 内置的 vnc  客户端访问安装程序的VNC界面存在问题，我尝试发现目前(2023年) 在 App Store中提供的 ``Remote Ripple`` 非常兼容
+
 - 创建 :ref:`win7` 虚拟机(失败):
 
 .. literalinclude:: deploy_win_vm/win7
@@ -58,12 +62,13 @@ Windows系统没有包涵virtio驱动，所以在系统安装时候必须提供�
 
 .. note::
 
-   这里我实际没有重新开始安装，而是修订 ``virsh edit`` 虚拟机配置，去除UEFI，然后重新启动进行安装
+   :strike:`这里我实际没有重新开始安装，而是修订 virsh edit 虚拟机配置，去除UEFI，然后重新启动进行安装`
 
-   还是遇到一个问题，能够看到从cd-rom启动，但是停滞在 ``Booting from DVD/CD ...`` ，准备删除虚拟机重新开始看看
+   还是遇到一个问题，能够看到从cd-rom启动，但是停滞在 ``Booting from DVD/CD ...`` ，所以删除虚拟机重新开始::
+
+      sudo virsh undefine --nvram z-win7 --remove-all-storage
 
 :strike:`虽然 Win7 安装时不能选择uefi支持` ，但是应该可以在安装以后进行转换。参考 `QEMU/KVM Change Existing Win10 from BIOS to UEFI <https://www.reddit.com/r/VFIO/comments/xusob5/qemukvm_change_existing_win10_from_bios_to_uefi/>`_ ，毕竟微软官方文档说明Win 7是支持UEFI的。后续待实践
-
 
 在arch linux中，通过AUR可以安装 virtio-win 软件包::
 

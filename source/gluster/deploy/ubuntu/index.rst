@@ -1,16 +1,13 @@
-.. _windows_desktop:
+.. _gluster_deploy_ubuntu:
 
 =================================
-Windows Desktop
+Ubuntu平台GlusterFS部署
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   win7.rst
-   win10.rst
-   delete_old_win_update_files.rst
-   bing_wallpaper.rst
+   deploy_gluster_ubuntu_zfs.rst
 
 .. only::  subproject and html
 
