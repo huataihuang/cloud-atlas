@@ -7,7 +7,7 @@ BIND
 .. toctree::
    :maxdepth: 1
 
-   introduce_bind.rst
+   intro_bind.rst
 
 .. only::  subproject and html
 

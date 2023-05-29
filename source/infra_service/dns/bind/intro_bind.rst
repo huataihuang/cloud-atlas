@@ -1,4 +1,4 @@
-.. _introduce_bind:
+.. _intro_bind:
 
 =================
 BIND简介
