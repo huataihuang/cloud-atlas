@@ -19,6 +19,12 @@ Ubuntu/Debian安装pip和venv
    apt install python3-pip
    apt install python3-venv
 
+在 :ref:`ubuntu_linux` 22.04 LTS则安装 ``python3-virtualenv`` :
+
+.. literalinclude:: virtualenv/ubuntu_virtualenv
+   :language: bash
+   :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``python3-virtualenv``
+
 如果安装pip2则执行::
 
    apt install python-pip
