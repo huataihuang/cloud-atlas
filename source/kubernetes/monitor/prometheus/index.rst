@@ -28,6 +28,8 @@ Prometheus监控
    prometheus_metrics_connect_refuse.rst
    prometheus_metrics_context_deadline_exceeded.rst
    prometheus_monitor_kubelet_controller-manager_scheduler.rst
+   prometheus_info-level_alert_inhibition.rst
+   prometheus_rule_failures.rst
    using_prometheus.rst
    z-k8s_gpu_prometheus_grafana.rst
    kube-prometheus-stack_persistent_volume.rst

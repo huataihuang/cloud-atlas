@@ -42,6 +42,10 @@ Kubernetes是2015年由Google开发并捐赠给Google和Linux基金会共同组�
 
 从Kubernetes 1.13(2018年12月发布)，CoreDNS就成为了Kubernetes的默认DNS。也就是说，现在CoreDNS已经默认安装在几乎所有Kubernetes集群。
 
+.. note::
+
+   `fengyun.rui <https://github.com/rfyiamcool>`_ 有一篇 `源码分析 kubernetes coredns 插件开发和服务发现的实现原理 <https://xiaorui.cc/archives/7346>`_ 建议学习
+
 参考
 ======
 

@@ -8,6 +8,7 @@ BIND
    :maxdepth: 1
 
    intro_bind.rst
+   dig.rst
 
 .. only::  subproject and html
 

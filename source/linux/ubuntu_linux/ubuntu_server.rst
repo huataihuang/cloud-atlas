@@ -28,9 +28,11 @@ Ubuntu Server
 
    echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-- 安装Server版本之后，有一些必要的软件包推荐安装::
+- 安装Server版本之后，有一些必要的软件包推荐安装:
 
-   sudo apt install parted nmon network-manager zsh openconnect ipmitool lm-sensors
+.. literalinclude:: ubuntu_server/apt_install
+   :language: bash
+   :caption: 安装必要工具软件包
 
 .. note::
 
