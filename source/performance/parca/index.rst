@@ -1,15 +1,13 @@
-.. _performance:
+.. _parca:
 
 =================================
-Performance Atlas
+Parca持续性能分析
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   performance_tools/index
-   parca/index
-   debug_java.rst
+    
+   intro_parca.rst
 
 .. only::  subproject and html
 

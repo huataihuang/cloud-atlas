@@ -1,0 +1,18 @@
+
+function run_coredns() {
+apiserver_ip=`hostname -i`
+
+# DNS端口映射为553, Metrics端口映射为59153
+docker run -d \
+  --restart=always \
+  -v /root/coredns/config/:/etc/coredns/ \
+  -v /root/coredns/serviceaccount/:/var/run/secrets/kubernetes.io/serviceaccount/ \
+  -v /etc/resolv.conf:/etc/resolv.conf \
+  -p 553:53 -p 59153:9153 \
+  -e KUBERNETES_SERVICE_PORT_HTTPS=6443 \
+  -e KUBERNETES_SERVICE_PORT=6443 \
+  -e KUBERNETES_SERVICE_HOST=${apiserver_ip} \
+  docker.io/coredns/coredns:1.6.7 -conf /etc/coredns/Corefile
+}
+
+run_coredns

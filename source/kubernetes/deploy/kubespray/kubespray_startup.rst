@@ -124,7 +124,61 @@ Kubespray快速起步
 
 然后再次执行部署
 
-如果一切顺利(取决于你的网络连接，特别是需要无障碍访问internet)，就会运行起一个完整的生产规格的Kubernetes
+如果一切顺利(取决于你的网络连接，特别是需要无障碍访问internet)，就会运行起一个完整的生产规格的Kubernetes::
+
+   kubectl get nodes -o wide
+
+显示集群已经部署完成::
+
+   NAME        STATUS   ROLES           AGE    VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+   y-k8s-m-1   Ready    control-plane   5h9m   v1.24.7   192.168.8.116   <none>        Ubuntu 22.04.2 LTS   5.15.0-71-generic   containerd://1.7.1
+   y-k8s-m-2   Ready    control-plane   5h8m   v1.24.7   192.168.8.117   <none>        Ubuntu 22.04.2 LTS   5.15.0-71-generic   containerd://1.7.1
+   y-k8s-m-3   Ready    control-plane   5h8m   v1.24.7   192.168.8.118   <none>        Ubuntu 22.04.2 LTS   5.15.0-71-generic   containerd://1.7.1
+   y-k8s-n-1   Ready    <none>          5h6m   v1.24.7   192.168.8.119   <none>        Ubuntu 22.04.2 LTS   5.15.0-71-generic   containerd://1.7.1
+   y-k8s-n-2   Ready    <none>          5h6m   v1.24.7   192.168.8.120   <none>        Ubuntu 22.04.2 LTS   5.15.0-71-generic   containerd://1.7.1
+
+检查系统部署pods::
+
+   kubectl get pods -A -o wide
+
+显示 ``kube-system`` 部署了基础pods::
+
+   NAMESPACE     NAME                                      READY   STATUS    RESTARTS        AGE     IP              NODE        NOMINATED NODE   READINESS GATES
+   kube-system   calico-kube-controllers-6dfcdfb99-4rgxb   1/1     Running   0               5h26m   10.233.78.65    y-k8s-n-2   <none>           <none>
+   kube-system   calico-node-442kp                         1/1     Running   0               5h27m   192.168.8.118   y-k8s-m-3   <none>           <none>
+   kube-system   calico-node-bcwb7                         1/1     Running   0               5h27m   192.168.8.116   y-k8s-m-1   <none>           <none>
+   kube-system   calico-node-m7mfs                         1/1     Running   0               5h27m   192.168.8.117   y-k8s-m-2   <none>           <none>
+   kube-system   calico-node-n78sg                         1/1     Running   0               5h27m   192.168.8.120   y-k8s-n-2   <none>           <none>
+   kube-system   calico-node-xmngx                         1/1     Running   0               5h27m   192.168.8.119   y-k8s-n-1   <none>           <none>
+   kube-system   coredns-645b46f4b6-k466l                  1/1     Running   0               5h25m   10.233.93.194   y-k8s-m-3   <none>           <none>
+   kube-system   coredns-645b46f4b6-s5vnj                  1/1     Running   0               5h26m   10.233.121.1    y-k8s-m-2   <none>           <none>
+   kube-system   dns-autoscaler-659b8c48cb-hjd49           1/1     Running   0               5h26m   10.233.93.193   y-k8s-m-3   <none>           <none>
+   kube-system   kube-apiserver-y-k8s-m-1                  1/1     Running   1               5h30m   192.168.8.116   y-k8s-m-1   <none>           <none>
+   kube-system   kube-apiserver-y-k8s-m-2                  1/1     Running   1               5h29m   192.168.8.117   y-k8s-m-2   <none>           <none>
+   kube-system   kube-apiserver-y-k8s-m-3                  1/1     Running   1               5h29m   192.168.8.118   y-k8s-m-3   <none>           <none>
+   kube-system   kube-controller-manager-y-k8s-m-1         1/1     Running   4 (5h24m ago)   5h30m   192.168.8.116   y-k8s-m-1   <none>           <none>
+   kube-system   kube-controller-manager-y-k8s-m-2         1/1     Running   2 (5h29m ago)   5h30m   192.168.8.117   y-k8s-m-2   <none>           <none>
+   kube-system   kube-controller-manager-y-k8s-m-3         1/1     Running   2               5h29m   192.168.8.118   y-k8s-m-3   <none>           <none>
+   kube-system   kube-proxy-4vhcn                          1/1     Running   0               5h28m   192.168.8.118   y-k8s-m-3   <none>           <none>
+   kube-system   kube-proxy-9zss7                          1/1     Running   0               5h28m   192.168.8.119   y-k8s-n-1   <none>           <none>
+   kube-system   kube-proxy-bbv8b                          1/1     Running   0               5h28m   192.168.8.117   y-k8s-m-2   <none>           <none>
+   kube-system   kube-proxy-dfpkc                          1/1     Running   0               5h28m   192.168.8.120   y-k8s-n-2   <none>           <none>
+   kube-system   kube-proxy-z4b8k                          1/1     Running   0               5h28m   192.168.8.116   y-k8s-m-1   <none>           <none>
+   kube-system   kube-scheduler-y-k8s-m-1                  1/1     Running   1               5h30m   192.168.8.116   y-k8s-m-1   <none>           <none>
+   kube-system   kube-scheduler-y-k8s-m-2                  1/1     Running   1               5h30m   192.168.8.117   y-k8s-m-2   <none>           <none>
+   kube-system   kube-scheduler-y-k8s-m-3                  1/1     Running   1               5h29m   192.168.8.118   y-k8s-m-3   <none>           <none>
+   kube-system   nginx-proxy-y-k8s-n-1                     1/1     Running   0               5h27m   192.168.8.119   y-k8s-n-1   <none>           <none>
+   kube-system   nginx-proxy-y-k8s-n-2                     1/1     Running   0               5h27m   192.168.8.120   y-k8s-n-2   <none>           <none>
+   kube-system   nodelocaldns-2klzt                        1/1     Running   0               5h25m   192.168.8.116   y-k8s-m-1   <none>           <none>
+   kube-system   nodelocaldns-jxpsr                        1/1     Running   0               5h25m   192.168.8.117   y-k8s-m-2   <none>           <none>
+   kube-system   nodelocaldns-lcxjz                        1/1     Running   0               5h25m   192.168.8.120   y-k8s-n-2   <none>           <none>
+   kube-system   nodelocaldns-q6x9t                        1/1     Running   0               5h25m   192.168.8.119   y-k8s-n-1   <none>           <none>
+   kube-system   nodelocaldns-ztl8p                        1/1     Running   0               5h25m   192.168.8.118   y-k8s-m-3   <none>           <none>
+
+可以看到:
+
+- :ref:`calico` 网络
+- 为何默认部署了 ``nginx-proxy`` ?待研究
 
 参考
 ======

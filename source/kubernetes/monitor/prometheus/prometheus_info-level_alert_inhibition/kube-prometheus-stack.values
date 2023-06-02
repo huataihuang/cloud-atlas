@@ -1,0 +1,56 @@
+## Configuration for alertmanager
+## ref: https://prometheus.io/docs/alerting/alertmanager/
+##
+alertmanager:
+...
+  ## Alertmanager configuration directives
+  ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
+  ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
+  ##
+  config:
+    global:
+      resolve_timeout: 5m
+    inhibit_rules:
+      - source_matchers:
+          - 'severity = critical'
+        target_matchers:
+          - 'severity =~ warning|info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'severity = warning'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'alertname = InfoInhibitor'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+    route:
+      group_by: ['namespace']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      routes:
+      - matchers:
+        - "alertname = Watchdog"
+        receiver: "Watchdog"
+      - matchers:
+        - "alertname = InfoInhibitor"
+        receiver: "null"
+      - matchers:
+        - "severity = critical"
+        receiver: cloud_atlas_alert
+    receivers:
+    - name: cloud_atlas_alert
+      webhook_configs:
+        - url: http://192.168.6.115:8060/dingtalk/cloud_atlas_alert/send
+    - name: "null"
+    - name: "Watchdog"
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
