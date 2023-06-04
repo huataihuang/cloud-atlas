@@ -25,7 +25,6 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    numa/index
    intel_vt/index
    iommu/index
-   sr-iov/index
    intel_gvt/index
    vgpu/index
    hardware_virtual.rst

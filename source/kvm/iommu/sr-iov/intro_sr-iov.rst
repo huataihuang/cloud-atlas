@@ -1,10 +1,10 @@
-.. _introduce_sr-iov:
+.. _intro_sr-iov:
 
 ===========================
 SR-IOV技术简介
 ===========================
 
-.. figure:: ../../_static/kvm/sr-iov/sr-iov_implementation.png
+.. figure:: ../../../_static/kvm/iommu/sr-iov/sr-iov_implementation.png
 
 参考
 =======
