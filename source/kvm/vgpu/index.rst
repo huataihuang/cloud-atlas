@@ -9,9 +9,12 @@ NVIDIA Virtual GPU (vGPU)
    :maxdepth: 1
 
    intro_nvidia_vgpu.rst
+   vgpu_release.rst
    install_vgpu_license_server.rst
-   vgpu_unlock.rst
    vgpu_startup.rst
+   install_vgpu_manager.rst
+   install_vgpu_guest_driver.rst
+   vgpu_unlock.rst
 
 .. only::  subproject and html
 

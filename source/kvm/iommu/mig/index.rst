@@ -1,16 +1,13 @@
-.. _sr-iov:
+.. _mig:
 
 ========================================
-Sigle Root I/O Virtualization(SR-IOV)
+NVIDIA Multi-Instance GPU (MIG)
 ========================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_sr-iov.rst
-   sr-iov_hardware.rst
-   config_sr-iov_network.rst
-   libvirt_network_pool_sr-iov.rst
+   intro_mig.rst
 
 .. only::  subproject and html
 

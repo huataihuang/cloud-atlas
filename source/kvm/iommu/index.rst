@@ -17,6 +17,9 @@ IOMMU
    install_nvidia_linux_driver_in_ovmf_vm.rst
    tainted_host-cpu.rst
    vfio.rst
+   open-iov/index
+   sr-iov/index
+   mig/index
    compare_iommu_native_nvme.rst
    tunning/index
    smmu/index

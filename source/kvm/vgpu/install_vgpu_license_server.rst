@@ -70,6 +70,16 @@
 
 访问页面上导航 ``License Server`` >> ``License Management`` ，导入许可证
 
+疑问
+=======
+
+我在 :ref:`win7` 虚拟机配置了 2c4g 规格，但是在运行License Server过一段时间就会遇到一个 ``Your computer is low on memory`` 警告，但是观察内存使用，主机还剩余 1.5GB 内存空闲，不知道为何会出现这样的告警:
+
+.. figure:: ../../_static/kvm/vgpu/win7_low_memory.png
+   :scale: 50
+
+内存调整为 6G
+
 参考
 ======
 

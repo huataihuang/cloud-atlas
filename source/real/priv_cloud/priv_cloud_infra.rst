@@ -9,6 +9,12 @@
 
 2021年10月，我购买了 :ref:`hpe_dl360_gen9` 来实现完整的云计算模拟，规划是采用一台二手服务器:
 
+- 物理服务器安装 :ref:`ubuntu_linux`
+
+  - 其实我更倾向于底层物理服务器采用高度定制精简的 :ref:`gentoo_linux` 甚至 :ref:`lfs_linux` ，但是由于经费紧张，我需要采用 :ref:`vgpu` 构建 :ref:`gpu_k8s` ， :strike:`只能` 采用商业化较好的 :ref:`ubuntu_linux` 为好(或者 :ref:`redhat_linux` )
+  - 如果有多块物理GPU卡，可以考虑采用 :ref:`gentoo_linux` 来构建自己定制的底层操作系统(希望有一天我有充足的GPU卡来完成这个构想实践)
+  - 另一种激进的方法我构思采用 :ref:`gentoo_linux` 上 :ref:`docker` 运行 :ref:`ubuntu_linux` 来实现 :ref:`vgpu` (CRAZY，只是我的YY)
+
 - 通过 :ref:`kvm_nested_virtual` 运行大量的一级KVM虚拟机，一级KVM虚拟机作为运行 :ref:`openstack` 的物理机，部署一个完整的OpenStack集群
 
   - 物理服务器运行 :ref:`cockpit` 可以集成 :ref:`stratis` 存储，以及 :ref:`ovirt` ，所以在第一层虚拟化上，可以不用自己手工部署 :ref:`kvm` ，而是集成到 oVirt
@@ -170,7 +176,7 @@
 
 - ``z-o7k`` 系列构建 :ref:`openstack` 集群
 
-  - 采用 :ref:`ubuntu_linux` 20.04 部署
+  - 采用 :ref:`ubuntu_linux` :strike:`20.04` 22.04 部署
   - 启用 :ref:`kvm_nested_virtual` 实现第二层虚拟化
 
 - ``z-o3t`` 系列构建 :ref:`ovirt` 集群
@@ -181,7 +187,7 @@
 
 - ``z-k8s`` 系列构建 :ref:`kubernetes` 集群
 
-  - 采用 :ref:`ubuntu_linux` 20.04 部署
+  - 采用 :ref:`ubuntu_linux` 22.04 部署
   - 采用 :ref:`vgpu` 将 :ref:`tesla_p10` 输出到多个工作节点虚拟机，实现分布式 :ref:`machine_learning`
   - 采用 :ref:`rook` 来部署一个集成到Kubernetes的 :ref:`ceph` 集群
 
