@@ -94,7 +94,16 @@ admissionWebhooks错误
    :language: bash
    :caption: 使用 ``helm upgrade`` prometheus-community/kube-prometheus-stack 报错信息
 
-我参考 `[stable/prometheus-operator] pre-upgrade hooks failed with prometheus-operator-admission: dial tcp 172.20.0.1:443: i/o timeout on EKS cluster #20480 <https://github.com/helm/charts/issues/20480>`_ 将 ``admissionWebhooks`` 改成 ``false``
+我参考 `[stable/prometheus-operator] pre-upgrade hooks failed with prometheus-operator-admission: dial tcp 172.20.0.1:443: i/o timeout on EKS cluster #20480 <https://github.com/helm/charts/issues/20480>`_ 将 ``admissionWebhooks`` 改成 ``false`` :
+
+.. literalinclude:: kube-prometheus-stack_persistent_volume/prometheusOperator_admissionWebhooks_enabled_false
+   :language: yaml
+   :caption: 关闭 Prometheus Operator 的 admissionWebhooks
+   :emphasize-lines: 21
+
+这里关闭掉 Prometheus Operator 的 admissionWebhooks 没有直接影响，但是不会自动检查Prometheus错误格式的rules
+
+此外，开启了 Prometheus Operator 的 admissionWebhooks 就会看到每次部署时候会自动运行一个 ``kube-prometheus-stack-1681-admission-create-fdfs2`` 这样的pods，运行完成后停留在 ``Completed`` 状态，也就是完成部署Prometheus的规则格式检查。如果这个Pod迟迟无法运行成功(例如我遇到Calico网络分配IP异常 :ref:`containerd_cni_plugin` 存在bridge插件协议支持问题)，就会导致更新 alertmanager / prometheus 配置刷新非常缓慢问题。 
 
 调度失败错误
 ---------------

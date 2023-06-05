@@ -22,6 +22,8 @@ Compute等语言，以支持CUDA的GPU进行通用计算和数据处理。CUDA�
 
 CUDA Cores是实时计算、计算密集型3D图形、游戏开发、密码散列(cryptographic hashing)、物理引擎和数据科学计算的主要硬件，在机器学习和深度学习领域，以及TB级别数据训练上，GPU也是重要核心硬件。
 
+.. _tensor_cores:
+
 Tensor Cores
 ---------------
 

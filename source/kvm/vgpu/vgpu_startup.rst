@@ -66,7 +66,15 @@ NVIDIA vGPU使用方式
 
 .. note::
 
-   NVIDIA的vGPU是一种封闭的私有 **GPU虚拟化** 技术，实际上 NVIDIA GPU 也支持 :ref:`sr-iov` ，但是从网上资料来看
+   NVIDIA的vGPU是一种封闭的私有 **GPU虚拟化** 技术，实际上 NVIDIA GPU 也支持 :ref:`sr-iov` ，称为 :ref:`mig` ，但现定于目前最高端的Ampere为架构数据中心卡 A30, A100, H100 (中美冲突已禁售)
+
+vGPU配置示例
+==============
+
+.. figure:: ../../_static/kvm/vgpu/mig-with-vgpu-overview.png
+   :scale: 50
+
+   NVIDIA vGPU配置示例
 
 部署
 ================================
