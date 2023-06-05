@@ -15,6 +15,7 @@ containerd运行时(runtime)
    estargz_lazy_pulling.rst
    ctr.rst
    nerdctl.rst
+   containerd_cni_plugin.rst
    containerd_proxy.rst
    containerd_btrfs.rst
    containerd_xfs.rst

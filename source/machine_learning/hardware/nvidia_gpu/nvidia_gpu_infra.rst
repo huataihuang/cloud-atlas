@@ -22,6 +22,8 @@ NVIDIA GPU微架构：
 
 总体来说，Tesla架构的GPU计算能力为1.*, Fermi架构的GPU计算能力为2.*，Kepler架构的GPU计算能力为3.*，Maxwell架构的GPU的计算能力为5.*，Pascal架构的GPU计算能力为6.*，Volta架构的GPU计算能力为7.*。
 
+此外，从 Volta 微架构开始，NVIDIA 引入了 :ref:`tensor_cores` 特殊设计的GPU核心，目前已经经历了四代
+
 更详细的产品，计算能力参见 `NVIDIA官网-推荐开发者使用的 GPU <https://developer.nvidia.com/zh-cn/cuda-gpus>`_
 
 2012年，NVIDIA推出了NVIDIA Virtual GPU ( :ref:`vgpu` ) 可以让多个虚拟机(VMs)同时直接访问一块单一的物理GPU
