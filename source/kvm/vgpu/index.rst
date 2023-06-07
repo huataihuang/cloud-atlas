@@ -10,8 +10,8 @@ NVIDIA Virtual GPU (vGPU)
 
    intro_nvidia_vgpu.rst
    vgpu_release.rst
+   vgpu_arch.rst
    install_vgpu_license_server.rst
-   vgpu_startup.rst
    install_vgpu_manager.rst
    install_vgpu_guest_driver.rst
    vgpu_unlock.rst

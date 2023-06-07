@@ -12,7 +12,7 @@ Helm - Kubernetes包管理器
 
    `Comparing Kubernetes Operator Pattern with alternatives <https://medium.com/@cloudark/why-to-write-kubernetes-operators-9b1e32a24814>`_ 对比了Operator和Helm在实践Postgres数据库的不同点，可以参考。
 
-Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和集群服务器端组件Tiller (运行在Kubernetes集群)
+:strike:`Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和集群服务器端组件Tiller (运行在Kubernetes集群)` 新版本helm已经不再需要部署服务器端Tiller，仅需要本地安装 ``helm`` 就可以工作。
 
 安装Helm
 ===========
@@ -51,13 +51,21 @@ Helm分为客户端Helm (运行在你的客户端电脑，有多种版本) 和�
 脚本安装
 ---------
 
+.. note::
+
+   推荐采用脚本安装，可以安装最新版本
+
 https://git.io/get_helm.sh 提供了安装脚本:
 
 .. literalinclude:: helm_startup/helm_install_by_script
    :language: bash
    :caption: 使用官方脚本安装 helm
 
-当然，你也可以直接运行命令 ``curl -L https://git.io/get_helm.sh | bash`` 。
+当然，你也可以直接运行命令:
+
+.. literalinclude:: helm_startup/helm_install_one_command
+   :language: bash
+   :caption: 一条命令直接使用官方脚本安装 helm
 
 需要注意的是，上述网站访问可能需要翻墙。
 
