@@ -1,7 +1,7 @@
-.. _vgpu_startup:
+.. _vgpu_arch:
 
 ====================
-vgpu虚拟化快速起步
+vGPU架构
 ====================
 
 .. note::
@@ -15,7 +15,7 @@ vgpu虚拟化快速起步
 - 将mediated设备分配给虚拟机
 - 在虚拟机中安装guest驱动
 
-准备工作
+软件准备
 ==============================
 
 - 从NVIDIA官方 `NVIDIA vGPU Software (Quadro vDWS, GRID vPC, GRID vApps) <https://www.nvidia.com/en-us/drivers/vgpu-software-driver/>`_  页面提供注册入口，可以注册一个试用账号获得90天试用licence(需要使用企业邮箱，并提供正确联系方式。实际上试用license应该是NVIDIA销售提供，详细注册、获取以及安装方式参考 `Virtual GPU Software Quick Start Guide <https://docs.nvidia.com/grid/15.0/grid-software-quick-start-guide/index.html>`_ ，不过我没有验证过)
@@ -72,9 +72,96 @@ vGPU配置示例
 ==============
 
 .. figure:: ../../_static/kvm/vgpu/mig-with-vgpu-overview.png
-   :scale: 50
+   :scale: 70
 
    NVIDIA vGPU配置示例
+
+NVIDIA vGPU软件功能:
+
+- vGPU软件支持的GPU实例: 支持 :ref:`mig` 功能
+- 需要注意并非所有hypervisor都支持NVIDIA vGPU部署的GPU实例，请参考 `NVIDIA Virtual GPU Software Documentation最新版本文档 <https://docs.nvidia.com/grid/latest/>`_
+- NVIDIA vGPU软件支持的GPU实例只支持NVIDIA Virtual Compute Server和Linux guest操作系统
+
+NVIDIA vGPU支持多种主要的API:
+
+- Open Computing Language (OpenCL™ software) 3.0
+- OpenGL® 4.6
+- Vulkan® 1.3
+- DirectX 11
+- DirectX 12 (Windows 10)
+- Direct2D
+- DirectX Video Acceleration (DXVA)
+- NVIDIA® CUDA® 12.0
+- NVIDIA vGPU software SDK (remote graphics acceleration)
+- NVIDIA RTX (on GPUs based on the NVIDIA Volta graphic architecture and later architectures)
+
+.. note::
+
+   当使用NVIDIA vGPU软件的图形驱动时，一定要避免安装针对软件发行版的独立安装软件包，也就是不能同时 :ref:`install_nvidia_linux_driver`
+
+NVIDIA的硬件对API和Debugger的支持是有特定型号要求，需要参考官方文档 `NVIDIA CUDA Toolkit and OpenCL Support on NVIDIA vGPU Software <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#cuda-open-cl-support-vgpu>`_
+
+vGPU架构
+===========
+
+.. figure:: ../../_static/kvm/vgpu/architecture-grid-vgpu-overview.png
+
+   NVIDIA vGPU架构
+
+- NVIDIA Virtual GPU Manager是运行在hypervisor中，物理GPU能够支持多个虚拟GPU设备(vGPUs)被直接分配给guest虚拟机
+- 对于Guest虚拟机所使用的vGPU就像物理GPU一样被hypervisor直通进虚拟机，此时在虚拟机中加载NVIDIA驱动来访问GPU
+- 对于NVIDIA Virtual GPU Manager的paravirtualized接口用于无需转换的管理操作
+
+对于每个vGPU:
+
+- 有一个固定的GPU缓存
+- 有一个或多个虚拟的显示输出(heads)
+- 当vGPU创建时也会从物理GPU分配对应的vGPU缓存，这个分配的缓存可以被vGPU一直使用直到vGPU被销毁
+
+注意，对于不同的GPU硬件，vGPU有以下类型:
+
+- 所有支持NVIDIA vGPU软件的GPU设备，可以创建分时(time-sliced) vGPU
+- 对于支持 :ref:`mig` 功能的GPU，则创建 MIG-backed vGPU(需要GPU硬件是Ampere架构)
+
+分时(Time-Sliced)NVIDIA vGPU内部架构
+--------------------------------------
+
+.. figure:: ../../_static/kvm/vgpu/architecture-grid-vgpu-internal.png
+
+   分时(Time-Sliced)NVIDIA vGPU架构
+
+- 分时(time-sliced) vGPU 其实是vGPU 共享相同的一块物理GPU，此时物理GPU并没有被分区成多个GPU实例
+- 所有的分时 vGPU 共享相同的GPU引擎(图形，视频解码和编码引擎)
+- 你可以将分时vGPU视为一个软件vGPU实现，也就是说实际只有一个物理GPU，只不过有一个NVIDIA Virtual GPU Manager帮助实现了GPU任务的调度，通过类似CPU时间片调度的技术不断在物理GPU引擎上切换
+
+.. note::
+
+   从上述架构图来看，软件实现的 分时(Time-Sliced) vGPU 应该是存储在一定的软件开销的，也就是说单块物理GPU通过软件分时切分成多个vGPU的总体性能是不如一块物理GPU的
+
+   对于大模型的训练和推理，一般能够将整个物理GPU资源全部吃掉，所以切分vGPU可能收益不大。不过，对于云计算切分vGPU可能可以销售给较小规模的互联网用户，还是具有一定使用价值。
+
+   我的目标是模拟多GPU的并发 :ref:`machine_learing` ，所以不追求性能，仅作为技术挑战。
+
+.. note::
+
+   对于GPU卡上具备多个物理GPU的设备，同一张卡上不同物理GPU可以托管具有不同framebuffer数量的vGPU，但是同一个物理GPU则必须是相同数量的framebuffer
+
+MIG-Backed NVIDIA vGPU内部架构
+---------------------------------
+
+.. figure:: ../../_static/kvm/vgpu/architecture-grid-vgpu-mig-backed-internal.png
+
+   :ref:`mig` NVIDIA vGPU架构
+
+
+:ref:`mig` 后端的vGPU是真正的物理级别划分的vGPU技术:
+
+- 每个MIG-Backed NVIDIA vGPU实例是物理GPU中完全独立的GPU引擎(图形，视频解码和编码引擎)
+- vGPU之间是独立的并发运行，你可以将 MIG-Backed vGPU视为物理分割的GPU，此时不需要 Virtual GPU Manager 做GPU的任务调度，所以大大简化了软件堆栈，也极大降低了分时cGPU的软件开销
+- 支持 :ref:`mig` 的GPU(Ampere微架构及更高) 的GPU在使用vGPU功能时，需要配置服务器BIOS和内核:
+
+  - VT-D/ :ref:`iommu`
+  - :ref:`sr-iov`
 
 部署
 ================================

@@ -148,7 +148,23 @@ helm3
 
 然后我们可以开始 :ref:`grafana_config_startup`
 
+检查
+=====
+
+使用 :ref:`helm` 可以见擦好所有安装的对象:
+
+.. literalinclude:: helm3_prometheus_grafana/helm_get_manifest
+   :language: bash
+   :caption: 获取 ``kube-prometheus-stack`` 安装的对象
+
+输出类似:
+
+.. literalinclude:: helm3_prometheus_grafana/helm_get_manifest_output
+   :language: bash
+   :caption: 获取 ``kube-prometheus-stack`` 安装的对象内容输出
+
 参考
 =======
 
 - `How to Install Prometheus and Grafana on Kubernetes using Helm 3 <https://www.fosstechnix.com/install-prometheus-and-grafana-on-kubernetes-using-helm/>`_
+- `Prometheus definitive guide part III – Prometheus operator <https://www.cncf.io/blog/2021/10/25/prometheus-definitive-guide-part-iii-prometheus-operator/>`_ 这篇非常详尽，特别是operator操作对象
