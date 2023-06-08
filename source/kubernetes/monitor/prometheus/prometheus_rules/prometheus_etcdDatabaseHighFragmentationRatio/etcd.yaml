@@ -1,0 +1,25 @@
+{{- if not (.Values.defaultRules.disabled.etcdDatabaseHighFragmentationRatio | default false) }}
+    - alert: etcdDatabaseHighFragmentationRatio
+      annotations:
+{{- if .Values.defaultRules.additionalRuleAnnotations }}
+{{ toYaml .Values.defaultRules.additionalRuleAnnotations | indent 8 }}
+{{- end }}
+{{- if .Values.defaultRules.additionalRuleGroupAnnotations.etcd }}
+{{ toYaml .Values.defaultRules.additionalRuleGroupAnnotations.etcd | indent 8 }}
+{{- end }}
+        description: 'etcd cluster "{{`{{`}} $labels.job {{`}}`}}": database size in use on instance {{`{{`}} $labels.instance {{`}}`}} is {{`{{`}} $value | humanizePercentage {{`}}`}} of the actual allocated disk space, please run defragmentation (e.g. etcdctl defrag) to retrieve the unused fragmented disk space.'
+        runbook_url: https://etcd.io/docs/v3.5/op-guide/maintenance/#defragmentation
+        summary: etcd database size in use is less than 50% of the actual allocated storage.
+      expr: (last_over_time(etcd_mvcc_db_total_size_in_use_in_bytes[5m]) / last_over_time(etcd_mvcc_db_total_size_in_bytes[5m])) < 0.5 and etcd_mvcc_db_total_size_in_use_in_bytes > 104857600
+      for: 10m
+      labels:
+        severity: warning
+      {{- if or .Values.defaultRules.additionalRuleLabels .Values.defaultRules.additionalRuleGroupLabels.etcd }}
+        {{- with .Values.defaultRules.additionalRuleLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.defaultRules.additionalRuleGroupLabels.etcd }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+{{- end }}

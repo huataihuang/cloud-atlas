@@ -1,0 +1,49 @@
+   config:
+     global:
+       resolve_timeout: 5m
+     inhibit_rules:
+       - source_matchers:
+           - 'severity = critical'
+         target_matchers:
+           - 'severity =~ warning|info'
+         equal:
+           - 'namespace'
+           - 'alertname'
+       - source_matchers:
+           - 'severity = warning'
+         target_matchers:
+           - 'severity = info'
+         equal:
+           - 'namespace'
+           - 'alertname'
+       - source_matchers:
+           - 'alertname = InfoInhibitor'
+         target_matchers:
+           - 'severity = info'
+         equal:
+           - 'namespace'
+     route:
+       group_by: ['namespace']
+       group_wait: 30s
+       group_interval: 5m
+       repeat_interval: 24h
+       routes:
+       - "matchers":
+         - "alertname = Watchdog"
+         "receiver": "antgpu_sre"
+       - "matchers":
+         - "alertname = InfoInhibitor"
+         "receiver": "null"
+       - "matchers":
+         - "alertname = etcdHighNumberOfFailedGRPCRequests"
+         "receiver": "null"
+       - "matchers":
+         - "severity =~ warning|critical"
+         "receiver": "antgpu_sre"
+     receivers:
+     - name: 'antgpu_sre'
+       webhook_configs:
+         - url: http://10.0.1.169:8060/dingtalk/antgpu_sre/send
+     - name: 'null'
+     templates:
+     - '/etc/alertmanager/config/*.tmpl'

@@ -37,7 +37,7 @@
 .. literalinclude:: kube-prometheus-stack_update_rule/kubernetes-apps.yaml
    :language: yaml
    :caption: ``KubePodNotReady`` 告警规则
-   :emphasize-lines: 21
+   :emphasize-lines: 10,12,21
 
 - 检查系统规则::
 
@@ -49,7 +49,7 @@
 
    kubectl -n prometheus edit prometheusrule kube-prometheus-stack-1681-kubernetes-apps
 
-当前内容就是前面 ``helm pull`` 下来 ``kube-prometheus-stack`` 的默认 ``kubernetes-apps.yaml`` 的15分钟配置，修改对应时间并保存。
+当前内容就是前面 ``helm pull`` 下来 ``kube-prometheus-stack`` 的默认 ``kubernetes-apps.yaml`` 的15分钟配置，修改对应时间(例如我修改成 ``185m`` 也就是 ``3h5m`` )并保存。
 
 .. note::
 

@@ -21,6 +21,16 @@
 安装Virtual GPU Manager Package for Linux KVM
 ================================================
 
+.. note::
+
+   NVIDIA官方文档 `Virtual GPU Software User Guide <https://docs.nvidia.com/grid/14.0/grid-vgpu-user-guide/index.html>`_ 中对于 Install Virtual GPU Manager Package for Linux KVM 比较简略，但是 `Installing and Configuring the NVIDIA Virtual GPU Manager for Red Hat Enterprise Linux KVM or RHV <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#red-hat-el-kvm-install-configure-vgpu>`_ 则比较详细， :strike:`所以主要参考后者(以For Red Hat Enterprise Linux KVM为主)。`
+
+.. note::
+
+   我的实践是在 :ref:`ubuntu_linux` 22.04 上使用 :ref:`tesla_p10` ，我后来发现原来官方文档提供了 `Installing and Configuring the NVIDIA Virtual GPU Manager for Ubuntu <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#ubuntu-install-configure-vgpu>`_ 所以我改为按照这部分资料来完成实践
+
+   NVIDIA官方文档非常详尽(繁琐)，需要仔细核对你的软硬件环境来找到最适配的文档部分进行参考
+
 - 安装非常简单，实际上就是运行 NVIDIA Host Drivers安装:
 
 .. literalinclude:: install_vgpu_manager/install_vgpu_manager
@@ -29,16 +39,53 @@
 
 安装执行很快，会编译内核模块并完成安装
 
-安装以后，系统会多出来以下 ``nvidia-xxxx`` 软件程序
+.. warning::
 
-- 重启服务器，重启后检查 ``vfio`` 模块::
+   我发现 `Installing and Configuring the NVIDIA Virtual GPU Manager for Ubuntu <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#ubuntu-install-configure-vgpu>`_ 文档中 `Installing the Virtual GPU Manager Package for Ubuntu <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#install-vgpu-package-ubuntu>`_ 使用的是 ``.deb`` 软件包安装，安装以后 ``lsmod | grep vfio`` 设备也是具备了 ``mdev`` 模块的。
 
-   lsmod | grep vfio
+   这和我这里 **在Host主机上安装vGPU Manager for Linux KVM** 结果不同，令人困惑
 
-此时可以看到以下模块::
+   这时， `Was the vfio_mdev module removed from the 5.15 kernel? <https://forum.proxmox.com/threads/was-the-vfio_mdev-module-removed-from-the-5-15-kernel.111335/>`_ 给了我一个指引: Kernel 5.15开始， ``mdev`` 模块取代了 ``vfio_mdev`` ，依然可以在 kernel 5.15 上通过 ``mdev`` 来使用 vfio
 
-   nvidia_vgpu_vfio       57344  0
-   mdev                   28672  1 nvidia_vgpu_vfio
+   `Proxmox 7 vGPU – v2 <https://wvthoog.nl/proxmox-7-vgpu-v2/>`_ 提供了详细的指导
+
+- 上述安装 ``vGPU Manager for Linux KVM`` 在 ``/etc/systemd/system/multi-user.target.wants`` 添加了链接，实际上激活了以下两个 vgpu 服务::
+
+   nvidia-vgpud.service -> /lib/systemd/system/nvidia-vgpud.service
+   nvidia-vgpu-mgr.service -> /lib/systemd/system/nvidia-vgpu-mgr.service
+
+但是我的实践实际发现 ``nvidia-vgpud.service`` 运行有异常，见下文 " ``nvidia-vgpud`` 和 ``nvidia-vgpu-mgr`` 服务段落"
+
+- 重启服务器，重启后检查 ``vfio`` 模块:
+
+.. literalinclude:: install_vgpu_manager/lsmod_vfio
+   :language: bash
+   :caption: 执行 ``lsmod`` 查看 vfio相关模块
+
+这里只看到2个vfio相关模块，并没有如文档中具备了 vfio_mdev 模块(内核 5.15 以后 ``mdev`` 取代了 ``vfio_mdev`` )， :strike:`这可能就是为何后面没有找到 /sys/class/mdev 入口的原因` :
+
+.. literalinclude:: install_vgpu_manager/lsmod_vfio_output
+   :language: bash
+   :caption: 执行 ``lsmod`` 查看 vfio相关模块，但是没有看到mdev
+
+按照官方文档 `Verifying the Installation of the NVIDIA vGPU Software for Red Hat Enterprise Linux KVM or RHV <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#verify-install-update-vgpu-red-hat-el-kvm>`_ 应该能够看到mdev设备模块:
+
+.. literalinclude:: install_vgpu_manager/lsmod_vfio_rhel
+   :language: bash
+   :caption: 按照文档RHEL中 ``lsmod`` 查看 vfio相关模块应该能够看到mdev
+   :emphasize-lines: 3,4
+
+- 检查设备对应加载的驱动可以使用如下命令:
+
+.. literalinclude:: install_vgpu_manager/lspci_gpu_kernel
+   :language: bash
+   :caption: 执行 ``lspci -vvvnnn`` 检查驱动详情
+
+输出显示已经加载了 ``nvidia`` 驱动:
+
+.. literalinclude:: install_vgpu_manager/lspci_gpu_kernel_output
+   :language: bash
+   :caption: 执行 ``lspci -vvvnnn`` 检查驱动详情
 
 - 此时检查 ``nvidia-smi`` 可以看到当前只有一个物理GPU:
 
@@ -96,18 +143,22 @@
    :language: bash
    :caption: 使用完整GPU标识，通过 ``virsh nodedev-dumpxml`` 获得完整的GPU配置(domain, bus, slot 以及 function)
 
-请记录下这个输出内容备用
+记录下这个输出内容备用
 
 创建KVM Hypervisor的NVIDIA vGPU
 ==================================
 
 为KVM Hypervisor创建NVIDIA vGPU分为两种方式:
 
-- 传统的NVIDIA vGPU 是分时切分vGPU
-- 基于最新的Ampere微架构的 :ref:`mig` vGPU
+- 传统的NVIDIA vGPU 是分时切分vGPU (本文记录)
+- 基于最新的Ampere微架构的 :ref:`mig` vGPU (不在本文记录)
 
 传统的NVIDIA vGPU (分时切分vGPU)
 ------------------------------------
+
+.. warning::
+
+   这段我在 :ref:`ubuntu_linux` 22.04 上实践不成功，跳过这段，采用 `Proxmox 7 vGPU – v2 <https://wvthoog.nl/proxmox-7-vgpu-v2/>`_ 提供的方案(下一段)
 
 - 首先进入物理GPU对应的 ``mdev_supported_types`` 目录，这个目录的完整路径结合了上文我们获得的 **domain, bus, slot, and function** 
 
@@ -135,6 +186,9 @@
 .. literalinclude:: install_vgpu_manager/lspci_gpu_output
    :language: bash
    :caption: 使用 ``lspci -v`` 检查GPU设备
+   :emphasize-lines: 3
+
+**奇怪，我的Tasla P10 GPU卡确实是插在物理slot 3上，为何前面使用virsh nodedev-dumpxml输出显示slot=0** 两者是什么关系?
 
 - 检查 vgpu 状态:
 
@@ -148,8 +202,67 @@
    :language: bash
    :caption: 使用 ``nvidia-smi vgpu`` 查看vgpu状态
 
+``nvidia-vgpud`` 和 ``nvidia-vgpu-mgr`` 服务
+----------------------------------------------
 
+- 检查 ``nvidia-vgpu-mgr`` 服务:
 
+.. literalinclude:: install_vgpu_manager/systemctl_staus_nvidia-vgpu-mgr
+   :language: bash
+   :caption: 检查 ``nvidia-vgpu-mgr`` 服务状态
+
+这里观察 ``nvidia-vgpu-mgr`` 服务运行正常:
+
+.. literalinclude:: install_vgpu_manager/systemctl_staus_nvidia-vgpu-mgr_output
+   :language: bash
+   :caption: ``nvidia-vgpu-mgr`` 服务状态正常
+
+- 但是检查 ``nvidia-vgpud`` 服务:
+
+.. literalinclude:: install_vgpu_manager/systemctl_staus_nvidia-vgpud
+   :language: bash
+   :caption: 检查 ``nvidia-vgpud`` 服务状态
+
+发现 ``nvidia-vgpud`` 启动失败:
+
+.. literalinclude:: install_vgpu_manager/systemctl_staus_nvidia-vgpud_output
+   :language: bash
+   :caption: ``nvidia-vgpud`` 服务启动失败
+
+为什么 ``nvidia-vgpud`` 启动失败？ ``error: failed to send vGPU configuration info to RM: 6`` 
+
+`Hacking NVidia Cards into their Professional Counterparts <https://www.eevblog.com/forum/general-computing/hacking-nvidia-cards-into-their-professional-counterparts/1475/>`_ 有用户提供了 Tesla P4 和 GTX 1080( 和 Tesla P4 是相同的 GP104核型 )启动日志对比，很不幸，我的 :ref:`tesla_p10` 启动日志居然和不支持 vGPU 的 GTX 1080相同。
+
+问了以下GPT 3.5，居然也提示: **根据日志显示，nvidia-vgpud服务启动失败，具体原因是GPU不支持vGPU。** ，而且GPT 3.5还告诉我 **NVIDIA Tesla P10不支持vGPU功能** ，建议我升级到Tesla P40
+
+难道我的 :ref:`tesla_p10` 这张隐形卡，真的是老黄刀法精准的阉割Tesla卡？ 我不服，扶我起来，我还能打!
+
+- ``nvidia-smi`` 提供了 ``query`` :
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_q
+   :language: bash
+   :caption: ``nvidia-smi -q`` 查询GPU
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_q_output
+   :language: bash
+   :caption: ``nvidia-smi -q`` 查询GPU显示支持VGPU
+   :emphasize-lines: 40-42
+
+可以看到这块GPU卡是支持 **非** :ref:`sr-iov` 模式的 ``Host VGPU`` 
+
+- 进一步查询 ``vgpu`` :
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_vgpu_q
+   :language: bash
+   :caption: ``nvidia-smi vgpu -q`` 查询vGPU
+
+输出显示只激活了一个vGPU:
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_vgpu_q_output
+   :language: bash
+   :caption: ``nvidia-smi vgpu -q`` 查询vGPU显示只有一个vGPU
+
+太沮丧了，我考虑尝试 :ref:`vgpu_unlock` 来解决 :ref:`tesla_p10` vGPU问题...待续
 
 参考
 ======
@@ -157,3 +270,4 @@
 - `Virtual GPU Software User Guide <https://docs.nvidia.com/grid/14.0/grid-vgpu-user-guide/index.html>`_ : `Installing the Virtual GPU Manager Package for Linux KVM <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#install-vgpu-package-generic-linux-kvm>`_
 - `Configuring the vGPU Manager for a Linux with KVM Hypervisor <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#configuring-vgpu-manager-linux-with-kvm>`_
 - `Configuring NVIDIA Virtual GPU (vGPU) in a Linux VM on Lenovo ThinkSystem Servers <https://lenovopress.lenovo.com/lp1585.pdf>`_
+- `Ubuntu 22.04 LTS mdevctl Manual <https://manpages.ubuntu.com/manpages/jammy/en/man8/mdevctl.8.html>`_   mdevctl, lsmdev - Mediated device management utility
