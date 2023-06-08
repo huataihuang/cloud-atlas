@@ -10,6 +10,7 @@ workload resources(工作负载资源)
 
 - :ref:`deployment` 和 :ref:`replicaset` : ``deployment`` 适合管理集群上的无状态应用，在 ``deployment`` 汇总所有 ``pod`` 完全等价，并且在需要时被替换
 - :ref:`statefulset` : 运行一个或多个需要跟踪应用状态的 :ref:`pods` 。例如，数据需要持久化的Pod就可以使用 ``StatefulSet`` ，将每个Pod和某个 :ref:`k8s_persistent_volumes` 对应起来
+- :ref:`job` : 创建一个或多个Pod，并持续充实Pod的执行，直到指定数量的Pod成功终止。(通常在 :ref:`machine_learning` 大规模并行计算时使用)
 
 参考
 ======

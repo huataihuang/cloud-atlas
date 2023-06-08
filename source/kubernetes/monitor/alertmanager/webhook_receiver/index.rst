@@ -13,3 +13,4 @@ Alertmanager 通知(Webhook Receiver)
 
    prometheus-webhook-dingtalk.rst
    prometheus-webhook-dingtalk_template.rst
+   prometheus-webhook-dingtalk_body_limit.rst

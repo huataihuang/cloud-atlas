@@ -6,8 +6,10 @@ prometheus-webhook-dingtalk
 
 `timonwong / prometheus-webhook-dingtalk <https://github.com/timonwong/prometheus-webhook-dingtalk>`_ 是Prometheus官方推荐的第三方 ``Alertmanager Webhook Receiver`` ，用于支持通过钉钉 ``DingTalk`` 发送告警通知。
 
-``systemd`` 方式运行可执行程序
-====================================
+.. _systemd_prometheus-webhook-dingtalk:
+
+``systemd`` 方式运行 ``prometheus-webhook-dingtalk``
+=====================================================
 
 .. note::
 

@@ -28,3 +28,4 @@ Prometheus有两种类型规则(two types of rules)需要配置:
    prometheus_monitor_apps.rst
    kube-prometheus-stack_alert_config.rst
    kube-prometheus-stack_update_rule.rst
+   prometheus_etcdDatabaseHighFragmentationRatio.rst

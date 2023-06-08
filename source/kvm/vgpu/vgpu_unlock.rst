@@ -17,7 +17,9 @@ vGPU unlock和license
 
 .. note::
 
-   本文仅做整理记录，由于我使用 :ref:`tesla_p10` 运算卡，不是消费级显卡，所以没有必要使用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_
+   :strike:`本文仅做整理记录，由于我使用 Tesla P10 运算卡，不是消费级显卡，所以没有必要使用` 在 :ref:`install_vgpu_manager` 过程中，我惊讶地发现 ``nvidia-vgpud`` 服务启动失败，并且提示 **GPU not supported by vGPU at PCI Id: 0:82:0:0 DevID: 0x10de / 0x1b39 / 0x10de / 0x1217** 。
+
+   这让我非常沮丧，似乎这块隐形卡是阉割了vGPU功能，需要采用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 来解锁功能
 
 vgpu_unlock支持的硬件和软件
 ============================
@@ -75,14 +77,14 @@ vgpu_unlock支持的硬件和软件
 
 .. note::
 
-   总之，尽可能使用NVIDIA官方提供的最新版本 vGPU 驱动，实在不行再使用 `Virtual Machine with vGPU Unlock for single GPU desktop <https://github.com/tuh8888/libvirt_win10_vm>`_ 提供的2021年4月版本驱动 ( :ref:`vgpu_startup` )
+   总之，尽可能使用NVIDIA官方提供的最新版本 vGPU 驱动，实在不行再使用 `Virtual Machine with vGPU Unlock for single GPU desktop <https://github.com/tuh8888/libvirt_win10_vm>`_ 提供的2021年4月版本驱动 ( :ref:`vgpu_arch` )
 
 准备工作
 ===========
 
 之前我在服务器上 :ref:`install_nvidia_linux_driver` ，所以物理主机上已经安装了 `NVIDIA官方提供的 P40 驱动 <https://www.nvidia.com/download/index.aspx#>`_ 。但是，对于vGPU则需要安装 ``NVIDIA GRID vGPU driver`` ，所以首先卸载原先 :ref:`install_nvidia_linux_driver` 。
 
-- (我后来发现我的P10无需unlcok，所以实际都没有做)卸载 :ref:`install_nvidia_linux_driver` :
+- (:strike:`我后来发现我的P10无需unlcok，所以实际都没有做` )卸载 :ref:`install_nvidia_linux_driver` :
 
 .. literalinclude:: vgpu_unlock/uninstall_nvidia_linux_driver
    :language: bash
@@ -108,7 +110,7 @@ vgpu_unlock支持的硬件和软件
 
 如上文所述，NVIDIA销售联系并通过你的申请，你获得licensing Portal账号就可以下载90天试用license，以及license server下载。此时你可以参考 `NVIDIA vGPU License服务器安装过程 <https://blog.csdn.net/Hum0rp/article/details/123326895>`_ 自己部署一个licensing server，这样就能够试用vGPU功能。
 
-物理服务器和虚拟都需要安装GRID驱动(也就是vGPU驱动)，这个安装过程可以参考阿里云的 `在GPU虚拟化型实例中安装GRID驱动（Linux） <https://help.aliyun.com/document_detail/163830.html>`_ ，其中配置 ``/etc/nvidia/gridd.conf`` 添加license服务器访问配置，就可以激活vGPU。
+物理服务器和虚拟都需要安装GRID驱动(也就是vGPU驱动)，这个安装过程可以参考阿里云的 `在GPU虚拟化型实例中安装GRID驱动（Linux） <https://help.aliyun.com/document_detail/163830.html>`_ ，其中配置 ``/etc/nvidia/gridd.conf`` 添加license服务器访问配置，就可以激活vGPU。(注意，这个 ``gridd.conf`` 是Guest虚拟机内部配置，用于访问License Server才能激活虚拟机内部的vGPU功能)
 
 .. note::
 
