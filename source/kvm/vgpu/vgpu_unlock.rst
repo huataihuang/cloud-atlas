@@ -178,6 +178,12 @@ vgpu_unlock支持的硬件和软件
 
 - 重启系统
 
+- 果然，在采用了 ``vgpu_unlock`` 之后，再次检查 ``nvidia-vgpud.service`` 就可以看到正常运行的状态:
+
+.. literalinclude:: vgpu_unlock/systemd_status_nvidia-vgpud_after_vgpu_unlock
+   :caption: 采用 ``vgpu_unlock`` 之后 ``nvidia-vgpud.service`` 能够正常运行显示状态
+   :emphasize-lines: 14,18
+
 安装license服务器
 ===================
 

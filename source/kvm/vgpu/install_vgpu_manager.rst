@@ -262,11 +262,19 @@
    :language: bash
    :caption: ``nvidia-smi vgpu -q`` 查询vGPU显示只有一个vGPU
 
-太沮丧了，我考虑尝试 :ref:`vgpu_unlock` 来解决 :ref:`tesla_p10` vGPU问题...待续
+解决: 采用 :ref:`vgpu_unlock`
+================================
+
+果然， :ref:`tesla_p10` 是一块被NVIDIA关闭vGPU功能的计算开，类似消费级GPU，需要采用 :ref:`vgpu_unlock` 来解锁 :ref:`tesla_p10` vGPU能力。在完成了 :ref:`vgpu_unlock` 之后，再次检查就可以看到 ``nvidia-vgpud`` 服务正常运行:
+
+.. literalinclude:: vgpu_unlock/systemd_status_nvidia-vgpud_after_vgpu_unlock
+   :caption: 采用 ``vgpu_unlock`` 之后 ``nvidia-vgpud.service`` 能够正常运行显示状态
+   :emphasize-lines: 14,18
 
 参考
 ======
 
+- `Proxmox 7 vGPU – v2 <https://wvthoog.nl/proxmox-7-vgpu-v2/>`_ 最新文档，提供了5.15内核配置vGPU参考，而且可行，赞
 - `Virtual GPU Software User Guide <https://docs.nvidia.com/grid/14.0/grid-vgpu-user-guide/index.html>`_ : `Installing the Virtual GPU Manager Package for Linux KVM <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#install-vgpu-package-generic-linux-kvm>`_
 - `Configuring the vGPU Manager for a Linux with KVM Hypervisor <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#configuring-vgpu-manager-linux-with-kvm>`_
 - `Configuring NVIDIA Virtual GPU (vGPU) in a Linux VM on Lenovo ThinkSystem Servers <https://lenovopress.lenovo.com/lp1585.pdf>`_
