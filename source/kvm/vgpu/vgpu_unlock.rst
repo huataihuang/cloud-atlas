@@ -6,18 +6,31 @@ vgpu_unlock
 
 NVIDIA不允许在消费级GPU上使用vGPU功能，但是实际上硬件是完全支持的。所以开源软件 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 通过软件方式解锁了消费级NVidia vGPU功能。
 
+:ref:`vgpu` 是一种数据中心针对Tesla和Quadro卡的虚拟化技术，面向 VDI(Virtual Desktop Infrastructure)市场，让用户能够采用远程桌面解决方案进行工作。远程运行的应用包括CAD/CAM软件，游戏，建筑设计以及其他图形加速程序。
+
+:ref:`vgpu` 为虚拟机带来了完全的图形加速，并且数据中心中运行的虚拟机可以轻易迁移并提供给用户。
+
+.. figure:: ../../_static/kvm/vgpu/architecture-grid-vgpu-overview.png
+
+   NVIDIA vGPU架构
+
+对于在Windows或Linux虚拟机的图形加速， :ref:`vgpu` 是非常适合的技术。
+
 vGPU unlock和license
 =====================
 
-我最初没有理解 NVIDIA vGPU的licese，以为我购买的二手 :ref:`tesla_p10` 需要使用vGPU unlock才能启用vGPU功能。不过通过对比阅读文档，原来 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 只是为消费级显卡解锁vGPU功能开发的。也就是说，消费级显卡的核心和数据中心的数据卡其实是一样的，但是被锁住了vGPU功能。vGPU unlock仅仅是解锁消费级显卡的vGPU功能。
+:strike:`我最初没有理解 NVIDIA vGPU的licese，以为我购买的二手 Tesla P10 需要使用vGPU unlock才能启用vGPU功能。` 通过对比阅读文档，原来 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 只是为消费级显卡解锁vGPU功能开发的。也就是说，消费级显卡的核心和数据中心的数据卡其实是一样的，但是被锁住了vGPU功能。vGPU unlock仅仅是解锁消费级显卡的vGPU功能。 **很不幸，我购买的二手 Tesla P10似乎是一块P10的降级卡，内部关闭了vGPU支持**
+，所以我还是尝试通过本文 vGPU unlock 方法来尝试激活vGPU支持。
 
-对于 :ref:`tesla_p10` 这样的数据中心高端运算卡，本身vGPU功能就是具备的，所以不需要使用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 。
+对于 Tesla 这样的数据中心高端运算卡，通常本身就支持vGPU功能就是具备的，所以一般不需要使用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ (我购买的 :ref:`tesla_p10` 可能是特例)。
 
-但是，NVIDIA :ref:`tesla_p10` 运算卡的vGPU功能依然需要通过NVIDIA licensing Server才能使用，这个licensing需要通过NVIDIA官方申请90天试用，非常麻烦。如果购买license，对于个人来说过于昂贵了。
+但是，NVIDIA Tesla 运算卡的vGPU功能依然需要通过NVIDIA licensing Server才能使用，这个licensing需要通过NVIDIA官方申请90天试用，非常麻烦。如果购买license，对于个人来说过于昂贵了。
 
 .. note::
 
-   :strike:`本文仅做整理记录，由于我使用 Tesla P10 运算卡，不是消费级显卡，所以没有必要使用` 在 :ref:`install_vgpu_manager` 过程中，我惊讶地发现 ``nvidia-vgpud`` 服务启动失败，并且提示 **GPU not supported by vGPU at PCI Id: 0:82:0:0 DevID: 0x10de / 0x1b39 / 0x10de / 0x1217** 。
+   :strike:`本文仅做整理记录，由于我使用 Tesla P10 运算卡，不是消费级显卡，所以没有必要 vGPU unlock` 
+
+   在 :ref:`install_vgpu_manager` 过程中，我惊讶地发现 ``nvidia-vgpud`` 服务启动失败，并且提示 **GPU not supported by vGPU at PCI Id: 0:82:0:0 DevID: 0x10de / 0x1b39 / 0x10de / 0x1217** 。
 
    这让我非常沮丧，似乎这块隐形卡是阉割了vGPU功能，需要采用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 来解锁功能
 
@@ -128,4 +141,4 @@ vgpu_unlock支持的硬件和软件
 - `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 
 - `vGPU_Unlock Wiki <https://docs.google.com/document/d/1pzrWJ9h-zANCtyqRgS7Vzla0Y8Ea2-5z2HEi4X75d2Q>`_ 详细的 ``vgpu_unlock`` 使用文档
 - `Proxmox 7 vGPU – v2 <https://wvthoog.nl/proxmox-7-vgpu-v2/>`_ 提供了详细的Proxmox 7配置vGPU步骤，采用 NVIDIA GPU驱动460.73.01在消费级GPU上激活vGPU功能
-- `NVIDIA License System (NLS) – General Availability <https://vdnieuwenhof.eu/nvidia-license-system-nls-general-availability/>`_ 解释了NVIDIA的license系统工作方式，实际上客户自己安装的license server是VNDIA的云license Server的一个转发代理
+- `NVIDIA License System (NLS) – General Availability <https://vdnieuwenhof.eu/nvidia-license-system-nls-general-availability/>`_ 解释了NVIDIA的license系统工作方式，实际上客户自己安装的license server是NVIDIA的云license Server的一个转发代理
