@@ -19,8 +19,7 @@ NVIDIA不允许在消费级GPU上使用vGPU功能，但是实际上硬件是完�
 vGPU unlock和license
 =====================
 
-:strike:`我最初没有理解 NVIDIA vGPU的licese，以为我购买的二手 Tesla P10 需要使用vGPU unlock才能启用vGPU功能。` 通过对比阅读文档，原来 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 只是为消费级显卡解锁vGPU功能开发的。也就是说，消费级显卡的核心和数据中心的数据卡其实是一样的，但是被锁住了vGPU功能。vGPU unlock仅仅是解锁消费级显卡的vGPU功能。 **很不幸，我购买的二手 Tesla P10似乎是一块P10的降级卡，内部关闭了vGPU支持**
-，所以我还是尝试通过本文 vGPU unlock 方法来尝试激活vGPU支持。
+:strike:`我最初没有理解 NVIDIA vGPU的licese，以为我购买的二手 Tesla P10 需要使用vGPU unlock才能启用vGPU功能。` 通过对比阅读文档，原来 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 只是为消费级显卡解锁vGPU功能开发的。也就是说，消费级显卡的核心和数据中心的数据卡其实是一样的，但是被锁住了vGPU功能。vGPU unlock仅仅是解锁消费级显卡的vGPU功能。 **很不幸，我购买的二手 Tesla P10似乎是一块P40的降级卡，内部关闭了vGPU支持** ，所以我还是尝试通过本文 vGPU unlock 方法来尝试激活vGPU支持。
 
 对于 Tesla 这样的数据中心高端运算卡，通常本身就支持vGPU功能就是具备的，所以一般不需要使用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ (我购买的 :ref:`tesla_p10` 可能是特例)。
 
@@ -61,7 +60,7 @@ vgpu_unlock支持的硬件和软件
    :widths: 30, 30, 40
    :header-rows: 1
 
-我在 :ref:`hpe_dl360_gen9` 上使用 :ref:`tesla_p10` 属于 ``gp102`` 图形芯片，等同于 ``Tesla P40`` 。这块P10运算法无需解锁就具备vGPU功能，如果你是使用消费级显卡，才需要执行本文方法。
+我在 :ref:`hpe_dl360_gen9` 上使用 :ref:`tesla_p10` 属于 ``gp102`` 图形芯片，等同于 ``Tesla P40`` 。 :strike:`这块P10运算法无需解锁就具备vGPU功能` 但 :ref:`tesla_p10` 实际 :ref:`install_vgpu_manager`  时发现不支持vGPU，所以也尝试采用 ``vgpu_unlock`` 来实现vGPU功能开启。
 
 支持操作系统
 ---------------
@@ -74,7 +73,7 @@ vgpu_unlock支持的硬件和软件
 
 对于 5.10-5.12 的内核，需要使用 `rupansh/vgpu_unlock_5.12 <https://github.com/rupansh/vgpu_unlock_5.12>`_ 补丁
 
-更新: 对于任何内核版本高于 5.10 都需要使用补丁。但是需要注意内核5.13不能工作，建议不要使用5.13。对于内核版本较高的系统，可以自己使用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 提供的 ``Kernel module hooks: vgpu_unlock_hooks.c`` 做补丁，这样就能够解锁。(应该不需要降级内核版本，我准备尝试一下，毕竟降低内核版本实际上是非常大的损失)
+更新: 对于任何内核版本高于 5.10 都需要使用补丁。但是需要注意内核5.13不能工作，建议不要使用5.13。对于内核版本较高的系统，可以自己使用 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 提供的 ``Kernel module hooks: vgpu_unlock_hooks.c`` 做补丁，这样就能够解锁。( 参考  `Was the vfio_mdev module removed from the 5.15 kernel? <https://forum.proxmox.com/threads/was-the-vfio_mdev-module-removed-from-the-5-15-kernel.111335/>`_ 已经有人按照 `Proxmox 7 vGPU – v2 <https://wvthoog.nl/proxmox-7-vgpu-v2/>`_ 验证过 kernel 5.15是可行的)
 
 `Rust-based vgpu_unlock <https://github.com/mbilker/vgpu_unlock-rs>`_ 提供了一个 :ref:`rust` 开发的 vgpu_unlock ，可以和使用 python 开发的解锁互相参看(都是user space工具，核心没有区别)
 
@@ -111,17 +110,80 @@ vgpu_unlock支持的硬件和软件
 
    我仔细阅读了网上文档，并且我自己尝试注册申请。但是，很不幸，NVIDIA对于企业级运算卡提供vGPU license是需要对接销售的。也就是你必须留下真实的联系方式，由NVIDIA销售联系你审核通过之后才会发送试用90天的license。这对于个人来说非常麻烦，我最终放弃了这个方式。
 
+- 下载 ``vgpu_unlock`` :
+
+.. literalinclude:: vgpu_unlock/download_vgpu_unlock
+   :language: bash
+   :caption: 下载 vgpu_unlock
+
+- 安装 ``dkms`` 等:
+
+.. literalinclude:: vgpu_unlock/install_dkms_python3_pip
+   :language: bash
+   :caption: 安装dkms python3 python3-pip
+
 安装
 ========
 
-- NVIDIA GRID vGPU驱动需要以 :ref:`dkms` 模块方式安装::
+- NVIDIA GRID vGPU驱动需要以 :ref:`dkms` 模块方式安装(我重新安装了一遍):
 
-   ./nvidia-installer --dkms
+.. literalinclude:: vgpu_unlock/nvidia_vgpu_driver_dkms
+   :language: bash
+   :caption: 使用DKMS方式安装NVIDIA vGPU驱动
+
+- 按照 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 提供对应文件修改以下4个NVIDIA文件:
+
+.. literalinclude:: vgpu_unlock/nvidia_vgpu_unlock_files
+   :caption: 修订4个NVIDIA文件
+
+这里修订的4个文件按照 `DualCoder/vgpu_unlock <https://github.com/DualCoder/vgpu_unlock>`_ 提供的说明进行:
+
+- 修改 ``/lib/systemd/system/nvidia-vgpud.service`` ，将::
+
+   ExecStart=/usr/bin/nvidia-vgpud
+
+修改为::
+
+   #ExecStart=/usr/bin/nvidia-vgpud
+   ExecStart=/opt/vgpu_unlock/vgpu_unlock /usr/bin/nvidia-vgpud
+
+- 修改 ``/lib/systemd/system/nvidia-vgpu-mgr.service`` ，将::
+
+   ExecStart=/usr/bin/nvidia-vgpu-mgr
+
+修改成::
+
+   #ExecStart=/usr/bin/nvidia-vgpu-mgr
+   ExecStart=/opt/vgpu_unlock/vgpu_unlock /usr/bin/nvidia-vgpu-mgr
+
+- 然后重新加载::
+
+   systemctl daemon-reload
+
+- 修改 ``/usr/src/nvidia-<version>/nvidia/os-interface.c`` ，将以下行添加到文件开头的 ``#include`` 行下面::
+
+   #include "/opt/vgpu_unlock/vgpu_unlock_hooks.c"
+
+- 修改 ``/usr/src/nvidia-<version>/nvidia/nvidia.Kbuild`` 在文件最后添加以下行::
+
+   ldflags-y += -T /opt/vgpu_unlock/kern.ld
+
+- 移除nvidia内核模块::
+
+   dkms remove -m nvidia -v <version> --all
+
+- 使用dkms重新build nvidia内核模块::
+
+   dkms install -m nvidia -v <version>
+
+- 重启系统
 
 安装license服务器
 ===================
 
 如上文所述，NVIDIA销售联系并通过你的申请，你获得licensing Portal账号就可以下载90天试用license，以及license server下载。此时你可以参考 `NVIDIA vGPU License服务器安装过程 <https://blog.csdn.net/Hum0rp/article/details/123326895>`_ 自己部署一个licensing server，这样就能够试用vGPU功能。
+
+详细安装license服务器见: :ref:`install_vgpu_license_server`
 
 物理服务器和虚拟都需要安装GRID驱动(也就是vGPU驱动)，这个安装过程可以参考阿里云的 `在GPU虚拟化型实例中安装GRID驱动（Linux） <https://help.aliyun.com/document_detail/163830.html>`_ ，其中配置 ``/etc/nvidia/gridd.conf`` 添加license服务器访问配置，就可以激活vGPU。(注意，这个 ``gridd.conf`` 是Guest虚拟机内部配置，用于访问License Server才能激活虚拟机内部的vGPU功能)
 
