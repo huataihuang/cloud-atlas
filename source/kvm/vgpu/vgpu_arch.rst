@@ -4,16 +4,17 @@
 vGPU架构
 ====================
 
-.. note::
-
-   本文实践在 NVIDIA vGPU 14.2 上完成，其他版本可能略有差异。后续我可能会尝试其他版本的实践
-
 要设置NVIDIA vGPU设备，需要:
 
 - 为GPU设备获取和安装对应的NVIDIA vGPU驱动
 - 创建 mediated (协调) 设备
 - 将mediated设备分配给虚拟机
 - 在虚拟机中安装guest驱动
+
+要使用 :ref:`vgpu` ，物理主机和操作系统需要 激活 **虚拟化扩展** (Virtualization extensions):
+
+- 对于Intel硬件Virtualization extensions 是 :ref:`intel_vt`
+- 对于AMD硬件Virtualization extensions 是 AMD-V
 
 软件准备
 ==============================
@@ -140,7 +141,7 @@ vGPU架构
 
    对于大模型的训练和推理，一般能够将整个物理GPU资源全部吃掉，所以切分vGPU可能收益不大。不过，对于云计算切分vGPU可能可以销售给较小规模的互联网用户，还是具有一定使用价值。
 
-   我的目标是模拟多GPU的并发 :ref:`machine_learing` ，所以不追求性能，仅作为技术挑战。
+   我的目标是模拟多GPU的并发 :ref:`machine_learning` ，所以不追求性能，仅作为技术挑战。
 
 .. note::
 

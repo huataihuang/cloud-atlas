@@ -4,8 +4,10 @@
 Kubespray管理
 =========================
 
-etcd
-=========
+.. _kubespray_etcd:
+
+Kubespray维护etcd
+==================
 
 - ``kubespray`` 是在本地通过 :ref:`systemd` 包装的 :ref:`container_runtimes` 运行 :ref:`etcd` ，这里的runtime可以是 :ref:`docker` 也可以是 :ref:`containerd` ，可以直接使用 :ref:`systemctl` 来简单管理和检查::
 
@@ -29,24 +31,18 @@ etcd
 
 非常奇怪，为何访问 ``etcd-endpoints://0xc000394a80/127.0.0.1:2379`` ? **惭愧** ，我忽略了在 :ref:`bash` 中，一定要使用 ``export`` 命令输出变量才能使得这个变量成为生效的环境便利那个。所以检查 ``/etc/etcd.env`` 可以知道需要生效以下环境变量
 
-.. literalinclude:: kubespray_admin/etcd_env
+.. literalinclude:: ../../administer/etcd/maintain/etcd_env/etcd.env
    :language: bash
    :caption: 配置环境变量访问etcd
 
 所以执行以下脚本命令为自己构建一个环境变量:
 
-.. literalinclude:: kubespray_admin/kubespray_etcdctl_env
+.. literalinclude:: ../../administer/etcd/maintain/etcd_env/etcdctl_env
    :language: bash
    :caption: **正确的** 采用 ``/etc/etcd.env`` 输出环境变量来使用 ``etcdctl``
    :emphasize-lines: 3
 
-现在执行 ``etcd_status`` 就能正确看到当前集群的etcd状态::
+现在执行 ``etcd_status`` 就能正确看到当前集群的etcd状态:
 
-   +----------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
-   |          ENDPOINT          |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
-   +----------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
-   | https://192.168.8.116:2379 | 3ff555f9837c69b9 |   3.5.6 |  7.8 MB |      true |      false |        10 |    1444995 |            1444995 |        |
-   | https://192.168.8.117:2379 | 4a784b4a93b49575 |   3.5.6 |  7.9 MB |     false |      false |        10 |    1444995 |            1444995 |        |
-   | https://192.168.8.118:2379 | cb79cdeb0f0fe1cb |   3.5.6 |  7.9 MB |     false |      false |        10 |    1444995 |            1444995 |        |
-   +----------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
-
+.. literalinclude:: ../../administer/etcd/maintain/etcd_env/etcd_status_output
+   :caption: 包装一个 ``etcd_status`` 命令查看etcd健康状态
