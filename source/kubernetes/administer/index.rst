@@ -22,6 +22,7 @@ Kubernetes管理
    port_forward_access_k8s_app.rst
    get_pods_on_node.rst
    k8s_cpu_management_policies.rst
+   change_k8s_image_registry.rst
    kubeadm_administer/index
    etcd/index
    coredns/index

@@ -22,6 +22,7 @@ Shell 实用工具
    rsync.rst
    nohup.rst
    nice.rst
+   grep.rst
 
 .. only::  subproject and html
 

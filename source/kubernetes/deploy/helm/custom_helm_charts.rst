@@ -37,6 +37,59 @@ Helm pull
 helm定制 ``kube-prometheus-stack``
 ====================================
 
+reddit 上有人讨论过这个问题 `Prometheus Stack deployment using private image registry <https://www.reddit.com/r/devops/comments/zozac8/prometheus_stack_deployment_using_private_image/>`_ 基本思路和我相同，就是找出image的配置替换为自己局域网私有registry。主要建议就是修订 ``values.yaml``
+
+- 在 ``values.yaml`` 中有一个 ``Global image registry`` 配置项:
+
+.. literalinclude:: custom_helm_charts/values.yaml
+   :language: yaml
+   :caption: ``values.yaml`` 中定义全局镜像仓库
+   :emphasize-lines: 22,27
+
+- 此外，纵观整个 ``values.yaml`` ，其中使用的不同仓库镜像，举例 :ref:`alertmanager` :
+
+.. literalinclude:: custom_helm_charts/values_alertmanager_image.yaml
+   :language: yaml
+   :caption: ``values.yaml`` 中定义alertmanager镜像(案例)
+   :emphasize-lines: 4-6
+
+.. note::
+
+   在 ``kube-prometheus-stack`` 各级子目录中也分布一些 ``values.yaml`` ::
+
+      ./values.yaml                                    # 主要服务镜像
+      ./charts/grafana/values.yaml                     # k8s-sidecar镜像
+      ./charts/kube-state-metrics/values.yaml          # kube-state-metrics镜像
+      ./charts/prometheus-node-exporter/values.yaml    # node-exporter镜像
+
+   仔细观察了一下，镜像实际上也不少
+
+- 执行以下 :ref:`grep` 可以看到 ``values.yaml`` 配置中，镜像没有配置 ``SHA`` 镜像校验:
+
+.. literalinclude:: custom_helm_charts/grep_image_values
+   :language: bash
+   :caption: 执行 grep 命令从 ``values.yaml`` 获取所有使用的镜像配置
+
+输出:
+
+.. literalinclude:: custom_helm_charts/grep_image_values_output
+   :language: bash
+   :caption: 执行 grep 命令从 ``values.yaml`` 获取所有使用的镜像配置的输出内容
+
+可以看到 ``kube-prometheus-stack`` 使用了 **2个** registry:
+
+  - quay.io
+  - registry.k8s.io
+
+将上述两个镜像regristry替换成自己私有的registry:
+
+.. literalinclude:: custom_helm_charts/replace_values_registry
+   :language: bash
+   :caption: 执行 sed 命令从 ``values.yaml`` 替换registry到自己私有仓库
+
+- 在一个已经部署过 ``kube-prometheus-stack`` 的集群，扫描出所有已经部署的镜像 :ref:`change_k8s_image_registry`
+
+
 参考
 ======
 

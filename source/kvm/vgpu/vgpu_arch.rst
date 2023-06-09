@@ -16,6 +16,14 @@ vGPU架构
 - 对于Intel硬件Virtualization extensions 是 :ref:`intel_vt`
 - 对于AMD硬件Virtualization extensions 是 AMD-V
 
+要使用 :ref:`vgpu` ，物理主机和操作系统需要 激活 **虚拟化扩展** (Virtualization extensions)，这样才能达到足够大虚拟化性能: 
+
+- 对于Intel硬件Virtualization extensions 是 :ref:`intel_vt`
+- 对于AMD硬件Virtualization extensions 是 AMD-V
+- 注意核对CPU和主板都支持硬件虚拟化(现代CPU应该都支持，但要注意BIOS开启虚拟化)，并且在启动内核参数添加::
+
+   intel_iommu=on iommu=pt
+
 软件准备
 ==============================
 
