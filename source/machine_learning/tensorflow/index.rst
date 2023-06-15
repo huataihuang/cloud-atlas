@@ -12,6 +12,7 @@ Tensorflow
    build_tensorflow.rst
    tensorflow_nvidia.rst
    mixed_precision_training.rst
+   tensorflow_benchmarks.rst
 
 .. only::  subproject and html
 

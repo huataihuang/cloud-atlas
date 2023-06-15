@@ -1,0 +1,24 @@
+# GPU芯片(按实际配置) => 0000:82:00.0
+gpu_bdf="0000:"`lspci | grep GP102GL | awk '{print $1}'`
+
+# vGPU profile从 mdevctl types 中查询
+vgpu_type="nvidia-286"
+
+# 生成2个uuid用于vgpu设备标识
+id_list=/tmp/vgpu_uuid
+uuid -n 2 > $id_list
+
+# 创建vGPU
+for id in `cat $id_list`;do
+    sudo mdevctl start -u $id -p $gpu_bdf -t $vgpu_type
+    sudo mdevctl define -a -u $id
+
+cat << EOF
+<hostdev mode='subsystem' type='mdev' managed='no' model='vfio-pci' display='off'>
+    <source>
+        <address uuid='$id'/>
+    </source>
+</hostdev>
+EOF
+
+done

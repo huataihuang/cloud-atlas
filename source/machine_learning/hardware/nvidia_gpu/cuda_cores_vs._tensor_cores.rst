@@ -35,6 +35,10 @@ Tensor Cores
 
 Tensor Cores是特殊设计的NVIDIA GPU核心，用于动态计算(dynamic calculations)和混合精度计算(mixed-precision computing)。Tensore cores可以在提供整体性能的同时保持准确性(accelerate the overall performance while simultaneously preserving accuracy)。
 
+.. note::
+
+   NVIDIA将Tensor Core加速的 高维矩阵(张量Tensor)计算称为混合精度计算(mixed-precision computing)，因为输入矩阵的精度为半精度(两个4*4 FP16矩阵相乘)，然后将结果添加到4*4 FP16或FP32矩阵中，最终输出新的4*4 FP6或FP32矩阵(可以达到完全精度)。
+
 属于 ``Tensor`` (张量) 定义了一种数据类型，可以保存或表示所有形式的数据，可以将其视为存储多维数据集的容器(a container to store multi-dimensional datasets)。
 
 Tensor cores利用融合乘加算法(fused multiply-addition algorithms)，将两个FP16 和/或 FP32 矩阵相乘并相加，从而显著加快计算速度，而且对模型的最终效果几乎没有损失。虽然矩阵乘法在逻辑上很简单，但是每次计算都需要寄存器和缓存来存储临时计算(interim calculations)，从而使得整个计算量非常庞大。所以Tensore cores特别适合训练庞大的ML/DL模型。
@@ -45,6 +49,16 @@ Tensor cores利用融合乘加算法(fused multiply-addition algorithms)，将�
 - 第二代Tensor cores使用Turing(图灵) GPU微架构(T100?): 第二代Tensor cores执行速度是Pascal GPU的32倍，并且将FP16计算扩展到Int8, Int4 和 Int1，从而提高计算精度
 - 第三代Tensor cores使用Ampere(安培) GPU微架构(A100): 第三代Tensor cores增加了对bfloat16, TF32和FP64精度的支持，进一步扩展了Volta和Turing微架构的潜力
 - 第四代Tensor cores使用Hopper(霍波) GPU微架构(H100): 第四代Tensor cores可以处理FP8精度，在FP16、FP32和FP64计算方面比上一代A100快三倍，在8位浮点数学运算方面快六倍
+
+.. figure:: ../../../_static/machine_learning/hardware/nvidia_gpu/nvidia_data_center_gpu_different_supported_precisions.png
+
+   不同代NVIDIA数据中心GPU支持的计算精度
+
+我的 :ref:`tesla_p10` 相当于 P4/P40 ，不支持 FP16 ，所以和 :ref:`tesla_p100` 相比较，更适合作为推理卡使用。
+
+.. note::
+
+   `Harnessing GPU Tensor Cores for Fast FP16 Arithmetic to Speed up Mixed-Precision Iterative Refinement Solvers <https://ieeexplore.ieee.org/abstract/document/8665777>`_ 介绍了采用NVIDIA Tensor Cores的FP16加速混合精度计算的解决方案
 
 .. note::
 

@@ -33,11 +33,11 @@ Kubespray快速起步
 
 .. note::
 
-   对于 :ref:`ubuntu_linux` 22.04 LTS 需要先安装 ``python3-virtualenv`` :
+   对于 :ref:`ubuntu_linux` 22.04 LTS 需要先安装 ``python3-venv`` :
 
-   .. literalinclude:: ../../../python/startup/virtualenv/ubuntu_virtualenv
+   .. literalinclude:: ../../../python/startup/virtualenv/ubuntu_venv
       :language: bash
-      :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``python3-virtualenv``
+      :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``python3-venv``
 
 安装
 =======
