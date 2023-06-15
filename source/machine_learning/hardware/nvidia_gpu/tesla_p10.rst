@@ -46,6 +46,22 @@ Tesla P10是一块 ``隐形运算卡`` ，你在网上几乎找不到资料，�
 
    ``Tesla P10`` 相当于同规格 ``Tesla P40`` 的降频版本，内核完全一致
 
+还有一个可以印证 ``Tesla P10`` 是 ``Tesla P40`` 的 **限制版** 的方式，是我在实践 :ref:`vgpu` :ref:`install_vgpu_manager` ，当执行 ``mdevctl types`` 检查时，可以看到 P10 的 vGPU 核心显示为 ``P40`` ::
+
+   0000:82:00.0
+     nvidia-156
+       Available instances: 12
+       Device API: vfio-pci
+       Name: GRID P40-2B
+       Description: num_heads=4, frl_config=45, framebuffer=2048M, max_resolution=5120x2880, max_instance=12
+     nvidia-215
+       Available instances: 12
+       Device API: vfio-pci
+       Name: GRID P40-2B4
+       Description: num_heads=4, frl_config=45, framebuffer=2048M, max_resolution=5120x2880, max_instance=12
+     nvidia-241
+   ...
+
 .. _tesla_p10_spec:
 
 技术规格

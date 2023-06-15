@@ -14,16 +14,11 @@ pip
 Ubuntu/Debian安装pip和venv
 ----------------------------
 
-在 :ref:`pi_400` 作为日常开发环境，ARM架构的Ubuntu/Debian安装pip3::
+在 :ref:`pi_400` 作为日常开发环境，ARM架构的Ubuntu/Debian安装pip3:
 
-   apt install python3-pip
-   apt install python3-venv
-
-在 :ref:`ubuntu_linux` 22.04 LTS则安装 ``python3-virtualenv`` :
-
-.. literalinclude:: virtualenv/ubuntu_virtualenv
+.. literalinclude:: virtualenv/apt_install_pip3_venv
    :language: bash
-   :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``python3-virtualenv``
+   :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``pip3`` 以及 ``venv``
 
 如果安装pip2则执行::
 

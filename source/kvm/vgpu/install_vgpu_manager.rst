@@ -264,7 +264,7 @@
 解决: 采用 :ref:`vgpu_unlock`
 ================================
 
-果然， :ref:`tesla_p10` 是一块被NVIDIA关闭vGPU功能的计算开，类似消费级GPU，需要采用 :ref:`vgpu_unlock` 来解锁 :ref:`tesla_p10` vGPU能力。在完成了 :ref:`vgpu_unlock` 之后，再次检查就可以看到 ``nvidia-vgpud`` 服务正常运行:
+果然， :ref:`tesla_p10` 是一块被NVIDIA关闭vGPU功能的计算卡，类似消费级GPU，需要采用 :ref:`vgpu_unlock` 来解锁 :ref:`tesla_p10` vGPU能力。在完成了 :ref:`vgpu_unlock` 之后，再次检查就可以看到 ``nvidia-vgpud`` 服务正常运行:
 
 .. literalinclude:: vgpu_unlock/systemd_status_nvidia-vgpud_after_vgpu_unlock
    :caption: 采用 ``vgpu_unlock`` 之后 ``nvidia-vgpud.service`` 能够正常运行显示状态
@@ -477,6 +477,21 @@ OK，就这么简单
 
    参考 NVIDIA 官方手册 `NVIDIA Docs Hub > NVIDIA AI Enterprise > Red Hat Enterprise Linux with KVM Deployment Guide > Setting Up NVIDIA vGPU Devices <https://docs.nvidia.com/ai-enterprise/deployment-guide-rhel-with-kvm/0.1.0/setting-vgpu-devices.html>`_
 
+- 使用 ``virsh nodedev-dumpxml`` 输出完整的 ``mdev`` 设备的详细信息(也就是 ``mdevctl list`` 输出信息的翻版xml):
+
+.. literalinclude:: install_vgpu_manager/virsh_nodedev-dumpxml_pci
+   :language: bash
+   :caption: ``virsh nodedev-dumpxml`` 获取 ``pci`` 设备的mdev xml配置
+
+这里会完整输出(前文采用了过滤):
+
+.. literalinclude:: install_vgpu_manager/virsh_nodedev-dumpxml_pci_output
+   :language: bash
+   :caption: ``virsh nodedev-dumpxml`` 获取 ``pci`` 设备的mdev xml配置
+   :emphasize-lines: 143-145
+
+这里 ``<iommuGroup>`` 标识一组设备，通过 :ref:`iommu` 功能和PCI总线拓扑，这些设备和其他设备隔离，并且本地Host主机驱动不得使用这些设备(解绑)，这样才能分配给Guest虚拟机。
+
 - 按照 ``mdevctl list`` 输出信息:
 
 .. literalinclude:: install_vgpu_manager/mdevctl_list_output
@@ -559,6 +574,12 @@ OK，就这么简单
    :caption: libvirt自动为添加的 vGPU 配置了 domain, bus, slot 以及 function
    :emphasize-lines: 5,11,17,23
 
+但是看起来这种方式还是存在pci设备冲突。
+
+.. note::
+
+   参考NVIDIA原文，采用简化的配置 libvirt 也会扩展成上述配置，但是启动时报错没有解决
+
 但是一个虚拟机添加一个vGPU正常
 -------------------------------
 
@@ -602,6 +623,225 @@ OK，就这么简单
 
    也就是说，截止目前，vGPU的创建和简单分配是成功的，而且能够添加到VM中，只是尚未解决如何在一个VM中使用多个vGPU。
 
+再次尝试在一个VM中添加多个vGPU(成功又遗憾)
+=============================================
+
+在 `Please ensure all devices within the iommu_group are bound to their vfio bus driver Error <https://www.reddit.com/r/VFIO/comments/u44uc8/please_ensure_all_devices_within_the_iommu_group/>`_  提到了一个细节，触发我想起了很久以前实践 :ref:`ovmf_gpu_nvme` 曾经在配置 PCIe Pass Through 中，有一段技术要求提到:
+
+- ``IOMMU Group`` 是直通给虚拟机的最小物理设备集合
+- 必须将一个 ``IOMMU Group`` 完整输出给一个VM
+
+找到一个和我的情况完全相同的 `Error when allocating multiple vGPUs in a single VM with Ubuntu KVM hypervisor <https://forums.developer.nvidia.com/t/error-when-allocating-multiple-vgpus-in-a-single-vm-with-ubuntu-kvm-hypervisor/198067>`_ 但是原帖没有解决这个问题
+
+前面我通过 ``mdevctl`` 创建了4个vGPU，在系统日志中可以看到:
+
+.. literalinclude:: install_vgpu_manager/dmesg_grep_iommu
+   :caption: ``dmesg`` 中有 ``IOMMU`` 记录显示添加了 ``vGPU`` 设备(mdev)
+
+输出显示的最后添加 ``Adding to iommu group 123`` 以及删除 ``Removing from iommu group 123`` 以及又添加 ``Adding to iommu group 123`` 则是我之前操作创建 ``mdev`` 设备以及删除再创建的记录
+
+.. literalinclude:: install_vgpu_manager/dmesg_grep_iommu_output
+   :caption: ``dmesg`` 中有 ``IOMMU`` 记录显示添加了 ``vGPU`` 设备(mdev)
+   :emphasize-lines: 52-55
+
+这些添加的 ``group 123`` 到 ``group 126`` 分别是4个 vGPU 设备对应的 ``iommu group``
+
+从内核 ``sys`` 文件系统可以找到对应项:
+
+.. literalinclude:: install_vgpu_manager/ls_-lh_iommu_group_devices
+   :language: bash
+   :caption: 通过 ``ls`` 检查 ``iommu_group`` 中详细的设备信息
+
+可以看到内核中这些 ``vGPU`` 设备都位于 ``/sys/devices/pci0000:80/0000:80:02.0/0000:82:00.0/`` 目录下:
+
+.. literalinclude:: install_vgpu_manager/ls_-lh_iommu_group_devices_output
+   :language: bash
+   :caption: ``vGPU`` 设备详情
+
+我发现 `Ubuntu官方文档: Virtualisation with QEMU <https://ubuntu.com/server/docs/virtualization-qemu>`_ 中检查 ``systemctl status nvidia-vgpu-mgr`` 得到的状态信息和我不同。在这个文档中提供了一些Guest获得vGPU passed的信息(表明vGPU工作)案例:
+
+.. literalinclude:: install_vgpu_manager/ubuntu_doc_vgpu-mgr_log
+   :caption:  Ubuntu文档中vGPU正常添加的日志案例
+   :emphasize-lines: 16-26
+
+我检查我的Host主机 ``nvidia-vgpu-mgr`` 日志，发现之前启动正常的服务日志，现在显示已经是一些错误信息了:
+
+.. literalinclude:: install_vgpu_manager/nvidia-vgpu-mgr_add_vgpu_err
+   :caption: 服务器添加vgpu错误日志
+   :emphasize-lines: 13,14,20,21
+
+想到我的虚拟机中尚未安装Guest GRID软件包，也没有配置连接Licence Server ( :ref:`install_vgpu_license_server` )，会不会是这个原因导致无法添加第2块vGPU呢? 
+
+再想了一下，不对，出现 ``vfio`` 设备添加报错是在VM启动初始化时候，此时GUEST操作系统尚未启动，所以虚拟机内部Guest GRID软件尚未起作用。头疼...
+
+- 再次将4块 vGPU 添加到到 ``y-k8s-n-1`` 虚拟机中，启动依然是报错的，此时，检查 ``journalctl -u nvidia-vgpu-mgr --no-pager`` 输出信息:
+
+.. literalinclude:: install_vgpu_manager/journalctl_-u_nvidia-vgpu-mgr
+   :caption: 检查添加了多块vGPU虚拟机启动时 ``nvidia-vgpu-mgr`` 报错日志
+   :emphasize-lines: 58
+
+**乌龙** 了
+
+原来错误日志是如此明显: ``multiple vGPUs in a VM not supported``
+
+``同一虚拟机配置多vGPU有硬件限制``
+------------------------------------
+
+原来 `Virtual GPU Software R525 for Ubuntu Release Notes #Multiple vGPU Support <https://docs.nvidia.com/grid/latest/grid-vgpu-release-notes-ubuntu/index.html#multiple-vgpu-support>`_ 是有硬件限制的，而且非常苛刻:
+
+- ``NVIDIA Pascal GPU Architecture`` (我的 :ref:`tesla_p10` )中 ``Tesla P40`` 实际上只有2个vGPU规格支持在一个虚拟机中配置多个vGPU: ``P40-24Q`` 和 ``P40-24C`` (NVIDIA你是玩我呀，24C和24Q不就是完整的一块P40 GPU卡么)
+- 实际上真正有效的 ``vGPU`` 功能要从 ``NVIDIA Volta GPU Architecture`` 系列以上，才支持全系列 Q / C 不同规格 ``多vGPUs`` 配置到同一个VM
+
+唉，折腾了好几天，原来我的 :ref:`tesla_p10` 太低端了，无法实现 ``同一虚拟机配置多vGPU`` ，郁闷...
+
+清理环境，再次起步
+====================
+
+终于折腾完了 :ref:`vgpu` ，断断续续杂七杂八写了很多曲折的笔记...
+
+我决定将 :ref:`tesla_p10` 切分成2块 :ref:`vgpu` 来构建 :ref:`gpu_k8s` :操作汇总整理到 :ref:`vgpu_quickstart` 。这里我先清理掉本文多次实践后的vGPU环境，以便重新开始:
+
+.. literalinclude:: install_vgpu_manager/cleanup_vgpu
+   :language: bash
+   :caption: 清理vGPU环境
+
+``nvidia-smi`` 清理
+----------------------
+
+我在上述清理之后实践 :ref:`vgpu_quickstart` 还是遇到了 ``y-k8s-n-1`` 启动报错:
+
+.. literalinclude:: install_vgpu_manager/cleanup_vgpu_err
+   :language: bash
+   :caption: 清理vGPU环境后启动新创建使用单个vGPU的报错，实际上是 ``nvidia-smi`` 没有清理干净
+
+此时我发现 ``nvidia-smi vgpu`` 居然还残留着之前配置的2个 ``P40-6Q`` (当时启动失败，但是配置残留):
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_vgpu_err
+   :language: bash
+   :caption: ``nvidia-smi vgpu`` 没有清理干净残留的2个 ``P40-6Q``
+   :emphasize-lines: 9-10
+
+而且此时 ``nvidia-smi`` 也残留着当时已经分配的一个 ``P40-6Q`` vGPU:
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_err
+   :language: bash
+   :caption: ``nvidia-smi`` 没有清理干净残留的1个 ``P40-6Q``
+   :emphasize-lines: 10,19
+
+- 执行 ``systemctl restart nvidia-vgpu-mgr`` ，然后检查 ``journalctl -u nvidia-vgpu-mgr`` 果然发现有残留:
+
+.. literalinclude:: install_vgpu_manager/restart_nvidia-vgpu-mgr_found_left-over_process
+   :language: bash
+   :caption: 重启 ``nvidia-vgpu-mgr`` 发现有4个之前残留的进程(之前使用过的2个mdev设备 ``P40-6Q`` )
+   :emphasize-lines: 9,11,13,15
+
+- 检查进程::
+
+   ps aux | grep nvidia-vgpu-mgr
+
+果然看到了对应的pid:
+
+.. literalinclude:: install_vgpu_manager/restart_nvidia-vgpu-mgr_found_left-over_process_pid
+   :language: bash
+   :caption: 通过 ``ps`` 检查可以看到残留的 ``nvidia-vgpu-mgr`` 对应于之前曾经使用过的2个mdev设备 ``P40-6Q``
+   :emphasize-lines: 1-4
+
+- 问题出在已经销毁的  ``mdev`` 设备对应的 ``vGPU`` 一直是激活状态，执行 ``nvidia-smi vqpu -q`` 可以看到查询详情:
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_vgpu_-q_output
+   :language: bash
+   :caption: ``nvidia-smi vqpu -q`` 显示已经销毁的 ``mdev`` 设备对应的 ``vGPU`` 依然是激活状态，所以导致资源不是放
+   :emphasize-lines: 5,6,8,9,38,39,41,42
+
+这说明关键因素在于 ``nvidia-smi vgpu`` ，需要清理残留
+
+- 检查 ``nvidia-smi vgpu -h`` ，可以看到有一个对应参数 ``-caa`` ::
+
+   [-caa | --clear-accounted-apps]: Clears accounting information of the vGPU instance that have already terminated.
+
+可以用来清理已经终止的 vGPU 实例的记账信息
+
+- 执行 ``vGPU`` 终止的实例 ``accounting information`` 清理:
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_vgpu_clear_accounting_infomation
+   :language: bash
+   :caption: 清理 ``vGPU`` 终止的实例 ``accounting information``
+
+可以看到残留的 vGPU accounting infomation 清理
+
+.. literalinclude:: install_vgpu_manager/nvidia-smi_vgpu_clear_accounting_infomation_output
+   :language: bash
+   :caption: 清理 ``vGPU`` 终止的实例 ``accounting information``
+
+但是没有解决问题
+
+- 乌龙: 我尝试了  ``echo 1`` 到 ``/sys/class/mdev_bus/0000:82:00.0/reset`` ，结果 ``nvidia-smi`` 再也检测不到设备了::
+
+   Unable to determine the device handle for GPU 0000:82:00.0: Unknown Error
+
+- 尝试 ``rmmod`` nvidia相关内核模块，但是显示正在使用
+
+- 执行 ``lsof | grep nvidia | awk '{print $2}' | sort -u`` 找出所有进程杀死，不过有一个内核进程 ``[nvidia]`` 无法杀掉
+
+- 此时执行 ``lsmod | grep nvidia`` 可以看到已经基本上没有使用模块了::
+
+   nvidia_vgpu_vfio       57344  0
+   nvidia              39174144  2
+   mdev                   28672  1 nvidia_vgpu_vfio
+   drm                   622592  4 drm_kms_helper,nvidia,mgag200
+
+则可以依次卸载内核模块::
+
+   rmmod nvidia_vgpu_vfio
+   rmmod nvidia
+
+则所有 ``nvidia`` 相关模块都卸载了
+
+- 再次加载 ``nvidia`` 模块::
+
+   # modprobe nvidia
+   # lsmod | grep nvidia
+   nvidia              39174144  0
+   drm                   622592  4 drm_kms_helper,nvidia,mgag200
+
+此时执行 ``nvidia-smi`` 不再报错，但是显示没有设备::
+
+   No devices were found
+
+- 我重新走了一遍 :ref:`vgpu_unlock` (为了重装一遍驱动以及加载内核模块)，完成后可以看到内核模块重新加载::
+
+   nvidia_vgpu_vfio       57344  0
+   nvidia              39145472  2
+   mdev                   28672  1 nvidia_vgpu_vfio
+   drm                   622592  4 drm_kms_helper,nvidia,mgag200
+
+- 不过 ``nvidia-smi`` 依然显示 ``No devices were found``
+
+- ``lspci -v -s 82:00.0`` 输出显示没有异常::
+
+   82:00.0 3D controller: NVIDIA Corporation GP102GL [Tesla P10] (rev a1)
+   	Subsystem: NVIDIA Corporation GP102GL [Tesla P10]
+   	Physical Slot: 3
+   	Flags: bus master, fast devsel, latency 0, IRQ 16, NUMA node 1, IOMMU group 80
+   	Memory at c8000000 (32-bit, non-prefetchable) [size=16M]
+   	Memory at 3b000000000 (64-bit, prefetchable) [size=32G]
+   	Memory at 3b800000000 (64-bit, prefetchable) [size=32M]
+   	Capabilities: [60] Power Management version 3
+   	Capabilities: [68] MSI: Enable- Count=1/1 Maskable- 64bit+
+   	Capabilities: [78] Express Endpoint, MSI 00
+   	Capabilities: [100] Virtual Channel
+   	Capabilities: [250] Latency Tolerance Reporting
+   	Capabilities: [128] Power Budgeting <?>
+   	Capabilities: [420] Advanced Error Reporting
+   	Capabilities: [600] Vendor Specific Information: ID=0001 Rev=1 Len=024 <?>
+   	Capabilities: [900] Secondary PCI Express
+   	Kernel driver in use: nvidia
+   	Kernel modules: nvidiafb, nouveau, nvidia_vgpu_vfio, nvidia
+
+.. note::
+
+   算了，我暂时放弃了，不折腾了。其实最简单的方式是重启服务器...
+
 参考
 ======
 
@@ -610,3 +850,5 @@ OK，就这么简单
 - `Configuring the vGPU Manager for a Linux with KVM Hypervisor <https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#configuring-vgpu-manager-linux-with-kvm>`_
 - `Configuring NVIDIA Virtual GPU (vGPU) in a Linux VM on Lenovo ThinkSystem Servers <https://lenovopress.lenovo.com/lp1585.pdf>`_
 - `Ubuntu 22.04 LTS mdevctl Manual <https://manpages.ubuntu.com/manpages/jammy/en/man8/mdevctl.8.html>`_   mdevctl, lsmdev - Mediated device management utility
+- `Ubuntu官方文档: Virtualisation with QEMU <https://ubuntu.com/server/docs/virtualization-qemu>`_
+- `Error when allocating multiple vGPUs in a single VM with Ubuntu KVM hypervisor <https://forums.developer.nvidia.com/t/error-when-allocating-multiple-vgpus-in-a-single-vm-with-ubuntu-kvm-hypervisor/198067>`_

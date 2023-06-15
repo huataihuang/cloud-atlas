@@ -35,7 +35,32 @@ PyTorch快速起步
 START LOCALLY
 =================
 
-待续...
+.. note::
+
+   测试环境采用 :ref:`vgpu_quickstart` 构建的虚拟机内部 vGPU
+
+- 安装 python3 / pip3 ( 采用 :ref:`virtualenv` ):
+
+.. literalinclude:: ../../python/startup/virtualenv/apt_install_pip3_venv
+   :language: bash
+   :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``pip3`` 以及 ``venv``
+
+- 创建virtualenv:
+
+.. literalinclude:: ../../python/startup/virtualenv/venv
+   :language: bash
+   :caption: venv初始化
+
+- 激活:
+
+.. literalinclude:: ../../python/startup/virtualenv/venv_active
+   :language: bash
+   :caption: 激活venv
+
+- 安装:
+
+.. literalinclude:: pytorch_startup/pip3_install_pytorch
+   :caption: 使用 ``pip3`` 安装 pytorch
 
 参考
 ======
