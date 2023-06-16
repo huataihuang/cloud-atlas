@@ -1,0 +1,18 @@
+# 以下命令在Host物理机上运行，扩展虚拟机磁盘
+rbd resize --size 32768 y-k8s-n-2
+virsh blockresize --domain y-k8s-n-2 --path vda --size 32G
+rbd resize --size 51200 y-k8s-n-2.docker
+virsh blockresize --domain y-k8s-n-2 --path vdb --size 50G
+
+# 以下命令在虚拟机 y-k8s-n-2 运行，扩展文件系统
+#安装growpart
+apt install cloud-guest-utils
+#扩展分区2
+growpart /dev/vda 2
+#扩展XFS根分区
+xfs_growfs /
+
+#扩展vdb分区1
+growpart /dev/vdb 1
+#扩展btrfs分区
+btrfs filesystem resize max /var/lib/docker
