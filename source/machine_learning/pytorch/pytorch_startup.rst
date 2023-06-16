@@ -30,7 +30,15 @@ PyTorch快速起步
        libnvidia-extra-530 : Conflicts: libnvidia-extra
       E: Error, pkgProblemResolver::Resolve generated breaks, this may be caused by held packages. 
 
-   所以我暂停这个实践测试，改为先构建 :ref:`vgpu` ，将物理 :ref:`tesla_p10` 拆分成 4 块 vgpu (每个6G显存)，然后分别 :ref:`ovmf_gpu_nvme` 直通到2个虚拟机中进行模拟测试(其中2个vgpu准备通过切换方式用于 :ref:`container_runtimes` 和 :ref:`kvm` 虚拟机)，这样就能实现不同的场景。
+   所以我暂停这个实践测试，改为先构建 :ref:`vgpu` ，将物理 :ref:`tesla_p10` 拆分成 2 块 vgpu (每个12G显存)，然后分别 :ref:`ovmf_gpu_nvme` 直通到2个虚拟机中进行模拟测试(其中2个vgpu准备通过切换方式用于 :ref:`container_runtimes` 和 :ref:`kvm` 虚拟机)，这样就能实现不同的场景。
+
+再次准备工作
+==============
+
+在完成 :ref:`vgpu_quickstart` 之后，我现在有2个虚拟机分别各配置一块 vGPU。需要注意，PyTorch运行环境非常占用磁盘空间，需要将默认虚拟机磁盘 :ref:`ceph_extend_rbd_drive_with_libvirt_xfs` 将 ``vda`` 扩展到 ``32GB``
+
+.. literalinclude:: pytorch_startup/rbd_resize
+   :caption: 将虚拟机磁盘扩展(xfs和btrfs)
 
 START LOCALLY
 =================
@@ -62,7 +70,25 @@ START LOCALLY
 .. literalinclude:: pytorch_startup/pip3_install_pytorch
    :caption: 使用 ``pip3`` 安装 pytorch
 
+- 验证:
+
+.. literalinclude:: pytorch_startup/verify_pytorch.py
+   :language: python
+   :caption: 验证torch工作
+
+输出类似:
+
+.. literalinclude:: pytorch_startup/verify_pytorch_output
+   :language: python
+   :caption: 验证torch工作代码运行输出
+
+验证Pytorch的FP16
+=====================
+
+
+
 参考
 ======
 
 - `PyTorch Start Locally <https://pytorch.org/get-started/locally/>`_
+- `FP16 in Pytorch <https://medium.com/@dwightfoster03/fp16-in-pytorch-a042e9967f7e>`_
