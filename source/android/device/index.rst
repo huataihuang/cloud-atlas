@@ -18,6 +18,7 @@ Android 设备
    pixel_3.rst
    pixel_3_usb_audio.rst
    pixel_4.rst
+   pixel_4_wireless_charger.rst
    pixel_6.rst
 
 .. only::  subproject and html

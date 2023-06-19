@@ -82,13 +82,7 @@ START LOCALLY
    :language: python
    :caption: 验证torch工作代码运行输出
 
-验证Pytorch的FP16
-=====================
-
-
-
 参考
 ======
 
 - `PyTorch Start Locally <https://pytorch.org/get-started/locally/>`_
-- `FP16 in Pytorch <https://medium.com/@dwightfoster03/fp16-in-pytorch-a042e9967f7e>`_
