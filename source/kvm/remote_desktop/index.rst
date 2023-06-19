@@ -9,6 +9,7 @@
 
    remote_desktop_classify.rst
    spice.rst
+   looking_glass.rst
 
 .. only::  subproject and html
 

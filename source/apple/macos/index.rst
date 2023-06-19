@@ -9,9 +9,11 @@ macOS
 .. toctree::
    :maxdepth: 1
 
+   mba11_late_2010.rst
    mbp15_late_2013.rst
    macos_big_sur_gts_root_certificate.rst
    macbook_nvme.rst
+   macbook_sata.rst
    apple_silicon_m1_pro.rst
    macos_install_drive.rst
    create_boot_usb_from_iso_in_mac.rst

@@ -101,6 +101,8 @@ NVIDIA License Server 安装是一个独立步骤
 
 .. note::
 
-   一切就绪，现在可以开始 :ref:`gpu_k8s` 部署
+   一切就绪，现在可以开始:
 
-   或者，先在虚拟机内部尝试一下 :ref:`pytorch_startup`
+   - :ref:`gpu_k8s` 部署
+   - 虚拟机内部尝试一下 :ref:`pytorch_startup`
+   - 部署 :ref:`looking_glass` 玩 :ref:`flight_simulator`
