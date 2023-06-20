@@ -17,6 +17,11 @@ CentOS 8已死:选择替代
 
 此外，RedHat也提供了自己的免费基础Docker镜像，称为 `Universal Base Image(UBI) <https://developers.redhat.com/products/rhel/ubi>`_
 
+CentOS Vault Mirror
+=======================
+
+`vault.centos.org <https://vault.centos.org/>`_ 提供了CentOS 7/8 的归档仓库，依然对外提供软件仓库，只是这些仓库软件不再更新。此外， 国内的 `centos-vault 163镜像 <http://mirrors.163.com/centos-vault/>`_ 提供了下载加速，在国内可以使用这个安装源来完成
+
 参考
 ======
 

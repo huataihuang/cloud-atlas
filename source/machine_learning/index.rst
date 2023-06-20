@@ -22,6 +22,7 @@ Machine Learning Atlas
    pytorch/index
    tensorflow/index
    stable_diffusion/index
+   fauxpilot/index
 
 .. only::  subproject and html
 
