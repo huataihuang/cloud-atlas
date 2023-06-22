@@ -12,9 +12,11 @@ OpenStack通过发行版仓库进行安装，所有节点（包括管控、计�
 
 - CentOS 激活 ``extras`` 仓库来激活OpenStack仓库，CentOS已经默认包括了 ``extras`` 仓库，只需要直接安装OpenStack就可以。
 
-安装对应版本::
+例如CentOS 7.9.2009 安装对应版本:
 
-   yum install centos-release-openstack-train 
+.. literalinclude:: openstack_env_repo/centos7_train
+   :language: bash
+   :caption: CentOS 7安装激活OpenStack Train版本软件仓库
 
 - RHEL 添加OpenStack软件仓库 (注意：这步只适用于RHEL) ::
 
