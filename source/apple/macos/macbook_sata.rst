@@ -26,5 +26,13 @@ SATA硬盘(m.2转接)升级MacBook Air 2010
 .. figure:: ../../_static/apple/macos/samsung_cm871a_m2.jpg
    :scale: 40
 
+.. note::
 
+   由于我的 :ref:`mba11_late_2010` 有点异常，无法从USB接口启动，所以我采用将 ``三星 CM871a 512GB MZ-NTN5120`` 存储(SATA)安装在 奥睿科（ORICO）M.2 NVMe/SATA双协议移动硬盘盒(主控芯片是 `Realtek RTL9210B-CG <https://www.realtek.com/en/products/connected-media-ics/item/rtl9210b-cg>`_ ) 中，在第三方主机上作为外接磁盘来安装 :ref:`gentoo_linux` ，然后再安装到 :ref:`mba11_late_2010` 尝试启动(待实践)
+
+安装
+=======
+
+性能测试
+===========
 

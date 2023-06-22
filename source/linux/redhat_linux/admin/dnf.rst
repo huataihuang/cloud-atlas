@@ -24,9 +24,11 @@ DNF从Yum分支出来，使用专注于性能的C语言库hawkey进行依赖关�
 安装DNF包管理器
 ==================
 
-- 在RHEL/CentOS 7中安装DNF需要先安装 ``epel-release`` ::
+- 在RHEL/CentOS 7中安装DNF需要先安装 ``epel-release`` :
 
-   yum install epel-release
+.. literalinclude:: dnf/yum_install_epel-release
+   :language: bash
+   :caption: yum命令安装EPEL仓库 release
 
 或者参考 `Extra Packages for Enterprise Linux (EPEL) <https://www.fedoraproject.org/wiki/EPEL>`_ :
 
