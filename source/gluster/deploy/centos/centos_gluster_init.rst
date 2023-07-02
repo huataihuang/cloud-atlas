@@ -51,6 +51,10 @@ CentOS目前依然是生产环境中常用的操作系统，虽然由于 :ref:`r
    - ``parted`` 的命令 ``name 1 gluster_brick0`` 是将分区命名成gluster相关
    - ``mkfs.xfs -i size=512`` 格式化XFS文件系统
 
+.. warning::
+
+   ``mkfs.xfs``（从 ``xfsprogs 3.2.4`` 版开始）默认创建的XFS superblock v5版本，不兼容于 RHEL 7/CentOS 7 的3.10内核，需要在格式化时候增加 ``-m crc=0,finobt=0`` 来强制格式化成 XFS superblock v4。详见 :ref:`xfs_kernel_incompatible`
+
 - 由于手工对一块块磁盘分区和格式化非常繁琐，所有可以准备一个脚本 ``parted_xfs.sh`` 脚本:
 
 .. literalinclude:: centos_gluster_init/parted_xfs.sh
@@ -68,11 +72,8 @@ CentOS目前依然是生产环境中常用的操作系统，虽然由于 :ref:`r
 
 这里我遇到一个错误， ``mkfs.xfs`` 顺利完成，但是挂载报错:
 
-.. literalinclude:: ../../../linux/storage/filesystem/xfs/xfs_uuid_incompatible/mount_xfs_err
+.. literalinclude:: ../../../linux/storage/filesystem/xfs/xfs_kernel_incompatible/mount_xfs_err
    :caption: 挂载XFS文件系统报错 ``wrong fs type, bad option, bad superblock``
    :emphasize-lines: 1,5
 
-根据提示，执行 ``dmesg | tail`` 查看，原来是服务器内核不支持挂载参数:
-
-.. literalinclude:: ../../../linux/storage/filesystem/xfs/xfs_uuid_incompatible/dmesg_superblock_incompatible
-   :caption: 内核不兼容xfs文件系统参数报错
+解决方法见 :ref:`xfs_kernel_incompatible` (上文格式化脚本已经修订)
