@@ -52,8 +52,8 @@ CentOS 7 部署Gluster 11
 .. literalinclude:: deploy_centos7_gluster11/ssh_install_glusterfs-server
    :caption: 简单使用 :ref:`ssh` 顺序循环安装 glusterfs-server
 
-配置
-=======
+配置服务
+==========
 
 -  CentOS 7 默认启用了防火墙(视具体部署)，确保服务器打开正确通讯端口:
 
@@ -80,4 +80,55 @@ CentOS 7 部署Gluster 11
    :caption: ``gluster peer status`` 输出显示 ``peer`` 是 ``Connected`` 状态则表明构建成功
    :emphasize-lines: 5
 
+创建GlusterFS卷
+==================
 
+- 创建一个简单的脚本 ``create_gluster`` ，方便构建 ``replica 3`` 的分布式卷:
+
+.. literalinclude:: deploy_centos7_gluster11/create_gluster
+   :language: bash
+   :caption: ``create_gluster`` 脚本，传递卷名作为参数就可以创建 ``replica 3`` 的分布式卷
+
+- 将脚本加上执行权限::
+
+   chmod 755 create_gluster
+
+- 创建卷，举例是 ``backup`` :
+
+.. literalinclude:: deploy_centos7_gluster11/create_gluster_backup_vol
+   :language: bash
+   :caption: ``create_gluster`` 脚本创建 ``backup`` 三副本分布式卷
+
+- 如果创建卷错误，通过以下方式删除:
+
+.. literalinclude:: deploy_centos7_gluster11/delete_gluster_backup_vol
+   :language: bash
+   :caption: 删除 ``backup`` 卷
+
+.. note::
+
+   这里在执行 ``gluster volume`` 的 ``stop`` 和 ``delete`` 命令时，都添加了参数 ``--mode=script`` 是为了避免交互，方便脚本命令执行。日常运维则可以不用这个参数，方便交互确认。
+
+- 完成后检查卷状态:
+
+.. literalinclude:: deploy_centos7_gluster11/gluster_volume_status
+   :language: bash
+   :caption: 检查 ``backup`` 卷状态
+
+挂载gluster卷
+====================
+
+- 在客户端服务器只需要安装 ``gluster-fuse`` 软件包:
+
+.. literalinclude:: deploy_centos7_gluster11/install_gluster-fuse
+   :caption: 安装GlusterFS客户端 ``gluster-fuse``
+
+- 修改 ``/etc/fstab`` 添加如下内容:
+
+.. literalinclude:: deploy_centos7_gluster11/gluster_fuse_fstab
+   :caption: GlusterFS客户端的 ``/etc/fstab``
+
+- 挂载存储卷:
+
+.. literalinclude:: deploy_centos7_gluster11/mount_gluster
+   :caption: 挂载GlusterFS卷
