@@ -1,7 +1,8 @@
+.. _deploy_suse_gluster_client_old:
 
-===========================
-SUSE平台Gluster客户端部署
-===========================
+===============================
+SUSE平台Gluster客户端部署(旧版)
+===============================
 
 SUSE系统环境可以使用 ``lsb-release -a`` 命令检查版本::
 
@@ -11,7 +12,7 @@ SUSE系统环境可以使用 ``lsb-release -a`` 命令检查版本::
    Release:        12.3
    Codename:       n/a
 
-在项目上使用的SUSE是作为GlusterFS客户端，访问在CentOS 7上所 :ref:`deploy_gluster6` 。
+在项目上使用的SUSE是作为GlusterFS客户端，访问在CentOS 7上所 :ref:`deploy_centos7_gluster6` 。
 
 .. note::
 
@@ -172,7 +173,7 @@ Mount failed
 
    Missing separate debuginfos, use: zypper install glusterfs-debuginfo-4.1.10-101.1.x86_64
 
-不过，opensuse提供的下载软件包没有dubuginfo，这步排查暂时放弃。后续我实际是通过自己编译源代码来完成部署( :ref:`build_gluser_suse` )。
+不过，opensuse提供的下载软件包没有dubuginfo，这步排查暂时放弃。后续我实际是通过自己编译源代码来完成部署( :ref:`build_glusterfs_suse` )。
 
 参考
 ======

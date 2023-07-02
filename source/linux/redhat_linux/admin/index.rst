@@ -11,6 +11,7 @@ RedHat Linux 系统管理
    init_centos.rst
    rpm.rst
    dnf.rst
+   createrepo.rst
    firewalld.rst
    centos_local_repo.rst
    centos_local_http_repo.rst

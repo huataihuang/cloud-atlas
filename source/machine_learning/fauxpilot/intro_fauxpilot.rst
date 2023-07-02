@@ -10,7 +10,6 @@ FauxPilot简介
 ==========
 
 - :ref:`docker`
-- ``docker
 
 参考
 ======
