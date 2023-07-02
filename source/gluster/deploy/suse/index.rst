@@ -8,7 +8,7 @@ SUSE平台GlusterFS部署
    :maxdepth: 1
 
    deploy_gluster_suse.rst
-   deploy_suse_gluster_client.rst 
+   deploy_suse_gluster_client_old.rst 
 
 .. only::  subproject and html
 
