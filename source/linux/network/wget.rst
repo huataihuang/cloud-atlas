@@ -53,7 +53,10 @@ wget镜像网站目录 ``-m`` ，不过如果单纯使用这个参数可能会�
 
 这里最重要的结合参数是 ``--no-parent`` ，避免下载太多不必要的内容
 
-上述参数的组合可以缩写为 ``-mkEpnp``
+上述参数的组合可以缩写为 ``-mkEpnp`` 举例，在 :ref:`deploy_sles15sp4_gluster11_client` 时，从官方仓库镜像下载 ``gluster-11`` rpm包:
+
+.. literalinclude:: ../../gluster/deploy/suse/deploy_sles15sp4_gluster11_client/wget_mirror_gluster_sles15sp4
+   :caption: 使用 :ref:`wget` 镜像网站方式下载GlusterFS 11 for SLES 15SP4
 
 参考
 ====

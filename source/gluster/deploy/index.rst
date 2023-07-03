@@ -11,7 +11,7 @@ GlusterFS部署实践，将不断完善和改进，所以最终方案会和最�
 
    gluster_releases.rst
    centos_sig_gluster.rst
-   deploy_centos7_suse15_gluster9.rst
+   deploy_centos7_suse15_gluster11.rst
    suse/index
    centos/index
    ubuntu/index

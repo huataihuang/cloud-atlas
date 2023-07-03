@@ -1,7 +1,7 @@
-.. _deploy_centos7_suse15_gluster9:
+.. _deploy_centos7_suse15_gluster11:
 
 ========================================
-在CentOS 7 和SUSE 15环境部署GlusterFS 9
+在CentOS 7 和SUSE 15环境部署GlusterFS 11
 ========================================
 
 部署方案
@@ -48,3 +48,6 @@
   - :ref:`deploy_centos7_gluster11` 
 
 - GlusterFS客户端:
+
+  - 在SELS 15.4平台 :ref:`deploy_sles15sp4_gluster11_client`
+  - :ref:`suse_linux` 同样可以使用 :ref:`createrepo` 构建软件包仓库
