@@ -92,6 +92,40 @@ zypper提供了一个模拟执行选项 ``--dry-run`` 可以模拟命令但实�
       namerepo = nr
       addrepo = ar
 
+添加 SLES iso镜像
+-------------------------
+
+在 :ref:`deploy_sles15sp4_gluster11_client` ，考虑到需要安装依赖，所以添加iso镜像:
+
+.. literalinclude:: zypper/zypper_add_sles15sp4_iso
+   :caption: 安装 glusterfs 客户端需要安装操作系统依然软件包，所以挂载SLES 15 SP4光盘镜像
+
+此时输出信息:
+
+.. literalinclude:: zypper/zypper_add_sles15sp4_iso_output
+   :caption: 挂载成功输出信息
+
+实际上上述操作会在 ``/etc/zypp/repos.d`` 目录下创建 ``SLES-15-SP4.repo`` :
+
+.. literalinclude:: zypper/SLES-15-SP4.repo
+   :caption: 添加iso镜像仓库的配置文件 ``/etc/zypp/repos.d/SLES-15-SP4.repo``
+
+
+添加 :ref:`createrepo` 构建仓库
+---------------------------------
+
+在 :ref:`deploy_sles15sp4_gluster11_client` ，采用 :ref:`createrepo` 构建了从社区下载rpm包的软件仓库。实际上SUSE采用了和 :ref:`redhat_linux` 完全一样的rpm管理方式，只不过配置目录略有差异
+
+- 配置 ``glusterfs-11_sles15sp4.repo`` :
+
+.. literalinclude:: zypper/glusterfs-11_sles15sp4.repo
+   :caption: ``/etc/zypp/repos.d/glusterfs-11_sles15sp4.repo`` 配置
+
+实际上 ``zypper ar`` 就是在 ``/etc/zypp/repos.d`` 目录下添加 ``.repo`` 文件，将上述 ``glusterfs-11_sles15sp4.repo`` 放到 ``/etc/zypp/repos.d`` ，然后执行 ``zypper lr -u`` 就会看到:
+
+.. literalinclude:: zypper/glusterfs-11_sles15sp4_zypper_lr_output
+   :caption: 检查添加 ``glusterfs-11_sles15sp4.repo`` 配置后的仓库情况
+
 SUSE Package Hub仓库
 ======================
 
