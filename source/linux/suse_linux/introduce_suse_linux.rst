@@ -24,6 +24,19 @@ openSUSE Leap 是 openSUSE 的常规版本，发行周期如下:
 
    SUSE官方提供了非常完善的文档 `SUSE Documetation <https://documentation.suse.com/>`_ ，和Red Hat相似，提供了不同发行版本的部署、管理、优化以及存储、虚拟化等指南手册。
 
+SUSE企业版: SLES
+==================
+
+SUSE Linux Enterprise(也称为 ``SLE`` )是SUSE开发的企业级Linux，对标 :ref:`redhat_linux` Enterprise Linux(RHEL)。这是一个非常稳定的发行版，大约每3~4年发布一个主版本，次要版本(也称为 ``Service Packs`` SP)则每12个月发布一次。
+
+SUSE Linux Enterprise在上游openSUSE社区版基础上做了更多测试以及适配:
+
+- 每个主版本提供10年支持周期，并且还可以购买3年扩展支持
+- 目前(2023)年有2个主版本得到支持: SLES 12 和 SLES 15 ，都发布了 SP5
+- 请参考SUSE SLES的产品周期选择版本(强烈建议选择 SLES 15 SP5):
+
+.. figure:: ../../_static/linux/suse_linux/suse_sles_end-of-support_schedule.png
+
 SUSE特色
 ==========
 
@@ -41,7 +54,7 @@ YaST包管理
 开放构建服务(Open Build Service)
 ---------------------------------
 
-`Open Build Servcie <https://openbuildservice.org/>`_ 是一个开源的完整发行版开发平台，可以用于多种Linux发行版的构建，支持诸如 SUSE Linux Enterprise Service, openSUSE, Red Hat Enterprise Linux, Mandriva, Ubuntu, Fedora, Debian 和 Arch Linux的构建服务。OBS服务的如阿健基于GPL发布，被广泛用于Linux社区。
+`Open Build Servcie <https://openbuildservice.org/>`_ 是一个开源的完整发行版开发平台，可以用于多种Linux发行版的构建，支持诸如 SUSE Linux Enterprise Service, openSUSE, Red Hat Enterprise Linux, Mandriva, Ubuntu, Fedora, Debian 和 Arch Linux的构建服务。OBS服务构建基于GPL发布，被广泛用于Linux社区。
 
 .. note::
 
@@ -62,3 +75,4 @@ YaST包管理
 
 - `维基百科SUSE <https://zh.wikipedia.org/wiki/SUSE>`_
 - `openSUSE:发行计划 <https://zh.opensuse.org/openSUSE:%E5%8F%91%E8%A1%8C%E8%AE%A1%E5%88%92>`_
+- `WikiPedia: SUSE Linux Enterprise <https://en.wikipedia.org/wiki/SUSE_Linux_Enterprise>`_
