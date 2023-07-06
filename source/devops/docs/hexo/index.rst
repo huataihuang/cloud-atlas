@@ -1,19 +1,13 @@
-.. _git:
+.. _hexo:
 
 =================================
-git
+Hexo静态网站
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   git_startup.rst
-   git_merge_rebase.rst
-   git_merge_fix_conflicts.rst
-   git_config.rst
-   git_proxy.rst
-   reduce_git_repo_size.rst
-   git-flow.rst
+   intro_hexo.rst
 
 .. only::  subproject and html
 
