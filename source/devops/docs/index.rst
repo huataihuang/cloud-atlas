@@ -19,6 +19,7 @@ DevOps 文档
    joplin/index
    jekyll/index
    hugo/index
+   hexo/index
    kindle/index
    pandoc.rst
    ffmpeg.rst

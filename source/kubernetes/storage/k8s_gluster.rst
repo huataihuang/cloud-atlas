@@ -708,3 +708,4 @@ GlusterFS卷权限
 - `k8s配置GlusterFS存储 <https://my.oschina.net/yx571304/blog/3043065>`_
 - `Persistent Storage Using GlusterFS <https://docs.okd.io/1.2/install_config/persistent_storage/persistent_storage_glusterfs.html>`_
 - `Complete Example Using GlusterFS <https://docs.openshift.com/container-platform/3.3/install_config/storage_examples/gluster_example.html>`_
+- `Kubernetes Storage — Part 2 — GlusterFS complete tutorial <https://itnext.io/kubernetes-storage-part-2-glusterfs-complete-tutorial-77542c12a602>`_
