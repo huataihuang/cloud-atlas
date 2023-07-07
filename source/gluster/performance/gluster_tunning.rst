@@ -19,6 +19,14 @@ GlusterFS性能优化
 
 此外，复制时，客户端 ``glusterfs`` 进程的CPU使用率大约 1.4 个cpu core
 
+再次部署了一个集群，区别是服务器端内核从 ``3.10`` 升级到 ``4.19`` ，此时启用了 ``xfs`` 的 v5版本(支持CRC)，同样复制 ``/usr`` 目录，略微快一点点::
+
+   # time cp -r /usr /mqha/supergwmuamqha/
+
+   real    2m48.185s
+   user    0m0.846s
+   sys     0m4.515s
+
 优化思路
 ==========
 
