@@ -58,7 +58,7 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 
 - ``rate(node_cpu_seconds_total{mode="system"}[1m])`` 表示在系统模式下每秒CPU消耗平均量，记录最近1分钟(每秒)
 
-.. figure:: ../../../_static/kubernetes/monitor/prometheus/node_exporter_cpu_time.png
+.. figure:: ../../../../_static/kubernetes/monitor/prometheus/prometheus_exporters/node_exporter_cpu_time.png
    :scale: 70
 
 配置Ceph节点监控
