@@ -15,6 +15,7 @@
    lackpack.rst
    dell/index
    hpe/index
+   fanless/index
    chipset/index
    storage/index
 

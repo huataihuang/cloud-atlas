@@ -19,7 +19,7 @@ Prometheus官方提供了大约十几种 `xxxx_exporters <https://github.com/org
 - ``systemd_exporter``
 - ``smartctl_exporter``
 - ``ecs_exporter`` Amazone ECS的exporter
-- ``ipmi_exporter`` 这是一个非常有用的exporter，特别是对于物理服务器的监控，如 :ref:`server_hpe` 有人还专门定制了 `hpe-exporter <https://github.com/pyguy/hpe-exporter>`_ (可以借鉴)
+- :ref:`ipmi_exporter` 这是一个非常有用的exporter，特别是对于物理服务器的监控，如 :ref:`server_hpe` 有人还专门定制了 `hpe-exporter <https://github.com/pyguy/hpe-exporter>`_ (可以借鉴)
 
    - `IPMI Exporter Grafana Dashboard <https://grafana.com/grafana/dashboards/15765-ipmi-exporter/>`_ 或许可以借鉴
    - 我准备用 ``impi_exporter`` 来监控我的 :ref:`hpe_dl360_gen9`

@@ -1,16 +1,15 @@
-.. _cockpit:
+.. _flask:
 
 =================================
-Cockpit服务器统一管理平台
+Flask Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
-   cockpit-pcp.rst
-   pcp/index
-   
+   intro_flask.rst
+   flask-admin/index
+
 .. only::  subproject and html
 
    Indices

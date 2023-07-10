@@ -20,6 +20,7 @@ NVIDIA GPU
    tesla_p100.rst
    nvidia_a100.rst
    nvidia_sxm_socket.rst
+   nvidia_gpu_mem_clock.rst
    install_nvidia_linux_driver.rst
 
 .. only::  subproject and html

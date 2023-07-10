@@ -1,16 +1,14 @@
-.. _cockpit:
+.. _server_fanless:
 
 =================================
-Cockpit服务器统一管理平台
+无风扇服务器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
-   cockpit-pcp.rst
-   pcp/index
-   
+   think_server_fanless.rst
+
 .. only::  subproject and html
 
    Indices
