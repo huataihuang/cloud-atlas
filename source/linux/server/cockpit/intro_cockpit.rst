@@ -26,7 +26,7 @@ Cockpit是Linux服务器的系统管理平台，可以用于管理容器、存�
 .. figure:: ../../../_static/linux/server/cockpit/cockpit_support_linux.png
    :scale: 75
 
-Cockpid集成
+Cockpit集成
 ============
 
 - Cockpid使用系统现有的API，所以它并没有重新开发子系统或者增加新的工具层

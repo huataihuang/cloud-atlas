@@ -1,15 +1,14 @@
-.. _cockpit:
+.. _pcp:
 
 =================================
-Cockpit服务器统一管理平台
+Performance Co-Pilot
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
-   cockpit-pcp.rst
-   pcp/index
+   intro_pcp.rst
+   install_pcp.rst
    
 .. only::  subproject and html
 

@@ -20,6 +20,7 @@ HPE服务器
    flexiblelom_bay_intel_i350.rst
    dl360_gen9_large_bar_memory.rst
    dl360_bios_numa.rst
+   hpe_dl360_gen9_without_fan.rst
    hp_utilities_ubuntu.rst
    hp_ilo/index
 

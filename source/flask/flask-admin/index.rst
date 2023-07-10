@@ -1,16 +1,14 @@
-.. _cockpit:
+.. _flask-admin:
 
 =================================
-Cockpit服务器统一管理平台
+Flask-Admin
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
-   cockpit-pcp.rst
-   pcp/index
-   
+   intro_flask-admin.rst
+
 .. only::  subproject and html
 
    Indices

@@ -12,4 +12,5 @@ Kubernetes集群(y-k8s)
 
 我构建第二个 :ref:`kubernetes` 集群命名为 ``y-k8s`` 采用如下服务器配置:
 
-
+- :ref:`kubespray_startup` 部署集群 ``y-k8s``
+- 采用 :ref:`vgpu` 技术将 :ref:`tesla_p10` 分为2块vGPU构建 :ref:`gpu_k8s` :
