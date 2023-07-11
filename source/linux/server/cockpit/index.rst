@@ -10,8 +10,10 @@ Cockpit服务器统一管理平台
    intro_cockpit.rst
    cockpit-pcp.rst
    pcp/index
+   cockpit_cannot_refresh_cache_whilst_offline.rst
    
 .. only::  subproject and html
+
 
    Indices
    =======

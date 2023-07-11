@@ -11,8 +11,6 @@ Redis是一个远程内存数据库：
 - 独特的数据结构 - NoSQL
 - 通过复制、持久化(persistence)和客户端分片(client-side shading)等特性，可以将Redis扩展成包含数百GB数据、每秒处理上百万次请求的系统
 
-
-
 参考
 =====
 

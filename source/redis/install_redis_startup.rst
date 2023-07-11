@@ -11,6 +11,11 @@ redis软件安装
 
    sudo dnf install redis
 
+- Debian/Ubuntu环境安装redis:
+
+.. literalinclude:: install_redis_startup/apt_install_redis
+   :caption: 在Debian/Ubuntu环境安装redis
+
 - 启动redis服务::
 
    sudo systemctl enable --now redis
