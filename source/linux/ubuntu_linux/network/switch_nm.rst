@@ -85,6 +85,10 @@
 
    虽然可以在Ubuntu Server版本上通过NetworkManager管理网络，但是从Ubuntu Server 18.04开始，服务器版本已经全面采用 ``systemd-networkd`` 并使用 :ref:`netplan` 来替代NetworkManager配置网络。所以，不建议在服务器上使用NetworkManager。
 
+.. note::
+
+   在 :ref:`cockpit_cannot_refresh_cache_whilst_offline` 需要采用NetworkManager来避免问题，或者配置 ``PackageKit`` 不使用NetworkManager
+
 参考
 =========
 

@@ -9,6 +9,7 @@ Performance Co-Pilot
 
    intro_pcp.rst
    install_pcp.rst
+   grafana-pcp.rst
    
 .. only::  subproject and html
 

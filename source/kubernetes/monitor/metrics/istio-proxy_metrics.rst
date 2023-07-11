@@ -4,13 +4,13 @@
 istio-proxy metrics
 ======================
 
-.. interalinclude:: istio-proxy_metrics/curl_istio-proxy_metrics
+.. literalinclude:: istio-proxy_metrics/curl_istio-proxy_metrics
    :language: bash
    :caption: 获取 istio-proxy 的metrics
 
 由于metrics内容过多，服务器端断开下载连接:
 
-.. interalinclude:: istio-proxy_metrics/curl_istio-proxy_metrics_output
+.. literalinclude:: istio-proxy_metrics/curl_istio-proxy_metrics_output
    :language: bash
    :caption: 获取 istio-proxy 的metrics失败，原因是metrics过大
 
