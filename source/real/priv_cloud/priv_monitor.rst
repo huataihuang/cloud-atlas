@@ -14,8 +14,9 @@
 
 采用 :ref:`prometheus` 能够对 :ref:`kubernetes` 集群进行监控，也能够通过 :ref:`ipmi_exporter` 采集物理主机的温度、主频等基础数据，所以在物理主机中:
 
-- 物理主机独立部署 :ref:`prometheus` 和 :ref:`ipmi_exporter` (采用 :ref:`systemd` 运行)，这样可以持续采集监控数据
-- 物理主机上部署一个独立 :ref:`grafana` 来汇总基础运行监控，例如底层的 :ref:`ceph` :ref:`gluster` :ref:`zfs` 等监控数据
+- 物理主机部署 :ref:`cockpit` ，通过 :ref:`pcp` 集成插件方式来实现底层系统的性能数据采集和分析
+- (可选)物理主机独立部署 :ref:`prometheus` 和 :ref:`ipmi_exporter` (采用 :ref:`systemd` 运行)，这样可以持续采集监控数据
+- 物理主机上部署一个独立 :ref:`grafana` 来汇总基础运行监控，将 :ref:`pcp` 数据可视化，例如底层的 :ref:`ceph` :ref:`gluster` :ref:`zfs` 等监控数据
 - 通过 :ref:`prometheus-webhook-dingtalk` 发送钉钉消息，也通过 微信 来发送通知，此外还可以尝试自己接入一个短信、语音网关来实现通知
 
 另外一个轻量级的主机监控是 :ref:`cockpit` ，发行版已经提供了集成，并且可以快速激活，也可以尝试实现上述 :ref:`prometheus` 的监控服务，同时提供对服务器的配置管理:
@@ -24,4 +25,4 @@
 
 .. note::
 
-   上述两种方案我都准备实现， :ref:`prometheus` 侧重监控和告警， :ref:`cockpit` 侧重服务器配置管理兼监控
+   最优的监控解决方案是 :ref:`opentelemetry` : :ref:`prometheus` 和 :ref:`pcp` 仅提供了 :ref:`metrics` 监控，两者的层次和功能其实非常类似，而 :ref:`opentelemetry` 集成了 Traces, Metrics, Logs 实现了完整的软件堆栈分析，当然这也更为复杂，更适合分布式集群的深入分析。不过，OpenTelemetry专注于数据生成、采集和管理，实际完整产品化方案可以采用 :ref:`signoz` ，或者结合 :ref:`prometheus` + :ref:`jaeger` + :ref:`fluentd` 来构建解决方案
