@@ -1,19 +1,18 @@
-.. _cockpit:
+.. _pcp:
 
 =================================
-Cockpit服务器统一管理平台
+Performance Co-Pilot
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
-   cockpit-pcp.rst
-   ../../../performance/pcp/index
-   cockpit_cannot_refresh_cache_whilst_offline.rst
+   intro_pcp.rst
+   install_pcp.rst
+   grafana-pcp.rst
+   pmdas/index
    
 .. only::  subproject and html
-
 
    Indices
    =======

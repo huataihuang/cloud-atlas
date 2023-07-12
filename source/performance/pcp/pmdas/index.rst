@@ -1,19 +1,15 @@
-.. _cockpit:
+.. _pcp_pmdas:
 
 =================================
-Cockpit服务器统一管理平台
+Performance Co-Pilot PMDAs
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_cockpit.rst
-   cockpit-pcp.rst
-   ../../../performance/pcp/index
-   cockpit_cannot_refresh_cache_whilst_offline.rst
+   lmsensors_pmda.rst
    
 .. only::  subproject and html
-
 
    Indices
    =======

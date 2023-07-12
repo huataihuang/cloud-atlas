@@ -27,7 +27,7 @@ cockpit-pcp
 
 安装 :ref:`pcp` :
 
-.. literalinclude:: pcp/install_pcp/apt_install_pcp
+.. literalinclude:: ../../../performance/pcp/install_pcp/apt_install_pcp
    :caption: Ubuntu 使用 :ref:`apt` 安装 PCP
 
 然后安装 ``cockpit-pcp`` 组件并重启一次 ``cockpit`` 服务:

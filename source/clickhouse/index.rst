@@ -1,16 +1,15 @@
-.. _pcp:
+.. _clickhouse:
 
 =================================
-Performance Co-Pilot
+ClickHouse Atlas
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   intro_pcp.rst
-   install_pcp.rst
-   grafana-pcp.rst
-   
+   intro_clickhouse.rst
+
 .. only::  subproject and html
 
    Indices

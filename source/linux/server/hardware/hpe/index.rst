@@ -23,6 +23,7 @@ HPE服务器
    hpe_dl360_gen9_without_fan.rst
    hp_utilities_ubuntu.rst
    hp_ilo/index
+   hpe_server_monitor.rst
 
 .. only::  subproject and html
 

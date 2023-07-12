@@ -14,6 +14,10 @@ Parca持续分析平台简介
 
    ``Parca`` ( ``Polar Signals`` 是商业化产品 ) 采用了Google开发的 :ref:`pprof`
 
+.. note::
+
+   ``Parca`` 的 bpf 分析方式实际上和 :ref:`pcp` 的 ``bpftrace`` PCMA 类似，两者可以对比验证
+
 架构
 ======
 

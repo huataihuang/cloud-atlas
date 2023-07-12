@@ -49,3 +49,7 @@ Linux服务器运维时非常重要的一项监控就是服务器内部温度监
 
    wtach -n 2 sensors
 
+参考
+=======
+
+- `Monitor AMD RYZEN Temps in Linux <https://www.techhut.tv/monitor-amd-ryzen-temps-in-linux/>`_
