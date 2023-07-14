@@ -26,3 +26,12 @@
 .. note::
 
    最优的监控解决方案是 :ref:`opentelemetry` : :ref:`prometheus` 和 :ref:`pcp` 仅提供了 :ref:`metrics` 监控，两者的层次和功能其实非常类似，而 :ref:`opentelemetry` 集成了 Traces, Metrics, Logs 实现了完整的软件堆栈分析，当然这也更为复杂，更适合分布式集群的深入分析。不过，OpenTelemetry专注于数据生成、采集和管理，实际完整产品化方案可以采用 :ref:`signoz` ，或者结合 :ref:`prometheus` + :ref:`jaeger` + :ref:`fluentd` 来构建解决方案
+
+.. note::
+
+   经过对比不同的主机监控方案，我在 :ref:`hpe_server_monitor` 方案中筛选了上述几个方案综合监控服务器集群
+
+部署Prometheus
+================
+
+除了在 :ref:`y-k8s` 采用 

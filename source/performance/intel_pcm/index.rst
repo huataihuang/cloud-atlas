@@ -8,6 +8,8 @@ Intel® Performance Counter Monitor (Intel® PCM)
    :maxdepth: 1
 
    intro_intel_pcm.rst
+   pcm-exporter.rst
+   pcm-grafana.rst
    
 .. only::  subproject and html
 

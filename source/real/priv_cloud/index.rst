@@ -35,3 +35,5 @@
    priv_k8s_docker_centos.rst
    real_unattended_upgrade.rst
    y-k8s.rst
+   y-k8s_kube-prometheus-stack.rst
+   y-k8s_signoz.rst

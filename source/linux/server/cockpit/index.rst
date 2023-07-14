@@ -11,6 +11,7 @@ Cockpit服务器统一管理平台
    cockpit-pcp.rst
    ../../../performance/pcp/index
    cockpit_cannot_refresh_cache_whilst_offline.rst
+   cockpit_port_address.rst
    
 .. only::  subproject and html
 

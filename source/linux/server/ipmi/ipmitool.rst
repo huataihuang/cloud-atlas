@@ -1,4 +1,4 @@
-.. _ipmitool_tips:
+.. _ipmitool:
 
 ===================
 IPMI工具ipmitool

@@ -12,3 +12,6 @@ Prometheus社区官方提供了大约十几种 `xxxx_exporters <https://github.c
    intro_prometheus_exporters.rst
    node_exporter.rst
    ipmi_exporter.rst
+   process-exporter.rst
+   amd_smi_exporter.rst
+   blackbox_exporter.rst

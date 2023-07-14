@@ -1,0 +1,29 @@
+- job_name: ipmi
+  params:
+    module: ['default']
+  scrape_interval: 1m
+  scrape_timeout: 30s
+  metrics_path: /metrics
+  scheme: http
+  file_sd_configs:
+  - files:
+    - /srv/ipmi_exporter/targets.yml
+    refresh_interval: 5m
+  relabel_configs:
+  - source_labels: [__address__]
+    separator: ;
+    regex: (.*)
+    target_label: __param_target
+    replacement: ${1}
+    action: replace
+  - source_labels: [__param_target]
+    separator: ;
+    regex: (.*)
+    target_label: instance
+    replacement: ${1}
+    action: replace
+  - separator: ;
+    regex: .*
+    target_label: __address__
+    replacement: ipmi-exporter.internal.example.com:9290
+    action: replace
