@@ -21,6 +21,16 @@ Intel 和 AMD 都开发了针对自家处理器的性能监控调试工具:
 
 如果要采用通用型监控处理器温度，则可以采用 :ref:`lm_sensor`
 
+基于 :ref:`pcm-exporter`
+--------------------------
+
+采用 :ref:`intel_pcm` 官方提供的 :ref:`pcm-exporter` 可以精细化监控Intel处理器(脑洞: 对于 :ref:`kvm` 虚拟化的处理器，能否模拟使用Intel PCM来监控?)，直接输出 :ref:`grafana`
+
+基于 :ref:`amd_smi_exporter`
+-----------------------------
+
+由于 :ref:`amd_uprof` 尚未支持 :ref:`metrics` ， 目前还不能基于uProf来构建AMD处理器的监控。不过，AMD开源了基于AMD SMI库输出为metrics的 :ref:`amd_smi_exporter` ，目前还没有完整方案，但可以尝试。
+
 基于 :ref:`hp_ilo`
 ====================
 
@@ -46,7 +56,11 @@ Intel 和 AMD 都开发了针对自家处理器的性能监控调试工具:
 基于 :ref:`ipmi`
 ======================
 
-:ref:`prometheus_exporters` 有一个官方 ``ipmi_exporter`` 可以基于 :ref:`ipmi` 输出 :ref:`metrics` 。并且有一个非常完美的 :ref:`grafana` `Dashboard IPMI for Prometheus <https://grafana.com/grafana/dashboards/13177-ipmi-for-prometheus/>`_ 。这样可以用来监控大规模服务器集群，并且生成告警。
+- :ref:`prometheus_exporters` 有一个官方 ``ipmi_exporter`` 可以基于 :ref:`ipmi` 输出 :ref:`metrics` 。使用 :ref:`grafana` `Dashboard IPMI Exporter <https://grafana.com/grafana/dashboards/15765-ipmi-exporter/>`_
+
+- :ref:`node_exporter` with :ref:`ipmitool` text plugin 可以使用 :ref:`grafana` `Dashboard IPMI for Prometheus <https://grafana.com/grafana/dashboards/13177-ipmi-for-prometheus/>`_ 
+
+这样可以用来监控大规模服务器集群，并且生成告警。
 
 基于 :ref:`lm_sensor`
 ========================

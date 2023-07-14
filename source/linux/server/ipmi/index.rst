@@ -8,7 +8,7 @@ IPMI
    :maxdepth: 1
 
    use_ipmi.rst
-   ipmitool_tips.rst
+   ipmitool.rst
    quick_config_ipmi.rst
    conman.rst
    

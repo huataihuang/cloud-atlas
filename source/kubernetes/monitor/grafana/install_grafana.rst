@@ -4,6 +4,10 @@
 安装Grafana
 =====================
 
+.. note::
+
+   在 :ref:`priv_cloud` 环境，我在 ``zcloud`` 上 :ref:`prometheus_startup` 配合本文安装的Grafana，实现 :ref:`hpe_server_monitor`
+
 在Debian/Ubuntu上安装
 ======================
 

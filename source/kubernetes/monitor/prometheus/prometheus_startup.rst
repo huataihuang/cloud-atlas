@@ -4,6 +4,10 @@
 Prometheus快速起步
 ==================
 
+.. note::
+
+   :ref:`install_grafana` 采用社区 :ref:`apt` 仓库安装，更为方便。配合本文，实现 :ref:`hpe_server_monitor`
+
 安装
 ====
 
@@ -20,12 +24,10 @@ ARM环境安装
 
 我的实践在 :ref:`arm_k8s` 的 :ref:`raspberry_pi` 主机上完成，所以安装的是 ``arm64`` 版本。
 
-- 下载软件包并解压缩::
+- 下载软件包并解压缩:
 
-   wget https://github.com/prometheus/prometheus/releases/download/v2.26.0/prometheus-2.26.0.linux-arm64.tar.gz
-   tar xfz prometheus-2.26.0.linux-arm64.tar.gz
-   sudo cp prometheus-2.26.0.linux-arm64/prometheus /usr/local/bin/
-   sudo cp prometheus-2.26.0.linux-arm64/promtool /usr/local/bin/
+.. literalinclude:: prometheus_startup/arm_install_prometheus
+   :caption: 在ARM环境( :ref:`raspberry_pi` )安装Prometheus
 
 - 检查::
 
@@ -56,41 +58,39 @@ zcloud物理主机安装Prometheus
 
 我在 :ref:`priv_cloud_infra` 重新在一台二手服务器 :ref:`hpe_dl360_gen9` 部署大规模虚拟化集群。为了结合 :ref:`zdata_ceph` 的 :ref:`ceph_dashboard` 以及对整个基础架构进行监控，我重新部署 ``prometheus + grafana`` 到两台KVM虚拟机 ``z-b-mon-1`` 和 ``z-b-mon-2`` 。
 
-- 操作系统: :ref:`ubuntu_linux` 20.04 LTS
+.. note::
 
-- 准备用户账号::
+   实践 :ref:`hpe_server_monitor` ，在 ``zcloud`` 物理服务器上部署
 
-   sudo groupadd --system prometheus
-   sudo useradd -s /sbin/nologin --system -g prometheus prometheus
+- 操作系统: :ref:`ubuntu_linux` 22.04 LTS
+
+- 准备用户账号:
+
+.. literalinclude:: prometheus_startup/add_prometheus_user
+   :language: bash
+   :caption: 在操作系统中添加 prometheus 用户
 
 用户ID < 1000则为系统用户ID，这个ID是从 999 开始递减的，对于刚安装好的Ubuntu系统， ``systemd-coredump`` 组的ID是 999，则上述两个命令创建的 ``prometheus`` 的GID和UID都是 998
 
-- 创建配置目录和数据目录::
+- 创建配置目录和数据目录:
 
-   sudo mkdir /var/lib/prometheus
-   for i in rules rules.d files_sd; do sudo mkdir -p /etc/prometheus/${i}; done
+.. literalinclude:: prometheus_startup/mkdir_prometheus
+   :language: bash
+   :caption: 在操作系统中创建prometheus目录
 
 - 下载工具::
 
    sudo apt update
    sudo apt -y install wget curl vim
 
-- 下载最新prometheus二进制程序::
+- 下载最新prometheus二进制程序:
 
-   mkdir -p /tmp/prometheus && cd /tmp/prometheus
-   curl -s https://api.github.com/repos/prometheus/prometheus/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi -
+.. literalinclude:: prometheus_startup/ubuntu_install_prometheus
+   :language: bash
+   :caption: 在Ubuntu环境安装Prometheus
 
-- 解压缩::
-
-   tar xvf prometheus*.tar.gz
-   cd prometheus*/
-
-- 将执行文件移动到 ``/usr/local/bin`` 目录 ::
-
-   sudo mv prometheus promtool /usr/local/bin/
-
-配置
-------
+简餐配置(归档,不推荐)
+----------------------
 
 在解压缩的Prometheus软件包目录下有一个默认配置文件 ``prometheus.yml`` ，这个初始配置复制到 ``/etc/prometheus`` 目录下然后简单配置就可以启动::
 
@@ -115,6 +115,29 @@ zcloud物理主机安装Prometheus
 如果发生异常，则可以使用 ``prometool`` 工具检查配置文件::
 
    promtool check config prometheus.yml
+
+配置以及systemd运行Prometheus
+===============================
+
+- 在解压缩的Prometheus软件包目录下有配置案例以及 console libraries :
+
+.. literalinclude:: prometheus_startup/config_prometheus
+   :language: bash
+   :caption: 简单配置
+
+- 创建 Prometheus 的 :ref:`systemd` 服务管理配置文件 ``/etc/systemd/system/prometheus.service`` :
+
+.. literalinclude:: prometheus_startup/prometheus.service
+   :caption: Prometheus :ref:`systemd` 服务管理配置文件 ``/etc/systemd/system/prometheus.service``
+
+- 启动服务:
+
+.. literalinclude:: prometheus_startup/start_prometheus
+   :caption: 启动Prometheus
+
+.. warning::
+
+   如果系统启用了 :ref:`cockpit` ，会遇到端口冲突导致无法启动。请先执行 :ref:`cockpit_port_address` 调整(我设置成 ``9091`` )
 
 Docker运行Prometheus
 =======================
@@ -176,6 +199,13 @@ Prometheus的PromQL提供了非常灵活的表达式语言，允许查询和聚�
 
 .. figure:: ../../../_static/kubernetes/monitor/prometheus/prometheus_graph_3.png
    :scale: 50
+
+配套安装exporter
+===================
+
+我的主要目标是实现 :ref:`hpe_server_monitor` ，所以继续安装以下组件:
+
+- 
 
 参考
 ========
