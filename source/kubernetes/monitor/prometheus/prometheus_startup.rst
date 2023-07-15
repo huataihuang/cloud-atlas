@@ -205,10 +205,11 @@ Prometheus的PromQL提供了非常灵活的表达式语言，允许查询和聚�
 
 我的主要目标是实现 :ref:`hpe_server_monitor` ，所以继续安装以下组件:
 
-- 
+- :ref:`node_exporter`
 
 参考
 ========
 
 - `How To Install and Configure Prometheus On a Linux Server <https://devopscube.com/install-configure-prometheus-linux/>`_
 - `Install Prometheus Server on Ubuntu 22.04|20.04|18.04 <https://computingforgeeks.com/install-prometheus-server-on-debian-ubuntu-linux/>`_
+- `How to Install Prometheus and Grafana on Ubuntu? <https://antonputra.com/monitoring/install-prometheus-and-grafana-on-ubuntu/>`_ 这篇非常详尽，建议参考

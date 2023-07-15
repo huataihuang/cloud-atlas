@@ -13,7 +13,9 @@ Performance Atlas
    debug_java.rst
    intel_pcm/index
    amd_uprof/index
+   arm_pmu/index
    amd_ryzen_smu.rst
+   likwid/index
 
 .. only::  subproject and html
 
