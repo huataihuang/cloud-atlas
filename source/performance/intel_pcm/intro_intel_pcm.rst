@@ -57,6 +57,14 @@ PCM提供了一系列命令行工具用于实时监控:
 
 通过 :ref:`pcm-exporter` 可以将 ``pcm`` 的监控指标输出到 :ref:`pcm-grafana`
 
+安装
+=======
+
+主流发行版已经集成提供了 ``pcm`` 软件包，例如 :ref:`ubuntu_linux` 安装非常方便:
+
+.. literalinclude:: intro_intel_pcm/ubuntu_install_pcm
+   :caption: 在Ubuntu安装Intel PCM
+
 参考
 ======
 

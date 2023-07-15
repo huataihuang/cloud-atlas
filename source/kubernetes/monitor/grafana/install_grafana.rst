@@ -25,6 +25,19 @@ Grafana提供了企业版和开源版，通常使用社区版本已经能够满�
 
 - grafana默认服务端口是3000，使用浏览器访问，请参考 :ref:`grafana_config_startup` 
 
+在RHEL/Fedora上安装
+====================
+
+- 添加仓库GPG密钥以及创建仓库配置文件:
+
+.. literalinclude:: install_grafana/rhel_install_grafana
+   :caption: 在RHEL/Fedora上安装Grafana
+
+- 启动服务(和Debian/Ubuntu相同):
+
+.. literalinclude:: install_grafana/ubuntu_start_grafana
+   :caption: 启动Grafana
+
 参考
 =====
 
