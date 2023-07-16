@@ -44,7 +44,10 @@ Intel开发的 PCM (Performance Counter Monitor) 提供了 :ref:`prometheus_expo
    :caption: ``pcm-exporter`` 服务运行状态
    :emphasize-lines: 11,16
 
-注意，功能受到硬件支持的限制，例如 :ref:`xeon_e5-2600_v3` 无法支持 :ref:`intel_rdt` (需要到下一代 ``v4`` 才行)，也不支持 `Intel QuickPath Interconnect <https://www.intel.com/content/www/us/en/io/quickpath-technology/quickpath-technology-general.html>`_ 
+注意，功能受到硬件支持的限制，例如 :ref:`xeon_e5-2600_v3` 无法支持 :ref:`intel_rdt` (需要到下一代 ``v4`` 才行)，也不支持 `Intel QuickPath Interconnect <https://www.intel.com/content/www/us/en/io/quickpath-technology/quickpath-technology-general.html>`_ 。 不过，如果换成在 ``Xeon Platinum 8163 CPU @ 2.50GHz`` (skylake) 则可以看到如下完整的正常输出:
+
+.. literalinclude:: pcm-exporter/pcm-sensor-server_output_skylake
+   :caption: ``pcm-exporter`` 服务运行输出(skylake处理器)
 
 此时，使用浏览器访问 http://192.168.6.200:9738 (我的服务器地址)，就能够看到 ``PCM Sensor Server`` 介绍页面，其中提供了 :ref:`influxdb` 和 :ref:`prometheus` 结合 :ref:`grafana` 的配置案例。
 

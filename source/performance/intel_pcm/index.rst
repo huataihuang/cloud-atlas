@@ -10,6 +10,7 @@ Intel® Performance Counter Monitor (Intel® PCM)
    intro_intel_pcm.rst
    pcm-exporter.rst
    pcm-grafana.rst
+   build_pcm.rst
    
 .. only::  subproject and html
 
