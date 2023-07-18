@@ -18,3 +18,4 @@ Kubernetes安全
    falco/index
    cert-manager/index
    spiffe/index
+   vault/index

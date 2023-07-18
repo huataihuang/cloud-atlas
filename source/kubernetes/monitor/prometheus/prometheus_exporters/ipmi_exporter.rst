@@ -16,6 +16,12 @@ IPMI Exporter
 
 有两个案例配置文件: ``ipmi_local.yml`` 抓取本地主机metrics，以及 ``ipmi_remote.yml`` 抓取远程IPMI接口。
 
+.. note::
+
+   社区 :ref:`prometheus_exporters` 的 ``ipmi_exporter`` 是采用 ``freeipmi`` 来访问IPMI获取服务器监控数据的。
+
+   另外一种解决方案是采用 :ref:`node_exporter` 提供的 :ref:`node_exporter_ipmitool_text_plugin` 实现
+
 安装
 ========
 

@@ -15,6 +15,7 @@ Kindle在，书未老
    reset_restart_kindle.rst
    save_web_page_as_pdf.rst
    read_e-books_after_kindle.rst
+   kindle_download_helper.rst
 
 
 .. only::  subproject and html
