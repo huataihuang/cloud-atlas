@@ -13,6 +13,7 @@ Prometheus社区官方提供了大约十几种 `xxxx_exporters <https://github.c
    node_exporter.rst
    node_exporter_textfile-collector.rst
    node_exporter_ipmitool_text_plugin.rst
+   node_exporter_smartctl_text_plugin.rst
    ipmi_exporter.rst
    process-exporter.rst
    amd_smi_exporter.rst

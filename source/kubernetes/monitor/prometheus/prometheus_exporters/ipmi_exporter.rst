@@ -8,7 +8,7 @@ IPMI Exporter
 
    :ref:`hpe_server_monitor`
 
-:ref:`prometheus_exporters` 有一个官方 ``ipmi_exporter`` 可以基于 :ref:`ipmi` 输出 :ref:`metrics` 。并且有一个非常完美的 :ref:`grafana` `Dashboard IPMI for Prometheus <https://grafana.com/grafana/dashboards/13177-ipmi-for-prometheus/>`_ 。这样可以用来监控大规模服务器集群，并且生成告警。
+:ref:`prometheus_exporters` 有一个官方 ``ipmi_exporter`` 可以基于 :ref:`ipmi` 输出 :ref:`metrics` 。并且有一个非常完美的 :ref:`grafana` `Grafana Dashboard 15765: IPMI Exporter <https://grafana.com/grafana/dashboards/15765-ipmi-exporter/>`_ 。这样可以用来监控大规模服务器集群，并且生成告警。
 
 ``ipmi_exporter`` 输出本地IPMI metrics到标准的 ``/metrics`` ，无需特殊配置。对于远程metrics，通用配置方法非常类似 :ref:`blackbox_exporter` (黑盒测试HTTP,HTTPS,DNS,TCP,ICMP和gRPC)，只需要简单使用 ``target`` 和 ``module`` URL参数告知IPMI设备入口即可。可以对数以千计的IPMI设备进行metrics输出。
 
@@ -129,7 +129,7 @@ debug
 配置Grafana
 ==============
 
-:ref:`grafana` `Dashboard IPMI for Prometheus <https://grafana.com/grafana/dashboards/13177-ipmi-for-prometheus/>`_
+:ref:`grafana` `Grafana Dashboard 15765: IPMI Exporter <https://grafana.com/grafana/dashboards/15765-ipmi-exporter/>`_
 
 完成后就可以看到我的 :ref:`hpe_dl360_gen9` :ref:`hpe_server_monitor` 的功耗监控:
 
