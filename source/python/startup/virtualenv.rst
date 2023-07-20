@@ -35,6 +35,15 @@ arch安装pip和venv
 
    pacman -S python-pip
 
+macOS安装pip和venv
+--------------------
+
+- macOS可以随着 Python3 安装 pip3 ，建议通过 :ref:`homebrew` 安装最新版本:
+
+.. literalinclude:: virtualenv/brew_install_pip3_venv
+   :language: bash 
+   :caption: 在 :ref:`macos` 环境安装 ``pip3`` 以及 ``venv``
+
 Python 2 virtualenv
 ====================
 
