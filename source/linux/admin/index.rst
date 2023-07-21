@@ -13,6 +13,7 @@ Linux系统管理
    linux_backlight.rst
    linux_system_time.rst
    linux_file_descriptor.rst
+   check_shared_libray_is_used.rst
    process/index
 
 .. only::  subproject and html
