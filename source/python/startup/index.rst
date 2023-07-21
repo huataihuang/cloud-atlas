@@ -16,6 +16,7 @@ Python起步
    install_python3_centos6.rst
    python_doc.rst
    pep_8.rst
+   run_pyton_in_browser.rst
 
 .. only::  subproject and html
 

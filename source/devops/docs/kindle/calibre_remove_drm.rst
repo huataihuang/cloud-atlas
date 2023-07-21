@@ -100,6 +100,10 @@ dedrm-ebook-tools
 
    Calibre支持 `send to kindle <https://www.amazon.com/gp/sendtokindle>`_ （即 `Kindle Personal Documents Service <https://www.amazon.com/gp/help/customer/display.html?nodeId=200767340>`_ ，非常方便把各种文档通过电子邮件方式发送给Kindle设备阅读），这样可以将中国区购买的Kindle书籍转换成去除DRM的 ``.azw3`` 文档发送到美国区Kindle设备，方便自己的学习。
 
+.. note::
+
+   Calibre删除电子书之后会放到自己的回收箱里面(不是系统的回收箱)，目录位于 ``Calibre Library`` 下的隐藏目录 ``.caltrash`` 。
+
 参考
 ======
 
