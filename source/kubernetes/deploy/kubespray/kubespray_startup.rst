@@ -53,7 +53,7 @@ Kubespray快速起步
 - ``calico_rr`` :  面向 :ref:`kubespray_calico`
 - ``bastion`` : 如果服务器不能直接访问(隔离网络)，则需要指定堡垒机(bastion)
 
-- 首先复制出需要修订的集群配置集，这里假设集群名为 ``y-k8s`` :
+- 首先复制出需要修订的集群配置集，这里群名为 :ref:`y-k8s` :
 
 .. literalinclude:: kubespray_startup/cp_y-k8s
    :language: bash
