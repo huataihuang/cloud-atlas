@@ -142,8 +142,6 @@ CUDA VectorAdd
    Test PASSED
    Done
 
-.. _gpu_node_schedule_err_debug:
-
 GPU节点调度异常排查
 =====================
 

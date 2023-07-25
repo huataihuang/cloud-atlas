@@ -8,6 +8,7 @@ eBPF
    :maxdepth: 1
 
    intro_ebpf.rst
+   bpftrace.rst
    ebpf_arch.rst
    ebpf_in_action.rst
    replace_iptables_with_ebpf.rst

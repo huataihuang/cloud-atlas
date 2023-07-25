@@ -18,7 +18,7 @@ SigNoz简介
 
 .. note::
 
-   ``SigNoz`` 是一个完整的基于 :ref:`oepntelemetry` 的综合性解决方案，也是一个提供云服务的商业产品。 ``SigNoz`` 可以说是一个开箱即用的 :ref:`oepntelemetry` 实现，从 ``Traces + Metrics + Logs`` 实现来看，也可以拆解成 :ref:`jaeger` + :ref:`prometheus` + :ref:`fluentd` ，或者其他相似开源软件组合。
+   ``SigNoz`` 是一个完整的基于 :ref:`opentelemetry` 的综合性解决方案，也是一个提供云服务的商业产品。 ``SigNoz`` 可以说是一个开箱即用的 :ref:`opentelemetry` 实现，从 ``Traces + Metrics + Logs`` 实现来看，也可以拆解成 :ref:`jaeger` + :ref:`prometheus` + :ref:`fluentd` ，或者其他相似开源软件组合。
 
    ``SigNoz`` 对标了闭源的 `DataDog <https://www.datadoghq.com>`_ 和 `New Relic <https://newrelic.com>`_
 
