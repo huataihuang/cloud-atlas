@@ -13,7 +13,7 @@ Gluster发布版本
 CentOS社区版本
 ==============
 
-在 `glusterfs下载网站 <https://download.gluster.org/pub/gluster/glusterfs/>`_ 可以看到对不同GlusterFS版本的下载索引，例如 :ref:`deploy_centos7_suse15_gluster11` 采用 GlusterFS 11.x ，就可以根据说明看到实际软件包是由 CentOS Storage SIG 提供，也就是首先激活SIG(在 :ref:`build_install_glusterfs` 也同样需要激活):
+在 `glusterfs下载网站 <https://download.gluster.org/pub/gluster/glusterfs/>`_ 可以看到对不同GlusterFS版本的下载索引，例如 :ref:`deploy_centos7_suse15_suse12_gluster11` 采用 GlusterFS 11.x ，就可以根据说明看到实际软件包是由 CentOS Storage SIG 提供，也就是首先激活SIG(在 :ref:`build_install_glusterfs` 也同样需要激活):
 
 - 激活 :ref:`centos_sig_gluster` :
 

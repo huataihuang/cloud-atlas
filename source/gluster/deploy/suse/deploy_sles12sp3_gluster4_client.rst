@@ -1,8 +1,8 @@
-.. _deploy_suse_gluster_client_old:
+.. _deploy_sles12sp3_gluster4_client:
 
-===============================
-SUSE平台Gluster客户端部署(旧版)
-===============================
+=======================================
+在SLES 12 sp3中部署GlusterFS 4客户端
+=======================================
 
 SUSE系统环境可以使用 ``lsb-release -a`` 命令检查版本::
 
@@ -173,7 +173,7 @@ Mount failed
 
    Missing separate debuginfos, use: zypper install glusterfs-debuginfo-4.1.10-101.1.x86_64
 
-不过，opensuse提供的下载软件包没有dubuginfo，这步排查暂时放弃。后续我实际是通过自己编译源代码来完成部署( :ref:`build_glusterfs_suse` )。
+不过，opensuse提供的下载软件包没有dubuginfo，这步排查暂时放弃。后续我实际是通过自己编译源代码来完成部署( :ref:`build_glusterfs_6_for_suse_12` )。
 
 参考
 ======

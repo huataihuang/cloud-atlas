@@ -80,7 +80,7 @@ Ubuntu Server
 串口通讯
 ------------
 
-物理服务器通常支持串口管理，可以通过 :ref:`ipmitool_tips` 实现远程管理和维护，但是需要操作系统内核配置。编辑 ``/etc/default/grub`` 设置::
+物理服务器通常支持串口管理，可以通过 :ref:`ipmi` 实现远程管理和维护，但是需要操作系统内核配置。编辑 ``/etc/default/grub`` 设置::
 
    GRUB_CMDLINE_LINUX="ipv6.disable=1 crashkernel=auto console=tty0 console=ttyS0,115200n8"
 
