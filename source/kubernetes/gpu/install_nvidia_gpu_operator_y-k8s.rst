@@ -112,9 +112,10 @@ CUDA VectorAdd
    :language: bash
    :caption: 运行一个简单的CUDA示例，两个向量相加
 
-提示信息::
+提示信息:
 
-   pod/cuda-vectoradd created
+.. literalinclude:: install_nvidia_gpu_operator/simple_cuda_sample_1_output
+   :caption: 运行一个简单的CUDA示例提示创建成功
 
 在 :ref:`install_nvidia_gpu_operator` 初次实践时遇到过问题和排查(见原文)
 
@@ -127,7 +128,6 @@ CUDA VectorAdd
 
 .. literalinclude:: install_nvidia_gpu_operator_y-k8s/get_pods_output
    :caption: 检查 CUDA示例 pods 输出信息
-
 
 - 通过检查日志来了解计算结果:
 

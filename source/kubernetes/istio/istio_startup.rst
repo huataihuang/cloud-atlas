@@ -1,0 +1,127 @@
+.. _istio_startup:
+
+=========================
+Istio起步
+=========================
+
+下载
+======
+
+- 从 `Istio releases页面 <https://github.com/istio/istio/releases>`_ 可以找到对应操作系统和架构的安装包文件，也可以直接通过以下命令下载:
+
+.. literalinclude:: istio_startup/download_istio
+   :language: bash
+   :caption: 下载Istio最新release版本
+
+如果要指定版本和架构，例如 :ref:`arm` ，则使用如下下载案例:
+
+.. literalinclude:: istio_startup/download_istio_arm
+   :language: bash
+   :caption: 下载Istio的release 1.18.2 ARM版本
+
+- 按照安装脚本提示执行:
+
+.. literalinclude:: istio_startup/istioctl_bin
+   :language: bash
+   :caption: 按照安装脚本设置环境变量并执行预检查
+
+如果顺利，则提示信息:
+
+.. literalinclude:: istio_startup/istioctl_bin_output
+   :language: bash
+   :caption: 按照安装脚本设置环境变量并执行预检查，提示信息
+
+安装
+=======
+
+Istio提供了多个 `Istio configuration profile <https://istio.io/latest/docs/setup/additional-setup/config-profiles/>`_ ，对于生产环境建议使用 ``default`` ，对于测试环境，建议使用 ``demo`` (两者的差异是 ``demo`` 增加了安装 ``istio-egressgateway`` 组件，并且安装了  :ref:`istio_bookinof_demo` 方便学习研究)
+
+.. literalinclude:: istio_startup/istioctl_install_demo
+   :caption: 执行 ``istioctl install`` 安装 profile=demo
+
+- 添加一个namespace label让istio自动注入Envoy sidecar proxy:
+
+.. literalinclude:: istio_startup/label_namespace_istio
+   :caption: 在默认namespace上标记 ``istio-injection=enabled`` 方便后续部署应用自动注入Envoy sidecar
+
+部署案例应用
+=============
+
+- 部署 :ref:`istio_bookinof_demo` :
+
+.. literalinclude:: istio_startup/deploy_bookinfo_demo
+   :caption: 部署 :ref:`istio_bookinof_demo`
+
+输出显示:
+
+.. literalinclude:: istio_startup/deploy_bookinfo_demo_output
+   :caption: 部署 :ref:`istio_bookinof_demo` 输出显示
+
+- 检查服务和pods，可以看到 services 启动(注意没有 ``EXTERNAL-IP`` 是因为缺乏 :ref:`metallb` 部署)
+
+.. literalinclude:: istio_startup/kubectl_get_services
+   :caption: 检查服务输出
+
+.. literalinclude:: istio_startup/kubectl_get_services_output
+   :caption: 检查服务输出
+
+.. literalinclude:: istio_startup/kubectl_get_pods
+   :caption: 检查pods
+
+.. literalinclude:: istio_startup/kubectl_get_pods_output
+   :caption: 检查pods
+
+- 执行以下命令可以检查应用是否正确运行(实际上就是通过在容器内部检查curl页面):
+
+.. literalinclude:: istio_startup/kubectl_exec_curl_check
+   :caption: 检查应用运行
+
+输出显示:
+
+.. literalinclude:: istio_startup/kubectl_exec_curl_check_output
+   :caption: 检查应用运行输出
+
+- 设置应用对外流量: 创建 :ref:`istio_traffic_management` Ingress Gateway:
+
+这里我们简单解析一下案例 ``samples/bookinfo/networking/bookinfo-gateway.yaml`` :
+
+.. literalinclude:: istio_startup/bookinfo-gateway.yaml
+   :language: yaml
+   :caption: 部署Ingress的 ``bookinfo-gateway.yaml``
+
+可以看到这是一个类似 :ref:`nginx_reverse_proxy` 的配置( ``VirtualService`` )
+
+- 创建Istio gateway:
+
+.. literalinclude:: istio_startup/kubectl_apply_istio_gateway
+   :caption: 执行创建 Istio gateway: gateway (相当于声明反向代理对外服务端口) 以及 virtualservice (相当于配置反向代理)
+
+此时提示输出
+
+.. literalinclude:: istio_startup/kubectl_apply_istio_gateway_output
+   :caption: 执行创建 Istio gateway 的输出信息
+
+检测Ingress的IP和端口
+=======================
+
+- 执行检查 Ingress 服务:
+
+.. literalinclude:: istio_startup/kubectl_get_svc
+   :caption: 检查上文创建的名为 ``istio-ingressgateway`` 的service(svc)
+
+输出显示:
+
+.. literalinclude:: istio_startup/kubectl_get_svc_output
+   :caption: 检查上文创建的名为 ``istio-ingressgateway`` 的service(svc): 输出显示 ``EXTERNAL-IP`` 没有分配
+
+可以看到 ``EXTERNAL-IP`` 始终是 ``pending`` 状态，表示没有分配外部访问IP地址
+
+这个 ``EXTERNAL-IP`` 是云计算厂商提供的负载均衡，因为 Kubernetes 设计架构就是部署在云计算厂商的环境，直接调用云厂商的负载均衡(LoadBalancer)的API接口来获得负载均衡外部访问IP地址。
+
+对于个人部署的 ``Barmetal`` 裸金属服务器，需要部署 :ref:`metallb` 来实现云厂商提供的外部负载均衡功能: :ref:`metallb_with_istio`
+
+
+参考
+======
+
+- `Istio Documentation > Setup > Getting Started <https://istio.io/latest/docs/setup/getting-started/>`_
