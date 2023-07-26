@@ -88,18 +88,21 @@ CUDA VectorAdd
    :language: bash
    :caption: 运行一个简单的CUDA示例，两个向量相加
 
-提示信息::
+提示信息:
 
-   pod/cuda-vectoradd created
+.. literalinclude:: install_nvidia_gpu_operator/simple_cuda_sample_1_output
+   :language: bash
+   :caption: 运行一个简单的CUDA示例提示创建成功
 
 这里我遇到启动问题(容器)
 
 排查
 ~~~~~~
 
-- 检查pod状态::
+- 检查pod状态:
 
-   kubectl get pods -o wide
+.. literalinclude:: install_nvidia_gpu_operator_y-k8s/get_pods
+   :caption: 检查 CUDA示例 pods
 
 可以看到没有就绪(NotReady)::
 
@@ -121,18 +124,15 @@ CUDA VectorAdd
 
    汗，原来这是正常的，这个NVIDIA CUDA的案例就是运算完成后自动退出，所以服务状态就是不可访问的(这个是一次性运行)。其实只要查看pod日志就可以验证CUDA是否工作正常(见下文)
 
-- 通过检查日志来了解计算结果::
+- 通过检查日志来了解计算结果:
 
-   kubectl logs cuda-vectoradd
+.. literalinclude:: install_nvidia_gpu_operator_y-k8s/logs_pods
+   :caption: 通过 ``kubectl logs`` 获取pods的日志来判断计算结果
 
-显示如下，表明NVIDIA GPU Operator安装正常::
+显示如下，表明NVIDIA GPU Operator安装正常:
 
-   [Vector addition of 50000 elements]
-   Copy input data from the host memory to the CUDA device
-   CUDA kernel launch with 196 blocks of 256 threads
-   Copy output data from the CUDA device to the host memory
-   Test PASSED
-   Done
+.. literalinclude:: install_nvidia_gpu_operator_y-k8s/logs_pods_output
+   :caption: 通过 ``kubectl logs`` 获取pods的日志来判断计算结果
 
 .. _gpu_node_schedule_err_debug:
 

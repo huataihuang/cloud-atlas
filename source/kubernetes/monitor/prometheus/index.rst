@@ -32,6 +32,7 @@ Prometheus监控
    prometheus_rule_failures.rst
    using_prometheus.rst
    z-k8s_gpu_prometheus_grafana.rst
+   y-k8s_gpu_prometheus_grafana.rst
    kube-prometheus-stack_persistent_volume.rst
    kube-prometheus-stack_persistent_volume_grafana_debug.rst
    kube-prometheus-stack_persistent_nodeselector.rst
