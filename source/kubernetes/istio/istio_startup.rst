@@ -120,6 +120,92 @@ Istio提供了多个 `Istio configuration profile <https://istio.io/latest/docs/
 
 对于个人部署的 ``Barmetal`` 裸金属服务器，需要部署 :ref:`metallb` 来实现云厂商提供的外部负载均衡功能: :ref:`metallb_with_istio`
 
+安装和配置 :ref:`metallb`
+---------------------------
+
+- 按照 :ref:`install_metallb` 步骤完成 ``MetalLB`` 安装(这里步骤不再复述)
+
+- 创建 ``MetalLB`` 的IP资源池来对外提供服务:
+
+.. literalinclude:: ../network/metallb/metallb_with_istio/y-k8s-ip-pool.yaml
+   :language: yaml
+   :caption: 创建 ``y-k8s-ip-pool.yaml`` 设置对外提供负载均衡服务的IP地址池
+
+- 然后执行创建:
+
+.. literalinclude:: ../network/metallb/metallb_with_istio/kubectl_create_metallb_ip-pool
+   :caption: 创建名为 ``y-k8s-ip-pool`` 的MetalLB地址池
+
+- 一旦完成 ``MetalLB`` 的负载均衡服务的IP地址池，再次检查 Ingress 服务:
+
+.. literalinclude:: istio_startup/kubectl_get_svc
+   :caption: 再次检查 ``istio-ingressgateway`` 的service(svc)
+
+**Binggo** ，现在可以看到对外服务的IP地址已经分配:
+
+.. literalinclude:: ../network/metallb/metallb_with_istio/kubectl_get_svc_metallb_ip_output
+   :caption: 可以看到完成 ``MetalLB`` 地址池配置后， ``istio-ingressgateway`` 的service(svc) 正确获得了对外服务负载均衡IP
+
+获得访问URL
+--------------
+
+- 执行以下命令获得访问URL:
+
+.. literalinclude:: istio_startup/get_ingress_ip_port_url
+   :caption: 获取Ingress的IP和Port，拼接出访问URL
+
+按照上文实践，我获得的URL输出如下:
+
+.. literalinclude:: istio_startup/get_ingress_ip_port_url_output
+   :caption: 获取Ingress的IP和Port，拼接出访问URL
+
+.. note::
+
+   上述访问URL是我部署 ``zcloud`` 的内部网络IP地址池，所以对外 ``public`` 网段不能直接访问。有两种简便方式:
+
+   - 方法一: 通过 ``iptables`` 端口转发:
+
+   .. literalinclude:: istio_startup/iptables_port_forwarding_bookinfo
+      :language: bash
+      :caption: 通过 ``iptables`` 端口转发实现访问内网 Kubernetes 的 :ref:`metallb` 输出入口
+
+   - 方法二: 构建 :ref:`nginx_reverse_proxy`
+
+Dashboard
+================
+
+Istio提供了一个Dashboard来实现可观测性
+
+- 默认 ``kiali`` 采用了 ``ClusterIP`` ，所以外部无法访问，官方采用了 ``istioctl dashboard kiali`` 方式在 ``127.0.0.1`` 上开启 ``20001`` 端口访问(但是我是在服务器上部署，所以转换为 LoadBalancer 模式，结合 :ref:`metallb` 就非常容易实现访问)
+
+- 修改 ``kubectl -n istio-system edit svc kiali`` ::
+
+   type: ClusterIP
+
+改为::
+
+   type: LoadBalancer
+
+此时 ``svc`` 从如下::
+
+   kiali                  ClusterIP      10.233.63.114   <none>          20001/TCP,9090/TCP                                                           15m
+
+自动修改成::
+
+   kiali                  LoadBalancer   10.233.63.114   192.168.8.152   20001:32561/TCP,9090:32408/TCP                                               20m
+
+- 再次创建一个简单的端口转发脚本 ``iptables_port_forwarding_kiali`` :
+
+.. literalinclude:: istio_startup/iptables_port_forwarding_kiali
+   :language: bash
+   :caption: 通过 ``iptables`` 端口转发实现访问 ``kiali``
+
+则可以通过访问 http://10.1.1.111:20001/kiali 来访问 ``kiali`` 服务
+
+此时就可以看到 ``kiali`` Dashboard:
+
+.. figure:: ../../_static/kubernetes/istio/kiali_dashboard.png
+
 
 参考
 ======
