@@ -31,7 +31,7 @@ MetalLB 实现了 FRR 模式，该模式使用 FRR 容器作为处理 BGP 会话
 准备工作
 ===============
 
-如果使用 ``IPVS`` 模式的 ``kube-proxy`` ，从 Kubernetes v1.14.2 开始，必须激活严格的 ARP 模式。注意，如果使用 ``kube-router`` 作为 ``service-proxy`` 饿不需要这个步骤，因为已经默认激活了 ``strict ARP``
+如果使用 ``IPVS`` 模式的 ``kube-proxy`` ，从 Kubernetes v1.14.2 开始，必须激活严格的 ARP 模式。注意，如果使用 ``kube-router`` 作为 ``service-proxy`` 则不需要这个步骤，因为已经默认激活了 ``strict ARP``
 
 - 通过编辑当前集群的 ``kube-proxy`` 配置实现:
 
@@ -44,6 +44,7 @@ MetalLB 实现了 FRR 模式，该模式使用 FRR 容器作为处理 BGP 会话
 .. literalinclude:: install_metallb/edit_configmap_enable_strict_arp_mode
    :language: bash
    :caption: 设置 ``ipvs`` 模式中 ``strictARP: true``
+   :emphasize-lines: 5
 
 .. note::
 

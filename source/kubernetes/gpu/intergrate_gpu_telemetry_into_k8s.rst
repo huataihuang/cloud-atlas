@@ -363,5 +363,6 @@ NVIDIA的GPU可观测性也是建立在 :ref:`prometheus` 基础上，构建的�
 =====
 
 - `Integrating GPU Telemetry into Kubernetes <https://docs.nvidia.com/datacenter/cloud-native/gpu-telemetry/dcgm-exporter.html#integrating-gpu-telemetry-into-kubernetes>`_
+- `Monitoring GPUs in Kubernetes with DCGM <https://developer.nvidia.com/blog/monitoring-gpus-in-kubernetes-with-dcgm/>`_ 
 - `Prometheus + Grafana 监控 NVIDIA GPU <https://www.yaoge123.com/blog/archives/2709>`_ yaoge123 在 `共享Grafana dashboards <https://grafana.com/dashboards>`_ 提供了一个基于 :ref:`dcgm-exporter` 数据采集的Grafana面板 `GPU Nodes v2 <https://grafana.com/grafana/dashboards/11752-hpc-gpu-nodes-v2/>`_ ，比NVIDIA官方提供的面板 `NVIDIA DCGM Exporter Dashboard <https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/>`_
   更多信息，不过我结合本文实践没有实现数据展示，需要再仔细研究研究。
