@@ -206,6 +206,28 @@ Istio提供了一个Dashboard来实现可观测性
 
 .. figure:: ../../_static/kubernetes/istio/kiali_dashboard.png
 
+简单使用
+------------
+
+- 点击 ``Graph`` 导航图标，然后在终端执行以下压测命令::
+
+   for i in $(seq 1 10000); do curl -s -o /dev/null "http://$GATEWAY_URL/productpage"; done
+
+- 此时在 ``Graph`` 页面就会看到图形化流量演示:
+
+.. figure:: ../../_static/kubernetes/istio/istio_graph_1.png
+
+此时点击 ``Namespace Layout 2 kiali-breathfirst`` 按钮就会看到监控组件关系(注意需要选择 ``default`` namespace)
+
+.. figure:: ../../_static/kubernetes/istio/istio_graph_2.png
+
+此外点击某个链路还能看到详细流量分析
+
+.. figure:: ../../_static/kubernetes/istio/istio_graph_3.png
+
+.. note::
+
+   目前仅仅完成搭建，还有很多需要学习实践
 
 参考
 ======
