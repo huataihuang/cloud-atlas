@@ -17,6 +17,7 @@ Kubernetes监控
    mixins/index
    opentelemetry/index
    jaeger/index
+   skywalking/index
    signoz/index
    node_health/index
    netdata.rst

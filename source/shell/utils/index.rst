@@ -23,6 +23,7 @@ Shell 实用工具
    nohup.rst
    nice.rst
    grep.rst
+   time.rst
 
 .. only::  subproject and html
 
