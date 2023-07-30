@@ -12,6 +12,8 @@ Linux LVM逻辑卷管理
    striped_lvm.rst
    lvmcache.rst
    lvmthin.rst
+   extend_ext4_on_lvm.rst
+   lvm_device_excluded_by_filter.rst
    
 .. only::  subproject and html
 

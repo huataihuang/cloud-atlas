@@ -10,13 +10,14 @@ Linux文件系统
    gpt_partition.rst
    parted.rst
    choice_linux_filesystem.rst
-   xfs/index
-   ext/index
-   quota/index
+   reserved_space_for_root_on_filesystem.rst
    linux_overlayfs.rst
    remount_without_reboot.rst
    fstrim.rst
    chattr.rst
+   xfs/index
+   ext/index
+   quota/index
 
 .. only::  subproject and html
 

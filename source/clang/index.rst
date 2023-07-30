@@ -11,6 +11,8 @@ C Atlas
    upgrade_cmake_on_centos7.rst
    upgrade_gcc_on_centos7.rst
    upgrade_gcc_on_suse12.5.rst
+   upgrade_gcc_on_ubuntu22.04.rst
+   parallel_make.rst
 
 .. only::  subproject and html
 

@@ -14,6 +14,7 @@ Bash
    append_to_file_as_sudo.rst
    list_all_cron_jobs.rst
    here_document.rst
+   bash_caculate.rst
    date_caculate.rst
    trace_disk_space_usage.rst
    bash_multi_variable_assigment.rst
