@@ -12,6 +12,7 @@ CentOS平台GlusterFS部署
    download_gluster_rpm_createrepo.rst
    gluster11_rpm_createrepo.rst
    deploy_centos7_gluster11.rst
+   add_centos7_gluster11_server.rst
 
 .. only::  subproject and html
 

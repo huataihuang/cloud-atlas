@@ -88,7 +88,7 @@ WHAT?
    :caption: 通过 ``/proc/devices`` 可以找到 ``id`` 是 ``253`` 的设备
    :emphasize-lines: 9
 
-明白了，原来我们服务器使用了 ``aliflash`` 存储设备
+明白了，原来我们服务器使用了 ``aliflash`` 存储设备(国产化设备)
 
 LVM默认只配置了常规的磁盘设备名，我们服务器上使用了特殊的 ``aliflash`` 设备，这个设备被识别为 ``/dev/dfX`` ，需要增加到 ``/etc/lvm/lvm.conf`` 中设备类型
 
@@ -109,7 +109,7 @@ LVM默认只配置了常规的磁盘设备名，我们服务器上使用了特�
 
    types = [ "aliflash", 16 ]
 
-这样就能够匹配使用 ``/dev/dfa`` 和 ``/dev/dfb`` 等设备(注意，不是配置 ``df`` ，而是配置 ``/proc/devices`` 中设备名 ``aliflash`` )
+这样就能够匹配使用 ``/dev/dfa`` 和 ``/dev/dfb`` 等设备(注意，不是配置 ``df`` ，而是配置 ``/proc/devices`` 中设备名 ``aliflash`` 也就是对应报错中 ``253`` id的设备名)
 
 然后执行::
 

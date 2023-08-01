@@ -34,9 +34,10 @@ Distributed GlusterFS Volume是默认创建的GlusterFS卷，也就是如果不�
 
    gluster volume create test-volume server1:/exp1 server2:/exp2 server3:/exp3 server4:/exp4
 
-然后就可以检查卷信息::
+然后就可以检查卷信息:
 
-   gluster volume info
+.. literalinclude:: gluster_architecture/gluster_volume_info
+   :caption: 执行 ``gluster volume info`` 可以检查卷信息
 
 显示信息类似::
 
@@ -71,6 +72,8 @@ GlusterFS复制卷解决了纯分布式卷的数据丢失风险。在所有的br
 
    gluster volume create test-volume replica 3 transport tcp \
          server1:/exp1 server2:/exp2 server3:/exp3
+
+.. _distributed_replicated_glusterfs_volume:
 
 分布式复制GlusterFS卷(Distributed Replicated GlusterFS Volume)
 ---------------------------------------------------------------

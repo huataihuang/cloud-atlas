@@ -26,3 +26,8 @@
 .. note::
 
    使用 ``-j`` 参数并发在多处理器服务器上运行编译，可以看到 ``real`` 时间远小于 ``system`` 和 ``user`` 累加的时间。这是因为 ``system`` 和 ``user`` 消耗时间是在多个处理器上累加起来的，多个并发实际完成时间大大缩短 ( ``real`` 时间 )。详见 :ref:`time`
+
+参考
+======
+
+- `Parallel make: set -j8 as the default option <https://stackoverflow.com/questions/10567890/parallel-make-set-j8-as-the-default-option>`_

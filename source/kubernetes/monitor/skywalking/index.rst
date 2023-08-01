@@ -8,4 +8,5 @@ Apache SkyWalking
    :maxdepth: 1
 
    intro_skywalking.rst
+   skywalking_opensource_talk.rst
 

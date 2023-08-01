@@ -15,6 +15,7 @@ GlusterFS部署实践，将不断完善和改进，所以最终方案会和最�
    suse/index
    centos/index
    ubuntu/index
+   gluster_mount_options_multi_volfile_servers.rst
 
 .. only::  subproject and html
 

@@ -89,6 +89,14 @@ CentOS 7 部署Gluster 11
    :language: bash
    :caption: ``create_gluster`` 脚本，传递卷名作为参数就可以创建 ``replica 3`` 的分布式卷
 
+.. note::
+
+   当 ``brick`` 数量是 ``replica`` 的整数倍(2倍或更多倍)时， :ref:`distributed_replicated_glusterfs_volume` 自动创建，能够同时获得高可用和高性能。但是对 ``brick`` 的排列有要求: 先 ``replica`` 后 ``distribute`` 。
+
+   所以为了能将数据分布到不同服务器上，我这里采用了特定的排列顺序: ``A:0,B:0,C:0,A:1,B:1,C:1,A:2,B2,C2...`` 以便让 ``replicas 3`` 能够精确分布到不同服务器上。
+
+   这种部署方式有利有弊: :ref:`best_practices_for_gluster` 我会详细探讨
+
 - 将脚本加上执行权限::
 
    chmod 755 create_gluster
