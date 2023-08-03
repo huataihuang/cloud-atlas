@@ -8,7 +8,9 @@ Linux LVM逻辑卷管理
    :maxdepth: 1
 
    lvm_infra.rst
+   lvmraid_vs_mdadm.rst
    deploy_lvm.rst
+   lvmraid.rst
    striped_lvm.rst
    lvmcache.rst
    lvmthin.rst
