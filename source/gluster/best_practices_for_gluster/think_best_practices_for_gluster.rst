@@ -9,4 +9,4 @@ Gluster存储最佳实践的思考
 参考
 =====
 
-- `Gluster Storage for Oracle Linux: Best Practices and Sizing Guideline <https://www.oracle.com/a/ocom/docs/linux/gluster-storage-linux-best-practices.pdf>`_
+- `Gluster Storage for Oracle Linux: Best Practices and Sizing Guideline <https://www.oracle.com/a/ocom/docs/linux/gluster-storage-linux-best-practices.pdf>`_ Oracle Linux提供的这个最佳实践撰写得比较清晰

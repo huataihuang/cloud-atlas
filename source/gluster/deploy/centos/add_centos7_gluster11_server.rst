@@ -79,6 +79,11 @@ CentOS 7上部署的Gluster 11 集群添加服务器
 
    我将在 :ref:`best_practices_for_gluster` 详细探讨我的实践方案以及总结改进
 
+- 通常我们还需要做一次 ``volume rebalance`` :
+
+.. literalinclude:: add_centos7_gluster11_server/gluster_volume_rebalance
+   :caption: 执行 ``gluster volume reblance`` 将brick上的文件重新hash均衡
+
 参考
 ======
 
