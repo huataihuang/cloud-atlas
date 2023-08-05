@@ -8,9 +8,11 @@ Grafana通用可视分析平台
    :maxdepth: 1
 
    install_grafana.rst
+   install_grafana_centos7.rst
    grafana_config_startup.rst
    run_grafana_in_k8s.rst
    grafana_behind_reverse_proxy.rst
+   grafana_behind_reverse_proxy_sub-path.rst
    grafana_reset_admin_password.rst
 
 推荐阅读:

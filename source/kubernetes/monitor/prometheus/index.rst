@@ -11,6 +11,8 @@ Prometheus监控
 
    introduce_prometheus.rst
    prometheus_startup.rst
+   prometheus_startup_centos7.rst
+   prometheus_behind_reverse_proxy.rst
    prometheus_exporters/index
    run_prometheus_in_k8s.rst
    run_prometheus_in_k8s_arm.rst

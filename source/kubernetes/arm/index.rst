@@ -1,4 +1,4 @@
-.. _kubernetes_arm:
+.. _arm_k8s:
 
 ======================
 ARM架构Kubernetes
@@ -13,6 +13,6 @@ ARM架构Kubernetes
    :maxdepth: 1
 
    multi_arch_k8s.rst
-   arm_k8s.rst
+   arm_k8s_plan.rst
    arm_k8s_deploy.rst
    perfmance_arm_x86.rst

@@ -1,7 +1,7 @@
-.. _arm_k8s:
+.. _arm_k8s_plan:
 
 ======================
-ARM部署Kubernetes
+ARM部署Kubernetes规划
 ======================
 
 概述
