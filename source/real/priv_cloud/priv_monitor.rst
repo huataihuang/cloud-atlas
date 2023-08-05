@@ -34,4 +34,57 @@
 部署Prometheus
 ================
 
-除了在 :ref:`y-k8s` 采用 
+除了在 :ref:`y-k8s` 采用 :ref:`y-k8s_kube-prometheus-stack` 部署Kubernetes集群内的 :ref:`prometheus` 监控外，在物理主机上直接部署一套 :ref:`prometheus` + :ref:`grafana` ，以提供基础监控并集成 :ref:`pcp` 来实现集成性能监控，并且将 :ref:`intel_pcm` 集成在监控中，对物理主机的 :ref:`intel_cpu` 进行深入的性能分析。
+
+物理主机部署 Prometheus 软件堆栈非常简便，采用 :ref:`prometheus_startup` 简单步骤就能初步完成部署( 如果服务器操作系统是CentOS7 则采用 :ref:`prometheus_startup_centos7` )
+
+- 准备用户账号:
+
+.. literalinclude:: ../../kubernetes/monitor/prometheus/prometheus_startup/add_prometheus_user
+   :language: bash
+   :caption: 在操作系统中添加 prometheus 用户
+
+- 创建配置目录和数据目录:
+
+.. literalinclude:: ../../kubernetes/monitor/prometheus/prometheus_startup/mkdir_prometheus
+   :language: bash
+   :caption: 在操作系统中创建prometheus目录
+
+- 下载最新prometheus二进制程序:
+
+.. literalinclude:: ../../kubernetes/monitor/prometheus/prometheus_startup/ubuntu_install_prometheus
+   :language: bash
+   :caption: 在Ubuntu环境安装Prometheus
+
+- 在解压缩的Prometheus软件包目录下有配置案例以及 console libraries :
+
+.. literalinclude:: ../../kubernetes/monitor/prometheus/prometheus_startup/config_prometheus
+   :language: bash
+   :caption: 简单配置
+
+- 创建 Prometheus 的 :ref:`systemd` 服务管理配置文件 ``/etc/systemd/system/prometheus.service`` :
+
+.. literalinclude:: ../../kubernetes/monitor/prometheus/prometheus_startup/prometheus.service
+   :caption: Prometheus :ref:`systemd` 服务管理配置文件 ``/etc/systemd/system/prometheus.service``
+
+- 启动服务:
+
+.. literalinclude:: ../../kubernetes/monitor/prometheus/prometheus_startup/start_prometheus
+   :caption: 启动Prometheus
+
+部署Grafana
+===============
+
+由于物理主机使用的是 :ref:`ubuntu_linux` 22.04，Grafana提供了非常方便的软件仓库安装方式，可以快速完成 :ref:`install_grafana`
+
+- 安装社区版APT源:
+
+.. literalinclude:: ../../kubernetes/monitor/grafana/install_grafana/ubuntu_install_grafana
+   :caption: 在Ubuntu中安装Grafana
+
+- 启动服务:
+
+.. literalinclude:: ../../kubernetes/monitor/grafana/install_grafana/ubuntu_start_grafana
+   :caption: 启动Grafana
+
+

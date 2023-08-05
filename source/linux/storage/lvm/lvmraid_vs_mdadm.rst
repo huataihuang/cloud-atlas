@@ -50,6 +50,7 @@ LVM和 :ref:`mdadm` 都是操作系统级别提供的存储管理软件:
 
 - 物理磁盘首先通过 :ref:`mdadm` 构建出 :ref:`linux_software_raid`
 - 在软RAID之上，采用 :ref:`linux_lvm` 实现逻辑卷的划分和调整，可以充分使用磁盘空间并实现quota
+- 注意: 当结合 **软RAID + LVM** ，必须将软RAID建立在底层，在软RAID之上构建LVM卷，否则会导致性能问题，并且非常难以维护(磁盘替换困难)
 
 参考
 =======
