@@ -21,3 +21,13 @@
 
 .. literalinclude:: grafana_behind_reverse_proxy_sub-path/sub-path_nginx.conf
    :caption: nginx反向代理，grafana用sub-path模式 ``/etc/nginx/conf.d/onesre-core.conf``
+
+- 启动服务(和Debian/Ubuntu相同):
+
+.. literalinclude:: install_grafana/ubuntu_start_grafana
+   :caption: 启动Grafana
+
+参考
+=======
+
+- `Run Grafana behind a reverse proxy <https://grafana.com/tutorials/run-grafana-behind-a-proxy/>`_

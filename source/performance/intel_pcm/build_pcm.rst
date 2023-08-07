@@ -36,6 +36,16 @@
 .. literalinclude:: build_pcm/deploy_pcm
    :caption: 快速部署自己编译的pcm-exporter
 
+也可以通过类似 :ref:`homebrew` 方法执行脚本安装:
+
+.. literalinclude:: build_pcm/install_pcm.sh
+   :language: bash
+   :caption: 快速在被监控节点部署安装 Intel PCM 的脚本 ``install_pcm.sh``
+
+.. literalinclude:: build_pcm/curl_install_pcm
+   :language: bash
+   :caption: crul 执行安装 脚本 ``intall_pcm.sh``
+
 问题排查
 ==========
 

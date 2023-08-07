@@ -14,6 +14,7 @@ Grafana通用可视分析平台
    grafana_behind_reverse_proxy.rst
    grafana_behind_reverse_proxy_sub-path.rst
    grafana_reset_admin_password.rst
+   grafana_mysql_data_source.rst
 
 推荐阅读:
 

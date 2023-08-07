@@ -22,7 +22,6 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 .. literalinclude:: node_exporter/install_node_exporter
    :caption: 安装Node Exporter执行程序
 
-
 :strike:`要持续运行可以采用 screen` :
 
    screen -S node_exporter -dm /usr/local/bin/node_exporter
@@ -36,6 +35,14 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 .. literalinclude:: node_exporter/node_exporter.service
    :caption: 配置 Node Exporter 服务，通过 :ref:`systemd` 运行
 
+.. note::
+
+   运行 Node Exporter 的节点不需要使用 ``root`` 用户账号运行进程，可以采用 :ref:`prometheus_startup` 中配置的 ``prometheus`` 账号:
+
+   .. literalinclude:: ../prometheus_startup/add_prometheus_user
+      :language: bash
+      :caption: 在操作系统中添加 prometheus 用户
+
 - 启动:
 
 .. literalinclude:: node_exporter/systemd_node_exporter
@@ -46,10 +53,25 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 .. literalinclude:: node_exporter/systemd_node_exporter_output
    :caption: 通过 :ref:`systemctl` 启动 ``node_exporter`` 服务的状态观察
 
+快速部署
+------------
+
+- 一个简单的脚本，方便快速部署:
+
+.. literalinclude:: node_exporter/install_node-exporter.sh
+   :language: bash
+   :caption: 快速在被监控节点部署安装 Node Exporter 的脚本 ``install_node-exporter.sh``
+
+- 执行安装类似 :ref:`homebrew` :
+
+.. literalinclude:: node_exporter/curl_install_node-exporter
+   :language: bash
+   :caption: 执行安装
+
 检查
 =======
 
-- 一旦 ``node_exporter`` 运行起来，可以见证metrics::
+- 一旦 ``node_exporter`` 运行起来，可以检查metrics::
 
    curl http://localhost:9100/metrics
 

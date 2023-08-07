@@ -15,6 +15,9 @@ Prometheus社区官方提供了大约十几种 `xxxx_exporters <https://github.c
    node_exporter_ipmitool_text_plugin.rst
    node_exporter_smartctl_text_plugin.rst
    ipmi_exporter.rst
+   ../../../../performance/intel_pcm/pcm-exporter.rst
+   ../../../../performance/intel_pcm/pcm-grafana.rst
+   ../../../gpu/dcgm-exporter.rst
    process-exporter.rst
    amd_smi_exporter.rst
    blackbox_exporter.rst
