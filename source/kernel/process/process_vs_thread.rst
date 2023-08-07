@@ -44,6 +44,52 @@ Richard Stevens大师这样说过(大意):
 - 线程有时候被称为轻量级进程，线程的创建速度比进程创建快10到100倍
 - 一个进程的所有线程共享相同的全局内存，这使得线程间信息共享很容易，但是这种简单性带来的问题是同步问题
 
+查看进程的线程
+================
+
+- 通过 ``/proc/<进程ID>/task/`` 下的文件名可以看到线程的 ``TID`` ，举例，检查 ``java`` 进程的线程:
+
+.. literalinclude:: process_vs_thread/get_thread_tid
+   :caption: 通过 ``/proc/<进程ID>/task/`` 下的文件名获取线程 ``TID``
+
+- 通过 ``ps`` 命令参数 ``-eLf`` 能够查看系统所有线程:
+
+.. literalinclude:: process_vs_thread/ps_thread
+   :caption: ``ps`` 参数 ``-eLf`` 可以查看所有线程
+
+这里参数含义:
+
+  - ``-L`` 显示线程，即 ``LWP`` 和 ``NLWP`` 列信息
+  - ``-e`` 显示所有进程(操作系统的所有进程，而不是仅仅当前用户)
+  - ``-f`` 采用 ``full-format`` 列出模式
+
+输出显示类似:
+
+.. literalinclude:: process_vs_thread/ps_thread_output
+   :caption: ``ps`` 参数 ``-eLf`` 输出案例
+   :emphasize-lines: 8,9
+
+这里的:
+
+  - 第4列 ``LWP`` 表示轻量级进程 ``Light Weight Process`` ，也就是线程 ``TID``
+  - 第6列 ``NWLP`` 就是表示 ``Number of Threads`` (线程数量)
+
+- 通过 ``pstree`` 命令
+
+.. literalinclude:: process_vs_thread/pstree_thread
+   :caption: 使用 ``pstree`` 可以查看某个进程PID的所有线程
+
+输出案例显示( :ref:`grafana` ):
+
+.. literalinclude:: process_vs_thread/pstree_thread_output
+   :caption: 使用 ``pstree`` 可以查看grafana进程对应所有线程
+
+- ``top`` 提供了观察线程数量以及排序的方法 :ref:`top_nth`
+
+.. note::
+
+   对于系统中异常的线程数量，请检查 :ref:`thread_count` 以及是否存在线程泄露问题
+
 参考
 ======
 
@@ -51,3 +97,4 @@ Richard Stevens大师这样说过(大意):
 - `Linux 线程实现机制分析 <https://www.ibm.com/developerworks/cn/linux/kernel/l-thread/>`_
 - `Linux 线程模型的比较：LinuxThreads 和 NPTL <http://www.ibm.com/developerworks/cn/linux/l-threading.html>`_
 - `知乎：Linux中进程和线程的开销基本一样啊，为什么还要多线程呢？ <https://www.zhihu.com/question/19903801>`_
+- `Solved: Check thread count per process in Linux [5 Methods] <https://www.golinuxcloud.com/check-threads-per-process-count-processes/>`_
