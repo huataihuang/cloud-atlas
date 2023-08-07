@@ -23,7 +23,13 @@ CentOS 7安装Grafana
 .. literalinclude:: install_grafana/ubuntu_start_grafana
    :caption: 启动Grafana
 
+反向代理
+==========
 
+Grafana提供了一个绑定在 ``3000`` 端口的WEB服务，为了方便访问，通常我们会在前端使用 :ref:`nginx` 做反向代理，有以下两种方式:
+
+- :ref:`grafana_behind_reverse_proxy_sub-path` 使用现有域名的 ``sub-path`` ，不需要重新申请域名
+- :ref:`grafana_behind_reverse_proxy` 独立的 ``grafana`` 域名
 
 参考
 =====
