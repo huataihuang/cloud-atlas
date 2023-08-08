@@ -60,6 +60,37 @@
    :caption: ``top`` 的 ``nTH`` 字段无法显示超过3位数值
    :emphasize-lines: 8
 
+- (推荐) ``ps`` 命令可以检查指定进程的线程，非常重要的命令:
+
+.. literalinclude:: process_vs_thread/ps_special_thread
+   :caption: 检查指定进程的线程 **重要命令**
+
+输出显示类似:
+
+.. literalinclude:: process_vs_thread/ps_special_thread_output
+   :caption: 检查指定进程的线程输出案例
+
+可以看到，这里根据第5列 ``线程命令`` 进行统计，就能找出哪个命令大量出现线程泄漏:
+
+.. literalinclude:: process_vs_thread/ps_special_thread_count
+   :caption: 统计指定进程的哪个线程出现泄
+
+输出类似:
+
+.. literalinclude:: process_vs_thread/ps_special_thread_count_output
+   :caption: 统计指定进程的哪个线程出现泄
+
+debug线程数量问题
+---------------------
+
+根据找到的怀疑泄漏线程的命令，例如上文 ``client_handler`` ，我们可以找一下这个问题线程的堆栈是否有异常:
+
+.. literalinclude:: thread_count/threads_stack
+   :caption: 检查异常线程的堆栈
+
+可以看到陷入了一个 syscall 
+
+
 进程允许的最大线程数量
 =======================
 
