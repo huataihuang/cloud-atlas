@@ -74,6 +74,26 @@ Richard Stevens大师这样说过(大意):
   - 第4列 ``LWP`` 表示轻量级进程 ``Light Weight Process`` ，也就是线程 ``TID``
   - 第6列 ``NWLP`` 就是表示 ``Number of Threads`` (线程数量)
 
+- ``ps`` 命令可以检查指定进程的线程，非常重要的命令:
+
+.. literalinclude:: process_vs_thread/ps_special_thread
+   :caption: 检查指定进程的线程 **重要命令**
+
+输出显示类似:
+
+.. literalinclude:: process_vs_thread/ps_special_thread_output
+   :caption: 检查指定进程的线程输出案例 
+
+可以看到，这里根据第5列 ``线程命令`` 进行统计，就能找出哪个命令大量出现线程泄漏:
+
+.. literalinclude:: process_vs_thread/ps_special_thread_count
+   :caption: 统计指定进程的哪个线程出现泄
+
+输出类似:
+
+.. literalinclude:: process_vs_thread/ps_special_thread_count_output
+   :caption: 统计指定进程的哪个线程出现泄
+
 - 通过 ``pstree`` 命令
 
 .. literalinclude:: process_vs_thread/pstree_thread

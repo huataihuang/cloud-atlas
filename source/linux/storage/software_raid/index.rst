@@ -9,7 +9,8 @@ Linux 软RAID
 
    linux_software_raid_arch.rst
    mdadm.rst
-   mdadm_raid6.rst
+   mdadm_raid10.rst
+   ../../../devops/ansible/ansible_config_raid.rst
    
 .. only::  subproject and html
 
