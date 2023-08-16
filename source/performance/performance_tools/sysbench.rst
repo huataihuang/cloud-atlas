@@ -17,8 +17,8 @@ Sysbench性能测试
 
    我在 :ref:`dl360_bios_upgrade` 前后采用sysbench进行性能测试，以观察BIOS升级对性能的影戏
 
-安装
-========
+安装(旧方法归档)
+=================
 
 - 在Ubuntu上可以直接安装::
 
@@ -33,6 +33,41 @@ Sysbench性能测试
 然后执行::
 
    sudo yum install sysbench
+
+安装
+==========
+
+sysbench现在提供了二进制安装仓库方法，通过 packagecloud ，可以直接针对不同操作系统进行安装
+
+- Debian/Ubuntu:
+
+.. literalinclude:: sysbench/ubuntu_install_sysbench
+   :caption: 在Debian/Ubuntu中安装sysbench
+
+- RHEL/CentOS:
+
+.. literalinclude:: sysbench/centos_install_sysbench
+   :caption: 在RHEL/CentOS中安装sysbench
+
+- Fedora:
+
+.. literalinclude:: sysbench/fedora_install_sysbench
+   :caption: 在Fedora中安装sysbench
+
+- Arch Linux:
+
+.. literalinclude:: sysbench/arch_install_sysbench
+   :caption: 在Arch Linux中安装sysbench
+
+- macOS:
+
+.. literalinclude:: sysbench/macos_install_sysbench
+   :caption: 在macOS中安装sysbench
+
+- 对于没有在官方列表中列出的操作系统，但是实际上是兼容的，例如aliOS就是兼容CentOS，可以采用先检查 `packagecloud os distro version <https://packagecloud.io/docs#os_distro_version>`_ 然后通过环境变量指定系统:
+
+.. literalinclude:: sysbench/alios_install_sysbench
+   :caption: 在aliOS (兼容CentOS 7.2) 中安装
 
 使用
 =======

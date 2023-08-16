@@ -18,6 +18,10 @@
 .. literalinclude:: upgrade_gcc_on_centos7/build_gcc
    :caption: 编译gcc
 
+.. warning::
+
+   编译GCC是非常大型的编译，如果没有使用 :ref:`parallel_make` 则编译过程非常漫长。对于多处理器核心建议使用 :ref:`parallel_make` 。不过，也很郁闷的是，这个并行编译可能还受限于gcc版本，我在aliOS 7.2环境使用发行版的gcc 4.8.5，开启 :ref:`parallel_make` 居然无法完成 ``gcc-10.5.0`` 编译，取消了并行编译才能正确完成编译gcc。
+
 参考
 ======
 

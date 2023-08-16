@@ -1,6 +1,10 @@
 for i in {0..11};do
     if [ ! -d /data/brick${i} ];then mkdir -p /data/brick${i};fi
     parted -s -a optimal /dev/nvme${i}n1 mklabel gpt
+    # 如果随机遇到以下报错，显示磁盘设备busy无法分区，则添加sleep 1避免上一个parted命令还没处理完就发起下一个parted
+    # Error: Error informing the kernel about modifications to partition /dev/nvme1n1p1 -- Device or resource busy.  This means Linux won't know about any changes you made to /dev/nvme1n1p1 until you reboot -- so you shouldn't mount it or use it in any way before rebooting.
+    # Error: Failed to add partition 1 (Device or resource busy)
+    sleep 1
     parted -s -a optimal /dev/nvme${i}n1 mkpart primary xfs 0% 100%
     parted -s -a optimal /dev/nvme${i}n1 name 1 gluster_brick${i}
     sleep 1
