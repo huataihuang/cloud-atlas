@@ -8,7 +8,13 @@
 
    通过 :ref:`apple_one` 订阅，可以同时获得苹果的6个服务，如果购买 Premier plan ，每月 29.95 美刀，可以家庭共享并且获得 2T icloud 存储。通过 Apple TV 和 Apple News ，可以打开英语世界的大门...
 
-   美区账号无法直接使用国内的信用卡，即使是双币信用卡(假的Visa/Master?)也无法在Google/Apple上直接订阅，变通的曲径是采用 `Apple Gift Card - App Store, iTunes, iPhone, iPad, AirPods, MacBook, accessories and more (Email Delivery) <https://www.amazon.com/gp/product/B08F7GTP2R/ref=ppx_yo_dt_b_asin_title_o00?ie=UTF8&psc=1>`_ 向美区账号充值
+   美区账号无法直接使用国内的信用卡，即使是双币信用卡(假的Visa/Master?)也无法在Google/Apple上直接订阅，变通的曲径有两种方法:
+
+   - 采用 `Apple Gift Card - App Store, iTunes, iPhone, iPad, AirPods, MacBook, accessories and more (Email Delivery) <https://www.amazon.com/gp/product/B08F7GTP2R/ref=ppx_yo_dt_b_asin_title_o00?ie=UTF8&psc=1>`_ 向美区账号充值(目前我采用这种方法)
+   - `美区 Apple ID 绑定 美区 Paypal <https://blog.shuziyimin.org/171>`_ 这个方法可能更好，但是有一个非常难以跨越的门槛(我没有成功): 需要有一个美国手机号(也可以是虚拟号码)
+
+     - `Google Voice <https://voice.google.com/>`_ 虚拟号码的依赖条件是首先有一个美国移动电话号码，晕倒...我就是要一个虚拟号码来替代美国手机号码啊...
+     - `TextNow <https://www.textnow.com/>`_ 虚拟号码似乎屏蔽了云计算服务的虚拟机IP导致无法注册...
 
 准备和加载Apple News
 =====================

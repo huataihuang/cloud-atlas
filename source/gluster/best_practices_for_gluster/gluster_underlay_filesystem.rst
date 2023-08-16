@@ -32,4 +32,4 @@ GlusterFS底层需要采用操作系统提供的文件系统，有以下推荐�
 实践
 =======
 
-- :ref:`deploy_centos7_gluster11_lvm_mdadm_raid6`
+- :ref:`deploy_centos7_gluster11_lvm_mdadm_raid10`

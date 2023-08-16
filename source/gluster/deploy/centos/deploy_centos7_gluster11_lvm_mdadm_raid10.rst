@@ -1,20 +1,31 @@
-.. _deploy_centos7_gluster11_lvm_mdadm_raid6:
+.. _deploy_centos7_gluster11_lvm_mdadm_raid10:
 
-========================================
-在软RAID6+LVM上CentOS 7 部署Gluster 11
-========================================
+=============================================
+在软RAID10 + LVM上CentOS 7 部署Gluster 11
+=============================================
 
 .. note::
 
    根据 :ref:`deploy_centos7_gluster11` 迭代改进部署方案
 
-**待续**
+在 :ref:`deploy_centos7_gluster11` 我采用了一个比较ugly的部署方案，将物理服务器上的12个 ``brick`` (磁盘)分别用于同一个volume，但是由于强制顺序安排，可以让数据分布到不同服务器上。但是，实际上这种方案限制了集群的扩容和缩容，例如在 :ref:`add_centos7_gluster11_server` 就会看到缺陷。对于GlusterFS这种精简架构的分布式存储， :ref:`think_best_practices_for_gluster` ，改进为底层采用 :ref:`linux_software_raid` 来统一存储磁盘，实现一个超大规模的磁盘，然后借助 :ref:`linux_lvm` 来实现灵活的卷划分和管理。
 
 准备工作
 ===========
 
 - :ref:`build_glusterfs_11_for_centos_7`
 - :ref:`gluster11_rpm_createrepo`
+
+磁盘存储池构建
+================
+
+- :ref:`mdadm_raid10` 是因为本省存储磁盘非常充裕，所以我就没有采用更为节约磁盘(且高数据安全)的RAID6
+
+.. warning::
+
+   由于项目方案调整，我现在采用了直接在 :ref:`mdadm_raid10` 构建 :ref:`xfs` ，快速完成部署。
+
+   以下部分请暂时忽略，等后续再有实践机会重新开始...
 
 安装和启动服务
 ===============

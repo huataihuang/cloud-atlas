@@ -67,6 +67,12 @@ CentOS目前依然是生产环境中常用的操作系统，虽然由于 :ref:`r
    :language: bash
    :caption: 通过 :ref:`pssh` 批量完成分区、格式化和挂载
 
+- 完成后在服务器上检查 ``df -h`` 可以看到12块已经格式化好 :ref:`xfs` 并挂载好的磁盘:
+
+.. literalinclude:: centos_gluster_init/parted_xfs_df
+   :caption: 分区和格式化、挂载好的12块磁盘的文件系统
+   :emphasize-lines: 9-20
+
 ``wrong fs type, bad option, bad superblock``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

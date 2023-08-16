@@ -9,7 +9,9 @@ Linux LVM逻辑卷管理
 
    lvm_infra.rst
    lvmraid_vs_mdadm.rst
+   lvm_partion_vs_disk.rst
    deploy_lvm.rst
+   deploy_lvm_mdadm_raid10.rst
    lvmraid.rst
    striped_lvm.rst
    lvmcache.rst

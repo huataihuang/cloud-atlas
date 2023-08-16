@@ -52,7 +52,11 @@ Flask 使用的 HTML 渲染模版 `Jinja2 template <http://quintagroup.com/cms/p
    :caption: 明确编写 ``escape()`` 防止恶意注入JS
    :emphasize-lines: 2,8
 
-此时用户在浏览器中输入 http:://127.0.0.1:5000/<script>alert("bad")</script> 这样的注入，就会直接被拒绝渲染，页面提示::
+.. note::
+
+   程序中 ``return f"Hello, {escape(name)}!"`` 中有一个 ``f`` 表示 ``f-string`` ，是Python 3.6以上版本共鞥，用于格式化字符串。也就是最后返回的值( ``escape()`` 处理后的值进行转义 )，最后返回的是 ``User xxx`` 
+
+此时用户在浏览器中输入 http:://127.0.0.1:5001/<script>alert("bad")</script> 这样的注入，就会直接被拒绝渲染，页面提示::
 
    Not Found
    The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
@@ -61,11 +65,33 @@ Flask 使用的 HTML 渲染模版 `Jinja2 template <http://quintagroup.com/cms/p
 
    注意， `Jinja2 template <http://quintagroup.com/cms/python/jinja2>`_ 已经内嵌了自动防范的功能，上述代码片段不使用 ``escape()`` 也是有同样效果的
 
-所以用户只能输入正常的名字 如 http:://127.0.0.1:5000/huatai
+所以用户只能输入正常的名字 如 http:://127.0.0.1:5001/huatai
 
 此时页面才能正常渲染::
 
    Hello,huatai!
+
+路由(Routing)
+================
+
+Web应用会使用一些有意义的URLs让用户访问以及调用不同的函数返回页面，这种方式称为 ``route`` （路由)
+
+.. literalinclude:: flask_startup/hello_route.py
+   :language: python
+   :caption: 路由访问
+
+不同规则
+==========
+
+以下代码可以从url中获取需要的内容，根据不同路径以及关系分别返回 ``username / post_id / subpath`` ，你可以分别试试::
+
+   http://http://127.0.0.1:5001/user/huatai
+   http://http://127.0.0.1:5001/post/1
+   http://http://127.0.0.1:5001/path/the_large_path/small_path
+
+.. literalinclude:: flask_startup/variable_rules.py
+   :language: python
+   :caption: 根据用户访问路径来返回不同类型的数据
 
 参考
 =======
