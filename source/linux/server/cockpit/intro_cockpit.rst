@@ -21,6 +21,10 @@ Cockpit是Linux服务器的系统管理平台，可以用于管理容器、存�
 
 访问: https://ip-address-of-machine:9090
 
+.. note::
+
+   由于 :ref:`prometheus` 默认也使用 ``9090`` 端口，所以我调整 :ref:`cockpit_port_address` 为 ``9091``
+
 很多主流的Linux发行版都内置支持了Cockpit(当前Arch Linux也内置支持了cockpit，不需要再从第三方社区仓库安装):
 
 .. figure:: ../../../_static/linux/server/cockpit/cockpit_support_linux.png

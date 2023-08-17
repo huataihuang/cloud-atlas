@@ -9,10 +9,10 @@ Node Exporter ipmitool 文本插件
 准备工作
 ==========
 
-- 创建一个 ``/var/lib/node_exporter/textfile_collector/`` 用于存放 ``--collector.textfile.directory`` 对应的 ``*.prom`` 文件，以便转换成metrics::
+- 创建一个 ``/var/lib/node_exporter/textfile_collector/`` 用于存放 ``--collector.textfile.directory`` 对应的 ``*.prom`` 文件，以便转换成metrics:
 
-   sudo mkdir -p /var/lib/node_exporter/textfile_collector
-   sudo chomd 777 /var/lib/node_exporter/textfile_collector
+.. literalinclude:: node_exporter_textfile-collector/textfile_collector_dir
+   :caption: 准备 ``/var/lib/node_exporter/textfile_collector/`` 目录
 
 - Prometheus社区提供了 `node-exporter-textfile-collector-scripts <https://github.com/prometheus-community/node-exporter-textfile-collector-scripts>`_ ，将这些脚本下载到服务器上:
 
@@ -60,8 +60,17 @@ Node Exporter ipmitool 文本插件
 
 重启 ``node_exporter`` 服务
 
+配置 Grafana Dashboard
+=========================
+
 在 :ref:`grafana` 中 ``import`` `Grafana Dashboard 13177: IPMI for Prometheus <https://grafana.com/grafana/dashboards/13177-ipmi-for-prometheus/>`_ 
 
 完成后Dashboard:
 
 .. figure:: ../../../../_static/kubernetes/monitor/prometheus/prometheus_exporters/node_exporter_with_ipmitool_text_plugin.png
+
+在 :ref:`grafana` 中 ``import`` `Grafana Dashboard 15765: IPMI Exporter <https://grafana.com/grafana/dashboards/15765-ipmi-exporter/>`_ (这个面板看起来更清晰，不过温度显示我比较喜欢 ``Time series`` 表现方式，所以我添加了一个视图)
+
+完成后Dashboard:
+
+.. figure:: ../../../../_static/kubernetes/monitor/prometheus/prometheus_exporters/node_exporter_with_ipmitool_text_plugin_1.png

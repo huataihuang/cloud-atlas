@@ -93,6 +93,43 @@ Web应用会使用一些有意义的URLs让用户访问以及调用不同的函�
    :language: python
    :caption: 根据用户访问路径来返回不同类型的数据
 
+URL Building
+================
+
+构建特定函数的URL，使用 ``url_for()`` 函数，可以接受函数名作为第一个参数，以及任意数量的关键字参数。每个参数对应于URL规则的变量部分，未知的变量部分作为查询参数附加到URL中:
+
+- URL反转功能 ``url_for()`` 构建URL，而不是硬编码到模版中:
+
+  - 通常比硬编码URL更具描述性
+  - URL构建透明地处理特殊字符转义
+  - 生成的路径始终是绝对路径，避免浏览器中相对路径的意外行为
+
+.. literalinclude:: flask_startup/url_for.py
+   :language: python
+   :caption: 动态构建URL
+
+则可以访问以下路径::
+
+   /
+   /login
+   /login?next=/
+   /user/John%20Doe
+
+HTTP metheods
+=================
+
+同样的URL，使用不同的HTTP methods会提供不同的功能，例如 ``login`` ，通常区分 ``GET`` 和 ``POST`` :
+
+.. literalinclude:: flask_startup/http_methods.py
+   :language: python
+   :caption: 区分 ``GET`` 和 ``POST``
+
+此外 flask 还提供了对于 ``get()`` 和 ``post()`` 方法的路由快捷方式，用于常用的HTTP method:
+
+.. literalinclude:: flask_startup/http_methods_shortcut.py
+   :language: python
+   :caption: 区分 ``GET`` 和 ``POST`` 快捷方式
+
 参考
 =======
 

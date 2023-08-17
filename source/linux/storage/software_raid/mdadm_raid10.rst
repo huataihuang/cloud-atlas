@@ -107,4 +107,4 @@ mdadm构建RAID10
 - `Red Hat Enterprise Linux 9 Docs > 管理存储设备 > 第18章 管理RAID <https://access.redhat.com/documentation/zh-cn/red_hat_enterprise_linux/9/html/managing_storage_devices/managing-raid_managing-storage-devices>`_ (中文版)
 - `How to configure RAID6 in centos 7 <https://www.linuxhelp.com/how-to-configure-raid6-in-centos-7>`_
 - `Create Software RAID 10 With mdadm <https://allcloud.io/blog/create-software-raid-10-with-mdadm/>`_
-- `SUSE Linux Enterprise Server Documentation / Storage Administration Guide / Software RAID / Creating Software RAID 10 Devices <https://documentation.suse.com/sles/15-SP1/html/SLES-all/cha-raid10.html>`_
+- `SUSE Linux Enterprise Server Documentation / Storage Administration Guide / Software RAID / Creating Software RAID 10 Devices <https://documentation.suse.com/sles/15-SP1/html/SLES-all/cha-raid10.html>`_ SUSE的这个文档非常详细，其中有些细节需要仔细研究和学习(官方文档 Software RAID比RED HAT要详细很多)
