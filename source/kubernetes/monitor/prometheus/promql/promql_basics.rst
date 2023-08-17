@@ -4,7 +4,7 @@
 PromQL查询基础
 ==============================
 
-Prometheus提供了一种名为 ``PromQL`` 的函数式查询语言，可以让用户实时选择和聚合时序数据(series data)。表达式的结果剋显示为图形或表格形式，页可以通过HTTP API在外部调用。
+Prometheus提供了一种名为 ``PromQL`` 的函数式查询语言，可以让用户实时选择和聚合时序数据(series data)。表达式的结果可以显示为图形或表格形式，也可以通过HTTP API在外部调用。
 
 表达式语言数据类型
 ======================
@@ -22,3 +22,4 @@ Prometheus的表达式语言(Expression language)中，表达式 或 子表达�
 ======
 
 - `QUERYING PROMETHEUS: Bssics <https://prometheus.io/docs/prometheus/latest/querying/basics/>`_
+- `PromQL Tutorial: 5 Tricks to Become a Prometheus God <https://coralogix.com/blog/promql-tutorial-5-tricks-to-become-a-prometheus-god/>`_

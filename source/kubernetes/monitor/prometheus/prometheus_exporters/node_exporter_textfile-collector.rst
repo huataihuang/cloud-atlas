@@ -25,6 +25,7 @@ Prometheus社区提供了 `node-exporter-textfile-collector-scripts <https://git
 ==========
 
 - :ref:`node_exporter_ipmitool_text_plugin`
+- :ref:`node_exporter_smartctl_text_plugin`
 
 参考
 ========
