@@ -21,6 +21,8 @@ Go Atlas
    go_package.rst
    go_string_literals.rst
    go_template.rst
+   yaml.rst
+   yaml_not_find_expected_key.rst
 
 .. only::  subproject and html
 

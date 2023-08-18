@@ -81,4 +81,4 @@ Node Exporter smartctl 文本插件
 参考
 ======
 
-- `Monitoring a mixed fleet of flash, HDD, and NVMe devices with node_exporter and Prometheus <https://www.wirewd.com/hacks/blog/monitoring_a_mixed_fleet_of_flash_hdd_and_nvme_devices_with_node_exporter_and_prometheus>`_
+- `Monitoring a mixed fleet of flash, HDD, and NVMe devices with node_exporter and Prometheus <https://www.wirewd.com/hacks/blog/monitoring_a_mixed_fleet_of_flash_hdd_and_nvme_devices_with_node_exporter_and_prometheus>`_ 这篇文档非常详细，并且提供了prometheus监控告警配置，可以参考用来发送告警消息
