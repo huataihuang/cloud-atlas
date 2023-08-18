@@ -16,7 +16,10 @@ Prometheus的表达式语言(Expression language)中，表达式 或 子表达�
 - 标量(Scalar) - 一个简单的浮点数字值
 - 字符串(String) - 一个简单的字符串值，目前未使用
 
+快速起步
+=========
 
+``PromQL`` 的第一个重要功能是聚合(Aggregation)，类似 :ref:`sql` 中的 ``GROUP BY`` 按字段分组并对另一个字段的值进行聚合( ``AVG()`` 或 ``COUBT()`` )。在 ``PromQL`` 中聚合是指结果通过指标标签(metric label)并由 ``sum()`` 等聚合运算符进行处理。 
 
 参考
 ======

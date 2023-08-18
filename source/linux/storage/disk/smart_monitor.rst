@@ -18,3 +18,6 @@
 ========
 
 - `arch linux - S.M.A.R.T. <https://wiki.archlinux.org/title/S.M.A.R.T.>`_
+- `Monitor and Analyze Hard Drive Health with Smartctl in Linux <https://www.linuxtechi.com/smartctl-monitoring-analysis-tool-hard-drive/>`_ 非常详细的命令行解析
+- `How to check an hard drive health from the command line using smartctl <https://linuxconfig.org/how-to-check-an-hard-drive-health-from-the-command-line-using-smartctl>`_
+- `SMART tests with smartctl <https://www.thomas-krenn.com/en/wiki/SMART_tests_with_smartctl>`_
