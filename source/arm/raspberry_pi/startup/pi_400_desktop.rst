@@ -8,7 +8,7 @@ Raspberry Pi 400桌面定制
 
 .. note::
 
-   当前Raspberry Pi OS没有提供官方64位操作系统，所以 :ref:`pi_400` 运行的是32位操作系统。为了能够充分发挥 :ref:`pi_4` 的64位架构能力( :ref:`pi_cluster` 使用的是 :ref:`pi_4` 的8G内存硬件 )，同时构建 :ref:`kubernetes_arm` 集群，在服务器端我使用的是64位Ubuntu ARM版本。
+   当前Raspberry Pi OS没有提供官方64位操作系统，所以 :ref:`pi_400` 运行的是32位操作系统。为了能够充分发挥 :ref:`pi_4` 的64位架构能力( :ref:`pi_cluster` 使用的是 :ref:`pi_4` 的8G内存硬件 )，同时构建 :ref:`arm_k8s` 集群，在服务器端我使用的是64位Ubuntu ARM版本。
 
 目标
 ======
@@ -20,7 +20,7 @@ Raspberry Pi 400桌面定制
 
 - 本地开发环境通过Docker来构建
   
-  - 为了能够降低客户端资源消耗，我使用多台树莓派和Jetson Nano构建 :ref:`kubernetes_arm` ，所以容器都运行在服务器端，桌面电脑几乎不需要消耗资源
+  - 为了能够降低客户端资源消耗，我使用多台树莓派和Jetson Nano构建 :ref:`arm_k8s` ，所以容器都运行在服务器端，桌面电脑几乎不需要消耗资源
 
 安装
 =====

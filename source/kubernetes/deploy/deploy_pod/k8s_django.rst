@@ -9,7 +9,7 @@ Kubernetes环境部署Django应用
 准备
 =====
 
-我部署了 :ref:`kubernetes_arm` 来完成自己的一系列学习和测试，所以在这里部署Django应用，也采用这个ARM集群。
+我部署了 :ref:`arm_k8s` 来完成自己的一系列学习和测试，所以在这里部署Django应用，也采用这个ARM集群。
 
 - 检查集群::
 

@@ -8,7 +8,7 @@ NVIDIA :ref:`jetson_nano` Developer Kit是一个小型AI计算机，面向创客
 
 .. note::
 
-   2021年初，我重新 :ref:`deploy_jetson_server` 来作为 :ref:`kubernetes_arm` 集群工作节点。有一些部署改进和调整，请参考。
+   2021年初，我重新 :ref:`deploy_jetson_server` 来作为 :ref:`arm_k8s` 集群工作节点。有一些部署改进和调整，请参考。
 
 下载和准备启动
 =================

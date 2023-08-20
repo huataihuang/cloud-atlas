@@ -4,7 +4,7 @@
 Jetson Nano无线AP
 =====================
 
-Jetson Nano安装了外接的Intel无线模块以后，非常类似一个无线路由器，所以我考虑利用这个现有硬件结合 :ref:`create_ap` 实现一个个人使用的无线路由器，方便我测试基于 :ref:`raspberry_pi` 的 :ref:`kubernetes_arm` 。
+Jetson Nano安装了外接的Intel无线模块以后，非常类似一个无线路由器，所以我考虑利用这个现有硬件结合 :ref:`create_ap` 实现一个个人使用的无线路由器，方便我测试基于 :ref:`raspberry_pi` 的 :ref:`arm_k8s` 。
 
 由于这是在ARM架构上实现无线AP，所以可以作为通用的低功耗路由器的实践基础，为后续实现无线路由交换设备做一个参考。
 

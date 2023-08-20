@@ -16,7 +16,7 @@ lvmraid vs. mdadm
 
 .. note::
 
-   我在生产环境采用 :ref:`mdadm` 构建稳定的 :ref:`mdadm_raid6` ，然后在软RAID之上使用 :ref:`linux_lvm` 构建卷管理，最终部署 :ref:`deploy_centos7_gluster11_lvm_mdadm_raid6`
+   我在生产环境采用 :ref:`mdadm` 构建稳定的 :ref:`mdadm_raid10` ，然后在软RAID之上使用 :ref:`linux_lvm` 构建卷管理，最终部署 :ref:`deploy_centos7_gluster11_lvm_mdadm_raid10`
 
    个人的实验室环境，我将模拟测试 :ref:`lvmraid` 进行对比和学习
 
