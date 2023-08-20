@@ -4,7 +4,7 @@
 部署Jetson Nano Server
 =========================
 
-最初我 :ref:`jetson_nano_startup` 时，采用了卸载Jetson Nano NVIDIA深度定制操作系统中不需要的应用软件，并且将Gnome桌面切换到轻量级Xfce4桌面。不过，实际上我日常中桌面系统使用的是macOS，Jetson Nano是作为 :ref:`kubernetes_arm` 集群中的GPU工作节点来使用的。所以并没有使用图形桌面的需求。
+最初我 :ref:`jetson_nano_startup` 时，采用了卸载Jetson Nano NVIDIA深度定制操作系统中不需要的应用软件，并且将Gnome桌面切换到轻量级Xfce4桌面。不过，实际上我日常中桌面系统使用的是macOS，Jetson Nano是作为 :ref:`arm_k8s` 集群中的GPU工作节点来使用的。所以并没有使用图形桌面的需求。
 
 为了能够减少资源消耗，同时能够实现类似阿里云的GPU虚拟化，我在第二次部署时改为完全的字符模式运行，并清理掉不必要软件。后续使用将完全基于 :ref:`kvm` 和 :ref:`docker` 模式来使用Jetson Nano。本文为部署实践整理。
 

@@ -55,17 +55,15 @@ XFS案例
 
 以下案例在LVM上创建XFS文件系统
 
-- 创建GPT分区::
+- 创建GPT分区:
 
-   parted -s /dev/nvme0n1 mklabel gpt
-   parted -s -a optimal /dev/nvme0n1 mkpart primary 0% 100%
+.. literalinclude:: xfs_startup/parted
+   :caption: 为 :ref:`linux_lvm` 准备磁盘
 
-如果有多个NVMe磁盘，依次执行::
+如果有多个NVMe磁盘，依次执行:
 
-   parted -s /dev/nvme0n2 mklabel gpt
-   parted -s -a optimal /dev/nvmd0n2 mkpart primary 0% 100%
-   parted -s /dev/nvme0n3 mklabel gpt
-   parted -s -a optimal /dev/nvmd0n3 mkpart primary 0% 100%
+.. literalinclude:: xfs_startup/parted_multi_disk
+   :caption: 多个磁盘分区
 
 - 完成后检查磁盘::
 
@@ -82,16 +80,10 @@ XFS案例
    └─nvme0n3p1 259:2    0  3.5T  0 part 
    ...
 
-- 创建逻辑卷::
+- 创建逻辑卷:
 
-   pvcreate /dev/nvme0n1p1
-   pvcreate /dev/nvme0n2p1
-   pvcreate /dev/nvme0n3p1
-
-   vgcreate vgdb /dev/nvme0n1p1 /dev/nvme0n2p1 /dev/nvme0n3p1
-
-   lvcreate -n log -l 10%FREE -i 3 -I 128k vgdb
-   lvcreate -n data -l 100%FREE -i 3 -I 128k vgdb
+.. literalinclude:: xfs_startup/lvm_striped
+   :caption: 创建条代化LVM卷
 
 说明:
 
@@ -106,8 +98,8 @@ XFS案例
 
 - 创建文件系统::
 
-   mkfs.xfs -n ftype=1 /dev/vgdb/log
-   mkfs.xfs -n ftype=1 /dev/vgdb/data
+   mkfs.xfs -n ftype=1 /dev/vg_db/vl_log
+   mkfs.xfs -n ftype=1 /dev/vg_db/vl_data
 
 说明:
 

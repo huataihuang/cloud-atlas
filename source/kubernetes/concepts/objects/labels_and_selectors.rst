@@ -37,7 +37,7 @@ Node的众所周知标签、申明、瑕疵
 标签实践
 =========
 
-- 首先需要准备一个Kubernetes集群，我采用 :ref:`kubernetes_arm` ::
+- 首先需要准备一个Kubernetes集群，我采用 :ref:`arm_k8s` ::
 
    kubectl get nodes -o wide --show-labels
 
