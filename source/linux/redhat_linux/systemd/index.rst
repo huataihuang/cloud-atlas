@@ -22,6 +22,7 @@ systemd最早是Red Hat主推开发，目前已经成为各大发行版最主要
    systemd_timer.rst
    systemd_mount.rst
    systemd_fstab_generator.rst
+   systemd_manage_resources.rst
    systemctl.rst
    networkctl.rst
    journalctl.rst

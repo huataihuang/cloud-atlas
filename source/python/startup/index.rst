@@ -14,9 +14,10 @@ Python起步
    python_in_kali.rst
    python_in_archlinux.rst
    install_python3_centos6.rst
+   build_python3_in_centos7.rst
    python_doc.rst
    pep_8.rst
-   run_pyton_in_browser.rst
+   run_python_in_browser.rst
 
 .. only::  subproject and html
 
