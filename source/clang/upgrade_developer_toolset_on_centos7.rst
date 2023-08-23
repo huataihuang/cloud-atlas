@@ -31,7 +31,7 @@ make
 .. literalinclude:: upgrade_developer_toolset_on_centos7/build_make
    :caption: 升级make
 
-- 配置 :ref:`parallel_make` ( ``~/.bashrc`` ):
+- 配置 :ref:`parallel_make` ( ``~/.bash_profile`` ):
 
 .. literalinclude:: parallel_make/make_j
 

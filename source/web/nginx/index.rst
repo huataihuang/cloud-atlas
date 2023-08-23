@@ -10,6 +10,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    :maxdepth: 1
 
    ubuntu_install_nginx.rst
+   centos_install_nginx.rst
    macos_homebrew_nginx.rst
    build_nginx_macos.rst
    get_nginx_default_config.rst

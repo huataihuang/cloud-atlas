@@ -17,6 +17,7 @@ Linux磁盘
    parted.rst
    mount_img.rst
    intel_ssd_dc_series.rst
+   update_intel_545s_ssd_firmware.rst
    using_apple_superdrive_on_linux.rst
    sandisk_cloudspeed_eco_gen_ii_sata_ssd.rst
 
