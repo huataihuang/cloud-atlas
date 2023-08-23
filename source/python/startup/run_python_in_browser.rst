@@ -1,4 +1,4 @@
-.. _run_pyton_in_browser:
+.. _run_python_in_browser:
 
 ==============================
 在浏览器中运行Python
