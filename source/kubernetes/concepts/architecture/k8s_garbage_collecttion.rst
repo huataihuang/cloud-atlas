@@ -34,7 +34,7 @@ kubelet ``image-gc-high-threshold``
 
 这个参数可以在 ``kubelet`` 启动配置文件 ``/etc/kubernetes/kubelet.env`` 中设置 (见 ``/etc/systemd/system/kubelet.service`` )
 
-
+此外，除了 Kubernetes 垃圾回收机制中 kubelet ``image-gc-high-threshold`` 方法外，也可以直接使用 :ref:`docker_image_prune`
 
 参考
 =======

@@ -26,17 +26,16 @@ ncdu
 
 那么我们在脚本中该如何找到占用最大的目录呢？
 
-虽然我们可以使用 ``du -sh *`` 一级级查找，但是在脚本中需要使用一条命令来找到最多消耗的目录::
+虽然我们可以使用 ``du -sh *`` 一级级查找，但是在脚本中需要使用一条命令来找到最多消耗的目录:
 
-   du -Sh | sort -rh | head -5
+.. literalinclude:: trace_disk_space_usage/du_large_dir
+   :caption: 查找消耗磁盘空间最大的目录
 
-输出类似::
+输出类似:
 
-   1.2G ./var/lib/containerd/io.containerd.content.v1.content/blobs/sha256
-   445M ./usr/bin
-   332M ./run/containerd/io.containerd.runtime.v2.task/k8s.io/6bd8822f911f8cbbc51826a3c2d37c0016ec44a8138c9d835fb5dbae99db269f/rootfs/usr/bin
-   328M ./home/huatai/z-k8s-dev
-   318M .
+.. literalinclude:: trace_disk_space_usage/du_large_dir_output
+   :caption: 查找消耗磁盘空间最大的目录输出案例(占用最大空间的的是容器镜像)
+   :emphasize-lines: 1
 
 为何要使用 ``-S`` 参数而不是常用的 ``-s`` (小写)参数呢？
 
