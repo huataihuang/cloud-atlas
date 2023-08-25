@@ -18,6 +18,7 @@ Docker 镜像
    dockerfile_best-practices.rst
    dockerfile_entrypoint_vs_cmd.rst
    inspect_docker_image.rst
+   docker_image_prune.rst
 
 .. only::  subproject and html
 
