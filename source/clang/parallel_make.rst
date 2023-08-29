@@ -8,7 +8,7 @@
 
 我想起来当时编译时确实发现只有一个 ``cc1plus`` 进程运行，完全浪费了多cpu core的高性能服务器资源。当时因为只处理一台编译，也就没有再尝试优化。
 
-没有启用 ``-j XX`` 参数 :ref:`` 耗时:
+没有启用 ``-j XX`` 参数 :ref:`upgrade_gcc_on_centos7` 耗时:
 
 .. literalinclude:: parallel_make/build_gcc_before_parallel_time
    :caption: 没有启用 ``-j XX`` 参数之前编译gcc 耗时
