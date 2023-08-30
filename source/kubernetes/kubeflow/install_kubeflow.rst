@@ -25,7 +25,12 @@ Kubeflow安装方式
 Kubeflow Manifests
 ----------------------
 
-``Kubeflow Manifests`` 是在纯粹的Kubernetes机群上通过 :ref:`kustomize` 和 :ref:`kubectl` 完成Kubeflow部署，是一种更为底层和复杂的部署技术，将在积累一定经验之后再实践
+``Kubeflow Manifests`` 是在纯粹的Kubernetes机群上通过 :ref:`kustomize` 和 :ref:`kubectl` 完成Kubeflow部署，是一种更为底层和复杂的部署技术。
+
+我的实践计划是想在 :ref:`kubespray` 部署的 :ref:`y-k8s` 集群上迭代部署 ``Kubeflow Manifests`` :
+
+- GPU节点采用 :ref:`vgpu` 将单块 :ref:`tesla_p10` 拆分成2块，模拟集群的2个 :ref:`gpu_k8s` 节点
+- 首先尝试 :ref:`install_kubeflow_single_command`
 
 参考
 =======
