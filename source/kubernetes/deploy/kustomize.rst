@@ -24,7 +24,10 @@ kustomize
 
    choco install kustomize
 
-- 全系列各平台都可以使用都安装方法是直接从 `kustomize 官方release <https://github.com/kubernetes-sigs/kustomize/releases>`_ 下载。
+- 全系列各平台都可以使用都安装方法是直接从 `kustomize 官方release <https://github.com/kubernetes-sigs/kustomize/releases>`_ 下载，推荐采用官方安装脚本安装:
+
+.. literalinclude:: kustomize/install_kustomize_script
+   :caption: 官方二进制安装脚本执行(需要非常畅通的网络),在当前目录下对应OS的 ``kustomize``
 
 - 也可以通过Go v.10.1 或更高版本安装::
 

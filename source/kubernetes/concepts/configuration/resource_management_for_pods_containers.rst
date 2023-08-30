@@ -147,4 +147,5 @@ Namespace LimitRange
 - `Resource Management for Pods and Containers <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>`_
 - `Kubernetes best practices: Resource requests and limits <https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits>`_
 - `A Deep Dive into Kubernetes Metrics — Part 3 Container Resource Metrics <https://blog.freshtracks.io/a-deep-dive-into-kubernetes-metrics-part-3-container-resource-metrics-361c5ee46e66>`_
-- `Understanding Kubernetes Limits and Requests <https://sysdig.com/blog/kubernetes-limits-requests/>`_ 这篇sysdig的博文非常形象，提供了一个很好的图解案例，值得参考学习
+- `Understanding Kubernetes Limits and Requests <https://sysdig.com/blog/kubernetes-limits-requests/>`_ 这篇sysdig的博文非常形象，提供了一个很好的图解案例，值得参考学习; 此外sysdig还有类似文档 `Kubernetes OOM and CPU Throttling <https://sysdig.com/blog/troubleshoot-kubernetes-oom/>`_ 通过图示解析了OOM和CPU节流的原理，后续再学习
+- `为命名空间配置默认的内存请求和限制 <https://kubernetes.io/zh-cn/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/>`_ Kubernetes官方文档，补充上文配置namespace设置默认内存限制方法，这个文档系列中也包含对cpu的约束配置案例

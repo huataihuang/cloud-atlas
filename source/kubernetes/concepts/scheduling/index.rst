@@ -11,6 +11,7 @@ Kubernetes调度
    assign_pod_node.rst
    kube-scheduling-framework.rst
    kube-scheduling-tuning.rst
+   node_pressure_eviction.rst
 
 .. only::  subproject and html
 
