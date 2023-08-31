@@ -43,7 +43,7 @@
 
 .. note::
 
-   我在 :ref:`y-k8s` 部署的虚拟机中采用了极小化的虚拟磁盘，遇到一个尴尬的问题就是 :ref:`node_pressure_eviction` ，也就是磁盘空间不足导致运行Pod被驱逐。在上述Pods检测就绪发现存在问题时，通过 :ref:`ceph_extend_rbd_drive_with_libvirt_xfs` 实现扩容解决
+   我在 :ref:`y-k8s` 部署的虚拟机中采用了极小化的虚拟磁盘，遇到一个尴尬的问题就是 :ref:`node_pressure_eviction` ，也就是磁盘空间不足导致运行Pod被驱逐。在上述Pods检测就绪发现存在问题时，通过 :ref:`ceph_extend_rbd_drive_with_libvirt_xfs` 实现扩容解决(离线扩展方式，并且将 ``/var/lib/docker`` 迁移到 ``/var/lib/containerd`` )
 
 参考
 =====

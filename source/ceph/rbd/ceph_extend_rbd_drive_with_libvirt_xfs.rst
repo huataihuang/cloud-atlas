@@ -109,6 +109,88 @@
    $ df -h | grep vdb1
    /dev/vdb1        50G  8.2G   42G  17% /var/lib/containerd
 
+离线扩展Ceph RBD磁盘vdb1
+==============================
+
+在 :ref:`install_kubeflow_single_command` 遇到磁盘空间不足导致 :ref:`node_pressure_eviction` ，所以我将节点依次关闭:
+
+- 扩容 ``/dev/vbd1`` 磁盘空间
+- 将 ``vbd1`` 挂载目录从 ``/var/lib/docker`` 改为 ``/var/lib/containerd`` (原因是 :ref:`y-k8s` 采用 :ref:`kubespray` 部署，实际上使用的 :ref:`containerd` )
+
+案例以 ``z-k8s-n9`` 为例
+
+虚拟磁盘添加到维护虚拟机
+-------------------------
+
+- 由于 ``z-k8s-n9`` 是虚拟机，磁盘是 :ref:`ceph_rbd` ，首先检查虚拟磁盘的 :ref:`libvirt` 配置:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/rbd.xml
+   :language: xml
+   :caption: 需要维护服务器rbd配置
+
+- 我使用 ``z-dev`` 虚拟机来加载这两个需要维护的磁盘，在 ``z-dev`` 的虚拟机上，原先的 ``vda`` 配置如下:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/z-dev_vda.xml
+   :language: xml
+   :caption: 用于运维的 ``z-dev`` 磁盘 ``vda``
+
+- 将上述 ``z-k8s-n9`` 的 :ref:`ceph_rbd` 配置添加到 ``z-dev`` 虚拟机，不过需要修改2个地方:
+
+  - 磁盘 ``target`` 命名需要从 ``vda`` 和 ``vdb`` 修改为 ``vdb`` 和 ``vdc``
+  - 删除虚拟磁盘 ``<address type='pci' domain='0x0000' bus='0x07' slot='0x00' function='0x0'/>`` 类似的这行配置，让 :ref:`libvirt` 自动决定配置(否则容易冲突)
+
+- 启动 ``z-dev`` 之后检查 ``fdisk -l`` 输入如下:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/vdb_vdc
+   :caption: 挂载的 ``rbd`` 磁盘 ``vdb`` 和 ``vdc``
+   :emphasize-lines: 10,21
+
+- 上述2个磁盘为需要调整磁盘，其中 ``vdc`` 先扩展到 100G (方法同上):
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/rbd_ls
+   :language: bash
+   :caption: 执行 rbd ls 命令检查存储池中rbd磁盘
+
+需要扩容的磁盘如下:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/rbd_ls_output
+   :caption: 执行 rbd ls 命令检查存储池中rbd磁盘，需要扩容的磁盘
+
+- RBD调整磁盘大小到100GB ( 1024x100=102400 )，并且 ``virsh blockresize`` 刷新虚拟机磁盘:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/rbd_resize_virsh_blockresize_100g
+   :language: bash
+   :caption: rbd resize调整RBD块设备镜像大小, virsh blockresize调整虚拟机磁盘大小，100g
+
+- 完成后在虚拟机内部检查 ``fdisk -l`` 可以看到磁盘扩展到100G:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/vdc_100g
+   :caption: ``rbd resize`` 和 ``virsh blockresize`` 之后在虚拟机内部可以看到扩展后的虚拟机磁盘达到100G
+   :emphasize-lines: 1
+
+- 在虚拟机内部重新创建文件系统( :ref:`parted` 重建GPT分区，并且构建 :ref:`xfs` ):
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/vdc_xfs
+   :caption: 在 ``vdc`` 上构建 :ref:`xfs`
+
+- 挂载磁盘:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/mount_vdb_vdc
+   :caption: 挂载 ``vdb`` 和 ``vdc`` 的分区，准备数据迁移
+
+现在需要迁移的数据::
+
+   /vdb2/var/lib/containerd  => /vdc2 (这个磁盘后续将挂载为目标主机的 /var/lib/containerd)
+
+- 数据迁移:
+
+.. literalinclude:: ceph_extend_rbd_drive_with_libvirt_xfs/migrate_containerd
+   :caption: 数据迁移
+
+- 修改 ``/vdb2/etc/fstab`` (这个是系统磁盘上挂载磁盘配置)::
+
+   /dev/vdb1    /var/lib/containerd    xfs   defaults,quota,gquota,prjquota 0 1
+
 参考
 ======
 
