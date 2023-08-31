@@ -58,9 +58,14 @@ NVIDIA License Server 安装是一个独立步骤
 
 将执行脚本的输出信息:
 
-.. literalinclude:: vgpu_quickstart/vgpu_create_output
+.. literalinclude:: vgpu_quickstart/vgpu_create_output_1
    :language: bash
-   :caption: 执行 ``vgpu_create`` 脚本创建2个 ``P40-12C`` :ref:`vgpu` 输出信息(用于配置VM)
+   :caption: 执行 ``vgpu_create`` 脚本创建2个 ``P40-12C`` :ref:`vgpu` 输出信息第 **一** 个vgpu设备
+
+.. literalinclude:: vgpu_quickstart/vgpu_create_output_2
+   :language: bash
+   :caption: 执行 ``vgpu_create`` 脚本创建2个 ``P40-12C`` :ref:`vgpu` 输出信息第 **二** 个vgpu设备
+
 
 (对应2个vGPU)分别添加到 **2个** 虚拟机 ``y-k8s-n-1`` 和 ``y-k8s-n-2`` 中，然后启动虚拟机
 
