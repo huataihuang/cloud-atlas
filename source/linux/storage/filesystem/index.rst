@@ -15,6 +15,7 @@ Linux文件系统
    remount_without_reboot.rst
    fstrim.rst
    chattr.rst
+   linux_filename_max_length.rst
    xfs/index
    ext/index
    quota/index

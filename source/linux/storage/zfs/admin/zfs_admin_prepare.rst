@@ -93,6 +93,13 @@ ZFS管理准备
    :caption: X86移动云ZFS磁盘parted划分分区: 新建的第3个分区作为zpool
    :emphasize-lines: 10
 
+完整磁盘用于ZFS
+=================
+
+请注意，在前文中，我在模拟系统上都是采用将一块磁盘划分为多个分区，原因只是因为笔记本电脑只有一块磁盘( :ref:`nvme` )，我需要用分区来实现特定目的的ZFS部署。实际上，在生产环境，通常都是完整使用整块磁盘，无需分区。
+
+:ref:`install_kubeflow_single_command` 需要共享存储，我采用 :ref:`ubuntu_zfs` ( :ref:`hpe_dl360_gen9` ) 构建ZFS使用的就是完整物理磁盘
+
 接下来操作
 ==============
 

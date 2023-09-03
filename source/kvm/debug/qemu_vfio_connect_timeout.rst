@@ -25,7 +25,7 @@
    :language: bash
    :caption: 检查 ``nvidia-vgpu-mgr`` 服务状态
 
-果然，再次发现这个服务启动失败...回到了老问题: :ref:`vgpu_unlock` 失效了:
+果然，再次发现这个服务启动正常退出(实际上只要执行一次就可以，返回success)。但是，回到了老问题: :ref:`vgpu_unlock` 失效了
 
 查询 ``vgpu`` :
 
@@ -39,6 +39,6 @@
    :language: bash
    :caption: ``nvidia-smi vgpu -q`` 查询vGPU显示只有 ``0`` 个vGPU
 
-我想起来了， :ref:`vgpu_unlock` 需要使用 :ref:`dkms` 模块方式安装 :ref:`vgpu` 驱动。最近依次我升级了内核，内核升级时会重新编译安装 :ref:`vgpu` 模块。我重新检查一遍流程，发现原先修订的过程都正确，但是会不会最近升级的内核支持不稳定呢？
+我想起来了， :ref:`vgpu_unlock` 需要使用 :ref:`dkms` 模块方式安装 :ref:`vgpu` 驱动。最近依次我升级了内核，内核升级时会重新编译安装 :ref:`vgpu` 模块。我重新检查一遍流程，发现原先修订的过程都正确。
 
-我重新编译了一次 :ref:`vgpu_unlock` (似乎不必)，重启服务器
+这个问题暂时无解，只要重启一次操作系统，就能恢复激活

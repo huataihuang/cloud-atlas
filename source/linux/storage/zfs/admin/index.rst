@@ -20,6 +20,7 @@ ZFS管理的主要手册可以参考:
    zfs_admin_prepare.rst
    config_zfs_auto_start.rst
    zfs_startup.rst
+   zfs_startup_zcloud.rst
    zfs_create_destory_zpool.rst
    zfs_compression.rst
    zfs_snapshot.rst
