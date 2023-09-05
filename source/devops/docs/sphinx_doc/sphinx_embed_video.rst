@@ -23,6 +23,11 @@ Sphinx文档嵌入视频
 
 就可以看到我使用 :ref:`yt-dlp` 从YoutTube下载的 **《杀死那个石家庄人》--万能青年旅店 影视混剪MV** (我选择了一个小规格mp4作为演示， **墙裂推荐** 观看YouTube原高清视频 `《杀死那个石家庄人》-- 万能青年旅店 影视混剪MV <https://www.youtube.com/watch?v=npHbCnf-Lpk&list=PLnqzKl0S_xnl8xgGJxWKDPuFrgafqSEfo&index=3>`_ )
 
+.. _kill_that_shijiazhuang_man:
+
+「杀死那个石家庄人」
+======================
+
 .. video:: ../../../_static/devops/docs/sphinx_doc/ssngsjzr.mp4
 
 .. note::

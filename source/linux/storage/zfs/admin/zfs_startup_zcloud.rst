@@ -19,6 +19,10 @@ ZFS快速起步(zcloud)
 .. literalinclude:: zfs_startup_zcloud/zpool_create
    :caption: 在磁盘 ``sda`` 上创建ZFS的存储池，名字为 ``zpool-data``
 
+.. note::
+
+   对于数据存储，启用 :ref:`zfs_compression` 节约存储空间
+
 - 检查 ``zpool`` :
 
 .. literalinclude:: zfs_startup_zcloud/zpool_list
@@ -35,19 +39,9 @@ ZFS快速起步(zcloud)
    :caption: zpool命令在完整磁盘上创建存储池的之后，就可以看到GPT分区以及2个ZFS分区
    :emphasize-lines: 10,11
 
-待续...
+- 由于 ``zpool-data`` 存储池挂载在 ``/zpool-data`` ，所以后续创建的卷，默认都会挂载到这个目录下的子目录:
 
-- 准备在 ``zpool-data`` 下构建一个 ``home`` 卷，挂载到 ``/home`` 目录，这样大多数数据都能够得到有效保存
-
-- 首先以 ``root`` 身份登陆，并确保 ``/home`` 目录没有用户访问，将 ``/home`` 目录重命名:
-
-.. literalinclude:: zfs_startup/rename_home
-   :language: bash
-   :caption: 将/home目录重命名(备份)
-
-- 由于 ``zpool-data`` 存储池已经在 :ref:`mobile_cloud_x86_zfs` 构建好，所以忽略创建 ZFS 存储池步骤，直接创建卷 ``home`` ，并且创建 ``home`` 卷下面的子(用户目录):
-
-.. literalinclude:: zfs_startup/zfs_create_volume
+.. literalinclude:: zfs_startup_zcloud/zfs_create_volume
    :language: bash
    :caption: 创建 zpool-data 存储池的 home 卷
 

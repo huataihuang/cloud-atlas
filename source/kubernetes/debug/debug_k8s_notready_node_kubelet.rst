@@ -1,7 +1,7 @@
-.. _k8s_notready_node:
+.. _debug_k8s_notready_node_kubelet:
 
 ===================================
-Kubernetes节点NotReady排查
+Kubernetes节点NotReady排查(kubelet)
 ===================================
 
 在Kubernetes集群运维时，工作节点 ``NotReady`` 状态是非常常见的故障。通常我们有一些排查思路需要依次执行以获取必要信息。这里我做一些案例分析，提供一些建议。
