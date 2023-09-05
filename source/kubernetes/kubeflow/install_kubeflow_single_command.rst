@@ -68,9 +68,16 @@
    :language: yaml
    :caption: ``get pvc authservice-pvc`` 
 
-考虑到简单化部署，我采用 :ref:`zfs` 来实现 NFS 输出
+我最初以为这是一个简单的 :ref:`k8s_pvc_pv_bind` (类似我之前实践过的 :ref:`kube-prometheus-stack_persistent_volume` ) ，想正好实践一下 :ref:`zfs_nfs` 输出为 :ref:`k8s_nfs` 。
 
+但是仔细检查这个 ``authservice-pvc`` 就会发现和 ``pv/pvc`` 的静态配置有所不同: ``authservice-pvc`` 并没有提供 ``storageClassName`` 来对应绑定 ``pv`` 和 ``pvc`` 。也就是说，这里的实现是 :ref:`k8s_dynamic_volume_provisioning` 。
 
+如果我不是在云计算厂商的平台部署(通常云厂商会提供 :ref:`k8s_csi` ，并且只要配置好 :ref:`admission_plugins_DefaultStorageClass` 就能无需指定 ``sc`` storage class直接创建存储pv )，就必须自己部署实现:
+
+  - :ref:`openebs`
+  - :ref:`ceph-csi`
+
+然后通过指定 :ref:`admission_plugins_DefaultStorageClass` 实现为 ``kubeflow mainfest`` 提供 :ref:`k8s_dynamic_volume_provisioning`
 
 
 参考

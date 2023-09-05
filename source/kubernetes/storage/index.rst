@@ -7,6 +7,8 @@ Kubernetes存储
 .. toctree::
    :maxdepth: 1
 
+   k8s_csi/index
+   openebs/index
    k8s_hostpath.rst
    k8s_local.rst
    k8s_nfs.rst
