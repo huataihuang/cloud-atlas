@@ -79,7 +79,6 @@
 
 然后通过指定 :ref:`admission_plugins_DefaultStorageClass` 实现为 ``kubeflow mainfest`` 提供 :ref:`k8s_dynamic_volume_provisioning`
 
-
 参考
 =====
 
