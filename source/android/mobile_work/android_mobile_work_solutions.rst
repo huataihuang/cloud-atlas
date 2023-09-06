@@ -31,3 +31,23 @@ Termux + 电脑
 ================
 
 :ref:`termux` 是Android系统上非常强大的终端模拟器，同时也是完整的Linux系统安装架构，可以通过 :ref:`apt` 安装所需的Linux工具实现 :ref:`termux_dev` 环境，可以成为一个移动的Linux工作站。
+
+Android平板支持hdmi in
+=========================
+
+其实我一直有一个想法: 将平板电脑作为显示器来使用。注意，并不是指苹果的iPad扩展第二屏，而是真正的Android平板无缝切换成移动显示器:
+
+- 我有一台屏幕损坏的 MacBook Pro 笔记本，实在舍不得维修屏幕(第三方屏幕也要3k)
+- 虽然通过视频捕捉卡能够将任何Android平板变成屏幕，但是性能实在太差了，完全无法和原生的显示屏幕相比
+- 苹果的iPad扩展第二屏虽然好用，但是其实不能没有主屏幕工作，而且电脑必须是macOS
+
+直到2023年底，这个非常小众的需求只有一款产品能够满足 ``联想YOGA Pad Pro`` ，提供了 ``hdmi in`` 功能。也就是只要连接hdmi接口，Android平板立即切换成显示器模式，正好能够满足我的需求: 携带无头笔记本外出移动工作
+
+.. figure:: ../../_static/android/mobile_work/yoga_pad_pro.png
+   
+   支持hdmi in可切换成显示屏的联想Yoga Pad Pro
+
+参考
+=====
+
+- `如何评价联想YOGA Pad Pro？ <https://www.zhihu.com/question/453832126>`_ 希望联想能够尽快推出下一代产品
