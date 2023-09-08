@@ -4,7 +4,7 @@
 Django配置MySQL数据库
 ==========================
 
-在部署 :ref:`django_env` 后，我们可以开发Django。但是，默认使用的数据库是sqlite，和生产环境往往不同。所以，我们通常会把Django数据库后端替换成MySQL。
+在部署 :ref:`django_env_linux` 后，我们可以开发Django。但是，默认使用的数据库是sqlite，和生产环境往往不同。所以，我们通常会把Django数据库后端替换成MySQL。
 
 但是，需要注意的是，我们不能把数据库访问账号密码直接配置在 ``manage.py`` 中，也不能把包含账号信息提交到git仓库中，所以需要有一定的配置方法来实现数据库连接。
 
@@ -38,7 +38,10 @@ Django配置MySQL数据库
     mariadb_config --version
     mysql_config --libs 
 
-则需要安装 mysql 开发包，例如 ``mariadb-devel`` ，安装以后系统会有 ``mysql_config`` 工具
+则需要安装 mysql 开发包，例如 ``mariadb-devel`` ，安装以后系统会有 ``mysql_config`` 工具:
+
+.. literalinclude:: django_mysql/install_mysql-devel
+   :caption: 需要提前安装 ``mysql-devel`` 或 ``mariadb-devel`` 才能执行 ``pip install mysqlclient``
 
 配置Django连接数据库
 =====================

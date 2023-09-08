@@ -18,6 +18,7 @@ Python起步
    python_doc.rst
    pep_8.rst
    run_python_in_browser.rst
+   pip_offline.rst
 
 .. only::  subproject and html
 

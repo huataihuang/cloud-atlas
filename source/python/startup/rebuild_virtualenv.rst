@@ -33,9 +33,11 @@
    python3 -m venv venv3
    . ~/venv3/bin/activate
 
-- 重新安装软件包::
+- 重新安装软件包:
 
-   pip install -r source/requirements.txt
+.. literalinclude:: rebuild_virtualenv/pip_install_requirements
+   :language: bash
+   :caption: 根据requirements.txt恢复virtualenv依赖模块包
 
 参考
 =======

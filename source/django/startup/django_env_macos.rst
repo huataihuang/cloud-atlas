@@ -1,8 +1,8 @@
-.. _django_env:
+.. _django_env_macos:
 
-================
-Django开发环境
-================
+=======================
+Django开发环境(macOS)
+=======================
 
 作为Python Web框架，Django需要Python支持才能运行。目前Python 2.x已经终止开发，如果你的项目刚刚开始，请从Python 3开始(Python 3不兼容Python 2)。请首先安装Python 3。
 
