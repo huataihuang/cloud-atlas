@@ -7,7 +7,8 @@ Django 起步
 .. toctree::
    :maxdepth: 1
 
-   django_env.rst
+   django_env_macos.rst
+   django_env_linux.rst
    django_mysql.rst
    run_django.rst
    django_migrate.rst
