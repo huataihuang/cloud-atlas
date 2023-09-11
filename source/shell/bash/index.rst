@@ -9,6 +9,7 @@ Bash
 
    shell_style.rst
    bash_shutcut.rst
+   bash_string.rst
    bash_variable_name_rules.rst
    shell_spec_variable.rst
    append_to_file_as_sudo.rst

@@ -43,6 +43,10 @@ Django配置MySQL数据库
 .. literalinclude:: django_mysql/install_mysql-devel
    :caption: 需要提前安装 ``mysql-devel`` 或 ``mariadb-devel`` 才能执行 ``pip install mysqlclient``
 
+.. note::
+
+   在 :ref:`django_env_linux` 对于 ``pip install mysqlclient`` 有处理案例
+
 配置Django连接数据库
 =====================
 
@@ -51,8 +55,10 @@ Django配置MySQL数据库
   - 直接读取 ``/etc/my.cnf`` (当前Django官方推荐)
   - 使用环境变量
 
-读取MySQL Client配置(推荐)
-----------------------------
+.. _django_mysqlclient_config:
+
+Django使用MySQL Client配置(推荐)
+-----------------------------------
 
 现在Django推荐采用直接读取操作系统安装的MySQL客户端配置来完成数据库连接配置。例如，通常我们的数据库访问配置 ``/etc/my.cnf`` 内容如下::
 
@@ -73,8 +79,8 @@ Django配置MySQL数据库
         }
     }
 
-数据库环境变量
-----------------
+Django使用数据库环境变量
+---------------------------
 
 django支持从环境变量中读取配置，所以可以将密码相关变量保存到环境中。对于使用Python virtualenv，可以在进入虚拟环境的最后激活配置 ``postactivate`` 中设置环境，并在 ``predeactivate`` 文件中 ``unset`` 环境变量。
 

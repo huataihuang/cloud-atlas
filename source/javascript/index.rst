@@ -4,11 +4,6 @@
 JavaScript Atlas
 =================================
 
-JavaScript注释方法有2种:
-
-- 单行注释 ``//``
-- 多行注释 ``/*    */``
-
 .. toctree::
    :maxdepth: 1
 
