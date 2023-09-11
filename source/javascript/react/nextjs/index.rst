@@ -1,17 +1,13 @@
-.. _js_startup:
+.. _nextjs:
 
 =================================
-JavaScript 快速起步
+Next.js
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   js_basic.rst
-   first_js.rst
-   js_var_const.rst
-   css.rst
-   debug_webpack.rst
+   intro_nextjs.rst
 
 .. only::  subproject and html
 
