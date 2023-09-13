@@ -26,8 +26,10 @@ Sphinx文档
    sphinx_rss_feed.rst
    sphinx_embed_video.rst
    sphinx_embed_youtube.rst
+   sphinx_embed_audio.rst
    sphinx_chinese_search.rst
    sphinx_typeerror.rst
+   sphinx-extension.rst
    rtd_fail_import_extension.rst
    sphinx_disqus.rst
 
