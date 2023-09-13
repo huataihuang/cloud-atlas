@@ -67,4 +67,15 @@ Sphinx Doc是我撰写 :ref:`cloud_atlas` 的文档平台，我是模仿Kernel D
 
    Sphinx Doc 和 MkDocs 都采用Python编写，可以共用Python virtualenv环境，这也是我比较喜欢这两个文档撰写工具的原因。
 
-我准备采用 :strike:`Hugo 来制作个人Blog` 
+我的构想
+==========
+
+根据 `Jamstack: Site Generators <https://jamstack.org/generators/>`_ 统计，按照GitHub的Star数量排序， :ref:`nextjs` 是最受欢迎的静态网站生成器，其次是 :ref:`hugo`
+
+我准备采用 :strike:`Hugo 来制作个人Blog` :ref:`nextjs` 来构建个人网站
+
+.. note::
+
+   `Jamstack <https://jamstack.org/>`_ 是网页托管领域独角兽 `Netlify <https://www.netlify.com/>`_ 的旗下产品。由于专注于CMS和Site，其网站提供了相关信息参考。
+
+   - 参考 `Vercel 和 Netlify ，两大20亿美金估值的独角兽，在网页托管领域的崛起史 <https://zhuanlan.zhihu.com/p/525979886>`_

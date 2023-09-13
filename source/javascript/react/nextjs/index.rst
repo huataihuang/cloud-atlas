@@ -8,6 +8,7 @@ Next.js
    :maxdepth: 1
 
    intro_nextjs.rst
+   install_nextjs.rst
 
 .. only::  subproject and html
 

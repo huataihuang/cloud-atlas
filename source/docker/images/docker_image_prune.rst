@@ -17,6 +17,15 @@ Docker清理镜像
 
 上述这是一个简单案例，实际上我在生产环境见过消耗了几百G甚至上T的镜像存储空间，大多数是因为历史上反复更新发布导致很多无用的镜像堆积在本地。
 
+``dangling`` image
+======================
+
+没有使用的镜像，在英语世界有一种非常形象的动作 ``dangling`` ，也就是 **悬空** 。例如 `how to get the dangling images using crictl <https://stackoverflow.com/questions/71901193/how-to-get-the-dangling-images-using-crictl>`_
+
+.. figure:: ../../_static/docker/images/dangling.png
+   
+   ``dangling`` 就是悬空的意思
+
 ``prune``
 ===========
 
