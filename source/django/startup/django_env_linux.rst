@@ -83,7 +83,10 @@ Django开发环境(linux)
 .. literalinclude:: ../../python/startup/pip_offline/pip_install_whl
    :caption: ``pip install`` 可以安装下载好的 ``.whl`` python包
 
+:ref:`mysql` 数据连接
+========================
 
+生产环境采用 :ref:`mysql` ，所以 :ref:`django_mysqlclient_config`  (这里包括数据库初始创建步骤):
 
 参考
 =====
