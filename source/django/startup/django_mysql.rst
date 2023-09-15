@@ -52,7 +52,7 @@ Django配置MySQL数据库
 
 - django一般有2种方式获取数据库连接信息:
 
-  - 直接读取 ``/etc/my.cnf`` (当前Django官方推荐)
+  - 直接读取 ``/etc/my.cnf`` (当前Django官方推荐) : 例如这里可以创建一个 ``myapp.cnf`` 配置文件，对应上文创建的 ``myappdb`` 数据库访问账号
   - 使用环境变量
 
 .. _django_mysqlclient_config:

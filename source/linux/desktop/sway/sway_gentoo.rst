@@ -99,6 +99,25 @@ Sway有一些 USE flags 可以微调:
 
 现在就能正常启动 ``sway`` 了，不过此时还不能充分发挥高分辨率屏幕特性，待继续优化...
 
+高分辨率
+==========
+
+- ``swaymsg`` 可检查系统硬件，其中检查显示屏如下:
+
+.. literalinclude:: sway_gentoo/swaymsg_outputs
+   :caption: 检查当前连接显示器
+
+例如我的笔记本显示:
+
+.. literalinclude:: sway_gentoo/swaymsg_outputs_output
+   :caption: 检查当前连接显示器输出案例(苹果笔记本内置显示器)
+
+- 在 ``~/.config/sway/config`` 可以添加多个显示器配置，例如以下是3个并排显示器配置，且第三个显示器垂直旋转:
+
+.. literalinclude:: sway_gentoo/sway_config_multi_display
+   :caption: 配置3个显示器的案例
+
+
 终端模拟器
 ============
 

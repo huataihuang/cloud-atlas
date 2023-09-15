@@ -8,6 +8,7 @@ Linux系统管理
    :maxdepth: 1
 
    locale_env.rst
+   linux_swap.rst
    cron.rst
    os_fork_resource_unavailable.rst
    linux_backlight.rst
