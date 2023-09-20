@@ -24,11 +24,37 @@ MariaDB是开源关系型数据库，和MySQL兼容并且用于替代MySQL。这
 
 建议同时安装 ``mariadb`` 和 ``mariadb-devel`` 软件包，方便后续开发
 
-.. note::
+使用MariaDB官方仓库安装(推荐)
+------------------------------
 
-   CentOS 7操作系统通过EPEL安装mariadb，需要注意EPEL提供的mariadb的版本很低，和最新的版本不兼容，带来很多开发移植上的不变。所以，我建议不要使用EPEL提供的版本，而是采用 `MariaDB官方软件仓库 <https://mariadb.org/download/#mariadb-repositories>`_ 安装。即将网站提供的 ``MariaDB.repo`` 存放到 ``/etc/yum.repos.d`` 目录下，然后执行安装::
+CentOS 7操作系统通过EPEL安装mariadb，需要注意EPEL提供的mariadb的版本很低，和最新的版本不兼容，带来很多开发移植上的不变。所以，我建议不要使用EPEL提供的版本，而是采用 `MariaDB官方软件仓库 <https://mariadb.org/download/#mariadb-repositories>`_ 安装。即将网站提供的 ``MariaDB.repo`` 存放到 ``/etc/yum.repos.d`` 目录下。例如这里使用国内的阿里云镜像:
 
-      sudo yum install MariaDB-server MariaDB-client
+.. literalinclude:: install_mariadb/MariaDB.repo
+   :caption: ``/etc/yum.repo.d/MariaDB.repo`` 配置阿里云镜像仓库(MariaDB 11.1)
+
+我实际选择了一个低版本 MariaDB 10.11:
+
+.. literalinclude:: install_mariadb/MariaDB_10.11.repo
+   :caption: ``/etc/yum.repo.d/MariaDB.repo`` 配置阿里云镜像仓库(MariaDB 10.11)
+
+- 执行安装:
+
+.. literalinclude:: install_mariadb/yum_install_MariaDB
+   :caption: 安装MariaDB
+
+这里有一个报错:
+
+.. literalinclude:: install_mariadb/yum_install_MariaDB_error
+   :caption: 安装MariaDB报错显示缺少 ``libpcre2-8.so.0``
+
+这个 ``libpcre2-8.so.0`` 是 ``pcre2`` 提供，aliOS 7.2系统默认只有 ``pcre`` 。这个软件包其实在CentOS 7.9社区版本是具备的，但是很不幸这里没有
+
+从 `centos.pkgs.org <https://centos.pkgs.org>`_ 可以搜索到 `pcre2-10.23-2.el7.x86_64.rpm <https://centos.pkgs.org/7/centos-x86_64/pcre2-10.23-2.el7.x86_64.rpm.html>`_ 但是我看到这个二进制库依赖 ``glibc 2.2.5`` 比系统 ``glibc 2.17`` 要高，不确定是否兼容。在 valut.centos.org 搜索可以看到 ``pcre2`` 软件包是 CentOS 7.4 引入的:
+
+.. literalinclude:: install_mariadb/rpm_install_pcre2
+   :caption: 安装 ``pcre2`` rpm
+
+然后再次执行安装 MariaDB 就能够成功
 
 - 启动数据库:
 
@@ -71,6 +97,11 @@ MariaDB是开源关系型数据库，和MySQL兼容并且用于替代MySQL。这
 但是，前面执行 ``mysql_install_db`` 实际上已经创建了 ``/var/lib/mysql/`` 目录并存储了数据库文件在 ``/var/lib/mysql/mysql/host.frm`` 。
 
 实际上仔细查看了文件权限发现，原来 ``mysql_install_db`` 命令必须使用 ``mysql`` 用户来执行，否则创建的 ``/var/lib/mysql/mysql`` 目录以及该目录下文件都是属于root用户的。不过，mysql用户账号默认是 ``nologin`` ，所以需要使用 ``sudo -u mysql`` 方式来运行。
+
+升级数据库
+================
+
+我之前使用了CentOS(aliOS 7.2)发行版自带的低版本MariaDB 5.5，重新安装了社区版本10.11，虽然能够运行，但是启动日志中提示需要升级系统表。所以我执行了一次 :ref:`upgrade_mariadb`
 
 数据库安全加固
 ====================

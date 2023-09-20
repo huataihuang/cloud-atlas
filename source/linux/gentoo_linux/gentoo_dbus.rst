@@ -36,7 +36,7 @@ USE flags
 
 在修订了 ``dbus`` 全局参数之后，使用以下命令的 ``--changed-use`` 选项确保更新整个系统
 
-.. literalinclude:: gentoo_dbus/rebuild_world_after_change_use
+.. literalinclude:: gentoo_use_flags/rebuild_world_after_change_use
    :caption: 在修改了全局 USE flag 之后对整个系统进行更新
 
 配置

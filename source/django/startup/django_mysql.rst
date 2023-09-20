@@ -47,6 +47,53 @@ Django配置MySQL数据库
 
    在 :ref:`django_env_linux` 对于 ``pip install mysqlclient`` 有处理案例
 
+.. warning::
+
+   我最近的实践发现在CentOS 7环境提供的是 MariaDB，此时编译安装 ``mysqlclient`` 模块始终报错，参考 `How to connect Python programs to MariaDB <https://mariadb.com/resources/blog/how-to-connect-python-programs-to-mariadb/>`_ ，看起来社区采用了新的 ``mariadb`` 来连接MariaDB，我以为 ``mysqlclient`` 已经不能兼容。 **实际上并不是这样** ， ``mysqlclient`` 需要采用 ``MariaDB`` 的较高版本才能正常编译。我验证 :ref:`install_mariadb` v10.11 则编译安装没有任何问题。
+
+解决 ``mysqlclient`` 模块安装
+------------------------------
+
+.. warning::
+
+   我这里的挫折实际上是因为我采用了CentOS(aliOS 7.2)发行版内置的 ``MariaDB`` v5.5 导致的，浪费了我两天时间。实际上，当重新 :ref:`install_mariadb` v10.11 之后问题引刃而解。
+
+这次遇到一个报错，和之前 :ref:`django_mysql` 不同:
+
+.. literalinclude:: django_env_linux/mysqlclient_error
+   :caption: ``pip`` 安装 ``mysqlclient`` 报错
+   :emphasize-lines: 10-13
+
+这里可以看到 ``pkg-config --exists mysqlclient`` 和 ``pkg-config --exists mariadb`` 都是返回 ``1`` (失败)。我手工执行了一下，确实 ``echo $?`` 显示 ``1``
+
+仔细一看，原来这个  ``pkg-config`` 是操作系统默认的 ``/usr/bin/pkg-config`` 。这里通过 ``rpm -qf /usr/bin/pkg-config`` 可以看出是属于 ``pkgconfig-0.27.1-4.1.alios7.x86_64`` ，显然不会获得正确的包信息
+
+`PyMySQL / mysqlclient / README.md <https://github.com/PyMySQL/mysqlclient/blob/main/README.md>`_ 提供了一个线索:
+
+.. literalinclude:: django_env_linux/pkg-config_mysqlclient
+   :caption: 定制编译时指定环境变量
+
+既然由于操作系统的 ``pkg-config`` 无法正常工作，那么该如何设置环境变量呢?
+
+我找了自己部署的一台 :ref:`fedora` 开发环境( :strike:`吐槽一下公司魔改的CentOS` 社区CentOS 7确实存在这个问题)，可以看到:
+
+.. literalinclude:: django_env_linux/pkg-config_mariadb
+   :caption: 在正确的环境中执行 ``pkg-config`` 获取环境变量
+   :emphasize-lines: 2,4
+
+- 所以修正安装方法:
+
+.. literalinclude:: django_env_linux/pkg-config_mariadb_env
+   :caption: 设置正确 ``mysqlclient`` 环境变量
+
+- :strike:`然后再次执行就可以完成` 不过我再次执行安装报错似乎不兼容:
+
+.. literalinclude:: django_env_linux/mysqlclient_error_again
+   :caption: 提供了mysqlient的编译环境变量，但是编译报错
+   :emphasize-lines: 46-55
+
+这个问题我最后做了多次安装对比，发现是旧版本 ``mariadb`` 的bug，当采用 :ref:`install_mariadb` 采用社区仓库并安装 MariaDB 10.11 之后，这个问题引刃而解。
+
 配置Django连接数据库
 =====================
 
