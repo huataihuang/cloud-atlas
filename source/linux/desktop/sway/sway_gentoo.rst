@@ -121,7 +121,7 @@ Sway有一些 USE flags 可以微调:
 终端模拟器
 ============
 
-默认终端模拟器是 ``foot`` ，一个非常轻量级的终端， :strike:`但是可能对中文支持不好` (我这次实践开启了cjk支持，待验证)
+默认终端模拟器是 ``foot`` ，一个非常轻量级的终端， :strike:`但是可能对中文支持不好` (我这次实践开启了 ``cjk`` :ref:`gentoo_use_flags` 发现中文显示很好)
 
 Gentoo的wiki中推荐 ``x11-terms/alacritty`` 是原生Wayland程序，而且使用 :ref:`rust` 编写，性能卓越。
 

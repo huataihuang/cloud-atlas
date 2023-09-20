@@ -1,7 +1,7 @@
-.. _install_mysql:
+.. _macos_install_mysql:
 
 =================
-安装MySQL
+macos安装MySQL
 =================
 
 macOS上安装MySQL
@@ -51,7 +51,8 @@ Homebrew安装
 在 :ref:`django` 开发中，我采用了两种环境:
 
 - :ref:`docker_compose_django` 是先 :ref:`install_docker_macos` ，然后通过 ``docker-compose`` 实现的MySQL容器化运行
-- :ref:`django_env` 是在macOS上通过Python virtualenv运行Django，连接的是本地运行的一个MySQL数据库
+- :ref:`django_env_macos` 是在macOS上通过Python virtualenv运行Django，连接的是本地运行的一个MySQL数据库
+- :ref:`django_env_linux` 是在Linux上通过Python virtualenv运行Django，连接的是本地运行的一个MySQL数据库
 
 前者通过 :ref:`docker` 的官方镜像，支持传递环境变量就可以自动配置好MySQL数据库；但是后者则是传统的数据库维护方式，需要我们做数据库初始化才能用于 :ref:`django` 开发。
 

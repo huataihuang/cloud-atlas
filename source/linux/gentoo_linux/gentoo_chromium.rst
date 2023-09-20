@@ -20,7 +20,7 @@ USE参数
 
 - 修订参数之后需要重建一次整个系统:
 
-.. literalinclude:: gentoo_dbus/rebuild_world_after_change_use
+.. literalinclude:: gentoo_use_flags/rebuild_world_after_change_use
    :caption: 在修改了全局 USE flag 之后对整个系统进行更新
 
 编译安装
@@ -45,7 +45,7 @@ chromium从 v87 开始原生支持 :ref:`wayland` ，但是需要传递以下参
 dbus支持
 =========
 
-虽然chromium没有像firefox那样强制要求 :ref:`gentoo_dbus` 支持，但是实际上运行还是会在终端中看到连接 ``bus`` 的提示，虽然似乎不影响运行:
+虽然chromium没有像firefox那样强制要求 :ref:`gentoo_dbus` 支持，但是实际上运行还是会在终端中看到连接 ``bus`` 的提示， :strike:`虽然似乎不影响运行` :
 
 .. literalinclude:: gentoo_dbus/chromium_run_err
    :caption: 终端运行 ``chromium`` 的一些报错信息，似乎不影响

@@ -21,6 +21,10 @@ macOS/Linux安装krew
    :language: bash
    :caption: 安装 ``krew`` 脚本
 
+.. note::
+
+   这里我遇到一个非常痛苦的事情，就是GFW阻塞了 ``krew`` 安装导致反复超时。
+
 - 在 :ref:`shell` 的profile中添加运行路径 ``$HOME/.krew/bin`` ，例如 ``.bashrc`` 和 ``.zshrc`` :
 
 .. literalinclude:: install_krew/profile_krew
