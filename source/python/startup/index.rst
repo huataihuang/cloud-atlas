@@ -9,6 +9,7 @@ Python起步
 
    virtualenv.rst
    rebuild_virtualenv.rst
+   pip.rst
    upgrade_all_python_packages_with_pip.rst
    python_in_rhel8.rst
    python_in_kali.rst
