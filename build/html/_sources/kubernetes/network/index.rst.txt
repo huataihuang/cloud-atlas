@@ -14,6 +14,7 @@ Kubernetes只支持基于Container Network Interface(CNI)的网络，需要通�
    k8s_network_infa.rst
    k8s_loadbalancer_ingress.rst
    dynamic_dns_loadbalancing_without_cloud_provider.rst
+   k8s_hosts_file_for_pods.rst
    ingress/index
    flannel/index
    cilium/index

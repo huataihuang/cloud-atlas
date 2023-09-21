@@ -12,10 +12,10 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/translations.js"></script>
+        <script src="../../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/translations.js?v=beaddf03"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../startup/index.html">Kubernetes快速起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../kind/index.html">kind(本地docker模拟k8s集群)</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Kubernetes概念辨析</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../architecture/index.html">Kubernetes架构</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../kubernetes_components.html">Kubernetes组件</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../k8s_health_check.html">Kubernetes健康检测</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../k8s_pods_cmd_args.html">Kubernetes Pods的命令和参数</a></li>
@@ -73,6 +74,7 @@
 <li class="toctree-l4"><a class="reference internal" href="assigning_pods_to_nodes.html">分配Pod到节点</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">瑕疵和容忍(Taints and Tolerations)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="secrets.html">Kubernetes Secrets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configmap.html">ConfigMap</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../cluster_administration/index.html">Kubernetes集群管理</a></li>
@@ -85,7 +87,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../manage_object/index.html">Kubernetes管理对象</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../access_application/index.html">Kubernetes访问应用</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../container_runtimes/index.html">Kubernetes 容器运行时(Container Runtimes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../container_runtimes/index.html">容器运行时(Container Runtimes)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../configure/index.html">Kubernetes 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../network/index.html">Kubernetes网络</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../in_action/index.html">Kubernetes实践</a></li>
@@ -121,6 +123,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../network/index.html">Network Atlas</a></li>
@@ -137,6 +140,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../clang/index.html">C Atlas</a></li>
@@ -188,17 +192,91 @@
            <div itemprop="articleBody">
              
   <section id="taints-and-tolerations">
-<span id="taints-and-tolerations-rst"></span><h1>瑕疵和容忍(Taints and Tolerations)<a class="headerlink" href="#taints-and-tolerations" title="此标题的永久链接">¶</a></h1>
+<span id="taints-and-tolerations-rst"></span><h1>瑕疵和容忍(Taints and Tolerations)<a class="headerlink" href="#taints-and-tolerations" title="Link to this heading">¶</a></h1>
 <p>Node affinity(节点亲和性)是设置pod优先分配到一组nodes(例如性能或硬件要求)。而 <code class="docutils literal notranslate"><span class="pre">taints</span></code> 则相反，设置节点排斥pod。</p>
 <p>taints和tolerations结合起来使用可以确保pod不会调度到不合适到节点。当一个或多个taints被应用到节点，则会标记节点不接受任何不容忍瑕疵的pods (not accept any pods that do not tolerate the tains)。当tolerations（容忍）被应用到节点，则允许（但不强求）pod调度到匹配瑕疵(taints)的节点上。</p>
+<p>这个概念在pod调度中非常有用，很多希望专门用途的服务器，可以通过 <code class="docutils literal notranslate"><span class="pre">taints</span></code> 设置为只让高优先级( <code class="docutils literal notranslate"><span class="pre">tolerations</span></code> )的用户使用。在多租户场景、异构Kubernetes集群( <a class="reference internal" href="../../arm/index.html#arm-k8s"><span class="std std-ref">ARM架构Kubernetes</span></a> / <a class="reference internal" href="../../gpu/index.html#gpu-k8s"><span class="std std-ref">GPU Kubernetes</span></a> )，结合使用污点(taints)和容忍(tolerations)能够将应用容器放到不同的节点组，实现复杂的调度。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p><code class="docutils literal notranslate"><span class="pre">taints</span></code> 和 <code class="docutils literal notranslate"><span class="pre">tolerations</span></code> 是结合使用的：从字面意思上就是 <code class="docutils literal notranslate"><span class="pre">瑕疵</span></code> 和 <code class="docutils literal notranslate"><span class="pre">容忍</span></code> 。当节点被标记为瑕疵( <code class="docutils literal notranslate"><span class="pre">taints</span></code> )，则默认不会调度到该节点。除非pod被标记为容忍( <code class="docutils literal notranslate"><span class="pre">tolerations</span></code> )这个瑕疵，则带有容忍这种瑕疵的节点才会被调度到对应有瑕疵的节点上。</p>
 </div>
-<section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<section id="taints-tolerations">
+<h2>污点(taints)和容忍(tolerations)的概念<a class="headerlink" href="#taints-tolerations" title="Link to this heading">¶</a></h2>
+<p>在节点(node)上添加污点(taints)可以排斥所有pod，除了那些能够容忍(toleration)污点的pods。一个节点可以有一个或多个关联的污点。</p>
+<p>举例:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/">Kubernetes Documentation - Concepts: Taints and Tolerations</a></p></li>
+<li><p>管控平面的节点(master)通常会被主动污点，以便只有管控pods能够调度到master节点，普通用户部署的应用pods就不会调度到master节点，以便专用.</p></li>
+<li><p>服务器首次导入集群，为了能够完成一系列初始化工作，此时需要屏蔽工作负载调度到还没有完成初始化的节点，就可以使用 <code class="docutils literal notranslate"><span class="pre">taint</span></code></p></li>
+</ul>
+<p>一个 <code class="docutils literal notranslate"><span class="pre">taint</span></code> 可以有3种可能的影响:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NoSchedule</span></code> - Kubernetes调度器只允许将对污点有容忍的pod调度到该节点</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PreferNoSchedule</span></code> - Kubernetes调度器将 <code class="docutils literal notranslate"><span class="pre">尝试避免</span></code> 将 <strong>没有配置容忍的</strong> pod调度到该节点(但不能保证，假如没有更好的可用节点)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NoExecute</span></code> - 如果pod对污点节点没有容忍度，则Kubernetes会立即驱逐正在运行的pod</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../../../_images/article-k8s-capacity-taint-tollerations.svg" src="../../../_images/article-k8s-capacity-taint-tollerations.svg" /></figure>
+</section>
+<section id="id1">
+<h2>污点(taints)和容忍(tolerations)的案例<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>对于需要为特定用户准备的工作节点，可以在节点上添加 <code class="docutils literal notranslate"><span class="pre">taint</span></code> :</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">为节点添加 <code class="docutils literal notranslate"><span class="pre">taint</span></code> 用于特定 <code class="docutils literal notranslate"><span class="pre">groupName</span></code> 用户组</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">taint</span> <span class="n">nodes</span> <span class="n">nodename</span> <span class="n">dedicated</span><span class="o">=</span><span class="n">groupName</span><span class="p">:</span><span class="n">NoSchedule</span>
+</pre></div>
+</div>
+</div>
+<p>然后该组用户的pod中添加 <code class="docutils literal notranslate"><span class="pre">taint</span></code> 对应的 <code class="docutils literal notranslate"><span class="pre">toleration</span></code> ，就能在这些节点运行。</p>
+<p>此外，为了确保这些用户的 pods <strong>仅</strong> 在该组 <code class="docutils literal notranslate"><span class="pre">taint</span></code> 节点上运行，还应该在该组节点添加标签，例如 <code class="docutils literal notranslate"><span class="pre">dedicated=groupName</span></code> ，然后在部署 pods 的时候使用 <code class="docutils literal notranslate"><span class="pre">NodeSelector</span></code> 将用户组的pod绑定到节点上，避免运行到其他地方。</p>
+<ul class="simple">
+<li><p>特殊硬件的节点(例如 <a class="reference internal" href="../../../arm/index.html#arm"><span class="std std-ref">ARM Atlas</span></a> 或者 <a class="reference internal" href="../../../machine_learning/hardware/nvidia_gpu/index.html#nvidia-gpu"><span class="std std-ref">NVIDIA GPU</span></a> )</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">为特殊硬件的节点添加 <code class="docutils literal notranslate"><span class="pre">taint</span></code> 以便只有使用特定硬件pod才能调度到该节点</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">taint</span> <span class="n">nodes</span> <span class="n">nodename</span> <span class="n">special</span><span class="o">=</span><span class="n">true</span><span class="p">:</span><span class="n">NoSchedule</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="taints-evict">
+<h2>基于污点(taints)的驱逐(evict)<a class="headerlink" href="#taints-evict" title="Link to this heading">¶</a></h2>
+<p>如果 pod 对污点没有容忍度，则具有 <code class="docutils literal notranslate"><span class="pre">NoExecute</span></code> 效果的污点会将正在运行的 pod 从节点中逐出(evict)。 在某些场景下，Kubernetes 节点控制器会自动将这种污点添加到节点上，以便 <strong>立即驱逐 pod</strong> ，并 <a class="reference internal" href="../../administer/drain_node.html#drain-node"><span class="std std-ref">安全地清空一个Kubernetes节点</span></a> （驱逐所有 pod）。</p>
+<p>举例:</p>
+<ul class="simple">
+<li><p>如果网络中断导致控制器无法访问某个节点，此时最好将所有pod移出故障节点，以便能够重新调度到其他节点</p></li>
+</ul>
+<section id="kubernetestains">
+<h3>Kubernetes内建的tains<a class="headerlink" href="#kubernetestains" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/not-ready</span></code> 节点没有就绪，对应于 <code class="docutils literal notranslate"><span class="pre">NodeCondition</span></code> 的 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 属性是 <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/unreachable</span></code> 节点不能从控制器访问，对应于 <code class="docutils literal notranslate"><span class="pre">NodeCondition</span></code> 的 <code class="docutils literal notranslate"><span class="pre">Ready</span></code> 属性是 <code class="docutils literal notranslate"><span class="pre">Unknown</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/memory-pressure</span></code> 节点内存压力高</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/disk-pressure</span></code> 节点磁盘IO压力高，此时会影响应用性能，建议重新分布pods</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/pid-pressure</span></code> 节点PID压力高，进程ID是一种有限资源，过饱和可能会导致应用程序停机，因此最好将Pod重新定位到其他地方</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/network-unavailable</span></code> 节点网络不可访问，此时建议将pod调度出去</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.kubernetes.io/unschedulable</span></code> 节点不可调度，这是控制节点调度的常用taint，例如需要做集群缩容，节点需要删除</p></li>
+</ul>
+</section>
+</section>
+<section id="id2">
+<h2>污点(taints)和容忍(tolerations)的实践<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>查询集群的taints配置</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">查询集群中节点的taints设置</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">nodes</span> <span class="o">-</span><span class="n">o</span><span class="o">=</span><span class="n">custom</span><span class="o">-</span><span class="n">columns</span><span class="o">=</span><span class="n">NodeName</span><span class="p">:</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">TaintKey</span><span class="p">:</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">taints</span><span class="p">[</span><span class="o">*</span><span class="p">]</span><span class="o">.</span><span class="n">key</span><span class="p">,</span><span class="n">TaintValue</span><span class="p">:</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">taints</span><span class="p">[</span><span class="o">*</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">TaintEffect</span><span class="p">:</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">taints</span><span class="p">[</span><span class="o">*</span><span class="p">]</span><span class="o">.</span><span class="n">effect</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/">Kubernetes Documentation - Concepts: Taints and Tolerations</a> 中文文档:  <a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/scheduling-eviction/taint-and-toleration/">Kubernetes 文档&gt;概念&gt;调度、抢占和驱逐&gt;污点和容忍度</a></p></li>
+<li><p><a class="reference external" href="https://www.densify.com/kubernetes-autoscaling/kubernetes-taints/">Kubernetes Tains &amp; Tolerations</a> 一个不错的简明教程，比官方文档更清晰易懂，推荐阅读</p></li>
 </ul>
 </section>
 </section>
@@ -214,7 +292,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -12,10 +12,10 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/translations.js"></script>
+        <script src="../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/translations.js?v=beaddf03"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
@@ -53,13 +53,16 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gluster Atlas</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../introduce_gluster.html">Gluster分布式存储简介</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../gluster_vs_ceph.html">Gluster和Ceph对比</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../best_practices_for_gluster/index.html">Gluster存储最佳实践</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../startup/index.html">GlusterFS起步</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deploy/index.html">GlusterFS部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../build/index.html">GlusterFS构建编译</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/index.html">GlusterFS管理</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">GlusterFS性能</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">GlusterFS性能优化</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">对比</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">优化思路</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">参考</a></li>
 </ul>
 </li>
 </ul>
@@ -82,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
@@ -98,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../clang/index.html">C Atlas</a></li>
@@ -148,9 +153,76 @@
            <div itemprop="articleBody">
              
   <section id="glusterfs">
-<span id="gluster-tunning"></span><h1>GlusterFS性能优化<a class="headerlink" href="#glusterfs" title="此标题的永久链接">¶</a></h1>
+<span id="gluster-tunning"></span><h1>GlusterFS性能优化<a class="headerlink" href="#glusterfs" title="Link to this heading">¶</a></h1>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<h2>对比<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<section id="centos7-2-suse15-5">
+<h3>CentOS7.2服务端/SuSE15.5客户端<a class="headerlink" href="#centos7-2-suse15-5" title="Link to this heading">¶</a></h3>
+<p>在 <a class="reference internal" href="../deploy/deploy_centos7_suse15_suse12_gluster11.html#deploy-centos7-suse15-suse12-gluster11"><span class="std std-ref">在CentOS 7 和SUSE 15/12 环境部署GlusterFS 11</span></a> 后，我简单测试了一下写入性能，选择了客户端上的 <code class="docutils literal notranslate"><span class="pre">/usr</span></code> 目录(1.9GB，大约6.24w文件)复制到GlusterFS卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># time cp -R /usr/ /data/backup</span>
+
+<span class="n">real</span>    <span class="mi">2</span><span class="n">m57</span><span class="mf">.236</span><span class="n">s</span>
+<span class="n">user</span>    <span class="mi">0</span><span class="n">m0</span><span class="mf">.773</span><span class="n">s</span>
+<span class="n">sys</span>     <span class="mi">0</span><span class="n">m4</span><span class="mf">.131</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>可以看到效率不高</p>
+<p>此外，复制时，客户端 <code class="docutils literal notranslate"><span class="pre">glusterfs</span></code> 进程的CPU使用率大约 1.4 个cpu core</p>
+<p>再次部署了一个集群，区别是服务器端内核从 <code class="docutils literal notranslate"><span class="pre">3.10</span></code> 升级到 <code class="docutils literal notranslate"><span class="pre">4.19</span></code> ，此时启用了 <code class="docutils literal notranslate"><span class="pre">xfs</span></code> 的 v5版本(支持CRC)，同样复制 <code class="docutils literal notranslate"><span class="pre">/usr</span></code> 目录，略微快一点点:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># time cp -r /usr /data/backup</span>
+
+<span class="n">real</span>    <span class="mi">2</span><span class="n">m48</span><span class="mf">.185</span><span class="n">s</span>
+<span class="n">user</span>    <span class="mi">0</span><span class="n">m0</span><span class="mf">.846</span><span class="n">s</span>
+<span class="n">sys</span>     <span class="mi">0</span><span class="n">m4</span><span class="mf">.515</span><span class="n">s</span>
+</pre></div>
+</div>
+</section>
+<section id="centos7-2-suse12-5">
+<h3>CentOS7.2服务端/SuSE12.5客户端<a class="headerlink" href="#centos7-2-suse12-5" title="Link to this heading">¶</a></h3>
+<p>再次部署 <a class="reference internal" href="../deploy/deploy_centos7_suse15_suse12_gluster11.html#deploy-centos7-suse15-suse12-gluster11"><span class="std std-ref">在CentOS 7 和SUSE 15/12 环境部署GlusterFS 11</span></a> ，同样复制客户端 <code class="docutils literal notranslate"><span class="pre">/usr</span></code> 目录(4.3GB，大约12w文件)复制到GlusterFS卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># time cp -R /usr/ /data/backup</span>
+
+<span class="n">real</span>    <span class="mi">4</span><span class="n">m9</span><span class="mf">.248</span><span class="n">s</span>
+<span class="n">user</span>    <span class="mi">0</span><span class="n">m1</span><span class="mf">.146</span><span class="n">s</span>
+<span class="n">sys</span>     <span class="mi">0</span><span class="n">m8</span><span class="mf">.926</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>删除文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># time rm -rf /data/backup/usr</span>
+
+<span class="n">real</span>    <span class="mi">1</span><span class="n">m58</span><span class="mf">.413</span><span class="n">s</span>
+<span class="n">user</span>    <span class="mi">0</span><span class="n">m0</span><span class="mf">.227</span><span class="n">s</span>
+<span class="n">sys</span>     <span class="mi">0</span><span class="n">m1</span><span class="mf">.779</span><span class="n">s</span>
+</pre></div>
+</div>
+</section>
+<section id="centos7-2-suse12-5-raid">
+<h3>CentOS7.2服务端/SuSE12.5客户端(软RAID)<a class="headerlink" href="#centos7-2-suse12-5-raid" title="Link to this heading">¶</a></h3>
+<p>改进部署 <a class="reference internal" href="../deploy/centos/deploy_centos7_gluster11_lvm_mdadm_raid10.html#deploy-centos7-gluster11-lvm-mdadm-raid10"><span class="std std-ref">在软RAID10 + LVM上CentOS 7 部署Gluster 11</span></a> ，同样复制客户端 <code class="docutils literal notranslate"><span class="pre">/usr</span></code> 目录(4.3GB，大约12w文件)复制到GlusterFS卷:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># time cp -R /usr/ /mqha/foreignexmuamqha/</span>
+
+<span class="n">real</span>    <span class="mi">3</span><span class="n">m35</span><span class="mf">.887</span><span class="n">s</span>
+<span class="n">user</span>    <span class="mi">0</span><span class="n">m1</span><span class="mf">.137</span><span class="n">s</span>
+<span class="n">sys</span>     <span class="mi">0</span><span class="n">m7</span><span class="mf">.584</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>可以看到性能略有提升，耗时降低了 25%</p>
+<p>删除文件:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># time rm -rf /mqha/foreignexmuamqha/usr</span>
+
+<span class="n">real</span>    <span class="mi">1</span><span class="n">m48</span><span class="mf">.089</span><span class="n">s</span>
+<span class="n">user</span>    <span class="mi">0</span><span class="n">m0</span><span class="mf">.450</span><span class="n">s</span>
+<span class="n">sys</span>     <span class="mi">0</span><span class="n">m2</span><span class="mf">.209</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>总体来说，采用 <a class="reference internal" href="../../linux/storage/software_raid/index.html#linux-software-raid"><span class="std std-ref">Linux 软RAID</span></a> 构建大容量磁盘(同时降低了brick数量)对于性能似乎有所提高。我感觉可能还是客户端的分发性能没有优化，无法充分利用多bricks的优势，反而被客户端瓶颈拖累了…</p>
+</section>
+</section>
+<section id="id2">
+<h2>优化思路<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+</section>
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://go.qct.io/wp-content/uploads/2018/08/Reference-Architecture-QCT-and-Red-Hat-Gluster-Storage-Performance-and-Sizing-Guide.pdf">performance and sizing guide (Redh Hat Gluster Storage on QCT servers)</a></p></li>
 </ul>
@@ -168,7 +240,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

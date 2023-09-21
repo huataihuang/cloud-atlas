@@ -192,6 +192,10 @@ LVM卷作为libvirt存储
    :linenos:
    :caption: /etc/netplan/00-cloud-init.yaml
 
+.. note::
+
+   这里的 :ref:`libvirt_bridged_network` 结合了多个网络网段，参见 :ref:`netplan`
+
 执行生效::
 
    sudo netplan generate

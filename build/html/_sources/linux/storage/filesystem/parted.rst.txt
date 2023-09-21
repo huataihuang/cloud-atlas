@@ -6,6 +6,14 @@
 
 ``parted`` 是当前主流发型版替代 ``fdisk`` 实现大容量磁盘分区管理的工具。 ``parted`` 支持交互模式，也支持直接的命令行模式（可以在shell中使用）。
 
+``分区的文件系统类型`` 和 ``mkfs``
+=====================================
+
+磁盘分区可以有一个 ``类型`` 但是这不是强制要求分区类型和实际文件系统类型一致，只是表示分区期望的文件系统类型。 ``parted`` 将分区定义为 ``磁盘之上的一部分`` (a part of the overall disk)，实际上 ``parted`` 并不知道分区类型(该参数可选)。不过，如果分区设置文件系统类型和实际文件系统类型不一致，在使用中，文件系统自动检测和自动挂载可能不能正常工作。
+
+命令行案例
+==========
+
 基本命令模式（注意，选项在设备名前面，命令在设备之后，这样选项就会传递给 ``parted`` 命令） ::
 
    parted [OPTION]... [DEVICE [COMMAND [PARAMETERS]...]...]
@@ -133,3 +141,4 @@ LFS磁盘分区准备案例
 - `8 Linux ‘Parted’ Commands to Create, Resize and Rescue Disk Partitions <https://www.tecmint.com/parted-command-to-create-resize-rescue-linux-disk-partitions/>`_
 - `archlinux: GNU Parted - UEFI/GPT examples <https://wiki.archlinux.org/index.php/GNU_Parted#UEFI.2FGPT_examples>`_
 - `Partitioning Disks with parted <https://access.redhat.com/sites/default/files/attachments/parted_0.pdf>`_
+- `Why does parted need a filesystem type when creating a partition, and how does its action differ from a utility like mkfs.ext4? <https://unix.stackexchange.com/questions/551030/why-does-parted-need-a-filesystem-type-when-creating-a-partition-and-how-does-i>`_

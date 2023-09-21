@@ -40,7 +40,7 @@ APT无阻碍代理架构
 
 综合我的几次实践，目前我选择 :ref:`squid_socks_peer` 作为基础，结合 SSH tunnel 来实现无阻碍网络:
 
-- 在 :ref:`pi_cluster` 上部署了 :ref:`kubernetes_arm` ，其中管控服务器节点 ``pi-master1`` 运行 squid 本地代理服务器
+- 在 :ref:`pi_cluster` 上部署了 :ref:`arm_k8s` ，其中管控服务器节点 ``pi-master1`` 运行 squid 本地代理服务器
 
 - 租用海外云计算厂商的VPS，采用  :ref:`squid_socks_peer` 架构，在服务器端运行一个只监听本地回环地址 ``127.0.0.1`` 的squid代理服务器：这样代理服务器不能被外部用户直接访问，只能通过ssh方式建立Tunnel之后才能通过端口映射方式被客户端访问到，这就提供了极强的安全加密
 

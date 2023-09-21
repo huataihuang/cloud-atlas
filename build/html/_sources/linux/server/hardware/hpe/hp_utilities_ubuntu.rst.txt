@@ -84,6 +84,14 @@ Management Component Pack
 
    iLO WEB管理平台在 ``System Information`` 中可以观察系统的状态，其中 ``Storage Information`` 依赖 ``Agentless Management Service`` ，所以需要安装 ``hp-ams`` ，这样才能显示监控页面
 
+.. note::
+
+   在升级Ubuntu 22.04之后， ``/etc/apt/sources.list.d/mcp.list`` 会自动配置关闭，看起来不再支持。此外，系统卸载了 ``hp-health`` ，原因似乎是::
+
+      The following packages have unmet dependencies:
+      hp-health : Depends: libc6-i686 but it is not installable or
+                             lib32gcc1 but it is not installable
+
 使用
 =======
 

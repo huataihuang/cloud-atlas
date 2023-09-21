@@ -12,10 +12,10 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/translations.js"></script>
+        <script src="../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/translations.js?v=beaddf03"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
@@ -65,7 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../manage_object/index.html">Kubernetes管理对象</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../access_application/index.html">Kubernetes访问应用</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../container_runtimes/index.html">Kubernetes 容器运行时(Container Runtimes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../container_runtimes/index.html">容器运行时(Container Runtimes)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../configure/index.html">Kubernetes 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../network/index.html">Kubernetes网络</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../in_action/index.html">Kubernetes实践</a></li>
@@ -81,6 +81,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../self_healing/index.html">Kubernetes 自愈</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Kubernetes排查</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="crictl.html">crictl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crictl_sidecar_debug_container.html">通过crictl运行一个容器sidecar进行debug</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_container_shell.html">获得容器shell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_k8s_pod_logs.html">获取Kubernetes Pod日志</a></li>
 <li class="toctree-l3"><a class="reference internal" href="kubelet_cert_expire.html">Kubelet证书过期</a></li>
@@ -99,6 +100,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pod_stuck_terminating.html">停滞在”Terminiating”状态Pod</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_pods_special_node.html">获取特定节点的pods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fix_pod_has_unbound_immediate_persistentvolumeclaims.html">修复”Unbound Immediate PersistentVolumeClaims”错误</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fail_create_container_cannot_allocate_memory.html">内存分配错误无法创建容器异常排查</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../knative/index.html">Knative - Serverless计算</a></li>
@@ -122,6 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
@@ -138,6 +141,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../clang/index.html">C Atlas</a></li>
@@ -188,7 +192,7 @@
            <div itemprop="articleBody">
              
   <section id="pods">
-<span id="debug-k8s-deleted-pods"></span><h1>排查已经被删除pods(重启)<a class="headerlink" href="#pods" title="此标题的永久链接">¶</a></h1>
+<span id="debug-k8s-deleted-pods"></span><h1>排查已经被删除pods(重启)<a class="headerlink" href="#pods" title="Link to this heading">¶</a></h1>
 <p>在kubernetes集群中， <code class="docutils literal notranslate"><span class="pre">deployments</span></code> 的pods在异常crash时会自动恢复，不过我们还是需要排查原先pods为何会crash:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">o</span> <span class="n">wide</span><span class="o">|</span> <span class="n">grep</span> <span class="n">scheduler</span>
 </pre></div>
@@ -277,7 +281,7 @@
 <p><a class="reference internal" href="get_pods_restart_time.html#get-pods-restart-time"><span class="std std-ref">获取pod重启时间</span></a> 用于找出最近重启的应用服务器(重建)</p>
 </div>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://stackoverflow.com/questions/40636021/how-to-list-kubernetes-recently-deleted-pods">How to list Kubernetes recently deleted pods?</a></p></li>
 <li><p><a class="reference external" href="https://stackoverflow.com/questions/51931113/kubectl-get-events-only-for-a-pod">kubectl get events only for a pod</a></p></li>
@@ -296,7 +300,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

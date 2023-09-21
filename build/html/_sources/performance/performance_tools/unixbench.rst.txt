@@ -16,8 +16,8 @@ UnixBench测试也包含了一些非常简单对图形测试(2D和3D)，并且�
 
    UnixBench测试不仅关系到系统硬件，也和操作系统，库甚至编译器相关，所以测试对比不同硬件到性能应该确保操作系统、库和编译器一致，而测试操作系统( :ref:`kernel` )性能，则应该保持其他变量(硬件、库和编译器等)一致。
 
-安装
-=========
+编译安装(release旧版编译)
+==========================
 
 - 编译环境准备
 
@@ -38,6 +38,21 @@ CentOS::
 
    cd byte-unixbench-5.1.3/UnixBench
    make
+
+编译安装(git版本安装)
+======================
+
+.. note::
+
+   在 :ref:`ubuntu_linux` 22.04 这样的主流新版本中编译 UnixBench 非常流畅，不过对于 :ref:`centos` 7 这样古老的系统，我实践发现操作系统自带的 gcc 4.85 无法正常编译，所以需要先完成 :ref:`upgrade_gcc_on_centos7`
+
+- 首先确保gcc使用较新版本，在 :ref:`centos` 7 我执行: :ref:`upgrade_gcc_on_centos7` ，升级到 gcc 10.5 版本才能正确编译UnixBench git版本
+
+- 下载编译UnixBench:
+
+.. literalinclude:: unixbench/compile_unixbench_git_version
+   :caption: 编译UnixBench的git版本
+
 
 运行
 ===========
@@ -88,7 +103,15 @@ CentOS 6编译错误
 
 参考 `byte-unixbench - issue #7 <https://code.google.com/archive/p/byte-unixbench/issues/7>`_ 注释掉 ``3dinfo`` 行
 
+运行结果
+===========
 
+- 海光 
+
+.. literalinclude:: unixbench/unixbench_haiguang
+   :caption: 在一台海光服务器上的运行结果
+
+- Intel
 
 参考
 ========

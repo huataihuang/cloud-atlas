@@ -34,10 +34,35 @@ NVidia的vGPU提供4个软件产品版本:
 
 必须随 NVIDIA 虚拟 GPU 软件许可证一起购买支持、更新和维护订阅 (SUMS)。
 
+.. note::
+
+   `NVIDIA vGPU License服务器详解 <https://cloud.tencent.com/developer/news/312774>`_ 介绍GRID授权分为:
+  
+   - vApps
+   - vPC
+   - 虚拟工作站vDWS
+
+   其中 ``vDWS`` 现在可能再细分为 ``vWS`` 和 ``vCS`` 授权了
+
+   ``vDWS`` 是功能最全面的授权，GPU卡可以在这个授权下加载专业Quodra卡驱动(vPC和vApps的License对应加载的是普通的显示驱动)
+
 Tesla 系列 GPU 可同时支持通用计算和图形图像处理，例如：
 
 - 安装免费的 Tesla Driver 和 CUDA SDK ，可用作深度学习、科学计算等通用计算场景。
 - 安装 GRID Driver 并且配置相关的 License 服务器，可开启 GPU 的 OpenGL 或 DirectX 图形加速能力。
+
+.. figure:: ../../_static/kvm/vgpu/grid-licensing-overview.png
+
+   NVIDIA vGPU 软件licensing过程示意图
+
+当虚拟机启动时会从NVIDIA vGPU软件license服务器(端口7070)获取license，并且每次启动会checkout。VM会维持license直到关机，然后释放掉license服务器上的license锁(回收的license可以被其他VM使用)
+
+.. note::
+
+   - 16GB内存的4个CPU的license服务器配置，适合处理多达15万个许可客户端
+   - 主机必须运行在支持的Windows系统，且推荐安装英文版操作系统
+   - license服务器的网卡MAC地址必须固定
+   - license服务器的时钟必须准确
 
 P10/P40 vGPU数据
 ------------------

@@ -124,8 +124,33 @@ Linux内核支持的cpufreq调节器
 
 此时需要结合 :ref:`intel_turbo_boost_pstate`
 
+永久性cpufreq governor设置
+===========================
+
+系统安装了 ``cpufrequtils`` 软件包之后，就可以通过脚本配置在启动时自动设置好对应的 ``cpufreq governer`` :
+
+- ``/etc/init.d/cpufrequtils`` 脚本在启动时执行，这个脚本(简单看一下就明白)非常简单，其中关于默认 ``cpufreq governer`` 有如下脚本命令:
+
+.. literalinclude:: cpu_frequency_governor/cpufrequtils
+   :language: bash
+   :caption: ``/etc/init.d/cpufrequtils`` 脚本
+   :emphasize-lines: 7
+
+可以看到参数变量可以在 ``/etc/default/cpufrequtils`` 中设置，所以执行以下命令将默认 ``cpufreq governer`` 调整为 ``powersave`` :
+
+.. literalinclude:: cpu_frequency_governor/cpufrequtils_default_powersave
+   :language: bash
+   :caption: 设置默认 ``powersave`` 的 ``cpufreq governer``
+
+当然，当前运行状态也要设置(不用重启):
+
+.. literalinclude:: cpu_frequency_governor/cpupower_frequency-set_powersave
+   :language: bash
+   :caption: 设置当前运行的 ``cpufreq governer``
+
 参考
 ======
 
 - `arch linux: CPU frequency scaling <https://wiki.archlinux.org/title/CPU_frequency_scaling>`_
 - `CPU Frequency utility <https://wiki.analog.com/resources/tools-software/linuxdsp/docs/linux-kernel-and-drivers/cpufreq/cpufreq>`_
+- `How to permanently set CPU power management to the powersave governor? <https://askubuntu.com/questions/410860/how-to-permanently-set-cpu-power-management-to-the-powersave-governor>`_

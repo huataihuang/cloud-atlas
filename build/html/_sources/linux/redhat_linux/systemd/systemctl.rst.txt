@@ -104,7 +104,13 @@ systemd-analyze
    2.789s hciuart.service
    ...
 
+输出页面自动回行(wrap)
+==========================
+
+在使用 ``systemctl status`` 检查服务时，看到的输出内容是不回行的，观看时可以通过左右键来滚动，但是不利于直接复制内容。我们需要一次性输出所有日志内容，此时就可以使用参数 ``--no-pager --full`` ，类似于 :ref:`journalctl` 一样
+
 参考
 =======
 
 - `Using systemctl <https://www.loggly.com/ultimate-guide/using-systemctl/>`_
+- `make systemd pager not do horizontal scroll, and wrap to next line instead <https://serverfault.com/questions/1067314/make-systemd-pager-not-do-horizontal-scroll-and-wrap-to-next-line-instead>`_

@@ -11,3 +11,5 @@ Controllers
    replicaset.rst
    statefulset.rst
    daemonset.rst
+   job.rst
+   cronjob.rst

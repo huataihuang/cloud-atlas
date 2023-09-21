@@ -12,16 +12,16 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/translations.js"></script>
+        <script src="../../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/translations.js?v=beaddf03"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
     <link rel="copyright" title="版权所有" href="../../../copyright.html" />
     <link rel="next" title="LVM卷缓存" href="lvmcache.html" />
-    <link rel="prev" title="部署LVM" href="deploy_lvm.html" /> 
+    <link rel="prev" title="LVM RAID( lvmraid )" href="lvmraid.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../network/index.html">Network Atlas</a></li>
@@ -100,12 +101,19 @@
 <li class="toctree-l3"><a class="reference internal" href="../filesystem/index.html">Linux文件系统</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Linux LVM逻辑卷管理</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="lvm_infra.html">LVM架构</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lvmraid_vs_mdadm.html">lvmraid vs. mdadm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lvm_partion_vs_disk.html">构建LVM卷管理应该使用分区还是直接使用磁盘?</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deploy_lvm.html">部署LVM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deploy_lvm_mdadm_raid10.html">在 <span class="xref std std-ref">mdadm_raid10</span> 上部署LVM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lvmraid.html">LVM RAID( <code class="docutils literal notranslate"><span class="pre">lvmraid</span></code> )</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">条带化逻辑卷管理(LVM)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lvmcache.html">LVM卷缓存</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lvmthin.html">精简模式LVM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="extend_ext4_on_lvm.html">扩展LVM上的EXT4文件系统</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lvm_device_excluded_by_filter.html">LVM执行 <code class="docutils literal notranslate"><span class="pre">pvcreate</span></code> 时报错 <code class="docutils literal notranslate"><span class="pre">Device</span> <span class="pre">/dev/XXX</span> <span class="pre">excluded</span> <span class="pre">by</span> <span class="pre">a</span> <span class="pre">filter.</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../software_raid/index.html">Linux 软RAID</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../zfs/index.html">ZFS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../btrfs/index.html">Btrfs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stratis/index.html">Stratis - Linux存储系统</a></li>
@@ -126,6 +134,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../clang/index.html">C Atlas</a></li>
@@ -177,9 +186,74 @@
            <div itemprop="articleBody">
              
   <section id="lvm">
-<span id="striped-lvm"></span><h1>条带化逻辑卷管理(LVM)<a class="headerlink" href="#lvm" title="此标题的永久链接">¶</a></h1>
+<span id="striped-lvm"></span><h1>条带化逻辑卷管理(LVM)<a class="headerlink" href="#lvm" title="Link to this heading">¶</a></h1>
+<section id="lvdisplay-m">
+<h2><code class="docutils literal notranslate"><span class="pre">lvdisplay</span> <span class="pre">-m</span></code><a class="headerlink" href="#lvdisplay-m" title="Link to this heading">¶</a></h2>
+<p>在我们构建的 LVM 中，数据是如何分布的，可以通过 <code class="docutils literal notranslate"><span class="pre">-m</span></code> 参数查看 ( <code class="docutils literal notranslate"><span class="pre">--maps</span></code> ):</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">检查LVM磁盘数据分布</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvdisplay</span> <span class="o">-</span><span class="n">m</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">mapper</span><span class="o">/</span><span class="n">vg</span><span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">lv</span><span class="o">--</span><span class="n">thanos</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">检查LVM磁盘数据分布</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="o">---</span> <span class="n">Logical</span> <span class="n">volume</span> <span class="o">---</span>
+  <span class="n">LV</span> <span class="n">Path</span>                <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">vg</span><span class="o">-</span><span class="n">data</span><span class="o">/</span><span class="n">lv</span><span class="o">-</span><span class="n">thanos</span>
+  <span class="n">LV</span> <span class="n">Name</span>                <span class="n">lv</span><span class="o">-</span><span class="n">thanos</span>
+  <span class="n">VG</span> <span class="n">Name</span>                <span class="n">vg</span><span class="o">-</span><span class="n">data</span>
+  <span class="n">LV</span> <span class="n">UUID</span>                <span class="n">mz432T</span><span class="o">-</span><span class="n">ISFa</span><span class="o">-</span><span class="n">ifKq</span><span class="o">-</span><span class="n">DqzF</span><span class="o">-</span><span class="n">nQdY</span><span class="o">-</span><span class="n">duq9</span><span class="o">-</span><span class="mi">2</span><span class="n">V3JOO</span>
+  <span class="n">LV</span> <span class="n">Write</span> <span class="n">Access</span>        <span class="n">read</span><span class="o">/</span><span class="n">write</span>
+  <span class="n">LV</span> <span class="n">Creation</span> <span class="n">host</span><span class="p">,</span> <span class="n">time</span> <span class="n">alipaydockerphy010052095245</span><span class="o">.</span><span class="n">et15</span><span class="p">,</span> <span class="mi">2023</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">29</span> <span class="mi">15</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">08</span> <span class="o">+</span><span class="mi">0800</span>
+  <span class="n">LV</span> <span class="n">Status</span>              <span class="n">available</span>
+  <span class="c1"># open                 1</span>
+  <span class="n">LV</span> <span class="n">Size</span>                <span class="o">&lt;</span><span class="mf">6.08</span> <span class="n">TiB</span>
+  <span class="n">Current</span> <span class="n">LE</span>             <span class="mi">1593389</span>
+  <span class="n">Segments</span>               <span class="mi">2</span>
+  <span class="n">Allocation</span>             <span class="n">inherit</span>
+  <span class="n">Read</span> <span class="n">ahead</span> <span class="n">sectors</span>     <span class="n">auto</span>
+  <span class="o">-</span> <span class="n">currently</span> <span class="nb">set</span> <span class="n">to</span>     <span class="mi">256</span>
+  <span class="n">Block</span> <span class="n">device</span>           <span class="mi">251</span><span class="p">:</span><span class="mi">0</span>
+
+  <span class="o">---</span> <span class="n">Segments</span> <span class="o">---</span>
+  <span class="n">Logical</span> <span class="n">extents</span> <span class="mi">0</span> <span class="n">to</span> <span class="mi">1525877</span><span class="p">:</span>
+<span class="hll">    <span class="n">Type</span>		<span class="n">linear</span>
+</span>    <span class="n">Physical</span> <span class="n">volume</span>	<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">dfb1</span>
+    <span class="n">Physical</span> <span class="n">extents</span>	<span class="mi">0</span> <span class="n">to</span> <span class="mi">1525877</span>
+
+  <span class="n">Logical</span> <span class="n">extents</span> <span class="mi">1525878</span> <span class="n">to</span> <span class="mi">1593388</span><span class="p">:</span>
+<span class="hll">    <span class="n">Type</span>		<span class="n">linear</span>
+</span>    <span class="n">Physical</span> <span class="n">volume</span>	<span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda5</span>
+    <span class="n">Physical</span> <span class="n">extents</span>	<span class="mi">0</span> <span class="n">to</span> <span class="mi">67510</span>
+</pre></div>
+</div>
+</div>
+<p>可以看到这里的类型是 <code class="docutils literal notranslate"><span class="pre">linear</span></code> ，也就是顺序分布</p>
+</section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<h2>构建条代化分布LVM<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>条代化 <code class="docutils literal notranslate"><span class="pre">striped</span></code> 配置实际上也非常简单，主要是传递参数 <code class="docutils literal notranslate"><span class="pre">-i</span></code> 表示数据跨几块物理磁盘分布，以及 <code class="docutils literal notranslate"><span class="pre">-I</span></code> 参数设置条代化大小。我在 <a class="reference internal" href="../filesystem/xfs/xfs_startup.html#xfs-startup"><span class="std std-ref">XFS文件系统快速起步</span></a> 为数据库构建的就是跨3块磁盘的条代化LVM，以便能够实现性能提升以及大容量磁盘:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">创建条代化LVM卷</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pvcreate</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n</span><span class="p">{</span><span class="mf">0..2</span><span class="p">}</span><span class="n">p1</span>
+<span class="n">vgcreate</span> <span class="n">vg_db</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n</span><span class="p">{</span><span class="mf">0..2</span><span class="p">}</span><span class="n">p1</span>
+
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">n</span> <span class="n">vl_log</span> <span class="o">-</span><span class="n">l</span> <span class="mi">10</span><span class="o">%</span><span class="n">FREE</span> <span class="o">-</span><span class="n">i</span> <span class="mi">3</span> <span class="o">-</span><span class="n">I</span> <span class="mi">128</span><span class="n">k</span> <span class="n">vg_db</span>
+<span class="n">lvcreate</span> <span class="o">-</span><span class="n">n</span> <span class="n">vl_data</span> <span class="o">-</span><span class="n">l</span> <span class="mi">100</span><span class="o">%</span><span class="n">FREE</span> <span class="o">-</span><span class="n">i</span> <span class="mi">3</span> <span class="o">-</span><span class="n">I</span> <span class="mi">128</span><span class="n">k</span> <span class="n">vg_db</span>
+</pre></div>
+</div>
+</div>
+<p>说明:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">3</span></code> 表示使用3块磁盘作为volume group，这样条带化会分布到3个磁盘上</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-I</span> <span class="pre">128k</span></code> 表示使用 128k 作为条带化大小，也可以使用单纯数字 <code class="docutils literal notranslate"><span class="pre">128</span></code> 默认单位就是 <code class="docutils literal notranslate"><span class="pre">k</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-l</span></code> 表示扩展百分比，这里采用了 <code class="docutils literal notranslate"><span class="pre">10%FREE</span></code> 和 <code class="docutils literal notranslate"><span class="pre">100%FREE</span></code> 表示空闲空间的10%和100% ; 另外一种常用的扩展大小表示是使用 <code class="docutils literal notranslate"><span class="pre">-L</span></code> 参数，则直接表示扩展多少容量，例如 <code class="docutils literal notranslate"><span class="pre">-L</span> <span class="pre">10G</span></code> 表示扩展 10GB 空间</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.linuxsysadmins.com/create-striped-logical-volume-on-linux/">Striped Logical Volume in Logical volume management (LVM)</a></p></li>
 </ul>
@@ -190,14 +264,14 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="deploy_lvm.html" class="btn btn-neutral float-left" title="部署LVM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lvmraid.html" class="btn btn-neutral float-left" title="LVM RAID( lvmraid )" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="lvmcache.html" class="btn btn-neutral float-right" title="LVM卷缓存" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

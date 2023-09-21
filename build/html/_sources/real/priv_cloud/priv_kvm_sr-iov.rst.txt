@@ -29,7 +29,7 @@
 
 - 在系统中添加一个 :ref:`netplan` 配置 ``/etc/netplan/02-eno49-config.yaml`` ，自动激活需要添加VF的PF设备 ``eno49`` ，必须确保PF激活才能使用VF:
 
-.. literalinclude:: ../../kvm/sr-iov/libvirt_network_pool_sr-iov/02-eno49-config.yaml
+.. literalinclude:: ../../kvm/iommu/sr-iov/libvirt_network_pool_sr-iov/02-eno49-config.yaml
    :language: xml
    :linenos:
    :caption: netplan激活eno49但不分配IP的方法
@@ -45,7 +45,7 @@
 
 - 网络资源池配置:
 
-.. literalinclude:: ../../kvm/sr-iov/libvirt_network_pool_sr-iov/eno49-sr-iov.xml
+.. literalinclude:: ../../kvm/iommu/sr-iov/libvirt_network_pool_sr-iov/eno49-sr-iov.xml
    :language: xml
    :linenos:
    :caption: 配置eno49网卡的VF网络资源池
@@ -78,7 +78,7 @@
 
 - 配置 ``vm-sr-iov.xml`` :
 
-.. literalinclude:: ../../kvm/sr-iov/libvirt_network_pool_sr-iov/vm-sr-iov.xml
+.. literalinclude:: ../../kvm/iommu/sr-iov/libvirt_network_pool_sr-iov/vm-sr-iov.xml
    :language: xml
    :linenos:
    :caption: 配置虚拟机sr-iov设备xml

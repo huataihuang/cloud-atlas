@@ -54,6 +54,16 @@ FreeBSD 也被用来支持 Internet 上一些最大的站点， 包括:
 - Apache
 - ...
 
+学习资料
+===========
+
+- `RIP Tutorial <https://riptutorial.com/>`_ 提供了很多学习语言的资料，也汇总了一些很有用的FreeBSD资料:
+
+  - `RIP Tutorial: FreeBSD Build from source <https://riptutorial.com/freebsd/topic/7062/build-from-source>`_ 
+  - `RIP Tutorial: FreeBSD Jails <https://riptutorial.com/freebsd/topic/7070/freebsd-jails>`_
+  - `RIP Tutorial: FreeBSD Packages and Ports management <https://riptutorial.com/freebsd/topic/7069/packages-and-ports-management>`_
+  - `RIP Tutorial: FreeBSD Set up the FreeBSD development environment <https://riptutorial.com/freebsd/topic/6136/set-up-the-freebsd-development-environment>`_
+
 参考
 =======
 

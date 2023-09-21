@@ -8,6 +8,7 @@ Ansible
    :maxdepth: 1
 
    introduce_ansible.rst
+   ansible_config_raid.rst
 
 .. only::  subproject and html
 

@@ -12,10 +12,10 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/translations.js"></script>
+        <script src="../../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/translations.js?v=beaddf03"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../network/index.html">Network Atlas</a></li>
@@ -120,6 +121,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../clang/index.html">C Atlas</a></li>
@@ -171,7 +173,7 @@
            <div itemprop="articleBody">
              
   <section id="ceph-osds-raw">
-<span id="add-ceph-osds-raw"></span><h1>添加Ceph OSDs (RAW磁盘)<a class="headerlink" href="#ceph-osds-raw" title="此标题的永久链接">¶</a></h1>
+<span id="add-ceph-osds-raw"></span><h1>添加Ceph OSDs (RAW磁盘)<a class="headerlink" href="#ceph-osds-raw" title="Link to this heading">¶</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">警告</p>
 <p>我尝试通过默认集群名来避免 <a class="reference internal" href="../install_ceph_manual_zdata/add_ceph_osds_zdata.html#add-ceph-osds-zdata"><span class="std std-ref">添加Ceph OSDs (zdata)</span></a> 遇到的无法传递自定义集群名的问题，但是本次尝试依然失败(虽然也有一些经验积累)。所以我准备重新开始采用标准 <a class="reference internal" href="add_ceph_osds_lvm.html#add-ceph-osds-lvm"><span class="std std-ref">添加Ceph OSDs (LVM卷)</span></a> 部署，后续再准备虚拟机环境解决本文实践问题。`</p>
@@ -188,12 +190,12 @@
 <p>我这里的测试环境，采用简化的 <code class="docutils literal notranslate"><span class="pre">磁盘分区</span></code> 来提供Ceph <a class="reference internal" href="../../arch/bluestore.html#bluestore"><span class="std std-ref">Ceph后端存储引擎BlueStore</span></a> 存储，原因是我需要简化配置，同时我的测试服务器也没有硬件进行后续扩容。</p>
 </div>
 <section id="bluestore">
-<h2>bluestore<a class="headerlink" href="#bluestore" title="此标题的永久链接">¶</a></h2>
+<h2>bluestore<a class="headerlink" href="#bluestore" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../arch/bluestore.html#bluestore"><span class="std std-ref">Ceph后端存储引擎BlueStore</span></a> 是最新的Ceph采用的默认高性能存储引擎，底层不再使用OS的文件系统，可以直接管理磁盘硬件。</p>
 <p>需要部署OSD的服务器首先准备存储，通常采用LVM卷作为底层存储块设备，这样可以通过LVM逻辑卷灵活调整块设备大小(有可能随着数据存储增长需要调整设备)。</p>
 <p>作为我的实践环境 <a class="reference internal" href="../../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 每个 <a class="reference internal" href="../../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机仅有一个pass-through PCIe NVMe存储，所以我没有划分不同存储设备来分别存放 <code class="docutils literal notranslate"><span class="pre">block</span></code> / <code class="docutils literal notranslate"><span class="pre">block.db</span></code> 和 <code class="docutils literal notranslate"><span class="pre">block.wal</span></code> 。并且也因为无法扩展存储，我就尝试不使用LVM卷，而直接采用磁盘分区。</p>
 <section id="rawbluestore">
-<h3>使用raw分区作为bluestore底层(失败)<a class="headerlink" href="#rawbluestore" title="此标题的永久链接">¶</a></h3>
+<h3>使用raw分区作为bluestore底层(失败)<a class="headerlink" href="#rawbluestore" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>执行 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">--help</span></code> 可以看到支持3种底层存储:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvm</span>                      <span class="n">Use</span> <span class="n">LVM</span> <span class="ow">and</span> <span class="n">LVM</span><span class="o">-</span><span class="n">based</span> <span class="n">technologies</span> <span class="n">to</span> <span class="n">deploy</span> <span class="n">OSDs</span>
@@ -305,7 +307,7 @@ vda2 252:2    0  5.8G  0 part /
 </div>
 <p>但是 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">raw</span> <span class="pre">prepare</span></code> 报错:</p>
 <div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">ceph-volume raw 输出(错误)</span><a class="headerlink" href="#id9" title="此代码块的永久链接">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">ceph-volume raw 输出(错误)</span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span>stderr:<span class="w"> </span>lsblk:<span class="w"> </span>/dev/nvme0n1p1:<span class="w"> </span>not<span class="w"> </span>a<span class="w"> </span>block<span class="w"> </span>device
 <span class="linenos"> 2</span><span class="w"> </span>stderr:<span class="w"> </span>Unknown<span class="w"> </span>device<span class="w"> </span><span class="s2">&quot;/dev/nvme0n1p1&quot;</span>:<span class="w"> </span>Inappropriate<span class="w"> </span>ioctl<span class="w"> </span><span class="k">for</span><span class="w"> </span>device
 <span class="linenos"> 3</span>Running<span class="w"> </span>command:<span class="w"> </span>/usr/bin/ceph-authtool<span class="w"> </span>--gen-print-key
@@ -340,7 +342,7 @@ vda2 252:2    0  5.8G  0 part /
 </div>
 </div>
 <section id="id1">
-<h4>问题根源<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h4>
+<h4>问题根源<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
 <p>实际我也发现即使采用 <code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">lvm</span> <span class="pre">create</span></code> 也是失败的，提示信息中也有:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stderr</span><span class="p">:</span> <span class="n">lsblk</span><span class="p">:</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">nvme0n1p1</span><span class="p">:</span> <span class="ow">not</span> <span class="n">a</span> <span class="n">block</span> <span class="n">device</span>
 </pre></div>
@@ -372,7 +374,7 @@ brw-rw---- 1 root disk 259, 2 Nov 29 20:33 /dev/nvme0n1p1
 </div>
 <p>然后重新执行创建OSD磁盘成功:</p>
 <div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">ceph-volume raw 输出(成功)</span><a class="headerlink" href="#id10" title="此代码块的永久链接">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">ceph-volume raw 输出(成功)</span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>Running<span class="w"> </span>command:<span class="w"> </span>/usr/bin/ceph-authtool<span class="w"> </span>--gen-print-key
 <span class="linenos"> 2</span>Running<span class="w"> </span>command:<span class="w"> </span>/usr/bin/ceph<span class="w"> </span>--cluster<span class="w"> </span>ceph<span class="w"> </span>--name<span class="w"> </span>client.bootstrap-osd<span class="w"> </span>--keyring<span class="w"> </span>/var/lib/ceph/bootstrap-osd/ceph.keyring<span class="w"> </span>-i<span class="w"> </span>-<span class="w"> </span>osd<span class="w"> </span>new<span class="w"> </span>8d889fc0-110c-45fa-a259-6a876183bc46
 <span class="linenos"> 3</span>Running<span class="w"> </span>command:<span class="w"> </span>/usr/bin/ceph-authtool<span class="w"> </span>--gen-print-key
@@ -525,7 +527,7 @@ Nov 29 22:44:40 z-b-data-1 ceph-osd[1382]: 2021-11-29T22:44:40.336+0800 7f081898
 </section>
 </section>
 <section id="id2">
-<h2>重启操作系统验证<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
+<h2>重启操作系统验证<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
 <p>重启操作系统 <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">shutdown</span> <span class="pre">-r</span> <span class="pre">now</span></code></p>
 <ul>
 <li><p>启动后检查:</p>
@@ -554,7 +556,7 @@ Nov 29 22:44:40 z-b-data-1 ceph-osd[1382]: 2021-11-29T22:44:40.336+0800 7f081898
 </div>
 <p>也即是 OSD没有启动成功</p>
 <section id="osd">
-<h3>重新激活OSD<a class="headerlink" href="#osd" title="此标题的永久链接">¶</a></h3>
+<h3>重新激活OSD<a class="headerlink" href="#osd" title="Link to this heading">¶</a></h3>
 <p>为何重启系统之前已经配置成功的OSD无法启动呢？</p>
 <ul>
 <li><p>检查OSD服务:</p>
@@ -746,7 +748,7 @@ Nov 29 23:50:17 z-b-data-1 systemd[1]: Failed to start Ceph object storage daemo
 </section>
 </section>
 <section id="id3">
-<h2>重新开始<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h2>
+<h2>重新开始<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
 <p>由于解决不了问题，我参考 <a class="reference external" href="https://docs.ceph.com/en/latest/rados/operations/add-or-rm-osds/">Adding/Removing OSDs</a> 删除掉osd，然后重新开始:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">osd</span> <span class="n">stop</span> <span class="mi">0</span>
 <span class="n">sudo</span> <span class="n">ceph</span> <span class="n">osd</span> <span class="n">purge</span> <span class="mi">0</span> <span class="o">--</span><span class="n">yes</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">really</span><span class="o">-</span><span class="n">mean</span><span class="o">-</span><span class="n">it</span>
@@ -1113,7 +1115,7 @@ Nov 30 21:18:06 z-b-data-1 systemd[1]: Failed to start Ceph object storage daemo
 <p>完整 <code class="docutils literal notranslate"><span class="pre">activate</span></code> BlueStore的过程见文档 <a class="reference external" href="https://docs.ceph.com/en/latest/ceph-volume/lvm/activate/#summary">ceph-volume » activate</a></p>
 </div>
 <section id="id6">
-<h3>总结<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h3>
+<h3>总结<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>删除掉OSD.0 准备重新开始:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">osd</span> <span class="n">purge</span> <span class="mi">0</span> <span class="o">--</span><span class="n">yes</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">really</span><span class="o">-</span><span class="n">mean</span><span class="o">-</span><span class="n">it</span>
@@ -1203,7 +1205,7 @@ Nov 30 21:18:06 z-b-data-1 systemd[1]: Failed to start Ceph object storage daemo
 </section>
 </section>
 <section id="id7">
-<h2>添加OSD<a class="headerlink" href="#id7" title="此标题的永久链接">¶</a></h2>
+<h2>添加OSD<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
 <p>需要满足3副本要求，我们需要在服务器本地或者其他服务器上添加OSD。为了能够冗余，我采用集群3个服务器上每个服务器都启动 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 和 <code class="docutils literal notranslate"><span class="pre">ceph-osd</span></code> ，所以下面我们来完成:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="add_ceph_mons.html#add-ceph-mons"><span class="std std-ref">Ceph集群添加ceph-mon</span></a></p></li>
@@ -1214,7 +1216,7 @@ Nov 30 21:18:06 z-b-data-1 systemd[1]: Failed to start Ceph object storage daemo
 </ul>
 </section>
 <section id="id8">
-<h2>参考<a class="headerlink" href="#id8" title="此标题的永久链接">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://docs.ceph.com/docs/master/install/">Ceph document - Installation (Manual)</a></p></li>
 <li><p><a class="reference external" href="https://tracker.ceph.com/issues/48783">raw osd’s are not started on boot after upgrade from 14.2.11 to 14.2.16 ; ceph-volume raw activate claim systemd support not yet implemented</a></p></li>
@@ -1233,7 +1235,7 @@ Nov 30 21:18:06 z-b-data-1 systemd[1]: Failed to start Ceph object storage daemo
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

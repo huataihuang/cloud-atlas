@@ -13,6 +13,8 @@ Ceph Block Device(RBD)
    down_1_of_3_ceph_vm_rbd.rst
    clone_vm_rbd.rst
    ceph_extend_rbd_drive_with_libvirt_xfs.rst
+   ceph_rbd_export_import.rst
+   ceph_rbd_transfer_between_two_clusters.rst
    ceph_iscsi/index
 
 .. only::  subproject and html

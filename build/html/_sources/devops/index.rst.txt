@@ -16,6 +16,7 @@ DevOps Atlas
    terraform/index
    ansible/index
    jsonnet/index
+   airflow/index
    utils/index
    docs/index
 

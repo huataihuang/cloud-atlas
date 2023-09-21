@@ -21,4 +21,5 @@ etcd是Kubernetes后端存储所有集群数据的高可用key value存储。由
    intro_etcd.rst 
    auth/index
    config/index
+   maintain/index
    recovery/index

@@ -38,3 +38,4 @@ Gluster目前主发布(major release)周期约1年，次要更新(minor release)
 
 - `Getting started with GlusterFS - Introduction <https://docs.gluster.org/en/latest/Administrator%20Guide/GlusterFS%20Introduction/>`_
 - `Gluster Release Schedule <https://www.gluster.org/release-schedule/>`_
+- `Planet Gluster <https://planet.gluster.org/>`_ 提供了不少技术文章，不过已经有2年没有更新了

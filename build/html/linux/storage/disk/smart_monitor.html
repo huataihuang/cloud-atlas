@@ -12,10 +12,10 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/translations.js"></script>
+        <script src="../../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/translations.js?v=beaddf03"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../network/index.html">Network Atlas</a></li>
@@ -103,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="parted.html">parted分区工具</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mount_img.html">挂载raw镜像(.img)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="intel_ssd_dc_series.html">Intel企业级固态硬盘</a></li>
+<li class="toctree-l4"><a class="reference internal" href="update_intel_545s_ssd_firmware.html">升级Intel 545s SSD firmware</a></li>
 <li class="toctree-l4"><a class="reference internal" href="using_apple_superdrive_on_linux.html">在Linux系统中使用Apple SuperDrive光驱</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sandisk_cloudspeed_eco_gen_ii_sata_ssd.html">SanDisk CloudSpeed Eco Gen. II SATA SSD企业级固态硬盘</a></li>
 </ul>
@@ -113,6 +115,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../spdk/index.html">Linux SPDK</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../filesystem/index.html">Linux文件系统</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../lvm/index.html">Linux LVM逻辑卷管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../software_raid/index.html">Linux 软RAID</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../zfs/index.html">ZFS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../btrfs/index.html">Btrfs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stratis/index.html">Stratis - Linux存储系统</a></li>
@@ -133,6 +136,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../clang/index.html">C Atlas</a></li>
@@ -184,11 +188,703 @@
            <div itemprop="articleBody">
              
   <section id="s-m-a-r-t">
-<span id="smart-monitor"></span><h1>存储设备S.M.A.R.T监控<a class="headerlink" href="#s-m-a-r-t" title="此标题的永久链接">¶</a></h1>
+<span id="smart-monitor"></span><h1>存储设备S.M.A.R.T监控<a class="headerlink" href="#s-m-a-r-t" title="Link to this heading">¶</a></h1>
+<p>我的二手 <a class="reference internal" href="../../server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 服务器使用了一块我很久以前购买的Intel SATA SSD磁盘，不过这块SSD时不时在系统日志中留下触目惊心的Err记录:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">dmesg</span></code> 中SSD磁盘错误日志</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[Sun Aug  6 11:05:54 2023] ata5.00: exception Emask 0x0 SAct 0x80080000 SErr 0x0 action 0x6 frozen
+[Sun Aug  6 11:05:54 2023] ata5.00: failed command: READ FPDMA QUEUED
+[Sun Aug  6 11:05:54 2023] ata5.00: cmd 60/08:98:98:20:9c/00:00:02:00:00/40 tag 19 ncq dma 4096 in
+                                    res 40/00:00:00:4f:c2/00:00:00:00:00/00 Emask 0x4 (timeout)
+[Sun Aug  6 11:05:54 2023] ata5.00: status: { DRDY }
+[Sun Aug  6 11:05:54 2023] ata5.00: failed command: READ FPDMA QUEUED
+[Sun Aug  6 11:05:54 2023] ata5.00: cmd 60/08:f8:e8:e4:8c/00:00:00:00:00/40 tag 31 ncq dma 4096 in
+                                    res 40/00:01:00:4f:c2/00:00:00:00:00/00 Emask 0x4 (timeout)
+[Sun Aug  6 11:05:54 2023] ata5.00: status: { DRDY }
+[Sun Aug  6 11:05:54 2023] ata5: hard resetting link
+[Sun Aug  6 11:05:54 2023] ata5: SATA link up 6.0 Gbps (SStatus 133 SControl 300)
+[Sun Aug  6 11:05:54 2023] ata5.00: configured for UDMA/133
+[Sun Aug  6 11:05:54 2023] sd 4:0:0:0: [sdb] tag#31 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=30s
+[Sun Aug  6 11:05:54 2023] sd 4:0:0:0: [sdb] tag#31 Sense Key : Illegal Request [current]
+[Sun Aug  6 11:05:54 2023] sd 4:0:0:0: [sdb] tag#31 Add. Sense: Unaligned write command
+[Sun Aug  6 11:05:54 2023] sd 4:0:0:0: [sdb] tag#31 CDB: Read(10) 28 00 00 8c e4 e8 00 00 08 00
+[Sun Aug  6 11:05:54 2023] blk_update_request: I/O error, dev sdb, sector 9233640 op 0x0:(READ) flags 0x80700 phys_seg 1 prio class 0
+[Sun Aug  6 11:05:54 2023] ata5: EH complete
+[Sun Aug  6 11:05:54 2023] ata5.00: Enabling discard_zeroes_data
+[Sun Aug  6 11:06:24 2023] ata5.00: exception Emask 0x0 SAct 0x1000000 SErr 0x0 action 0x6 frozen
+[Sun Aug  6 11:06:24 2023] ata5.00: failed command: READ FPDMA QUEUED
+[Sun Aug  6 11:06:24 2023] ata5.00: cmd 60/08:c0:70:1f:ce/00:00:00:00:00/40 tag 24 ncq dma 4096 in
+                                    res 40/00:00:00:00:00/00:00:00:00:00/00 Emask 0x4 (timeout)
+[Sun Aug  6 11:06:24 2023] ata5.00: status: { DRDY }
+[Sun Aug  6 11:06:24 2023] ata5: hard resetting link
+[Sun Aug  6 11:06:24 2023] ata5: SATA link up 6.0 Gbps (SStatus 133 SControl 300)
+[Sun Aug  6 11:06:24 2023] ata5.00: configured for UDMA/133
+[Sun Aug  6 11:06:24 2023] ata5.00: device reported invalid CHS sector 0
+[Sun Aug  6 11:06:24 2023] sd 4:0:0:0: [sdb] tag#24 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=30s
+[Sun Aug  6 11:06:24 2023] sd 4:0:0:0: [sdb] tag#24 Sense Key : Illegal Request [current]
+[Sun Aug  6 11:06:24 2023] sd 4:0:0:0: [sdb] tag#24 Add. Sense: Unaligned write command
+[Sun Aug  6 11:06:24 2023] sd 4:0:0:0: [sdb] tag#24 CDB: Read(10) 28 00 00 ce 1f 70 00 00 08 00
+[Sun Aug  6 11:06:24 2023] blk_update_request: I/O error, dev sdb, sector 13508464 op 0x0:(READ) flags 0x80700 phys_seg 1 prio class 0
+[Sun Aug  6 11:06:24 2023] ata5: EH complete
+[Sun Aug  6 11:06:24 2023] ata5.00: Enabling discard_zeroes_data
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>我感觉这个 <code class="docutils literal notranslate"><span class="pre">Intel</span> <span class="pre">545s</span> <span class="pre">Series</span> <span class="pre">SSDs</span></code> 的firmware可能存在问题，参考 <a class="reference external" href="https://www.solidigmtech.com.cn/support-page/product-doc-cert/ka-00099.html">Latest Firmware For Solidigm™ (Formerly Intel®) Solid State Drives</a> 可以看到这款 <code class="docutils literal notranslate"><span class="pre">Intel</span> <span class="pre">545s</span> <span class="pre">Series</span> <span class="pre">SSDs</span></code> 最新的firmware 是 <code class="docutils literal notranslate"><span class="pre">004C</span></code> (针对512GB) 和 <code class="docutils literal notranslate"><span class="pre">0B3C</span></code> (针对1TB) 。我准备做一次firmware升级来尝试修复这个reset问题。</p>
+</div>
+<p>我想通过存储的 S.M.A.R.T. 技术来检测和监视磁盘的异常:</p>
+<ul class="simple">
+<li><p>本文的 <code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 命令行检查(基础能力)</p></li>
+<li><p><a class="reference internal" href="../../../kubernetes/monitor/prometheus/prometheus_exporters/node_exporter_smartctl_text_plugin.html#node-exporter-smartctl-text-plugin"><span class="std std-ref">Node Exporter smartctl 文本插件</span></a> 通过自己部署的 Prometheus + Grafana 监控来直观观察</p></li>
+</ul>
+<section id="smartmontools">
+<h2>安装 <code class="docutils literal notranslate"><span class="pre">smartmontools</span></code><a class="headerlink" href="#smartmontools" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>在 <a class="reference internal" href="../../ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 环境使用 <a class="reference internal" href="../../ubuntu_linux/admin/apt.html#apt"><span class="std std-ref">APT包管理</span></a> 安装:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">在Ubuntu安装 <code class="docutils literal notranslate"><span class="pre">smartmontools</span></code></span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">smartmontools</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="smart-info">
+<h2>SMART info<a class="headerlink" href="#smart-info" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>检查磁盘设备是否支持和激活SMART:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span> <span class="pre">-i</span></code> 检查磁盘info信息</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</div>
+<p>我的 <a class="reference internal" href="sandisk_cloudspeed_eco_gen_ii_sata_ssd.html#sandisk-cloudspeed-eco-gen-ii-sata-ssd"><span class="std std-ref">SanDisk CloudSpeed Eco Gen. II SATA SSD企业级固态硬盘</span></a> SMART 信息如下:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span> <span class="pre">-i</span></code> 检查Sandisk SSD磁盘info信息</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">INFORMATION</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">Model</span> <span class="n">Family</span><span class="p">:</span>     <span class="n">Sandisk</span> <span class="n">SATA</span> <span class="n">Cloudspeed</span> <span class="n">Max</span> <span class="ow">and</span> <span class="n">GEN2</span> <span class="n">ESS</span> <span class="n">SSDs</span>
+<span class="n">Device</span> <span class="n">Model</span><span class="p">:</span>     <span class="n">SDLF1CRR</span><span class="o">-</span><span class="mi">019</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="n">HA1</span>
+<span class="n">Serial</span> <span class="n">Number</span><span class="p">:</span>    <span class="n">A007C9D9</span>
+<span class="n">LU</span> <span class="n">WWN</span> <span class="n">Device</span> <span class="n">Id</span><span class="p">:</span> <span class="mi">5</span> <span class="mi">001173</span> <span class="mi">100</span><span class="n">a88424</span>
+<span class="n">Firmware</span> <span class="n">Version</span><span class="p">:</span> <span class="n">ZR11RPA1</span>
+<span class="n">User</span> <span class="n">Capacity</span><span class="p">:</span>    <span class="mi">1</span><span class="p">,</span><span class="mi">920</span><span class="p">,</span><span class="mi">383</span><span class="p">,</span><span class="mi">410</span><span class="p">,</span><span class="mi">176</span> <span class="nb">bytes</span> <span class="p">[</span><span class="mf">1.92</span> <span class="n">TB</span><span class="p">]</span>
+<span class="n">Sector</span> <span class="n">Sizes</span><span class="p">:</span>     <span class="mi">512</span> <span class="nb">bytes</span> <span class="n">logical</span><span class="p">,</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="n">physical</span>
+<span class="n">Rotation</span> <span class="n">Rate</span><span class="p">:</span>    <span class="n">Solid</span> <span class="n">State</span> <span class="n">Device</span>
+<span class="n">TRIM</span> <span class="n">Command</span><span class="p">:</span>     <span class="n">Available</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">,</span> <span class="n">zeroed</span>
+<span class="n">Device</span> <span class="ow">is</span><span class="p">:</span>        <span class="n">In</span> <span class="n">smartctl</span> <span class="n">database</span> <span class="p">[</span><span class="k">for</span> <span class="n">details</span> <span class="n">use</span><span class="p">:</span> <span class="o">-</span><span class="n">P</span> <span class="n">show</span><span class="p">]</span>
+<span class="n">ATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>   <span class="n">ATA8</span><span class="o">-</span><span class="n">ACS</span> <span class="n">T13</span><span class="o">/</span><span class="mi">1699</span><span class="o">-</span><span class="n">D</span> <span class="n">revision</span> <span class="mi">4</span><span class="n">c</span>
+<span class="n">SATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>  <span class="n">SATA</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span> <span class="p">(</span><span class="n">current</span><span class="p">:</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span><span class="p">)</span>
+<span class="n">Local</span> <span class="n">Time</span> <span class="ow">is</span><span class="p">:</span>    <span class="n">Wed</span> <span class="n">Aug</span> <span class="mi">23</span> <span class="mi">11</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">03</span> <span class="mi">2023</span> <span class="n">CST</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Available</span> <span class="o">-</span> <span class="n">device</span> <span class="n">has</span> <span class="n">SMART</span> <span class="n">capability</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Enabled</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span> <span class="pre">-i</span></code> 检查Intel SSD磁盘info信息</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">INFORMATION</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">Model</span> <span class="n">Family</span><span class="p">:</span>     <span class="n">Intel</span> <span class="mi">545</span><span class="n">s</span> <span class="n">Series</span> <span class="n">SSDs</span>
+<span class="n">Device</span> <span class="n">Model</span><span class="p">:</span>     <span class="n">INTEL</span> <span class="n">SSDSC2KW512G8</span>
+<span class="n">Serial</span> <span class="n">Number</span><span class="p">:</span>    <span class="n">BTLA7513037S512DGN</span>
+<span class="n">LU</span> <span class="n">WWN</span> <span class="n">Device</span> <span class="n">Id</span><span class="p">:</span> <span class="mi">5</span> <span class="mi">5</span><span class="n">cd2e4</span> <span class="mi">14</span><span class="n">eea7536</span>
+<span class="n">Firmware</span> <span class="n">Version</span><span class="p">:</span> <span class="n">LHF002C</span>
+<span class="n">User</span> <span class="n">Capacity</span><span class="p">:</span>    <span class="mi">512</span><span class="p">,</span><span class="mi">110</span><span class="p">,</span><span class="mi">190</span><span class="p">,</span><span class="mi">592</span> <span class="nb">bytes</span> <span class="p">[</span><span class="mi">512</span> <span class="n">GB</span><span class="p">]</span>
+<span class="n">Sector</span> <span class="n">Size</span><span class="p">:</span>      <span class="mi">512</span> <span class="nb">bytes</span> <span class="n">logical</span><span class="o">/</span><span class="n">physical</span>
+<span class="n">Rotation</span> <span class="n">Rate</span><span class="p">:</span>    <span class="n">Solid</span> <span class="n">State</span> <span class="n">Device</span>
+<span class="n">Form</span> <span class="n">Factor</span><span class="p">:</span>      <span class="mf">2.5</span> <span class="n">inches</span>
+<span class="n">TRIM</span> <span class="n">Command</span><span class="p">:</span>     <span class="n">Available</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">,</span> <span class="n">zeroed</span>
+<span class="n">Device</span> <span class="ow">is</span><span class="p">:</span>        <span class="n">In</span> <span class="n">smartctl</span> <span class="n">database</span> <span class="p">[</span><span class="k">for</span> <span class="n">details</span> <span class="n">use</span><span class="p">:</span> <span class="o">-</span><span class="n">P</span> <span class="n">show</span><span class="p">]</span>
+<span class="n">ATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>   <span class="n">ACS</span><span class="o">-</span><span class="mi">3</span> <span class="p">(</span><span class="n">minor</span> <span class="n">revision</span> <span class="ow">not</span> <span class="n">indicated</span><span class="p">)</span>
+<span class="n">SATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>  <span class="n">SATA</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span> <span class="p">(</span><span class="n">current</span><span class="p">:</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span><span class="p">)</span>
+<span class="n">Local</span> <span class="n">Time</span> <span class="ow">is</span><span class="p">:</span>    <span class="n">Wed</span> <span class="n">Aug</span> <span class="mi">23</span> <span class="mi">11</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">31</span> <span class="mi">2023</span> <span class="n">CST</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Available</span> <span class="o">-</span> <span class="n">device</span> <span class="n">has</span> <span class="n">SMART</span> <span class="n">capability</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Enabled</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="smart-test">
+<h2>SMART test<a class="headerlink" href="#smart-test" title="Link to this heading">¶</a></h2>
+<p>SMART提供 <strong>两种</strong> 不同的测试:</p>
+<ul class="simple">
+<li><p>Background Mode(后台模式): 后台测试的优先级低，也就是说硬盘仍然会处理常规指令。如果硬盘繁忙，则测试会暂停并且以低负载速度进行，这样不会中断硬盘工作</p></li>
+<li><p>Foreground Mode(前台模式): 测试采用了 <code class="docutils literal notranslate"><span class="pre">CHECK</span> <span class="pre">CONDITION</span></code> 状态必须响应，这种模式只能在不使用的硬盘上进行。</p></li>
+</ul>
+<p>根据经验， <strong>建议采用后台模式</strong></p>
+<section id="ata-scsi">
+<h3>ATA/SCSI(共有的)测试<a class="headerlink" href="#ata-scsi" title="Link to this heading">¶</a></h3>
+<section id="short-test">
+<h4>Short Test<a class="headerlink" href="#short-test" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">短测试</span></code> 的目的是快速识别有缺陷的硬盘驱动器。因此，短测试的最大持续实践大约2分钟。该测试将磁盘氛围3个不同阶段来检查:</p>
+<ul class="simple">
+<li><p><strong>Electrical Properties</strong> (电气特性): 控制器测试自己的的电子电路，由于这个测试是每个制造商特有的，因此无法确切解释正在测试的内容。例如测试内部RAM，读写电路或磁头电子器件</p></li>
+<li><p><strong>Mechanical Properties</strong> (机械特性): 测试伺服系统和定位机构的确切顺序也因每个制造商而异</p></li>
+<li><p><strong>Read/Verify</strong> (读取/验证): 读取磁盘的某个区域并验证某些数据，读取的区域的大小和位置也是每个制造商特定的</p></li>
+</ul>
+</section>
+<section id="long-test">
+<h4>Long Test<a class="headerlink" href="#long-test" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">长测试</span></code> 被设计成生产中的最终测试，与短测试相同，但有 <strong>2点区别</strong> :</p>
+<ul class="simple">
+<li><p>长测试没有时间限制</p></li>
+<li><p>长测试会 <strong>Read/Verify</strong> (读取/验证) 整个磁盘而不仅仅是一小部分</p></li>
+</ul>
+</section>
+</section>
+<section id="ata">
+<h3>ATA特有的测试<a class="headerlink" href="#ata" title="Link to this heading">¶</a></h3>
+<section id="conveyance-tests">
+<h4>运输测试(Conveyance Tests)<a class="headerlink" href="#conveyance-tests" title="Link to this heading">¶</a></h4>
+<p>运输测试(Conveyance Test)可以在短短几分钟内确定硬盘在运输过程中的损坏情况</p>
+</section>
+<section id="select-tests">
+<h4>选择测试(Select Tests)<a class="headerlink" href="#select-tests" title="Link to this heading">¶</a></h4>
+<p>选择测试可以指定LBA范围，即只扫描指定的LBA区域:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">指定LBA进行扫描</span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>smartctl<span class="w"> </span>-t<span class="w"> </span><span class="k">select</span>,10-20<span class="w"> </span>/dev/sdc<span class="w"> </span><span class="c1">#LBA 10 to LBA 20 (incl.)</span>
+sudo<span class="w"> </span>smartctl<span class="w"> </span>-t<span class="w"> </span><span class="k">select</span>,10+11<span class="w"> </span>/dev/sdc<span class="w"> </span><span class="c1">#LBA 10 to LBA 20 (incl.)</span>
+</pre></div>
+</div>
+</div>
+<p>而且可以指定多个范围(最多5个)进行扫描:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">指定多个LBA范围进行扫描</span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>smartctl<span class="w"> </span>-t<span class="w"> </span><span class="k">select</span>,0-10<span class="w"> </span>-t<span class="w"> </span><span class="k">select</span>,5-15<span class="w"> </span>-t<span class="w"> </span><span class="k">select</span>,10-20<span class="w"> </span>/dev/sdc
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="smartctl">
+<h2>使用 <code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 测试<a class="headerlink" href="#smartctl" title="Link to this heading">¶</a></h2>
+<section id="smart">
+<h3>检查存储设备SMART能力<a class="headerlink" href="#smart" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>在测试前，可以预估一下不同测试所需时间:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 检查存储设备能力，可以看到预估测试时间</span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</div>
+<p>可以看到 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> ( <a class="reference internal" href="sandisk_cloudspeed_eco_gen_ii_sata_ssd.html#sandisk-cloudspeed-eco-gen-ii-sata-ssd"><span class="std std-ref">SanDisk CloudSpeed Eco Gen. II SATA SSD企业级固态硬盘</span></a> )预估测试时间:</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 检查存储 <a class="reference internal" href="sandisk_cloudspeed_eco_gen_ii_sata_ssd.html#sandisk-cloudspeed-eco-gen-ii-sata-ssd"><span class="std std-ref">SanDisk CloudSpeed Eco Gen. II SATA SSD企业级固态硬盘</span></a> 设备能力，可以看到预估测试时间</span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">READ</span> <span class="n">SMART</span> <span class="n">DATA</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">General</span> <span class="n">SMART</span> <span class="n">Values</span><span class="p">:</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">status</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x00</span><span class="p">)</span>	<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">activity</span>
+					<span class="n">was</span> <span class="n">never</span> <span class="n">started</span><span class="o">.</span>
+					<span class="n">Auto</span> <span class="n">Offline</span> <span class="n">Data</span> <span class="n">Collection</span><span class="p">:</span> <span class="n">Disabled</span><span class="o">.</span>
+<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">execution</span> <span class="n">status</span><span class="p">:</span>      <span class="p">(</span>   <span class="mi">0</span><span class="p">)</span>	<span class="n">The</span> <span class="n">previous</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span> <span class="n">completed</span>
+					<span class="n">without</span> <span class="n">error</span> <span class="ow">or</span> <span class="n">no</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">has</span> <span class="n">ever</span>
+					<span class="n">been</span> <span class="n">run</span><span class="o">.</span>
+<span class="n">Total</span> <span class="n">time</span> <span class="n">to</span> <span class="n">complete</span> <span class="n">Offline</span>
+<span class="n">data</span> <span class="n">collection</span><span class="p">:</span> 		<span class="p">(</span><span class="mi">20160</span><span class="p">)</span> <span class="n">seconds</span><span class="o">.</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span>
+<span class="n">capabilities</span><span class="p">:</span> 			 <span class="p">(</span><span class="mh">0x5d</span><span class="p">)</span> <span class="n">SMART</span> <span class="n">execute</span> <span class="n">Offline</span> <span class="n">immediate</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Auto</span> <span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">support</span><span class="o">.</span>
+					<span class="n">Abort</span> <span class="n">Offline</span> <span class="n">collection</span> <span class="n">upon</span> <span class="n">new</span>
+					<span class="n">command</span><span class="o">.</span>
+					<span class="n">Offline</span> <span class="n">surface</span> <span class="n">scan</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Conveyance</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Selective</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">capabilities</span><span class="p">:</span>            <span class="p">(</span><span class="mh">0x0003</span><span class="p">)</span>	<span class="n">Saves</span> <span class="n">SMART</span> <span class="n">data</span> <span class="n">before</span> <span class="n">entering</span>
+					<span class="n">power</span><span class="o">-</span><span class="n">saving</span> <span class="n">mode</span><span class="o">.</span>
+					<span class="n">Supports</span> <span class="n">SMART</span> <span class="n">auto</span> <span class="n">save</span> <span class="n">timer</span><span class="o">.</span>
+<span class="n">Error</span> <span class="n">logging</span> <span class="n">capability</span><span class="p">:</span>        <span class="p">(</span><span class="mh">0x01</span><span class="p">)</span>	<span class="n">Error</span> <span class="n">logging</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">General</span> <span class="n">Purpose</span> <span class="n">Logging</span> <span class="n">supported</span><span class="o">.</span>
+<span class="hll"><span class="n">Short</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+</span><span class="hll"><span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>   <span class="mi">1</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+</span><span class="hll"><span class="n">Extended</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+</span><span class="hll"><span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>   <span class="mi">1</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+</span><span class="n">SCT</span> <span class="n">capabilities</span><span class="p">:</span> 	       <span class="p">(</span><span class="mh">0x003d</span><span class="p">)</span>	<span class="n">SCT</span> <span class="n">Status</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Error</span> <span class="n">Recovery</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Feature</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Data</span> <span class="n">Table</span> <span class="n">supported</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<p>我的另一个磁盘 <code class="docutils literal notranslate"><span class="pre">/dev/sdb</span></code> ( Intel 545s系列 ):</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 检查存储 Intel 545s系列SSD 设备能力，可以看到预估测试时间</span><a class="headerlink" href="#id12" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">READ</span> <span class="n">SMART</span> <span class="n">DATA</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">General</span> <span class="n">SMART</span> <span class="n">Values</span><span class="p">:</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">status</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x00</span><span class="p">)</span>	<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">activity</span>
+					<span class="n">was</span> <span class="n">never</span> <span class="n">started</span><span class="o">.</span>
+					<span class="n">Auto</span> <span class="n">Offline</span> <span class="n">Data</span> <span class="n">Collection</span><span class="p">:</span> <span class="n">Disabled</span><span class="o">.</span>
+<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">execution</span> <span class="n">status</span><span class="p">:</span>      <span class="p">(</span>   <span class="mi">0</span><span class="p">)</span>	<span class="n">The</span> <span class="n">previous</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span> <span class="n">completed</span>
+					<span class="n">without</span> <span class="n">error</span> <span class="ow">or</span> <span class="n">no</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">has</span> <span class="n">ever</span>
+					<span class="n">been</span> <span class="n">run</span><span class="o">.</span>
+<span class="n">Total</span> <span class="n">time</span> <span class="n">to</span> <span class="n">complete</span> <span class="n">Offline</span>
+<span class="n">data</span> <span class="n">collection</span><span class="p">:</span> 		<span class="p">(</span>    <span class="mi">0</span><span class="p">)</span> <span class="n">seconds</span><span class="o">.</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span>
+<span class="n">capabilities</span><span class="p">:</span> 			 <span class="p">(</span><span class="mh">0x53</span><span class="p">)</span> <span class="n">SMART</span> <span class="n">execute</span> <span class="n">Offline</span> <span class="n">immediate</span><span class="o">.</span>
+					<span class="n">Auto</span> <span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">on</span><span class="o">/</span><span class="n">off</span> <span class="n">support</span><span class="o">.</span>
+					<span class="n">Suspend</span> <span class="n">Offline</span> <span class="n">collection</span> <span class="n">upon</span> <span class="n">new</span>
+					<span class="n">command</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Offline</span> <span class="n">surface</span> <span class="n">scan</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Conveyance</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Selective</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">capabilities</span><span class="p">:</span>            <span class="p">(</span><span class="mh">0x0003</span><span class="p">)</span>	<span class="n">Saves</span> <span class="n">SMART</span> <span class="n">data</span> <span class="n">before</span> <span class="n">entering</span>
+					<span class="n">power</span><span class="o">-</span><span class="n">saving</span> <span class="n">mode</span><span class="o">.</span>
+					<span class="n">Supports</span> <span class="n">SMART</span> <span class="n">auto</span> <span class="n">save</span> <span class="n">timer</span><span class="o">.</span>
+<span class="n">Error</span> <span class="n">logging</span> <span class="n">capability</span><span class="p">:</span>        <span class="p">(</span><span class="mh">0x01</span><span class="p">)</span>	<span class="n">Error</span> <span class="n">logging</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">General</span> <span class="n">Purpose</span> <span class="n">Logging</span> <span class="n">supported</span><span class="o">.</span>
+<span class="hll"><span class="n">Short</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+</span><span class="hll"><span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>   <span class="mi">2</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+</span><span class="hll"><span class="n">Extended</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+</span><span class="hll"><span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>  <span class="mi">30</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+</span><span class="n">SCT</span> <span class="n">capabilities</span><span class="p">:</span> 	       <span class="p">(</span><span class="mh">0x003d</span><span class="p">)</span>	<span class="n">SCT</span> <span class="n">Status</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Error</span> <span class="n">Recovery</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Feature</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Data</span> <span class="n">Table</span> <span class="n">supported</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+</section>
 <section id="id1">
-<h2>参考<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<h3>测试<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<section id="dev-sda">
+<h4><code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code><a class="headerlink" href="#dev-sda" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>执行测试(long test):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 对sda进行长测试，注意参数结合 <code class="docutils literal notranslate"><span class="pre">-C</span></code> 表示Foreground Mode</span><a class="headerlink" href="#id13" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">t</span> <span class="n">long</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>长测试输出信息</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 对sda进行长测试的输出信息</span><a class="headerlink" href="#id14" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">smartctl</span> <span class="mf">7.2</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">30</span> <span class="n">r5155</span> <span class="p">[</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="mf">5.15.0</span><span class="o">-</span><span class="mi">78</span><span class="o">-</span><span class="n">generic</span><span class="p">]</span> <span class="p">(</span><span class="n">local</span> <span class="n">build</span><span class="p">)</span>
+<span class="n">Copyright</span> <span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="mi">2002</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">Bruce</span> <span class="n">Allen</span><span class="p">,</span> <span class="n">Christian</span> <span class="n">Franke</span><span class="p">,</span> <span class="n">www</span><span class="o">.</span><span class="n">smartmontools</span><span class="o">.</span><span class="n">org</span>
+
+<span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">OFFLINE</span> <span class="n">IMMEDIATE</span> <span class="n">AND</span> <span class="n">SELF</span><span class="o">-</span><span class="n">TEST</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">Sending</span> <span class="n">command</span><span class="p">:</span> <span class="s2">&quot;Execute SMART Extended self-test routine immediately in captive mode&quot;</span><span class="o">.</span>
+<span class="n">Drive</span> <span class="n">command</span> <span class="s2">&quot;Execute SMART Extended self-test routine immediately in captive mode&quot;</span> <span class="n">successful</span><span class="o">.</span>
+<span class="n">Testing</span> <span class="n">has</span> <span class="n">begun</span><span class="o">.</span>
+<span class="hll"><span class="n">Please</span> <span class="n">wait</span> <span class="mi">1</span> <span class="n">minutes</span> <span class="k">for</span> <span class="n">test</span> <span class="n">to</span> <span class="n">complete</span><span class="o">.</span>
+</span><span class="hll"><span class="n">Test</span> <span class="n">will</span> <span class="n">complete</span> <span class="n">after</span> <span class="n">Wed</span> <span class="n">Aug</span> <span class="mi">23</span> <span class="mi">15</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">27</span> <span class="mi">2023</span> <span class="n">CST</span>
+</span></pre></div>
+</div>
+</div>
+<p>可以看到这个 <a class="reference internal" href="sandisk_cloudspeed_eco_gen_ii_sata_ssd.html#sandisk-cloudspeed-eco-gen-ii-sata-ssd"><span class="std std-ref">SanDisk CloudSpeed Eco Gen. II SATA SSD企业级固态硬盘</span></a> 仅需要1分钟就能完成长测试 ( 搞笑? 这个长测试和短测试的时间是一样的，不会是虚假吧 )</p>
+<ul class="simple">
+<li><p>查看测试结果( <code class="docutils literal notranslate"><span class="pre">-a</span></code> 参数 ):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 查看sda测试结果</span><a class="headerlink" href="#id15" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 查看sda测试结果，可以看到存储健康度(剩余寿命) <code class="docutils literal notranslate"><span class="pre">92%</span></code></span><a class="headerlink" href="#id16" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">INFORMATION</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">Model</span> <span class="n">Family</span><span class="p">:</span>     <span class="n">Sandisk</span> <span class="n">SATA</span> <span class="n">Cloudspeed</span> <span class="n">Max</span> <span class="ow">and</span> <span class="n">GEN2</span> <span class="n">ESS</span> <span class="n">SSDs</span>
+<span class="n">Device</span> <span class="n">Model</span><span class="p">:</span>     <span class="n">SDLF1CRR</span><span class="o">-</span><span class="mi">019</span><span class="n">T</span><span class="o">-</span><span class="mi">1</span><span class="n">HA1</span>
+<span class="n">Serial</span> <span class="n">Number</span><span class="p">:</span>    <span class="n">A007C9D9</span>
+<span class="n">LU</span> <span class="n">WWN</span> <span class="n">Device</span> <span class="n">Id</span><span class="p">:</span> <span class="mi">5</span> <span class="mi">001173</span> <span class="mi">100</span><span class="n">a88424</span>
+<span class="n">Firmware</span> <span class="n">Version</span><span class="p">:</span> <span class="n">ZR11RPA1</span>
+<span class="n">User</span> <span class="n">Capacity</span><span class="p">:</span>    <span class="mi">1</span><span class="p">,</span><span class="mi">920</span><span class="p">,</span><span class="mi">383</span><span class="p">,</span><span class="mi">410</span><span class="p">,</span><span class="mi">176</span> <span class="nb">bytes</span> <span class="p">[</span><span class="mf">1.92</span> <span class="n">TB</span><span class="p">]</span>
+<span class="n">Sector</span> <span class="n">Sizes</span><span class="p">:</span>     <span class="mi">512</span> <span class="nb">bytes</span> <span class="n">logical</span><span class="p">,</span> <span class="mi">4096</span> <span class="nb">bytes</span> <span class="n">physical</span>
+<span class="n">Rotation</span> <span class="n">Rate</span><span class="p">:</span>    <span class="n">Solid</span> <span class="n">State</span> <span class="n">Device</span>
+<span class="n">TRIM</span> <span class="n">Command</span><span class="p">:</span>     <span class="n">Available</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">,</span> <span class="n">zeroed</span>
+<span class="n">Device</span> <span class="ow">is</span><span class="p">:</span>        <span class="n">In</span> <span class="n">smartctl</span> <span class="n">database</span> <span class="p">[</span><span class="k">for</span> <span class="n">details</span> <span class="n">use</span><span class="p">:</span> <span class="o">-</span><span class="n">P</span> <span class="n">show</span><span class="p">]</span>
+<span class="n">ATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>   <span class="n">ATA8</span><span class="o">-</span><span class="n">ACS</span> <span class="n">T13</span><span class="o">/</span><span class="mi">1699</span><span class="o">-</span><span class="n">D</span> <span class="n">revision</span> <span class="mi">4</span><span class="n">c</span>
+<span class="n">SATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>  <span class="n">SATA</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span> <span class="p">(</span><span class="n">current</span><span class="p">:</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span><span class="p">)</span>
+<span class="n">Local</span> <span class="n">Time</span> <span class="ow">is</span><span class="p">:</span>    <span class="n">Wed</span> <span class="n">Aug</span> <span class="mi">23</span> <span class="mi">15</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">40</span> <span class="mi">2023</span> <span class="n">CST</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Available</span> <span class="o">-</span> <span class="n">device</span> <span class="n">has</span> <span class="n">SMART</span> <span class="n">capability</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Enabled</span>
+
+<span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">READ</span> <span class="n">SMART</span> <span class="n">DATA</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">SMART</span> <span class="n">overall</span><span class="o">-</span><span class="n">health</span> <span class="bp">self</span><span class="o">-</span><span class="n">assessment</span> <span class="n">test</span> <span class="n">result</span><span class="p">:</span> <span class="n">PASSED</span>
+
+<span class="n">General</span> <span class="n">SMART</span> <span class="n">Values</span><span class="p">:</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">status</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x00</span><span class="p">)</span> <span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">activity</span>
+                                        <span class="n">was</span> <span class="n">never</span> <span class="n">started</span><span class="o">.</span>
+                                        <span class="n">Auto</span> <span class="n">Offline</span> <span class="n">Data</span> <span class="n">Collection</span><span class="p">:</span> <span class="n">Disabled</span><span class="o">.</span>
+<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">execution</span> <span class="n">status</span><span class="p">:</span>      <span class="p">(</span>   <span class="mi">0</span><span class="p">)</span> <span class="n">The</span> <span class="n">previous</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span> <span class="n">completed</span>
+                                        <span class="n">without</span> <span class="n">error</span> <span class="ow">or</span> <span class="n">no</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">has</span> <span class="n">ever</span>
+                                        <span class="n">been</span> <span class="n">run</span><span class="o">.</span>
+<span class="n">Total</span> <span class="n">time</span> <span class="n">to</span> <span class="n">complete</span> <span class="n">Offline</span>
+<span class="n">data</span> <span class="n">collection</span><span class="p">:</span>                <span class="p">(</span><span class="mi">20160</span><span class="p">)</span> <span class="n">seconds</span><span class="o">.</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span>
+<span class="n">capabilities</span><span class="p">:</span>                    <span class="p">(</span><span class="mh">0x5d</span><span class="p">)</span> <span class="n">SMART</span> <span class="n">execute</span> <span class="n">Offline</span> <span class="n">immediate</span><span class="o">.</span>
+                                        <span class="n">No</span> <span class="n">Auto</span> <span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">support</span><span class="o">.</span>
+                                        <span class="n">Abort</span> <span class="n">Offline</span> <span class="n">collection</span> <span class="n">upon</span> <span class="n">new</span>
+                                        <span class="n">command</span><span class="o">.</span>
+                                        <span class="n">Offline</span> <span class="n">surface</span> <span class="n">scan</span> <span class="n">supported</span><span class="o">.</span>
+                                        <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+                                        <span class="n">No</span> <span class="n">Conveyance</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+                                        <span class="n">Selective</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">capabilities</span><span class="p">:</span>            <span class="p">(</span><span class="mh">0x0003</span><span class="p">)</span> <span class="n">Saves</span> <span class="n">SMART</span> <span class="n">data</span> <span class="n">before</span> <span class="n">entering</span>
+                                        <span class="n">power</span><span class="o">-</span><span class="n">saving</span> <span class="n">mode</span><span class="o">.</span>
+                                        <span class="n">Supports</span> <span class="n">SMART</span> <span class="n">auto</span> <span class="n">save</span> <span class="n">timer</span><span class="o">.</span>
+<span class="n">Error</span> <span class="n">logging</span> <span class="n">capability</span><span class="p">:</span>        <span class="p">(</span><span class="mh">0x01</span><span class="p">)</span> <span class="n">Error</span> <span class="n">logging</span> <span class="n">supported</span><span class="o">.</span>
+                                        <span class="n">General</span> <span class="n">Purpose</span> <span class="n">Logging</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">Short</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+<span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span>        <span class="p">(</span>   <span class="mi">1</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+<span class="n">Extended</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+<span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span>        <span class="p">(</span>   <span class="mi">1</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+<span class="n">SCT</span> <span class="n">capabilities</span><span class="p">:</span>              <span class="p">(</span><span class="mh">0x003d</span><span class="p">)</span> <span class="n">SCT</span> <span class="n">Status</span> <span class="n">supported</span><span class="o">.</span>
+                                        <span class="n">SCT</span> <span class="n">Error</span> <span class="n">Recovery</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+                                        <span class="n">SCT</span> <span class="n">Feature</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+                                        <span class="n">SCT</span> <span class="n">Data</span> <span class="n">Table</span> <span class="n">supported</span><span class="o">.</span>
+
+<span class="n">SMART</span> <span class="n">Attributes</span> <span class="n">Data</span> <span class="n">Structure</span> <span class="n">revision</span> <span class="n">number</span><span class="p">:</span> <span class="mi">16</span>
+<span class="n">Vendor</span> <span class="n">Specific</span> <span class="n">SMART</span> <span class="n">Attributes</span> <span class="k">with</span> <span class="n">Thresholds</span><span class="p">:</span>
+<span class="n">ID</span><span class="c1"># ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE</span>
+  <span class="mi">5</span> <span class="n">Reallocated_Sector_Ct</span>   <span class="mh">0x0033</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">010</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+  <span class="mi">9</span> <span class="n">Power_On_Hours</span>          <span class="mh">0x0032</span>   <span class="mi">046</span>   <span class="mi">046</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">47763</span> <span class="p">(</span><span class="mi">2</span> <span class="mi">27</span> <span class="mi">0</span><span class="p">)</span>
+ <span class="mi">13</span> <span class="n">Lifetime_UECC_Ct</span>        <span class="mh">0x0012</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">001</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+ <span class="mi">32</span> <span class="n">Lifetime_Write_AmpFctr</span>  <span class="mh">0x0002</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+ <span class="mi">33</span> <span class="n">Write_AmpFctr</span>           <span class="mh">0x0002</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">100</span>
+<span class="mi">170</span> <span class="n">Reserve_Erase_BlkCt</span>     <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">18218</span>
+<span class="mi">171</span> <span class="n">Program_Fail_Ct</span>         <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">172</span> <span class="n">Erase_Fail_Ct</span>           <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">175</span> <span class="n">Lifetime_Die_Failure_Ct</span> <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="hll"><span class="mi">178</span> <span class="n">SSD_LifeLeft</span><span class="p">(</span><span class="mf">0.01</span><span class="o">%</span><span class="p">)</span>     <span class="mh">0x0012</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">9126</span>
+</span><span class="mi">183</span> <span class="n">LT_Link_Rate_DwnGrd_Ct</span>  <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">191</span> <span class="n">Clean_Shutdown_Ct</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">46</span>
+<span class="mi">192</span> <span class="n">Unclean_Shutdown_Ct</span>     <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">194</span> <span class="n">Temperature_Celsius</span>     <span class="mh">0x0022</span>   <span class="mi">068</span>   <span class="mi">059</span>   <span class="mi">030</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">32</span> <span class="p">(</span><span class="n">Min</span><span class="o">/</span><span class="n">Max</span> <span class="mi">19</span><span class="o">/</span><span class="mi">41</span><span class="p">)</span>
+<span class="mi">196</span> <span class="n">Lifetime_Retried_Blk_Ct</span> <span class="mh">0x001b</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">010</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">199</span> <span class="n">UDMA_CRC_Error_Count</span>    <span class="mh">0x003e</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">211</span> <span class="n">Read_Disturb_ReallocEvt</span> <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">233</span> <span class="n">Lifetime_Nand_Writes</span>    <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">1347968</span>
+<span class="mi">235</span> <span class="n">Capacitor_Health</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">241</span> <span class="n">Total_LBAs_Written</span>      <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">806144</span>
+<span class="mi">242</span> <span class="n">Total_LBAs_Read</span>         <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">923840</span>
+<span class="mi">244</span> <span class="n">Therm_Throt_Activation</span>  <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="hll"><span class="mi">245</span> <span class="n">Drive_Life_Remaining</span><span class="o">%</span>   <span class="mh">0x0012</span>   <span class="mi">092</span>   <span class="mi">092</span>   <span class="mi">002</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">92</span>
+</span><span class="mi">253</span> <span class="n">SPI_Test_Remaining</span>      <span class="mh">0x0012</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">001</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+
+<span class="n">SMART</span> <span class="n">Error</span> <span class="n">Log</span> <span class="n">Version</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">No</span> <span class="n">Errors</span> <span class="n">Logged</span>
+
+<span class="n">SMART</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">log</span> <span class="n">structure</span> <span class="n">revision</span> <span class="n">number</span> <span class="mi">1</span>
+<span class="n">Num</span>  <span class="n">Test_Description</span>    <span class="n">Status</span>                  <span class="n">Remaining</span>  <span class="n">LifeTime</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span>  <span class="n">LBA_of_first_error</span>
+<span class="c1"># 1  Extended captive    Completed without error       00%     47763         -</span>
+
+<span class="n">SMART</span> <span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">log</span> <span class="n">data</span> <span class="n">structure</span> <span class="n">revision</span> <span class="n">number</span> <span class="mi">1</span>
+ <span class="n">SPAN</span>  <span class="n">MIN_LBA</span>  <span class="n">MAX_LBA</span>  <span class="n">CURRENT_TEST_STATUS</span>
+    <span class="mi">1</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">2</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">3</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">4</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">5</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+<span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">flags</span> <span class="p">(</span><span class="mh">0x0</span><span class="p">):</span>
+  <span class="n">After</span> <span class="n">scanning</span> <span class="n">selected</span> <span class="n">spans</span><span class="p">,</span> <span class="n">do</span> <span class="n">NOT</span> <span class="n">read</span><span class="o">-</span><span class="n">scan</span> <span class="n">remainder</span> <span class="n">of</span> <span class="n">disk</span><span class="o">.</span>
+<span class="n">If</span> <span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="ow">is</span> <span class="n">pending</span> <span class="n">on</span> <span class="n">power</span><span class="o">-</span><span class="n">up</span><span class="p">,</span> <span class="n">resume</span> <span class="n">after</span> <span class="mi">0</span> <span class="n">minute</span> <span class="n">delay</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<p>这里可以看到 <code class="docutils literal notranslate"><span class="pre">SSD_LifeLeft(0.01%)</span></code> 表示以 万分比 <code class="docutils literal notranslate"><span class="pre">0.01%</span></code> 为单位得到的数值是 <code class="docutils literal notranslate"><span class="pre">9126</span></code> ，折算为百分比就是 <code class="docutils literal notranslate"><span class="pre">91.26%</span></code> ，所以在 <code class="docutils literal notranslate"><span class="pre">Drive_Life_Remaining%</span></code> 的数值就是 <code class="docutils literal notranslate"><span class="pre">92</span></code></p>
+</section>
+<section id="dev-sdb">
+<h4><code class="docutils literal notranslate"><span class="pre">/dev/sdb</span></code><a class="headerlink" href="#dev-sdb" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>执行测试(long test):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 对sdb进行长测试，注意参数结合 <code class="docutils literal notranslate"><span class="pre">-C</span></code> 表示Foreground Mode</span><a class="headerlink" href="#id17" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">t</span> <span class="n">long</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>长测试输出信息</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id18">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 对sdb进行长测试的输出信息</span><a class="headerlink" href="#id18" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">smartctl</span> <span class="mf">7.2</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">30</span> <span class="n">r5155</span> <span class="p">[</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="mf">5.15.0</span><span class="o">-</span><span class="mi">78</span><span class="o">-</span><span class="n">generic</span><span class="p">]</span> <span class="p">(</span><span class="n">local</span> <span class="n">build</span><span class="p">)</span>
+<span class="n">Copyright</span> <span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="mi">2002</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">Bruce</span> <span class="n">Allen</span><span class="p">,</span> <span class="n">Christian</span> <span class="n">Franke</span><span class="p">,</span> <span class="n">www</span><span class="o">.</span><span class="n">smartmontools</span><span class="o">.</span><span class="n">org</span>
+
+<span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">OFFLINE</span> <span class="n">IMMEDIATE</span> <span class="n">AND</span> <span class="n">SELF</span><span class="o">-</span><span class="n">TEST</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">Sending</span> <span class="n">command</span><span class="p">:</span> <span class="s2">&quot;Execute SMART Extended self-test routine immediately in captive mode&quot;</span><span class="o">.</span>
+<span class="n">Drive</span> <span class="n">command</span> <span class="s2">&quot;Execute SMART Extended self-test routine immediately in captive mode&quot;</span> <span class="n">successful</span><span class="o">.</span>
+<span class="n">Testing</span> <span class="n">has</span> <span class="n">begun</span><span class="o">.</span>
+<span class="hll"><span class="n">Please</span> <span class="n">wait</span> <span class="mi">30</span> <span class="n">minutes</span> <span class="k">for</span> <span class="n">test</span> <span class="n">to</span> <span class="n">complete</span><span class="o">.</span>
+</span><span class="hll"><span class="n">Test</span> <span class="n">will</span> <span class="n">complete</span> <span class="n">after</span> <span class="n">Wed</span> <span class="n">Aug</span> <span class="mi">23</span> <span class="mi">16</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">44</span> <span class="mi">2023</span> <span class="n">CST</span>
+</span></pre></div>
+</div>
+</div>
+<p>Intel SSD的长测试 <strong>似乎是真测试</strong> 需要花费30分钟完成</p>
+<ul class="simple">
+<li><p>查看测试结果( <code class="docutils literal notranslate"><span class="pre">-a</span></code> 参数  ):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id19">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 查看sdb(Intel SSD)测试结果</span><a class="headerlink" href="#id19" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id20">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 查看sdb测试结果，测试了两次都没有完成 <code class="docutils literal notranslate"><span class="pre">Extended</span> <span class="pre">captive</span></code> : <code class="docutils literal notranslate"><span class="pre">Interrupted</span> <span class="pre">(host</span> <span class="pre">reset)</span></code></span><a class="headerlink" href="#id20" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">INFORMATION</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">Model</span> <span class="n">Family</span><span class="p">:</span>     <span class="n">Intel</span> <span class="mi">545</span><span class="n">s</span> <span class="n">Series</span> <span class="n">SSDs</span>
+<span class="n">Device</span> <span class="n">Model</span><span class="p">:</span>     <span class="n">INTEL</span> <span class="n">SSDSC2KW512G8</span>
+<span class="n">Serial</span> <span class="n">Number</span><span class="p">:</span>    <span class="n">BTLA7513037S512DGN</span>
+<span class="n">LU</span> <span class="n">WWN</span> <span class="n">Device</span> <span class="n">Id</span><span class="p">:</span> <span class="mi">5</span> <span class="mi">5</span><span class="n">cd2e4</span> <span class="mi">14</span><span class="n">eea7536</span>
+<span class="n">Firmware</span> <span class="n">Version</span><span class="p">:</span> <span class="n">LHF002C</span>
+<span class="n">User</span> <span class="n">Capacity</span><span class="p">:</span>    <span class="mi">512</span><span class="p">,</span><span class="mi">110</span><span class="p">,</span><span class="mi">190</span><span class="p">,</span><span class="mi">592</span> <span class="nb">bytes</span> <span class="p">[</span><span class="mi">512</span> <span class="n">GB</span><span class="p">]</span>
+<span class="n">Sector</span> <span class="n">Size</span><span class="p">:</span>      <span class="mi">512</span> <span class="nb">bytes</span> <span class="n">logical</span><span class="o">/</span><span class="n">physical</span>
+<span class="n">Rotation</span> <span class="n">Rate</span><span class="p">:</span>    <span class="n">Solid</span> <span class="n">State</span> <span class="n">Device</span>
+<span class="n">Form</span> <span class="n">Factor</span><span class="p">:</span>      <span class="mf">2.5</span> <span class="n">inches</span>
+<span class="n">TRIM</span> <span class="n">Command</span><span class="p">:</span>     <span class="n">Available</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">,</span> <span class="n">zeroed</span>
+<span class="n">Device</span> <span class="ow">is</span><span class="p">:</span>        <span class="n">In</span> <span class="n">smartctl</span> <span class="n">database</span> <span class="p">[</span><span class="k">for</span> <span class="n">details</span> <span class="n">use</span><span class="p">:</span> <span class="o">-</span><span class="n">P</span> <span class="n">show</span><span class="p">]</span>
+<span class="n">ATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>   <span class="n">ACS</span><span class="o">-</span><span class="mi">3</span> <span class="p">(</span><span class="n">minor</span> <span class="n">revision</span> <span class="ow">not</span> <span class="n">indicated</span><span class="p">)</span>
+<span class="n">SATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>  <span class="n">SATA</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span> <span class="p">(</span><span class="n">current</span><span class="p">:</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span><span class="p">)</span>
+<span class="n">Local</span> <span class="n">Time</span> <span class="ow">is</span><span class="p">:</span>    <span class="n">Wed</span> <span class="n">Aug</span> <span class="mi">23</span> <span class="mi">22</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">29</span> <span class="mi">2023</span> <span class="n">CST</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Available</span> <span class="o">-</span> <span class="n">device</span> <span class="n">has</span> <span class="n">SMART</span> <span class="n">capability</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Enabled</span>
+
+<span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">READ</span> <span class="n">SMART</span> <span class="n">DATA</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">SMART</span> <span class="n">overall</span><span class="o">-</span><span class="n">health</span> <span class="bp">self</span><span class="o">-</span><span class="n">assessment</span> <span class="n">test</span> <span class="n">result</span><span class="p">:</span> <span class="n">PASSED</span>
+
+<span class="n">General</span> <span class="n">SMART</span> <span class="n">Values</span><span class="p">:</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">status</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x05</span><span class="p">)</span>	<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">activity</span>
+					<span class="n">was</span> <span class="n">aborted</span> <span class="n">by</span> <span class="n">an</span> <span class="n">interrupting</span> <span class="n">command</span> <span class="kn">from</span> <span class="nn">host.</span>
+					<span class="n">Auto</span> <span class="n">Offline</span> <span class="n">Data</span> <span class="n">Collection</span><span class="p">:</span> <span class="n">Disabled</span><span class="o">.</span>
+<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">execution</span> <span class="n">status</span><span class="p">:</span>      <span class="p">(</span>  <span class="mi">41</span><span class="p">)</span>	<span class="n">The</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span> <span class="n">was</span> <span class="n">interrupted</span>
+					<span class="n">by</span> <span class="n">the</span> <span class="n">host</span> <span class="k">with</span> <span class="n">a</span> <span class="n">hard</span> <span class="ow">or</span> <span class="n">soft</span> <span class="n">reset</span><span class="o">.</span>
+<span class="n">Total</span> <span class="n">time</span> <span class="n">to</span> <span class="n">complete</span> <span class="n">Offline</span>
+<span class="n">data</span> <span class="n">collection</span><span class="p">:</span> 		<span class="p">(</span>    <span class="mi">0</span><span class="p">)</span> <span class="n">seconds</span><span class="o">.</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span>
+<span class="n">capabilities</span><span class="p">:</span> 			 <span class="p">(</span><span class="mh">0x53</span><span class="p">)</span> <span class="n">SMART</span> <span class="n">execute</span> <span class="n">Offline</span> <span class="n">immediate</span><span class="o">.</span>
+					<span class="n">Auto</span> <span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">on</span><span class="o">/</span><span class="n">off</span> <span class="n">support</span><span class="o">.</span>
+					<span class="n">Suspend</span> <span class="n">Offline</span> <span class="n">collection</span> <span class="n">upon</span> <span class="n">new</span>
+					<span class="n">command</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Offline</span> <span class="n">surface</span> <span class="n">scan</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Conveyance</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Selective</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">capabilities</span><span class="p">:</span>            <span class="p">(</span><span class="mh">0x0003</span><span class="p">)</span>	<span class="n">Saves</span> <span class="n">SMART</span> <span class="n">data</span> <span class="n">before</span> <span class="n">entering</span>
+					<span class="n">power</span><span class="o">-</span><span class="n">saving</span> <span class="n">mode</span><span class="o">.</span>
+					<span class="n">Supports</span> <span class="n">SMART</span> <span class="n">auto</span> <span class="n">save</span> <span class="n">timer</span><span class="o">.</span>
+<span class="n">Error</span> <span class="n">logging</span> <span class="n">capability</span><span class="p">:</span>        <span class="p">(</span><span class="mh">0x01</span><span class="p">)</span>	<span class="n">Error</span> <span class="n">logging</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">General</span> <span class="n">Purpose</span> <span class="n">Logging</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">Short</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+<span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>   <span class="mi">2</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+<span class="n">Extended</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+<span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>  <span class="mi">30</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+<span class="n">SCT</span> <span class="n">capabilities</span><span class="p">:</span> 	       <span class="p">(</span><span class="mh">0x003d</span><span class="p">)</span>	<span class="n">SCT</span> <span class="n">Status</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Error</span> <span class="n">Recovery</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Feature</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Data</span> <span class="n">Table</span> <span class="n">supported</span><span class="o">.</span>
+
+<span class="n">SMART</span> <span class="n">Attributes</span> <span class="n">Data</span> <span class="n">Structure</span> <span class="n">revision</span> <span class="n">number</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">Vendor</span> <span class="n">Specific</span> <span class="n">SMART</span> <span class="n">Attributes</span> <span class="k">with</span> <span class="n">Thresholds</span><span class="p">:</span>
+<span class="n">ID</span><span class="c1"># ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE</span>
+  <span class="mi">5</span> <span class="n">Reallocated_Sector_Ct</span>   <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+  <span class="mi">9</span> <span class="n">Power_On_Hours</span>          <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">24193</span>
+ <span class="mi">12</span> <span class="n">Power_Cycle_Count</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">160</span>
+<span class="mi">170</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0033</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">010</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">171</span> <span class="n">Program_Fail_Count</span>      <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">172</span> <span class="n">Erase_Fail_Count</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">173</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0033</span>   <span class="mi">079</span>   <span class="mi">079</span>   <span class="mi">005</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">1413069406491</span>
+<span class="mi">174</span> <span class="n">Unexpect_Power_Loss_Ct</span>  <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">36</span>
+<span class="mi">183</span> <span class="n">SATA_Downshift_Count</span>    <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">184</span> <span class="n">End</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">End_Error</span>        <span class="mh">0x0033</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">090</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">187</span> <span class="n">Reported_Uncorrect</span>      <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">190</span> <span class="n">Temperature_Case</span>        <span class="mh">0x0032</span>   <span class="mi">027</span>   <span class="mi">044</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">27</span> <span class="p">(</span><span class="n">Min</span><span class="o">/</span><span class="n">Max</span> <span class="mi">13</span><span class="o">/</span><span class="mi">44</span><span class="p">)</span>
+<span class="mi">192</span> <span class="n">Unsafe_Shutdown_Count</span>   <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">36</span>
+<span class="mi">199</span> <span class="n">CRC_Error_Count</span>         <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">225</span> <span class="n">Host_Writes_32MiB</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">1787678</span>
+<span class="mi">226</span> <span class="n">Workld_Media_Wear_Indic</span> <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">227</span> <span class="n">Workld_Host_Reads_Perc</span>  <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">228</span> <span class="n">Workload_Minutes</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">232</span> <span class="n">Available_Reservd_Space</span> <span class="mh">0x0033</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">010</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">233</span> <span class="n">Media_Wearout_Indicator</span> <span class="mh">0x0032</span>   <span class="mi">079</span>   <span class="mi">079</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">236</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">241</span> <span class="n">Host_Writes_32MiB</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">1787678</span>
+<span class="mi">242</span> <span class="n">Host_Reads_32MiB</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">47693</span>
+<span class="mi">249</span> <span class="n">NAND_Writes_1GiB</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">168517</span>
+<span class="mi">252</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">329</span>
+
+<span class="n">SMART</span> <span class="n">Error</span> <span class="n">Log</span> <span class="n">Version</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">No</span> <span class="n">Errors</span> <span class="n">Logged</span>
+
+<span class="n">SMART</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">log</span> <span class="n">structure</span> <span class="n">revision</span> <span class="n">number</span> <span class="mi">1</span>
+<span class="n">Num</span>  <span class="n">Test_Description</span>    <span class="n">Status</span>                  <span class="n">Remaining</span>  <span class="n">LifeTime</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span>  <span class="n">LBA_of_first_error</span>
+<span class="hll"><span class="c1"># 1  Extended captive    Interrupted (host reset)      90%     24191         -</span>
+</span><span class="hll"><span class="c1"># 2  Extended captive    Interrupted (host reset)      90%     24191         -</span>
+</span>
+<span class="n">SMART</span> <span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">log</span> <span class="n">data</span> <span class="n">structure</span> <span class="n">revision</span> <span class="n">number</span> <span class="mi">1</span>
+ <span class="n">SPAN</span>  <span class="n">MIN_LBA</span>  <span class="n">MAX_LBA</span>  <span class="n">CURRENT_TEST_STATUS</span>
+    <span class="mi">1</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">2</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">3</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">4</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">5</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+<span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">flags</span> <span class="p">(</span><span class="mh">0x0</span><span class="p">):</span>
+  <span class="n">After</span> <span class="n">scanning</span> <span class="n">selected</span> <span class="n">spans</span><span class="p">,</span> <span class="n">do</span> <span class="n">NOT</span> <span class="n">read</span><span class="o">-</span><span class="n">scan</span> <span class="n">remainder</span> <span class="n">of</span> <span class="n">disk</span><span class="o">.</span>
+<span class="n">If</span> <span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="ow">is</span> <span class="n">pending</span> <span class="n">on</span> <span class="n">power</span><span class="o">-</span><span class="n">up</span><span class="p">,</span> <span class="n">resume</span> <span class="n">after</span> <span class="mi">0</span> <span class="n">minute</span> <span class="n">delay</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<p>比较奇怪，这个 Intel SSD 的SMART测试看不到健康度(剩余寿命 <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">#245</span></code> )，而且测试状态没有完成 <code class="docutils literal notranslate"><span class="pre">Interrupted</span> <span class="pre">(host</span> <span class="pre">reset)</span></code> 。我连做两次测试都是这样(见高亮部分)</p>
+<p>我想了一下，是不是因为这个 <code class="docutils literal notranslate"><span class="pre">/dev/sdb</span></code> 正在使用(挂载为系统盘)，所以 <code class="docutils literal notranslate"><span class="pre">Foreground</span> <span class="pre">Test</span></code> 会被磁盘读写操作中断？</p>
+<ul class="simple">
+<li><p>改为 <code class="docutils literal notranslate"><span class="pre">Background</span> <span class="pre">Mode</span></code> <code class="docutils literal notranslate"><span class="pre">long</span> <span class="pre">tests</span></code> 测试( 去掉 <code class="docutils literal notranslate"><span class="pre">-C</span></code> 参数 ):</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id21">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 对sdb进行长测试，注意 <strong>没有使用</strong> <code class="docutils literal notranslate"><span class="pre">-C</span></code> 参数表示 <code class="docutils literal notranslate"><span class="pre">Background</span> <span class="pre">Mode</span></code></span><a class="headerlink" href="#id21" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">t</span> <span class="n">long</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span>
+</pre></div>
+</div>
+</div>
+<p>此时会看到立即返回终端提示(不像 <code class="docutils literal notranslate"><span class="pre">-C</span></code> 参数需要等待卡住一会):</p>
+<div class="literal-block-wrapper docutils container" id="id22">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 对sdb进行长测试( <code class="docutils literal notranslate"><span class="pre">Background</span> <span class="pre">Mode</span></code> )输出信息</span><a class="headerlink" href="#id22" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">OFFLINE</span> <span class="n">IMMEDIATE</span> <span class="n">AND</span> <span class="n">SELF</span><span class="o">-</span><span class="n">TEST</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="hll"><span class="n">Sending</span> <span class="n">command</span><span class="p">:</span> <span class="s2">&quot;Execute SMART Extended self-test routine immediately in off-line mode&quot;</span><span class="o">.</span>
+</span><span class="n">Drive</span> <span class="n">command</span> <span class="s2">&quot;Execute SMART Extended self-test routine immediately in off-line mode&quot;</span> <span class="n">successful</span><span class="o">.</span>
+<span class="n">Testing</span> <span class="n">has</span> <span class="n">begun</span><span class="o">.</span>
+<span class="n">Please</span> <span class="n">wait</span> <span class="mi">30</span> <span class="n">minutes</span> <span class="k">for</span> <span class="n">test</span> <span class="n">to</span> <span class="n">complete</span><span class="o">.</span>
+<span class="n">Test</span> <span class="n">will</span> <span class="n">complete</span> <span class="n">after</span> <span class="n">Wed</span> <span class="n">Aug</span> <span class="mi">23</span> <span class="mi">23</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">21</span> <span class="mi">2023</span> <span class="n">CST</span>
+<span class="n">Use</span> <span class="n">smartctl</span> <span class="o">-</span><span class="n">X</span> <span class="n">to</span> <span class="n">abort</span> <span class="n">test</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<p>可以看到测试时间依然是30分钟，不过提示是 <code class="docutils literal notranslate"><span class="pre">off-line</span> <span class="pre">mode</span></code> (之前 <code class="docutils literal notranslate"><span class="pre">-C</span></code> 参数显示 <code class="docutils literal notranslate"><span class="pre">captive</span> <span class="pre">mode</span></code> )</p>
+<ul class="simple">
+<li><p>果然，采用 <code class="docutils literal notranslate"><span class="pre">offline</span> <span class="pre">mode</span></code> 方式扫描，就能够正常完成测试，输出结果如下:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id23">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">smartctl</span></code> 对sdb进行长测试( <code class="docutils literal notranslate"><span class="pre">Background</span> <span class="pre">Mode</span></code> )能够正常完成测试，结果输出</span><a class="headerlink" href="#id23" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">INFORMATION</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">Model</span> <span class="n">Family</span><span class="p">:</span>     <span class="n">Intel</span> <span class="mi">545</span><span class="n">s</span> <span class="n">Series</span> <span class="n">SSDs</span>
+<span class="n">Device</span> <span class="n">Model</span><span class="p">:</span>     <span class="n">INTEL</span> <span class="n">SSDSC2KW512G8</span>
+<span class="n">Serial</span> <span class="n">Number</span><span class="p">:</span>    <span class="n">BTLA7513037S512DGN</span>
+<span class="n">LU</span> <span class="n">WWN</span> <span class="n">Device</span> <span class="n">Id</span><span class="p">:</span> <span class="mi">5</span> <span class="mi">5</span><span class="n">cd2e4</span> <span class="mi">14</span><span class="n">eea7536</span>
+<span class="n">Firmware</span> <span class="n">Version</span><span class="p">:</span> <span class="n">LHF002C</span>
+<span class="n">User</span> <span class="n">Capacity</span><span class="p">:</span>    <span class="mi">512</span><span class="p">,</span><span class="mi">110</span><span class="p">,</span><span class="mi">190</span><span class="p">,</span><span class="mi">592</span> <span class="nb">bytes</span> <span class="p">[</span><span class="mi">512</span> <span class="n">GB</span><span class="p">]</span>
+<span class="n">Sector</span> <span class="n">Size</span><span class="p">:</span>      <span class="mi">512</span> <span class="nb">bytes</span> <span class="n">logical</span><span class="o">/</span><span class="n">physical</span>
+<span class="n">Rotation</span> <span class="n">Rate</span><span class="p">:</span>    <span class="n">Solid</span> <span class="n">State</span> <span class="n">Device</span>
+<span class="n">Form</span> <span class="n">Factor</span><span class="p">:</span>      <span class="mf">2.5</span> <span class="n">inches</span>
+<span class="n">TRIM</span> <span class="n">Command</span><span class="p">:</span>     <span class="n">Available</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">,</span> <span class="n">zeroed</span>
+<span class="n">Device</span> <span class="ow">is</span><span class="p">:</span>        <span class="n">In</span> <span class="n">smartctl</span> <span class="n">database</span> <span class="p">[</span><span class="k">for</span> <span class="n">details</span> <span class="n">use</span><span class="p">:</span> <span class="o">-</span><span class="n">P</span> <span class="n">show</span><span class="p">]</span>
+<span class="n">ATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>   <span class="n">ACS</span><span class="o">-</span><span class="mi">3</span> <span class="p">(</span><span class="n">minor</span> <span class="n">revision</span> <span class="ow">not</span> <span class="n">indicated</span><span class="p">)</span>
+<span class="n">SATA</span> <span class="n">Version</span> <span class="ow">is</span><span class="p">:</span>  <span class="n">SATA</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span> <span class="p">(</span><span class="n">current</span><span class="p">:</span> <span class="mf">6.0</span> <span class="n">Gb</span><span class="o">/</span><span class="n">s</span><span class="p">)</span>
+<span class="n">Local</span> <span class="n">Time</span> <span class="ow">is</span><span class="p">:</span>    <span class="n">Thu</span> <span class="n">Aug</span> <span class="mi">24</span> <span class="mi">00</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">08</span> <span class="mi">2023</span> <span class="n">CST</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Available</span> <span class="o">-</span> <span class="n">device</span> <span class="n">has</span> <span class="n">SMART</span> <span class="n">capability</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">support</span> <span class="ow">is</span><span class="p">:</span> <span class="n">Enabled</span>
+
+<span class="o">===</span> <span class="n">START</span> <span class="n">OF</span> <span class="n">READ</span> <span class="n">SMART</span> <span class="n">DATA</span> <span class="n">SECTION</span> <span class="o">===</span>
+<span class="n">SMART</span> <span class="n">overall</span><span class="o">-</span><span class="n">health</span> <span class="bp">self</span><span class="o">-</span><span class="n">assessment</span> <span class="n">test</span> <span class="n">result</span><span class="p">:</span> <span class="n">PASSED</span>
+
+<span class="n">General</span> <span class="n">SMART</span> <span class="n">Values</span><span class="p">:</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">status</span><span class="p">:</span>  <span class="p">(</span><span class="mh">0x02</span><span class="p">)</span>	<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">activity</span>
+					<span class="n">was</span> <span class="n">completed</span> <span class="n">without</span> <span class="n">error</span><span class="o">.</span>
+					<span class="n">Auto</span> <span class="n">Offline</span> <span class="n">Data</span> <span class="n">Collection</span><span class="p">:</span> <span class="n">Disabled</span><span class="o">.</span>
+<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">execution</span> <span class="n">status</span><span class="p">:</span>      <span class="p">(</span>   <span class="mi">0</span><span class="p">)</span>	<span class="n">The</span> <span class="n">previous</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span> <span class="n">completed</span>
+					<span class="n">without</span> <span class="n">error</span> <span class="ow">or</span> <span class="n">no</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">has</span> <span class="n">ever</span>
+					<span class="n">been</span> <span class="n">run</span><span class="o">.</span>
+<span class="n">Total</span> <span class="n">time</span> <span class="n">to</span> <span class="n">complete</span> <span class="n">Offline</span>
+<span class="n">data</span> <span class="n">collection</span><span class="p">:</span> 		<span class="p">(</span>    <span class="mi">0</span><span class="p">)</span> <span class="n">seconds</span><span class="o">.</span>
+<span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span>
+<span class="n">capabilities</span><span class="p">:</span> 			 <span class="p">(</span><span class="mh">0x53</span><span class="p">)</span> <span class="n">SMART</span> <span class="n">execute</span> <span class="n">Offline</span> <span class="n">immediate</span><span class="o">.</span>
+					<span class="n">Auto</span> <span class="n">Offline</span> <span class="n">data</span> <span class="n">collection</span> <span class="n">on</span><span class="o">/</span><span class="n">off</span> <span class="n">support</span><span class="o">.</span>
+					<span class="n">Suspend</span> <span class="n">Offline</span> <span class="n">collection</span> <span class="n">upon</span> <span class="n">new</span>
+					<span class="n">command</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Offline</span> <span class="n">surface</span> <span class="n">scan</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">No</span> <span class="n">Conveyance</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">Selective</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">SMART</span> <span class="n">capabilities</span><span class="p">:</span>            <span class="p">(</span><span class="mh">0x0003</span><span class="p">)</span>	<span class="n">Saves</span> <span class="n">SMART</span> <span class="n">data</span> <span class="n">before</span> <span class="n">entering</span>
+					<span class="n">power</span><span class="o">-</span><span class="n">saving</span> <span class="n">mode</span><span class="o">.</span>
+					<span class="n">Supports</span> <span class="n">SMART</span> <span class="n">auto</span> <span class="n">save</span> <span class="n">timer</span><span class="o">.</span>
+<span class="n">Error</span> <span class="n">logging</span> <span class="n">capability</span><span class="p">:</span>        <span class="p">(</span><span class="mh">0x01</span><span class="p">)</span>	<span class="n">Error</span> <span class="n">logging</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">General</span> <span class="n">Purpose</span> <span class="n">Logging</span> <span class="n">supported</span><span class="o">.</span>
+<span class="n">Short</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+<span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>   <span class="mi">2</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+<span class="n">Extended</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">routine</span>
+<span class="n">recommended</span> <span class="n">polling</span> <span class="n">time</span><span class="p">:</span> 	 <span class="p">(</span>  <span class="mi">30</span><span class="p">)</span> <span class="n">minutes</span><span class="o">.</span>
+<span class="n">SCT</span> <span class="n">capabilities</span><span class="p">:</span> 	       <span class="p">(</span><span class="mh">0x003d</span><span class="p">)</span>	<span class="n">SCT</span> <span class="n">Status</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Error</span> <span class="n">Recovery</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Feature</span> <span class="n">Control</span> <span class="n">supported</span><span class="o">.</span>
+					<span class="n">SCT</span> <span class="n">Data</span> <span class="n">Table</span> <span class="n">supported</span><span class="o">.</span>
+
+<span class="n">SMART</span> <span class="n">Attributes</span> <span class="n">Data</span> <span class="n">Structure</span> <span class="n">revision</span> <span class="n">number</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">Vendor</span> <span class="n">Specific</span> <span class="n">SMART</span> <span class="n">Attributes</span> <span class="k">with</span> <span class="n">Thresholds</span><span class="p">:</span>
+<span class="n">ID</span><span class="c1"># ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE</span>
+  <span class="mi">5</span> <span class="n">Reallocated_Sector_Ct</span>   <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+  <span class="mi">9</span> <span class="n">Power_On_Hours</span>          <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">24193</span>
+ <span class="mi">12</span> <span class="n">Power_Cycle_Count</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">160</span>
+<span class="mi">170</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0033</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">010</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">171</span> <span class="n">Program_Fail_Count</span>      <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">172</span> <span class="n">Erase_Fail_Count</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">173</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0033</span>   <span class="mi">079</span>   <span class="mi">079</span>   <span class="mi">005</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">1413069406491</span>
+<span class="mi">174</span> <span class="n">Unexpect_Power_Loss_Ct</span>  <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">36</span>
+<span class="mi">183</span> <span class="n">SATA_Downshift_Count</span>    <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">184</span> <span class="n">End</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">End_Error</span>        <span class="mh">0x0033</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">090</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">187</span> <span class="n">Reported_Uncorrect</span>      <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">190</span> <span class="n">Temperature_Case</span>        <span class="mh">0x0032</span>   <span class="mi">028</span>   <span class="mi">045</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">28</span> <span class="p">(</span><span class="n">Min</span><span class="o">/</span><span class="n">Max</span> <span class="mi">13</span><span class="o">/</span><span class="mi">45</span><span class="p">)</span>
+<span class="mi">192</span> <span class="n">Unsafe_Shutdown_Count</span>   <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">36</span>
+<span class="mi">199</span> <span class="n">CRC_Error_Count</span>         <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">225</span> <span class="n">Host_Writes_32MiB</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">1787849</span>
+<span class="mi">226</span> <span class="n">Workld_Media_Wear_Indic</span> <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">227</span> <span class="n">Workld_Host_Reads_Perc</span>  <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">228</span> <span class="n">Workload_Minutes</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">232</span> <span class="n">Available_Reservd_Space</span> <span class="mh">0x0033</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">010</span>    <span class="n">Pre</span><span class="o">-</span><span class="n">fail</span>  <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">233</span> <span class="n">Media_Wearout_Indicator</span> <span class="mh">0x0032</span>   <span class="mi">079</span>   <span class="mi">079</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">236</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">0</span>
+<span class="mi">241</span> <span class="n">Host_Writes_32MiB</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">1787849</span>
+<span class="mi">242</span> <span class="n">Host_Reads_32MiB</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">47693</span>
+<span class="mi">249</span> <span class="n">NAND_Writes_1GiB</span>        <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">168542</span>
+<span class="mi">252</span> <span class="n">Unknown_Attribute</span>       <span class="mh">0x0032</span>   <span class="mi">100</span>   <span class="mi">100</span>   <span class="mi">000</span>    <span class="n">Old_age</span>   <span class="n">Always</span>       <span class="o">-</span>       <span class="mi">329</span>
+
+<span class="n">SMART</span> <span class="n">Error</span> <span class="n">Log</span> <span class="n">Version</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">No</span> <span class="n">Errors</span> <span class="n">Logged</span>
+
+<span class="n">SMART</span> <span class="n">Self</span><span class="o">-</span><span class="n">test</span> <span class="n">log</span> <span class="n">structure</span> <span class="n">revision</span> <span class="n">number</span> <span class="mi">1</span>
+<span class="n">Num</span>  <span class="n">Test_Description</span>    <span class="n">Status</span>                  <span class="n">Remaining</span>  <span class="n">LifeTime</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span>  <span class="n">LBA_of_first_error</span>
+<span class="hll"><span class="c1"># 1  Extended offline    Completed without error       00%     24193         -</span>
+</span><span class="c1"># 2  Extended captive    Interrupted (host reset)      90%     24191         -</span>
+<span class="c1"># 3  Extended captive    Interrupted (host reset)      90%     24191         -</span>
+
+<span class="n">SMART</span> <span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">log</span> <span class="n">data</span> <span class="n">structure</span> <span class="n">revision</span> <span class="n">number</span> <span class="mi">1</span>
+ <span class="n">SPAN</span>  <span class="n">MIN_LBA</span>  <span class="n">MAX_LBA</span>  <span class="n">CURRENT_TEST_STATUS</span>
+    <span class="mi">1</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">2</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">3</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">4</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+    <span class="mi">5</span>        <span class="mi">0</span>        <span class="mi">0</span>  <span class="n">Not_testing</span>
+<span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="n">flags</span> <span class="p">(</span><span class="mh">0x0</span><span class="p">):</span>
+  <span class="n">After</span> <span class="n">scanning</span> <span class="n">selected</span> <span class="n">spans</span><span class="p">,</span> <span class="n">do</span> <span class="n">NOT</span> <span class="n">read</span><span class="o">-</span><span class="n">scan</span> <span class="n">remainder</span> <span class="n">of</span> <span class="n">disk</span><span class="o">.</span>
+<span class="n">If</span> <span class="n">Selective</span> <span class="bp">self</span><span class="o">-</span><span class="n">test</span> <span class="ow">is</span> <span class="n">pending</span> <span class="n">on</span> <span class="n">power</span><span class="o">-</span><span class="n">up</span><span class="p">,</span> <span class="n">resume</span> <span class="n">after</span> <span class="mi">0</span> <span class="n">minute</span> <span class="n">delay</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<p>这里看到 <code class="docutils literal notranslate"><span class="pre">LifeTime(hours)</span></code> 值是 <code class="docutils literal notranslate"><span class="pre">24193</span></code> 这个值就是 <code class="docutils literal notranslate"><span class="pre">Power_On_Hours</span></code> 值，也就是磁盘加电时长</p>
+<p>很奇怪，为何Intel SSD无法查看 <code class="docutils literal notranslate"><span class="pre">Drive_Life_Remaining%</span></code> ?</p>
+<p>搜索了一下，看来Intel有自己的诊断工具 <a class="reference external" href="https://www.intel.com/content/www/us/en/support/articles/000056729/memory-and-storage/ssd-management-tools.html">How to Perform Quick/Full Diagnostic of Intel® SSDs Using Intel® Memory and Storage Tool (Intel® MAS) GUI</a> (这个是Intel Optane SSDs / Memory 设备检测工具)</p>
+<p>详细请参考 ` Support for Intel® Memory and Storage Tool &lt;<a class="reference external" href="https://www.intel.com/content/www/us/en/support/products/202249/memory-and-storage/ssd-management-tools/intel-memory-and-storage-tool.html">https://www.intel.com/content/www/us/en/support/products/202249/memory-and-storage/ssd-management-tools/intel-memory-and-storage-tool.html</a>&gt;`_</p>
+</section>
+</section>
+</section>
+<section id="id2">
+<h2>参考<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://wiki.archlinux.org/title/S.M.A.R.T.">arch linux - S.M.A.R.T.</a></p></li>
+<li><p><a class="reference external" href="https://www.linuxtechi.com/smartctl-monitoring-analysis-tool-hard-drive/">Monitor and Analyze Hard Drive Health with Smartctl in Linux</a> 非常详细的命令行解析</p></li>
+<li><p><a class="reference external" href="https://linuxconfig.org/how-to-check-an-hard-drive-health-from-the-command-line-using-smartctl">How to check an hard drive health from the command line using smartctl</a></p></li>
+<li><p><a class="reference external" href="https://www.thomas-krenn.com/en/wiki/SMART_tests_with_smartctl">SMART tests with smartctl</a></p></li>
 </ul>
 </section>
 </section>
@@ -204,7 +900,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -27,3 +27,4 @@ Linux Out of Memory管理技术简介
 - `What Should I Do If the OOM Killer Is Triggered When a Container Uses Memory Resources More Than Limited? <https://support.huaweicloud.com/intl/en-us/eu-west-0-usermanual-cce/cce_faq_00002.html>`_
 - `Kubernetes OOM killing pod <https://stackoverflow.com/questions/67540519/kubernetes-oom-killing-pod>`_
 - `理解和配置 Linux 下的 OOM Killer <https://www.vpsee.com/2013/10/how-to-configure-the-linux-oom-killer/>`_
+- `CPU and Memory Management on Kubernetes with Cgroupsv2 <https://linuxera.org/cpu-memory-management-kubernetes-cgroupsv2/>`_

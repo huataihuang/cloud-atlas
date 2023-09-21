@@ -55,15 +55,10 @@ Homebrew安装
 
 前者通过 :ref:`docker` 的官方镜像，支持传递环境变量就可以自动配置好MySQL数据库；但是后者则是传统的数据库维护方式，需要我们做数据库初始化才能用于 :ref:`django` 开发。
 
-- 在MySQL中创建数据库 ``mydb`` 并创建 ``myapp_user`` 账号及对应密码 ``myapp_passwd`` ::
+- 在MySQL中创建数据库 ``mydb`` 并创建 ``myapp_user`` 账号及对应密码 ``myapp_passwd`` :
 
-   create database mydb characterset utf8;
-
-   grant usage on mydb.* to myapp_user@'%' identified by 'myapp_passwd';
-
-   grant all privileges on mydb.* to myapp_user@'%';
-
-   flush privileges;
+.. literalinclude:: install_mariadb/create_db_user
+   :caption: 创建一个数据库并创建访问账号及授权
 
 参考
 ========

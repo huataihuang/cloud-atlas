@@ -32,6 +32,15 @@ Kindle 邮箱是非常有效的在线转换工具，支持将不同格式文档�
 
 通常我们可以发送zip压缩格式的pdf,txt,docx等文件到kindle，会自动转换并进行设备同步。而且，Kindle邮箱还曲线支持了epub文件，也就是说你可以在Kindle中阅读epub文件，虽然这是通过Kindle在线服务做了转换的方式，但毕竟不需要自己安装类似Calibre这样的桌面工具就能在线完成，所以还是很方便的。
 
+- 注册一个 QQ 邮箱，然后在 Amazon 网站 ``Manage Your Content & Devices> Preferences > Personal Document Settings`` 找到 ``Send-to-Kindle E-Mail Settings`` ，添加信任的发件人地址(也就是你注册的QQ邮箱地址)。这样就能够通过 Calibre 的 ``Preferences > Sharing books by email`` 设置，通过QQ邮箱给Kindle的邮件地址发送文件来实现转换
+- 或者直接访问 `Send to Kindle <https://www.amazon.com/sendtokindle>`_ 通过WEB页面拖放，可以上传最高200MB的 ``.epub`` / ``.pdf`` / ``.doc`` 文档
+
+.. note::
+
+   ``Send-to-Kindle`` 已经不再支持 ``.mobile`` ，只支持 ``.epub`` 和 ``.pdf`` 电子书了
+
+   在传输文件之前，请先将电子书文件名改成中文，否则传输后无法修改
+
 参考
 ======
 

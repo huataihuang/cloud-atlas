@@ -1,7 +1,7 @@
 .. _container_runtimes:
 
 ============================================
-Kubernetes 容器运行时(Container Runtimes)
+容器运行时(Container Runtimes)
 ============================================
 
 .. toctree::

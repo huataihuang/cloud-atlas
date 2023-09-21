@@ -12,10 +12,10 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/translations.js"></script>
+        <script src="../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/translations.js?v=beaddf03"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
@@ -71,6 +71,8 @@
 <li class="toctree-l3"><a class="reference internal" href="down_1_of_3_ceph_vm_rbd.html">1/3 Ceph节点宕机演练: VM RBD测试</a></li>
 <li class="toctree-l3"><a class="reference internal" href="clone_vm_rbd.html">Clone使用Ceph RBD的虚拟机</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ceph_extend_rbd_drive_with_libvirt_xfs.html">使用libvirt和XFS在线扩展Ceph RBD设备</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ceph_rbd_export_import.html">Ceph RBD 导出和导入</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ceph_rbd_transfer_between_two_clusters.html">在两个Ceph集群传输(导出并导入)RBD镜像</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ceph_iscsi/index.html">Ceph iSCSI</a></li>
 </ul>
 </li>
@@ -98,6 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
@@ -114,6 +117,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../clang/index.html">C Atlas</a></li>
@@ -164,22 +168,22 @@
            <div itemprop="articleBody">
              
   <section id="kvmssdceph-rbd">
-<span id="compare-local-ssd-ceph-rbd"></span><h1>比较KVM虚拟机本地SSD和Ceph RBD存储性能<a class="headerlink" href="#kvmssdceph-rbd" title="此标题的永久链接">¶</a></h1>
+<span id="compare-local-ssd-ceph-rbd"></span><h1>比较KVM虚拟机本地SSD和Ceph RBD存储性能<a class="headerlink" href="#kvmssdceph-rbd" title="Link to this heading">¶</a></h1>
 <p>我在 <a class="reference internal" href="../../kvm/iommu/compare_iommu_native_nvme.html#compare-iommu-native-nvme"><span class="std std-ref">比较IOMMU NVMe和原生NVMe存储性能</span></a> 中，对比了在 <a class="reference internal" href="../../kvm/iommu/ovmf.html#ovmf"><span class="std std-ref">Open Virtual Machine Firmware(OMVF)</span></a> 虚拟机内部采用IOMMU技术读写NVMe存储和裸物理机读写NVMe的性能差异。现在，按照 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 部署了 <a class="reference internal" href="../index.html#ceph"><span class="std std-ref">Ceph Atlas</span></a> 存储来提供虚拟机存储，也需要考虑分布式存储Ceph对性能的损耗。所以本文将采用相同的 <a class="reference internal" href="../../performance/performance_tools/fio/index.html#fio"><span class="std std-ref">fio 存储性能测试</span></a> 测试方法，对比性能差异。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
 <p>我希望测试能够获得在分布式Ceph上运行的KVM虚拟机磁盘性能达到使用本地SSD的性能，毕竟底层硬件是性能更佳的NVMe，即使分布式消耗，也希望能够达到本地SSD磁盘性能。</p>
 </div>
 <section id="id1">
-<h2>测试环境<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<h2>测试环境<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>虚拟机采用 <a class="reference internal" href="ceph_rbd_libvirt.html#ceph-rbd-libvirt"><span class="std std-ref">Libvirt集成Ceph RBD</span></a> 部署完全相同的 <a class="reference internal" href="../../linux/ubuntu_linux/index.html#ubuntu-linux"><span class="std std-ref">Ubuntu Linux</span></a> 20.04 ，虚拟机配置采用 <code class="docutils literal notranslate"><span class="pre">4c8g</span></code> 配置( <code class="docutils literal notranslate"><span class="pre">vcpu=4</span></code> 匹配 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 测试命令 <code class="docutils literal notranslate"><span class="pre">-numjobs=4</span></code> 并发数量 )</p></li>
 </ul>
 </section>
 <section id="id2">
-<h2>磁盘性能测试<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
+<h2>磁盘性能测试<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
 <section id="id3">
-<h3>测试说明<a class="headerlink" href="#id3" title="此标题的永久链接">¶</a></h3>
+<h3>测试说明<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">/dev/vda</span></code> 磁盘已经安装了虚拟机操作系统，所以 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 采用文件进行测试，和直接读写块设备文件有差异(存在操作系统缓存影响)，不过对于测试两个一致操作系统还是可以有一定对比性。</p></li>
 <li><p>提供Ceph服务的3个虚拟机已经做了 cpu pinning ，分配到socket 0上的CPU核心; 但是由于我的 <a class="reference internal" href="../../linux/server/hardware/hpe/hpe_dl360_gen9.html#hpe-dl360-gen9"><span class="std std-ref">HPE ProLiant DL360 Gen9服务器</span></a> 配置的XEON处理器是 <a class="reference internal" href="../../kernel/cpu/intel/xeon_e5/xeon_e5-2670_v3.html#xeon-e5-2670-v3"><span class="std std-ref">Intel Xeon E5-2670 v3处理器</span></a> ，物理核心数量有限，不考虑超线程已经全部一一分配给这3个Ceph虚拟机；所以我不确定Ceph客户端虚拟机绑定在同一个Socket的处理器上超线程cpu core上性能更好还是绑定到Socket 1的CPU核心更好(需要实测，并且我估计和负载、软件版本有关)</p></li>
@@ -189,7 +193,7 @@
 </section>
 </section>
 <section id="iops">
-<h2>随机写IOPS(文件)<a class="headerlink" href="#iops" title="此标题的永久链接">¶</a></h2>
+<h2>随机写IOPS(文件)<a class="headerlink" href="#iops" title="Link to this heading">¶</a></h2>
 <ul>
 <li><p>测试命令:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>fio -direct=1 -iodepth=32 -rw=randwrite -ioengine=libaio -bs=4k -numjobs=4 -time_based=1 -runtime=60 -group_reporting -filename=${HOME}/fio -size=2g -name=test
@@ -199,7 +203,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">z-ubuntu20</span></code> 本地SSD测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">本地SSD虚拟机 随机写IOPS</span><a class="headerlink" href="#id5" title="此代码块的永久链接">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">本地SSD虚拟机 随机写IOPS</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting<span class="w"> </span><span class="m">4</span><span class="w"> </span>processes
 <span class="linenos"> 3</span>test:<span class="w"> </span>Laying<span class="w"> </span>out<span class="w"> </span>IO<span class="w"> </span>file<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>file<span class="w"> </span>/<span class="w"> </span>2048MiB<span class="o">)</span>
@@ -237,7 +241,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">z-ubuntu20-rbd</span></code> Ceph RBD测试结果:</p></li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">Ceph RBD虚拟机 随机写IOPS</span><a class="headerlink" href="#id6" title="此代码块的永久链接">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">Ceph RBD虚拟机 随机写IOPS</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting<span class="w"> </span><span class="m">4</span><span class="w"> </span>processes
 <span class="linenos"> 3</span>test:<span class="w"> </span>Laying<span class="w"> </span>out<span class="w"> </span>IO<span class="w"> </span>file<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>file<span class="w"> </span>/<span class="w"> </span>2048MiB<span class="o">)</span>
@@ -312,7 +316,7 @@
 </li>
 </ul>
 <div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机文件系统2GB文件 随机写IOPS</span><a class="headerlink" href="#id7" title="此代码块的永久链接">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">IOMMU虚拟机文件系统2GB文件 随机写IOPS</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>fio-3.16
 <span class="linenos"> 2</span>Starting<span class="w"> </span><span class="m">4</span><span class="w"> </span>processes
 <span class="linenos"> 3</span>test:<span class="w"> </span>Laying<span class="w"> </span>out<span class="w"> </span>IO<span class="w"> </span>file<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>file<span class="w"> </span>/<span class="w"> </span>2048MiB<span class="o">)</span>
@@ -351,7 +355,7 @@
 </div>
 </section>
 <section id="id4">
-<h2>云盘性能分析<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
+<h2>云盘性能分析<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>对 <code class="docutils literal notranslate"><span class="pre">1TB</span></code> NVMe 磁盘设备文件进行 <code class="docutils literal notranslate"><span class="pre">fio</span></code> 随机读写压测，IO是随机分散到整个固态硬盘，所以整体性能卓越；而对单个文件(特别是只有 <code class="docutils literal notranslate"><span class="pre">2GB</span></code> 的小文件)测试随机读写压测，则IO只能局限于2GB的NVMe局部进行读写测试，所以性能 “下降” 到 <code class="docutils literal notranslate"><span class="pre">2G/1024G</span> <span class="pre">=</span> <span class="pre">1/512</span></code> ，也就是只有整体设备读写性能的 <code class="docutils literal notranslate"><span class="pre">1/512</span></code></p></li>
 <li><p>固态设备规格越小，同样型号的SSD性能越差；要 <code class="docutils literal notranslate"><span class="pre">公平</span></code> 测试性能，只能对比相同规格固态磁盘</p></li>
@@ -378,7 +382,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

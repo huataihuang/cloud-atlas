@@ -19,9 +19,10 @@ MkDocs中文搜索
 配置MkDocs中文搜索
 =========================
 
-- 安装 `jieba "结巴"中文分词 <https://pypi.org/project/jieba/>`_ 模块::
+- 安装 `jieba "结巴"中文分词 <https://pypi.org/project/jieba/>`_ 模块:
 
-   pip install jieba
+.. literalinclude:: mkdocs_chinese_search/jieba
+   :caption: 安装 ``jieba`` 模块
 
 - 在 ``mkdocs.yml`` 中配置 ``separator`` ::
 

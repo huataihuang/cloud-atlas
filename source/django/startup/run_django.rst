@@ -32,6 +32,22 @@ Djang提供了一个命令行工具来创建一个项目，这里我们构建的
 
 此时，再次运行 ``python functional_tests.py`` 则可以看到启动的Firefox正确打开了Django页面。
 
+Django ``ALLOWED_HOSTS``
+============================
+
+在 Django 项目 ``settings.py`` 中有一行 ``ALLOWED_HOSTS`` 限制了客户端访问Django时候能够使用域名和IP地址:
+
+.. literalinclude:: run_django/settings_allowed_hosts.py
+   :language: python
+   :caption: 修订允许访问的域名和IP
+
+如果没有配置好 ``ALLOWED_HOSTS`` (这里配置的是Django服务器IP地址 ``192.168.47.230`` 和域名 ``onesre.huatai.me`` )，则外部访问就会被拒绝，并且在Django终端显示::
+
+   "GET /api/hygonwafmonitor/ HTTP/1.0" 200 15996
+   Invalid HTTP_HOST header: '192.168.47.230'. You may need to add '192.168.47.230' to ALLOWED_HOSTS.
+   Bad Request: /api/hygonwafmonitor/
+   "GET /api/hygonwafmonitor/ HTTP/1.0" 400 143
+
 创建Git仓库
 =============
 
@@ -65,4 +81,4 @@ git仓库初始化之后，提交文件前需要先把不合适提交的数据�
 Docker Compose运行开发环境
 ===========================
 
-我们通过部署 :ref:`django_env` 来 :ref:`run_django` ，但是每次这样重复创建环境也是非常麻烦的事情。并且，部署到测试环境、生产环境，都是重复的工作。我们通过 :ref:`docker` 可以 :ref:`docker_django_quickstart` 。
+我们通过部署 :ref:`django_env_linux` 来 :ref:`run_django` ，但是每次这样重复创建环境也是非常麻烦的事情。并且，部署到测试环境、生产环境，都是重复的工作。我们通过 :ref:`docker` 可以 :ref:`docker_django_quickstart` 。

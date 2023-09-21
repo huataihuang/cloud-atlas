@@ -38,7 +38,7 @@
 
 - 在我的 ``zcloud`` 服务器上，安装了多个网卡，其中内网采用有线网络，网段是 ``192.168.6.x`` ，所以需要设置dnsmasq监听特定地址，只监听内部网络网段和回环地址::
 
-   listen-address=192.168.6.200,127.0.0.1
+   listen-address=192.168.6.200,192.168.7.200,192.168.8.200,127.0.0.1
 
 .. note::
 
@@ -52,7 +52,7 @@
 
 .. note::
 
-   我这里采用 ``listen-address=192.168.6.200,127.0.0.1`` 是因为我这个服务将针对整个 :ref:`priv_cloud_infra` ，并且我会在多个接口上使用这个网段的IP
+   我这里采用 ``listen-address=192.168.6.200,192.168.7.200,192.168.8.200,127.0.0.1`` 是因为我这个服务将针对整个 :ref:`priv_cloud_infra` ，并且我会在多个接口上使用这个网段的IP
 
 - 设置缓存大小：通常dnsmasq是作为本地局域网的DNS缓存服务器运行，并且默认只缓存150条DNS记录，可以将这个缓存扩大::
 
@@ -143,7 +143,6 @@ Manual forwarding
 
 .. literalinclude:: deploy_dnsmasq/dnsmasq.conf
    :language: ini
-   :linenos:
    :caption: dnsmasq简易配置
 
 上述域名就是我们用于DHCP和内部域名，这样我们在 ``/etc/hosts`` 中配置主机名解析时候就只需要配置短域名主机名就可以了，会自动扩展成FQDN完整域名。例如， ``/etc/hosts`` 配置::
@@ -158,6 +157,17 @@ Manual forwarding
    192.168.6.17 pi-worker3
 
 则自动会被加上 ``.staging.huatai.me`` 后缀域名，形成完成的域名 ``192.168.6.9 zcloud.staging.huatai.me``
+
+多域名解析
+===============
+
+- 可以为不同网段设置不同的域名，例如我构建了 ``huatai.me`` 和 ``cloud-atlas.io`` 两个域名(3个)::
+
+   domain=staging.huatai.me,192.168.6.0/24
+   domain=edge.cloud-atlas.io,192.168.7.0/24
+   domain=staging.cloud-atlas.io,192.168.8.0/24
+
+这样我在 :ref:`priv_cloud_infra` 构建了 ``z-k8s`` (192.168.6.x) 和 ``y-k8s`` (192.168.8.x) 分别位于 ``staging.huatia.me`` 和 ``staging.cloud-atlas.io`` 两个域名下
 
 启动DNSmasq
 ===============

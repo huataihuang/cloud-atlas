@@ -43,6 +43,13 @@
    :language: bash
    :caption: 制作Gentoo Linux安装U盘
 
+网络
+======
+
+:ref:`gentoo_mbp_wifi` 是非常麻烦的过程: 我的 :ref:`mbp15_late_2013` 使用了 Broadcom BCM4360 无线芯片，对开源支持不佳。我至今依然没有很好解决这款wifi芯片的驱动(编译)，所以最初在安装Gentoo Linux时不得不使用有线网络连接。
+
+不过，如果使用 :ref:`android` 手机，可以使用 :ref:`android_usb_tethering` 来实现一个通用的USB无线网卡。这样就可以非常容易在安装中连接到无线网络，顺利进行安装。是的，目前我就是采用这种方法来解决安装联网(甚至可以让 :ref:`freebsd` 在无法使用 Broadcom BCM4360 无线芯片情况下通过这种方式连接无线网络 )
+
 安装
 =======
 
@@ -84,6 +91,8 @@
 .. warning::
 
    只有分区3是可以删除(之前安装macOS保留的空白分区)，我将创建一个50G磁盘分区用于操作系统
+
+   之所以没有将所有磁盘分区都用完，是因为我规划在其余 :ref:`nvme` 磁盘分区中采用 :ref:`zfs` 作为数据存储文件系统，来实现灵活的卷管理
 
 - 创建一个名为 ``rootfs`` 分区，格式化成 ``xfs`` :
 
@@ -189,6 +198,7 @@ Chrooting
       :language: bash
       :caption: 在make.conf配置中添加阿里云国内镜像网
 
+
 - 配置 ``/etc/portage/repos.conf/gentoo.conf`` Gentoo ebuild存储库:
 
 .. literalinclude:: install_gentoo_on_mbp/gentoo.conf
@@ -250,6 +260,10 @@ Chrooting
 
    emerge --sync
 
+.. note::
+
+   国内镜像网站虽然没有GFW干扰，下载速度较快。但是 **国内镜像网站同步有延迟，可能会存在好几天都没有同步最新文件的情况** ，所以使用 ``emerge-webrsync`` 下载快照文件可能会失败(因为快照还没有同步)。不过，使用 ``emerge --sync`` 可以绕开这个同步延迟问题，最多也就是本次同步不能及时得到官方的最新版本(稍微旧几天的版本)。
+
 选择正确profile
 ================
 
@@ -270,10 +284,13 @@ Chrooting
 .. literalinclude:: install_gentoo_on_mbp/eselect_profile_list_output
    :language: bash
    :caption: 检查当前使用的 ``profile``
+   :emphasize-lines: 6
 
 .. note::
 
    当使用 :ref:`systemd` 时，请确保 ``profile`` 名称中包含 ``systemd`` ，否则请确保 **不包含** ``systemd``
+
+   在2023年9月的实践，我采用 ``no-multilib (stable)`` ，尝试构建一种轻量级的64位Linux系统
 
 .. warning::
 
@@ -281,7 +298,7 @@ Chrooting
 
    选择初始 ``profile`` 文件时，请确保使用与 stage3 最初使用的版本相同的配置文件
 
-- 设置profile:
+- 设置profile案例:
 
 .. literalinclude:: install_gentoo_on_mbp/eselect_profile_set
    :language: bash
@@ -289,7 +306,7 @@ Chrooting
 
 .. note::
 
-   我准备采用 :ref:`sway` 最小化窗口管理器，所以选择 ``default/linux/amd64/17.1/desktop`` ( ``5`` )
+   之前我曾经采用过 :ref:`sway` 最小化窗口管理器，所以选择 ``default/linux/amd64/17.1/desktop`` ( ``5`` )
 
 更新 @world set
 ================
@@ -313,7 +330,7 @@ Chrooting
 
 ``USE`` 是Gentoo为用户 提供的最强大的变量之一，可以配置支持或不支持某些选项来编译多个程序。例如有些程序可以支持 ``GTK+`` 或 ``Qt`` 情况下编译，或者支持 ``SSL`` ，有些程序甚至可以使用帧缓冲( ``svgalib`` )而不是X11支持来完成编译。
 
-大多数Linux发行版为了能够尽可能多支持不同环境(软件和硬件)，采用了最大化的编译参数，这导致增加了程序大小以及启动时间，而且会导致大量的依赖。使用Gentoo的用户可以通过定义编译选项来精简系统，使得硬件发挥更大功效。
+**大多数Linux发行版为了能够尽可能多支持不同环境(软件和硬件)，采用了最大化的编译参数，这导致增加了程序大小以及启动时间，而且会导致大量的依赖。使用Gentoo的用户可以通过定义编译选项来精简系统，使得硬件发挥更大功效。**
 
 默认的 ``USE`` 设置使用Gentoo配置文件 ``make.defaults`` 。Gentoo使用了一个(复杂的)继承系统。检查当前的USE配置最简单的方法是:
 

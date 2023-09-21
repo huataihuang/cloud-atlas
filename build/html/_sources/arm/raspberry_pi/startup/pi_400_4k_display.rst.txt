@@ -17,7 +17,7 @@ Raspberry Pi 400的4K显示
 
 当我在YouTube上看到能够 :ref:`fydeos_pi` ，让我非常心动：仅仅500RMB就能够实现Linux融合Android应用，能够用Android应用软件来补充Linux桌面应用，应该是非常适合工作环境。 
 
-我购买了4K显示器和 :ref:`pi_400` ，想要实现一个轻量级的Linux开发环境(大量的计算和部署实践在我的 :ref:`pi_cluster` 通过 :ref:`kubernetes_arm` 实现)。不过，当我使用中发现:
+我购买了4K显示器和 :ref:`pi_400` ，想要实现一个轻量级的Linux开发环境(大量的计算和部署实践在我的 :ref:`pi_cluster` 通过 :ref:`arm_k8s` 实现)。不过，当我使用中发现:
 
 - 在Raspberry Pi 400上如果配置了 ``hdmi_enable_4kp60=1`` ，则重启系统后，4K显示器在 :ref:`xfce` 的Display配置中，虽然刷新率确实是 ``60Hz`` ，但是分辨率最高只有 ``1920x1080`` ，无法设置更高的分辨率。
 - 如果去掉 ``hdmi_enable_4kp60=1`` ，则Raspberry Pi 400能够自动检测到4K显示器并且设置最高分辨率 ``3840*2160`` ，但是很不幸，刷新率只有 ``30Hz``

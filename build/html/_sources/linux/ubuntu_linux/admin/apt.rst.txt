@@ -116,6 +116,24 @@ proxy.conf
 
    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A507B2BBA7803E3B
 
+第三方 :ref:`grafana` 仓库
+----------------------------
+
+在安装 :ref:`grafana` 以及升级过程中，也遇到(Grafana)服务器证书更换的问题，此时无法升级软件，报错也类似如上(不过这次这个证书是Grafana提供的，非Ubuntu):
+
+.. literalinclude:: apt/grafana_pub_key_error
+   :caption: ``apt`` 更新时遇到Grafana网站证书更新报错
+   :emphasize-lines: 1
+
+.. note::
+
+   这里除了 Grafana Pub Key 错误之外，另外几行报错是 :ref:`install_pcp` 之前的方法因为JForg免费仓库关闭服务导致，后续再更新 :ref:`install_pcp` 方法
+
+这个问题的解决方法类似，执行一下命令更新服务器存储的Grafana证书(方法参见 `Welcome to Grafana Labs's package repository <https://packages.grafana.com/>`_ ):
+
+.. literalinclude:: apt/update_grafana_pub_key
+   :caption: ``apt`` 更新Grafana网站证书
+
 .. _apt_hold:
 
 apt hold保持包不更新

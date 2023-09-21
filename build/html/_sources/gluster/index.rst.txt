@@ -9,6 +9,7 @@ Gluster Atlas
 
    introduce_gluster.rst
    gluster_vs_ceph.rst
+   best_practices_for_gluster/index
    startup/index
    deploy/index
    build/index

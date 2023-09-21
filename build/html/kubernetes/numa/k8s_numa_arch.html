@@ -12,10 +12,10 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/translations.js"></script>
+        <script src="../../_static/documentation_options.js?v=7c91f8fd"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/translations.js?v=beaddf03"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../genindex.html" />
     <link rel="search" title="搜索" href="../../search.html" />
@@ -65,7 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../manage_object/index.html">Kubernetes管理对象</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../administer/index.html">Kubernetes管理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../access_application/index.html">Kubernetes访问应用</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../container_runtimes/index.html">Kubernetes 容器运行时(Container Runtimes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../container_runtimes/index.html">容器运行时(Container Runtimes)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../configure/index.html">Kubernetes 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../network/index.html">Kubernetes网络</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../in_action/index.html">Kubernetes实践</a></li>
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../sqlite/index.html">SQLite Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mysql/index.html">MySQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pgsql/index.html">PostgreSQL Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../clickhouse/index.html">ClickHouse Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nosql/index.html">NoSQL Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis/index.html">Redis Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../network/index.html">Network Atlas</a></li>
@@ -125,6 +126,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../shell/index.html">Shell Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../python/index.html">Python Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../django/index.html">Django Atlas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flask/index.html">Flask Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../javascript/index.html">JavaScript Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nodejs/index.html">Node.js Atlas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../clang/index.html">C Atlas</a></li>
@@ -175,35 +177,35 @@
            <div itemprop="articleBody">
              
   <section id="kubernetes-numa">
-<span id="k8s-numa-arch"></span><h1>Kubernetes NUMA实现架构<a class="headerlink" href="#kubernetes-numa" title="此标题的永久链接">¶</a></h1>
+<span id="k8s-numa-arch"></span><h1>Kubernetes NUMA实现架构<a class="headerlink" href="#kubernetes-numa" title="Link to this heading">¶</a></h1>
 <p>当Kubernetes部署到裸金属服务器(直接物理主机，非 <a class="reference internal" href="../../kvm/index.html#kvm"><span class="std std-ref">KVM Atlas</span></a> 虚拟机环境) ，就会面对一个现状：服务器的负载锁使用的物理资源分布，从内存、CPU到存储和I/O，会戏剧性地影响性能。直到最近的Kubernetes用户还没有直接方式来影响这个硬件和软件的关键因素，也就是通常所说的资源拓扑(Resource Topology)。</p>
 <p>2021年开始Kubernetes引入了 <code class="docutils literal notranslate"><span class="pre">Topology</span> <span class="pre">Aware</span> <span class="pre">Scheduling</span></code> (拓扑感知调度)功能，使得kubernel控制平面(control plane)可以在pod调度到节点到时候控制资源拓扑限制(keep to Resource Topology constraints)。这个技术实现是从Kubernetes 1.17引入到 <code class="docutils literal notranslate"><span class="pre">Topology</span> <span class="pre">Manager</span></code> ，在kuberlet中节点级别的资源拓扑实现强制限制。</p>
 <section id="id1">
-<h2>资源拓扑的意义<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h2>
+<h2>资源拓扑的意义<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../kernel/memory/numa/index.html#numa"><span class="std std-ref">NUMA架构</span></a> (Non-Uniform Mmeory Access，非一致性内存访问)是计算机平台中允许不同处理器以不同速度访问不同部分(regions)的内存的架构。这个CPU, 内存以及PCI设备的位置，也就是我们所说的资源拓扑 <code class="docutils literal notranslate"><span class="pre">Resource</span> <span class="pre">Topology</span></code> 。</p>
 <p>虽然任何CPU核心都能访问系统中所有内存，但是存在一些性能影响，例如以下拓扑结构示意图中，CPU core 1 访问近端的内存就比其访问靠近CPU core 7的远端内存要快:</p>
 <figure class="align-default" id="id3">
 <a class="reference internal image-reference" href="../../_images/k8s_numa_arch_1.png"><img alt="A Non-uniform Memory Access (NUMA) system" src="../../_images/k8s_numa_arch_1.png" style="width: 571.8px; height: 262.2px;" /></a>
 <figcaption>
-<p><span class="caption-text">FIGURE 1: A Non-uniform Memory Access (NUMA) system</span><a class="headerlink" href="#id3" title="此图像的永久链接">¶</a></p>
+<p><span class="caption-text">FIGURE 1: A Non-uniform Memory Access (NUMA) system</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>简单来说，底层操作系统会管理大多数和numa相关工作，在Kubernetes集群中也是如此。但是，当你试图从裸金属服务器上压榨出低延迟性能，你就需要为特定应用分配隔离的资源。随着添加新型资源，这项工作会更复杂。</p>
 <p>对于 I/O 关键的工作负载，位于远端NUMA zone的网卡会降低数据到达应用程序的速度。高性能负载，例如运行在5G网络，甚至不能在这种情况下运作。</p>
 <section id="numa">
-<h3>资源对齐的NUMA系统<a class="headerlink" href="#numa" title="此标题的永久链接">¶</a></h3>
+<h3>资源对齐的NUMA系统<a class="headerlink" href="#numa" title="Link to this heading">¶</a></h3>
 <p>以下案例是一个请求 2个 CPU 和 1个 PCI设备的 Pod，分别是:</p>
 <figure class="align-default" id="id4">
 <a class="reference internal image-reference" href="../../_images/k8s_numa_arch_2.png"><img alt="A NUMA System with no Resource Alignment" src="../../_images/k8s_numa_arch_2.png" style="width: 489.0px; height: 185.4px;" /></a>
 <figcaption>
-<p><span class="caption-text">FIGURE 2: A NUMA System with no Resource Alignment</span><a class="headerlink" href="#id4" title="此图像的永久链接">¶</a></p>
+<p><span class="caption-text">FIGURE 2: A NUMA System with no Resource Alignment</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>上图中，NUMA没有对齐资源，也就是 CPU 3 需要访问远端内存，而 CPU 6 需要访问远端PCI 设备，相应带来数据访问延迟</p>
 <figure class="align-default" id="id5">
 <a class="reference internal image-reference" href="../../_images/k8s_numa_arch_3.png"><img alt="A NUMA System with Resource Alignment" src="../../_images/k8s_numa_arch_3.png" style="width: 490.2px; height: 185.4px;" /></a>
 <figcaption>
-<p><span class="caption-text">FIGURE 3: A NUMA System with Resource Alignment</span><a class="headerlink" href="#id5" title="此图像的永久链接">¶</a></p>
+<p><span class="caption-text">FIGURE 3: A NUMA System with Resource Alignment</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>上图中，NUMA对齐资源，则CPU 2 和 CPU 3 都是访问近端内存和近端PCI设备，带来性能提升</p>
@@ -213,11 +215,11 @@
 </section>
 </section>
 <section id="topology-managertopology-aware-scheduling">
-<h2>Topology Manager和Topology Aware Scheduling<a class="headerlink" href="#topology-managertopology-aware-scheduling" title="此标题的永久链接">¶</a></h2>
+<h2>Topology Manager和Topology Aware Scheduling<a class="headerlink" href="#topology-managertopology-aware-scheduling" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id6">
 <a class="reference internal image-reference" href="../../_images/k8s_numa_arch_4.png"><img alt="System Level Diagram of Topology-Aware Scheduling" src="../../_images/k8s_numa_arch_4.png" style="width: 718.8px; height: 359.4px;" /></a>
 <figcaption>
-<p><span class="caption-text">FIGURE 4: 拓扑感知的调度器系统级别示意图</span><a class="headerlink" href="#id6" title="此图像的永久链接">¶</a></p>
+<p><span class="caption-text">FIGURE 4: 拓扑感知的调度器系统级别示意图</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <ul class="simple">
@@ -229,12 +231,12 @@
 <figure class="align-default" id="id7">
 <a class="reference internal image-reference" href="../../_images/k8s_numa_arch_5.png"><img alt="Sequence Diagram of Topology-Aware Scheduling" src="../../_images/k8s_numa_arch_5.png" style="width: 738.0px; height: 362.4px;" /></a>
 <figcaption>
-<p><span class="caption-text">FIGURE 5: 拓扑感知的调度器时序图</span><a class="headerlink" href="#id7" title="此图像的永久链接">¶</a></p>
+<p><span class="caption-text">FIGURE 5: 拓扑感知的调度器时序图</span><a class="headerlink" href="#id7" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="id2">
-<h2>参考<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
+<h2>参考<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://cloud.redhat.com/blog/topology-aware-scheduling-in-kubernetes-part-1-the-high-level-business-case">Topology Aware Scheduling in Kubernetes Part 1: The High Level Business Case</a></p></li>
 <li><p><a class="reference external" href="https://cloud.redhat.com/blog/topology-awareness-in-kubernetes-part-2-dont-we-already-have-a-topology-manager">Topology Awareness in Kubernetes Part 2: Don’t we already have a Topology Manager?</a></p></li>
@@ -256,7 +258,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; <a href="../../copyright.html"> 版权所有</a> 2018 - now, Huatai Huang.</p>
+    <p>&#169; <a href="../../copyright.html">Copyright</a> 2018 - now, Huatai Huang.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

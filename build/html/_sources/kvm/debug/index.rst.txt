@@ -8,6 +8,7 @@ KVM故障排查
    :maxdepth: 1
 
    dracut-initqueue_timeout.rst
+   qemu_vfio_connect_timeout.rst
 
 .. only::  subproject and html
 

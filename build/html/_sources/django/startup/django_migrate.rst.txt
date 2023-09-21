@@ -20,17 +20,17 @@ migrations流程
 
 .. literalinclude:: django_migrate/models.py
    :language: python
-   :linenos:
 
-- 然后我们执行 ``makemigrations`` 创建对应的数据库initial.py::
+- 然后我们执行 ``makemigrations`` 创建对应的数据库initial.py:
 
-   python manage.py makemigrations
+.. literalinclude:: django_migrate/makemigrations
+   :language: bash
+   :caption: 执行 makemigrations
 
 此时会自动在 ``migrations`` 目录下生成生成一个 ``0001_initial.py`` 文件，类似
 
 .. literalinclude:: django_migrate/0001_initial.py
    :language: python
-   :linenos:
 
 - 执行数据库操作::
 
@@ -43,6 +43,16 @@ migrations流程
    python manage.py showmigrations
 
 这个命令会输出所有的migrations以及状态(是否执行过)
+
+``makemigrations`` 报错处理
+-----------------------------
+
+我在最近的一次实践中，对一个老项目重新部署，在完成数据库初步准备之后(创建数据库以及设置好账号密码)，执行 ``python manage.py makemigrations`` 出现报错:
+
+.. literalinclude:: django_migrate/makemigrations_err
+   :caption: 执行 makemigrations 报错
+
+这个问题在 `ImportError: cannot import name 'url' from 'django.conf.urls' after upgrading to Django 4.0 <https://stackoverflow.com/questions/70319606/importerror-cannot-import-name-url-from-django-conf-urls-after-upgrading-to>`_ 有解释，原因是Django 3.0升级到Django 4.0+之后已经废弃了 ``django.conf.urls.url()`` 。由于是老项目，我采用 :ref:`pip` Downgrade Django版本方式来解决
 
 Migrations后端支持
 ===================

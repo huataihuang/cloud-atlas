@@ -63,6 +63,10 @@ ZFS是 128 位文件系统，这个设计如此超前，以至于理论极限可
 
 - 在公司配备的 :ref:`apple_silicon_m1_pro` 的MacBook Pro上构建 :ref:`mobile_cloud_infra` (底层操作系统是基于 :ref:`arch_linux` 的 :ref:`asahi_linux` ) (补充: 由于 ``OpenZFS`` 目前仅最高内核v6.0，和 :ref:`asahi_linux` 最新内核 v6.1冲突，所以暂时放弃在 :ref:`apple_silicon_m1_pro` 的MacBook Pro上运行ZFS)
 - 在我自己的旧MacBook Pro 2013上采用ZFS来管理 :ref:`docker` 和 :ref:`libvirt` 存储
+- 在 :ref:`priv_cloud_infra` 所使用的 :ref:`hpe_dl160_gen9` ，使用了3块旧的HDD，构建ZFS存储池:
+
+  - 构建 :ref:`libvirt_zfs_pool` ，扩展本地 libvirt 存储，以便能够运行较大存储规格的KVM虚拟机
+  - 构建 :ref:`deploy_gluster_ubuntu_zfs` ，通过3个Ubuntu虚拟机来实现测试环境的GlusterFS集群，模拟一些有趣的案例
 
 参考
 =======
