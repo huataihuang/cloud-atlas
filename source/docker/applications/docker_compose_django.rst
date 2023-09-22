@@ -8,7 +8,7 @@
 
    本文实践采用 :ref:`docker_compose` 完成设置，运行一个简单的Django/MySQK应用。
 
-   请参考 :ref:`django_env` 完成设置，并确保能够 :ref:`run_django` 。
+   请参考 :ref:`django_env_linux` 完成设置，并确保能够 :ref:`run_django` 。
 
 在Docker环境中运行Django，需要创建Dockerfile，Python依赖文件，以及 ``docker-compose.yml`` 文件。
 
@@ -58,7 +58,7 @@
 
 .. note::
 
-   由于我已经 :ref:`django_env` 完成设置，并确保能够 :ref:`run_django` ，所以我在这里执行的命令是::
+   由于我已经 :ref:`django_env_linux` 完成设置，并确保能够 :ref:`run_django` ，所以我在这里执行的命令是::
 
       docker-compose run web
 

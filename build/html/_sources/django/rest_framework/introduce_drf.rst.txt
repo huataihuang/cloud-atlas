@@ -46,7 +46,7 @@ REST framework运行要求：
    pip install payments
    pip install django-filter  # Filtering support
 
-在 :ref:`django_env` 中 :ref:`run_django` 创建好开发项目，修改 ``settings.py`` 配置的 ``INSTALLED_APPS`` 段落::
+在 :ref:`django_env_linux` 中 :ref:`run_django` 创建好开发项目，修改 ``settings.py`` 配置的 ``INSTALLED_APPS`` 段落::
 
    INSTALLED_APPS = [
        ...

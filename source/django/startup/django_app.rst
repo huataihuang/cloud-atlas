@@ -72,7 +72,7 @@ Django建议采用 "应用" 的形式组织代码，也就是在一个项目中�
 
 这个报错是因为没有执行过 ``python manage.py migrate`` 导致的，在安装了MySQL数据库并且切换了 ``<project_name>/settings.py`` 的数据库设置之后，需要先执行一次数据库迁移。
 
-数据库初始化请参考 :ref:`install_mysql` 。
+数据库初始化请参考 :ref:`centos7_install_mysql` 和 :ref:`install_mariadb` 。
 
 不过，执行完 ``python manage.py migrate`` 之后，再执行 ``python manage.py test`` 出现权限报错::
 

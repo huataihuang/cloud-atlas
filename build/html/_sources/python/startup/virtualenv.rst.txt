@@ -26,7 +26,7 @@ Ubuntu/Debian安装pip和venv
 
 .. note::
 
-   在 :ref:`django_env` 同样也使用virtualenv来构建Django开发环境
+   在 :ref:`django_env_linux` 同样也使用virtualenv来构建Django开发环境
 
 arch安装pip和venv
 --------------------
