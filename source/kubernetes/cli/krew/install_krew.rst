@@ -23,7 +23,7 @@ macOS/Linux安装krew
 
 .. note::
 
-   这里我遇到一个非常痛苦的事情，就是GFW阻塞了 ``krew`` 安装导致反复超时。
+   这里我遇到一个非常痛苦的事情，就是GFW阻塞了 ``krew`` 安装导致反复超时。解决方法可以采用 :ref:`openconnect_vpn`
 
 - 在 :ref:`shell` 的profile中添加运行路径 ``$HOME/.krew/bin`` ，例如 ``.bashrc`` 和 ``.zshrc`` :
 
