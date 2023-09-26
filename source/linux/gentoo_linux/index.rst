@@ -23,6 +23,7 @@ Gentoo Linux
    gentoo_docker.rst
    cross-platform_file_system.rst
    pentoo/index
+   think_gentooserv.rst
 
 .. only::  subproject and html
 

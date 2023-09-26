@@ -22,3 +22,4 @@ Prometheus社区官方提供了大约十几种 `xxxx_exporters <https://github.c
    amd_smi_exporter.rst
    blackbox_exporter.rst
    node_exporter_killed_by_sigpipe.rst
+   ceph_exporter.rst

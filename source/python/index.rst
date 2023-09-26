@@ -14,6 +14,7 @@ Python Atlas
    intro_python.rst
    startup/index
    network/index
+   database/index
    gui/index
    deploy/index
    regular_exresssions.rst
