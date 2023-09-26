@@ -62,6 +62,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id1">安装和配置</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">激活Prometheus输出</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">配置Prometheus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grafana">配置Grafana</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id4">参考</a></li>
 </ul>
 </li>
@@ -167,50 +168,97 @@
 <h2>安装和配置<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <section id="prometheus">
 <h3>Prometheus<a class="headerlink" href="#prometheus" title="Link to this heading">¶</a></h3>
-<p>在我的 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划中，最初想采用如下独立服务器部署Prometheus，不过最终我改为集成化 <a class="reference internal" href="../../real/priv_cloud/z-k8s_prometheus-stack.html#z-k8s-prometheus-stack"><span class="std std-ref">Kubernetes集群(z-k8s)部署Prometheus-stack</span></a></p>
+<p>在我的 <a class="reference internal" href="../../real/priv_cloud/priv_cloud_infra.html#priv-cloud-infra"><span class="std std-ref">私有云架构</span></a> 规划中我采用两种部署方式:</p>
 <ul class="simple">
+<li><p>独立在 <code class="docutils literal notranslate"><span class="pre">zcloud</span></code> 物理服务器上部署 <a class="reference internal" href="../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 和 <a class="reference internal" href="../../kubernetes/monitor/grafana/index.html#grafana"><span class="std std-ref">Grafana通用可视分析平台</span></a></p></li>
+<li><p>在Kubernetes集群部署 <a class="reference internal" href="../../real/priv_cloud/z-k8s_prometheus-stack.html#z-k8s-prometheus-stack"><span class="std std-ref">Kubernetes集群(z-k8s)部署Prometheus-stack</span></a></p></li>
+</ul>
+<p>此外，也尝试在两个 <code class="docutils literal notranslate"><span class="pre">z-b-mon-1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-mon-2</span></code> 上部署双机:</p>
+<blockquote>
+<div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">z-b-mon-1</span></code> 上 <a class="reference internal" href="../../kubernetes/monitor/prometheus/prometheus_startup.html#prometheus-startup"><span class="std std-ref">Prometheus快速起步</span></a> 部署</p></li>
 <li><p>Ceph集群的3个节点 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> / <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 安装并运行 <a class="reference internal" href="../../kubernetes/monitor/prometheus/prometheus_exporters/node_exporter.html#node-exporter"><span class="std std-ref">Node Exporter</span></a></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">z-b-mon-1</span></code> 上 <a class="reference internal" href="../../kubernetes/monitor/grafana/install_grafana.html#install-grafana"><span class="std std-ref">安装Grafana</span></a> 并 <a class="reference internal" href="../../kubernetes/monitor/grafana/grafana_config_startup.html#grafana-config-startup"><span class="std std-ref">Grafana配置快速起步</span></a></p></li>
 </ul>
+</div></blockquote>
 </section>
 </section>
 <section id="id2">
 <h2>激活Prometheus输出<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
-<ul>
-<li><p>使用以下命令激活 prometheus 模块:</p>
+<ul class="simple">
+<li><p>使用以下命令激活 prometheus 模块:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span></code> 激活 <a class="reference internal" href="../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 管理模块</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">enable</span> <span class="n">prometheus</span>
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 <p>默认Ceph Prometheus模块会监听在所有网络接口的 <code class="docutils literal notranslate"><span class="pre">9283</span></code> 端口，即以下配置命令是默认设置:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mgr</span> <span class="n">mgr</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span><span class="n">server_addr</span> <span class="mf">0.0.0.0</span>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">config</span></code> 可以配置 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> 的 <a class="reference internal" href="../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 监听IP和端口</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 默认监听所有网络接口和端口9283</span>
+<span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mgr</span> <span class="n">mgr</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span><span class="n">server_addr</span> <span class="mf">0.0.0.0</span>
 <span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mgr</span> <span class="n">mgr</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span><span class="n">server_port</span> <span class="mi">9283</span>
 </pre></div>
+</div>
 </div>
 <p>你可以通过上述命令修订监听IP地址和端口</p>
 </section>
 <section id="id3">
 <h2>配置Prometheus<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
-<ul>
-<li><p>修订 <code class="docutils literal notranslate"><span class="pre">z-b-mon-1</span></code> 配置 <code class="docutils literal notranslate"><span class="pre">/etc/prometheus/promethesu.yaml</span></code> 添加:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scrape_configs</span><span class="p">:</span>
-  <span class="o">-</span> <span class="n">job_name</span><span class="p">:</span> <span class="s1">&#39;ceph&#39;</span>
-    <span class="n">honor_labels</span><span class="p">:</span> <span class="n">true</span>
-    <span class="n">static_configs</span><span class="p">:</span>
-      <span class="o">-</span> <span class="n">targets</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;z-b-data-1:9283&#39;</span><span class="p">]</span>
-        <span class="n">labels</span><span class="p">:</span>
-          <span class="n">instance</span><span class="p">:</span> <span class="s1">&#39;ceph_cluster&#39;</span>
-      <span class="o">-</span> <span class="n">targets</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;z-b-data-2:9283&#39;</span><span class="p">]</span>
-        <span class="n">labels</span><span class="p">:</span>
-          <span class="n">instance</span><span class="p">:</span> <span class="s1">&#39;ceph_cluster&#39;</span>
-      <span class="o">-</span> <span class="n">targets</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;z-b-data-3:9283&#39;</span><span class="p">]</span>
-        <span class="n">labels</span><span class="p">:</span>
-          <span class="n">instance</span><span class="p">:</span> <span class="s1">&#39;ceph_cluster&#39;</span>
+<ul class="simple">
+<li><p>配置 <code class="docutils literal notranslate"><span class="pre">/etc/prometheus/prometheus.yaml</span></code> 添加:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">配置 <a class="reference internal" href="../../kubernetes/monitor/prometheus/index.html#prometheus"><span class="std std-ref">Prometheus监控</span></a> 抓取Ceph的metrics</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">   </span><span class="nt">scrape_configs</span><span class="p">:</span>
+<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;ceph&#39;</span>
+<span class="w">       </span><span class="nt">honor_labels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">       </span><span class="nt">static_configs</span><span class="p">:</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;192.168.6.204:9283&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">           </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">             </span><span class="nt">instance</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;ceph_cluster&#39;</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;192.168.6.205:9283&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">           </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">             </span><span class="nt">instance</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;ceph_cluster&#39;</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;192.168.6.206:9283&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">           </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">             </span><span class="nt">instance</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;ceph_cluster&#39;</span>
 </pre></div>
 </div>
-</li>
+</div>
+<ul class="simple">
+<li><p>重启prometheus</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>当 <a class="reference internal" href="../deploy/install_ceph_manual/install_ceph_mgr.html#install-ceph-mgr-single"><span class="std std-ref">部署单个 mgr</span></a> 则Prometheus的抓取入口只有一个，此时上文配置3个抓取入口会有2个显示无法连接:</p>
+<figure class="align-default">
+<img alt="../../_images/ceph_mgr_single_prometheus.png" src="../../_images/ceph_mgr_single_prometheus.png" />
+</figure>
+<p>当完成 <a class="reference internal" href="../deploy/install_ceph_manual/install_ceph_mgr.html#install-ceph-mgr-multi"><span class="std std-ref">部署多个 mgr</span></a> 配置之后，就会看到3个prometheus抓取Endpoint都UP起来了:</p>
+<figure class="align-default">
+<img alt="../../_images/ceph_mgr_multi_prometheus.png" src="../../_images/ceph_mgr_multi_prometheus.png" />
+</figure>
+</div>
+</section>
+<section id="grafana">
+<h2>配置Grafana<a class="headerlink" href="#grafana" title="Link to this heading">¶</a></h2>
+<p>在Grafana的Dashboard网站可以搜索到很多Ceph Dashboard，基本上都是围绕 Ceph官方的 <code class="docutils literal notranslate"><span class="pre">Ceph</span> <span class="pre">MGR(s)</span> <span class="pre">Prometheus</span> <span class="pre">Metrics</span> <span class="pre">Endpoints</span></code> 实现:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://grafana.com/grafana/dashboards/2842-ceph-cluster/">Ceph Cluster (ID: 2842)</a> 以下是我的安装实践截图:</p></li>
+</ul>
+<figure class="align-default">
+<img alt="../../_images/ceph_grafana_1.png" src="../../_images/ceph_grafana_1.png" />
+</figure>
+<figure class="align-default">
+<img alt="../../_images/ceph_grafana_2.png" src="../../_images/ceph_grafana_2.png" />
+</figure>
+<ul class="simple">
+<li><p><a class="reference external" href="https://grafana.com/grafana/dashboards/5336-ceph-osd-single/">Ceph - OSD (Single) (ID: 5336)</a></p></li>
+<li><p><a class="reference external" href="https://grafana.com/grafana/dashboards/5342-ceph-pools/">Ceph - Pools (ID: 5342)</a></p></li>
+<li><p><a class="reference external" href="https://grafana.com/grafana/dashboards/7056-ceph-cluster/">Ceph - Cluster (ID: 7056)</a></p></li>
 </ul>
 </section>
 <section id="id4">

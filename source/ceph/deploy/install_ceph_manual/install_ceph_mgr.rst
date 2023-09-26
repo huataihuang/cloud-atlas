@@ -4,9 +4,12 @@
 安装 ceph-mgr
 =======================
 
-手工安装Ceph的第一阶段工作 :ref:`install_ceph_mon` 完成后，需要在 ``每个`` ``ceph-mon`` 服务的运行节点，在安装一个 ``ceph-mgr`` daemon
+手工安装Ceph的第一阶段工作 :ref:`install_ceph_mon` 完成后，需要在 :strike:`每个` 至少一个 ``ceph-mon`` 服务的运行节点，在安装一个 ``ceph-mgr`` daemon(这里的案例是在 ``z-b-data-1`` 节点上启动第一个 ``mgr`` )
 
 可以设置 ``ceph-mgr`` 来使用诸如 ``ceph-ansible`` 工具。
+
+手工部署单个 ``mgr``
+=======================
 
 - 创建服务的认证key::
 
@@ -37,38 +40,56 @@
    [mgr.adm]
         key = XXXXXXXXXXXXXXXX
 
-上述命令可以合并起来(不用再手工编辑 ``/var/lib/ceph/mgr/ceph-z-b-data-1/keyring`` )::
+.. _install_ceph_mgr_single:
 
-   sudo mkdir /var/lib/ceph/mgr/ceph-z-b-data-1
-   sudo ceph auth get-or-create mgr.z-b-data-1 mon 'allow profile mgr' osd 'allow *' mds 'allow *' | sudo tee /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+部署单个 ``mgr``
+===================
 
-- 然后还需要修订文件属性::
+上述命令可以合并起来(不用再手工编辑 ``/var/lib/ceph/mgr/ceph-z-b-data-1/keyring`` ):
 
-   sudo chown ceph:ceph /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
-   sudo chmod 600 /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+.. literalinclude:: install_ceph_mgr/ceph_mgr_keyring
+   :caption: 创建对应主机名的 ``mgr`` keyring
 
-- 然后通过systemd启动::
+- 然后还需要修订文件属性:
 
-   sudo systemctl start ceph-mgr@z-b-data-1
+.. literalinclude:: install_ceph_mgr/ceph_mgr_keyring_chown_chmod
+   :caption: 修改 ``mgr`` keyring的属性和属主
 
-- 然后检查::
+- 最后通过systemd启动:
 
-   sudo ceph -s
+.. literalinclude:: install_ceph_mgr/start_ceph_mgr
+   :caption: 启动 ``mgr``
 
-可以看到 ``ceph-mgr`` 已经注册成功::
+- 然后检查:
 
-   cluster:
-     id:     39392603-fe09-4441-acce-1eb22b1391e1
-     health: HEALTH_OK
-   services:
-     mon: 1 daemons, quorum z-b-data-1 (age 18m)
-     mgr: z-b-data-1(active, since 11s)
-     osd: 0 osds: 0 up, 0 in
-   data:
-     pools:   0 pools, 0 pgs
-     objects: 0 objects, 0 B
-     usage:   0 B used, 0 B / 0 B avail
-     pgs:
+.. literalinclude:: install_ceph_mgr/check_ceph_mgr
+   :caption: 检查 ``mgr`` 运行状态
+
+可以看到 ``ceph-mgr`` 已经注册成功:
+
+.. literalinclude:: install_ceph_mgr/check_ceph_mgr_output
+   :caption: 检查 ``mgr`` 运行状态输出
+
+.. note::
+
+   注意，上述步骤只启动了一个 ``mgr`` 运行在 ``z-b-data-1`` 上，所以如果配置 :ref:`ceph_dashboard_prometheus` ，则激活的 ``protmetheus`` 模块也只是运行在 ``z-b-data-1`` 上。要实现监控冗余，则应该在多个节点部署 ``mgr`` (见下文)
+
+- 上述多个步骤可以合并成一个通用脚本:
+
+.. literalinclude:: install_ceph_mgr/ceph_mgr
+   :caption: 配置 ``mgr`` keyring并启动服务
+
+.. _install_ceph_mgr_multi:
+
+部署多个 ``mgr``
+===================
+
+在 :ref:`ceph_dashboard_prometheus` 可以定义多个抓取入口，此时需要在Ceph集群中运行对应的 ``mgr`` 以及激活 ``prometheus`` 模块
+
+- 将上文 ``z-b-data-1`` 配置文件 ``/var/lib/ceph/mgr/ceph-z-b-data-1/keyring`` 复制到 ``z-b-data-2`` 和 ``z-b-data-3`` ，或者直接在对应的 ``z-b-data-2`` 和 ``z-b-data-3`` 上执行通用脚本:
+
+.. literalinclude:: install_ceph_mgr/ceph_mgr
+   :caption: 配置 ``mgr`` keyring并启动服务
 
 使用模块
 ===========

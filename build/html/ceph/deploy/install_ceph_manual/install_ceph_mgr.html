@@ -174,8 +174,10 @@
              
   <section id="ceph-mgr">
 <span id="install-ceph-mgr"></span><h1>安装 ceph-mgr<a class="headerlink" href="#ceph-mgr" title="Link to this heading">¶</a></h1>
-<p>手工安装Ceph的第一阶段工作 <a class="reference internal" href="install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a> 完成后，需要在 <code class="docutils literal notranslate"><span class="pre">每个</span></code> <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 服务的运行节点，在安装一个 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> daemon</p>
+<p>手工安装Ceph的第一阶段工作 <a class="reference internal" href="install_ceph_mon.html#install-ceph-mon"><span class="std std-ref">安装 ceph-mon</span></a> 完成后，需要在 <span class="sphinxnotes-strike" style="text-decoration: line-through;">每个</span> 至少一个 <code class="docutils literal notranslate"><span class="pre">ceph-mon</span></code> 服务的运行节点，在安装一个 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> daemon(这里的案例是在 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 节点上启动第一个 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> )</p>
 <p>可以设置 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 来使用诸如 <code class="docutils literal notranslate"><span class="pre">ceph-ansible</span></code> 工具。</p>
+<section id="mgr">
+<h2>手工部署单个 <code class="docutils literal notranslate"><span class="pre">mgr</span></code><a class="headerlink" href="#mgr" title="Link to this heading">¶</a></h2>
 <ul>
 <li><p>创建服务的认证key:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo ceph auth get-or-create mgr.$name mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39;
@@ -207,30 +209,50 @@
      <span class="n">key</span> <span class="o">=</span> <span class="n">XXXXXXXXXXXXXXXX</span>
 </pre></div>
 </div>
+</section>
+<section id="install-ceph-mgr-single">
+<span id="id1"></span><h2>部署单个 <code class="docutils literal notranslate"><span class="pre">mgr</span></code><a class="headerlink" href="#install-ceph-mgr-single" title="Link to this heading">¶</a></h2>
 <p>上述命令可以合并起来(不用再手工编辑 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/ceph-z-b-data-1/keyring</span></code> ):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">创建对应主机名的 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> keyring</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 生成mgr密钥</span>
+<span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
 <span class="n">sudo</span> <span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">mgr</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span> <span class="n">mon</span> <span class="s1">&#39;allow profile mgr&#39;</span> <span class="n">osd</span> <span class="s1">&#39;allow *&#39;</span> <span class="n">mds</span> <span class="s1">&#39;allow *&#39;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
 </pre></div>
 </div>
-<ul>
-<li><p>然后还需要修订文件属性:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">chown</span> <span class="n">ceph</span><span class="p">:</span><span class="n">ceph</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
+</div>
+<ul class="simple">
+<li><p>然后还需要修订文件属性:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">修改 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> keyring的属性和属主</span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 修订密钥属性和属主</span>
+<span class="n">sudo</span> <span class="n">chown</span> <span class="n">ceph</span><span class="p">:</span><span class="n">ceph</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
 <span class="n">sudo</span> <span class="n">chmod</span> <span class="mi">600</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">mgr</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">keyring</span>
 </pre></div>
 </div>
-</li>
-<li><p>然后通过systemd启动:</p>
+</div>
+<ul class="simple">
+<li><p>最后通过systemd启动:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">启动 <code class="docutils literal notranslate"><span class="pre">mgr</span></code></span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mgr</span><span class="nd">@z</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">data</span><span class="o">-</span><span class="mi">1</span>
 </pre></div>
 </div>
-</li>
-<li><p>然后检查:</p>
+</div>
+<ul class="simple">
+<li><p>然后检查:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">检查 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> 运行状态</span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="o">-</span><span class="n">s</span>
 </pre></div>
 </div>
-</li>
-</ul>
+</div>
 <p>可以看到 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 已经注册成功:</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">检查 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> 运行状态输出</span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cluster</span><span class="p">:</span>
   <span class="nb">id</span><span class="p">:</span>     <span class="mi">39392603</span><span class="o">-</span><span class="n">fe09</span><span class="o">-</span><span class="mi">4441</span><span class="o">-</span><span class="n">acce</span><span class="o">-</span><span class="mi">1</span><span class="n">eb22b1391e1</span>
   <span class="n">health</span><span class="p">:</span> <span class="n">HEALTH_OK</span>
@@ -245,8 +267,62 @@
   <span class="n">pgs</span><span class="p">:</span>
 </pre></div>
 </div>
-<section id="id1">
-<h2>使用模块<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>注意，上述步骤只启动了一个 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> 运行在 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 上，所以如果配置 <a class="reference internal" href="../../mgr/ceph_dashboard_prometheus.html#ceph-dashboard-prometheus"><span class="std std-ref">Ceph Dashboard集成Prometheus</span></a> ，则激活的 <code class="docutils literal notranslate"><span class="pre">protmetheus</span></code> 模块也只是运行在 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 上。要实现监控冗余，则应该在多个节点部署 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> (见下文)</p>
+</div>
+<ul class="simple">
+<li><p>上述多个步骤可以合并成一个通用脚本:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">配置 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> keyring并启动服务</span><a class="headerlink" href="#id12" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#sudo mkdir /var/lib/ceph/mgr/ceph-z-b-data-1
+#sudo ceph auth get-or-create mgr.z-b-data-1 mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39; | sudo tee /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+#sudo chown ceph:ceph /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+#sudo chmod 600 /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+#sudo systemctl start ceph-mgr@z-b-data-1
+
+HOST=`hostname -s`
+sudo mkdir /var/lib/ceph/mgr/ceph-${HOST}
+sudo ceph auth get-or-create mgr.${HOST} mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39; | sudo tee /var/lib/ceph/mgr/ceph-${HOST}/keyring
+
+sudo chown ceph:ceph /var/lib/ceph/mgr/ceph-${HOST}/keyring
+sudo chmod 600 /var/lib/ceph/mgr/ceph-${HOST}/keyring
+
+sudo systemctl start ceph-mgr@${HOST}
+</pre></div>
+</div>
+</div>
+</section>
+<section id="install-ceph-mgr-multi">
+<span id="id2"></span><h2>部署多个 <code class="docutils literal notranslate"><span class="pre">mgr</span></code><a class="headerlink" href="#install-ceph-mgr-multi" title="Link to this heading">¶</a></h2>
+<p>在 <a class="reference internal" href="../../mgr/ceph_dashboard_prometheus.html#ceph-dashboard-prometheus"><span class="std std-ref">Ceph Dashboard集成Prometheus</span></a> 可以定义多个抓取入口，此时需要在Ceph集群中运行对应的 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> 以及激活 <code class="docutils literal notranslate"><span class="pre">prometheus</span></code> 模块</p>
+<ul class="simple">
+<li><p>将上文 <code class="docutils literal notranslate"><span class="pre">z-b-data-1</span></code> 配置文件 <code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/ceph-z-b-data-1/keyring</span></code> 复制到 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> ，或者直接在对应的 <code class="docutils literal notranslate"><span class="pre">z-b-data-2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">z-b-data-3</span></code> 上执行通用脚本:</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">配置 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> keyring并启动服务</span><a class="headerlink" href="#id13" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#sudo mkdir /var/lib/ceph/mgr/ceph-z-b-data-1
+#sudo ceph auth get-or-create mgr.z-b-data-1 mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39; | sudo tee /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+#sudo chown ceph:ceph /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+#sudo chmod 600 /var/lib/ceph/mgr/ceph-z-b-data-1/keyring
+#sudo systemctl start ceph-mgr@z-b-data-1
+
+HOST=`hostname -s`
+sudo mkdir /var/lib/ceph/mgr/ceph-${HOST}
+sudo ceph auth get-or-create mgr.${HOST} mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39; | sudo tee /var/lib/ceph/mgr/ceph-${HOST}/keyring
+
+sudo chown ceph:ceph /var/lib/ceph/mgr/ceph-${HOST}/keyring
+sudo chmod 600 /var/lib/ceph/mgr/ceph-${HOST}/keyring
+
+sudo systemctl start ceph-mgr@${HOST}
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h2>使用模块<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
 <ul>
 <li><p>查看 <code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code> 提供了哪些模块:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">ls</span>
@@ -276,14 +352,14 @@
 </li>
 </ul>
 </section>
-<section id="id2">
-<h2>下一步<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<section id="id4">
+<h2>下一步<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="add_ceph_osds_lvm.html#add-ceph-osds-lvm"><span class="std std-ref">添加Ceph OSDs (LVM卷)</span></a></p></li>
 </ul>
 </section>
-<section id="id3">
-<h2>参考<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<section id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.ceph.com/en/pacific/mgr/administrator/#mgr-administrator-guide">ceph-mgr administrator’s guide: MANUAL SETUP</a></p></li>
 <li><p><a class="reference external" href="http://www.hep.ph.ic.ac.uk/~dbauer/cloud/iris/ceph.html">CEPH by hand</a> 这篇笔记非常实用，补充了ceph官方文档的缺失</p></li>

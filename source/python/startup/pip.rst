@@ -27,10 +27,15 @@ pip安装指定版本python包
 .. literalinclude:: pip/pip_install_specific_package
    :caption: pip安装指定版本python包
 
+- 此外， ``pip`` 还提供了指定版本范围的安装方法:
+
+.. literalinclude:: pip/pip_install_specific_range_package
+   :caption: pip安装指定版本范围python包
+
 降级(已经安装过软件包)
 -------------------------------
 
-如果安装了高版本软件包想要降级，采用的方法其实还是上文安装指定Python包的方法，但是需要使用 ``-I`` ( ``--ignore-installed`` ) 参数表示忽略已经安装版本，或者使用强制参数 ``--force-reinstall`` :
+- 如果安装了高版本软件包想要降级，采用的方法其实还是上文安装指定Python包的方法，但是需要使用 ``-I`` ( ``--ignore-installed`` ) 参数表示忽略已经安装版本，或者使用强制参数 ``--force-reinstall`` :
 
 .. literalinclude:: pip/pip_install_specific_package_force
    :caption: pip降级指定python包(强制安装)
