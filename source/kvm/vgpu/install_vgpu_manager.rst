@@ -705,6 +705,10 @@ OK，就这么简单
    :language: bash
    :caption: 清理vGPU环境
 
+.. warning::
+
+   目前我实际采用 :ref:`vgpu_quickstart` 构建双vGPU模式来运行(每个vGPU分配12G显存)
+
 ``nvidia-smi`` 清理
 ----------------------
 
