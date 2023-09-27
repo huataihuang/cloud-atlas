@@ -44,7 +44,7 @@ USE flags
 
 - 主要的配置文件有2个:
 
-  - ``/usr/share/dbus-1/system.conf `` 用于 system bus
+  - ``/usr/share/dbus-1/system.conf`` 用于 system bus
   - ``/usr/share/dbus-1/session.conf`` 用于 session bus
 
 system bus: ``dbus`` 服务

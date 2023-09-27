@@ -66,7 +66,6 @@ NVIDIA License Server 安装是一个独立步骤
    :language: bash
    :caption: 执行 ``vgpu_create`` 脚本创建2个 ``P40-12C`` :ref:`vgpu` 输出信息第 **二** 个vgpu设备
 
-
 (对应2个vGPU)分别添加到 **2个** 虚拟机 ``y-k8s-n-1`` 和 ``y-k8s-n-2`` 中，然后启动虚拟机
 
 - 虚拟机启动后，在 Host 物理主机上检查 ``nvidia-smi vgpu`` 可以看到如下输出信息，表明两块 :ref:`vgpu` 已经正确插入到2个虚拟机中:
@@ -74,6 +73,27 @@ NVIDIA License Server 安装是一个独立步骤
 .. literalinclude:: vgpu_quickstart/nvidia-smi_vgpu_output
    :caption: 执行 ``nvidia-smi vgpu`` 可以看到两块vGPU已经分配给两个虚拟机
    :emphasize-lines: 9,10
+
+恢复 ``mdev`` 设备
+---------------------
+
+当操作系统升级(内核)之后，重启物理服务器，上述 ``mdev`` 设备丢失，此时启动 ``y-k8s-n-1`` 报错::
+
+   error: Failed to start domain 'y-k8s-n-1'
+   error: device not found: mediated device '3eb9d560-0b31-11ee-91a9-bb28039c61eb' not found
+
+则需要恢复原先的 ``mdev`` 设备(依然使用原先的uuid)，也就是将上述 ``vgpu_create`` 脚本后半段抠出来直接运行(uuid沿用分配给虚拟机的设备uuid):
+
+.. literalinclude:: vgpu_quickstart/restore_mdev.sh
+   :language: bash
+   :caption: 恢复原先创建过的 ``mdev`` 设备
+
+不过，这里会提示::
+
+   Device 3eb9d560-0b31-11ee-91a9-bb28039c61eb on 0000:82:00.0 already defined, try modify?
+   Device 3eb9d718-0b31-11ee-91aa-2b17f51ee12d on 0000:82:00.0 already defined, try modify?
+
+也就是说，只要执行 ``mdevctl start`` 就可以了
 
 :ref:`install_vgpu_guest_driver`
 =================================
