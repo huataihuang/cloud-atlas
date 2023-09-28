@@ -9,6 +9,7 @@ Asahi Linux
 
    intro_asahi_linux.rst
    install_asahi_linux.rst
+   uninstall_asahi_linux.rst
    asahi_linux_wifi.rst
    resize_asahi_linux_rootfs.rst
 

@@ -6,6 +6,8 @@ Ceph Dashboard集成Prometheus
 
 Ceph Dashboard使用了 :ref:`grafana` 面板来实现RBD监控，数据源是从 :ref:`prometheus` 拉取数据，Ceph Prometheus Module 采用Prometheus输出格式输出(export)数据，然后由Grafana面板从Prometheus模块和 Node exporter获取metrics名字。
 
+
+
 安装和配置
 ==================
 
@@ -22,6 +24,10 @@ Prometheus
   - ``z-b-mon-1`` 上 :ref:`prometheus_startup` 部署
   - Ceph集群的3个节点 ``z-b-data-1`` / ``z-b-data-2`` / ``z-b-data-3`` 安装并运行 :ref:`node_exporter`
   - ``z-b-mon-1`` 上 :ref:`install_grafana` 并 :ref:`grafana_config_startup`
+
+.. note::
+
+   本文最终实践是在物理主机 ``zcloud`` 上运行 :ref:`prometheus` + :ref:`grafana` 来构建监控底盘
 
 激活Prometheus输出
 ===================
