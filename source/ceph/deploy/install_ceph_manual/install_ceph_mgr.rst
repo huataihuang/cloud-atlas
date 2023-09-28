@@ -91,6 +91,18 @@
 .. literalinclude:: install_ceph_mgr/ceph_mgr
    :caption: 配置 ``mgr`` keyring并启动服务
 
+.. note::
+
+   Ceph ``mgr`` 是 ``active-standby`` 架构，也就是说虽然部署了多个 ``mgr`` 但实际上只有一个在工作，这点可以通过 ``ceph -s`` 查看到:
+
+   .. literalinclude:: install_ceph_mgr/ceph_status
+      :caption: 通过 ``ceph -s`` 可以观察到 ``mgr`` 只有一个激活 ``z-b-data-2`` 是 ``active`` ，其他都是 ``standby``
+      :emphasize-lines: 7
+
+当部署了多个 ``mgr`` ，随着 ``ceph`` 服务器的重启，有可能 ``mgr`` 的 ``active`` 状态会切换(哪个服务器节点最先启动就可能夺得 ``mgr`` 的 ``active`` 状态)。这里可能会遇到一个问题， ``ceph-mgr-dashboard`` 是跟随 ``mgr`` 的active节点工作的，当 ``mgr`` 从 ``z-b-data-1`` 切换到 ``z-b-data-2`` 时，一定要确保 ``z-b-data-2`` 也安装了 ``ceph-mgr-dashboard`` ，才能正确看到管控面板。
+
+实际上，应该在所有 ``mgr`` 的节点上都安装 ``ceph-mgr-dashboard`` 软件包，只要集群 ``ceph mgr module enable dashboard`` 。那么不管切换到哪个节点，都会正常工作(实际每个节点都在监听 ``8443`` 端口，但只有一个 ``active`` 节点是工作的)
+
 使用模块
 ===========
 
