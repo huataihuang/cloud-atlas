@@ -38,11 +38,22 @@ Homebrew
 安装网络阻塞问题的解决方法
 ------------------------------
 
-安装Homebrew的最大麻烦是 GFW 对GitHub的干扰(并不是完全不通，但是不断间歇阻塞会浪费大量的时间精力)，解决的方法是使用代理。安装脚本中涉及到 ``curl`` 和 ``git`` 都需要配置代理。我采用的方法是:
+安装Homebrew的最大麻烦是 GFW 对GitHub的干扰(并不是完全不通，但是不断间歇阻塞会浪费大量的时间精力)，解决的方法是使用代理。安装脚本中涉及到 ``curl`` 和 ``git`` 都需要配置代理。我采用的方法是: :ref:`ssh_tunneling_dynamic_port_forwarding` :
 
-- :ref:`squid_socks_peer` 方案可以在本地构建一个squid代理，通过墙外到二级代理实现无障碍访问
+.. literalinclude:: ../../infra_service/ssh/ssh_tunneling_dynamic_port_forwarding/ssh_tunnel_dynamic
+   :caption: 执行一条命令建立起动态端口转发的翻墙ssh tunnel
+
+- 我最初采用socks结合squid代理 ( :ref:`squid_socks_peer` 方案可以在本地构建一个squid代理，通过墙外到二级代理实现无障碍访问)，不过感觉对桌面来说有点复杂，所以改为更为简单的 :ref:``
 - :ref:`curl_proxy`
+
+.. literalinclude:: ../../web/curl/curl_proxy/socks5_proxy_env
+   :caption: 配置curl的socks5代理环境变量
+
 - :ref:`git_proxy`
+
+.. literalinclude:: ../../devops/git/git_proxy/git_config_http.proxy_socks5
+   :language: bash
+   :caption: 全局配置git使用socks5代理
 
 此外，参考 `How to install an homebrew package behind a proxy? <https://apple.stackexchange.com/questions/228865/how-to-install-an-homebrew-package-behind-a-proxy>`_ 有一个简单设置方法:
 
@@ -169,6 +180,32 @@ macOS升级系统，可能会导致brew的软件无法正常工作。例如，�
 也可以单独升级某个异常软件::
 
    brew upgrade macvim
+
+服务起停
+============
+
+``brew`` 提供了一个 ``services`` 方式来启动和停止服务以及管理服务的自动启动
+
+- 通过以下命令 ``tapping`` ``homebrew/services`` (只需要执行一次):
+
+.. literalinclude:: homebrew/tap_services
+   :caption: 安装 ``brew services``
+
+- 通过以下命令可启动/停止 nginx 服务，其中 ``start`` 命令不仅启动nginx而且会设置nginx随着操作系统启动而启动:
+
+.. literalinclude:: homebrew/services_start_stop_nginx
+   :caption: ``brew`` 启动和停止nginx
+
+- ``list`` 命令可检查当前系统所有服务:
+
+.. literalinclude:: homebrew/services_list
+   :caption: ``brew`` 检查系统所有服务
+
+输出类似:
+
+.. literalinclude:: homebrew/services_list_output
+   :caption: ``brew`` 检查系统所有服务输出案例
+
 
 实践和必备安装
 =================

@@ -43,9 +43,10 @@ http/https代理
 socks5代理
 ------------
 
-比较特别，对于socks代理，变量是使用全部大写字母::
+比较特别，对于socks代理，变量是使用全部大写字母:
 
-   export ALL_PROXY=socks5h://localhost:1080
+.. literalinclude:: curl_proxy/socks5_proxy_env
+   :caption: 配置curl的socks5代理环境变量
 
 参考
 =======
