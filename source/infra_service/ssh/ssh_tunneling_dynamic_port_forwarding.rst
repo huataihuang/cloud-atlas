@@ -20,9 +20,10 @@ SSH Tunneling: 动态端口转发
   - ``[LOCAL_IP:]LOCAL_PORT`` 是本地主机IP地址和端口，如果没有提供 ``LOCAL_IP`` 则ssh客户端绑定到回环地址 ``localhost`` 
   - ``[USER@]SERVER_IP`` 远程SSH服务器地址和用户名
 
-例如我经常使用的::
+例如使用的:
 
-  ssh -D 8123 -C huatai@vpn.huatai.me
+.. literalinclude:: ssh_tunneling_dynamic_port_forwarding/ssh_tunnel_dynamic
+   :caption: 执行一条命令建立起动态端口转发的翻墙ssh tunnel
 
 则建立起本地socks加密代理
 
