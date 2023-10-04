@@ -15,23 +15,11 @@ Ubuntu的母公司Canonical在dockerhub官方维护了一个基于 Ubuntu LTS �
    :language: bash
    :caption: 在物理主机创建squid容器的卷
 
-- 准备配置文件 :ref:`squid_startup` :
+- 准备配置文件 ``${BASE_DIR}/etc/squid/squid.conf`` (参考 :ref:`squid_startup` ):
 
 .. literalinclude:: ../../web/proxy/squid/squid_startup/squid.conf
    :language: bash
    :caption: fedora默认初始squid配置: /etc/squid/squid.conf
-
-.. note::
-
-   这里有一个问题，就是在 :ref:`docker_desktop` for mac 容器中运行squid，启用了 ``cache_dir`` 配置之后，squid出现报错::
-
-      2023/01/31 17:03:09| FATAL: Failed to make swap directory /var/cache/squid: (13) Permission denied
-
-   原因看起来是因为 squid 使用了 ``proxy`` 用户账号来运行，一旦需要缓存目录，该目录必须是 ``proxy`` ( ``id=13`` ) 来读写。
-
-   我发现在macOS的host主机，实际目录属主是 ``huatai`` ，但是映射到容器内部后这个目录属主是 ``root`` 
-
-   但是，即使我不映射host的磁盘目录到 ``/var/spool/squid`` 也依然无法在容器中配置squid的 ``cache_dir`` 功能，迷惑
 
 运行
 ========
