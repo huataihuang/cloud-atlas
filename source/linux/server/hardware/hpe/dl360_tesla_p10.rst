@@ -25,16 +25,50 @@ Tesla P10买家是通过顺丰空运，第二天晚上就拿到了，安装到 D
 
 但是，遇到一个问题，Nvidia的GPU卡需要外接电源，而DL 360内部没有这个电源线。(后面我还要说因为这个外接电源带来的困扰和失误)
 
-问了卖家，这个电源线就是PC机的标准8-pin电源线。在HP DL360 gen9的 ``Primary PCIe 3.0 riser for PCIe slot 1 & 2`` (对应CPU 1) 的电路板背面(靠近 slot2)有一个象牙色的电源出输出(8-pin)，可以输出电流给显卡使用。下图是PCIe Slot 1 & 2板上电源接口(部件翻转过来看):
+:strike:`问了卖家，这个电源线就是PC机的标准8-pin电源线` (实际不是)。
+
+Tesla计算卡使用EPS供电接口，这个接口是服务器通用接口，通常在主板Raiser上提供。下图是 EPS 8pin 连接线接头:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/eps_8pin_power_connector.webp
+
+在HP DL360 gen9的 ``Primary PCIe 3.0 riser for PCIe slot 1 & 2`` (对应CPU 1) 的电路板背面(靠近 slot2)有一个象牙色的电源出输出(8-pin)，可以安装EPS 8pin电源线(上图)输出电流给显卡使用。
+
+下图是PCIe Slot 1 & 2板上电源接口(部件翻转过来看):
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/dl360_gen9_pcie1.png
    :scale: 70
 
-不过，万能淘宝上能够找到 ``DELL R720 双8针 独立显卡 供电线 8针供电 8P 6+2`` ，虽然卖家反复强调这根电源线只能用于Dell服务器，但是苦于无法找到HP服务器的显卡供电线，我仔细对比观察了 ``Dell R720 双2针`` 的接口，看起来是标准电源线接口，和我的HPE DL360 Gen9的 ``Primary PCIe 3.0 riser for PCIe slot 1 & 2`` 电源输出接口完全匹配。
+需要注意EPS 8pin供电接口和普通家用的PCIe供电口不同(通常用于消费级显卡): 下图是PCIe 8pin接口和 EPS 8pin接口 差异比较
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_eps_8pin_connector.webp
+
+对于家用台式机安装数据中心Tesla计算卡，通常需要使用PCIe转EPS接口电源转接线，将两个PCIe电源作为输入来提供GPU计算卡外接电源:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/pcie2eps_connector.webp
+
+我最初不知道EPS电源线规格(这也是最近和网友jinghuashang交流才注意到的)，好在万能淘宝上能够找到 ``DELL R720 双8针 独立显卡 供电线 8针供电 8P 6+2`` ，虽然卖家反复强调这根电源线只能用于Dell服务器，但是当时(一年前)苦于无法找到HP服务器的显卡供电线，我仔细对比观察了 ``Dell R720 双2针`` 的接口，看起来是标准电源线接口，和我的HPE DL360 Gen9的 ``Primary PCIe 3.0 riser for PCIe slot 1 & 2`` 电源输出接口完全匹配。
 
 考虑到PC服务器大多是标准通用部件，所以我推测Dell的电源线也可以用于HP服务器。价格不贵，10元，但是我也非常担心加电以后错误输电导致显卡或主板烧毁。毕竟，现在显卡实在太昂贵了...
 
 收到显卡电源线之后，仔细检查了 ``PCIe 3.0 riser`` 的电源输出和 Tesla P10 电源输入，确认接口完全一致。连接以后，确实完全匹配。一咬牙，加电启动...还好，没有出现短路或者烧焦的现象出现。
+
+散热
+=======
+
+Tesla系列计算卡大多数是被动散热设计，原因是计算卡都是安装在数据中心服务器上，可以利用机架服务器机箱内的暴力风扇提供充足的散热气流(你可以看到计算卡的两头贯通有一排风洞)。
+
+.. note::
+
+   我之前有过 :ref:`think_server_fanless` ，但是和网友jinghuashang交流了解到如果不盖机箱盖，Tesla M40计算卡因为没有散热气流快速升温。所以对于GPU这种高能耗设备，可能较难实现 :ref:`server_fanless` 。可能的解决方案也许就是改造为主动散热，或者降频(浪费硬件资源)
+
+`Tesla M40\P40 训练机组装与散热改造 <https://zhuanlan.zhihu.com/p/536850498>`_ 原文是在家用电脑上安装Tesla计算卡。因为家用电脑没有数据中心服务器那样的气流散热，所以需要改造计算卡的散热结构，通过加装主动散热风扇来解决。虽然我暂时用不上这个方案，但是也觉得很有借鉴: 采用 ``影驰 GTX 1080Ti 大将 (GALAX GTX 1080Ti EXOC)``
+散热风扇(淘宝售价当前大约为66元)，改装效果如下:
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/tesla_fans.webp
+
+.. note::
+
+   `Tesla M40\P40 训练机组装与散热改造 <https://zhuanlan.zhihu.com/p/536850498>`_ 提到的几个散热风扇改装方式，可以在油管的 `Craft Computing: How do you cool an nVidia Tesla GPU? <https://www.youtube.com/watch?v=WfKQP2sARGY>`_ 看到视频博主的演示
 
 安装位置
 =====================
@@ -82,3 +116,8 @@ GPU需要服务器large bar内存
 ============================
 
 硬件安装完成后，首次启动会发现BIOS报错，显示GPU请求太多内存超出限制。这里需要 :ref:`dl360_gen9_large_bar_memory` 配置完成才能正常识别GPU运算卡。之后，我们才能开始进一步 :ref:`vgpu` 以及 :ref:`iommu` 等虚拟化配置。
+
+参考
+=======
+
+- `Tesla M40\P40 训练机组装与散热改造 <https://zhuanlan.zhihu.com/p/536850498>`_

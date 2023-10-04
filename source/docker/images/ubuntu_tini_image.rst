@@ -1,14 +1,14 @@
-.. _fedora_tini_image:
+.. _ubuntu_tini_image:
 
 ================================
-Fedora镜像(采用tini替代systemd)
+Ubuntu镜像(采用tini替代systemd)
 ================================
-
-虽然我构建的 :ref:`fedora_image` (使用systemd作为init进程管理器)能够完美在Docker中运行，但是迁移到 :ref:`kubernetes` 中运行( :ref:`kind_deploy_fedora-dev` )却无法正确初始化 :ref:`systemd` 。我尝试采用Docker默认的init管理器 :ref:`docker_tini` 来再次尝试构建镜像，以期能够在 :ref:`kind_deploy_fedora-dev-tini`
 
 .. note::
 
    由于使用 :ref:`dockerfile` 重复构建镜像时，需要重复在容器内部执行各种软件包安装下载，非常消耗时间。为了能够节约部署时间(特别是局域网内部)，我采用在 :ref:`k8s_deploy_squid` 在我的 :ref:`kind` ( :ref:`macos_studio` ) ，这样不断重复相同操作系统的安装升级可以节约时间和带宽。
+
+我为 :ref:`android_build_env` 构建基于 :ref:`ubuntu_linux` 的Android开发环境，基于 :ref:`fedora_tini_image` 修改，来实现一个轻量级的Ubuntu通用开发环境。这样我的实践就覆盖了 :ref:`redhat_linux` 系(rpm)和 Debian系(apt)两个主流发行版的Docker镜像。
 
 准备工作
 ================
@@ -21,17 +21,7 @@ Fedora镜像(采用tini替代systemd)
    :language: json
    :caption: 采用默认docker网络 bridge 上部署的 :ref:`docker_squid` 代理
 
-- 还有一个问题需要解决: 默认 :ref:`dnf` 会使用 ``mirrors.fedoraproject.org`` 来侦测最快的镜像网站，但是实际上每次选择可能都是不同网站，这导致代理服务缓存效果很差。解决的思路是注释掉 ``metalink=`` 行，启用固定的 ``baseurl=`` 行 ( `How to disable some mirrors for use by dnf in Fedora [closed] <https://unix.stackexchange.com/questions/533543/how-to-disable-some-mirrors-for-use-by-dnf-in-fedora>`_ 提及原先 ``yum-plugin-fastestmirror`` 被移植到dnf时没有移植参数调整功能 )
-
-我采用 :ref:`sed` 修订 ``/etc/yum.repos.d`` 目录下配置:
-
-.. literalinclude:: fedora_image/disable_dnf_mirrors
-   :language: bash
-   :caption: 关闭dnf镜像列表功能，指定固定软件仓库以便优化使用proxy代理缓存
-
-这里有一个 ``fedora-cisco-openh264.repo`` 配置文件没有提供 ``baseurl=`` ，实际这个只有一个下载地址，所以跳过替换
-
-下文我将脚本融入 :ref:`dockerfile` 中执行
+**以下待继续**
 
 基础运行 ``fedora-base-tini``
 ===============================
