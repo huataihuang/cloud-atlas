@@ -20,6 +20,15 @@ Ultimate vimrc安装
 
 是的，安装步骤就是这么简单...
 
+升级
+-------
+
+要升级 ``vimrc`` 执行以下命令(git rebase):
+
+.. literalinclude:: my_vimrc/update_ultimate_vimrc.sh
+   :language: bash
+   :caption: 升级Ultimate vimrc
+
 :ref:`jedi-vim`
 -----------------
 

@@ -11,6 +11,7 @@ Ubuntu系统管理
    alien.rst
    snap.rst
    disable_snap.rst
+   debootstrap.rst
    ufw.rst
    tar_multi_boot_ubuntu.rst
    recover_system_by_tar.rst
