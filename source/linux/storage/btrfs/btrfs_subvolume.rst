@@ -53,6 +53,15 @@ Btrfs子卷
 
    接下来就可以实践 :ref:`btrfs_nfs` 将上述 ``cloud-atlas_build`` 子卷通过NFS输出给 :ref:`kind` 集群使用构建一个简单的个人WEB网站
 
+实践案例
+===========
+
+为 :ref:`debootstrap` 提供一个独立 btrfs subvolume ``ubuntu-dev`` :
+
+.. literalinclude:: btrfs_subvolume/ubuntu-dev
+   :language: bash
+   :caption: 创建 btrfs subvolume ``ubuntu-dev``
+
 参考
 ======
 

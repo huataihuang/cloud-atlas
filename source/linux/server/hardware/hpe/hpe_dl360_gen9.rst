@@ -98,9 +98,16 @@ PCIe
 FlexibleLOM Adapter
 -----------------------
 
-可选的 ``FlexibleLOM Bay`` 网卡有多种规格，千兆、万兆甚至25Gb。常见的是Intel 4口千兆网卡 ``HP Ethernet 1Gb 4-port 366FLR Adapter`` (部件编号 ``665240-B21``) 。
+可选的 ``FlexibleLOM Bay`` 网卡有多种规格，千兆、万兆甚至25Gb。常见的是:
+
+- Intel 4口千兆网卡 ``HP Ethernet 1Gb 4-port 366FLR Adapter`` (部件编号 ``665240-B21`` )
+- Intel 82599控制芯片 ``HPE Ethernet 10Gb 2-port 560SFP+ Adapter`` (部件编号 ``665249-B21`` ) 
 
 不过我从淘宝购买二手DL360服务器，这块可选网卡被拆除了，需要单独购买 220 元。虽然有些小贵，但是考虑到不用占用服务器宝贵的PCIe插槽，并且是Intel网卡芯片，可以结合Intel开发的驱动以及DPDK技术加速网络虚拟化性能，我准备用来构建Linux交换设备，来连接我的多个 :ref:`pi_cluster` ，实现混合架构 :ref:`kubernetes` 。
+
+.. note::
+
+   部件选择以 `HPE ProLiant DL360 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docLocale=en_US&docId=c04346229>`_ 为准。HPE服务器网络配件 `HPE Ethernet 10Gb 2-port 530FLR-SFP+ Adapter (手册) <https://www.hpe.com/psnow/doc/c04111479>`_ 采用 QLogic 控制芯片，适配列表是 (DL360p) Gen8 ，没有包含在 (DL360) Gen9 兼容列表中。
 
 内部改造
 -----------

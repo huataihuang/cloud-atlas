@@ -1,8 +1,12 @@
-.. _android_build_env:
+.. _android_build_env_centos8:
 
-======================
-构建Android编译环境
-======================
+==============================
+构建Android编译环境(CentOS 8)
+==============================
+
+.. note::
+
+   我最初想通过CentOS 8来作为构建Android开发编译环境，不过参考LineageOS的官方文档，社区主要采用Ubuntu，所以我近期实践采用 :ref:`android_build_env_ubuntu`
 
 准备工作
 =========
@@ -13,15 +17,13 @@
   - 如果你只是编译android系统，则存放以下名为 ``android-build`` 的Dockerfile
   - 如果你想开发android系统，则存放以下名为 ``android-studio`` 的Dockerfile
 
-.. literalinclude:: android-build
+.. literalinclude:: android_build_env_centos8/android-build
    :language: dockerfile
-   :linenos:
-   :caption:
+   :caption: ``android-build``
 
-.. literalinclude:: android-studio
+.. literalinclude:: android_build_env_centos8/android-studio
    :language: dockerfile
-   :linenos:
-   :caption:
+   :caption: ``android-studio``
 
 - 下载android开发工具包：
 
