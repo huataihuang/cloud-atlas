@@ -80,10 +80,15 @@ squid转发配置实例
    :linenos:
    :caption: squid_liberty.conf - 本地转发墙外squid
 
-不足之处
-===========
+结合 ``gfwlist``
+===================
 
-- 由于YouTube的视频内容有特别安全设置 `Caching YouTube Content <https://wiki.squid-cache.org/ConfigExamples/DynamicContent/YouTube>`_ 似乎无法实现
+通过手工来维护squid转发翻墙列表是一个非常麻烦而且无趣的事，好在社区有人维护了一个
+
+:strike:`不足之处`
+=====================
+
+- 由于YouTube的视频内容有特别安全设置 `Caching YouTube Content <https://wiki.squid-cache.org/ConfigExamples/DynamicContent/YouTube>`_ :strike:`似乎无法实现` <= 这个问题现在似乎已经解决了，我不确定是哪个版本升级修复
 
   - 只能浏览YouTube网站，但是无法播放视频
   - `mikenye/youtube-dl <https://github.com/mikenye/docker-youtube-dl>`_ 提供了下载YouTube订阅视频的方法，不过我没有实践过

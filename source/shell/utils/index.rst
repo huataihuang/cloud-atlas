@@ -24,6 +24,7 @@ Shell 实用工具
    nice.rst
    grep.rst
    time.rst
+   sponge.rst
 
 .. only::  subproject and html
 
