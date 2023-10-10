@@ -18,3 +18,5 @@
 
 - `Pixel 4 enabling VoLTE if option not available <https://www.reddit.com/r/GooglePixel/comments/orzyl8/pixel_4_enabling_volte_if_option_not_available/>`_
 - `[Update: Mar. 17] Google Pixel phones still lack VoLTE & Vo-WiFi support in multiple European & Asian countries <https://piunikaweb.com/2023/03/17/google-pixel-phones-lack-volte-in-some-european-and-asian-countries/>`_
+- `Enabling VoLTE & VoWifi Pixel 4 <https://xdaforums.com/t/enabling-volte-vowifi-pixel-4.4002611/>`_
+- `VoLTE Patch for Pixel 4/4XL <https://github.com/hyx0329/VoLTE-Patch-for-Pixel4>`_ 有人提供了这个patch，待验证

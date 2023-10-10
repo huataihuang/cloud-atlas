@@ -9,6 +9,10 @@ Node Exporter ipmitool 文本插件
 准备工作
 ==========
 
+.. note::
+
+   由于 :ref:`ipmitool` 工具命令执行需要 ``root`` 权限，所以类似 :ref:`node_exporter_smartctl_text_plugin` 完成配置
+
 - 创建一个 ``/var/lib/node_exporter/textfile_collector/`` 用于存放 ``--collector.textfile.directory`` 对应的 ``*.prom`` 文件，以便转换成metrics:
 
 .. literalinclude:: node_exporter_textfile-collector/textfile_collector_dir
@@ -24,9 +28,11 @@ Node Exporter ipmitool 文本插件
 执行脚本
 =========
 
-社区推荐使用 ``sponge`` 来自动写输出，所以先执行以下命令生成一个案例检查::
+社区推荐使用 ``sponge`` 来自动写输出，所以先切换到 ``root`` 执行以下命令生成一个案例检查(详见 :ref:`node_exporter_smartctl_text_plugin` )::
 
-   sudo ipmitool sensor | /etc/prometheus/node-exporter-textfile-collector-scripts/ipmitool | sponge /var/lib/node_exporter/textfile_collector/ipmitool.prom
+   # 注意这条命令是切换到root用户身份执行的
+   sudo su -
+   ipmitool sensor |  sudo -u prometheus /etc/prometheus/node-exporter-textfile-collector-scripts/ipmitool | sudo -u prometheus sponge /var/lib/node_exporter/textfile_collector/ipmitool.prom
 
 然后检查输出内容 ``/var/lib/node_exporter/textfile_collector/ipmitool.prom`` 可以看到类似::
 
@@ -40,23 +46,24 @@ Node Exporter ipmitool 文本插件
 
 这个文件就是 :ref:`node_exporter_textfile-collector` 可以处理的标准格式
 
-- 检查没有问题，就配置 crontab (这里采用root用户) ::
+- 检查 ``/var/lib/node_exporter/textfile_collector/ipmitool.prom`` 内容无误之后，在 ``/etc/cron.d`` 目录下添加配置文件 ``node_exporter_textfile_collector`` :
 
-   crontab -e
+.. literalinclude:: node_exporter_textfile-collector/node_exporter_textfile_collector
+   :language: bash
+   :caption: 配置定时执行 ``node_exporter`` 的 ``textfile`` Collectors
+   :emphasize-lines: 3
 
-输入内容::
+.. note::
 
-   * * * * * ipmitool sensor | /etc/prometheus/node-exporter-textfile-collector-scripts/ipmitool | sponge /var/lib/node_exporter/textfile_collector/ipmitool.prom
-
-然后检查目标文件，正常是每分钟刷新一次
+   上述配置详情参考 :ref:`node_exporter_smartctl_text_plugin`
 
 配置 ``node_exporter``
 ==========================
 
-按照 :ref:`node_exporter` 中 :ref:`systemd` 运行服务配置，修订 ``/etc/systemd/system/node_exporter.service`` ::
+按照 :ref:`node_exporter` 中 :ref:`systemd` 运行服务配置，修订 ``/etc/systemd/system/node_exporter.service`` :
 
-   ExecStart=/usr/local/bin/node_exporter \
-       --collector.textfile.directory=/var/lib/node_exporter/textfile_collector
+.. literalinclude:: node_exporter_textfile-collector/node_exporter.service
+   :caption: ``/etc/systemd/system/node_exporter.service`` 添加 textfile Collector 输出数据目录
 
 重启 ``node_exporter`` 服务
 

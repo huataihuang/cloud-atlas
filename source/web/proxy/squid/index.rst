@@ -10,6 +10,7 @@ Squid代理服务
    introduce_squid.rst
    squid_startup.rst
    squid_socks_peer.rst
+   squid_gfwlist.rst
    squid_ssh_proxy.rst
    squid_websocket.rst
    squid_ssl_bumping.rst

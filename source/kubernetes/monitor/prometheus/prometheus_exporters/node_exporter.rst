@@ -30,6 +30,20 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 
    ``node_exporter`` 运行不需要root权限，并且会监听所有网络接口的 ``9100`` 端口，所以prometheus可以直接抓去指定服务器 ``node_exporter`` 输出的 metrics
 
+   一般账号用户直接运行 ``node_exporter`` ，则运行进程的owner就是这个一般用户账号，通常为了结合 :ref:`prometheus` 运行，可以采用一致的 ``prometheus`` 账号结合 :ref:`systemd` 部署运行，见下文。
+
+.. note::
+
+   :ref:`macos` 上使用 :ref:`homebrew` 安装 ``node_exporter`` :
+
+   .. literalinclude:: node_exporter/brew_install_node_exporter
+      :caption: 在macOS安装 ``node_exporter``
+
+   我在 Apple Silicon 的 Mabbook上使用 `node_exporter (GitHub) <https://github.com/prometheus/node_exporter>`_ 提供的 release版本运行时会提示 ``"node_exporter" is damaged and can't e opened.You should move it to the Trash`` 提示弹窗，然后终端提示 ``zsh: killed     ./node_exporter --version`` 未找到解决方法。
+
+结合 :ref:`systemd` 部署 ``node_exporter``
+--------------------------------------------
+
 - 参考 :ref:`prometheus_startup` 的 :ref:`systemd` 配置，为 ``Node Exporter`` 配置一个服务 ``/etc/systemd/system/node_exporter.service``
 
 .. literalinclude:: node_exporter/node_exporter.service
@@ -67,6 +81,18 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 .. literalinclude:: node_exporter/curl_install_node-exporter
    :language: bash
    :caption: 执行安装
+
+Collectors (采集器)
+=====================
+
+``node_exporter`` 可以在多种平台运行，在不同的操作系统支持多种collectors。 ``node_exporter`` 提供了两个开关参数来开启和关闭 ``collectors`` :
+
+- ``--collector.<name>`` 激活名为 ``<name>`` 的采集器
+- ``--no-collector.<name>`` 关闭名为 ``<name>`` 的采集器
+
+请参考 `node_exporter (GitHub) <https://github.com/prometheus/node_exporter>`_ 官方文档中 `node_exporter (GitHub) #Enabled by default <https://github.com/prometheus/node_exporter#enabled-by-default>`_ 和 `node_exporter (GitHub) #Disabled by default <https://github.com/prometheus/node_exporter#disabled-by-default>`_ ，这样可以了解哪些采集器默认开启，哪些是默认关闭。对于默认开启和默认关闭的采集器，可以使用上述2个开关参数反向关闭或开启。
+
+默认启用的采集器，如 :ref:`node_exporter_textfile-collector` 必须设置 ``--collector.textfile.directory`` 参数，以便从本地磁盘目录读取并输出状态数据。
 
 检查
 =======
@@ -149,3 +175,4 @@ Prometheus Node Exporter提供了一系列硬件和内核相关metric
 - `MONITORING LINUX HOST METRICS WITH THE NODE EXPORTER <https://prometheus.io/docs/guides/node-exporter/>`_
 - `How to Setup Prometheus Node Exporter on Kubernetes <https://devopscube.com/node-exporter-kubernetes/>`_
 - `Complete Node Exporter Mastery with Prometheus <https://devconnected.com/complete-node-exporter-mastery-with-prometheus/>`_ 这篇文章较为全面，提供了详细的 `Node Exporter Full <https://grafana.com/grafana/dashboards/1860-node-exporter-full/>`_ 介绍以及使用附加模块和 :ref:`node_exporter_textfile-collector` YouTube资源
+- `node_exporter (GitHub) <https://github.com/prometheus/node_exporter>`_

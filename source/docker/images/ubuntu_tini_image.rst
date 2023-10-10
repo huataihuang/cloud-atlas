@@ -62,21 +62,30 @@ tini运行ssh ``ubuntu-ssh-tini``
 
 按照 :ref:`docker_tini` 经验总结，实现一个初始完备的远程可登录 :ref:`ubuntu_linux` 系统:
 
-- ``ubuntu-ssh-tini`` 包含了安装 :ref:`docker_tini` 以及 :ref:`ssh` 服务，并构建基于认证的SSH登陆环境:
+- ``ubuntu-ssh-tini`` 包含了安装 :ref:`docker_tini` 以及 :ref:`ssh` 服务，但是和 :ref:`fedora_tini_image` 不同没有直接注入 ``admin`` 的密钥:
 
 .. literalinclude:: ubuntu_tini_image/ssh/Dockerfile
    :language: dockerfile
    :caption: 具备ssh服务的ubuntu镜像Dockerfile
-
-其中，使用的 ``entrypoint.sh`` 脚本是 :ref:`kind_deploy_fedora-dev-tini` 实践中改进过的脚本:
-
-.. literalinclude:: fedora_tini_image/ssh/entrypoint_ssh_cron_bash
-   :language: bash
-   :caption: ``/entrypoint.sh`` 脚本的 ``main()`` 确保持续运行(循环)
+   :emphasize-lines: 33,35,36
 
 .. note::
 
-   这里在 ``/entrypoint.sh`` 增加了一个将 ``/home/admin`` 目录修订属主的命令，这是因为默认映射的目录属主是容器内部的 ``root`` 用户
+   - ``mkdir /run/sshd`` 是因为Ubuntu官方镜像是不提供ssh服务，缺少这个目录会导致 ``sshd`` 启动失败，所以补充创建
+   - ``ssh-keygen -A`` 为 ``sshd`` 运行创建主机密钥对
+   - 没有如 :ref:`fedora_tini_image` 直接注入 ``admin`` 用户密钥，而是在 ``docker run`` 是将物理主机用户目录bind到虚拟机内部提供卷，这样可以更灵活也保证了数据安全
+   - 使用的 ``entrypoint.sh`` 脚本是 :ref:`kind_deploy_fedora-dev-tini` 实践中改进过的脚本:
+
+.. literalinclude:: ubuntu_tini_image/ssh/entrypoint_ssh_cron_bash
+   :language: bash
+   :caption: ``/entrypoint.sh`` 脚本的 ``main()`` 确保持续运行(循环)
+   :emphasize-lines: 4,9,17
+
+.. note::
+
+   - 在运行 ``sshd`` 的函数中加了 ``chown -R admin:admin /home/admin`` 是因为 ``docker run`` 将物理主机 ``home`` 目录映射到容器内部后，默认的属主是 ``root`` ，这里为了能够使用普通用户账号 ``admin`` 所以在容器初始化时候修订一次属主
+   - :ref:`ubuntu_linux` 安装cron的包名字就是 ``cron`` ，安装后运行程序就是 ``/usr/sbin/cron`` ，这个和 :ref:`fedora` 不同
+   - 如果在 ``docker`` 中运行最后执行的命令可以是 ``/bin/bash`` ，但是为了能够在 ;ref:`kubernetes` 中通用最后必须是一个永续执行的程序，这里是循环，如果是应用容器则改为应用程序
 
 - 构建 ``ubuntu-ssh-tini`` 镜像:
 
@@ -89,6 +98,18 @@ tini运行ssh ``ubuntu-ssh-tini``
 .. literalinclude:: ubuntu_tini_image/ssh/run_ubuntu-ssh-tini_container
    :language: bash
    :caption: 运行包含tini和ssh的ubuntu容器
+   :emphasize-lines: 1,5
+
+.. note::
+
+   这里运行docker容器的命令:
+
+   - ``. ../../../etc/environment`` 是为了获取 ``${BASE_DIR}`` 变量确定工作目录
+   - ``-v ${BASE_DIR}/home:/home`` 将物理主机的home目录映射到容器内部以便数据持久化
+
+.. note::
+
+   除了docker容器以外， :ref:`systemd-nspawn` 也可以构建轻量级容器(类似chroot)
 
 开发环境 ``ubuntu-dev-tini``
 ===============================

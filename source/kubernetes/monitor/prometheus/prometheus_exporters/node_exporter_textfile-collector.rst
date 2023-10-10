@@ -21,6 +21,20 @@ Prometheus社区提供了 `node-exporter-textfile-collector-scripts <https://git
 .. literalinclude:: node_exporter_textfile-collector/git_node-exporter-textfile-collector-scripts
    :caption: 下载 ``node-exporter-textfile-collector-scripts`` 到本地( ``/etc/prometheus`` )
 
+配置 ``node_exporter``
+==========================
+
+按照 :ref:`node_exporter` 中 :ref:`systemd` 运行服务配置，修订 ``/etc/systemd/system/node_exporter.service`` :
+
+.. literalinclude:: node_exporter_textfile-collector/node_exporter.service
+   :caption: ``/etc/systemd/system/node_exporter.service`` 添加 textfile Collector 输出数据目录
+
+重启 ``node_exporter`` 服务
+
+.. note::
+
+   实际上 :ref:`node_exporter` 默认就启用了 textfile Collector ，但是需要配置一个输出数据目录参数
+
 实践案例
 ==========
 
