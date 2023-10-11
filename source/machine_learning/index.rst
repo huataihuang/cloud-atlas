@@ -13,8 +13,10 @@ Machine Learning Atlas
 .. toctree::
    :maxdepth: 1
 
-   gpt/index
    startup/index
+   deep_learning/index
+   gpt/index
+   llm/index
    studio/index
    hardware/index
    jetson/index

@@ -20,7 +20,9 @@ Unix/Linux系统的cron服务是一个非常重要的系统服务，提供了定
 
 ``cron`` 作为定时任务配置服务，可以通过 ``crontab`` 进行交互式编辑，或者通过 ``/etc/cron.d/`` 目录下配置文件设置，此外 cron 服务还会检查 ``/var/spool/cron`` 目录下配置文件和 ``/etc/anacrontab`` 配置文件。
 
-独立用户的 ``cron`` 文件位于 ``/var/spool/cron`` 目录下配置文件；而系统服务和应用程序通常把cron任务配置存放在 ``/etc/cron.d`` 目录。至于 ``/etc/anacrontab`` 是一个特殊配置。
+独立用户的 ``cron`` 文件位于 ``/var/spool/cron`` 目录下配置文件，例如 ``root`` 用户的独立配置文件就是 ``/var/spool/cron/crontabs/root``
+
+而系统服务和应用程序通常把cron任务配置存放在 ``/etc/cron.d`` 目录。至于 ``/etc/anacrontab`` 是一个特殊配置。
 
 使用crontab
 ===========
@@ -57,6 +59,10 @@ cron配置定时的案例
    # |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
    # |  |  |  |  |
    # *  *  *  *  * user-name  command to be executed
+
+.. note::
+
+   只有 ``/etc/crontab`` 和 ``/etc/cron.d/`` 目录下的配置文件有一个 ``user-name`` 字段，可以用来配置执行命令的属主
 
 -  每天凌晨 ``01:01`` 运行一次脚本
 
@@ -110,6 +116,18 @@ cron运行脚本
    . /etc/profile
 
    ...
+
+在 ``cron`` 中切换用户身份运行脚本
+=====================================
+
+在上文中，我们已经看到了 ``/etc/crontab`` 和 ``/etc/cron.d/`` 目录下的配置文件有一个 ``user-name`` 字段，可以用来配置执行命令的属主
+
+可以结合 :ref:`sudo` 来实现整个命令管道中不同命令执行身份的切换，例如 :ref:`node_exporter_smartctl_text_plugin` 采用了配置 ``/etc/cron.d/node_exporter_textfile_collector`` 通过 ``|`` 管道连接命令，且不同命令采用了不同用户身份:
+
+.. literalinclude:: ../../kubernetes/monitor/prometheus/prometheus_exporters/node_exporter_textfile-collector/node_exporter_textfile_collector
+   :language: bash
+   :caption: 配置定时执行 ``node_exporter`` 的 ``textfile`` Collectors
+   :emphasize-lines: 5
 
 限制cron访问
 ============
@@ -247,6 +265,7 @@ anacron快捷方式
 参考
 ====
 
--  `How to use cron in Linux <https://opensource.com/article/17/11/how-use-cron-linux>`_
--  `What is the difference between cron.d (as in /etc/cron.d/) and crontab? <https://unix.stackexchange.com/questions/417323/what-is-the-difference-between-cron-d-as-in-etc-cron-d-and-crontab>`_
--  `CronHowto <https://help.ubuntu.com/community/CronHowto>`_
+- `How to use cron in Linux <https://opensource.com/article/17/11/how-use-cron-linux>`_
+- `What is the difference between cron.d (as in /etc/cron.d/) and crontab? <https://unix.stackexchange.com/questions/417323/what-is-the-difference-between-cron-d-as-in-etc-cron-d-and-crontab>`_
+- `CronHowto <https://help.ubuntu.com/community/CronHowto>`_
+- `crontab running as a specific user <https://serverfault.com/questions/352835/crontab-running-as-a-specific-user>`_

@@ -8,6 +8,8 @@
 
 当然，这里不需要完整 :ref:`python` 的所有技能，专注于 ``NumPy`` , ``Matplotlib`` 等数值计算、统计分析，以及使用Python来使用深度学习框架，如 ``caffe`` , :ref:`pytorch` , :ref:`tensorflow` 等。
 
+需要掌握的Python技术如下(纲要)
+
 
 
 参考

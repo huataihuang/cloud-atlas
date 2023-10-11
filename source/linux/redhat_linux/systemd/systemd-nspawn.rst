@@ -15,7 +15,7 @@ systemd-nspawn
 参考
 ======
 
-- `archlinxu: systemd-nspawn <https://wiki.archlinux.org/title/Systemd-nspawn>`_
+- `archlinux: systemd-nspawn <https://wiki.archlinux.org/title/Systemd-nspawn>`_
 - `On Running systemd-nspawn Containers <https://benjamintoll.com/2022/02/04/on-running-systemd-nspawn-containers/>`_
 - `systemd-nspawn — Spawn a command or OS in a light-weight container <https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html>`_
 - `How to build LineageOS inside a container <https://dzx.fr/blog/how-to-build-lineageos-inside-a-container/>`_
