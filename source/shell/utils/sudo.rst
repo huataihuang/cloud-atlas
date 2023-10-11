@@ -80,9 +80,16 @@ sudo缓慢问题
 
 我在 :ref:`priv_kvm` 采用 ``virsh clone`` 方式从模版服务器复制出虚拟机，在修订了主机IP地址之后，我发现 ``sudo su -`` 命令响应非常缓慢。这个问题和 ``/etc/hosts`` 配置有关，因为需要解析IP地址和主机名，如果没有及时更新(修改了IP地址)，则会需要通过DNS解析。而如果此时没有配置DNS，则 ``sudo`` 命令要等待IP解析超时才能返回，这样就会非常慢。
 
+``sudo !!``
+===============
+
+看到一个巧妙的 ``!!`` 用法，实际上就是 :ref:`bash` 的一个 ``event designator`` 使用，表示历史列表中命令。实际上就是执行上一次 ``sudo`` 命令
+
 参考
 ====
 
 -  `Run a shell script as another user that has no password <https://askubuntu.com/questions/294736/run-a-shell-script-as-another-user-that-has-no-password>`_
 -  `sudo with password in one command line? <https://superuser.com/questions/67765/sudo-with-password-in-one-command-line>`_
 -  `How do I edit /etc/sudoers from a script? <https://stackoverflow.com/questions/323957/how-do-i-edit-etc-sudoers-from-a-script>`_
+- `Switching user using sudo <https://researchhubs.com/post/computing/linux-cmd/sudo-command.html>`_
+- `What does the command "sudo !!" mean? <https://superuser.com/questions/247894/what-does-the-command-sudo-mean>`_

@@ -32,6 +32,8 @@ macOS
    restore_launchpad.rst
    macos_ftdi_serial.rst
    macos_vnc.rst
+   macos_filesystem.rst
+   macos_apfs_case-sensitive.rst
    extfs.rst
    vlc_play_bluray.rst
 
