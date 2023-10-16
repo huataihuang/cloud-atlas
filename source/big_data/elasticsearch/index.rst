@@ -8,6 +8,7 @@ Elasticsearch
    :maxdepth: 1
 
    logstash.rst
+   metricbeat.rst
 
 .. only::  subproject and html
 

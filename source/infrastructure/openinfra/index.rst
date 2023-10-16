@@ -9,7 +9,7 @@ OpenInfra
 
    intro_openinfra.rst
    openinfralabs.rst
-   loki.rst
+   linux_openstack_k8s_infra.rst
 
 .. only::  subproject and html
 

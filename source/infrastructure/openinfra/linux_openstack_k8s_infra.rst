@@ -1,4 +1,4 @@
-.. _loki:
+.. _linux_openstack_k8s_infra:
 
 ====================================================
 LOKI(Linux OpenStack Kubernetes Infrastructure)

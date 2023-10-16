@@ -13,6 +13,8 @@ Kubernetes监控
    cadvisor.rst
    prometheus/index
    grafana/index
+   loki/index
+   thanos/index
    alertmanager/index
    mixins/index
    opentelemetry/index
@@ -21,7 +23,6 @@ Kubernetes监控
    signoz/index
    node_health/index
    netdata.rst
-   thanos/index
    cortex/index
    m3/index
    victoriametrics/index
