@@ -48,6 +48,10 @@
 
    kubectl drain jetson --delete-local-data --force --ignore-daemonsets
 
+.. note::
+
+   现在 ``--delete-local-data`` 参数已经废弃，改为使用 ``--delete-emptydir-data``
+
 这里只要 ``drain`` 没有报错返回就表明节点已经清理干净。
 
 此时检查节点 ``kubectl get nodes -o wide`` 会看到节点状态是 ``SchedulingDisabled`` ::
@@ -162,3 +166,4 @@
 - `How to remove broken nodes in Kubernetes <https://stackoverflow.com/questions/56064537/how-to-remove-broken-nodes-in-kubernetes/56289161>`_
 - `Remove a Kubernetes Node <https://docs.mirantis.com/mcp/q4-18/mcp-operations-guide/kubernetes-operations/k8s-node-ops/k8s-node-remove.html>`_
 - `Safely Drain a Node <https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/>`_
+- `Remove a Kubernetes Node <https://docs.mirantis.com/mcp/q4-18/mcp-operations-guide/kubernetes-operations/k8s-node-ops/k8s-node-remove.html>`_

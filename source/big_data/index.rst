@@ -17,6 +17,7 @@ Big Data Atlas
    :maxdepth: 1
 
    introduce_big_data.rst
+   log_systems.rst
    spark_vs_flink.rst
    presto_vs_impala.rst
    message_queue/index

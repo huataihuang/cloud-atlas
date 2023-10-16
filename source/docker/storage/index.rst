@@ -17,6 +17,8 @@ Docker存储
    docker_btrfs_driver.rst
    docker_zfs_driver.rst
    docker_overlay_driver.rst
+   identify_container_overlay_directory.rst
+   overlay_mount_influnce_rootfs.rst
    docker_devicemapper_driver.rst
    docker_unionfs.rst
    docker_size_quota.rst

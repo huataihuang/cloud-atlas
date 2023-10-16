@@ -8,7 +8,7 @@ Linux文件系统
    :maxdepth: 1
 
    gpt_partition.rst
-   parted.rst
+   parted_example.rst
    choice_linux_filesystem.rst
    reserved_space_for_root_on_filesystem.rst
    linux_overlayfs.rst
