@@ -9,3 +9,8 @@ Squid 结合 ``gfwlist``
 .. note::
 
    先挖坑，后续更新
+
+参考
+======
+
+- `SwitchyOmega 结合GFWList <https://github.com/FelisCatus/SwitchyOmega/wiki/GFWList>`_ 这篇文章介绍了如何在 SwitchyOmega 中结合GFWList

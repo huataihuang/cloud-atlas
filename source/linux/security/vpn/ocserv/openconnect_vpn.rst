@@ -156,11 +156,15 @@ OpenConnect VPN Client使用技巧
 - 需要手工输入用户名和密码
 - 服务器证书过期后每次都要手工接受服务器证书 (早期版本可以使用 ``--no-cert-check`` 参数绕过，但是现在不行，必须明确接受服务器证书)
 
-``openconnect`` 提供了 ``-u`` 参数传递账号名，但是使用 ``-p`` 参数传递密码失败，所以改成 ``--passwd-on-stdin`` 从管道获取密码::
+``openconnect`` 提供了 ``-u`` 参数传递账号名，但是使用 ``-p`` 参数传递密码失败，所以改成 ``--passwd-on-stdin`` 从管道获取密码:
 
-   echo mypassword | sudo openconnect -u <myusernae> --passwd-on-stdin <vpnserver>:<vpn_port>
+.. literalinclude:: openconnect_vpn/openconnect_passwd-on-stdin
+   :caption: openconnect从标准输入(管道)获取登陆密码
 
-上述命令可以无需用户干预，只用一条命令就完成VPN服务器连接
+对于接受服务器证书的问题，可以使用 ``--servercert`` 参数来传递服务器证书，这样就不需要每次都手工确认一次了，所以完整的命令
+
+.. literalinclude:: openconnect_vpn/openconnect_passwd-on-stdin_servercert
+   :caption: openconnect从标准输入(管道)获取登陆密码并且使用服务器证书
 
 Cisco AnyConnect VPN Client
 =============================
