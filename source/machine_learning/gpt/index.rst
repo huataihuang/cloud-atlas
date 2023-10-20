@@ -8,6 +8,7 @@ GPT
    :maxdepth: 1
 
    think_gpt.rst
+   gpt_startup.rst
 
 .. only::  subproject and html
 

@@ -13,6 +13,7 @@
    ../startup/install_anaconda.rst
    ../startup/ml_python.rst
    dl_learn_tips.rst
+   transformer.rst
 
 .. only::  subproject and html
 

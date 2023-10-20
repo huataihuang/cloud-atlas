@@ -36,9 +36,11 @@ pdf文档裁边
 
 我推荐采用briss进行简单的裁边而不是 `K2pdfopt <https://www.willus.com/k2pdfopt/>`_ 对pdf文档进行重排。主要原因还是pdf文档格式太复杂，重排虽然更适合移动设备看清文字，但是会丢失原先的排版，阅读非常不舒适。
 
-使用 briss 裁边pdf也非常简单，从 sourceforge 下载 `briss <http://sourceforge.net/projects/briss/>`_ ，然后使用以下命令crop掉pdf文档的白边::
+使用 briss 裁边pdf也非常简单，从 sourceforge 下载 `briss <http://sourceforge.net/projects/briss/>`_ ，然后使用以下脚本crop掉pdf文档的白边( ``crop example.pdf`` ):
 
-   java -jar briss-0.9/briss-0.9.jar -s myfile.pdf -d myfile-crop.pdf
+.. literalinclude:: use_kindle_read_pdf/briss_crop
+   :language: bash
+   :caption: 使用 `briss <http://sourceforge.net/projects/briss/>`_ 裁剪pdf的白边
 
 kindle个人文档同步
 ====================

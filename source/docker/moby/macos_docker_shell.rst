@@ -9,9 +9,15 @@
 方法一: netcat(推荐)
 =============================
 
-使用 ``nc`` 命令连接Docker的debug-shell socket文件::
+使用 ``nc`` 命令连接Docker的debug-shell socket文件( 在 :ref:`docker_macos_vm` 详述):
 
-   nc -U ~/Library/Containers/com.docker.docker/Data/debug-shell.sock
+.. literalinclude:: ../desktop/docker_macos_vm/netcat_docker_macos_vm_sock
+   :language: bash
+   :caption: 使用 ``nc`` 命令连接Docker的debug-shell socket访问docker虚拟机终端
+
+.. note::
+
+   这里 ``nc`` 使用 :ref:`macos` 内置的 ``nc`` 命令( ``/usr/bin/nc`` )，支持参数 ``-U`` (即 ``Use UNIX-domain sockets`` )，而不能使用 :ref:`homebrew` 提供的 ``nc`` (不支持 ``-U`` 参数)。Linux版本的 ``nc`` 是支持 ``-U`` 参数的，但是 homebrew 版本没有提供
 
 显示的提示符比较奇怪，不过不影响使用::
 
