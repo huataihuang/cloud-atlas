@@ -11,6 +11,8 @@ Linux 软RAID
    mdadm_partion_vs_disk.rst
    mdadm.rst
    mdadm_raid10.rst
+   raid-check.rst
+   md_sync_speed.rst
    mdadm_remove_md.rst
    speed_up_mdadm_rebuild_resyn.rst
    ../../../devops/ansible/ansible_config_raid.rst
