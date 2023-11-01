@@ -12,6 +12,7 @@ git
    git_merge_fix_conflicts.rst
    git_config.rst
    git_proxy.rst
+   git-openssl.rst
    reduce_git_repo_size.rst
    git-flow.rst
 

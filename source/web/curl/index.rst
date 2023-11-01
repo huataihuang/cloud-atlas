@@ -11,6 +11,7 @@ curl
    curl_show_request_headers.rst
    curl_post_json.rst
    curl_https.rst
+   compile_curl_ssl.rst
 
 .. only::  subproject and html
 

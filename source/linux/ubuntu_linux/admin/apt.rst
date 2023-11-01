@@ -155,6 +155,42 @@ apt hold保持包不更新
 
    apt-mark unhold kubelet kubeadm kubectl
 
+apt源代码安装和编译
+=====================
+
+我在 :ref:`build_lineageos_20_pixel_4` 遇到一个需要编译 ``git with openssl`` 来解决通过 :ref:`squid_socks_peer` 使用 :ref:`git_proxy` 的问题。这个案例采用了ubuntu发行版提供的软件包源代码编译安装，步骤是可借鉴的:
+
+- 安装编译环境:
+
+.. literalinclude:: ../../../devops/git/git-openssl/gt_build_dependencies
+   :caption: 安装git编译依赖环境
+
+- 修改 ``/etc/apt/sources.list`` 将源代码仓库激活(默认没有激活或配置):
+
+.. literalinclude:: ../../../devops/git/git-openssl/sources.list
+   :caption: 配置apt源代码源
+   :emphasize-lines: 2,4,6
+
+- 更新仓库索引然后安装 ``git`` 源代码:
+
+.. literalinclude:: ../../../devops/git/git-openssl/apt_source_git
+   :caption: 更新仓库索引然后安装 ``git`` 源代码
+
+- 安装 ``libcurl`` :
+
+.. literalinclude:: ../../../devops/git/git-openssl/apt_libcurl
+   :caption: 安装 libcurl
+
+- 进入git源代码目录，修改2个文件，然后重新编译git:
+
+.. literalinclude:: ../../../devops/git/git-openssl/recompile_git_with_openssl
+   :caption: 修订配置后重新编译git with openssl
+
+- 然后进入上级目录安装编译后的deb包:
+
+.. literalinclude:: ../../../devops/git/git-openssl/pkg_install_git_with_openssl
+   :caption: 安装编译后的deb包
+
 参考
 ========
 

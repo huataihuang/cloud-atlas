@@ -12,6 +12,12 @@ git配置代理
    :language: bash
    :caption: 全局配置git使用HTTP/HTTPS代理
 
+.. note::
+
+   当配置git使用HTTP/HTTPS代理时，会使得git采用HTTPS方式代替 :ref:`ssh` 方式来访问git仓库。我遇到一个问题是 :ref:`build_lineageos_20_pixel_4` 结合使用 :ref:`squid_socks_peer` 同步 ``googlesource`` 仓库报错:
+
+   解决的方法是独立编译 :ref:`git-openssl`
+
 - 配置 ``git`` 使用socks5代理:
 
 .. literalinclude:: git_proxy/git_config_http.proxy_socks5
