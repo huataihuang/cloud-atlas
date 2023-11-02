@@ -10,6 +10,7 @@
    android_build_env_centos8.rst
    android_build_env_ubuntu.rst
    build_lineageos_20_pixel_4.rst
+   extract_proprietary_blobs_from_lineageos_zip.rst
 
 .. only::  subproject and html
 

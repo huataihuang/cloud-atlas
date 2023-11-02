@@ -13,6 +13,11 @@
 
    编译LineageOS需要惊人的磁盘空间，按照官方文档参考，linage-18.1就需要300GB空间，更高版本要求的空间更多...
 
+   我的实践(LineageOS 20.0/Android 13):
+
+   - ``repo sync`` 仓库同步占用 ``146G``
+   - ``breakfast flame`` 后仓库占用 ``150G`` ( ``tar cfz`` 压缩以后大小 ``97G`` )
+
 安装仓库
 ==========
 
@@ -89,6 +94,54 @@
 
 .. literalinclude:: build_lineageos_20_pixel_4/breakfast
    :caption: 同步设备特定代码
+
+上述步骤会下载设备特定的配置文件以及内核
+
+提取专有blobs
+===============
+
+如果你已经在设备中安装了LineageOS，就可以从设备中提取blobs。这个工作由 ``Android platform tools`` ( :ref:`adb` )完成，执行以下命令:
+
+.. literalinclude:: build_lineageos_20_pixel_4/extract_proprietary_blobs
+   :caption: 获取设备特定的专有blobs
+
+此时会在 ``~/android/lineage/vendor/google`` 找到提取出来的 blobs
+
+**我实际采用的方法** 是: :ref:`extract_proprietary_blobs_from_lineageos_zip` ，完成后在 ``~/android/lineage/vendor/google`` 就存放了 blobs 文件
+
+.. warning::
+
+   我这里也遇到了官方文档所说的 "部分设备需要一个vender(供应商)目录，然后才能 ``breakfast`` 成功。也就是说遇到类似如下的 ``makefile`` 错误，则需要从 **最新的LineageOS设备** 中提取响应的第一份专有blobs，然后才能完成 ``breakfast`` " :
+
+   .. literalinclude:: build_lineageos_20_pixel_4/breakfast_err
+      :caption: 执行 ``breakfast flame`` 错误信息
+
+   这里有一个悖论，我没有这样已经安装过LineageOS的设备，如果有的话，则连接手机设备执行:
+
+   .. literalinclude:: build_lineageos_20_pixel_4/extract_proprietary_blobs
+      :caption: 获取设备特定的专有blobs
+
+   实际上我是从官方网站下载这个对应 blobs ，也就是 `Install LineageOS on Google Pixel 4 <https://wiki.lineageos.org/devices/flame/install>`_ 官方下载 `LineageOS installation package <https://download.lineageos.org/devices/flame/builds>`_ 
+
+   采用 :ref:`extract_proprietary_blobs_from_lineageos_zip` 提取 blobs
+
+**然后再次执行** :
+
+.. literalinclude:: build_lineageos_20_pixel_4/breakfast
+   :caption: 同步设备特定代码
+
+编译
+========
+
+- 终于到了最后一步:
+
+.. literalinclude:: build_lineageos_20_pixel_4/build
+   :caption: 编译
+
+- 完成编译后，在 ``$OUTPUT`` 目录下(执行 ``cd $OUTPUT`` 到达该目录)会有如下编译后生成文件:
+
+.. literalinclude:: build_lineageos_20_pixel_4/build_output
+   :caption: 编译生成的文件
 
 参考
 ======
