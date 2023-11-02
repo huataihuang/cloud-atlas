@@ -1,0 +1,1 @@
+ufw status verbose

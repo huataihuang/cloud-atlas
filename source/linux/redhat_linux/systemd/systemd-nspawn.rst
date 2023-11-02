@@ -40,9 +40,20 @@ systemd-nspawn
 
 实际为了方便编译，独立出android和ccache目录:
 
+- 在 :ref:`zfs_startup_zcloud` 基础上 (已经构建了 ``zpool-data`` 的 zpool) 创建独立的卷:
+
+.. literalinclude:: systemd-nspawn/zfs
+   :caption: 在zfs上创建独立的子卷用于 ``android`` 和 ``ccache``
+
 .. literalinclude:: systemd-nspawn/systemd-nspawn_ubuntu-dev_android_ccache
    :language: bash
    :caption: 执行 ``systemd-nspawn`` 启动 ``ubuntu-dev`` 容器(提供独立android和ccache目录)
+
+- 此时位于容器内部，执行 ``df -h`` 检查可以看到如下挂载目录:
+
+.. literalinclude:: systemd-nspawn/systemd-nspawn_ubuntu-dev_df_output
+   :caption: 进入容器内部后检查磁盘卷挂载
+   :emphasize-lines: 12-14
 
 .. note::
 
