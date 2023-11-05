@@ -23,11 +23,11 @@ root Android
 为了能够更好使用我的 :ref:`pixel_3` ，采用以下步骤:
 
 - :ref:`unlock_bootloader` 以便刷入第三方OS
-- :ref:`root_pixel` 以便释放所有的能力
-- :ref:`lineageos_19.1_pixel_3`
+- 使用 :ref:`magisk` 解锁手机root (之前采用旧版的 :ref:`root_pixel` )
+- :ref:`lineageos_20_pixel_4` (之前使用 :ref:`lineageos_19.1_pixel_3` )
 
-  - :strike:`编译LineageOS系统` (目前无精力)
-  - :strike:`刷入自己编译的LineageOS系统` (目前无精力)
+  - :ref:`build_lineageos_20_pixel_4`
+  - :ref:`lineageos_20_pixel_4`
 
 - 安装 :ref:`magisk` 对设备进行root - :ref:`magisk_root_ota` (在Pixel系列现代化设备，无法使用传统的 :ref:`twrp` ，必须使用 :ref:`adb` 和 fastboot)
 

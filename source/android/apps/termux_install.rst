@@ -12,7 +12,12 @@ Termux安装
 
 需要注意Termux不支持没有NEON SIMD的ARM设备，例如基于Nvidia Tegra 2 CPU。
 
-可以安装 :ref:`f-droid` 客户端来安装应用，也可以直接下载安装 `termux apk <https://f-droid.org/en/packages/com.termux/>`_ APK软件包直接运行安装 - 安装方法和其他APK没有什么两样，安装后运行 ``Termux`` 会出现一个终端界面，然后有一些提示信息指导我们下一步操作。
+可以采用如下两种方法之一:
+
+- 安装 :ref:`f-droid` 客户端来安装应用
+- 直接下载安装 `termux apk <https://f-droid.org/en/packages/com.termux/>`_ APK软件包直接运行安装 
+
+安装方法和其他APK没有什么两样，安装后运行 ``Termux`` 会出现一个终端界面，然后有一些提示信息指导我们下一步操作
 
 更新系统
 ==========
@@ -52,11 +57,15 @@ Termux安装
    :caption: 配置ssh登陆Termux环境 ~/.ssh/config
    :emphasize-lines: 3
 
-注意，Termux不是使用标准的22端口作为ssh访问端口，使用 ``8022``
+.. note::
+
+   - Termux不是使用标准的22端口作为ssh访问端口，使用 ``8022``
+   - 登陆用户的账号名字以 ``termux`` 终端中输入 ``id`` 命令获得，请替换成你自己系统中的用户名
+
 
 - 然后就可以ssh访问主机::
 
-   ssh pixel1
+   ssh pixel
 
 顺利登陆系统之后，立即配置 :ref:`ssh_key` 方便后续无需密码直接访问系统
 
