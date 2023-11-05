@@ -12,6 +12,8 @@ Android 安装
    android_10_pixel_xl.rst
    android_11_pixel_3.rst
    lineageos_19.1_pixel_3.rst
+   lineageos_20_pixel_4.rst
+   lineageos_apps.rst
    disable_setupwizard.rst
 
 .. only::  subproject and html

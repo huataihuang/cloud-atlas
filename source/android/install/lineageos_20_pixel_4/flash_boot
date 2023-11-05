@@ -1,0 +1,1 @@
+fastboot flash boot boot.img

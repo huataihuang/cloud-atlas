@@ -69,11 +69,10 @@ Magisk可以实现的功能包括:
 - 现在需要检查设备是否使用独立的 ``vbmeta`` 分区:
 
   - 如果官方firmware软件包中有一个 ``vbmeta.img`` ，就表明你的设备使用了 ``vbmeta`` 分区
-  - 也可以使用如下命令检查设备
+  - 也可以使用如下命令检查设备:
 
-::
-
-   adb shell ls -l /dev/block/by-name
+.. literalinclude:: magisk/adb_ls_block
+   :caption: 检查系统中是否有 ``vbmeta`` 分区
 
 输出中有 ``vbmeta`` , ``vbmeta_a`` 或者 ``vbmeta_b`` ，则表示设备是使用独立的 ``vbmeta`` 分区的。例如，我的 :ref:`pixel_3` 输出就有::
 
@@ -82,14 +81,22 @@ Magisk可以实现的功能包括:
    lrwxrwxrwx 1 root root 16 1971-01-10 12:45 vbmeta_b -> /dev/block/sde22
    ...
 
-综上，对于我的 :ref:`pixel_3` :
+我的 :ref:`pixel_4` 输出显示:
+
+.. literalinclude:: magisk/adb_ls_block_output
+   :caption: 检查系统中是否有 ``vbmeta`` 分区, :ref:`pixel_4` 输出信息
+
+综上，对于我的 :ref:`pixel_3` / :ref:`pixel_4` :
 
   - 使用 boot ramdisk
   - 使用独立的 ``vbmeta`` 分区
   - 基于第一条，应该使用 ``boot.img`` 镜像
 
 Patching Images
------------------
+===================
+
+:ref:`pixel_3` 下载LineageOS镜像
+----------------------------------
 
 - 我之前在 :ref:`magisk_root_ota` 采用Google Android官方下载的 factory image 中的 ``boot.img`` ，但是目前我已经不再使用Google 官方 Android ，改为 :ref:`lineageos_19.1_pixel_3` 。所以参考 `How to Root LineageOS ROM via Magisk Boot.img <https://www.droidwin.com/root-lineageos-magisk-boot-img/>`_ 
 
@@ -109,9 +116,10 @@ Patching Images
 
 就能获得 ``boot.img`` 文件(以及其他)
 
-- 将 ``boot.img`` 推送到手机中::
+- 将 ``boot.img`` 推送到手机中:
 
-   adb push boot.img /sdcard/Download/boot.img
+.. literalinclude:: magisk/push_boot.img
+   :caption: 将安装启动镜像 ``boot.img`` 推送到手机中
 
 - 在手机上运行前面安装好的 ``Magisk`` 程序，然后点击 ``Install`` 按钮，此时 ``Magisk`` 会让你选择需要patch的文件，则选择刚才上传到手机中的 ``boot.img`` 文件，并继续
 
@@ -121,13 +129,15 @@ Patching Images
 
    adb pull /sdcard/Download/magisk_patched-24300_DHRRP.img
 
-- 将Android设备重启到Bootlader/Fastboot模式::
+- 将Android设备重启到Bootlader/Fastboot模式:
 
-   adb reboot bootloader
+.. literalinclude:: ../startup/unlock_bootloader/reboot_bootloader
+   :caption: 重启设备进入 ``bootloader`` 模式
 
-并检查设备状态::
+输入如下命令验证设备已经进入 ``fastboot`` 模式:
 
-   fastboot devices
+.. literalinclude:: ../startup/unlock_bootloader/fastboot
+   :caption: 验证设备是否进入 ``fastboot`` 模式
 
 可以看到::
 
@@ -152,6 +162,65 @@ Patching Images
    fastboot reboot
 
 - 完成后检查 ``Magisk`` 应用，可以看到是 ``Installed`` 状态
+
+:ref:`build_lineageos_20_pixel_4`
+-----------------------------------
+
+现在我的最新实践是采用 :ref:`build_lineageos_20_pixel_4` ，所以 :ref:`lineageos_20_pixel_4` 可以直接使用自己编译过程生成的 ``boot.img`` 来进行补丁(也就是跳过上述从官方安装包解压 ``boot.img`` 的步骤)。方法和上述 :ref:`pixel_3` 实践类似:
+
+- 将 ``boot.img`` 推送到手机中:
+
+.. literalinclude:: magisk/push_boot.img
+   :caption: 将安装启动镜像 ``boot.img`` 推送到手机中
+
+- 在手机上运行前面安装好的 ``Magisk`` 程序，然后点击 ``Install`` 按钮，此时 ``Magisk`` 会让你选择需要patch的文件，则选择刚才上传到手机中的 ``boot.img`` 文件，并继续
+
+此时生成patch过的文件可以通过 ``adb ls /sdcard/Download/`` 看到，名为 ``magisk_patched-26300_NHXW1.img``
+
+- 将patched过的镜像下载到电脑上:
+
+.. literalinclude:: magisk/push_boot_patched.img
+   :caption: 将patched的镜像下载
+
+- 然后将手机重启到 ``fastboot`` 模式:
+
+.. literalinclude:: ../startup/unlock_bootloader/reboot_bootloader
+   :caption: 重启设备进入 ``bootloader`` 模式
+
+输入如下命令验证设备已经进入 ``fastboot`` 模式:
+
+.. literalinclude:: ../startup/unlock_bootloader/fastboot
+   :caption: 验证设备是否进入 ``fastboot`` 模式
+
+可以看到:
+
+.. literalinclude:: ../startup/unlock_bootloader/fastboot_output
+   :caption: 验证正确的 ``fastboot`` 模式输出信息
+
+- 将补丁过的 ``boot.img`` 刷入当前激活的slot:
+
+.. literalinclude:: magisk/flash_boot_patched.img
+   :caption: 将patched的镜像刷入手机
+
+此时显示补丁过的boot镜像是刷入到手机当前激活的slot:
+
+.. literalinclude:: magisk/flash_boot_patched.img_output
+   :caption: 将patched的镜像刷入手机，可以看到刷入的是当前激活的slot ``boot_b``
+
+- 这里只flash了当前激活的 ``boot_b`` ，那么还有一个 ``boot_a`` 需要flash，则使用命令(需要明确指定分区 ``boot_a`` ，前面没有明确指定 ``boot_b`` 则是因为 ``boot_b`` 是当前激活分区，所以用 ``boot`` 指代就行 ):
+
+.. literalinclude:: magisk/flash_boot_patched.img_boot_a
+   :caption: 另一个非当前激活分区需要明确指定刷入分区 ``boot_a`` 才能刷入
+
+完成显示:
+
+.. literalinclude:: magisk/flash_boot_patched.img_boot_a_output
+   :caption: 另一个非当前激活分区需要明确指定刷入分区 ``boot_a`` 才能刷入
+
+- 重启设备:
+
+.. literalinclude:: magisk/fastboot_reboot
+   :caption: ``fastboot`` 重启手机
 
 旧版Magisk安装(归档)
 ======================
@@ -265,6 +334,7 @@ Magisk Hide可以绕过这些检测。
 参考
 =======
 
+- `Magisk Installation <https://topjohnwu.github.io/Magisk/install.html>`_ 官方文档，基本参考
 - `How to Root LineageOS ROM via Magisk Boot.img <https://www.droidwin.com/root-lineageos-magisk-boot-img/>`_
 - `神奇的 Magisk <https://www.jianshu.com/p/393f5e51716e>`_
 - `Android 玩家不可错过的神器：Magisk Manager <https://zhuanlan.zhihu.com/p/61302392>`_

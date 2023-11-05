@@ -1,0 +1,1 @@
+adb reboot bootloader

@@ -8,6 +8,9 @@ Android Debug Bridge (adb) 是一个多用途命令行工具，用于和设备�
 
 * 客户端：发送指令。这个客户端程序运行在开发主机上，你可以从命令行终端发起
 
+安装
+=========
+
 .. note::
 
    Android Studio安装Android SDK以后，adb位于 ``sdk/platform-tools`` 目录:
@@ -17,6 +20,28 @@ Android Debug Bridge (adb) 是一个多用途命令行工具，用于和设备�
 
 你可以通过 Android Studio 安装来获得 ``adb`` ，也可以仅下载 `Android 调试桥 (adb) <https://developer.android.com/studio/command-line/adb>`_ 的 `SDK Platform Tools <https://developer.android.com/studio/releases/platform-tools>`_ 软件包，下载以后解压缩就是 ``platform-tools`` 目录，请移动到对应目录下。
 
+macOS安装adb
+-------------
+
+- 通过 :ref:`homebrew` 可以完成:
+
+.. literalinclude:: adb/macos_install_adb
+   :caption: 在 :ref:`macos` 上使用 :ref:`homebrew` 安装 ``adb``
+
+Linux安装adb
+----------------
+
+- 从 Google 下载 ``platform-tools for linux`` (这里下载版本是 ``r34.0.5`` )并解压缩并移动到 ``~/adb-fastboot`` 目录下:
+
+.. literalinclude:: adb/linux_install_adb
+   :caption: 在 :ref:`linux` 上安装 ``adb``
+
+- 配置 ``~/.profile`` 内容添加路径:
+
+.. literalinclude:: adb/profile
+   :caption: 在用户的profile中添加 ``platform-tools`` 安装路径 
+
+
 激活设备adb debugging
 =======================
 
@@ -24,21 +49,17 @@ Android Debug Bridge (adb) 是一个多用途命令行工具，用于和设备�
 
 对于Android 4.2或更高版本，这个 Developer options 默认是关闭的，要看到这个选项，选择菜单 ``Settings > About phone`` ，然后在 ``Build number`` 菜单上 ``连续点击7次`` 。
 
-此时将设备通过USB连接电脑，执行命令::
+注意，此时设备还没有授权给主机，需要在设备上点击确认信任该电脑: 选择菜单 ``Settings > Developer options > USB debugging`` ，此时手机上会弹出确认是否信任连接主机，选择信任
 
-   adb devices
+此时将设备通过USB连接电脑，执行命令:
 
-就会看到设备::
+.. literalinclude:: adb/devices
+   :caption: ``adb devices`` 检查连接设备
 
-   * daemon not running; starting now at tcp:5037
-   * daemon started successfully
-   List of devices attached
-   04a827c034408cdc      unauthorized
+就会看到设备:
 
-注意，此时设备还没有授权给主机，需要在设备上点击确认信任该电脑，确认以后再次执行 ``adb devices`` 就能够看到::
-
-   List of devices attached
-   04a827c034408cdc      device
+.. literalinclude:: adb/devices_output
+   :caption: ``adb devices`` 显示连接的 :ref:`pixel_4` 设备
 
 现在就可以使用adb对设备进行操作了。
 
