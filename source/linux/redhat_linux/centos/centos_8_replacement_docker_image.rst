@@ -1,8 +1,8 @@
-.. _centos_8_replacement:
+.. _centos_8_replacement_docker_image:
 
-=========================
-CentOS 8已死:选择替代
-=========================
+=====================================
+CentOS 8 已死:选择替代的docker镜像
+=====================================
 
 我在 :ref:`nerdctl` 尝试部署CentOS 8容器镜像失败，原因是2021年底CentOS 8已经终止更新，已经无法直接使用官方镜像。通过 :ref:`centos_8_convert_stream` 虽然能够继续使用CentOS，但是CentOS Stream滚动更新模式，作为Red Hat Enterprise Linux上游，相对而言稳定性差一些，所以可能需要寻找可行的替代发行版。
 

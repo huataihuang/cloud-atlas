@@ -9,11 +9,12 @@ RedHat Linux
 
    redhat_linux_state.rst
    centos/index
+   almalinux/index
+   fedora/index
    admin/index
    systemd/index
    udev/index
    cgroup/index
-   fedora/index
    kernel/index
    performance/index
 
