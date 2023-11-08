@@ -16,3 +16,13 @@ CentOS Storage Special Interest Group (SIG)
 .. note::
 
    我将在 :ref:`ceph` 和 :ref:`gluster` 部署实践中采用SIG方案。
+
+CentOS已死
+============
+
+从2021年底开始，由于CentOS8停止更新，在 :ref:`docker` 容器化运行环境中，就不得不 :ref:`centos_8_replacement_docker_image` 。这也迫使用户要么选择购买RedHat的企业级Linux，要么选择采用替代发行版。主要可选的RedHat兼容发行版:
+
+- :ref:`almalinux` : 开源社区驱动的二进制兼容Red Hat Enterprise Linux发行版
+- `Rocky Linux <https://rockylinux.org/>`_ : 目前最流行的Red Hat Enterprise Linux bug-for-bug 兼容的企业级发行版
+
+:ref:`almalinux_vs_rockylinux` ，我选择尝试 :ref:`almalinux` 以磨练在RedHat系发行版的技能。

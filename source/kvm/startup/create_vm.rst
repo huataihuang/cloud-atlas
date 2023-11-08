@@ -158,6 +158,11 @@ ARM环境Ubuntu虚拟机
      --location=http://mirrors.163.com/centos/7/os/x86_64/ \
      --extra-args="console=tty0 console=ttyS0,115200"
 
+- CentOS 7虚拟机在线安装( 使用 :ref:`libvirt_zfs_pool` ，创建方法同下文 **创建CentOS 7 (vault)虚拟机**  ):
+
+.. literalinclude:: create_vm/create_centos7_vm_zfs
+   :caption: 在 :ref:`libvirt_zfs_pool` 创建CentOS 7虚拟机
+
 - CentOS 6.10 虚拟机在线安装::
 
    virt-install \
@@ -225,7 +230,7 @@ ARM环境Ubuntu虚拟机
 .. note::
 
    - 存储采用 :ref:`ceph_rbd_libvirt`
-   - 和 :ref:`centos_8_replacement` 相似，需要采用 `centos-vault 163镜像 <http://mirrors.163.com/centos-vault/>`_ 安装
+   - 和 :ref:`centos_8_replacement_docker_image` 相似，需要采用 `centos-vault 163镜像 <http://mirrors.163.com/centos-vault/>`_ 安装
 
 - 在 :ref:`ceph_rbd_libvirt` 上构建 RBD磁盘:
 
