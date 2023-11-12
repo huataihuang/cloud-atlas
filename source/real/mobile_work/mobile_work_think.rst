@@ -66,10 +66,16 @@ iOS对屏幕外接输出支持较为完善，有两种方式:
 Android移动工作
 =================
 
-我使用 :ref:`pixel_3` 来实现移动办公，主要有两种模式:
+我使用 :ref:`pixel_4` (已替代 :ref:`pixel_3` )来实现移动办公，主要有两种模式:
 
 - :ref:`termux` 实现在 :ref:`android` 系统内部运行一个微型Linux系统，实现完整的 :ref:`termux_dev` 以及 :ref:`termux_proxy` ，这样只需要一台简单的瘦客户机(有浏览器和termianl)，就可以实现访问办公网络以及无障碍访问互联网信息
 - 对于没有完整瘦客户机的情况，如果有一个外接显示器和蓝牙键盘，那么采用 :ref:`android_mobile_work_solutions` 中 :ref:`termux` 结合外界显示器来实现
+
+.. note::
+
+   目前原生Android 13极以下系统都没有提供三星独有的 `Samsung DeX <https://www.samsung.com/us/apps/dex/>`_ ，而从Pixel 8开始，Google将为Android 14带来相似的原生功能，这将极大拓展Android 系统的灵活性，特别适合移动工作。
+
+   阮一峰在 `科技爱好者周刊（第 277 期）：工作台副屏的最佳选择 <https://www.ruanyifeng.com/blog/2023/11/weekly-issue-277.html>`_ 也提出了采用 Samsung Dex 实现多窗口桌面工作的建议方案(他特意购买了二手的三星手机)。可见科技工作着都有着相似的需求和想法。
 
 参考
 ======

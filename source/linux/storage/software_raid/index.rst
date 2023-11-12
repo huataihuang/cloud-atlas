@@ -11,6 +11,7 @@ Linux 软RAID
    mdadm_partion_vs_disk.rst
    mdadm.rst
    mdadm_raid10.rst
+   md_sync_action.rst
    raid-check.rst
    md_sync_speed.rst
    mdadm_remove_md.rst

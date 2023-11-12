@@ -33,6 +33,28 @@ Linux/Unix 通常采用 System V ( ``ps -elf`` ) 或 BSD ( ``ps alx`` ) 风格 `
    - ``stime`` 启动时间类似 ``09:10`` ，但是超过24小时的进程也是显示为日期，类似 ``Aug31``
    - ``lstart`` 启动时间最详尽和标准化，非常方便对比检查，类似 ``Thu Aug 31 23:58:01 2023`` 强烈推荐
 
+``ps`` 获取完整命令参数
+========================
+
+``ps`` 命令参数 ``-o args`` 可以指定输出完整格式命令:
+
+.. literalinclude:: ps/ps_args
+   :caption: ``ps`` 输出完成的进程命令参数
+
+完整命令也可以从 ``PID`` 的对应 ``cmdline`` 获取，但是需要注意到系统将命令中的空格( ``spces`` )替换成了 ``NULL`` 字符( ``x00`` )，所以看到的命令糊成一片::
+
+   /usr/bin/qemu-system-x86_64-nameguest=y-k8s-m-3,debug-threads=on-S-object{"qom-type":"secret"...
+
+解决方法是将 ``NULL`` 再次替换为 ``space`` :
+
+.. literalinclude:: ps/get_process_cmdline_from_proc
+   :caption: 从 ``/proc/<PID>/cmdline`` 获取进程命令
+
+此时就能看到正确的输出格式:
+
+.. literalinclude:: ps/get_process_cmdline_from_proc_output
+   :caption: 从 ``/proc/<PID>/cmdline`` 获取进程命令，转换 ``NULL`` 到 ``space``
+
 ``ps`` 检查线程
 =================
 
@@ -61,3 +83,5 @@ Linux/Unix 通常采用 System V ( ``ps -elf`` ) 或 BSD ( ``ps alx`` ) 风格 `
 
 - `About the output fields of the ps command in Unix <https://kb.iu.edu/d/afnv>`_ 非常清晰的 ``ps -o`` 参数字段快速查询，建议参考
 - `How to get the start time of a long-running Linux process? <https://stackoverflow.com/questions/5731234/how-to-get-the-start-time-of-a-long-running-linux-process>`_
+- `How to get whole command line from a process? <https://unix.stackexchange.com/questions/163145/how-to-get-whole-command-line-from-a-process>`_
+- `How to Get the Command Line Args Passed to a Running Process on Unix/Linux Systems? <https://www.baeldung.com/linux/get-command-line-args-passed-running-process>`_

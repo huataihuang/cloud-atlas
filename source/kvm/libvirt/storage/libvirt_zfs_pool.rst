@@ -100,6 +100,33 @@ ZFS存储池定义
 .. literalinclude:: ../../startup/create_vm/create_centos7_vm_zfs
    :caption: 在 :ref:`libvirt_zfs_pool` 创建CentOS 7虚拟机
 
+clone虚拟机
+============
+
+``virsh`` 不支持clone ZFS卷
+----------------------------
+
+- 使用 virt-clone 克隆新的虚拟机( 参考 :ref:`libvirt_lvm_pool` ) **实践失败**
+
+.. literalinclude:: libvirt_zfs_pool/virt-clone
+   :caption: 使用 ``virt-clone`` 复制虚拟机，但是 **实际上对 ZFS 卷失败**
+
+提示错误:
+
+.. literalinclude:: libvirt_zfs_pool/virt-clone_err
+   :caption: 使用 ``virt-clone`` 复制虚拟机，但是 **实际上对 ZFS 卷失败**
+
+这个报错实际上就是 ``virsh clone-vol`` 的报错，原因是 ``libvirt`` 不支持 ZFS 卷clone。举例:
+
+.. literalinclude:: libvirt_zfs_pool/virsh_vol-clone
+   :caption: 使用 ``virsh vol-clone`` 尝试clone出ZFS卷
+
+.. literalinclude:: libvirt_zfs_pool/virsh_vol-clone_err
+   :caption: 使用 ``virsh vol-clone`` 尝试clone出ZFS卷报错信息
+
+手工处理
+
+
 参考
 =======
 

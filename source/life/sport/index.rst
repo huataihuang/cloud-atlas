@@ -11,6 +11,7 @@
    :maxdepth: 1
 
    jabra_sport_pulse.rst
+   plantronics_fit_3100.rst
 
 .. only::  subproject and html
 
