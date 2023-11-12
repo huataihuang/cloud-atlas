@@ -65,9 +65,10 @@ pacman简明使用
 
    上述命令会打破系统完整，所以需要避免
 
-* 升级整个系统所有软件包::
+* 升级整个系统所有软件包:
 
-   pacman -Syu
+.. literalinclude:: pacman/upgrade_system
+   :caption: 升级整个arch linux系统
 
 * 清理缓存::
 

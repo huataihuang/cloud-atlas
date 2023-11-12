@@ -9,6 +9,7 @@
 
    process_vs_thread.rst
    thread_count.rst
+   get_process_start_time.rst
    utils/index
 
 .. only::  subproject and html

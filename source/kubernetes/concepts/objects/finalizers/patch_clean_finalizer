@@ -1,0 +1,19 @@
+# 输出参数是Node节点
+node=$1
+cluster=z-k8s
+kubeconfig="--kubeconfig ${cluster}/admin.kubeconfig.yaml"
+
+kubectl ${kubeconfig} get pods -l scheduler.assign/nodename=${node} -A | tee node_pods
+
+# 获取节点上pods的ns和名字列表
+cat node_pods | grep "Terminating" | awk '{print $1" "$2}' | tee node_ns_pods
+
+> node_ns_pods_cmd
+while read ns pod; do
+    # 最初我是手工修改
+    #echo "kubectl ${kubeconfig} -n $ns edit pods $pod" | tee -a node_ns_pods_cmd
+    #echo "kubectl ${kubeconfig} -n $ns delete pods $pod --force" | tee -a node_ns_pods_cmd
+
+    # 采用patch方式可以批量处理
+    echo "kubectl ${kubeconfig} -n $ns patch pods $pod -p '{"metadata":{"finalizers":null}}' --type=merge" | tee -a node_ns_pods_cmd
+done < "node_ns_pods"

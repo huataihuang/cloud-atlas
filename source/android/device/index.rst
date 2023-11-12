@@ -20,6 +20,7 @@ Android 设备
    pixel_4.rst
    pixel_4_wireless_charger.rst
    pixel_6.rst
+   samsung_galaxy_watch_4.rst
 
 .. only::  subproject and html
 

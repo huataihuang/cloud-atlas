@@ -58,3 +58,8 @@
 .. warning::
 
    ``md`` 配置默认 ``200MB/s`` 同步速度是有一定道理的，我在这里踩了一个坑(见下文)
+
+参考
+======
+
+- `5 Tips To Speed Up Linux Software Raid Rebuilding And Re-syncing <https://www.cyberciti.biz/tips/linux-raid-increase-resync-rebuild-speed.html>`_  这是一篇非常好的文档
