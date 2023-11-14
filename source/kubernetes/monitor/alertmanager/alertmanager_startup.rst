@@ -19,6 +19,33 @@ Prometheus 通常与处理警报和警报路由的 AlertManager 结合使用:
 
    `Swatto/promtotwilio <https://github.com/Swatto/promtotwilio>`_ 提供了一个从 :ref:`prometheus` 接收webooks然后通过 `Twilio <https://www.twilio.com/>`_ 发送短信告警
 
+安装
+======
+
+和 :ref:`prometheus_startup` 类似，采用 :ref:`zcloud_host_install_prometheus` 类似方法完成部署 ``Alertmanger`` : 共用部分 :ref:`prometheus_startup` 配置(运行用户设置为 ``prometheus`` )
+
+- 准备用户账号(已完成过):
+
+.. literalinclude:: ../prometheus/prometheus_startup/add_prometheus_user
+   :language: bash
+   :caption: 在操作系统中添加 prometheus 用户
+
+- 安装和初始配置复制:
+
+.. literalinclude:: alertmanager_startup/init_alertmanager
+   :language: bash
+   :caption: 复制和初始化alertmanager
+
+- 配置 :ref:`systemd` 服务 ``/etc/systemd/system/alertmanager.service`` :
+
+.. literalinclude:: alertmanager_startup/alertmanager.service
+   :caption: Alertmanager :ref:`systemd` 服务管理配置文件 ``/etc/systemd/system/alertmanager.service``
+
+- 启动服务:
+
+.. literalinclude:: alertmanager_startup/start_alertmanager
+   :caption: 启动Alertmanager
+
 测试alert
 ===========
 
@@ -52,3 +79,6 @@ Alertmanager的配置主要包含两个部分:
 =======
 
 - `Prometheus docs: Alertmanager <https://prometheus.io/docs/alerting/latest/alertmanager/>`_
+- `AlertManager and Prometheus Complete Setup on Linux <https://devconnected.com/alertmanager-and-prometheus-complete-setup-on-linux/>`_
+- `How to Install and Configure Prometheus and Alert Manager on CentOS 7?  <https://medium.com/@Dylan.Wang/how-to-install-and-configure-prometheus-and-alert-manager-on-centos-7-78095c2de356>`_
+- `prometheus告警流程及相关时间参数说明 <https://blog.csdn.net/ifenggege/article/details/125456836>`_
