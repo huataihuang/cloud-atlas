@@ -46,10 +46,10 @@ Squid也支持 ``round-robin`` 方式访问多个parent proxy::
 
    ssh -C -L 4128:127.0.0.1:3128 <REMOTE_SERVER>
 
-- 然后在墙外squid ( ``EXTERNAL PROXY`` ) 配置 ``/etc/squid/squid.conf`` 修改::
+- 然后在墙外squid ( ``EXTERNAL PROXY`` ) 配置 ``/etc/squid/squid.conf`` 修改:
 
-   # 仅提供本地回环地址服务，避免安全隐患
-   http_port 127.0.0.1:3128
+.. literalinclude:: squid_socks_peer/squid_limit_localhost
+   :caption: 限制squid仅监听本地回环地址，避免外部滥用
 
 .. note::
 

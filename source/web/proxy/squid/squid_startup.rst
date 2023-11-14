@@ -7,9 +7,10 @@ Squid快速起步
 安装
 ========
 
-- arch linux安装::
+- arch linux安装:
 
-   pacman -S squid
+.. literalinclude:: squid_startup/pacman_install_squid
+   :caption: 在 :ref:`arch_linux` 系统安装squid
 
 默认配置的缓存目录是 ``/var/cache/squid`` ，配置文件是 ``/etc/squid/squid.conf`` 。
 
@@ -55,10 +56,10 @@ Squid快速起步
 
    :ref:`fedora` 发行版安装squid默认没有启用本地缓存目录，修改了上述一行 ``cache_dir`` 配置
 
-- 重启服务::
+- 重启并激活squid服务:
 
-   systemctl restart squid
-   systemctl enable squid
+.. literalinclude:: squid_startup/restart_enable_squid
+   :caption: 重启并激活squid服务器(在操作系统启动时启动)
 
 - 对于使用了firewalld的防火墙主机，请设置允许访问端口 3128 ::
 
