@@ -14,9 +14,22 @@
 安装
 ======
 
-- 服务器端可以采用各种Linux发行版完成 `WireGuard Installation <https://www.wireguard.com/install/>`_ ，例如 Debian / Ubuntu ::
+- 服务器端可以采用各种Linux发行版完成 `WireGuard Installation <https://www.wireguard.com/install/>`_ 
 
-   apt install wireguard
+例如 Debian / :ref:`ubuntu_linux` :
+
+.. literalinclude:: deploy_wireguard/apt_wireguard
+   :caption: :ref:`ubuntu_linux` 安装wireguard
+
+:ref:`arch_linux` :
+
+.. literalinclude:: deploy_wireguard/pacman_wireguard
+   :caption: :ref:`arch_linux` 安装wireguard
+
+:ref:`macos` :
+
+.. literalinclude:: deploy_wireguard/brew_wireguard
+   :caption: :ref:`macos` 安装wireguard
 
 对等加密隧道建立
 =================
@@ -128,13 +141,21 @@ Peer建立连接
 
    建议修订配置中端口，著名端口可能被屏蔽
 
+   上述配置 ``wg0.conf`` 中网卡 ``enp1s0`` 请按照实际服务器网卡接口命名修正
+
 .. note::
 
    这里客户端部分，也就是 ``[Peer]`` 部分不用手工配置，后面通过命令行添加后，重启一次 ``wg0`` 会自动刷新
 
-- 启动服务端接口::
+- 启动服务端接口:
 
-   sudo wg-quick up wg0
+.. literalinclude:: deploy_wireguard/up_wg0
+   :caption: 启动 ``wg0`` 接口
+
+输出信息类似:
+
+.. literalinclude:: deploy_wireguard/up_wg0_output
+   :caption: 启动 ``wg0`` 接口输出信息
 
 - 添加NAT流量:
 
@@ -150,24 +171,32 @@ Peer建立连接
    :language: bash
    :caption: 创建密钥对
 
-- 回到服务器端，将刚才生成的客户端公钥以及IP添加到允许列表 ``peer`` 中::
+- 回到服务器端，将刚才生成的客户端公钥以及IP添加到允许列表 ``peer`` 中:
 
-   wg set wg0 peer <客户端的公钥> allowed-ips 10.10.0.2/32
+.. literalinclude:: deploy_wireguard/wg_client_add
+   :caption: 在服务器上添加客户端的公钥
 
-此时在服务器端执行一次 ``wg0`` 重启就会看到客户端公钥和对应IP地址被刷入配置文件 ``/etc/wireguard/wg0.conf`` 中::
+此时在服务器端执行一次 ``wg0`` 重启就会看到客户端公钥和对应IP地址被刷入配置文件 ``/etc/wireguard/wg0.conf`` 中:
 
-   wg-quick down wg0
-   wg-quick up wg0
+.. literalinclude:: deploy_wireguard/restart_wg
+   :caption: 在服务器上重启一下 ``wg0`` 刷新刚才添加客户端公钥的配置文件设置
 
-- 客户端也配置一个 ``/etc/wireguard/wg0.conf`` 
+完成后，服务器上检查 ``/etc/wireguard/wg0.conf`` 就会看到添加了如下内容::
+
+   [Peer]
+   PublicKey = <客户端公钥>
+   AllowedIPs = 10.10.0.2/32
+
+- 客户端也配置一个 ``/etc/wireguard/wg0.conf``  ( 如果是 :ref:`macos` 使用 :ref:`homebrew` 部署，则ARM架构的 macOS 上配置文件是 ``/opt/homebrew/etc/wireguard/wg0.conf`` ，即brew的安装目录下 )
 
 .. literalinclude:: deploy_wireguard/wg0.conf_client
    :language: bash
    :caption: 客户端/etc/wireguard/wg0.conf
 
-- 启动::
+- 客户端启动方法和服务端一样的命令:
 
-   sudo wg-quick up wg0
+.. literalinclude:: deploy_wireguard/up_wg0
+   :caption: 启动 ``wg0`` 接口
 
 此时在服务器上检查::
 
@@ -192,10 +221,15 @@ Peer建立连接
 
    注意，客户端要配置DNS，否则即使网络通如果没有解析则无法访问internet
 
+.. warning::
+
+   这里默认简化配置会使得客户端所有公网访问流量都走了VPN，对于一些环境可能不适合。后续再优化
+
 参考
 ======
 
 - `WireGuard Quick Start <https://www.wireguard.com/quickstart/>`_
+- `WireGuard Installation <https://www.wireguard.com/install/>`_
 - `arch linux: WireGuard <https://wiki.archlinux.org/title/WireGuard>`_ arch文档作为印证补充，但是该文档似乎没有按照WireGuard官网及时更新
 - `如何配置wireguard服务端及客户端 <https://y2k38.github.io/posts/how-to-setup-wireguard-vpn-server/>`_ 非常好的配置说明，实践通过。官方qucickstart英文文档写得实在是不清晰，我还是参考这篇文档完成的
 - `体验Wireguard的简单之美 <https://www.nixops.me/articles/wireguard-howtos.html>`_

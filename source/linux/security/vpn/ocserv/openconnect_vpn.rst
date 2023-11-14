@@ -36,6 +36,33 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
 安装完成后，OpenConnect VPN服务自动启动，可以通过 ``systemctl status ocserv`` 检查。
 
+源代码编译
+------------
+
+在 :ref:`arch_linux` 上安装 ``ocserv`` 比较麻烦一些，需要通过 :ref:`archlinux_aur` 编译安装，也就是先安装 ``yay`` ，然后执行 ``yay -S ocserv`` ，不过在2023年11月的尝试安装失败，原因是 ocserv 依赖的 ``freeradius-client`` (AUR) 引用了一个已经不再维护的 ``libpcl`` ，所以直接安装会失败。所以我实际安装是通过源代码编译安装的:
+
+.. literalinclude:: openconnect_vpn/build_ocserv
+   :caption: 源代码编译安装 ocserv
+
+服务起停配置文件我采用了 :ref:`ubuntu_linux` 提供的 :ref:`systemd` 配置:
+
+- ``/lib/systemd/system/ocserv.service`` :
+
+.. literalinclude:: openconnect_vpn/ocserv.service
+   :caption: :ref:`ubuntu_linux` 提供的ocserv启动systemd配置
+
+- 创建 ``/etc/ocserv/ocserv.conf`` (从 :ref:`ubuntu_linux` 发行版默认配置提取):
+
+.. literalinclude:: openconnect_vpn/ocserv.conf
+   :caption: :ref:`ubuntu_linux` 提供的ocserv默认配置
+
+.. note::
+
+   :ref:`arch_linux` 仓库提供软件包上述配置文件可能已经就绪(不过我尚未实践 :ref:`archlinux_aur` 安装成功)
+
+配置
+-------
+
 - 安装Let's Encrypt客户端（Certbot）::
 
    sudo apt install software-properties-common
