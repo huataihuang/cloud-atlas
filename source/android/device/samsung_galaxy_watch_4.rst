@@ -59,7 +59,7 @@ Watch 4 vs. Watch 4 Classic vs. Watch 5 vs. Watch 6
 三星Galaxy Watch 4系列分为普通版本和Classic版本，差别是外观: 
 
 - Classic 是不锈钢外壳(普通版是铝合金)，并且配备了物理转盘(普通版是虚拟触摸转盘)。
-- 但是代价是两倍的价格: 二手9新的Watch 4是 ``328元`` ，而 Watch 4 Classic是 ``679元`` 。(作为目标是体验Wear OS的电子垃圾佬，我显然会选择尽可能低的版本来提高性价比。)
+- 但是代价是两倍的价格: 二手9新的Watch 4是 ``328元`` ，而 Watch 4 Classic是 ``679元`` 。(作为目标是体验Wear OS的电子垃圾佬，我显然会选择尽可能低的版本来提高性价比。) **注意:这是双十一价格，之后价格我发现上涨了，允悲**
 
 Galaxy Watch 4 和 Galaxy Watch 5 主要差异(核心SoC其实是一样的): (但在淘宝二手上，Watch 5价格达到 ``639元`` ，几乎是 Watch 4 两倍)
 
@@ -72,6 +72,20 @@ Galaxy Watch 4 和 Galaxy Watch 5 主要差异(核心SoC其实是一样的): (�
 
    - Google Pixel 8将支持原本三星独有的 Samsung DeX功能: 终于可以通过手机获得桌面Android体验了，这也是 :ref:`mobile_work_think` 的实现方案
    - 如果没有意外，我购买的二手三星Galaxy Watch 4和 :ref:`pixel_4` 可以使用3年(预计电池老化或硬件损坏)，此时二手的Galaxy Watch 6预计会降低到300元左右，Google Pixel 8预计会降低到1000元以下，就是非常好入手升级的时机。
+
+Galaxy Watch 4 Classic
+-------------------------
+
+我短暂把玩过 :ref:`samsung_galaxy_watch_3` ，发现经典款式的不锈钢材质运动腕表造型却是非常美观，这激起我对 ``Galaxy Watch 4 Classic`` 的兴趣:
+
+- 根据三星官方资料，大陆行货Watch 4之后LTE版本是支持国内运营商的，而且NFC功能也支持部分城市(北京、上海)交通卡
+- 从网上资料来看，三星Galaxy Watch 3的LTE功能就已经适配过国内运营商，并且应该是拿到资质(网上有很多宣传资料)
+
+美亚上 ``Samsung 三星 Galaxy Watch4 Classic 智能手表（不锈钢，LTE，46 毫米）银色`` 大约是1920元(含进口税)，淘宝上略微便宜些
+
+.. note::
+      需要注意2023年中，中国移动暂停了eSim一号多机业务，何时恢复未知，所以理论上支持LTE的智能手表独立上网功能实际上暂时无法使用
+
 
 技术规格
 ===========
@@ -143,6 +157,10 @@ Galaxy Watch 4 和 Galaxy Watch 5 主要差异(核心SoC其实是一样的): (�
   - One UI Watch 用户界面: 配合兼容手机可以实现手机安装软件同步安装，手机设置同步手表
   - Auto Switch 功能，可以在聆听音频（如电话或音乐）时，让耳塞根据使用情况，在手机和手表之间切换音频
   - 人机交互: 增加了上下摇晃手腕两次接听电话、转动手腕两次拒绝接听电话（或关闭通知和闹钟）的交互方式(Apple Watch最新一代提供的双指互扣也有类似效果)
+
+.. note::
+
+   目前我还没有体验过Wear OS，支持的软件列表或许可以参考一下 `Samsung Galaxy Watch4 港版上手 <https://post.smzdm.com/p/ar6m3prg/>`_ 这篇文章，看起来微信、百度地图是有支持的，据说支付宝提供了静态扫码支付功能
 
 软件生态
 =========
