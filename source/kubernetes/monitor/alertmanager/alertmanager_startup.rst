@@ -19,6 +19,17 @@ Prometheus 通常与处理警报和警报路由的 AlertManager 结合使用:
 
    `Swatto/promtotwilio <https://github.com/Swatto/promtotwilio>`_ 提供了一个从 :ref:`prometheus` 接收webooks然后通过 `Twilio <https://www.twilio.com/>`_ 发送短信告警
 
+架构
+=======
+
+Alertmanager是一个告警服务器，用于处理从一系列客户端(例如 :ref:`prometheus` )提供的告警，并且分发给预先定义的接收者组(Slack, email 或 Pagerduty)。Alertmanager是Prometheus Stack的一部分，但是也可以作为独立的服务器运行。
+
+通常 :ref:`prometheus` 被配置成直接发送告警给Alertmanager，不过，也可以采用不同的客户端，此时AlertManager提供一个REST路口来提供fire alerts功能.
+
+.. figure:: ../../../_static/kubernetes/monitor/alertmanager/alert-manager-works.png
+
+   AlertManager 工作原理图
+
 安装
 ======
 
@@ -82,3 +93,4 @@ Alertmanager的配置主要包含两个部分:
 - `AlertManager and Prometheus Complete Setup on Linux <https://devconnected.com/alertmanager-and-prometheus-complete-setup-on-linux/>`_
 - `How to Install and Configure Prometheus and Alert Manager on CentOS 7?  <https://medium.com/@Dylan.Wang/how-to-install-and-configure-prometheus-and-alert-manager-on-centos-7-78095c2de356>`_
 - `prometheus告警流程及相关时间参数说明 <https://blog.csdn.net/ifenggege/article/details/125456836>`_
+- `AlertManager and Prometheus Complete Setup on Linux <https://devconnected.com/alertmanager-and-prometheus-complete-setup-on-linux/>`_ 这篇文章比较详尽，并且有一个系列文章 `The complete Prometheus and Grafana installation <https://devconnected.com/how-to-setup-grafana-and-prometheus-on-linux/>`_
