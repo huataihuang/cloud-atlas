@@ -34,7 +34,17 @@ Galaxy Watch 4(我的选择)
 
 .. note::
 
-   对比之后，当下最经济实惠的Wear OS智能手表，二手9新只需要328元。还要什么🚴?
+   对比之后，当下最经济实惠的Wear OS智能手表， :strike:`二手9新只需要328元。还要什么🚴?`
+
+.. warning::
+
+   乌龙了: 双十一下单过于匆忙，没有仔细看清买家的商品说明，对三星智能手表的铲皮系列还是了解不充分:
+
+   - 三星有一款早期的产品 ``Gear S4`` ，硬件和外观几乎和 Galaxy Watch 3完全一致，也就是后来 Watch 4/6 的Classic款外观
+   - 由于是早期产品，使用的是Tizen系统，虽然功能基本就绪，但是无法使用Wear OS注定无法进一步升级，也不能适应最新的系统
+   - ``Gear S4`` 命名中也有一个 ``4`` ，所以我搞混淆了 Galaxy Watch 4，错误下单，这款手表才是最低 328元；而 ``Galary Watch 4`` 实际售价达到了 549元(9新) / 599元(98新)
+
+   由于实际上 ``Galary Watch 4`` 和 ``Galary Watch 4 Classic`` 售价只相差130元，所以我最后换购了 :ref:`samsung_galaxy_watch_4_classic`
 
 2021年8月11日三星发布Galaxy Watch 4
 
@@ -183,3 +193,4 @@ Galaxy Watch 4 Classic
 - `如何评价三星 8 月 11 日发布的 Galaxy Watch 4?有什么亮点与特征？ <https://www.zhihu.com/question/479085586/answer/2061846895>`_
 - `有没有人能说说三星watch4在使用中的缺点? <https://www.zhihu.com/question/486166840>`_
 - `2021年8月11日三星发布会｜如何评价三星Galaxy Watch4｜三星Galaxy Watch4值得买吗 <https://zhuanlan.zhihu.com/p/398805886>`_
+- `配置&系统焕新，三星Galaxy Watch4 Classic <https://zhongce.sina.com.cn/article/view/121721/>`_ 详细的评测介绍，感兴趣可以参考
