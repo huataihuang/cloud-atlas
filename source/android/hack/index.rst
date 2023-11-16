@@ -15,6 +15,7 @@ Android Hack
    magisk_root_ota.rst
    pixel_3_chinese_volte.rst
    pixel_4_volte.rst
+   cn_samsung_galaxy_watch_4_wich_android.rst
    pixel_6_volte.rst
    change_build_prop.rst
    android_busybox.rst
