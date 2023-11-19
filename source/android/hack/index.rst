@@ -13,9 +13,11 @@ Android Hack
    ab_seamless_update.rst
    magisk.rst
    magisk_root_ota.rst
+   android_recovery_mode.rst
    pixel_3_chinese_volte.rst
    pixel_4_volte.rst
    cn_samsung_galaxy_watch_4_wich_android.rst
+   samsung_health_monitor.rst
    pixel_6_volte.rst
    change_build_prop.rst
    android_busybox.rst

@@ -44,7 +44,7 @@ Galaxy Watch 4(我的选择)
    - 由于是早期产品，使用的是Tizen系统，虽然功能基本就绪，但是无法使用Wear OS注定无法进一步升级，也不能适应最新的系统
    - ``Gear S4`` 命名中也有一个 ``4`` ，所以我搞混淆了 Galaxy Watch 4，错误下单，这款手表才是最低 328元；而 ``Galary Watch 4`` 实际售价达到了 549元(9新) / 599元(98新)
 
-   由于实际上 ``Galary Watch 4`` 和 ``Galary Watch 4 Classic`` 售价只相差130元，所以我最后换购了 :ref:`samsung_galaxy_watch_4_classic`
+   由于实际上 ``Galary Watch 4`` 和 ``Galary Watch 4 Classic`` 售价只相差130元，所以我最后换购了 :ref:`samsung_galaxy_watch_4_classic_lte`
 
 2021年8月11日三星发布Galaxy Watch 4
 
@@ -194,3 +194,4 @@ Galaxy Watch 4 Classic
 - `有没有人能说说三星watch4在使用中的缺点? <https://www.zhihu.com/question/486166840>`_
 - `2021年8月11日三星发布会｜如何评价三星Galaxy Watch4｜三星Galaxy Watch4值得买吗 <https://zhuanlan.zhihu.com/p/398805886>`_
 - `配置&系统焕新，三星Galaxy Watch4 Classic <https://zhongce.sina.com.cn/article/view/121721/>`_ 详细的评测介绍，感兴趣可以参考
+- `Galaxy Watch4：难道只是星粉的自我狂欢？ <https://sspai.com/post/70741>`_ 这篇评测可以了解Galaxy Watch 4的优缺点
