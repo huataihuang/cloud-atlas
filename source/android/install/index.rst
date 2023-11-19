@@ -11,6 +11,7 @@ Android 安装
    lineageos_16_nexus_5.rst
    android_10_pixel_xl.rst
    android_11_pixel_3.rst
+   android_13_pixel_4.rst
    lineageos_19.1_pixel_3.rst
    lineageos_20_pixel_4.rst
    lineageos_apps.rst
