@@ -9,7 +9,7 @@ Kubernetes批处理
 项目
 ======
 
-- :ref:`kqueue`
+- :ref:`kueue`
 - `Volcano批处理 <https://volcano.sh/>`_ 华为开源的批处理工作负载管理系统，用于AI调度，已经进入CNCF孵化; 具备中文文档，对国内技术工作者较为方便
 
 资料

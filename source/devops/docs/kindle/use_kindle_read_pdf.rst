@@ -40,7 +40,7 @@ pdf文档裁边
 
 .. literalinclude:: use_kindle_read_pdf/briss_crop
    :language: bash
-   :caption: 使用 `briss <http://sourceforge.net/projects/briss/>`_ 裁剪pdf的白边
+   :caption: 使用 ``briss`` 裁剪pdf的白边
 
 kindle个人文档同步
 ====================

@@ -44,8 +44,16 @@ extensions = [
         'sphinxnotes.strike',
 #        'sphinxcontrib.newsfeed',
         'sphinxcontrib.youtube',
-        'sphinxcontrib.video'
+        'sphinxcontrib.video',
+        'sphinx_comments'
 ]
+
+comments_config = {
+   "utterances": {
+      "repo": "huataihuang/cloud-atlas",
+      "optional": "config",
+   }
+}
 
 #disqus_shortname = 'cloud-atlas'
 

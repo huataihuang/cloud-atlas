@@ -31,6 +31,7 @@ Sphinx文档
    sphinx_typeerror.rst
    sphinx-extension.rst
    rtd_fail_import_extension.rst
+   sphinx-comments.rst
    sphinx_disqus.rst
 
 .. only::  subproject and html

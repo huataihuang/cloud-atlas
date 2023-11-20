@@ -10,7 +10,7 @@
 
 之前在项目方案上，改进了 :ref:`deploy_centos7_gluster11` (物理服务器上的12个 ``brick`` 用于同一个volume,但限制了集群的扩容和缩容)，基于 :ref:`think_best_practices_for_gluster` ，优化为底层采用 :ref:`linux_software_raid` 来统一存储磁盘，实现一个超大规模的磁盘，然后借助 :ref:`linux_lvm` 来实现灵活的卷划分和管理(实际项目部署还是简化去掉了LVM)。实施方案 :ref:`deploy_centos7_gluster11_lvm_mdadm_raid10` 我其实没有写完(没时间)。
 
-不过，最近发现 :ref:`raid_check` 带来一个困扰，所以我想在虚拟机环境中完全模拟线上环境构建一个GlusterFS集群(唯一的差别是，每块磁盘我只模拟2GB大小)，以便完成一系列的测试验证以及监控部署方案。所以有本文记录
+不过，最近发现 :ref:`raid-check` 带来一个困扰，所以我想在虚拟机环境中完全模拟线上环境构建一个GlusterFS集群(唯一的差别是，每块磁盘我只模拟2GB大小)，以便完成一系列的测试验证以及监控部署方案。所以有本文记录
 
 准备工作
 ===========
