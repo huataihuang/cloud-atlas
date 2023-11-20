@@ -127,7 +127,7 @@ AlertManager 采用YAML格式配置文件:
 
 - 重启prometheus::
 
-  sudo systemctl restart prometheus
+   sudo systemctl restart prometheus
 
 配置 ``alertmanager.yml``
 ===========================
