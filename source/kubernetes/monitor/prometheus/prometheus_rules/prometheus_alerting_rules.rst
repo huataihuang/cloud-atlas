@@ -48,7 +48,12 @@ Alerting rules可以根据Prometheus表达式定义条件，并将触发的报�
 
 通过 :ref:`alertmanager` 发送出来的告警通知，默认是 Kubernetes 的 SVC 名称，实际上需要修改成用户能够访问的 Prometheus 的外部域名，类似 http://prometheus.cloud-atlas.io/graph 。这个修订是修改 ``prometheus`` 的命令行参数 ``--web.external-url`` : `关于模版中GeneratorURL的定义 #20 <https://github.com/timonwong/prometheus-webhook-dingtalk/issues/20>`_
 
+站在巨人的肩膀上: ``Awesome Prometheus alerts``
+==================================================
 
+刚开始配置 :ref:`alertmanager` 时候，如果完全从零开始，初学者会非常迷惘(说的就是我)，因为看到明明 Prometheus Targets 显示有监控对象 ``Unhealthy`` ，但是 ``Alerts`` 中却是一片空白
+
+这个原因就是默认 :ref:`prometheus_startup` 默认配置中没有激活任何 ``rules_files`` (也因为 ``/etc/prometheus`` 目录下 ``rules`` 子目录是空的)，所以在 :ref:`alertmanager_startup` 采用 `Awesome Prometheus alerts <https://samber.github.io/awesome-prometheus-alerts/>`_ 作为起步，可以方便不断按需改进监控告警。
 
 参考
 =====

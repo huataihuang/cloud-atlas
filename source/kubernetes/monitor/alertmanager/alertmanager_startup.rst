@@ -124,10 +124,15 @@ AlertManager 采用YAML格式配置文件:
 .. literalinclude:: alertmanager_startup/prometheus.yml
    :language: yaml
    :caption: 在 ``/etc/prometheus/prometheus.yml`` 中添加连接 Alertmanager 配置
+   :emphasize-lines: 12
 
 - 重启prometheus::
 
    sudo systemctl restart prometheus
+
+.. note::
+
+   在完成初步的 Prometheus 连接 AlertManager 之后，接下来我们需要配置告警规则。为了快速起步不用一个个手工配置，可以在 `Awesome Prometheus alerts <https://samber.github.io/awesome-prometheus-alerts/>`_ 基础上迭代改进
 
 配置 ``alertmanager.yml``
 ===========================
@@ -137,6 +142,12 @@ Alertmanager的配置主要包含两个部分:
 - 路由(route)
 - 接收器(receivers)
 
+- 修改 ``/etc/prometheus/prometheus.yml`` ，添加以下配置引用 ``alerts`` 目录下的配置:
+
+.. literalinclude:: alertmanager_startup/prometheus.yml
+   :caption: 修改 ``/etc/prometheus/prometheus.yml`` 添加告警规则配置引用
+   :emphasize-lines: 18
+
 参考
 =======
 
@@ -144,3 +155,4 @@ Alertmanager的配置主要包含两个部分:
 - `AlertManager and Prometheus Complete Setup on Linux <https://devconnected.com/alertmanager-and-prometheus-complete-setup-on-linux/>`_ 这篇文章比较详尽，并且有一个系列文章 `The complete Prometheus and Grafana installation <https://devconnected.com/how-to-setup-grafana-and-prometheus-on-linux/>`_
 - `How to Install and Configure Prometheus and Alert Manager on CentOS 7?  <https://medium.com/@Dylan.Wang/how-to-install-and-configure-prometheus-and-alert-manager-on-centos-7-78095c2de356>`_
 - `prometheus告警流程及相关时间参数说明 <https://blog.csdn.net/ifenggege/article/details/125456836>`_
+- `Awesome Prometheus alerts: AlertManager configuration <https://samber.github.io/awesome-prometheus-alerts/alertmanager>`_

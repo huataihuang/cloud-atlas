@@ -51,6 +51,7 @@ Prometheus监控
    grafana_backup_and_restore.rst
    prometheus_monitor_calico.rst
    scalable/index
+   debug/index
 
 推荐阅读:
 
