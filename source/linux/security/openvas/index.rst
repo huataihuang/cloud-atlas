@@ -1,19 +1,13 @@
-.. _linux_security:
+.. _openvas:
 
 =================================
-Linux安全
+OpenVAS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   chroot.rst
-   vpn/index
-   audit/index
-   tpm/index
-   openvas/index
-   hunting_for_persistence_in_linux/index
-   mitre_attack/index
+   intro_openvas.rst
 
 .. only::  subproject and html
 
