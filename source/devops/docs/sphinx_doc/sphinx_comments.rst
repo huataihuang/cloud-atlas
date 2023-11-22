@@ -40,6 +40,10 @@ Sphinx文档评论系统
 
 - (已在 :ref:`sphinx_footer` 完成)修订文档项目的 ``conf.py`` 指定模版目录:
 
+.. literalinclude:: sphinx_footer/conf.py
+   :language: python
+   :caption: 修改 ``conf.py`` 指定模版目录
+
 - 修订 :ref:`sphinx_footer` 中 ``foot.html`` ，增加以下内容:
 
 .. literalinclude:: ../../../_templates/footer.html
@@ -50,8 +54,10 @@ Sphinx文档评论系统
 
 .. literalinclude:: ../../../_templates/comments.html
    :language: html
+   :emphasize-lines: 3
+   :caption: ``_templete/comments.html`` 中 ``repo`` 配置行设置对应GitHub仓库
 
--
+- 现在可以开始 ``make html`` 输出文档了
 
 ``sphinx-comments`` 插件(归档参考)
 =====================================
