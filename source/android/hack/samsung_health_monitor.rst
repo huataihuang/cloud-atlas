@@ -47,6 +47,14 @@
 
 - 下载 `XDA论坛提供的SMH工具 <https://xdaforums.com/t/restrictions-removed-samsung-health-monitor-wearos-1-1-1-171-root-age-country-device-restriction-removed-22nd-november-2021.4322527/>`_ : 很不幸，这个页面在墙内无法打开，翻墙梯子被网站拒绝，所以我实际上采用了 `破解三星Galaxy Watch 4 ECG和血压监测限制并移除部分系统应用 <https://blog.irain.in/archives/Samsung-Galaxy-Watch-4-ECG-BP-restrictions-removed-and-optimization.html>`_  `共享在 Google Drive 的SHM工具包 <https://drive.google.com/drive/folders/138thPYPMbZIp2Us0Unx_h-SqJQEDxZ-0>`_
 
+.. note::
+
+   `三星watch6 flyme(非三星安卓)系统折腾记 <https://www.aprdec.top/index.php/archives/200>`_ 这位 "孟夏十二" 网友提供了全套三星破解软件，非常赞。我因为已经搞完SHM，所以没有再验证，但看起来他提供的方法和软件是可行的。
+
+.. note::
+
+   在Reddit上可以找到最新发布的 SHM MOD(也就是本文所说的SHM Moditified，破解版SHM)，例如最新版本 `SHM MOD 1.2.1.009 - Released - 9th August 2023 <https://www.reddit.com/r/GalaxyWatch/comments/15mansg/shm_mod_121009_released_9th_august_2023/>`_ (我实践安装的 1.2.2.005 似乎版本更新?)
+
 允许血压数据同步
 -----------------
 
@@ -150,3 +158,4 @@
 - `三星 Galaxy Watch 4/5 国行版手表现已支持 ECG 心电图、血压监测等功能 <https://www.ithome.com/0/711/308.htm>`_
 - `三星官网: 三星健康监测器 <https://www.samsung.com.cn/apps/samsung-health-monitor/>`_
 - `破解三星Galaxy Watch 4 ECG和血压监测限制并移除部分系统应用 <https://blog.irain.in/archives/Samsung-Galaxy-Watch-4-ECG-BP-restrictions-removed-and-optimization.html>`_
+- `三星watch6 flyme(非三星安卓)系统折腾记 <https://www.aprdec.top/index.php/archives/200>`_

@@ -1,17 +1,13 @@
-.. _dns:
+.. _nas:
 
 =================================
-DNS服务
+NAS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   compare_dns_software.rst
-   wpad_protocol.rst
-   dns_hijacking_godaddy_login.rst
-   bind/index
-   dnsmasq/index
+   think_nas.rst
 
 .. only::  subproject and html
 

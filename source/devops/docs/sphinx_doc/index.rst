@@ -34,6 +34,7 @@ Sphinx文档
    sphinx_footer.rst
    sphinx_comments.rst
    sphinx_disqus.rst
+   readthedocs_slow_builds.rst
 
 .. only::  subproject and html
 
