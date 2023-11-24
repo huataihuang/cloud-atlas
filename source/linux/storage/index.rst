@@ -20,6 +20,7 @@ Linux存储
    stratis/index
    openmediavault/index
    bcache/index
+   nas/index
 
 .. only::  subproject and html
 

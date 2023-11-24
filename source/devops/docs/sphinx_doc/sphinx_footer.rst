@@ -16,11 +16,12 @@ Sphinx文档自定义页脚
 
 .. literalinclude:: ../../../_templates/footer.html
    :language: html
-   :emphasize-lines: 1,3,4,13
+   :emphasize-lines: 1,3,4,12
 
-然后就可以在上述 ``footer.html`` 内容部分填写自己希望在每个页面展示的内容，内容会显示在页脚上。
+然后就可以在上述 ``footer.html`` 内容部分填写自己希望在每个页面展示的内容，内容会显示在页脚上
 
-上文 ``footer.html`` 部分内容是 :ref:`sphinx_comments` ，用于我的网站和网友交流评论
+  - 注意：参考 `How can I add a custom footer to Sphinx documentation? <https://stackoverflow.com/questions/5585250/how-can-i-add-a-custom-footer-to-sphinx-documentation>`_ 提到的采用 ``RTD theme`` : ``{% extends '!footer.html' %} {% block extrafooter %} <!-- your html code here --> {% endblock %}``
+  - 上文 ``footer.html`` 部分内容是 :ref:`sphinx_comments` ，用于我的网站和网友交流评论
 
 参考
 =====

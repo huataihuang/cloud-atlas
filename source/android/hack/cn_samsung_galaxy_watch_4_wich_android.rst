@@ -63,6 +63,11 @@
 
 - 总之，非常折腾，需要耐性反复尝试。因为国情特殊导致一系列技术消耗，浪费了很多人的时间和精力，也损害了三星的产品声誉。
 
+.. note::
+
+   `三星watch6 flyme(非三星安卓)系统折腾记 <https://www.aprdec.top/index.php/archives/200>`_ 这位 "孟夏十二" 网友提供了全套   
+
+
 其他方案
 =============
 
@@ -93,3 +98,4 @@ Watch刷国际版本
 - `给国行 Galaxy Watch 4 应用生态加了一片瓦（YaoYao 跳绳） <https://v2ex.com/t/821295>`_
 - `抢先 Pixel Watch，三星 Galaxy Watch 4 手表获得基于 Wear OS 4 的 One UI 5 Watch 更新 <https://www.ithome.com/0/717/060.htm>`_ 新闻而已，不过可以知道Galaxy Watch 4会得到更新
 - `Galaxy Watch4：难道只是星粉的自我狂欢？ <https://sspai.com/post/70741>`_ 这篇评测可以了解Galaxy Watch 4的优缺点
+- `三星watch6 flyme(非三星安卓)系统折腾记 <https://www.aprdec.top/index.php/archives/200>`_
