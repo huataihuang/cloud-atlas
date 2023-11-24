@@ -19,6 +19,7 @@ Android Hack
    cn_samsung_galaxy_watch_4_wich_android.rst
    samsung_health_monitor.rst
    samsung_pay_card.rst
+   samsung_music.rst
    pixel_6_volte.rst
    change_build_prop.rst
    android_busybox.rst

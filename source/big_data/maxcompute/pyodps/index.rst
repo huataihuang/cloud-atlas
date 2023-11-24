@@ -1,14 +1,13 @@
-.. _maxcompute:
+.. _pyodps:
 
 =================================
-MaxCompute
+PyODPS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_maxcompute.rst
-   pyodps/index
+   pyodps_startup.rst
 
 .. only::  subproject and html
 
