@@ -6,10 +6,12 @@
 
 .. note::
 
-   `体验Wireguard的简单之美 <https://www.nixops.me/articles/wireguard-howtos.html>`_ 提到了WireGuard的优缺点。其中缺点(我未能验证，但至少目前我使用WG上网正常):
+   `体验Wireguard的简单之美 <https://www.nixops.me/articles/wireguard-howtos.html>`_ 提到了WireGuard的优缺点。其中缺点( :strike:`我未能验证，但至少目前我使用WG上网正常``):
 
    - Wireguard专注实现简单可靠的加密，不关注流量混淆，容易被DPI检测到，同时由于特征明显，流量有可能被中继或在握手阶段阻断
    - wireguard配置简单且安全高效，适合服务器之间互联。由于国内udp限速及特征明显，不适合个人当梯子用。
+
+   我的实践确实也发现，当刚开始部署好WG时候使用是正常的，但是过一两天，就会发现WG服务器无法连接。看起来GFW在一段时间后会通过某种算法分析发现WG的加密流量从而阻断。相对而言， :ref:`ocserv` 采用SSL加密，和WEB常用的HTTPS流量相近，反而不容易被GFW发现和屏蔽(毕竟不可能物理断网)，所以可能更适合个人使用。
 
 安装
 ======
