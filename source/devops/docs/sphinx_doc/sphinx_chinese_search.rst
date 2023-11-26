@@ -21,7 +21,13 @@ Sphinx中文搜索
    :language: python
    :caption: 可选配置 ``jieba`` 词典路径
 
+.. warning::
 
+   目前不知道什么变化导致 :ref:`readthedocs_slow_builds` ，我通过关闭中文language来恢复快速编译。不影响阅读，但是搜索功能已经很久不工作了，待有空再解决
+
+.. note::
+
+   `readthedocs-demo-zh <https://readthedocs-demo-zh.readthedocs.io/zh-cn/latest/%E6%96%87%E4%BB%B6%E6%89%98%E7%AE%A1%E7%B3%BB%E7%BB%9F-ReadtheDocs.html>`_ 给出了一个完整构建中英文双语文档的方法，或许今后可以参考
 
 参考
 =====
