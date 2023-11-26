@@ -13,6 +13,8 @@ Python Atlas
 
    intro_python.rst
    startup/index
+   os/index
+   dictionary/index
    network/index
    database/index
    gui/index

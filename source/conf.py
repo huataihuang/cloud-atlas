@@ -25,9 +25,9 @@ copyright = '2018 - now, Huatai Huang'
 author = 'Huatai Huang'
 
 # The short X.Y version
-version = ''
+version = '0.7'
 # The full version, including alpha/beta/rc tags
-release = '0.7'
+release = 'beta'
 
 
 # -- General configuration ---------------------------------------------------
