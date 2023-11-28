@@ -27,18 +27,55 @@ mcelog服务记录 `内存 <http://www.mcelog.org/memory.html>`_ 和 `各种途�
 
    在线上的实践中，往往会采用日志采集方式，统一采集mcelog日志进行分析，并通过平台触发报警或自动服务器下线维修。上述mcelog自带的trigger机制也不失为一种硬件监控维护手段，可以不用以来统一日志平台，不过，各自服务和组件的独立维护方式可能在小规模或者比较单一简单的应用环境下合适。
 
+``mcelog: warning: 16 bytes ignored in each record``
+------------------------------------------------------
+
+在早期的RHEL7/CentOS 7上，有时候执行 ``mcelog`` 会出现如下报错:
+
+.. literalinclude:: edac/mcelog_err
+   :caption: 执行 ``mcelog`` 提示需要升级的报错信息
+   :emphasize-lines: 1
+
+这个问题在 `Bug 1435338 - mcelog: warning: 16 bytes ignored in each record <https://bugzilla.redhat.com/show_bug.cgi?id=1435338>`_ 有解释，问题出在 mcelog 版本 137 上，上游已经解决，需要升级到 153 版本。
+
 rasdaemon
 ==============
 
+.. note::
+
+   RAS Daemon( ``rasdaemon`` )是使用EDAC内核驱动实现的HERM(Hardware Events Report Method)，用于替代 ``edac-tools`` 。这个服务作为用户空间工具，可以搜集所有由Linux内核从服务器硬件源头(EDAC, MCE, PCI...)采集到的硬件错误。
+
+   强烈推荐在服务器上部署和运行
+
 以往发行版，如RHEL 5/6 和 arch linux早期版本都提供一个 ``mcelog`` 包包含了mcelog工具，但是这个方式已经不再使用，并且Arch Linux内核不再配置 ``CONFIG_X86_MCELOG_LEGACY`` 选项。现在发行版使用的是 `rasdaemon <https://pagure.io/rasdaemon>`_ ，例如, RHEL 7引入了新的硬件事件报告机制(hardware event report mechanism, HERM)。
+
+arch linux
+-----------------
 
 - 安装rasdaemon::
 
    yay -S rasdaemon
 
-rasdaemon可以之际命令启动，此时会在后台运行，并不断通过syslog输出。如果要在前台运行，将日志输出到控制台，则运行::
+RHEL/CentOS
+--------------
 
-   rasdaemon -f
+- 在CentOS 7上安装 ``rasdaemon`` :
+
+.. literalinclude:: edac/centos_install_rasdaemon
+   :caption: 在CentOS 7上安装 ``rasdaemon``
+
+使用
+---------
+
+rasdaemon可以之际命令启动，此时会在后台运行，并不断通过syslog输出。如果要在前台运行，将日志输出到控制台，则运行:
+
+.. literalinclude:: edac/rasdaemon_run_front
+   :caption: 前台运行 ``rasdaemon``
+
+此时输出显示 ``rasdaemon`` 初始化并监听事件，此时就可以等待出现的硬件异常
+
+.. literalinclude:: edac/rasdaemon_run_front_output
+   :caption: 前台运行 ``rasdaemon``
 
 如果希望同时将错误记录到数据库(编译时使用了参数 ``--enable-sqlite3``)，则可以增加一个 ``-r`` 参数::
 
@@ -47,12 +84,22 @@ rasdaemon可以之际命令启动，此时会在后台运行，并不断通过sy
 配置rasdaemon
 ~~~~~~~~~~~~~~~
 
-- 需要启动两个systemd服务: ``ras-mc-ctl.service`` 和 ``rasdaemon.service`` ::
+- 需要启动两个systemd服务: ``ras-mc-ctl.service`` 和 ``rasdaemon.service`` :
 
-   sudo systemctl enable ras-mc-ctl.service
-   sudo systemctl enable rasdaemon.service
-   sudo systemctl start ras-mc-ctl.service
-   sudo systemctl start rasdaemon.service
+.. literalinclude:: edac/centos_enable_rasdaemon
+   :caption: 在CentOS 7上激活和启动 ``rasdaemon``
+
+- 检查服务状态:
+
+.. literalinclude:: edac/systemctl_status_rasdaemon
+   :caption: 检查 ``rasdaemon`` 状态
+   :emphasize-lines: 32
+
+这里有一个错误提示: ``ras-mc-ctl: Error: No dimm labels for XXXX`` ，实际上在各种服务器上初始时都能看到，需要进一步配置
+
+配置 DIMM labels
+------------------
+
 
 使用rasdaemon
 ~~~~~~~~~~~~~~~~
@@ -68,3 +115,5 @@ rasdaemon可以之际命令启动，此时会在后台运行，并不断通过sy
 - `Linux x86_64: Detecting Hardware Errors <http://www.cyberciti.biz/tips/linux-server-predicting-hardware-failure.html>`_
 - `mcelog: memory error handling in user space <http://www.halobates.de/lk10-mcelog.pdf>`_
 - `Machine-check exception <https://wiki.archlinux.org/index.php/Machine-check_exception>`_
+- `GitHub: RAS Daemon <https://github.com/mchehab/rasdaemon>`_
+- `Monitoring ECC memory on Linux with rasdaemon <https://www.setphaserstostun.org/posts/monitoring-ecc-memory-on-linux-with-rasdaemon/>`_

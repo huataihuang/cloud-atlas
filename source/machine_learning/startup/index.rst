@@ -10,6 +10,7 @@
    :maxdepth: 1
 
    ml_basics.rst
+   ml_training.rst
    install_anaconda.rst
    ml_python.rst
 
