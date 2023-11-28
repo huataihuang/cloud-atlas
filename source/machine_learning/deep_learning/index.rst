@@ -9,10 +9,10 @@
 .. toctree::
    :maxdepth: 1
 
-   dl_basics.rst
+   dl_learn_tips.rst
+   intro_dl.rst
    ../startup/install_anaconda.rst
    ../startup/ml_python.rst
-   dl_learn_tips.rst
    transformer.rst
 
 .. only::  subproject and html

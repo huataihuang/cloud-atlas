@@ -13,8 +13,18 @@
 
 - 深度学习入门: 以 **斋藤康义** 的 「深度学习入门: 基于Python的理论与实现」 来起步，同时参考学习
 
-  - `CS230 Deep Learning <https://cs230.stanford.edu/>`_ (吴恩达教授)
+  - `CS230 Deep Learning <https://cs230.stanford.edu/>`_ (吴恩达教授) - 斯坦福大学机器学习课程(2014版有中文翻译笔记)
   - `CS231n: Deep Learning for Computer Vision <http://cs231n.stanford.edu/>`_ (李飞飞教授)
+
+- `Deeplearning.ai深度学习教程中文笔记 <https://github.com/fengdu78/deeplearning_ai_books>`_ (课程笔记目录) ，对应B站视屏 `吴恩达《深度学习》视频课程全集 <https://www.bilibili.com/video/BV16r4y1Y7jv>`_ (中英文双字幕)
+
+  - 由于吴恩达教授的 `depplearning-ai <https://www.deeplearning.ai/>`_ 学习课程非常著名，在GitHub上有一个 `GitHub #deeplearning-ai <https://github.com/topics/deeplearning-ai>`_ 话题，可以找到大量的学习笔记和相关资源
+
+- `机器学习初学者 <http://www.ai-start.com/>`_ 汇总了吴恩达教授的两门课程完整笔记(由 ``黄海光`` 组织翻译整理)
+
+  - `斯坦福大学2014机器学习教程中文笔记目录 <http://www.ai-start.com/ml2014/>`_
+  - `深度学习笔记目录 <http://www.ai-start.com/dl2017/>`_
+
 
 网友整理资料汇总
 =================

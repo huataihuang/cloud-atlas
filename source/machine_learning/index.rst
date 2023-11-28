@@ -14,7 +14,9 @@ Machine Learning Atlas
    :maxdepth: 1
 
    startup/index
+   concept/index
    deep_learning/index
+   reinforcement_learning/index
    gpt/index
    llm/index
    studio/index

@@ -24,10 +24,13 @@ Python ``os.environ`` 对象 和 ``os.getenv()`` 方法
 
 .. literalinclude:: ../../big_data/maxcompute/pyodps/pyodps_startup/odps_env
    :caption: ODPS相关环境变量设置
-   :emphasize-lines: 4
+   :emphasize-lines: 5
+
+原因说来很简单，一定要确保 ``~/.bash_profile`` 中输出的环境变量使用了 ``export`` 指令明确输出，否则 ``os.environ`` 对象 或者 ``os.getenv()`` 方法返回的就是空值
 
 参考
 =====
 
 - `Python | os.environ object <https://www.geeksforgeeks.org/python-os-environ-object/>`_
 - `Python | os.getenv() method <https://www.geeksforgeeks.org/python-os-getenv-method/>`_
+- `Python os.environ throws key error? <https://stackoverflow.com/questions/39280435/python-os-environ-throws-key-error>`_
