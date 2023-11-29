@@ -64,6 +64,14 @@ RHEL/CentOS
 .. literalinclude:: edac/centos_install_rasdaemon
    :caption: 在CentOS 7上安装 ``rasdaemon``
 
+Gentoo
+---------
+
+- 在Gentoo平台 ``rasdaemon`` 被标记为unstale，所以需要 ``unmask`` 才能安装(并且建议同时激活 ``sqlite`` 支持):
+
+.. literalinclude:: edac/gentoo_install_rasdaemon
+   :caption: 在Gentoo上安装 ``rasdaemon``
+
 使用
 ---------
 
@@ -89,23 +97,137 @@ rasdaemon可以之际命令启动，此时会在后台运行，并不断通过sy
 .. literalinclude:: edac/centos_enable_rasdaemon
    :caption: 在CentOS 7上激活和启动 ``rasdaemon``
 
+如果在 :ref:`gentoo_linux` 使用 ``openrc`` ，则添加到 **default** run-level:
+
+ .. literalinclude:: edac/gentoo_enable_rasdaemon
+    :caption: 在Gentoo上激活和启动 ``rasdaemon``
+
 - 检查服务状态:
 
 .. literalinclude:: edac/systemctl_status_rasdaemon
+   :caption: 检查 ``rasdaemon`` 状态
+
+输出信息:
+
+.. literalinclude:: edac/systemctl_status_rasdaemon_output
    :caption: 检查 ``rasdaemon`` 状态
    :emphasize-lines: 32
 
 这里有一个错误提示: ``ras-mc-ctl: Error: No dimm labels for XXXX`` ，实际上在各种服务器上初始时都能看到，需要进一步配置
 
+使用rasdaemon
+==================
+
 配置 DIMM labels
 ------------------
 
-
-使用rasdaemon
-~~~~~~~~~~~~~~~~
-
 ``ras-mc-ctl`` 是RAS内存控制器管理工具，用于执行一些针对EDAC(Error Detection and Correction)驱动的RAS管理任务。
 
+
+- ``ras-mc-ctl`` 可以查询检测到的错误，例如 ``--error-count`` 可以获取主机错误计数:
+
+.. literalinclude:: edac/ras-mc-ctl_error-count
+   :caption: ``ras-mc-ctl`` 使用 ``--error-count`` 获取错误计数
+
+此时输出类似:
+
+.. literalinclude:: edac/ras-mc-ctl_error-count_output
+   :caption: ``ras-mc-ctl`` 使用 ``--error-count`` 获取错误计数显示案例
+
+.. note::
+
+   上述 ``--error-count`` 是显示插入了DIMM内存的插槽，没有插内存的DIMM插槽不显示。上述输出是我的 :ref:`hpe_dl360_gen9` 服务器，插入了12根内存，所以显示了12行输出信息。
+
+   我过滤掉分隔字符，仅显示数字::
+
+      0000
+      0001
+      0010
+      0011
+      0100
+      0110 <= 应该插入 0101 ?
+      1000
+      1001
+      1010
+      1011
+      1100
+      1110 <= 应该插入 1101 ?
+
+   我发现对应数字并没有完全连续，是不是我插错了槽？
+
+``CE`` 列显示了从给定 ``DIMM`` 检测到的可修复错误( ``corrected errors`` )数量； ``UE`` 则表示不可修复错误( ``uncorrectable errors`` )；这里最左边的一列 ``Label`` 表示从 ``/sys/devices/system/edac/mc/`` 中每个DIMM的 ``EDAC`` 路径
+
+要确定哪个DIMM插槽(DIMM slot)对应于哪个 ``EDAC`` 路径，你需要在仅插入一个 ``DIMM`` 的情况下重新启动系统，记录下插入的插槽名称，然后使用  ``ras-mc-ctl --error-count`` 答应出路径，然后比编辑 ``/etc/ras/dimm_labels.d/`` 目录下创建配置文件，格式类似:
+
+.. literalinclude:: edac/ras_dimm_lables_format
+   :caption: RAS的dimm_labels配置文件格式
+
+.. warning::
+
+   由于我没有实际采用依次插入DIMM内存来查找插槽和对应的 ``<mc>.<row>.<channel>`` ，这里只是模拟演示。对于生产环境，统一的服务器型号，这个工作只需要完成一次，就可以对线上海量的相同型号的服务器DIMM内存进行监控检查
+
+   具体的方法我在CentOS7的 ``/etc/ras/dimm_labels.d/dell`` 配置文件开头看到注释:
+
+   - 使用 ``dmidecode`` 来获得 Vendor-name 和 model-name
+   - 通过物理主板上丝印(silk screen)获得labels: 即你每插入一块内存条，就看一下 ``ras-mc-ctl --error-count`` 输出，就能够知道 ``<mc>.<top>.<mid>.<low>`` 对应物理主板上的哪个DIMM插槽标记
+
+   只要配置好label，今后物理主机DIMM内存一旦故障，就可以根据EDAC输出的labels定位到哪个插槽上的内存故障，就很容易通知IDC机房现场技术支持维修替换
+
+   **很不幸，我没有搜索到 HP服务器的 DIMM labels 配置文件** 网上倒是能够搜索到dell和suppermicro的 ``RASDAEMON Motherboard DIMM labels Database file`` 
+
+- 获取主板厂商和型号名:
+
+.. literalinclude:: edac/ras-mc-ctl_mainboard
+   :caption: ``ras-mc-ctl`` 获取主板的厂商和型号
+
+我的二手 :ref:`hpe_dl360_gen9` 服务器输出信息:
+
+.. literalinclude:: edac/ras-mc-ctl_mainboard_output
+   :caption: ``ras-mc-ctl`` 获取主板的厂商和型号，这里的案例是我的 :ref:`hpe_dl360_gen9`
+
+- 检查 labels 输出:
+
+.. literalinclude:: edac/ras-mc-ctl_print-labels
+   :caption: 检查DIMM输出
+
+此时还没有配置 DIMM labels，显示输出:
+
+.. literalinclude:: edac/ras-mc-ctl_print-labels_output_without_labels
+   :caption: 在没有完成 DIMM labels 之前，检查DIMM输出
+
+- 配置 ``/etc/ras/dimm_labels.d/hp`` 内容如下:
+
+.. literalinclude:: edac/hp
+   :caption: 配置 ``/etc/ras/dimm_labels.d/hp`` 为DIMM加上标签
+
+- 执行注册label的命令以便和内核识别的插槽对应起来:
+
+.. literalinclude:: edac/ras-mc-ctl_register-labels
+   :caption: 注册label
+
+.. warning::
+
+   上述我配置HP DL360 Gen9 的 ``RASDAEMON Motherboard DIMM labels Database file`` 是 **错误的** ，只是为了演示，请不要照抄
+
+   实际上需要一一核对DIMM标记和内核识别的Label才能正确标记好这个配置文件
+
+此时再次检查 labels 输出:
+
+.. literalinclude:: edac/ras-mc-ctl_print-labels
+   :caption: 检查DIMM输出
+
+就会看到增加了label标签的DIMM输出(后续DIMM内存故障就容易找到对应问题了):
+
+.. _hpe_dl360_gen9_memory:
+
+HP DL360 Gen9 内存插入顺序
+=============================
+
+根据HP的文档 :ref:`hpe_dl360_gen9` 是 4个 Channel ，所以官方文档推荐安装内存条的时候，要按照 ``ABCDEFGHIJKL`` 顺序安装(其实就是先安装白色槽，其次是黑色，最后是绿色)，见下图(参考 `Help with HP DL360 Gen9 memory configuration <https://www.reddit.com/r/homelab/comments/xt37v6/help_with_hp_dl360_gen9_memory_configuration/>`_ )，这样才能确保内存通道均衡:
+
+.. figure:: ../../../_static/linux/server/hardware/hpe_dl360_gen9_memory.webp
+
+   HPE DL360 Gen9 内存插槽顺序
 
 
 参考

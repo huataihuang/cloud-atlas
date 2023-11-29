@@ -12,7 +12,9 @@ PyODPS是MaxCompute的Python版本的SDK:
   - 查询MaxCompute表和视图
   - 管理MaxCompute资源
 
-PyODPS支持在本地环境、DataWorks、PAI Notebooks中使用
+PyODPS支持在本地环境、DataWorks、PAI Notebooks中使用:
+
+- 
 
 安装PyODPS
 =============

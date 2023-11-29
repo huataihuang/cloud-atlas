@@ -82,6 +82,10 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
    :widths: 25, 75
    :header-rows: 1
 
+.. note::
+
+   我在 :ref:`edac` 实践中了解到，内存插槽和硬件检测故障定位有密切关系，需要注意 :ref:`hpe_dl360_gen9_memory` ，并且确保 ``DIMM labels`` 数据配置文件和实际服务器DIMM插槽正确对应，这样才能帮助运维人员快速定位故障内存
+
 PCIe
 --------
 
