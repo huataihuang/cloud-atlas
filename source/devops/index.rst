@@ -17,6 +17,7 @@ DevOps Atlas
    ansible/index
    jsonnet/index
    airflow/index
+   checkov/index
    utils/index
    docs/index
 

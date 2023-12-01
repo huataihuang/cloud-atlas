@@ -16,6 +16,10 @@
 .. literalinclude:: extract_proprietary_blobs_from_lineageos_zip/install_payload.bin_extrator
    :caption: 安装 ``payload.bin`` 解压缩工具
 
+.. note::
+
+   ``python3-protobuf`` 这个模块是用来处理 :ref:`protobuf` (Google的数据交换格式)，这个数据格式通过二进制方式可以极大提升数据交换性能
+
 - 创建使用 ``payload.bin`` 解压缩工具所需的repo仓库:
 
 .. literalinclude:: extract_proprietary_blobs_from_lineageos_zip/repo_payload.bin_extrator
