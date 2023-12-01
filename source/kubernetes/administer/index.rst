@@ -1,4 +1,4 @@
-.. _kubernetes_administer:
+.. _k8s_administer:
 
 ======================
 Kubernetes管理
@@ -27,3 +27,4 @@ Kubernetes管理
    etcd/index
    coredns/index
    federation/index
+   policy/index

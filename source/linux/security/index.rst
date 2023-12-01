@@ -12,6 +12,7 @@ Linux安全
    audit/index
    tpm/index
    openvas/index
+   bridgecrew/index
    hunting_for_persistence_in_linux/index
    mitre_attack/index
 

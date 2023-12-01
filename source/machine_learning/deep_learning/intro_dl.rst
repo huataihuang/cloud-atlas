@@ -27,3 +27,36 @@
 
   - 神经网络擅长计算从x(输入)到y(输出)的 **精准映射函数**
   - 神经网络需要大量的x和y(训练样本)才能实现 **精准映射函数**
+
+神经网络的监督学习(Supervised Learning with Neural Networks)
+--------------------------------------------------------------
+
+目前几乎所有的神经网络显示出的经济价值，本质上都是一种称为 **监督学习** 的机器学习类别:
+
+- 目前非常"成功"的神经网络应用领域是在线广告: 神经网络能够预测你是否点开广告，展示最有可能点开的广告来获取难以置信的利润
+- 深度学习促进了:
+
+  - 计算机视觉: 卷积神经网络CNN 是图像领域最常用的
+  - 语音识别: 语音片段输入神经网络可以获得文本记录，音频处理被视为序列数据处理，通常使用RNN，也就是递归神经网络, Recurrent Neural Network
+  - 机器翻译: 语言也是顺序数据，会使用更为复杂的RNN来处理
+  - 自动驾驶: 卷积神经网络CNN用于处理图像，而雷达数据则需要使用混和的神经网络结构来处理
+
+常见神经网络:
+
+- 标准神经网络:
+
+.. figure:: ../../_static/machine_learning/deep_learning/standard_neural_network.png
+
+- 卷积神经网络:
+
+.. figure:: ../../_static/machine_learning/deep_learning/convolutional_neural_network.png
+
+- 对贵神经网络:
+
+.. figure:: ../../_static/machine_learning/deep_learning/recurrent_neural_network.png
+
+通过深度学习和神经网络，现在计算机能够更好解释非结构化数据。所以大量的新的令人兴奋的应用出现: 语音识别，图像识别，自然语言处理...
+
+.. note::
+
+   `OpenAI首席科学家：通向无监督学习之路 <https://zhuanlan.zhihu.com/p/653449452>`_ 
