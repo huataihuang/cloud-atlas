@@ -49,6 +49,7 @@ LineageOS 使用的 ``MindTheGapps`` 默认只安装 Google Play Store 和 Googl
 - `KOReader <https://f-droid.org/en/packages/org.koreader.launcher.fdroid/>`_ 非常轻量级的电子书阅读器，比 :ref:`kindle` 快捷(自己维护电子书同步)
 - `脉脉 <https://maimai.cn/>`_
 - `高德地图 <https://mobile.amap.com/>`_
+- `全家超市: Fa米家 <https://sj.qq.com/appdetail/com.x2era.xcloud.app>`_ 在Google Play上提供的全家App似乎是台湾地区的，国内使用的是Fa米家，所以从腾讯应用宝网站下载
 
 
 应用安装(尝试后放弃这种精简方式)

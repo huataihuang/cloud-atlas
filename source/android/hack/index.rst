@@ -12,6 +12,7 @@ Android Hack
    check_secondhand_phone.rst
    ab_seamless_update.rst
    magisk.rst
+   magisk_zygisk.rst
    magisk_root_ota.rst
    android_recovery_mode.rst
    pixel_3_chinese_volte.rst

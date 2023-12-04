@@ -9,7 +9,7 @@ Termux是一个移植到Android系统的终端模拟程序，集成了大量的�
 工作原理
 =========
 
-终端模拟器(terminal emulator)是通过使用系统调用 ``execve`` 来家在命令行程序的应用，并且重定向标准如数，输出以及错误的数据流到显示屏幕。大多数在Android上提供的终端应用都是功能有限，通常由操作系统提供，或者由root工具如Magisk提供。Termux则是进一步提供了大量的GNU/Linux软件给Android。
+终端模拟器(terminal emulator)是通过使用系统调用 ``execve`` 来加载命令行程序的应用，并且重定向标准输入，输出以及错误的数据流到显示屏幕。大多数在Android上提供的终端应用都是功能有限，通常由操作系统提供，或者由root工具如Magisk提供。Termux则是进一步提供了大量的GNU/Linux软件给Android。
 
 Termux不是虚拟机，也不是模拟环境。所有提供的软件包都是使用 :ref:`android_ndk` 进行交叉编译，并且采用了兼容补丁以便能够在Android上工作。由于Android操作系统不提供完全访问文件系统的权限，所以Termux不能在标准目录下安装，例如 ``/bin`` , ``/etc`` , ``/usr`` 或者 ``/var`` ，所有文件都是位于私有应用目录，位于: ``/data/data/com.termux/files/usr`` 
 
