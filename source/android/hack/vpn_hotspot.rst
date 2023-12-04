@@ -65,11 +65,15 @@ Misc
 使用VPN HotSpot
 =========================
 
+USB网络共享(USB tethering)
+----------------------------
+
+USB网络共享(USB
+tethering)就是将手机和电脑使用USB线连接，不需要启动WiFi功能(无需手机和电脑连接相同的无线网络)，此时手机就相当于电脑的一个外接有线网卡。这个方式对于个人电脑使用非常方便，但是缺陷是需要电脑能够识别这种特定驱动的外接模拟网卡。对于Linux系统，操作系统内置支持 :ref:`android_usb_tethering` 驱动，但是对于 :ref:`macos` 则需要安装 `HoRNDIS(the USB tethering driver for Mac OS X) <https://github.com/jwise/horndis>`_ 驱动。
+
 .. note::
 
-   如果是使用移动数据网络建立的VPN连接，则可以使用 ``Wi-Fi Hotspot`` 。但是，如果是已经在Wi-Fi网络上启用了VPN，就不可以使用 ``Wi-Fi Hotspot`` ，否则会导致VPN断开(因为无线网卡被改为AP热点导致直联的WLAN断开)
-
-通常有3步操作：
+   USB网络共享可能需要Android手机开启开发者模式(USB Debug)
 
 * 启动VPN - 可以使用Cisco AnyConnect连接VPN，连接完成后，切换到VPN Hot Spot程序
 
@@ -93,6 +97,22 @@ Misc
 .. note::
 
    Andorid系统默认不能连接隐藏的网络，需要在设置添加无线SSID时候选择 ``Advanced options >> Hidden network >> Yes`` 才能连接到Hidden(stealth) WiFi network。否则会始终提示WiFi status是 ``out of range`` (参考 `Android 10: Connect To A Hidden Network <https://supportcommunity.zebra.com/s/article/000020035?language=en_US>`_ )
+
+WLAN热点(WiFi共享)
+---------------------
+
+另一种更为通用的方式是使用 ``VPN Hotspot`` 的共享WLAN热点，也就是Android手机自己模拟出一个WiFi AP，同时共享VPN(tun)，这样所有连接到手机共享的WiFi热点，就能共享VPN访问。这种方式无需电脑上安装任何驱动，对于电脑来说，就是换一个AP连接，然后就能够通过手机端VPN线路。
+
+.. figure:: ../../_static/android/hack/vpn_share_wlan.png
+
+   启用WLAN共享方式VPN访问
+
+- 点击 ``WLAN热点`` 开启Android上共享WiFi热点，此时会类似USB网络共享一样，出现一个 ``wlan1`` 设备接口
+- 再点击 ``wlan1`` 设备启用它，此时连接到共享热点的客户端就能够通过共享VPN访问特定网络
+
+.. note::
+
+   共享 ``WLAN热点`` 会自动配置一个随机密码，这个密码需要点击左上角的WiFi加密图标来进一步菜单获得
 
 参考
 =====

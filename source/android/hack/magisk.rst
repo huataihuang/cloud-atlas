@@ -293,13 +293,17 @@ Magisk使用
 隐藏root
 ----------
 
+.. note::
+
+   新版 Magisk 去除了 ``MagiskHide`` ，取代以 :ref:`magisk_zygisk` 实现root隐藏
+
 由于Google服务等很多Android上应用、游戏和服务都十分重视保护自己的版权信息，所以这些软件检测到手机遭到root就会拒绝认证设备。
 
 Magisk Hide可以绕过这些检测。
 
-- 首先进入 Magisk Manager 检测是否通过了谷歌服务中的 SafetyNet 安全性测试。
+- 首先进入 Magisk Manager 检测是否通过了谷歌服务中的 SafetyNet 安全性测试
 
-想要通过 SafetyNet 测试，最好使用原厂系统，或者是值得信赖的第三方 ROM 正式版（也就是 Official Builds），以减少不必要的麻烦。
+**想要通过 SafetyNet 测试，最好使用原厂系统，或者是值得信赖的第三方 ROM 正式版（也就是 Official Builds），以减少不必要的麻烦。**
 
 如果是 ``basic integrity`` 这一项没有通过认证，那说明你遇到了大麻烦：试着开启「Magisk 核心功能模式」或者卸载所有模块，如果还是没有通过，那么你可能需要换一个系统或者第三方 ROM 了。
 
@@ -307,7 +311,7 @@ Magisk Hide可以绕过这些检测。
 
 - 在 Magisk Manager 的侧边菜单中找到 Magisk Hide 项，选中我们想要隐藏的目标 App 即可。最近更新的 Magisk 19.0 版本还加入了「应用组件」层面进行 Magisk Hide 的功能。
 
-至于对哪些应用进行 Magisk Hide，这个就要看每个读者的具体需要了。一般来说，Google Play 服务和商店是必须的，但也请注意这条来自开发者的注意事项：如无必要，不要随意在 Magisk Hide 列表添加 App 而造成滥用（Do not abuse MagiskHide!）。
+至于对哪些应用进行 Magisk Hide，这个就要看具体需要: 一般来说，Google Play 服务和商店是必须的，但也请注意这条来自开发者的注意事项：如无必要，不要随意在 Magisk Hide 列表添加 App 而造成滥用（Do not abuse MagiskHide!）。
 
 如果你还不放心，还可以去 Magisk Manager 的设置中打开「隐藏 Magisk Manager」。此时 Magisk Manager 将会进行一次重新安装，以便打乱软件包名来躲过对 Magisk Manager 的检测。
 
