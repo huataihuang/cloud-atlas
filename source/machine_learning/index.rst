@@ -13,6 +13,7 @@ Machine Learning Atlas
 .. toctree::
    :maxdepth: 1
 
+   become_a_machine_learning_practitioner.rst
    startup/index
    concept/index
    deep_learning/index
