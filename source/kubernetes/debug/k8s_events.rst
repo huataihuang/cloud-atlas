@@ -16,16 +16,12 @@ Kubernetes 默认保持 **最近一小时** 事件记录，这是通过 ``kube-a
 事件存储方案
 ===============
 
-.. note::
+调研
+-----
 
-   `Kubernetes events — how to keep historical data of your cluster <https://medium.com/@andrew.kaczynski/kubernetes-events-how-to-keep-historical-data-of-your-cluster-835d685cc45>`_ 原文介绍了通过 :ref:`metricbeat` 将Kubernetes的 :ref:`metrics` 采集到 :ref:`elasticsearch` 进行分析
-
-   我这里整理的概要有待实践
-
-   此外，我在考虑是否可以采用 :ref:`loki` 这样的 :ref:`log_systems` 来实现类似的集群事件采集？
-
-
-   
+- `Kubernetes events — how to keep historical data of your cluster <https://medium.com/@andrew.kaczynski/kubernetes-events-how-to-keep-historical-data-of-your-cluster-835d685cc45>`_ 原文介绍了通过 :ref:`metricbeat` 将Kubernetes的 :ref:`metrics` 采集到 :ref:`elasticsearch` 进行分析
+- 是否可以采用 :ref:`loki` 这样的 :ref:`log_systems` 来实现类似的集群事件采集？
+- `GitHub: kube-eventer <https://github.com/AliyunContainerService/kube-eventer>`_ 是阿里云开发的kubernetes事件采集组件，可以将Kubernetes events下沉到不同平台(elasticsearch, SLS, Kafka, InfluxDB)，在生产环境中也有所采用
 
 参考
 ======
