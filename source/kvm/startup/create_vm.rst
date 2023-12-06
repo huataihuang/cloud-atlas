@@ -375,10 +375,12 @@ ARM环境Ubuntu虚拟机
 
 .. note::
 
-   KVM提供的VNC访问方式在macOS上需要使用第三方VNC客户端来访问，例如 `TigerVNC <https://tigervnc.org>`_ ，使用macOS内置的vnc无法打开访问。使用VNC客户端访问本地 ``127.0.0.1:5900`` 则可以看到远程虚拟机的终端界面，就可以开始进一步安装:
+   KVM提供的VNC访问方式在macOS上需要使用第三方VNC客户端来访问，例如 `TigerVNC <https://tigervnc.org>`_ 或者 ``Remote Ripple`` (从苹果应用商店安装，推荐) ，使用macOS内置的vnc无法打开访问。使用VNC客户端访问本地 ``127.0.0.1:5900`` 则可以看到远程虚拟机的终端界面，就可以开始进一步安装:
 
    .. figure:: ../../_static/kvm/startup/tigervnc_install_sles12.png
       :scale: 75
+
+   另外，需要注意苹果的 :ref:`macos` 提供了内置的VNC Server，也就是 ``Screen Sharing`` 功能(从 ``System Settings >> General >> Sharing`` 进入菜单)，这个 ``Screen Sharing`` 功能占用 ``5900`` 端口，所以在苹果macOS上使用上上述ssh端口转发登陆服务器，需要避免端口冲突
 
 虚拟机bridge网络
 ==================

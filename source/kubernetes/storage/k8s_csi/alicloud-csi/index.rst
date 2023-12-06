@@ -1,15 +1,13 @@
-.. _k8s_csi:
+.. _alicloud-csi:
 
 ============================================================
-Kubernetes 容器存储接口(Container Storage Interface, CSI)
+阿里云 CSI
 ============================================================
 
 .. toctree::
    :maxdepth: 1
 
-   k8s_csi_arch.rst
-   ceph-csi/index
-   alicloud-csi/index
+   alicloud_csi_arch.rst
 
 .. only::  subproject and html
 

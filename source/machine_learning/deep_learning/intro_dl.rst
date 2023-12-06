@@ -51,7 +51,7 @@
 
 .. figure:: ../../_static/machine_learning/deep_learning/convolutional_neural_network.png
 
-- 对贵神经网络:
+- 递归神经网络:
 
 .. figure:: ../../_static/machine_learning/deep_learning/recurrent_neural_network.png
 
