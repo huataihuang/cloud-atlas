@@ -29,7 +29,7 @@ Kubespray维护etcd
    :language: bash
    :caption: 通过 ``/etc/etcd.env`` 来使用 ``etcdctl`` 出现报错
 
-非常奇怪，为何访问 ``etcd-endpoints://0xc000394a80/127.0.0.1:2379`` ? **惭愧** ，我忽略了在 :ref:`bash` 中，一定要使用 ``export`` 命令输出变量才能使得这个变量成为生效的环境便利那个。所以检查 ``/etc/etcd.env`` 可以知道需要生效以下环境变量
+非常奇怪，为何访问 ``etcd-endpoints://0xc000394a80/127.0.0.1:2379`` ? **惭愧** ，我忽略了在 :ref:`bash` 中，一定要使用 ``export`` 命令输出变量才能使得这个变量成为生效的环境变量。所以检查 ``/etc/etcd.env`` 可以知道需要生效以下环境变量
 
 .. literalinclude:: ../../administer/etcd/maintain/etcd_env/etcd.env
    :language: bash

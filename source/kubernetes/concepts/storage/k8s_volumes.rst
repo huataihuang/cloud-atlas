@@ -152,7 +152,38 @@ local
 
    通常我们持久化应用要使用 ``local`` 卷，只有所有服务器一致的配置文件(目录)才可以作为 ``hostPath`` 挂载到pod内部。
 
+.. _k8s_volume_mount_propagation:
 
+Kunbernetes挂载卷传播(特性)
+============================
+
+Kubernetes的挂载卷有一个 ``mount propagation`` (挂载传播)特性: 这个 ``mount propagation`` 指允许容器安装的卷共享到 **同一个Pod** 中的其他容器，甚至共享到 **同一节点上的其他Pod** 。
+
+``mount propagation`` 特性由 ``Container.volumeMounts`` 的 ``mountPropagation`` 字段控制:
+
+- ``None`` : 卷挂载将不会感知到主机后续在此卷或其任何子目录上执行的挂载变化。类似的，容器所创建的卷挂载在主机上是不可兼得。 这是 **默认** 模式
+
+  - 这个选项相当于 ``mount`` 命令的参数 ``rprivate`` 
+  - 当 ``rprivate`` 传播选项不适用是，CRI运行时可以转为选择 ``rslave`` 挂载传播选项(即 ``HostToContainer`` )。当挂载源包含Docker daemon的根目录( ``/var/lib/docker`` )时， ``cri-docker`` (Docker)已知可以选择 ``rslave`` 挂载传播选项
+
+- ``HostToContainer`` : 卷挂载将会感知主机后续针对此卷或其任何子目录的挂载操作。
+
+  - 也就是说，如果主机在这个挂载卷中挂载任何内容，容器内能够看到它被挂载在那里
+  - 类似的，配置了 ``Bidirectional`` 挂载传播选项的Pod如果在同一个卷上挂载了内容，则挂载传播选项为 ``HostToContainer`` 的容器都能看到这个变化
+  - 该模式相当于 ``mount`` 命令的参数 ``rslave``
+
+- ``Bidirectional`` : 卷挂载和 ``HostToContainer`` 挂载表现相同
+
+  - 容器创建的卷挂载将被传播回至主机和使用同一卷的所有Pod的所有容器
+  - 该模式相当于 ``mount`` 命令的参数 ``rshared``
+
+.. warning::
+
+   ``Bidirectional`` 模式的挂载传播可能比较危险:
+
+   - **它可以破坏主机操作系统** ，所以只允许在特权容器 ``privileged container`` 中使用
+   - 特权容器可以访问Host主机的内核，所以强烈建议你需要熟悉Linux内核特性
+   - ``Bidirectional`` 模式的Pod中容器创建的任何卷挂载必须在终止时由容器销毁(卸载)
 
 参考
 ======

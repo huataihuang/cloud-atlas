@@ -1,16 +1,13 @@
-.. _ceph_arch:
+.. _mysql_debug:
 
 =================================
-Ceph 架构
+MySQL 问题排查
 =================================
-
-参考 `ceph architecture <https://docs.ceph.com/en/pacific/architecture/>`_
 
 .. toctree::
    :maxdepth: 1
 
-   bluestore.rst
-   crush.rst
+   mariadb_error_4025_constraint_fail.rst
 
 .. only::  subproject and html
 

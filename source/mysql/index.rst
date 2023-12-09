@@ -20,6 +20,7 @@ MySQL是使用最广泛的开源数据库，很多开源项目都会在后端使
    troubleshoot/index
    database_sharding.rst
    vitess/index
+   debug/index
 
 .. only::  subproject and html
 
