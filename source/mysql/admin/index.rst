@@ -7,6 +7,7 @@ MySQL 管理
 .. toctree::
    :maxdepth: 1
 
+   mysql_config.rst
    mysql_user_grant.rst
 
 .. only::  subproject and html

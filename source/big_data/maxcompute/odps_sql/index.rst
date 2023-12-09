@@ -1,16 +1,13 @@
-.. _ceph_arch:
+.. _odps_sql:
 
 =================================
-Ceph 架构
+ODPS SQL
 =================================
-
-参考 `ceph architecture <https://docs.ceph.com/en/pacific/architecture/>`_
 
 .. toctree::
    :maxdepth: 1
 
-   bluestore.rst
-   crush.rst
+   odps_sql_json.rst
 
 .. only::  subproject and html
 
