@@ -1,14 +1,14 @@
-.. _k8s_architecture:
+.. _k8s_api_extension:
 
 ======================
-Kubernetes架构
+Kubernetes API扩展
 ======================
 
 .. toctree::
    :maxdepth: 1
 
-   k8s_controller.rst
-   k8s_garbage_collecttion.rst
+   k8s_custom_resources.rst
+
 
 .. only::  subproject and html
 

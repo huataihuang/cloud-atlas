@@ -11,6 +11,7 @@ MySQL 查询
    mysql_query_group_by_order_by.rst
    mysql_query_json.rst
    mysql_json_string_convert.rst
+   using_json_in_mysql.rst
    using_json_in_mariadb.rst
 
 .. only::  subproject and html

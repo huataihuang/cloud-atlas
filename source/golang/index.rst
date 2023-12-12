@@ -7,10 +7,12 @@ Go Atlas
 .. toctree::
    :maxdepth: 1
 
+   install_golang.rst
    go_on_arch_linux.rst
    go_on_fedora.rst
    go_on_macos.rst
    gopath.rst
+   write_go.rst
    using_modules_and_packages_in_go.rst
    go_vendor.rst
    migrate_go_modules.rst

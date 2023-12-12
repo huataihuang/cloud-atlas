@@ -108,7 +108,7 @@ dep是Go的依赖管理工具，建议安装。很多项目会使用到这个工
 
    Jetbrains GoLand开发平台提供了集成dep的方式，请参考 `GoLand - Creating a project with dep integration <https://www.jetbrains.com/help/go/creating-a-project-with-dep-integration.html>`_ 进行设置。
 
-   .. figure:: ../../_static/kubernetes/develop/go_create_dep_project.png
+   .. figure:: ../_static/k8s_dev/go_create_dep_project.png
       :scale: 40
 
 参考

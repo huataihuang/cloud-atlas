@@ -11,6 +11,7 @@ Ceph 架构
 
    bluestore.rst
    crush.rst
+   erasure_code.rst
 
 .. only::  subproject and html
 
