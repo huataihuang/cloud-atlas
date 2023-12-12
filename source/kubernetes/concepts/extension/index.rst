@@ -7,7 +7,7 @@ Kubernetes扩展
 .. toctree::
    :maxdepth: 1
 
-   k8s_crd.rst
+   api/index
 
 .. only::  subproject and html
 

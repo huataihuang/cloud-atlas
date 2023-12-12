@@ -9,10 +9,14 @@ Ceph CSI RBD plugin 可以提供一个 :ref:`ceph_rbd` 镜像，并将其附加�
 Ceph创建存储池
 ===============
 
-默认情况戏，Ceph块设备使用 ``rbd`` 存储池。可以为Kubernetes集群创建一个Kubernetes卷存储池(确保Ceph集群运行状态，执行创建存储池。方法同 :ref:`ceph_rbd_libvirt` ):
+- 默认情况戏，Ceph块设备使用 ``rbd`` 存储池。可以为Kubernetes集群创建一个Kubernetes卷存储池(确保Ceph集群运行状态，执行创建存储池。方法同 :ref:`ceph_rbd_libvirt` )，我这里创建了一个独立存储池给 ``y-k8s`` 集群使用，命名为 ``y-k8s-pool`` :
 
 .. literalinclude:: ceph_csi_rbd/create_rbd_pool
    :caption: 为Kubernetes创建存储池
+
+.. note::
+
+   命令行操作创建存储池之后需要进行初始化才能使用。我这里实际上是采用 :ref:`ceph_dashboard` 完成，更为方便
 
 在Kubernetes中部署CSI RBD
 ============================
@@ -82,8 +86,20 @@ Kubernetes集群需要
 部署CSI plugins的 ``ConfigMap``
 -----------------------------------
 
-这里的 ``configmap`` 部署一个空白的 CSI 配置挂载到Ceph CSI plugin pods的一个卷，详细的特定Ceph集群配置信息参考 
+`ceph-csi/docs/deploy-rbd.md <https://github.com/ceph/ceph-csi/blob/devel/docs/deploy-rbd.md>`_ 采用了一个空白CSI配置来挂载Ceph CSI plugin pods的卷，我没有理解为何这样操作。实际我参考 `BLOCK DEVICES AND KUBERNETES <https://docs.ceph.com/en/latest/rbd/rbd-kubernetes/>`_ 提供的 `GENERATE CEPH-CSI CONFIGMAP <https://docs.ceph.com/en/latest/rbd/rbd-kubernetes/#generate-ceph-csi-configmap>`_ 来生成这个configmap配置
 
+``ceph-csi`` 需要一个ConfigMap对象来定义Ceph monitor地址，所以需要先搜集Ceph集群的 ``fsid`` 和 monitor 地址:
+
+.. literalinclude:: ceph_csi_rbd/ceph_mon_dump
+   :caption: 执行 ``ceph mon dump`` 获取集群配置信息
+
+输出信息如下:
+
+.. literalinclude:: ceph_csi_rbd/ceph_mon_dump_output
+   :caption: 我的Ceph集群monitor信息
+   :emphasize-lines: 2,7-9
+
+- 根据上述信息，我们创建一个 ``csi-config-map.yaml`` 
 
 参考
 ======

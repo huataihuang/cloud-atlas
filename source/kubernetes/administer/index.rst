@@ -24,6 +24,7 @@ Kubernetes管理
    k8s_cpu_management_policies.rst
    change_k8s_image_registry.rst
    kubeadm_administer/index
+   extend/index
    etcd/index
    coredns/index
    federation/index

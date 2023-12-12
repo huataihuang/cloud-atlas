@@ -12,6 +12,10 @@ workload resources(工作负载资源)
 - :ref:`statefulset` : 运行一个或多个需要跟踪应用状态的 :ref:`pods` 。例如，数据需要持久化的Pod就可以使用 ``StatefulSet`` ，将每个Pod和某个 :ref:`k8s_persistent_volumes` 对应起来(也就是共享存储)，这样 ``StatefulSet`` 的各个Pod可以通过共享的 :ref:`k8s_persistent_volumes` 交换数据提高整体服务可靠性(你可以 ``StatefulSet`` 理解成共享NAS的WEB服务器，高可用)
 - :ref:`job` : 创建一个或多个Pod，并持续重复Pod的执行，直到指定数量的Pod成功终止。也就是说定义Job可以确保一组Pod围绕一个任务来反复执行直到最终目标达成后Job终止 (通常在 :ref:`machine_learning` 大规模并行计算时使用)
 
+.. note::
+
+   对于 Rollout 发布 :ref:`deployment` ， :ref:`argo_rollouts` 提供了更为精细的蓝绿发布控制，在生产环境中用于重要组件发布，例如 ``kube-apiserver``
+
 参考
 ======
 
