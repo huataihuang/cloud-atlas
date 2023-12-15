@@ -8,13 +8,17 @@ Tendrl是开源的管理软件定义存储SDS的解决方案，提供了Ceph和G
 
 .. note::
 
-   `GitHub:Tendrl <https://github.com/Tendrl>`_ 采用了 :ref:`ruby` :ref:`python` :ref:`javascript` 混合的开发语言，但是似乎已经不再活跃开发。不过，其方案和思路可以借鉴
+   `GitHub:Tendrl <https://github.com/Tendrl>`_ 采用了 :ref:`ruby` :ref:`python` :ref:`javascript` 混合的开发语言，但是似乎已经不再活跃开发(2018年以后没有更新)。不过，其方案和思路可以借鉴
+
+我不是很看好这个Tendrl，目前看起来Red Hat似乎放弃了 GlusterFS 和 Tendrl 开源项目，特别是 Tendrl 已经不再开源开发(或许RedHat自己售卖的 Red Hat Gluster Storage 在内部有开发版本)
 
 思考
 ===========
 
 - 从 Red Hat Gluster Storage 文档来看，早期3.1版本采用了集成Nagios的告警方式。不过现在3.5版本已经没有相关资料，而是采用了Gluster社区的Volume监控(命令行)，但是没有提供进一步的WEB集成信息
 - 随着 :ref:`kubernetes` 云原生快速发展，大多数基于K8S的集群监控都转向了 :ref:`prometheus` 这样的metrics监控模式，所以建议从这个角度来部署
+
+具体我在 :ref:`gluster_monitor_overview` 讨论
 
 参考
 ======

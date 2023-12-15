@@ -32,6 +32,8 @@ zram基本使用
    modprobe -v zram
    echo zstd > /sys/block/zram0/comp_algorithm
    echo 2G > /sys/block/zram0/disksize
+
+   # 如果使用 mkswap 和 swapon ，那么刚才创建的 zram0 就是一个类似普通的块设备
    mkswap /dev/zram0
    swapon /dev/zram0
 

@@ -8,14 +8,8 @@ zswap是一项内核功能，可以为交换页面提供压缩的RAM缓存: 换�
 
 与 :ref:`zram` 的区别是， zswap 需要和交换设备一起工作，而 ``zram`` 是RAM中的交换设备，不需要后端支持的swap设备。
 
-``zram`` vs ``zswap`` vs ``zcache``
-===========================================
-
-
-在 Ask Ubuntu 有一个辨析 ``zram`` vs ``zswap`` vs ``zcache`` 的文章: `zram vs zswap vs zcache Ultimate guide: when to use which one <https://askubuntu.com/questions/471912/zram-vs-zswap-vs-zcache-ultimate-guide-when-to-use-which-one>`_ :
-
 参考
 ======
 
 - `arch linux: zswap <https://wiki.archlinux.org/title/zswap>`_
-
+- `Use Zswap to Improve Performance on Linux PC with Low Amounts of RAM <https://www.maketecheasier.com/use-zswap-improve-old-linux-performance/>`_
