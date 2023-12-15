@@ -8,6 +8,7 @@ GlusterFS监控
    :maxdepth: 1
 
    gluster_monitor_overview.rst
+   gluster_volume_top.rst
 
 .. only::  subproject and html
 
