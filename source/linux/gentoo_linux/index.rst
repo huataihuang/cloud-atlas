@@ -9,8 +9,10 @@ Gentoo Linux
 
    intro_gentoo.rst
    install_gentoo_on_mbp.rst
+   clone_gentoo.rst
    gentoo_use_flags.rst
    upgrade_gentoo.rst
+   gentoo_vim.rst
    gentoo_dbus.rst
    gentoo_chromium.rst
    gentoo_chinese_view.rst

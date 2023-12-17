@@ -1,8 +1,8 @@
 .. _macbook_nvme:
 
-============================
-NvMe硬盘升级MacBook Pro SSD
-============================
+====================================
+NvMe硬盘升级MacBook(2013~2017) SSD
+====================================
 
 我在撰写 :ref:`cloud_atlas` 的实践中，采用的是 :ref:`mbp15_late_2013` 。不过，在2021年初尝试重装macOS时发现安装自检程序已经扫描出存储SMART报错，拒绝安装。
 
@@ -12,7 +12,7 @@ NvMe硬盘升级MacBook Pro SSD
 
    `How to Install OSX 10.6 onto a HDD with "S.M.A.R.T failures" --Macbook A1181 <https://www.techsupportforum.com/threads/how-to-install-osx-10-6-onto-a-hdd-with-s-m-a-r-t-failures-macbook-a1181.583692/>`_ 介绍了如何忽略SMART报错安装操作系统的方法。仅供参考
 
-由于2015年MacBook Pro已经使用了 PCIe 2.0x2 存储接口，并且随着macOS升级，已经支持了NVMe存储。所以目前2021年，已经可以采购MVMe存储通过转接卡安装到MacBook中，提升存储性能。
+由于2013年MacBook Pro/Air 已经使用了 PCIe 2.0x2 存储接口，并且随着macOS升级，已经支持了NVMe存储。所以目前2021年，已经可以采购MVMe存储通过转接卡安装到MacBook中，提升存储性能。
 
 需要注意，苹果的2013-2014年主机和2015年以及之后主机对待休眠方式不同，如果使用NVMe硬盘，早期设备需要防止电脑进入待机状态::
 
@@ -21,6 +21,10 @@ NvMe硬盘升级MacBook Pro SSD
 设置之后电脑依然可以休眠，但是不会进入Hibernate模式，也就是不会把电脑状态存储到硬盘，完全缓存在内存中。这种模式下电池需要持续供电，所以会缩短电池寿命，并且待机可持续时间也相对较短。不过，对于2015年以及以后的主机不需要这样修改，也就没有这个困扰。
 
 我怀疑休眠其实还是和苹果对NVME设备的兼容性，我仔细查看了NVMe转接卡的淘宝买家评论，发现有人提到三星的NVMe能够正常休眠。所以我最终还是选购了 :ref:`samsung_pm9a1` (也就是我构建 :ref:`priv_cloud_infra` 所用二手服务器的存储)。实践证明，这个选择是明智的， :ref:`samsung_pm9a1` 在我的 :ref:`mbp15_late_2013` 完美运行，不仅读写速度飞快(应该远高于原先的SATA SSD)，而且安装能够支持最高版本 macOS Big Sur 也能完美支持休眠，和原装没有任何差异。
+
+.. note::
+
+   很巧，我的 :ref:`mbp15_late_2013` 和 :ref:`mba13_mid_2013` 是同一代产品，也就是苹果Mac产品线的存储从SATA转向 :ref:`nvme` 的第一代产品，所以这两款笔记本电脑的升级存储方法都是一样的(我都采用 :ref:`samsung_pm9a1` )，硬件完全通用。
 
 转接卡
 ========
@@ -39,7 +43,10 @@ NvMe硬盘升级MacBook Pro SSD
 
 .. note::
 
-   2022年9月，我终于购买了 :ref:`samsung_pm9a1` ，毫无阻碍地完成了系统安装，证明第三方NVMe可以完美升级 :ref:`mbp15_late_2013`
+   2022年9月，我终于购买了 :ref:`samsung_pm9a1` 1TB规格 ，毫无阻碍地完成了系统安装，证明第三方NVMe可以完美升级 :ref:`mbp15_late_2013` :
+
+   - 2022年9月售价 700元
+   - 2023年12月售价 500元
 
 虚拟化解决方案(瞎想想,未实践)
 ==============================

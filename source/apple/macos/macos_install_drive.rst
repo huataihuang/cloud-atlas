@@ -28,7 +28,7 @@ Store中选择最新操作系统安装升级，但是在下载了安装软件之
 
 Mac有可能不允许使用扩展启动磁盘，这样就不能用U盘启动安装。这种情况下需要修改安全配置：
 
-- 重启Mac在启动过程中同时按住 ``Command-R`` ，这会使Mac进入Recovery模式
+- 重启Mac在启动过程中同时按住 ``Command-R`` ，这会使Mac进入 :ref:`macos_recovery` 模式
 
 - 在Recovery模式下，会启动一个 ``macOS Utilities`` 窗口，这时你选择 ``Utilites => Startup Security Utility`` 菜单
 

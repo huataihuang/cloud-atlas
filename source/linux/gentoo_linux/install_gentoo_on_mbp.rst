@@ -10,6 +10,13 @@
 
    我大约话费了2~3个晚上来完成初步部署，后续会定制一个精简的 :ref:`mobile_cloud_infra` 来实现开发
 
+安装实践环境有以下两个:
+
+- :ref:`mbp15_late_2013`
+- :ref:`mba13_mid_2013`
+
+上述两个MacBook笔记本都是同一代产品，架构相同，区别仅是CPU主频(i7 vs. i5)以及GPU(Nvidia vs. Intel)，所以大致安装过程相同
+
 制作Gentoo Linux安装U盘
 =======================
 
@@ -73,6 +80,10 @@
 
    我现在为了简化，采用启动时安装 ``option`` 键，利用硬件内置的磁盘分区选择来启动不同操作系统。所以可以不用安装 ``rEFInd`` ，不过安装 ``rEFIne`` 可以方便自动启动选择界面。
 
+.. note::
+
+   在 :ref:`mba13_mid_2013` 部署时，由于硬盘空间太小，并且我也不太可能切换到 :ref:`macos` ，所以就没有采用双启动，而是直接将整个磁盘都分配给Gentoo
+
 - 启动LiveCD，进入安装过程(需要连接一个有线网络，通过DHCP获取IP连接Internet)
 
 - 登陆是root用户身份，执行以下命令启动 ``sshd`` 并设置好root用户密码，这样就方便我远程登陆到主机上进行下一步安装:
@@ -81,11 +92,20 @@
    :language: bash
    :caption: 启动Gentoo Linux安装的sshd服务
 
+:ref:`mbp15_late_2013` 分区
+-----------------------------
+
+.. note::
+
+   :ref:`mbp15_late_2013` 换过 :ref:`nvme` 存储( :ref:`macbook_nvme` )，所以磁盘空间较大(1T)
+
+   **注意：我这里的案例是保留了macOS分区，也就是采用双启动方式。所以分区和后面挂载 /boot 分区和纯粹的只使用Linux的分区是不一样的** 如果你只安装Gentoo Linux(删除macOS)，那么就采用下面的 " :ref:`mba13_mid_2013` 分区 " 方法
+
 - 磁盘分区:
 
 .. literalinclude:: install_gentoo_on_mbp/parted_nvme
    :language: bash
-   :caption: 对NVMe磁盘进行分区检查
+   :caption: MBP 15存储:对NVMe磁盘进行分区检查
    :emphasize-lines: 15
 
 .. warning::
@@ -105,9 +125,9 @@
 
    对于UEFI启动，磁盘上必须有一个分区是系统的EFI启动分区，并且是 ``vfat`` 文件系统
 
-   为什么我没有创建这个 EFI 系统分区呢？ 原因是系统磁盘上已经有一个Apple的 :ref:`macos` 操作系统，已经构建了 ``分区1`` ，这个分区已经是 ``boot, esp`` 标记。只需要将这个分区挂载为Linux的 ``/boot/EFI`` 目录就可以。
+   为什么我没有创建这个 EFI 系统分区呢？ 原因是系统磁盘上已经有一个Apple的 :ref:`macos` 操作系统，已经构建了 ``分区1`` ，这个分区已经是 ``boot, esp`` 标记。只需要将这个分区挂载为Linux的 ``/boot`` 目录就可以。
 
-   当然，如果是整个磁盘作为Linux使用，则可以抹掉整个磁盘所有分区，然后单独为Linux创建一个 ``boot, esp`` 标记的 ``vfat32`` 分区，挂载到 ``/boot/EFI`` 。
+   当然，如果是整个磁盘作为Linux使用，则可以抹掉整个磁盘所有分区，然后单独为Linux创建一个 ``boot, esp`` 标记的 ``vfat32`` 分区，挂载到 ``/boot`` 。
 
 - 创建文件系统 - 将分区3格式化成 ``xfs`` 文件系统( 使用了 ``-f`` 强制参数，因为需要覆盖之前的分区信息 ):
 
@@ -118,6 +138,40 @@
 - 挂载 root 分区文件系统:
 
 .. literalinclude:: install_gentoo_on_mbp/mount_gentoo_fs
+   :language: bash
+   :caption: 挂载文件系统
+
+:ref:`mba13_mid_2013` 分区
+---------------------------
+
+.. note::
+
+   :ref:`mba13_mid_2013` 原装存储 只有 128GB，而且在没有 :ref:`macbook_nvme` 之前，内置存储还是SATA
+
+- 磁盘分区:
+
+.. literalinclude:: install_gentoo_on_mbp/parted_sata
+   :language: bash
+   :caption: MBA 13存储: 对SATAe磁盘(128G)进行分区检查
+   :emphasize-lines: 13,14
+
+上述有2个 :ref:`macos` 分区，由于我只使用 Gentoo ，所以会删除掉这两个分区(先重建分区表)
+
+- 重建GPT分区表，并创建2个分区:  ``boot, esp`` 标记的 ``vfat32`` 分区，挂载为 ``/boot/EFI`` ， 命名为 ``rootfs`` 的 :ref:`xfs` 分区，作为系统磁盘(保留 100GB 作为数据分区，使用 :ref:`zfs` )
+
+.. literalinclude:: install_gentoo_on_mbp/parted_sata_rootfs
+   :language: bash
+   :caption: MBA 13存储: 对SATAe磁盘(128G)分区和格式化
+
+完成后输出的分区情况如下:
+
+.. literalinclude:: install_gentoo_on_mbp/parted_sata_rootfs_output
+   :language: bash
+   :caption: MBA 13存储: 对SATAe磁盘(128G)分区和格式化后状态
+
+- 挂载 root 分区文件系统:
+
+.. literalinclude:: install_gentoo_on_mbp/mount_gentoo_fs_sata
    :language: bash
    :caption: 挂载文件系统
 
@@ -135,6 +189,8 @@ Gentoo Linux提供了 Multilib (32和64位)，也提供了纯64位的 No-Multili
 .. note::
 
    Gentoo Linux默认使用 ``OpenRC`` 作为init，而不是复杂的 :ref:`systemd` (可选)
+
+   此外stage还区分LLVM版本，这个版本是使用Clang编译的，并且Gentoo也支持将主编译器切换为Clang。但是由于gcc是事实标准，有些软件使用Clang编译会出错，所以Clang提供了fallback到gcc的方式。并且Clang不能编译glibc，所以实际上系统还是会保留gcc。此外，Clang编译的软件并没有比Gcc编译的软件更快，且通常会占用更多内存。不过，Clang采用了BSD协议，比较宽松，所以在BSD系统以及商业公司支持上通常会选择Clang，对于个人而言(散兵游勇)通常会选择Gcc。请参考 `为什么Clang不能取代GCC？ <https://www.zhihu.com/question/602844208>`_ 讨论，其中 <为什么Clang不能取代GCC？ - 韩朴宇的回答 - 知乎 <https://www.zhihu.com/question/602844208/answer/3044304429>`_ 有很多人讨论了这个问题，可以参考
 
 - 下载 ``stage tarball`` 并解压缩:
 
@@ -243,11 +299,25 @@ Chrooting
 挂载boot分区
 ===============
 
+:ref:`mbp15_late_2013` 分区
+-----------------------------
+
+对于保留macOS的安装，挂载boot分区是直接挂载原先macOS的ESP分区到 ``/boot`` 。如果抹除了macOS，则参考下面 " :ref:`mba13_mid_2013` 分区 " 方法
+
 - 挂载boot分区(这个分区是MacBook的macos和gentoo公用的):
 
 .. literalinclude:: install_gentoo_on_mbp/mount_boot
    :language: bash
    :caption: 挂载 /boot
+
+:ref:`mba13_mid_2013` 分区
+----------------------------
+
+对于只使用Gentoo Linux的系统，则ESP分区挂载到 ``/boot/efi`` 目录下(参考 `Quick Installation Checklist <https://wiki.gentoo.org/wiki/Quick_Installation_Checklist>`_ )
+
+.. literalinclude:: install_gentoo_on_mbp/mount_boot_mba13
+   :language: bash
+   :caption: 挂载 /boot(只使用Linux，则vfat分区需要挂载到 /boot 目录)
 
 配置Portage
 ==============
@@ -298,7 +368,7 @@ Chrooting
 
    选择初始 ``profile`` 文件时，请确保使用与 stage3 最初使用的版本相同的配置文件
 
-- 设置profile案例:
+- 设置profile案例(仅供参考):
 
 .. literalinclude:: install_gentoo_on_mbp/eselect_profile_set
    :language: bash
@@ -359,11 +429,19 @@ Chrooting
    :language: bash
    :caption: 运行 ``cpuid2cpuflags``
 
-在我的 MacBook 2013上输出:
+在我的 :ref:`mbp15_late_2013` 上输出:
 
 .. literalinclude:: install_gentoo_on_mbp/cpuid2cpuflags_output
    :language: bash
-   :caption: 运行 ``cpuid2cpuflags`` 输出
+   :caption: :ref:`mbp15_late_2013` 运行 ``cpuid2cpuflags`` 输出
+
+在我的 :ref:`mba13_mid_2013` 上输出:
+
+.. literalinclude:: install_gentoo_on_mbp/cpuid2cpuflags_output_mba13
+   :language: bash
+   :caption: :ref:`mba13_mid_2013` 运行 ``cpuid2cpuflags`` 输出
+
+这里可以看到 :ref:`mbp15_late_2013` 和 :ref:`mba13_mid_2013` 作为同代产品，CPU特性是相同的
 
 - 将输出结果添加到 ``package.use`` :
 
@@ -591,8 +669,8 @@ Gentoo提供了三种内核管理方法，并且安装以后任何时候都可�
 配置系统
 ============
 
-文件系统
------------
+文件系统配置
+=============
 
 ``/etc/fstab`` 提供了文件系统挂载配置(挂载点和选项)。文件系统标签和UUID可以通过 ``blkid`` 命令查看，对于多磁盘，由于启动系统时识别磁盘可能顺序随机(导致设备识别名变化)，所以建议使用UUID来识别设备进行挂载。但是，需要注意，当分区被擦除，则文件系统label和UUID值将会变化或移除。
 
@@ -600,11 +678,16 @@ Gentoo提供了三种内核管理方法，并且安装以后任何时候都可�
 
    LVM的卷和LVM的snapshot使用相同的UUID，所以如果挂载LVM卷不要使用UUID。
 
+   我的实践在 :ref:`mbp15_late_2013` (macOS和Linux双启动)和 :ref:`mba13_mid_2013` (Linux独占)略有不同，所以这里分开记述
+
+:ref:`mbp15_late_2013` 文件系统
+---------------------------------
+
 - 使用 ``blkid`` 检查磁盘，当前显示主机内部的NVMe设备分区如下:
 
 .. literalinclude:: install_gentoo_on_mbp/blkid_output
    :language: bash
-   :caption: blkid显示输出内置NVMe设备分区(label和UUID)
+   :caption: :ref:`mbp15_late_2013` blkid显示输出内置NVMe设备分区(label和UUID)
    :emphasize-lines: 1,2
 
 其中 分区3 是安装Gentoo Linux的分区，将被挂载到根分区 ``/`` ; 分区1是原先 :ref:`macos` 安装时已经构建的 ``vfat32`` 文件系统分区，用于存储EFI启动信息，这个分区也是和 Gentoo Linux 共用的，将被挂载到 ``/boot`` 目录
@@ -613,14 +696,35 @@ Gentoo提供了三种内核管理方法，并且安装以后任何时候都可�
 
 .. literalinclude:: install_gentoo_on_mbp/disk_by_uuid
    :language: bash
-   :caption: /dev/disk/by-uuid 目录下文件软连接显示UUID对应设备
+   :caption: :ref:`mbp15_late_2013` /dev/disk/by-uuid 目录下文件软连接显示UUID对应设备
    :emphasize-lines: 1,2
 
 - 配置 ``/etc/fstab`` 如下:
 
 .. literalinclude:: install_gentoo_on_mbp/fstab
    :language: bash
-   :caption: 使用UUID配置 /etc/fstab
+   :caption: :ref:`mbp15_late_2013` 使用UUID配置 /etc/fstab
+
+:ref:`mba13_mid_2013` 文件系统
+--------------------------------
+
+- 使用 ``blkid`` 检查磁盘，当前显示主机内部的SATA设备分区如下:
+
+.. literalinclude:: install_gentoo_on_mbp/blkid_output_mba13
+   :language: bash
+   :caption: :ref:`mba13_mid_2013` blkid显示输出内置SATA设备分区(label和UUID)
+
+- 同样，检查 ``ls -lh /dev/disk/by-uuid`` 可以看到上述分区信息，这个设备路径可以用于配置 ``/etc/fstab`` :
+
+.. literalinclude:: install_gentoo_on_mbp/disk_by_uuid_mba13
+   :language: bash
+   :caption: :ref:`mba13_mid_2013` /dev/disk/by-uuid 目录下文件软连接显示UUID对应设备
+
+- 配置 ``/etc/fstab`` 如下:
+
+.. literalinclude:: install_gentoo_on_mbp/fstab_mba13
+   :language: bash
+   :caption: :ref:`mba13_mid_2013` 使用UUID配置 /etc/fstab
 
 网络配置
 ==========
@@ -628,7 +732,7 @@ Gentoo提供了三种内核管理方法，并且安装以后任何时候都可�
 主机名
 --------
 
-- 主机名配置 ``xcloud`` :
+- 主机名配置 ``xcloud`` ( ``bcloud`` ):
 
 .. literalinclude:: install_gentoo_on_mbp/set_hostname
    :language: bash
@@ -703,17 +807,35 @@ Gentoo 官方文档 `Configuring the bootloader <https://wiki.gentoo.org/wiki/Ha
    :language: bash
    :caption: 安装 efibootmgr
 
+:ref:`mbp15_late_2013`
+------------------------
+
 - 配置启动Gentoo:
 
 .. literalinclude:: install_gentoo_on_mbp/efibootmgr_set
    :language: bash
-   :caption: 设置efibootmgr
+   :caption: :ref:`mbp15_late_2013` 设置efibootmgr
 
 .. note::
 
    - ``--disk /dev/nvme0n1`` 是指整个磁盘设备
    - ``--part 1`` 是指ESP分区，这个分区是Apple和Gentoo共享的
    - ``root=PARTUUID=fbf163f3-a42e-411a-be61-f2ae7b398e61`` 这个参数是 ``PARTUUID`` ，是通过 ``ls -lh /dev/disk/by-partuuid/`` 查询得到。注意，不是磁盘UUID(在 ``/etc/fstab`` 中使用磁盘UUID)
+
+:ref:`mba13_mid_2013`
+-------------------------
+
+- 配置启动Gentoo:
+
+.. literalinclude:: install_gentoo_on_mbp/efibootmgr_set_mba13
+   :language: bash
+   :caption: :ref:`mba13_mid_2013` 设置efibootmgr
+
+.. note::
+
+   - ``--disk /dev/sda`` 是指整个磁盘设备
+   - ``--part 1`` 是指ESP分区，这个分区是vfat32格式的启动分区
+   - ``root=PARTUUID=1c16164d-fab1-49f8-8d95-7c7dd02ec8ed`` 这个参数是 ``PARTUUID`` ，是通过 ``ls -lh /dev/disk/by-partuuid/`` 查询得到。注意，不是磁盘UUID(在 ``/etc/fstab`` 中使用磁盘UUID)
 
 收尾工作
 ==========

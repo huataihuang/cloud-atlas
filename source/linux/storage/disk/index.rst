@@ -8,6 +8,7 @@ Linux磁盘
    :maxdepth: 1
 
    linux_ssd.rst
+   orico_m2_nvme_sata_udisk.rst
    smart_monitor.rst
    check_hd_sn.rst
    linux_partition.rst

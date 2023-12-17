@@ -211,6 +211,14 @@ parted是一个创建和维护分区表的工具，提供了交互模式和直�
 .. literalinclude:: ../filesystem/xfs/xfs_startup/parted
    :caption: 为 :ref:`linux_lvm` 准备磁盘
 
+案例三
+----------
+
+在 :ref:`install_gentoo_on_mbp` 案例和案例一类似，但是做了一些调整:
+
+.. literalinclude:: ../../gentoo_linux/install_gentoo_on_mbp/parted_sata_rootfs
+   :caption: 为磁盘划分2个分区，一个ESP启动分区，一个系统分区
+
 参考
 =======
 
