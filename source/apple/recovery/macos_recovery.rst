@@ -8,6 +8,8 @@ macOS故障恢复
 
    如果你的Mac系统由于错误操作导致操作系统摧毁，同时又没有做过Time Machine备份，也没有安装介质。此时，只要你有联网环境，苹果提供了一种在线恢复出厂系统的方法，非常适合最后的故障救援。 
 
+   我第一次购买和接触Mac设备是 :ref:`mba11_late_2010` ，那时候苹果笔记本电脑随机还附赠一个U盘提供操作系统恢复。不过，实际上苹果电脑都有一个联网在线恢复安装操作系统的功能，这种 `macOS Recovery <https://support.apple.com/kb/HT201314>`_ 方法使得重新安装Mac操作系统轻而易举，甚至你完整抹除了启动盘也能够恢复。只需要连接到Internet上，就可以通过macOS Recovery重装操作系统。
+
 .. warning::
 
    实际上我在铲除系统之前，已经完整作了数据备份，所以恢复出厂macOS没有任何数据丢失。如果你要采用我介绍的这个方法，请务必做好数据备份。
@@ -36,6 +38,11 @@ macOS故障恢复
 - ``Command (⌘)-R`` 重装你Mac最近安装的最新macOS系统(推荐)
 - ``Option-⌘-R`` 更新到Mac硬件系统能够兼容的最新的macOS系统
 - ``Shift-Option-⌘-R`` 重新安装你购买Mac硬件的随机相同版本的macOS（也就是旧版本）
+
+macOS版本选择
+---------------
+
+- `Identify your MacBook Air model <https://support.apple.com/en-us/102869>`_ 提供了所有MacBook Air硬件规格和手册索引，同时提供了每一代MBA支持的最高兼容macOS版本说明
 
 后记
 ======

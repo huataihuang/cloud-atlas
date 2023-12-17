@@ -20,7 +20,7 @@ Pixel Watch一代(放弃)
     - 处理器使用的是三星用于Galaxy Watch 1~3代的Exynos 9110(对比之下，2021年月11日发布的三星Galaxy Watch 4已经升级到Exynos W920)，唯一超过三星Galaxy Watch 4(1.5G内存)的是Pixel Watch一代升级内存到2G
     - Pixel Watch是谷歌收购了FitBit之后推出的产品，集成了Fitbit的运动健康(心电图功能)，而且没有Apple Watch区域限制，只需要更新系统就可以使用(三星Galaxy Watch 4国行版本阉割了心电图功能，用美版配合软件可以实现)
 
-  - Pixel Watch二代在2023年10月4日和Pixel 8一同推出，但是知乎居然没有讨论话题，似乎完全被忽视了
+  - Pixel Watch二代在2023年10月4日和Pixel 8一同推出，但是知乎居然没有讨论话题，似乎完全被忽视了(不像Pixel手机有一定热度)
 
     - 外观和一代相同，不过外壳由上一代不锈钢换成了再生铝(外观造型偏向于女性使用的圆形饰品)
     - 高通骁龙 W5+ Gen 1 芯片
@@ -29,8 +29,8 @@ Pixel Watch一代(放弃)
 
    不论是Pixel Watch还是三星Galaxy Watch，都不要购买美版LTE，在国内无法使用eSIM卡(也不支持NFC门禁)
 
-Galaxy Watch 4(我的选择)
---------------------------
+Galaxy Watch 4( :strike:`我的选择` )
+--------------------------------------
 
 .. note::
 
@@ -61,7 +61,10 @@ Galaxy Watch 4(我的选择)
 
 .. note::
 
-   国行Galaxy Watch 4阉割了ECG和血压检测功能，请参考 `三星galaxy watch4 classic使用技巧 <https://zhuanlan.zhihu.com/p/411079427>`_ 激活。我购买的是美版，不确定情况，待入手后验证...
+   国行Galaxy Watch 4阉割了ECG和血压检测功能，请参考 `三星galaxy watch4 classic使用技巧 <https://zhuanlan.zhihu.com/p/411079427>`_ 激活。 :strike:`我购买的是美版，不确定情况，待入手后验证...`
+
+:ref:`samsung_galaxy_watch_4_classic_lte` (我的最终选择)
+-----------------------------------------------------------
 
 Watch 4 vs. Watch 4 Classic vs. Watch 5 vs. Watch 6
 -----------------------------------------------------
@@ -81,7 +84,7 @@ Galaxy Watch 4 和 Galaxy Watch 5 主要差异(核心SoC其实是一样的): (�
    未来的选择 -- 我非常看好 Google Pixel 8 以及 三星 Galaxy Watch 6 :strike:`Classic` :
 
    - Google Pixel 8将支持原本三星独有的 Samsung DeX功能: 终于可以通过手机获得桌面Android体验了，这也是 :ref:`mobile_work_think` 的实现方案
-   - 如果没有意外，我购买的二手三星Galaxy Watch 4和 :ref:`pixel_4` 可以使用3年(预计电池老化或硬件损坏)，此时二手的Galaxy Watch 6预计会降低到300元左右，Google Pixel 8预计会降低到1000元以下，就是非常好入手升级的时机。
+   - 如果没有意外，我购买的 :ref:`samsung_galaxy_watch_4_classic_lte` 和 :ref:`pixel_4` 可以使用3年(预计电池老化或硬件损坏)，此时二手的Galaxy Watch 6预计会降低到300元左右，Google Pixel 8预计会降低到1000元以下，就是非常好入手升级的时机。
 
 Galaxy Watch 4 Classic
 -------------------------
@@ -128,7 +131,9 @@ Galaxy Watch 4 Classic
 
    2023年11月根据三星中文官网信息 `Galaxy Watch4 蓝牙版 44mm <https://www.samsung.com/cn/watches/galaxy-watch/galaxy-watch4-silver-bluetooth-sm-r870nzsachc/>`_ 可以看到通过 "三星智能卡" 应用可以添加公交卡，支持 ``京津冀互联互通卡`` , ``上海公共交通卡`` 和 ``岭南通`` 三种公交联合卡；此外支持复制门禁卡，可以绑定一张交通卡和一张门禁卡，开启自动选卡功能后，可以自动识别和切换到所刷卡片，无需手动选卡。 (官方说明交通卡添加仅限Android 12以上三星Galaxy手机使用，门禁卡复制仅支持部分种类)
 
-   待验证...
+   我的实践验证:
+
+   - :ref:`samsung_pay_card` 在上海可以使用交通卡(对于非三星Glasxy手机非常折腾，需要hack)，所以我现在坐地铁和公交只需要佩戴我的 :ref:`samsung_galaxy_watch_4_classic_lte`
 
 - 厚度9.8mm
 
@@ -136,7 +141,7 @@ Galaxy Watch 4 Classic
 - 快充: 
 
   - 30分钟充电可运行10小时，充满大约2小时(横向比较同期的 :ref:`apple_watch` 和其他智能手表，充电速度相对较慢)
-  - 三星10W无线充电器可以对手表充电 (不知道我购买的二手 :ref:`pixel_4_wireless_charger` 是否支持，待验证)
+  - 三星10W无线充电器可以对手表充电 (已验证我的二手 :ref:`pixel_4_wireless_charger` 不支持)
 
 - 单个芯片集成了3大健康传感器: 光学心率传感器、心电传感器和和生物电阻抗分析 **可检测** :
 
@@ -170,7 +175,7 @@ Galaxy Watch 4 Classic
 
 .. note::
 
-   目前我还没有体验过Wear OS，支持的软件列表或许可以参考一下 `Samsung Galaxy Watch4 港版上手 <https://post.smzdm.com/p/ar6m3prg/>`_ 这篇文章，看起来微信、百度地图是有支持的，据说支付宝提供了静态扫码支付功能
+   :strike:`目前我还没有体验过Wear OS` ，支持的软件列表或许可以参考一下 `Samsung Galaxy Watch4 港版上手 <https://post.smzdm.com/p/ar6m3prg/>`_ 这篇文章，看起来微信、百度地图是有支持的，支付宝提供了静态扫码支付功能(已验证，确实如此)
 
 软件生态
 =========

@@ -4,9 +4,7 @@
 Gluster Exporter
 =========================
 
-`GitHub: Prometheus exporter for Gluster Metrics <https://github.com/gluster/gluster-prometheus>`_ 是GlusterFS官方提供的Gluster peers专用的exporter，提供了搜集本地 :ref:`metrics` 并聚合到Prometheus服务器的能力。不过，这个开源项目在2018年11月停滞，我暂时没有找到更好的替代，所以依然采用这个exporter组件尝试为GlusterFS集群提供一些基础监控。
-
-但是很不幸，2023年12月，我的尝试编译 ``Gluster Exporter`` 是失败的，以下尝试
+`GitHub: Prometheus exporter for Gluster Metrics <https://github.com/gluster/gluster-prometheus>`_ 是GlusterFS官方提供的Gluster peers专用的exporter，提供了搜集本地 :ref:`metrics` 并聚合到Prometheus服务器的能力。不过，这个开源项目在2018年11月停滞， :strike:`我暂时没有找到更好的替代，所以依然采用这个exporter组件尝试为GlusterFS集群提供一些基础监控。` ，目前已经无法编译。所以改为采用 `kadalu/gluster-metrics-exporter <https://github.com/kadalu/gluster-metrics-exporter>`_ 替代。
 
 编译 ``Gluster Exporter`` (失败，放弃)
 ========================================
@@ -56,6 +54,12 @@ Gluster Exporter
    :caption: 安装 ``gluster-metrics-exporter`` 输出
    :emphasize-lines: 6,7
 
+根据输出信息(:ref:`bash` ``-x`` debug输出 )可以看到在系统中安装了以下2个文件:
+
+.. literalinclude:: gluster-exporter/install_gluster-metrics-exporter_files
+   :caption: ``gluster-metrics-exporter`` 实际安装文件
+
+也就是说，如果是内部环境，可以直接复制这两个文件来实现部署
 
 参考
 =======
