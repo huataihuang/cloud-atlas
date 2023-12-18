@@ -12,6 +12,8 @@ kubernetes管理了容器规模，从边缘计算的微小集群到数据中心�
 
    虽然Docker/Kubernetes一直承诺我们更快速的部署，易于管理和强大的伸缩性，但是，就如同漂浮在海面上的冰山，你所看到的简洁易用是建立在底层无数辛勤开发和部署的云计算工作之上的。目前的技术发展趋势是，不断把客户的复杂度降低，把所有的脏活累活都下沉到系统平台。所以，决不要以为Kubernetes横空出世就解决了一切问题。恰恰相反，分布式、高可用、容灾、实时计算，随着规模的不断膨胀，这些技术的挑战越来越大。
 
+   从阿里云转岗到蚂蚁金服，从事了五年的围绕Kubernetes的工作，这个领域太过复杂，需要重新 :ref:`think_k8s`
+
 .. note::
 
    **学习资料**
@@ -25,6 +27,7 @@ kubernetes管理了容器规模，从边缘计算的微小集群到数据中心�
 .. toctree::
    :maxdepth: 2
 
+   think_k8s.rst
    kubernetes_overview.rst
    startup_prepare/index
    startup/index
