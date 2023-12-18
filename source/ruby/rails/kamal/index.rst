@@ -1,11 +1,13 @@
-.. _ruby_on_rails:
+.. _kamal:
 
 =================================
-Ruby on Rails
+Kamal
 =================================
 
 .. toctree::
    :maxdepth: 1
+
+   intro_kamal.rst
 
 .. only::  subproject and html
 

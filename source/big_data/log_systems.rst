@@ -32,6 +32,14 @@ Loki
 
 :ref:`loki` 是 :ref:`grafana` Labs团队的开源项目，但是和十项全能型日志系统 :ref:`elasticsearch` 不同，是简化版的日志聚合系统: :ref:`loki_startup` 综合介绍工作原理和特点。
 
+SigNoz
+==========
+
+:ref:`signoz` 也是一个全面集成 ``logs, metrics, traces, analytics`` 的监控系统: :ref:`intro_signoz` 介绍原理和特点
+
+Graylog
+=========
+
 思考
 ======
 
