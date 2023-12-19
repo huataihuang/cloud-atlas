@@ -8,6 +8,7 @@ Ruby on Rails
    :maxdepth: 1
 
    intro_rails.rst
+   microservice_vs_monolith.rst
    kamal/index
 
 .. only::  subproject and html

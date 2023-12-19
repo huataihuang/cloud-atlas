@@ -1,15 +1,13 @@
-.. _elasticsearch:
+.. _opensearch:
 
 =================================
-Elasticsearch
+OpenSearch
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   logstash.rst
-   metricbeat.rst
-   opensearch/index
+   intro_opensearch.rst
 
 .. only::  subproject and html
 

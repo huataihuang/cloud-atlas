@@ -13,6 +13,7 @@ ZFS安装
    archlinux_root_on_zfs.rst
    fedora_zfs.rst
    ubuntu_zfs.rst
+   gentoo_zfs.rst
 
 .. only::  subproject and html
 

@@ -40,10 +40,50 @@ SigNoz
 Graylog
 =========
 
+`graylog <https://graylog.org/>`_ 开源了 `github: graylog2-server <graylog2-server>`_ ，采用java开发，根据 `Graylog Docs > Installing Graylog <https://go2docs.graylog.org/5-2/downloading_and_installing_graylog/installing_graylog.html>`_ 可以初略了解graylog的架构:
+
+- 后端基于 :ref:`elasticsearch` 或者 :ref:`opensearch` (目前看 ``OpenSearch`` 是发展趋势) 
+- 使用Java开发的日志管理系统，可以视为 :ref:`elasticsearch` 或者 :ref:`opensearch` 的管理增强(使用MangoDB存储用户信息、流配置等元数据；日志数据完全存储在 :ref:`elasticsearch` 或者 :ref:`opensearch` )
+
+.. note::
+
+   初略查看了Graylog资料，看起来这个LMS是  :ref:`elasticsearch` 或者 :ref:`opensearch` 的再包装版本，不是很看好。毕竟对于大型企业，完全有能力自己维护 :ref:`elasticsearch` 或者 :ref:`opensearch` ，核心功能具备后自己定制并非难事。
+
+syslog-ng
+===========
+
+:ref:`syslog-ng` 是传统的日志采集系统的现代化发展: 实际上核心的syslog-ng日志采集系统已经成熟发展了很多年，一度是很多Linux发行版默认或推荐的日志采集系统:
+
+- 很久以前，蚂蚁金服还叫 "支付宝公司" 的时候，生产环境使用的Red Hat Enterprise Linux还都是使用 ``syslog-ng`` 来采集日志(现在已经全部改为阿里云的SLS，类似 :ref:`elasticsearch` )
+- 配置语法有些特别，需要花时间学习，但是后续 :ref:`redhat_linux` 全系列转换为 :ref:`rsyslog` 所以逐渐退出了主流
+
+看起来有商业公司收购和重新支持起 ``syslog-ng`` 准备打造成全系列的底层日志采集系统。我仅观察并在必要的遗留系统中维护 :ref:`syslog-ng`
+
+Highlight.io
+==============
+
+`highlight.io <https://www.highlight.io/>`_ 是一个非常年轻的开源日志监控系统，最早开始于2020年12月1日(以GitHub首次提交)，也是采用 :ref:`elasticsearch` 作为后端的搜索分析平台，主要增强在于:
+
+- 不仅提供日志管理，还提供会话重放和错误监控(基于日志设置告警阀值和频率，支持不同渠道通知)
+- 使用 :ref:`clickhouse` 进行数据存储和检索
+- 提供多种语言框架SDK
+
+这是一个相对较为年轻的开源项目，可能还没有得到广泛的验证
+
+Circonus
+============
+
+`circonus3 <https://docs.circonus.com/circonus3/getting-started/introduction>`_ 是 `circonus.com <https://circonus.com>`_ 公司的 ``logs, metrics, traces, analytics`` 产品:
+
+- 基于 :ref:`elasticsearch` 并集成 :ref:`opentelemetry` (例如 :ref:`jaeger` 或 ``Zipkin`` ) 和 :ref:`metrics` (采用自己的Circonus Unified Agent)
+- `Circonus集成了很多第三方库 <https://docs.circonus.com/circonus3/integrations/library/>`_ 提供深入的功能，例如 :ref:`intel_rdt` 库 `Circonus 3.0 Liberty: Intel RDT <https://docs.circonus.com/circonus3/integrations/library/intel-rdt/>`_ 是一种比较好的全面参考方案(你可以了解如何使用Intel RDT Software Package来获取pqos信息)
+
 思考
 ======
 
 - 目前看来突出 **低成本和高速** 的日志系统( 典型如 ``OpenObserve`` 和 :ref:`loki` )都是舍弃了全文索引，采用 Label 聚合查询的方式，对于特定应用是有优势的，但同时也具有局限性
+- 产品化的日志管理系统大多数基于 :ref:`elasticsearch` 构建，并集成 :ref:`opentelemetry` (例如 :ref:`jaeger` 或 ``Zipkin`` ) 和 :ref:`metrics` (可能会直接使用 :ref:`prometheus_exporters` 也可能直接提供自己的Agent)
+- 架构大同小异，所以可以精研其中的典型解决方案来了解和掌握这种日志分析基础架构
 
 参考
 =======
