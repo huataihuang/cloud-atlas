@@ -854,6 +854,10 @@ Gentoo 官方文档 `Configuring the bootloader <https://wiki.gentoo.org/wiki/Ha
    umount /mnt/gentoo{/boot,/sys,/proc,}
    reboot 
 
+.. note::
+
+   安装完成后，后续可以执行 :ref:`upgrade_gentoo` 来保持系统滚动更新
+
 参考
 =======
 

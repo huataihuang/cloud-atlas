@@ -1,0 +1,116 @@
+.. _gentoo_zfs:
+
+===================
+Gentoo上运行ZFS
+===================
+
+安装
+=======
+
+`ZFSOnLinux项目 <https://zfsonlinux.org/>`_ 提供了out-of-tree Linux内核模块。从ZFS模块版本 0.6.1 开始，OpenZFS项目宣布将ZFS视为可以广泛用于桌面到超级计算机的生产部署。
+
+- 安装ZFS:
+
+.. literalinclude:: gentoo_zfs/install_zfs
+   :caption: ``emerge`` 安装 zfs
+
+.. warning::
+
+   每次内核编译之后，都需要重新 emerge ``sys-fs/zfs-kmod`` ，即使内核修改是微不足道的。如果你在merge了内核模块之后重新编译内核，则可能会是的zpool进入不可终端的睡眠(也就是不能杀死的进程)或者直接crash。
+
+- 在内核变更之后，执行以下命令重新 remerge zfs-kmod :
+
+.. literalinclude:: gentoo_zfs/remerge_zfs-kmod
+   :caption: 重新emerge zfs-kmod
+
+输出信息类似:
+
+.. literalinclude:: gentoo_zfs/remerge_zfs-kmod_output
+   :caption: 重新emerge zfs-kmod
+   :emphasize-lines: 5
+
+ZFS Event Daemon通知
+=====================
+
+ZED(ZFS Event Daemon)监控ZFS内核模块产生的事件: 当一个 ``zevent`` (ZFS Event)发出是，ZED将为对应的zevent分类运行一个 ``ZEDLETs`` (ZFS Event Daemon Linkage for Executable Tasks)。
+
+- 配置 ``/etc/zfs/zed.d/zed.rc`` :
+
+.. literalinclude:: gentoo_zfs/zed.rc
+   :caption: ``/etc/zfs/zed.d/zed.rc`` 配置案例，激活通知邮件地址以及定期发送pool健康通知
+
+OpenRC
+=============
+
+- 配置 openrc 设置ZFS在操作系统启动时启动:
+
+.. literalinclude:: gentoo_zfs/openrc_zfs
+   :caption: 配置 openrc 设置ZFS服务
+
+.. note::
+
+   - 多数情况下只需要配置 zfs-import 和 zfs-mount
+   - zfs-share 是提供NFS共享
+   - zfs-zed 是ZFS Event Daemon用于处理磁盘hotspares替换以及故障的电子邮件通知
+
+Systemd
+================
+
+如果系统使用 :ref:`systemd` 则配置如下:
+
+.. literalinclude:: gentoo_zfs/systemd_zfs
+   :caption: 配置 systemd 设置ZFS服务
+
+内核
+=======
+
+``sys-fs/zfs`` 需要内核支持 ``zlib`` :
+
+.. literalinclude:: gentoo_zfs/zfs_kernel_zlib
+   :caption: ``sys-fs/zfs`` 需要内核支持 ``zlib``
+
+.. note::
+
+   内核更改必须重新编译内核模块
+
+   如果使用clang来编译 ``sys-fs/zfs-kmod`` 则必须使用 2.1.7 以上版本
+
+安装内核模块(前面安装 zfs 已经包括):
+
+.. literalinclude:: gentoo_zfs/install_zfs-kmod
+   :caption: 安装 ``zfs-kmod``
+
+如果使用 ``initramfs`` ，则需要在编译模块以后重新生成initramfs
+
+- 如果服务器没有重启过，可能需要手工夹在 ``zfs`` 内核模块:
+
+.. literalinclude:: gentoo_zfs/modprobe_zfs
+   :caption: 手工加载zfs模块
+
+使用
+=========
+
+- 磁盘分区:
+
+这里的案例是 :ref:`install_gentoo_on_mbp` ，磁盘已经划分了 ``sda1`` (/boot) 和 ``sda2`` (/) ，现在将剩余空间都作为ZFS分区:
+
+.. literalinclude:: gentoo_zfs/parted
+   :caption: 使用 :ref:`parted` 创建 /dev/sda3 分区用于ZFS
+
+划分好以后，最后输出的分区信息:
+
+.. literalinclude:: gentoo_zfs/parted_output
+   :caption: 使用 :ref:`parted` 创建 /dev/sda3 分区用于ZFS
+
+- 如果是常规使用，通常可以使用类似 :ref:`zfs_startup_zcloud` 方法(注意那个案例使用的是整块sda磁盘):
+
+
+
+- 创建ZFS存储池 ``zpool`` ，这里命名为 ``zpool-docker`` (存储池用于 ) :
+
+
+
+参考
+======
+
+- `Gentoo Wiki: ZFS <https://wiki.gentoo.org/wiki/ZFS>`_
