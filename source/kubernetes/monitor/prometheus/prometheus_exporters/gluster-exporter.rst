@@ -6,6 +6,8 @@ Gluster Exporter
 
 `GitHub: Prometheus exporter for Gluster Metrics <https://github.com/gluster/gluster-prometheus>`_ 是GlusterFS官方提供的Gluster peers专用的exporter，提供了搜集本地 :ref:`metrics` 并聚合到Prometheus服务器的能力。不过，这个开源项目在2018年11月停滞， :strike:`我暂时没有找到更好的替代，所以依然采用这个exporter组件尝试为GlusterFS集群提供一些基础监控。` ，目前已经无法编译。所以改为采用 `kadalu/gluster-metrics-exporter <https://github.com/kadalu/gluster-metrics-exporter>`_ 替代。
 
+``gluster-metrics-exporter`` 是采用 :ref:`crystal` 语言开发的 :ref:`prometheus_exporters`
+
 编译 ``Gluster Exporter`` (失败，放弃)
 ========================================
 

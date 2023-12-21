@@ -102,13 +102,27 @@ Systemd
 .. literalinclude:: gentoo_zfs/parted_output
    :caption: 使用 :ref:`parted` 创建 /dev/sda3 分区用于ZFS
 
-- 如果是常规使用，通常可以使用类似 :ref:`zfs_startup_zcloud` 方法(注意那个案例使用的是整块sda磁盘):
+- ( **参考** 请不要执行这步)如果是常规使用，通常可以使用类似 :ref:`zfs_startup_zcloud` 方法(注意那个案例使用的是整块sda磁盘，和这里的案例磁盘分区 ``/dev/sda3`` 不同，注意区别):
 
+.. literalinclude:: ../admin/zfs_startup_zcloud/zpool_create
+   :caption: 在磁盘 ``sda`` 上创建ZFS的存储池，名字为 ``zpool-data``
 
+- 我在 :ref:`install_gentoo_on_mbp` 计划使用一个ZFS文件系统来作为 :ref:`docker_zfs_driver` (需要将整个 zpool 存储池挂载到独立的 ``/var/lib/docker/`` 目录) ，所以我实际创建名为 ``zpool-docker`` 存储池:
 
-- 创建ZFS存储池 ``zpool`` ，这里命名为 ``zpool-docker`` (存储池用于 ) :
+.. literalinclude:: gentoo_zfs/docker_zfs_driver
+   :caption: 创建 :ref:`docker_zfs_driver` 存储池
 
+完成以后检查 ``zpool list`` 可以看到新创建的 ``zpool-docker`` 存储池:
 
+.. literalinclude:: gentoo_zfs/zpool-docker
+   :caption: ``zpool list`` 输出显示新创建的 ``zpool-docker`` 存储池
+
+再检查 ``zfs list`` 可以看到这个存储池 ``zpool-docker`` 被挂载到 ``/var/lib/docker`` (通过 ``df -h`` 也能看到):
+
+.. literalinclude:: gentoo_zfs/zfs_list
+   :caption: ``zfs list`` 输出显示 存储池 ``zpool-docker`` 被挂载到 ``/var/lib/docker``
+
+一切就绪，现在可以执行 :ref:`gentoo_docker` 部署了
 
 参考
 ======

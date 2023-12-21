@@ -1,15 +1,13 @@
-.. _gpt:
+.. _trino:
 
 =================================
-GPT
+Trino分布式大数据查询
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_gpt.rst
-   gpt_startup.rst
-   gpt_radar.rst
+   intro_trino.rst
 
 .. only::  subproject and html
 

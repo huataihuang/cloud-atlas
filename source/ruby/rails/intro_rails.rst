@@ -30,7 +30,7 @@ rails的创造者大卫说 **他曾经多次学习开发，但都失败了** 。
 社区融合
 ---------
 
-纪录片中提到的一个竞争框架 `GitHub: merb <https://github.com/wycats/merb>`_ 最终社区合并到Rails，当时人的 `Together: The Merb Story <https://yehudakatz.com/2020/02/19/together-the-merb-story/>`_ 故事
+纪录片中提到的一个竞争框架 `GitHub: merb <https://github.com/wycats/merb>`_ 最终社区合并到Rails，Merb的核心开发者Yehuda Katz(Ember.js创建者，Rust,Rails和jQuery的核心开发者，著名程序员)在个人网站撰写了 `Together: The Merb Story <https://yehudakatz.com/2020/02/19/together-the-merb-story/>`_ 讲述了两个WEB框架合并的故事，可以作为纪录片的补充。
 
 shopify的故事
 ----------------

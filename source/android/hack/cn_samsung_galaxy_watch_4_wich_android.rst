@@ -26,6 +26,20 @@
 
 - 对于普通用户，如果不想折腾，那么只能国行安卓手机配国行三星智能手表；如果美版Android手机(例如Pixel)则建议使用美版Samsung Galaxy Watch
 
+关于 "美版"
+============
+
+美版的三星Galaxy Watch 4虽然容易适配美版三星Galaxy手机，但是对于美版Watch 4 LTE版本，存在一个(反向)无法直接使用国内移动运营商网络的问题。 `美版三星galaxy watch LTE 版本（带u型号，如sm-r865u，4、5、6代）解锁基带频段限制以实现非美国区域移动网络可用 <https://post.cplus8.com/d/647>`_ 楼主 "傑克•特裡•斯科鋪" 提供了一个很好的解决方法:
+
+- 三星官网上的链接性能信息显示 ``sm-875u`` (美版Galaxy Watch4 44mm) 和 ``sm-b65u`` (美版Galaxy Watch4 40mm) 的 LTE BAND Support 覆盖了B5频率段(850MHz)是得到国内三家移动运营商支持的，此外国际版本(f后缀)还支持联通电信所使用的B1和B3
+- 三星的Galaxy Watch提供了 ``secret code`` 可以激活 ``service mode`` ，能够启用一些被屏蔽的功能参数:  ``#2263# *CPLUS!`` 可能可以打开Network Setting，其中有一个菜单 ``Band Disable`` 有一些频段被关闭了，所以将所有频段打开就可以支持国内移动运营商网络
+- 此外 ``Band Selection`` 可以锁定运营商的网络频段，例如中国联通使用B3
+- 这篇文章还推荐添加国外的esim卡来实现移动网络(思路打开):
+
+  - Eskimo的免费1.5G有效期一年的esim
+  - 澳门电讯的esim: `CTM 5G Chill Prepaid card-澳门电讯5G快卡小测 <https://post.cplus8.com/d/587>`_
+  - 三星Galaxy Watch 4有两个 esim 槽位，可以用一个esim来接收验证码(我突然想到 :ref:`us_apple_id_paypal` 一直难以解决的海外手机号码接收验证码才能开启PayPal国际支付 )
+
 解决方案(综合)
 =================
 

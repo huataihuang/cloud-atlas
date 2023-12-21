@@ -14,7 +14,7 @@ Vitess 提供了兼容JDBC和Go数据库驱动，支持原生查询协议。
 
 Vitess从2011年开始用于YouTube数据库，目前已经被很多企业用于生产。并且目前已经成为 `Cloud Native Computing Foundation <https://www.cncf.io>`_ (云原生计算基金会)孵化项目，并且和Kubernetes良好结合（可以扩展部署到数万个节点）。
 
-GitHub使用 :ref:`ruby_on_rails` 开发网站，主要数据库存储在MySQL，2019年开始逐步将数据库表迁移到Vitess，并于2021年9月介绍了GitHub的Vitess的部署和迁移Vitess经验 `Partitioning GitHub’s relational databases to handle scale <https://github.blog/2021-09-27-partitioning-githubs-relational-databases-scale/>`_ 。
+GitHub使用 :ref:`rails` 开发网站，主要数据库存储在MySQL，2019年开始逐步将数据库表迁移到Vitess，并于2021年9月介绍了GitHub的Vitess的部署和迁移Vitess经验 `Partitioning GitHub’s relational databases to handle scale <https://github.blog/2021-09-27-partitioning-githubs-relational-databases-scale/>`_ 。
 
 .. note::
 

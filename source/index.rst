@@ -30,6 +30,10 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 
    如果你按照我的文档无法完成，请在文章下的评论系统留言，我们一起讨论并完善指南
 
+.. note::
+
+   之前和一个网友聊天，谈到我撰写的 ``Cloud Atlas`` 有点像 `Thoughtworks技术雷达 <https://www.thoughtworks.com/zh-cn/radar>`_ 提供云计算相关的技术指南。当然Thoughtworks在技术咨询领域为我们提供了广阔的视野，我期望能够借鉴Thoughtworks的见解，并进一步成为可落实的技术指南。
+
 阅读
 =========
 

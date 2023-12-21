@@ -14,6 +14,7 @@ Gentoo Linux
    upgrade_gentoo.rst
    gentoo_vim.rst
    gentoo_dbus.rst
+   ../desktop/sway/sway_gentoo.rst
    gentoo_chromium.rst
    gentoo_chinese_view.rst
    gentoo_chinese_input.rst

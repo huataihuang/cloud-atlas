@@ -1,10 +1,10 @@
-.. _introduce_presto:
+.. _intro_trino:
 
 =====================
-Presto简介
+Trino简介
 =====================
 
-Presto是Facebook开源的分布式SQL查询执行引擎，可以从不同的数据源进行分布式海量数据处理。
+`trino开源分析项目 <https://trino.io/>`_ 以前是Presto，也就是Facebook开源的分布式SQL查询执行引擎，可以从不同的数据源进行分布式海量数据处理。
 
 需要注意的是:
 
