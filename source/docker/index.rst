@@ -9,6 +9,7 @@ Docker Atlas
 
    startup/index
    desktop/index
+   colima/index
    images/index
    rootless/index
    moby/index

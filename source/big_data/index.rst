@@ -26,7 +26,7 @@ Big Data Atlas
    spark/index
    kafka/index
    flink/index
-   presto/index
+   trino/index
    elasticsearch/index
    log_analysis.rst
    fluentd/index

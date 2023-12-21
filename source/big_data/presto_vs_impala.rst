@@ -49,6 +49,10 @@ Presto 和 Impala 都是开源OLAP引擎。
 Presto
 --------
 
+.. note::
+
+   现在 Presto 项目演进成 :ref:`trino`
+
 Fackbook开源的presto大数据OLAP引擎，分布式SQL查询引擎(MPP, Massive Parallel Processing)。Presto的设计理念源于一个叫Volcano的并行数据库，该数据库提出了一个并行执行SQL的模型，它被设计为用来专门进行高速、实时的数据分析。
 
 Presto 可以查询包括 Hive、Cassandra 甚至是一些商业的数据存储产品。单个 Presto 查询可合并来自多个数据源的数据进行统一分析。Presto是一个OLAP的工具，擅长对海量数据进行复杂的分析；但是对于OLTP场景，并不是Presto所擅长，所以不要把Presto当做数据库来使用。

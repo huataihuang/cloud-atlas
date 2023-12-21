@@ -4,6 +4,15 @@
 xhyve - macOS平台的KVM
 ==========================
 
+.. note::
+
+   ``xhyve`` 只是一个 hypervisor 之上的管理工具，并不是真正运行虚拟机的 Virtualization framework，也不是 hypvervisor (这两个底层框架都是苹果公司 :ref:`macos` 内置提供的)
+
+   `xhyve hypervisor <https://github.com/mist64/xhyve>`_ 项目已经停滞开发，目前 macOS Virtualizaion 进入了新的节点，基于苹果公司的 ``macOS Virtualization`` 和 ``Hypervisor`` ，新的开源项目以及商业软件不断出现:
+
+   - :ref:`lima` 在macOS中运行虚拟机，衍生出 :ref:`colima` 在macOS中运行容器运行时
+   - `OrbStack <https://orbstack.dev/>`_ 商业软件
+
 我个人使用MacBook Pro作为工作笔记本，使用的是macOS操作系统。macOS兼具精美方便的图形界面和灵活强大的Unix核心工具，对于开发和运维工作非常友好。macOS虽然没有KVM这样经过大量服务运维验证的虚拟化方案，但是实际上也有基于开源 `bhyve <http://bhyve.org>`_ port到OS X的开源项目 `xhyve hypervisor <https://github.com/mist64/xhyve>`_ 。
 
 xhyve构建在OS X 10.10的 `Hypervisor.framework <https://developer.apple.com/documentation/hypervisor>`_ ，完全运行在用户空间，没有其他依赖。

@@ -11,7 +11,21 @@ Nokia KaiOS手机
 - `Nokia 800 Tough <https://www.nokia.com/phones/zh_int/nokia-800>`_ 三防手机，请参考 `什么值得买社区Nokia800 Touch不认真的开箱 <https://post.smzdm.com/p/apzko2r9/>`_ 和 `Nokia 800三防手机评测图赏 <https://www.cfan.com.cn/2020/0102/133379.shtml>`_ ，适合户外运动使用
 - `Nokia 2720 Flip <https://www.nokia.com/phones/zh_int/nokia-2720>`_ 少见的翻盖手机，但价格过高
 - `Nokia 8110 4G <https://www.nokia.com/phones/zh_int/nokia-8110-4g>`_ 黑客帝国中尼奥使用的Nokia 8110复刻版，价格偏高
+- `Nokia 2760 Flip <https://www.nokia.com/phones/en_us/nokia-2760-flip>`_ 比2720更为简朴一些的低价版本 `eBay上的诺基亚 2760 <https://cn.ebay.com/b/Nokia-2760-Flip-Cell-Phones-Smartphones/9355/bn_106736014>`_ 二手售价大约200～300元(Tracfone)，这款手机在国内没有销售 参考 `诺基亚2760 Flip 4G翻盖手机曝光，运行KaiOS <https://finance.sina.cn/tech/2021-12-20/detail-ikyakumx5109902.d.html>`_ 一文可以看到:
 
+  - 尺寸为 4.33 x 2.28 x 0.76 英寸，重 4.8 盎司（约 135.84 克）
+  - 屏幕为 240 x 320 像素分辨率
+  - 1450mAh 电池，可提供长达 6.8 小时的通话时间和长达 13.7 小时的待机时间
+  - 500 万像素的后置摄像头
+  - 支持 4G、Wi-Fi、蓝牙、GPS、彩信、免提扬声器、彩色显示屏、mp3 播放器等功能
+
+.. note::
+
+   诺基亚还有一款 `Nokia 2660 Flip <https://www.nokia.com/phones/zh_int/nokia-2660-flip>`_ 在国内有售，硬件和 ``Nokia 2760 Flip`` 完全一样，但是操作系统被只换成S30+ 非常遗憾
+
+.. note::
+
+   2016年HMD公司拿到了Nokia的手机业务，就开始全力打造新一代功能手机: 也就是复刻Nokia历史上经典手机，增加现代的4G功能，外观模仿Nokia早期的成功的经典款，以期通过复古和怀旧吸引用户。
 
 注意: 国行版KaiOS的手机都删除了404应用并且不预装应用商店，所以使用可能比较折腾。例如 `Nokia 6300 4G国际版 <https://www.nokia.com/phones/en_int/nokia-6300-4g>`_ 完整介绍了KaiOS的各种应用功能
 

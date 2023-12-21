@@ -1,13 +1,13 @@
-.. _macos_xhyve:
+.. _lima:
 
 =================================
-macOS平台KVM虚拟化技术xhyve
+Lima: Linux Machines
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   xhyve.rst
+   intro_lima.rst
 
 
 .. only::  subproject and html

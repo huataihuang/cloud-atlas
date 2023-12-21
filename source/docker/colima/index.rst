@@ -1,15 +1,13 @@
-.. _gpt:
+.. _colima:
 
 =================================
-GPT
+Colima
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_gpt.rst
-   gpt_startup.rst
-   gpt_radar.rst
+   intro_colima.rst
 
 .. only::  subproject and html
 

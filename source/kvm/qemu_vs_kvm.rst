@@ -1,7 +1,7 @@
-.. _kvm_architecture:
+.. _qemu_vs_kvm:
 
 ======================
-KVM虚拟化
+QEMU v. KVM
 ======================
 
 KVM(Kernel-based Virtual Machine)，是内建在Linux Kernel中的hypervisor。相对于另一种开源虚拟化Xen，KVM更为简单和易用，并且和原生QEMU不同，KVM通过一个内核模块使用CPU硬件扩展(HVM)来运行一个特殊运行模式的QEMU。
@@ -39,5 +39,6 @@ KVM(Kernel-based Virtual Machine)，是内建在Linux Kernel中的hypervisor。�
 参考
 ========
 
+- `QEMU vs. KVM: Exploring the Virtualization Giants <QEMU vs. KVM: Exploring the Virtualization Giants>`_
 - `Arch Linux文档 - KVM <https://wiki.archlinux.org/index.php/KVM>`_
 - `Arch Linux文档 - QEMU <https://wiki.archlinux.org/index.php/QEMU>`_
