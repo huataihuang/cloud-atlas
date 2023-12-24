@@ -24,6 +24,7 @@ Gentoo Linux
    gentoo_mbp_kernel.rst
    gentoo_initramfs.rst
    gentoo_docker.rst
+   gentoo_on_gentoo.rst
    cross-platform_file_system.rst
    pentoo/index
    think_gentooserv.rst

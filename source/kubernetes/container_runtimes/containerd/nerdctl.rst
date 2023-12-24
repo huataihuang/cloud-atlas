@@ -29,6 +29,10 @@ nerdctl 是 ``containerd`` 子项目，提供Docker兼容的CLI命令:
 
 我安装的是Minimal版本，其他组件按需各自安装
 
+.. note::
+
+   在 :ref:`macos` 上运行 :ref:`colima` 可以获得开源的容器运行环境，支持采用 :ref:`containerd` 作为运行时。
+
 快速起步
 ============
 

@@ -6,6 +6,13 @@ Docker Desktop简介
 
 `Docker Desktop <https://www.docker.com/products/docker-desktop/>`_ 是Docker公司面向 :ref:`windows` / :ref:`linux` / :ref:`macos` 桌面推出的集成多项开源技术的虚拟机运行docker容器的OneBox技术。也就是说，不需要在Host主机操作系统中安装 :ref:`container_runtimes` 以及各种复杂的软件堆栈，只需要Host主机能够运行虚拟化(通常已经内置)，就可以得到一个完整的已经预先配置的Docker运行环境以及一键安装 :ref:`kubernetes` (简化单机版)。非常适合对底层技术了解不多且专注于应用开发的程序员。
 
+.. note::
+
+   2023年底，我尝试采用开源的 :ref:`colima` 来代替 Docker Desktop，以便能够深入学习:
+
+   - :ref:`lima` 实现在 :ref:`macos` 平台使用 :ref:`macos_virtualization` 构建底层虚拟化
+   - 开源的 :ref:`colima` 结合了很多工具可以参考学习
+
 Docker Desktop on Mac vs. Docker Toolbox
 =========================================
 
