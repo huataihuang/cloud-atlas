@@ -44,4 +44,3 @@ DCGM-Exporter
 ======
 
 - `NVIDIA GPU Telemetry <https://docs.nvidia.com/datacenter/cloud-native/gpu-telemetry/dcgm-exporter.html>`_
-

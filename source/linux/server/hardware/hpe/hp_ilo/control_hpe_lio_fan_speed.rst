@@ -40,6 +40,7 @@ WEB设置
 参考
 =====
 
+- `Silence of the fans pt 2: HP iLO 4 2.73 now with the fan hack! <https://www.reddit.com/r/homelab/comments/hix44v/silence_of_the_fans_pt_2_hp_ilo_4_273_now_with/>`_  介绍ilo控制fan的资料，可以作为起步
 - `HOW TO CONTROL HPE ILO FAN SPEED (ILO 4, GEN 8~9) <https://forums.unraid.net/topic/141249-how-to-control-hpe-ilo-fan-speed-ilo-4-gen-8~9/>`_
 - `Silence of the fans pt 2: HP iLO 4 2.73 now with the fan hack! <https://www.reddit.com/r/homelab/comments/hix44v/silence_of_the_fans_pt_2_hp_ilo_4_273_now_with/>`_
 - `ilo-fans-controller (GitHub项目) <https://github.com/alex3025/ilo-fans-controller>`_

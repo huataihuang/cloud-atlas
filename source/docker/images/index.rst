@@ -14,6 +14,7 @@ Docker 镜像
    ubuntu_tini_image.rst
    alpine_docker_image.rst
    archlinux_docker_image.rst
+   gentoo_image.rst
    smaller_docker_images.rst
    docker_multi-platform_images.rst
    dockerfile_best-practices.rst

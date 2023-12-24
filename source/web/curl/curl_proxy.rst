@@ -31,14 +31,15 @@ socks5代理
 http/https代理
 ---------------------
 
-- 环境变量设置::
+- 环境变量设置:
 
-   export http_proxy=http://192.168.10.9:3128
-   export https_proxy=$http_proxy
+.. literalinclude:: curl_proxy/socks5_http_env
+   :caption: 配置curl的http/https代理环境变量
 
-- 或者采用 ``~/.curlrc`` ::
+- 或者采用 ``~/.curlrc`` :
 
-   proxy=192.168.10.9:3128
+.. literalinclude:: curl_proxy/curlrc
+   :caption: 配置 ``~/.curlrc`` 设置http/https代理
 
 socks5代理
 ------------
