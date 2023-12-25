@@ -21,6 +21,7 @@ Android Studio
    yay -S android-studio
 
 - 安装Java运行环境 - Android Studio是基于IntelliJ IDEA开发的，需要Java环境才能运行::
+
    sudo pacman -S jdk-openjdk
 
 .. note::
@@ -45,7 +46,7 @@ Android的版本分裂非常严重，从 `Android 开发者 > 平台 > 版本 <h
 
 .. note::
 
-   我个人感觉Android版本选择至少应该延续5年，考虑到硬件设备的使用寿命，通常5年应该能够满足大多数用户的使用。
+   :strike:`我个人感觉Android版本选择至少应该延续5年，考虑到硬件设备的使用寿命，通常5年应该能够满足大多数用户的使用。`
 
 参考
 ======
