@@ -15,7 +15,7 @@
 
 通过 :ref:`gentoo_image` 构建提供ssh服务并且能够安装不同开发环境的基础容器
 
-:ref:`gentoo_docker` 之后进入容器，首先按照 :ref:`install_gentoo_on_mbp` 完成一些必要调整
+:ref:`gentoo_docker` 之后进入容器，首先按照 :ref:`install_gentoo_on_mbp` 完成一些必要调整，也就是以下这些手工执行的命令。在完成验证之后，就可以按图索骥定制 :ref:`gentoo_image`
 
 修改gentoo镜像地址
 -----------------------
@@ -62,6 +62,10 @@
 配置USE变量
 -------------
 
+.. note::
+
+   获取CPU特性，设置对应USE变量
+
 - 安装工具包:
 
 .. literalinclude:: install_gentoo_on_mbp/install_cpuid2cpuflags
@@ -80,6 +84,16 @@
    :language: bash
    :caption: 运行 ``cpuid2cpuflags`` 输出添加到 ``package.use``
 
+(可选)配置 ``ACCEPT_LICENSE`` 变量
+-------------------------------------
+
+考虑到容器内部暂时不需要编译特定私有代码，所以我暂时没有修订默认接受的licenses。不过，后续如果要支持 :ref:`gentoo_nvidia` 来实现类似 :ref:`nvidia-docker` 可能还是需要接受厂商协议，可能需要执行以下命令:
+
+.. literalinclude:: gentoo_on_gentoo/gentoo_licenses
+   :language: bash
+   :caption: 配置接受特定licenses
+   :emphasize-lines: 2
+
 配置时区
 ----------
 
@@ -95,4 +109,71 @@
    :language: bash
    :caption: 重新配置 sys-libs/timezone-data
 
-待续...
+配置本地化(语言支持)
+-----------------------
+
+- 修订 ``/etc/locale.gen``
+
+.. literalinclude:: install_gentoo_on_mbp/locale.gen
+   :language: bash
+   :caption: 在 /etc/locale.gen 中添加 UTF-8 支持
+
+- 根据 ``/etc/locale.gen`` 生成所有本地化支持:
+
+.. literalinclude:: install_gentoo_on_mbp/locale-gen
+   :language: bash
+   :caption: 运行 ``locale-gen`` 命令，根据 /etc/locale.gen 生成本地化支持
+
+选择本地化
+============
+
+- 显示可支持的 ``lcoale`` :
+
+.. literalinclude:: install_gentoo_on_mbp/eselect_locale_list
+   :language: bash
+   :caption: 查看当前locale
+
+- 修订本地化为 ``en_US.utf8`` :
+
+.. literalinclude:: install_gentoo_on_mbp/eselect_locale_set
+   :language: bash
+   :caption: 设置locale
+
+- 重新加载环境:
+
+.. literalinclude:: install_gentoo_on_mbp/env-update
+   :language: bash
+   :caption: 更新加载环境
+
+安装必要工具
+----------------
+
+- 安装工具参考 :ref:`install_gentoo_on_mbp` 做了一些精简:
+
+.. literalinclude:: gentoo_on_gentoo/option_tools
+   :language: bash
+   :caption: 安装可选工具
+
+升级Gentoo
+=============
+
+在上述构建部署完成后，最后做一次仓库更新和系统整体升级:
+
+- 更新Gentoo仓库，这时需要使用工具 ``emaint`` :
+
+.. literalinclude:: upgrade_gentoo/emaint_short
+   :language: bash
+   :caption: 使用emaint更新仓库 
+
+- 完成仓库更新之后，使用 ``emerge`` 升级整个系统:
+
+.. literalinclude:: upgrade_gentoo/emerge_world_short
+   :language: bash
+   :caption: 使用emerge升级整个系统(简化参数)
+
+构建 :ref:`gentoo_image`
+==========================
+
+以上完成一系列调整定制后，就可以参考上文步骤来定制 :ref:`gentoo_image`
+
+
