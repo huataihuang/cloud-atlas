@@ -26,6 +26,7 @@ Gentoo Linux
    gentoo_docker.rst
    gentoo_on_gentoo.rst
    cross-platform_file_system.rst
+   gentoo_mac_cpuidle.rst
    pentoo/index
    think_gentooserv.rst
 

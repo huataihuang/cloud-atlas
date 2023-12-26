@@ -1,16 +1,13 @@
-.. _gpt:
+.. _gpt_ruby:
 
 =================================
-GPT
+GPT with Ruby
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_gpt.rst
-   gpt_startup.rst
-   gpt_radar.rst
-   ruby/index
+   gpt_ruby_arch.rst
 
 .. only::  subproject and html
 

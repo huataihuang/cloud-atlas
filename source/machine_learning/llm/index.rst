@@ -8,6 +8,7 @@ LLM 大型语言模型
    :maxdepth: 1
 
    llm_startup.rst
+   langchain/index
 
 .. only::  subproject and html
 

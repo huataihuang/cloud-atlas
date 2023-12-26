@@ -4,11 +4,23 @@
 Kubernetes快速起步
 =========================
 
-任何计算机技术的快速起步就是动手实践，我建议你采用两种方式：
+任何计算机技术的快速起步就是动手实践，我建议你采用：
 
 - 如果你对Kubernetes不熟悉，那么可以使用minikube在本地主机上学习如何使用kubernetes，请参考 :ref:`kubernetes_startup_prepare` 中前2章 :ref:`install_run_minikube` 和 :ref:`install_setup_kubectl` 。
 
-- 如果你已经对Kubernetes有实践经验，例如在公司内部使用过Kubernetes集群并且有一定的服务器部署基础，则建议参考 :ref:`k8s_deploy` 部署基于虚拟机环境的模拟真实生产环境的Kubernetes集群，然后再学习本章节快速起步。
+- 如果想进一步在单机上模拟复杂的Kubernetes集群，可以采用 :ref:`kind` 来在本机快速完成模拟小集群的部署
+
+- 如果你有一组虚拟机来模拟物理集群，那么 :ref:`kubespray` 可以帮助你快速在模拟集群上部署生产级别的Kubernetes集群
+
+.. note::
+
+   在 `CNCF Cloud Native Landscape <https://landscape.cncf.io/>`_ 上可以找到CNCF所有项目的 ``Interactive Landscape`` ，可以看到在 ``Certified Kubernetes - Installer`` 中，有三个领先的安装工具:
+
+   - :ref:`minikube`  GitHub ``2.73w`` Star
+   - :ref:`kubespray` GitHub ``1.45w`` Star
+   - :ref:`kind`      GitHub ``1.2w`` Star
+
+- 如果你已经对Kubernetes有实践经验，例如在公司内部使用过Kubernetes集群并且有一定的服务器部署基础，可以进一步使用 ``kubeadm`` 一步步完成 :ref:`k8s_deploy` 部署基于虚拟机环境的模拟真实生产环境的Kubernetes集群，然后再学习本章节快速起步。
 
 本章节前半部分使用 :ref:`kubernetes_startup_prepare` 所安装的Kubernetes系统(minikube)。虽然远不是一个完整的高可用集群，但是麻雀虽小五脏俱全。我们将使用这个单机版Kubernetes练习如何部署和运行基本的应用容器，以便对Kubernetes有一个初步的概念。
 

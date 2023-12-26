@@ -11,7 +11,8 @@ Docker多进程容器init进程简介
 不同的进程管理器
 =================
 
-- :ref:`systemd` - 大而全的系统进程管理器，功能复杂且强大，对于Docker容器环境 :ref:`docker_systemd` 是比较重的解决方案，但是符合传统运维管理模式
+- :ref:`systemd` - 大而全的系统进程管理器，功能复杂且强大，对于Docker容器环境 :ref:`docker_systemd` 是比较重的解决方案，但是符合传统运维管理模式 **我的实践虽然成功但是依然不推荐，配置太繁琐易错**
+- :ref:`openrc` - 在 :ref:`gentoo_image` 实践时意外发现这个轻量级进程管理器在Docker容器中"开箱即用"，而且也是 :ref:`gentoo_linux` 和 :ref:`alpine_linux` 默认进程管理器，得到社区持续开发和维护，所以 **推荐采用**
 - :ref:`supervisord` - 易于使用的进程管理器
 - `monit <https://mmonit.com/monit/>`_ 小型的进程管理器
 - `runit <http://smarden.org/runit/>`_

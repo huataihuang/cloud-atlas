@@ -41,8 +41,8 @@ RUN emerge -qv app-admin/sudo
 RUN rc-update add sshd default
 
 # add account "admin" and give sudo privilege
-RUN groupadd -g 505 admin
-RUN useradd -g 505 -u 505 -d /home/admin -m admin
+RUN groupadd -g 1001 admin
+RUN useradd -g 1001 -u 1001 -d /home/admin -m admin
 RUN usermod -aG wheel admin
 RUN echo "%wheel        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 

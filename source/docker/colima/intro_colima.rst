@@ -27,6 +27,8 @@ Colima功能
 - :ref:`kubernetes`
 - 多个实例运行
 
+本质上， ``colima`` 就是 **定制化** 的提供 :ref:`nerdctl` 的 :ref:`lima` 虚拟机，类似的产品还有 :ref:`rancher_desktop`
+
 参考
 ======
 
