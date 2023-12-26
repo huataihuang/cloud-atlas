@@ -1,16 +1,13 @@
-.. _gpt:
+.. _langchain:
 
 =================================
-GPT
+LangChain
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_gpt.rst
-   gpt_startup.rst
-   gpt_radar.rst
-   ruby/index
+   langchain_startup.rst
 
 .. only::  subproject and html
 

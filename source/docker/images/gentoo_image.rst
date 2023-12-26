@@ -71,7 +71,6 @@ Gentoo 默认的 :ref:`openrc` 是一个轻量级的解决方案，不仅被Gent
    :language: bash
    :caption: 通过docker exec运行 ``gentoo-base-plus`` 容器内部bash
 
-
 开发环境 ``gentoo-dev``
 ===============================
 

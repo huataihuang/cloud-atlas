@@ -4,6 +4,29 @@
 Dockerfiles最佳实践
 ======================
 
+.. _dockerfile_multi_lines:
+
+Dockerfile使用多行配置
+========================
+
+在Dockerfile中，有时候我们需要将一个多行配置 ``echo`` 到某个配置文件中:
+
+对于 :ref:`shell` 脚本，我们知道 ``\n`` 表示换行，但是如果直接在 ``Dockerfile`` 中使用 ``\n`` 换行符会发现Dockerfile在build时候报错。
+
+- 需要使用 "ANSI-C quoting" 方式来完成，也就是 ``$'....'`` ，这个特性在 ``bash`` , ``zsh`` 等支持
+- 在 Dockerfile 中，采用 "\" 表示命令行是连续的一行
+- 需要注意在Dockerfile中默认使用的是 ``/bin/sh`` ，需要先切换到bash上
+
+.. literalinclude:: dockerfile_best-practices/dockerfile_multi_lines
+   :language: dockerfile
+   :caption: 在Dockerfile中使用多行
+
+- 然后build和run这个测试容器:
+
+.. literalinclude:: dockerfile_best-practices/build_run_exec_dockerfile_multi_lines
+   :language: bash
+   :caption: build、run 并进入容器
+
 .. _docker_json_use_double_quotes:
 
 Dockerfile使用JSON，应该用双引号
@@ -45,3 +68,5 @@ Docker镜像支持 :ref:`docker_multi-platform_images` ，可以在一个镜像�
 
 - `Best practices for writing Dockerfiles <https://docs.docker.com/develop/develop-images/dockerfile_best-practices/>`_
 - `ENTRYPOINT ['/bin/bash'] not work, but --entrypoint=/bin/bash works #30752 <https://github.com/moby/moby/issues/30752>`_
+- `How to write commands with multiple lines in Dockerfile while preserving the new lines? <https://stackoverflow.com/questions/33439230/how-to-write-commands-with-multiple-lines-in-dockerfile-while-preserving-the-new>`_
+- `Dockerfile to append multi-lines config file <https://forums.docker.com/t/dockerfile-to-append-multi-lines-config-file/73937>`_

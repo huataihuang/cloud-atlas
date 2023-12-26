@@ -8,6 +8,7 @@ Ruby起步
    :maxdepth: 1
 
    macos_install_ruby.rst
+   gentoo_install_ruby.rst
    ruby_quickstart.rst
    ruby_object.rst
    ruby_number.rst

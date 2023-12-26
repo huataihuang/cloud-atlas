@@ -1,7 +1,7 @@
 .. _install_run_minikube:
 
 ======================
-安装和运行minikube
+minikube
 ======================
 
 .. note::
