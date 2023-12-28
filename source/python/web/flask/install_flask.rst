@@ -11,15 +11,15 @@ flask支持Python 3.8以及更新版本
 
 - 安装和初始化 :ref:`virtualenv` :
 
-.. literalinclude:: ../python/startup/virtualenv/apt_install_pip3_venv
+.. literalinclude:: ../../startup/virtualenv/apt_install_pip3_venv
    :language: bash
    :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``pip3`` 以及 ``venv``
 
-.. literalinclude:: ../python/startup/virtualenv/venv
+.. literalinclude:: ../../startup/virtualenv/venv
    :language: bash
    :caption: venv初始化
 
-.. literalinclude:: ../python/startup/virtualenv/venv_active
+.. literalinclude:: ../../startup/virtualenv/venv_active
    :language: bash
    :caption: 激活venv
 

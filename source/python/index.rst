@@ -17,6 +17,7 @@ Python Atlas
    dictionary/index
    network/index
    database/index
+   web/index
    gui/index
    deploy/index
    regular_exresssions.rst

@@ -81,3 +81,9 @@ systemd日志通过journalctl管理，可以检查使用磁盘量和清理：
 - `Ultimate Guide to Logging <https://www.loggly.com/ultimate-guide/using-systemctl/>`_
 - `How to clear journalctl <http://unix.stackexchange.com/questions/139513/how-to-clear-journalctl>`_
 - `Is it safe to delete /var/log/journal log files? <https://bbs.archlinux.org/viewtopic.php?id=158510>`_
+
+还有一些比较好的文档可以学习:
+
+- `Using systemd journals to troubleshoot transient problems <https://opensource.com/article/20/8/journals-systemd>`_
+
+- `Repairing CENTOS 7 Journal Corruption <https://off-grid-engineering.com/2019/09/10/repairing-centos-7-journal-corruption/>`_ 提供了修复案例参考，但是该文章 ``journalctl --verify`` 是显示哪些文件损坏了，而我的实践没有输出具体文件(也可能只有正常日志文件才是added状态，其他文件都要清理？)
