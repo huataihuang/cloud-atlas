@@ -27,6 +27,7 @@ systemd最早是Red Hat主推开发，目前已经成为各大发行版最主要
    systemctl.rst
    networkctl.rst
    journalctl.rst
+   journal_recovery_out_of_space.rst
    hostnamectl.rst
    tmp_directory_cleanup_periodically.rst
 

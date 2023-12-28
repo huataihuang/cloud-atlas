@@ -74,6 +74,40 @@ Gentoo 默认的 :ref:`openrc` 是一个轻量级的解决方案，不仅被Gent
 开发环境 ``gentoo-dev``
 ===============================
 
+.. note::
+
+   开发环境的构建 ``Dockerfile`` 将随着我的开发学习以及工作不断调整和完善
+
+- 在 ``gentoo-base-plus`` 增加开发工具安装的 ``Dockerfile`` (逐步完善):
+
+.. literalinclude:: gentoo_image/dev/Dockerfile
+   :language: dockerfile
+   :caption: 在 ``gentoo-base-plus`` 基础上增加开发工具安装
+
+.. note::
+
+   墙内使用 :ref:`rvm` 需要梯子，所以结合 :ref:`docker_proxy` 和 :ref:`squid_socks_peer` 实现翻墙。上面的 ``Dockerfile`` 配置中通过添加环境变量使得容器镜像构建时可以使用代理服务器。
+
+   如果没有GFW干扰，可以去除代理配置；请按照实际情况调整配置内容
+
+- 构建 ``gentoo-dev`` 镜像:
+
+.. literalinclude:: gentoo_image/dev/build_gentoo-dev_image
+   :language: bash
+   :caption: 构建 ``gentoo-dev`` Dockerfile镜像
+
+- 运行 ``gentoo-dev`` 镜像:
+
+.. literalinclude:: gentoo_image/dev/run_gentoo-dev_container
+   :language: bash
+   :caption: 运行 ``gentoo-dev`` 容器
+
+- 连接到 ``gentoo-dev`` 容器内:
+
+.. literalinclude:: gentoo_image/dev/exec_gentoo-dev_container
+   :language: bash
+   :caption: 通过docker exec运行 ``gentoo-dev`` 容器内部bash
+
 
 参考
 ======

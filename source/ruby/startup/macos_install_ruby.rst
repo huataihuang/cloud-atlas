@@ -12,7 +12,7 @@ macOS环境安装Ruby
 
 .. note::
 
-   `rvm <https://rvm.io/rvm/install>`_ 为Ruby带来了类似 :ref:`nodejs` 的 ``nvm`` 一样的管理Ruby不同版本的能力。
+   :ref:`rvm` 为Ruby带来了类似 :ref:`nodejs` 的 ``nvm`` 一样的管理Ruby不同版本的能力。
 
 在 :ref:`macos` 上，通过 :ref:`homebrew` 可以方便安装和升级最新版本Ruby::
 
