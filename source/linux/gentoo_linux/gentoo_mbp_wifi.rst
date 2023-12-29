@@ -19,7 +19,7 @@ Broadcom WiFi
 Broadcom BCM4360
 -------------------
 
-到 :ref:`mbp15_late_2013` 以及我另外一台 MacBook Air 13" ，采用是 Broadcom BCM4360 。这款无线芯片对开源支持不佳，参考 `Linux wireless b43文档 <https://wireless.wiki.kernel.org/en/users/drivers/b43>`_ 可以看到 ``b43`` 驱动不支持BCM4360，建议使用 ``wl`` 驱动。
+到 :ref:`mbp15_late_2013` 以及我另外一台 :ref:`mba13_mid_2013`  ，采用是 Broadcom BCM4360 。这款无线芯片对开源支持不佳，参考 `Linux wireless b43文档 <https://wireless.wiki.kernel.org/en/users/drivers/b43>`_ 可以看到 ``b43`` 驱动不支持BCM4360，建议使用 ``wl`` 驱动 ``broadcom-sta``
 
 也就是需要使用闭源的Broadcom驱动( `Apple Macbook Pro Retina - Closed source Broadcom driver <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina#Closed_source_Broadcom_driver>`_ )
 
@@ -96,8 +96,12 @@ Firmware
    :widths: 30,20,20,30
    :header-rows: 1
 
-Broadcom BCM4360驱动和Firmware
-================================
+快速起步: Broadcom BCM4360驱动和Firmware
+============================================
+
+.. note::
+
+   上文的絮絮叨叨，实际上你要快速解决问题的话，只有一个步骤: 见这里
 
 综上所述，对于 Broadcom BCM4360 实际上就只有安装私有驱动和firmware了，几乎连内核驱动模块都省了:
 
@@ -110,10 +114,57 @@ Broadcom BCM4360驱动和Firmware
 
    ``net-wireless/broadcom-sta`` 同时包含了驱动和firmware
 
+
 ``broadcom-sta`` 编译时会检查当前内核编译配置，如果有冲突选项会提示，按提示调整内核编译配置，例如我遇到以下内核配置需要关闭::
 
    X86_INTEL_LPSS  #位于 "Processor type and features ==> Intel Low Power Subsystem Support"
    PREEMPT_RCU 不能设置为 Preemptible Kernel 的 Preemption Model  #位于General setup ==> RCU Subsystem
+
+``genkernel`` 内核安装 ``broadcom-sta``
+-------------------------------------------
+
+- 安装 ``wl`` 驱动和firmware:
+
+.. literalinclude:: gentoo_mbp_wifi/broadcom_bcm4360_driver_firmware
+   :caption: 安装Broadcom BCM4360的私有驱动和firmware
+
+- 提示错误显示 ``net-wireless/broadcom-sta`` 已经被 ``masked`` :
+
+.. literalinclude:: gentoo_mbp_wifi/broadcom-sta_masked
+   :caption: 安装 ``net-wireless/broadcom-sta`` 提示被 ``masked``
+   :emphasize-lines: 3
+
+这里软件被屏蔽的原因是 ``~amd64`` 关键字，有两种方式解决，
+
+方法一: 在 :ref:`gentoo_makeconf` 中配置接受测试版本:
+
+.. literalinclude:: gentoo_makeconf/accept_keywords_test_amd64
+   :caption: 在 ``/etc/portage/make.conf`` 配置接受测试阶段的AMD64架构软件包
+
+方法二(建议):  在 ``/etc/portage/package.accept_keywords`` 中添加你想安装的被mask的关键字:
+
+.. literalinclude:: gentoo_makeconf/package.accept_keywords
+   :caption: 创建 ``/etc/portage/package.accept_keywords`` 包含接受的软件包关键字
+
+当初次完成 :ref:`install_gentoo_on_mbp` 采用通用发行版内核时，会提示如下信息:
+
+.. literalinclude:: gentoo_mbp_wifi/broadcom-sta_install_messages
+   :caption: 在通用内核的Gentoo上安装 ``net-wireless/broadcom-sta`` 提示信息
+
+按照提示，需要配置 ``blocklist`` 屏蔽冲突内核模块 也就是配置 ``/etc/modprobe.d/blacklist.conf`` 如下:
+
+.. literalinclude:: gentoo_mbp_wifi/broadcom-sta_blocklist.conf
+   :caption: 针对安装 ``net-wireless/broadcom-sta`` 需要屏蔽地内核模块配置文件 ``/etc/modprobe.d/blacklist.conf``
+
+- 移除冲突内核模块，加载 ``wl`` 内核模块:
+
+.. literalinclude:: gentoo_mbp_wifi/modprobe_wl
+   :caption: 移除冲突内核模块后加载 ``wl`` 内核模块
+
+- 需要重新编译内核(并且每次升级内核都需要重新安装一次 ``net-wireless/broadcom-sta`` 并重新编译内核):
+
+.. literalinclude:: gentoo_genkernel/genkernel_all
+   :caption: 重新编译内核， ``all`` 参数将包括firmware
 
 ``PREEMPT_RCU`` 冲突
 =====================
@@ -140,3 +191,5 @@ Broadcom BCM4360驱动和Firmware
 - `Apple Macbook Pro Retina - Closed source Broadcom driver <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina#Closed_source_Broadcom_driver>`_
 - `gentoo linux wiki: WiFi <https://wiki.gentoo.org/wiki/Wifi>`_
 - `emerge broadcom-sta fails (6.1.12 kernel) due to PREEMPT_RCU <https://forums.gentoo.org/viewtopic-p-8780772.html?sid=5cc5e86da1895dbc2b210c1d15a2d113>`_
+- `bookpro-11-2-gentoo-config/README.md <https://github.com/aesophor/macbookpro-11-2-gentoo-config/blob/master/README.md>`_
+- `Apple Macbook Pro Retina (early 2013)#Wireless <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina_(early_2013)#Wireless>`_

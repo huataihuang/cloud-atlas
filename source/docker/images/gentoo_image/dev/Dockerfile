@@ -55,17 +55,19 @@ RUN chmod 600 /home/admin/.ssh/authorized_keys
 RUN chmod 700 /home/admin/.ssh
 
 # 墙内RVM安装需要梯子，在Dockerfile中注入代理配置
-ENV HTTP_PROXY "http://192.168.6.200:3128"
-ENV HTTPS_PROXY "http://192.168.6.200:3128"
-ENV NO_PROXY "*.baidu.com,.taobao.com"
+#ENV HTTP_PROXY "http://192.168.6.200:3128"
+#ENV HTTPS_PROXY "http://192.168.6.200:3128"
+#ENV NO_PROXY "*.baidu.com,.taobao.com"
 
 # Ruby Rails (master)
 RUN gpg2 --keyserver keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
 RUN curl -sSL https://get.rvm.io | bash -s master --rails
 
-# run service when container started - sshd
+# expose ssh/http/https AND some dev ports
 EXPOSE 22
 EXPOSE 80
 EXPOSE 443
+#EXPOSE 3000
+#EXPOSE 8000
 
 CMD ["/sbin/init"]

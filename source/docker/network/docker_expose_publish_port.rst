@@ -41,6 +41,16 @@ Dockerfile中的EXPOSE指令
 
 可以看到完全是空的，也就是在外部无法访问容器内部端口
 
+多端口EXPOSE
+----------------
+
+在部署我的开发测试环境，我采用 :ref:`gentoo_on_gentoo` 方式运行 :ref:`gentoo_image` 容器，默认情况下，我希望我的开发测试服务器能够对外输出常用的端口。 ``Dockerfile`` 支持同时输出多个端口，案例采用 ``gentoo-dev`` 镜像:
+
+.. literalinclude:: ../images/gentoo_image/dev/Dockerfile
+   :language: dockerfile
+   :caption: 在 ``gentoo-dev`` 上输出多个常用端口
+   :emphasize-lines: 67-69
+
 EXPOSE和PUBLISH
 =================
 
@@ -92,6 +102,15 @@ PUBLISH端口
 
    tcp        0      0 0.0.0.0:3000            0.0.0.0:*               LISTEN
    tcp        0      0 :::3000                 :::*                    LISTEN
+
+PUBLISH 多个端口
+==================
+
+结合多个 ``-p`` 参数来执行 ``docker run`` 可以向外发布容器的多个服务端口，同样以 ``gentoo-dev`` 为例:
+
+.. literalinclude:: ../images/gentoo_image/dev/run_gentoo-dev_container
+   :language: bash
+   :caption: 运行 ``gentoo-dev`` 容器 输出多个服务端口
 
 PUBLISH ``所有`` 端口
 =====================
@@ -158,3 +177,5 @@ PUBLISH ``所有`` 端口
 
 - `What’s the Difference Between Exposing and Publishing a Docker Port? <https://www.cloudsavvyit.com/14880/whats-the-difference-between-exposing-and-publishing-a-docker-port/>`_
 - `Connection refused? Docker networking and how it impacts your image <https://pythonspeed.com/articles/docker-connection-refused/>`_
+- `Understanding “EXPOSE” in Dockerfile <https://we-are.bookmyshow.com/understanding-expose-in-dockerfile-266938b6a33d>`_
+- `How can I expose more than 1 port with Docker? <https://stackoverflow.com/questions/20845056/how-can-i-expose-more-than-1-port-with-docker>`_
