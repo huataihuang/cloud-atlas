@@ -11,6 +11,7 @@ Gentoo Linux
    install_gentoo_on_mbp.rst
    clone_gentoo.rst
    gentoo_use_flags.rst
+   gentoo_makeconf.rst
    upgrade_gentoo.rst
    gentoo_vim.rst
    gentoo_dbus.rst
@@ -21,8 +22,9 @@ Gentoo Linux
    gentoo_nvidia.rst
    gentoo_mbp_wifi.rst
    gentoo_kernel.rst
+   gentoo_genkernel.rst
    gentoo_mbp_kernel.rst
-   gentoo_initramfs.rst
+   initramfs.rst
    gentoo_docker.rst
    gentoo_on_gentoo.rst
    cross-platform_file_system.rst

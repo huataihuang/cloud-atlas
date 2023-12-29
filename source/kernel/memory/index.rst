@@ -10,6 +10,7 @@ Linux内存管理
    linux_mmu.rst
    slab_allocator.rst
    pgfault.rst
+   maps_smaps_memory_stats.rst
    huge_memory_pages/index
    numa/index
    valgrind/index

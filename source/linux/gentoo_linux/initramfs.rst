@@ -1,7 +1,7 @@
-.. _gentoo_initramfs:
+.. _initramfs:
 
 =======================
-Gentoo initramfs
+nitramfs
 =======================
 
 ``initramfs`` 是 :ref:`ramfs` 类型的启动初始文件系统
