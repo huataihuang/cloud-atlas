@@ -15,12 +15,15 @@ Gentoo Linux
    upgrade_gentoo.rst
    gentoo_vim.rst
    gentoo_dbus.rst
-   ../desktop/sway/sway_gentoo.rst
+   gentoo_wayland.rst
+   gentoo_sway.rst
+   gentoo_sway_bcloud.rst
    gentoo_chromium.rst
    gentoo_chinese_view.rst
    gentoo_chinese_input.rst
    gentoo_nvidia.rst
    gentoo_mbp_wifi.rst
+   gentoo_brcmfmac_wifi.rst
    gentoo_kernel.rst
    gentoo_genkernel.rst
    gentoo_mbp_kernel.rst
@@ -28,6 +31,8 @@ Gentoo Linux
    gentoo_docker.rst
    gentoo_on_gentoo.rst
    cross-platform_file_system.rst
+   gentoo_power_management.rst
+   tlp.rst
    gentoo_mac_cpuidle.rst
    pentoo/index
    think_gentooserv.rst

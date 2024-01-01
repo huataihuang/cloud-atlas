@@ -13,7 +13,7 @@ sway - i3兼容Wayland compositor
    sway_with_nvidia.rst
    wayland_sway_video.rst
    sway_screen_sharing.rst
-   sway_gentoo.rst
+   ../../gentoo_linux/gentoo_sway.rst 
 
 .. only::  subproject and html
 

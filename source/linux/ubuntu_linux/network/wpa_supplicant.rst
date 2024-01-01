@@ -60,23 +60,34 @@
 
    sudo apt install wpasupplicant
 
-- 创建初始配置::
+- 创建初始配置:
 
-   wpa_passphrase your-ESSID your-passphrase | sudo tee /etc/wpa_supplicant.conf
+.. literalinclude:: wpa_supplicant/init_wpa_supplicant.conf
+   :caption: 使用 ``wpa_passphrase`` 初始化一个简单配置
 
-- 使用以下命令连接无线::
+.. note::
 
-   sudo wpa_supplicant -c /etc/wpa_supplicant.conf -i wlp3s0
+   对于5G网络连接需要增加 country code 配置(类似于 :ref:`netplan` 的 ``REGDOMAIN=CN`` ):
+
+   .. literalinclude:: wpa_supplicant/country_code
+      :caption: 在 ``wpa_supplicant.conf`` 增加 ``country=CN`` 来连接5G WIFI
+
+- 使用以下命令连接无线:
+
+.. literalinclude:: wpa_supplicant/wpa_supplicant_connect
+   :caption: 使用 ``wpa_supplicant`` 验证配置(前台执行)
 
 注意，这时是前台运行 wpa_supplicant ，当连接建立以后，请另外开一个终端窗口，执行 ``iwconfig`` 命令检查无线是否连接正常，应该看到 ``wlps3s0`` 连接到指定的AP。
 
-- 按下 ``CTRL+C`` 终止前台运行的 ``wpa_supplicant`` 进程，然后加上 ``-B`` 参数让它后台运行::
+- 按下 ``CTRL+C`` 终止前台运行的 ``wpa_supplicant`` 进程，然后加上 ``-B`` 参数让它后台运行:
 
-   sudo wpa_supplicant -B -c /etc/wpa_supplicant.conf -i wlp3s0
+.. literalinclude:: wpa_supplicant/wpa_supplicant_background
+   :caption: 使用 ``wpa_supplicant`` 的 ``-B`` 参数后台运行
 
-- 当完成无线连接之后，我们需要获取DHCP地址，所以我们还要运行 ``dhclient`` ::
+- 当完成无线连接之后，我们需要获取DHCP地址，所以我们还要运行 ``dhclient`` :
 
-   sudo dhclient wlp3s0
+.. literalinclude:: wpa_supplicant/dhclient
+   :caption: 当 ``wpa_supplicant`` 完成验证运行后，启动 ``dhclient`` 获取动态IP
 
 如果一切正常，使用 ``ifconfig wlp3s0`` 将看到无线网卡获得IP地址并能够正常上网。
 

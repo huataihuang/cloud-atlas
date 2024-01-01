@@ -1,15 +1,14 @@
-.. _llm:
+.. _codellama:
 
 =================================
-LLM 大型语言模型
+Code Llama
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   llm_startup.rst
-   llama/index
-   langchain/index
+   intro_codellama.rst
+   wizardcoder.rst
 
 .. only::  subproject and html
 

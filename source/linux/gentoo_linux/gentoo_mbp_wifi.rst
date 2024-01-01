@@ -4,6 +4,17 @@
 Gentoo Linux在MacBook Pro配置Wifi
 ===================================
 
+.. note::
+
+   ``broadcom-sta`` 私有驱动非常难以安装，对内核互斥选项很多，实际上 ``ebuild`` 的维护者也说这个驱动已经不再维护，建议直接购买内核 ``brcmfmac`` 驱动支持的兼容无线网卡 ``BCM943602CS`` ，在二手市场上只需要20美金。
+
+   - :strike:`我准备最后再折腾一下 broadcom-sta 私有驱动安装` **累了，放弃了** 
+
+     - 目前最有希望的方案是参考 `Broadcom Wireless Drivers <https://jimbob88.github.io/gentoo/broadcom_wifi_drivers.html>`_ ，该文档是最新的 5.16.11 内核实践，提供了很多修复异常报错的方法
+     - 我目前实在没有精力来折腾，所以准备购买Linux兼容的无线网卡来绕过这个问题 **为了使用闭源broadcom-sta导致很多新内核特性无法使用实在觉得得不偿失** ，这个闭源驱动从2015年以后就没有更新，所以在最新的内核中需要很多hack才能使用，代价很大
+
+   - 然后花50元换一块 :ref:`bcm943602cs` 省的以后再折腾这种私有驱动了
+
 Broadcom WiFi
 ===============
 
@@ -114,14 +125,19 @@ Firmware
 
    ``net-wireless/broadcom-sta`` 同时包含了驱动和firmware
 
-
 ``broadcom-sta`` 编译时会检查当前内核编译配置，如果有冲突选项会提示，按提示调整内核编译配置，例如我遇到以下内核配置需要关闭::
 
    X86_INTEL_LPSS  #位于 "Processor type and features ==> Intel Low Power Subsystem Support"
    PREEMPT_RCU 不能设置为 Preemptible Kernel 的 Preemption Model  #位于General setup ==> RCU Subsystem
 
+经验总结
+-----------
+
+- 实际上最好的内核参数校验(是否满足 ``wl`` 正常运行)就是安装 ``net-wireless/broadcom-sta`` 输出信息
+- 将输出信息项和 ``/usr/src/linux/.config`` 进行对比就知道内核配置有哪些不能满足闭源 ``wl`` 驱动的运行条件
+
 ``genkernel`` 内核安装 ``broadcom-sta``
--------------------------------------------
+========================================
 
 - 安装 ``wl`` 驱动和firmware:
 
@@ -156,6 +172,10 @@ Firmware
 .. literalinclude:: gentoo_mbp_wifi/broadcom-sta_blocklist.conf
    :caption: 针对安装 ``net-wireless/broadcom-sta`` 需要屏蔽地内核模块配置文件 ``/etc/modprobe.d/blacklist.conf``
 
+.. warning::
+
+   必须在操作系统启动时屏蔽掉上述冲突的内核模块，否则即使加载了 ``wl`` 模块，也看不到对应的网卡
+
 - 移除冲突内核模块，加载 ``wl`` 内核模块:
 
 .. literalinclude:: gentoo_mbp_wifi/modprobe_wl
@@ -166,8 +186,10 @@ Firmware
 .. literalinclude:: gentoo_genkernel/genkernel_all
    :caption: 重新编译内核， ``all`` 参数将包括firmware
 
+- 重启系统后，如果正确加载了 ``wl`` 内核模块，那么可以看到一块新出现的无线网卡 ``wlp3s0``
+
 ``PREEMPT_RCU`` 冲突
-=====================
+----------------------
 
 我在最新的 6.1.12 内核安装 ``broadcom-sta`` 遇到报错::
 
@@ -185,6 +207,117 @@ Firmware
 
 果然，原来我选择激活了 ``Gneeral setup => Preemption behaviour defined on boot`` ，这个选项就是 ``PREEMPT_DYNAMIC=y`` ，就是这个选项导致。真是这个选项激活导致了 ``PREEMPT_RCU`` 出现，我取消这个配置就可以了
 
+配置 :ref:`wpa_supplicant`
+=============================
+
+和 :ref:`ubuntu_linux` 配置 :ref:`wpa_supplicant` 或者 :ref:`archlinux_wpa_supplicant` 类似，采用 ``wpa_supplicant`` 可以轻松配置无线连接:
+
+- 创建初始配置:
+
+.. literalinclude:: ../ubuntu_linux/network/wpa_supplicant/init_wpa_supplicant.conf
+   :caption: 使用 ``wpa_passphrase`` 初始化一个简单配置
+
+- 通过 :ref:`openrc` 启动 ``wpa_supplicant`` 服务:
+
+.. literalinclude:: gentoo_mbp_wifi/openrc_wpa_supplicant
+   :caption: 设置 ``openrc`` 启动 ``wpa_supplicant`` 服务
+
+异常排查
+===========
+
+- ``wlp3s0`` 无线网卡没有任何数据包进出(观察 ``ifconfig`` 输出显示 RX/TX 包都是0)
+
+通过前台执行命令 ``wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant.conf -i wlp3s0`` 可以看到输出了错误信息:
+
+.. literalinclude:: gentoo_mbp_wifi/wpa_supplicant_scan_failed
+   :caption: ``wpa_supplicant`` 显示无线网卡扫描错误
+
+参考 `gentoo linux wiki: WiFi <https://wiki.gentoo.org/wiki/Wifi>`_ 提到，当操作系统启动时， ``dmesg`` 或 :ref:`journalctl` 中应该有对应的firmware probe，则我现在检查 ``dmesg -T | grep -i firmware`` 输出:
+
+.. literalinclude:: gentoo_mbp_wifi/dmesg_without_wl_firmware
+   :caption: ``dmesg -T`` 输出过滤找不到无线网卡的firmware信息
+
+``IPW2100``
+-------------
+
+参考 `Apple Macbook Pro Retina (early 2013)#Wireless <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina_(early_2013)#Wireless>`_ 其中提到闭源Broadcom驱动需要内核中输出 ``LIB80211`` ，这个配置是通过将 ``Intel PRO/Wireless 2100 Network Connection`` 直接编译进内核(不是模块)来实现的。不过，需要注意这个 ``Intel Pro/Wireless 2100 Network Connection`` 默认是编译为模块，因为它依赖的内核部分是模块形式导致，需要仔细调整，强制为直接编译进内核:
+
+.. literalinclude:: gentoo_mbp_wifi/intel_wireless_2100
+   :caption: ``Intel PRO/Wireless 2100 Network Connection`` 需要编译进内核以激活 ``LIB80211``
+   :emphasize-lines: 4
+
+这里有一个模块依赖关系::
+
+   IPW2100 (m) => CFG80211 (m) => RFKILL (m)
+
+.. literalinclude:: gentoo_mbp_wifi/intel_wireless_2100_buildin
+   :caption: 设置 ``IPW2100`` buildin 内核的配置方法
+   :emphasize-lines: 3,6,11
+
+最终解决方法是前文的 **经验总结** : 对比 ``net-wireless/broadcom-sta`` 安装后的输出信息 和 ``/usr/src/linux/.config`` ，调整内核配置。 也就是 ``grep XXX /usr/src/linux/.config`` ，我发现我的错误在于依然包含了冲突配置::
+
+   CONFIG_SSB=m
+   CONFIG_X86_INTEL_LPSS=y   <= Intel Low Power Subsystem Support
+   CONFIG_PREEMPT_RCU=y
+
+``PREEMPT_RCU``
+----------------
+
+.. note::
+
+   `Broadcom Wireless Drivers <https://jimbob88.github.io/gentoo/broadcom_wifi_drivers.html>`_ 文档提到 ``ERROR: PREEMPT_RCU`` 可以忽略，原因不明
+
+这个 ``PREEMPT_RCU`` 非常难找，在 ``make menuconfig`` 中，通过 ``/PREEMPT_RCU`` 找不到入口。参考 `How to disable CONFIG_PREEMPT_RCU in 5.14 kernel <https://stackoverflow.com/questions/75934094/how-to-disable-config-preempt-rcu-in-5-14-kernel>`_ ，这个配置在 3.14 内核没有激活，到 5.14 内核默认激活
+
+根据 ``make menuconfig`` 搜索 ``/PREEMPT_RCU`` 可以看到提示这个选项在 ``kernel/rcu/Kconfig:19`` 提供: 所以查看源码中 ``/usr/src/linux/kernel/rcu/Kconfig``
+
+.. literalinclude:: gentoo_mbp_wifi/Kconfig
+   :language: c
+   :caption: 根据 ``Kconfig`` : ``PREEMPTION`` 选择  ``PREEMPT_RCU`` 就会触发 ``PREEMPT_RCU=y`` 
+   :emphasize-lines: 8,10,12,19,21,22
+
+上述 ``Kconfig`` 可以看出选择的链路:
+
+  - ``SMP`` 选择了 ``CONTEXT_TRACKING_IDLE`` 导致 ``TREE_RCU`` 为 ``Y``
+  - ``TREE_RCU`` 选择之后就会导致 ``PREEMPT_RCU`` 为 ``Y``
+
+但是，我还是没有找到可以调整的入口，看起来在最新的Kernel 这个配置是固化的？
+
+.. warning::
+
+   :strike:`太折腾了，我最终还是没有解决在最新的 Kernel 6.1.67 上支持 BCM4360 网卡的私有驱动 broadcom-sta (wl)的安装，太累了，放弃...` 突然找到了解决方案，最后再试一下
+
+   我理解关闭内核 :ref:`rcu` ``PREEMPT_RCU`` 对性能是有影响的，无法充分发挥最新内核的特性。加上实在太折腾了，我放弃继续安装 ``broadcom-sta`` ，准备更换无线网卡硬件，采用内核原生开源驱动。 
+
+   或许早期内核版本能够使用这个网卡驱动?
+
+.. note::
+
+   我学习和整理了内核的 :ref:`rcu_overview` 知识点，算是为这次无线网卡折腾画个句号。
+
+最终的解决方法
+=================
+
+根据 `Broadcom Wireless Drivers <https://jimbob88.github.io/gentoo/broadcom_wifi_drivers.html>`_ 文档经验，原来最新版本的 ``wpa_supplicant`` 是无法配合 ``broadcom-sta`` 驱动工作的，需要回退到 2019 年的 ``wpa_supplicant-2.8`` 版本
+
+.. literalinclude:: gentoo_mbp_wifi/wpa_supplicant
+   :caption: 由于兼容性问题，需要回滚 ``wpa_supplicant`` 2.8 版本才能和 ``broadcom-sta`` 一起工作
+
+需要修订 ``wpa_supplicant`` 编译配置，所以修改源代码 ``./wpa_supplicant/.config`` 如下:
+
+.. literalinclude:: gentoo_mbp_wifi/wpa_supplicant_config
+   :caption: 修改 ``./wpa_supplicant/.config`` 配置
+
+- 删除掉系统已经安装的 ``wpa_supplicant`` 并清理:
+
+.. literalinclude:: gentoo_mbp_wifi/remove_wpa_supplicant
+   :caption: 删除并清理系统已经安装的 ``wpa_supplicant``
+
+- 最后完成编译安装:
+
+.. literalinclude:: gentoo_mbp_wifi/build_wpa_supplicant
+   :caption: 编译安装旧版本 ``wpa_supplicant``
+
 参考
 =====
 
@@ -193,3 +326,4 @@ Firmware
 - `emerge broadcom-sta fails (6.1.12 kernel) due to PREEMPT_RCU <https://forums.gentoo.org/viewtopic-p-8780772.html?sid=5cc5e86da1895dbc2b210c1d15a2d113>`_
 - `bookpro-11-2-gentoo-config/README.md <https://github.com/aesophor/macbookpro-11-2-gentoo-config/blob/master/README.md>`_
 - `Apple Macbook Pro Retina (early 2013)#Wireless <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina_(early_2013)#Wireless>`_
+- `gentoo linux wiki: wpa_supplicant <https://wiki.gentoo.org/wiki/Wpa_supplicant>`_
