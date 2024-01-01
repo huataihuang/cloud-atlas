@@ -102,7 +102,7 @@ Systemd
 .. literalinclude:: gentoo_zfs/parted_output
    :caption: 使用 :ref:`parted` 创建 /dev/sda3 分区用于ZFS
 
-- ( **参考** 请不要执行这步)如果是常规使用，通常可以使用类似 :ref:`zfs_startup_zcloud` 方法(注意那个案例使用的是整块sda磁盘，和这里的案例磁盘分区 ``/dev/sda3`` 不同，注意区别):
+- ( **仅供参考** ``请不要执行这步`` )如果是常规使用，通常可以使用类似 :ref:`zfs_startup_zcloud` 方法(注意那个案例使用的是整块sda磁盘，和这里的案例磁盘分区 ``/dev/sda3`` 不同，注意区别):
 
 .. literalinclude:: ../admin/zfs_startup_zcloud/zpool_create
    :caption: 在磁盘 ``sda`` 上创建ZFS的存储池，名字为 ``zpool-data``
@@ -123,6 +123,26 @@ Systemd
    :caption: ``zfs list`` 输出显示 存储池 ``zpool-docker`` 被挂载到 ``/var/lib/docker``
 
 一切就绪，现在可以执行 :ref:`gentoo_docker` 部署了
+
+子卷配置
+==========
+
+我的 :ref:`mba13_mid_2013` 内置存储空间有限(128G)，所以我在 :ref:`install_gentoo_on_mbp` ( :ref:`mba13_mid_2013` )，为操作系统分配了很小的分区(20G):
+
+.. literalinclude:: gentoo_zfs/parted_output
+   :caption: 分配给 ``rootfs`` 的 ``/dev/sda2`` 只有20G
+   :emphasize-lines: 9
+
+虽然 ``rootfs`` 精简能够空出更多宝贵的磁盘空间给数据盘，但是Gentoo的编译需要很大的空间，特别是 :ref:`gentoo_kernel` 。所以我在上文的 ``zpool-docker`` 存储池中划分出一些子卷给特定的数据目录 -- 通过 :ref:`trace_disk_space_usage` 找到最消耗空间目录::
+
+   /var/cache
+   /var/tmp
+   /usr/src
+
+- 将需要迁移的目录先重命名(添加 ``.bak`` 后缀)，然后创建对应的 ZFS 子卷 指定 :ref:`zfs_mount` 到对应目录下，最后使用 ``tar`` 命令迁移数据，并清理掉无用数据释放空间:
+
+.. literalinclude:: gentoo_zfs/migrate_rootfs_subdir_zfs
+   :caption: 将系统中占用空间较大的目录迁移到 ZFS 子卷
 
 参考
 ======

@@ -58,6 +58,12 @@ Gentoo genkernel
 .. literalinclude:: gentoo_genkernel/genkernel_all
    :caption: 编译内核
 
+采用 :ref:`install_gentoo_on_mbp` 同样的 ``efibootmgr`` 设置启动，不过需要注意内核名称稍微有所调整(因为编译配置时修改了后缀名):
+
+.. literalinclude:: gentoo_genkernel/efibootmgr_set_mba13
+   :language: bash
+   :caption: :ref:`mba13_mid_2013` 设置efibootmgr，启动 ``genkernel`` 新编译的内核
+
 报错: failed to compile the "prepare" target
 ---------------------------------------------
 

@@ -14,6 +14,7 @@ Kernel Atlas
    scheduler/index
    cgroup/index
    process/index
+   core_api/index
    flame_graph.rst
    kms.rst
    accounting/index

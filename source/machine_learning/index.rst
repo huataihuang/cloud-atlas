@@ -28,6 +28,7 @@ Machine Learning Atlas
    tensorflow/index
    stable_diffusion/index
    fauxpilot/index
+   codellama/index
 
 .. only::  subproject and html
 

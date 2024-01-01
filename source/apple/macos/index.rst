@@ -12,6 +12,7 @@ macOS
    mba11_late_2010.rst
    mba13_mid_2013.rst
    mbp15_late_2013.rst
+   bcm943602cs.rst
    macos_big_sur_gts_root_certificate.rst
    macbook_nvme.rst
    macbook_sata.rst

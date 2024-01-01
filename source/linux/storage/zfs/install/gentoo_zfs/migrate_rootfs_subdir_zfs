@@ -1,0 +1,19 @@
+# 重命名需要迁移的数据目录
+mv /var/cache /var/cache.bak
+mv /var/tmp /var/tmp.bak
+mv /usr/src /usr/src.bak
+
+# 创建ZFS存储卷的子卷，挂载到相应目录
+zfs create -o mountpoint=/var/cache zpool-docker/var-cache
+zfs create -o mountpoint=/var/tmp zpool-docker/var-tmp
+zfs create -o mountpoint=/usr/src zpool-docker/usr-src
+
+# 数据迁移
+(cd /var/cache.bak && tar cf - .)|(cd /var/cache && tar xf -)
+(cd /var/tmp.bak && tar cf - .)|(cd /var/tmp && tar xf -)
+(cd /usr/src.bak && tar cf - .)|(cd /usr/src && tar xf -)
+
+# 清理无用数据
+rm -rf /var/cache.bak
+rm -rf /var/tmp.bak
+rm -rf /usr/src.bak
