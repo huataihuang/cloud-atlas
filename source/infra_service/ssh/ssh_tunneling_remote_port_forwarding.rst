@@ -81,6 +81,9 @@ By default, TCP listening sockets on the server will be bound to the loopback in
 
 此时访问 http://cloud-atlas.huatai.me:20080/ 就会看到自己本地笔记本上的 python http.server 显示有访问，同时浏览器中可以看到自己的WEB页面，这表明已经将本地主机上的服务输出到因特网上，对外提供服务。
 
+多端口映射
+--------------
+
 参考
 ======
 

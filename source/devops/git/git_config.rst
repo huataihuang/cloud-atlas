@@ -6,6 +6,14 @@ git配置
 
 ``git config`` 命令可以方便用于配置Git配置变量，并且可以在全局或本地项目范围配置。这些变量配置对应了 ``.gitconfig`` 文本，执行 ``git config`` 将修改配置文件。通常我们需要设置用户名，电子优点等。
 
+快速配置
+=========
+
+简单来说，对于个人开发者，刚上手git的工作环境简单配置如下:
+
+.. literalinclude:: git_config/git_config_init
+   :caption: 简单的初始化git配置
+
 提交人信息
 =============
 

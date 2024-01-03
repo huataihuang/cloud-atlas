@@ -10,7 +10,10 @@ GPT 是 ``Generative pre-trained transformers`` 的缩写，中文意思是 ``�
 
    2023年最后几天，这一年OpenAI引发的GPT爆炸，但是仍然迷雾重重: 网上围绕GPT技术充斥着大量的 "正确的废话" 。我依然 "踽踽独行" ，试图再多掌握一些AI技能...
 
+ChatGPT 的惊人能力来源
+=======================
 
+ChatGPT本质上是一个 ``大型语言模型`` **Large Language Models** ( :ref:`llm` )，通过 **革命性的自注意力机制** ( ``self-attention mechanism`` )进行训练，然后通过 :ref:``
 
 参考
 ======

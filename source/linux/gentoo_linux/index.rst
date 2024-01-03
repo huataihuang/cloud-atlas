@@ -11,7 +11,9 @@ Gentoo Linux
    install_gentoo_on_mbp.rst
    clone_gentoo.rst
    gentoo_use_flags.rst
+   gentoo_version_specifier.rst
    gentoo_makeconf.rst
+   gentoo_emerge.rst
    upgrade_gentoo.rst
    gentoo_vim.rst
    gentoo_dbus.rst
@@ -19,15 +21,20 @@ Gentoo Linux
    gentoo_sway.rst
    gentoo_sway_bcloud.rst
    gentoo_chromium.rst
+   gentoo_firefox.rst
    gentoo_chinese_view.rst
    gentoo_chinese_input.rst
+   gentoo_ebuild_repository.rst
    gentoo_nvidia.rst
    gentoo_mbp_wifi.rst
+   gentoo_mba_wifi.rst
    gentoo_brcmfmac_wifi.rst
    gentoo_kernel.rst
    gentoo_genkernel.rst
    gentoo_mbp_kernel.rst
    initramfs.rst
+   gentoo_ccache.rst
+   gentoo_distcc.rst
    gentoo_docker.rst
    gentoo_on_gentoo.rst
    cross-platform_file_system.rst
