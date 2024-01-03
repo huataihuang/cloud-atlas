@@ -15,19 +15,21 @@
 
    sudo apt install rfkill
 
-- 检查无线网卡状态::
+- 检查无线网卡状态:
 
-   rfkill list
+.. literalinclude:: wpa_supplicant/rfkill_list
+   :caption: 使用 ``rfkill list`` 检查网卡设备是否被block
 
-如果看到无线网卡状态是 ``Soft blocked`` 则表明软件关闭了无线网卡::
+如果看到无线网卡状态是 ``Soft blocked`` 则表明软件关闭了无线网卡:
 
-   0: phy0: Wireless LAN
-           Soft blocked: yes
-           Hard blocked: no
+.. literalinclude:: wpa_supplicant/rfkill_list_output
+   :caption: ``rfkill list`` 输出中有 ``blocked`` 状态设备则表明被关闭
+   :emphasize-lines: 2
 
-则使用以下命令启用无线(unblock)::
+则使用以下命令启用无线(unblock):
 
-   rfkill unblock wifi
+.. literalinclude:: wpa_supplicant/rfkill_unblock
+   :caption: 对于软件关闭的无线设别可以通过 ``rfkill unblock`` 恢复
 
 - 如果使用桌面版本Ubuntu，默认是启用了NetworkManager，则会和手工设置 ``wpa_supplicant`` 冲突，所以需要停止NetworkManager::
 
@@ -90,6 +92,8 @@
    :caption: 当 ``wpa_supplicant`` 完成验证运行后，启动 ``dhclient`` 获取动态IP
 
 如果一切正常，使用 ``ifconfig wlp3s0`` 将看到无线网卡获得IP地址并能够正常上网。
+
+.. _802.1x_eap:
 
 802.1x和EAP
 ===============

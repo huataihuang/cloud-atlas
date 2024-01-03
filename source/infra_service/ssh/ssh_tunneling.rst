@@ -68,6 +68,10 @@ SSH命令行端口转发
        LocalForward 33062 db2:3306
        LocalForward 33063 db3:3306
 
+.. note::
+
+   多端口转发在很多测试环境非常有用，类似的设置在 :ref:`ssh_tunneling_remote_port_forwarding` 也可以实现( ``-R`` )
+
 .. _ssh_tunneling_remove_squid:
 
 远程服务器squid提供给本地局域网

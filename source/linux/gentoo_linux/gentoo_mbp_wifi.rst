@@ -8,12 +8,13 @@ Gentoo Linux在MacBook Pro配置Wifi
 
    ``broadcom-sta`` 私有驱动非常难以安装，对内核互斥选项很多，实际上 ``ebuild`` 的维护者也说这个驱动已经不再维护，建议直接购买内核 ``brcmfmac`` 驱动支持的兼容无线网卡 ``BCM943602CS`` ，在二手市场上只需要20美金。
 
-   - :strike:`我准备最后再折腾一下 broadcom-sta 私有驱动安装` **累了，放弃了** 
+   - :strike:`我准备最后再折腾一下 broadcom-sta 私有驱动安装` **最终通过回退 wpa_supplicant 版本2.8 解决无线网卡无流量问题** 非常 ``ugly`` ，我准备改为采用兼容无线网卡避免新版本内核的退化  
 
      - 目前最有希望的方案是参考 `Broadcom Wireless Drivers <https://jimbob88.github.io/gentoo/broadcom_wifi_drivers.html>`_ ，该文档是最新的 5.16.11 内核实践，提供了很多修复异常报错的方法
      - 我目前实在没有精力来折腾，所以准备购买Linux兼容的无线网卡来绕过这个问题 **为了使用闭源broadcom-sta导致很多新内核特性无法使用实在觉得得不偿失** ，这个闭源驱动从2015年以后就没有更新，所以在最新的内核中需要很多hack才能使用，代价很大
 
-   - 然后花50元换一块 :ref:`bcm943602cs` 省的以后再折腾这种私有驱动了
+   - :ref:`mbp15_late_2013` 我在淘宝上花50元换一块 :ref:`bcm943602cs` 省的以后再折腾这种私有驱动了
+   - :ref:`mba13_mid_2013` 找不到内置兼容的无线网卡模块，太古老低端设备，我通过购买外接USB无线网卡来解决
 
 Broadcom WiFi
 ===============
@@ -212,6 +213,17 @@ Firmware
 
 和 :ref:`ubuntu_linux` 配置 :ref:`wpa_supplicant` 或者 :ref:`archlinux_wpa_supplicant` 类似，采用 ``wpa_supplicant`` 可以轻松配置无线连接:
 
+- 检查无线网络:
+
+.. literalinclude:: ../ubuntu_linux/network/wpa_supplicant/rfkill_list
+   :caption: 使用 ``rfkill list`` 检查网卡设备是否被block
+
+输出显示当前状态，可以看到无线网络没有屏蔽:
+
+.. literalinclude:: gentoo_mbp_wifi/rfkill_list_output
+   :caption: ``rfkill list`` 显示我的主机无线网卡没有被软件block
+   :emphasize-lines: 7,8
+
 - 创建初始配置:
 
 .. literalinclude:: ../ubuntu_linux/network/wpa_supplicant/init_wpa_supplicant.conf
@@ -224,6 +236,10 @@ Firmware
 
 异常排查
 ===========
+
+.. warning::
+
+   我折腾了很久 ``wlp3s0`` 无线网卡无数据流量的问题，最初以为是内核编译问题，但是实际上最终解决的方法是将 ``wpa_supplicant`` 回退到旧版本 ``2.8`` 解决。非常坑
 
 - ``wlp3s0`` 无线网卡没有任何数据包进出(观察 ``ifconfig`` 输出显示 RX/TX 包都是0)
 
@@ -317,6 +333,21 @@ Firmware
 
 .. literalinclude:: gentoo_mbp_wifi/build_wpa_supplicant
    :caption: 编译安装旧版本 ``wpa_supplicant``
+
+果然， **使用旧版wpa_supplicant** 就能够正常发起通讯，此时无线网卡已经显示有数据流量。
+
+接下来 ``wpa_supplicant`` 和上文相同，不再重复
+
+其他问题
+------------
+
+旧版 ``wpa_supplicant`` 在连接 :ref:`802.1x_eap` 报错:
+
+.. literalinclude:: gentoo_mbp_wifi/wpa_supplicant_802.1x_eap_error
+   :caption: 旧版 ``wpa_supplicant`` 连接 :ref:`802.1x_eap` 无线网络报错，显示不支持TLS
+   :emphasize-lines: 3
+
+这个报错 ``error:0308010C:digital envelope routines::unsupported`` 在 :ref:`nodejs` version 17 中常见，原因是不支持 TLS 导致。我感觉我回退到旧版本的 ``wpa_supplicant`` 应该也是存在这个异常问题的，不过我没有再折腾解决这个问题。(参考 `Error: error:0308010c:digital envelope routines::unsupported [Node Error Solved] <https://www.freecodecamp.org/news/error-error-0308010c-digital-envelope-routines-unsupported-node-error-solved/>`_ )
 
 参考
 =====

@@ -11,6 +11,8 @@
 .. toctree::
    :maxdepth: 1
 
+   intro_rl.rst
+   rlhf/index
 
 .. only::  subproject and html
 

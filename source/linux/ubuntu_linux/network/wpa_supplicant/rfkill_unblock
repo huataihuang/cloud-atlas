@@ -1,0 +1,1 @@
+rfkill unblock wifi
