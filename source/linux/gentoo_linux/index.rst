@@ -15,7 +15,7 @@ Gentoo Linux
    gentoo_makeconf.rst
    gentoo_emerge.rst
    upgrade_gentoo.rst
-   gentoo_vim.rst
+   gentoo_neovim.rst
    gentoo_dbus.rst
    gentoo_wayland.rst
    gentoo_sway.rst
@@ -41,6 +41,7 @@ Gentoo Linux
    gentoo_power_management.rst
    tlp.rst
    gentoo_mac_cpuidle.rst
+   gentoo_pgsql.rst
    pentoo/index
    think_gentooserv.rst
 

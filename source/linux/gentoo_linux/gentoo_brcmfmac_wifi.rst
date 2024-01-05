@@ -48,6 +48,22 @@ Gentoo ``brcmfmac`` 无线
 .. literalinclude:: gentoo_brcmfmac_wifi/kernel_menuconfig
    :caption: 内核配置支持 ``brcmfmac`` 驱动
 
+使用 :ref:`gentoo_genkernel` 完成内核编译和安装之后，重启系统
+
+恢复 :ref:`gentoo_mbp_wifi` 中因为需要安装旧版本 ``wpa_supplicant`` 被 :ref:`gentoo_emerge` 删除的 :ref:`wpa_supplicant` 软件包，按照 :ref:`gentoo_mbp_wifi` 中重新配置 ``wpa_supplicant``
+
+- 创建初始配置:
+
+.. literalinclude:: ../ubuntu_linux/network/wpa_supplicant/init_wpa_supplicant.conf
+   :caption: 使用 ``wpa_passphrase`` 初始化一个简单配置
+
+- 通过 :ref:`openrc` 启动 ``wpa_supplicant`` 服务:
+
+.. literalinclude:: gentoo_mbp_wifi/openrc_wpa_supplicant
+   :caption: 设置 ``openrc`` 启动 ``wpa_supplicant`` 服务
+
+非常丝滑，这款 MacBook Pro 2015 的无线配件 :ref:`bcm943602cs` 确实非常适合Linux使用，完全适配我的 :ref:`mbp15_late_2013`
+
 参考
 =====
 

@@ -1,0 +1,21 @@
+.. _neovim:
+
+=================================
+neovim
+=================================
+
+``neovim`` 是从 :ref:`vim` 7 fork出来的增强型vi编辑器
+
+.. toctree::
+   :maxdepth: 1
+
+   vim_vs_neovim.rst
+   coc.nvim.rst
+
+
+.. only::  subproject and html
+
+   Indices
+   =======
+
+   * :ref:`genindex`

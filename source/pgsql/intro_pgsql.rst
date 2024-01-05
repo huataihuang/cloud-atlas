@@ -1,4 +1,4 @@
-.. _introduce_pgsql:
+.. _intro_pgsql:
 
 =====================
 PostgreSQL简介

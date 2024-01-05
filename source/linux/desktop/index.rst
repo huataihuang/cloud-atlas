@@ -18,6 +18,7 @@ Linux桌面
    kde/index
    xpra/index
    vim/index
+   neovim/index
    vscode/index
    audio/index
    xorg_dpi_fix.rst

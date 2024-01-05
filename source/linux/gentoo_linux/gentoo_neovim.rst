@@ -1,0 +1,26 @@
+.. _gentoo_neovim:
+
+===================
+Gentoo neovim
+===================
+
+:ref:`neovim` 是 :ref:`vim` 增强和改进，具有开箱即用的优点。( :ref:`vim_vs_neovim` )
+
+安装
+=======
+
+- 如果系统已经按转过 :ref:`vim` 可以通过以下命令移除:
+
+.. literalinclude:: gentoo_neovim/remove_vim
+   :caption: 卸载系统已经安装的vim
+
+- 安装 :ref:`neovim` :
+
+.. literalinclude:: gentoo_neovim/install_neovim
+   :caption: 安装neovim
+
+参考
+=======
+
+- `gentoo linux wiki: Neovim <https://wiki.gentoo.org/wiki/Neovim>`_
+- `GitHub: neovim/neovim <https://github.com/neovim/neovim>`_
