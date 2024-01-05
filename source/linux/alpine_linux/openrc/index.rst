@@ -11,6 +11,7 @@ OpenRC
    openrc-init.rst
    supervise-daemon.rst
    pi_acpid_crashed.rst
+   openrc_udev.rst
 
 .. only::  subproject and html
 

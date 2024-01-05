@@ -10,10 +10,11 @@ sway - i3兼容Wayland compositor
    intro_sway.rst
    build_sway_on_pi.rst
    run_sway.rst
+   ../../gentoo_linux/gentoo_sway.rst 
    sway_with_nvidia.rst
    wayland_sway_video.rst
    sway_screen_sharing.rst
-   ../../gentoo_linux/gentoo_sway.rst 
+   sway_macbook_key.rst
 
 .. only::  subproject and html
 
