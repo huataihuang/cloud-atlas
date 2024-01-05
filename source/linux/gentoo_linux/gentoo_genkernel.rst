@@ -80,19 +80,19 @@ Gentoo genkernel
 参考 `make[1]: *** No rule to make target <https://www.reddit.com/r/Gentoo/comments/13k9z2b/make1_no_rule_to_make_target/>`_ 原因是系统中安装了两个Kernel source: 之前 :ref:`install_gentoo_on_mbp` 安装了 ``Distribution Kernel`` ，也就是 ``sys-kernel/gentoo-kernel`` ，然后我又安装了 ``sys-kernel/gentoo-sources`` ，所以执行:
 
 .. literalinclude:: gentoo_genkernel/eselect_kernel
-   :caption: 执行 ``eslect kernel`` 检查系统中内核源代码
+   :caption: 执行 ``eselect kernel`` 检查系统中内核源代码
 
 输出显示:
 
 .. literalinclude:: gentoo_genkernel/eselect_kernel_output
-   :caption: 执行 ``eslect kernel`` 可以看到当前内核源代码是发行版内核
+   :caption: 执行 ``eselect kernel`` 可以看到当前内核源代码是发行版内核
    :emphasize-lines: 3
 
 此时检查 ``ls -lh /usr/src/linux`` 可以看到引用的是 ``-dist`` 内核::
 
    lrwxrwxrwx 1 root root 24 Dec 17 15:22 /usr/src/linux -> linux-6.1.67-gentoo-dist
 
-解决方法是修改 ``eslect kernel`` ，然后删除掉发行版源代码内核
+解决方法是修改 ``eselect kernel`` ，然后删除掉发行版源代码内核
 
 修改成 ``kernel-srouce`` :
 
@@ -102,10 +102,47 @@ Gentoo genkernel
 现在再次检查 ``eselect kernel list`` 输出就可以看到切换到了标准内核:
 
 .. literalinclude:: gentoo_genkernel/eselect_kernel_output_1
-   :caption: 执行 ``eslect kernel`` 可以看到当前内核源代码切换到标准内核
+   :caption: 执行 ``eselect kernel`` 可以看到当前内核源代码切换到标准内核
    :emphasize-lines: 2
 
 此时可以手工删除 ``/usr/src/linux-6.1.67-gentoo-dist``
+
+升级内核
+============
+
+我在部署初期Gentoo提供的内核是 6.1.67 ，但是近期升级提供了 6.6.9 ，我将原先 ``/usr/src/linux-6.1.67-gentoo`` 目录下 ``.config`` 复制到新的 ``/usr/src/linux-6.6.9-gentoo`` 目录下(以便减少重新配置项)，然后执行 ``genkernel all`` 。
+
+调用 ``make menuconfig`` 没有问题，正常的交互界面，稍作修改后，我保存退出。此时 ``genkernel`` 开始执行下一步时候报错:
+
+.. literalinclude:: gentoo_genkernel/miss_config_microcode_amd_err
+   :caption: ``genkernel`` 报错显示缺少 ``CONFIG_MICROCODE_AMD`` 配置项
+
+检查 ``/var/log/genkernel.log`` 有报错详情:
+
+.. literalinclude:: gentoo_genkernel/genkernel_microcode.log
+   :caption: ``genkernel.log`` 日志中有关 ``MICROCODE`` 错误
+   :emphasize-lines: 21,22,34
+
+- 这个问题在以下帖子中讨论:
+
+  - `solved! genkernel force CONFIG_MICROCODE=AMD as well <https://forums.gentoo.org/viewtopic-p-8719100.html>`_
+  - `Need help with genkernel (Microcode option for Intel) <https://forums.gentoo.org/viewtopic-t-1165728-highlight-.html>`_
+  - `Bug 913659 - genkernel needs adaptation to microcode changes in linux-6.6 (Why genkernel forces CONFIG_MICROCODE AND INTEL AND AMD microcode loading option?) <https://bugs.gentoo.org/913659>`_
+
+原因是 ``CONFIG_MICROCODE_AMD`` 和 ``CONFIG_MICROCODE_INTEL`` 已经从内核中移除
+
+解决方法
+
+- 传递 ``--microcode=none`` 参数给 ``genkernel`` :
+
+.. literalinclude:: gentoo_genkernel/genkernel_microcode_none
+   :caption: ``genkernel --micorcode=none``
+
+- **或者** 修订 ``/etc/genkernel.conf`` 配置:
+
+.. literalinclude:: gentoo_genkernel/genkernel_microcode_none.conf
+   :caption: 配置 ``/etc/genkernel.conf`` 设置 MICROCODE="none"
+   :emphasize-lines: 4
 
 参考
 ======

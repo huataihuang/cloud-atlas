@@ -22,6 +22,7 @@ VS Code
    vscode_in_browser.rst
    vscode_python.rst
    vscode_virtualenv.rst
+   vscode-neovim.rst
 
 .. only::  subproject and html
 

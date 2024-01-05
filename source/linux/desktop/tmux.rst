@@ -15,21 +15,25 @@ tmux意思是 ``terminal multiplexer`` (终端多路器) ，它的功能是在�
 安装tmux
 ============
 
-- debian/ubuntu::
+- :ref:`ubuntu_linux` :
 
-   sudo apt install tmux
+.. literalinclude:: tmux/ubuntu_tmux
+   :caption: debian/ubuntu安装tmux
 
-- arch linux::
+- :ref:`arch_linux` :
 
-   sudo pacman -Sy tmux
+.. literalinclude:: tmux/arch_tmux
+   :caption: arch安装tmux
 
-- 源代码安装::
+- :ref:`gentoo_linux` :
 
-   git clone https://https://github.com/tmux/
-   cd tmux
-   sh autogen.sh
-   ./configure && make -j4
-   sudo make install
+.. literalinclude:: tmux/gentoo_tmux
+   :caption: gentoo安装tmux
+
+- 源代码安装:
+
+.. literalinclude:: tmux/build_tmux
+   :caption: 源代码编译安装tmux
 
 - 在macOS平台著名的终端应用 iTerm2 就集成了tmux
 
