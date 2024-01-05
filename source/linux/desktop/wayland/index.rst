@@ -14,6 +14,7 @@ wayland显示服务器协议
    dumb_buffer_permission_denied.rst
    wayland_vnc.rst
    wl-clipboard.rst
+   wev.rst
 
 .. only::  subproject and html
 

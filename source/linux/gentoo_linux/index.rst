@@ -28,6 +28,7 @@ Gentoo Linux
    gentoo_nvidia.rst
    gentoo_mbp_wifi.rst
    gentoo_mba_wifi.rst
+   usb_modeswitch.rst
    gentoo_brcmfmac_wifi.rst
    gentoo_kernel.rst
    gentoo_genkernel.rst

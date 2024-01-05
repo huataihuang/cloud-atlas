@@ -83,6 +83,67 @@ Gentoo Linux在MacBook Air配置Wifi
 .. literalinclude:: gentoo_mba_wifi/install_aic8800
    :caption: 安装 ``aic8800`` 驱动
 
+- **识别设备**
+
+编译很顺利，安装完成后，在 ``/lib/modules/$(uname -r)`` 目录下可以通过 ``tree`` 命令找到安装的内核模块和firmware，通过 ``ls`` 检查:
+
+.. literalinclude:: gentoo_mba_wifi/ls_aic8800
+   :caption: ``tree`` 找到对应驱动，通过 ``ls`` 检查
+
+输出可以看到以下两个文件:
+
+.. literalinclude:: gentoo_mba_wifi/ls_aic8800_output
+   :caption:  ``aic8800`` 内核模块和firmware
+
+但是，很奇怪，为何没有像网上所说的那样能够自动加载内核模块呢？而且再次使用 ``lsusb`` 看到的USB口插入的无线网卡依然没有显示出详细的品牌和型号信息，依然是:
+
+.. literalinclude:: gentoo_mba_wifi/aicsemi
+   :caption: 安装了 ``aic8800`` 内核模块和firmware，却没有看到设备输出信息有任何变化
+
+根据 `BrosTrend Source code: install.sh <https://linux.brostrend.com/troubleshooting/source-code/>`_ 提供了 ``install.sh`` 脚本中段落:
+
+.. literalinclude:: gentoo_mba_wifi/brostrend_install.sh
+   :caption: `BrosTrend Source code <https://linux.brostrend.com/troubleshooting/source-code/>`_ 安装脚本 ``install.sh`` 有关 ``aic8800``
+
+``原来如此``
+
+这个无线网卡默认是存储模式，需要通过一个工具 :ref:`usb_modeswitch` 工具来转换工作模式
+
+- 安装 :ref:`usb_modeswitch` :
+
+.. literalinclude:: usb_modeswitch/gentoo_install
+   :caption: 在Gentoo上安装 ``usb_modeswitch``
+
+- 参考官方提供的 ``install.sh`` 脚本片段的实际命令，执行:
+
+.. literalinclude:: gentoo_mba_wifi/usb_modeswitch_wifi
+   :caption: 执行 ``usb_modeswitch`` 命令将 ``AX5L`` 从存储模式切换到WLAN模式
+
+注意: 在转换前设备ID是 ``a69c:5721`` ，这个参数就是 ``usb_modeswitch`` 需要的参数
+
+- 执行完成后，再次执行 ``lsusb`` 就会看到设备显示信息，可以看到该USB设备的ID和名称都发生了变化:
+
+.. literalinclude:: gentoo_mba_wifi/aicsemi_usb_modeswitch
+   :caption: ``a69c:5721`` ( **aicsemi Aic MSC** ) 在切换模式之后，改变成 ``a69c:88dc`` ( **AICSemi AIC8800DC** )
+
+此时检查 ``ifconfig`` 会看到系统中增加了一个 ``wlan0`` 设备
+
+并且系统日志中会记录模式切换的数据信息:
+
+.. literalinclude:: gentoo_mba_wifi/aicsemi_usb_modeswitch_messagest
+   :caption: ``aicsemi`` USB设备切换模式时系统日志
+   :emphasize-lines: 5,6,8,11
+
+:ref:`udev` 配置自动切换WLAN模式
+==================================
+
+上述 ``aic8800`` 配置完成后，如果重启操作系统或者重新插入 ``AX5L`` USB WiFi设备，初始状态都是USB存储模式。每次手工输入 ``usb_modeswitch`` 命令切换显然太笨拙了。这就需要结合 :ref:`openrc_udev` 来完成自动切换:
+
+:ref:`wpa_supplicant`
+=======================
+
+接下来就是常规槽错，通过 :ref:`wpa_supplicant` 配置无线认证和接入WiFi
+
 参考
 =======
 
