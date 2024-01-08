@@ -77,17 +77,80 @@ fcitx内置了非常简单的拼音输入法，所以通常会安装第三方输
    :language: bash
    :caption: 在 ~/.config/sway/config 中添加运行 fcitx5 的配置
 
+异常排查
+============
+
+fcitx5的 :ref:`gentoo_dbus` 相关报错
+--------------------------------------
+
+再次进入 ``sway`` 之后，通过 ``ps`` 命令检查可以看到 ``fcitx5`` 进程已经启动，不过没有看到有托盘图标(应该是我还没有安装托盘组件)，但是遇到一个问题，按下 ``ctrl+space`` 没有看到浮现中文输入框
+
+我改为终端运行 ``fcitx5`` (杀掉后台进程，直接在终端执行 ``fcitx5`` ) ，看到 ``fcitx5`` 运行的终端显示报错信息似乎与 :ref:`gentoo_dbus` 有关:
+
+.. literalinclude:: gentoo_chinese_input/fcitx5_dbus
+   :caption: 控制台fcitx5启动时 :ref:`gentoo_dbus` 相关错误
+   :emphasize-lines: 6,7
+
+我调整 :ref:`gentoo_dbus` 的 ``/etc/portage/make.conf`` 添加:
+
+.. literalinclude:: gentoo_dbus/dbus_make.conf
+   :caption: 全局激活 ``dbus``
+
+使用 ``--changed-use`` 选项确保更新整个系统
+
+.. literalinclude:: gentoo_use_flags/rebuild_world_after_change_use
+   :caption: 在修改了全局 USE flag 之后对整个系统进行更新
+
+完成后检查，发现 ``fcitx5`` 运行报错依旧，这是窗口管理器 :ref:`dbus_session_bus` 没有创建，仔细看了 Gentoo Sway 文档，原来 ``sway`` 需要通过shell脚本包装 ``XDG_RUNTIME_DIR`` 变量，并且使用 ``dbus-run-session`` 命令来启动(方法一) 或者 采用 ``elogind`` 加入到启动服务中(方法二)，这样才能实现 :ref:`dbus_session_bus` (详见 :ref:`gentoo_sway` ):
+
+**我采用方法一** :
+
+安装 ``sys-auth/seatd`` 并且配置用户 ``huatai`` 到对应组，以及启动服务:
+
+.. literalinclude:: gentoo_sway/seatd
+   :language: bash
+   :caption: 安装和配置 ``seatd`` ， ``seat`` USE flag必须添加 ``server`` 和 ``builtin``
+
+为用户 ``huatai`` 配置 ``~/.bashrc`` 添加如下内容设置用户环境变量:
+
+.. literalinclude:: gentoo_sway/bashrc
+   :language: bash
+   :caption: 配置用户环境变量 ``~/.bashrc``
+
+再次前台运行 ``fcitx5`` 可以看到连接成功，但是出现了新的关于DBus调用错误:
+
+.. literalinclude:: gentoo_chinese_input/fcitx5_dbus_call
+   :caption: 控制台fcitx5启动时 DBus调用错误
+   :emphasize-lines: 23
+
+参考 `[Bug]: The name org.freedesktop.portal.Desktop was not provided by any .service files #5201 <https://github.com/flatpak/flatpak/issues/5201>`_ : 需要安装 ``xdg-desktop-portal`` 已经和特定桌面环境相关的后端软件，例如GNOME Shell 需要安装 ``xdg-desktop-portal-gnome`` ， KDE Plasma需要安装 ``xdg-desktop-portal-kde`` ，对于gtk环境则安装 ``xdg-desktop-portal-gtk`` 等。这个软件包是 `Flatpak <https://flatpak.org/>`_ 开发的，已经用于很多应用软件，如gimp, firefox, slack 等。:
+
+- 安装 ``xdg-desktop-portal`` :
+
+.. literalinclude:: gentoo_xdg-desktop-portal/install_xdg-desktop-portal
+   :caption: 安装 ``xdg-desktop-portal``
+
+.. literalinclude:: gentoo_xdg-desktop-portal/install_xdg-desktop-portal-wlr
+   :caption: 安装面向 :ref:`wayland` 的 ``xdg-desktop-portal-wlr``
+
 .. note::
 
-   看起来 :ref:`gentoo_dbus` 是比较重要的功能，在 fcitx 的官方文档中说明fcitx和im模块之间是通过 dbus 通讯。所以我推测 ``fcitx-rime`` 输入法和 ``fcitx`` 之间还是需要 ``dbus`` 来通讯的，并且我看到默认启动的 ``fcitx`` 进程显示::
+   尝试补充安装 :ref:`gentoo_xdg-desktop-portal` (结合 ``sys-apps/xdg-desktop-portal-wlr`` )
 
-      /usr/bin/fcitx-dbus-watcher unix:path=/tmp/dbus-TPoXVu8TM0,guid=140f65b1a3552b97ddd7e9cd6505a51b 617
+:ref:`gentoo_dbus` 是重要的功能，在 fcitx 的官方文档中说明fcitx和im模块之间是通过 dbus 通讯。所以我推测 ``fcitx-rime`` 输入法和 ``fcitx`` 之间还是需要 ``dbus`` 来通讯的，并且我看到默认启动的 ``fcitx`` 进程显示::
 
-   和 :ref:`gentoo_chromium` 一样，默认启动了一个 ``dbus`` socket文件，这个应该有功能影响
+   /usr/bin/fcitx-dbus-watcher unix:path=/tmp/dbus-TPoXVu8TM0,guid=140f65b1a3552b97ddd7e9cd6505a51b 617
 
-.. note::
+和 :ref:`gentoo_chromium` 一样，默认启动了一个 ``dbus`` socket文件，这个应该有功能影响
 
-   我在Gentoo Linux中为了精简，去掉了所有 ``gtk`` 和 ``qt`` USE flag，所以执行 ``fcitx-configtool`` 时，是直接使用系统默认编辑器编辑配置文件。有点难搞
+.. warning::
+
+   我在2024年1月的实践中，采用了上述指定 ``SLOT 5`` 方式安装了 ``fcitx5`` ，但是发现一个问题，没有配套的软件包可以安装，例如，没有 ``fcitx5-data`` ，也没有 ``xcb-imkit`` ，我对比了以下 :ref:`fedora_os_images` 中 Fedora Sway (以LiveCD方式运行)，安装 ``fcitx5`` 时候会配套安装相应组件:
+
+   .. literalinclude:: gentoo_chinese_input/fedora_sway_install_fcitx5
+      :caption: Fedora Sway安装fctix5
+
+   参考 `SWAY配置中文输入法 <https://zhuanlan.zhihu.com/p/379583988>`_ 提到的使用 ``gentoo-zh`` 社区overlay仓库，其中也依赖安装 ``x11-libs/xcb-imdkit`` 和 ``app-i18n/libime`` 等包
 
 chromium
 ===========

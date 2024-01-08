@@ -20,12 +20,14 @@ Gentoo Linux
    gentoo_wayland.rst
    gentoo_sway.rst
    gentoo_sway_bcloud.rst
+   gentoo_xdg-desktop-portal.rst
    gentoo_chromium.rst
    gentoo_firefox.rst
    gentoo_chinese_view.rst
    gentoo_chinese_input.rst
    gentoo_ebuild_repository.rst
    gentoo_nvidia.rst
+   gentoo_intel.rst
    gentoo_mbp_wifi.rst
    gentoo_mba_wifi.rst
    usb_modeswitch.rst
@@ -39,6 +41,7 @@ Gentoo Linux
    gentoo_docker.rst
    gentoo_on_gentoo.rst
    cross-platform_file_system.rst
+   gentoo_udev.rst
    gentoo_power_management.rst
    tlp.rst
    gentoo_mac_cpuidle.rst
