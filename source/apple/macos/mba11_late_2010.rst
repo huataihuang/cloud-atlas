@@ -33,9 +33,9 @@ MacBook Air (11-inch, Mid 2011)
 - 需要一个新的散热器(heatsink)，也就是买一个 mid 2011 的散热器(通常主板会带上散热器)
 - 最困难的问题: 蓝牙和WiFi天线的电缆不适配，因为airport天线(airport antenna)短了2英寸
 
-  - 这个问题也不是不能解决，购买 mid 2011 显示屏就能够轻松解决(但是投入就很大了)
+  - 这个问题也不是不能解决， :strike:`购买 mid 2011 显示屏就能够轻松解决(但是投入就很大了)` 使用外接USB无线网卡: :ref:`gentoo_mba_wifi` 我采用了 ``aic8800`` 芯片的 ``AX5L`` (AX300)无线网卡，实践是能够很好满足Linux运行的 
 
-综上来看，如果要使用 mid 2011 主板，实际上需要同时更换显示屏( `Is Mid 2011 MacBook Air (11") display compatible with Late 2010? <https://www.ifixit.com/Answers/View/67566/Is+Mid+2011+MacBook+Air+(11%22)+display+compatible+with+Late+2010>`_ )和电池，差不多把整台主机都更换了，非常不经济。
+综上来看，如果要使用 mid 2011 主板，实际上需要同时更换 :strike:`显示屏` ( `Is Mid 2011 MacBook Air (11") display compatible with Late 2010? <https://www.ifixit.com/Answers/View/67566/Is+Mid+2011+MacBook+Air+(11%22)+display+compatible+with+Late+2010>`_ ) **电池** ， :strike:`差不多把整台主机都更换了，非常不经济` 我准备调研一下是否替换
 
 总的来说，mid 2011主板是可以用于 late 2010主机的，只是较新的主板设计略有不同，连接器被移动了，所以需要使用不同的电缆(恐怕难以找到)
 

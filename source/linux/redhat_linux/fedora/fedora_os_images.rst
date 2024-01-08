@@ -8,14 +8,18 @@ Fedora社区提供了一系列Fedora Linux为基础的面向不同用户的操�
 
 - 面向笔记本,工作站和桌面PC:
 
-  - Fedora Linux with Gnome (Fedora Workstation): 使用Gnome3技术的全功能现代化桌面环境
-  - Fedora Linux with KDE Plasma：采用KDE的经典全功能桌面环境
-  - Fedora Linux with XFCE: 轻量级 :ref:`xfce` 桌面环境，这是我主要使用的桌面
-  - Fedora Linux with LXQT: 轻量级基于QT的桌面环境
-  - Fedora Linux with Mate-Compiz: 基于Gnome2的桌面环境
-  - Fedora Linux with Cinnamon: 全功能Gnome 3桌面，但是采用传统的Ghome 2设计
-  - Fedora Linux with LXDE: 轻量级传统设计的桌面环境
-  - `Fedora Linux with the i3 tiling window manager <https://spins.fedoraproject.org/en/i3/>`_ : 轻量级平铺桌面环境，这是我比较感兴趣的轻量级桌面，我计划用于服务器运行远程桌面，专注于服务器开发
+  - Fedora Workstation: 使用 :strike`Gnome3` Gnome4x 技术的全功能现代化桌面环境
+  - Fedora :ref:`kde` Plasma Desktop：采用KDE的经典全功能桌面环境
+  - Fedora :ref:`xfce` : 轻量级 Xfce 桌面环境 :strike:`这是我主要使用的桌面` 虽然更新缓慢但是非常稳定和轻量级
+  - Fedora Cinnamon: 非常有特色的基于 Gnome3 fork出来精美且轻量的现代化桌面(采用Gnome2设计)，设置简洁但默认已经非常调优，我准备作为后备操作系统(例如使用U盘运行)
+  - Fedora LXQT: 轻量级基于QT的桌面环境
+  - Fedora LXDE: 轻量级传统设计的桌面环境
+  - Fedora MATE-Compiz : 基于Gnome2并集成了3D窗口管理器，适合比较古老低配的硬件环境
+  - Fedora :ref:`i3` : 集成i3平铺窗口管理器
+  - Fedora :ref:`sway` : 集成sway平铺窗口管理器
+  - Fedora Phosh: 面向移动设备(手机)的Fedora
+  - Fedora Budgie: 集成Budgie桌面
+  - Fedora SOAS
 
 此外，Fedora有针对不同使用场景的定制发行，例如科学计算，机器人，安全，Python教学，音乐，游戏，设计和多媒体，以及天文学。从 `fedora labs <https://labs.fedoraproject.org/>`_ 可以获取这些镜像。
 
@@ -36,4 +40,4 @@ Fedora社区提供了一系列Fedora Linux为基础的面向不同用户的操�
 参考
 =======
 
-- `Fedora Linux OS images <https://docs.fedoraproject.org/en-US/neurofedora/install-media/>`_
+- `Fedora Linux OS images <https://docs.fedoraproject.org/en-US/neurofedora/install-media/>`_ 我参考2024年1月时Fedora社区新版的Fedora Spin做了修订

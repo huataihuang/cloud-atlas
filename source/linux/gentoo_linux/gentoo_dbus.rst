@@ -4,7 +4,7 @@
 Gentoo D-Bus
 =================
 
-安装 firefox 时发现需要 ``dbus`` USE flag支持，所以修订 :ref:`install_gentoo_on_mbp` 配置; 不过 chromium 安装没有这个需求 (我在考虑作为精简系统是否确实需要这个参数?)
+:strike:`安装 firefox 时发现需要 dbus USE flag支持(现在默认不需要了)，不过 chromium 安装没有这个需求(我在考虑作为精简系统是否确实需要这个参数?)` ，在 :ref:`gentoo_chinese_input` 可以看到 ``fcitx`` 是通过 ``dbus`` 和应用通讯的，所以修订 :ref:`install_gentoo_on_mbp` 配置。
 
 D-Bus
 =======
@@ -47,8 +47,10 @@ USE flags
   - ``/usr/share/dbus-1/system.conf`` 用于 system bus
   - ``/usr/share/dbus-1/session.conf`` 用于 session bus
 
-system bus: ``dbus`` 服务
-===========================
+.. _dbus_system_bus:
+
+D-Bus system bus: ``dbus`` 服务
+=================================
 
 D-Bus服务，也就是 OpenRC服务配置的 ``dbus`` service，是只负责 system bus 但不负责 session bus。
 
@@ -57,8 +59,10 @@ D-Bus服务，也就是 OpenRC服务配置的 ``dbus`` service，是只负责 sy
 .. literalinclude:: gentoo_dbus/openrc_dbus
    :caption: 在OpenRC中激活和启动dbus服务
 
-session bus
-================
+.. _dbus_session_bus:
+
+D-Bus session bus
+======================
 
 对于 KDE 和 GNOME 桌面环境，需要自动启动一个session bus。不过，这个session bus一般没有自动启动，例如可能需要配置到 ``.xinitrc`` 中(假设终端登陆使用 ``startx`` 启动桌面)
 

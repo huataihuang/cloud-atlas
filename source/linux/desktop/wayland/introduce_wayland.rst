@@ -27,13 +27,23 @@ Wayland是一个显示服务器协议，目标是替代X Window System，实现�
 要求
 ========
 
-大多数Wayland组件只能工作在 :ref:`kms` 的系统上。这要求选择兼容的硬件，区别是两种不同的缓存API：GBM和EGLStreams。NVIDIA GPU使用EGLStreams驱动，其他显卡驱动则支持GBM。对于Wayland compositor必须支持这两种API或者其中一种API才能正常工作。例如，GNOME(使用Mutter)同时支持GBM和EGLStreams，而KDE
-Plasma(使用KWin)则在所有版本中支持GBM，不过只从Plasma 5.16才开始支持EGLStreams。其他Compositors如果只支持GBM就不能在NVIDIA上工作。
+大多数Wayland组件只能工作在 :ref:`kms` 的系统上。这要求选择兼容的硬件，区别是两种不同的缓存API：GBM和EGLStreams。NVIDIA GPU使用EGLStreams驱动，其他显卡驱动则支持GBM。对于Wayland compositor必须支持这两种API或者其中一种API才能正常工作。例如，GNOME(使用Mutter)同时支持GBM和EGLStreams，而KDE Plasma(使用KWin)则在所有版本中支持GBM，不过只从Plasma 5.16才开始支持EGLStreams。其他Compositors如果只支持GBM就不能在NVIDIA上工作。
 
 目前除了上述GNOME和KDE，其他的Wayland compositors推荐使用 :ref:`sway` 和 enlightenment 。
 
+推荐程序
+============
+
+在Gentoo Wiki中有一页 `gentoo linux wiki: List of software for Wayland <https://wiki.gentoo.org/wiki/List_of_software_for_Wayland>`_ 集中介绍了一些适合Wayland环境的推荐程序:
+
+- Compositors:
+
+  - Enlightenment: 堆叠式现代化的扁平设计风格，简洁有力，而且这个窗口管理器以轻量级快速闻名
+  - :ref:`sway` : 轻量级简洁平铺，我的主力桌面
+  - Hyprland: `Hyprland.org <https://hyprland.org/>`_ 推出的非常酷炫的 ``自动平铺`` compositor，并且官网上有很多动图和截屏可以了解这款compositor。类似科幻电影的交互终端，有点意思
+
 :ref:`sway`
-=============
+---------------
 
 :ref:`sway` 是一个平铺窗口管理器，完全用C愿意啊编写，非常快速并且占用资源少。我日常 :ref:`run_sway` ，经过实践验证，采用Wayland图形现实服务的 :ref:`sway` 窗口管理器是最轻量级且满足开发运维工作的桌面(无需任何花哨的效果)。
 

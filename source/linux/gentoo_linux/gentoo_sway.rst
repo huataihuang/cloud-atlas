@@ -64,13 +64,13 @@ Sway有一些 USE flags 可以微调:
    :language: bash
    :caption: 复制sway个人配置
 
-- 启动:
+- :strike:`启动` 测试( **注意单纯sway命令会有环境配置问题，需要仔细设置** ):
 
 .. literalinclude:: gentoo_sway/run_sway
    :caption: 直接运行 ``sway``
 
-报错处理
-============
+``XDG_RUNTIME_DIR``
+=======================
 
 - 启动 ``sway`` 报错:
 
@@ -82,6 +82,9 @@ Sway有一些 USE flags 可以微调:
   - 没有安装和配置 ``seatd``
   - 没有设置好用户的环境变量 ``XDG_RUNTIME_DIR`` (也就是每个用户需要有独立分离的运行时目录)
 
+解决方法一
+--------------
+
 解决方法:
 
 - 安装 ``sys-auth/seatd`` 并且配置用户 ``huatai`` 到对应组，以及启动服务:
@@ -89,15 +92,6 @@ Sway有一些 USE flags 可以微调:
 .. literalinclude:: gentoo_sway/seatd
    :language: bash
    :caption: 安装和配置 ``seatd``
-
-- 然后为用户 ``huatai`` 配置 ``~/.bashrc`` 添加如下内容设置用户环境变量:
-
-.. literalinclude:: gentoo_sway/bashrc
-   :language: bash
-   :caption: 配置用户环境变量 ``~/.bashrc``
-
-``seatd`` 需要配置为服务器
----------------------------
 
 在上述添加用户到 ``seat`` 组时遇到报错::
 
@@ -113,6 +107,110 @@ Sway有一些 USE flags 可以微调:
 .. literalinclude:: gentoo_sway/seatd_use_flags
    :caption: 为 ``sys-auth/seatd`` 配置 USE flag
 
+然后重新编译安装 ``seat``
+
+- 然后为用户 ``huatai`` 配置 ``~/.bashrc`` 添加如下内容设置用户环境变量:
+
+.. literalinclude:: gentoo_sway/bashrc
+   :language: bash
+   :caption: 配置用户环境变量 ``~/.bashrc``
+
+还有一个类似脚本，可以参考:
+
+.. literalinclude:: gentoo_sway/bashrc_xdg
+   :language: bash
+   :caption: 配置用户环境变量 ``~/.bashrc`` 的另一个脚本
+
+- 最后(手工)执行启动命令中添加 ``dbus-run-session`` :
+
+.. literalinclude:: gentoo_sway/start_sway
+   :caption: 使用 ``dbus-run-session`` 启动 sway 这样能够正确获得 :ref:`dbus_session_bus`
+
+解决方法二
+------------
+
+.. note::
+
+   我理解 ``elogind`` 是为了帮助设置DBUS环境的，上文通过环境变量和脚本设置了 ``XDG_RUNTIME_DIR`` ，则这段不用执行
+
+``elogind`` 需要添加到 boot 运行级别:
+
+``/etc/portage/make.conf`` 添加:
+
+.. literalinclude:: gentoo_sway/elogind_make.conf
+   :caption: 配置关闭 ``systemd`` 启用 ``elogind``
+
+执行USE修订后重新更新系统
+
+.. literalinclude:: gentoo_use_flags/rebuild_world_after_change_use
+   :caption: 在修改了全局 USE flag 之后对整个系统进行更新
+
+.. literalinclude:: gentoo_sway/elogind
+   :caption: 对于 :ref:`openrc` 环境支持运行 强依赖 :ref:`systemd` 的应用程序(KDE或GNOME)需要部署 ``elogind`` 来代替 ``systemd logind``
+
+.. note::
+
+   当 :ref:`gentoo_dbus` 使用了 ``USE="elogind"`` 参数，则系统启动 ``elogind`` 会自动触发启动 ``dbus``
+
+.. note::
+
+   当使用了 ``elogind`` 或 ``systemd`` ，则会自动设置 ``XDG_RUNTIME_DIR`` ，否则就要自己手工设置
+
+   **没有 dbus-run-session 支持，sway 运行可能出现运行时错误**
+
+.. warning::
+
+   我最终没有使用这段方案，即没有安装 ``elogind`` ，而是采用上文手工命令方式(方案一)
+
+系统程序
+============
+
+安装和 ``sway`` 底层系统相关的一些基础实用程序:
+
+``bemenu``
+----------------
+
+由于常用的 ``dmenu`` 使用X，所以现在基于 :ref:`wayland` 的 :ref:`sway` 推荐使用 ``dev-libs/bemenu`` :
+
+.. literalinclude:: gentoo_sway/install_bemenu
+   :caption: 安装 ``bemenu`` 代替 ``dmenu``
+
+然后配置 ``~/.config/sway/config`` 将默认的 ``dmenu`` 行替换成 ``bemenu`` :
+
+.. literalinclude:: gentoo_sway/sway_config_bemenu
+   :caption: 配置 ``~/.config/sway/config`` 将 ``dmenu`` 替换成 ``bemenu``
+   :emphasize-lines: 4,5
+
+``swaylock``
+-----------------
+
+``gui-apps/swaylock`` 用于锁定当前会话
+
+.. literalinclude:: gentoo_sway/install_swaylock
+   :caption: 安装 ``swaylock``
+
+然后配置 ``~/.config/sway/config`` 将 ``$mod + l`` 作为锁屏快捷键:
+
+.. literalinclude:: gentoo_sway/sway_config_swaylock
+   :caption: ``~/.config/sway/config`` 配置锁屏快捷键
+
+``swayidle``
+----------------
+
+``gui-apps/swayidle`` 可以在系统进入idle一段时间后运行一个命令，典型的如锁定屏幕或者关闭显示屏:
+
+.. literalinclude:: gentoo_sway/install_swayidle
+   :caption: 安装swayidle
+
+然后将 ``~/.config/sway/config`` 中有关 ``swayidle`` 的功能恢复出来(去除行首的 ``#`` ):
+
+.. literalinclude:: gentoo_sway/sway_config_swayidle
+   :caption: ``~/.config/sway/config`` 中有关 ``swayidle`` 激活
+   :emphasize-lines: 5-8
+
+应用程序
+=============
+
 foat终端
 -----------
 
@@ -126,6 +224,18 @@ foat终端
    我发现在安装 ``foot`` 的依赖包 ``dev-libs/libutf8proc`` 提供了一个 USE flag ``cjk`` 是用来支持Multi-byte character languages (Chinese, Japanese, Korean)
 
 现在就能正常启动 ``sway`` 了，不过此时还不能充分发挥高分辨率屏幕特性，待继续优化...
+
+终端模拟器
+--------------
+
+默认终端模拟器是 ``foot`` ，一个非常轻量级的终端， :strike:`但是可能对中文支持不好` (我这次实践开启了 ``cjk`` :ref:`gentoo_use_flags` 发现中文显示很好)
+
+Gentoo的wiki中推荐 ``x11-terms/alacritty`` 是原生Wayland程序，而且使用 :ref:`rust` 编写，性能卓越。
+
+应用程序加载器
+---------------------
+
+默认的应用程序加载器是 ``dmenu`` 但是这个程序依赖X，所以推荐使用 ``dev-libs/bemenu`` （原生Wayland)替代
 
 高分辨率
 ==========
@@ -144,19 +254,6 @@ foat终端
 
 .. literalinclude:: gentoo_sway/sway_config_multi_display
    :caption: 配置3个显示器的案例
-
-
-终端模拟器
-============
-
-默认终端模拟器是 ``foot`` ，一个非常轻量级的终端， :strike:`但是可能对中文支持不好` (我这次实践开启了 ``cjk`` :ref:`gentoo_use_flags` 发现中文显示很好)
-
-Gentoo的wiki中推荐 ``x11-terms/alacritty`` 是原生Wayland程序，而且使用 :ref:`rust` 编写，性能卓越。
-
-应用程序加载器
-=================
-
-默认的应用程序加载器是 ``dmenu`` 但是这个程序依赖X，所以推荐使用 ``dev-libs/bemenu`` （原生Wayland)替代
 
 参考
 ======

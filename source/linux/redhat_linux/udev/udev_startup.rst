@@ -1,8 +1,13 @@
-.. _intro_udev:
+.. _udev_startup:
 
 ===============
-udev简介
+udev快速起步
 ===============
+
+- 完成 ``/etc/udev/rules.d/`` 目录下规则配置修改后，可以重启操作系统或或者通过以下命令使得 ``udev`` 重新加载规则:
+
+.. literalinclude:: udev_startup/udev_reload-rules
+   :caption: ``udevadm`` 控制重新加载 ``udev`` 规则
 
 参考
 =======

@@ -139,6 +139,14 @@ Gentoo Linux在MacBook Air配置Wifi
 
 上述 ``aic8800`` 配置完成后，如果重启操作系统或者重新插入 ``AX5L`` USB WiFi设备，初始状态都是USB存储模式。每次手工输入 ``usb_modeswitch`` 命令切换显然太笨拙了。这就需要结合 :ref:`openrc_udev` 来完成自动切换:
 
+.. literalinclude:: gentoo_mba_wifi/10-aic8800.rules
+   :caption: 配置 ``aic8800`` (AX5L)无线网卡插入时自动将存储模式切换为WLAN模式
+
+完成配置后，触发 :ref:`udev` 重新加载规则:
+
+.. literalinclude:: ../redhat_linux/udev/udev_startup/udev_reload-rules
+   :caption: ``udevadm`` 控制重新加载 ``udev`` 规则
+
 :ref:`wpa_supplicant`
 =======================
 
