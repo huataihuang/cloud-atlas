@@ -10,6 +10,7 @@ Ruby on Rails
    intro_rails.rst
    microservice_vs_monolith.rst
    gentoo_install_rails.rst
+   rails_startup.rst
    kamal/index
 
 .. only::  subproject and html

@@ -8,3 +8,4 @@
 ======
 
 - `GitHub: Jermolene/TiddlyWiki5 <https://github.com/Jermolene/TiddlyWiki5>`_
+- `搭建个人非线性笔记本 TiddlyWiki Server <https://ssine.ink/posts/tiddlywiki-setup/>`_

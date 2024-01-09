@@ -8,6 +8,7 @@ Stable Diffusion模型方法
    :maxdepth: 1
 
    stable_diffusion_infra.rst
+   diffusionbee.rst
    stable_diffusion_on_k8s.rst
 
 

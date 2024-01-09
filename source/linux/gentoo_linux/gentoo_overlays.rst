@@ -53,14 +53,22 @@ Gentoo Overlays 项目成员维护了独立仓库，之前采用 ``app-portage/l
 .. literalinclude:: gentoo_overlays/eselect-repo.conf
    :caption: ``/etc/portage/repos.conf/eselect-repo.conf`` 添加了激活的仓库 ``gentoo-zh`` 配置
 
-- 如果要禁用仓库，则使用:
+如果要禁用仓库，则使用:
 
 .. literalinclude:: gentoo_overlays/disable_repository
    :caption: 禁用 ``gentoo-zh`` 仓库
 
-- 如果要彻底移除:
+如果要删除仓库，则使用:
 
+.. literalinclude:: gentoo_overlays/remove_repository
+   :caption: 移除 ``gentoo-zh`` 仓库
 
+- 使用 ``emaint`` 对新添加Portage进行软件库同步:
+
+.. literalinclude:: gentoo_overlays/emaint_sync
+   :caption: 使用 ``emaint`` 同步新添加的软件库
+
+然后就可以按照正常方式进行 :ref:`gentoo_emerge` 安装了
 
 参考
 ======
