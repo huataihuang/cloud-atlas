@@ -25,6 +25,23 @@ Gentoo xdg-desktop-portal
 .. literalinclude:: gentoo_xdg-desktop-portal/install_xdg-desktop-portal-wlr
    :caption: 安装面向 :ref:`wayland` 的 ``xdg-desktop-portal-wlr``
 
+此外， ``sway-portals.conf`` 配置 使用 ``xdg-desktop-portal-gtk`` 提供每个portal接口，所以还需要安装 ``sys-apps/xdg-desktop-portal-gtk`` :
+
+.. literalinclude:: gentoo_xdg-desktop-portal/install_xdg-desktop-portal-gtk
+   :caption: ``xdg-desktop-portal-wlr`` 默认使用 ``xdg-desktop-portal-gtk`` 提供portal接口，所以同时安装 ``sys-apps/xdg-desktop-portal-gtk``
+
+.. note::
+
+   我检查了我的安装 ``xdg-desktop-portal`` + ``xdg-desktop-portal-wlr``
+
+   在 ``/usr/share/xdg-desktop-portal/sway-portals.conf`` 配置如下:
+
+   .. literalinclude:: gentoo_xdg-desktop-portal/sway-portals.conf
+      :caption: ``/usr/share/xdg-desktop-portal/sway-portals.conf``
+      :emphasize-lines: 2,3
+
+   可以看到 ``wlr`` 默认设置 ``gtk`` 提供接口，所以，还应该同时安装 ``sys-apps/xdg-desktop-portal-gtk``
+
 配置
 ===========
 
@@ -45,6 +62,7 @@ Gentoo xdg-desktop-portal
 
 .. literalinclude:: gentoo_xdg-desktop-portal/portals.conf
    :caption: 简单的 ``~/.config/portals.conf``
+
 
 使用
 =========

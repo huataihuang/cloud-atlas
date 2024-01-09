@@ -1,7 +1,7 @@
 .. _initramfs:
 
 =======================
-nitramfs
+initramfs
 =======================
 
 ``initramfs`` 是 :ref:`ramfs` 类型的启动初始文件系统
